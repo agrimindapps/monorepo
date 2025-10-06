@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection.dart' as di;
 import '../../features/account/presentation/usage_stats.dart' as local;

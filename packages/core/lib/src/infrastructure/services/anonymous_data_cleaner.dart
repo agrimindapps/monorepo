@@ -232,7 +232,7 @@ class CleanupProgress {
 
   @override
   String toString() {
-    return 'CleanupProgress(${percentageInt}%): $currentOperation';
+    return 'CleanupProgress($percentageInt%): $currentOperation';
   }
 }
 
@@ -296,7 +296,7 @@ abstract class BaseAnonymousDataCleaner implements AnonymousDataCleaner {
   
   @override
   Stream<CleanupProgress> get cleanupProgress => 
-      _progressStream ?? Stream.empty();
+      _progressStream ?? const Stream.empty();
 
   /// Helper method to emit progress updates
   @protected

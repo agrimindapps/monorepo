@@ -362,8 +362,9 @@ class CacheStatistics {
   /// Uso de memória formatado
   String get formattedMemoryUsage {
     if (memoryUsageEstimate < 1024) return '${memoryUsageEstimate}B';
-    if (memoryUsageEstimate < 1024 * 1024)
+    if (memoryUsageEstimate < 1024 * 1024) {
       return '${(memoryUsageEstimate / 1024).toStringAsFixed(1)}KB';
+    }
     return '${(memoryUsageEstimate / (1024 * 1024)).toStringAsFixed(1)}MB';
   }
 }

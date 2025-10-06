@@ -371,7 +371,7 @@ class TaskManagerAuthService {
       final user = await currentUser.first;
 
       if (user == null) {
-        return Left(AuthFailure('Nenhum usuário autenticado'));
+        return const Left(AuthFailure('Nenhum usuário autenticado'));
       }
 
       // Use Enhanced Account Deletion Service

@@ -1,5 +1,5 @@
+import 'package:core/core.dart' show Hive;
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../services/task_priority_adapter.dart';

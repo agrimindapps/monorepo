@@ -1,12 +1,13 @@
 import 'package:core/core.dart';
-import '../../../../core/errors/failures.dart' as app_failures;
+
 import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/errors/failures.dart' as app_failures;
 import '../../../../core/utils/typedef.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/favorito_repository.dart';
 
 /// Implementação do repositório de favoritos
-/// 
+///
 /// Esta classe implementa o contrato definido no domain layer,
 /// usando o FavoritosHiveRepository como fonte de dados
 class FavoritoRepositoryImpl implements FavoritoRepository {
@@ -34,10 +35,16 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       if (success) {
         return Right(favorito.id);
       } else {
-        return const Left(app_failures.CacheFailure('Falha ao adicionar favorito'));
+        return const Left(
+          app_failures.CacheFailure('Falha ao adicionar favorito'),
+        );
       }
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao adicionar favorito: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure(
+          'Erro ao adicionar favorito: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -49,10 +56,14 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       if (success) {
         return const Right(null);
       } else {
-        return const Left(app_failures.CacheFailure('Falha ao remover favorito'));
+        return const Left(
+          app_failures.CacheFailure('Falha ao remover favorito'),
+        );
       }
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao remover favorito: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure('Erro ao remover favorito: ${e.toString()}'),
+      );
     }
   }
 
@@ -62,7 +73,11 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       final isFavorited = await _hiveRepository.isFavorito(tipo, itemId);
       return Right(isFavorited);
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao verificar favorito: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure(
+          'Erro ao verificar favorito: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -71,26 +86,37 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
     try {
       final hiveFavoritos = await _hiveRepository.getFavoritosByTipoAsync(tipo);
       final favoritos = <FavoritoEntity>[];
-      
+
       for (final hiveFavorito in hiveFavoritos) {
-        final data = await _hiveRepository.getFavoritoDataAsync(tipo, hiveFavorito.itemId);
+        final data = await _hiveRepository.getFavoritoDataAsync(
+          tipo,
+          hiveFavorito.itemId,
+        );
         if (data != null) {
-          favoritos.add(FavoritoEntity(
-            id: hiveFavorito.objectId,
-            itemId: hiveFavorito.itemId,
-            tipo: hiveFavorito.tipo,
-            nome: data['nome']?.toString() ?? '',
-            fabricante: data['fabricante']?.toString(),
-            cultura: data['cultura']?.toString(),
-            metadata: data,
-            createdAt: DateTime.fromMillisecondsSinceEpoch(hiveFavorito.createdAt),
-          ));
+          favoritos.add(
+            FavoritoEntity(
+              id: hiveFavorito.objectId,
+              itemId: hiveFavorito.itemId,
+              tipo: hiveFavorito.tipo,
+              nome: data['nome']?.toString() ?? '',
+              fabricante: data['fabricante']?.toString(),
+              cultura: data['cultura']?.toString(),
+              metadata: data,
+              createdAt: DateTime.fromMillisecondsSinceEpoch(
+                hiveFavorito.createdAt,
+              ),
+            ),
+          );
         }
       }
-      
+
       return Right(favoritos);
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao buscar favoritos por tipo: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure(
+          'Erro ao buscar favoritos por tipo: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -99,26 +125,37 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
     try {
       final hiveFavoritos = await _hiveRepository.getAllAsync();
       final favoritos = <FavoritoEntity>[];
-      
+
       for (final hiveFavorito in hiveFavoritos) {
-        final data = await _hiveRepository.getFavoritoDataAsync(hiveFavorito.tipo, hiveFavorito.itemId);
+        final data = await _hiveRepository.getFavoritoDataAsync(
+          hiveFavorito.tipo,
+          hiveFavorito.itemId,
+        );
         if (data != null) {
-          favoritos.add(FavoritoEntity(
-            id: hiveFavorito.objectId,
-            itemId: hiveFavorito.itemId,
-            tipo: hiveFavorito.tipo,
-            nome: data['nome']?.toString() ?? '',
-            fabricante: data['fabricante']?.toString(),
-            cultura: data['cultura']?.toString(),
-            metadata: data,
-            createdAt: DateTime.fromMillisecondsSinceEpoch(hiveFavorito.createdAt),
-          ));
+          favoritos.add(
+            FavoritoEntity(
+              id: hiveFavorito.objectId,
+              itemId: hiveFavorito.itemId,
+              tipo: hiveFavorito.tipo,
+              nome: data['nome']?.toString() ?? '',
+              fabricante: data['fabricante']?.toString(),
+              cultura: data['cultura']?.toString(),
+              metadata: data,
+              createdAt: DateTime.fromMillisecondsSinceEpoch(
+                hiveFavorito.createdAt,
+              ),
+            ),
+          );
         }
       }
-      
+
       return Right(favoritos);
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao buscar todos os favoritos: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure(
+          'Erro ao buscar todos os favoritos: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -130,20 +167,24 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       }
 
       final allFavoritosResult = await getAllFavoritos();
-      return allFavoritosResult.fold(
-        (failure) => Left(failure),
-        (favoritos) {
-          final filteredFavoritos = favoritos.where((favorito) {
-            final lowerQuery = query.toLowerCase();
-            return favorito.nome.toLowerCase().contains(lowerQuery) ||
-                   (favorito.fabricante?.toLowerCase().contains(lowerQuery) ?? false) ||
-                   (favorito.cultura?.toLowerCase().contains(lowerQuery) ?? false);
-          }).toList();
-          return Right(filteredFavoritos);
-        },
-      );
+      return allFavoritosResult.fold((failure) => Left(failure), (favoritos) {
+        final filteredFavoritos =
+            favoritos.where((favorito) {
+              final lowerQuery = query.toLowerCase();
+              return favorito.nome.toLowerCase().contains(lowerQuery) ||
+                  (favorito.fabricante?.toLowerCase().contains(lowerQuery) ??
+                      false) ||
+                  (favorito.cultura?.toLowerCase().contains(lowerQuery) ??
+                      false);
+            }).toList();
+        return Right(filteredFavoritos);
+      });
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao pesquisar favoritos: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure(
+          'Erro ao pesquisar favoritos: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -157,7 +198,7 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
           (failure) => <FavoritoEntity>[],
           (favoritos) => favoritos,
         );
-        
+
         // Aguarda 5 segundos antes do próximo refresh
         await Future<void>.delayed(const Duration(seconds: 5));
       }
@@ -172,7 +213,9 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       final hiveFavoritos = await _hiveRepository.getFavoritosByTipoAsync(tipo);
       return Right(hiveFavoritos.length);
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao contar favoritos: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure('Erro ao contar favoritos: ${e.toString()}'),
+      );
     }
   }
 
@@ -185,7 +228,9 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
       }
       return const Right(null);
     } catch (e) {
-      return Left(app_failures.CacheFailure('Erro ao limpar favoritos: ${e.toString()}'));
+      return Left(
+        app_failures.CacheFailure('Erro ao limpar favoritos: ${e.toString()}'),
+      );
     }
   }
 }

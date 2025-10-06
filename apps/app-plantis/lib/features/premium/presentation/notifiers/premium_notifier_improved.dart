@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide getIt;
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../data/services/subscription_sync_service.dart';
@@ -265,8 +264,8 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
   }
 
   void _resetSubscriptionState() {
-    state = AsyncValue.data(
-      const PremiumImprovedState(
+    state = const AsyncValue.data(
+      PremiumImprovedState(
         currentSubscription: null,
         premiumFeaturesEnabled: [],
         plantLimits: null,

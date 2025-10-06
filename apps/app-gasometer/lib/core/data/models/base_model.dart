@@ -1,9 +1,8 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' show HiveObject, HiveField;
 
 /// Base model class for all Hive models in the GasOMeter app
 /// Provides common fields for sync and versioning
 abstract class BaseModel extends HiveObject {
-
   BaseModel({
     this.id,
     this.createdAt,

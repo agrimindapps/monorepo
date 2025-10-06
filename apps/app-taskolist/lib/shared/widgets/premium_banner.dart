@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/account/presentation/usage_stats.dart' as local_stats;
 import '../../features/auth/domain/user_limits.dart' as local;
@@ -9,15 +9,12 @@ import '../providers/subscription_providers.dart';
 class PremiumBanner extends ConsumerWidget {
   final VoidCallback? onUpgradePressed;
 
-  const PremiumBanner({
-    super.key,
-    this.onUpgradePressed,
-  });
+  const PremiumBanner({super.key, this.onUpgradePressed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasPremiumAsync = ref.watch(hasPremiumProvider);
-    
+
     return hasPremiumAsync.when(
       data: (hasPremium) {
         if (hasPremium) {
@@ -36,7 +33,7 @@ class _PremiumActiveBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptionAsync = ref.watch(currentSubscriptionProvider);
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -50,11 +47,7 @@ class _PremiumActiveBanner extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.workspace_premium,
-            color: Colors.white,
-            size: 24,
-          ),
+          const Icon(Icons.workspace_premium, color: Colors.white, size: 24),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -84,10 +77,7 @@ class _PremiumActiveBanner extends ConsumerWidget {
                     }
                     return const Text(
                       'Aproveite todos os recursos',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
                     );
                   },
                   loading: () => const SizedBox.shrink(),
@@ -98,11 +88,7 @@ class _PremiumActiveBanner extends ConsumerWidget {
           ),
           GestureDetector(
             onTap: () => _showManagementOptions(context, ref),
-            child: const Icon(
-              Icons.settings,
-              color: Colors.white70,
-              size: 20,
-            ),
+            child: const Icon(Icons.settings, color: Colors.white70, size: 20),
           ),
         ],
       ),
@@ -129,19 +115,25 @@ class _UpgradeBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usageStatsAsync = ref.watch(usageStatsProvider);
-    
+
     return usageStatsAsync.when(
       data: (stats) {
-        final userLimitsAsync = ref.watch(userLimitsProvider(UserLimitsParams(
-          currentTasks: stats.totalTasks,
-          currentSubtasks: stats.totalSubtasks,
-          currentTags: stats.totalTags,
-          completedTasks: stats.completedTasks,
-          completedSubtasks: stats.totalCompletedSubtasks,
-        )));
+        final userLimitsAsync = ref.watch(
+          userLimitsProvider(
+            UserLimitsParams(
+              currentTasks: stats.totalTasks,
+              currentSubtasks: stats.totalSubtasks,
+              currentTags: stats.totalTags,
+              completedTasks: stats.completedTasks,
+              completedSubtasks: stats.totalCompletedSubtasks,
+            ),
+          ),
+        );
 
         return userLimitsAsync.when(
-          data: (local.UserLimits? limits) => _buildUpgradeBanner(context, stats, limits),
+          data:
+              (local.UserLimits? limits) =>
+                  _buildUpgradeBanner(context, stats, limits),
           loading: () => const SizedBox.shrink(),
           error: (error, stack) => const SizedBox.shrink(),
         );
@@ -151,13 +143,17 @@ class _UpgradeBanner extends ConsumerWidget {
     );
   }
 
-  Widget _buildUpgradeBanner(BuildContext context, local_stats.UsageStats stats, local.UserLimits? limits) {
+  Widget _buildUpgradeBanner(
+    BuildContext context,
+    local_stats.UsageStats stats,
+    local.UserLimits? limits,
+  ) {
     final isNearLimit = _isNearAnyLimit(limits);
 
     if (!isNearLimit || limits == null) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -171,18 +167,11 @@ class _UpgradeBanner extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.warning_amber,
-                color: Colors.orange[700],
-                size: 20,
-              ),
+              Icon(Icons.warning_amber, color: Colors.orange[700], size: 20),
               const SizedBox(width: 8),
               const Text(
                 'Você está próximo do limite',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ],
           ),
@@ -219,8 +208,8 @@ class _UpgradeBanner extends ConsumerWidget {
     final maxTags = limits.maxTags;
 
     return (remainingTasks / maxTasks) <= (1 - threshold) ||
-           (remainingSubtasks / maxSubtasks) <= (1 - threshold) ||
-           (remainingTags / maxTags) <= (1 - threshold);
+        (remainingSubtasks / maxSubtasks) <= (1 - threshold) ||
+        (remainingTags / maxTags) <= (1 - threshold);
   }
 
   List<Widget> _buildLimitWarnings(local.UserLimits? limits) {
@@ -236,26 +225,32 @@ class _UpgradeBanner extends ConsumerWidget {
     final maxTags = limits.maxTags;
 
     if (remainingTasks <= 10 && maxTasks > 0) {
-      warnings.add(_buildLimitWarning(
-        'Tarefas: ${maxTasks - remainingTasks}/$maxTasks',
-        remainingTasks / maxTasks,
-      ));
+      warnings.add(
+        _buildLimitWarning(
+          'Tarefas: ${maxTasks - remainingTasks}/$maxTasks',
+          remainingTasks / maxTasks,
+        ),
+      );
     }
 
     if (remainingSubtasks <= 2 && maxSubtasks > 0) {
-      warnings.add(_buildLimitWarning(
-        'Subtarefas: ${maxSubtasks - remainingSubtasks}/$maxSubtasks',
-        remainingSubtasks / maxSubtasks,
-      ));
+      warnings.add(
+        _buildLimitWarning(
+          'Subtarefas: ${maxSubtasks - remainingSubtasks}/$maxSubtasks',
+          remainingSubtasks / maxSubtasks,
+        ),
+      );
     }
 
     if (remainingTags <= 1 && maxTags > 0) {
-      warnings.add(_buildLimitWarning(
-        'Tags: ${maxTags - remainingTags}/$maxTags',
-        remainingTags / maxTags,
-      ));
+      warnings.add(
+        _buildLimitWarning(
+          'Tags: ${maxTags - remainingTags}/$maxTags',
+          remainingTags / maxTags,
+        ),
+      );
     }
-    
+
     return warnings;
   }
 
@@ -264,12 +259,7 @@ class _UpgradeBanner extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 12))),
           SizedBox(
             width: 60,
             child: LinearProgressIndicator(
@@ -287,9 +277,7 @@ class _UpgradeBanner extends ConsumerWidget {
 
   void _navigateToPremium(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute<dynamic>(
-        builder: (context) => const PremiumPage(),
-      ),
+      MaterialPageRoute<dynamic>(builder: (context) => const PremiumPage()),
     );
   }
 }
@@ -298,7 +286,7 @@ class _ManagementBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final managementUrlAsync = ref.watch(managementUrlProvider);
-    
+
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -307,21 +295,18 @@ class _ManagementBottomSheet extends ConsumerWidget {
         children: [
           const Text(
             'Gerenciar Assinatura',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          
+
           ListTile(
             leading: const Icon(Icons.receipt),
             title: const Text('Ver Histórico'),
             subtitle: const Text('Visualizar compras anteriores'),
             onTap: () => _showSubscriptionHistory(context, ref),
           ),
-          
+
           managementUrlAsync.when(
             data: (url) {
               if (url != null) {
@@ -334,20 +319,21 @@ class _ManagementBottomSheet extends ConsumerWidget {
               }
               return const SizedBox.shrink();
             },
-            loading: () => const ListTile(
-              leading: Icon(Icons.manage_accounts),
-              title: Text('Carregando...'),
-            ),
+            loading:
+                () => const ListTile(
+                  leading: Icon(Icons.manage_accounts),
+                  title: Text('Carregando...'),
+                ),
             error: (error, stack) => const SizedBox.shrink(),
           ),
-          
+
           ListTile(
             leading: const Icon(Icons.restore),
             title: const Text('Restaurar Compras'),
             subtitle: const Text('Recuperar assinaturas anteriores'),
             onTap: () => _restorePurchases(context, ref),
           ),
-          
+
           const SizedBox(height: 16),
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -361,9 +347,9 @@ class _ManagementBottomSheet extends ConsumerWidget {
   void _showSubscriptionHistory(BuildContext context, WidgetRef ref) {
     // Implementar visualização do histórico
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Histórico de assinaturas')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Histórico de assinaturas')));
   }
 
   void _openManagementUrl(String url) {
@@ -373,17 +359,17 @@ class _ManagementBottomSheet extends ConsumerWidget {
 
   void _restorePurchases(BuildContext context, WidgetRef ref) async {
     Navigator.pop(context);
-    
+
     final actions = ref.read(subscriptionActionsProvider);
     final success = await actions.restorePurchases();
-    
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            success 
-              ? 'Compras restauradas com sucesso!'
-              : 'Nenhuma compra encontrada',
+            success
+                ? 'Compras restauradas com sucesso!'
+                : 'Nenhuma compra encontrada',
           ),
           backgroundColor: success ? Colors.green : null,
         ),

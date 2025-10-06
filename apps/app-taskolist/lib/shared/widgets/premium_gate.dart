@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/premium/presentation/premium_page.dart';
 import '../providers/subscription_providers.dart';
@@ -26,7 +26,7 @@ class PremiumGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasFeatureAsync = ref.watch(hasFeatureProvider(featureName));
-    
+
     return hasFeatureAsync.when(
       data: (hasFeature) {
         if (hasFeature) {
@@ -53,27 +53,17 @@ class PremiumGate extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.workspace_premium,
-              color: Colors.orange[700],
-              size: 32,
-            ),
+            Icon(Icons.workspace_premium, color: Colors.orange[700], size: 32),
             const SizedBox(height: 8),
             Text(
               premiumMessage ?? 'Feature Premium',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
             const Text(
               'Toque para fazer upgrade',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ],
@@ -95,18 +85,17 @@ class PremiumGate extends ConsumerWidget {
   void _showPremiumDialog(BuildContext context) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => PremiumRequiredDialog(
-        featureName: featureName,
-        message: premiumMessage,
-      ),
+      builder:
+          (context) => PremiumRequiredDialog(
+            featureName: featureName,
+            message: premiumMessage,
+          ),
     );
   }
 
   void _navigateToPremium(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute<dynamic>(
-        builder: (context) => const PremiumPage(),
-      ),
+      MaterialPageRoute<dynamic>(builder: (context) => const PremiumPage()),
     );
   }
 }
@@ -129,7 +118,7 @@ class CreationLimitGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     late final AsyncValue<bool> canCreateAsync;
-    
+
     switch (limitType) {
       case 'tasks':
         canCreateAsync = ref.watch(canCreateTasksProvider(currentCount));
@@ -143,7 +132,7 @@ class CreationLimitGate extends ConsumerWidget {
       default:
         return child;
     }
-    
+
     return canCreateAsync.when(
       data: (canCreate) {
         if (canCreate) {
@@ -172,11 +161,7 @@ class CreationLimitGate extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Center(
-                  child: Icon(
-                    Icons.lock,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: Icon(Icons.lock, color: Colors.white, size: 24),
                 ),
               ),
             ),
@@ -216,15 +201,10 @@ class PremiumRequiredDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(
-            Icons.workspace_premium,
-            color: Colors.orange[700],
-          ),
+          Icon(Icons.workspace_premium, color: Colors.orange[700]),
           const SizedBox(width: 8),
           const Text('Premium Necessário'),
         ],
@@ -233,9 +213,7 @@ class PremiumRequiredDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            message ?? _getDefaultMessage(featureName),
-          ),
+          Text(message ?? _getDefaultMessage(featureName)),
           const SizedBox(height: 16),
           const Text(
             'Com o Premium você tem acesso a:',
@@ -293,25 +271,22 @@ class PremiumRequiredDialog extends StatelessWidget {
       'Sincronização na nuvem',
     ];
 
-    return features.map((feature) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.check,
-            size: 16,
-            color: Colors.green,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              feature,
-              style: const TextStyle(fontSize: 14),
+    return features
+        .map(
+          (feature) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                const Icon(Icons.check, size: 16, color: Colors.green),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(feature, style: const TextStyle(fontSize: 14)),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    )).toList();
+        )
+        .toList();
   }
 }
 
@@ -319,23 +294,15 @@ class PremiumRequiredDialog extends StatelessWidget {
 class LimitReachedDialog extends StatelessWidget {
   final String limitType;
 
-  const LimitReachedDialog({
-    super.key,
-    required this.limitType,
-  });
+  const LimitReachedDialog({super.key, required this.limitType});
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(
-            Icons.warning_amber,
-            color: Colors.orange[700],
-          ),
+          Icon(Icons.warning_amber, color: Colors.orange[700]),
           const SizedBox(width: 8),
           const Text('Limite Atingido'),
         ],
@@ -353,11 +320,7 @@ class LimitReachedDialog extends StatelessWidget {
             ),
             child: const Column(
               children: [
-                Icon(
-                  Icons.workspace_premium,
-                  color: Colors.blue,
-                  size: 32,
-                ),
+                Icon(Icons.workspace_premium, color: Colors.blue, size: 32),
                 SizedBox(height: 8),
                 Text(
                   'Premium = Ilimitado',
@@ -370,10 +333,7 @@ class LimitReachedDialog extends StatelessWidget {
                 Text(
                   'Crie quantas tarefas, subtarefas e tags quiser',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.blue),
                 ),
               ],
             ),

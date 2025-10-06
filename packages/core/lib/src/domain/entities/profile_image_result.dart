@@ -1,6 +1,4 @@
-import '../../shared/utils/result.dart';
-
-/// Result para operações de imagem de perfil
+// Result para operações de imagem de perfil
 class ProfileImageResult {
   final String downloadUrl;
   final String fileName;
@@ -96,7 +94,8 @@ class ProfileImageResult {
           userId == other.userId;
 
   @override
-  int get hashCode => downloadUrl.hashCode ^ fileName.hashCode ^ userId.hashCode;
+  int get hashCode =>
+      downloadUrl.hashCode ^ fileName.hashCode ^ userId.hashCode;
 
   @override
   String toString() {

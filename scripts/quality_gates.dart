@@ -13,8 +13,8 @@
 /// --ci                 CI mode with stricter rules and exit codes
 /// --report=<format>    Report format (console, json, html)
 
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 class QualityGates {
@@ -473,7 +473,7 @@ Examples:
           line: _getLineNumber(content, match.start),
           data: {
             'pattern_type': patternName,
-            'match_preview': match.group(0)!.substring(0, min(20, match.group(0)!.length)) + '...'
+            'match_preview': '${match.group(0)!.substring(0, min(20, match.group(0)!.length))}...'
           },
         ));
       }
@@ -606,7 +606,7 @@ Examples:
     };
     
     final file = File('quality_gates_report.json');
-    await file.writeAsString(JsonEncoder.withIndent('  ').convert(report));
+    await file.writeAsString(const JsonEncoder.withIndent('  ').convert(report));
     print('📄 JSON report generated: ${file.path}');
   }
   

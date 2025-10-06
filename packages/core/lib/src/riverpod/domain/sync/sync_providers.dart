@@ -1,10 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-
-import '../../../infrastructure/services/connectivity_service.dart';
-import '../../../infrastructure/services/selective_sync_service.dart';
-import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
-import '../../common_providers.dart' hide currentUserProvider;
+import 'package:core/core.dart';
 
 /// Providers unificados para sincronização e conectividade
 /// Consolidam offline/online sync entre todos os apps do monorepo
@@ -50,9 +44,10 @@ final connectionTypeProvider = Provider<ConnectionType>((ref) {
 // ========== SYNC STATE PROVIDERS ==========
 
 /// Provider principal para estado de sincronização
-final syncStateProvider = StateNotifierProvider<OfflineSyncStateNotifier, OfflineSyncState>((ref) {
-  return OfflineSyncStateNotifier();
-});
+final syncStateProvider =
+    StateNotifierProvider<OfflineSyncStateNotifier, OfflineSyncState>((ref) {
+      return OfflineSyncStateNotifier();
+    });
 
 /// Provider para verificar se está sincronizando
 final isSyncingProvider = Provider<bool>((ref) {
@@ -86,18 +81,22 @@ final pendingItemsCountProvider = Provider<int>((ref) {
 // ========== APP-SPECIFIC SYNC PROVIDERS ==========
 
 /// Provider para sincronização específica por app
-final appSyncProvider = StateNotifierProvider.family<AppSyncNotifier, AppOfflineSyncState, String>((ref, appId) {
-  return AppSyncNotifier(appId);
-});
+final appSyncProvider =
+    StateNotifierProvider.family<AppSyncNotifier, AppOfflineSyncState, String>((
+      ref,
+      appId,
+    ) {
+      return AppSyncNotifier(appId);
+    });
 
 /// Provider para verificar se app específico precisa sincronizar
 final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
   final isConnected = ref.watch(isConnectedProvider);
   final appSync = ref.watch(appSyncProvider(appId));
   final lastSync = ref.watch(lastSyncProvider);
-  
+
   if (!isConnected) return false;
-  
+
   return appSync.maybeWhen(
     needsSync: () => true,
     orElse: () => _shouldSync(lastSync),
@@ -108,32 +107,39 @@ final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
 final syncLimitsProvider = Provider.family<SyncLimits, String>((ref, appId) {
   final user = ref.watch(domainCurrentUserProvider);
   // TODO: Integrar com subscription providers para verificar premium
-  final isPremium = false; // Temporário até integração ser feita
-  
+  const isPremium = false; // Temporário até integração ser feita
+
   return SyncLimits.forApp(appId, isPremium);
 });
 
 // ========== OFFLINE PROVIDERS ==========
 
 /// Provider para capacidades offline por app
-final offlineCapabilitiesProvider = Provider.family<OfflineCapabilities, String>((ref, appId) {
-  return OfflineCapabilities.forApp(appId);
-});
+final offlineCapabilitiesProvider =
+    Provider.family<OfflineCapabilities, String>((ref, appId) {
+      return OfflineCapabilities.forApp(appId);
+    });
 
 /// Provider para dados offline disponíveis
-final offlineDataProvider = FutureProvider.family<OfflineData, String>((ref, appId) async {
+final offlineDataProvider = FutureProvider.family<OfflineData, String>((
+  ref,
+  appId,
+) async {
   final capabilities = ref.watch(offlineCapabilitiesProvider(appId));
   if (!capabilities.hasOfflineSupport) {
     return OfflineData.empty();
   }
-  
+
   // TODO: Implementar SelectiveSyncService com HiveStorage
   // Por enquanto, retornar OfflineData vazio
   return OfflineData.empty();
 });
 
 /// Provider para tamanho do cache offline
-final offlineCacheSizeProvider = FutureProvider.family<int, String>((ref, appId) async {
+final offlineCacheSizeProvider = FutureProvider.family<int, String>((
+  ref,
+  appId,
+) async {
   // TODO: Implementar SelectiveSyncService com HiveStorage
   // Por enquanto, retornar 0
   return 0;
@@ -144,13 +150,14 @@ final offlineCacheSizeProvider = FutureProvider.family<int, String>((ref, appId)
 /// Provider para ações de sincronização
 final syncActionsProvider = Provider<SyncActions>((ref) {
   final syncNotifier = ref.read(syncStateProvider.notifier);
-  
+
   return SyncActions(
     startSync: syncNotifier.startSync,
     stopSync: syncNotifier.stopSync,
     forcSync: syncNotifier.forceSync,
     clearOfflineData: syncNotifier.clearOfflineData,
-    syncSpecificApp: (appId) => ref.read(appSyncProvider(appId).notifier).startSync(),
+    syncSpecificApp:
+        (appId) => ref.read(appSyncProvider(appId).notifier).startSync(),
   );
 });
 
@@ -168,11 +175,19 @@ final hasSyncConflictsProvider = Provider<bool>((ref) {
 /// Provider para ações de resolução de conflitos
 final conflictResolutionProvider = Provider<ConflictResolution>((ref) {
   return ConflictResolution(
-    resolveWithLocal: (conflictId) => _resolveConflict(ref, conflictId, ResolutionType.useLocal),
-    resolveWithRemote: (conflictId) => _resolveConflict(ref, conflictId, ResolutionType.useRemote),
-    resolveWithMerge: (conflictId, mergedData) => _resolveConflictWithMerge(ref, conflictId, mergedData),
-    resolveAllWithLocal: () => _resolveAllConflicts(ref, ResolutionType.useLocal),
-    resolveAllWithRemote: () => _resolveAllConflicts(ref, ResolutionType.useRemote),
+    resolveWithLocal:
+        (conflictId) =>
+            _resolveConflict(ref, conflictId, ResolutionType.useLocal),
+    resolveWithRemote:
+        (conflictId) =>
+            _resolveConflict(ref, conflictId, ResolutionType.useRemote),
+    resolveWithMerge:
+        (conflictId, mergedData) =>
+            _resolveConflictWithMerge(ref, conflictId, mergedData),
+    resolveAllWithLocal:
+        () => _resolveAllConflicts(ref, ResolutionType.useLocal),
+    resolveAllWithRemote:
+        () => _resolveAllConflicts(ref, ResolutionType.useRemote),
   );
 });
 
@@ -188,7 +203,7 @@ final bandwidthConfigProvider = StateProvider<BandwidthConfig>((ref) {
 final dataEconomyModeProvider = Provider<bool>((ref) {
   final config = ref.watch(bandwidthConfigProvider);
   final connectionType = ref.watch(connectionTypeProvider);
-  
+
   return config.useDataEconomy || connectionType == ConnectionType.cellular;
 });
 
@@ -206,7 +221,7 @@ class SyncIdle extends OfflineSyncState {
 class SyncSyncing extends OfflineSyncState {
   final double progress;
   final String? currentItem;
-  
+
   const SyncSyncing({this.progress = 0.0, this.currentItem});
 }
 
@@ -257,9 +272,15 @@ extension OfflineSyncStateExtension on OfflineSyncState {
       final state = this as SyncSyncing;
       return syncing(state.progress, state.currentItem);
     }
-    if (this is SyncSuccess && success != null) return success((this as SyncSuccess).info);
-    if (this is SyncPartial && partial != null) return partial((this as SyncPartial).info);
-    if (this is SyncFailed && failed != null) return failed((this as SyncFailed).info);
+    if (this is SyncSuccess && success != null) {
+      return success((this as SyncSuccess).info);
+    }
+    if (this is SyncPartial && partial != null) {
+      return partial((this as SyncPartial).info);
+    }
+    if (this is SyncFailed && failed != null) {
+      return failed((this as SyncFailed).info);
+    }
     return orElse();
   }
 }
@@ -327,12 +348,7 @@ class SyncInfo {
 }
 
 /// Tipos de conexão
-enum ConnectionType {
-  wifi,
-  cellular,
-  ethernet,
-  none,
-}
+enum ConnectionType { wifi, cellular, ethernet, none }
 
 extension ConnectionTypeExtension on ConnectionType {
   static ConnectionType fromConnectivityResult(ConnectivityResult result) {
@@ -350,7 +366,8 @@ extension ConnectionTypeExtension on ConnectionType {
     }
   }
 
-  bool get isHighBandwidth => this == ConnectionType.wifi || this == ConnectionType.ethernet;
+  bool get isHighBandwidth =>
+      this == ConnectionType.wifi || this == ConnectionType.ethernet;
   bool get isLimitedBandwidth => this == ConnectionType.cellular;
 }
 
@@ -460,7 +477,11 @@ class OfflineCapabilities {
           canCreateOffline: true,
           canEditOffline: true,
           canDeleteOffline: true,
-          offlineFeatures: {'fuel_tracking', 'expense_tracking', 'vehicle_management'},
+          offlineFeatures: {
+            'fuel_tracking',
+            'expense_tracking',
+            'vehicle_management',
+          },
         );
       case 'plantis':
         return const OfflineCapabilities(
@@ -550,11 +571,7 @@ enum ConflictReason {
   schemaChange,
 }
 
-enum ResolutionType {
-  useLocal,
-  useRemote,
-  merge,
-}
+enum ResolutionType { useLocal, useRemote, merge }
 
 /// Configuração de bandwidth
 class BandwidthConfig {
@@ -624,7 +641,11 @@ class SyncActions {
 class ConflictResolution {
   final Future<void> Function(String conflictId) resolveWithLocal;
   final Future<void> Function(String conflictId) resolveWithRemote;
-  final Future<void> Function(String conflictId, Map<String, dynamic> mergedData) resolveWithMerge;
+  final Future<void> Function(
+    String conflictId,
+    Map<String, dynamic> mergedData,
+  )
+  resolveWithMerge;
   final Future<void> Function() resolveAllWithLocal;
   final Future<void> Function() resolveAllWithRemote;
 
@@ -652,34 +673,33 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
 
   Future<void> startSync() async {
     if (state is SyncSyncing) return;
-    
+
     try {
       state = const SyncSyncing();
       _initialize();
-      
+
       // TODO: Implementar performSync real
       // Por enquanto, simular sync com progresso
       for (int i = 0; i <= 100; i += 25) {
-        state = SyncSyncing(progress: i.toDouble(), currentItem: 'Sincronizando item $i%');
+        state = SyncSyncing(
+          progress: i.toDouble(),
+          currentItem: 'Sincronizando item $i%',
+        );
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
       // Simular sucesso da sincronização
-      state = SyncSuccess(SyncInfo(
-        lastSync: DateTime.now(),
-        errors: [],
-      ));
+      state = SyncSuccess(SyncInfo(lastSync: DateTime.now(), errors: []));
     } catch (e) {
-      state = SyncFailed(SyncInfo(
-        lastSync: DateTime.now(),
-        errors: ['Erro inesperado: $e'],
-      ));
+      state = SyncFailed(
+        SyncInfo(lastSync: DateTime.now(), errors: ['Erro inesperado: $e']),
+      );
     }
   }
 
   Future<void> stopSync() async {
     if (state is! SyncSyncing) return;
-    
+
     // TODO: Implementar cancelSync no service
     // Por enquanto, apenas parar
     state = const SyncIdle();
@@ -700,14 +720,14 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
 /// Notifier para sincronização por app
 class AppSyncNotifier extends StateNotifier<AppOfflineSyncState> {
   final String appId;
-  
+
   AppSyncNotifier(this.appId) : super(const AppSyncIdle());
 
   Future<void> startSync() async {
     if (state is AppSyncSyncing) return;
-    
+
     state = const AppSyncSyncing();
-    
+
     try {
       // TODO: Implementar sincronização real do app
       // Por enquanto, simular sincronização bem-sucedida
@@ -734,25 +754,33 @@ bool _shouldSync(DateTime? lastSync) {
   return hoursSinceLastSync >= 1; // Sync if more than 1 hour
 }
 
-Future<void> _resolveConflict(ProviderRef ref, String conflictId, ResolutionType type) async {
+Future<void> _resolveConflict(
+  ProviderRef ref,
+  String conflictId,
+  ResolutionType type,
+) async {
   final conflicts = ref.read(syncConflictsProvider);
   final updatedConflicts = conflicts.where((c) => c.id != conflictId).toList();
   ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
-  
+
   // Implementar resolução real baseada no tipo
   // await SyncService().resolveConflict(conflictId, type);
 }
 
-Future<void> _resolveConflictWithMerge(ProviderRef ref, String conflictId, Map<String, dynamic> mergedData) async {
+Future<void> _resolveConflictWithMerge(
+  ProviderRef ref,
+  String conflictId,
+  Map<String, dynamic> mergedData,
+) async {
   final conflicts = ref.read(syncConflictsProvider);
   final updatedConflicts = conflicts.where((c) => c.id != conflictId).toList();
   ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
-  
+
   // await SyncService().resolveConflictWithMerge(conflictId, mergedData);
 }
 
 Future<void> _resolveAllConflicts(ProviderRef ref, ResolutionType type) async {
   ref.read(syncConflictsProvider.notifier).state = [];
-  
+
   // await SyncService().resolveAllConflicts(type);
 }

@@ -250,7 +250,7 @@ class NotificationAnalyticsHelper {
         estimatedSizeKb: _estimateDataSize(events),
       );
     } catch (e) {
-      return AnalyticsStorageInfo(
+      return const AnalyticsStorageInfo(
         totalEvents: 0,
         oldestEventDate: null,
         newestEventDate: null,

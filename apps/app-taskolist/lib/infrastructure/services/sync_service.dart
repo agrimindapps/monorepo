@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:core/core.dart' hide Failure;
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/failures.dart';

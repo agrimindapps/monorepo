@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
@@ -38,19 +38,22 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
       try {
         const uuid = Uuid();
         // Criar a task usando o notifier
-        await ref.read(taskNotifierProvider.notifier).createTask(
-          TaskEntity(
-            id: uuid.v4(),
-            title: _titleController.text,
-            description: _descriptionController.text.isEmpty 
-              ? null 
-              : _descriptionController.text,
-            listId: 'default', // Por enquanto usar lista padrão
-            createdById: currentUser.id,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          ),
-        );
+        await ref
+            .read(taskNotifierProvider.notifier)
+            .createTask(
+              TaskEntity(
+                id: uuid.v4(),
+                title: _titleController.text,
+                description:
+                    _descriptionController.text.isEmpty
+                        ? null
+                        : _descriptionController.text,
+                listId: 'default', // Por enquanto usar lista padrão
+                createdById: currentUser.id,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              ),
+            );
 
         if (mounted) {
           Navigator.of(context).pop();
@@ -104,10 +107,7 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: _createTask,
-          child: const Text('Create'),
-        ),
+        ElevatedButton(onPressed: _createTask, child: const Text('Create')),
       ],
     );
   }

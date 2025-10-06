@@ -15,6 +15,30 @@ dependencies:
   core:
     path: ../../packages/core
 
+  cloud_firestore: any
+  connectivity_plus: any
+  device_info_plus: any
+  firebase_auth: any
+  flutter_secure_storage: any
+  get_it: any
+  injectable: any
+  shared_preferences: any
+  firebase_crashlytics: any
+  dartz: any
+  uuid: any
+  image: any
+  image_picker: any
+  permission_handler: any
+  firebase_storage: any
+  path: any
+  intl: any
+  collection: any
+  flutter_riverpod: any
+  riverpod_annotation: any
+  go_router: any
+  path_provider: any
+  flutter_staggered_grid_view: any
+  rxdart: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

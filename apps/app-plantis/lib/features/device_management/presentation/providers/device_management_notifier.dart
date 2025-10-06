@@ -14,7 +14,6 @@ import 'package:core/core.dart'
         getIt;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection.dart';

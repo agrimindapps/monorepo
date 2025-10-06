@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../providers/auth_providers.dart';
@@ -7,13 +7,11 @@ import '../providers/auth_providers.dart';
 class TaskCommentsSection extends ConsumerStatefulWidget {
   final String taskId;
 
-  const TaskCommentsSection({
-    super.key,
-    required this.taskId,
-  });
+  const TaskCommentsSection({super.key, required this.taskId});
 
   @override
-  ConsumerState<TaskCommentsSection> createState() => _TaskCommentsSectionState();
+  ConsumerState<TaskCommentsSection> createState() =>
+      _TaskCommentsSectionState();
 }
 
 class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
@@ -31,21 +29,25 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
     if (text.isEmpty) return;
 
     setState(() {
-      _comments.add(TaskComment(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        taskId: widget.taskId,
-        text: text,
-        authorName: ref.read(currentUserProvider).when(
-          data: (user) => user?.displayName ?? 'Usuário',
-          loading: () => 'Usuário',
-          error: (_, __) => 'Usuário',
+      _comments.add(
+        TaskComment(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          taskId: widget.taskId,
+          text: text,
+          authorName: ref
+              .read(currentUserProvider)
+              .when(
+                data: (user) => user?.displayName ?? 'Usuário',
+                loading: () => 'Usuário',
+                error: (_, __) => 'Usuário',
+              ),
+          createdAt: DateTime.now(),
         ),
-        createdAt: DateTime.now(),
-      ));
+      );
     });
 
     _commentController.clear();
-    
+
     // Auto scroll para o novo comentário
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -85,7 +87,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
             ],
           ),
         ),
-        
+
         // Lista de comentários
         if (_comments.isEmpty)
           Container(
@@ -94,10 +96,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
             decoration: BoxDecoration(
               color: AppColors.backgroundLight,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.border,
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.border, width: 1),
             ),
             child: const Center(
               child: Column(
@@ -119,10 +118,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                   SizedBox(height: 4),
                   Text(
                     'Adicione o primeiro comentário abaixo',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textHint,
-                    ),
+                    style: TextStyle(fontSize: 14, color: AppColors.textHint),
                   ),
                 ],
               ),
@@ -130,17 +126,14 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
           )
         else
           ..._comments.map((comment) => _buildCommentItem(comment)),
-        
+
         // Input para novo comentário
         Container(
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: AppColors.border,
-              width: 1,
-            ),
+            border: Border.all(color: AppColors.border, width: 1),
           ),
           child: Row(
             children: [
@@ -159,7 +152,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                   size: 18,
                 ),
               ),
-              
+
               // Campo de texto
               Expanded(
                 child: TextField(
@@ -174,14 +167,11 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                   onSubmitted: (_) => _addComment(),
                 ),
               ),
-              
+
               // Botão enviar
               IconButton(
                 onPressed: _addComment,
-                icon: const Icon(
-                  Icons.send,
-                  color: AppColors.primaryColor,
-                ),
+                icon: const Icon(Icons.send, color: AppColors.primaryColor),
               ),
             ],
           ),
@@ -197,10 +187,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.border,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +210,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                 ),
               ),
               const SizedBox(width: 8),
-              
+
               // Nome do autor
               Text(
                 comment.authorName,
@@ -233,22 +220,19 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Data
               Text(
                 _formatCommentDate(comment.createdAt),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textHint,
-                ),
+                style: const TextStyle(fontSize: 12, color: AppColors.textHint),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Texto do comentário
           Text(
             comment.text,
@@ -266,7 +250,7 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
   String _formatCommentDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inMinutes < 1) {
       return 'Agora';
     } else if (difference.inMinutes < 60) {

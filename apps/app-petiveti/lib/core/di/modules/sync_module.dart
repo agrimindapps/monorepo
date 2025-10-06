@@ -1,6 +1,4 @@
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:core/core.dart' show GetIt;
 
 /// Módulo de Dependency Injection para sincronização do Petiveti
 /// Integra PetivetiSyncService com repositories existentes

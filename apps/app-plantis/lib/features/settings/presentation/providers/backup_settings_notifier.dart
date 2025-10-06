@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide getIt;
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/backup_model.dart';
 import '../../../../core/di/injection.dart';

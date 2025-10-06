@@ -1,5 +1,4 @@
-import 'package:hive/hive.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:core/core.dart';
 
 import '../../domain/entities/medication.dart';
 

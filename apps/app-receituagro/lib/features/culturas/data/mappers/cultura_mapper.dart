@@ -1,6 +1,6 @@
 import '../../../../core/data/models/cultura_hive.dart';
-import '../../domain/entities/cultura_entity.dart';
 import '../../data/cultura_model.dart';
+import '../../domain/entities/cultura_entity.dart';
 
 /// Mapper para conversão entre CulturaModel/CulturaHive e CulturaEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas
@@ -39,7 +39,7 @@ class CulturaMapper {
     return models.map((model) => toEntity(model)).toList();
   }
 
-  /// Converte lista de CulturaHive para Entities  
+  /// Converte lista de CulturaHive para Entities
   static List<CulturaEntity> fromHiveToEntityList(List<CulturaHive> hives) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
   }

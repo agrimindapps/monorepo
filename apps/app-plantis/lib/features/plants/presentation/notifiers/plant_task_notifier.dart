@@ -1,6 +1,5 @@
-import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide getIt;
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
@@ -79,7 +78,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         print('📥 PlantTaskNotifier: Loading tasks for plant $plantId');
       }
 
-      final result = await _repository!.getPlantTasksByPlantId(plantId);
+      final result = await _repository.getPlantTasksByPlantId(plantId);
 
       result.fold(
         (failure) {
@@ -97,10 +96,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           updatedTasks[plantId] = tasks;
 
           state = AsyncValue.data(
-            currentState.copyWith(
-              plantTasks: updatedTasks,
-              isLoading: false,
-            ),
+            currentState.copyWith(plantTasks: updatedTasks, isLoading: false),
           );
 
           if (kDebugMode) {
@@ -166,7 +162,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       // Persist tasks if repository available
       if (_repository != null && tasks.isNotEmpty) {
-        final result = await _repository!.addPlantTasks(tasks);
+        final result = await _repository.addPlantTasks(tasks);
 
         result.fold(
           (failure) {
@@ -184,10 +180,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
             updatedTasks[plant.id] = savedTasks;
 
             state = AsyncValue.data(
-              currentState.copyWith(
-                plantTasks: updatedTasks,
-                isLoading: false,
-              ),
+              currentState.copyWith(plantTasks: updatedTasks, isLoading: false),
             );
 
             _updateTaskStatuses(plant.id);
@@ -201,10 +194,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         updatedTasks[plant.id] = tasks;
 
         state = AsyncValue.data(
-          currentState.copyWith(
-            plantTasks: updatedTasks,
-            isLoading: false,
-          ),
+          currentState.copyWith(plantTasks: updatedTasks, isLoading: false),
         );
 
         _updateTaskStatuses(plant.id);
@@ -244,7 +234,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         tasks[taskIndex] = pendingTask;
 
         if (_repository != null) {
-          await _repository!.updatePlantTask(pendingTask);
+          await _repository.updatePlantTask(pendingTask);
         }
       } else {
         // Mark as completed
@@ -252,7 +242,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         tasks[taskIndex] = completedTask;
 
         if (_repository != null) {
-          await _repository!.updatePlantTask(completedTask);
+          await _repository.updatePlantTask(completedTask);
         }
 
         // Generate next task
@@ -263,7 +253,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         tasks.add(nextTask);
 
         if (_repository != null) {
-          await _repository!.addPlantTask(nextTask);
+          await _repository.addPlantTask(nextTask);
         }
       }
 
@@ -273,17 +263,13 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       );
       updatedTasks[plantId] = tasks;
 
-      state = AsyncValue.data(
-        currentState.copyWith(plantTasks: updatedTasks),
-      );
+      state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
 
       await _updateTaskStatuses(plantId);
     } catch (e) {
       final currentState = state.valueOrNull ?? const PlantTaskState();
       state = AsyncValue.data(
-        currentState.copyWith(
-          errorMessage: 'Erro ao alterar status: $e',
-        ),
+        currentState.copyWith(errorMessage: 'Erro ao alterar status: $e'),
       );
     }
   }
@@ -316,7 +302,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       tasks[taskIndex] = completedTask;
 
       if (_repository != null) {
-        await _repository!.updatePlantTask(completedTask);
+        await _repository.updatePlantTask(completedTask);
       }
 
       // Generate next task with real completion date
@@ -327,7 +313,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       tasks.add(nextTask);
 
       if (_repository != null) {
-        await _repository!.addPlantTask(nextTask);
+        await _repository.addPlantTask(nextTask);
       }
 
       final currentState = state.valueOrNull ?? const PlantTaskState();
@@ -336,9 +322,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       );
       updatedTasks[plantId] = tasks;
 
-      state = AsyncValue.data(
-        currentState.copyWith(plantTasks: updatedTasks),
-      );
+      state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
 
       await _updateTaskStatuses(plantId);
 
@@ -375,9 +359,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       );
       updatedTasks[plantId] = tasks;
 
-      state = AsyncValue.data(
-        currentState.copyWith(plantTasks: updatedTasks),
-      );
+      state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
 
       await _updateTaskStatuses(plantId);
     } catch (e) {
@@ -392,7 +374,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
   Future<void> removeTasksForPlant(String plantId) async {
     try {
       if (_repository != null) {
-        await _repository!.deletePlantTasksByPlantId(plantId);
+        await _repository.deletePlantTasksByPlantId(plantId);
       }
 
       final currentState = state.valueOrNull ?? const PlantTaskState();
@@ -401,15 +383,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       );
       updatedTasks.remove(plantId);
 
-      state = AsyncValue.data(
-        currentState.copyWith(plantTasks: updatedTasks),
-      );
+      state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
     } catch (e) {
       final currentState = state.valueOrNull ?? const PlantTaskState();
       state = AsyncValue.data(
-        currentState.copyWith(
-          errorMessage: 'Erro ao remover tarefas: $e',
-        ),
+        currentState.copyWith(errorMessage: 'Erro ao remover tarefas: $e'),
       );
     }
   }
@@ -422,7 +400,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       // Delete old tasks
       if (_repository != null) {
-        await _repository!.deletePlantTasksByPlantId(plant.id);
+        await _repository.deletePlantTasksByPlantId(plant.id);
       }
 
       // Remove from memory
@@ -431,9 +409,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       );
       updatedTasks.remove(plant.id);
 
-      state = AsyncValue.data(
-        currentState.copyWith(plantTasks: updatedTasks),
-      );
+      state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
 
       // Generate new tasks
       await generateTasksForPlant(plant);
@@ -457,8 +433,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       allTasks.addAll(_taskGenerationService.getUpcomingTasks(tasks));
     }
 
-    return allTasks
-      ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+    return allTasks..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
   }
 
   /// Get all overdue tasks across all plants
@@ -470,8 +445,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       allTasks.addAll(_taskGenerationService.getOverdueTasks(tasks));
     }
 
-    return allTasks
-      ..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
+    return allTasks..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
   }
 
   /// Update task statuses for a plant
@@ -480,14 +454,10 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
     final updatedTasks = _taskGenerationService.updateTaskStatuses(tasks);
 
     final currentState = state.valueOrNull ?? const PlantTaskState();
-    final newTasks = Map<String, List<PlantTask>>.from(
-      currentState.plantTasks,
-    );
+    final newTasks = Map<String, List<PlantTask>>.from(currentState.plantTasks);
     newTasks[plantId] = updatedTasks;
 
-    state = AsyncValue.data(
-      currentState.copyWith(plantTasks: newTasks),
-    );
+    state = AsyncValue.data(currentState.copyWith(plantTasks: newTasks));
   }
 
   /// Clear error

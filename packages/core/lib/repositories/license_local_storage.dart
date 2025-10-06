@@ -118,7 +118,7 @@ class LicenseLocalStorage implements LicenseRepository {
         (failure) => Left(failure),
         (license) async {
           if (license == null) {
-            return Left(NotFoundFailure('No license found to extend'));
+            return const Left(NotFoundFailure('No license found to extend'));
           }
 
           final extendedLicense = license.copyWith(
@@ -146,7 +146,7 @@ class LicenseLocalStorage implements LicenseRepository {
         (failure) => Left(failure),
         (license) async {
           if (license == null || license.id != licenseId) {
-            return Left(NotFoundFailure('License not found'));
+            return const Left(NotFoundFailure('License not found'));
           }
 
           final activatedLicense = license.copyWith(isActive: true);
@@ -170,7 +170,7 @@ class LicenseLocalStorage implements LicenseRepository {
         (failure) => Left(failure),
         (license) async {
           if (license == null) {
-            return Right(null);
+            return const Right(null);
           }
 
           final deactivatedLicense = license.copyWith(isActive: false);

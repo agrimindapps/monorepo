@@ -7,8 +7,8 @@ import 'package:app_agrihurbi/features/markets/presentation/widgets/market_summa
 import 'package:app_agrihurbi/features/markets/presentation/widgets/market_type_chips.dart';
 import 'package:app_agrihurbi/features/markets/presentation/widgets/top_performers_section.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Markets List Page
 ///

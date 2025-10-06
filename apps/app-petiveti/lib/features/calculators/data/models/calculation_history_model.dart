@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' show HiveType, HiveField, HiveObject;
 
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
@@ -75,20 +75,30 @@ class CalculationHistoryModel extends HiveObject {
   static Map<String, dynamic> _resultToMap(CalculationResult result) {
     return {
       'calculator_id': result.calculatorId,
-      'results': result.results.map((item) => {
-        'label': item.label,
-        'value': item.value,
-        'unit': item.unit,
-        'severity': item.severity.code,
-        'description': item.description,
-      }).toList(),
-      'recommendations': result.recommendations.map((rec) => {
-        'title': rec.title,
-        'message': rec.message,
-        'severity': rec.severity.code,
-        'action_label': rec.actionLabel,
-        'action_url': rec.actionUrl,
-      }).toList(),
+      'results':
+          result.results
+              .map(
+                (item) => {
+                  'label': item.label,
+                  'value': item.value,
+                  'unit': item.unit,
+                  'severity': item.severity.code,
+                  'description': item.description,
+                },
+              )
+              .toList(),
+      'recommendations':
+          result.recommendations
+              .map(
+                (rec) => {
+                  'title': rec.title,
+                  'message': rec.message,
+                  'severity': rec.severity.code,
+                  'action_label': rec.actionLabel,
+                  'action_url': rec.actionUrl,
+                },
+              )
+              .toList(),
       'summary': result.summary,
       'calculated_at': result.calculatedAt?.toIso8601String(),
     };
@@ -96,34 +106,43 @@ class CalculationHistoryModel extends HiveObject {
 
   /// Converte Map para CalculationResult
   static CalculationResult _mapToResult(Map<String, dynamic> data) {
-    final results = (data['results'] as List<dynamic>?)
-        ?.map((item) => ResultItem(
-          label: item['label'] as String,
-          value: item['value'],
-          unit: item['unit'] as String?,
-          severity: _parseSeverity(item['severity'] as String?),
-          description: item['description'] as String?,
-        ))
-        .toList() ?? [];
+    final results =
+        (data['results'] as List<dynamic>?)
+            ?.map(
+              (item) => ResultItem(
+                label: item['label'] as String,
+                value: item['value'],
+                unit: item['unit'] as String?,
+                severity: _parseSeverity(item['severity'] as String?),
+                description: item['description'] as String?,
+              ),
+            )
+            .toList() ??
+        [];
 
-    final recommendations = (data['recommendations'] as List<dynamic>?)
-        ?.map((item) => Recommendation(
-          title: item['title'] as String,
-          message: item['message'] as String,
-          severity: _parseSeverity(item['severity'] as String?),
-          actionLabel: item['action_label'] as String?,
-          actionUrl: item['action_url'] as String?,
-        ))
-        .toList() ?? [];
+    final recommendations =
+        (data['recommendations'] as List<dynamic>?)
+            ?.map(
+              (item) => Recommendation(
+                title: item['title'] as String,
+                message: item['message'] as String,
+                severity: _parseSeverity(item['severity'] as String?),
+                actionLabel: item['action_label'] as String?,
+                actionUrl: item['action_url'] as String?,
+              ),
+            )
+            .toList() ??
+        [];
 
     return _GenericCalculationResult(
       calculatorId: data['calculator_id'] as String,
       results: results,
       recommendations: recommendations,
       summary: data['summary'] as String?,
-      calculatedAt: data['calculated_at'] != null 
-          ? DateTime.parse(data['calculated_at'] as String)
-          : null,
+      calculatedAt:
+          data['calculated_at'] != null
+              ? DateTime.parse(data['calculated_at'] as String)
+              : null,
     );
   }
 

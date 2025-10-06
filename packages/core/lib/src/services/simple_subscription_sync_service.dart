@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
+import '../domain/entities/subscription_entity.dart';
 import '../domain/repositories/i_local_storage_repository.dart';
 import '../domain/repositories/i_subscription_repository.dart';
-import '../domain/entities/subscription_entity.dart';
 import '../shared/utils/failure.dart';
 
 /// Versão simplificada do serviço de sincronização de subscription
@@ -20,7 +20,8 @@ class SimpleSubscriptionSyncService {
   final ILocalStorageRepository _localStorage;
 
   /// Stream controller para subscription status updates
-  final _subscriptionStreamController = StreamController<SubscriptionEntity?>.broadcast();
+  final _subscriptionStreamController =
+      StreamController<SubscriptionEntity?>.broadcast();
 
   /// Cache local da assinatura atual
   SubscriptionEntity? _cachedSubscription;
@@ -40,11 +41,12 @@ class SimpleSubscriptionSyncService {
   SimpleSubscriptionSyncService({
     required ISubscriptionRepository subscriptionRepository,
     required ILocalStorageRepository localStorage,
-  })  : _subscriptionRepository = subscriptionRepository,
-        _localStorage = localStorage;
+  }) : _subscriptionRepository = subscriptionRepository,
+       _localStorage = localStorage;
 
   /// Stream com o status atual da assinatura (offline-first)
-  Stream<SubscriptionEntity?> get subscriptionStatus => _subscriptionStreamController.stream;
+  Stream<SubscriptionEntity?> get subscriptionStatus =>
+      _subscriptionStreamController.stream;
 
   /// Subscription atual em cache (offline-first)
   SubscriptionEntity? get currentSubscription => _cachedSubscription;
@@ -68,7 +70,9 @@ class SimpleSubscriptionSyncService {
       unawaited(_performSync());
 
       if (kDebugMode) {
-        print('📱 SimpleSubscriptionSyncService: Initialized with ${_cachedSubscription != null ? "cached" : "no"} subscription');
+        print(
+          '📱 SimpleSubscriptionSyncService: Initialized with ${_cachedSubscription != null ? "cached" : "no"} subscription',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -89,7 +93,9 @@ class SimpleSubscriptionSyncService {
   }
 
   /// Verifica se tem assinatura ativa para um app específico
-  Future<Either<Failure, bool>> hasActiveSubscriptionForApp(String appName) async {
+  Future<Either<Failure, bool>> hasActiveSubscriptionForApp(
+    String appName,
+  ) async {
     // Se não tem cache, tenta sincronizar
     if (_cachedSubscription == null) {
       final syncResult = await _performSync();
@@ -109,7 +115,9 @@ class SimpleSubscriptionSyncService {
   }
 
   /// Obtém produtos disponíveis para um app específico
-  Future<Either<Failure, List<ProductInfo>>> getProductsForApp(String appName) async {
+  Future<Either<Failure, List<ProductInfo>>> getProductsForApp(
+    String appName,
+  ) async {
     switch (appName.toLowerCase()) {
       case 'plantis':
         return await _subscriptionRepository.getPlantisProducts();
@@ -124,14 +132,18 @@ class SimpleSubscriptionSyncService {
 
   /// Verifica elegibilidade para trial de um produto específico
   Future<Either<Failure, bool>> isEligibleForTrial(String productId) async {
-    return await _subscriptionRepository.isEligibleForTrial(productId: productId);
+    return await _subscriptionRepository.isEligibleForTrial(
+      productId: productId,
+    );
   }
 
   /// Realiza sincronização com RevenueCat
   Future<Either<Failure, SubscriptionEntity?>> _performSync() async {
     if (_isSyncing) {
       if (kDebugMode) {
-        print('📱 SimpleSubscriptionSyncService: Sync already in progress, skipping');
+        print(
+          '📱 SimpleSubscriptionSyncService: Sync already in progress, skipping',
+        );
       }
       return Right(_cachedSubscription);
     }
@@ -144,10 +156,13 @@ class SimpleSubscriptionSyncService {
       }
 
       // Busca dados do RevenueCat (source of truth)
-      final revenueCatResult = await _subscriptionRepository.getCurrentSubscription();
+      final revenueCatResult =
+          await _subscriptionRepository.getCurrentSubscription();
       if (revenueCatResult.isLeft()) {
         if (kDebugMode) {
-          print('⚠️ SimpleSubscriptionSyncService: RevenueCat failed, using cache');
+          print(
+            '⚠️ SimpleSubscriptionSyncService: RevenueCat failed, using cache',
+          );
         }
         return Right(_cachedSubscription);
       }
@@ -162,7 +177,9 @@ class SimpleSubscriptionSyncService {
 
       if (hasChanges) {
         if (kDebugMode) {
-          print('📱 SimpleSubscriptionSyncService: Changes detected, updating cache');
+          print(
+            '📱 SimpleSubscriptionSyncService: Changes detected, updating cache',
+          );
         }
 
         // Salva no cache local
@@ -194,7 +211,9 @@ class SimpleSubscriptionSyncService {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ SimpleSubscriptionSyncService: Failed to load from cache: ${failure.message}');
+            print(
+              '⚠️ SimpleSubscriptionSyncService: Failed to load from cache: ${failure.message}',
+            );
           }
         },
         (jsonString) {
@@ -207,11 +226,15 @@ class SimpleSubscriptionSyncService {
               _subscriptionStreamController.add(_cachedSubscription);
 
               if (kDebugMode) {
-                print('📱 SimpleSubscriptionSyncService: Loaded cached subscription (${_cachedSubscription?.productId})');
+                print(
+                  '📱 SimpleSubscriptionSyncService: Loaded cached subscription (${_cachedSubscription?.productId})',
+                );
               }
             } catch (e) {
               if (kDebugMode) {
-                print('⚠️ SimpleSubscriptionSyncService: Failed to deserialize cache: $e');
+                print(
+                  '⚠️ SimpleSubscriptionSyncService: Failed to deserialize cache: $e',
+                );
               }
             }
           }
@@ -219,7 +242,9 @@ class SimpleSubscriptionSyncService {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ SimpleSubscriptionSyncService: Failed to load from cache: $e');
+        print(
+          '⚠️ SimpleSubscriptionSyncService: Failed to load from cache: $e',
+        );
       }
     }
   }
@@ -239,7 +264,9 @@ class SimpleSubscriptionSyncService {
       _cachedSubscription = subscription;
 
       if (kDebugMode) {
-        print('📱 SimpleSubscriptionSyncService: Saved subscription to cache (${subscription?.productId})');
+        print(
+          '📱 SimpleSubscriptionSyncService: Saved subscription to cache (${subscription?.productId})',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -258,7 +285,8 @@ class SimpleSubscriptionSyncService {
       'tier': subscription.tier.name,
       'expirationDate': subscription.expirationDate?.millisecondsSinceEpoch,
       'purchaseDate': subscription.purchaseDate?.millisecondsSinceEpoch,
-      'originalPurchaseDate': subscription.originalPurchaseDate?.millisecondsSinceEpoch,
+      'originalPurchaseDate':
+          subscription.originalPurchaseDate?.millisecondsSinceEpoch,
       'store': subscription.store.name,
       'isInTrial': subscription.isInTrial,
       'isSandbox': subscription.isSandbox,
@@ -281,27 +309,36 @@ class SimpleSubscriptionSyncService {
         (e) => e.name == json['tier'],
         orElse: () => SubscriptionTier.free,
       ),
-      expirationDate: json['expirationDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['expirationDate'] as int)
-          : null,
-      purchaseDate: json['purchaseDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['purchaseDate'] as int)
-          : null,
-      originalPurchaseDate: json['originalPurchaseDate'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['originalPurchaseDate'] as int)
-          : null,
+      expirationDate:
+          json['expirationDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(
+                json['expirationDate'] as int,
+              )
+              : null,
+      purchaseDate:
+          json['purchaseDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['purchaseDate'] as int)
+              : null,
+      originalPurchaseDate:
+          json['originalPurchaseDate'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(
+                json['originalPurchaseDate'] as int,
+              )
+              : null,
       store: Store.values.firstWhere(
         (e) => e.name == json['store'],
         orElse: () => Store.unknown,
       ),
       isInTrial: json['isInTrial'] as bool? ?? false,
       isSandbox: json['isSandbox'] as bool? ?? false,
-      createdAt: json['createdAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
-          : DateTime.now(),
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int)
-          : DateTime.now(),
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
+              : DateTime.now(),
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int)
+              : DateTime.now(),
     );
   }
 
@@ -344,7 +381,9 @@ class SimpleSubscriptionSyncService {
     // Remove outer braces
     var content = jsonString.trim();
     if (content.startsWith('{')) content = content.substring(1);
-    if (content.endsWith('}')) content = content.substring(0, content.length - 1);
+    if (content.endsWith('}')) {
+      content = content.substring(0, content.length - 1);
+    }
 
     // Split by comma (simplified - doesn't handle nested objects)
     final pairs = content.split(',');
@@ -426,5 +465,5 @@ class SimpleSubscriptionSyncService {
 
 /// Extension para usar unawaited sem import adicional
 extension _Unawaited on Future {
-  void get unawaited => null;
+  void get unawaited {}
 }

@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/comentarios/domain/comentarios_service.dart';
-import '../models/comentario_hive.dart';
 import '../../services/device_identity_service.dart';
+import '../models/comentario_hive.dart';
 
 class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive> 
     implements IComentariosRepository {

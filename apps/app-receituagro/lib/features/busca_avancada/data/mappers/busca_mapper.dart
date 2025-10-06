@@ -2,17 +2,19 @@ import '../../../../core/data/models/cultura_hive.dart';
 import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/data/models/pragas_hive.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/busca_entity.dart';
 
 /// Mapper para conversão entre diferentes modelos e BuscaResultEntity
 class BuscaMapper {
   /// Converte DiagnosticoHive para BuscaResultEntity
   /// ✅ CORRETO: Resolve nomes usando repositories, NUNCA usa campos cached
-  static Future<BuscaResultEntity> diagnosticoToEntity(DiagnosticoHive diagnostico) async {
+  static Future<BuscaResultEntity> diagnosticoToEntity(
+    DiagnosticoHive diagnostico,
+  ) async {
     // Resolve nomes dinamicamente usando repositories
     String defensivoNome = 'Defensivo não encontrado';
     String culturaNome = 'Cultura não encontrada';
@@ -62,16 +64,21 @@ class BuscaMapper {
     );
   }
 
-  /// Converte PragasHive para BuscaResultEntity  
+  /// Converte PragasHive para BuscaResultEntity
   static BuscaResultEntity pragaToEntity(PragasHive praga) {
-    final nomeExibicao = (praga.nomeComum.isNotEmpty == true) ? praga.nomeComum : praga.nomeCientifico;
-    
+    final nomeExibicao =
+        (praga.nomeComum.isNotEmpty == true)
+            ? praga.nomeComum
+            : praga.nomeCientifico;
+
     return BuscaResultEntity(
       id: praga.objectId,
       tipo: 'praga',
       titulo: nomeExibicao,
-      subtitulo: praga.nomeCientifico != nomeExibicao ? praga.nomeCientifico : null,
-      descricao: 'Praga identificada', // Simplified - TODO: usar propriedade correta
+      subtitulo:
+          praga.nomeCientifico != nomeExibicao ? praga.nomeCientifico : null,
+      descricao:
+          'Praga identificada', // Simplified - TODO: usar propriedade correta
       metadata: {
         'nomeCientifico': praga.nomeCientifico,
         'nomeComum': praga.nomeComum,
@@ -85,10 +92,11 @@ class BuscaMapper {
 
   /// Converte FitossanitarioHive para BuscaResultEntity
   static BuscaResultEntity defensivoToEntity(FitossanitarioHive defensivo) {
-    final nomeExibicao = defensivo.nomeComum.isNotEmpty 
-        ? defensivo.nomeComum 
-        : defensivo.nomeTecnico;
-    
+    final nomeExibicao =
+        defensivo.nomeComum.isNotEmpty
+            ? defensivo.nomeComum
+            : defensivo.nomeTecnico;
+
     return BuscaResultEntity(
       id: defensivo.objectId ?? defensivo.idReg, // objectId pode ser null
       tipo: 'defensivo',
@@ -122,7 +130,9 @@ class BuscaMapper {
   }
 
   /// Converte lista de diagnósticos com resolução assíncrona
-  static Future<List<BuscaResultEntity>> diagnosticosToEntityList(List<DiagnosticoHive> diagnosticos) async {
+  static Future<List<BuscaResultEntity>> diagnosticosToEntityList(
+    List<DiagnosticoHive> diagnosticos,
+  ) async {
     final results = <BuscaResultEntity>[];
     for (final d in diagnosticos) {
       results.add(await diagnosticoToEntity(d));
@@ -136,12 +146,16 @@ class BuscaMapper {
   }
 
   /// Converte lista de defensivos
-  static List<BuscaResultEntity> defensivosToEntityList(List<FitossanitarioHive> defensivos) {
+  static List<BuscaResultEntity> defensivosToEntityList(
+    List<FitossanitarioHive> defensivos,
+  ) {
     return defensivos.map((d) => defensivoToEntity(d)).toList();
   }
 
   /// Converte lista de culturas
-  static List<BuscaResultEntity> culturasToEntityList(List<CulturaHive> culturas) {
+  static List<BuscaResultEntity> culturasToEntityList(
+    List<CulturaHive> culturas,
+  ) {
     return culturas.map((c) => culturaToEntity(c)).toList();
   }
 
@@ -157,8 +171,11 @@ class BuscaMapper {
 
   /// Converte PragasHive para DropdownItemEntity
   static DropdownItemEntity pragaToDropdownItem(PragasHive praga) {
-    final nomeExibicao = (praga.nomeComum.isNotEmpty == true) ? praga.nomeComum : praga.nomeCientifico;
-    
+    final nomeExibicao =
+        (praga.nomeComum.isNotEmpty == true)
+            ? praga.nomeComum
+            : praga.nomeCientifico;
+
     return DropdownItemEntity(
       id: praga.objectId,
       nome: nomeExibicao,
@@ -168,11 +185,14 @@ class BuscaMapper {
   }
 
   /// Converte FitossanitarioHive para DropdownItemEntity
-  static DropdownItemEntity defensivoToDropdownItem(FitossanitarioHive defensivo) {
-    final nomeExibicao = defensivo.nomeComum.isNotEmpty 
-        ? defensivo.nomeComum 
-        : defensivo.nomeTecnico;
-    
+  static DropdownItemEntity defensivoToDropdownItem(
+    FitossanitarioHive defensivo,
+  ) {
+    final nomeExibicao =
+        defensivo.nomeComum.isNotEmpty
+            ? defensivo.nomeComum
+            : defensivo.nomeTecnico;
+
     return DropdownItemEntity(
       id: defensivo.objectId ?? defensivo.idReg,
       nome: nomeExibicao,

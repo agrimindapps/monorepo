@@ -1,5 +1,4 @@
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider, Ref;
+import 'package:core/core.dart' show Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;

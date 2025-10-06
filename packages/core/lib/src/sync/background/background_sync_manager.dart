@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../shared/utils/failure.dart';
 import '../interfaces/i_sync_service.dart';
 import '../services/sync_logger.dart';
-import '../throttling/sync_throttler.dart';
 import '../throttling/sync_queue.dart';
+import '../throttling/sync_throttler.dart';
 
 /// Configuração de background sync para um service
 class BackgroundSyncConfig {
@@ -134,7 +133,9 @@ class BackgroundSyncManager {
 
       _isInitialized = true;
 
-      _logger.logInfo(message: 'Background Sync Manager initialized successfully');
+      _logger.logInfo(
+        message: 'Background Sync Manager initialized successfully',
+      );
       _eventController.add(BackgroundSyncEvent.initialized());
 
       return const Right(null);
@@ -149,10 +150,7 @@ class BackgroundSyncManager {
   }
 
   /// Registra um sync service para background sync
-  void registerService(
-    ISyncService service, {
-    BackgroundSyncConfig? config,
-  }) {
+  void registerService(ISyncService service, {BackgroundSyncConfig? config}) {
     if (!_isInitialized) {
       throw StateError('BackgroundSyncManager not initialized');
     }
@@ -174,7 +172,9 @@ class BackgroundSyncManager {
       _startPeriodicSync(service.serviceId);
     }
 
-    _eventController.add(BackgroundSyncEvent.serviceRegistered(service.serviceId));
+    _eventController.add(
+      BackgroundSyncEvent.serviceRegistered(service.serviceId),
+    );
   }
 
   /// Remove registro de um service
@@ -255,7 +255,9 @@ class BackgroundSyncManager {
         },
       );
 
-      _eventController.add(BackgroundSyncEvent.syncThrottled(serviceId, timeUntilNext));
+      _eventController.add(
+        BackgroundSyncEvent.syncThrottled(serviceId, timeUntilNext),
+      );
       return;
     }
 
@@ -273,10 +275,7 @@ class BackgroundSyncManager {
         result.fold(
           (failure) {
             _throttler.recordFailure(serviceId);
-            _logger.logSyncFailure(
-              entity: serviceId,
-              error: failure.message,
-            );
+            _logger.logSyncFailure(entity: serviceId, error: failure.message);
           },
           (syncResult) {
             _throttler.recordSuccess(serviceId);
@@ -328,10 +327,7 @@ class BackgroundSyncManager {
 
       case SyncQueueEventType.itemFailed:
         _eventController.add(
-          BackgroundSyncEvent.syncFailed(
-            event.item!.serviceId,
-            event.failure!,
-          ),
+          BackgroundSyncEvent.syncFailed(event.item!.serviceId, event.failure!),
         );
         break;
 
@@ -500,12 +496,11 @@ class BackgroundSyncEvent {
   factory BackgroundSyncEvent.syncCompleted(
     String serviceId,
     ServiceSyncResult result,
-  ) =>
-      BackgroundSyncEvent._(
-        type: BackgroundSyncEventType.syncCompleted,
-        serviceId: serviceId,
-        result: result,
-      );
+  ) => BackgroundSyncEvent._(
+    type: BackgroundSyncEventType.syncCompleted,
+    serviceId: serviceId,
+    result: result,
+  );
 
   factory BackgroundSyncEvent.syncFailed(String serviceId, Failure failure) =>
       BackgroundSyncEvent._(
@@ -517,12 +512,11 @@ class BackgroundSyncEvent {
   factory BackgroundSyncEvent.syncThrottled(
     String serviceId,
     Duration? timeUntilNext,
-  ) =>
-      BackgroundSyncEvent._(
-        type: BackgroundSyncEventType.syncThrottled,
-        serviceId: serviceId,
-        timeUntilNext: timeUntilNext,
-      );
+  ) => BackgroundSyncEvent._(
+    type: BackgroundSyncEventType.syncThrottled,
+    serviceId: serviceId,
+    timeUntilNext: timeUntilNext,
+  );
 
   factory BackgroundSyncEvent.syncPaused(String serviceId) =>
       BackgroundSyncEvent._(
@@ -539,12 +533,11 @@ class BackgroundSyncEvent {
   factory BackgroundSyncEvent.configUpdated(
     String serviceId,
     BackgroundSyncConfig config,
-  ) =>
-      BackgroundSyncEvent._(
-        type: BackgroundSyncEventType.configUpdated,
-        serviceId: serviceId,
-        config: config,
-      );
+  ) => BackgroundSyncEvent._(
+    type: BackgroundSyncEventType.configUpdated,
+    serviceId: serviceId,
+    config: config,
+  );
 }
 
 /// Tipos de eventos de background sync

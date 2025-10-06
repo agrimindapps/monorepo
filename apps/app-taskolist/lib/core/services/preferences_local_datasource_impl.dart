@@ -1,5 +1,5 @@
+import 'package:core/core.dart' show Box, Hive;
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 
 import '../../core/theme/theme_mode_enum.dart';
 import 'preferences_local_datasource.dart';
@@ -20,7 +20,10 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   Future<AppThemeMode> getThemeMode() async {
     try {
       final box = await _preferencesBox;
-      final themeValue = box.get(_themeKey, defaultValue: AppThemeMode.system.persistenceValue) as String? ?? AppThemeMode.system.persistenceValue;
+      final themeValue =
+          box.get(_themeKey, defaultValue: AppThemeMode.system.persistenceValue)
+              as String? ??
+          AppThemeMode.system.persistenceValue;
       return AppThemeMode.fromPersistenceValue(themeValue);
     } catch (e) {
       if (kDebugMode) {

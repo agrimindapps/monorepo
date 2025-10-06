@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/enums/task_filter.dart';
 import '../../features/tasks/domain/task_entity.dart';
@@ -25,27 +25,28 @@ class TaskListWidget extends ConsumerWidget {
 
     return tasksState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            const Text('Erro ao carregar tarefas'),
-            const SizedBox(height: 8),
-            Text(error.toString(), style: const TextStyle(fontSize: 12)),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => ref.refresh(taskNotifierProvider),
-              child: const Text('Tentar novamente'),
+      error:
+          (error, stackTrace) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                const Text('Erro ao carregar tarefas'),
+                const SizedBox(height: 8),
+                Text(error.toString(), style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.refresh(taskNotifierProvider),
+                  child: const Text('Tentar novamente'),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
       data: (tasks) {
         // Aplicar filtros
         final filteredTasks = _filterTasks(tasks);
-        
+
         if (filteredTasks.isEmpty) {
           return Center(
             child: Column(
@@ -54,30 +55,32 @@ class TaskListWidget extends ConsumerWidget {
                 const Icon(Icons.task_alt, size: 48, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
-                  tasks.isEmpty 
-                    ? 'Nenhuma tarefa encontrada'
-                    : 'Nenhuma tarefa corresponde aos filtros',
+                  tasks.isEmpty
+                      ? 'Nenhuma tarefa encontrada'
+                      : 'Nenhuma tarefa corresponde aos filtros',
                 ),
                 Text(
-                  tasks.isEmpty 
-                    ? 'Toque no + para criar sua primeira tarefa'
-                    : 'Tente ajustar os filtros no menu lateral',
+                  tasks.isEmpty
+                      ? 'Toque no + para criar sua primeira tarefa'
+                      : 'Tente ajustar os filtros no menu lateral',
                 ),
               ],
             ),
           );
         }
 
-        return enableReorder 
-          ? ReorderableListView.builder(
+        return enableReorder
+            ? ReorderableListView.builder(
               itemCount: filteredTasks.length,
-              onReorder: (oldIndex, newIndex) => _onReorder(ref, filteredTasks, oldIndex, newIndex),
+              onReorder:
+                  (oldIndex, newIndex) =>
+                      _onReorder(ref, filteredTasks, oldIndex, newIndex),
               itemBuilder: (context, index) {
                 final task = filteredTasks[index];
                 return _buildTaskCard(context, ref, task, index);
               },
             )
-          : ListView.builder(
+            : ListView.builder(
               itemCount: filteredTasks.length,
               itemBuilder: (context, index) {
                 final task = filteredTasks[index];
@@ -93,7 +96,8 @@ class TaskListWidget extends ConsumerWidget {
 
     // Filtrar por tag primeiro (se especificada)
     if (selectedTag != null && selectedTag!.isNotEmpty) {
-      filtered = filtered.where((task) => task.tags.contains(selectedTag)).toList();
+      filtered =
+          filtered.where((task) => task.tags.contains(selectedTag)).toList();
     }
 
     // Aplicar filtro de tipo
@@ -118,7 +122,12 @@ class TaskListWidget extends ConsumerWidget {
     return filtered;
   }
 
-  Widget _buildTaskCard(BuildContext context, WidgetRef ref, TaskEntity task, int index) {
+  Widget _buildTaskCard(
+    BuildContext context,
+    WidgetRef ref,
+    TaskEntity task,
+    int index,
+  ) {
     return Card(
       key: ValueKey(task.id), // Key necessária para ReorderableListView
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -126,14 +135,12 @@ class TaskListWidget extends ConsumerWidget {
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (enableReorder)
-              Icon(Icons.drag_handle, color: Colors.grey[400]),
+            if (enableReorder) Icon(Icons.drag_handle, color: Colors.grey[400]),
             Checkbox(
               value: task.status == TaskStatus.completed,
               onChanged: (value) {
-                final newStatus = value == true 
-                  ? TaskStatus.completed 
-                  : TaskStatus.pending;
+                final newStatus =
+                    value == true ? TaskStatus.completed : TaskStatus.pending;
                 final updatedTask = task.copyWith(
                   status: newStatus,
                   updatedAt: DateTime.now(),
@@ -146,14 +153,13 @@ class TaskListWidget extends ConsumerWidget {
         title: Text(
           task.title,
           style: TextStyle(
-            decoration: task.status == TaskStatus.completed
-              ? TextDecoration.lineThrough
-              : null,
+            decoration:
+                task.status == TaskStatus.completed
+                    ? TextDecoration.lineThrough
+                    : null,
           ),
         ),
-        subtitle: task.description != null 
-          ? Text(task.description!)
-          : null,
+        subtitle: task.description != null ? Text(task.description!) : null,
         trailing: IconButton(
           icon: Icon(
             task.isStarred ? Icons.star : Icons.star_border,
@@ -176,7 +182,12 @@ class TaskListWidget extends ConsumerWidget {
     );
   }
 
-  void _onReorder(WidgetRef ref, List<TaskEntity> tasks, int oldIndex, int newIndex) {
+  void _onReorder(
+    WidgetRef ref,
+    List<TaskEntity> tasks,
+    int oldIndex,
+    int newIndex,
+  ) {
     // Ajustar newIndex se for maior que oldIndex (comportamento padrão do ReorderableListView)
     if (newIndex > oldIndex) {
       newIndex -= 1;

@@ -1,4 +1,5 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' show Box, Hive;
+
 import '../entities/log_entry.dart';
 import 'log_local_datasource.dart';
 
@@ -35,7 +36,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   }) async {
     try {
       if (_logsBox == null) return <LogEntry>[];
-      
+
       var logs = _logsBox!.values.cast<LogEntry>().toList();
 
       // Apply filters
@@ -48,17 +49,25 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
       }
 
       if (startDate != null) {
-        logs = logs.where((log) => 
-          log.timestamp.isAfter(startDate) || 
-          log.timestamp.isAtSameMomentAs(startDate)
-        ).toList();
+        logs =
+            logs
+                .where(
+                  (log) =>
+                      log.timestamp.isAfter(startDate) ||
+                      log.timestamp.isAtSameMomentAs(startDate),
+                )
+                .toList();
       }
 
       if (endDate != null) {
-        logs = logs.where((log) => 
-          log.timestamp.isBefore(endDate) || 
-          log.timestamp.isAtSameMomentAs(endDate)
-        ).toList();
+        logs =
+            logs
+                .where(
+                  (log) =>
+                      log.timestamp.isBefore(endDate) ||
+                      log.timestamp.isAtSameMomentAs(endDate),
+                )
+                .toList();
       }
 
       // Sort by timestamp (newest first)
@@ -84,9 +93,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   }
 
   @override
-  Future<List<LogEntry>> getErrorLogs({
-    int? limit,
-  }) async {
+  Future<List<LogEntry>> getErrorLogs({int? limit}) async {
     return getLogs(level: LogLevel.error, limit: limit);
   }
 
@@ -94,7 +101,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<void> clearOldLogs(int daysToKeep) async {
     try {
       if (_logsBox == null) return;
-      
+
       final cutoffDate = DateTime.now().subtract(Duration(days: daysToKeep));
       final keysToDelete = <String>[];
 
@@ -125,9 +132,9 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<Map<LogLevel, int>> getLogsCount() async {
     try {
       if (_logsBox == null) return <LogLevel, int>{};
-      
+
       final counts = <LogLevel, int>{};
-      
+
       // Initialize counts
       for (final level in LogLevel.values) {
         counts[level] = 0;

@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/usecases/sign_in_anonymously.dart';
 import '../../domain/usecases/sign_in_with_email.dart';

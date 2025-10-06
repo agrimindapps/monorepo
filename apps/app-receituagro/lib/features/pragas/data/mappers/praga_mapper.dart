@@ -1,6 +1,6 @@
 import '../../../../core/data/models/pragas_hive.dart';
-import '../../domain/entities/praga_entity.dart';
 import '../../data/praga_model.dart';
+import '../../domain/entities/praga_entity.dart';
 
 /// Mapper unificado para conversão entre diferentes models e PragaEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas

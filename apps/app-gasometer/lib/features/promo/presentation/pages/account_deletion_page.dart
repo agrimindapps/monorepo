@@ -1,15 +1,14 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../auth/presentation/state/auth_state.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 
 class AccountDeletionPage extends ConsumerStatefulWidget {
   const AccountDeletionPage({super.key});
 
   @override
-  ConsumerState<AccountDeletionPage> createState() => _AccountDeletionPageState();
+  ConsumerState<AccountDeletionPage> createState() =>
+      _AccountDeletionPageState();
 }
 
 class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
@@ -56,32 +55,33 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.warning, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Confirmação Final'),
-          ],
-        ),
-        content: const Text(
-          'Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente deletados em até 30 dias.\n\nDeseja realmente prosseguir com a exclusão da conta?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.warning, color: Colors.red),
+                SizedBox(width: 8),
+                Text('Confirmação Final'),
+              ],
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirmar Exclusão'),
+            content: const Text(
+              'Esta ação não pode ser desfeita. Todos os seus dados serão permanentemente deletados em até 30 dias.\n\nDeseja realmente prosseguir com a exclusão da conta?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Confirmar Exclusão'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed != true) return;
@@ -106,17 +106,19 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
         }
         return;
       }
-      
+
       // Show success message and redirect
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Conta deletada com sucesso. Você será redirecionado para a tela inicial.'),
+            content: Text(
+              'Conta deletada com sucesso. Você será redirecionado para a tela inicial.',
+            ),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 3),
           ),
         );
-        
+
         // Wait a moment then redirect to login
         await Future<void>.delayed(const Duration(seconds: 2));
         if (mounted) {
@@ -143,7 +145,7 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
 
   Future<String?> _showPasswordDialog() async {
     final TextEditingController passwordController = TextEditingController();
-    
+
     return showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -211,10 +213,7 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Colors.red.shade800,
-            Colors.red.shade600,
-          ],
+          colors: [Colors.red.shade800, Colors.red.shade600],
         ),
       ),
       child: Column(
@@ -398,13 +397,34 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
               else
                 Row(
                   children: [
-                    _navBarButton('Introdução', () => _scrollToSection(_introSection)),
-                    _navBarButton('O que será deletado', () => _scrollToSection(_whatDeletedSection)),
-                    _navBarButton('Consequências', () => _scrollToSection(_consequencesSection)),
-                    _navBarButton('Serviços Terceiros', () => _scrollToSection(_thirdPartySection)),
-                    _navBarButton('Processo', () => _scrollToSection(_processSection)),
-                    _navBarButton('Confirmação', () => _scrollToSection(_confirmationSection)),
-                    _navBarButton('Contato', () => _scrollToSection(_contactSection)),
+                    _navBarButton(
+                      'Introdução',
+                      () => _scrollToSection(_introSection),
+                    ),
+                    _navBarButton(
+                      'O que será deletado',
+                      () => _scrollToSection(_whatDeletedSection),
+                    ),
+                    _navBarButton(
+                      'Consequências',
+                      () => _scrollToSection(_consequencesSection),
+                    ),
+                    _navBarButton(
+                      'Serviços Terceiros',
+                      () => _scrollToSection(_thirdPartySection),
+                    ),
+                    _navBarButton(
+                      'Processo',
+                      () => _scrollToSection(_processSection),
+                    ),
+                    _navBarButton(
+                      'Confirmação',
+                      () => _scrollToSection(_confirmationSection),
+                    ),
+                    _navBarButton(
+                      'Contato',
+                      () => _scrollToSection(_contactSection),
+                    ),
                   ],
                 ),
             ],
@@ -419,10 +439,7 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
       onPressed: onPressed,
       child: Text(
         title,
-        style: TextStyle(
-          color: Colors.grey[800],
-          fontSize: 14,
-        ),
+        style: TextStyle(color: Colors.grey[800], fontSize: 14),
       ),
     );
   }
@@ -439,36 +456,29 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'Direito à Exclusão de Dados',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               _buildParagraph(
-                  'De acordo com a Lei Geral de Proteção de Dados (LGPD) brasileira e o Regulamento Geral sobre Proteção de Dados (GDPR) europeu, você tem o direito fundamental ao esquecimento, também conhecido como direito ao apagamento.'),
+                'De acordo com a Lei Geral de Proteção de Dados (LGPD) brasileira e o Regulamento Geral sobre Proteção de Dados (GDPR) europeu, você tem o direito fundamental ao esquecimento, também conhecido como direito ao apagamento.',
+              ),
               const SizedBox(height: 16),
               _buildParagraph(
-                  'Este direito permite que você solicite a exclusão completa e permanente de todos os seus dados pessoais coletados e processados pelo GasOMeter.'),
+                'Este direito permite que você solicite a exclusão completa e permanente de todos os seus dados pessoais coletados e processados pelo GasOMeter.',
+              ),
               const SizedBox(height: 16),
               _buildParagraph(
-                  'Esta página foi criada para facilitar o exercício deste direito de forma transparente, segura e em conformidade com todas as regulamentações aplicáveis.'),
+                'Esta página foi criada para facilitar o exercício deste direito de forma transparente, segura e em conformidade com todas as regulamentações aplicáveis.',
+              ),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade50,
                   border: const Border(
-                    left: BorderSide(
-                      width: 4,
-                      color: Colors.orange,
-                    ),
+                    left: BorderSide(width: 4, color: Colors.orange),
                   ),
                 ),
                 child: Row(
@@ -508,64 +518,42 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'O que será Deletado',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               _buildParagraph(
-                  'Ao solicitar a exclusão da sua conta, os seguintes dados serão permanentemente removidos de nossos sistemas:'),
+                'Ao solicitar a exclusão da sua conta, os seguintes dados serão permanentemente removidos de nossos sistemas:',
+              ),
               const SizedBox(height: 20),
-              _buildDataCategoryCard(
-                'Dados da Conta',
-                Icons.person,
-                [
-                  'Informações de perfil (nome, email)',
-                  'Dados de autenticação',
-                  'Preferências e configurações',
-                  'Histórico de login e sessões',
-                ],
-              ),
+              _buildDataCategoryCard('Dados da Conta', Icons.person, [
+                'Informações de perfil (nome, email)',
+                'Dados de autenticação',
+                'Preferências e configurações',
+                'Histórico de login e sessões',
+              ]),
               const SizedBox(height: 16),
-              _buildDataCategoryCard(
-                'Dados dos Veículos',
-                Icons.car_repair,
-                [
-                  'Informações dos veículos cadastrados',
-                  'Histórico de abastecimentos',
-                  'Registros de manutenção',
-                  'Dados do odômetro',
-                ],
-              ),
+              _buildDataCategoryCard('Dados dos Veículos', Icons.car_repair, [
+                'Informações dos veículos cadastrados',
+                'Histórico de abastecimentos',
+                'Registros de manutenção',
+                'Dados do odômetro',
+              ]),
               const SizedBox(height: 16),
-              _buildDataCategoryCard(
-                'Dados Financeiros',
-                Icons.attach_money,
-                [
-                  'Registros de despesas',
-                  'Relatórios de custos',
-                  'Estatísticas de consumo',
-                  'Dados de assinaturas premium',
-                ],
-              ),
+              _buildDataCategoryCard('Dados Financeiros', Icons.attach_money, [
+                'Registros de despesas',
+                'Relatórios de custos',
+                'Estatísticas de consumo',
+                'Dados de assinaturas premium',
+              ]),
               const SizedBox(height: 16),
-              _buildDataCategoryCard(
-                'Dados Técnicos',
-                Icons.analytics,
-                [
-                  'Logs de uso da aplicação',
-                  'Dados de analytics anonimizados',
-                  'Informações de crash reports',
-                  'Dados de sincronização',
-                ],
-              ),
+              _buildDataCategoryCard('Dados Técnicos', Icons.analytics, [
+                'Logs de uso da aplicação',
+                'Dados de analytics anonimizados',
+                'Informações de crash reports',
+                'Dados de sincronização',
+              ]),
             ],
           ),
         ),
@@ -573,7 +561,11 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
     );
   }
 
-  Widget _buildDataCategoryCard(String title, IconData icon, List<String> items) {
+  Widget _buildDataCategoryCard(
+    String title,
+    IconData icon,
+    List<String> items,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -604,25 +596,29 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             ],
           ),
           const SizedBox(height: 16),
-          for (final item in items) Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('• ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Expanded(
-                  child: Text(
-                    item,
-                    style: TextStyle(
-                      fontSize: 15,
-                      height: 1.5,
-                      color: Colors.grey[700],
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '• ',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Expanded(
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.5,
+                        color: Colors.grey[700],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -640,20 +636,14 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'Consequências da Exclusão',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               _buildParagraph(
-                  'É importante entender as consequências permanentes da exclusão da sua conta:'),
+                'É importante entender as consequências permanentes da exclusão da sua conta:',
+              ),
               const SizedBox(height: 20),
               _buildConsequenceCard(
                 'Perda Completa de Dados',
@@ -689,7 +679,12 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
     );
   }
 
-  Widget _buildConsequenceCard(String title, IconData icon, String description, Color color) {
+  Widget _buildConsequenceCard(
+    String title,
+    IconData icon,
+    String description,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -744,20 +739,14 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'Serviços de Terceiros',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               _buildParagraph(
-                  'O GasOMeter utiliza serviços de terceiros que também processam seus dados. A exclusão afetará os seguintes serviços:'),
+                'O GasOMeter utiliza serviços de terceiros que também processam seus dados. A exclusão afetará os seguintes serviços:',
+              ),
               const SizedBox(height: 20),
               _buildThirdPartyCard(
                 'Firebase Authentication',
@@ -789,7 +778,11 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
     );
   }
 
-  Widget _buildThirdPartyCard(String service, String description, IconData icon) {
+  Widget _buildThirdPartyCard(
+    String service,
+    String description,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -848,20 +841,14 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'Como Funciona o Processo',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               _buildParagraph(
-                  'O processo de exclusão da conta seguirá os seguintes passos:'),
+                'O processo de exclusão da conta seguirá os seguintes passos:',
+              ),
               const SizedBox(height: 20),
               _buildProcessStep(
                 '1',
@@ -1000,17 +987,10 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'Confirmar Exclusão da Conta',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               Container(
                 padding: const EdgeInsets.all(24),
@@ -1030,7 +1010,11 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.warning, color: Colors.red.shade600, size: 28),
+                        Icon(
+                          Icons.warning,
+                          color: Colors.red.shade600,
+                          size: 28,
+                        ),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
@@ -1046,26 +1030,34 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                     const SizedBox(height: 16),
                     Text(
                       'Ao marcar a caixa abaixo e clicar em "Excluir Conta", você confirma que:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                     ),
                     const SizedBox(height: 16),
-                    _buildConfirmationItem('Entende que esta ação não pode ser desfeita'),
-                    _buildConfirmationItem('Aceita a perda permanente de todos os dados'),
-                    _buildConfirmationItem('Concorda com o cancelamento da assinatura premium'),
-                    _buildConfirmationItem('Leu e entendeu as consequências descritas acima'),
+                    _buildConfirmationItem(
+                      'Entende que esta ação não pode ser desfeita',
+                    ),
+                    _buildConfirmationItem(
+                      'Aceita a perda permanente de todos os dados',
+                    ),
+                    _buildConfirmationItem(
+                      'Concorda com o cancelamento da assinatura premium',
+                    ),
+                    _buildConfirmationItem(
+                      'Leu e entendeu as consequências descritas acima',
+                    ),
                     const SizedBox(height: 24),
                     Row(
                       children: [
                         Checkbox(
                           value: _confirmationChecked,
-                          onChanged: _isDeleting ? null : (value) {
-                            setState(() {
-                              _confirmationChecked = value ?? false;
-                            });
-                          },
+                          onChanged:
+                              _isDeleting
+                                  ? null
+                                  : (value) {
+                                    setState(() {
+                                      _confirmationChecked = value ?? false;
+                                    });
+                                  },
                           activeColor: Colors.red.shade600,
                         ),
                         const SizedBox(width: 8),
@@ -1086,7 +1078,10 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton.icon(
-                        onPressed: _confirmationChecked && !_isDeleting ? _handleAccountDeletion : null,
+                        onPressed:
+                            _confirmationChecked && !_isDeleting
+                                ? _handleAccountDeletion
+                                : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red.shade600,
                           foregroundColor: Colors.white,
@@ -1094,18 +1089,23 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon: _isDeleting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.delete_forever),
+                        icon:
+                            _isDeleting
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                                : const Icon(Icons.delete_forever),
                         label: Text(
-                          _isDeleting ? 'Excluindo Conta...' : 'Excluir Conta Permanentemente',
+                          _isDeleting
+                              ? 'Excluindo Conta...'
+                              : 'Excluir Conta Permanentemente',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1158,20 +1158,14 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             children: [
               const Text(
                 'Precisa de Ajuda?',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                color: Colors.red.shade700,
-              ),
+              Container(width: 60, height: 4, color: Colors.red.shade700),
               const SizedBox(height: 30),
               _buildParagraph(
-                  'Se você tem dúvidas sobre o processo de exclusão ou sobre seus direitos de proteção de dados, nossa equipe está pronta para ajudar.'),
+                'Se você tem dúvidas sobre o processo de exclusão ou sobre seus direitos de proteção de dados, nossa equipe está pronta para ajudar.',
+              ),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(20),
@@ -1219,7 +1213,8 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
               ),
               const SizedBox(height: 20),
               _buildParagraph(
-                  'Nosso compromisso é garantir que seus direitos sejam respeitados de acordo com a LGPD e GDPR.'),
+                'Nosso compromisso é garantir que seus direitos sejam respeitados de acordo com a LGPD e GDPR.',
+              ),
             ],
           ),
         ),
@@ -1266,7 +1261,10 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _footerLink('Política de Privacidade', () => context.go('/privacy')),
+                _footerLink(
+                  'Política de Privacidade',
+                  () => context.go('/privacy'),
+                ),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   height: 12,
@@ -1305,21 +1303,16 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
   Widget _buildParagraph(String text) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 16,
-        height: 1.6,
-        color: Colors.grey[800],
-      ),
+      style: TextStyle(fontSize: 16, height: 1.6, color: Colors.grey[800]),
       textAlign: TextAlign.justify,
     );
   }
 }
 
 class _PasswordDialog extends StatefulWidget {
-  
   const _PasswordDialog({required this.controller});
   final TextEditingController controller;
-  
+
   @override
   State<_PasswordDialog> createState() => _PasswordDialogState();
 }
@@ -1327,25 +1320,25 @@ class _PasswordDialog extends StatefulWidget {
 class _PasswordDialogState extends State<_PasswordDialog> {
   bool _isPasswordVisible = false;
   bool _hasText = false;
-  
+
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_updateButtonState);
   }
-  
+
   @override
   void dispose() {
     widget.controller.removeListener(_updateButtonState);
     super.dispose();
   }
-  
+
   void _updateButtonState() {
     setState(() {
       _hasText = widget.controller.text.trim().isNotEmpty;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1377,11 +1370,18 @@ class _PasswordDialogState extends State<_PasswordDialog> {
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                 ),
-                onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                onPressed:
+                    () => setState(
+                      () => _isPasswordVisible = !_isPasswordVisible,
+                    ),
               ),
               border: const OutlineInputBorder(),
             ),
-            onSubmitted: _hasText ? (_) => Navigator.of(context).pop(widget.controller.text.trim()) : null,
+            onSubmitted:
+                _hasText
+                    ? (_) =>
+                        Navigator.of(context).pop(widget.controller.text.trim())
+                    : null,
           ),
           const SizedBox(height: 16),
           Container(
@@ -1412,9 +1412,11 @@ class _PasswordDialogState extends State<_PasswordDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _hasText
-              ? () => Navigator.of(context).pop(widget.controller.text.trim())
-              : null,
+          onPressed:
+              _hasText
+                  ? () =>
+                      Navigator.of(context).pop(widget.controller.text.trim())
+                  : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,

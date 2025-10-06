@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/spacing_tokens.dart';
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../providers/detalhe_defensivo_notifier.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/theme/spacing_tokens.dart';
 import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
+import '../providers/detalhe_defensivo_notifier.dart';
 import 'diagnosticos_defensivos_components.dart';
 
 /// Widget principal responsável por exibir diagnósticos relacionados ao defensivo
@@ -30,10 +30,7 @@ import 'diagnosticos_defensivos_components.dart';
 class DiagnosticosTabWidget extends ConsumerWidget {
   final String defensivoName;
 
-  const DiagnosticosTabWidget({
-    super.key,
-    required this.defensivoName,
-  });
+  const DiagnosticosTabWidget({super.key, required this.defensivoName});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,7 +67,9 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       final idReg = data.defensivoData?.idReg;
       final nomeDefensivo = data.defensivoData?.nomeComum;
       if (idReg != null) {
-        ref.read(diagnosticosNotifierProvider.notifier).getDiagnosticosByDefensivo(idReg, nomeDefensivo: nomeDefensivo);
+        ref
+            .read(diagnosticosNotifierProvider.notifier)
+            .getDiagnosticosByDefensivo(idReg, nomeDefensivo: nomeDefensivo);
       }
     });
   }
@@ -83,13 +82,13 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (snapshot.hasError) {
           return Center(child: Text('Erro: ${snapshot.error}'));
         }
-        
+
         final groupedDiagnostics = snapshot.data ?? {};
-        
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,17 +97,17 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       },
     );
   }
-  
+
   /// Agrupa diagnósticos por cultura usando dados reais do repositório
   Future<Map<String, List<dynamic>>> _groupDiagnosticsByCulture(
     List<dynamic> diagnosticos,
   ) async {
     final grouped = <String, List<dynamic>>{};
     final culturaRepository = sl<CulturaHiveRepository>();
-    
+
     for (final diagnostic in diagnosticos) {
       String culturaNome = 'Não especificado';
-      
+
       try {
         // Primeiro tenta buscar pela idCultura (estrutura nova)
         final idCultura = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
@@ -118,10 +117,13 @@ class DiagnosticosTabWidget extends ConsumerWidget {
             culturaNome = culturaData.cultura;
           }
         }
-        
+
         // Se não encontrou pela ID, tenta usar nomeCultura como fallback
         if (culturaNome == 'Não especificado') {
-          final nomeCultura = _getPropertyFromDiagnostic(diagnostic, 'nomeCultura');
+          final nomeCultura = _getPropertyFromDiagnostic(
+            diagnostic,
+            'nomeCultura',
+          );
           final culturaProp = _getPropertyFromDiagnostic(diagnostic, 'cultura');
           culturaNome = nomeCultura ?? culturaProp ?? 'Não especificado';
         }
@@ -129,13 +131,13 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         // Em caso de erro, mantém o valor padrão
         culturaNome = 'Não especificado';
       }
-      
+
       grouped.putIfAbsent(culturaNome, () => []).add(diagnostic);
     }
-    
+
     return grouped;
   }
-  
+
   /// Helper para extrair propriedades de um diagnóstico
   String? _getPropertyFromDiagnostic(dynamic diagnostic, String property) {
     try {
@@ -158,7 +160,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       return null;
     }
   }
-  
+
   /// Constrói widgets agrupados por cultura
   List<Widget> _buildGroupedWidgets(
     Map<String, List<dynamic>> groupedDiagnostics,
@@ -181,10 +183,11 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         final diagnostic = diagnostics[i];
         widgets.add(
           Builder(
-            builder: (context) => DiagnosticoDefensivoListItemWidget(
-              diagnostico: diagnostic,
-              onTap: () => _showDiagnosticoDialog(context, diagnostic),
-            ),
+            builder:
+                (context) => DiagnosticoDefensivoListItemWidget(
+                  diagnostico: diagnostic,
+                  onTap: () => _showDiagnosticoDialog(context, diagnostic),
+                ),
           ),
         );
         if (i < diagnostics.length - 1) {

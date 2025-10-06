@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/enums/task_filter.dart';
 import '../../core/theme/app_colors.dart';
@@ -24,7 +24,7 @@ class FilterSidePanel extends ConsumerStatefulWidget {
   ConsumerState<FilterSidePanel> createState() => _FilterSidePanelState();
 }
 
-class _FilterSidePanelState extends ConsumerState<FilterSidePanel> 
+class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     with TickerProviderStateMixin {
   late TaskFilter _selectedFilter;
   String? _selectedTag;
@@ -39,7 +39,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     super.initState();
     _selectedFilter = widget.currentFilter;
     _selectedTag = widget.currentSelectedTag;
-    
+
     // Inicializar controladores de animação
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -49,25 +49,20 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(-0.3, 0.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
-    
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+    );
+
     _loadAvailableTags();
-    
+
     // Iniciar animações
     _fadeController.forward();
     _slideController.forward();
@@ -83,25 +78,28 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   void _loadAvailableTags() {
     // Obter todas as tasks para extrair tags
     const tasksRequest = GetTasksRequest();
-    ref.read(getTasksProvider(tasksRequest).future).then((tasks) {
-      final tagsSet = <String>{};
-      for (final task in tasks) {
-        tagsSet.addAll(task.tags);
-      }
+    ref
+        .read(getTasksProvider(tasksRequest).future)
+        .then((tasks) {
+          final tagsSet = <String>{};
+          for (final task in tasks) {
+            tagsSet.addAll(task.tags);
+          }
 
-      if (mounted) {
-        setState(() {
-          _availableTags = tagsSet.toList()..sort();
+          if (mounted) {
+            setState(() {
+              _availableTags = tagsSet.toList()..sort();
+            });
+          }
+        })
+        .catchError((error) {
+          // Em caso de erro, manter lista vazia
+          if (mounted) {
+            setState(() {
+              _availableTags = [];
+            });
+          }
         });
-      }
-    }).catchError((error) {
-      // Em caso de erro, manter lista vazia
-      if (mounted) {
-        setState(() {
-          _availableTags = [];
-        });
-      }
-    });
   }
 
   @override
@@ -195,9 +193,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
           end: Alignment.bottomRight,
           stops: const [0.0, 0.6, 1.0],
         ),
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(24),
-        ),
+        borderRadius: const BorderRadius.only(topRight: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -337,8 +333,10 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             future: ref.read(getTasksProvider(const GetTasksRequest()).future),
             builder: (context, snapshot) {
               final tasks = snapshot.data ?? <TaskEntity>[];
-              final pendingCount = tasks.where((t) => t.status.name == 'pending').length;
-              final completedCount = tasks.where((t) => t.status.name == 'completed').length;
+              final pendingCount =
+                  tasks.where((t) => t.status.name == 'pending').length;
+              final completedCount =
+                  tasks.where((t) => t.status.name == 'completed').length;
               final totalCount = tasks.length;
 
               return Row(
@@ -351,11 +349,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                       color: AppColors.warning,
                     ),
                   ),
-                  Container(
-                    width: 1,
-                    height: 32,
-                    color: AppColors.divider,
-                  ),
+                  Container(width: 1, height: 32, color: AppColors.divider),
                   Expanded(
                     child: _buildStatItem(
                       icon: Icons.check_circle,
@@ -364,11 +358,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                       color: AppColors.success,
                     ),
                   ),
-                  Container(
-                    width: 1,
-                    height: 32,
-                    color: AppColors.divider,
-                  ),
+                  Container(width: 1, height: 32, color: AppColors.divider),
                   Expanded(
                     child: _buildStatItem(
                       icon: Icons.list_alt,
@@ -394,11 +384,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 20,
-        ),
+        Icon(icon, color: color, size: 20),
         const SizedBox(height: 4),
         Text(
           value,
@@ -453,7 +439,9 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
           final index = entry.key;
           final filter = entry.value;
           return Padding(
-            padding: EdgeInsets.only(bottom: index < TaskFilter.values.length - 1 ? 8 : 0),
+            padding: EdgeInsets.only(
+              bottom: index < TaskFilter.values.length - 1 ? 8 : 0,
+            ),
             child: _buildModernFilterTile(filter),
           );
         }),
@@ -468,28 +456,31 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       decoration: BoxDecoration(
-        color: isSelected 
-            ? filter.color.withValues(alpha: 0.1)
-            : Colors.transparent,
+        color:
+            isSelected
+                ? filter.color.withValues(alpha: 0.1)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
-        border: isSelected
-            ? Border.all(
-                color: filter.color.withValues(alpha: 0.3),
-                width: 1.5,
-              )
-            : Border.all(
-                color: AppColors.divider.withValues(alpha: 0.3),
-                width: 1,
-              ),
-        boxShadow: isSelected
-            ? [
-                BoxShadow(
-                  color: filter.color.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+        border:
+            isSelected
+                ? Border.all(
+                  color: filter.color.withValues(alpha: 0.3),
+                  width: 1.5,
+                )
+                : Border.all(
+                  color: AppColors.divider.withValues(alpha: 0.3),
+                  width: 1,
                 ),
-              ]
-            : null,
+        boxShadow:
+            isSelected
+                ? [
+                  BoxShadow(
+                    color: filter.color.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+                : null,
       ),
       child: Material(
         color: Colors.transparent,
@@ -508,9 +499,12 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? filter.color.withValues(alpha: 0.15)
-                        : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        isSelected
+                            ? filter.color.withValues(alpha: 0.15)
+                            : Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -519,9 +513,9 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                     size: 18,
                   ),
                 ),
-                
+
                 const SizedBox(width: 14),
-                
+
                 // Text with improved typography
                 Expanded(
                   child: Column(
@@ -531,10 +525,14 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                         filter.displayName,
                         style: TextStyle(
                           fontSize: 15,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected 
-                              ? filter.color 
-                              : Theme.of(context).textTheme.bodyLarge?.color,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color:
+                              isSelected
+                                  ? filter.color
+                                  : Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
                           letterSpacing: 0.1,
                         ),
                       ),
@@ -553,37 +551,38 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                     ],
                   ),
                 ),
-                
+
                 // Selection indicator
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
-                  child: isSelected
-                      ? Container(
-                          key: const ValueKey('selected'),
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: filter.color,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        )
-                      : Container(
-                          key: const ValueKey('unselected'),
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.divider,
-                              width: 1.5,
+                  child:
+                      isSelected
+                          ? Container(
+                            key: const ValueKey('selected'),
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: filter.color,
+                              shape: BoxShape.circle,
                             ),
-                            shape: BoxShape.circle,
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          )
+                          : Container(
+                            key: const ValueKey('unselected'),
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: AppColors.divider,
+                                width: 1.5,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
                 ),
               ],
             ),
@@ -717,35 +716,39 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              gradient: isSelected
-                  ? LinearGradient(
-                      colors: [
-                        chipColor.withValues(alpha: 0.15),
-                        chipColor.withValues(alpha: 0.08),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              color: isSelected
-                  ? null
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              gradient:
+                  isSelected
+                      ? LinearGradient(
+                        colors: [
+                          chipColor.withValues(alpha: 0.15),
+                          chipColor.withValues(alpha: 0.08),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                      : null,
+              color:
+                  isSelected
+                      ? null
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
               border: Border.all(
-                color: isSelected
-                    ? chipColor.withValues(alpha: 0.4)
-                    : AppColors.divider.withValues(alpha: 0.5),
+                color:
+                    isSelected
+                        ? chipColor.withValues(alpha: 0.4)
+                        : AppColors.divider.withValues(alpha: 0.5),
                 width: isSelected ? 1.5 : 1,
               ),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: chipColor.withValues(alpha: 0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  isSelected
+                      ? [
+                        BoxShadow(
+                          color: chipColor.withValues(alpha: 0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                      : null,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -756,19 +759,21 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? chipColor
-                        : AppColors.textSecondary.withValues(alpha: 0.6),
+                    color:
+                        isSelected
+                            ? chipColor
+                            : AppColors.textSecondary.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: chipColor.withValues(alpha: 0.3),
-                              blurRadius: 3,
-                              offset: const Offset(0, 1),
-                            ),
-                          ]
-                        : null,
+                    boxShadow:
+                        isSelected
+                            ? [
+                              BoxShadow(
+                                color: chipColor.withValues(alpha: 0.3),
+                                blurRadius: 3,
+                                offset: const Offset(0, 1),
+                              ),
+                            ]
+                            : null,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -777,19 +782,16 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected
-                        ? chipColor
-                        : Theme.of(context).textTheme.bodyMedium?.color,
+                    color:
+                        isSelected
+                            ? chipColor
+                            : Theme.of(context).textTheme.bodyMedium?.color,
                     letterSpacing: 0.1,
                   ),
                 ),
                 if (isSelected && !isAllChip) ...[
                   const SizedBox(width: 6),
-                  Icon(
-                    Icons.check_circle,
-                    size: 14,
-                    color: chipColor,
-                  ),
+                  Icon(Icons.check_circle, size: 14, color: chipColor),
                 ],
               ],
             ),
@@ -801,7 +803,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
 
   Color _getTagColor(String? tag) {
     if (tag == null) return AppColors.primaryColor;
-    
+
     // Generate color based on tag hash
     final colors = [
       AppColors.primaryColor,
@@ -815,7 +817,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
       const Color(0xFF009688), // Teal
       const Color(0xFF4CAF50), // Green
     ];
-    
+
     return colors[tag.hashCode % colors.length];
   }
 
@@ -837,9 +839,9 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Action buttons grid
         Row(
           children: [
@@ -862,9 +864,9 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             ),
           ],
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Additional action
         SizedBox(
           width: double.infinity,
@@ -902,20 +904,13 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            border: Border.all(
-              color: color.withValues(alpha: 0.2),
-              width: 1,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: color,
-                size: 18,
-              ),
+              Icon(icon, color: color, size: 18),
               const SizedBox(width: 8),
               Text(
                 label,
@@ -954,20 +949,21 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   void _showHelpDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajuda e Suporte'),
-        content: const Text(
-          'Para suporte, entre em contato conosco através do email: '
-          'suporte@taskolist.com\n\n'
-          'Ou visite nossa página de ajuda para mais informações.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Ajuda e Suporte'),
+            content: const Text(
+              'Para suporte, entre em contato conosco através do email: '
+              'suporte@taskolist.com\n\n'
+              'Ou visite nossa página de ajuda para mais informações.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -999,9 +995,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     // Navegar para a página de configurações
     Navigator.push(
       context,
-      MaterialPageRoute<dynamic>(
-        builder: (context) => const SettingsPage(),
-      ),
+      MaterialPageRoute<dynamic>(builder: (context) => const SettingsPage()),
     );
   }
 }

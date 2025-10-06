@@ -1,8 +1,6 @@
 import 'package:core/core.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 import '../core/device_integration_service.dart';
-import '../presentation/providers/vehicle_device_notifier.dart';
 
 /// Módulo de injeção de dependência para Device Management
 @module
@@ -23,21 +21,18 @@ abstract class DeviceManagementModule {
     FirebaseAnalyticsService analyticsService,
     IDeviceRepository deviceRepository,
   ) => DeviceManagementService(
-        firebaseDeviceService: firebaseDeviceService,
-        authService: authService,
-        analyticsService: analyticsService,
-        deviceRepository: deviceRepository,
-      );
+    firebaseDeviceService: firebaseDeviceService,
+    authService: authService,
+    analyticsService: analyticsService,
+    deviceRepository: deviceRepository,
+  );
 
   // Vehicle-specific integration service
   @lazySingleton
   DeviceIntegrationService provideDeviceIntegrationService(
     DeviceManagementService coreDeviceService,
     DeviceInfoPlugin deviceInfoPlugin,
-  ) => DeviceIntegrationService(
-        coreDeviceService,
-        deviceInfoPlugin,
-      );
+  ) => DeviceIntegrationService(coreDeviceService, deviceInfoPlugin);
 
   // TODO: Fix VehicleDeviceProvider - migrated to Riverpod
   // @injectable

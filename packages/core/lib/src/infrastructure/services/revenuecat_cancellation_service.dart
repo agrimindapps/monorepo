@@ -1,10 +1,11 @@
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/utils/result.dart';
-import '../../shared/utils/app_error.dart';
 
 /// Serviço para gerenciar cancelamento de assinaturas RevenueCat
 /// durante exclusão de conta
@@ -14,10 +15,13 @@ class RevenueCatCancellationService {
   /// NOTA: RevenueCat não cancela diretamente - ele trabalha com as stores.
   /// Este método registra a intenção de cancelamento e fornece instruções
   /// para o usuário cancelar manualmente nas lojas.
-  Future<Result<SubscriptionCancellationResult>> handleSubscriptionCancellation() async {
+  Future<Result<SubscriptionCancellationResult>>
+  handleSubscriptionCancellation() async {
     try {
       if (kDebugMode) {
-        debugPrint('💳 RevenueCatCancellationService: Checking for active subscriptions');
+        debugPrint(
+          '💳 RevenueCatCancellationService: Checking for active subscriptions',
+        );
       }
 
       // Get current customer info
@@ -26,14 +30,18 @@ class RevenueCatCancellationService {
         customerInfo = await Purchases.getCustomerInfo();
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('⚠️ RevenueCatCancellationService: Error getting customer info: $e');
+          debugPrint(
+            '⚠️ RevenueCatCancellationService: Error getting customer info: $e',
+          );
         }
         // If RevenueCat fails, we don't want to block account deletion
-        return Result.success(SubscriptionCancellationResult(
-          hadActiveSubscription: false,
-          message: 'Não foi possível verificar assinaturas',
-          error: e.toString(),
-        ));
+        return Result.success(
+          SubscriptionCancellationResult(
+            hadActiveSubscription: false,
+            message: 'Não foi possível verificar assinaturas',
+            error: e.toString(),
+          ),
+        );
       }
 
       final activeSubscriptions = customerInfo.activeSubscriptions;
@@ -43,14 +51,18 @@ class RevenueCatCancellationService {
           debugPrint('✅ No active subscriptions to cancel');
         }
 
-        return Result.success(SubscriptionCancellationResult(
-          hadActiveSubscription: false,
-          message: 'Nenhuma assinatura ativa encontrada',
-        ));
+        return Result.success(
+          SubscriptionCancellationResult(
+            hadActiveSubscription: false,
+            message: 'Nenhuma assinatura ativa encontrada',
+          ),
+        );
       }
 
       if (kDebugMode) {
-        debugPrint('⚠️ Found ${activeSubscriptions.length} active subscription(s)');
+        debugPrint(
+          '⚠️ Found ${activeSubscriptions.length} active subscription(s)',
+        );
       }
 
       // Get entitlements info
@@ -80,14 +92,17 @@ class RevenueCatCancellationService {
         debugPrint('💡 User needs to cancel manually via store');
       }
 
-      return Result.success(SubscriptionCancellationResult(
-        hadActiveSubscription: true,
-        activeSubscriptionIds: activeSubscriptions.toList(),
-        entitlementDetails: entitlementDetails,
-        requiresManualCancellation: true,
-        manualCancellationInstructions: instructions,
-        message: 'Assinatura ativa encontrada. Cancelamento manual necessário.',
-      ));
+      return Result.success(
+        SubscriptionCancellationResult(
+          hadActiveSubscription: true,
+          activeSubscriptionIds: activeSubscriptions.toList(),
+          entitlementDetails: entitlementDetails,
+          requiresManualCancellation: true,
+          manualCancellationInstructions: instructions,
+          message:
+              'Assinatura ativa encontrada. Cancelamento manual necessário.',
+        ),
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ RevenueCatCancellationService: Unexpected error: $e');
@@ -164,7 +179,8 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
           'identifier': entitlement.identifier,
           'productId': entitlement.productIdentifier,
           'periodType': entitlement.periodType.name,
-          'expiresDate': entitlement.expirationDate, // Already a String in ISO 8601 format
+          'expiresDate':
+              entitlement.expirationDate, // Already a String in ISO 8601 format
           'willRenew': entitlement.willRenew,
           'store': entitlement.store.name,
         };
@@ -175,7 +191,7 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
           final expirationDate = DateTime.parse(entitlement.expirationDate!);
           if (currentString == null ||
               expirationDate.isAfter(DateTime.parse(currentString))) {
-            details['latestExpirationDate'] = entitlement.expirationDate!;
+            details['latestExpirationDate'] = entitlement.expirationDate;
           }
         }
       }

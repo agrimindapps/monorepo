@@ -2,9 +2,9 @@ import 'package:core/core.dart';
 
 import '../../core/enums/analytics_user_type.dart';
 
+export '../../core/enums/analytics_user_type.dart' show AnalyticsUserType;
 // Export types
 export 'enhanced_analytics_notifier.dart' show EnhancedAnalyticsNotifier;
-export '../../core/enums/analytics_user_type.dart' show AnalyticsUserType;
 
 /// Analytics events specific to ReceitaAgro
 enum ReceitaAgroAnalyticsEvent {
@@ -65,15 +65,18 @@ class ReceitaAgroAnalyticsService {
   ReceitaAgroAnalyticsService({
     required IAnalyticsRepository analyticsRepository,
     required ICrashlyticsRepository crashlyticsRepository,
-  })  : _analyticsRepository = analyticsRepository,
-        _crashlyticsRepository = crashlyticsRepository;
+  }) : _analyticsRepository = analyticsRepository,
+       _crashlyticsRepository = crashlyticsRepository;
 
   // Core analytics operations
   Future<void> initialize() async {
     // Analytics repository doesn't have initialize method - it's auto-initialized
   }
 
-  Future<void> logEvent(String eventName, Map<String, dynamic>? parameters) async {
+  Future<void> logEvent(
+    String eventName,
+    Map<String, dynamic>? parameters,
+  ) async {
     await _analyticsRepository.logEvent(eventName, parameters: parameters);
   }
 
@@ -85,7 +88,11 @@ class ReceitaAgroAnalyticsService {
     await _analyticsRepository.setUserProperties(properties: {name: value});
   }
 
-  Future<void> recordError(dynamic error, StackTrace? stackTrace, {String? reason}) async {
+  Future<void> recordError(
+    dynamic error,
+    StackTrace? stackTrace, {
+    String? reason,
+  }) async {
     await _crashlyticsRepository.recordError(
       exception: error,
       stackTrace: stackTrace ?? StackTrace.empty,
@@ -109,7 +116,11 @@ class ReceitaAgroAnalyticsService {
     await logEvent('app_open', null);
   }
 
-  Future<void> logSubscriptionEvent(String eventType, String? productId, {Map<String, dynamic>? additionalData}) async {
+  Future<void> logSubscriptionEvent(
+    String eventType,
+    String? productId, {
+    Map<String, dynamic>? additionalData,
+  }) async {
     final params = <String, dynamic>{
       'event_type': eventType,
       if (productId != null) 'product_id': productId,
@@ -144,8 +155,17 @@ class ReceitaAgroAnalyticsService {
     logEvent(eventName, parameters);
   }
 
-  void trackError(String context, String error, {bool fatal = false, Map<String, dynamic>? metadata}) {
-    recordError(error, StackTrace.current, reason: '$context${fatal ? ' (FATAL)' : ''}');
+  void trackError(
+    String context,
+    String error, {
+    bool fatal = false,
+    Map<String, dynamic>? metadata,
+  }) {
+    recordError(
+      error,
+      StackTrace.current,
+      reason: '$context${fatal ? ' (FATAL)' : ''}',
+    );
   }
 
   Future<void> setUserProperties({

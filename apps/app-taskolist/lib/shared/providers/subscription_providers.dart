@@ -1,19 +1,24 @@
 import 'package:core/core.dart' hide getIt;
 
 import '../../core/di/injection.dart' as di;
-import '../../features/premium/presentation/subscription_status.dart' as local_sub;
 // Local Domain Entities
 import '../../features/account/presentation/usage_stats.dart' as local;
 import '../../features/auth/domain/user_limits.dart' as local;
+import '../../features/premium/presentation/subscription_status.dart'
+    as local_sub;
 import '../../infrastructure/services/subscription_service.dart';
 
 class Subscription {
-  static final subscriptionStatusProvider = StateNotifierProvider<SubscriptionStatusNotifier, AsyncValue<local_sub.SubscriptionStatus>>((ref) {
+  static final subscriptionStatusProvider = StateNotifierProvider<
+    SubscriptionStatusNotifier,
+    AsyncValue<local_sub.SubscriptionStatus>
+  >((ref) {
     return SubscriptionStatusNotifier();
   });
 }
 
-class SubscriptionStatusNotifier extends StateNotifier<AsyncValue<local_sub.SubscriptionStatus>> {
+class SubscriptionStatusNotifier
+    extends StateNotifier<AsyncValue<local_sub.SubscriptionStatus>> {
   SubscriptionStatusNotifier() : super(const AsyncValue.loading()) {
     _fetchSubscriptionStatus();
   }
@@ -22,17 +27,20 @@ class SubscriptionStatusNotifier extends StateNotifier<AsyncValue<local_sub.Subs
     try {
       // TODO: Implement actual subscription status fetching
       const status = local_sub.SubscriptionStatus(
-        isActive: false, 
+        isActive: false,
         expirationDate: null,
       );
-      state = AsyncValue.data(status);
+      state = const AsyncValue.data(status);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
 }
+
 // Provider para o serviço de subscription
-final subscriptionServiceProvider = Provider<TaskManagerSubscriptionService>((ref) {
+final subscriptionServiceProvider = Provider<TaskManagerSubscriptionService>((
+  ref,
+) {
   return di.getIt<TaskManagerSubscriptionService>();
 });
 
@@ -43,7 +51,9 @@ final hasPremiumProvider = FutureProvider<bool>((ref) async {
 });
 
 // Provider para o status da subscription atual
-final currentSubscriptionProvider = FutureProvider<SubscriptionEntity?>((ref) async {
+final currentSubscriptionProvider = FutureProvider<SubscriptionEntity?>((
+  ref,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.getCurrentSubscription();
 });
@@ -55,49 +65,69 @@ final availableFeaturesProvider = FutureProvider<List<String>>((ref) async {
 });
 
 // Provider para produtos disponíveis
-final availableProductsProvider = FutureProvider<List<ProductInfo>>((ref) async {
+final availableProductsProvider = FutureProvider<List<ProductInfo>>((
+  ref,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.getTaskManagerProducts();
 });
 
 // Provider para limites do usuário
-final userLimitsProvider = FutureProvider.family<local.UserLimits, UserLimitsParams>((ref, params) async {
-  final subscriptionService = ref.watch(subscriptionServiceProvider);
-  return await subscriptionService.getUserLimits(
-    currentTasks: params.currentTasks,
-    currentSubtasks: params.currentSubtasks,
-    currentTags: params.currentTags,
-    completedTasks: params.completedTasks,
-    completedSubtasks: params.completedSubtasks,
-  );
-});
+final userLimitsProvider =
+    FutureProvider.family<local.UserLimits, UserLimitsParams>((
+      ref,
+      params,
+    ) async {
+      final subscriptionService = ref.watch(subscriptionServiceProvider);
+      return await subscriptionService.getUserLimits(
+        currentTasks: params.currentTasks,
+        currentSubtasks: params.currentSubtasks,
+        currentTags: params.currentTags,
+        completedTasks: params.completedTasks,
+        completedSubtasks: params.completedSubtasks,
+      );
+    });
 
 // Provider para verificar features específicas
-final hasFeatureProvider = FutureProvider.family<bool, String>((ref, featureName) async {
+final hasFeatureProvider = FutureProvider.family<bool, String>((
+  ref,
+  featureName,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.hasFeature(featureName);
 });
 
 // Provider para verificar se pode criar mais tarefas
-final canCreateTasksProvider = FutureProvider.family<bool, int>((ref, currentTaskCount) async {
+final canCreateTasksProvider = FutureProvider.family<bool, int>((
+  ref,
+  currentTaskCount,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.canCreateMoreTasks(currentTaskCount);
 });
 
 // Provider para verificar se pode criar mais subtarefas
-final canCreateSubtasksProvider = FutureProvider.family<bool, int>((ref, currentSubtaskCount) async {
+final canCreateSubtasksProvider = FutureProvider.family<bool, int>((
+  ref,
+  currentSubtaskCount,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.canCreateMoreSubtasks(currentSubtaskCount);
 });
 
 // Provider para verificar se pode criar mais tags
-final canCreateTagsProvider = FutureProvider.family<bool, int>((ref, currentTagCount) async {
+final canCreateTagsProvider = FutureProvider.family<bool, int>((
+  ref,
+  currentTagCount,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.canCreateMoreTags(currentTagCount);
 });
 
 // Provider para o stream de subscription status
-final subscriptionStatusStreamProvider = StreamProvider<SubscriptionEntity?>((ref) {
+final subscriptionStatusStreamProvider = StreamProvider<SubscriptionEntity?>((
+  ref,
+) {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return subscriptionService.subscriptionStatus;
 });
@@ -115,7 +145,9 @@ final managementUrlProvider = FutureProvider<String?>((ref) async {
 });
 
 // Provider para histórico de subscriptions
-final subscriptionHistoryProvider = FutureProvider<List<SubscriptionEntity>>((ref) async {
+final subscriptionHistoryProvider = FutureProvider<List<SubscriptionEntity>>((
+  ref,
+) async {
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return await subscriptionService.getUserSubscriptions();
 });
@@ -149,8 +181,8 @@ class UserLimitsParams {
 
   @override
   int get hashCode =>
-      currentTasks.hashCode ^ 
-      currentSubtasks.hashCode ^ 
+      currentTasks.hashCode ^
+      currentSubtasks.hashCode ^
       currentTags.hashCode ^
       completedTasks.hashCode ^
       completedSubtasks.hashCode;
@@ -171,7 +203,7 @@ class SubscriptionActions {
   /// Compra um produto e atualiza os providers
   Future<bool> purchaseProduct(String productId) async {
     final success = await _subscriptionService.purchaseProduct(productId);
-    
+
     if (success) {
       // Invalidar providers relacionados para forçar atualização
       _ref.invalidate(hasPremiumProvider);
@@ -179,14 +211,14 @@ class SubscriptionActions {
       _ref.invalidate(availableFeaturesProvider);
       _ref.invalidate(subscriptionHistoryProvider);
     }
-    
+
     return success;
   }
 
   /// Restaura compras e atualiza os providers
   Future<bool> restorePurchases() async {
     final success = await _subscriptionService.restorePurchases();
-    
+
     if (success) {
       // Invalidar providers relacionados
       _ref.invalidate(hasPremiumProvider);
@@ -194,14 +226,14 @@ class SubscriptionActions {
       _ref.invalidate(availableFeaturesProvider);
       _ref.invalidate(subscriptionHistoryProvider);
     }
-    
+
     return success;
   }
 
   /// Define o usuário no RevenueCat
   Future<void> setUser(String userId, {Map<String, String>? attributes}) async {
     await _subscriptionService.setUser(userId, attributes: attributes);
-    
+
     // Invalidar providers após definir usuário
     _ref.invalidate(hasPremiumProvider);
     _ref.invalidate(currentSubscriptionProvider);

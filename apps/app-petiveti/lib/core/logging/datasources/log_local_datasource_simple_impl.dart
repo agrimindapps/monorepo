@@ -1,5 +1,7 @@
 import 'dart:convert';
-import 'package:hive/hive.dart';
+
+import 'package:core/core.dart' show Box, Hive;
+
 import '../entities/log_entry.dart';
 import 'log_local_datasource.dart';
 

@@ -6,8 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../auth/presentation/notifiers/auth_notifier.dart';
-import '../../../auth/presentation/state/auth_state.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/validation/form_validator.dart';
 import '../../../../core/widgets/error_header.dart';
@@ -15,6 +13,8 @@ import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
+import '../../../auth/presentation/notifiers/auth_notifier.dart';
+import '../../../auth/presentation/state/auth_state.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_form_notifier.dart';

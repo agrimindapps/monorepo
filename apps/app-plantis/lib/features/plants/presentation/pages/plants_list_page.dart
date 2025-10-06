@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
+// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart';
 // Plants providers now imported from Riverpod - using plants_providers.dart
-import '../../../../core/providers/plants_providers.dart'
-    show ViewMode, SortBy;
-import '../../../../core/providers/plants_providers.dart'
-    as riverpod_plants;
+import '../../../../core/providers/plants_providers.dart' show ViewMode, SortBy;
+import '../../../../core/providers/plants_providers.dart' as riverpod_plants;
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 // import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
@@ -302,7 +301,11 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
                 // Search and filters section
                 Consumer(
-                  builder: (BuildContext context, WidgetRef ref, Widget? child) {
+                  builder: (
+                    BuildContext context,
+                    WidgetRef ref,
+                    Widget? child,
+                  ) {
                     final plantsState = ref.watch(
                       riverpod_plants.plantsProvider,
                     );

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../providers/notification_providers.dart';
@@ -8,11 +8,7 @@ class TaskReminderWidget extends ConsumerStatefulWidget {
   final TaskEntity task;
   final VoidCallback? onReminderSet;
 
-  const TaskReminderWidget({
-    super.key,
-    required this.task,
-    this.onReminderSet,
-  });
+  const TaskReminderWidget({super.key, required this.task, this.onReminderSet});
 
   @override
   ConsumerState<TaskReminderWidget> createState() => _TaskReminderWidgetState();
@@ -37,10 +33,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
                 const SizedBox(width: 8),
                 const Text(
                   'Lembrete',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(
@@ -50,7 +43,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Toggle entre lembrete rápido e personalizado
             ToggleButtons(
               isSelected: [isQuickReminder, !isQuickReminder],
@@ -74,17 +67,17 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             if (isQuickReminder) ...[
               _buildQuickReminderSection(),
             ] else ...[
               _buildCustomReminderSection(),
             ],
-            
+
             const SizedBox(height: 16),
-            
+
             // Botões de ação
             Row(
               children: [
@@ -97,7 +90,8 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _canScheduleReminder() ? _scheduleReminder : null,
+                    onPressed:
+                        _canScheduleReminder() ? _scheduleReminder : null,
                     child: const Text('Agendar Lembrete'),
                   ),
                 ),
@@ -118,7 +112,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           style: TextStyle(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        
+
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -127,16 +121,19 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
             _buildQuickReminderChip('30 min', const Duration(minutes: 30)),
             _buildQuickReminderChip('1 hora', const Duration(hours: 1)),
             _buildQuickReminderChip('2 horas', const Duration(hours: 2)),
-            _buildQuickReminderChip('Amanhã 9h', Duration(
-              days: 1,
-              hours: 9 - DateTime.now().hour,
-              minutes: -DateTime.now().minute,
-            )),
+            _buildQuickReminderChip(
+              'Amanhã 9h',
+              Duration(
+                days: 1,
+                hours: 9 - DateTime.now().hour,
+                minutes: -DateTime.now().minute,
+              ),
+            ),
           ],
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -164,7 +161,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
 
   Widget _buildQuickReminderChip(String label, Duration duration) {
     final isSelected = quickReminderDuration == duration;
-    
+
     return FilterChip(
       label: Text(label),
       selected: isSelected,
@@ -189,7 +186,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           style: TextStyle(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 12),
-        
+
         DecoratedBox(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey[300]!),
@@ -202,15 +199,17 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
                   ? _formatDateTime(selectedDateTime!)
                   : 'Selecionar data e hora',
             ),
-            subtitle: selectedDateTime != null
-                ? Text(_getRelativeTime(selectedDateTime!))
-                : null,
+            subtitle:
+                selectedDateTime != null
+                    ? Text(_getRelativeTime(selectedDateTime!))
+                    : null,
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _selectDateTime(),
           ),
         ),
-        
-        if (selectedDateTime != null && selectedDateTime!.isBefore(DateTime.now())) ...[
+
+        if (selectedDateTime != null &&
+            selectedDateTime!.isBefore(DateTime.now())) ...[
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(8),
@@ -241,13 +240,14 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     if (isQuickReminder) {
       return true;
     } else {
-      return selectedDateTime != null && selectedDateTime!.isAfter(DateTime.now());
+      return selectedDateTime != null &&
+          selectedDateTime!.isAfter(DateTime.now());
     }
   }
 
   Future<void> _selectDateTime() async {
     final now = DateTime.now();
-    
+
     // Selecionar data
     final selectedDate = await showDatePicker(
       context: context,
@@ -255,9 +255,9 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
       firstDate: now,
       lastDate: now.add(const Duration(days: 365)),
     );
-    
+
     if (selectedDate == null) return;
-    
+
     // Selecionar hora
     if (!mounted) return;
     final selectedTime = await showTimePicker(
@@ -266,9 +266,9 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
         selectedDateTime ?? now.add(const Duration(hours: 1)),
       ),
     );
-    
+
     if (selectedTime == null) return;
-    
+
     setState(() {
       selectedDateTime = DateTime(
         selectedDate.year,
@@ -283,13 +283,13 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
   Future<void> _scheduleReminder() async {
     try {
       DateTime reminderTime;
-      
+
       if (isQuickReminder) {
         reminderTime = DateTime.now().add(quickReminderDuration);
       } else {
         reminderTime = selectedDateTime!;
       }
-      
+
       final actions = ref.read(notificationActionsProvider);
       final success = await actions.scheduleTaskReminder(
         taskId: widget.task.id,
@@ -297,7 +297,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
         reminderTime: reminderTime,
         description: widget.task.description,
       );
-      
+
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -321,10 +321,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -333,13 +330,11 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
   Future<void> _scheduleDeadlineAlert() async {
     if (widget.task.dueDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Esta tarefa não possui prazo definido'),
-        ),
+        const SnackBar(content: Text('Esta tarefa não possui prazo definido')),
       );
       return;
     }
-    
+
     try {
       final actions = ref.read(notificationActionsProvider);
       final success = await actions.scheduleTaskDeadlineAlert(
@@ -347,7 +342,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
         taskTitle: widget.task.title,
         deadline: widget.task.dueDate!,
       );
-      
+
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -368,10 +363,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -380,28 +372,33 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
   void _showReminderInfo(BuildContext context) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sobre os Lembretes'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Lembretes rápidos são baseados no momento atual'),
-            SizedBox(height: 8),
-            Text('• Lembretes personalizados permitem escolher data e hora específicas'),
-            SizedBox(height: 8),
-            Text('• Alertas de prazo são enviados 24h antes do vencimento'),
-            SizedBox(height: 8),
-            Text('• Você pode cancelar lembretes nas configurações de notificação'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendi'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Sobre os Lembretes'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('• Lembretes rápidos são baseados no momento atual'),
+                SizedBox(height: 8),
+                Text(
+                  '• Lembretes personalizados permitem escolher data e hora específicas',
+                ),
+                SizedBox(height: 8),
+                Text('• Alertas de prazo são enviados 24h antes do vencimento'),
+                SizedBox(height: 8),
+                Text(
+                  '• Você pode cancelar lembretes nas configurações de notificação',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendi'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -422,7 +419,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
   String _getRelativeTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = dateTime.difference(now);
-    
+
     if (difference.isNegative) {
       return 'No passado';
     } else if (difference.inMinutes < 60) {

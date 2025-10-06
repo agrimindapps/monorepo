@@ -45,10 +45,10 @@ import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart'
 import 'package:app_agrihurbi/features/markets/domain/usecases/manage_market_favorites.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core_lib;
+import 'package:core/core.dart' show GetIt;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:core/core.dart' show GetIt;
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Custom modules

@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' show GetIt;
+import 'package:flutter/foundation.dart';
 
 import '../data/services/premium_sync_service.dart';
 import '../test/premium_sync_test.dart';

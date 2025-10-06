@@ -15,6 +15,20 @@ dependencies:
   core:
     path: ../../packages/core
 
+  get_it: any
+  injectable: any
+  shared_preferences: any
+  connectivity_plus: any
+  dartz: any
+  cloud_firestore: any
+  firebase_auth: any
+  flutter_local_notifications: any
+  timezone: any
+  intl: any
+  flutter_riverpod: any
+  url_launcher: any
+  firebase_core: any
+  package_info_plus: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

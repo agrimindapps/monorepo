@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' show injectable;
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/data/models/conflict_history_model.dart';
 import '../../../../core/services/conflict_history_service.dart';

@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide getIt, ConflictResolutionStrategy;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/conflict_history_model.dart';
 import '../../../../core/services/conflict_history_service.dart';
@@ -129,8 +128,8 @@ class ConflictNotifier extends _$ConflictNotifier {
     try {
       await _conflictHistoryService.clearConflictHistory();
 
-      state = AsyncValue.data(
-        const ConflictState(conflicts: [], isLoading: false),
+      state = const AsyncValue.data(
+        ConflictState(conflicts: [], isLoading: false),
       );
     } catch (e) {
       state = AsyncValue.data(

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart' show Equatable;
 import '../repositories/maintenance_repository.dart';
 
 class DeleteMaintenanceRecordParams extends Equatable {

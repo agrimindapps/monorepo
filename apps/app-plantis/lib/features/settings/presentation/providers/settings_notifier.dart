@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/backup_service.dart';
@@ -670,7 +669,7 @@ extension SettingsStateExtensions on SettingsState {
   String get themeSubtitle {
     if (this.isDarkMode) {
       return 'Tema escuro ativo';
-    } else if (this.isLightMode) {
+    } else if (isLightMode) {
       return 'Tema claro ativo';
     } else {
       return 'Seguir sistema';

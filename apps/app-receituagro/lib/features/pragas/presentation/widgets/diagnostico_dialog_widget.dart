@@ -1,9 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
 import '../../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
-import '../../../detalhes_diagnostico/presentation/providers/detalhe_diagnostico_notifier.dart';
 import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
@@ -31,10 +30,11 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
   ) {
     return showDialog<void>(
       context: context,
-      builder: (context) => DiagnosticoDialogWidget(
-        diagnostico: diagnostico,
-        pragaName: pragaName,
-      ),
+      builder:
+          (context) => DiagnosticoDialogWidget(
+            diagnostico: diagnostico,
+            pragaName: pragaName,
+          ),
     );
   }
 
@@ -44,9 +44,7 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
 
     return Dialog(
       backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.7,
@@ -56,9 +54,7 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(context),
-            Flexible(
-              child: _buildContent(context),
-            ),
+            Flexible(child: _buildContent(context)),
             _buildActions(context, ref),
           ],
         ),
@@ -69,7 +65,7 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
   /// Cabeçalho do modal com título e botão de fechar
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
       child: Row(
@@ -85,10 +81,7 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
             ),
           ),
           IconButton(
-            icon: Icon(
-              Icons.close,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -99,7 +92,7 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
   /// Conteúdo principal do modal
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -121,7 +114,9 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -168,12 +163,7 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          Expanded(
-            child: _DefensivoButton(
-              diagnostico: diagnostico,
-              ref: ref,
-            ),
-          ),
+          Expanded(child: _DefensivoButton(diagnostico: diagnostico, ref: ref)),
           const SizedBox(width: 12),
           Expanded(
             child: _DiagnosticoButton(
@@ -239,9 +229,12 @@ class _DiagnosticoInfoRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: isPremium ? FontWeight.w600 : FontWeight.w300,
-                  color: isPremium
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  color:
+                      isPremium
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.6,
+                          ),
                 ),
               ),
             ],
@@ -252,11 +245,7 @@ class _DiagnosticoInfoRow extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.diamond,
-                size: 12,
-                color: Colors.amber.shade600,
-              ),
+              Icon(Icons.diamond, size: 12, color: Colors.amber.shade600),
               const SizedBox(width: 4),
               Text(
                 'Premium',
@@ -279,10 +268,7 @@ class _DefensivoButton extends ConsumerWidget {
   final DiagnosticoModel diagnostico;
   final WidgetRef ref;
 
-  const _DefensivoButton({
-    required this.diagnostico,
-    required this.ref,
-  });
+  const _DefensivoButton({required this.diagnostico, required this.ref});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -296,19 +282,18 @@ class _DefensivoButton extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute<void>(
-              builder: (context) => DetalheDefensivoPage(
-                defensivoName: diagnostico.nome,
-                fabricante: fabricante,
-              ),
+              builder:
+                  (context) => DetalheDefensivoPage(
+                    defensivoName: diagnostico.nome,
+                    fabricante: fabricante,
+                  ),
             ),
           );
         }
       },
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: const Text('Defensivo'),
     );
@@ -336,12 +321,13 @@ class _DiagnosticoButton extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute<void>(
-              builder: (context) => DetalheDiagnosticoPage(
-                diagnosticoId: diagnostico.id,
-                nomeDefensivo: diagnostico.nome,
-                nomePraga: pragaName,
-                cultura: diagnostico.cultura,
-              ),
+              builder:
+                  (context) => DetalheDiagnosticoPage(
+                    diagnosticoId: diagnostico.id,
+                    nomeDefensivo: diagnostico.nome,
+                    nomePraga: pragaName,
+                    cultura: diagnostico.cultura,
+                  ),
             ),
           );
         }
@@ -350,9 +336,7 @@ class _DiagnosticoButton extends ConsumerWidget {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
         padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: const Text('Diagnóstico'),
     );

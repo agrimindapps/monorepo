@@ -185,6 +185,7 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Clear all data in specific encrypted box
+  @override
   Future<Either<Failure, void>> clearEncryptedBox(String boxName) async {
     final boxResult = await getEncryptedBox(boxName);
 
@@ -363,6 +364,7 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   // ==========================================================================
 
   /// Store encrypted data with interface signature
+  @override
   Future<Either<Failure, void>> storeEncrypted<T extends Object>(
     String key,
     T data,
@@ -377,6 +379,7 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Get encrypted data with interface signature
+  @override
   Future<Either<Failure, T?>> getEncrypted<T extends Object>(
     String key,
     String boxName, {
@@ -390,11 +393,13 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Delete encrypted data with interface signature
+  @override
   Future<Either<Failure, void>> deleteEncrypted(String key, String boxName) async {
     return deleteEncryptedData(boxName: boxName, key: key);
   }
 
   /// Clear all encrypted data across all boxes
+  @override
   Future<Either<Failure, void>> clearAllEncrypted() async {
     try {
       final boxesToClear = _ciphers.keys.toList();
@@ -419,6 +424,7 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Get encryption status for monitoring
+  @override
   Map<String, dynamic> getEncryptionStatus() {
     return {
       'app_identifier': _appIdentifier,
@@ -430,12 +436,14 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Check if box is open
+  @override
   bool isBoxOpen(String boxName) {
     final fullBoxName = '${_appIdentifier}_$boxName';
     return Hive.isBoxOpen(fullBoxName);
   }
 
   /// Get all keys from a specific box
+  @override
   Future<Either<Failure, List<String>>> getKeysFromBox(String boxName) async {
     final boxResult = await getEncryptedBox(boxName);
 
@@ -456,6 +464,7 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Get box size (number of entries)
+  @override
   Future<Either<Failure, int>> getBoxSize(String boxName) async {
     final boxResult = await getEncryptedBox(boxName);
 

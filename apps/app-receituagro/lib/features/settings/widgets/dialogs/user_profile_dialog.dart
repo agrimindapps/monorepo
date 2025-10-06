@@ -1,8 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/receituagro_auth_notifier.dart';
-import '../../../../core/services/device_identity_service.dart';
 import '../../presentation/providers/settings_notifier.dart';
 
 /// User Profile Dialog
@@ -83,33 +82,38 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
 
     return authState.when(
       data: (state) => _buildDialogContent(context, theme, state),
-      loading: () => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-      error: (error, _) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(child: Text('Erro ao carregar perfil: $error')),
-        ),
-      ),
+      loading:
+          () => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          ),
+      error:
+          (error, _) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(child: Text('Erro ao carregar perfil: $error')),
+            ),
+          ),
     );
   }
 
-  Widget _buildDialogContent(BuildContext context, ThemeData theme, ReceitaAgroAuthState authState) {
+  Widget _buildDialogContent(
+    BuildContext context,
+    ThemeData theme,
+    ReceitaAgroAuthState authState,
+  ) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        constraints: const BoxConstraints(
-          maxWidth: 400,
-          maxHeight: 500,
-        ),
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -118,11 +122,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.person,
-                  color: theme.colorScheme.primary,
-                  size: 24,
-                ),
+                Icon(Icons.person, color: theme.colorScheme.primary, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   'Perfil do Usuário',
@@ -164,9 +164,10 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
 
   /// Build user avatar
   Widget _buildAvatar(ThemeData theme, ReceitaAgroAuthState authState) {
-    final displayName = _displayNameController.text.isEmpty
-        ? _getUserDisplayName(authState)
-        : _displayNameController.text;
+    final displayName =
+        _displayNameController.text.isEmpty
+            ? _getUserDisplayName(authState)
+            : _displayNameController.text;
 
     return Stack(
       children: [
@@ -192,17 +193,10 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
             ),
             child: IconButton(
               onPressed: _changeAvatar,
-              icon: const Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-                size: 16,
-              ),
+              icon: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
               iconSize: 16,
               padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(
-                minWidth: 24,
-                minHeight: 24,
-              ),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
             ),
           ),
         ),
@@ -215,7 +209,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     final settingsState = ref.read(settingsNotifierProvider).value;
     final currentDevice = settingsState?.currentDeviceInfo;
     final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
-    final isPremium = false; // TODO: Get from premium state when available
+    const isPremium = false; // TODO: Get from premium state when available
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,17 +227,16 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
           enabled: _isEditing,
           decoration: InputDecoration(
             hintText: 'Digite seu nome de exibição',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            suffixIcon: _isEditing
-                ? IconButton(
-                    onPressed: () {
-                      _displayNameController.clear();
-                    },
-                    icon: const Icon(Icons.clear, size: 16),
-                  )
-                : null,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            suffixIcon:
+                _isEditing
+                    ? IconButton(
+                      onPressed: () {
+                        _displayNameController.clear();
+                      },
+                      icon: const Icon(Icons.clear, size: 16),
+                    )
+                    : null,
           ),
           onChanged: (value) {
             setState(() {}); // Rebuild to update avatar initials
@@ -265,12 +258,11 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
           enabled: false, // Email typically not editable
           decoration: InputDecoration(
             hintText: 'Email da conta',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            suffixIcon: authState.isAuthenticated
-                ? const Icon(Icons.verified, color: Colors.green, size: 16)
-                : null,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            suffixIcon:
+                authState.isAuthenticated
+                    ? const Icon(Icons.verified, color: Colors.green, size: 16)
+                    : null,
           ),
         ),
 
@@ -280,7 +272,9 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.3,
+            ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -296,8 +290,14 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildInfoRow('Dispositivo Atual', currentDevice?.displayName ?? 'Desconhecido'),
-              _buildInfoRow('Dispositivos Conectados', '${connectedDevices.length} de 3'),
+              _buildInfoRow(
+                'Dispositivo Atual',
+                currentDevice?.displayName ?? 'Desconhecido',
+              ),
+              _buildInfoRow(
+                'Dispositivos Conectados',
+                '${connectedDevices.length} de 3',
+              ),
               _buildInfoRow('Status Premium', isPremium ? 'Ativo' : 'Inativo'),
               _buildInfoRow('Sincronização', 'Ativa'),
             ],
@@ -314,10 +314,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodySmall),
           Text(
             value,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -368,13 +365,14 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
         Expanded(
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveChanges,
-            child: _isSaving
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Salvar'),
+            child:
+                _isSaving
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Text('Salvar'),
           ),
         ),
       ],
@@ -386,26 +384,28 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     if (displayName.isEmpty) return 'U';
     final words = displayName.split(' ');
     if (words.length == 1) return words[0].substring(0, 1).toUpperCase();
-    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'.toUpperCase();
+    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'
+        .toUpperCase();
   }
 
   /// Change avatar
   void _changeAvatar() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Alterar Avatar'),
-        content: const Text(
-          'Funcionalidade de upload de avatar será implementada em breve.\n\n'
-          'Por enquanto, o avatar é gerado automaticamente baseado no nome.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Alterar Avatar'),
+            content: const Text(
+              'Funcionalidade de upload de avatar será implementada em breve.\n\n'
+              'Por enquanto, o avatar é gerado automaticamente baseado no nome.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -432,7 +432,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     try {
       // Simulate save operation
       await Future<void>.delayed(const Duration(seconds: 1));
-      
+
       if (mounted) {
         setState(() {
           _isEditing = false;
@@ -460,16 +460,17 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   void _showErrorDialog(String message) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Erro'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Erro'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

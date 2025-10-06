@@ -24,7 +24,7 @@ class EnhancedAnalyticsService {
     AnalyticsConfig? config,
   }) : _analytics = analytics,
        _crashlytics = crashlytics,
-       _config = config ?? AnalyticsConfig.defaultConfig();
+       _config = config ?? const AnalyticsConfig.defaultConfig();
 
   /// Logs an event with enhanced error handling and environment awareness
   Future<void> logEvent(
@@ -154,7 +154,7 @@ class EnhancedAnalyticsService {
       if (_config.enableDebugLogging) {
         debugPrint('🔥 Error recorded: ${error.toString()}');
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       // Last resort - at least log to debug
       if (_config.enableDebugLogging) {
         debugPrint('❌ Failed to record error: $e');

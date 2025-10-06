@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
 
 /// Widget para estado de erro da listagem de despesas
 class ExpensesErrorState extends StatelessWidget {

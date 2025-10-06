@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import '../entities/export_progress.dart';
 import '../entities/export_request.dart';
 import '../entities/export_result.dart';
@@ -7,10 +5,10 @@ import '../entities/export_result.dart';
 /// Interface para repositório de exportação de dados LGPD
 abstract class DataExportRepository {
   /// Inicia uma exportação de dados do usuário
-  /// 
+  ///
   /// [request] - Configuração da exportação
   /// [onProgress] - Callback para atualizações de progresso
-  /// 
+  ///
   /// Retorna o resultado da exportação com path do arquivo gerado
   Future<ExportResult> exportUserData(
     ExportRequest request, {

@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/core.dart' show GetIt;
 
 /// Módulo de Dependency Injection para Account Deletion
 /// Registra todos os serviços necessários para exclusão de conta segura

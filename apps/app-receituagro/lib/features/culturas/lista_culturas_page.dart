@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/di/injection_container.dart';
 import '../../core/data/models/cultura_hive.dart';
 import '../../core/data/repositories/cultura_hive_repository.dart';
+import '../../core/di/injection_container.dart';
 import '../../core/services/receituagro_navigation_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../pragas_por_cultura/pragas_por_cultura_detalhadas_page.dart';
@@ -83,11 +83,12 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
       if (searchText.isEmpty) {
         _filteredCulturas = _culturas;
       } else {
-        _filteredCulturas = _culturas.where((cultura) {
-          return cultura.cultura
-              .toLowerCase()
-              .contains(searchText.toLowerCase());
-        }).toList();
+        _filteredCulturas =
+            _culturas.where((cultura) {
+              return cultura.cultura.toLowerCase().contains(
+                searchText.toLowerCase(),
+              );
+            }).toList();
       }
       _sortCulturas();
     });
@@ -126,9 +127,9 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => PragasPorCulturaDetalhadasPage(
-          culturaIdInicial: cultura.idReg,
-        ),
+        builder:
+            (context) =>
+                PragasPorCulturaDetalhadasPage(culturaIdInicial: cultura.idReg),
       ),
     );
   }
@@ -161,13 +162,17 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
                   title: 'Culturas',
                   subtitle: _getHeaderSubtitle(),
                   leftIcon: Icons.agriculture_outlined,
-                  rightIcon: _isAscending
-                      ? Icons.arrow_upward_outlined
-                      : Icons.arrow_downward_outlined,
+                  rightIcon:
+                      _isAscending
+                          ? Icons.arrow_upward_outlined
+                          : Icons.arrow_downward_outlined,
                   isDark: isDark,
                   showBackButton: true,
                   showActions: true,
-                  onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+                  onBackPressed:
+                      () =>
+                          GetIt.instance<ReceitaAgroNavigationService>()
+                              .goBack<void>(),
                   onRightIconPressed: _toggleSort,
                 ),
                 CulturaSearchField(
@@ -241,9 +246,9 @@ class _ListaCulturasPageState extends State<ListaCulturasPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _searchController.text.isNotEmpty 
-                ? Icons.search_off 
-                : Icons.grass_outlined,
+              _searchController.text.isNotEmpty
+                  ? Icons.search_off
+                  : Icons.grass_outlined,
               size: 64,
               color: isDark ? Colors.grey[400] : Colors.grey[600],
             ),

@@ -1,14 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../domain/entities/user_entity.dart';
 import '../../../infrastructure/services/firebase_analytics_service.dart';
 import '../../../infrastructure/services/firebase_crashlytics_service.dart';
-import '../../../domain/entities/user_entity.dart';
 import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
 import '../premium/subscription_providers.dart';
-import '../../common_providers.dart' hide currentUserProvider;
 
 /// Providers unificados para analytics e tracking
 /// Consolidam Firebase Analytics, Crashlytics e métricas customizadas entre todos os apps
@@ -26,17 +24,15 @@ final firebaseAnalyticsProvider = Provider<FirebaseAnalytics>((ref) {
 });
 
 /// Provider para estado de analytics
-final analyticsStateProvider = StateNotifierProvider<AnalyticsNotifier, AnalyticsState>((ref) {
-  return AnalyticsNotifier();
-});
+final analyticsStateProvider =
+    StateNotifierProvider<AnalyticsNotifier, AnalyticsState>((ref) {
+      return AnalyticsNotifier();
+    });
 
 /// Provider para verificar se analytics está habilitado
 final isAnalyticsEnabledProvider = Provider<bool>((ref) {
   final state = ref.watch(analyticsStateProvider);
-  return state.maybeWhen(
-    enabled: () => true,
-    orElse: () => false,
-  );
+  return state.maybeWhen(enabled: () => true, orElse: () => false);
 });
 
 // ========== USER ANALYTICS PROVIDERS ==========
@@ -46,9 +42,9 @@ final userAnalyticsPropertiesProvider = Provider<Map<String, String>>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   final isPremium = ref.watch(isPremiumProvider);
   final appId = ref.watch(currentAppIdProvider);
-  
+
   if (user == null) return {};
-  
+
   return {
     'user_id': user.id,
     'is_premium': isPremium.toString(),
@@ -60,9 +56,10 @@ final userAnalyticsPropertiesProvider = Provider<Map<String, String>>((ref) {
 });
 
 /// Provider para tracking de sessão
-final sessionTrackingProvider = StateNotifierProvider<SessionTrackingNotifier, SessionState>((ref) {
-  return SessionTrackingNotifier();
-});
+final sessionTrackingProvider =
+    StateNotifierProvider<SessionTrackingNotifier, SessionState>((ref) {
+      return SessionTrackingNotifier();
+    });
 
 /// Provider para duração da sessão atual
 final currentSessionDurationProvider = Provider<Duration>((ref) {
@@ -79,49 +76,69 @@ final currentSessionDurationProvider = Provider<Duration>((ref) {
 final eventTrackingProvider = Provider<EventTracking>((ref) {
   final analytics = ref.read(analyticsServiceProvider);
   final userProperties = ref.watch(userAnalyticsPropertiesProvider);
-  
+
   return EventTracking(
-    trackEvent: (eventName, parameters) => analytics.logEvent(eventName, parameters: {
-      ...userProperties,
-      ...parameters,
-    }).then((_) => {}), // Convert Either to Future<void>
-    trackScreenView: (screenName, screenClass) => analytics.setCurrentScreen(
-      screenName: screenName,
-      screenClassOverride: screenClass,
-    ).then((_) => {}),
-    trackUserAction: (action, category, label) => analytics.logEvent('user_action', parameters: {
-      'action': action,
-      'category': category ?? '',
-      'label': label ?? '',
-    }).then((_) => {}),
-    trackFeatureUsage: (feature, context) => analytics.logEvent('feature_usage', parameters: {
-      'feature': feature,
-      ...context,
-    }).then((_) => {}),
-    trackError: (error, context) => analytics.logError(
-      error: error.toString(),
-      additionalInfo: context,
-    ).then((_) => {}),
+    trackEvent:
+        (eventName, parameters) => analytics
+            .logEvent(eventName, parameters: {...userProperties, ...parameters})
+            .then((_) => {}), // Convert Either to Future<void>
+    trackScreenView:
+        (screenName, screenClass) => analytics
+            .setCurrentScreen(
+              screenName: screenName,
+              screenClassOverride: screenClass,
+            )
+            .then((_) => {}),
+    trackUserAction:
+        (action, category, label) => analytics
+            .logEvent(
+              'user_action',
+              parameters: {
+                'action': action,
+                'category': category ?? '',
+                'label': label ?? '',
+              },
+            )
+            .then((_) => {}),
+    trackFeatureUsage:
+        (feature, context) => analytics
+            .logEvent(
+              'feature_usage',
+              parameters: {'feature': feature, ...context},
+            )
+            .then((_) => {}),
+    trackError:
+        (error, context) => analytics
+            .logError(error: error.toString(), additionalInfo: context)
+            .then((_) => {}),
   );
 });
 
 /// Provider para métricas de performance
-final performanceTrackingProvider = StateNotifierProvider<PerformanceTrackingNotifier, PerformanceState>((ref) {
-  return PerformanceTrackingNotifier();
-});
+final performanceTrackingProvider =
+    StateNotifierProvider<PerformanceTrackingNotifier, PerformanceState>((ref) {
+      return PerformanceTrackingNotifier();
+    });
 
 /// Provider para métricas de app específico
-final appMetricsProvider = StateNotifierProvider.family<AppMetricsNotifier, AppMetrics, String>((ref, appId) {
-  return AppMetricsNotifier(appId);
-});
+final appMetricsProvider =
+    StateNotifierProvider.family<AppMetricsNotifier, AppMetrics, String>((
+      ref,
+      appId,
+    ) {
+      return AppMetricsNotifier(appId);
+    });
 
 // ========== BUSINESS METRICS PROVIDERS ==========
 
 /// Provider para métricas de negócio por app
-final businessMetricsProvider = Provider.family<BusinessMetrics, String>((ref, appId) {
+final businessMetricsProvider = Provider.family<BusinessMetrics, String>((
+  ref,
+  appId,
+) {
   final appMetrics = ref.watch(appMetricsProvider(appId));
   final isPremium = ref.watch(isPremiumProvider);
-  
+
   return BusinessMetrics.fromAppMetrics(appId, appMetrics, isPremium);
 });
 
@@ -130,7 +147,7 @@ final kpiProvider = Provider<KPIMetrics>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   final isPremium = ref.watch(isPremiumProvider);
   final sessionDuration = ref.watch(currentSessionDurationProvider);
-  
+
   return KPIMetrics(
     dau: user != null ? 1 : 0, // Daily Active Users (simplified)
     sessionDuration: sessionDuration,
@@ -150,21 +167,29 @@ final crashReportingProvider = Provider<FirebaseCrashlyticsService>((ref) {
 final crashReportingActionsProvider = Provider<CrashReportingActions>((ref) {
   final crashService = ref.read(crashReportingProvider);
   final userProperties = ref.watch(userAnalyticsPropertiesProvider);
-  
+
   return CrashReportingActions(
-    recordError: (error, stackTrace, fatal) => crashService.recordError(
-      exception: error, 
-      stackTrace: stackTrace ?? StackTrace.empty, 
-      fatal: fatal, 
-      additionalInfo: userProperties,
-    ).then((_) => {}),
-    recordFlutterError: (flutterError) => crashService.recordError(
-      exception: flutterError.exception ?? 'Unknown Flutter error',
-      stackTrace: flutterError.stack ?? StackTrace.empty,
-      additionalInfo: userProperties,
-    ).then((_) => {}),
+    recordError:
+        (error, stackTrace, fatal) => crashService
+            .recordError(
+              exception: error,
+              stackTrace: stackTrace ?? StackTrace.empty,
+              fatal: fatal,
+              additionalInfo: userProperties,
+            )
+            .then((_) => {}),
+    recordFlutterError:
+        (flutterError) => crashService
+            .recordError(
+              exception: flutterError.exception ?? 'Unknown Flutter error',
+              stackTrace: flutterError.stack ?? StackTrace.empty,
+              additionalInfo: userProperties,
+            )
+            .then((_) => {}),
     log: (message) => crashService.log(message).then((_) => {}),
-    setCustomKey: (key, value) => crashService.setCustomKey(key: key, value: value).then((_) => {}),
+    setCustomKey:
+        (key, value) =>
+            crashService.setCustomKey(key: key, value: value).then((_) => {}),
     setUserId: (userId) => crashService.setUserId(userId).then((_) => {}),
   );
 });
@@ -174,9 +199,9 @@ final crashReportingActionsProvider = Provider<CrashReportingActions>((ref) {
 /// Provider para configuração de A/B tests
 final abTestConfigProvider = FutureProvider<ABTestConfig>((ref) async {
   final user = ref.watch(domainCurrentUserProvider);
-  
+
   if (user == null) return ABTestConfig.empty();
-  
+
   // TODO: Implementar A/B testing real quando necessário
   return ABTestConfig.empty();
 });
@@ -190,23 +215,32 @@ final abTestVariantProvider = Provider.family<String?, String>((ref, testName) {
 /// Provider para ações de A/B testing
 final abTestActionsProvider = Provider<ABTestActions>((ref) {
   final analytics = ref.read(analyticsServiceProvider);
-  
+
   return ABTestActions(
-    trackConversion: (testName, variant) => analytics.logEvent('ab_test_conversion', parameters: {
-      'test_name': testName,
-      'variant': variant,
-    }).then((_) => {}),
-    trackExposure: (testName, variant) => analytics.logEvent('ab_test_exposure', parameters: {
-      'test_name': testName,
-      'variant': variant,
-    }).then((_) => {}),
+    trackConversion:
+        (testName, variant) => analytics
+            .logEvent(
+              'ab_test_conversion',
+              parameters: {'test_name': testName, 'variant': variant},
+            )
+            .then((_) => {}),
+    trackExposure:
+        (testName, variant) => analytics
+            .logEvent(
+              'ab_test_exposure',
+              parameters: {'test_name': testName, 'variant': variant},
+            )
+            .then((_) => {}),
   );
 });
 
 // ========== CUSTOM METRICS PROVIDERS ==========
 
 /// Provider para métricas customizadas por app
-final customMetricsProvider = Provider.family<CustomMetrics, String>((ref, appId) {
+final customMetricsProvider = Provider.family<CustomMetrics, String>((
+  ref,
+  appId,
+) {
   switch (appId) {
     case 'gasometer':
       return GasometerMetrics(ref);
@@ -220,14 +254,16 @@ final customMetricsProvider = Provider.family<CustomMetrics, String>((ref, appId
 });
 
 /// Provider para tracking de onboarding
-final onboardingTrackingProvider = StateNotifierProvider<OnboardingTrackingNotifier, OnboardingState>((ref) {
-  return OnboardingTrackingNotifier();
-});
+final onboardingTrackingProvider =
+    StateNotifierProvider<OnboardingTrackingNotifier, OnboardingState>((ref) {
+      return OnboardingTrackingNotifier();
+    });
 
 /// Provider para métricas de engagement
-final engagementMetricsProvider = StateNotifierProvider<EngagementMetricsNotifier, EngagementMetrics>((ref) {
-  return EngagementMetricsNotifier();
-});
+final engagementMetricsProvider =
+    StateNotifierProvider<EngagementMetricsNotifier, EngagementMetrics>((ref) {
+      return EngagementMetricsNotifier();
+    });
 
 // ========== PRIVACY & CONSENT PROVIDERS ==========
 
@@ -275,7 +311,9 @@ extension AnalyticsStateExtension on AnalyticsState {
   }) {
     if (this is AnalyticsDisabled && disabled != null) return disabled();
     if (this is AnalyticsEnabled && enabled != null) return enabled();
-    if (this is AnalyticsInitializing && initializing != null) return initializing();
+    if (this is AnalyticsInitializing && initializing != null) {
+      return initializing();
+    }
     return orElse();
   }
 }
@@ -301,7 +339,9 @@ extension SessionStateExtension on SessionState {
     required T Function() orElse,
   }) {
     if (this is SessionInactive && inactive != null) return inactive();
-    if (this is SessionActive && active != null) return active((this as SessionActive).startTime);
+    if (this is SessionActive && active != null) {
+      return active((this as SessionActive).startTime);
+    }
     return orElse();
   }
 }
@@ -379,12 +419,13 @@ class AppMetrics {
   }
 
   double get engagementScore => _calculateEngagementScore();
-  
+
   double _calculateEngagementScore() {
-    final baseScore = (screenViews * 1.0) + (userActions * 2.0) + (featureUsages * 3.0);
+    final baseScore =
+        (screenViews * 1.0) + (userActions * 2.0) + (featureUsages * 3.0);
     final errorPenalty = errors * 0.5;
     final timeBonus = totalSessionTime.inMinutes * 0.1;
-    
+
     return (baseScore - errorPenalty + timeBonus).clamp(0.0, 100.0);
   }
 }
@@ -411,7 +452,11 @@ class BusinessMetrics {
     this.isPremiumUser = false,
   });
 
-  factory BusinessMetrics.fromAppMetrics(String appId, AppMetrics appMetrics, bool isPremium) {
+  factory BusinessMetrics.fromAppMetrics(
+    String appId,
+    AppMetrics appMetrics,
+    bool isPremium,
+  ) {
     return BusinessMetrics(
       appId: appId,
       dau: 1, // Simplified - user is active today
@@ -442,7 +487,7 @@ class KPIMetrics {
   });
 
   double get sessionQuality => _calculateSessionQuality();
-  
+
   double _calculateSessionQuality() {
     final durationScore = (sessionDuration.inMinutes / 30.0).clamp(0.0, 1.0);
     final premiumBonus = isPremiumUser ? 0.2 : 0.0;
@@ -455,16 +500,10 @@ class ABTestConfig {
   final Map<String, String> variants;
   final DateTime lastUpdated;
 
-  const ABTestConfig({
-    required this.variants,
-    required this.lastUpdated,
-  });
+  const ABTestConfig({required this.variants, required this.lastUpdated});
 
   factory ABTestConfig.empty() {
-    return ABTestConfig(
-      variants: const {},
-      lastUpdated: DateTime.now(),
-    );
+    return ABTestConfig(variants: const {}, lastUpdated: DateTime.now());
   }
 
   String? getVariant(String testName) => variants[testName];
@@ -551,20 +590,28 @@ class PrivacySettings {
   }) {
     return PrivacySettings(
       analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
-      crashReportingEnabled: crashReportingEnabled ?? this.crashReportingEnabled,
-      personalizedAdsEnabled: personalizedAdsEnabled ?? this.personalizedAdsEnabled,
-      dataProcessingConsent: dataProcessingConsent ?? this.dataProcessingConsent,
+      crashReportingEnabled:
+          crashReportingEnabled ?? this.crashReportingEnabled,
+      personalizedAdsEnabled:
+          personalizedAdsEnabled ?? this.personalizedAdsEnabled,
+      dataProcessingConsent:
+          dataProcessingConsent ?? this.dataProcessingConsent,
     );
   }
 }
 
 /// Ações de tracking de eventos
 class EventTracking {
-  final Future<void> Function(String eventName, Map<String, String> parameters) trackEvent;
-  final Future<void> Function(String screenName, String? screenClass) trackScreenView;
-  final Future<void> Function(String action, String? category, String? label) trackUserAction;
-  final Future<void> Function(String feature, Map<String, String> context) trackFeatureUsage;
-  final Future<void> Function(dynamic error, Map<String, String> context) trackError;
+  final Future<void> Function(String eventName, Map<String, String> parameters)
+  trackEvent;
+  final Future<void> Function(String screenName, String? screenClass)
+  trackScreenView;
+  final Future<void> Function(String action, String? category, String? label)
+  trackUserAction;
+  final Future<void> Function(String feature, Map<String, String> context)
+  trackFeatureUsage;
+  final Future<void> Function(dynamic error, Map<String, String> context)
+  trackError;
 
   const EventTracking({
     required this.trackEvent,
@@ -577,8 +624,10 @@ class EventTracking {
 
 /// Ações de crash reporting
 class CrashReportingActions {
-  final Future<void> Function(dynamic error, StackTrace? stackTrace, bool fatal) recordError;
-  final Future<void> Function(FlutterErrorDetails flutterError) recordFlutterError;
+  final Future<void> Function(dynamic error, StackTrace? stackTrace, bool fatal)
+  recordError;
+  final Future<void> Function(FlutterErrorDetails flutterError)
+  recordFlutterError;
   final Future<void> Function(String message) log;
   final Future<void> Function(String key, String value) setCustomKey;
   final Future<void> Function(String userId) setUserId;
@@ -607,7 +656,7 @@ class ABTestActions {
 abstract class CustomMetrics {
   final Ref ref;
   const CustomMetrics(this.ref);
-  
+
   Future<void> trackCustomEvent(String event, Map<String, String> parameters);
 }
 
@@ -616,7 +665,10 @@ class GasometerMetrics extends CustomMetrics {
   const GasometerMetrics(super.ref);
 
   @override
-  Future<void> trackCustomEvent(String event, Map<String, String> parameters) async {
+  Future<void> trackCustomEvent(
+    String event,
+    Map<String, String> parameters,
+  ) async {
     final eventTracking = ref.read(eventTrackingProvider);
     await eventTracking.trackEvent('gasometer_$event', {
       'app': 'gasometer',
@@ -644,7 +696,10 @@ class PlantisMetrics extends CustomMetrics {
   const PlantisMetrics(super.ref);
 
   @override
-  Future<void> trackCustomEvent(String event, Map<String, String> parameters) async {
+  Future<void> trackCustomEvent(
+    String event,
+    Map<String, String> parameters,
+  ) async {
     final eventTracking = ref.read(eventTrackingProvider);
     await eventTracking.trackEvent('plantis_$event', {
       'app': 'plantis',
@@ -653,9 +708,7 @@ class PlantisMetrics extends CustomMetrics {
   }
 
   Future<void> trackPlantAdded(String plantType) async {
-    await trackCustomEvent('plant_added', {
-      'plant_type': plantType,
-    });
+    await trackCustomEvent('plant_added', {'plant_type': plantType});
   }
 
   Future<void> trackCareAction(String action, String plantType) async {
@@ -671,7 +724,10 @@ class ReceitaAgroMetrics extends CustomMetrics {
   const ReceitaAgroMetrics(super.ref);
 
   @override
-  Future<void> trackCustomEvent(String event, Map<String, String> parameters) async {
+  Future<void> trackCustomEvent(
+    String event,
+    Map<String, String> parameters,
+  ) async {
     final eventTracking = ref.read(eventTrackingProvider);
     await eventTracking.trackEvent('receituagro_$event', {
       'app': 'receituagro',
@@ -692,7 +748,10 @@ class DefaultMetrics extends CustomMetrics {
   const DefaultMetrics(super.ref);
 
   @override
-  Future<void> trackCustomEvent(String event, Map<String, String> parameters) async {
+  Future<void> trackCustomEvent(
+    String event,
+    Map<String, String> parameters,
+  ) async {
     final eventTracking = ref.read(eventTrackingProvider);
     await eventTracking.trackEvent('default_$event', parameters);
   }
@@ -753,19 +812,13 @@ class PerformanceTrackingNotifier extends StateNotifier<PerformanceState> {
 
   void recordScreenLoadTime(String screenName, Duration loadTime) {
     state = state.copyWith(
-      screenLoadTimes: {
-        ...state.screenLoadTimes,
-        screenName: loadTime,
-      },
+      screenLoadTimes: {...state.screenLoadTimes, screenName: loadTime},
     );
   }
 
   void recordApiCallDuration(String endpoint, int duration) {
     state = state.copyWith(
-      apiCallDurations: {
-        ...state.apiCallDurations,
-        endpoint: duration,
-      },
+      apiCallDurations: {...state.apiCallDurations, endpoint: duration},
     );
   }
 
@@ -797,18 +850,13 @@ class AppMetricsNotifier extends StateNotifier<AppMetrics> {
   }
 
   void addSessionTime(Duration duration) {
-    state = state.copyWith(
-      totalSessionTime: state.totalSessionTime + duration,
-    );
+    state = state.copyWith(totalSessionTime: state.totalSessionTime + duration);
   }
 
   void recordEvent(String eventName) {
     final currentCount = state.eventCounts[eventName] ?? 0;
     state = state.copyWith(
-      eventCounts: {
-        ...state.eventCounts,
-        eventName: currentCount + 1,
-      },
+      eventCounts: {...state.eventCounts, eventName: currentCount + 1},
     );
   }
 }
@@ -827,7 +875,10 @@ class OnboardingTrackingNotifier extends StateNotifier<OnboardingState> {
       if (current.currentStep >= current.totalSteps) {
         state = OnboardingCompleted(DateTime.now());
       } else {
-        state = OnboardingInProgress(current.currentStep + 1, current.totalSteps);
+        state = OnboardingInProgress(
+          current.currentStep + 1,
+          current.totalSteps,
+        );
       }
     }
   }
@@ -849,35 +900,30 @@ class EngagementMetricsNotifier extends StateNotifier<EngagementMetrics> {
   EngagementMetricsNotifier() : super(const EngagementMetrics());
 
   void startNewSession() {
-    state = state.copyWith(
-      sessionsToday: state.sessionsToday + 1,
-    );
+    state = state.copyWith(sessionsToday: state.sessionsToday + 1);
   }
 
   void addSessionTime(Duration duration) {
-    state = state.copyWith(
-      totalTimeToday: state.totalTimeToday + duration,
-    );
+    state = state.copyWith(totalTimeToday: state.totalTimeToday + duration);
     _updateEngagementScore();
   }
 
   void recordAction() {
-    state = state.copyWith(
-      actionsToday: state.actionsToday + 1,
-    );
+    state = state.copyWith(actionsToday: state.actionsToday + 1);
     _updateEngagementScore();
   }
 
   void _updateEngagementScore() {
     final sessionScore = (state.sessionsToday * 10.0).clamp(0.0, 50.0);
-    final timeScore = (state.totalTimeToday.inMinutes / 60.0 * 30.0).clamp(0.0, 30.0);
-    final actionScore = (state.actionsToday * 2.0).clamp(0.0, 20.0);
-    
-    final totalScore = sessionScore + timeScore + actionScore;
-    
-    state = state.copyWith(
-      engagementScore: totalScore.clamp(0.0, 100.0),
+    final timeScore = (state.totalTimeToday.inMinutes / 60.0 * 30.0).clamp(
+      0.0,
+      30.0,
     );
+    final actionScore = (state.actionsToday * 2.0).clamp(0.0, 20.0);
+
+    final totalScore = sessionScore + timeScore + actionScore;
+
+    state = state.copyWith(engagementScore: totalScore.clamp(0.0, 100.0));
   }
 }
 

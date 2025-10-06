@@ -1,6 +1,7 @@
 import 'package:core/core.dart' as core;
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart' show Equatable;
+import 'package:dartz/dartz.dart';
+
 import '../constants/ui_constants.dart';
 
 /// Base class for all use cases

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 
-import '../interfaces/i_sync_service.dart';
 import '../../shared/utils/failure.dart';
+import '../interfaces/i_sync_service.dart';
 import 'sync_logger.dart';
 
 /// Serviço de sincronização específico para o app Taskolist

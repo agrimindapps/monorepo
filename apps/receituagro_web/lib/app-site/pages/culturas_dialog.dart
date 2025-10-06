@@ -8,7 +8,7 @@ import '../services/feedback_service.dart';
 class CulturaDialog extends StatefulWidget {
   final Cultura? cultura;
 
-  const CulturaDialog({Key? key, this.cultura}) : super(key: key);
+  const CulturaDialog({super.key, this.cultura});
 
   @override
   _CulturaDialogState createState() => _CulturaDialogState();

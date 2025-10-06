@@ -6,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/di/injection_container_modular.dart';
-import '../../../auth/presentation/state/auth_state.dart';
-import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../../core/services/input_sanitizer.dart';
 import '../../../../core/services/receipt_image_service.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../core/constants/fuel_constants.dart';
@@ -50,7 +49,8 @@ class FuelFormState {
   final String? imageUploadError;
 
   // Computed getters
-  bool get hasReceiptImage => receiptImagePath != null || receiptImageUrl != null;
+  bool get hasReceiptImage =>
+      receiptImagePath != null || receiptImageUrl != null;
   bool get canSubmit =>
       !isLoading &&
       !isUploadingImage &&
@@ -82,10 +82,13 @@ class FuelFormState {
       isLoading: isLoading ?? this.isLoading,
       lastError: clearError ? null : (lastError ?? this.lastError),
       lastOdometerReading: lastOdometerReading ?? this.lastOdometerReading,
-      receiptImagePath: clearImagePaths ? null : (receiptImagePath ?? this.receiptImagePath),
-      receiptImageUrl: clearImagePaths ? null : (receiptImageUrl ?? this.receiptImageUrl),
+      receiptImagePath:
+          clearImagePaths ? null : (receiptImagePath ?? this.receiptImagePath),
+      receiptImageUrl:
+          clearImagePaths ? null : (receiptImageUrl ?? this.receiptImageUrl),
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,
-      imageUploadError: clearImageError ? null : (imageUploadError ?? this.imageUploadError),
+      imageUploadError:
+          clearImageError ? null : (imageUploadError ?? this.imageUploadError),
     );
   }
 }
@@ -99,11 +102,16 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     required String? userId,
     required ReceiptImageService receiptImageService,
     required Ref ref,
-  })  : _receiptImageService = receiptImageService,
-        _ref = ref,
-        super(FuelFormState(
-          formModel: FuelFormModel.initial(initialVehicleId ?? '', userId ?? ''),
-        )) {
+  }) : _receiptImageService = receiptImageService,
+       _ref = ref,
+       super(
+         FuelFormState(
+           formModel: FuelFormModel.initial(
+             initialVehicleId ?? '',
+             userId ?? '',
+           ),
+         ),
+       ) {
     _formatter = FuelFormatterService();
     _validator = FuelValidatorService();
     _imagePicker = ImagePicker();
@@ -123,7 +131,8 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   final TextEditingController pricePerLiterController = TextEditingController();
   final TextEditingController odometerController = TextEditingController();
   final TextEditingController gasStationController = TextEditingController();
-  final TextEditingController gasStationBrandController = TextEditingController();
+  final TextEditingController gasStationBrandController =
+      TextEditingController();
   final TextEditingController notesController = TextEditingController();
 
   // Debounce timers
@@ -188,9 +197,10 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
           formModel: state.formModel.copyWith(
             vehicle: vehicle,
             odometer: vehicle.currentOdometer,
-            fuelType: vehicle.supportedFuels.isNotEmpty
-                ? vehicle.supportedFuels.first
-                : FuelType.gasoline,
+            fuelType:
+                vehicle.supportedFuels.isNotEmpty
+                    ? vehicle.supportedFuels.first
+                    : FuelType.gasoline,
           ),
           lastOdometerReading: lastOdometer,
         );
@@ -201,24 +211,25 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       if (kDebugMode) {
         debugPrint('🚗 Erro ao carregar dados do veículo: $e');
       }
-      state = state.copyWith(
-        lastError: 'Erro ao carregar veículo: $e',
-      );
+      state = state.copyWith(lastError: 'Erro ao carregar veículo: $e');
     }
   }
 
   void _updateTextControllers() {
-    litersController.text = state.formModel.liters > 0
-        ? _formatter.formatLiters(state.formModel.liters)
-        : '';
+    litersController.text =
+        state.formModel.liters > 0
+            ? _formatter.formatLiters(state.formModel.liters)
+            : '';
 
-    pricePerLiterController.text = state.formModel.pricePerLiter > 0
-        ? _formatter.formatPricePerLiter(state.formModel.pricePerLiter)
-        : '';
+    pricePerLiterController.text =
+        state.formModel.pricePerLiter > 0
+            ? _formatter.formatPricePerLiter(state.formModel.pricePerLiter)
+            : '';
 
-    odometerController.text = state.formModel.odometer > 0
-        ? _formatter.formatOdometer(state.formModel.odometer)
-        : '';
+    odometerController.text =
+        state.formModel.odometer > 0
+            ? _formatter.formatOdometer(state.formModel.odometer)
+            : '';
 
     gasStationController.text = state.formModel.gasStationName;
     gasStationBrandController.text = state.formModel.gasStationBrand;
@@ -243,7 +254,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     _priceDebounceTimer = Timer(
       const Duration(milliseconds: FuelConstants.priceDebounceMs),
       () {
-        final value = _formatter.parseFormattedValue(pricePerLiterController.text);
+        final value = _formatter.parseFormattedValue(
+          pricePerLiterController.text,
+        );
         _updatePricePerLiter(value);
       },
     );
@@ -266,7 +279,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   }
 
   void _onGasStationBrandChanged() {
-    final sanitized = InputSanitizer.sanitizeName(gasStationBrandController.text);
+    final sanitized = InputSanitizer.sanitizeName(
+      gasStationBrandController.text,
+    );
     _updateGasStationBrand(sanitized);
   }
 
@@ -279,10 +294,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.liters == value) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        liters: value,
-        hasChanges: true,
-      ).clearFieldError('liters'),
+      formModel: state.formModel
+          .copyWith(liters: value, hasChanges: true)
+          .clearFieldError('liters'),
     );
 
     _calculateTotalPrice();
@@ -292,10 +306,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.pricePerLiter == value) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        pricePerLiter: value,
-        hasChanges: true,
-      ).clearFieldError('pricePerLiter'),
+      formModel: state.formModel
+          .copyWith(pricePerLiter: value, hasChanges: true)
+          .clearFieldError('pricePerLiter'),
     );
 
     _calculateTotalPrice();
@@ -305,10 +318,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.odometer == value) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        odometer: value,
-        hasChanges: true,
-      ).clearFieldError('odometer'),
+      formModel: state.formModel
+          .copyWith(odometer: value, hasChanges: true)
+          .clearFieldError('odometer'),
     );
   }
 
@@ -316,10 +328,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.gasStationName == value) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        gasStationName: value,
-        hasChanges: true,
-      ).clearFieldError('gasStationName'),
+      formModel: state.formModel
+          .copyWith(gasStationName: value, hasChanges: true)
+          .clearFieldError('gasStationName'),
     );
   }
 
@@ -327,10 +338,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.gasStationBrand == value) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        gasStationBrand: value,
-        hasChanges: true,
-      ).clearFieldError('gasStationBrand'),
+      formModel: state.formModel
+          .copyWith(gasStationBrand: value, hasChanges: true)
+          .clearFieldError('gasStationBrand'),
     );
   }
 
@@ -338,10 +348,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.notes == value) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        notes: value,
-        hasChanges: true,
-      ).clearFieldError('notes'),
+      formModel: state.formModel
+          .copyWith(notes: value, hasChanges: true)
+          .clearFieldError('notes'),
     );
   }
 
@@ -349,10 +358,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.fuelType == fuelType) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        fuelType: fuelType,
-        hasChanges: true,
-      ).clearFieldError('fuelType'),
+      formModel: state.formModel
+          .copyWith(fuelType: fuelType, hasChanges: true)
+          .clearFieldError('fuelType'),
     );
   }
 
@@ -360,10 +368,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.date == date) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        date: date,
-        hasChanges: true,
-      ).clearFieldError('date'),
+      formModel: state.formModel
+          .copyWith(date: date, hasChanges: true)
+          .clearFieldError('date'),
     );
   }
 
@@ -371,10 +378,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (state.formModel.fullTank == fullTank) return;
 
     state = state.copyWith(
-      formModel: state.formModel.copyWith(
-        fullTank: fullTank,
-        hasChanges: true,
-      ),
+      formModel: state.formModel.copyWith(fullTank: fullTank, hasChanges: true),
     );
   }
 
@@ -399,7 +403,10 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   String? validateField(String field, String? value) {
     switch (field) {
       case 'liters':
-        return _validator.validateLiters(value, tankCapacity: state.formModel.vehicle?.tankCapacity);
+        return _validator.validateLiters(
+          value,
+          tankCapacity: state.formModel.vehicle?.tankCapacity,
+        );
       case 'pricePerLiter':
         return _validator.validatePricePerLiter(value);
       case 'odometer':
@@ -421,7 +428,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     if (kDebugMode) {
       debugPrint('[FUEL VALIDATION] Starting form validation...');
       debugPrint('[FUEL VALIDATION] liters: "${litersController.text}"');
-      debugPrint('[FUEL VALIDATION] pricePerLiter: "${pricePerLiterController.text}"');
+      debugPrint(
+        '[FUEL VALIDATION] pricePerLiter: "${pricePerLiterController.text}"',
+      );
       debugPrint('[FUEL VALIDATION] odometer: "${odometerController.text}"');
     }
 
@@ -439,12 +448,12 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
     if (kDebugMode) {
       debugPrint('[FUEL VALIDATION] Validation errors: $errors');
-      debugPrint('[FUEL VALIDATION] Form is ${errors.isEmpty ? "VALID" : "INVALID"}');
+      debugPrint(
+        '[FUEL VALIDATION] Form is ${errors.isEmpty ? "VALID" : "INVALID"}',
+      );
     }
 
-    state = state.copyWith(
-      formModel: state.formModel.copyWith(errors: errors),
-    );
+    state = state.copyWith(formModel: state.formModel.copyWith(errors: errors));
 
     return errors.isEmpty;
   }
@@ -460,7 +469,10 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     notesController.clear();
 
     state = state.copyWith(
-      formModel: FuelFormModel.initial(state.formModel.vehicleId, state.formModel.userId),
+      formModel: FuelFormModel.initial(
+        state.formModel.vehicleId,
+        state.formModel.userId,
+      ),
       clearImagePaths: true,
       clearImageError: true,
     );
@@ -481,9 +493,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   Future<void> loadFromFuelRecord(FuelRecordEntity record) async {
     try {
       // Update form model with record data
-      state = state.copyWith(
-        formModel: FuelFormModel.fromFuelRecord(record),
-      );
+      state = state.copyWith(formModel: FuelFormModel.fromFuelRecord(record));
 
       // Load vehicle data
       await _loadVehicleData(record.vehicleId);
@@ -494,9 +504,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       if (kDebugMode) {
         debugPrint('🚗 Erro ao carregar registro: $e');
       }
-      state = state.copyWith(
-        lastError: 'Erro ao carregar registro: $e',
-      );
+      state = state.copyWith(lastError: 'Erro ao carregar registro: $e');
     }
   }
 
@@ -542,7 +550,11 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
   Future<void> _processReceiptImage(String imagePath) async {
     try {
-      state = state.copyWith(isUploadingImage: true, imageUploadError: null, clearImageError: true);
+      state = state.copyWith(
+        isUploadingImage: true,
+        imageUploadError: null,
+        clearImageError: true,
+      );
 
       // Validate image
       final isValid = await _receiptImageService.isValidImage(imagePath);
@@ -626,7 +638,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       );
 
       if (kDebugMode) {
-        debugPrint('[FUEL FORM] Image synced to Firebase: ${result.downloadUrl}');
+        debugPrint(
+          '[FUEL FORM] Image synced to Firebase: ${result.downloadUrl}',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -662,31 +676,45 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 // ========== PROVIDERS ==========
 
 /// Fuel form notifier provider factory
-final fuelFormNotifierProvider = StateNotifierProvider.family<FuelFormNotifier, FuelFormState, String>(
-  (ref, vehicleId) {
-    final userId = ref.watch(userIdProvider);
-    return FuelFormNotifier(
-      initialVehicleId: vehicleId,
-      userId: userId,
-      receiptImageService: sl<ReceiptImageService>(),
-      ref: ref,
-    );
-  },
-);
+final fuelFormNotifierProvider =
+    StateNotifierProvider.family<FuelFormNotifier, FuelFormState, String>((
+      ref,
+      vehicleId,
+    ) {
+      final userId = ref.watch(userIdProvider);
+      return FuelFormNotifier(
+        initialVehicleId: vehicleId,
+        userId: userId,
+        receiptImageService: sl<ReceiptImageService>(),
+        ref: ref,
+      );
+    });
 
 /// Derived providers for form state
-final fuelFormCanSubmitProvider = Provider.family<bool, String>((ref, vehicleId) {
+final fuelFormCanSubmitProvider = Provider.family<bool, String>((
+  ref,
+  vehicleId,
+) {
   return ref.watch(fuelFormNotifierProvider(vehicleId)).canSubmit;
 });
 
-final fuelFormHasChangesProvider = Provider.family<bool, String>((ref, vehicleId) {
+final fuelFormHasChangesProvider = Provider.family<bool, String>((
+  ref,
+  vehicleId,
+) {
   return ref.watch(fuelFormNotifierProvider(vehicleId)).hasChanges;
 });
 
-final fuelFormHasErrorsProvider = Provider.family<bool, String>((ref, vehicleId) {
+final fuelFormHasErrorsProvider = Provider.family<bool, String>((
+  ref,
+  vehicleId,
+) {
   return ref.watch(fuelFormNotifierProvider(vehicleId)).hasErrors;
 });
 
-final fuelFormImageStateProvider = Provider.family<bool, String>((ref, vehicleId) {
+final fuelFormImageStateProvider = Provider.family<bool, String>((
+  ref,
+  vehicleId,
+) {
   return ref.watch(fuelFormNotifierProvider(vehicleId)).hasReceiptImage;
 });

@@ -278,16 +278,16 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
 
   List<Widget> _buildFeaturesList() {
     final features = [
-      _Feature('Tarefas ilimitadas', Icons.task_alt),
-      _Feature('Subtarefas ilimitadas', Icons.subdirectory_arrow_right),
-      _Feature('Filtros avançados', Icons.filter_list),
-      _Feature('Tags personalizadas', Icons.label),
-      _Feature('Controle de tempo', Icons.timer),
-      _Feature('Analytics de produtividade', Icons.analytics),
-      _Feature('Sincronização na nuvem', Icons.cloud_sync),
-      _Feature('Exportar dados', Icons.file_download),
-      _Feature('Suporte prioritário', Icons.support_agent),
-      _Feature('Temas personalizados', Icons.palette),
+      const _Feature('Tarefas ilimitadas', Icons.task_alt),
+      const _Feature('Subtarefas ilimitadas', Icons.subdirectory_arrow_right),
+      const _Feature('Filtros avançados', Icons.filter_list),
+      const _Feature('Tags personalizadas', Icons.label),
+      const _Feature('Controle de tempo', Icons.timer),
+      const _Feature('Analytics de produtividade', Icons.analytics),
+      const _Feature('Sincronização na nuvem', Icons.cloud_sync),
+      const _Feature('Exportar dados', Icons.file_download),
+      const _Feature('Suporte prioritário', Icons.support_agent),
+      const _Feature('Temas personalizados', Icons.palette),
     ];
 
     return features.map((feature) => Padding(

@@ -1,13 +1,15 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart';
 
-import '../../../../core/theme/theme_mode_enum.dart';
 import '../../../../core/services/preferences_local_datasource.dart';
 import '../../../../core/services/preferences_local_datasource_impl.dart';
+import '../../../../core/theme/theme_mode_enum.dart';
 
 // Provider para o data source de preferências
-final preferencesDataSourceProvider = Provider<PreferencesLocalDataSource>((ref) {
+final preferencesDataSourceProvider = Provider<PreferencesLocalDataSource>((
+  ref,
+) {
   return PreferencesLocalDataSourceImpl();
 });
 
@@ -15,7 +17,8 @@ final preferencesDataSourceProvider = Provider<PreferencesLocalDataSource>((ref)
 class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
   final PreferencesLocalDataSource _preferencesDataSource;
 
-  ThemeNotifier(this._preferencesDataSource) : super(const AsyncValue.loading()) {
+  ThemeNotifier(this._preferencesDataSource)
+    : super(const AsyncValue.loading()) {
     _loadTheme();
   }
 
@@ -39,7 +42,7 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
     try {
       // Atualizar estado imediatamente para UI responsiva
       state = AsyncValue.data(themeMode);
-      
+
       // Persistir a mudança
       await _preferencesDataSource.setThemeMode(themeMode);
     } catch (error, stackTrace) {
@@ -53,7 +56,7 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
   // Alternar entre claro e escuro (útil para quick toggle)
   Future<void> toggleTheme() async {
     final currentTheme = state.value ?? AppThemeMode.system;
-    
+
     AppThemeMode newTheme;
     switch (currentTheme) {
       case AppThemeMode.light:
@@ -63,10 +66,11 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
         newTheme = AppThemeMode.light;
         break;
       case AppThemeMode.system:
-        newTheme = AppThemeMode.light; // Default para claro quando vem do sistema
+        newTheme =
+            AppThemeMode.light; // Default para claro quando vem do sistema
         break;
     }
-    
+
     await setThemeMode(newTheme);
   }
 
@@ -87,10 +91,11 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
 }
 
 // Provider para o theme notifier
-final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, AsyncValue<AppThemeMode>>((ref) {
-  final dataSource = ref.watch(preferencesDataSourceProvider);
-  return ThemeNotifier(dataSource);
-});
+final themeNotifierProvider =
+    StateNotifierProvider<ThemeNotifier, AsyncValue<AppThemeMode>>((ref) {
+      final dataSource = ref.watch(preferencesDataSourceProvider);
+      return ThemeNotifier(dataSource);
+    });
 
 // Provider derivado para obter apenas o valor do tema (sem AsyncValue)
 final currentThemeProvider = Provider<AppThemeMode>((ref) {
@@ -110,9 +115,8 @@ final themeErrorProvider = Provider<String?>((ref) {
   return asyncTheme.hasError ? asyncTheme.error.toString() : null;
 });
 
-// Provider conveniente para obter o ThemeMode do Flutter  
+// Provider conveniente para obter o ThemeMode do Flutter
 final flutterThemeModeProvider = Provider<ThemeMode>((ref) {
   final appThemeMode = ref.watch(currentThemeProvider);
   return appThemeMode.themeMode;
 });
-

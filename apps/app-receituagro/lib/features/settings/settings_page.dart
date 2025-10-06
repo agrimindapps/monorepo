@@ -1,8 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/injection_container.dart' as di;
-import '../../core/providers/receituagro_auth_notifier.dart';
 import '../../core/services/device_identity_service.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
@@ -60,39 +59,45 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Expanded(
                   child: settingsState.when(
                     data: (state) => _buildSettingsContent(),
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    error: (error, _) => Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: theme.colorScheme.error,
+                    loading:
+                        () => const Center(child: CircularProgressIndicator()),
+                    error:
+                        (error, _) => Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: theme.colorScheme.error,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Erro ao carregar configurações',
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                error.toString(),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed:
+                                    () =>
+                                        ref
+                                            .read(
+                                              settingsNotifierProvider.notifier,
+                                            )
+                                            .refresh(),
+                                child: const Text('Tentar Novamente'),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Erro ao carregar configurações',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            error.toString(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () => ref.read(settingsNotifierProvider.notifier).refresh(),
-                            child: const Text('Tentar Novamente'),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
                   ),
                 ),
               ],
@@ -144,9 +149,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       showBackButton: false,
       showActions: true,
       isDark: isDark,
-      additionalActions: [
-        _buildThemeSettingsButton(context),
-      ],
+      additionalActions: [_buildThemeSettingsButton(context)],
     );
   }
 
@@ -184,7 +187,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     } catch (e) {
       debugPrint('Error initializing settings: $e');
       // Fallback to anonymous user
-      await ref.read(settingsNotifierProvider.notifier).initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
+      await ref
+          .read(settingsNotifierProvider.notifier)
+          .initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
     }
   }
 }

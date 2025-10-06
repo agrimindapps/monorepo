@@ -53,7 +53,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         if (!_settingsInitialized && isAuthenticated && user?.id != null) {
           _settingsInitialized = true;
           final userId = user?.id;
-          if (userId != null && userId is String) {
+          if (userId != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ref.read(settingsNotifierProvider.notifier).initialize(userId);
             });

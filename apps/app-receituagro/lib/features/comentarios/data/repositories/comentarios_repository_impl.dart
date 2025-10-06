@@ -1,9 +1,9 @@
 import 'package:core/core.dart';
 
 import '../../../../core/data/repositories/comentarios_hive_repository.dart';
+import '../../data/comentario_model.dart';
 import '../../domain/entities/comentario_entity.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
-import '../../data/comentario_model.dart';
 
 /// Implementation of IComentariosRepository using Hive local storage.
 /// This is the data layer implementation that handles actual data persistence.
@@ -19,8 +19,12 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
   }
 
   @override
-  Future<List<ComentarioEntity>> getComentariosByContext(String pkIdentificador) async {
-    final models = await _hiveRepository.getComentariosByContext(pkIdentificador);
+  Future<List<ComentarioEntity>> getComentariosByContext(
+    String pkIdentificador,
+  ) async {
+    final models = await _hiveRepository.getComentariosByContext(
+      pkIdentificador,
+    );
     return models.map(_modelToEntity).toList();
   }
 
@@ -34,7 +38,7 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
   Future<ComentarioEntity?> getComentarioById(String id) async {
     final result = await _hiveRepository.getByKey(id);
     if (result.isFailure || result.data == null) return null;
-    
+
     final hiveItem = result.data!;
     final model = hiveItem.toComentarioModel();
     return _modelToEntity(model);
@@ -71,16 +75,16 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
   Future<List<ComentarioEntity>> searchComentarios(String query) async {
     // Get all comentarios and filter by search query
     final allComentarios = await getAllComentarios();
-    
+
     if (query.trim().isEmpty) {
       return allComentarios;
     }
-    
+
     final queryLower = query.toLowerCase();
     return allComentarios.where((comentario) {
       return comentario.conteudo.toLowerCase().contains(queryLower) ||
-             comentario.titulo.toLowerCase().contains(queryLower) ||
-             comentario.ferramenta.toLowerCase().contains(queryLower);
+          comentario.titulo.toLowerCase().contains(queryLower) ||
+          comentario.ferramenta.toLowerCase().contains(queryLower);
     }).toList();
   }
 
@@ -90,12 +94,15 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
   }
 
   @override
-  Future<List<ComentarioEntity>> getCommentsByDateRange(DateTime start, DateTime end) async {
+  Future<List<ComentarioEntity>> getCommentsByDateRange(
+    DateTime start,
+    DateTime end,
+  ) async {
     final allComentarios = await getAllComentarios();
-    
+
     return allComentarios.where((comentario) {
-      return comentario.createdAt.isAfter(start) && 
-             comentario.createdAt.isBefore(end);
+      return comentario.createdAt.isAfter(start) &&
+          comentario.createdAt.isBefore(end);
     }).toList();
   }
 

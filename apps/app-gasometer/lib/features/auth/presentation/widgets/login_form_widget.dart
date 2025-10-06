@@ -2,9 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../auth/presentation/state/auth_state.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
-import '../notifiers/login_form_notifier.dart';
 import 'auth_button_widget.dart';
 import 'auth_text_field_widget.dart';
 import 'social_login_buttons_widget.dart';
@@ -12,11 +10,7 @@ import 'social_login_buttons_widget.dart';
 /// Widget responsável apenas pelo formulário de login
 /// Segue o princípio da Responsabilidade Única
 class LoginFormWidget extends ConsumerWidget {
-
-  const LoginFormWidget({
-    super.key,
-    this.onLoginSuccess,
-  });
+  const LoginFormWidget({super.key, this.onLoginSuccess});
   final VoidCallback? onLoginSuccess;
 
   @override
@@ -30,15 +24,15 @@ class LoginFormWidget extends ConsumerWidget {
         children: [
           Text(
             'Acesse sua conta para gerenciar seu consumo',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 20),
 
           // Campo de email
           AuthTextFieldWidget(
-            controller: formNotifier.emailController!,
+            controller: formNotifier.emailController,
             label: 'Email',
             hint: 'Insira seu email',
             prefixIcon: Icons.email_outlined,
@@ -52,7 +46,7 @@ class LoginFormWidget extends ConsumerWidget {
 
           // Campo de senha
           AuthTextFieldWidget(
-            controller: formNotifier.passwordController!,
+            controller: formNotifier.passwordController,
             label: 'Senha',
             hint: 'Insira sua senha',
             prefixIcon: Icons.lock_outline,
@@ -64,9 +58,8 @@ class LoginFormWidget extends ConsumerWidget {
                     : Icons.visibility_off_outlined,
               ),
               onPressed: formNotifier.togglePasswordVisibility,
-              tooltip: formState.obscurePassword
-                  ? 'Mostrar senha'
-                  : 'Ocultar senha',
+              tooltip:
+                  formState.obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
             ),
             validator: formNotifier.validatePassword,
             onFieldSubmitted: (_) => _handleLogin(context, ref),
@@ -124,7 +117,10 @@ class LoginFormWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildRememberMeAndForgotPassword(BuildContext context, WidgetRef ref) {
+  Widget _buildRememberMeAndForgotPassword(
+    BuildContext context,
+    WidgetRef ref,
+  ) {
     final formState = ref.watch(loginFormNotifierProvider);
     final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
 
@@ -148,10 +144,7 @@ class LoginFormWidget extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(
               'Lembrar-me',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
             ),
           ],
         ),
@@ -169,7 +162,11 @@ class LoginFormWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorMessage(BuildContext context, WidgetRef ref, String message) {
+  Widget _buildErrorMessage(
+    BuildContext context,
+    WidgetRef ref,
+    String message,
+  ) {
     final formNotifier = ref.watch(loginFormNotifierProvider.notifier);
 
     return Container(
@@ -181,19 +178,12 @@ class LoginFormWidget extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red.shade700,
-            size: 20,
-          ),
+          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: Colors.red.shade700,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.red.shade700, fontSize: 14),
             ),
           ),
           const SizedBox(width: 8),
@@ -201,11 +191,7 @@ class LoginFormWidget extends ConsumerWidget {
             onTap: formNotifier.clearError,
             child: Container(
               padding: const EdgeInsets.all(4),
-              child: Icon(
-                Icons.close,
-                color: Colors.red.shade700,
-                size: 16,
-              ),
+              child: Icon(Icons.close, color: Colors.red.shade700, size: 16),
             ),
           ),
         ],
@@ -221,14 +207,15 @@ class LoginFormWidget extends ConsumerWidget {
       width: double.infinity,
       height: 48,
       child: OutlinedButton(
-        onPressed: authState.isLoading
-            ? null
-            : () async {
-                final success = await formNotifier.signInAnonymously();
-                if (context.mounted && success && onLoginSuccess != null) {
-                  onLoginSuccess!();
-                }
-              },
+        onPressed:
+            authState.isLoading
+                ? null
+                : () async {
+                  final success = await formNotifier.signInAnonymously();
+                  if (context.mounted && success && onLoginSuccess != null) {
+                    onLoginSuccess!();
+                  }
+                },
         style: OutlinedButton.styleFrom(
           foregroundColor: Theme.of(context).primaryColor,
           side: BorderSide(
@@ -238,36 +225,37 @@ class LoginFormWidget extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: authState.isLoading
-            ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor,
-                  ),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.person_outline,
-                    size: 20,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Continuar sem conta',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).primaryColor,
+        child:
+            authState.isLoading
+                ? SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor,
                     ),
                   ),
-                ],
-              ),
+                )
+                : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      size: 20,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Continuar sem conta',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
       ),
     );
   }

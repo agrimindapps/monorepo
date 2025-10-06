@@ -201,7 +201,7 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      final user = (currentState as AsyncData<AuthState>).value!.user!;
+      final user = (currentState as AsyncData<AuthState>).value.user!;
 
       // Iniciar sincronização automática apenas se não foi feita ainda
       if (!state.value!.hasPerformedInitialSync && !_isAnonymous(user)) {

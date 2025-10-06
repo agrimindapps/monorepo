@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/semantic_widgets.dart';
 import '../../domain/entities/vehicle_entity.dart';
 
 /// Vehicle card content widget following SOLID principles

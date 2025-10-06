@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:gasometer/core/services/gasometer_analytics_service.dart';
+import '../services/gasometer_analytics_service.dart';
 
 /// Tipos de erro específicos do contexto automotivo do Gasometer
 enum GasometerSyncErrorType {

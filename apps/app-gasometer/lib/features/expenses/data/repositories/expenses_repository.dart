@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/interfaces/i_expenses_repository.dart';
@@ -18,8 +16,9 @@ import '../models/expense_model.dart';
 
 /// Repository para persistência de despesas usando Hive com cache strategy e sync Firebase
 @Injectable(as: IExpensesRepository)
-class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositoryMixin implements IExpensesRepository {
-
+class ExpensesRepository
+    with CachedRepository<ExpenseEntity>, LoggableRepositoryMixin
+    implements IExpensesRepository {
   ExpensesRepository(
     this._loggingService,
     this._remoteDataSource,
@@ -46,10 +45,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
 
   Future<String?> _getCurrentUserId() async {
     final userResult = await _authRepository.getCurrentUser();
-    return userResult.fold(
-      (failure) => null,
-      (user) => user?.id,
-    );
+    return userResult.fold((failure) => null, (user) => user?.id);
   }
 
   /// Garante que o box está inicializado antes do uso
@@ -63,13 +59,15 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   @override
   Future<void> initialize() async {
     _box = await Hive.openBox<ExpenseModel>(_boxName);
-    
+
     // Inicializar cache com configurações otimizadas para expenses
     initializeCache(
       maxSize: 200, // Mais entradas para expenses frequentes
-      defaultTtl: const Duration(minutes: 45), // TTL otimizado para dados financeiros (45 min)
+      defaultTtl: const Duration(
+        minutes: 45,
+      ), // TTL otimizado para dados financeiros (45 min)
     );
-    
+
     // Aquecimento de cache para dados frequentemente acessados (em background)
     unawaited(_warmupCache());
   }
@@ -79,23 +77,22 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
     try {
       // Carregar todas as despesas para o cache (em background)
       unawaited(getAllExpenses());
-      
+
       // Carregar estatísticas básicas
       unawaited(getStats());
-      
+
       // Se há despesas, carregar as mais recentes
-      final recentModels = _box.values
-          .where((model) => !model.isDeleted)
-          .toList()
-        ..sort((a, b) => b.data.compareTo(a.data));
-      
+      final recentModels =
+          _box.values.where((model) => !model.isDeleted).toList()
+            ..sort((a, b) => b.data.compareTo(a.data));
+
       if (recentModels.isNotEmpty) {
         // Cache das últimas 10 despesas individualmente
         for (int i = 0; i < recentModels.length && i < 10; i++) {
           final entity = _modelToEntity(recentModels[i]);
           cacheEntity(entityCacheKey(entity.id), entity);
         }
-        
+
         // Carregar despesas do último mês (período comum de consulta)
         final lastMonth = DateTime.now().subtract(const Duration(days: 30));
         unawaited(getExpensesByPeriod(lastMonth, DateTime.now()));
@@ -124,9 +121,9 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
         // Always save locally first
         final model = _entityToModel(expense);
         await _box.put(expense.id, model);
-        
+
         final entity = _modelToEntity(model);
-        
+
         // Log local storage
         await logLocalStorage(
           action: 'saved',
@@ -134,18 +131,18 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
           entityId: expense.id,
           metadata: {'storage_type': 'hive'},
         );
-        
+
         // Cache a entidade
         cacheEntity(entityCacheKey(expense.id), entity);
-        
+
         // Invalidar caches de listas relacionadas
         invalidateListCache('all_expenses');
         invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
         invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
-        
+
         // Remote sync in background (fire-and-forget)
         unawaited(_syncExpenseToRemoteInBackground(expense));
-        
+
         return entity;
       },
     );
@@ -167,12 +164,12 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
         if (!_box.containsKey(expense.id)) {
           throw Exception('Despesa não encontrada');
         }
-        
+
         final model = _entityToModel(expense);
         await _box.put(expense.id, model);
-        
+
         final entity = _modelToEntity(model);
-        
+
         // Log local storage
         await logLocalStorage(
           action: 'updated',
@@ -180,18 +177,18 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
           entityId: expense.id,
           metadata: {'storage_type': 'hive'},
         );
-        
+
         // Atualizar cache da entidade
         cacheEntity(entityCacheKey(expense.id), entity);
-        
+
         // Invalidar caches de listas relacionadas
         invalidateListCache('all_expenses');
         invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
         invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
-        
+
         // Remote sync in background (fire-and-forget)
         unawaited(_syncExpenseToRemoteInBackground(expense));
-        
+
         return entity;
       },
     );
@@ -207,9 +204,9 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
       operationFunc: () async {
         // Buscar dados antes de deletar para invalidação seletiva
         final expenseToDelete = _box.get(expenseId);
-        
+
         await _box.delete(expenseId);
-        
+
         // Log local storage
         await logLocalStorage(
           action: 'deleted',
@@ -217,20 +214,22 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
           entityId: expenseId,
           metadata: {'storage_type': 'hive'},
         );
-        
+
         // Remover do cache
         invalidateCache(entityCacheKey(expenseId));
-        
+
         // Invalidação seletiva baseada na despesa removida
         if (expenseToDelete != null) {
           invalidateListCache('all_expenses');
-          invalidateListCache(vehicleCacheKey(expenseToDelete.veiculoId, 'expenses'));
+          invalidateListCache(
+            vehicleCacheKey(expenseToDelete.veiculoId, 'expenses'),
+          );
           invalidateListCache(typeCacheKey(expenseToDelete.tipo, 'expenses'));
         } else {
           // Fallback para invalidação completa apenas se não conseguir dados específicos
           invalidateListCache('all_expenses');
         }
-        
+
         return true;
       },
     );
@@ -241,22 +240,22 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   Future<ExpenseEntity?> getExpenseById(String expenseId) async {
     try {
       await _ensureInitialized();
-      
+
       // Verificar cache primeiro
       final cacheKey = entityCacheKey(expenseId);
       final cached = getCachedEntity(cacheKey);
       if (cached != null) {
         return cached;
       }
-      
+
       final model = _box.get(expenseId);
       if (model == null) return null;
-      
+
       final entity = _modelToEntity(model);
-      
+
       // Cache o resultado
       cacheEntity(cacheKey, entity);
-      
+
       return entity;
     } catch (e) {
       throw Exception('Erro ao buscar despesa: $e');
@@ -268,20 +267,20 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   Future<List<ExpenseEntity>> getAllExpenses() async {
     try {
       await _ensureInitialized();
-      
+
       // Verificar cache primeiro
       const cacheKey = 'all_expenses';
       final cached = getCachedList(cacheKey);
       if (cached != null) {
         return cached;
       }
-      
+
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache o resultado
       cacheList(cacheKey, entities);
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao carregar despesas: $e');
@@ -293,22 +292,25 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   Future<List<ExpenseEntity>> getExpensesByVehicle(String vehicleId) async {
     try {
       await _ensureInitialized();
-      
+
       // Verificar cache primeiro
       final cacheKey = vehicleCacheKey(vehicleId, 'expenses');
       final cached = getCachedList(cacheKey);
       if (cached != null) {
         return cached;
       }
-      
-      final models = _box.values
-          .where((model) => model.veiculoId == vehicleId && !model.isDeleted)
-          .toList();
+
+      final models =
+          _box.values
+              .where(
+                (model) => model.veiculoId == vehicleId && !model.isDeleted,
+              )
+              .toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache o resultado
       cacheList(cacheKey, entities);
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao carregar despesas do veículo: $e');
@@ -325,15 +327,16 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
       if (cached != null) {
         return cached;
       }
-      
-      final models = _box.values
-          .where((model) => model.tipo == type.name && !model.isDeleted)
-          .toList();
+
+      final models =
+          _box.values
+              .where((model) => model.tipo == type.name && !model.isDeleted)
+              .toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache o resultado
       cacheList(cacheKey, entities);
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao carregar despesas por tipo: $e');
@@ -342,29 +345,34 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
 
   /// Carrega despesas por período
   @override
-  Future<List<ExpenseEntity>> getExpensesByPeriod(DateTime start, DateTime end) async {
+  Future<List<ExpenseEntity>> getExpensesByPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
       // Cache key baseado no período
-      final periodKey = 'period_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
+      final periodKey =
+          'period_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
       final cached = getCachedList(periodKey);
       if (cached != null) {
         return cached;
       }
-      
+
       final startMs = start.millisecondsSinceEpoch;
       final endMs = end.millisecondsSinceEpoch;
-      
-      final models = _box.values.where((model) {
-        return model.data >= startMs && 
-               model.data <= endMs && 
-               !model.isDeleted;
-      }).toList();
-      
+
+      final models =
+          _box.values.where((model) {
+            return model.data >= startMs &&
+                model.data <= endMs &&
+                !model.isDeleted;
+          }).toList();
+
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache com TTL menor para buscas por período (20 min)
       cacheList(periodKey, entities, ttl: const Duration(minutes: 20));
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao carregar despesas por período: $e');
@@ -381,18 +389,19 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
       if (cached != null) {
         return cached;
       }
-      
+
       final lowerQuery = query.toLowerCase();
-      final models = _box.values.where((model) {
-        return !model.isDeleted && 
-               model.descricao.toLowerCase().contains(lowerQuery);
-      }).toList();
-      
+      final models =
+          _box.values.where((model) {
+            return !model.isDeleted &&
+                model.descricao.toLowerCase().contains(lowerQuery);
+          }).toList();
+
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache com TTL bem menor para buscas (10 min)
       cacheList(searchKey, entities, ttl: const Duration(minutes: 10));
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao buscar despesas: $e');
@@ -404,25 +413,25 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
   Future<Map<String, dynamic>> getStats() async {
     try {
       await _ensureInitialized();
-      
+
       final models = _box.values.where((model) => !model.isDeleted).toList();
-      
+
       if (models.isEmpty) {
-        return {
-          'totalRecords': 0,
-          'totalAmount': 0.0,
-          'averageAmount': 0.0,
-        };
+        return {'totalRecords': 0, 'totalAmount': 0.0, 'averageAmount': 0.0};
       }
 
-      final totalAmount = models.fold<double>(0, (sum, model) => sum + model.valor);
-      
+      final totalAmount = models.fold<double>(
+        0,
+        (sum, model) => sum + model.valor,
+      );
+
       return {
         'totalRecords': models.length,
         'totalAmount': totalAmount,
         'averageAmount': totalAmount / models.length,
-        'lastExpense': _modelToEntity(models.reduce((a, b) => 
-            a.data > b.data ? a : b)),
+        'lastExpense': _modelToEntity(
+          models.reduce((a, b) => a.data > b.data ? a : b),
+        ),
       };
     } catch (e) {
       throw Exception('Erro ao calcular estatísticas: $e');
@@ -435,16 +444,16 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final duplicates = <ExpenseModel>[];
-      
+
       for (int i = 0; i < models.length; i++) {
         for (int j = i + 1; j < models.length; j++) {
           final model1 = models[i];
           final model2 = models[j];
-          
+
           // Considera duplicata se mesmo veículo, tipo, data (mesmo dia) e valor muito próximo
           final date1 = DateTime.fromMillisecondsSinceEpoch(model1.data);
           final date2 = DateTime.fromMillisecondsSinceEpoch(model2.data);
-          
+
           if (model1.veiculoId == model2.veiculoId &&
               model1.tipo == model2.tipo &&
               date1.day == date2.day &&
@@ -455,7 +464,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
           }
         }
       }
-      
+
       return duplicates.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao buscar duplicatas: $e');
@@ -565,37 +574,45 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
         maxAmount: maxAmount,
         searchText: searchText,
       );
-      
+
       final cached = getCachedList(filterKey);
       if (cached != null) {
         return cached;
       }
-      
-      final models = _box.values.where((model) {
-        if (model.isDeleted) return false;
-        
-        if (vehicleId != null && model.veiculoId != vehicleId) return false;
-        if (type != null && model.tipo != type.name) return false;
-        
-        if (startDate != null && model.data < startDate.millisecondsSinceEpoch) return false;
-        if (endDate != null && model.data > endDate.millisecondsSinceEpoch) return false;
-        
-        if (minAmount != null && model.valor < minAmount) return false;
-        if (maxAmount != null && model.valor > maxAmount) return false;
-        
-        if (searchText != null && 
-            !model.descricao.toLowerCase().contains(searchText.toLowerCase())) {
-          return false;
-        }
-        
-        return true;
-      }).toList();
-      
+
+      final models =
+          _box.values.where((model) {
+            if (model.isDeleted) return false;
+
+            if (vehicleId != null && model.veiculoId != vehicleId) return false;
+            if (type != null && model.tipo != type.name) return false;
+
+            if (startDate != null &&
+                model.data < startDate.millisecondsSinceEpoch) {
+              return false;
+            }
+            if (endDate != null && model.data > endDate.millisecondsSinceEpoch) {
+              return false;
+            }
+
+            if (minAmount != null && model.valor < minAmount) return false;
+            if (maxAmount != null && model.valor > maxAmount) return false;
+
+            if (searchText != null &&
+                !model.descricao.toLowerCase().contains(
+                  searchText.toLowerCase(),
+                )) {
+              return false;
+            }
+
+            return true;
+          }).toList();
+
       final entities = models.map((model) => _modelToEntity(model)).toList();
-      
+
       // Cache com TTL médio para filtros (25 min)
       cacheList(filterKey, entities, ttl: const Duration(minutes: 25));
-      
+
       return entities;
     } catch (e) {
       throw Exception('Erro ao filtrar despesas: $e');
@@ -613,15 +630,17 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
     String? searchText,
   }) {
     final parts = <String>['filter'];
-    
+
     if (vehicleId != null) parts.add('v_$vehicleId');
     if (type != null) parts.add('t_${type.name}');
     if (startDate != null) parts.add('sd_${startDate.millisecondsSinceEpoch}');
     if (endDate != null) parts.add('ed_${endDate.millisecondsSinceEpoch}');
     if (minAmount != null) parts.add('min_$minAmount');
     if (maxAmount != null) parts.add('max_$maxAmount');
-    if (searchText != null) parts.add('q_${searchText.toLowerCase().replaceAll(' ', '_')}');
-    
+    if (searchText != null) {
+      parts.add('q_${searchText.toLowerCase().replaceAll(' ', '_')}');
+    }
+
     return parts.join('_');
   }
 
@@ -666,7 +685,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
             comparison = a.odometer.compareTo(b.odometer);
             break;
         }
-        
+
         return sortOrder == SortOrder.ascending ? comparison : -comparison;
       });
 
@@ -675,7 +694,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
       final totalPages = (totalItems / pageSize).ceil();
       final startIndex = page * pageSize;
       final endIndex = (startIndex + pageSize).clamp(0, totalItems);
-      
+
       final paginatedItems = allExpenses.sublist(
         startIndex.clamp(0, totalItems),
         endIndex,
@@ -711,7 +730,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
 
       // Sincronizar com Firebase
       await _remoteDataSource.addExpense(userId, expense);
-      
+
       // Log successful sync
       await logRemoteSync(
         action: 'synced',
@@ -737,7 +756,7 @@ class ExpensesRepository with CachedRepository<ExpenseEntity>, LoggableRepositor
           'type': expense.type.name,
         },
       );
-      
+
       // Log but don't throw - background sync should be silent
       if (kDebugMode) {
         print('Background sync failed for expense ${expense.id}: $e');

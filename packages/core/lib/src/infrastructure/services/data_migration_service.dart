@@ -165,7 +165,7 @@ class MigrationProgress {
 
   @override
   String toString() {
-    return 'MigrationProgress(${percentageInt}%): $currentOperation';
+    return 'MigrationProgress($percentageInt%): $currentOperation';
   }
 }
 
@@ -178,7 +178,7 @@ abstract class BaseDataMigrationService implements DataMigrationService {
   
   @override
   Stream<MigrationProgress> get migrationProgress => 
-      _progressStream ?? Stream.empty();
+      _progressStream ?? const Stream.empty();
 
   /// Helper method to emit progress updates
   @protected

@@ -1,6 +1,8 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+
 import 'package:core/core.dart' show injectable;
+import 'package:flutter/foundation.dart';
+
 import 'app_error.dart';
 
 /// Service for structured error logging

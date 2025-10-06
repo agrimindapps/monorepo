@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 

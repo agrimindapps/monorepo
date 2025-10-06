@@ -1,43 +1,34 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+
 import 'package:dartz/dartz.dart';
 
+import '../../shared/utils/failure.dart';
 import '../config/sync_feature_flags.dart';
 import '../interfaces/i_sync_service.dart';
-import '../../shared/utils/failure.dart';
 import 'legacy_sync_bridge.dart';
-
-// App-specific sync services
-// NOTE: These imports are commented due to analyzer issues with relative paths.
-// Apps should import these services from package:core/src/sync/sync.dart instead.
-import '../services/gasometer_sync_service.dart';
-import '../services/plantis_sync_service.dart';
-import '../services/receituagro_sync_service.dart';
-// import '../services/petiveti_sync_service.dart';
-// import '../services/agrihurbi_sync_service.dart';
-// import '../services/taskolist_sync_service.dart';
 
 /// Helper para migração gradual de apps específicos do UnifiedSyncManager
 /// para a nova arquitetura SOLID com app-specific sync services
 class AppMigrationHelper {
   static final AppMigrationHelper _instance = AppMigrationHelper._internal();
   static AppMigrationHelper get instance => _instance;
-  
+
   AppMigrationHelper._internal();
-  
+
   final Map<String, ISyncService> _migrationServices = {};
   bool _isInitialized = false;
-  
+
   /// Inicializa o helper de migração
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       developer.log(
         'Initializing App Migration Helper',
         name: 'AppMigrationHelper',
       );
-      
+
       // Registrar serviços de migração para cada app
       // NOTE: Estes services precisam ser instanciados com repositories reais via DI
       // Por ora, deixamos comentado até que a migração seja feita em cada app
@@ -45,7 +36,7 @@ class AppMigrationHelper {
       // _migrationServices['plantis'] = PlantisSyncService();
       // _migrationServices['receituagro'] = ReceitaAgroSyncService();
       // _migrationServices['petiveti'] = PetiVetiSyncService();
-      
+
       // Inicializar todos os serviços
       for (final entry in _migrationServices.entries) {
         await entry.value.initialize();
@@ -54,14 +45,13 @@ class AppMigrationHelper {
           name: 'AppMigrationHelper',
         );
       }
-      
+
       _isInitialized = true;
-      
+
       developer.log(
         'App Migration Helper initialized for ${_migrationServices.length} apps',
         name: 'AppMigrationHelper',
       );
-      
     } catch (e) {
       developer.log(
         'Error initializing App Migration Helper: $e',
@@ -70,38 +60,39 @@ class AppMigrationHelper {
       rethrow;
     }
   }
-  
+
   /// Executa teste de compatibilidade para verificar se o app pode migrar
-  Future<Either<Failure, MigrationCompatibilityReport>> testMigrationCompatibility(
-    String appName,
-  ) async {
+  Future<Either<Failure, MigrationCompatibilityReport>>
+  testMigrationCompatibility(String appName) async {
     if (!_isInitialized) {
       await initialize();
     }
-    
+
     try {
       developer.log(
         'Testing migration compatibility for $appName',
         name: 'AppMigrationHelper',
       );
-      
+
       final service = _migrationServices[appName];
       if (service == null) {
-        return Left(NotFoundFailure('No migration service available for app: $appName'));
+        return Left(
+          NotFoundFailure('No migration service available for app: $appName'),
+        );
       }
-      
+
       // Testar conectividade
       final hasConnectivity = await service.checkConnectivity();
-      
+
       // Testar se o serviço pode sincronizar
       final canSync = service.canSync;
-      
+
       // Obter estatísticas atuais
       final stats = await service.getStatistics();
-      
+
       // Verificar se há sync pendente
       final hasPending = await service.hasPendingSync;
-      
+
       // Simular um sync de teste (apenas um item para verificar)
       Either<Failure, ServiceSyncResult>? testSyncResult;
       try {
@@ -112,7 +103,7 @@ class AppMigrationHelper {
           name: 'AppMigrationHelper',
         );
       }
-      
+
       final report = MigrationCompatibilityReport(
         appName: appName,
         serviceId: service.serviceId,
@@ -126,19 +117,22 @@ class AppMigrationHelper {
         recommendedMigrationTime: _calculateRecommendedMigrationTime(stats),
         migrationSteps: _generateMigrationSteps(appName),
       );
-      
+
       developer.log(
         'Migration compatibility test completed for $appName: ${report.isCompatible ? "COMPATIBLE" : "NOT COMPATIBLE"}',
         name: 'AppMigrationHelper',
       );
-      
+
       return Right(report);
-      
     } catch (e) {
-      return Left(MigrationFailure('Failed to test migration compatibility for $appName: $e'));
+      return Left(
+        MigrationFailure(
+          'Failed to test migration compatibility for $appName: $e',
+        ),
+      );
     }
   }
-  
+
   /// Executa migração assistida para um app específico
   Future<Either<Failure, MigrationResult>> migrateApp(
     String appName, {
@@ -148,102 +142,134 @@ class AppMigrationHelper {
     if (!_isInitialized) {
       await initialize();
     }
-    
+
     try {
       developer.log(
         'Starting ${dryRun ? "DRY RUN " : ""}migration for $appName',
         name: 'AppMigrationHelper',
       );
-      
+
       final startTime = DateTime.now();
-      
+
       // Passo 1: Verificar compatibilidade
       final compatibilityResult = await testMigrationCompatibility(appName);
-      
+
       final compatibilityReport = compatibilityResult.fold(
-        (failure) => throw Exception('Compatibility check failed: ${failure.message}'),
+        (failure) =>
+            throw Exception('Compatibility check failed: ${failure.message}'),
         (report) => report,
       );
-      
+
       if (!compatibilityReport.isCompatible && !dryRun) {
-        return Left(MigrationFailure(
-          'App $appName is not compatible for migration. Risks: ${compatibilityReport.migrationRisks.join(", ")}'
-        ));
+        return Left(
+          MigrationFailure(
+            'App $appName is not compatible for migration. Risks: ${compatibilityReport.migrationRisks.join(", ")}',
+          ),
+        );
       }
-      
+
       final steps = <MigrationStep>[];
-      
+
       // Passo 2: Backup do estado atual (dry run apenas simula)
       if (!dryRun) {
-        steps.add(MigrationStep(
-          name: 'backup_current_state',
-          description: 'Backup do estado atual do UnifiedSyncManager',
-          status: MigrationStepStatus.completed,
-          timestamp: DateTime.now(),
-        ));
+        steps.add(
+          MigrationStep(
+            name: 'backup_current_state',
+            description: 'Backup do estado atual do UnifiedSyncManager',
+            status: MigrationStepStatus.completed,
+            timestamp: DateTime.now(),
+          ),
+        );
       } else {
-        steps.add(MigrationStep(
-          name: 'backup_current_state',
-          description: 'Backup do estado atual do UnifiedSyncManager (DRY RUN)',
-          status: MigrationStepStatus.skipped,
-          timestamp: DateTime.now(),
-        ));
+        steps.add(
+          MigrationStep(
+            name: 'backup_current_state',
+            description:
+                'Backup do estado atual do UnifiedSyncManager (DRY RUN)',
+            status: MigrationStepStatus.skipped,
+            timestamp: DateTime.now(),
+          ),
+        );
       }
-      
+
       // Passo 3: Ativar feature flag (se solicitado)
       if (enableFeatureFlag && !dryRun) {
         final flags = SyncFeatureFlags.instance;
         flags.enableForApp(appName);
-        
-        steps.add(MigrationStep(
-          name: 'enable_feature_flag',
-          description: 'Feature flag ativada para $appName',
-          status: MigrationStepStatus.completed,
-          timestamp: DateTime.now(),
-        ));
+
+        steps.add(
+          MigrationStep(
+            name: 'enable_feature_flag',
+            description: 'Feature flag ativada para $appName',
+            status: MigrationStepStatus.completed,
+            timestamp: DateTime.now(),
+          ),
+        );
       } else {
-        steps.add(MigrationStep(
-          name: 'enable_feature_flag',
-          description: 'Feature flag ${dryRun ? "(DRY RUN)" : "não solicitada"}',
-          status: dryRun ? MigrationStepStatus.skipped : MigrationStepStatus.pending,
-          timestamp: DateTime.now(),
-        ));
+        steps.add(
+          MigrationStep(
+            name: 'enable_feature_flag',
+            description:
+                'Feature flag ${dryRun ? "(DRY RUN)" : "não solicitada"}',
+            status:
+                dryRun
+                    ? MigrationStepStatus.skipped
+                    : MigrationStepStatus.pending,
+            timestamp: DateTime.now(),
+          ),
+        );
       }
-      
+
       // Passo 4: Testar nova arquitetura
       final service = _migrationServices[appName]!;
       final testSyncResult = await service.sync();
-      
+
       if (testSyncResult.isLeft() && !dryRun) {
-        steps.add(MigrationStep(
-          name: 'test_new_architecture',
-          description: 'Teste da nova arquitetura FALHOU',
-          status: MigrationStepStatus.failed,
-          timestamp: DateTime.now(),
-          error: (testSyncResult as Left).value.toString(),
-        ));
-        
-        return Left(MigrationFailure('New architecture test failed for $appName'));
+        steps.add(
+          MigrationStep(
+            name: 'test_new_architecture',
+            description: 'Teste da nova arquitetura FALHOU',
+            status: MigrationStepStatus.failed,
+            timestamp: DateTime.now(),
+            error: (testSyncResult as Left).value.toString(),
+          ),
+        );
+
+        return Left(
+          MigrationFailure('New architecture test failed for $appName'),
+        );
       } else {
-        steps.add(MigrationStep(
-          name: 'test_new_architecture',
-          description: 'Teste da nova arquitetura ${dryRun ? "(DRY RUN)" : "SUCESSO"}',
-          status: dryRun ? MigrationStepStatus.skipped : MigrationStepStatus.completed,
-          timestamp: DateTime.now(),
-        ));
+        steps.add(
+          MigrationStep(
+            name: 'test_new_architecture',
+            description:
+                'Teste da nova arquitetura ${dryRun ? "(DRY RUN)" : "SUCESSO"}',
+            status:
+                dryRun
+                    ? MigrationStepStatus.skipped
+                    : MigrationStepStatus.completed,
+            timestamp: DateTime.now(),
+          ),
+        );
       }
-      
+
       // Passo 5: Validação final
-      steps.add(MigrationStep(
-        name: 'final_validation',
-        description: 'Validação final da migração ${dryRun ? "(DRY RUN)" : ""}',
-        status: dryRun ? MigrationStepStatus.skipped : MigrationStepStatus.completed,
-        timestamp: DateTime.now(),
-      ));
-      
+      steps.add(
+        MigrationStep(
+          name: 'final_validation',
+          description:
+              'Validação final da migração ${dryRun ? "(DRY RUN)" : ""}',
+          status:
+              dryRun
+                  ? MigrationStepStatus.skipped
+                  : MigrationStepStatus.completed,
+          timestamp: DateTime.now(),
+        ),
+      );
+
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
-      
+
       final result = MigrationResult(
         appName: appName,
         success: true,
@@ -255,19 +281,18 @@ class AppMigrationHelper {
         compatibilityReport: compatibilityReport,
         newServiceStatistics: await service.getStatistics(),
       );
-      
+
       developer.log(
         '${dryRun ? "DRY RUN " : ""}Migration completed for $appName in ${duration.inMilliseconds}ms',
         name: 'AppMigrationHelper',
       );
-      
+
       return Right(result);
-      
     } catch (e) {
       return Left(MigrationFailure('Migration failed for $appName: $e'));
     }
   }
-  
+
   /// Rollback de migração (volta para UnifiedSyncManager)
   Future<Either<Failure, void>> rollbackMigration(String appName) async {
     try {
@@ -275,42 +300,44 @@ class AppMigrationHelper {
         'Rolling back migration for $appName',
         name: 'AppMigrationHelper',
       );
-      
+
       // Desativar feature flag
       final flags = SyncFeatureFlags.instance;
       flags.disableForApp(appName);
-      
+
       // Usar LegacySyncBridge para garantir que volta para legacy
       await LegacySyncBridge.instance.rollbackAppToLegacy(appName);
-      
+
       developer.log(
         'Migration rollback completed for $appName',
         name: 'AppMigrationHelper',
       );
-      
+
       return const Right(null);
-      
     } catch (e) {
-      return Left(MigrationFailure('Failed to rollback migration for $appName: $e'));
+      return Left(
+        MigrationFailure('Failed to rollback migration for $appName: $e'),
+      );
     }
   }
-  
+
   /// Gera relatório de status de migração para todos os apps
   Future<Map<String, MigrationStatus>> getAllAppsStatus() async {
     if (!_isInitialized) {
       await initialize();
     }
-    
+
     final result = <String, MigrationStatus>{};
     final flags = SyncFeatureFlags.instance;
-    
+
     for (final appName in _migrationServices.keys) {
       final isFeatureFlagEnabled = flags.isEnabledForApp(appName);
-      final isUsingNewArchitecture = isFeatureFlagEnabled && flags.useNewSyncOrchestrator;
-      
+      final isUsingNewArchitecture =
+          isFeatureFlagEnabled && flags.useNewSyncOrchestrator;
+
       final service = _migrationServices[appName]!;
       final stats = await service.getStatistics();
-      
+
       result[appName] = MigrationStatus(
         appName: appName,
         currentArchitecture: isUsingNewArchitecture ? 'new' : 'legacy',
@@ -321,59 +348,66 @@ class AppMigrationHelper {
         successRate: stats.successRate,
       );
     }
-    
+
     return result;
   }
-  
+
   // Métodos privados para assessments
-  
-  List<String> _assessMigrationRisks(String appName, SyncStatistics stats, bool hasPending) {
+
+  List<String> _assessMigrationRisks(
+    String appName,
+    SyncStatistics stats,
+    bool hasPending,
+  ) {
     final risks = <String>[];
-    
+
     if (hasPending) {
       risks.add('Possui dados pendentes de sincronização');
     }
-    
+
     if (stats.successRate < 0.9) {
-      risks.add('Taxa de sucesso baixa (${(stats.successRate * 100).toStringAsFixed(1)}%)');
+      risks.add(
+        'Taxa de sucesso baixa (${(stats.successRate * 100).toStringAsFixed(1)}%)',
+      );
     }
-    
+
     if (stats.lastSyncTime == null) {
       risks.add('Nunca foi sincronizado');
     } else {
-      final daysSinceLastSync = DateTime.now().difference(stats.lastSyncTime!).inDays;
+      final daysSinceLastSync =
+          DateTime.now().difference(stats.lastSyncTime!).inDays;
       if (daysSinceLastSync > 7) {
         risks.add('Última sincronização há $daysSinceLastSync dias');
       }
     }
-    
+
     if (stats.totalSyncs < 10) {
       risks.add('Poucos históricos de sincronização (${stats.totalSyncs})');
     }
-    
+
     return risks;
   }
-  
+
   DateTime _calculateRecommendedMigrationTime(SyncStatistics stats) {
     // Recomendar migração em horário de baixo uso (baseado no histórico)
     final now = DateTime.now();
-    
+
     if (stats.lastSyncTime == null) {
       // Se nunca sincronizou, pode migrar imediatamente
       return now;
     }
-    
+
     // Recomendar para a próxima madrugada (menos uso)
     var recommended = DateTime(now.year, now.month, now.day + 1, 3, 0);
-    
+
     // Se já passou das 3h hoje, agendar para amanhã
     if (now.hour >= 3) {
       recommended = recommended.add(const Duration(days: 1));
     }
-    
+
     return recommended;
   }
-  
+
   List<String> _generateMigrationSteps(String appName) {
     return [
       'Verificar compatibilidade do app $appName',
@@ -384,18 +418,15 @@ class AppMigrationHelper {
       'Confirmar migração ou fazer rollback',
     ];
   }
-  
+
   /// Cleanup e dispose
   Future<void> dispose() async {
-    developer.log(
-      'Disposing App Migration Helper',
-      name: 'AppMigrationHelper',
-    );
-    
+    developer.log('Disposing App Migration Helper', name: 'AppMigrationHelper');
+
     for (final service in _migrationServices.values) {
       await service.dispose();
     }
-    
+
     _migrationServices.clear();
     _isInitialized = false;
   }
@@ -473,13 +504,7 @@ class MigrationStep {
 }
 
 /// Status de um passo da migração
-enum MigrationStepStatus {
-  pending,
-  running,
-  completed,
-  failed,
-  skipped,
-}
+enum MigrationStepStatus { pending, running, completed, failed, skipped }
 
 /// Status geral de migração de um app
 class MigrationStatus {

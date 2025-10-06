@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../notifiers/data_export_notifier.dart';
 import '../state/data_export_state.dart';
 
@@ -51,9 +51,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       context,
       title: 'Meus Dados',
       icon: Icons.download,
-      children: [
-        _buildDataActionsContainer(context, exportState, user.id),
-      ],
+      children: [_buildDataActionsContainer(context, exportState, user.id)],
     );
   }
 
@@ -66,7 +64,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusCard),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusCard,
+        ),
         side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       color: Theme.of(context).colorScheme.surface,
@@ -80,8 +80,12 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusButton),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: GasometerDesignTokens.borderRadius(
+                      GasometerDesignTokens.radiusButton,
+                    ),
                   ),
                   child: Icon(
                     icon,
@@ -116,7 +120,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+        borderRadius: GasometerDesignTokens.borderRadius(
+          GasometerDesignTokens.radiusDialog,
+        ),
       ),
       child: Column(
         children: [
@@ -154,27 +160,31 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: isFirst
-            ? const BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
-              )
-            : isLast
+        borderRadius:
+            isFirst
                 ? const BorderRadius.only(
-                    bottomLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
-                  )
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                )
+                : isLast
+                ? const BorderRadius.only(
+                  bottomLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                )
                 : BorderRadius.zero,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             border: Border(
-              bottom: isLast
-                  ? BorderSide.none
-                  : BorderSide(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
+              bottom:
+                  isLast
+                      ? BorderSide.none
+                      : BorderSide(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
             ),
           ),
           child: Row(
@@ -182,7 +192,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -209,7 +221,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -217,7 +231,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.4),
                 size: 20,
               ),
             ],
@@ -226,7 +242,6 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       ),
     );
   }
-
 
   // Métodos de ação
 

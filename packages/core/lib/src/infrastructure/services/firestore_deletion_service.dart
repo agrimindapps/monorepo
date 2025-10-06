@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/utils/result.dart';
-import '../../shared/utils/app_error.dart';
 
 /// Serviço para exclusão completa de dados do Firestore e Storage
 /// Gerencia exclusão de documentos, subcoleções e arquivos armazenados
@@ -15,8 +15,8 @@ class FirestoreDeletionService {
   FirestoreDeletionService({
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance;
 
   /// Deleta todos os dados do usuário do Firestore e Storage
   ///
@@ -40,7 +40,9 @@ class FirestoreDeletionService {
   }) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔥 FirestoreDeletionService: Starting Firestore deletion for user $userId');
+        debugPrint(
+          '🔥 FirestoreDeletionService: Starting Firestore deletion for user $userId',
+        );
       }
 
       final result = FirestoreDeletionResult();
@@ -60,7 +62,9 @@ class FirestoreDeletionService {
 
       if (kDebugMode) {
         debugPrint('✅ FirestoreDeletionService: Deletion completed');
-        debugPrint('   User document: ${result.userDocumentDeleted ? "✅" : "❌"}');
+        debugPrint(
+          '   User document: ${result.userDocumentDeleted ? "✅" : "❌"}',
+        );
         debugPrint('   Subcollections: ${result.subcollectionsDeleted.length}');
         debugPrint('   Storage files: ${result.storageFilesDeleted}');
         debugPrint('   Errors: ${result.errors.length}');
@@ -113,14 +117,17 @@ class FirestoreDeletionService {
     for (final subcollection in subcollections) {
       try {
         if (kDebugMode) {
-          debugPrint('🗑️ Deleting subcollection: users/$userId/$subcollection');
+          debugPrint(
+            '🗑️ Deleting subcollection: users/$userId/$subcollection',
+          );
         }
 
-        final snapshot = await _firestore
-            .collection('users')
-            .doc(userId)
-            .collection(subcollection)
-            .get();
+        final snapshot =
+            await _firestore
+                .collection('users')
+                .doc(userId)
+                .collection(subcollection)
+                .get();
 
         if (snapshot.docs.isEmpty) {
           if (kDebugMode) {
@@ -135,7 +142,9 @@ class FirestoreDeletionService {
         result.subcollectionsDeleted[subcollection] = snapshot.docs.length;
 
         if (kDebugMode) {
-          debugPrint('✅ Deleted ${snapshot.docs.length} documents from $subcollection');
+          debugPrint(
+            '✅ Deleted ${snapshot.docs.length} documents from $subcollection',
+          );
         }
       } catch (e) {
         result.errors.add('Failed to delete subcollection $subcollection: $e');
@@ -296,12 +305,13 @@ class FirestoreDeletionService {
       // Count documents in each subcollection
       for (final subcollection in subcollections) {
         try {
-          final snapshot = await _firestore
-              .collection('users')
-              .doc(userId)
-              .collection(subcollection)
-              .count()
-              .get();
+          final snapshot =
+              await _firestore
+                  .collection('users')
+                  .doc(userId)
+                  .collection(subcollection)
+                  .count()
+                  .get();
 
           final count = snapshot.count ?? 0;
           if (count > 0) {

@@ -4,10 +4,9 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:core/core.dart' show Hive;
 
-import '../../../../core/utils/receita_agro_data_inspector_initializer.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/utils/receita_agro_data_inspector_initializer.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 

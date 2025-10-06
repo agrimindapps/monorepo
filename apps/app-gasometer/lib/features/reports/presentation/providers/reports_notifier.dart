@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/usecases/compare_reports.dart';
 import '../../domain/usecases/export_report.dart';

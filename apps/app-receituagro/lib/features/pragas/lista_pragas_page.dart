@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
-import 'domain/entities/praga_entity.dart';
-import 'presentation/pages/detalhe_praga_page.dart';
-import 'domain/usecases/get_pragas_usecase.dart';
 import 'data/praga_view_mode.dart';
+import 'domain/entities/praga_entity.dart';
+import 'domain/usecases/get_pragas_usecase.dart';
+import 'presentation/pages/detalhe_praga_page.dart';
 import 'presentation/providers/pragas_notifier.dart';
 import 'widgets/praga_card_widget.dart';
 import 'widgets/praga_search_field_widget.dart';

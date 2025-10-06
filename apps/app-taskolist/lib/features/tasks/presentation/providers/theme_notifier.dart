@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/theme/theme_mode_enum.dart';
 import '../../../../core/services/preferences_local_datasource.dart';
 import '../../../../core/services/preferences_local_datasource_impl.dart';
+import '../../../../core/theme/theme_mode_enum.dart';
 
 part 'theme_notifier.g.dart';
 
@@ -25,15 +25,9 @@ class ThemeState {
   final AppThemeMode themeMode;
   final bool isLoading;
 
-  const ThemeState({
-    required this.themeMode,
-    this.isLoading = false,
-  });
+  const ThemeState({required this.themeMode, this.isLoading = false});
 
-  ThemeState copyWith({
-    AppThemeMode? themeMode,
-    bool? isLoading,
-  }) {
+  ThemeState copyWith({AppThemeMode? themeMode, bool? isLoading}) {
     return ThemeState(
       themeMode: themeMode ?? this.themeMode,
       isLoading: isLoading ?? this.isLoading,
@@ -94,7 +88,8 @@ class ThemeNotifier extends _$ThemeNotifier {
         newTheme = AppThemeMode.light;
         break;
       case AppThemeMode.system:
-        newTheme = AppThemeMode.light; // Default para claro quando vem do sistema
+        newTheme =
+            AppThemeMode.light; // Default para claro quando vem do sistema
         break;
     }
 
@@ -108,7 +103,8 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   /// Verificar se está usando tema do sistema
   bool get isSystemMode {
-    return (state.value?.themeMode ?? AppThemeMode.system) == AppThemeMode.system;
+    return (state.value?.themeMode ?? AppThemeMode.system) ==
+        AppThemeMode.system;
   }
 
   /// Obter tema atual ou fallback

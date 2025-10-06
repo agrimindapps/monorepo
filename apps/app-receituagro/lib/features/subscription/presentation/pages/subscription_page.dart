@@ -140,24 +140,24 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   /// View para usuários com subscription ativa
   Widget _buildActiveSubscriptionView() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8.0),
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(8.0),
       child: Column(
         children: [
           // Status da subscription ativa
-          const SubscriptionStatusWidget(),
+          SubscriptionStatusWidget(),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Lista de recursos/benefícios
-          const SubscriptionBenefitsWidget(
+          SubscriptionBenefitsWidget(
             showModernStyle: false, // Estilo card para subscription ativa
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Ações de gerenciamento
-          const PaymentActionsWidget(
+          PaymentActionsWidget(
             showSubscriptionManagement: true,
           ),
         ],
@@ -167,15 +167,15 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   /// View para seleção de planos (usuário sem subscription)
   Widget _buildPlansView() {
-    return Expanded(
+    return const Expanded(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.0),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // Título principal
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 'Tenha acesso ilimitado\na todos os recursos',
@@ -189,33 +189,33 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Seleção de planos
-            const SubscriptionPlansWidget(),
+            SubscriptionPlansWidget(),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Lista de benefícios/recursos
-            const SubscriptionBenefitsWidget(
+            SubscriptionBenefitsWidget(
               showModernStyle: true, // Estilo moderno para marketing
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
 
             // Botão principal de compra
-            const PaymentActionsWidget(
+            PaymentActionsWidget(
               showPurchaseButton: true,
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Links de rodapé (Termos, Privacidade, Restaurar)
-            const PaymentActionsWidget(
+            PaymentActionsWidget(
               showFooterLinks: true,
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
           ],
         ),
       ),

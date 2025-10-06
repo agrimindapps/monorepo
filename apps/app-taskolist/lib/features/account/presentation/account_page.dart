@@ -1,6 +1,5 @@
-import 'package:core/core.dart' show UserEntity, AuthProvider;
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/providers/auth_providers.dart';
@@ -29,7 +28,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
-    final subscriptionState = ref.watch(Subscription.subscriptionStatusProvider);
+    final subscriptionState = ref.watch(
+      Subscription.subscriptionStatusProvider,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -39,21 +40,23 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         foregroundColor: Colors.black87,
       ),
       body: authState.when(
-        data: (user) => user != null 
-          ? _buildAccountContent(context, user, subscriptionState)
-          : _buildNotLoggedInContent(),
+        data:
+            (user) =>
+                user != null
+                    ? _buildAccountContent(context, user, subscriptionState)
+                    : _buildNotLoggedInContent(),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Erro ao carregar conta: $error'),
-        ),
+        error:
+            (error, stack) =>
+                Center(child: Text('Erro ao carregar conta: $error')),
       ),
     );
   }
 
   Widget _buildAccountContent(
-    BuildContext context, 
-    UserEntity user, 
-    AsyncValue<local_sub.SubscriptionStatus> subscriptionState
+    BuildContext context,
+    UserEntity user,
+    AsyncValue<local_sub.SubscriptionStatus> subscriptionState,
   ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -63,23 +66,23 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           // Header do usuário
           _buildUserHeader(user),
           const SizedBox(height: 24),
-          
+
           // Status da assinatura
           _buildSubscriptionSection(subscriptionState),
           const SizedBox(height: 24),
-          
+
           // Configurações da conta
           _buildAccountSection(user),
           const SizedBox(height: 24),
-          
+
           // Configurações do app
           _buildAppSection(),
           const SizedBox(height: 24),
-          
+
           // Seção de dados
           _buildDataSection(),
           const SizedBox(height: 24),
-          
+
           // Ações da conta
           _buildAccountActions(user),
         ],
@@ -97,19 +100,19 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.primaryColor.withAlpha(26),
-              backgroundImage: user.photoUrl != null 
-                ? NetworkImage(user.photoUrl!)
-                : null,
-              child: user.photoUrl == null
-                ? const Icon(
-                    Icons.person,
-                    size: 40,
-                    color: AppColors.primaryColor,
-                  )
-                : null,
+              backgroundImage:
+                  user.photoUrl != null ? NetworkImage(user.photoUrl!) : null,
+              child:
+                  user.photoUrl == null
+                      ? const Icon(
+                        Icons.person,
+                        size: 40,
+                        color: AppColors.primaryColor,
+                      )
+                      : null,
             ),
             const SizedBox(width: 16),
-            
+
             // Informações do usuário
             Expanded(
               child: Column(
@@ -125,13 +128,10 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                   const SizedBox(height: 4),
                   Text(
                     user.email.isNotEmpty ? user.email : 'Nenhum email',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Status badges
                   Wrap(
                     spacing: 8,
@@ -148,7 +148,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                           AppColors.warning,
                           Icons.warning,
                         ),
-                      
+
                       if (user.provider == AuthProvider.anonymous)
                         _buildStatusChip(
                           'Conta temporária',
@@ -160,7 +160,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 ],
               ),
             ),
-            
+
             // Botão editar perfil
             IconButton(
               onPressed: () => _showEditProfileDialog(user),
@@ -189,7 +189,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildSubscriptionSection(AsyncValue<local_sub.SubscriptionStatus> subscriptionState) {
+  Widget _buildSubscriptionSection(
+    AsyncValue<local_sub.SubscriptionStatus> subscriptionState,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -202,10 +204,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 const SizedBox(width: 8),
                 const Text(
                   'Plano atual',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 TextButton(
@@ -221,41 +220,45 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             subscriptionState.when(
-              data: (status) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    status.isActive ? 'Premium' : 'Gratuito',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: status.isActive ? AppColors.success : AppColors.textSecondary,
-                    ),
+              data:
+                  (status) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        status.isActive ? 'Premium' : 'Gratuito',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              status.isActive
+                                  ? AppColors.success
+                                  : AppColors.textSecondary,
+                        ),
+                      ),
+                      if (status.isActive && status.expirationDate != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Válido até ${_formatDate(status.expirationDate!)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                      if (!status.isActive) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'Limite: 50 tarefas, 10 subtarefas por tarefa',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  if (status.isActive && status.expirationDate != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Válido até ${_formatDate(status.expirationDate!)}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                  if (!status.isActive) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'Limite: 50 tarefas, 10 subtarefas por tarefa',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
               loading: () => const Text('Carregando...'),
               error: (error, stack) => const Text('Erro ao carregar plano'),
             ),
@@ -276,8 +279,9 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showEditProfileDialog(user),
           ),
-          
-          if (!user.isEmailVerified && user.provider != AuthProvider.anonymous) ...[
+
+          if (!user.isEmailVerified &&
+              user.provider != AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
               leading: const Icon(Icons.email, color: AppColors.warning),
@@ -287,7 +291,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               onTap: () => _sendEmailVerification(),
             ),
           ],
-          
+
           if (user.provider == AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
@@ -320,7 +324,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               );
             },
           ),
-          
+
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.palette),
@@ -329,7 +333,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showThemeDialog(),
           ),
-          
+
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.language),
@@ -354,7 +358,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showBackupDialog(),
           ),
-          
+
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.download),
@@ -378,7 +382,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showHelpDialog(),
           ),
-          
+
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.privacy_tip, color: AppColors.info),
@@ -386,14 +390,14 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _showPrivacyDialog(),
           ),
-          
+
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.warning),
             title: const Text('Sair'),
             onTap: () => _showLogoutDialog(),
           ),
-          
+
           if (user.provider != AuthProvider.anonymous) ...[
             const Divider(height: 1),
             ListTile(
@@ -412,18 +416,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.account_circle,
-            size: 80,
-            color: Colors.grey,
-          ),
+          Icon(Icons.account_circle, size: 80, color: Colors.grey),
           SizedBox(height: 16),
           Text(
             'Você não está logado',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 8),
           Text(
@@ -438,78 +435,77 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   // Dialog methods
   void _showEditProfileDialog(UserEntity user) {
     _displayNameController.text = user.displayName;
-    
+
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar perfil'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _displayNameController,
-              decoration: const InputDecoration(
-                labelText: 'Nome de exibição',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Editar perfil'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _displayNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nome de exibição',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Outras funcionalidades de edição serão implementadas em breve.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Outras funcionalidades de edição serão implementadas em breve.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _updateProfile();
+                },
+                child: const Text('Salvar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _updateProfile();
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showLogoutDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair'),
-        content: const Text('Tem certeza que deseja sair da sua conta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Sair'),
+            content: const Text('Tem certeza que deseja sair da sua conta?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await ref.read(authNotifierProvider.notifier).signOut();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Sair'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await ref.read(authNotifierProvider.notifier).signOut();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showDeleteAccountDialog() {
     final authState = ref.read(authNotifierProvider);
-    
+
     authState.when(
       data: (user) async {
         if (user == null) return;
@@ -550,7 +546,10 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             ),
             SizedBox(width: 16),
             Text('Atualizando perfil...'),
@@ -562,11 +561,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
 
     final result = await authService.updateProfile(displayName: newName);
-    
+
     // Remover loading snackbar
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      
+
       result.fold(
         (failure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -601,24 +600,25 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   void _showUpgradeAccountDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Criar conta permanente'),
-        content: const Text(
-          'Para manter seus dados seguros, crie uma conta com email e senha.\n\nEsta funcionalidade será implementada em breve.'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendi'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Criar conta permanente'),
+            content: const Text(
+              'Para manter seus dados seguros, crie uma conta com email e senha.\n\nEsta funcionalidade será implementada em breve.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendi'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _deleteAccount() async {
     final authService = ref.read(taskManagerAuthServiceProvider);
-    
+
     // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -627,7 +627,10 @@ class _AccountPageState extends ConsumerState<AccountPage> {
             SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             ),
             SizedBox(width: 16),
             Text('Excluindo conta...'),
@@ -639,11 +642,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
 
     final result = await authService.deleteAccount();
-    
+
     // Remover loading snackbar
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      
+
       result.fold(
         (failure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -663,7 +666,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               duration: Duration(seconds: 3),
             ),
           );
-        
+
           // Voltar para a tela de login (o auth guard deve redirecionar automaticamente)
           Navigator.of(context).popUntil((route) => route.isFirst);
         },
@@ -674,104 +677,118 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   void _showThemeDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Tema'),
-        content: const Text('Configurações de tema serão implementadas em breve'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Tema'),
+            content: const Text(
+              'Configurações de tema serão implementadas em breve',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showLanguageDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Idioma'),
-        content: const Text('Suporte a múltiplos idiomas será implementado em breve'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Idioma'),
+            content: const Text(
+              'Suporte a múltiplos idiomas será implementado em breve',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showBackupDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Backup'),
-        content: const Text('Sincronização com a nuvem será implementada em breve'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Backup'),
+            content: const Text(
+              'Sincronização com a nuvem será implementada em breve',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showExportDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exportar dados'),
-        content: const Text('Exportação de dados será implementada em breve'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Exportar dados'),
+            content: const Text(
+              'Exportação de dados será implementada em breve',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showHelpDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajuda'),
-        content: const Text(
-          'Task Manager - Gerenciador de Tarefas\n\n'
-          'Para suporte, entre em contato:\n'
-          '• Email: suporte@taskmanager.com\n'
-          '• Website: www.taskmanager.com'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Ajuda'),
+            content: const Text(
+              'Task Manager - Gerenciador de Tarefas\n\n'
+              'Para suporte, entre em contato:\n'
+              '• Email: suporte@taskmanager.com\n'
+              '• Website: www.taskmanager.com',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showPrivacyDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Privacidade'),
-        content: const Text(
-          'Seus dados são tratados com segurança e privacidade.\n\n'
-          'Para mais informações, consulte nossa política de privacidade.'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Privacidade'),
+            content: const Text(
+              'Seus dados são tratados com segurança e privacidade.\n\n'
+              'Para mais informações, consulte nossa política de privacidade.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 

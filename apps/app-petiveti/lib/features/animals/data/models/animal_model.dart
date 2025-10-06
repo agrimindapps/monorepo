@@ -1,5 +1,4 @@
-import 'package:hive/hive.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:core/core.dart';
 
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
@@ -118,22 +117,26 @@ class AnimalModel extends HiveObject {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       name: json['name'] as String,
-      species: json['species'] is String
-          ? AnimalSpeciesExtension.fromString(json['species'] as String)
-          : AnimalSpecies.values[json['species'] as int],
+      species:
+          json['species'] is String
+              ? AnimalSpeciesExtension.fromString(json['species'] as String)
+              : AnimalSpecies.values[json['species'] as int],
       breed: json['breed'] as String?,
-      gender: json['gender'] is String
-          ? AnimalGenderExtension.fromString(json['gender'] as String)
-          : AnimalGender.values[json['gender'] as int],
-      birthDate: json['birth_date'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(json['birth_date'] as int)
-          : null,
+      gender:
+          json['gender'] is String
+              ? AnimalGenderExtension.fromString(json['gender'] as String)
+              : AnimalGender.values[json['gender'] as int],
+      birthDate:
+          json['birth_date'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(json['birth_date'] as int)
+              : null,
       weight: (json['weight'] as num?)?.toDouble(),
-      size: json['size'] != null
-          ? (json['size'] is String
-              ? AnimalSizeExtension.fromString(json['size'] as String)
-              : AnimalSize.values[json['size'] as int])
-          : null,
+      size:
+          json['size'] != null
+              ? (json['size'] is String
+                  ? AnimalSizeExtension.fromString(json['size'] as String)
+                  : AnimalSize.values[json['size'] as int])
+              : null,
       color: json['color'] as String?,
       microchipNumber: json['microchip_number'] as String?,
       notes: json['notes'] as String?,
@@ -232,17 +235,13 @@ class AnimalModel extends HiveObject {
     return AnimalModel.fromJson(map);
   }
 
-  // Instance method para Map conversion  
+  // Instance method para Map conversion
   Map<String, dynamic> toMap() {
     return toJson();
   }
 
   // Método copyWith atualizado para suportar isDeleted
-  AnimalModel copyWithDeleted({
-    bool? isDeleted,
-  }) {
-    return copyWith(
-      isActive: isDeleted != null ? !isDeleted : null,
-    );
+  AnimalModel copyWithDeleted({bool? isDeleted}) {
+    return copyWith(isActive: isDeleted != null ? !isDeleted : null);
   }
 }

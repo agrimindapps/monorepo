@@ -122,8 +122,9 @@ class WeatherMeasurementEntity extends Equatable {
 
   /// Calculate heat index based on temperature and humidity
   double get heatIndex {
-    if (temperature < 27)
+    if (temperature < 27) {
       return temperature; // Heat index only relevant for high temps
+    }
 
     final T = temperature;
     final relativeHumidity = humidity;

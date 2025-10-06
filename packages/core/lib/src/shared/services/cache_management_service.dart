@@ -156,8 +156,8 @@ class CacheManagementService {
     // Image cache - large capacity, disk persistent
     await createCache(
       'images',
-      CacheConfig(
-        ttl: const Duration(days: 7),
+      const CacheConfig(
+        ttl: Duration(days: 7),
         maxSize: 500,
         strategy: CacheStrategy.lru,
         persistToDisk: true,
@@ -168,8 +168,8 @@ class CacheManagementService {
     // API responses cache - medium capacity, memory only
     await createCache(
       'api_responses',
-      CacheConfig(
-        ttl: const Duration(minutes: 30),
+      const CacheConfig(
+        ttl: Duration(minutes: 30),
         maxSize: 200,
         strategy: CacheStrategy.ttl,
         persistToDisk: false,
@@ -179,8 +179,8 @@ class CacheManagementService {
     // Search results cache - small capacity, session based
     await createCache(
       'search_results',
-      CacheConfig(
-        ttl: const Duration(minutes: 15),
+      const CacheConfig(
+        ttl: Duration(minutes: 15),
         maxSize: 50,
         strategy: CacheStrategy.session,
         persistToDisk: false,
@@ -190,7 +190,7 @@ class CacheManagementService {
     // Static data cache - permanent, disk persistent
     await createCache(
       'static_data',
-      CacheConfig(
+      const CacheConfig(
         strategy: CacheStrategy.permanent,
         maxSize: 100,
         persistToDisk: true,
@@ -201,7 +201,7 @@ class CacheManagementService {
     // User preferences cache - permanent, disk persistent
     await createCache(
       'user_prefs',
-      CacheConfig(
+      const CacheConfig(
         strategy: CacheStrategy.permanent,
         maxSize: 20,
         persistToDisk: true,
@@ -212,8 +212,8 @@ class CacheManagementService {
     // Diagnostics cache - medium TTL, memory only
     await createCache(
       'diagnostics',
-      CacheConfig(
-        ttl: const Duration(hours: 2),
+      const CacheConfig(
+        ttl: Duration(hours: 2),
         maxSize: 100,
         strategy: CacheStrategy.ttl,
         persistToDisk: false,

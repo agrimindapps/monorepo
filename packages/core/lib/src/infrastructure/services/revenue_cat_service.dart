@@ -204,7 +204,7 @@ class RevenueCatService implements ISubscriptionRepository {
       }
 
       if (targetPackage == null) {
-        return Left(SubscriptionPaymentFailure.productUnavailable());
+        return const Left(SubscriptionPaymentFailure.productUnavailable());
       }
 
       final purchaseResult = await Purchases.purchasePackage(targetPackage);

@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
-import 'package:collection/collection.dart';
 
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/entities/performance_entity.dart';
 import '../../domain/repositories/i_enhanced_notification_repository.dart';
 import '../../domain/repositories/i_notification_repository.dart';
+import '../helpers/notification_analytics_helper.dart';
+import '../helpers/notification_template_engine.dart';
 import 'local_notification_service.dart';
 import 'web_notification_service.dart';
-import '../helpers/notification_template_engine.dart';
-import '../helpers/notification_analytics_helper.dart';
 
 /// Enhanced notification service implementation with plugin support
 class EnhancedNotificationService implements IEnhancedNotificationRepository {
@@ -39,6 +39,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   final List<PerformanceTrackingEntry> _performanceData = [];
 
   /// Initializes the enhanced notification service
+  @override
   Future<bool> initialize({
     List<NotificationChannelEntity>? defaultChannels,
     EnhancedNotificationSettings? settings,

@@ -1,12 +1,7 @@
-
 import 'package:core/core.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// TODO: Replace with Riverpod providers
-// import '../controllers/login_controller.dart';
-// import '../../features/auth/presentation/state/auth_state.dart';
-import '../notifiers/notifiers.dart';
 import '../widgets/auth_tabs_widget.dart';
 import '../widgets/login_background_widget.dart';
 import '../widgets/login_form_widget.dart';
@@ -14,11 +9,7 @@ import '../widgets/login_form_widget.dart';
 /// Página de login seguindo padrões SOLID
 /// Responsabilidade única: Orquestrar widgets de autenticação
 class LoginPage extends ConsumerStatefulWidget {
-
-  const LoginPage({
-    super.key,
-    this.showBackButton,
-  });
+  const LoginPage({super.key, this.showBackButton});
   final bool? showBackButton;
 
   @override
@@ -78,9 +69,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: LoginBackgroundWidget(
-          child: _buildResponsiveLayout(context),
-        ),
+        child: LoginBackgroundWidget(child: _buildResponsiveLayout(context)),
       ),
     );
   }
@@ -98,12 +87,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: isMobile
-                ? size.width * 0.9
-                : (isTablet ? 500 : 1000),
-            maxHeight: isMobile
-                ? size.height * 0.9
-                : (isTablet ? 700 : 650),
+            maxWidth: isMobile ? size.width * 0.9 : (isTablet ? 500 : 1000),
+            maxHeight: isMobile ? size.height * 0.9 : (isTablet ? 700 : 650),
           ),
           child: Card(
             elevation: 10,
@@ -112,9 +97,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            child: isDesktop
-                ? _buildDesktopLayout()
-                : _buildMobileLayout(),
+            child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
           ),
         ),
       ),
@@ -125,10 +108,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     return Row(
       children: [
         // Lado esquerdo com branding
-        Expanded(
-          flex: 5,
-          child: _buildBrandingSide(),
-        ),
+        Expanded(flex: 5, child: _buildBrandingSide()),
         // Lado direito com formulário
         Expanded(
           flex: 4,
@@ -174,15 +154,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: isDark
-                ? [
-                    const Color(0xFF0F3460),
-                    const Color(0xFF16213E),
-                  ]
-                : [
-                    Colors.blue.shade600,
-                    Colors.blue.shade800,
-                  ],
+            colors:
+                isDark
+                    ? [const Color(0xFF0F3460), const Color(0xFF16213E)]
+                    : [Colors.blue.shade600, Colors.blue.shade800],
           ),
         ),
         child: Padding(
@@ -237,11 +212,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.security,
-                    color: Colors.white70,
-                    size: 16,
-                  ),
+                  const Icon(Icons.security, color: Colors.white70, size: 16),
                   const SizedBox(width: 8),
                   Text(
                     'Área restrita - Acesso seguro',
@@ -280,11 +251,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 5),
-        Container(
-          width: 50,
-          height: 4,
-          color: Theme.of(context).primaryColor,
-        ),
+        Container(width: 50, height: 4, color: Theme.of(context).primaryColor),
       ],
     );
   }
@@ -322,9 +289,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       children: [
         const AuthTabsWidget(),
         const SizedBox(height: 24),
-        LoginFormWidget(
-          onLoginSuccess: _handleAuthSuccess,
-        ),
+        LoginFormWidget(onLoginSuccess: _handleAuthSuccess),
       ],
     );
   }

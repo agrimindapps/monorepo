@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/contracts/i_app_data_cleaner.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/utils/result.dart';
-import '../../shared/utils/app_error.dart';
 import 'account_deletion_rate_limiter.dart';
 import 'firestore_deletion_service.dart';
 import 'revenuecat_cancellation_service.dart';
@@ -29,12 +29,12 @@ class EnhancedAccountDeletionService {
     FirestoreDeletionService? firestoreDeletion,
     RevenueCatCancellationService? revenueCatCancellation,
     AccountDeletionRateLimiter? rateLimiter,
-  })  : _authRepository = authRepository,
-        _appDataCleaner = appDataCleaner,
-        _firestoreDeletion = firestoreDeletion ?? FirestoreDeletionService(),
-        _revenueCatCancellation =
-            revenueCatCancellation ?? RevenueCatCancellationService(),
-        _rateLimiter = rateLimiter ?? AccountDeletionRateLimiter();
+  }) : _authRepository = authRepository,
+       _appDataCleaner = appDataCleaner,
+       _firestoreDeletion = firestoreDeletion ?? FirestoreDeletionService(),
+       _revenueCatCancellation =
+           revenueCatCancellation ?? RevenueCatCancellationService(),
+       _rateLimiter = rateLimiter ?? AccountDeletionRateLimiter();
 
   /// Executa exclusão completa da conta com todas as verificações de segurança
   ///
@@ -136,13 +136,10 @@ class EnhancedAccountDeletionService {
           password: password,
         );
 
-        final reauthSuccess = reauthResult.fold(
-          (failure) {
-            result.reauthenticationError = failure.message;
-            return false;
-          },
-          (_) => true,
-        );
+        final reauthSuccess = reauthResult.fold((failure) {
+          result.reauthenticationError = failure.message;
+          return false;
+        }, (_) => true);
 
         result.reauthenticationSuccess = reauthSuccess;
 
@@ -192,7 +189,9 @@ class EnhancedAccountDeletionService {
           (cancelResult) {
             result.subscriptionCancellationResult = cancelResult;
             if (kDebugMode) {
-              debugPrint('✅ Subscription check completed: ${cancelResult.message}');
+              debugPrint(
+                '✅ Subscription check completed: ${cancelResult.message}',
+              );
             }
           },
         );
@@ -211,8 +210,9 @@ class EnhancedAccountDeletionService {
           debugPrint('☁️ Deleting Firestore/Storage data');
         }
 
-        final firestoreResult =
-            await _firestoreDeletion.deleteUserData(userId: currentUserId);
+        final firestoreResult = await _firestoreDeletion.deleteUserData(
+          userId: currentUserId,
+        );
 
         firestoreResult.fold(
           (error) {
@@ -224,7 +224,9 @@ class EnhancedAccountDeletionService {
           (deleteResult) {
             result.firestoreDeletionResult = deleteResult;
             if (kDebugMode) {
-              debugPrint('✅ Firestore data deleted: ${deleteResult.totalDocumentsDeleted} docs');
+              debugPrint(
+                '✅ Firestore data deleted: ${deleteResult.totalDocumentsDeleted} docs',
+              );
             }
           },
         );
@@ -245,13 +247,13 @@ class EnhancedAccountDeletionService {
           }
 
           final statsBeforeCleaning =
-              await _appDataCleaner!.getDataStatsBeforeCleaning();
+              await _appDataCleaner.getDataStatsBeforeCleaning();
           result.dataStatsBeforeCleaning = statsBeforeCleaning;
 
-          final cleanupResult = await _appDataCleaner!.clearAllAppData();
+          final cleanupResult = await _appDataCleaner.clearAllAppData();
           result.localDataCleanupResult = cleanupResult;
 
-          final verificationResult = await _appDataCleaner!.verifyDataCleanup();
+          final verificationResult = await _appDataCleaner.verifyDataCleanup();
           result.dataCleanupVerified = verificationResult;
 
           if (kDebugMode) {
@@ -288,7 +290,9 @@ class EnhancedAccountDeletionService {
 
       if (!deletionSuccess) {
         if (kDebugMode) {
-          debugPrint('❌ Firebase Auth deletion failed: ${result.firebaseDeleteError}');
+          debugPrint(
+            '❌ Firebase Auth deletion failed: ${result.firebaseDeleteError}',
+          );
         }
 
         return Result.error(
@@ -311,9 +315,15 @@ class EnhancedAccountDeletionService {
         debugPrint('✅ Account deletion completed successfully');
         debugPrint('   Duration: ${result.totalDurationSeconds}s');
         debugPrint('   Firebase Auth: ✅');
-        debugPrint('   Firestore: ${result.firestoreDeletionResult?.isSuccess ?? false ? "✅" : "⚠️"}');
-        debugPrint('   Local Data: ${result.localDataCleanupResult?["success"] == true ? "✅" : "⚠️"}');
-        debugPrint('   Subscriptions: ${result.subscriptionCancellationResult?.isSuccess ?? true ? "✅" : "⚠️"}');
+        debugPrint(
+          '   Firestore: ${result.firestoreDeletionResult?.isSuccess ?? false ? "✅" : "⚠️"}',
+        );
+        debugPrint(
+          '   Local Data: ${result.localDataCleanupResult?["success"] == true ? "✅" : "⚠️"}',
+        );
+        debugPrint(
+          '   Subscriptions: ${result.subscriptionCancellationResult?.isSuccess ?? true ? "✅" : "⚠️"}',
+        );
       }
 
       return Result.success(result);
@@ -345,9 +355,9 @@ class EnhancedAccountDeletionService {
       // Local data stats
       if (_appDataCleaner != null) {
         try {
-          final hasData = await _appDataCleaner!.hasDataToClear();
-          final stats = await _appDataCleaner!.getDataStatsBeforeCleaning();
-          final categories = _appDataCleaner!.getAvailableCategories();
+          final hasData = await _appDataCleaner.hasDataToClear();
+          final stats = await _appDataCleaner.getDataStatsBeforeCleaning();
+          final categories = _appDataCleaner.getAvailableCategories();
 
           preview['localData'] = {
             'hasData': hasData,
@@ -440,9 +450,7 @@ class EnhancedDeletionResult {
       (localDataCleanupResult?['success'] != false);
 
   /// Indica se houve sucesso parcial (Firebase deletado mas alguns cleanups falharam)
-  bool get isPartialSuccess =>
-      firebaseDeleteSuccess &&
-      (!isSuccess);
+  bool get isPartialSuccess => firebaseDeleteSuccess && (!isSuccess);
 
   /// Retorna mensagem amigável do resultado
   String get userMessage {

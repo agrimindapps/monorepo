@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'package:hive/hive.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show HiveInterface, Box, singleton;
 import 'package:uuid/uuid.dart';
 
 import '../data/models/sync_queue_item.dart';

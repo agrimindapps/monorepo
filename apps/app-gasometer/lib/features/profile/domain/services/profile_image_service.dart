@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:core/core.dart' show injectable;
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
-import 'package:core/core.dart' show injectable;
 
 import '../../../../core/error/failures.dart';
-import 'package:gasometer/core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/gasometer_analytics_service.dart';
 
 /// Alias para Result até encontrarmos o import correto
 class Result<T> {

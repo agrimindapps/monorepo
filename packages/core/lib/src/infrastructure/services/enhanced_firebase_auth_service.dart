@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/user_entity.dart' as core_entities;
-import '../../domain/repositories/i_auth_repository.dart';
 import '../../shared/utils/failure.dart';
 import 'firebase_auth_service.dart';
 import 'security_service.dart';
@@ -16,10 +15,9 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
 
   EnhancedFirebaseAuthService({
     SecurityService? securityService,
-    FirebaseAuth? firebaseAuth,
-  })  : _securityService = securityService ?? SecurityService.instance,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-        super(firebaseAuth: firebaseAuth);
+    super.firebaseAuth,
+  }) : _securityService = securityService ?? SecurityService.instance,
+       _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   @override
   Future<Either<Failure, core_entities.UserEntity>> signInWithEmailAndPassword({
@@ -28,9 +26,15 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   }) async {
     try {
       // Pre-authentication security checks
-      final securityResult = await _performSecurityChecks(email, password, isSignIn: true);
+      final securityResult = await _performSecurityChecks(
+        email,
+        password,
+        isSignIn: true,
+      );
       if (securityResult.isLeft()) {
-        return Left(securityResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          securityResult.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
       // Proceed with authentication using parent implementation
@@ -45,7 +49,9 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
       return authResult;
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        debugPrint('L EnhancedFirebaseAuthService: signInWithEmailAndPassword error: $e');
+        debugPrint(
+          'L EnhancedFirebaseAuthService: signInWithEmailAndPassword error: $e',
+        );
         debugPrint('Stack trace: $stackTrace');
       }
 
@@ -65,17 +71,27 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   }) async {
     try {
       // Pre-registration security checks
-      final securityResult = await _performSecurityChecks(email, password, isSignIn: false);
+      final securityResult = await _performSecurityChecks(
+        email,
+        password,
+        isSignIn: false,
+      );
       if (securityResult.isLeft()) {
-        return Left(securityResult.fold((failure) => failure, (_) => throw Exception()));
+        return Left(
+          securityResult.fold((failure) => failure, (_) => throw Exception()),
+        );
       }
 
       // Enhanced password validation for registration
-      final passwordValidation = _securityService.validatePasswordStrength(password);
+      final passwordValidation = _securityService.validatePasswordStrength(
+        password,
+      );
       if (!passwordValidation.isValid) {
-        return Left(AuthFailure(
-          'Password security requirements not met: ${passwordValidation.issues.join(', ')}',
-        ));
+        return Left(
+          AuthFailure(
+            'Password security requirements not met: ${passwordValidation.issues.join(', ')}',
+          ),
+        );
       }
 
       // Input sanitization for display name
@@ -90,7 +106,9 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
       );
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        debugPrint('L EnhancedFirebaseAuthService: signUpWithEmailAndPassword error: $e');
+        debugPrint(
+          'L EnhancedFirebaseAuthService: signUpWithEmailAndPassword error: $e',
+        );
         debugPrint('Stack trace: $stackTrace');
       }
 
@@ -105,17 +123,21 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   }) async {
     try {
       // Validate new password strength
-      final passwordValidation = _securityService.validatePasswordStrength(newPassword);
+      final passwordValidation = _securityService.validatePasswordStrength(
+        newPassword,
+      );
       if (!passwordValidation.isValid) {
-        return Left(AuthFailure(
-          'New password security requirements not met: ${passwordValidation.issues.join(', ')}',
-        ));
+        return Left(
+          AuthFailure(
+            'New password security requirements not met: ${passwordValidation.issues.join(', ')}',
+          ),
+        );
       }
 
       // Input safety check
       if (!_securityService.isInputSafe(currentPassword) ||
           !_securityService.isInputSafe(newPassword)) {
-        return Left(const AuthFailure('Invalid input detected'));
+        return const Left(AuthFailure('Invalid input detected'));
       }
 
       // Proceed with password update using parent implementation
@@ -167,7 +189,9 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   // Security-specific methods
 
   /// Get security status report for a user
-  Future<Either<Failure, SecurityStatusReport>> getSecurityStatus(String userIdentifier) async {
+  Future<Either<Failure, SecurityStatusReport>> getSecurityStatus(
+    String userIdentifier,
+  ) async {
     try {
       final report = await _securityService.getSecurityStatus(userIdentifier);
       return Right(report);
@@ -182,7 +206,9 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   /// Check if account is locked for a user
   Future<Either<Failure, bool>> isAccountLocked(String userIdentifier) async {
     try {
-      final isLocked = await _securityService.isAccountLockedOut(userIdentifier);
+      final isLocked = await _securityService.isAccountLockedOut(
+        userIdentifier,
+      );
       return Right(isLocked);
     } catch (e) {
       if (kDebugMode) {
@@ -193,9 +219,13 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   }
 
   /// Get remaining lockout time
-  Future<Either<Failure, Duration?>> getRemainingLockoutTime(String userIdentifier) async {
+  Future<Either<Failure, Duration?>> getRemainingLockoutTime(
+    String userIdentifier,
+  ) async {
     try {
-      final remainingTime = await _securityService.getRemainingLockoutTime(userIdentifier);
+      final remainingTime = await _securityService.getRemainingLockoutTime(
+        userIdentifier,
+      );
       return Right(remainingTime);
     } catch (e) {
       if (kDebugMode) {
@@ -231,26 +261,36 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
       // Account lockout check
       final isLocked = await _securityService.isAccountLockedOut(email);
       if (isLocked) {
-        final remainingTime = await _securityService.getRemainingLockoutTime(email);
+        final remainingTime = await _securityService.getRemainingLockoutTime(
+          email,
+        );
         final minutes = remainingTime?.inMinutes ?? 0;
-        return Left(AuthFailure(
-          'Account temporarily locked due to too many failed attempts. '
-          'Try again in $minutes minutes.',
-        ));
+        return Left(
+          AuthFailure(
+            'Account temporarily locked due to too many failed attempts. '
+            'Try again in $minutes minutes.',
+          ),
+        );
       }
 
       // Rate limiting check
       final endpoint = isSignIn ? 'login' : 'register';
-      final isRateLimited = await _securityService.isRateLimited(endpoint, email);
+      final isRateLimited = await _securityService.isRateLimited(
+        endpoint,
+        email,
+      );
       if (isRateLimited) {
-        return Left(const AuthFailure(
-          'Too many requests. Please wait before trying again.',
-        ));
+        return const Left(
+          AuthFailure(
+            'Too many requests. Please wait before trying again.',
+          ),
+        );
       }
 
       // Input validation
-      if (!_securityService.isInputSafe(email) || !_securityService.isInputSafe(password)) {
-        return Left(const AuthFailure('Invalid input detected'));
+      if (!_securityService.isInputSafe(email) ||
+          !_securityService.isInputSafe(password)) {
+        return const Left(AuthFailure('Invalid input detected'));
       }
 
       return const Right(null);
@@ -286,12 +326,14 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
         return const Right(null);
       }
 
-      return Right(core_entities.UserEntity(
-        id: user.uid,
-        email: user.email ?? '',
-        displayName: user.displayName ?? '',
-        isEmailVerified: user.emailVerified,
-      ));
+      return Right(
+        core_entities.UserEntity(
+          id: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName ?? '',
+          isEmailVerified: user.emailVerified,
+        ),
+      );
     } catch (e) {
       return Left(AuthFailure('Error getting current user: $e'));
     }

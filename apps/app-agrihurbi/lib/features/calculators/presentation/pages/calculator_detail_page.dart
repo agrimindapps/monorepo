@@ -162,8 +162,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       floatingActionButton: Consumer(
         builder: (context, ref, child) {
           final provider = ref.watch(calculatorProvider);
-          if (provider.selectedCalculator == null)
+          if (provider.selectedCalculator == null) {
             return const SizedBox.shrink();
+          }
           return FloatingActionButton.extended(
             onPressed:
                 provider.isCalculating

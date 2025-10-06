@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 
 import '../../../core/errors/failures.dart' as local;
 import '../../../shared/providers/auth_providers.dart';
@@ -36,11 +36,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(authNotifierProvider.notifier).signUp(
-        _emailController.text.trim(),
-        _passwordController.text,
-        _nameController.text.trim(),
-      );
+      await ref
+          .read(authNotifierProvider.notifier)
+          .signUp(
+            _emailController.text.trim(),
+            _passwordController.text,
+            _nameController.text.trim(),
+          );
 
       if (mounted) {
         await Navigator.of(context).pushReplacementNamed('/home');
@@ -48,7 +50,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     } catch (e) {
       if (mounted) {
         String errorMessage = 'Erro ao criar conta';
-        
+
         if (e is local.Failure) {
           errorMessage = e.message;
         } else {
@@ -56,10 +58,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -72,77 +71,80 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   void _showSocialLoginDialog(String provider) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.orange.withAlpha(26),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.construction_rounded,
-                color: Colors.orange,
-                size: 24,
-              ),
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(width: 12),
-            const Text('Em Desenvolvimento'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Registro com $provider',
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'O registro social está em desenvolvimento e estará disponível em uma futura atualização!',
-              style: TextStyle(fontSize: 14, height: 1.4),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withAlpha(13),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withAlpha(51)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    color: Colors.blue[600],
-                    size: 20,
+            title: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withAlpha(26),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 8),
-                  const Expanded(
-                    child: Text(
-                      'Por enquanto, preencha o formulário para criar sua conta.',
-                      style: TextStyle(fontSize: 12),
-                    ),
+                  child: const Icon(
+                    Icons.construction_rounded,
+                    color: Colors.orange,
+                    size: 24,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 12),
+                const Text('Em Desenvolvimento'),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendi'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Registro com $provider',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'O registro social está em desenvolvimento e estará disponível em uma futura atualização!',
+                  style: TextStyle(fontSize: 14, height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withAlpha(13),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.withAlpha(51)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.blue[600],
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Por enquanto, preencha o formulário para criar sua conta.',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendi'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -182,7 +184,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Header moderno
                 _buildModernHeader(context),
                 const SizedBox(height: 40),
@@ -231,7 +233,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   icon: Icons.lock_outlined,
                   isPassword: true,
                   obscureText: !_isPasswordVisible,
-                  onTogglePassword: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  onTogglePassword:
+                      () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Por favor, insira uma senha';
@@ -251,7 +256,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   icon: Icons.lock_outline,
                   isPassword: true,
                   obscureText: !_isConfirmPasswordVisible,
-                  onTogglePassword: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                  onTogglePassword:
+                      () => setState(
+                        () =>
+                            _isConfirmPasswordVisible =
+                                !_isConfirmPasswordVisible,
+                      ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Por favor, confirme sua senha';
@@ -293,7 +303,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           height: 80,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.7)],
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withValues(alpha: 0.7),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -366,10 +379,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         style: const TextStyle(fontSize: 16),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 16,
-          ),
+          labelStyle: TextStyle(color: Colors.grey[600], fontSize: 16),
           prefixIcon: Container(
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(8),
@@ -379,15 +389,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             ),
             child: Icon(icon, color: Theme.of(context).primaryColor, size: 20),
           ),
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                    (obscureText ?? false) ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey[600],
-                  ),
-                  onPressed: onTogglePassword,
-                )
-              : null,
+          suffixIcon:
+              isPassword
+                  ? IconButton(
+                    icon: Icon(
+                      (obscureText ?? false)
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey[600],
+                    ),
+                    onPressed: onTogglePassword,
+                  )
+                  : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
@@ -398,7 +411,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+            borderSide: BorderSide(
+              color: Theme.of(context).primaryColor,
+              width: 2,
+            ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -410,7 +426,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ),
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
         validator: validator,
       ),
@@ -424,22 +443,29 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       height: 56,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: _isLoading
-              ? [Colors.grey[400]!, Colors.grey[500]!]
-              : [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+          colors:
+              _isLoading
+                  ? [Colors.grey[400]!, Colors.grey[500]!]
+                  : [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                  ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: _isLoading
-            ? null
-            : [
-                BoxShadow(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+        boxShadow:
+            _isLoading
+                ? null
+                : [
+                  BoxShadow(
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -447,23 +473,24 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           onTap: _isLoading ? null : _handleRegister,
           borderRadius: BorderRadius.circular(16),
           child: Center(
-            child: _isLoading
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            child:
+                _isLoading
+                    ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : const Text(
+                      'Criar Conta',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  )
-                : const Text(
-                    'Criar Conta',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
           ),
         ),
       ),
@@ -481,10 +508,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 'ou registre-se com',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
             ),
             const Expanded(child: Divider(color: Colors.grey)),
@@ -569,10 +593,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       child: RichText(
         text: TextSpan(
           text: 'Já tem uma conta? ',
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
+          style: TextStyle(color: Colors.grey[600], fontSize: 14),
           children: [
             TextSpan(
               text: 'Faça login',

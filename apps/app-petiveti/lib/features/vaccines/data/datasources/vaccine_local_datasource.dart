@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
 import '../../../../core/storage/hive_service.dart';
 import '../models/vaccine_model.dart';
@@ -33,16 +33,25 @@ abstract class VaccineLocalDataSource {
     int month, [
     String? animalId,
   ]);
-  
+
   /// Reminder functionality
   Future<List<VaccineModel>> getVaccinesNeedingReminders();
   Future<List<VaccineModel>> getVaccinesWithActiveReminders();
 
   /// Search and filtering
   Future<List<VaccineModel>> searchVaccines(String query, [String? animalId]);
-  Future<List<VaccineModel>> getVaccinesByVeterinarian(String veterinarian, [String? animalId]);
-  Future<List<VaccineModel>> getVaccinesByName(String vaccineName, [String? animalId]);
-  Future<List<VaccineModel>> getVaccinesByManufacturer(String manufacturer, [String? animalId]);
+  Future<List<VaccineModel>> getVaccinesByVeterinarian(
+    String veterinarian, [
+    String? animalId,
+  ]);
+  Future<List<VaccineModel>> getVaccinesByName(
+    String vaccineName, [
+    String? animalId,
+  ]);
+  Future<List<VaccineModel>> getVaccinesByManufacturer(
+    String manufacturer, [
+    String? animalId,
+  ]);
 
   /// Bulk operations
   Future<void> addMultipleVaccines(List<VaccineModel> vaccines);
@@ -60,9 +69,9 @@ abstract class VaccineLocalDataSource {
 
 class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   final HiveService _hiveService;
-  
+
   VaccineLocalDataSourceImpl(this._hiveService);
-  
+
   Future<Box<VaccineModel>> get _box async {
     return await _hiveService.getBox<VaccineModel>('vaccines');
   }
@@ -71,7 +80,10 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     return vaccines.where((vaccine) => !vaccine.isDeleted).toList();
   }
 
-  List<VaccineModel> _filterByAnimal(List<VaccineModel> vaccines, String? animalId) {
+  List<VaccineModel> _filterByAnimal(
+    List<VaccineModel> vaccines,
+    String? animalId,
+  ) {
     if (animalId == null) return vaccines;
     return vaccines.where((vaccine) => vaccine.animalId == animalId).toList();
   }
@@ -116,10 +128,7 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     final vaccine = vaccinesBox.get(id);
     if (vaccine != null) {
       final deletedVaccine = VaccineModel.fromEntity(
-        vaccine.toEntity().copyWith(
-          isDeleted: true,
-          updatedAt: DateTime.now(),
-        ),
+        vaccine.toEntity().copyWith(isDeleted: true, updatedAt: DateTime.now()),
       );
       await vaccinesBox.put(id, deletedVaccine);
     }
@@ -129,13 +138,10 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   Future<void> deleteVaccinesByAnimalId(String animalId) async {
     final vaccines = await getVaccinesByAnimalId(animalId);
     final vaccinesBox = await _box;
-    
+
     for (final vaccine in vaccines) {
       final deletedVaccine = VaccineModel.fromEntity(
-        vaccine.toEntity().copyWith(
-          isDeleted: true,
-          updatedAt: DateTime.now(),
-        ),
+        vaccine.toEntity().copyWith(isDeleted: true, updatedAt: DateTime.now()),
       );
       await vaccinesBox.put(vaccine.id, deletedVaccine);
     }
@@ -176,10 +182,12 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     final filtered = _filterByAnimal(vaccines, animalId);
     final now = DateTime.now();
     final futureDate = now.add(const Duration(days: 30)); // Next 30 days
-    
+
     return filtered.where((vaccine) {
       if (vaccine.nextDueDateTimestamp == null) return false;
-      final nextDueDate = DateTime.fromMillisecondsSinceEpoch(vaccine.nextDueDateTimestamp!);
+      final nextDueDate = DateTime.fromMillisecondsSinceEpoch(
+        vaccine.nextDueDateTimestamp!,
+      );
       return nextDueDate.isAfter(now) && nextDueDate.isBefore(futureDate);
     }).toList();
   }
@@ -207,11 +215,13 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   ]) async {
     final vaccines = await getVaccines();
     final filtered = _filterByAnimal(vaccines, animalId);
-    
+
     return filtered.where((vaccine) {
-      final vaccineDate = DateTime.fromMillisecondsSinceEpoch(vaccine.dateTimestamp);
+      final vaccineDate = DateTime.fromMillisecondsSinceEpoch(
+        vaccine.dateTimestamp,
+      );
       return vaccineDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-             vaccineDate.isBefore(endDate.add(const Duration(days: 1)));
+          vaccineDate.isBefore(endDate.add(const Duration(days: 1)));
     }).toList();
   }
 
@@ -230,51 +240,72 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   @override
   Future<List<VaccineModel>> getVaccinesNeedingReminders() async {
     final vaccines = await getVaccines();
-    return vaccines.where((vaccine) => vaccine.toEntity().needsReminder).toList();
+    return vaccines
+        .where((vaccine) => vaccine.toEntity().needsReminder)
+        .toList();
   }
 
   @override
   Future<List<VaccineModel>> getVaccinesWithActiveReminders() async {
     final vaccines = await getVaccines();
-    return vaccines.where((vaccine) => 
-      vaccine.reminderDateTimestamp != null && !vaccine.isCompleted
-    ).toList();
+    return vaccines
+        .where(
+          (vaccine) =>
+              vaccine.reminderDateTimestamp != null && !vaccine.isCompleted,
+        )
+        .toList();
   }
 
   // Search and filtering
   @override
-  Future<List<VaccineModel>> searchVaccines(String query, [String? animalId]) async {
+  Future<List<VaccineModel>> searchVaccines(
+    String query, [
+    String? animalId,
+  ]) async {
     final vaccines = await getVaccines();
     final filtered = _filterByAnimal(vaccines, animalId);
     final queryLower = query.toLowerCase();
-    
+
     return filtered.where((vaccine) {
       return vaccine.name.toLowerCase().contains(queryLower) ||
-             vaccine.veterinarian.toLowerCase().contains(queryLower) ||
-             (vaccine.manufacturer?.toLowerCase().contains(queryLower) ?? false) ||
-             (vaccine.notes?.toLowerCase().contains(queryLower) ?? false);
+          vaccine.veterinarian.toLowerCase().contains(queryLower) ||
+          (vaccine.manufacturer?.toLowerCase().contains(queryLower) ?? false) ||
+          (vaccine.notes?.toLowerCase().contains(queryLower) ?? false);
     }).toList();
   }
 
   @override
-  Future<List<VaccineModel>> getVaccinesByVeterinarian(String veterinarian, [String? animalId]) async {
+  Future<List<VaccineModel>> getVaccinesByVeterinarian(
+    String veterinarian, [
+    String? animalId,
+  ]) async {
     final vaccines = await getVaccines();
     final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.veterinarian == veterinarian).toList();
+    return filtered
+        .where((vaccine) => vaccine.veterinarian == veterinarian)
+        .toList();
   }
 
   @override
-  Future<List<VaccineModel>> getVaccinesByName(String vaccineName, [String? animalId]) async {
+  Future<List<VaccineModel>> getVaccinesByName(
+    String vaccineName, [
+    String? animalId,
+  ]) async {
     final vaccines = await getVaccines();
     final filtered = _filterByAnimal(vaccines, animalId);
     return filtered.where((vaccine) => vaccine.name == vaccineName).toList();
   }
 
   @override
-  Future<List<VaccineModel>> getVaccinesByManufacturer(String manufacturer, [String? animalId]) async {
+  Future<List<VaccineModel>> getVaccinesByManufacturer(
+    String manufacturer, [
+    String? animalId,
+  ]) async {
     final vaccines = await getVaccines();
     final filtered = _filterByAnimal(vaccines, animalId);
-    return filtered.where((vaccine) => vaccine.manufacturer == manufacturer).toList();
+    return filtered
+        .where((vaccine) => vaccine.manufacturer == manufacturer)
+        .toList();
   }
 
   // Bulk operations
@@ -282,7 +313,7 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   Future<void> addMultipleVaccines(List<VaccineModel> vaccines) async {
     final vaccinesBox = await _box;
     final vaccineMap = Map.fromEntries(
-      vaccines.map((vaccine) => MapEntry(vaccine.id, vaccine))
+      vaccines.map((vaccine) => MapEntry(vaccine.id, vaccine)),
     );
     await vaccinesBox.putAll(vaccineMap);
   }
@@ -295,13 +326,15 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   @override
   Future<void> markVaccinesAsCompleted(List<String> vaccineIds) async {
     final vaccinesBox = await _box;
-    
+
     for (final id in vaccineIds) {
       final vaccine = vaccinesBox.get(id);
       if (vaccine != null && !vaccine.isDeleted) {
         final entity = vaccine.toEntity();
         if (entity.canBeMarkedAsCompleted()) {
-          final completedVaccine = VaccineModel.fromEntity(entity.markAsCompleted());
+          final completedVaccine = VaccineModel.fromEntity(
+            entity.markAsCompleted(),
+          );
           await vaccinesBox.put(id, completedVaccine);
         }
       }
@@ -324,7 +357,7 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
   @override
   Stream<List<VaccineModel>> watchVaccines() async* {
     final vaccinesBox = await _box;
-    
+
     yield* Stream.periodic(const Duration(milliseconds: 500), (_) {
       final vaccines = _filterActive(vaccinesBox.values);
       vaccines.sort((a, b) => b.dateTimestamp.compareTo(a.dateTimestamp));

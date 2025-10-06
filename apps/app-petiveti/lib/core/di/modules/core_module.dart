@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart' as core;
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' show GetIt;
+import 'package:flutter/foundation.dart';
 
 import '../../cache/cache_service.dart';
 import '../../logging/datasources/log_local_datasource.dart';

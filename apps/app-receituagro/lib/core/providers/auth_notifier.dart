@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
-import '../enums/analytics_user_type.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';

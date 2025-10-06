@@ -1,7 +1,7 @@
 import '../../../../core/data/models/fitossanitario_hive.dart';
-import '../../domain/entities/defensivo_entity.dart';
 import '../../data/defensivo_agrupado_item_model.dart';
 import '../../data/defensivo_model.dart';
+import '../../domain/entities/defensivo_entity.dart';
 
 /// Mapper unificado para conversão entre diferentes models e DefensivoEntity
 /// Segue padrão Clean Architecture - isolamento entre camadas
@@ -23,9 +23,11 @@ class DefensivoMapper {
       lastUpdated: DateTime.now(),
     );
   }
-  
+
   /// Converte DefensivoAgrupadoItemModel para Entity
-  static DefensivoEntity fromAgrupadoToEntity(DefensivoAgrupadoItemModel model) {
+  static DefensivoEntity fromAgrupadoToEntity(
+    DefensivoAgrupadoItemModel model,
+  ) {
     return DefensivoEntity(
       id: model.idReg,
       nome: model.line1,
@@ -56,7 +58,7 @@ class DefensivoMapper {
       modoAcao: entity.modoAcao,
     );
   }
-  
+
   /// Converte Entity para DefensivoAgrupadoItemModel
   static DefensivoAgrupadoItemModel toAgrupadoModel(DefensivoEntity entity) {
     return DefensivoAgrupadoItemModel(
@@ -76,9 +78,11 @@ class DefensivoMapper {
   static List<DefensivoEntity> toEntityList(List<DefensivoModel> models) {
     return models.map((model) => toEntity(model)).toList();
   }
-  
+
   /// Converte lista de DefensivoAgrupadoItemModel para Entities
-  static List<DefensivoEntity> fromAgrupadoToEntityList(List<DefensivoAgrupadoItemModel> models) {
+  static List<DefensivoEntity> fromAgrupadoToEntityList(
+    List<DefensivoAgrupadoItemModel> models,
+  ) {
     return models.map((model) => fromAgrupadoToEntity(model)).toList();
   }
 
@@ -86,9 +90,11 @@ class DefensivoMapper {
   static List<DefensivoModel> toModelList(List<DefensivoEntity> entities) {
     return entities.map((entity) => toModel(entity)).toList();
   }
-  
+
   /// Converte lista de Entities para DefensivoAgrupadoItemModel
-  static List<DefensivoAgrupadoItemModel> toAgrupadoModelList(List<DefensivoEntity> entities) {
+  static List<DefensivoAgrupadoItemModel> toAgrupadoModelList(
+    List<DefensivoEntity> entities,
+  ) {
     return entities.map((entity) => toAgrupadoModel(entity)).toList();
   }
 
@@ -108,7 +114,9 @@ class DefensivoMapper {
   }
 
   /// Converte lista de FitossanitarioHive para Entities
-  static List<DefensivoEntity> fromHiveToEntityList(List<FitossanitarioHive> hives) {
+  static List<DefensivoEntity> fromHiveToEntityList(
+    List<FitossanitarioHive> hives,
+  ) {
     return hives.map((hive) => fromHiveToEntity(hive)).toList();
   }
 }

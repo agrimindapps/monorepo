@@ -1,8 +1,9 @@
 import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 
-import '../interfaces/i_sync_service.dart';
 import '../../shared/utils/failure.dart';
+import '../interfaces/i_sync_service.dart';
 import 'sync_logger.dart';
 
 /// Serviço de sincronização específico para o app Plantis
@@ -44,7 +45,7 @@ class PlantisSyncService implements ISyncService {
 
   // Estado interno
   bool _isInitialized = false;
-  bool _canSync = true;
+  final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
 
@@ -63,12 +64,7 @@ class PlantisSyncService implements ISyncService {
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
 
   // Entidades específicas do Plantis (na ordem de prioridade)
-  final List<String> _entityTypes = [
-    'plants',
-    'spaces',
-    'tasks',
-    'comments',
-  ];
+  final List<String> _entityTypes = ['plants', 'spaces', 'tasks', 'comments'];
 
   @override
   Future<Either<Failure, void>> initialize() async {
@@ -87,7 +83,6 @@ class PlantisSyncService implements ISyncService {
       );
 
       return const Right(null);
-
     } catch (e, stackTrace) {
       _updateStatus(SyncServiceStatus.failed);
       logger.logError(
@@ -114,7 +109,9 @@ class PlantisSyncService implements ISyncService {
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
     if (!canSync) {
-      return Left(SyncFailure('Plantis sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('Plantis sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -132,13 +129,15 @@ class PlantisSyncService implements ISyncService {
       for (int i = 0; i < _entityTypes.length; i++) {
         final entityType = _entityTypes[i];
 
-        _emitProgress(ServiceProgress(
-          serviceId: serviceId,
-          operation: 'Syncing $entityType',
-          current: i + 1,
-          total: _entityTypes.length,
-          currentItem: entityType,
-        ));
+        _emitProgress(
+          ServiceProgress(
+            serviceId: serviceId,
+            operation: 'Syncing $entityType',
+            current: i + 1,
+            total: _entityTypes.length,
+            currentItem: entityType,
+          ),
+        );
 
         // Delegar sync para o repository correspondente
         final syncResult = await _syncEntity(entityType);
@@ -182,17 +181,19 @@ class PlantisSyncService implements ISyncService {
           },
         );
 
-        return Right(ServiceSyncResult(
-          success: true,
-          itemsSynced: totalSynced,
-          duration: duration,
-          metadata: {
-            'entities_synced': _entityTypes,
-            'app': 'plantis',
-            'sync_type': 'full',
-            'partial_failures': errors,
-          },
-        ));
+        return Right(
+          ServiceSyncResult(
+            success: true,
+            itemsSynced: totalSynced,
+            duration: duration,
+            metadata: {
+              'entities_synced': _entityTypes,
+              'app': 'plantis',
+              'sync_type': 'full',
+              'partial_failures': errors,
+            },
+          ),
+        );
       } else {
         _failedSyncs++;
         _updateStatus(SyncServiceStatus.failed);
@@ -202,9 +203,10 @@ class PlantisSyncService implements ISyncService {
           error: 'All entities failed: ${errors.join(', ')}',
         );
 
-        return Left(SyncFailure('All entities failed to sync: ${errors.join(', ')}'));
+        return Left(
+          SyncFailure('All entities failed to sync: ${errors.join(', ')}'),
+        );
       }
-
     } catch (e, stackTrace) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
@@ -243,13 +245,16 @@ class PlantisSyncService implements ISyncService {
   Future<Either<Failure, int>> _syncPlants() async {
     try {
       // O repository já implementa syncPendingChanges()
-      final result = await plantsRepository.syncPendingChanges() as Either<Failure, void>;
+      final result =
+          await plantsRepository.syncPendingChanges() as Either<Failure, void>;
 
       return await result.fold(
         (Failure failure) async => Left<Failure, int>(failure),
         (_) async {
           // Obter contagem de plantas sincronizadas
-          final plantsResult = await plantsRepository.getPlants() as Either<Failure, List<dynamic>>;
+          final plantsResult =
+              await plantsRepository.getPlants()
+                  as Either<Failure, List<dynamic>>;
           return plantsResult.fold(
             (Failure failure) => const Right<Failure, int>(0),
             (List<dynamic> plants) => Right<Failure, int>(plants.length),
@@ -264,12 +269,15 @@ class PlantisSyncService implements ISyncService {
   /// Sincroniza espaços delegando para SpacesRepository
   Future<Either<Failure, int>> _syncSpaces() async {
     try {
-      final result = await spacesRepository.syncPendingChanges() as Either<Failure, void>;
+      final result =
+          await spacesRepository.syncPendingChanges() as Either<Failure, void>;
 
       return await result.fold(
         (Failure failure) async => Left<Failure, int>(failure),
         (_) async {
-          final spacesResult = await spacesRepository.getSpaces() as Either<Failure, List<dynamic>>;
+          final spacesResult =
+              await spacesRepository.getSpaces()
+                  as Either<Failure, List<dynamic>>;
           return spacesResult.fold(
             (Failure failure) => const Right<Failure, int>(0),
             (List<dynamic> spaces) => Right<Failure, int>(spaces.length),
@@ -284,11 +292,15 @@ class PlantisSyncService implements ISyncService {
   /// Sincroniza tarefas delegando para PlantTasksRepository
   Future<Either<Failure, int>> _syncTasks() async {
     try {
-      final result = await plantTasksRepository.syncPendingChanges() as Either<Failure, void>;
+      final result =
+          await plantTasksRepository.syncPendingChanges()
+              as Either<Failure, void>;
 
       return result.fold(
         (Failure failure) => Left<Failure, int>(failure),
-        (_) => const Right<Failure, int>(0), // Contagem de tasks não disponível facilmente
+        (_) => const Right<Failure, int>(
+          0,
+        ), // Contagem de tasks não disponível facilmente
       );
     } catch (e) {
       return Left<Failure, int>(SyncFailure('Failed to sync tasks: $e'));
@@ -298,11 +310,15 @@ class PlantisSyncService implements ISyncService {
   /// Sincroniza comentários delegando para PlantCommentsRepository
   Future<Either<Failure, int>> _syncComments() async {
     try {
-      final result = await plantCommentsRepository.syncPendingChanges() as Either<Failure, void>;
+      final result =
+          await plantCommentsRepository.syncPendingChanges()
+              as Either<Failure, void>;
 
       return result.fold(
         (Failure failure) => Left<Failure, int>(failure),
-        (_) => const Right<Failure, int>(0), // Contagem de comments não disponível facilmente
+        (_) => const Right<Failure, int>(
+          0,
+        ), // Contagem de comments não disponível facilmente
       );
     } catch (e) {
       return Left<Failure, int>(SyncFailure('Failed to sync comments: $e'));
@@ -310,9 +326,13 @@ class PlantisSyncService implements ISyncService {
   }
 
   @override
-  Future<Either<Failure, ServiceSyncResult>> syncSpecific(List<String> ids) async {
+  Future<Either<Failure, ServiceSyncResult>> syncSpecific(
+    List<String> ids,
+  ) async {
     if (!canSync) {
-      return Left(SyncFailure('Plantis sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('Plantis sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -327,7 +347,6 @@ class PlantisSyncService implements ISyncService {
       // Sync específico pode ser implementado posteriormente
       // Por ora, sincroniza tudo
       return await sync();
-
     } catch (e, stackTrace) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
@@ -368,7 +387,6 @@ class PlantisSyncService implements ISyncService {
       _totalItemsSynced = 0;
 
       return const Right(null);
-
     } catch (e, stackTrace) {
       logger.logError(
         message: 'Failed to clear Plantis local data',
@@ -390,12 +408,14 @@ class PlantisSyncService implements ISyncService {
       totalItemsSynced: _totalItemsSynced,
       metadata: {
         'entity_types': _entityTypes,
-        'avg_items_per_sync': _successfulSyncs > 0
-            ? (_totalItemsSynced / _successfulSyncs).round()
-            : 0,
-        'success_rate': _totalSyncs > 0
-            ? ((_successfulSyncs / _totalSyncs) * 100).toStringAsFixed(1)
-            : '0.0',
+        'avg_items_per_sync':
+            _successfulSyncs > 0
+                ? (_totalItemsSynced / _successfulSyncs).round()
+                : 0,
+        'success_rate':
+            _totalSyncs > 0
+                ? ((_successfulSyncs / _totalSyncs) * 100).toStringAsFixed(1)
+                : '0.0',
       },
     );
   }
@@ -483,7 +503,10 @@ class PlantisSyncService implements ISyncService {
 
       logger.logInfo(
         message: 'Sync status changed',
-        metadata: {'old_status': _currentStatus.name, 'new_status': status.name},
+        metadata: {
+          'old_status': _currentStatus.name,
+          'new_status': status.name,
+        },
       );
     }
   }

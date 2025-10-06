@@ -5,7 +5,6 @@ import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
 import 'package:app_agrihurbi/features/auth/presentation/providers/auth_provider.dart';
-import 'package:flutter/material.dart';
 import 'package:core/core.dart'
     show
         StateNotifier,
@@ -14,6 +13,7 @@ import 'package:core/core.dart'
         Provider,
         ChangeNotifierProvider,
         Consumer;
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Riverpod provider exposing the existing AuthProvider (registered with GetIt)

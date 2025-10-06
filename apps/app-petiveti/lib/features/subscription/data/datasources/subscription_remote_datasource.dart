@@ -86,7 +86,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       autoRenew: !entity.isExpired,
       trialEndDate: entity.trialEndDate,
       receiptData: entity.id, // Using subscription ID as receipt
-      metadata: {},
+      metadata: const {},
       createdAt: entity.createdAt ?? DateTime.now(),
       updatedAt: entity.updatedAt ?? DateTime.now(),
     );

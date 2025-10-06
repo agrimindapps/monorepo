@@ -1,8 +1,9 @@
 import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 
-import '../interfaces/i_sync_service.dart';
 import '../../shared/utils/failure.dart';
+import '../interfaces/i_sync_service.dart';
 import 'sync_logger.dart';
 
 /// Serviço de sincronização específico para o app ReceitaAgro
@@ -22,9 +23,8 @@ class ReceitaAgroSyncService implements ISyncService {
   /// Connectivity monitoring (opcional)
   StreamSubscription<bool>? _connectivitySubscription;
 
-  ReceitaAgroSyncService({
-    required this.unifiedSyncManager,
-  }) : logger = SyncLogger(appName: 'receituagro');
+  ReceitaAgroSyncService({required this.unifiedSyncManager})
+    : logger = SyncLogger(appName: 'receituagro');
 
   @override
   final String serviceId = 'receituagro';
@@ -40,7 +40,7 @@ class ReceitaAgroSyncService implements ISyncService {
 
   // Estado interno
   bool _isInitialized = false;
-  bool _canSync = true;
+  final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
 
@@ -60,11 +60,11 @@ class ReceitaAgroSyncService implements ISyncService {
 
   // Entidades do ReceitaAgro (da config atual)
   final List<String> _entityTypes = [
-    'favoritos',     // Ferramentas favoritas do usuário
-    'comentarios',   // Feedback sobre diagnósticos
+    'favoritos', // Ferramentas favoritas do usuário
+    'comentarios', // Feedback sobre diagnósticos
     'user_settings', // Preferências e configurações
-    'user_history',  // Analytics e comportamento
-    'users',         // Profile compartilhado
+    'user_history', // Analytics e comportamento
+    'users', // Profile compartilhado
     'subscriptions', // Assinaturas
   ];
 
@@ -86,12 +86,15 @@ class ReceitaAgroSyncService implements ISyncService {
         message: 'ReceitaAgro Sync Service initialized successfully',
         metadata: {
           'entity_count': _entityTypes.length,
-          'features': ['batch_sync', 'conflict_resolution', 'realtime_optional'],
+          'features': [
+            'batch_sync',
+            'conflict_resolution',
+            'realtime_optional',
+          ],
         },
       );
 
       return const Right(null);
-
     } catch (e, stackTrace) {
       _updateStatus(SyncServiceStatus.failed);
       logger.logError(
@@ -118,7 +121,9 @@ class ReceitaAgroSyncService implements ISyncService {
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
     if (!canSync) {
-      return Left(SyncFailure('ReceitaAgro sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('ReceitaAgro sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -141,13 +146,15 @@ class ReceitaAgroSyncService implements ISyncService {
       for (int i = 0; i < _entityTypes.length; i++) {
         final entityType = _entityTypes[i];
 
-        _emitProgress(ServiceProgress(
-          serviceId: serviceId,
-          operation: 'Syncing $entityType',
-          current: i + 1,
-          total: _entityTypes.length,
-          currentItem: entityType,
-        ));
+        _emitProgress(
+          ServiceProgress(
+            serviceId: serviceId,
+            operation: 'Syncing $entityType',
+            current: i + 1,
+            total: _entityTypes.length,
+            currentItem: entityType,
+          ),
+        );
 
         // Delegar sync para UnifiedSyncManager
         final syncResult = await _syncEntity(entityType);
@@ -191,18 +198,20 @@ class ReceitaAgroSyncService implements ISyncService {
           },
         );
 
-        return Right(ServiceSyncResult(
-          success: true,
-          itemsSynced: totalSynced,
-          duration: duration,
-          metadata: {
-            'entities_synced': _entityTypes,
-            'app': 'receituagro',
-            'sync_type': 'full',
-            'partial_failures': errors,
-            'unified_sync_manager': true,
-          },
-        ));
+        return Right(
+          ServiceSyncResult(
+            success: true,
+            itemsSynced: totalSynced,
+            duration: duration,
+            metadata: {
+              'entities_synced': _entityTypes,
+              'app': 'receituagro',
+              'sync_type': 'full',
+              'partial_failures': errors,
+              'unified_sync_manager': true,
+            },
+          ),
+        );
       } else {
         _failedSyncs++;
         _updateStatus(SyncServiceStatus.failed);
@@ -212,9 +221,10 @@ class ReceitaAgroSyncService implements ISyncService {
           error: 'All entities failed: ${errors.join(', ')}',
         );
 
-        return Left(SyncFailure('All entities failed to sync: ${errors.join(', ')}'));
+        return Left(
+          SyncFailure('All entities failed to sync: ${errors.join(', ')}'),
+        );
       }
-
     } catch (e, stackTrace) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
@@ -263,9 +273,13 @@ class ReceitaAgroSyncService implements ISyncService {
   }
 
   @override
-  Future<Either<Failure, ServiceSyncResult>> syncSpecific(List<String> ids) async {
+  Future<Either<Failure, ServiceSyncResult>> syncSpecific(
+    List<String> ids,
+  ) async {
     if (!canSync) {
-      return Left(SyncFailure('ReceitaAgro sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('ReceitaAgro sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -299,17 +313,18 @@ class ReceitaAgroSyncService implements ISyncService {
       _totalItemsSynced += totalSynced;
       _updateStatus(SyncServiceStatus.completed);
 
-      return Right(ServiceSyncResult(
-        success: true,
-        itemsSynced: totalSynced,
-        duration: duration,
-        metadata: {
-          'sync_type': 'specific',
-          'entity_types': ids,
-          'app': 'receituagro',
-        },
-      ));
-
+      return Right(
+        ServiceSyncResult(
+          success: true,
+          itemsSynced: totalSynced,
+          duration: duration,
+          metadata: {
+            'sync_type': 'specific',
+            'entity_types': ids,
+            'app': 'receituagro',
+          },
+        ),
+      );
     } catch (e, stackTrace) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
@@ -349,7 +364,6 @@ class ReceitaAgroSyncService implements ISyncService {
       _totalItemsSynced = 0;
 
       return const Right(null);
-
     } catch (e, stackTrace) {
       logger.logError(
         message: 'Failed to clear ReceitaAgro local data',
@@ -371,12 +385,14 @@ class ReceitaAgroSyncService implements ISyncService {
       totalItemsSynced: _totalItemsSynced,
       metadata: {
         'entity_types': _entityTypes,
-        'avg_items_per_sync': _successfulSyncs > 0
-            ? (_totalItemsSynced / _successfulSyncs).round()
-            : 0,
-        'success_rate': _totalSyncs > 0
-            ? ((_successfulSyncs / _totalSyncs) * 100).toStringAsFixed(1)
-            : '0.0',
+        'avg_items_per_sync':
+            _successfulSyncs > 0
+                ? (_totalItemsSynced / _successfulSyncs).round()
+                : 0,
+        'success_rate':
+            _totalSyncs > 0
+                ? ((_successfulSyncs / _totalSyncs) * 100).toStringAsFixed(1)
+                : '0.0',
         'unified_sync_manager': true,
       },
     );
@@ -401,7 +417,12 @@ class ReceitaAgroSyncService implements ISyncService {
 
   /// Sync apenas dados do usuário (favoritos, comentários, settings, history)
   Future<Either<Failure, ServiceSyncResult>> syncUserData() async {
-    final userEntities = ['favoritos', 'comentarios', 'user_settings', 'user_history'];
+    final userEntities = [
+      'favoritos',
+      'comentarios',
+      'user_settings',
+      'user_history',
+    ];
     return await syncSpecific(userEntities);
   }
 
@@ -494,7 +515,10 @@ class ReceitaAgroSyncService implements ISyncService {
 
       logger.logInfo(
         message: 'Sync status changed',
-        metadata: {'old_status': _currentStatus.name, 'new_status': status.name},
+        metadata: {
+          'old_status': _currentStatus.name,
+          'new_status': status.name,
+        },
       );
     }
   }
@@ -508,11 +532,7 @@ class ReceitaAgroSyncService implements ISyncService {
 
 /// Factory para criar ReceitaAgroSyncService com dependências
 class ReceitaAgroSyncServiceFactory {
-  static ReceitaAgroSyncService create({
-    required dynamic unifiedSyncManager,
-  }) {
-    return ReceitaAgroSyncService(
-      unifiedSyncManager: unifiedSyncManager,
-    );
+  static ReceitaAgroSyncService create({required dynamic unifiedSyncManager}) {
+    return ReceitaAgroSyncService(unifiedSyncManager: unifiedSyncManager);
   }
 }

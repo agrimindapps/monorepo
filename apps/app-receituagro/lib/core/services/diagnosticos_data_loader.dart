@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../di/injection_container.dart' as di;
 import '../data/models/diagnostico_hive.dart';
 import '../data/repositories/diagnostico_hive_repository.dart';
+import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de diagnósticos dos assets JSON
 class DiagnosticosDataLoader {
@@ -18,17 +18,17 @@ class DiagnosticosDataLoader {
     }
 
     try {
-
       final List<Map<String, dynamic>> allDiagnosticos = [];
 
       // Carrega todos os arquivos JSON de diagnósticos (0 a 64)
       for (int i = 0; i <= 64; i++) {
         try {
           // Use path without 'assets/' prefix for web compatibility
-          final String assetPath = kIsWeb 
-              ? 'database/json/tbdiagnostico/TBDIAGNOSTICO$i.json'
-              : 'assets/database/json/tbdiagnostico/TBDIAGNOSTICO$i.json';
-          
+          final String assetPath =
+              kIsWeb
+                  ? 'database/json/tbdiagnostico/TBDIAGNOSTICO$i.json'
+                  : 'assets/database/json/tbdiagnostico/TBDIAGNOSTICO$i.json';
+
           final String jsonString = await rootBundle.loadString(assetPath);
 
           final dynamic decodedJson = json.decode(jsonString);
@@ -39,23 +39,25 @@ class DiagnosticosDataLoader {
           allDiagnosticos.addAll(diagnosticos);
         } catch (e) {
           if (kDebugMode) {
-            debugPrint('⚠️ DiagnosticosDataLoader: Error loading file TBDIAGNOSTICO$i.json - $e');
+            debugPrint(
+              '⚠️ DiagnosticosDataLoader: Error loading file TBDIAGNOSTICO$i.json - $e',
+            );
           }
         }
       }
 
       // Filtra apenas registros válidos - correção: usar 'IdReg' (maiúsculo) como no JSON
-      final List<Map<String, dynamic>> diagnosticos = allDiagnosticos
-          .where((item) =>
-              item['IdReg'] != null &&
-              item['IdReg'].toString().trim().isNotEmpty &&
-              item['fkIdDefensivo'] != null &&
-              item['fkIdCultura'] != null &&
-              item['fkIdPraga'] != null)
-          .toList();
-
-
-
+      final List<Map<String, dynamic>> diagnosticos =
+          allDiagnosticos
+              .where(
+                (item) =>
+                    item['IdReg'] != null &&
+                    item['IdReg'].toString().trim().isNotEmpty &&
+                    item['fkIdDefensivo'] != null &&
+                    item['fkIdCultura'] != null &&
+                    item['fkIdPraga'] != null,
+              )
+              .toList();
 
       // 2. Salva no repositório Hive usando injeção de dependência
       final repository = di.sl<DiagnosticoHiveRepository>();
@@ -67,11 +69,11 @@ class DiagnosticosDataLoader {
           final diagnosticoHive = DiagnosticoHive.fromJson(diagnosticoData);
           await repository.save(diagnosticoHive);
         } catch (e) {
-          debugPrint('Erro ao carregar diagnóstico ${diagnosticoData['IdReg']}: $e');
+          debugPrint(
+            'Erro ao carregar diagnóstico ${diagnosticoData['IdReg']}: $e',
+          );
         }
       }
-
-
 
       _isLoaded = true;
     } catch (e) {
@@ -90,10 +92,10 @@ class DiagnosticosDataLoader {
     try {
       final repository = di.sl<DiagnosticoHiveRepository>();
       final result = await repository.getAll();
-      final diagnosticos = result.isSuccess ? result.data! : <DiagnosticoHive>[];
+      final diagnosticos =
+          result.isSuccess ? result.data! : <DiagnosticoHive>[];
       final hasData = diagnosticos.isNotEmpty;
-      
-      
+
       return hasData;
     } catch (e) {
       return false;
@@ -105,12 +107,14 @@ class DiagnosticosDataLoader {
     try {
       final repository = di.sl<DiagnosticoHiveRepository>();
       final result = await repository.getAll();
-      final diagnosticos = result.isSuccess ? result.data! : <DiagnosticoHive>[];
+      final diagnosticos =
+          result.isSuccess ? result.data! : <DiagnosticoHive>[];
 
       return {
         'total_diagnosticos': diagnosticos.length,
         'is_loaded': _isLoaded,
-        'sample_diagnosticos': diagnosticos.take(5).map((d) => d.idReg).toList(),
+        'sample_diagnosticos':
+            diagnosticos.take(5).map((d) => d.idReg).toList(),
       };
     } catch (e) {
       return {

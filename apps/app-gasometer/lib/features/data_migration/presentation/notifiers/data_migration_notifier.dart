@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/services/gasometer_data_migration_service.dart';
 import '../state/data_migration_state.dart';

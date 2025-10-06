@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/enums/task_filter.dart';
 import '../../../core/utils/sample_data.dart';
@@ -19,7 +19,8 @@ class HomePage extends ConsumerStatefulWidget {
   ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends ConsumerState<HomePage>
+    with TickerProviderStateMixin {
   TaskStatus _selectedFilter = TaskStatus.pending;
   TaskFilter _taskFilter = TaskFilter.all;
   String? _selectedTag;
@@ -39,11 +40,13 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     _drawerSlideAnimation = Tween<Offset>(
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _drawerAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    ).animate(
+      CurvedAnimation(
+        parent: _drawerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _filterDrawerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -51,11 +54,13 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     _filterDrawerSlideAnimation = Tween<Offset>(
       begin: const Offset(-1.0, 0.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _filterDrawerAnimationController,
-      curve: Curves.easeInOut,
-    ));
-    
+    ).animate(
+      CurvedAnimation(
+        parent: _filterDrawerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadTasks();
       _loadSampleDataIfEmpty();
@@ -70,9 +75,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
   }
 
   void _loadTasks() {
-    ref.read(taskNotifierProvider.notifier).getTasks(
-      status: _selectedFilter,
-    );
+    ref.read(taskNotifierProvider.notifier).getTasks(status: _selectedFilter);
   }
 
   Future<void> _loadSampleDataIfEmpty() async {
@@ -80,7 +83,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
       // Buscar tasks existentes usando o provider
       const tasksRequest = GetTasksRequest();
       final tasks = await ref.read(getTasksProvider(tasksRequest).future);
-      
+
       // Se não há tasks, carregar dados de exemplo
       if (tasks.isEmpty) {
         final sampleTasks = SampleData.getSampleTasks();
@@ -132,10 +135,8 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
     _loadTasks();
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Stack(
         children: [
@@ -159,38 +160,48 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
                     });
                     _loadTasks();
                   },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: TaskStatus.pending,
-                      child: Row(
-                        children: [
-                          Icon(Icons.schedule_rounded, color: Colors.orange),
-                          SizedBox(width: 8),
-                          Text('Pendentes'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: TaskStatus.inProgress,
-                      child: Row(
-                        children: [
-                          Icon(Icons.play_circle_rounded, color: Colors.blue),
-                          SizedBox(width: 8),
-                          Text('Em Progresso'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: TaskStatus.completed,
-                      child: Row(
-                        children: [
-                          Icon(Icons.check_circle_rounded, color: Colors.green),
-                          SizedBox(width: 8),
-                          Text('Concluídas'),
-                        ],
-                      ),
-                    ),
-                  ],
+                  itemBuilder:
+                      (context) => [
+                        const PopupMenuItem(
+                          value: TaskStatus.pending,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.schedule_rounded,
+                                color: Colors.orange,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Pendentes'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: TaskStatus.inProgress,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.play_circle_rounded,
+                                color: Colors.blue,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Em Progresso'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: TaskStatus.completed,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: Colors.green,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Concluídas'),
+                            ],
+                          ),
+                        ),
+                      ],
                 ),
               ],
             ),
@@ -198,7 +209,7 @@ class _HomePageState extends ConsumerState<HomePage> with TickerProviderStateMix
               children: [
                 // Premium Banner
                 const PremiumBanner(),
-                
+
                 Container(
                   padding: const EdgeInsets.all(16),
                   child: Row(

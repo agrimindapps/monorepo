@@ -2,20 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:core/core.dart'
+    show GetIt, ConsumerStatefulWidget, ConsumerState, GoRouterHelper;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:core/core.dart' show GetIt;
-import 'package:go_router/go_router.dart';
 
-// import '../../../../core/sync/presentation/providers/sync_status_provider.dart'; // TODO: Replace with UnifiedSync in Phase 2
-// import '../../../../core/sync/services/sync_status_manager.dart'; // TODO: Replace with UnifiedSync in Phase 2
-import '../../../auth/presentation/state/auth_state.dart';
-import '../../../auth/presentation/notifiers/notifiers.dart';
-import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../data_export/presentation/widgets/export_data_section.dart';
 import '../../domain/services/profile_image_service.dart';
 import '../widgets/devices_section_widget.dart';

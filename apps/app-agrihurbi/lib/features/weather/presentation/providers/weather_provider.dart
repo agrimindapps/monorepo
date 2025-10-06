@@ -1,6 +1,5 @@
+import 'package:core/core.dart' show Provider;
 import 'package:flutter/foundation.dart';
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/rain_gauge_entity.dart';

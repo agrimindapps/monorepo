@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'dependency_providers.dart';
 

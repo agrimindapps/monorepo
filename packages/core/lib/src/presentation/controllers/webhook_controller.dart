@@ -23,7 +23,7 @@ class WebhookController {
       // Rate limiting check - stub
       final rateLimitCheck = _checkRateLimit();
       if (!rateLimitCheck) {
-        return Left(ValidationFailure('Rate limit exceeded'));
+        return const Left(ValidationFailure('Rate limit exceeded'));
       }
 
       // Process webhook

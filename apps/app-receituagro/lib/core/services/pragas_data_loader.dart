@@ -4,8 +4,8 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '../di/injection_container.dart' as di;
 import '../data/repositories/pragas_hive_repository.dart';
+import '../di/injection_container.dart' as di;
 
 /// Serviço para carregar dados de pragas dos assets JSON
 class PragasDataLoader {
@@ -14,20 +14,25 @@ class PragasDataLoader {
   /// Carrega dados de pragas do JSON dos assets usando repositório
   static Future<void> loadPragasData() async {
     if (_isLoaded) {
-      developer.log('Pragas já carregadas, pulando...',
-          name: 'PragasDataLoader');
+      developer.log(
+        'Pragas já carregadas, pulando...',
+        name: 'PragasDataLoader',
+      );
       return;
     }
 
     try {
-      developer.log('🐛 [PRAGAS] Iniciando carregamento de pragas...',
-          name: 'PragasDataLoader');
+      developer.log(
+        '🐛 [PRAGAS] Iniciando carregamento de pragas...',
+        name: 'PragasDataLoader',
+      );
 
       // Carrega JSON do asset principal - use path without 'assets/' prefix for web compatibility
-      const String assetPath = kIsWeb 
-          ? 'database/json/tbpragas/TBPRAGAS0.json'
-          : 'assets/database/json/tbpragas/TBPRAGAS0.json';
-      
+      const String assetPath =
+          kIsWeb
+              ? 'database/json/tbpragas/TBPRAGAS0.json'
+              : 'assets/database/json/tbpragas/TBPRAGAS0.json';
+
       final String jsonString = await rootBundle.loadString(assetPath);
 
       final dynamic decodedJson = json.decode(jsonString);
@@ -36,17 +41,21 @@ class PragasDataLoader {
           jsonData.cast<Map<String, dynamic>>().toList();
 
       // Filtra apenas registros válidos
-      final List<Map<String, dynamic>> pragas = allPragas
-          .where((item) =>
-              item['nomeCientifico'] != null &&
-              item['nomeCientifico'].toString().trim().isNotEmpty &&
-              item['idReg'] != null &&
-              item['idReg'].toString().trim().isNotEmpty)
-          .toList();
+      final List<Map<String, dynamic>> pragas =
+          allPragas
+              .where(
+                (item) =>
+                    item['nomeCientifico'] != null &&
+                    item['nomeCientifico'].toString().trim().isNotEmpty &&
+                    item['idReg'] != null &&
+                    item['idReg'].toString().trim().isNotEmpty,
+              )
+              .toList();
 
       developer.log(
-          '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas',
-          name: 'PragasDataLoader');
+        '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas',
+        name: 'PragasDataLoader',
+      );
 
       // Obtém repositório do DI
       final repository = di.sl<PragasHiveRepository>();
@@ -56,13 +65,17 @@ class PragasDataLoader {
 
       result.fold(
         (error) {
-          developer.log('Erro ao carregar pragas: $error',
-              name: 'PragasDataLoader');
+          developer.log(
+            'Erro ao carregar pragas: $error',
+            name: 'PragasDataLoader',
+          );
           throw Exception('Erro ao carregar pragas: $error');
         },
         (_) {
-          developer.log('Pragas carregadas com sucesso!',
-              name: 'PragasDataLoader');
+          developer.log(
+            'Pragas carregadas com sucesso!',
+            name: 'PragasDataLoader',
+          );
           _isLoaded = true;
         },
       );
@@ -71,23 +84,31 @@ class PragasDataLoader {
       final loadedPragasResult = await repository.getAll();
       loadedPragasResult.fold(
         (error) {
-          developer.log('Erro ao verificar pragas carregadas: $error', name: 'PragasDataLoader');
+          developer.log(
+            'Erro ao verificar pragas carregadas: $error',
+            name: 'PragasDataLoader',
+          );
         },
         (loadedPragas) {
           developer.log(
-              'Verificação: ${loadedPragas.length} pragas disponíveis',
-              name: 'PragasDataLoader');
-          
+            'Verificação: ${loadedPragas.length} pragas disponíveis',
+            name: 'PragasDataLoader',
+          );
+
           if (loadedPragas.isNotEmpty) {
             developer.log(
-                'Primeiras 3 pragas: ${loadedPragas.take(3).map((p) => p.nomeComum).join(', ')}',
-                name: 'PragasDataLoader');
+              'Primeiras 3 pragas: ${loadedPragas.take(3).map((p) => p.nomeComum).join(', ')}',
+              name: 'PragasDataLoader',
+            );
           }
         },
       );
     } catch (e) {
-      developer.log('❌ [PRAGAS] Erro durante carregamento de pragas: $e',
-          name: 'PragasDataLoader', stackTrace: StackTrace.current);
+      developer.log(
+        '❌ [PRAGAS] Erro durante carregamento de pragas: $e',
+        name: 'PragasDataLoader',
+        stackTrace: StackTrace.current,
+      );
       // Não bloqueia o app, apenas registra o erro
     }
   }
@@ -103,23 +124,29 @@ class PragasDataLoader {
     try {
       final repository = di.sl<PragasHiveRepository>();
       final pragasResult = await repository.getAll();
-      
+
       return pragasResult.fold(
         (error) {
-          developer.log('❌ [PRAGAS] Error checking isDataLoaded: $error', 
-              name: 'PragasDataLoader');
+          developer.log(
+            '❌ [PRAGAS] Error checking isDataLoaded: $error',
+            name: 'PragasDataLoader',
+          );
           return false;
         },
         (pragas) {
           final hasData = pragas.isNotEmpty;
-          developer.log('🔍 [PRAGAS] isDataLoaded() - Repository has ${pragas.length} items: $hasData', 
-              name: 'PragasDataLoader');
+          developer.log(
+            '🔍 [PRAGAS] isDataLoaded() - Repository has ${pragas.length} items: $hasData',
+            name: 'PragasDataLoader',
+          );
           return hasData;
         },
       );
     } catch (e) {
-      developer.log('❌ [PRAGAS] Error checking isDataLoaded: $e', 
-          name: 'PragasDataLoader');
+      developer.log(
+        '❌ [PRAGAS] Error checking isDataLoaded: $e',
+        name: 'PragasDataLoader',
+      );
       return false;
     }
   }
@@ -143,11 +170,7 @@ class PragasDataLoader {
         },
       );
     } catch (e) {
-      return {
-        'total_pragas': 0,
-        'is_loaded': false,
-        'error': e.toString(),
-      };
+      return {'total_pragas': 0, 'is_loaded': false, 'error': e.toString()};
     }
   }
 }

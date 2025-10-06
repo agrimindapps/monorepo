@@ -38,7 +38,7 @@ import '../navigation/bottom_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Web inicia em promo (landing page), Mobile/Desktop inicia em splash
-  final initialRoute = kIsWeb ? '/promo' : '/splash';
+  const initialRoute = kIsWeb ? '/promo' : '/splash';
   
   return GoRouter(
     initialLocation: initialRoute,

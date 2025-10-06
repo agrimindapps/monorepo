@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
@@ -17,7 +17,8 @@ class CreateSubtaskDialog extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CreateSubtaskDialog> createState() => _CreateSubtaskDialogState();
+  ConsumerState<CreateSubtaskDialog> createState() =>
+      _CreateSubtaskDialogState();
 }
 
 class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
@@ -61,14 +62,17 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
       if (_isEditing) {
         final updatedSubtask = widget.editingSubtask!.copyWith(
           title: _titleController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty 
-            ? null 
-            : _descriptionController.text.trim(),
+          description:
+              _descriptionController.text.trim().isEmpty
+                  ? null
+                  : _descriptionController.text.trim(),
           updatedAt: DateTime.now(),
         );
-        
-        await ref.read(subtaskNotifierProvider.notifier).updateSubtask(updatedSubtask);
-        
+
+        await ref
+            .read(subtaskNotifierProvider.notifier)
+            .updateSubtask(updatedSubtask);
+
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -80,9 +84,10 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         final newSubtask = TaskEntity(
           id: uuid.v4(),
           title: _titleController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty 
-            ? null 
-            : _descriptionController.text.trim(),
+          description:
+              _descriptionController.text.trim().isEmpty
+                  ? null
+                  : _descriptionController.text.trim(),
           listId: 'default',
           createdById: currentUser.id,
           parentTaskId: widget.parentTaskId,
@@ -90,8 +95,10 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
           updatedAt: DateTime.now(),
         );
 
-        await ref.read(subtaskNotifierProvider.notifier).createSubtask(newSubtask);
-        
+        await ref
+            .read(subtaskNotifierProvider.notifier)
+            .createSubtask(newSubtask);
+
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +108,9 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
       }
     } catch (e) {
       if (mounted) {
-        _showError('Erro ao ${_isEditing ? 'atualizar' : 'criar'} subtarefa: $e');
+        _showError(
+          'Erro ao ${_isEditing ? 'atualizar' : 'criar'} subtarefa: $e',
+        );
       }
     } finally {
       if (mounted) {
@@ -112,10 +121,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -163,13 +169,14 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _save,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(_isEditing ? 'Salvar' : 'Criar'),
+          child:
+              _isLoading
+                  ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : Text(_isEditing ? 'Salvar' : 'Criar'),
         ),
       ],
     );

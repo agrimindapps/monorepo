@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_providers.dart';
@@ -37,7 +37,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.task.title);
-    _descriptionController = TextEditingController(text: widget.task.description ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.task.description ?? '',
+    );
     _notesController = TextEditingController(text: widget.task.notes ?? '');
     _selectedStatus = widget.task.status;
     _selectedPriority = widget.task.priority;
@@ -65,12 +67,14 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     try {
       final updatedTask = widget.task.copyWith(
         title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty 
-          ? null 
-          : _descriptionController.text.trim(),
-        notes: _notesController.text.trim().isEmpty 
-          ? null 
-          : _notesController.text.trim(),
+        description:
+            _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
+        notes:
+            _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
         status: _selectedStatus,
         priority: _selectedPriority,
         isStarred: _isStarred,
@@ -101,32 +105,37 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   Future<void> _deleteTask() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Tarefa'),
-        content: const Text('Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Excluir Tarefa'),
+            content: const Text(
+              'Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Excluir'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true && mounted) {
       setState(() => _isLoading = true);
 
       try {
-        await ref.read(taskNotifierProvider.notifier).deleteTask(widget.task.id);
-        
+        await ref
+            .read(taskNotifierProvider.notifier)
+            .deleteTask(widget.task.id);
+
         if (mounted) {
           widget.onClose(); // Fechar o drawer
           ScaffoldMessenger.of(context).showSnackBar(
@@ -150,14 +159,15 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
   void _openNotesDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => NotesExpansionDialog(
-        initialNotes: _notesController.text,
-        onSave: (notes) {
-          setState(() {
-            _notesController.text = notes ?? '';
-          });
-        },
-      ),
+      builder:
+          (context) => NotesExpansionDialog(
+            initialNotes: _notesController.text,
+            onSave: (notes) {
+              setState(() {
+                _notesController.text = notes ?? '';
+              });
+            },
+          ),
     );
   }
 
@@ -168,16 +178,16 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (date != null) {
       // Atualizar a data de vencimento da tarefa
       final updatedTask = widget.task.copyWith(
         dueDate: date,
         updatedAt: DateTime.now(),
       );
-      
+
       await ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -209,9 +219,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
           // Header
           Container(
             padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
             child: Row(
               children: [
                 Expanded(
@@ -224,7 +232,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                     ),
                   ),
                 ),
-                if (!_isEditing) ...[ 
+                if (!_isEditing) ...[
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.white),
                     onPressed: () => setState(() => _isEditing = true),
@@ -250,125 +258,134 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
               ],
             ),
           ),
-          
+
           // Content
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : CustomScrollView(
-                    slivers: [
-                      // Header Card
-                      SliverToBoxAdapter(
-                        child: TaskHeaderCard(
-                          task: widget.task,
-                          isEditing: _isEditing,
-                          titleController: _titleController,
-                          descriptionController: _descriptionController,
+            child:
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : CustomScrollView(
+                      slivers: [
+                        // Header Card
+                        SliverToBoxAdapter(
+                          child: TaskHeaderCard(
+                            task: widget.task,
+                            isEditing: _isEditing,
+                            titleController: _titleController,
+                            descriptionController: _descriptionController,
+                          ),
                         ),
-                      ),
-                      
-                      // Details Card
-                      SliverToBoxAdapter(
-                        child: TaskDetailsCard(
-                          task: widget.task,
-                          isEditing: _isEditing,
-                          selectedStatus: _selectedStatus,
-                          selectedPriority: _selectedPriority,
-                          onStatusChanged: (status) {
-                            setState(() => _selectedStatus = status);
-                          },
-                          onPriorityChanged: (priority) {
-                            setState(() => _selectedPriority = priority);
-                          },
-                          onDateTap: _showDatePicker,
+
+                        // Details Card
+                        SliverToBoxAdapter(
+                          child: TaskDetailsCard(
+                            task: widget.task,
+                            isEditing: _isEditing,
+                            selectedStatus: _selectedStatus,
+                            selectedPriority: _selectedPriority,
+                            onStatusChanged: (status) {
+                              setState(() => _selectedStatus = status);
+                            },
+                            onPriorityChanged: (priority) {
+                              setState(() => _selectedPriority = priority);
+                            },
+                            onDateTap: _showDatePicker,
+                          ),
                         ),
-                      ),
-                      
-                      // Anotações Card
-                      SliverToBoxAdapter(
-                        child: Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Expanded(
-                                      child: Text(
-                                        'Anotações',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+
+                        // Anotações Card
+                        SliverToBoxAdapter(
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Expanded(
+                                        child: Text(
+                                          'Anotações',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
+                                      if (_isEditing)
+                                        IconButton(
+                                          icon: const Icon(Icons.open_in_full),
+                                          onPressed: _openNotesDialog,
+                                          tooltip: 'Expandir editor',
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  TextField(
+                                    controller: _notesController,
+                                    enabled: _isEditing,
+                                    maxLines: 5,
+                                    decoration: InputDecoration(
+                                      hintText: 'Digite suas anotações aqui...',
+                                      border:
+                                          _isEditing
+                                              ? const OutlineInputBorder()
+                                              : InputBorder.none,
+                                      filled: !_isEditing,
+                                      fillColor: Colors.grey[100],
                                     ),
-                                    if (_isEditing)
-                                      IconButton(
-                                        icon: const Icon(Icons.open_in_full),
-                                        onPressed: _openNotesDialog,
-                                        tooltip: 'Expandir editor',
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                TextField(
-                                  controller: _notesController,
-                                  enabled: _isEditing,
-                                  maxLines: 5,
-                                  decoration: InputDecoration(
-                                    hintText: 'Digite suas anotações aqui...',
-                                    border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
-                                    filled: !_isEditing,
-                                    fillColor: Colors.grey[100],
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      
-                      // Subtarefas Card
-                      SliverToBoxAdapter(
-                        child: Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Subtarefas',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+
+                        // Subtarefas Card
+                        SliverToBoxAdapter(
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Subtarefas',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                SubtaskListWidget(parentTaskId: widget.task.id),
-                              ],
+                                  const SizedBox(height: 16),
+                                  SubtaskListWidget(
+                                    parentTaskId: widget.task.id,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      
-                      // Comentários Section
-                      SliverToBoxAdapter(
-                        child: TaskCommentsSection(taskId: widget.task.id),
-                      ),
-                      
-                      // Bottom spacing
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 24),
-                      ),
-                    ],
-                  ),
+
+                        // Comentários Section
+                        SliverToBoxAdapter(
+                          child: TaskCommentsSection(taskId: widget.task.id),
+                        ),
+
+                        // Bottom spacing
+                        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                      ],
+                    ),
           ),
         ],
       ),
     );
   }
-
 }

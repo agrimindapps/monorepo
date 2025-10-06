@@ -1,18 +1,15 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 /// Configuração de criptografia para uma box
 class BoxEncryptionConfig extends Equatable {
   /// Chave de criptografia (deve ter 32 bytes para AES-256)
   final List<int> key;
-  
+
   /// Algoritmo de criptografia usado
   final String algorithm;
 
-  const BoxEncryptionConfig({
-    required this.key,
-    this.algorithm = 'AES-256',
-  });
+  const BoxEncryptionConfig({required this.key, this.algorithm = 'AES-256'});
 
   @override
   List<Object?> get props => [key, algorithm];
@@ -24,35 +21,35 @@ class BoxEncryptionConfig extends Equatable {
 class BoxConfiguration extends Equatable {
   /// Nome da box (deve ser único no sistema)
   final String name;
-  
+
   /// Identificador do app proprietário desta box
   /// Usado para isolamento e controle de acesso
   final String appId;
-  
+
   /// Adapters customizados para tipos específicos desta box
   /// Registrados automaticamente quando a box é aberta
   final List<TypeAdapter>? customAdapters;
-  
+
   /// Se a box deve ser persistente ou apenas em memória
   /// Por padrão, todas as boxes são persistentes
   final bool persistent;
-  
+
   /// Configuração de criptografia (opcional)
   /// Se fornecida, a box será criptografada
   final BoxEncryptionConfig? encryption;
-  
+
   /// Pasta customizada para armazenar a box
   /// Se não fornecida, usa a pasta padrão do Hive
   final String? customPath;
-  
+
   /// Se deve fazer lazy loading dos dados
   /// Melhora performance para boxes grandes
   final bool lazy;
-  
+
   /// Versão da estrutura de dados desta box
   /// Usado para migração de dados quando necessário
   final int version;
-  
+
   /// Metadados adicionais da box
   /// Podem ser usados para informações específicas do app
   final Map<String, dynamic>? metadata;
@@ -75,10 +72,7 @@ class BoxConfiguration extends Equatable {
     required String name,
     required String appId,
   }) {
-    return BoxConfiguration(
-      name: name,
-      appId: appId,
-    );
+    return BoxConfiguration(name: name, appId: appId);
   }
 
   /// Factory para criar configuração com criptografia
@@ -99,11 +93,7 @@ class BoxConfiguration extends Equatable {
     required String name,
     required String appId,
   }) {
-    return BoxConfiguration(
-      name: name,
-      appId: appId,
-      persistent: false,
-    );
+    return BoxConfiguration(name: name, appId: appId, persistent: false);
   }
 
   /// Cria uma cópia da configuração com modificações
@@ -163,16 +153,16 @@ class BoxConfiguration extends Equatable {
 
   @override
   List<Object?> get props => [
-        name,
-        appId,
-        customAdapters,
-        persistent,
-        encryption,
-        customPath,
-        lazy,
-        version,
-        metadata,
-      ];
+    name,
+    appId,
+    customAdapters,
+    persistent,
+    encryption,
+    customPath,
+    lazy,
+    version,
+    metadata,
+  ];
 
   @override
   String toString() {

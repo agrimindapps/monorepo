@@ -51,6 +51,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  flutter_web_plugins: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

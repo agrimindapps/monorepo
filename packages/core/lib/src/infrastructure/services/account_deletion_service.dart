@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/contracts/i_app_data_cleaner.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/utils/result.dart';
-import '../../shared/utils/app_error.dart';
 
 /// Serviço centralizado de exclusão de contas
 /// Coordena a exclusão de conta Firebase com limpeza de dados específicos por app
@@ -16,8 +16,8 @@ class AccountDeletionService {
   const AccountDeletionService({
     required IAuthRepository authRepository,
     IAppDataCleaner? appDataCleaner,
-  })  : _authRepository = authRepository,
-        _appDataCleaner = appDataCleaner;
+  }) : _authRepository = authRepository,
+       _appDataCleaner = appDataCleaner;
 
   /// Executa exclusão completa da conta
   /// 1. Limpa dados locais específicos do app
@@ -26,7 +26,9 @@ class AccountDeletionService {
   Future<Result<AccountDeletionResult>> deleteAccount() async {
     try {
       if (kDebugMode) {
-        debugPrint('🗑️ AccountDeletionService: Starting account deletion process');
+        debugPrint(
+          '🗑️ AccountDeletionService: Starting account deletion process',
+        );
       }
 
       final deletionResult = AccountDeletionResult();
@@ -44,17 +46,22 @@ class AccountDeletionService {
       // Step 2: Obter estatísticas antes da limpeza (para logs)
       if (_appDataCleaner != null) {
         try {
-          final statsBeforeCleaning = await _appDataCleaner!.getDataStatsBeforeCleaning();
+          final statsBeforeCleaning =
+              await _appDataCleaner.getDataStatsBeforeCleaning();
           deletionResult.dataStatsBeforeCleaning = statsBeforeCleaning;
 
           if (kDebugMode) {
-            debugPrint('📊 AccountDeletionService: Data stats before cleaning:');
-            debugPrint('   App: ${_appDataCleaner!.appName}');
+            debugPrint(
+              '📊 AccountDeletionService: Data stats before cleaning:',
+            );
+            debugPrint('   App: ${_appDataCleaner.appName}');
             debugPrint('   Stats: $statsBeforeCleaning');
           }
         } catch (e) {
           if (kDebugMode) {
-            debugPrint('⚠️ AccountDeletionService: Error getting data stats: $e');
+            debugPrint(
+              '⚠️ AccountDeletionService: Error getting data stats: $e',
+            );
           }
         }
       }
@@ -63,44 +70,61 @@ class AccountDeletionService {
       if (_appDataCleaner != null) {
         try {
           if (kDebugMode) {
-            debugPrint('🧹 AccountDeletionService: Cleaning app-specific data...');
+            debugPrint(
+              '🧹 AccountDeletionService: Cleaning app-specific data...',
+            );
           }
 
-          final cleanupResult = await _appDataCleaner!.clearAllAppData();
+          final cleanupResult = await _appDataCleaner.clearAllAppData();
           deletionResult.localDataCleanupResult = cleanupResult;
 
           if (cleanupResult['success'] == true) {
             if (kDebugMode) {
-              debugPrint('✅ AccountDeletionService: App data cleaned successfully');
-              debugPrint('   Boxes cleared: ${cleanupResult['clearedBoxes']?.length ?? 0}');
-              debugPrint('   Preferences cleared: ${cleanupResult['clearedPreferences']?.length ?? 0}');
-              debugPrint('   Total records: ${cleanupResult['totalRecordsCleared'] ?? 0}');
+              debugPrint(
+                '✅ AccountDeletionService: App data cleaned successfully',
+              );
+              debugPrint(
+                '   Boxes cleared: ${cleanupResult['clearedBoxes']?.length ?? 0}',
+              );
+              debugPrint(
+                '   Preferences cleared: ${cleanupResult['clearedPreferences']?.length ?? 0}',
+              );
+              debugPrint(
+                '   Total records: ${cleanupResult['totalRecordsCleared'] ?? 0}',
+              );
             }
           } else {
             if (kDebugMode) {
-              debugPrint('⚠️ AccountDeletionService: App data cleanup had issues');
+              debugPrint(
+                '⚠️ AccountDeletionService: App data cleanup had issues',
+              );
               debugPrint('   Errors: ${cleanupResult['errors']}');
             }
           }
 
           // Verificar integridade da limpeza
-          final verificationResult = await _appDataCleaner!.verifyDataCleanup();
+          final verificationResult = await _appDataCleaner.verifyDataCleanup();
           deletionResult.dataCleanupVerified = verificationResult;
 
           if (kDebugMode) {
-            debugPrint('🔍 AccountDeletionService: Data cleanup verification: $verificationResult');
+            debugPrint(
+              '🔍 AccountDeletionService: Data cleanup verification: $verificationResult',
+            );
           }
-
         } catch (e) {
           deletionResult.localDataCleanupError = e.toString();
           if (kDebugMode) {
-            debugPrint('❌ AccountDeletionService: Error during app data cleanup: $e');
+            debugPrint(
+              '❌ AccountDeletionService: Error during app data cleanup: $e',
+            );
           }
           // Continue with Firebase deletion even if local cleanup fails
         }
       } else {
         if (kDebugMode) {
-          debugPrint('⚠️ AccountDeletionService: No app data cleaner provided - skipping local cleanup');
+          debugPrint(
+            '⚠️ AccountDeletionService: No app data cleaner provided - skipping local cleanup',
+          );
         }
       }
 
@@ -117,7 +141,9 @@ class AccountDeletionService {
           deletionResult.firebaseDeleteError = failure.message;
 
           if (kDebugMode) {
-            debugPrint('❌ AccountDeletionService: Firebase deletion failed: ${failure.message}');
+            debugPrint(
+              '❌ AccountDeletionService: Firebase deletion failed: ${failure.message}',
+            );
           }
 
           return Result.error(AppErrorFactory.fromFailure(failure));
@@ -127,19 +153,26 @@ class AccountDeletionService {
           deletionResult.completedAt = DateTime.now();
 
           if (kDebugMode) {
-            debugPrint('✅ AccountDeletionService: Account deletion completed successfully');
+            debugPrint(
+              '✅ AccountDeletionService: Account deletion completed successfully',
+            );
             debugPrint('   Firebase: ✅');
-            debugPrint('   Local Data: ${deletionResult.localDataCleanupResult?['success'] == true ? '✅' : '⚠️'}');
-            debugPrint('   Verification: ${deletionResult.dataCleanupVerified ? '✅' : '⚠️'}');
+            debugPrint(
+              '   Local Data: ${deletionResult.localDataCleanupResult?['success'] == true ? '✅' : '⚠️'}',
+            );
+            debugPrint(
+              '   Verification: ${deletionResult.dataCleanupVerified ? '✅' : '⚠️'}',
+            );
           }
 
           return Result.success(deletionResult);
         },
       );
-
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ AccountDeletionService: Unexpected error during deletion: $e');
+        debugPrint(
+          '❌ AccountDeletionService: Unexpected error during deletion: $e',
+        );
       }
 
       return Result.error(
@@ -163,9 +196,9 @@ class AccountDeletionService {
 
       if (_appDataCleaner != null) {
         try {
-          final hasData = await _appDataCleaner!.hasDataToClear();
-          final stats = await _appDataCleaner!.getDataStatsBeforeCleaning();
-          final categories = _appDataCleaner!.getAvailableCategories();
+          final hasData = await _appDataCleaner.hasDataToClear();
+          final stats = await _appDataCleaner.getDataStatsBeforeCleaning();
+          final categories = _appDataCleaner.getAvailableCategories();
 
           preview.addAll({
             'hasDataToClear': hasData,
@@ -231,8 +264,8 @@ class AccountDeletionResult {
   @override
   String toString() {
     return 'AccountDeletionResult(isSuccess: $isSuccess, '
-           'firebaseDeleteSuccess: $firebaseDeleteSuccess, '
-           'localDataCleanupSuccess: ${localDataCleanupResult?['success']}, '
-           'dataCleanupVerified: $dataCleanupVerified)';
+        'firebaseDeleteSuccess: $firebaseDeleteSuccess, '
+        'localDataCleanupSuccess: ${localDataCleanupResult?['success']}, '
+        'dataCleanupVerified: $dataCleanupVerified)';
   }
 }

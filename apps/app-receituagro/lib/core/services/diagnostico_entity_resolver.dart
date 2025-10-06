@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
-import '../di/injection_container.dart';
 import '../data/repositories/cultura_hive_repository.dart';
 import '../data/repositories/fitossanitario_hive_repository.dart';
 import '../data/repositories/pragas_hive_repository.dart';
+import '../di/injection_container.dart';
 
 /// Serviço unificado para resolver nomes de entidades em diagnósticos
 /// 

@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
@@ -10,7 +10,7 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Princípio: Single Responsibility - Apenas storage
 class FavoritosStorageService implements IFavoritosStorage {
   final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
-  
+
   // Constantes para chaves de storage
   static const Map<String, String> _storageKeys = {
     'defensivo': 'defensivos',
@@ -50,10 +50,14 @@ class FavoritosStorageService implements IFavoritosStorage {
         'tipo': tipo,
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
-      
+
       return await _repository.addFavorito(tipoKey, id, itemData);
     } catch (e) {
-      throw FavoritosException('Erro ao adicionar favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao adicionar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -65,7 +69,11 @@ class FavoritosStorageService implements IFavoritosStorage {
 
       return await _repository.removeFavorito(tipoKey, id);
     } catch (e) {
-      throw FavoritosException('Erro ao remover favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao remover favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -77,7 +85,11 @@ class FavoritosStorageService implements IFavoritosStorage {
 
       return await _repository.isFavorito(tipoKey, id);
     } catch (e) {
-      throw FavoritosException('Erro ao verificar favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao verificar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -109,10 +121,13 @@ class FavoritosStorageService implements IFavoritosStorage {
     try {
       // Implementação para sincronização local - força reload do cache
       // Futura integração com Firebase será implementada quando necessário
-      
+
       // Por enquanto, invalida estatísticas para forçar reload
       final stats = await _repository.getFavoritosStats();
-      developer.log('Favoritos sincronizados - Stats: $stats', name: 'FavoritosStorageService');
+      developer.log(
+        'Favoritos sincronizados - Stats: $stats',
+        name: 'FavoritosStorageService',
+      );
     } catch (e) {
       throw FavoritosException('Erro ao sincronizar favoritos: $e');
     }
@@ -171,10 +186,9 @@ class FavoritosCacheService implements IFavoritosCache {
   @override
   Future<void> clearByPrefix(String prefix) async {
     try {
-      final keysToRemove = _memoryCache.keys
-          .where((key) => key.startsWith(prefix))
-          .toList();
-      
+      final keysToRemove =
+          _memoryCache.keys.where((key) => key.startsWith(prefix)).toList();
+
       for (final key in keysToRemove) {
         await remove(key);
       }
@@ -211,7 +225,6 @@ class FavoritosCacheService implements IFavoritosCache {
 /// Implementação do resolvedor de dados
 /// Princípio: Single Responsibility - Apenas resolução de dados
 class FavoritosDataResolverService implements IFavoritosDataResolver {
-  
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
     try {
@@ -225,7 +238,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'modoAcao': defensivo.modoAcao ?? '',
         };
       }
-      
+
       // Fallback se não encontrar dados
       return {
         'nomeComum': 'Defensivo $id',
@@ -251,7 +264,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'familia': praga.familia ?? '',
         };
       }
-      
+
       // Fallback se não encontrar dados
       return {
         'nomeComum': 'Praga $id',
@@ -270,14 +283,16 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
       if (diagnostico != null) {
         return {
           'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
-          'nomeDefensivo': diagnostico.nomeDefensivo ?? 'Defensivo não encontrado',
+          'nomeDefensivo':
+              diagnostico.nomeDefensivo ?? 'Defensivo não encontrado',
           'cultura': diagnostico.nomeCultura ?? 'Cultura não encontrada',
-          'dosagem': '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
+          'dosagem':
+              '${diagnostico.dsMin ?? ''} - ${diagnostico.dsMax} ${diagnostico.um}',
           'fabricante': '', // Campo não disponível no DiagnosticoHive
           'modoAcao': '', // Campo não disponível no DiagnosticoHive
         };
       }
-      
+
       // Fallback se não encontrar dados
       return {
         'nomePraga': 'Praga $id',
@@ -301,7 +316,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'nomeComum': cultura.nomeComum,
         };
       }
-      
+
       // Fallback se não encontrar dados
       return {
         'nomeCultura': 'Cultura $id',
@@ -316,7 +331,6 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
 /// Factory para criação de entidades de favoritos
 /// Princípio: Factory Pattern + Single Responsibility
 class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
-  
   @override
   FavoritoDefensivoEntity createDefensivo({
     required String id,
@@ -397,7 +411,6 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
 /// Validador para favoritos
 /// Princípio: Single Responsibility - Apenas validação
 class FavoritosValidatorService implements IFavoritosValidator {
-  
   @override
   Future<bool> canAddToFavorites(String tipo, String id) async {
     return isValidTipo(tipo) && isValidId(id) && await exists(tipo, id);
@@ -408,13 +421,17 @@ class FavoritosValidatorService implements IFavoritosValidator {
     try {
       switch (tipo) {
         case TipoFavorito.defensivo:
-          final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(id);
+          final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(
+            id,
+          );
           return defensivo != null;
         case TipoFavorito.praga:
           final praga = await ReceitaAgroHiveService.getPragaById(id);
           return praga != null;
         case TipoFavorito.diagnostico:
-          final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(id);
+          final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(
+            id,
+          );
           return diagnostico != null;
         case TipoFavorito.cultura:
           final cultura = await ReceitaAgroHiveService.getCulturaById(id);

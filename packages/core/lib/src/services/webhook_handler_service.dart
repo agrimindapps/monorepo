@@ -30,7 +30,7 @@ class WebhookHandlerService {
   Future<Either<Failure, void>> validateWebhook(Map<String, dynamic> data) async {
     // Simple validation stub
     if (data.isEmpty) {
-      return Left(ValidationFailure('Empty webhook data'));
+      return const Left(ValidationFailure('Empty webhook data'));
     }
     return const Right(null);
   }
@@ -42,7 +42,7 @@ class WebhookHandlerService {
     // Validate first
     final validationResult = await validateWebhook(webhookData);
     if (validationResult.isLeft()) {
-      return Left(ValidationFailure('Webhook validation failed'));
+      return const Left(ValidationFailure('Webhook validation failed'));
     }
 
     // Process webhook - stub implementation

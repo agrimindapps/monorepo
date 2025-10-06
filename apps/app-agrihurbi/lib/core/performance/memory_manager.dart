@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
+    show StateNotifier, StateNotifierProvider, Provider;
+import 'package:flutter/foundation.dart';
 
 /// Callback para situações de pressão de memória
 typedef MemoryPressureCallback =

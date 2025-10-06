@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/providers/auth_providers.dart';
@@ -16,18 +16,15 @@ class SettingsPage extends ConsumerWidget {
     final userDisplayName = authState.value?.displayName ?? 'Usuário';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configurações'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Configurações'), elevation: 0),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Header do usuário
             _buildUserHeader(context, userDisplayName),
-            
+
             const SizedBox(height: 24),
-            
+
             // Seção de Aparência
             _buildSectionCard(
               context,
@@ -44,9 +41,9 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Seção de Conta
             _buildSectionCard(
               context,
@@ -70,9 +67,9 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Seção de Notificações
             _buildSectionCard(
               context,
@@ -87,9 +84,9 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Seção de Dados
             _buildSectionCard(
               context,
@@ -104,7 +101,10 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.delete_outline, color: AppColors.warning),
+                  leading: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.warning,
+                  ),
                   title: const Text(
                     'Limpar dados',
                     style: TextStyle(color: AppColors.warning),
@@ -114,9 +114,9 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Seção Sobre
             _buildSectionCard(
               context,
@@ -143,9 +143,9 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Footer
             Text(
               'Task Manager',
@@ -163,7 +163,7 @@ class SettingsPage extends ConsumerWidget {
                 color: Theme.of(context).textTheme.bodySmall?.color,
               ),
             ),
-            
+
             const SizedBox(height: 32),
           ],
         ),
@@ -219,7 +219,8 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionCard(BuildContext context, {
+  Widget _buildSectionCard(
+    BuildContext context, {
     required String title,
     required List<Widget> children,
   }) {
@@ -232,10 +233,7 @@ class SettingsPage extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
           ...children,
@@ -248,104 +246,114 @@ class SettingsPage extends ConsumerWidget {
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair'),
-        content: const Text('Tem certeza que deseja sair do aplicativo?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Sair'),
+            content: const Text('Tem certeza que deseja sair do aplicativo?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  Navigator.pop(context); // Voltar para tela anterior
+
+                  try {
+                    await ref.read(authNotifierProvider.notifier).signOut();
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Erro ao sair: ${e.toString()}'),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Sair'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              Navigator.pop(context); // Voltar para tela anterior
-              
-              try {
-                await ref.read(authNotifierProvider.notifier).signOut();
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erro ao sair: ${e.toString()}'),
-                      backgroundColor: AppColors.error,
-                    ),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showExportDialog(BuildContext context) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exportar dados'),
-        content: const Text('Funcionalidade em desenvolvimento.\n\nEm breve você poderá exportar suas tarefas para arquivo JSON ou CSV.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Exportar dados'),
+            content: const Text(
+              'Funcionalidade em desenvolvimento.\n\nEm breve você poderá exportar suas tarefas para arquivo JSON ou CSV.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showClearDataDialog(BuildContext context) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Limpar dados'),
-        content: const Text('Tem certeza que deseja remover todas as tarefas?\n\nEsta ação não pode ser desfeita.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Funcionalidade em desenvolvimento'),
-                  backgroundColor: AppColors.info,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.warning,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Limpar dados'),
+            content: const Text(
+              'Tem certeza que deseja remover todas as tarefas?\n\nEsta ação não pode ser desfeita.',
             ),
-            child: const Text('Limpar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Funcionalidade em desenvolvimento'),
+                      backgroundColor: AppColors.info,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.warning,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Limpar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showHelpDialog(BuildContext context) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajuda'),
-        content: const Text('Task Manager é um aplicativo para gerenciar suas tarefas pessoais.\n\n• Adicione tarefas rapidamente\n• Organize por prioridade\n• Marque como favoritas\n• Adicione comentários e anotações\n\nPara suporte, entre em contato conosco.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendi'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Ajuda'),
+            content: const Text(
+              'Task Manager é um aplicativo para gerenciar suas tarefas pessoais.\n\n• Adicione tarefas rapidamente\n• Organize por prioridade\n• Marque como favoritas\n• Adicione comentários e anotações\n\nPara suporte, entre em contato conosco.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendi'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -359,37 +367,40 @@ class SettingsPage extends ConsumerWidget {
 
   void _navigateToAccountPage(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute<dynamic>(
-        builder: (context) => const AccountPage(),
-      ),
+      MaterialPageRoute<dynamic>(builder: (context) => const AccountPage()),
     );
   }
 
   void _showRatingDialog(BuildContext context) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Avaliar app'),
-        content: const Text('Gostou do Task Manager?\n\nSua avaliação nos ajuda a melhorar o aplicativo!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Mais tarde'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Avaliar app'),
+            content: const Text(
+              'Gostou do Task Manager?\n\nSua avaliação nos ajuda a melhorar o aplicativo!',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Mais tarde'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Obrigado pelo interesse! Link da store em breve.',
+                      ),
+                      backgroundColor: AppColors.success,
+                    ),
+                  );
+                },
+                child: const Text('Avaliar'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Obrigado pelo interesse! Link da store em breve.'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            },
-            child: const Text('Avaliar'),
-          ),
-        ],
-      ),
     );
   }
 }

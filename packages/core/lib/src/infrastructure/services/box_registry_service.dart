@@ -2,20 +2,20 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../../../models/license_model.dart';
 import '../../domain/services/i_box_registry_service.dart';
 import '../../shared/utils/failure.dart';
 import '../models/box_configuration.dart';
-import '../../../models/license_model.dart';
 
 /// Implementação do serviço de registro de boxes
 /// Gerencia o ciclo de vida das boxes e garante isolamento entre apps
 class BoxRegistryService implements IBoxRegistryService {
   /// Registry de configurações de boxes
   final Map<String, BoxConfiguration> _boxConfigurations = {};
-  
+
   /// Registry de boxes abertas
   final Map<String, Box> _openBoxes = {};
-  
+
   /// Flag de inicialização
   bool _isInitialized = false;
 
@@ -30,7 +30,7 @@ class BoxRegistryService implements IBoxRegistryService {
       _registerLicenseAdapters();
 
       _isInitialized = true;
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao inicializar BoxRegistryService: $e'));
@@ -44,9 +44,11 @@ class BoxRegistryService implements IBoxRegistryService {
 
       // Verifica se já existe box com este nome
       if (_boxConfigurations.containsKey(config.name)) {
-        return Left(CacheFailure(
-          'Box "${config.name}" já está registrada por app "${_boxConfigurations[config.name]!.appId}"'
-        ));
+        return Left(
+          CacheFailure(
+            'Box "${config.name}" já está registrada por app "${_boxConfigurations[config.name]!.appId}"',
+          ),
+        );
       }
 
       // Registra adapters customizados se houver
@@ -60,14 +62,17 @@ class BoxRegistryService implements IBoxRegistryService {
 
       // Armazena configuração
       _boxConfigurations[config.name] = config;
-      
+
       // Abre a box imediatamente se for persistente
       if (config.persistent) {
         final boxResult = await _openBox(config);
         if (boxResult.isLeft()) {
           // Remove do registry se falhou ao abrir
           _boxConfigurations.remove(config.name);
-          return boxResult.fold((failure) => Left(failure), (_) => const Right(null));
+          return boxResult.fold(
+            (failure) => Left(failure),
+            (_) => const Right(null),
+          );
         }
       }
 
@@ -95,11 +100,8 @@ class BoxRegistryService implements IBoxRegistryService {
       // Abre a box
       final config = _boxConfigurations[boxName]!;
       final boxResult = await _openBox(config);
-      
-      return boxResult.fold(
-        (failure) => Left(failure),
-        (box) => Right(box),
-      );
+
+      return boxResult.fold((failure) => Left(failure), (box) => Right(box));
     } catch (e) {
       return Left(CacheFailure('Erro ao obter box "$boxName": $e'));
     }
@@ -132,7 +134,7 @@ class BoxRegistryService implements IBoxRegistryService {
 
       // Remove do registry (mas não fecha a box)
       _boxConfigurations.remove(boxName);
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao desregistrar box "$boxName": $e'));
@@ -154,7 +156,7 @@ class BoxRegistryService implements IBoxRegistryService {
 
       // Remove do registry
       _boxConfigurations.remove(boxName);
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao fechar box "$boxName": $e'));
@@ -165,7 +167,7 @@ class BoxRegistryService implements IBoxRegistryService {
   Future<Either<Failure, void>> closeBoxesForApp(String appId) async {
     try {
       final boxesToClose = getRegisteredBoxesForApp(appId);
-      
+
       for (final boxName in boxesToClose) {
         final result = await closeBox(boxName);
         if (result.isLeft()) {
@@ -175,7 +177,7 @@ class BoxRegistryService implements IBoxRegistryService {
           }
         }
       }
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao fechar boxes do app "$appId": $e'));
@@ -186,7 +188,7 @@ class BoxRegistryService implements IBoxRegistryService {
   bool canAppAccessBox(String boxName, String requestingAppId) {
     final config = _boxConfigurations[boxName];
     if (config == null) return false;
-    
+
     // Por agora, apenas o app proprietário pode acessar a box
     // No futuro, pode-se implementar sistema de permissões mais sofisticado
     return config.appId == requestingAppId;
@@ -200,15 +202,17 @@ class BoxRegistryService implements IBoxRegistryService {
       for (final boxName in boxNames) {
         await _openBoxes[boxName]!.close();
       }
-      
+
       // Limpa registries
       _openBoxes.clear();
       _boxConfigurations.clear();
       _isInitialized = false;
-      
+
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao fazer dispose do BoxRegistryService: $e'));
+      return Left(
+        CacheFailure('Erro ao fazer dispose do BoxRegistryService: $e'),
+      );
     }
   }
 
@@ -216,7 +220,7 @@ class BoxRegistryService implements IBoxRegistryService {
   Future<Either<Failure, Box>> _openBox(BoxConfiguration config) async {
     try {
       Box box;
-      
+
       if (config.encryption != null) {
         // Box criptografada
         box = await Hive.openBox(
@@ -226,12 +230,9 @@ class BoxRegistryService implements IBoxRegistryService {
         );
       } else {
         // Box normal
-        box = await Hive.openBox(
-          config.name,
-          path: config.customPath,
-        );
+        box = await Hive.openBox(config.name, path: config.customPath);
       }
-      
+
       _openBoxes[config.name] = box;
       return Right(box);
     } catch (e) {
@@ -271,7 +272,7 @@ class BoxRegistryService implements IBoxRegistryService {
   /// Agrupa boxes por app para debug
   Map<String, List<String>> _groupBoxesByApp() {
     final grouped = <String, List<String>>{};
-    
+
     for (final entry in _boxConfigurations.entries) {
       final appId = entry.value.appId;
       if (!grouped.containsKey(appId)) {
@@ -279,7 +280,7 @@ class BoxRegistryService implements IBoxRegistryService {
       }
       grouped[appId]!.add(entry.key);
     }
-    
+
     return grouped;
   }
 

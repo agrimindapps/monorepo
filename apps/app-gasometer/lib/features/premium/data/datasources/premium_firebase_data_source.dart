@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' as core;
+import 'package:core/core.dart' show injectable;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:core/core.dart' show injectable;
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/premium_status.dart';

@@ -107,9 +107,9 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog> {
           ),
         );
       },
-      loading: () => AlertDialog(
-        title: const Text('Exportando dados'),
-        content: const SizedBox(
+      loading: () => const AlertDialog(
+        title: Text('Exportando dados'),
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,

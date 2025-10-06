@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../theme/unified_design_tokens.dart';
 import '../services/unified_formatters.dart';
 import '../services/unified_validators.dart';
+import '../theme/unified_design_tokens.dart';
 
 /// Componente de formulário unificado que substitui todos os outros campos
-/// 
+///
 /// Características:
 /// - Validação em tempo real com debounce
 /// - Formatação automática baseada no tipo
@@ -61,15 +61,15 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
   late TextEditingController _controller;
   UnifiedValidationResult _validationResult = UnifiedValidationResult.initial();
   Timer? _debounceTimer;
-  
+
   late AnimationController _iconAnimationController;
   late Animation<double> _iconAnimation;
-  
+
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-    
+
     // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: const Duration(milliseconds: 250),
@@ -81,7 +81,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         curve: Curves.easeInOut,
       ),
     );
-    
+
     // Listener para mudanças no texto
     _controller.addListener(_onTextChanged);
   }
@@ -100,13 +100,13 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
 
   void _onTextChanged() {
     final text = _controller.text;
-    
+
     // Chamar callback imediatamente
     widget.onChanged?.call(text);
-    
+
     // Cancelar timer anterior se existir
     _debounceTimer?.cancel();
-    
+
     // Se campo vazio e não obrigatório, resetar validação
     if (text.isEmpty && !widget.required) {
       setState(() {
@@ -115,12 +115,12 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
       widget.onValidationChanged?.call(_validationResult);
       return;
     }
-    
+
     // Mostrar estado de validação em progresso
     setState(() {
       _validationResult = UnifiedValidationResult.validating();
     });
-    
+
     // Configurar debounce para validação
     _debounceTimer = Timer(widget.debounceDuration, () {
       _performValidation(text);
@@ -129,37 +129,38 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
 
   Future<void> _performValidation(String text) async {
     if (!mounted) return;
-    
+
     try {
       final validator = UnifiedValidators.getValidator(
         widget.validationType,
         context: widget.validationContext,
       );
-      
+
       final result = validator.validate(text, required: widget.required);
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _validationResult = result;
       });
-      
+
       // Notificar mudança de validação
       widget.onValidationChanged?.call(result);
-      
+
       // Animar ícone se houver mudança de estado
-      if (result.status != ValidationStatus.initial && 
+      if (result.status != ValidationStatus.initial &&
           result.status != ValidationStatus.validating) {
         _iconAnimationController.forward();
       }
-      
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
-        _validationResult = UnifiedValidationResult.error('Erro na validação: $e');
+        _validationResult = UnifiedValidationResult.error(
+          'Erro na validação: $e',
+        );
       });
-      
+
       widget.onValidationChanged?.call(_validationResult);
     }
   }
@@ -182,7 +183,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -212,7 +213,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
               ),
             ),
           ),
-        
+
         // Input Field
         TextFormField(
           controller: _controller,
@@ -225,35 +226,43 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
             prefixIcon: widget.prefixIcon,
             suffixIcon: _buildSuffixIcon(),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
+              borderRadius: BorderRadius.circular(
+                UnifiedDesignTokens.radiusInput,
+              ),
               borderSide: BorderSide(color: _getBorderColor()),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
+              borderRadius: BorderRadius.circular(
+                UnifiedDesignTokens.radiusInput,
+              ),
               borderSide: BorderSide(color: _getBorderColor()),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
-              borderSide: BorderSide(
-                color: _getBorderColor(),
-                width: 2.0,
+              borderRadius: BorderRadius.circular(
+                UnifiedDesignTokens.radiusInput,
               ),
+              borderSide: BorderSide(color: _getBorderColor(), width: 2.0),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
+              borderRadius: BorderRadius.circular(
+                UnifiedDesignTokens.radiusInput,
+              ),
               borderSide: BorderSide(color: theme.colorScheme.error),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
+              borderRadius: BorderRadius.circular(
+                UnifiedDesignTokens.radiusInput,
+              ),
               borderSide: BorderSide(
                 color: theme.colorScheme.error,
                 width: 2.0,
               ),
             ),
             filled: true,
-            fillColor: widget.enabled 
-                ? theme.colorScheme.surface
-                : UnifiedDesignTokens.colorSurfaceVariant,
+            fillColor:
+                widget.enabled
+                    ? theme.colorScheme.surface
+                    : UnifiedDesignTokens.colorSurfaceVariant,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: UnifiedDesignTokens.spacingLG,
               vertical: UnifiedDesignTokens.spacingMD,
@@ -262,7 +271,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
           // Não usar validação nativa do FormField - usar nosso sistema
           validator: null,
         ),
-        
+
         // Validation Message
         if (_validationResult.message != null)
           Padding(
@@ -293,7 +302,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
       ],
     );
   }
-  
+
   Widget? _buildSuffixIcon() {
     if (widget.suffixIcon != null) {
       // Se há um suffixIcon customizado, combinar com o ícone de validação
@@ -307,15 +316,15 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         ],
       );
     }
-    
+
     return _buildValidationIcon();
   }
-  
+
   Widget _buildValidationIcon() {
     if (_validationResult.status == ValidationStatus.initial) {
       return const SizedBox.shrink();
     }
-    
+
     switch (_validationResult.status) {
       case ValidationStatus.validating:
         return const SizedBox(
@@ -359,14 +368,14 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         return const SizedBox.shrink();
     }
   }
-  
+
   Color _getBorderColor() {
     final theme = Theme.of(context);
-    
+
     if (!widget.enabled) {
       return theme.colorScheme.outline.withValues(alpha: 0.5);
     }
-    
+
     switch (_validationResult.status) {
       case ValidationStatus.valid:
         return UnifiedDesignTokens.colorSuccess;
@@ -380,7 +389,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         return theme.colorScheme.outline;
     }
   }
-  
+
   Color _getValidationColor() {
     final theme = Theme.of(context);
     switch (_validationResult.status) {
@@ -394,7 +403,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         return theme.colorScheme.onSurfaceVariant;
     }
   }
-  
+
   IconData _getValidationIcon() {
     switch (_validationResult.status) {
       case ValidationStatus.valid:
@@ -407,7 +416,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         return Icons.info;
     }
   }
-  
+
   TextInputType _getKeyboardType() {
     switch (widget.validationType) {
       case UnifiedValidationType.email:
@@ -421,7 +430,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         return TextInputType.text;
     }
   }
-  
+
   List<TextInputFormatter> _getInputFormatters() {
     return UnifiedFormatters.getFormatters(widget.validationType);
   }

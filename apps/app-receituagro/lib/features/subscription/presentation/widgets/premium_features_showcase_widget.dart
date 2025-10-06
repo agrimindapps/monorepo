@@ -538,8 +538,9 @@ class _PremiumFeaturesShowcaseWidgetState
     BuildContext context,
     FeatureFlagsNotifier featureFlags,
   ) {
-    if (!featureFlags.isContentSynchronizationEnabled)
+    if (!featureFlags.isContentSynchronizationEnabled) {
       return const SizedBox.shrink();
+    }
 
     final theme = Theme.of(context);
 

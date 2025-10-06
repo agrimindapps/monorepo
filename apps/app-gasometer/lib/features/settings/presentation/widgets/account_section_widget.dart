@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/widgets/user_avatar_widget.dart';
-import '../../../../core/widgets/standard_loading_view.dart';
-import '../../../auth/presentation/state/auth_state.dart';
-import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/user_avatar_widget.dart';
 import '../../../auth/domain/entities/user_entity.dart' as gasometer_entities;
+import '../../../auth/presentation/notifiers/notifiers.dart';
+import '../../../auth/presentation/state/auth_state.dart';
 
 class AccountSectionWidget extends ConsumerWidget {
   const AccountSectionWidget({super.key});

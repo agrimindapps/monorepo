@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../models/license_model.dart';
-import '../src/shared/utils/failure.dart';
 import '../repositories/license_repository.dart';
+import '../src/shared/utils/failure.dart';
 
 /// Service for managing license operations and business logic
 @Injectable()
@@ -23,7 +23,9 @@ class LicenseService {
       return currentResult.fold(
         (failure) async {
           // Error getting license, create new trial
-          return await _licenseRepository.createTrialLicense(metadata: metadata);
+          return await _licenseRepository.createTrialLicense(
+            metadata: metadata,
+          );
         },
         (existingLicense) async {
           if (existingLicense != null && existingLicense.isValid) {
@@ -31,7 +33,9 @@ class LicenseService {
             return Right(existingLicense);
           } else {
             // No valid license, create new trial
-            return await _licenseRepository.createTrialLicense(metadata: metadata);
+            return await _licenseRepository.createTrialLicense(
+              metadata: metadata,
+            );
           }
         },
       );
@@ -45,28 +49,25 @@ class LicenseService {
     try {
       final result = await _licenseRepository.getCurrentLicense();
 
-      return result.fold(
-        (failure) => Left(failure),
-        (license) {
-          if (license == null) {
-            return const Right(LicenseStatus.noLicense);
-          }
+      return result.fold((failure) => Left(failure), (license) {
+        if (license == null) {
+          return const Right(LicenseStatus.noLicense);
+        }
 
-          if (license.isExpired) {
-            return const Right(LicenseStatus.expired);
-          }
+        if (license.isExpired) {
+          return const Right(LicenseStatus.expired);
+        }
 
-          if (license.isAboutToExpire) {
-            return const Right(LicenseStatus.aboutToExpire);
-          }
+        if (license.isAboutToExpire) {
+          return const Right(LicenseStatus.aboutToExpire);
+        }
 
-          if (license.isValid) {
-            return const Right(LicenseStatus.active);
-          }
+        if (license.isValid) {
+          return const Right(LicenseStatus.active);
+        }
 
-          return const Right(LicenseStatus.inactive);
-        },
-      );
+        return const Right(LicenseStatus.inactive);
+      });
     } catch (e) {
       return Left(UnknownFailure('Failed to get license status: $e'));
     }
@@ -77,16 +78,13 @@ class LicenseService {
     try {
       final statusResult = await getLicenseStatus();
 
-      return statusResult.fold(
-        (failure) => Left(failure),
-        (status) {
-          final premiumStatuses = [
-            LicenseStatus.active,
-            LicenseStatus.aboutToExpire,
-          ];
-          return Right(premiumStatuses.contains(status));
-        },
-      );
+      return statusResult.fold((failure) => Left(failure), (status) {
+        final premiumStatuses = [
+          LicenseStatus.active,
+          LicenseStatus.aboutToExpire,
+        ];
+        return Right(premiumStatuses.contains(status));
+      });
     } catch (e) {
       return Left(UnknownFailure('Failed to check premium availability: $e'));
     }
@@ -105,7 +103,9 @@ class LicenseService {
   Future<Either<Failure, LicenseModel>> extendTrial(int days) async {
     try {
       if (days <= 0 || days > 90) {
-        return Left(const ValidationFailure('Extension days must be between 1 and 90'));
+        return const Left(
+          ValidationFailure('Extension days must be between 1 and 90'),
+        );
       }
 
       return await _licenseRepository.extendLicense(days);
@@ -127,10 +127,7 @@ class LicenseService {
         expirationDate: DateTime.now().add(const Duration(days: 365)), // 1 year
         isActive: true,
         type: LicenseType.premium,
-        metadata: {
-          'subscriptionId': subscriptionId,
-          ...?metadata,
-        },
+        metadata: {'subscriptionId': subscriptionId, ...?metadata},
       );
 
       final saveResult = await _licenseRepository.saveLicense(premiumLicense);
@@ -148,26 +145,27 @@ class LicenseService {
     try {
       final licenseResult = await _licenseRepository.getCurrentLicense();
 
-      return licenseResult.fold(
-        (failure) => Left(failure),
-        (license) async {
-          if (license == null) {
-            return const Right(LicenseInfo.noLicense());
-          }
+      return licenseResult.fold((failure) => Left(failure), (license) async {
+        if (license == null) {
+          return const Right(LicenseInfo.noLicense());
+        }
 
-          final statusResult = await getLicenseStatus();
-          return statusResult.fold(
-            (failure) => Left(failure),
-            (status) => Right(LicenseInfo(
+        final statusResult = await getLicenseStatus();
+        return statusResult.fold(
+          (failure) => Left(failure),
+          (status) => Right(
+            LicenseInfo(
               license: license,
               status: status,
               remainingDays: license.remainingDays,
-              isTrialActive: license.type == LicenseType.trial && license.isValid,
-              isPremiumActive: license.type == LicenseType.premium && license.isValid,
-            )),
-          );
-        },
-      );
+              isTrialActive:
+                  license.type == LicenseType.trial && license.isValid,
+              isPremiumActive:
+                  license.type == LicenseType.premium && license.isValid,
+            ),
+          ),
+        );
+      });
     } catch (e) {
       return Left(UnknownFailure('Failed to get license info: $e'));
     }
@@ -196,13 +194,10 @@ class LicenseService {
     try {
       final premiumResult = await isPremiumAvailable();
 
-      return premiumResult.fold(
-        (failure) => Left(failure),
-        (isPremium) {
-          // All features require premium access
-          return Right(isPremium);
-        },
-      );
+      return premiumResult.fold((failure) => Left(failure), (isPremium) {
+        // All features require premium access
+        return Right(isPremium);
+      });
     } catch (e) {
       return Left(UnknownFailure('Failed to validate feature access: $e'));
     }
@@ -213,21 +208,22 @@ class LicenseService {
     try {
       final infoResult = await getLicenseInfo();
 
-      return infoResult.fold(
-        (failure) => Left(failure),
-        (info) {
-          if (!info.isTrialActive) return const Right(null);
+      return infoResult.fold((failure) => Left(failure), (info) {
+        if (!info.isTrialActive) return const Right(null);
 
-          final days = info.remainingDays;
-          if (days <= 0) {
-            return const Right('Seu período de teste expirou. Assine o premium para continuar.');
-          } else if (days <= 3) {
-            return Right('Seu período de teste expira em $days ${days == 1 ? 'dia' : 'dias'}.');
-          }
+        final days = info.remainingDays;
+        if (days <= 0) {
+          return const Right(
+            'Seu período de teste expirou. Assine o premium para continuar.',
+          );
+        } else if (days <= 3) {
+          return Right(
+            'Seu período de teste expira em $days ${days == 1 ? 'dia' : 'dias'}.',
+          );
+        }
 
-          return const Right(null);
-        },
-      );
+        return const Right(null);
+      });
     } catch (e) {
       return Left(UnknownFailure('Failed to get expiration warning: $e'));
     }
@@ -235,13 +231,7 @@ class LicenseService {
 }
 
 /// Enum for license status
-enum LicenseStatus {
-  noLicense,
-  active,
-  aboutToExpire,
-  expired,
-  inactive,
-}
+enum LicenseStatus { noLicense, active, aboutToExpire, expired, inactive }
 
 /// Extension for LicenseStatus display
 extension LicenseStatusExtension on LicenseStatus {
@@ -293,11 +283,11 @@ class LicenseInfo {
   });
 
   const LicenseInfo.noLicense()
-      : license = null,
-        status = LicenseStatus.noLicense,
-        remainingDays = 0,
-        isTrialActive = false,
-        isPremiumActive = false;
+    : license = null,
+      status = LicenseStatus.noLicense,
+      remainingDays = 0,
+      isTrialActive = false,
+      isPremiumActive = false;
 
   bool get hasValidLicense => isTrialActive || isPremiumActive;
 

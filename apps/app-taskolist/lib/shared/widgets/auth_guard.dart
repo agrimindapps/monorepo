@@ -1,14 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/login_page.dart';
 import '../providers/auth_providers.dart';
 
 class AuthGuard extends ConsumerWidget {
-  const AuthGuard({
-    super.key,
-    required this.child,
-  });
+  const AuthGuard({super.key, required this.child});
 
   final Widget child;
 
@@ -17,11 +14,9 @@ class AuthGuard extends ConsumerWidget {
     final authState = ref.watch(authNotifierProvider);
 
     return authState.when(
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
+      loading:
+          () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stackTrace) => const LoginPage(),
       data: (user) {
         if (user == null) {

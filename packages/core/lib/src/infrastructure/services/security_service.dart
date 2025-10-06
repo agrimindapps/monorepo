@@ -13,7 +13,7 @@ class SecurityService {
   // Configurable policies
   PasswordPolicy _passwordPolicy = const PasswordPolicy.standard();
   LockoutPolicy _lockoutPolicy = const LockoutPolicy.standard();
-  Map<String, RateLimitConfig> _rateLimitConfigs = {};
+  final Map<String, RateLimitConfig> _rateLimitConfigs = {};
 
   // State tracking
   final Map<String, List<DateTime>> _rateLimitTracking = {};

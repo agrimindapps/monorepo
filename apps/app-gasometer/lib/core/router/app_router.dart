@@ -21,7 +21,7 @@ import '../../shared/widgets/adaptive_main_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Web inicia em promo, Mobile/Desktop inicia em login
-  final initialRoute = kIsWeb ? '/promo' : '/login';
+  const initialRoute = kIsWeb ? '/promo' : '/login';
 
   return GoRouter(
     initialLocation: initialRoute,

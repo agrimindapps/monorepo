@@ -1,15 +1,14 @@
+import 'package:core/core.dart' show Provider;
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
+import '../../../../core/di/injection_container.dart';
 import 'bovines_filter_provider.dart';
 import 'bovines_management_provider.dart';
 import 'equines_management_provider.dart';
 import 'livestock_search_provider.dart';
 import 'livestock_statistics_provider.dart';
 import 'livestock_sync_provider.dart';
-import '../../../../core/di/injection_container.dart';
 
 /// Provider coordenador que compõe funcionalidades especializadas
 ///

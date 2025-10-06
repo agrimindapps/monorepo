@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../infrastructure/services/revenue_cat_service.dart';
-import '../../common_providers.dart';
 
 /// Providers unificados para gerenciamento de assinaturas Premium
 /// Consolida RevenueCat integration entre todos os apps do monorepo
@@ -10,9 +9,10 @@ import '../../common_providers.dart';
 // ========== CORE SUBSCRIPTION PROVIDERS ==========
 
 /// Provider principal para estado de assinatura
-final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  return SubscriptionNotifier();
-});
+final subscriptionProvider =
+    StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
+      return SubscriptionNotifier();
+    });
 
 /// Provider para verificar se usuário tem premium ativo
 final isPremiumProvider = Provider<bool>((ref) {
@@ -34,7 +34,9 @@ final subscriptionInfoProvider = Provider<SubscriptionInfo?>((ref) {
 });
 
 /// Provider para produtos disponíveis (SKUs)
-final availableProductsProvider = FutureProvider<List<StoreProduct>>((ref) async {
+final availableProductsProvider = FutureProvider<List<StoreProduct>>((
+  ref,
+) async {
   // TODO: Implementar getOfferings no RevenueCatService
   // Por enquanto, retornar lista vazia
   return <StoreProduct>[];
@@ -53,31 +55,40 @@ final currentOfferingsProvider = FutureProvider<Offerings?>((ref) async {
 final featureGateProvider = Provider.family<bool, String>((ref, featureName) {
   final isPremium = ref.watch(isPremiumProvider);
   final appId = ref.watch(currentAppIdProvider); // Será criado
-  
+
   return _hasFeatureAccess(appId, featureName, isPremium);
 });
 
 /// Provider para limitações específicas por app
-final featureLimitsProvider = Provider.family<FeatureLimits, String>((ref, appId) {
+final featureLimitsProvider = Provider.family<FeatureLimits, String>((
+  ref,
+  appId,
+) {
   final isPremium = ref.watch(isPremiumProvider);
   return FeatureLimits.forApp(appId, isPremium);
 });
 
 /// Provider para contagem de uso de features
-final featureUsageProvider = StateProvider.family<int, String>((ref, feature) => 0);
+final featureUsageProvider = StateProvider.family<int, String>(
+  (ref, feature) => 0,
+);
 
 /// Provider para verificar se atingiu limite de uso
 final hasReachedLimitProvider = Provider.family<bool, String>((ref, feature) {
   final usage = ref.watch(featureUsageProvider(feature));
-  final limits = ref.watch(featureLimitsProvider(feature.split(':').first)); // app:feature
-  
+  final limits = ref.watch(
+    featureLimitsProvider(feature.split(':').first),
+  ); // app:feature
+
   return limits.hasReachedLimit(feature, usage);
 });
 
 // ========== APP-SPECIFIC PROVIDERS ==========
 
 /// Provider para features premium específicas do Gasometer
-final gasometerPremiumFeaturesProvider = Provider<GasometerPremiumFeatures>((ref) {
+final gasometerPremiumFeaturesProvider = Provider<GasometerPremiumFeatures>((
+  ref,
+) {
   final isPremium = ref.watch(isPremiumProvider);
   return GasometerPremiumFeatures(isPremium);
 });
@@ -89,17 +100,19 @@ final plantisPremiumFeaturesProvider = Provider<PlantisPremiumFeatures>((ref) {
 });
 
 /// Provider para features premium específicas do ReceitaAgro
-final receitaagroPremiumFeaturesProvider = Provider<ReceitaagroPremiumFeatures>((ref) {
-  final isPremium = ref.watch(isPremiumProvider);
-  return ReceitaagroPremiumFeatures(isPremium);
-});
+final receitaagroPremiumFeaturesProvider = Provider<ReceitaagroPremiumFeatures>(
+  (ref) {
+    final isPremium = ref.watch(isPremiumProvider);
+    return ReceitaagroPremiumFeatures(isPremium);
+  },
+);
 
 // ========== PURCHASE PROVIDERS ==========
 
 /// Provider para ações de compra
 final purchaseActionsProvider = Provider<PurchaseActions>((ref) {
   final notifier = ref.read(subscriptionProvider.notifier);
-  
+
   return PurchaseActions(
     purchasePackage: notifier.purchasePackage,
     restorePurchases: notifier.restorePurchases,
@@ -108,7 +121,9 @@ final purchaseActionsProvider = Provider<PurchaseActions>((ref) {
 });
 
 /// Provider para histórico de compras
-final purchaseHistoryProvider = FutureProvider<List<StoreTransaction>>((ref) async {
+final purchaseHistoryProvider = FutureProvider<List<StoreTransaction>>((
+  ref,
+) async {
   // TODO: Implementar getCustomerInfo no RevenueCatService
   // Por enquanto, retornar lista vazia
   return <StoreTransaction>[];
@@ -133,7 +148,7 @@ final subscriptionExpirationProvider = Provider<DateTime?>((ref) {
 final subscriptionExpiringSoonProvider = Provider<bool>((ref) {
   final expiration = ref.watch(subscriptionExpirationProvider);
   if (expiration == null) return false;
-  
+
   final daysUntilExpiration = expiration.difference(DateTime.now()).inDays;
   return daysUntilExpiration <= 7; // Avisa 7 dias antes
 });
@@ -141,11 +156,11 @@ final subscriptionExpiringSoonProvider = Provider<bool>((ref) {
 /// Provider para status de trial
 final trialStatusProvider = Provider<TrialStatus>((ref) {
   final info = ref.watch(subscriptionInfoProvider);
-  
+
   if (info == null) return TrialStatus.notStarted;
   if (info.isTrialPeriod) return TrialStatus.active;
   if (info.hasUsedTrial) return TrialStatus.expired;
-  
+
   return TrialStatus.notEligible;
 });
 
@@ -188,10 +203,16 @@ extension SubscriptionStateExtension on SubscriptionState {
     required T Function(String message) error,
   }) {
     if (this is SubscriptionLoading) return loading();
-    if (this is SubscriptionActive) return active((this as SubscriptionActive).info);
-    if (this is SubscriptionExpired) return expired((this as SubscriptionExpired).info);
+    if (this is SubscriptionActive) {
+      return active((this as SubscriptionActive).info);
+    }
+    if (this is SubscriptionExpired) {
+      return expired((this as SubscriptionExpired).info);
+    }
     if (this is SubscriptionInactive) return inactive();
-    if (this is SubscriptionError) return error((this as SubscriptionError).message);
+    if (this is SubscriptionError) {
+      return error((this as SubscriptionError).message);
+    }
     throw StateError('Unknown state: $this');
   }
 
@@ -204,10 +225,16 @@ extension SubscriptionStateExtension on SubscriptionState {
     required T Function() orElse,
   }) {
     if (this is SubscriptionLoading && loading != null) return loading();
-    if (this is SubscriptionActive && active != null) return active((this as SubscriptionActive).info);
-    if (this is SubscriptionExpired && expired != null) return expired((this as SubscriptionExpired).info);
+    if (this is SubscriptionActive && active != null) {
+      return active((this as SubscriptionActive).info);
+    }
+    if (this is SubscriptionExpired && expired != null) {
+      return expired((this as SubscriptionExpired).info);
+    }
     if (this is SubscriptionInactive && inactive != null) return inactive();
-    if (this is SubscriptionError && error != null) return error((this as SubscriptionError).message);
+    if (this is SubscriptionError && error != null) {
+      return error((this as SubscriptionError).message);
+    }
     return orElse();
   }
 }
@@ -234,9 +261,10 @@ class SubscriptionInfo {
     this.entitlementInfo,
   });
 
-  bool get isActive => isPremium && (expirationDate?.isAfter(DateTime.now()) ?? false);
+  bool get isActive =>
+      isPremium && (expirationDate?.isAfter(DateTime.now()) ?? false);
   bool get isExpired => !isActive && expirationDate != null;
-  
+
   int get daysUntilExpiration {
     if (expirationDate == null) return -1;
     return expirationDate!.difference(DateTime.now()).inDays;
@@ -244,12 +272,7 @@ class SubscriptionInfo {
 }
 
 /// Status do trial
-enum TrialStatus {
-  notStarted,
-  active,
-  expired,
-  notEligible,
-}
+enum TrialStatus { notStarted, active, expired, notEligible }
 
 /// Limitações de features por app
 class FeatureLimits {
@@ -266,11 +289,7 @@ class FeatureLimits {
   factory FeatureLimits.forApp(String appId, bool isPremium) {
     if (isPremium) {
       // Premium users have no limits
-      return FeatureLimits(
-        appId: appId,
-        isPremium: true,
-        limits: const {},
-      );
+      return FeatureLimits(appId: appId, isPremium: true, limits: const {});
     }
 
     // Free users have app-specific limits
@@ -311,11 +330,7 @@ class FeatureLimits {
           },
         );
       default:
-        return FeatureLimits(
-          appId: appId,
-          isPremium: false,
-          limits: const {},
-        );
+        return FeatureLimits(appId: appId, isPremium: false, limits: const {});
     }
   }
 
@@ -324,6 +339,7 @@ class FeatureLimits {
     final limit = getLimitFor(feature);
     return limit != -1 && currentUsage >= limit;
   }
+
   bool isFeatureUnlimited(String feature) => getLimitFor(feature) == -1;
 }
 
@@ -404,11 +420,11 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> checkSubscriptionStatus() async {
     try {
       state = const SubscriptionLoading();
-      
+
       // TODO: Implementar getCustomerInfo no RevenueCatService
       // Por enquanto, simular usuário sem premium
       final entitlements = <String, EntitlementInfo>{};
-      
+
       if (entitlements.isNotEmpty) {
         // TODO: Implementar parsing real do EntitlementInfo quando service estiver pronto
         final info = SubscriptionInfo(
@@ -419,7 +435,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
           expirationDate: DateTime.now().add(const Duration(days: 15)),
           originalTransactionId: 'mock_transaction_id',
         );
-        
+
         if (info.isActive) {
           state = SubscriptionActive(info);
         } else {
@@ -436,11 +452,11 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<bool> purchasePackage(dynamic package) async {
     try {
       state = const SubscriptionLoading();
-      
+
       // TODO: Implementar purchasePackage no RevenueCatService
       // Por enquanto, simular compra bem-sucedida
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Simular ativação de premium após compra
       final info = SubscriptionInfo(
         productId: 'premium_monthly',
@@ -448,9 +464,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
         isTrialPeriod: false,
         purchaseDate: DateTime.now(),
         expirationDate: DateTime.now().add(const Duration(days: 30)),
-        originalTransactionId: 'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
+        originalTransactionId:
+            'mock_transaction_${DateTime.now().millisecondsSinceEpoch}',
       );
-      
+
       state = SubscriptionActive(info);
       return true;
     } catch (e) {
@@ -462,9 +479,9 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<bool> restorePurchases() async {
     try {
       state = const SubscriptionLoading();
-      
+
       final result = await _revenueCatService.restorePurchases();
-      
+
       result.fold(
         (failure) {
           state = SubscriptionError(failure.message);
@@ -475,7 +492,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
           return true;
         },
       );
-      
+
       return false;
     } catch (e) {
       state = SubscriptionError('Erro ao restaurar compras: $e');
@@ -489,14 +506,14 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 /// Verifica se tem acesso a uma feature específica
 bool _hasFeatureAccess(String appId, String featureName, bool isPremium) {
   if (isPremium) return true;
-  
+
   // Features sempre gratuitas por app
   const freeFeatures = {
     'gasometer': {'basic_tracking', 'simple_reports'},
     'plantis': {'basic_plant_care', 'reminders'},
     'receituagro': {'basic_diagnostics', 'simple_search'},
   };
-  
+
   return freeFeatures[appId]?.contains(featureName) ?? false;
 }
 

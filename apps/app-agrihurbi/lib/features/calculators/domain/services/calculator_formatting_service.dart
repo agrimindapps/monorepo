@@ -328,8 +328,9 @@ class CalculatorFormattingService {
 
   ValueCategory _categorizeValue(CalculationResultValue value) {
     if (value.isPrimary) return ValueCategory.primary;
-    if (value.unit.toLowerCase().contains('r\$'))
+    if (value.unit.toLowerCase().contains('r\$')) {
       return ValueCategory.financial;
+    }
     if (value.label.toLowerCase().contains('total')) return ValueCategory.total;
     return ValueCategory.supporting;
   }

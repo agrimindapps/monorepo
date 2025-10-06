@@ -5,10 +5,9 @@ import 'package:app_agrihurbi/features/markets/domain/repositories/market_reposi
 import 'package:app_agrihurbi/features/markets/domain/usecases/get_market_summary.dart';
 import 'package:app_agrihurbi/features/markets/domain/usecases/get_markets.dart';
 import 'package:app_agrihurbi/features/markets/domain/usecases/manage_market_favorites.dart';
-import 'package:flutter/foundation.dart';
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
+import 'package:core/core.dart' show Provider;
 import 'package:core/core.dart' show injectable;
+import 'package:flutter/foundation.dart';
 
 /// Provider Riverpod para MarketProvider
 ///

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../data/datasources/calculator_local_datasource.dart';
+import '../../data/repositories/calculator_repository_impl.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -9,8 +12,6 @@ import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/manage_favorites.dart';
 import '../../domain/usecases/save_calculation_to_history.dart';
-import '../../data/repositories/calculator_repository_impl.dart';
-import '../../data/datasources/calculator_local_datasource.dart';
 
 /// Provider Riverpod para CalculatorProvider
 final calculatorProvider = ChangeNotifierProvider<CalculatorProvider>((ref) {

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart' as flutter show FormState;
 import 'package:flutter/material.dart' hide FormState;
 
 import '../../../../core/error/app_error.dart' as local_error;
-import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../../../core/services/input_sanitizer.dart';
+import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import 'vehicles_notifier.dart';

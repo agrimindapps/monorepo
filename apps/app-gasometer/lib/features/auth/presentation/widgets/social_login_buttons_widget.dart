@@ -1,6 +1,6 @@
+import 'package:core/core.dart' show GetIt;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:core/core.dart' show GetIt;
 
 import '../../domain/repositories/auth_repository.dart';
 

@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/extensions/pragas_hive_extension.dart';
 import '../../../core/data/models/pragas_hive.dart';
+import '../../../core/extensions/pragas_hive_extension.dart';
 import '../../../core/widgets/optimized_praga_image_widget.dart';
 import '../data/praga_view_mode.dart';
 
@@ -22,18 +22,14 @@ class PragaItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return viewMode.isList 
-        ? _buildListItem(context)
-        : _buildGridItem(context);
+    return viewMode.isList ? _buildListItem(context) : _buildGridItem(context);
   }
 
   Widget _buildListItem(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: isDark ? const Color(0xFF222228) : Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -44,9 +40,7 @@ class PragaItemWidget extends StatelessWidget {
             children: [
               _buildIcon(),
               const SizedBox(width: 16),
-              Expanded(
-                child: _buildContent(),
-              ),
+              Expanded(child: _buildContent()),
               _buildTrailingIcon(),
             ],
           ),
@@ -59,9 +53,7 @@ class PragaItemWidget extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(4),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: isDark ? const Color(0xFF222228) : Colors.white,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -99,10 +91,7 @@ class PragaItemWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color.withValues(alpha: 0.3),
-            width: 1,
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
         ),
         child: Center(
           child: FaIcon(
@@ -117,9 +106,10 @@ class PragaItemWidget extends StatelessWidget {
 
   Widget _buildContent() {
     return Column(
-      crossAxisAlignment: viewMode.isList 
-          ? CrossAxisAlignment.start 
-          : CrossAxisAlignment.center,
+      crossAxisAlignment:
+          viewMode.isList
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
@@ -188,7 +178,7 @@ class PragaItemWidget extends StatelessWidget {
   // Métodos específicos para o modo grid com imagem em tela cheia
   Widget _buildFullImage() {
     final color = _getTypeColor();
-    
+
     return Positioned.fill(
       child: OptimizedPragaImageWidget(
         nomeCientifico: praga.nomeCientifico,
@@ -200,13 +190,7 @@ class PragaItemWidget extends StatelessWidget {
           width: double.infinity,
           height: double.infinity,
           color: color.withValues(alpha: 0.1),
-          child: Center(
-            child: FaIcon(
-              _getTypeIcon(),
-              color: color,
-              size: 48,
-            ),
-          ),
+          child: Center(child: FaIcon(_getTypeIcon(), color: color, size: 48)),
         ),
       ),
     );
@@ -285,5 +269,4 @@ class PragaItemWidget extends StatelessWidget {
       ),
     );
   }
-
 }

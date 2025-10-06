@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'preferences_notifier.g.dart';
 
@@ -121,7 +120,7 @@ class PreferencesNotifier extends _$PreferencesNotifier {
   Future<void> resetToDefaults() async {
     final success = await _preferencesService.resetToDefaults();
     if (success) {
-      state = AsyncValue.data(
+      state = const AsyncValue.data(
         PreferencesState(
           pragasDetectadasEnabled: true,
           lembretesAplicacaoEnabled: true,

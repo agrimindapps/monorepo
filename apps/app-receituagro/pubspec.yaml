@@ -17,6 +17,20 @@ dependencies:
   device_info_plus: ^11.5.0
   flutter_riverpod: ^2.6.1
 
+  get_it: any
+  injectable: any
+  riverpod_annotation: any
+  shared_preferences: any
+  firebase_auth: any
+  firebase_messaging: any
+  flutter_local_notifications: any
+  firebase_remote_config: any
+  http: any
+  crypto: any
+  flutter_secure_storage: any
+  package_info_plus: any
+  share_plus: any
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,6 +1,5 @@
+import 'package:core/core.dart' show Provider;
 import 'package:flutter/foundation.dart';
-import 'package:core/core.dart'
-    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/di/injection.dart';

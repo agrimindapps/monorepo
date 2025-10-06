@@ -1,8 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../auth/presentation/state/auth_state.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../widgets/call_to_action.dart';
 import '../widgets/faq_section.dart';
@@ -23,7 +21,7 @@ class PromoPage extends ConsumerStatefulWidget {
 
 class _PromoPageState extends ConsumerState<PromoPage> {
   final ScrollController _scrollController = ScrollController();
-  
+
   // Keys para navegação entre seções
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
@@ -52,7 +50,9 @@ class _PromoPageState extends ConsumerState<PromoPage> {
 
     // Se o usuário estiver autenticado (incluindo anônimo), redirecionar para a página interna
     if (authState.isAuthenticated) {
-      debugPrint('🔐 Usuário autenticado na página promocional, redirecionando para página interna');
+      debugPrint(
+        '🔐 Usuário autenticado na página promocional, redirecionando para página interna',
+      );
 
       // Verificar novamente se ainda está montado antes da navegação
       if (mounted) {
@@ -84,34 +84,34 @@ class _PromoPageState extends ConsumerState<PromoPage> {
               children: [
                 // Header com hero section
                 const HeaderSection(),
-                
+
                 // Seção de funcionalidades
                 FeaturesCarousel(
                   key: _featuresKey,
                   features: _getFeaturesList(),
                 ),
-                
+
                 // Seção como funciona
                 HowItWorks(key: _howItWorksKey),
-                
+
                 // Seção de estatísticas
                 const StatisticsSection(),
-                
+
                 // Seção de depoimentos
                 TestimonialsSection(key: _testimonialsKey),
-                
+
                 // Seção de perguntas frequentes
                 FaqSection(key: _faqKey),
-                
+
                 // Call to action final
                 const CallToAction(),
-                
+
                 // Footer
                 const FooterSection(),
               ],
             ),
           ),
-          
+
           // Navigation bar fixo no topo
           Positioned(
             top: 0,
@@ -135,22 +135,26 @@ class _PromoPageState extends ConsumerState<PromoPage> {
       {
         'icon': Icons.local_gas_station,
         'title': 'Controle de Abastecimento',
-        'description': 'Registre cada abastecimento e acompanhe o consumo do seu veículo com precisão.',
+        'description':
+            'Registre cada abastecimento e acompanhe o consumo do seu veículo com precisão.',
       },
       {
         'icon': Icons.build,
         'title': 'Manutenções',
-        'description': 'Mantenha um histórico completo das manutenções preventivas e corretivas.',
+        'description':
+            'Mantenha um histórico completo das manutenções preventivas e corretivas.',
       },
       {
         'icon': Icons.analytics,
         'title': 'Relatórios Detalhados',
-        'description': 'Visualize gráficos e estatísticas sobre gastos, consumo e performance.',
+        'description':
+            'Visualize gráficos e estatísticas sobre gastos, consumo e performance.',
       },
       {
         'icon': Icons.notifications,
         'title': 'Lembretes Inteligentes',
-        'description': 'Receba notificações para manutenções programadas e revisões importantes.',
+        'description':
+            'Receba notificações para manutenções programadas e revisões importantes.',
       },
     ];
   }

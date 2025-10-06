@@ -180,7 +180,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       }
 
       // Mark as completed
-      final completedProgress = const ExportProgress.completed();
+      const completedProgress = ExportProgress.completed();
       state = AsyncValue.data(currentState.copyWith(currentProgress: completedProgress));
 
       _updateExportRequest(

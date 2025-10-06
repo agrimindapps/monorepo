@@ -1,5 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../domain/entities/user_entity.dart';
 import '../../../infrastructure/services/firebase_auth_service.dart';
@@ -13,14 +13,15 @@ import '../../common_providers.dart';
 
 /// Provider principal para estado de autenticação
 /// Unifica auth state entre gasometer, plantis, receituagro, etc.
-final unifiedAuthProvider = StateNotifierProvider<UnifiedAuthNotifier, AuthState>((ref) {
-  return UnifiedAuthNotifier();
-});
+final unifiedAuthProvider =
+    StateNotifierProvider<UnifiedAuthNotifier, AuthState>((ref) {
+      return UnifiedAuthNotifier();
+    });
 
 /// Provider para usuário atual unificado
 final domainCurrentUserProvider = Provider<UserEntity?>((ref) {
   final authState = ref.watch(unifiedAuthProvider);
-  
+
   return authState.maybeWhen(
     authenticated: (user) => UserEntity.fromJson(user),
     orElse: () => null,
@@ -30,7 +31,7 @@ final domainCurrentUserProvider = Provider<UserEntity?>((ref) {
 /// Provider para status de autenticação simplificado
 final authStatusProvider = Provider<AuthStatus>((ref) {
   final authState = ref.watch(unifiedAuthProvider);
-  
+
   return authState.when(
     loading: () => AuthStatus.loading,
     authenticated: (_) => AuthStatus.authenticated,
@@ -64,7 +65,10 @@ final authConfigProvider = Provider.family<AuthConfig, String>((ref, appId) {
 });
 
 /// Provider para recursos específicos de auth por app
-final authFeaturesProvider = Provider.family<AuthFeatures, String>((ref, appId) {
+final authFeaturesProvider = Provider.family<AuthFeatures, String>((
+  ref,
+  appId,
+) {
   final config = ref.watch(authConfigProvider(appId));
   return AuthFeatures.fromConfig(config);
 });
@@ -75,7 +79,7 @@ final authFeaturesProvider = Provider.family<AuthFeatures, String>((ref, appId) 
 final userProfileProvider = Provider<UserProfile?>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   if (user == null) return null;
-  
+
   return UserProfile(
     id: user.id,
     name: user.displayName,
@@ -91,7 +95,7 @@ final userProfileProvider = Provider<UserProfile?>((ref) {
 final userPermissionsProvider = Provider<Set<String>>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   if (user == null) return <String>{};
-  
+
   // Lógica de permissões baseada no usuário
   // Será implementada por cada app conforme necessário
   return <String>{'basic_access'};
@@ -101,9 +105,10 @@ final userPermissionsProvider = Provider<Set<String>>((ref) {
 final userLimitationsProvider = Provider<UserLimitations>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   // TODO: Implementar verificação de premium via subscription providers
-  final isPremium = false; // Temporário - será integrado com subscription providers
-  
-  return UserLimitations(
+  const isPremium =
+      false; // Temporário - será integrado com subscription providers
+
+  return const UserLimitations(
     isPremium: isPremium,
     maxDevices: isPremium ? 10 : 2,
     maxSyncItems: isPremium ? -1 : 100, // -1 = unlimited
@@ -117,7 +122,7 @@ final userLimitationsProvider = Provider<UserLimitations>((ref) {
 /// Provider para ações de autenticação
 final authActionsProvider = Provider<AuthActions>((ref) {
   final notifier = ref.read(unifiedAuthProvider.notifier);
-  
+
   return AuthActions(
     login: notifier.login,
     loginWithGoogle: notifier.loginWithGoogle,
@@ -137,7 +142,7 @@ final authActionsProvider = Provider<AuthActions>((ref) {
 final authTokenProvider = FutureProvider<String?>((ref) async {
   final user = ref.watch(domainCurrentUserProvider);
   if (user == null) return null;
-  
+
   try {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     return await firebaseUser?.getIdToken();
@@ -150,9 +155,9 @@ final authTokenProvider = FutureProvider<String?>((ref) async {
 final sessionInfoProvider = Provider<SessionInfo?>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   final isConnected = ref.watch(isConnectedProvider);
-  
+
   if (user == null) return null;
-  
+
   return SessionInfo(
     userId: user.id,
     deviceId: null, // TODO: Será implementado via device management
@@ -165,12 +170,7 @@ final sessionInfoProvider = Provider<SessionInfo?>((ref) {
 // ========== MODELS ==========
 
 /// Status simplificado de autenticação
-enum AuthStatus {
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
-}
+enum AuthStatus { loading, authenticated, unauthenticated, error }
 
 /// Configurações de auth específicas por app
 class AuthConfig {
@@ -262,7 +262,13 @@ class UserProfile {
   });
 
   String get displayName => name ?? email?.split('@').first ?? 'Usuário';
-  String get initials => displayName.split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase();
+  String get initials =>
+      displayName
+          .split(' ')
+          .map((e) => e.isNotEmpty ? e[0] : '')
+          .take(2)
+          .join()
+          .toUpperCase();
 }
 
 /// Limitações do usuário
@@ -282,7 +288,8 @@ class UserLimitations {
   });
 
   bool canAddDevice(int currentDevices) => currentDevices < maxDevices;
-  bool canSyncMore(int currentItems) => maxSyncItems == -1 || currentItems < maxSyncItems;
+  bool canSyncMore(int currentItems) =>
+      maxSyncItems == -1 || currentItems < maxSyncItems;
 }
 
 /// Informações da sessão
@@ -312,7 +319,12 @@ class AuthActions {
   final Future<void> Function() loginWithApple;
   final Future<void> Function() loginAnonymously;
   final Future<void> Function() logout;
-  final Future<void> Function(String email, String password, Map<String, dynamic> userData) register;
+  final Future<void> Function(
+    String email,
+    String password,
+    Map<String, dynamic> userData,
+  )
+  register;
   final Future<void> Function(String email) resetPassword;
   final Future<void> Function() deleteAccount;
   final Future<void> Function(Map<String, dynamic> updates) updateProfile;
@@ -334,7 +346,6 @@ class AuthActions {
 
 /// Notifier unificado para autenticação
 class UnifiedAuthNotifier extends BaseAuthNotifier {
-  
   @override
   Future<void> login(String email, String password) async {
     setLoading();
@@ -345,7 +356,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         email: email,
         password: password,
       );
-      
+
       result.fold(
         (failure) => setError(failure.message),
         (user) => setAuthenticated(user.toMap()),
@@ -367,24 +378,26 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
   }
 
   @override
-  Future<void> register(String email, String password, Map<String, dynamic> userData) async {
+  Future<void> register(
+    String email,
+    String password,
+    Map<String, dynamic> userData,
+  ) async {
     setLoading();
     try {
       final authService = FirebaseAuthService();
       final result = await authService.signUpWithEmailAndPassword(
         email: email,
         password: password,
-        displayName: (userData['displayName'] as String?) ?? email.split('@').first,
+        displayName:
+            (userData['displayName'] as String?) ?? email.split('@').first,
       );
-      
-      result.fold(
-        (failure) => setError(failure.message),
-        (user) {
-          // Atualizar perfil com dados adicionais
-          // updateProfile(userData);
-          setAuthenticated(user.toJson());
-        },
-      );
+
+      result.fold((failure) => setError(failure.message), (user) {
+        // Atualizar perfil com dados adicionais
+        // updateProfile(userData);
+        setAuthenticated(user.toJson());
+      });
     } catch (e) {
       setError('Erro no registro: $e');
     }
@@ -403,7 +416,7 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
   Future<void> checkAuthStatus() async {
     setLoading();
     final user = FirebaseAuth.instance.currentUser;
-    
+
     if (user != null) {
       setAuthenticated({
         'id': user.uid,
@@ -444,12 +457,9 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
     try {
       final result = await FirebaseAuth.instance.signInAnonymously();
       final user = result.user;
-      
+
       if (user != null) {
-        setAuthenticated({
-          'id': user.uid,
-          'isAnonymous': true,
-        });
+        setAuthenticated({'id': user.uid, 'isAnonymous': true});
       } else {
         setError('Falha no login anônimo');
       }
@@ -481,14 +491,11 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         if (updates['photoURL'] != null) {
           await user.updatePhotoURL(updates['photoURL'] as String?);
         }
-        
+
         // Atualizar estado - usar extensão when para acessar o estado
         state.when(
           loading: () {},
-          authenticated: (user) => setAuthenticated({
-            ...user,
-            ...updates,
-          }),
+          authenticated: (user) => setAuthenticated({...user, ...updates}),
           unauthenticated: () {},
           error: (_) {},
         );

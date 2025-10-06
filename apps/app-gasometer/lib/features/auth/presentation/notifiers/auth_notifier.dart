@@ -1,11 +1,15 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide AuthStatus, AuthState;
 import 'package:core/core.dart' as core show UserEntity, AuthProvider;
+import 'package:core/core.dart' hide AuthStatus, AuthState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/injection_container_modular.dart';
+import '../../../../core/services/auth_rate_limiter.dart';
+import '../../../../core/services/gasometer_analytics_service.dart';
+import '../../../../core/services/platform_service.dart';
+import '../../../../core/widgets/logout_loading_dialog.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../domain/entities/user_entity.dart' as gasometer_auth;
 import '../../domain/usecases/get_current_user.dart';
@@ -16,11 +20,6 @@ import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/update_profile.dart';
 import '../../domain/usecases/watch_auth_state.dart';
-import '../../../../core/di/injection_container_modular.dart';
-import '../../../../core/services/gasometer_analytics_service.dart';
-import '../../../../core/services/auth_rate_limiter.dart';
-import '../../../../core/services/platform_service.dart';
-import '../../../../core/widgets/logout_loading_dialog.dart';
 import '../state/auth_state.dart';
 
 part 'auth_notifier.g.dart';
@@ -158,7 +157,8 @@ class Auth extends _$Auth {
             final shouldUseAnonymous = await shouldUseAnonymousMode();
             if (kDebugMode) {
               debugPrint(
-                  '🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=$_isInLoginAttempt)');
+                '🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=$_isInLoginAttempt)',
+              );
             }
 
             state = state.copyWith(isInitialized: true);
@@ -174,7 +174,8 @@ class Auth extends _$Auth {
 
           if (kDebugMode) {
             debugPrint(
-                '🔐 AuthState inicializado com sucesso. Usuário autenticado: ${state.isAuthenticated}');
+              '🔐 AuthState inicializado com sucesso. Usuário autenticado: ${state.isAuthenticated}',
+            );
           }
         },
       );
@@ -282,22 +283,26 @@ class Auth extends _$Auth {
         _isInLoginAttempt = false;
 
         // Log tentativa bloqueada
-        await _analytics.logUserAction('login_blocked_rate_limit', parameters: {
-          'lockout_minutes_remaining': rateLimitInfo.lockoutTimeRemainingMinutes,
-        });
+        await _analytics.logUserAction(
+          'login_blocked_rate_limit',
+          parameters: {
+            'lockout_minutes_remaining':
+                rateLimitInfo.lockoutTimeRemainingMinutes,
+          },
+        );
         return;
       }
 
-      final result = await _signInWithEmail(SignInWithEmailParams(
-        email: email,
-        password: password,
-      ));
+      final result = await _signInWithEmail(
+        SignInWithEmailParams(email: email, password: password),
+      );
 
       await result.fold(
         (failure) async {
           if (kDebugMode) {
             debugPrint(
-                '🔐 AuthNotifier: Login falhou - Tipo: ${failure.runtimeType}, Mensagem: ${failure.message}');
+              '🔐 AuthNotifier: Login falhou - Tipo: ${failure.runtimeType}, Mensagem: ${failure.message}',
+            );
           }
 
           // Registra tentativa falhada no rate limiter
@@ -323,12 +328,15 @@ class Auth extends _$Auth {
           _isInLoginAttempt = false; // SECURITY + UX FIX
 
           // Log analytics para tentativa falhada
-          await _analytics.logUserAction('login_failed', parameters: {
-            'method': 'email',
-            'failure_type': failure.runtimeType.toString(),
-            'attempts_remaining': rateLimitInfo.attemptsRemaining,
-            'is_locked': rateLimitInfo.isLocked,
-          });
+          await _analytics.logUserAction(
+            'login_failed',
+            parameters: {
+              'method': 'email',
+              'failure_type': failure.runtimeType.toString(),
+              'attempts_remaining': rateLimitInfo.attemptsRemaining,
+              'is_locked': rateLimitInfo.isLocked,
+            },
+          );
         },
         (user) async {
           // Registra tentativa bem-sucedida (limpa rate limiting)
@@ -348,9 +356,10 @@ class Auth extends _$Auth {
 
           // Log analytics
           await _analytics.logLogin('email');
-          await _analytics.logUserAction('login_success', parameters: {
-            'method': 'email',
-          });
+          await _analytics.logUserAction(
+            'login_success',
+            parameters: {'method': 'email'},
+          );
         },
       );
     } catch (e) {
@@ -371,7 +380,11 @@ class Auth extends _$Auth {
   }
 
   /// REGISTER - migrado do AuthProvider
-  Future<void> register(String email, String password, String displayName) async {
+  Future<void> register(
+    String email,
+    String password,
+    String displayName,
+  ) async {
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,
@@ -379,11 +392,13 @@ class Auth extends _$Auth {
       clearError: true,
     );
 
-    final result = await _signUpWithEmail(SignUpWithEmailParams(
-      email: email,
-      password: password,
-      displayName: displayName,
-    ));
+    final result = await _signUpWithEmail(
+      SignUpWithEmailParams(
+        email: email,
+        password: password,
+        displayName: displayName,
+      ),
+    );
 
     await result.fold(
       (failure) async {
@@ -406,9 +421,10 @@ class Auth extends _$Auth {
         );
 
         // Log analytics
-        await _analytics.logUserAction('register_success', parameters: {
-          'method': 'email',
-        });
+        await _analytics.logUserAction(
+          'register_success',
+          parameters: {'method': 'email'},
+        );
       },
     );
   }
@@ -571,7 +587,9 @@ class Auth extends _$Auth {
       clearError: true,
     );
 
-    final result = await _sendPasswordReset(SendPasswordResetParams(email: email));
+    final result = await _sendPasswordReset(
+      SendPasswordResetParams(email: email),
+    );
 
     result.fold(
       (failure) {
@@ -588,17 +606,19 @@ class Auth extends _$Auth {
   }
 
   /// UPDATE PROFILE - migrado do AuthProvider
-  Future<void> updateUserProfile({String? displayName, String? photoUrl}) async {
+  Future<void> updateUserProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,
       clearError: true,
     );
 
-    final result = await _updateProfile(UpdateProfileParams(
-      displayName: displayName,
-      photoUrl: photoUrl,
-    ));
+    final result = await _updateProfile(
+      UpdateProfileParams(displayName: displayName, photoUrl: photoUrl),
+    );
 
     result.fold(
       (failure) {
@@ -610,10 +630,7 @@ class Auth extends _$Auth {
       },
       (updatedUser) {
         final gasometerUser = _convertFromCoreUser(updatedUser);
-        state = state.copyWith(
-          currentUser: gasometerUser,
-          isLoading: false,
-        );
+        state = state.copyWith(currentUser: gasometerUser, isLoading: false);
       },
     );
   }
@@ -624,7 +641,9 @@ class Auth extends _$Auth {
       if (state.currentUser == null) return false;
 
       // Update user with new avatar
-      final updatedUser = state.currentUser!.copyWith(avatarBase64: avatarBase64);
+      final updatedUser = state.currentUser!.copyWith(
+        avatarBase64: avatarBase64,
+      );
 
       // Persist the avatar locally through the auth data source
       await _saveUserLocallyWithAvatar(updatedUser);
@@ -632,10 +651,13 @@ class Auth extends _$Auth {
       state = state.copyWith(currentUser: updatedUser);
 
       // Log avatar update
-      await _analytics.logUserAction('avatar_updated', parameters: {
-        'avatar_size_kb': (avatarBase64.length * 3 ~/ 4 / 1024).toString(),
-        'user_type': state.currentUser!.type.toString(),
-      });
+      await _analytics.logUserAction(
+        'avatar_updated',
+        parameters: {
+          'avatar_size_kb': (avatarBase64.length * 3 ~/ 4 / 1024).toString(),
+          'user_type': state.currentUser!.type.toString(),
+        },
+      );
 
       return true;
     } catch (e) {
@@ -668,9 +690,10 @@ class Auth extends _$Auth {
       state = state.copyWith(currentUser: updatedUser);
 
       // Log avatar removal
-      await _analytics.logUserAction('avatar_removed', parameters: {
-        'user_type': state.currentUser!.type.toString(),
-      });
+      await _analytics.logUserAction(
+        'avatar_removed',
+        parameters: {'user_type': state.currentUser!.type.toString()},
+      );
 
       return true;
     } catch (e) {
@@ -690,7 +713,9 @@ class Auth extends _$Auth {
   }
 
   /// Helper method to save user data locally including avatar
-  Future<void> _saveUserLocallyWithAvatar(gasometer_auth.UserEntity user) async {
+  Future<void> _saveUserLocallyWithAvatar(
+    gasometer_auth.UserEntity user,
+  ) async {
     try {
       if (kDebugMode) {
         debugPrint('🔐 Salvando dados do usuário localmente com avatar');
@@ -838,7 +863,8 @@ class Auth extends _$Auth {
       }
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Erro interno no login com sincronização. Tente novamente.',
+        errorMessage:
+            'Erro interno no login com sincronização. Tente novamente.',
         isLoading: false,
         status: AuthStatus.error,
       );
@@ -895,12 +921,16 @@ class Auth extends _$Auth {
   Future<void> _syncGasometerData() async {
     try {
       // Usar o UnifiedSyncManager para sincronizar todos os dados do app gasometer
-      final syncResult = await UnifiedSyncManager.instance.forceSyncApp('gasometer');
+      final syncResult = await UnifiedSyncManager.instance.forceSyncApp(
+        'gasometer',
+      );
 
       syncResult.fold(
         (failure) {
           if (kDebugMode) {
-            debugPrint('❌ Erro na sincronização UnifiedSync: ${failure.message}');
+            debugPrint(
+              '❌ Erro na sincronização UnifiedSync: ${failure.message}',
+            );
           }
         },
         (_) {
@@ -922,7 +952,8 @@ class Auth extends _$Auth {
   }
 
   /// Rate limiting methods
-  Future<AuthRateLimitInfo> getRateLimitInfo() => _rateLimiter.getRateLimitInfo();
+  Future<AuthRateLimitInfo> getRateLimitInfo() =>
+      _rateLimiter.getRateLimitInfo();
 
   Future<bool> canAttemptLogin() => _rateLimiter.canAttemptLogin();
 
@@ -952,7 +983,9 @@ class Auth extends _$Auth {
   }
 
   /// Map AuthProvider to UserType
-  gasometer_auth.UserType _mapAuthProviderToUserType(core.AuthProvider provider) {
+  gasometer_auth.UserType _mapAuthProviderToUserType(
+    core.AuthProvider provider,
+  ) {
     switch (provider) {
       case core.AuthProvider.anonymous:
         return gasometer_auth.UserType.anonymous;
@@ -987,7 +1020,9 @@ class Auth extends _$Auth {
   }
 
   /// Map UserType to AuthProvider for reverse conversion
-  core.AuthProvider _mapUserTypeToAuthProvider(gasometer_auth.UserType userType) {
+  core.AuthProvider _mapUserTypeToAuthProvider(
+    gasometer_auth.UserType userType,
+  ) {
     switch (userType) {
       case gasometer_auth.UserType.anonymous:
         return core.AuthProvider.anonymous;

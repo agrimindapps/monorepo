@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/tasks/domain/task_entity.dart';
@@ -26,26 +26,28 @@ class TaskHeaderCard extends ConsumerStatefulWidget {
 class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
   Future<void> _toggleCompleted() async {
     final updatedTask = widget.task.copyWith(
-      status: widget.task.status == TaskStatus.completed 
-        ? TaskStatus.pending 
-        : TaskStatus.completed,
+      status:
+          widget.task.status == TaskStatus.completed
+              ? TaskStatus.pending
+              : TaskStatus.completed,
       updatedAt: DateTime.now(),
     );
 
     try {
       await ref.read(taskNotifierProvider.notifier).updateTask(updatedTask);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              updatedTask.status == TaskStatus.completed 
-                ? 'Tarefa concluída!' 
-                : 'Tarefa reaberta!'
+              updatedTask.status == TaskStatus.completed
+                  ? 'Tarefa concluída!'
+                  : 'Tarefa reaberta!',
             ),
-            backgroundColor: updatedTask.status == TaskStatus.completed 
-              ? AppColors.success 
-              : AppColors.info,
+            backgroundColor:
+                updatedTask.status == TaskStatus.completed
+                    ? AppColors.success
+                    : AppColors.info,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -85,7 +87,7 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
   @override
   Widget build(BuildContext context) {
     final isCompleted = widget.task.status == TaskStatus.completed;
-    
+
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -105,64 +107,82 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isCompleted ? AppColors.success : AppColors.border,
+                        color:
+                            isCompleted ? AppColors.success : AppColors.border,
                         width: 2,
                       ),
-                      color: isCompleted ? AppColors.success : Colors.transparent,
+                      color:
+                          isCompleted ? AppColors.success : Colors.transparent,
                     ),
-                    child: isCompleted
-                      ? const Icon(
-                          Icons.check,
-                          size: 16,
-                          color: Colors.white,
-                        )
-                      : null,
+                    child:
+                        isCompleted
+                            ? const Icon(
+                              Icons.check,
+                              size: 16,
+                              color: Colors.white,
+                            )
+                            : null,
                   ),
                 ),
                 const SizedBox(width: 12),
-                
+
                 // Indicador de prioridade
                 Container(
                   width: 4,
                   height: 24,
                   decoration: BoxDecoration(
-                    color: AppColors.getPriorityColor(widget.task.priority.name),
+                    color: AppColors.getPriorityColor(
+                      widget.task.priority.name,
+                    ),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(width: 12),
-                
+
                 // Título
                 Expanded(
-                  child: widget.isEditing
-                    ? TextField(
-                        controller: widget.titleController,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          decoration: isCompleted ? TextDecoration.lineThrough : null,
-                          color: isCompleted ? AppColors.textSecondary : AppColors.textPrimary,
-                        ),
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          isDense: true,
-                        ),
-                        maxLines: 2,
-                      )
-                    : Text(
-                        widget.task.title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          decoration: isCompleted ? TextDecoration.lineThrough : null,
-                          color: isCompleted ? AppColors.textSecondary : AppColors.textPrimary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                  child:
+                      widget.isEditing
+                          ? TextField(
+                            controller: widget.titleController,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              decoration:
+                                  isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                              color:
+                                  isCompleted
+                                      ? AppColors.textSecondary
+                                      : AppColors.textPrimary,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                            ),
+                            maxLines: 2,
+                          )
+                          : Text(
+                            widget.task.title,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              decoration:
+                                  isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                              color:
+                                  isCompleted
+                                      ? AppColors.textSecondary
+                                      : AppColors.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                 ),
-                
+
                 // Botão de favoritar
                 GestureDetector(
                   onTap: _toggleStarred,
@@ -170,16 +190,17 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                     padding: const EdgeInsets.all(4),
                     child: Icon(
                       widget.task.isStarred ? Icons.star : Icons.star_border,
-                      color: widget.task.isStarred 
-                        ? AppColors.starredYellow 
-                        : AppColors.textSecondary,
+                      color:
+                          widget.task.isStarred
+                              ? AppColors.starredYellow
+                              : AppColors.textSecondary,
                       size: 24,
                     ),
                   ),
                 ),
               ],
             ),
-            
+
             // Descrição (se houver)
             if (widget.task.description != null || widget.isEditing) ...[
               const SizedBox(height: 12),
@@ -188,7 +209,10 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                   controller: widget.descriptionController,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isCompleted ? AppColors.textSecondary : AppColors.textSecondary,
+                    color:
+                        isCompleted
+                            ? AppColors.textSecondary
+                            : AppColors.textSecondary,
                   ),
                   decoration: const InputDecoration(
                     hintText: 'Adicionar descrição...',
@@ -203,35 +227,48 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                   widget.task.description!,
                   style: TextStyle(
                     fontSize: 14,
-                    color: isCompleted ? AppColors.textSecondary : AppColors.textSecondary,
+                    color:
+                        isCompleted
+                            ? AppColors.textSecondary
+                            : AppColors.textSecondary,
                     decoration: isCompleted ? TextDecoration.lineThrough : null,
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
             ],
-            
+
             // Tags (se houver)
             if (widget.task.tags.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 4,
-                children: widget.task.tags.map((tag) => Chip(
-                  label: Text(
-                    tag,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  backgroundColor: AppColors.primaryColor.withAlpha(26),
-                  side: BorderSide(
-                    color: AppColors.primaryColor.withAlpha(77),
-                    width: 1,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                )).toList(),
+                children:
+                    widget.task.tags
+                        .map(
+                          (tag) => Chip(
+                            label: Text(
+                              tag,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            backgroundColor: AppColors.primaryColor.withAlpha(
+                              26,
+                            ),
+                            side: BorderSide(
+                              color: AppColors.primaryColor.withAlpha(77),
+                              width: 1,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                          ),
+                        )
+                        .toList(),
               ),
             ],
           ],

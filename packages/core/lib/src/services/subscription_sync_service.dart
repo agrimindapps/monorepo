@@ -3,33 +3,18 @@
 // Will be replaced with proper implementation later
 
 import 'package:dartz/dartz.dart';
+
+import '../domain/entities/subscription_entity.dart';
 import '../domain/repositories/i_local_storage_repository.dart';
 import '../domain/repositories/i_subscription_repository.dart';
-import '../domain/entities/subscription_entity.dart';
 import '../shared/utils/failure.dart';
 
 // Missing enums - stub implementations
-enum SubscriptionStatus {
-  active,
-  cancelled,
-  expired,
-  gracePeriod,
-  unknown,
-}
+enum SubscriptionStatus { active, cancelled, expired, gracePeriod, unknown }
 
-enum SubscriptionTier {
-  free,
-  premium,
-  pro,
-}
+enum SubscriptionTier { free, premium, pro }
 
-enum Store {
-  appStore,
-  playStore,
-  stripe,
-  promotional,
-  unknown,
-}
+enum Store { appStore, playStore, stripe, promotional, unknown }
 
 // Stub class for sync operations
 class SyncOperations {
@@ -55,9 +40,9 @@ class SubscriptionSyncService {
     required SyncQueue syncQueue,
     required SyncOperations syncOperations,
   }) : _subscriptionRepository = subscriptionRepository,
-        _localStorage = localStorage,
-        _syncQueue = syncQueue,
-        _syncOperations = syncOperations;
+       _localStorage = localStorage,
+       _syncQueue = syncQueue,
+       _syncOperations = syncOperations;
 
   /// Stub method to prevent compilation errors
   Future<Either<Failure, SubscriptionEntity?>> getCurrentSubscription() async {

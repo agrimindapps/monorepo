@@ -39,7 +39,7 @@ class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParam
               
               // Dispositivo novo, verifica se pode adicionar
               if (!canAdd) {
-                return Left(
+                return const Left(
                   ValidationFailure(
                     'Limite de dispositivos atingido',
                     code: 'DEVICE_LIMIT_EXCEEDED',

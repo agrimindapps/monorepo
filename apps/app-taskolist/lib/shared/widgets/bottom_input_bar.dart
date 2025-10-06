@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -49,11 +49,13 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
         id: const Uuid().v4(),
         title: title,
         listId: 'default',
-        createdById: ref.read(currentUserProvider).when(
-          data: (user) => user?.id ?? 'anonymous',
-          loading: () => 'anonymous',
-          error: (_, __) => 'anonymous',
-        ),
+        createdById: ref
+            .read(currentUserProvider)
+            .when(
+              data: (user) => user?.id ?? 'anonymous',
+              loading: () => 'anonymous',
+              error: (_, __) => 'anonymous',
+            ),
         dueDate: _selectedDueDate,
         priority: _selectedPriority,
         createdAt: DateTime.now(),
@@ -62,14 +64,14 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
       );
 
       await ref.read(taskNotifierProvider.notifier).createTask(newTask);
-      
+
       _controller.clear();
       _focusNode.unfocus();
       setState(() {
         _selectedDueDate = null;
         _selectedPriority = TaskPriority.medium;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -111,9 +113,10 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
             offset: Offset(0, -2),
           ),
         ],
-        borderRadius: _isExpanded 
-          ? const BorderRadius.vertical(top: Radius.circular(16))
-          : null,
+        borderRadius:
+            _isExpanded
+                ? const BorderRadius.vertical(top: Radius.circular(16))
+                : null,
       ),
       child: SafeArea(
         child: Row(
@@ -133,7 +136,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
               ),
             ),
             const SizedBox(width: 12),
-            
+
             // Campo de entrada
             Expanded(
               child: TextField(
@@ -151,12 +154,16 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
                     horizontal: 16,
                     vertical: 10,
                   ),
-                  suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.send, color: AppColors.primaryColor),
-                        onPressed: _createTask,
-                      )
-                    : null,
+                  suffixIcon:
+                      _controller.text.isNotEmpty
+                          ? IconButton(
+                            icon: const Icon(
+                              Icons.send,
+                              color: AppColors.primaryColor,
+                            ),
+                            onPressed: _createTask,
+                          )
+                          : null,
                 ),
                 onSubmitted: (_) => _createTask(),
                 onChanged: (value) {
@@ -166,19 +173,28 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
                 maxLines: _isExpanded ? 3 : 1,
               ),
             ),
-            
+
             // Botões de ação (quando expandido)
             if (_isExpanded) ...[
               const SizedBox(width: 8),
               _buildActionButton(
-                icon: _selectedPriority == TaskPriority.medium ? Icons.flag_outlined : Icons.flag,
+                icon:
+                    _selectedPriority == TaskPriority.medium
+                        ? Icons.flag_outlined
+                        : Icons.flag,
                 color: AppColors.getPriorityColor(_selectedPriority.name),
                 onTap: () => _showPrioritySelector(),
               ),
               const SizedBox(width: 4),
               _buildActionButton(
-                icon: _selectedDueDate != null ? Icons.event : Icons.calendar_today_outlined,
-                color: _selectedDueDate != null ? AppColors.primaryColor : AppColors.textSecondary,
+                icon:
+                    _selectedDueDate != null
+                        ? Icons.event
+                        : Icons.calendar_today_outlined,
+                color:
+                    _selectedDueDate != null
+                        ? AppColors.primaryColor
+                        : AppColors.textSecondary,
                 onTap: () => _showDatePicker(),
               ),
             ],
@@ -202,11 +218,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
           color: color.withAlpha(26),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 16,
-        ),
+        child: Icon(icon, color: color, size: 16),
       ),
     );
   }
@@ -218,35 +230,35 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Selecionar Prioridade',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Selecionar Prioridade',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 16),
+                ...TaskPriority.values.map(
+                  (priority) => ListTile(
+                    leading: Icon(
+                      Icons.flag,
+                      color: AppColors.getPriorityColor(priority.name),
+                    ),
+                    title: Text(_getPriorityName(priority)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      setState(() {
+                        _selectedPriority = priority;
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            ...TaskPriority.values.map((priority) => ListTile(
-              leading: Icon(
-                Icons.flag,
-                color: AppColors.getPriorityColor(priority.name),
-              ),
-              title: Text(_getPriorityName(priority)),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() {
-                  _selectedPriority = priority;
-                });
-              },
-            )),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -257,7 +269,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (date != null) {
       setState(() {
         _selectedDueDate = date;

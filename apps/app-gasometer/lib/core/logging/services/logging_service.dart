@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:gasometer/core/services/gasometer_analytics_service.dart';
+
+import '../../services/gasometer_analytics_service.dart';
 import '../entities/log_entry.dart';
 import '../repositories/log_repository.dart';
 
@@ -9,11 +11,7 @@ import '../repositories/log_repository.dart';
 /// Integra com Analytics, Crashlytics e persistência local
 @lazySingleton
 class LoggingService {
-  
-  LoggingService(
-    this._logRepository,
-    this._analyticsService,
-  );
+  LoggingService(this._logRepository, this._analyticsService);
   final LogRepository _logRepository;
   final GasometerAnalyticsService _analyticsService;
 
@@ -44,7 +42,7 @@ class LoggingService {
     );
 
     await _saveLog(logEntry);
-    
+
     if (kDebugMode) {
       debugPrint('🚀 [$category] Starting $operation: $message');
     }
@@ -59,24 +57,22 @@ class LoggingService {
   }) async {
     final operationKey = '${category}_$operation';
     final startTime = _operationStartTimes.remove(operationKey);
-    final duration = startTime != null 
-        ? DateTime.now().difference(startTime).inMilliseconds 
-        : null;
+    final duration =
+        startTime != null
+            ? DateTime.now().difference(startTime).inMilliseconds
+            : null;
 
     final logEntry = LogEntry.operationSuccess(
       category: category,
       operation: operation,
       message: message,
       userId: _currentUserId,
-      metadata: {
-        ...?metadata,
-        if (duration != null) 'duration_ms': duration,
-      },
+      metadata: {...?metadata, if (duration != null) 'duration_ms': duration},
       duration: duration,
     );
 
     await _saveLog(logEntry);
-    
+
     // Send performance analytics
     await _analyticsService.logEvent('operation_completed', {
       'category': category,
@@ -84,7 +80,7 @@ class LoggingService {
       if (duration != null) 'duration_ms': duration,
       'success': true,
     });
-    
+
     if (kDebugMode) {
       final durationText = duration != null ? ' (${duration}ms)' : '';
       debugPrint('✅ [$category] Completed $operation$durationText: $message');
@@ -102,9 +98,10 @@ class LoggingService {
   }) async {
     final operationKey = '${category}_$operation';
     final startTime = _operationStartTimes.remove(operationKey);
-    final duration = startTime != null 
-        ? DateTime.now().difference(startTime).inMilliseconds 
-        : null;
+    final duration =
+        startTime != null
+            ? DateTime.now().difference(startTime).inMilliseconds
+            : null;
 
     final logEntry = LogEntry.operationError(
       category: category,
@@ -113,15 +110,12 @@ class LoggingService {
       userId: _currentUserId,
       error: error.toString(),
       stackTrace: stackTrace?.toString(),
-      metadata: {
-        ...?metadata,
-        if (duration != null) 'duration_ms': duration,
-      },
+      metadata: {...?metadata, if (duration != null) 'duration_ms': duration},
       duration: duration,
     );
 
     await _saveLog(logEntry);
-    
+
     // Send error analytics
     await _analyticsService.logEvent('operation_error', {
       'category': category,
@@ -129,7 +123,7 @@ class LoggingService {
       'error_type': error.runtimeType.toString(),
       if (duration != null) 'duration_ms': duration,
     });
-    
+
     // Record error in Crashlytics
     await _analyticsService.recordError(
       error,
@@ -139,10 +133,11 @@ class LoggingService {
         'category': category,
         'operation': operation,
         'user_id': _currentUserId ?? 'unknown',
-        if (metadata != null) ...metadata.map((k, v) => MapEntry(k, v?.toString() ?? 'null')),
+        if (metadata != null)
+          ...metadata.map((k, v) => MapEntry(k, v?.toString() ?? 'null')),
       },
     );
-    
+
     if (kDebugMode) {
       final durationText = duration != null ? ' (${duration}ms)' : '';
       debugPrint('❌ [$category] Failed $operation$durationText: $message');
@@ -159,24 +154,22 @@ class LoggingService {
   }) async {
     final operationKey = '${category}_$operation';
     final startTime = _operationStartTimes[operationKey];
-    final duration = startTime != null 
-        ? DateTime.now().difference(startTime).inMilliseconds 
-        : null;
+    final duration =
+        startTime != null
+            ? DateTime.now().difference(startTime).inMilliseconds
+            : null;
 
     final logEntry = LogEntry.operationWarning(
       category: category,
       operation: operation,
       message: message,
       userId: _currentUserId,
-      metadata: {
-        ...?metadata,
-        if (duration != null) 'duration_ms': duration,
-      },
+      metadata: {...?metadata, if (duration != null) 'duration_ms': duration},
       duration: duration,
     );
 
     await _saveLog(logEntry);
-    
+
     if (kDebugMode) {
       debugPrint('⚠️ [$category] Warning in $operation: $message');
     }
@@ -199,7 +192,7 @@ class LoggingService {
     );
 
     await _saveLog(logEntry);
-    
+
     if (kDebugMode) {
       debugPrint('ℹ️ [$category] $message');
     }
@@ -240,10 +233,7 @@ class LoggingService {
       category: LogCategory.vehicles,
       operation: operation,
       message: message,
-      metadata: {
-        if (vehicleId != null) 'vehicle_id': vehicleId,
-        ...?metadata,
-      },
+      metadata: {if (vehicleId != null) 'vehicle_id': vehicleId, ...?metadata},
     );
   }
 
@@ -332,29 +322,23 @@ class LoggingService {
   /// Obtém estatísticas dos logs
   Future<Map<String, dynamic>?> getStatistics() async {
     final result = await _logRepository.getLogStatistics();
-    return result.fold(
-      (failure) {
-        if (kDebugMode) {
-          debugPrint('❌ Failed to get log statistics: ${failure.toString()}');
-        }
-        return null;
-      },
-      (stats) => stats,
-    );
+    return result.fold((failure) {
+      if (kDebugMode) {
+        debugPrint('❌ Failed to get log statistics: ${failure.toString()}');
+      }
+      return null;
+    }, (stats) => stats);
   }
 
   /// Obtém logs com erro
   Future<List<LogEntry>> getErrorLogs() async {
     final result = await _logRepository.getErrorLogs();
-    return result.fold(
-      (failure) {
-        if (kDebugMode) {
-          debugPrint('❌ Failed to get error logs: ${failure.toString()}');
-        }
-        return <LogEntry>[];
-      },
-      (logs) => logs,
-    );
+    return result.fold((failure) {
+      if (kDebugMode) {
+        debugPrint('❌ Failed to get error logs: ${failure.toString()}');
+      }
+      return <LogEntry>[];
+    }, (logs) => logs);
   }
 
   /// Limpa logs antigos
@@ -379,21 +363,18 @@ class LoggingService {
   /// Exporta logs para JSON
   Future<String?> exportLogsToJson() async {
     final result = await _logRepository.exportLogsToJson();
-    return result.fold(
-      (failure) {
-        if (kDebugMode) {
-          debugPrint('❌ Failed to export logs: ${failure.toString()}');
-        }
-        return null;
-      },
-      (jsonString) => jsonString,
-    );
+    return result.fold((failure) {
+      if (kDebugMode) {
+        debugPrint('❌ Failed to export logs: ${failure.toString()}');
+      }
+      return null;
+    }, (jsonString) => jsonString);
   }
 
   /// Força sincronização de logs pendentes
   Future<bool> forceSyncLogs() async {
     final unsyncedResult = await _logRepository.getUnsyncedLogs();
-    
+
     return unsyncedResult.fold(
       (failure) {
         if (kDebugMode) {

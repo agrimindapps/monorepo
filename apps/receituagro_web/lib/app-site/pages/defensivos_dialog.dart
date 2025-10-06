@@ -9,10 +9,10 @@ class FitossanitarioDialog extends StatefulWidget {
   final Fitossanitario? fitossanitario;
 
   const FitossanitarioDialog({
-    Key? key,
+    super.key,
     required this.repository,
     this.fitossanitario,
-  }) : super(key: key);
+  });
 
   @override
   _FitossanitarioDialogState createState() => _FitossanitarioDialogState();

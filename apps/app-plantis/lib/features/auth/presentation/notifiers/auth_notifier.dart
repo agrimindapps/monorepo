@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/providers/analytics_provider.dart';

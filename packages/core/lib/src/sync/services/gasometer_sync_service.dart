@@ -1,8 +1,9 @@
 import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 
-import '../interfaces/i_sync_service.dart';
 import '../../shared/utils/failure.dart';
+import '../interfaces/i_sync_service.dart';
 import 'sync_logger.dart';
 
 /// Serviço de sincronização específico para o app Gasometer
@@ -32,45 +33,45 @@ class GasometerSyncService implements ISyncService {
 
   @override
   final String serviceId = 'gasometer';
-  
+
   @override
   final String displayName = 'Gasometer Vehicle Sync';
-  
+
   @override
   final String version = '2.0.0';
-  
+
   @override
   final List<String> dependencies = [];
-  
+
   // Estado interno
   bool _isInitialized = false;
-  bool _canSync = true;
+  final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
-  
+
   // Estatísticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
   int _totalItemsSynced = 0;
-  
+
   // Stream controllers
-  final StreamController<SyncServiceStatus> _statusController = 
+  final StreamController<SyncServiceStatus> _statusController =
       StreamController<SyncServiceStatus>.broadcast();
-  final StreamController<ServiceProgress> _progressController = 
+  final StreamController<ServiceProgress> _progressController =
       StreamController<ServiceProgress>.broadcast();
-      
+
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
-  
+
   // Entidades específicas do Gasometer
   final List<String> _entityTypes = [
     'vehicles',
-    'fuel_records', 
+    'fuel_records',
     'maintenance_records',
     'expenses',
-    'categories'
+    'categories',
   ];
-  
+
   @override
   Future<Either<Failure, void>> initialize() async {
     try {
@@ -88,7 +89,6 @@ class GasometerSyncService implements ISyncService {
       );
 
       return const Right(null);
-
     } catch (e, stackTrace) {
       _updateStatus(SyncServiceStatus.failed);
       logger.logError(
@@ -99,23 +99,25 @@ class GasometerSyncService implements ISyncService {
       return Left(SyncFailure('Failed to initialize Gasometer sync: $e'));
     }
   }
-  
+
   @override
   bool get canSync => _isInitialized && _canSync;
-  
+
   @override
   Future<bool> get hasPendingSync async => _hasPendingSync;
-  
+
   @override
   Stream<SyncServiceStatus> get statusStream => _statusController.stream;
-  
+
   @override
   Stream<ServiceProgress> get progressStream => _progressController.stream;
-  
+
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
     if (!canSync) {
-      return const Left(SyncFailure('Gasometer sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('Gasometer sync service cannot sync in current state'),
+      );
     }
 
     try {
@@ -133,13 +135,15 @@ class GasometerSyncService implements ISyncService {
       for (int i = 0; i < _entityTypes.length; i++) {
         final entityType = _entityTypes[i];
 
-        _emitProgress(ServiceProgress(
-          serviceId: serviceId,
-          operation: 'Syncing $entityType',
-          current: i + 1,
-          total: _entityTypes.length,
-          currentItem: entityType,
-        ));
+        _emitProgress(
+          ServiceProgress(
+            serviceId: serviceId,
+            operation: 'Syncing $entityType',
+            current: i + 1,
+            total: _entityTypes.length,
+            currentItem: entityType,
+          ),
+        );
 
         // Coordenar sync da entidade (repositories fazem sync interno)
         final syncResult = await _syncEntity(entityType);
@@ -183,17 +187,19 @@ class GasometerSyncService implements ISyncService {
           },
         );
 
-        return Right(ServiceSyncResult(
-          success: true,
-          itemsSynced: totalSynced,
-          duration: duration,
-          metadata: {
-            'entities_synced': _entityTypes,
-            'app': 'gasometer',
-            'sync_type': 'full',
-            'partial_failures': errors,
-          },
-        ));
+        return Right(
+          ServiceSyncResult(
+            success: true,
+            itemsSynced: totalSynced,
+            duration: duration,
+            metadata: {
+              'entities_synced': _entityTypes,
+              'app': 'gasometer',
+              'sync_type': 'full',
+              'partial_failures': errors,
+            },
+          ),
+        );
       } else {
         _failedSyncs++;
         _updateStatus(SyncServiceStatus.failed);
@@ -203,9 +209,10 @@ class GasometerSyncService implements ISyncService {
           error: 'All entities failed: ${errors.join(', ')}',
         );
 
-        return Left(SyncFailure('All entities failed to sync: ${errors.join(', ')}'));
+        return Left(
+          SyncFailure('All entities failed to sync: ${errors.join(', ')}'),
+        );
       }
-
     } catch (e, stackTrace) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
@@ -247,7 +254,8 @@ class GasometerSyncService implements ISyncService {
     try {
       // Vehicles repository geralmente não precisa sync pois são dados locais
       // Mas podemos obter a contagem atual para estatísticas
-      final result = await vehicleRepository.getAllVehicles() as Either<Failure, dynamic>;
+      final result =
+          await vehicleRepository.getAllVehicles() as Either<Failure, dynamic>;
 
       return result.fold<Either<Failure, int>>(
         (Failure failure) => Left<Failure, int>(failure),
@@ -263,7 +271,8 @@ class GasometerSyncService implements ISyncService {
     try {
       // Fuel repository tem métodos de sync em background
       // Obtemos todos os registros para contar quantos foram sincronizados
-      final result = await fuelRepository.getAllFuelRecords() as Either<Failure, dynamic>;
+      final result =
+          await fuelRepository.getAllFuelRecords() as Either<Failure, dynamic>;
 
       return result.fold<Either<Failure, int>>(
         (Failure failure) => Left<Failure, int>(failure),
@@ -282,7 +291,9 @@ class GasometerSyncService implements ISyncService {
   Future<Either<Failure, int>> _syncMaintenanceRecords() async {
     try {
       // Maintenance repository tem sync em background similar ao fuel
-      final result = await maintenanceRepository.getAllMaintenanceRecords() as Either<Failure, dynamic>;
+      final result =
+          await maintenanceRepository.getAllMaintenanceRecords()
+              as Either<Failure, dynamic>;
 
       return result.fold<Either<Failure, int>>(
         (Failure failure) => Left<Failure, int>(failure),
@@ -292,7 +303,9 @@ class GasometerSyncService implements ISyncService {
         },
       );
     } catch (e) {
-      return Left<Failure, int>(SyncFailure('Failed to sync maintenance records: $e'));
+      return Left<Failure, int>(
+        SyncFailure('Failed to sync maintenance records: $e'),
+      );
     }
   }
 
@@ -301,7 +314,8 @@ class GasometerSyncService implements ISyncService {
     try {
       // Expenses repository ainda não tem sync implementado
       // Por enquanto retorna 0
-      final result = await expensesRepository.getAllExpenses() as Either<Failure, dynamic>;
+      final result =
+          await expensesRepository.getAllExpenses() as Either<Failure, dynamic>;
 
       return result.fold<Either<Failure, int>>(
         (Failure failure) => Left<Failure, int>(failure),
@@ -311,33 +325,37 @@ class GasometerSyncService implements ISyncService {
       return Left<Failure, int>(SyncFailure('Failed to sync expenses: $e'));
     }
   }
-  
+
   @override
-  Future<Either<Failure, ServiceSyncResult>> syncSpecific(List<String> ids) async {
+  Future<Either<Failure, ServiceSyncResult>> syncSpecific(
+    List<String> ids,
+  ) async {
     if (!canSync) {
-      return Left(SyncFailure('Gasometer sync service cannot sync in current state'));
+      return const Left(
+        SyncFailure('Gasometer sync service cannot sync in current state'),
+      );
     }
-    
+
     try {
       _updateStatus(SyncServiceStatus.syncing);
       final startTime = DateTime.now();
-      
+
       logger.logInfo(
         message: 'Starting specific sync for Gasometer items: ${ids.length}',
         metadata: {'item_count': ids.length},
       );
-      
+
       // Simular sync de items específicos
       await Future.delayed(Duration(milliseconds: ids.length * 50));
-      
+
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
-      
+
       _lastSync = endTime;
       _successfulSyncs++;
       _totalItemsSynced += ids.length;
       _updateStatus(SyncServiceStatus.completed);
-      
+
       final result = ServiceSyncResult(
         success: true,
         itemsSynced: ids.length,
@@ -348,47 +366,45 @@ class GasometerSyncService implements ISyncService {
           'app': 'gasometer',
         },
       );
-      
+
       return Right(result);
-      
     } catch (e) {
       _failedSyncs++;
       _updateStatus(SyncServiceStatus.failed);
       return Left(SyncFailure('Gasometer specific sync failed: $e'));
     }
   }
-  
+
   @override
   Future<void> stopSync() async {
     _updateStatus(SyncServiceStatus.paused);
     logger.logInfo(message: 'Gasometer sync stopped');
   }
-  
+
   @override
   Future<bool> checkConnectivity() async {
     // Verificação específica para Gasometer pode incluir endpoints financeiros
     return true; // Implementação simplificada
   }
-  
+
   @override
   Future<Either<Failure, void>> clearLocalData() async {
     try {
       logger.logInfo(message: 'Clearing local sync metadata for Gasometer');
-      
+
       _lastSync = null;
       _hasPendingSync = false;
       _totalSyncs = 0;
       _successfulSyncs = 0;
       _failedSyncs = 0;
       _totalItemsSynced = 0;
-      
+
       return const Right(null);
-      
     } catch (e) {
       return Left(CacheFailure('Failed to clear Gasometer local data: $e'));
     }
   }
-  
+
   @override
   Future<SyncStatistics> getStatistics() async {
     return SyncStatistics(
@@ -400,11 +416,14 @@ class GasometerSyncService implements ISyncService {
       totalItemsSynced: _totalItemsSynced,
       metadata: {
         'entity_types': _entityTypes,
-        'avg_items_per_sync': _successfulSyncs > 0 ? (_totalItemsSynced / _successfulSyncs).round() : 0,
+        'avg_items_per_sync':
+            _successfulSyncs > 0
+                ? (_totalItemsSynced / _successfulSyncs).round()
+                : 0,
       },
     );
   }
-  
+
   @override
   Future<void> dispose() async {
     // Cancel connectivity monitoring
@@ -412,27 +431,31 @@ class GasometerSyncService implements ISyncService {
     _connectivitySubscription = null;
 
     logger.logInfo(message: 'Disposing Gasometer Sync Service');
-    
+
     await _statusController.close();
     await _progressController.close();
-    
+
     _isInitialized = false;
     _updateStatus(SyncServiceStatus.disposing);
   }
-  
+
   // Métodos específicos do Gasometer
-  
+
   /// Force sync específico para dados financeiros (alta prioridade)
   Future<Either<Failure, ServiceSyncResult>> syncFinancialData() async {
-    final financialEntities = ['expenses', 'fuel_records', 'maintenance_records'];
+    final financialEntities = [
+      'expenses',
+      'fuel_records',
+      'maintenance_records',
+    ];
     return await syncSpecific(financialEntities);
   }
-  
+
   /// Sync apenas veículos (usado frequentemente)
   Future<Either<Failure, ServiceSyncResult>> syncVehicles() async {
     return await syncSpecific(['vehicles']);
   }
-  
+
   /// Marca dados como pendentes (usado quando offline)
   void markDataAsPending() {
     _hasPendingSync = true;
@@ -496,28 +519,30 @@ class GasometerSyncService implements ISyncService {
   }
 
   // Métodos privados
-  
+
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {
       _currentStatus = status;
-      
+
       if (!_statusController.isClosed) {
         _statusController.add(status);
       }
-      
+
       logger.logInfo(
         message: 'Sync status changed',
-        metadata: {'old_status': _currentStatus.name, 'new_status': status.name},
+        metadata: {
+          'old_status': _currentStatus.name,
+          'new_status': status.name,
+        },
       );
     }
   }
-  
+
   void _emitProgress(ServiceProgress progress) {
     if (!_progressController.isClosed) {
       _progressController.add(progress);
     }
   }
-  
 }
 
 /// Factory para criar GasometerSyncService com dependências

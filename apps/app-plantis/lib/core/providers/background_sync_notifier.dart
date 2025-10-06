@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:core/core.dart' hide getIt;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/background_sync_service.dart';
 import '../sync/background_sync_status.dart';

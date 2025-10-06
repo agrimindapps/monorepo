@@ -6,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../domain/entities/base_sync_entity.dart';
 import '../domain/repositories/i_sync_repository.dart';
-import '../shared/utils/failure.dart';
 import '../infrastructure/services/sync_firebase_service.dart';
+import '../shared/utils/failure.dart';
 import 'app_sync_config.dart';
 import 'entity_sync_registration.dart';
 

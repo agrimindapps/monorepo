@@ -1,14 +1,13 @@
+import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../core/providers/receituagro_auth_notifier.dart';
 
 /// Diálogo simplificado de confirmação para exclusão de conta
 class DeleteAccountDialog extends ConsumerStatefulWidget {
   const DeleteAccountDialog({super.key});
 
   @override
-  ConsumerState<DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+  ConsumerState<DeleteAccountDialog> createState() =>
+      _DeleteAccountDialogState();
 }
 
 class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
@@ -24,9 +23,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 8,
       title: Row(
         children: [
@@ -52,7 +49,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
         children: [
           const Text('Esta ação é irreversível e resultará em:'),
           const SizedBox(height: 16),
-          
+
           // Lista de consequências com ícones estilizados
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +61,11 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.delete_forever, color: Colors.red, size: 16),
+                child: const Icon(
+                  Icons.delete_forever,
+                  color: Colors.red,
+                  size: 16,
+                ),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -86,9 +87,7 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 child: const Icon(Icons.history, color: Colors.red, size: 16),
               ),
               const SizedBox(width: 12),
-              const Expanded(
-                child: Text('Perda do histórico de atividades'),
-              ),
+              const Expanded(child: Text('Perda do histórico de atividades')),
             ],
           ),
           const SizedBox(height: 12),
@@ -110,9 +109,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Nota sobre cancelamento estilizada
           Container(
             padding: const EdgeInsets.all(16),
@@ -130,7 +129,11 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                     color: Colors.green.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.info, color: Colors.green.shade700, size: 16),
+                  child: Icon(
+                    Icons.info,
+                    color: Colors.green.shade700,
+                    size: 16,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -142,9 +145,9 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Campo de confirmação estilizado
           const Text(
             'Para confirmar, digite CONCORDO abaixo:',
@@ -172,7 +175,10 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
             textCapitalization: TextCapitalization.characters,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -189,15 +195,22 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w500)),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
         ),
         const SizedBox(width: 8),
         ElevatedButton(
-          onPressed: _isConfirmationValid ? () {
-            Navigator.of(context).pop(true);
-          } : null,
+          onPressed:
+              _isConfirmationValid
+                  ? () {
+                    Navigator.of(context).pop(true);
+                  }
+                  : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isConfirmationValid ? Colors.red : Colors.grey.shade300,
+            backgroundColor:
+                _isConfirmationValid ? Colors.red : Colors.grey.shade300,
             foregroundColor: Colors.white,
             elevation: _isConfirmationValid ? 2 : 0,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -205,7 +218,10 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          child: const Text('Excluir Conta', style: TextStyle(fontWeight: FontWeight.w600)),
+          child: const Text(
+            'Excluir Conta',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );

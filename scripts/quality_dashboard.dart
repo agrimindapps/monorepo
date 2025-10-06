@@ -4,31 +4,37 @@
 /// Generates comprehensive HTML dashboard with trends and insights
 
 import 'dart:io';
-import 'dart:convert';
 import 'dart:math';
 
 class QualityDashboard {
   static const String version = '1.0.0';
-  
+
   Map<String, AppMetrics> appMetrics = {};
   Map<String, dynamic> trends = {};
-  
+
   Future<void> generate() async {
     print('📊 Generating Quality Dashboard v$version...');
-    
+
     // Collect metrics from all apps
     await _collectMetrics();
-    
+
     // Generate HTML dashboard
     await _generateHtmlDashboard();
-    
+
     print('✅ Dashboard generated: quality_dashboard.html');
-    print('🌐 Open in browser: file://${Directory.current.absolute.path}/quality_dashboard.html');
+    print(
+        '🌐 Open in browser: file://${Directory.current.absolute.path}/quality_dashboard.html');
   }
-  
+
   Future<void> _collectMetrics() async {
-    final apps = ['app-receituagro', 'app-gasometer', 'app-plantis', 'app_taskolist', 'app-petiveti'];
-    
+    final apps = [
+      'app-receituagro',
+      'app-gasometer',
+      'app-plantis',
+      'app_taskolist',
+      'app-petiveti'
+    ];
+
     for (String app in apps) {
       final libDir = Directory('apps/$app/lib');
       if (libDir.existsSync()) {
@@ -37,23 +43,23 @@ class QualityDashboard {
       }
     }
   }
-  
+
   Future<AppMetrics> _analyzeApp(Directory libDir) async {
     int totalFiles = 0;
     int totalLines = 0;
     int largeFiles = 0;
     int criticalFiles = 0;
     List<FileMetric> fileMetrics = [];
-    
+
     await for (FileSystemEntity entity in libDir.list(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         totalFiles++;
-        
+
         final lines = await _countLines(entity);
         totalLines += lines;
-        
+
         final relativePath = entity.path.replaceFirst('${libDir.path}/', '');
-        
+
         FileHealth health = FileHealth.healthy;
         if (lines > 500) {
           criticalFiles++;
@@ -64,7 +70,7 @@ class QualityDashboard {
         } else if (lines > 250) {
           health = FileHealth.attention;
         }
-        
+
         fileMetrics.add(FileMetric(
           path: relativePath,
           lines: lines,
@@ -72,7 +78,7 @@ class QualityDashboard {
         ));
       }
     }
-    
+
     return AppMetrics(
       totalFiles: totalFiles,
       totalLines: totalLines,
@@ -83,7 +89,7 @@ class QualityDashboard {
       fileMetrics: fileMetrics,
     );
   }
-  
+
   Future<int> _countLines(File file) async {
     try {
       final lines = await file.readAsLines();
@@ -92,23 +98,24 @@ class QualityDashboard {
       return 0;
     }
   }
-  
+
   double _calculateHealthScore(int total, int large, int critical) {
     if (total == 0) return 10.0;
-    
+
     double penalty = 0.0;
-    penalty += (critical / total) * 5.0; // Critical files reduce score significantly
-    penalty += (large / total) * 2.0;    // Large files reduce score moderately
-    
+    penalty +=
+        (critical / total) * 5.0; // Critical files reduce score significantly
+    penalty += (large / total) * 2.0; // Large files reduce score moderately
+
     return max(0.0, 10.0 - penalty);
   }
-  
+
   Future<void> _generateHtmlDashboard() async {
     final html = _buildDashboardHtml();
     final file = File('quality_dashboard.html');
     await file.writeAsString(html);
   }
-  
+
   String _buildDashboardHtml() {
     return '''
 <!DOCTYPE html>
@@ -447,14 +454,19 @@ class QualityDashboard {
 </html>
 ''';
   }
-  
+
   String _buildOverallStats() {
-    final totalFiles = appMetrics.values.fold(0, (sum, m) => sum + m.totalFiles);
-    final totalLines = appMetrics.values.fold(0, (sum, m) => sum + m.totalLines);
-    final totalCritical = appMetrics.values.fold(0, (sum, m) => sum + m.criticalFiles);
-    final avgHealth = appMetrics.values.isEmpty ? 0.0 : 
-        appMetrics.values.fold(0.0, (sum, m) => sum + m.healthScore) / appMetrics.length;
-    
+    final totalFiles =
+        appMetrics.values.fold(0, (sum, m) => sum + m.totalFiles);
+    final totalLines =
+        appMetrics.values.fold(0, (sum, m) => sum + m.totalLines);
+    final totalCritical =
+        appMetrics.values.fold(0, (sum, m) => sum + m.criticalFiles);
+    final avgHealth = appMetrics.values.isEmpty
+        ? 0.0
+        : appMetrics.values.fold(0.0, (sum, m) => sum + m.healthScore) /
+            appMetrics.length;
+
     return '''
     <div class="stats-grid">
         <div class="stat-card">
@@ -480,15 +492,15 @@ class QualityDashboard {
     </div>
     ''';
   }
-  
+
   String _buildAppCards() {
     return appMetrics.entries.map((entry) {
       final app = entry.key;
       final metrics = entry.value;
-      
+
       String healthColor = 'healthy';
       String healthText = 'Excellent';
-      
+
       if (metrics.healthScore < 6) {
         healthColor = 'critical';
         healthText = 'Needs Attention';
@@ -496,7 +508,7 @@ class QualityDashboard {
         healthColor = 'warning';
         healthText = 'Good';
       }
-      
+
       return '''
       <div class="app-card">
           <div class="app-header">
@@ -532,18 +544,30 @@ class QualityDashboard {
       ''';
     }).join('\n');
   }
-  
-  int _getTotalHealthyFiles() => appMetrics.values.fold(0, (sum, m) => 
-    sum + m.fileMetrics.where((f) => f.health == FileHealth.healthy).length);
-  
-  int _getTotalAttentionFiles() => appMetrics.values.fold(0, (sum, m) => 
-    sum + m.fileMetrics.where((f) => f.health == FileHealth.attention).length);
-  
-  int _getTotalWarningFiles() => appMetrics.values.fold(0, (sum, m) => 
-    sum + m.fileMetrics.where((f) => f.health == FileHealth.warning).length);
-  
-  int _getTotalCriticalFiles() => appMetrics.values.fold(0, (sum, m) => 
-    sum + m.fileMetrics.where((f) => f.health == FileHealth.critical).length);
+
+  int _getTotalHealthyFiles() => appMetrics.values.fold(
+      0,
+      (sum, m) =>
+          sum +
+          m.fileMetrics.where((f) => f.health == FileHealth.healthy).length);
+
+  int _getTotalAttentionFiles() => appMetrics.values.fold(
+      0,
+      (sum, m) =>
+          sum +
+          m.fileMetrics.where((f) => f.health == FileHealth.attention).length);
+
+  int _getTotalWarningFiles() => appMetrics.values.fold(
+      0,
+      (sum, m) =>
+          sum +
+          m.fileMetrics.where((f) => f.health == FileHealth.warning).length);
+
+  int _getTotalCriticalFiles() => appMetrics.values.fold(
+      0,
+      (sum, m) =>
+          sum +
+          m.fileMetrics.where((f) => f.health == FileHealth.critical).length);
 }
 
 class AppMetrics {
@@ -554,7 +578,7 @@ class AppMetrics {
   final int criticalFiles;
   final double healthScore;
   final List<FileMetric> fileMetrics;
-  
+
   AppMetrics({
     required this.totalFiles,
     required this.totalLines,
@@ -570,7 +594,7 @@ class FileMetric {
   final String path;
   final int lines;
   final FileHealth health;
-  
+
   FileMetric({
     required this.path,
     required this.lines,

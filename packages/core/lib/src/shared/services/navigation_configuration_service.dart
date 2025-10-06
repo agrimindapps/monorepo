@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../models/navigation_state.dart';
 import '../interfaces/i_navigation_extension.dart';
+import '../models/navigation_state.dart';
 
 /// Service for managing navigation configurations across the application
 class NavigationConfigurationService implements INavigationConfiguration {
@@ -15,8 +15,8 @@ class NavigationConfigurationService implements INavigationConfiguration {
   @override
   NavigationConfiguration getDefaultConfiguration(String pageType) {
     return _defaultConfigurations[pageType] ??
-           _defaultConfigurations['default'] ??
-           const NavigationConfiguration();
+        _defaultConfigurations['default'] ??
+        const NavigationConfiguration();
   }
 
   @override
@@ -97,7 +97,10 @@ class NavigationConfigurationService implements INavigationConfiguration {
   }
 
   /// Set default configuration for a page type
-  void setDefaultConfiguration(String pageType, NavigationConfiguration config) {
+  void setDefaultConfiguration(
+    String pageType,
+    NavigationConfiguration config,
+  ) {
     _defaultConfigurations[pageType] = config;
     debugPrint('Set default configuration for pageType: $pageType');
   }
@@ -123,7 +126,8 @@ class NavigationConfigurationService implements INavigationConfiguration {
     return {
       'customConfigurations': _configurations.length,
       'defaultConfigurations': _defaultConfigurations.length,
-      'totalPageTypes': {..._configurations.keys, ..._defaultConfigurations.keys}.length,
+      'totalPageTypes':
+          {..._configurations.keys, ..._defaultConfigurations.keys}.length,
     };
   }
 

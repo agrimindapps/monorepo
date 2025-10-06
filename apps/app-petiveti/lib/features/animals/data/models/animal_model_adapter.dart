@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' show BinaryReader, TypeAdapter, BinaryWriter;
 
 import '../../domain/entities/animal_enums.dart';
 import 'animal_model.dart';
@@ -13,7 +13,7 @@ class AnimalModelAdapter extends TypeAdapter<AnimalModel> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    
+
     return AnimalModel(
       id: fields[0] as String,
       userId: fields[1] as String,

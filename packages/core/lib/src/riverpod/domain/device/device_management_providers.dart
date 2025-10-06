@@ -1,11 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-
-import '../../../domain/entities/device_entity.dart';
-import '../../../infrastructure/services/device_management_service.dart';
-import '../auth/auth_domain_providers.dart';
-import '../premium/subscription_providers.dart';
 
 /// Providers unificados para gerenciamento de dispositivos
 /// Consolida lógica de device management entre todos os apps do monorepo
@@ -40,7 +34,7 @@ final currentDeviceProvider = FutureProvider<DeviceEntity>((ref) async {
 final userDevicesProvider = FutureProvider<List<DeviceEntity>>((ref) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return [];
-  
+
   // TODO: Implementar busca real de dispositivos do usuário
   // Por enquanto, retornar lista mock até services serem implementados
   final currentDevice = await ref.watch(currentDeviceProvider.future);
@@ -48,17 +42,20 @@ final userDevicesProvider = FutureProvider<List<DeviceEntity>>((ref) async {
 });
 
 /// Provider para estado de gerenciamento de dispositivos
-final deviceManagementProvider = StateNotifierProvider<DeviceManagementNotifier, DeviceManagementState>((ref) {
-  return DeviceManagementNotifier();
-});
+final deviceManagementProvider =
+    StateNotifierProvider<DeviceManagementNotifier, DeviceManagementState>((
+      ref,
+    ) {
+      return DeviceManagementNotifier();
+    });
 
 /// Provider para sessão ativa do dispositivo atual
 final currentDeviceSessionProvider = Provider<DeviceSession?>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   final device = ref.watch(currentDeviceProvider).value;
-  
+
   if (user == null || device == null) return null;
-  
+
   return DeviceSession(
     userId: user.id,
     deviceId: device.id,
@@ -74,8 +71,10 @@ final currentDeviceSessionProvider = Provider<DeviceSession?>((ref) {
 /// Provider para verificar se pode adicionar novo dispositivo
 final canAddDeviceProvider = Provider<bool>((ref) {
   final devices = ref.watch(userDevicesProvider).value ?? [];
-  final limits = ref.watch(featureLimitsProvider(ref.watch(currentAppIdProvider)));
-  
+  final limits = ref.watch(
+    featureLimitsProvider(ref.watch(currentAppIdProvider)),
+  );
+
   return limits.hasReachedLimit('devices', devices.length) == false;
 });
 
@@ -96,27 +95,31 @@ final maxDevicesProvider = Provider<int>((ref) {
 final excessDevicesProvider = Provider<List<DeviceEntity>>((ref) {
   final devices = ref.watch(userDevicesProvider).value ?? [];
   final maxDevices = ref.watch(maxDevicesProvider);
-  
+
   if (maxDevices == -1 || devices.length <= maxDevices) return [];
-  
+
   // Ordenar por último acesso e retornar os que excedem
   final sortedDevices = List<DeviceEntity>.from(devices)
     ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
-  
+
   return sortedDevices.skip(maxDevices).toList();
 });
 
 // ========== DEVICE VALIDATION PROVIDERS ==========
 
 /// Provider para validação do dispositivo atual
-final deviceValidationProvider = FutureProvider<DeviceValidationResult>((ref) async {
+final deviceValidationProvider = FutureProvider<DeviceValidationResult>((
+  ref,
+) async {
   final device = ref.watch(currentDeviceProvider).value;
   final user = ref.watch(domainCurrentUserProvider);
-  
+
   if (device == null || user == null) {
-    return DeviceValidationResult.invalid('Dispositivo ou usuário não disponível');
+    return DeviceValidationResult.invalid(
+      'Dispositivo ou usuário não disponível',
+    );
   }
-  
+
   // TODO: Implementar validação real de dispositivo
   // Por enquanto, considerar sempre válido
   return DeviceValidationResult.valid();
@@ -139,7 +142,7 @@ final deviceUnauthorizedReasonProvider = Provider<String?>((ref) {
 /// Provider para ações de gerenciamento de dispositivos
 final deviceActionsProvider = Provider<DeviceActions>((ref) {
   final notifier = ref.read(deviceManagementProvider.notifier);
-  
+
   return DeviceActions(
     registerDevice: notifier.registerCurrentDevice,
     revokeDevice: notifier.revokeDevice,
@@ -152,28 +155,25 @@ final deviceActionsProvider = Provider<DeviceActions>((ref) {
 // ========== DEVICE ANALYTICS PROVIDERS ==========
 
 /// Provider para estatísticas de uso por dispositivo
-final deviceUsageStatsProvider = FutureProvider.family<DeviceUsageStats, String>((ref, deviceId) async {
-  // TODO: Implementar estatísticas reais de uso
-  // Por enquanto, retornar estatísticas mock
-  return DeviceUsageStats(
-    deviceId: deviceId,
-    totalSessions: 42,
-    totalUsageTime: const Duration(hours: 24),
-    lastUsed: DateTime.now(),
-    appLaunches: 156,
-    featureUsage: {
-      'auth': 50,
-      'sync': 30,
-      'analytics': 20,
-    },
-  );
-});
+final deviceUsageStatsProvider =
+    FutureProvider.family<DeviceUsageStats, String>((ref, deviceId) async {
+      // TODO: Implementar estatísticas reais de uso
+      // Por enquanto, retornar estatísticas mock
+      return DeviceUsageStats(
+        deviceId: deviceId,
+        totalSessions: 42,
+        totalUsageTime: const Duration(hours: 24),
+        lastUsed: DateTime.now(),
+        appLaunches: 156,
+        featureUsage: {'auth': 50, 'sync': 30, 'analytics': 20},
+      );
+    });
 
 /// Provider para dispositivos ativos recentemente
 final recentActiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
   final devices = ref.watch(userDevicesProvider).value ?? [];
   final now = DateTime.now();
-  
+
   return devices.where((device) {
     final daysSinceAccess = now.difference(device.lastActiveAt).inDays;
     return daysSinceAccess <= 30; // Ativo nos últimos 30 dias
@@ -184,7 +184,7 @@ final recentActiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
 final inactiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
   final devices = ref.watch(userDevicesProvider).value ?? [];
   final now = DateTime.now();
-  
+
   return devices.where((device) {
     final daysSinceAccess = now.difference(device.lastActiveAt).inDays;
     return daysSinceAccess > 90; // Inativo por mais de 90 dias
@@ -197,7 +197,7 @@ final inactiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
 final deviceSecurityProvider = FutureProvider<DeviceSecurityInfo>((ref) async {
   final device = ref.watch(currentDeviceProvider).value;
   if (device == null) throw Exception('Dispositivo não disponível');
-  
+
   // TODO: Implementar verificação real de segurança
   // Por enquanto, retornar informações mock
   return DeviceSecurityInfo(
@@ -266,7 +266,8 @@ class DeviceSession {
   });
 
   Duration get sessionDuration => DateTime.now().difference(sessionStart);
-  bool get isActiveSession => DateTime.now().difference(lastActivity).inMinutes < 30;
+  bool get isActiveSession =>
+      DateTime.now().difference(lastActivity).inMinutes < 30;
 }
 
 /// Resultado da validação do dispositivo
@@ -282,10 +283,7 @@ class DeviceValidationResult {
   });
 
   factory DeviceValidationResult.valid() {
-    return DeviceValidationResult(
-      isValid: true,
-      validatedAt: DateTime.now(),
-    );
+    return DeviceValidationResult(isValid: true, validatedAt: DateTime.now());
   }
 
   factory DeviceValidationResult.invalid(String reason) {
@@ -372,12 +370,7 @@ enum SecurityAlertType {
   suspiciousActivity,
 }
 
-enum SecuritySeverity {
-  low,
-  medium,
-  high,
-  critical,
-}
+enum SecuritySeverity { low, medium, high, critical }
 
 /// Ações de gerenciamento de dispositivos
 class DeviceActions {
@@ -412,12 +405,14 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> registerCurrentDevice() async {
     try {
       state = const DeviceManagementLoading();
-      
+
       // TODO: Implementar registro real de dispositivo
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
-      
-      state = const DeviceManagementSuccess('Dispositivo registrado com sucesso');
+
+      state = const DeviceManagementSuccess(
+        'Dispositivo registrado com sucesso',
+      );
       return true;
     } catch (e) {
       state = DeviceManagementError('Erro ao registrar dispositivo: $e');
@@ -428,11 +423,11 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> revokeDevice(String deviceId) async {
     try {
       state = const DeviceManagementLoading();
-      
+
       // TODO: Implementar revogação real de dispositivo
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
-      
+
       state = const DeviceManagementSuccess('Dispositivo revogado com sucesso');
       return true;
     } catch (e) {
@@ -444,12 +439,14 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> revokeAllOtherDevices() async {
     try {
       state = const DeviceManagementLoading();
-      
+
       // TODO: Implementar revogação de outros dispositivos
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
-      
-      state = const DeviceManagementSuccess('Outros dispositivos revogados com sucesso');
+
+      state = const DeviceManagementSuccess(
+        'Outros dispositivos revogados com sucesso',
+      );
       return true;
     } catch (e) {
       state = DeviceManagementError('Erro ao revogar outros dispositivos: $e');
@@ -460,12 +457,14 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<bool> updateDeviceInfo(Map<String, dynamic> updates) async {
     try {
       state = const DeviceManagementLoading();
-      
+
       // TODO: Implementar atualização real de informações do dispositivo
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
-      
-      state = const DeviceManagementSuccess('Informações do dispositivo atualizadas');
+
+      state = const DeviceManagementSuccess(
+        'Informações do dispositivo atualizadas',
+      );
       return true;
     } catch (e) {
       state = DeviceManagementError('Erro ao atualizar informações: $e');
@@ -476,10 +475,10 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   Future<void> refreshDevicesList() async {
     try {
       state = const DeviceManagementLoading();
-      
+
       // Trigger refresh nos providers relacionados
       // Será implementado com ref.invalidate() quando necessário
-      
+
       state = const DeviceManagementIdle();
     } catch (e) {
       state = DeviceManagementError('Erro ao atualizar lista: $e');

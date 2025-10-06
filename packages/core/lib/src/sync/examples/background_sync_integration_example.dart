@@ -6,6 +6,7 @@
 /// - SyncQueue
 ///
 /// Com os sync services existentes de cada app.
+library;
 
 // ignore_for_file: unused_local_variable, unused_element
 

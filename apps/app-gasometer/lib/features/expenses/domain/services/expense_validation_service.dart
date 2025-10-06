@@ -707,17 +707,22 @@ class ExpenseValidationService {
     if (descLower.contains('seguro')) return ExpenseType.insurance;
     if (descLower.contains('ipva')) return ExpenseType.ipva;
     if (descLower.contains('estacion')) return ExpenseType.parking;
-    if (descLower.contains('lavag') || descLower.contains('lav car'))
+    if (descLower.contains('lavag') || descLower.contains('lav car')) {
       return ExpenseType.carWash;
-    if (descLower.contains('multa') || descLower.contains('infra'))
+    }
+    if (descLower.contains('multa') || descLower.contains('infra')) {
       return ExpenseType.fine;
-    if (descLower.contains('pedágio') || descLower.contains('pedagio'))
+    }
+    if (descLower.contains('pedágio') || descLower.contains('pedagio')) {
       return ExpenseType.toll;
+    }
     if (descLower.contains('licen')) return ExpenseType.licensing;
-    if (descLower.contains('acess') || descLower.contains('equip'))
+    if (descLower.contains('acess') || descLower.contains('equip')) {
       return ExpenseType.accessories;
-    if (descLower.contains('document') || descLower.contains('papel'))
+    }
+    if (descLower.contains('document') || descLower.contains('papel')) {
       return ExpenseType.documentation;
+    }
 
     return ExpenseType.other;
   }

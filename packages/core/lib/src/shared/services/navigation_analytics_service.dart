@@ -1,8 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
-import '../interfaces/i_navigation_extension.dart';
 import '../../infrastructure/services/firebase_analytics_service.dart';
+import '../interfaces/i_navigation_extension.dart';
 
 /// Service for tracking navigation analytics and user journey patterns
 class NavigationAnalyticsService implements INavigationAnalytics {
@@ -39,12 +40,18 @@ class NavigationAnalyticsService implements INavigationAnalytics {
       _addSessionEvent(event);
 
       // Track with Firebase
-      final result = await _firebaseAnalytics.logEvent('navigation_page_view', parameters: {
-        'page_type': pageType,
-        'session_page_count': _pageViewCounts[pageType],
-        ...?parameters,
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_page_view',
+        parameters: {
+          'page_type': pageType,
+          'session_page_count': _pageViewCounts[pageType],
+          ...?parameters,
+        },
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
       debugPrint('Tracked page view: $pageType');
     } catch (error) {
@@ -68,12 +75,18 @@ class NavigationAnalyticsService implements INavigationAnalytics {
 
       _addSessionEvent(event);
 
-      final result = await _firebaseAnalytics.logEvent('navigation_path', parameters: {
-        'path': path,
-        'path_length': path.length,
-        'path_string': path.join(' -> '),
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_path',
+        parameters: {
+          'path': path,
+          'path_length': path.length,
+          'path_string': path.join(' -> '),
+        },
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
       debugPrint('Tracked navigation path: ${path.join(' -> ')}');
     } catch (error) {
@@ -100,14 +113,22 @@ class NavigationAnalyticsService implements INavigationAnalytics {
 
       _addSessionEvent(event);
 
-      final result = await _firebaseAnalytics.logEvent('navigation_performance', parameters: {
-        'action': action,
-        'duration_ms': duration.inMilliseconds,
-        'is_slow': duration.inMilliseconds > 1000,
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_performance',
+        parameters: {
+          'action': action,
+          'duration_ms': duration.inMilliseconds,
+          'is_slow': duration.inMilliseconds > 1000,
+        },
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
-      debugPrint('Tracked navigation performance: $action (${duration.inMilliseconds}ms)');
+      debugPrint(
+        'Tracked navigation performance: $action (${duration.inMilliseconds}ms)',
+      );
     } catch (error) {
       debugPrint('Failed to track navigation performance: $error');
     }
@@ -124,21 +145,19 @@ class NavigationAnalyticsService implements INavigationAnalytics {
         type: NavigationEventType.error,
         pageType: pageType,
         timestamp: DateTime.now(),
-        parameters: {
-          'error': error,
-          'page_type': pageType,
-          ...?context,
-        },
+        parameters: {'error': error, 'page_type': pageType, ...?context},
       );
 
       _addSessionEvent(event);
 
-      final result = await _firebaseAnalytics.logEvent('navigation_error', parameters: {
-        'page_type': pageType,
-        'error': error,
-        ...?context,
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_error',
+        parameters: {'page_type': pageType, 'error': error, ...?context},
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
       debugPrint('Tracked navigation error: $pageType - $error');
     } catch (error) {
@@ -156,19 +175,19 @@ class NavigationAnalyticsService implements INavigationAnalytics {
         type: NavigationEventType.pattern,
         pageType: pattern,
         timestamp: DateTime.now(),
-        parameters: {
-          'pattern': pattern,
-          ...metadata,
-        },
+        parameters: {'pattern': pattern, ...metadata},
       );
 
       _addSessionEvent(event);
 
-      final result = await _firebaseAnalytics.logEvent('navigation_pattern', parameters: {
-        'pattern': pattern,
-        ...metadata,
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_pattern',
+        parameters: {'pattern': pattern, ...metadata},
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
       debugPrint('Tracked navigation pattern: $pattern');
     } catch (error) {
@@ -183,10 +202,11 @@ class NavigationAnalyticsService implements INavigationAnalytics {
   ) async {
     try {
       // Filter events by date range
-      final filteredEvents = _sessionEvents.where((event) {
-        return event.timestamp.isAfter(startDate) &&
-               event.timestamp.isBefore(endDate);
-      }).toList();
+      final filteredEvents =
+          _sessionEvents.where((event) {
+            return event.timestamp.isAfter(startDate) &&
+                event.timestamp.isBefore(endDate);
+          }).toList();
 
       // Calculate summary statistics
       final summary = <String, dynamic>{
@@ -195,20 +215,26 @@ class NavigationAnalyticsService implements INavigationAnalytics {
           'end': endDate.toIso8601String(),
         },
         'total_events': filteredEvents.length,
-        'page_views': filteredEvents
-            .where((e) => e.type == NavigationEventType.pageView)
-            .length,
-        'navigation_paths': filteredEvents
-            .where((e) => e.type == NavigationEventType.navigationPath)
-            .length,
-        'errors': filteredEvents
-            .where((e) => e.type == NavigationEventType.error)
-            .length,
-        'performance_events': filteredEvents
-            .where((e) => e.type == NavigationEventType.performance)
-            .length,
+        'page_views':
+            filteredEvents
+                .where((e) => e.type == NavigationEventType.pageView)
+                .length,
+        'navigation_paths':
+            filteredEvents
+                .where((e) => e.type == NavigationEventType.navigationPath)
+                .length,
+        'errors':
+            filteredEvents
+                .where((e) => e.type == NavigationEventType.error)
+                .length,
+        'performance_events':
+            filteredEvents
+                .where((e) => e.type == NavigationEventType.performance)
+                .length,
         'most_viewed_pages': _getMostViewedPages(),
-        'average_session_length': _calculateAverageSessionLength(filteredEvents),
+        'average_session_length': _calculateAverageSessionLength(
+          filteredEvents,
+        ),
         'error_rate': _calculateErrorRate(filteredEvents),
       };
 
@@ -227,12 +253,18 @@ class NavigationAnalyticsService implements INavigationAnalytics {
         final timeSpent = DateTime.now().difference(startTime);
         _pageTimings[pageType] = timeSpent;
 
-        final result = await _firebaseAnalytics.logEvent('navigation_page_exit', parameters: {
-          'page_type': pageType,
-          'time_spent_ms': timeSpent.inMilliseconds,
-          'time_spent_seconds': timeSpent.inSeconds,
-        });
-        result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+        final result = await _firebaseAnalytics.logEvent(
+          'navigation_page_exit',
+          parameters: {
+            'page_type': pageType,
+            'time_spent_ms': timeSpent.inMilliseconds,
+            'time_spent_seconds': timeSpent.inSeconds,
+          },
+        );
+        result.fold(
+          (error) => debugPrint('Analytics error: ${error.message}'),
+          (_) {},
+        );
 
         _pageStartTimes.remove(pageType);
         debugPrint('Tracked page exit: $pageType (${timeSpent.inSeconds}s)');
@@ -245,11 +277,14 @@ class NavigationAnalyticsService implements INavigationAnalytics {
   /// Track back navigation
   Future<void> trackBackNavigation(String fromPage, String toPage) async {
     try {
-      final result = await _firebaseAnalytics.logEvent('navigation_back', parameters: {
-        'from_page': fromPage,
-        'to_page': toPage,
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_back',
+        parameters: {'from_page': fromPage, 'to_page': toPage},
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
       debugPrint('Tracked back navigation: $fromPage -> $toPage');
     } catch (error) {
@@ -265,13 +300,19 @@ class NavigationAnalyticsService implements INavigationAnalytics {
     Map<String, dynamic>? metadata,
   ) async {
     try {
-      final result = await _firebaseAnalytics.logEvent('navigation_funnel_step', parameters: {
-        'funnel_name': funnelName,
-        'step_name': stepName,
-        'step_index': stepIndex,
-        ...?metadata,
-      });
-      result.fold((error) => debugPrint('Analytics error: ${error.message}'), (_) {});
+      final result = await _firebaseAnalytics.logEvent(
+        'navigation_funnel_step',
+        parameters: {
+          'funnel_name': funnelName,
+          'step_name': stepName,
+          'step_index': stepIndex,
+          ...?metadata,
+        },
+      );
+      result.fold(
+        (error) => debugPrint('Analytics error: ${error.message}'),
+        (_) {},
+      );
 
       debugPrint('Tracked funnel step: $funnelName - $stepName ($stepIndex)');
     } catch (error) {
@@ -287,9 +328,10 @@ class NavigationAnalyticsService implements INavigationAnalytics {
       'total_page_views': _pageViewCounts.values.fold(0, (a, b) => a + b),
       'session_duration': _calculateSessionDuration(),
       'most_viewed_page': _getMostViewedPage(),
-      'error_count': _sessionEvents
-          .where((e) => e.type == NavigationEventType.error)
-          .length,
+      'error_count':
+          _sessionEvents
+              .where((e) => e.type == NavigationEventType.error)
+              .length,
     };
   }
 
@@ -314,8 +356,9 @@ class NavigationAnalyticsService implements INavigationAnalytics {
 
   /// Get most viewed pages in current session
   Map<String, int> _getMostViewedPages() {
-    final sorted = _pageViewCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final sorted =
+        _pageViewCounts.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
 
     return Map.fromEntries(sorted.take(10));
   }
@@ -333,9 +376,8 @@ class NavigationAnalyticsService implements INavigationAnalytics {
   Duration _calculateAverageSessionLength(List<NavigationEvent> events) {
     if (events.isEmpty) return Duration.zero;
 
-    final pageViewEvents = events
-        .where((e) => e.type == NavigationEventType.pageView)
-        .toList();
+    final pageViewEvents =
+        events.where((e) => e.type == NavigationEventType.pageView).toList();
 
     if (pageViewEvents.length < 2) return Duration.zero;
 
@@ -349,9 +391,8 @@ class NavigationAnalyticsService implements INavigationAnalytics {
   double _calculateErrorRate(List<NavigationEvent> events) {
     if (events.isEmpty) return 0.0;
 
-    final errorCount = events
-        .where((e) => e.type == NavigationEventType.error)
-        .length;
+    final errorCount =
+        events.where((e) => e.type == NavigationEventType.error).length;
 
     return errorCount / events.length;
   }

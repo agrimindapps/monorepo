@@ -229,7 +229,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       // This would need to be implemented in the remote data source
       // For now, return not implemented
-      return Left(UnexpectedFailure('Password reset confirmation not implemented'));
+      return const Left(UnexpectedFailure('Password reset confirmation not implemented'));
     } catch (e) {
       return Left(UnexpectedFailure(e.toString()));
     }

@@ -323,7 +323,7 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
     // Usar valores padrão por enquanto
     final isIOSPremiumActive = subscriptionState.hasActiveSubscription;
     final isAndroidPremiumActive = subscriptionState.hasActiveSubscription;
-    final isWebPremiumActive = false; // Web ainda não tem subscription
+    const isWebPremiumActive = false; // Web ainda não tem subscription
 
     return Card(
       elevation: 2,

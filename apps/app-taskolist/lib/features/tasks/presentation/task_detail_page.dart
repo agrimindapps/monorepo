@@ -1,20 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/services/navigation_service.dart';
+import '../../../shared/widgets/subtask_list_widget.dart';
 import '../domain/task_entity.dart';
 import 'providers/task_providers.dart';
-import '../../../shared/widgets/subtask_list_widget.dart';
 
 class TaskDetailPage extends ConsumerStatefulWidget {
   final TaskEntity task;
   final TaskDetailFocus? initialFocus;
 
-  const TaskDetailPage({
-    super.key,
-    required this.task,
-    this.initialFocus,
-  });
+  const TaskDetailPage({super.key, required this.task, this.initialFocus});
 
   @override
   ConsumerState<TaskDetailPage> createState() => _TaskDetailPageState();
@@ -33,7 +29,9 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.task.title);
-    _descriptionController = TextEditingController(text: widget.task.description ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.task.description ?? '',
+    );
     _selectedStatus = widget.task.status;
     _selectedPriority = widget.task.priority;
     _isStarred = widget.task.isStarred;
@@ -59,9 +57,10 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
     try {
       final updatedTask = widget.task.copyWith(
         title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty 
-          ? null 
-          : _descriptionController.text.trim(),
+        description:
+            _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
         status: _selectedStatus,
         priority: _selectedPriority,
         isStarred: _isStarred,
@@ -92,32 +91,37 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
   Future<void> _deleteTask() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Tarefa'),
-        content: const Text('Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Excluir Tarefa'),
+            content: const Text(
+              'Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.',
             ),
-            child: const Text('Excluir'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true && mounted) {
       setState(() => _isLoading = true);
 
       try {
-        await ref.read(taskNotifierProvider.notifier).deleteTask(widget.task.id);
-        
+        await ref
+            .read(taskNotifierProvider.notifier)
+            .deleteTask(widget.task.id);
+
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -165,190 +169,232 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
           ],
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Título
-                  const Text(
-                    'Título',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _titleController,
-                    enabled: _isEditing,
-                    decoration: InputDecoration(
-                      hintText: 'Digite o título da tarefa',
-                      border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
-                      filled: !_isEditing,
-                      fillColor: Colors.grey[100],
-                    ),
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: _isEditing ? null : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Descrição
-                  const Text(
-                    'Descrição',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _descriptionController,
-                    enabled: _isEditing,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: 'Digite a descrição da tarefa (opcional)',
-                      border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
-                      filled: !_isEditing,
-                      fillColor: Colors.grey[100],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Status
-                  const Text(
-                    'Status',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<TaskStatus>(
-                    value: _selectedStatus,
-                    onChanged: _isEditing ? (status) {
-                      if (status != null) {
-                        setState(() => _selectedStatus = status);
-                      }
-                    } : null,
-                    decoration: InputDecoration(
-                      border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
-                      filled: !_isEditing,
-                      fillColor: Colors.grey[100],
-                    ),
-                    items: TaskStatus.values.map((status) {
-                      return DropdownMenuItem(
-                        value: status,
-                        child: Row(
-                          children: [
-                            Icon(
-                              status == TaskStatus.completed ? Icons.check_circle :
-                              status == TaskStatus.inProgress ? Icons.access_time :
-                              Icons.radio_button_unchecked,
-                              color: status == TaskStatus.completed ? Colors.green :
-                                     status == TaskStatus.inProgress ? Colors.orange :
-                                     Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(_getStatusName(status)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Prioridade
-                  const Text(
-                    'Prioridade',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<TaskPriority>(
-                    value: _selectedPriority,
-                    onChanged: _isEditing ? (priority) {
-                      if (priority != null) {
-                        setState(() => _selectedPriority = priority);
-                      }
-                    } : null,
-                    decoration: InputDecoration(
-                      border: _isEditing ? const OutlineInputBorder() : InputBorder.none,
-                      filled: !_isEditing,
-                      fillColor: Colors.grey[100],
-                    ),
-                    items: TaskPriority.values.map((priority) {
-                      return DropdownMenuItem(
-                        value: priority,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.flag,
-                              color: priority == TaskPriority.urgent ? Colors.red :
-                                     priority == TaskPriority.high ? Colors.orange :
-                                     priority == TaskPriority.medium ? Colors.blue :
-                                     Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(_getPriorityName(priority)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Favorito
-                  CheckboxListTile(
-                    title: const Text('Tarefa Favorita'),
-                    subtitle: const Text('Marcar como importante'),
-                    value: _isStarred,
-                    onChanged: _isEditing ? (value) {
-                      setState(() => _isStarred = value ?? false);
-                    } : null,
-                    secondary: Icon(
-                      _isStarred ? Icons.star : Icons.star_border,
-                      color: _isStarred ? Colors.amber : null,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Informações adicionais
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Informações',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildInfoRow('Criado em:', _formatDate(widget.task.createdAt)),
-                          _buildInfoRow('Atualizado em:', _formatDate(widget.task.updatedAt)),
-                          if (widget.task.dueDate != null)
-                            _buildInfoRow('Vencimento:', _formatDate(widget.task.dueDate!)),
-                        ],
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Título
+                    const Text(
+                      'Título',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _titleController,
+                      enabled: _isEditing,
+                      decoration: InputDecoration(
+                        hintText: 'Digite o título da tarefa',
+                        border:
+                            _isEditing
+                                ? const OutlineInputBorder()
+                                : InputBorder.none,
+                        filled: !_isEditing,
+                        fillColor: Colors.grey[100],
+                      ),
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: _isEditing ? null : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
-                  // Subtarefas
-                  SubtaskListWidget(parentTaskId: widget.task.id),
-                ],
+                    // Descrição
+                    const Text(
+                      'Descrição',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _descriptionController,
+                      enabled: _isEditing,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Digite a descrição da tarefa (opcional)',
+                        border:
+                            _isEditing
+                                ? const OutlineInputBorder()
+                                : InputBorder.none,
+                        filled: !_isEditing,
+                        fillColor: Colors.grey[100],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Status
+                    const Text(
+                      'Status',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<TaskStatus>(
+                      value: _selectedStatus,
+                      onChanged:
+                          _isEditing
+                              ? (status) {
+                                if (status != null) {
+                                  setState(() => _selectedStatus = status);
+                                }
+                              }
+                              : null,
+                      decoration: InputDecoration(
+                        border:
+                            _isEditing
+                                ? const OutlineInputBorder()
+                                : InputBorder.none,
+                        filled: !_isEditing,
+                        fillColor: Colors.grey[100],
+                      ),
+                      items:
+                          TaskStatus.values.map((status) {
+                            return DropdownMenuItem(
+                              value: status,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    status == TaskStatus.completed
+                                        ? Icons.check_circle
+                                        : status == TaskStatus.inProgress
+                                        ? Icons.access_time
+                                        : Icons.radio_button_unchecked,
+                                    color:
+                                        status == TaskStatus.completed
+                                            ? Colors.green
+                                            : status == TaskStatus.inProgress
+                                            ? Colors.orange
+                                            : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(_getStatusName(status)),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Prioridade
+                    const Text(
+                      'Prioridade',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<TaskPriority>(
+                      value: _selectedPriority,
+                      onChanged:
+                          _isEditing
+                              ? (priority) {
+                                if (priority != null) {
+                                  setState(() => _selectedPriority = priority);
+                                }
+                              }
+                              : null,
+                      decoration: InputDecoration(
+                        border:
+                            _isEditing
+                                ? const OutlineInputBorder()
+                                : InputBorder.none,
+                        filled: !_isEditing,
+                        fillColor: Colors.grey[100],
+                      ),
+                      items:
+                          TaskPriority.values.map((priority) {
+                            return DropdownMenuItem(
+                              value: priority,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.flag,
+                                    color:
+                                        priority == TaskPriority.urgent
+                                            ? Colors.red
+                                            : priority == TaskPriority.high
+                                            ? Colors.orange
+                                            : priority == TaskPriority.medium
+                                            ? Colors.blue
+                                            : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(_getPriorityName(priority)),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Favorito
+                    CheckboxListTile(
+                      title: const Text('Tarefa Favorita'),
+                      subtitle: const Text('Marcar como importante'),
+                      value: _isStarred,
+                      onChanged:
+                          _isEditing
+                              ? (value) {
+                                setState(() => _isStarred = value ?? false);
+                              }
+                              : null,
+                      secondary: Icon(
+                        _isStarred ? Icons.star : Icons.star_border,
+                        color: _isStarred ? Colors.amber : null,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Informações adicionais
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Informações',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildInfoRow(
+                              'Criado em:',
+                              _formatDate(widget.task.createdAt),
+                            ),
+                            _buildInfoRow(
+                              'Atualizado em:',
+                              _formatDate(widget.task.updatedAt),
+                            ),
+                            if (widget.task.dueDate != null)
+                              _buildInfoRow(
+                                'Vencimento:',
+                                _formatDate(widget.task.dueDate!),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Subtarefas
+                    SubtaskListWidget(parentTaskId: widget.task.id),
+                  ],
+                ),
               ),
-            ),
     );
   }
 

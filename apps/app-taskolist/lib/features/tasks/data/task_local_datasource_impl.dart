@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:core/core.dart';
 
 import '../domain/task_entity.dart';
-import 'task_model.dart';
 import 'task_local_datasource.dart';
+import 'task_model.dart';
 
 @LazySingleton(as: TaskLocalDataSource)
 class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   static const String _boxName = 'tasks';
   Box<TaskModel>? _box;
-  final StreamController<List<TaskModel>> _taskStreamController = 
+  final StreamController<List<TaskModel>> _taskStreamController =
       StreamController<List<TaskModel>>.broadcast();
 
   Future<Box<TaskModel>> get _taskBox async {
@@ -54,28 +54,32 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     if (listId != null) {
       tasks = tasks.where((task) => task.listId == listId).toList();
     }
-    
+
     if (userId != null) {
-      tasks = tasks.where((task) => 
-        task.createdById == userId || task.assignedToId == userId
-      ).toList();
+      tasks =
+          tasks
+              .where(
+                (task) =>
+                    task.createdById == userId || task.assignedToId == userId,
+              )
+              .toList();
     }
-    
+
     if (status != null) {
       tasks = tasks.where((task) => task.status == status).toList();
     }
-    
+
     if (priority != null) {
       tasks = tasks.where((task) => task.priority == priority).toList();
     }
-    
+
     if (isStarred != null) {
       tasks = tasks.where((task) => task.isStarred == isStarred).toList();
     }
 
     // Ordenar por posição
     tasks.sort((a, b) => a.position.compareTo(b.position));
-    
+
     return tasks;
   }
 
@@ -154,23 +158,29 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
 
   Future<int> getCompletedTaskCount({String? listId, String? userId}) async {
     final tasks = await getTasks(
-      listId: listId, 
-      userId: userId, 
-      status: TaskStatus.completed
+      listId: listId,
+      userId: userId,
+      status: TaskStatus.completed,
     );
     return tasks.length;
   }
 
-  Future<List<TaskModel>> getOverdueTasks({String? listId, String? userId}) async {
+  Future<List<TaskModel>> getOverdueTasks({
+    String? listId,
+    String? userId,
+  }) async {
     final tasks = await getTasks(listId: listId, userId: userId);
     final now = DateTime.now();
-    
-    return tasks.where((task) => 
-      task.dueDate != null && 
-      task.dueDate!.isBefore(now) &&
-      task.status != TaskStatus.completed &&
-      task.status != TaskStatus.cancelled
-    ).toList();
+
+    return tasks
+        .where(
+          (task) =>
+              task.dueDate != null &&
+              task.dueDate!.isBefore(now) &&
+              task.status != TaskStatus.completed &&
+              task.status != TaskStatus.cancelled,
+        )
+        .toList();
   }
 
   Future<List<TaskModel>> getTasksByTag(String tag, {String? listId}) async {

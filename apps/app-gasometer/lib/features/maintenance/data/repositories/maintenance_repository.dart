@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../models/maintenance_model.dart';
 
@@ -14,7 +14,9 @@ class MaintenanceRepository {
   }
 
   /// Salva nova manutenção
-  Future<MaintenanceEntity?> saveMaintenance(MaintenanceEntity maintenance) async {
+  Future<MaintenanceEntity?> saveMaintenance(
+    MaintenanceEntity maintenance,
+  ) async {
     try {
       final model = _entityToModel(maintenance);
       await _box.put(maintenance.id, model);
@@ -25,12 +27,14 @@ class MaintenanceRepository {
   }
 
   /// Atualiza manutenção existente
-  Future<MaintenanceEntity?> updateMaintenance(MaintenanceEntity maintenance) async {
+  Future<MaintenanceEntity?> updateMaintenance(
+    MaintenanceEntity maintenance,
+  ) async {
     try {
       if (!_box.containsKey(maintenance.id)) {
         throw Exception('Manutenção não encontrada');
       }
-      
+
       final model = _entityToModel(maintenance);
       await _box.put(maintenance.id, model);
       return _modelToEntity(model);
@@ -70,11 +74,16 @@ class MaintenanceRepository {
   }
 
   /// Carrega manutenções por veículo
-  Future<List<MaintenanceEntity>> getMaintenancesByVehicle(String vehicleId) async {
+  Future<List<MaintenanceEntity>> getMaintenancesByVehicle(
+    String vehicleId,
+  ) async {
     try {
-      final models = _box.values
-          .where((model) => model.veiculoId == vehicleId && !model.isDeleted)
-          .toList();
+      final models =
+          _box.values
+              .where(
+                (model) => model.veiculoId == vehicleId && !model.isDeleted,
+              )
+              .toList();
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao carregar manutenções do veículo: $e');
@@ -82,12 +91,15 @@ class MaintenanceRepository {
   }
 
   /// Carrega manutenções por tipo
-  Future<List<MaintenanceEntity>> getMaintenancesByType(MaintenanceType type) async {
+  Future<List<MaintenanceEntity>> getMaintenancesByType(
+    MaintenanceType type,
+  ) async {
     try {
       final typeString = _typeToString(type);
-      final models = _box.values
-          .where((model) => model.tipo == typeString && !model.isDeleted)
-          .toList();
+      final models =
+          _box.values
+              .where((model) => model.tipo == typeString && !model.isDeleted)
+              .toList();
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao carregar manutenções por tipo: $e');
@@ -95,23 +107,24 @@ class MaintenanceRepository {
   }
 
   /// Carrega manutenções por status
-  Future<List<MaintenanceEntity>> getMaintenancesByStatus(MaintenanceStatus status) async {
+  Future<List<MaintenanceEntity>> getMaintenancesByStatus(
+    MaintenanceStatus status,
+  ) async {
     try {
-      final models = _box.values
-          .where((model) => !model.isDeleted)
-          .toList();
-      
+      final models = _box.values.where((model) => !model.isDeleted).toList();
+
       // Como o modelo atual não tem status separado, vamos considerar todas como 'completed'
       // se foram salvas, ou filtrar de outra forma
-      final filteredModels = models.where((model) {
-        if (status == MaintenanceStatus.completed) {
-          return model.concluida;
-        } else if (status == MaintenanceStatus.pending) {
-          return !model.concluida;
-        }
-        return false; // Para inProgress e cancelled, retorna vazio por enquanto
-      }).toList();
-      
+      final filteredModels =
+          models.where((model) {
+            if (status == MaintenanceStatus.completed) {
+              return model.concluida;
+            } else if (status == MaintenanceStatus.pending) {
+              return !model.concluida;
+            }
+            return false; // Para inProgress e cancelled, retorna vazio por enquanto
+          }).toList();
+
       return filteredModels.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao carregar manutenções por status: $e');
@@ -119,17 +132,21 @@ class MaintenanceRepository {
   }
 
   /// Carrega manutenções por período
-  Future<List<MaintenanceEntity>> getMaintenancesByPeriod(DateTime start, DateTime end) async {
+  Future<List<MaintenanceEntity>> getMaintenancesByPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
     try {
       final startMs = start.millisecondsSinceEpoch;
       final endMs = end.millisecondsSinceEpoch;
-      
-      final models = _box.values.where((model) {
-        return model.data >= startMs && 
-               model.data <= endMs && 
-               !model.isDeleted;
-      }).toList();
-      
+
+      final models =
+          _box.values.where((model) {
+            return model.data >= startMs &&
+                model.data <= endMs &&
+                !model.isDeleted;
+          }).toList();
+
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao carregar manutenções por período: $e');
@@ -137,11 +154,14 @@ class MaintenanceRepository {
   }
 
   /// Carrega manutenções pendentes (próximas revisões vencidas)
-  Future<List<MaintenanceEntity>> getUpcomingMaintenances(double currentOdometer) async {
+  Future<List<MaintenanceEntity>> getUpcomingMaintenances(
+    double currentOdometer,
+  ) async {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
-      final maintenances = models.map((model) => _modelToEntity(model)).toList();
-      
+      final maintenances =
+          models.map((model) => _modelToEntity(model)).toList();
+
       return maintenances.where((maintenance) {
         return maintenance.isNextServiceDue(currentOdometer);
       }).toList();
@@ -154,11 +174,12 @@ class MaintenanceRepository {
   Future<List<MaintenanceEntity>> searchMaintenances(String query) async {
     try {
       final lowerQuery = query.toLowerCase();
-      final models = _box.values.where((model) {
-        return !model.isDeleted && 
-               model.descricao.toLowerCase().contains(lowerQuery);
-      }).toList();
-      
+      final models =
+          _box.values.where((model) {
+            return !model.isDeleted &&
+                model.descricao.toLowerCase().contains(lowerQuery);
+          }).toList();
+
       return models.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao buscar manutenções: $e');
@@ -169,23 +190,23 @@ class MaintenanceRepository {
   Future<Map<String, dynamic>> getStats() async {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
-      
+
       if (models.isEmpty) {
-        return {
-          'totalRecords': 0,
-          'totalCost': 0.0,
-          'averageCost': 0.0,
-        };
+        return {'totalRecords': 0, 'totalCost': 0.0, 'averageCost': 0.0};
       }
 
-      final totalCost = models.fold<double>(0, (sum, model) => sum + model.valor);
-      
+      final totalCost = models.fold<double>(
+        0,
+        (sum, model) => sum + model.valor,
+      );
+
       return {
         'totalRecords': models.length,
         'totalCost': totalCost,
         'averageCost': totalCost / models.length,
-        'lastMaintenance': _modelToEntity(models.reduce((a, b) => 
-            a.data > b.data ? a : b)),
+        'lastMaintenance': _modelToEntity(
+          models.reduce((a, b) => a.data > b.data ? a : b),
+        ),
       };
     } catch (e) {
       throw Exception('Erro ao calcular estatísticas: $e');
@@ -197,16 +218,16 @@ class MaintenanceRepository {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final duplicates = <MaintenanceModel>[];
-      
+
       for (int i = 0; i < models.length; i++) {
         for (int j = i + 1; j < models.length; j++) {
           final model1 = models[i];
           final model2 = models[j];
-          
+
           // Considera duplicata se mesmo veículo, tipo, data (mesmo dia) e valor muito próximo
           final date1 = DateTime.fromMillisecondsSinceEpoch(model1.data);
           final date2 = DateTime.fromMillisecondsSinceEpoch(model2.data);
-          
+
           if (model1.veiculoId == model2.veiculoId &&
               model1.tipo == model2.tipo &&
               date1.day == date2.day &&
@@ -217,7 +238,7 @@ class MaintenanceRepository {
           }
         }
       }
-      
+
       return duplicates.map((model) => _modelToEntity(model)).toList();
     } catch (e) {
       throw Exception('Erro ao buscar duplicatas: $e');
@@ -240,7 +261,8 @@ class MaintenanceRepository {
       userId: entity.userId,
       veiculoId: entity.vehicleId,
       tipo: _typeToString(entity.type),
-      descricao: '${entity.title} - ${entity.description}', // Combina título e descrição
+      descricao:
+          '${entity.title} - ${entity.description}', // Combina título e descrição
       valor: entity.cost,
       data: entity.serviceDate.millisecondsSinceEpoch,
       odometro: entity.odometer.round(),
@@ -254,14 +276,18 @@ class MaintenanceRepository {
     // Separar título e descrição se possível (formato: "Título - Descrição")
     final parts = model.descricao.split(' - ');
     final title = parts.isNotEmpty ? parts.first : model.descricao;
-    final description = parts.length > 1 ? parts.skip(1).join(' - ') : model.descricao;
-    
+    final description =
+        parts.length > 1 ? parts.skip(1).join(' - ') : model.descricao;
+
     return MaintenanceEntity(
       id: model.id,
       userId: model.userId ?? '',
       vehicleId: model.veiculoId,
       type: _stringToType(model.tipo),
-      status: model.concluida ? MaintenanceStatus.completed : MaintenanceStatus.pending,
+      status:
+          model.concluida
+              ? MaintenanceStatus.completed
+              : MaintenanceStatus.pending,
       title: title,
       description: description,
       cost: model.valor,
@@ -270,9 +296,10 @@ class MaintenanceRepository {
       workshopName: null, // Não disponível no modelo atual
       workshopPhone: null, // Não disponível no modelo atual
       workshopAddress: null, // Não disponível no modelo atual
-      nextServiceDate: model.proximaRevisao != null 
-          ? DateTime.fromMillisecondsSinceEpoch(model.proximaRevisao!)
-          : null,
+      nextServiceDate:
+          model.proximaRevisao != null
+              ? DateTime.fromMillisecondsSinceEpoch(model.proximaRevisao!)
+              : null,
       nextServiceOdometer: null, // Não disponível no modelo atual
       photosPaths: const [], // Não disponível no modelo atual
       invoicesPaths: const [], // Não disponível no modelo atual

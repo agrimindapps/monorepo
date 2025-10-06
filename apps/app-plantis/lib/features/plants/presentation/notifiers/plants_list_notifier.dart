@@ -1,4 +1,3 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide getIt;
 
 import '../../domain/entities/plant.dart';

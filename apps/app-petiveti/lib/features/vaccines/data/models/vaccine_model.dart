@@ -1,5 +1,4 @@
-import 'package:hive/hive.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:core/core.dart';
 
 import '../../domain/entities/vaccine.dart';
 
@@ -86,18 +85,20 @@ class VaccineModel extends HiveObject {
       name: name,
       veterinarian: veterinarian,
       date: DateTime.fromMillisecondsSinceEpoch(dateTimestamp),
-      nextDueDate: nextDueDateTimestamp != null
-          ? DateTime.fromMillisecondsSinceEpoch(nextDueDateTimestamp!)
-          : null,
+      nextDueDate:
+          nextDueDateTimestamp != null
+              ? DateTime.fromMillisecondsSinceEpoch(nextDueDateTimestamp!)
+              : null,
       batch: batch,
       manufacturer: manufacturer,
       dosage: dosage,
       notes: notes,
       isRequired: isRequired,
       isCompleted: isCompleted,
-      reminderDate: reminderDateTimestamp != null
-          ? DateTime.fromMillisecondsSinceEpoch(reminderDateTimestamp!)
-          : null,
+      reminderDate:
+          reminderDateTimestamp != null
+              ? DateTime.fromMillisecondsSinceEpoch(reminderDateTimestamp!)
+              : null,
       status: VaccineStatus.values[status],
       createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtTimestamp),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(updatedAtTimestamp),
@@ -159,19 +160,36 @@ class VaccineModel extends HiveObject {
       id: (map['id'] as String?) ?? '',
       animalId: (map['animalId'] as String?) ?? '',
       name: (map['nomeVacina'] as String?) ?? (map['name'] as String?) ?? '',
-      veterinarian: (map['veterinario'] as String?) ?? (map['veterinarian'] as String?) ?? '',
-      dateTimestamp: (map['dataAplicacao'] as int?) ?? (map['dateTimestamp'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      nextDueDateTimestamp: map['proximaDose'] == 0 ? null : ((map['proximaDose'] ?? map['nextDueDateTimestamp']) as int?),
+      veterinarian:
+          (map['veterinario'] as String?) ??
+          (map['veterinarian'] as String?) ??
+          '',
+      dateTimestamp:
+          (map['dataAplicacao'] as int?) ??
+          (map['dateTimestamp'] as int?) ??
+          DateTime.now().millisecondsSinceEpoch,
+      nextDueDateTimestamp:
+          map['proximaDose'] == 0
+              ? null
+              : ((map['proximaDose'] ?? map['nextDueDateTimestamp']) as int?),
       batch: (map['lote'] as String?) ?? (map['batch'] as String?),
-      manufacturer: (map['fabricante'] as String?) ?? (map['manufacturer'] as String?),
+      manufacturer:
+          (map['fabricante'] as String?) ?? (map['manufacturer'] as String?),
       dosage: (map['dosagem'] as String?) ?? (map['dosage'] as String?),
       notes: (map['observacoes'] as String?) ?? (map['notes'] as String?),
-      isRequired: (map['obrigatoria'] as bool?) ?? (map['isRequired'] as bool?) ?? true,
-      isCompleted: (map['concluida'] as bool?) ?? (map['isCompleted'] as bool?) ?? false,
-      reminderDateTimestamp: map['dataLembrete'] == 0 ? null : ((map['dataLembrete'] ?? map['reminderDateTimestamp']) as int?),
+      isRequired:
+          (map['obrigatoria'] as bool?) ?? (map['isRequired'] as bool?) ?? true,
+      isCompleted:
+          (map['concluida'] as bool?) ?? (map['isCompleted'] as bool?) ?? false,
+      reminderDateTimestamp:
+          map['dataLembrete'] == 0
+              ? null
+              : ((map['dataLembrete'] ?? map['reminderDateTimestamp']) as int?),
       status: (map['status'] as int?) ?? 0,
-      createdAtTimestamp: (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      updatedAtTimestamp: (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      createdAtTimestamp:
+          (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      updatedAtTimestamp:
+          (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
       isDeleted: (map['isDeleted'] as bool?) ?? false,
     );
   }

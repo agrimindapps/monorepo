@@ -1,16 +1,18 @@
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../diagnosticos/domain/entities/diagnostico_entity.dart' as diag_entity;
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../diagnosticos/domain/entities/diagnostico_entity.dart'
+    as diag_entity;
 import '../../domain/entities/diagnostico_entity.dart';
 
 /// Mapper para converter entre diferentes representações de diagnóstico
 /// Segue padrão de conversão entre camadas
 class DiagnosticoMapper {
-
   /// Converte da entity de diagnósticos para entity local
-  static DiagnosticoEntity fromDiagnosticosEntity(diag_entity.DiagnosticoEntity entity) {
+  static DiagnosticoEntity fromDiagnosticosEntity(
+    diag_entity.DiagnosticoEntity entity,
+  ) {
     return DiagnosticoEntity(
       id: entity.id,
       idDefensivo: entity.idDefensivo,
@@ -103,12 +105,15 @@ class DiagnosticoMapper {
   }
 
   /// Converte lista de entities
-  static List<DiagnosticoEntity> fromDiagnosticosEntityList(List<diag_entity.DiagnosticoEntity> entities) {
+  static List<DiagnosticoEntity> fromDiagnosticosEntityList(
+    List<diag_entity.DiagnosticoEntity> entities,
+  ) {
     return entities.map((entity) => fromDiagnosticosEntity(entity)).toList();
   }
 
   /// Converte lista de entities com resolução de nomes
-  static Future<List<DiagnosticoEntity>> fromDiagnosticosEntityListWithResolution(
+  static Future<List<DiagnosticoEntity>>
+  fromDiagnosticosEntityListWithResolution(
     List<diag_entity.DiagnosticoEntity> entities,
   ) async {
     final results = <DiagnosticoEntity>[];

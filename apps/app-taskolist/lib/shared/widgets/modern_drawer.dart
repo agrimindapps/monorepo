@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:core/core.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/settings/presentation/settings_page.dart';
@@ -68,7 +68,7 @@ class ModernDrawer extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Nome do usuário
                     Text(
                       userDisplayName,
@@ -80,7 +80,7 @@ class ModernDrawer extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
+
                     // Email ou status anônimo
                     Text(
                       isAnonymous ? 'Modo Anônimo' : userEmail,
@@ -95,7 +95,7 @@ class ModernDrawer extends ConsumerWidget {
               ),
             ),
           ),
-          
+
           // Menu items
           Expanded(
             child: ListView(
@@ -108,7 +108,7 @@ class ModernDrawer extends ConsumerWidget {
                   subtitle: 'Visualizar tarefas',
                   onTap: () => Navigator.pop(context),
                 ),
-                
+
                 _buildMenuItem(
                   context,
                   icon: Icons.task_rounded,
@@ -116,7 +116,7 @@ class ModernDrawer extends ConsumerWidget {
                   subtitle: 'Gerenciar atividades',
                   onTap: () => Navigator.pop(context),
                 ),
-                
+
                 _buildMenuItem(
                   context,
                   icon: Icons.analytics_rounded,
@@ -124,7 +124,7 @@ class ModernDrawer extends ConsumerWidget {
                   subtitle: 'Visualizar progresso',
                   onTap: () => Navigator.pop(context),
                 ),
-                
+
                 _buildMenuItem(
                   context,
                   icon: Icons.category_rounded,
@@ -132,12 +132,12 @@ class ModernDrawer extends ConsumerWidget {
                   subtitle: 'Organizar por tags',
                   onTap: () => Navigator.pop(context),
                 ),
-                
+
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Divider(),
                 ),
-                
+
                 _buildMenuItem(
                   context,
                   icon: Icons.settings_rounded,
@@ -153,7 +153,7 @@ class ModernDrawer extends ConsumerWidget {
                     );
                   },
                 ),
-                
+
                 _buildMenuItem(
                   context,
                   icon: Icons.help_rounded,
@@ -161,7 +161,7 @@ class ModernDrawer extends ConsumerWidget {
                   subtitle: 'Obter assistência',
                   onTap: () => Navigator.pop(context),
                 ),
-                
+
                 _buildMenuItem(
                   context,
                   icon: Icons.info_rounded,
@@ -172,7 +172,7 @@ class ModernDrawer extends ConsumerWidget {
               ],
             ),
           ),
-          
+
           // Footer com logout
           Container(
             padding: const EdgeInsets.all(16),
@@ -208,25 +208,22 @@ class ModernDrawer extends ConsumerWidget {
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: isDestructive 
-                ? Colors.red.withAlpha(26)
-                : AppColors.primaryColor.withAlpha(26),
+            color:
+                isDestructive
+                    ? Colors.red.withAlpha(26)
+                    : AppColors.primaryColor.withAlpha(26),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: isDestructive 
-                ? Colors.red[600]
-                : AppColors.primaryColor,
+            color: isDestructive ? Colors.red[600] : AppColors.primaryColor,
             size: 24,
           ),
         ),
@@ -235,9 +232,10 @@ class ModernDrawer extends ConsumerWidget {
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: isDestructive 
-                ? Colors.red[600]
-                : Theme.of(context).textTheme.titleMedium?.color,
+            color:
+                isDestructive
+                    ? Colors.red[600]
+                    : Theme.of(context).textTheme.titleMedium?.color,
             letterSpacing: 0.2,
           ),
         ),
@@ -255,12 +253,11 @@ class ModernDrawer extends ConsumerWidget {
           color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(102),
         ),
         onTap: onTap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        hoverColor: isDestructive 
-            ? Colors.red.withAlpha(13)
-            : AppColors.primaryColor.withAlpha(13),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        hoverColor:
+            isDestructive
+                ? Colors.red.withAlpha(13)
+                : AppColors.primaryColor.withAlpha(13),
       ),
     );
   }

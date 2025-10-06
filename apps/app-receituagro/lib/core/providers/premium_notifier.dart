@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide PremiumFeature;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../di/injection_container.dart' as di;

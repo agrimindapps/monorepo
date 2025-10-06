@@ -23,7 +23,7 @@ import '../providers/providers.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   // Web inicia em promo (landing page), Mobile/Desktop inicia em login
-  final initialRoute = kIsWeb ? '/promo' : '/login';
+  const initialRoute = kIsWeb ? '/promo' : '/login';
 
   return GoRouter(
     initialLocation: initialRoute,

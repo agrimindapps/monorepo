@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' show Hive;
 
 /// Registra todos os adapters Hive necessários para o app
 /// Deve ser chamado antes de usar qualquer Box

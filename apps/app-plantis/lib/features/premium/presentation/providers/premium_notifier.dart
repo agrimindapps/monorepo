@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
 
@@ -131,7 +130,7 @@ class PremiumNotifier extends _$PremiumNotifier {
   void _setupSubscriptionStreams() {
     // Listen to subscription changes via SimpleSubscriptionSyncService
     if (_simpleSubscriptionSyncService != null) {
-      _syncSubscriptionStream = _simpleSubscriptionSyncService!
+      _syncSubscriptionStream = _simpleSubscriptionSyncService
           .subscriptionStatus
           .listen(
             (subscription) {
@@ -204,7 +203,7 @@ class PremiumNotifier extends _$PremiumNotifier {
 
     // Use SimpleSubscriptionSyncService if available
     if (_simpleSubscriptionSyncService != null) {
-      final result = await _simpleSubscriptionSyncService!
+      final result = await _simpleSubscriptionSyncService
           .hasActiveSubscriptionForApp('plantis');
 
       result.fold(

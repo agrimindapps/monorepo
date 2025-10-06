@@ -1,10 +1,7 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../auth/presentation/state/auth_state.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
-import '../notifiers/auth_notifier.dart';
-import '../notifiers/login_form_notifier.dart';
 import 'auth_button_widget.dart';
 import 'auth_text_field_widget.dart';
 
@@ -32,16 +29,16 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
       children: [
         Text(
           'Recuperar Senha',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
           'Enviaremos um link para redefinir sua senha',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[600],
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
         ),
         const SizedBox(height: 30),
 
@@ -103,19 +100,12 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red.shade700,
-            size: 20,
-          ),
+          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: Colors.red.shade700,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.red.shade700, fontSize: 14),
             ),
           ),
         ],
@@ -142,10 +132,7 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
           Expanded(
             child: Text(
               'Email de recuperação enviado! Verifique sua caixa de entrada.',
-              style: TextStyle(
-                color: Colors.green.shade700,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.green.shade700, fontSize: 14),
             ),
           ),
         ],

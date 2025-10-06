@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:hive/hive.dart';
+import 'package:core/core.dart';
 
 /// Sistema avançado de otimização de queries e cache de banco de dados
 class DatabaseOptimizer {
@@ -12,7 +12,7 @@ class DatabaseOptimizer {
   final Map<String, QueryCache> _queryCache = {};
   final Map<String, DatabaseMetrics> _metrics = {};
   final List<SlowQuery> _slowQueries = [];
-  
+
   static const Duration cacheTimeout = Duration(minutes: 5);
   static const int slowQueryThresholdMs = 100;
   static const int maxCacheEntries = 200;
@@ -28,36 +28,34 @@ class DatabaseOptimizer {
     final now = DateTime.now();
 
     // Verifica cache válido
-    if (!forceRefresh && 
-        cacheEntry != null && 
+    if (!forceRefresh &&
+        cacheEntry != null &&
         !_isCacheExpired(cacheEntry, cacheFor ?? cacheTimeout)) {
-      
       _updateMetrics(queryKey, 0, true); // Cache hit
       return cacheEntry.data as T;
     }
 
     // Executa query com medição de performance
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       final result = await query();
       stopwatch.stop();
-      
+
       final executionTime = stopwatch.elapsedMilliseconds;
-      
+
       // Armazena no cache
       _cacheResult(queryKey, result, now);
-      
+
       // Registra métricas
       _updateMetrics(queryKey, executionTime, false);
-      
+
       // Detecta queries lentas
       if (executionTime > slowQueryThresholdMs) {
         _recordSlowQuery(queryKey, executionTime);
       }
-      
+
       return result;
-      
     } catch (error) {
       stopwatch.stop();
       _updateMetrics(queryKey, stopwatch.elapsedMilliseconds, false, error);
@@ -74,38 +72,36 @@ class DatabaseOptimizer {
     int? offset,
     String? cacheKey,
   }) async {
-    final queryKey = cacheKey ?? 'hive_${box.name}_${filter.hashCode}_${sortBy.hashCode}';
-    
-    return executeWithCache(
-      queryKey,
-      () async {
-        // Implementação otimizada para Hive
-        List<T> results = [];
-        
-        if (filter != null) {
-          // Filtragem eficiente
-          results = await _efficientFilter(box, filter);
-        } else {
-          results = box.values.toList();
-        }
-        
-        // Ordenação se especificada
-        if (sortBy != null) {
-          results.sort(sortBy);
-        }
-        
-        // Paginação
-        if (offset != null) {
-          results = results.skip(offset).toList();
-        }
-        
-        if (limit != null) {
-          results = results.take(limit).toList();
-        }
-        
-        return results;
-      },
-    );
+    final queryKey =
+        cacheKey ?? 'hive_${box.name}_${filter.hashCode}_${sortBy.hashCode}';
+
+    return executeWithCache(queryKey, () async {
+      // Implementação otimizada para Hive
+      List<T> results = [];
+
+      if (filter != null) {
+        // Filtragem eficiente
+        results = await _efficientFilter(box, filter);
+      } else {
+        results = box.values.toList();
+      }
+
+      // Ordenação se especificada
+      if (sortBy != null) {
+        results.sort(sortBy);
+      }
+
+      // Paginação
+      if (offset != null) {
+        results = results.skip(offset).toList();
+      }
+
+      if (limit != null) {
+        results = results.take(limit).toList();
+      }
+
+      return results;
+    });
   }
 
   /// Batch operations otimizadas para Hive
@@ -115,10 +111,10 @@ class DatabaseOptimizer {
     int batchSize = 100,
   }) async {
     final batches = _createBatches(entries, batchSize);
-    
+
     for (final batch in batches) {
       await box.putAll(batch);
-      
+
       // Pequena pausa para não bloquear a UI
       if (batches.length > 1) {
         await Future<void>.delayed(const Duration(milliseconds: 1));
@@ -133,12 +129,12 @@ class DatabaseOptimizer {
     dynamic Function(T) keyExtractor,
   ) {
     final index = <dynamic, List<T>>{};
-    
+
     for (final item in box.values) {
       final key = keyExtractor(item);
       index.putIfAbsent(key, () => []).add(item);
     }
-    
+
     _queryCache['index_$indexName'] = QueryCache(
       data: index,
       createdAt: DateTime.now(),
@@ -147,35 +143,36 @@ class DatabaseOptimizer {
   }
 
   /// Query com índice
-  List<T> queryWithIndex<T>(
-    String indexName,
-    dynamic indexKey,
-  ) {
+  List<T> queryWithIndex<T>(String indexName, dynamic indexKey) {
     final cacheKey = 'index_$indexName';
     final indexCache = _queryCache[cacheKey];
-    
+
     if (indexCache != null) {
       final index = indexCache.data as Map<dynamic, List<T>>;
       _queryCache[cacheKey] = indexCache.copyWith(hits: indexCache.hits + 1);
       return index[indexKey] ?? [];
     }
-    
+
     return [];
   }
 
   /// Compactação otimizada de banco
   Future<void> optimizedCompact(Box<dynamic> box) async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       await box.compact();
       stopwatch.stop();
-      
-      log('Box ${box.name} compacted in ${stopwatch.elapsedMilliseconds}ms', 
-          name: 'DatabaseOptimizer');
-          
+
+      log(
+        'Box ${box.name} compacted in ${stopwatch.elapsedMilliseconds}ms',
+        name: 'DatabaseOptimizer',
+      );
     } catch (error) {
-      log('Error compacting box ${box.name}: $error', name: 'DatabaseOptimizer');
+      log(
+        'Error compacting box ${box.name}: $error',
+        name: 'DatabaseOptimizer',
+      );
       rethrow;
     }
   }
@@ -183,19 +180,19 @@ class DatabaseOptimizer {
   /// Limpeza automática de cache
   void cleanupCache({bool aggressive = false}) {
     final keysToRemove = <String>[];
-    
+
     for (final entry in _queryCache.entries) {
       final cache = entry.value;
-      
+
       if (aggressive || _isCacheExpired(cache, cacheTimeout)) {
         keysToRemove.add(entry.key);
       }
     }
-    
+
     for (final key in keysToRemove) {
       _queryCache.remove(key);
     }
-    
+
     // Limitar tamanho do cache
     while (_queryCache.length > maxCacheEntries) {
       final oldestKey = _findOldestCacheKey();
@@ -211,13 +208,14 @@ class DatabaseOptimizer {
   DatabasePerformanceReport analyzePerformance({Duration? period}) {
     final now = DateTime.now();
     final startTime = period != null ? now.subtract(period) : null;
-    
-    final relevantQueries = startTime != null
-        ? _slowQueries.where((q) => q.timestamp.isAfter(startTime)).toList()
-        : _slowQueries;
-    
+
+    final relevantQueries =
+        startTime != null
+            ? _slowQueries.where((q) => q.timestamp.isAfter(startTime)).toList()
+            : _slowQueries;
+
     final cacheStats = _calculateCacheStats();
-    
+
     return DatabasePerformanceReport(
       generatedAt: now,
       period: period,
@@ -233,7 +231,7 @@ class DatabaseOptimizer {
   Future<void> runAutoOptimizations() async {
     // Limpeza de cache
     cleanupCache();
-    
+
     // Compactação de boxes com muitas operações
     for (final metric in _metrics.values) {
       if (metric.executionCount > 1000 && metric.boxName != null) {
@@ -247,74 +245,82 @@ class DatabaseOptimizer {
         }
       }
     }
-    
+
     log('Auto-optimization completed', name: 'DatabaseOptimizer');
   }
 
   // Métodos auxiliares privados
-  
-  Future<List<T>> _efficientFilter<T>(Box<T> box, bool Function(T) filter) async {
+
+  Future<List<T>> _efficientFilter<T>(
+    Box<T> box,
+    bool Function(T) filter,
+  ) async {
     final results = <T>[];
     const batchSize = 1000;
-    
+
     final values = box.values.toList();
-    
+
     for (int i = 0; i < values.length; i += batchSize) {
       final batch = values.skip(i).take(batchSize);
-      
+
       for (final item in batch) {
         if (filter(item)) {
           results.add(item);
         }
       }
-      
+
       // Permite outras operações rodarem
       if (i + batchSize < values.length) {
         await Future<void>.delayed(Duration.zero);
       }
     }
-    
+
     return results;
   }
 
-  List<Map<dynamic, T>> _createBatches<T>(Map<dynamic, T> entries, int batchSize) {
+  List<Map<dynamic, T>> _createBatches<T>(
+    Map<dynamic, T> entries,
+    int batchSize,
+  ) {
     final batches = <Map<dynamic, T>>[];
     final entriesList = entries.entries.toList();
-    
+
     for (int i = 0; i < entriesList.length; i += batchSize) {
       final batch = <dynamic, T>{};
       final batchEntries = entriesList.skip(i).take(batchSize);
-      
+
       for (final entry in batchEntries) {
         batch[entry.key] = entry.value;
       }
-      
+
       batches.add(batch);
     }
-    
+
     return batches;
   }
 
   void _cacheResult(String key, dynamic data, DateTime createdAt) {
-    _queryCache[key] = QueryCache(
-      data: data,
-      createdAt: createdAt,
-      hits: 0,
-    );
+    _queryCache[key] = QueryCache(data: data, createdAt: createdAt, hits: 0);
   }
 
   bool _isCacheExpired(QueryCache cache, Duration timeout) {
     return DateTime.now().difference(cache.createdAt) > timeout;
   }
 
-  void _updateMetrics(String queryKey, int executionTime, bool cacheHit, [dynamic error]) {
-    final metric = _metrics[queryKey] ??= DatabaseMetrics(
-      queryKey: queryKey,
-      executionCount: 0,
-      totalExecutionTime: 0,
-      cacheHits: 0,
-      errors: 0,
-    );
+  void _updateMetrics(
+    String queryKey,
+    int executionTime,
+    bool cacheHit, [
+    dynamic error,
+  ]) {
+    final metric =
+        _metrics[queryKey] ??= DatabaseMetrics(
+          queryKey: queryKey,
+          executionCount: 0,
+          totalExecutionTime: 0,
+          cacheHits: 0,
+          errors: 0,
+        );
 
     _metrics[queryKey] = metric.copyWith(
       executionCount: metric.executionCount + 1,
@@ -325,12 +331,14 @@ class DatabaseOptimizer {
   }
 
   void _recordSlowQuery(String queryKey, int executionTime) {
-    _slowQueries.add(SlowQuery(
-      queryKey: queryKey,
-      executionTime: executionTime,
-      timestamp: DateTime.now(),
-    ));
-    
+    _slowQueries.add(
+      SlowQuery(
+        queryKey: queryKey,
+        executionTime: executionTime,
+        timestamp: DateTime.now(),
+      ),
+    );
+
     // Manter apenas as 50 queries mais recentes
     if (_slowQueries.length > 50) {
       _slowQueries.removeAt(0);
@@ -338,9 +346,15 @@ class DatabaseOptimizer {
   }
 
   CacheStats _calculateCacheStats() {
-    final totalHits = _queryCache.values.fold(0, (sum, cache) => sum + cache.hits);
-    final totalQueries = _metrics.values.fold(0, (sum, metric) => sum + metric.executionCount);
-    
+    final totalHits = _queryCache.values.fold(
+      0,
+      (sum, cache) => sum + cache.hits,
+    );
+    final totalQueries = _metrics.values.fold(
+      0,
+      (sum, metric) => sum + metric.executionCount,
+    );
+
     return CacheStats(
       hitRate: totalQueries > 0 ? totalHits / totalQueries : 0.0,
       totalEntries: _queryCache.length,
@@ -350,44 +364,50 @@ class DatabaseOptimizer {
   String? _findOldestCacheKey() {
     DateTime? oldest;
     String? oldestKey;
-    
+
     for (final entry in _queryCache.entries) {
       if (oldest == null || entry.value.createdAt.isBefore(oldest)) {
         oldest = entry.value.createdAt;
         oldestKey = entry.key;
       }
     }
-    
+
     return oldestKey;
   }
 
   List<String> _generateRecommendations() {
     final recommendations = <String>[];
-    
+
     // Recomendar índices para queries frequentes
-    final frequentQueries = _metrics.values
-        .where((m) => m.executionCount > 10)
-        .toList()
-      ..sort((a, b) => b.executionCount.compareTo(a.executionCount));
-    
+    final frequentQueries =
+        _metrics.values.where((m) => m.executionCount > 10).toList()
+          ..sort((a, b) => b.executionCount.compareTo(a.executionCount));
+
     if (frequentQueries.isNotEmpty) {
-      recommendations.add('Consider creating indices for frequent queries: ${frequentQueries.take(3).map((q) => q.queryKey).join(', ')}');
+      recommendations.add(
+        'Consider creating indices for frequent queries: ${frequentQueries.take(3).map((q) => q.queryKey).join(', ')}',
+      );
     }
-    
+
     // Recomendar cache para queries lentas
-    final slowFrequentQueries = _slowQueries
-        .where((q) => (_metrics[q.queryKey]?.executionCount ?? 0) > 5)
-        .toList();
-    
+    final slowFrequentQueries =
+        _slowQueries
+            .where((q) => (_metrics[q.queryKey]?.executionCount ?? 0) > 5)
+            .toList();
+
     if (slowFrequentQueries.isNotEmpty) {
-      recommendations.add('Consider implementing caching for slow frequent queries');
+      recommendations.add(
+        'Consider implementing caching for slow frequent queries',
+      );
     }
-    
+
     // Recomendar compactação
     if (_metrics.values.any((m) => m.executionCount > 1000)) {
-      recommendations.add('Consider running database compaction for heavily used boxes');
+      recommendations.add(
+        'Consider running database compaction for heavily used boxes',
+      );
     }
-    
+
     return recommendations;
   }
 }
@@ -404,11 +424,7 @@ class QueryCache {
     required this.hits,
   });
 
-  QueryCache copyWith({
-    dynamic data,
-    DateTime? createdAt,
-    int? hits,
-  }) {
+  QueryCache copyWith({dynamic data, DateTime? createdAt, int? hits}) {
     return QueryCache(
       data: data ?? this.data,
       createdAt: createdAt ?? this.createdAt,
@@ -435,10 +451,10 @@ class DatabaseMetrics {
     this.boxName,
   });
 
-  double get averageExecutionTime => 
+  double get averageExecutionTime =>
       executionCount > 0 ? totalExecutionTime / executionCount : 0.0;
 
-  double get cacheHitRate => 
+  double get cacheHitRate =>
       executionCount > 0 ? cacheHits / executionCount : 0.0;
 
   DatabaseMetrics copyWith({
@@ -478,10 +494,7 @@ class CacheStats {
   final double hitRate;
   final int totalEntries;
 
-  const CacheStats({
-    required this.hitRate,
-    required this.totalEntries,
-  });
+  const CacheStats({required this.hitRate, required this.totalEntries});
 }
 
 /// Relatório de performance do banco

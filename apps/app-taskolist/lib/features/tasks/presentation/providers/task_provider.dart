@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 
-import '../../domain/task_entity.dart';
 import '../../domain/create_task.dart';
 import '../../domain/delete_task.dart';
 import '../../domain/get_tasks.dart';
 import '../../domain/reorder_tasks.dart';
+import '../../domain/task_entity.dart';
 import '../../domain/update_task.dart';
 import '../../domain/watch_tasks.dart';
 
@@ -16,13 +16,13 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     required ReorderTasks reorderTasks,
     required UpdateTask updateTask,
     required WatchTasks watchTasks,
-  })  : _createTask = createTask,
-        _deleteTask = deleteTask,
-        _getTasks = getTasks,
-        _reorderTasks = reorderTasks,
-        _updateTask = updateTask,
-        _watchTasks = watchTasks,
-        super(const AsyncValue.loading());
+  }) : _createTask = createTask,
+       _deleteTask = deleteTask,
+       _getTasks = getTasks,
+       _reorderTasks = reorderTasks,
+       _updateTask = updateTask,
+       _watchTasks = watchTasks,
+       super(const AsyncValue.loading());
 
   final CreateTask _createTask;
   final DeleteTask _deleteTask;
@@ -40,13 +40,15 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }) async {
     state = const AsyncValue.loading();
 
-    final result = await _getTasks(GetTasksParams(
-      listId: listId,
-      userId: userId,
-      status: status,
-      priority: priority,
-      isStarred: isStarred,
-    ));
+    final result = await _getTasks(
+      GetTasksParams(
+        listId: listId,
+        userId: userId,
+        status: status,
+        priority: priority,
+        isStarred: isStarred,
+      ),
+    );
 
     result.fold(
       (failure) => state = AsyncValue.error(failure, StackTrace.current),
@@ -82,9 +84,10 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
       (_) {
         if (state.hasValue) {
           final currentTasks = state.value!;
-          final updatedTasks = currentTasks.map((t) {
-            return t.id == task.id ? task : t;
-          }).toList();
+          final updatedTasks =
+              currentTasks.map((t) {
+                return t.id == task.id ? task : t;
+              }).toList();
           state = AsyncValue.data(updatedTasks);
         }
       },
@@ -99,7 +102,8 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
       (_) {
         if (state.hasValue) {
           final currentTasks = state.value!;
-          final updatedTasks = currentTasks.where((t) => t.id != taskId).toList();
+          final updatedTasks =
+              currentTasks.where((t) => t.id != taskId).toList();
           state = AsyncValue.data(updatedTasks);
         }
       },
@@ -125,23 +129,23 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
           final currentTasks = state.value!;
           // Reordenar as tasks localmente conforme a nova ordem
           final reorderedTasks = <TaskEntity>[];
-          
+
           // Adicionar tasks na nova ordem
           for (int i = 0; i < taskIds.length; i++) {
             final taskId = taskIds[i];
             final task = currentTasks.firstWhere(
               (t) => t.id == taskId,
-              orElse: () => currentTasks.first, // fallback, não deveria acontecer
+              orElse:
+                  () => currentTasks.first, // fallback, não deveria acontecer
             );
             reorderedTasks.add(task.copyWith(position: i));
           }
-          
+
           // Adicionar qualquer task que não estava na lista de reordenação
-          final remainingTasks = currentTasks.where(
-            (task) => !taskIds.contains(task.id),
-          ).toList();
+          final remainingTasks =
+              currentTasks.where((task) => !taskIds.contains(task.id)).toList();
           reorderedTasks.addAll(remainingTasks);
-          
+
           state = AsyncValue.data(reorderedTasks);
         }
       },
@@ -155,18 +159,21 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     TaskPriority? priority,
     bool? isStarred,
   }) {
-    final stream = _watchTasks(WatchTasksParams(
-      listId: listId,
-      userId: userId,
-      status: status,
-      priority: priority,
-      isStarred: isStarred,
-    ));
+    final stream = _watchTasks(
+      WatchTasksParams(
+        listId: listId,
+        userId: userId,
+        status: status,
+        priority: priority,
+        isStarred: isStarred,
+      ),
+    );
 
     stream.listen(
       (tasks) => state = AsyncValue.data(tasks),
-      onError: (Object error, StackTrace stackTrace) =>
-          state = AsyncValue.error(error, stackTrace),
+      onError:
+          (Object error, StackTrace stackTrace) =>
+              state = AsyncValue.error(error, stackTrace),
     );
   }
 }

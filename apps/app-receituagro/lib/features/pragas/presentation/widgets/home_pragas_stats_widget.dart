@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../providers/home_pragas_notifier.dart';
 
 /// Widget para exibir grid de estatísticas/categorias na home de pragas
@@ -15,17 +15,12 @@ import '../providers/home_pragas_notifier.dart';
 class HomePragasStatsWidget extends StatelessWidget {
   final HomePragasState state;
 
-  const HomePragasStatsWidget({
-    super.key,
-    required this.state,
-  });
+  const HomePragasStatsWidget({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Card(
         elevation: ReceitaAgroElevation.card,
         shape: RoundedRectangleBorder(
@@ -37,23 +32,27 @@ class HomePragasStatsWidget extends StatelessWidget {
             horizontal: 0,
             vertical: ReceitaAgroSpacing.sm,
           ),
-          child: state.errorMessage != null
-              ? _buildErrorState(context)
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final availableWidth = constraints.maxWidth;
-                    final screenWidth = MediaQuery.of(context).size.width;
-                    final isSmallDevice = screenWidth < ReceitaAgroBreakpoints.smallDevice;
-                    final useVerticalLayout = isSmallDevice || 
-                        availableWidth < ReceitaAgroBreakpoints.verticalLayoutThreshold;
+          child:
+              state.errorMessage != null
+                  ? _buildErrorState(context)
+                  : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final availableWidth = constraints.maxWidth;
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final isSmallDevice =
+                          screenWidth < ReceitaAgroBreakpoints.smallDevice;
+                      final useVerticalLayout =
+                          isSmallDevice ||
+                          availableWidth <
+                              ReceitaAgroBreakpoints.verticalLayoutThreshold;
 
-                    if (useVerticalLayout) {
-                      return _buildVerticalLayout(context, availableWidth);
-                    } else {
-                      return _buildGridLayout(context, availableWidth);
-                    }
-                  },
-                ),
+                      if (useVerticalLayout) {
+                        return _buildVerticalLayout(context, availableWidth);
+                      } else {
+                        return _buildGridLayout(context, availableWidth);
+                      }
+                    },
+                  ),
         ),
       ),
     );
@@ -61,17 +60,13 @@ class HomePragasStatsWidget extends StatelessWidget {
 
   Widget _buildErrorState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(ReceitaAgroSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: theme.colorScheme.error,
-          ),
+          Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
           const SizedBox(height: 12),
           Text(
             'Erro ao carregar dados',
@@ -90,9 +85,9 @@ class HomePragasStatsWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
+          const ElevatedButton(
             onPressed: null, // Refresh handled by parent widget with ref
-            child: const Text('Tentar Novamente'),
+            child: Text('Tentar Novamente'),
           ),
         ],
       ),
@@ -100,8 +95,11 @@ class HomePragasStatsWidget extends StatelessWidget {
   }
 
   Widget _buildVerticalLayout(BuildContext context, double availableWidth) {
-    final buttonWidth = (availableWidth - 16) / 3; // Três botões por linha com espaçamento reduzido
-    final cultureButtonWidth = availableWidth - 8; // Botão cultura ocupa linha inteira
+    final buttonWidth =
+        (availableWidth - 16) /
+        3; // Três botões por linha com espaçamento reduzido
+    final cultureButtonWidth =
+        availableWidth - 8; // Botão cultura ocupa linha inteira
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -153,8 +151,11 @@ class HomePragasStatsWidget extends StatelessWidget {
   }
 
   Widget _buildGridLayout(BuildContext context, double availableWidth) {
-    final buttonWidth = (availableWidth - 16) / 3; // Três botões por linha com espaçamento reduzido
-    final cultureButtonWidth = availableWidth - 8; // Botão cultura ocupa linha inteira
+    final buttonWidth =
+        (availableWidth - 16) /
+        3; // Três botões por linha com espaçamento reduzido
+    final cultureButtonWidth =
+        availableWidth - 8; // Botão cultura ocupa linha inteira
 
     return Column(
       children: [
@@ -214,7 +215,7 @@ class HomePragasStatsWidget extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final buttonColor = theme.colorScheme.primary;
-    
+
     return SizedBox(
       width: width,
       height: ReceitaAgroDimensions.buttonHeight,
@@ -233,7 +234,9 @@ class HomePragasStatsWidget extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.button),
+              borderRadius: BorderRadius.circular(
+                ReceitaAgroBorderRadius.button,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: buttonColor.withValues(alpha: 0.3),
@@ -271,7 +274,9 @@ class HomePragasStatsWidget extends StatelessWidget {
                           const SizedBox(width: 4),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 2),
+                              horizontal: 10,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
@@ -328,7 +333,7 @@ class HomePragasStatsWidget extends StatelessWidget {
   void _navigateToCategory(BuildContext context, String category) {
     debugPrint('=== NAVEGAÇÃO HOME PRAGAS ===');
     debugPrint('Categoria: $category');
-    
+
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     switch (category) {
       case 'culturas':

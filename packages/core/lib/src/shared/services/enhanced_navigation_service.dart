@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 
-import '../models/navigation_state.dart';
 import '../interfaces/i_navigation_extension.dart';
+import '../models/navigation_state.dart';
 import '../services/navigation_service.dart';
 
 /// Enhanced navigation service with stack management, history, and extensions
@@ -22,7 +22,7 @@ class EnhancedNavigationService {
   bool _isNavigating = false;
 
   EnhancedNavigationService([NavigationService? baseNavigationService])
-      : _baseNavigationService = baseNavigationService ?? NavigationService();
+    : _baseNavigationService = baseNavigationService ?? NavigationService();
 
   /// Stream of navigation state changes
   Stream<NavigationState> get navigationStateStream =>
@@ -32,7 +32,8 @@ class EnhancedNavigationService {
   NavigationState? get currentState => _currentState;
 
   /// Current navigation stack
-  List<NavigationState> get navigationStack => List.unmodifiable(_navigationStack);
+  List<NavigationState> get navigationStack =>
+      List.unmodifiable(_navigationStack);
 
   /// Navigation history (last 10 entries)
   List<NavigationHistoryEntry> get navigationHistory =>
@@ -118,7 +119,10 @@ class EnhancedNavigationService {
       _updateNavigationStack(finalState);
 
       // Perform navigation
-      final result = await _baseNavigationService.navigateTo<T>(routeName, arguments: arguments);
+      final result = await _baseNavigationService.navigateTo<T>(
+        routeName,
+        arguments: arguments,
+      );
 
       // Update current state and notify listeners
       _currentState = finalState;
@@ -135,7 +139,8 @@ class EnhancedNavigationService {
   }
 
   /// Enhanced push with state management
-  Future<T?> push<T>(Widget page, {
+  Future<T?> push<T>(
+    Widget page, {
     String? pageType,
     Map<String, dynamic>? arguments,
     NavigationConfiguration? configuration,
@@ -201,11 +206,13 @@ class EnhancedNavigationService {
     final currentState = _currentState;
     if (currentState != null) {
       final timeSpent = DateTime.now().difference(currentState.timestamp);
-      _addToHistory(NavigationHistoryEntry(
-        state: currentState,
-        exitTime: DateTime.now(),
-        timeSpent: timeSpent,
-      ));
+      _addToHistory(
+        NavigationHistoryEntry(
+          state: currentState,
+          exitTime: DateTime.now(),
+          timeSpent: timeSpent,
+        ),
+      );
     }
 
     // Remove from stack
@@ -319,19 +326,24 @@ class EnhancedNavigationService {
         );
 
         if (extensionConfig != null) {
-          result = result?.copyWith(
-            showBottomNavigation: extensionConfig.showBottomNavigation,
-            showBackButton: extensionConfig.showBackButton,
-            canGoBack: extensionConfig.canGoBack,
-            customAppBarTitle: extensionConfig.customAppBarTitle ?? result.customAppBarTitle,
-            showAppBar: extensionConfig.showAppBar,
-            showLoading: extensionConfig.showLoading,
-            statusBarColor: extensionConfig.statusBarColor ?? result.statusBarColor,
-            extensionData: {
-              ...?result.extensionData,
-              ...?extensionConfig.extensionData,
-            },
-          ) ?? extensionConfig;
+          result =
+              result?.copyWith(
+                showBottomNavigation: extensionConfig.showBottomNavigation,
+                showBackButton: extensionConfig.showBackButton,
+                canGoBack: extensionConfig.canGoBack,
+                customAppBarTitle:
+                    extensionConfig.customAppBarTitle ??
+                    result.customAppBarTitle,
+                showAppBar: extensionConfig.showAppBar,
+                showLoading: extensionConfig.showLoading,
+                statusBarColor:
+                    extensionConfig.statusBarColor ?? result.statusBarColor,
+                extensionData: {
+                  ...?result.extensionData,
+                  ...?extensionConfig.extensionData,
+                },
+              ) ??
+              extensionConfig;
         }
       } catch (error) {
         debugPrint('Extension processing error: $error');
@@ -384,11 +396,13 @@ class EnhancedNavigationService {
     // Add current states to history before clearing
     for (final state in _navigationStack) {
       final timeSpent = DateTime.now().difference(state.timestamp);
-      _addToHistory(NavigationHistoryEntry(
-        state: state,
-        exitTime: DateTime.now(),
-        timeSpent: timeSpent,
-      ));
+      _addToHistory(
+        NavigationHistoryEntry(
+          state: state,
+          exitTime: DateTime.now(),
+          timeSpent: timeSpent,
+        ),
+      );
     }
 
     _navigationStack.clear();
@@ -401,7 +415,10 @@ class EnhancedNavigationService {
 
   /// Show snackbar (delegated to base service)
   void showSnackBar(String message, {Color? backgroundColor}) {
-    _baseNavigationService.showSnackBar(message, backgroundColor: backgroundColor);
+    _baseNavigationService.showSnackBar(
+      message,
+      backgroundColor: backgroundColor,
+    );
   }
 
   /// Open external URL (delegated to base service)

@@ -1,6 +1,6 @@
 import 'package:core/core.dart' as core;
-import 'package:flutter/material.dart';
 import 'package:core/core.dart' hide NotificationSettings;
+import 'package:flutter/material.dart';
 
 import '../../../shared/providers/notification_providers.dart';
 import 'notification_stats.dart' as local;
@@ -9,10 +9,12 @@ class NotificationSettingsPage extends ConsumerStatefulWidget {
   const NotificationSettingsPage({super.key});
 
   @override
-  ConsumerState<NotificationSettingsPage> createState() => _NotificationSettingsPageState();
+  ConsumerState<NotificationSettingsPage> createState() =>
+      _NotificationSettingsPageState();
 }
 
-class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsPage> {
+class _NotificationSettingsPageState
+    extends ConsumerState<NotificationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final permissionAsync = ref.watch(notificationPermissionProvider);
@@ -27,11 +29,13 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
         foregroundColor: Colors.black87,
       ),
       body: permissionAsync.when(
-        data: (permission) => _buildContent(context, permission, settings, statsAsync),
+        data:
+            (permission) =>
+                _buildContent(context, permission, settings, statsAsync),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Erro ao carregar permissões: $error'),
-        ),
+        error:
+            (error, stack) =>
+                Center(child: Text('Erro ao carregar permissões: $error')),
       ),
     );
   }
@@ -54,15 +58,15 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
           // Status das notificações
           _buildStatusCard(permission, statsAsync),
           const SizedBox(height: 24),
-          
+
           // Configurações de tarefas
           _buildTaskNotificationsSection(settings),
           const SizedBox(height: 24),
-          
+
           // Configurações de produtividade
           _buildProductivitySection(settings),
           const SizedBox(height: 24),
-          
+
           // Ações
           _buildActionsSection(),
         ],
@@ -70,63 +74,60 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
     );
   }
 
-  Widget _buildPermissionRequiredView(BuildContext context, core.NotificationPermissionEntity permission) {
+  Widget _buildPermissionRequiredView(
+    BuildContext context,
+    core.NotificationPermissionEntity permission,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_off,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.notifications_off, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 24),
           const Text(
             'Permissão necessária',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           const Text(
             'Para receber lembretes de tarefas e alertas de prazos, é necessário permitir notificações.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          
+
           if (permission.isPermanentlyDenied) ...[
             const Text(
               'As notificações foram permanentemente negadas. Você pode habilitá-las nas configurações do sistema.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.orange,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.orange),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                ref.read(notificationActionsProvider).openNotificationSettings();
+                ref
+                    .read(notificationActionsProvider)
+                    .openNotificationSettings();
               },
               child: const Text('Abrir Configurações'),
             ),
           ] else ...[
             ElevatedButton(
               onPressed: () async {
-                await ref.read(notificationActionsProvider).requestPermissions();
+                await ref
+                    .read(notificationActionsProvider)
+                    .requestPermissions();
                 ref.invalidate(notificationPermissionProvider);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
               ),
               child: const Text('Permitir Notificações'),
             ),
@@ -136,7 +137,10 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
     );
   }
 
-  Widget _buildStatusCard(core.NotificationPermissionEntity permission, AsyncValue<local.NotificationStats> statsAsync) {
+  Widget _buildStatusCard(
+    core.NotificationPermissionEntity permission,
+    AsyncValue<local.NotificationStats> statsAsync,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -151,7 +155,9 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  permission.isGranted ? 'Notificações Ativadas' : 'Notificações Desativadas',
+                  permission.isGranted
+                      ? 'Notificações Ativadas'
+                      : 'Notificações Desativadas',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -160,19 +166,30 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
               ],
             ),
             const SizedBox(height: 16),
-            
+
             statsAsync.when(
-              data: (stats) => Column(
-                children: [
-                  _buildStatRow('Notificações pendentes', stats.totalPending.toString()),
-                  _buildStatRow('Lembretes de tarefas', stats.taskReminders.toString()),
-                  _buildStatRow('Alertas de prazo', stats.taskDeadlines.toString()),
-                ],
-              ),
+              data:
+                  (stats) => Column(
+                    children: [
+                      _buildStatRow(
+                        'Notificações pendentes',
+                        stats.totalPending.toString(),
+                      ),
+                      _buildStatRow(
+                        'Lembretes de tarefas',
+                        stats.taskReminders.toString(),
+                      ),
+                      _buildStatRow(
+                        'Alertas de prazo',
+                        stats.taskDeadlines.toString(),
+                      ),
+                    ],
+                  ),
               loading: () => const Text('Carregando estatísticas...'),
-              error: (error, stack) => const Text('Erro ao carregar estatísticas'),
+              error:
+                  (error, stack) => const Text('Erro ao carregar estatísticas'),
             ),
-            
+
             if (!permission.canScheduleExactAlarms) ...[
               const SizedBox(height: 12),
               Container(
@@ -209,10 +226,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -224,49 +238,61 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
       children: [
         const Text(
           'Notificações de Tarefas',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        
+
         Card(
           child: Column(
             children: [
               SwitchListTile(
                 title: const Text('Lembretes de Tarefas'),
-                subtitle: const Text('Receber notificações para tarefas agendadas'),
+                subtitle: const Text(
+                  'Receber notificações para tarefas agendadas',
+                ),
                 value: settings.taskRemindersEnabled,
                 onChanged: (value) {
-                  ref.read(notificationSettingsProvider.notifier).updateTaskReminders(value);
+                  ref
+                      .read(notificationSettingsProvider.notifier)
+                      .updateTaskReminders(value);
                 },
               ),
-              
+
               SwitchListTile(
                 title: const Text('Alertas de Prazo'),
-                subtitle: const Text('Ser notificado quando prazos estão vencendo'),
+                subtitle: const Text(
+                  'Ser notificado quando prazos estão vencendo',
+                ),
                 value: settings.deadlineAlertsEnabled,
                 onChanged: (value) {
-                  ref.read(notificationSettingsProvider.notifier).updateDeadlineAlerts(value);
+                  ref
+                      .read(notificationSettingsProvider.notifier)
+                      .updateDeadlineAlerts(value);
                 },
               ),
-              
+
               if (settings.deadlineAlertsEnabled) ...[
                 ListTile(
                   title: const Text('Avisar com antecedência'),
                   subtitle: Text(_formatDuration(settings.deadlineAlertBefore)),
                   trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () => _showDeadlineAlertDialog(settings.deadlineAlertBefore),
+                  onTap:
+                      () => _showDeadlineAlertDialog(
+                        settings.deadlineAlertBefore,
+                      ),
                 ),
               ],
-              
+
               SwitchListTile(
                 title: const Text('Confirmações de Conclusão'),
-                subtitle: const Text('Mostrar notificação quando tarefas são completadas'),
+                subtitle: const Text(
+                  'Mostrar notificação quando tarefas são completadas',
+                ),
                 value: settings.completionNotificationsEnabled,
                 onChanged: (value) {
-                  ref.read(notificationSettingsProvider.notifier).updateCompletionNotifications(value);
+                  ref
+                      .read(notificationSettingsProvider.notifier)
+                      .updateCompletionNotifications(value);
                 },
               ),
             ],
@@ -282,13 +308,10 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
       children: [
         const Text(
           'Produtividade',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        
+
         Card(
           child: Column(
             children: [
@@ -297,34 +320,44 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
                 subtitle: const Text('Lembrete semanal para revisar progresso'),
                 value: settings.weeklyReviewEnabled,
                 onChanged: (value) {
-                  ref.read(notificationSettingsProvider.notifier).updateWeeklyReview(value);
+                  ref
+                      .read(notificationSettingsProvider.notifier)
+                      .updateWeeklyReview(value);
                   ref.read(notificationActionsProvider).updateWeeklyReview();
                 },
               ),
-              
+
               if (settings.weeklyReviewEnabled) ...[
                 ListTile(
                   title: const Text('Horário da Revisão'),
-                  subtitle: Text('${_getDayName(settings.weeklyReviewDayOfWeek)} às ${settings.weeklyReviewHour.toString().padLeft(2, '0')}:${settings.weeklyReviewMinute.toString().padLeft(2, '0')}'),
+                  subtitle: Text(
+                    '${_getDayName(settings.weeklyReviewDayOfWeek)} às ${settings.weeklyReviewHour.toString().padLeft(2, '0')}:${settings.weeklyReviewMinute.toString().padLeft(2, '0')}',
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _showWeeklyReviewTimeDialog(settings),
                 ),
               ],
-              
+
               SwitchListTile(
                 title: const Text('Lembrete de Produtividade'),
                 subtitle: const Text('Lembrete diário para manter o foco'),
                 value: settings.dailyProductivityEnabled,
                 onChanged: (value) {
-                  ref.read(notificationSettingsProvider.notifier).updateDailyProductivity(value);
-                  ref.read(notificationActionsProvider).updateDailyProductivityReminder();
+                  ref
+                      .read(notificationSettingsProvider.notifier)
+                      .updateDailyProductivity(value);
+                  ref
+                      .read(notificationActionsProvider)
+                      .updateDailyProductivityReminder();
                 },
               ),
-              
+
               if (settings.dailyProductivityEnabled) ...[
                 ListTile(
                   title: const Text('Horário do Lembrete'),
-                  subtitle: Text('${settings.dailyProductivityHour.toString().padLeft(2, '0')}:${settings.dailyProductivityMinute.toString().padLeft(2, '0')}'),
+                  subtitle: Text(
+                    '${settings.dailyProductivityHour.toString().padLeft(2, '0')}:${settings.dailyProductivityMinute.toString().padLeft(2, '0')}',
+                  ),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () => _showDailyProductivityTimeDialog(settings),
                 ),
@@ -347,7 +380,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _showPendingNotificationsDialog(),
           ),
-          
+
           ListTile(
             leading: const Icon(Icons.clear_all),
             title: const Text('Cancelar Todas'),
@@ -355,13 +388,19 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => _showCancelAllDialog(),
           ),
-          
+
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Configurações do Sistema'),
-            subtitle: const Text('Abrir configurações de notificação do sistema'),
+            subtitle: const Text(
+              'Abrir configurações de notificação do sistema',
+            ),
             trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () => ref.read(notificationActionsProvider).openNotificationSettings(),
+            onTap:
+                () =>
+                    ref
+                        .read(notificationActionsProvider)
+                        .openNotificationSettings(),
           ),
         ],
       ),
@@ -371,27 +410,32 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
   void _showDeadlineAlertDialog(Duration currentDuration) {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Aviso de Prazo'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Avisar com quantas horas de antecedência?'),
-            const SizedBox(height: 16),
-            ...DurationValues.values.map((duration) => RadioListTile<Duration>(
-              title: Text(_formatDuration(duration)),
-              value: duration,
-              groupValue: currentDuration,
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(notificationSettingsProvider.notifier).updateDeadlineAlertTime(value);
-                  Navigator.pop(context);
-                }
-              },
-            )),
-          ],
-        ),
-      ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Aviso de Prazo'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Avisar com quantas horas de antecedência?'),
+                const SizedBox(height: 16),
+                ...DurationValues.values.map(
+                  (duration) => RadioListTile<Duration>(
+                    title: Text(_formatDuration(duration)),
+                    value: duration,
+                    groupValue: currentDuration,
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref
+                            .read(notificationSettingsProvider.notifier)
+                            .updateDeadlineAlertTime(value);
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
     );
   }
 
@@ -399,20 +443,21 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
     // Implementar dialog para escolher dia e horário
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Horário da Revisão Semanal'),
-        content: const Text('Dialog para escolher dia da semana e horário'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Horário da Revisão Semanal'),
+            content: const Text('Dialog para escolher dia da semana e horário'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Salvar'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -420,107 +465,115 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
     // Implementar dialog para escolher horário
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Horário do Lembrete'),
-        content: const Text('Dialog para escolher horário'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Horário do Lembrete'),
+            content: const Text('Dialog para escolher horário'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Salvar'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showPendingNotificationsDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notificações Pendentes'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 300,
-          child: Consumer(
-            builder: (context, WidgetRef ref, child) {
-              final pendingAsync = ref.watch(pendingNotificationsProvider);
-              
-              return pendingAsync.when(
-                data: (List<core.PendingNotificationEntity> notifications) {
-                  if (notifications.isEmpty) {
-                    return const Center(
-                      child: Text('Nenhuma notificação pendente'),
-                    );
-                  }
-                  
-                  return ListView.builder(
-                    itemCount: notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = notifications[index];
-                      return ListTile(
-                        title: Text(notification.title),
-                        subtitle: Text(notification.body),
-                        trailing: Text('ID: ${notification.id}'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Notificações Pendentes'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 300,
+              child: Consumer(
+                builder: (context, WidgetRef ref, child) {
+                  final pendingAsync = ref.watch(pendingNotificationsProvider);
+
+                  return pendingAsync.when(
+                    data: (List<core.PendingNotificationEntity> notifications) {
+                      if (notifications.isEmpty) {
+                        return const Center(
+                          child: Text('Nenhuma notificação pendente'),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: notifications.length,
+                        itemBuilder: (context, index) {
+                          final notification = notifications[index];
+                          return ListTile(
+                            title: Text(notification.title),
+                            subtitle: Text(notification.body),
+                            trailing: Text('ID: ${notification.id}'),
+                          );
+                        },
                       );
                     },
+                    loading:
+                        () => const Center(child: CircularProgressIndicator()),
+                    error:
+                        (error, stack) => Center(child: Text('Erro: $error')),
                   );
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text('Erro: $error'),
-                ),
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showCancelAllDialog() {
     showDialog<dynamic>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancelar Todas'),
-        content: const Text('Tem certeza que deseja cancelar todas as notificações pendentes?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Cancelar Todas'),
+            content: const Text(
+              'Tem certeza que deseja cancelar todas as notificações pendentes?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+                  navigator.pop();
+                  final bool success =
+                      await ref
+                          .read(notificationActionsProvider)
+                          .cancelAllNotifications();
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          success
+                              ? 'Todas as notificações foram canceladas'
+                              : 'Erro ao cancelar notificações',
+                        ),
+                        backgroundColor: success ? Colors.green : Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Confirmar'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              final navigator = Navigator.of(context);
-              final scaffoldMessenger = ScaffoldMessenger.of(context);
-              navigator.pop();
-              final bool success = await ref.read(notificationActionsProvider).cancelAllNotifications();
-              if (mounted) {
-                scaffoldMessenger.showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success 
-                        ? 'Todas as notificações foram canceladas'
-                        : 'Erro ao cancelar notificações',
-                    ),
-                    backgroundColor: success ? Colors.green : Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -535,7 +588,16 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
   }
 
   String _getDayName(int dayOfWeek) {
-    const days = ['', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+    const days = [
+      '',
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado',
+      'Domingo',
+    ];
     return days[dayOfWeek];
   }
 }

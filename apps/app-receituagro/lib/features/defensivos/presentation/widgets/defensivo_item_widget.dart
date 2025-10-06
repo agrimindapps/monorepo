@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/data/models/fitossanitario_hive.dart';
+import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
   final FitossanitarioHive defensivo;
@@ -146,10 +146,7 @@ class DefensivoItemWidget extends StatelessWidget {
                     // Ingrediente ativo
                     Text(
                       defensivo.displayIngredient,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -159,7 +156,9 @@ class DefensivoItemWidget extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
@@ -178,11 +177,7 @@ class DefensivoItemWidget extends StatelessWidget {
                 ),
               ),
               // Seta à direita
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.grey,
-                size: 20,
-              ),
+              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
           ),
         ),
@@ -196,9 +191,7 @@ class DefensivoItemWidget extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(4),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -226,29 +219,29 @@ class DefensivoItemWidget extends StatelessWidget {
                       color: color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: FaIcon(
-                      _getClassIcon,
-                      size: 16,
-                      color: color,
-                    ),
+                    child: FaIcon(_getClassIcon, size: 16, color: color),
                   ),
                   const Spacer(),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.grey.shade700.withValues(alpha: 0.5)
-                          : Colors.grey.shade200,
+                      color:
+                          isDark
+                              ? Colors.grey.shade700.withValues(alpha: 0.5)
+                              : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       defensivo.idReg,
                       style: TextStyle(
                         fontSize: 9,
-                        color: isDark
-                            ? Colors.grey.shade400
-                            : Colors.grey.shade600,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -265,9 +258,10 @@ class DefensivoItemWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? Colors.grey.shade200
-                            : Colors.grey.shade800,
+                        color:
+                            isDark
+                                ? Colors.grey.shade200
+                                : Colors.grey.shade800,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -277,9 +271,10 @@ class DefensivoItemWidget extends StatelessWidget {
                       defensivo.displayIngredient,
                       style: TextStyle(
                         fontSize: 11,
-                        color: isDark
-                            ? Colors.grey.shade400
-                            : Colors.grey.shade600,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -288,7 +283,9 @@ class DefensivoItemWidget extends StatelessWidget {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(6),

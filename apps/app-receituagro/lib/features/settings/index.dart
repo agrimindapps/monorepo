@@ -2,21 +2,21 @@
 export 'constants/settings_design_tokens.dart';
 // Data layer
 export 'data/repositories/user_settings_repository_impl.dart';
-// Dependency Injection
-export 'di/settings_di.dart';
-// Domain layer
-export 'domain/entities/user_settings_entity.dart';
-export 'domain/exceptions/settings_exceptions.dart';
-export 'domain/repositories/i_user_settings_repository.dart';
 // Model exports
 export 'data/settings_state.dart';
+// Dependency Injection
+export 'di/settings_di.dart';
 // Presentation layer (Riverpod)
 // Note: Import settings_notifier.dart directly when needed to avoid conflicts
 // export 'presentation/providers/settings_notifier.dart';
 // Services
 export 'domain/device_service.dart';
+// Domain layer
+export 'domain/entities/user_settings_entity.dart';
+export 'domain/exceptions/settings_exceptions.dart';
 export 'domain/navigation_service.dart';
 export 'domain/premium_service.dart';
+export 'domain/repositories/i_user_settings_repository.dart';
 export 'domain/theme_service.dart';
 // Note: Use cases não são exportados para evitar duplicação de exceções
 // Importe diretamente quando necessário

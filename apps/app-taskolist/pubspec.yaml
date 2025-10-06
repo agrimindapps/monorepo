@@ -15,6 +15,12 @@ dependencies:
   core:
     path: ../../packages/core
 
+  path_provider: any
+  get_it: any
+  injectable: any
+  dartz: any
+  uuid: any
+  riverpod_annotation: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

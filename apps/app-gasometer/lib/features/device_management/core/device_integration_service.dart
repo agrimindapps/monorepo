@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:core/core.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
 import '../presentation/providers/vehicle_device_notifier.dart';

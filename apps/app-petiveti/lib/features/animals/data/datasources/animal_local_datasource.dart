@@ -1,4 +1,5 @@
-import 'package:hive/hive.dart';
+import 'package:core/core.dart' show Box;
+
 import '../../../../core/storage/hive_service.dart';
 import '../models/animal_model.dart';
 
@@ -13,9 +14,9 @@ abstract class AnimalLocalDataSource {
 
 class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   final HiveService _hiveService;
-  
+
   AnimalLocalDataSourceImpl(this._hiveService);
-  
+
   Future<Box<AnimalModel>> get _box async {
     return await _hiveService.getBox<AnimalModel>(HiveBoxNames.animals);
   }
@@ -23,9 +24,7 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   @override
   Future<List<AnimalModel>> getAnimals() async {
     final animalsBox = await _box;
-    return animalsBox.values
-        .where((animal) => !animal.isDeleted)
-        .toList()
+    return animalsBox.values.where((animal) => !animal.isDeleted).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
@@ -65,11 +64,9 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   @override
   Stream<List<AnimalModel>> watchAnimals() async* {
     final animalsBox = await _box;
-    
+
     yield* Stream.periodic(const Duration(milliseconds: 500), (_) {
-      return animalsBox.values
-          .where((animal) => !animal.isDeleted)
-          .toList()
+      return animalsBox.values.where((animal) => !animal.isDeleted).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     });
   }

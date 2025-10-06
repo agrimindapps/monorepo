@@ -1,9 +1,9 @@
-import 'anonymous_data.dart';
 import 'account_data.dart';
+import 'anonymous_data.dart';
 import 'data_resolution_choice.dart';
 
 /// Result of data conflict detection between anonymous and existing account data
-/// 
+///
 /// This class encapsulates the results of comparing anonymous user data
 /// with existing account data to determine if conflicts exist and what
 /// actions are available to the user.
@@ -23,40 +23,40 @@ class DataConflictResult {
 
   /// Whether a conflict was detected between anonymous and account data
   final bool hasConflict;
-  
+
   /// The anonymous user's data
   final AnonymousData? anonymousData;
-  
+
   /// The existing account's data
   final AccountData? accountData;
-  
+
   /// Detailed information about specific conflicts found
   final Map<String, dynamic> conflictDetails;
-  
+
   /// System recommendation for conflict resolution (optional)
   final DataResolutionChoice? recommendedChoice;
-  
+
   /// Available choices for the user to resolve the conflict
   final List<DataResolutionChoice> availableChoices;
 
   /// Whether both data sources have significant data
-  bool get hasTwoWayConflict => 
-      (anonymousData?.hasSignificantData ?? false) && 
+  bool get hasTwoWayConflict =>
+      (anonymousData?.hasSignificantData ?? false) &&
       (accountData?.hasSignificantData ?? false);
 
   /// Whether only anonymous data exists
-  bool get hasOnlyAnonymousData => 
-      (anonymousData?.hasSignificantData ?? false) && 
+  bool get hasOnlyAnonymousData =>
+      (anonymousData?.hasSignificantData ?? false) &&
       !(accountData?.hasSignificantData ?? false);
 
-  /// Whether only account data exists  
-  bool get hasOnlyAccountData => 
-      !(anonymousData?.hasSignificantData ?? false) && 
+  /// Whether only account data exists
+  bool get hasOnlyAccountData =>
+      !(anonymousData?.hasSignificantData ?? false) &&
       (accountData?.hasSignificantData ?? false);
 
   /// Whether no data exists in either source
-  bool get hasNoData => 
-      !(anonymousData?.hasSignificantData ?? false) && 
+  bool get hasNoData =>
+      !(anonymousData?.hasSignificantData ?? false) &&
       !(accountData?.hasSignificantData ?? false);
 
   /// Get conflict severity level
@@ -70,32 +70,32 @@ class DataConflictResult {
   /// Get a human-readable description of the conflict
   String get conflictDescription {
     if (!hasConflict) return 'Nenhum conflito detectado.';
-    
+
     if (hasNoData) {
       return 'Não há dados em nenhuma das contas.';
     }
-    
+
     if (hasOnlyAnonymousData) {
       return 'Apenas dados anônimos encontrados. Você pode migrar estes dados para a sua conta.';
     }
-    
+
     if (hasOnlyAccountData) {
       return 'Apenas dados da conta existente encontrados. Os dados serão mantidos.';
     }
-    
+
     if (hasTwoWayConflict) {
       final anonCount = anonymousData?.recordCount ?? 0;
       final accountCount = accountData?.recordCount ?? 0;
       return 'Conflito detectado: dados anônimos ($anonCount registros) e dados da conta ($accountCount registros) encontrados.';
     }
-    
+
     return 'Conflito de dados detectado.';
   }
 
   /// Get recommended action text
   String? get recommendedActionText {
     if (recommendedChoice == null) return null;
-    
+
     switch (recommendedChoice!) {
       case DataResolutionChoice.keepAccountData:
         return 'Recomendamos manter os dados da sua conta existente.';
@@ -142,25 +142,24 @@ class DataConflictResult {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is DataConflictResult &&
-           other.hasConflict == hasConflict &&
-           other.anonymousData == anonymousData &&
-           other.accountData == accountData;
+        other.hasConflict == hasConflict &&
+        other.anonymousData == anonymousData &&
+        other.accountData == accountData;
   }
 
   @override
-  int get hashCode => hasConflict.hashCode ^ 
-                     anonymousData.hashCode ^ 
-                     accountData.hashCode;
+  int get hashCode =>
+      hasConflict.hashCode ^ anonymousData.hashCode ^ accountData.hashCode;
 }
 
 /// Severity levels for data conflicts
 enum ConflictSeverity {
   /// No conflict detected
   none,
-  
+
   /// Minor conflict - can be easily resolved
   low,
-  
+
   /// Significant conflict - requires user decision
   high;
 

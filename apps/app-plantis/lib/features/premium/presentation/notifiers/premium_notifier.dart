@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide getIt;
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
 
@@ -71,8 +70,9 @@ class PremiumNotifier extends _$PremiumNotifier {
   Future<PremiumState> build() async {
     _subscriptionRepository = ref.read(subscriptionRepositoryProvider);
     _authRepository = ref.read(authRepositoryProvider);
-    _simpleSubscriptionSyncService =
-        ref.read(simpleSubscriptionSyncServiceProvider);
+    _simpleSubscriptionSyncService = ref.read(
+      simpleSubscriptionSyncServiceProvider,
+    );
 
     // Setup subscriptions
     _setupSubscriptions();
@@ -87,18 +87,19 @@ class PremiumNotifier extends _$PremiumNotifier {
   void _setupSubscriptions() {
     // Escuta mudanças na assinatura via SimpleSubscriptionSyncService
     if (_simpleSubscriptionSyncService != null) {
-      _syncSubscriptionStream = _simpleSubscriptionSyncService!
+      _syncSubscriptionStream = _simpleSubscriptionSyncService
           .subscriptionStatus
           .listen((subscription) {
-        final currentState = state.valueOrNull ?? const PremiumState();
-        state = AsyncValue.data(
-          currentState.copyWith(currentSubscription: subscription),
-        );
-      });
+            final currentState = state.valueOrNull ?? const PremiumState();
+            state = AsyncValue.data(
+              currentState.copyWith(currentSubscription: subscription),
+            );
+          });
     } else {
       // Fallback para versão original (compatibilidade)
-      _subscriptionStream =
-          _subscriptionRepository.subscriptionStatus.listen((subscription) {
+      _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
+        subscription,
+      ) {
         final currentState = state.valueOrNull ?? const PremiumState();
         state = AsyncValue.data(
           currentState.copyWith(currentSubscription: subscription),
@@ -146,7 +147,7 @@ class PremiumNotifier extends _$PremiumNotifier {
 
     // Usa SimpleSubscriptionSyncService se disponível
     if (_simpleSubscriptionSyncService != null) {
-      final result = await _simpleSubscriptionSyncService!
+      final result = await _simpleSubscriptionSyncService
           .hasActiveSubscriptionForApp('plantis');
 
       result.fold(
@@ -162,10 +163,7 @@ class PremiumNotifier extends _$PremiumNotifier {
         (_) {
           // Subscription será atualizada via stream
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              currentOperation: null,
-            ),
+            currentState.copyWith(isLoading: false, currentOperation: null),
           );
         },
       );
@@ -289,10 +287,7 @@ class PremiumNotifier extends _$PremiumNotifier {
           }
         } else {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              currentOperation: null,
-            ),
+            currentState.copyWith(isLoading: false, currentOperation: null),
           );
         }
         return true;

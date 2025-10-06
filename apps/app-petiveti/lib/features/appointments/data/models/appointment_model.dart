@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:core/core.dart'
+    show HiveType, JsonSerializable, HiveObject, HiveField;
 
 import '../../domain/entities/appointment.dart';
 
@@ -126,15 +126,22 @@ class AppointmentModel extends HiveObject {
     return AppointmentModel(
       id: (map['id'] as String?) ?? '',
       animalId: (map['animalId'] as String?) ?? '',
-      veterinarianName: (map['veterinario'] as String?) ?? (map['veterinarianName'] as String?) ?? '',
-      dateTimestamp: (map['dataConsulta'] as int?) ?? (map['dateTimestamp'] as int?) ?? 0,
+      veterinarianName:
+          (map['veterinario'] as String?) ??
+          (map['veterinarianName'] as String?) ??
+          '',
+      dateTimestamp:
+          (map['dataConsulta'] as int?) ?? (map['dateTimestamp'] as int?) ?? 0,
       reason: (map['motivo'] as String?) ?? (map['reason'] as String?) ?? '',
-      diagnosis: (map['diagnostico'] as String?) ?? (map['diagnosis'] as String?),
+      diagnosis:
+          (map['diagnostico'] as String?) ?? (map['diagnosis'] as String?),
       notes: (map['observacoes'] as String?) ?? (map['notes'] as String?),
       status: (map['status'] as int?) ?? 0,
       cost: ((map['valor'] ?? map['cost']) as num?)?.toDouble(),
-      createdAtTimestamp: (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
-      updatedAtTimestamp: (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      createdAtTimestamp:
+          (map['createdAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
+      updatedAtTimestamp:
+          (map['updatedAt'] as int?) ?? DateTime.now().millisecondsSinceEpoch,
       isDeleted: (map['isDeleted'] as bool?) ?? false,
     );
   }

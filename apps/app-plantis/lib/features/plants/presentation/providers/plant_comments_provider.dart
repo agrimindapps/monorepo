@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
 import '../../domain/repositories/plant_comments_repository.dart';

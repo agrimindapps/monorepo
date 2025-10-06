@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:core/core.dart'
+    show injectable, Box, Connectivity, ConnectivityResult, Hive;
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
-import 'package:core/core.dart' show injectable;
 
 import '../../../../core/cache/cache_manager.dart';
 import '../../../../core/logging/entities/log_entry.dart';

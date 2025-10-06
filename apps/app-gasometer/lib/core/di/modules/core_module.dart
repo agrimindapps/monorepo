@@ -1,6 +1,6 @@
 import 'package:core/core.dart' as core;
-import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' show GetIt;
+import 'package:flutter/foundation.dart';
 
 import '../../services/data_cleaner_service.dart';
 import '../di_module.dart';

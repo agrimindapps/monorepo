@@ -1,19 +1,16 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 import '../../../core/errors/failures.dart' as local_failures;
 import '../../../core/utils/typedef.dart';
 import '../domain/task_entity.dart';
 import '../domain/task_repository.dart';
 import 'task_local_datasource.dart';
-import 'task_remote_datasource.dart';
 import 'task_model.dart';
+import 'task_remote_datasource.dart';
 
 @LazySingleton(as: TaskRepository)
 class TaskRepositoryImpl implements TaskRepository {
-  const TaskRepositoryImpl(
-    this._localDataSource,
-  ) : _remoteDataSource = null;
+  const TaskRepositoryImpl(this._localDataSource) : _remoteDataSource = null;
 
   final TaskRemoteDataSource? _remoteDataSource;
   final TaskLocalDataSource _localDataSource;
@@ -22,7 +19,7 @@ class TaskRepositoryImpl implements TaskRepository {
   ResultFuture<String> createTask(TaskEntity task) async {
     try {
       final taskModel = TaskModel.fromEntity(task);
-      
+
       // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         final taskId = await _remoteDataSource.createTask(taskModel);
@@ -54,7 +51,9 @@ class TaskRepositoryImpl implements TaskRepository {
         return Right(remoteTask);
       } else {
         // Modo offline - retornar erro se não encontrar localmente
-        return const Left(local_failures.CacheFailure('Task not found locally'));
+        return const Left(
+          local_failures.CacheFailure('Task not found locally'),
+        );
       }
     } catch (e) {
       return Left(local_failures.ServerFailure(e.toString()));
@@ -84,14 +83,14 @@ class TaskRepositoryImpl implements TaskRepository {
             dueBefore: dueBefore,
             dueAfter: dueAfter,
           );
-          
+
           await _localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks);
         } catch (e) {
           // Fallback para local se remoto falhar
         }
       }
-      
+
       // Buscar localmente
       final localTasks = await _localDataSource.getTasks(
         listId: listId,
@@ -101,7 +100,8 @@ class TaskRepositoryImpl implements TaskRepository {
         isStarred: isStarred,
       );
       // Filtrar subtasks da lista principal (apenas tarefas principais)
-      final mainTasks = localTasks.where((task) => task.parentTaskId == null).toList();
+      final mainTasks =
+          localTasks.where((task) => task.parentTaskId == null).toList();
       return Right(mainTasks);
     } catch (e) {
       return Left(local_failures.CacheFailure(e.toString()));
@@ -265,11 +265,17 @@ class TaskRepositoryImpl implements TaskRepository {
       } else {
         // Modo offline - buscar localmente
         final allTasks = await _localDataSource.getTasks();
-        final filteredTasks = allTasks.where((task) {
-          return task.title.toLowerCase().contains(query.toLowerCase()) ||
-                 (task.description?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
-                 task.tags.any((tag) => tag.toLowerCase().contains(query.toLowerCase()));
-        }).toList();
+        final filteredTasks =
+            allTasks.where((task) {
+              return task.title.toLowerCase().contains(query.toLowerCase()) ||
+                  (task.description?.toLowerCase().contains(
+                        query.toLowerCase(),
+                      ) ??
+                      false) ||
+                  task.tags.any(
+                    (tag) => tag.toLowerCase().contains(query.toLowerCase()),
+                  );
+            }).toList();
         return Right(filteredTasks);
       }
     } catch (e) {
@@ -293,7 +299,8 @@ class TaskRepositoryImpl implements TaskRepository {
 
       // Buscar subtasks localmente
       final allTasks = await _localDataSource.getTasks();
-      final subtasks = allTasks.where((task) => task.parentTaskId == parentTaskId).toList();
+      final subtasks =
+          allTasks.where((task) => task.parentTaskId == parentTaskId).toList();
       return Right(subtasks);
     } catch (e) {
       return Left(local_failures.CacheFailure(e.toString()));

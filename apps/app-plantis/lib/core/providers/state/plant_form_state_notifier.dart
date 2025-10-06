@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';

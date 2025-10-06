@@ -39,16 +39,12 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     _initializeProviders();
   }
 
-  // === PROVIDERS ACCESS ===
-
   BovinesManagementProvider get bovinesProvider => _bovinesProvider;
   EquinesManagementProvider get equinesProvider => _equinesProvider;
   BovinesFilterProvider get filtersProvider => _filtersProvider;
   LivestockSearchProvider get searchProvider => _searchProvider;
   LivestockStatisticsProvider get statisticsProvider => _statisticsProvider;
   LivestockSyncProvider get syncProvider => _syncProvider;
-
-  // === AGGREGATED GETTERS ===
 
   /// Verifica se alguma operação está em andamento
   bool get isAnyOperationInProgress =>
@@ -90,8 +86,6 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
   int get totalAnimals =>
       _bovinesProvider.totalBovines + _equinesProvider.totalEquines;
 
-  // === COORDINATED OPERATIONS ===
-
   /// Inicialização completa do sistema livestock
   Future<void> initializeSystem() async {
     debugPrint('LivestockCoordinatorProvider: Inicializando sistema livestock');
@@ -101,8 +95,6 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
       _equinesProvider.loadEquines(),
       _statisticsProvider.loadStatistics(),
     ]);
-
-    // Atualiza filtros com dados carregados
     _filtersProvider.updateAvailableValues(_bovinesProvider.bovines);
 
     debugPrint('LivestockCoordinatorProvider: Sistema livestock inicializado');
@@ -117,8 +109,6 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
       _equinesProvider.refreshEquines(),
       _statisticsProvider.refreshStatistics(),
     ]);
-
-    // Atualiza filtros
     _filtersProvider.updateAvailableValues(_bovinesProvider.bovines);
 
     debugPrint('LivestockCoordinatorProvider: Todos os dados atualizados');
@@ -129,14 +119,11 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     debugPrint(
       'LivestockCoordinatorProvider: Iniciando sincronização completa',
     );
-
-    // Executa sincronização
     final syncSuccess = await _syncProvider.forceSyncNow(
       onProgress: onProgress,
     );
 
     if (syncSuccess) {
-      // Recarrega dados após sync bem-sucedido
       await refreshAllData();
       debugPrint(
         'LivestockCoordinatorProvider: Sincronização completa realizada com sucesso',
@@ -169,10 +156,7 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
     debugPrint('LivestockCoordinatorProvider: Sistema resetado');
   }
 
-  // === PRIVATE METHODS ===
-
   void _initializeProviders() {
-    // Escuta mudanças de todos os providers especializados
     _bovinesProvider.addListener(_onProviderChanged);
     _equinesProvider.addListener(_onProviderChanged);
     _filtersProvider.addListener(_onProviderChanged);
@@ -186,13 +170,11 @@ class LivestockCoordinatorProvider extends ChangeNotifier {
   }
 
   void _onProviderChanged() {
-    // Propaga mudanças para listeners do coordenador
     notifyListeners();
   }
 
   @override
   void dispose() {
-    // Remove listeners dos providers especializados
     _bovinesProvider.removeListener(_onProviderChanged);
     _equinesProvider.removeListener(_onProviderChanged);
     _filtersProvider.removeListener(_onProviderChanged);

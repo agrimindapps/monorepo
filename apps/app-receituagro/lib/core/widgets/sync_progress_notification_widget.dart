@@ -67,11 +67,7 @@ class _SyncProgressNotificationWidgetState
     ).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-
-    // Show notification
     _showNotification();
-
-    // Setup auto hide
     if (widget.autoHideDuration != null) {
       _autoHideTimer = Timer(widget.autoHideDuration!, _hideNotification);
     }
@@ -124,15 +120,11 @@ class _SyncProgressNotificationWidgetState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Row
                 Row(
                   children: [
-                    // Icon
                     _buildIcon(context),
 
                     const SizedBox(width: 12),
-
-                    // Title and Message
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,8 +154,6 @@ class _SyncProgressNotificationWidgetState
                         ],
                       ),
                     ),
-
-                    // Dismiss Button
                     if (widget.isDismissible)
                       IconButton(
                         onPressed: _hideNotification,
@@ -180,14 +170,10 @@ class _SyncProgressNotificationWidgetState
                       ),
                   ],
                 ),
-
-                // Progress Bar
                 if (widget.showProgress && widget.progress != null) ...[
                   const SizedBox(height: 12),
                   _buildProgressBar(context),
                 ],
-
-                // Action Button
                 if (widget.onActionPressed != null &&
                     widget.actionLabel != null) ...[
                   const SizedBox(height: 12),
@@ -378,8 +364,6 @@ class _SyncProgressNotificationManagerState
     return Stack(
       children: [
         widget.child,
-
-        // Notification Overlay
         if (_activeNotifications.isNotEmpty)
           Positioned(
             top: 0,

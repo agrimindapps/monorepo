@@ -196,8 +196,6 @@ class MaintenanceRemoteDataSourceImpl implements MaintenanceRemoteDataSource {
       throw ServerException('Erro ao observar manutenções por veículo: ${e.toString()}');
     }
   }
-
-  // Helper methods for entity-model mapping
   MaintenanceEntity _mapToEntity(MaintenanceModel model) {
     return MaintenanceEntity(
       id: model.id,

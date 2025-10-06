@@ -13,8 +13,6 @@ import '../../domain/usecases/get_fuel_records_by_vehicle.dart';
 import '../../domain/usecases/search_fuel_records.dart';
 import '../../domain/usecases/update_fuel_record.dart';
 
-// ========== MODELS ==========
-
 /// Statistics for analytics caching
 class FuelStatistics {
   const FuelStatistics({
@@ -65,8 +63,6 @@ class FuelAnalytics {
   );
 }
 
-// ========== STATE ==========
-
 /// Fuel State - manages fuel records, analytics, offline queue
 class FuelState {
   const FuelState({
@@ -94,8 +90,6 @@ class FuelState {
   final bool isOnline;
   final List<FuelRecordEntity> pendingRecords; // Offline queue
   final bool isSyncing;
-
-  // Computed getters
   bool get hasRecords => fuelRecords.isNotEmpty;
   int get recordCount => fuelRecords.length;
   bool get hasError => errorMessage != null;
@@ -108,13 +102,9 @@ class FuelState {
   /// Filtered records by vehicle and search
   List<FuelRecordEntity> get filteredRecords {
     var records = fuelRecords;
-
-    // Filter by vehicle
     if (selectedVehicleId != null) {
       records = records.where((r) => r.vehicleId == selectedVehicleId).toList();
     }
-
-    // Filter by search query
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
       records =
@@ -171,8 +161,6 @@ class FuelState {
   }
 }
 
-// ========== NOTIFIER ==========
-
 /// FuelNotifier - Complete fuel management with offline queue, connectivity, analytics
 class FuelNotifier extends StateNotifier<FuelState> {
   FuelNotifier({
@@ -212,20 +200,11 @@ class FuelNotifier extends StateNotifier<FuelState> {
   StreamSubscription<bool>? _connectivitySubscription;
   Box<dynamic>? _offlineQueueBox;
 
-  // ========== INITIALIZATION ==========
-
   Future<void> _initialize() async {
     try {
-      // 1. Setup connectivity listener
       await _setupConnectivityListener();
-
-      // 2. Load offline queue from Hive
       await _loadOfflineQueue();
-
-      // 3. Load fuel records
       await loadFuelRecords();
-
-      // 4. Sync offline records if online
       if (state.isOnline && state.hasPendingRecords) {
         await syncPendingRecords();
       }
@@ -241,7 +220,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
   }
 
   Future<void> _setupConnectivityListener() async {
-    // Get initial connectivity state
     final result = await _connectivityService.isOnline();
     result.fold(
       (failure) {
@@ -260,8 +238,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
         }
       },
     );
-
-    // Listen to connectivity changes
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
       (isOnline) {
         _onConnectivityChanged(isOnline);
@@ -283,14 +259,10 @@ class FuelNotifier extends StateNotifier<FuelState> {
         '🔌 Conectividade mudou: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}',
       );
     }
-
-    // Auto-sync when coming back online
     if (!wasOnline && isOnline && state.hasPendingRecords) {
       syncPendingRecords();
     }
   }
-
-  // ========== OFFLINE QUEUE PERSISTENCE ==========
 
   Future<void> _loadOfflineQueue() async {
     try {
@@ -351,8 +323,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
       }
     }
   }
-
-  // ========== CRUD OPERATIONS ==========
 
   Future<void> loadFuelRecords() async {
     state = state.copyWith(
@@ -448,12 +418,8 @@ class FuelNotifier extends StateNotifier<FuelState> {
     );
 
     try {
-      // Check if online
       if (!state.isOnline) {
-        // Save to offline queue
         await _addToOfflineQueue(record);
-
-        // Add to local list immediately for UI
         final updatedRecords = [record, ...state.fuelRecords];
         state = state.copyWith(
           fuelRecords: updatedRecords,
@@ -467,15 +433,12 @@ class FuelNotifier extends StateNotifier<FuelState> {
 
         return true;
       }
-
-      // Try to add online
       final result = await _addFuelRecord(
         AddFuelRecordParams(fuelRecord: record),
       );
 
       return result.fold(
         (failure) async {
-          // Failed online - save offline as fallback
           await _addToOfflineQueue(record);
 
           final updatedRecords = [record, ...state.fuelRecords];
@@ -610,8 +573,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
     }
   }
 
-  // ========== OFFLINE QUEUE MANAGEMENT ==========
-
   Future<void> _addToOfflineQueue(FuelRecordEntity record) async {
     final updatedPending = [...state.pendingRecords, record];
     state = state.copyWith(pendingRecords: updatedPending);
@@ -660,8 +621,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
         }
       }
     }
-
-    // Update pending records with only failed ones
     state = state.copyWith(pendingRecords: failedRecords, isSyncing: false);
 
     if (failedRecords.isEmpty) {
@@ -675,12 +634,8 @@ class FuelNotifier extends StateNotifier<FuelState> {
         debugPrint('🔌 ${failedRecords.length} registros ainda pendentes');
       }
     }
-
-    // Reload records after sync
     await loadFuelRecords();
   }
-
-  // ========== SEARCH & FILTER ==========
 
   void searchFuelRecords(String query) {
     state = state.copyWith(searchQuery: query.trim());
@@ -714,13 +669,10 @@ class FuelNotifier extends StateNotifier<FuelState> {
     loadFuelRecords();
   }
 
-  // ========== ANALYTICS ==========
-
   Future<void> loadAnalytics(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
     try {
-      // Load average consumption
       final consumptionResult = await _getAverageConsumption(
         GetAverageConsumptionParams(vehicleId: vehicleId),
       );
@@ -731,8 +683,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
             debugPrint('Erro ao carregar consumo médio: ${failure.message}'),
         (consumption) => averageConsumption = consumption,
       );
-
-      // Load total spent (last 30 days)
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       final totalSpentResult = await _getTotalSpent(
         GetTotalSpentParams(vehicleId: vehicleId, startDate: thirtyDaysAgo),
@@ -744,8 +694,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
             debugPrint('Erro ao carregar total gasto: ${failure.message}'),
         (total) => totalSpent = total,
       );
-
-      // Load recent records
       final recentResult = await _getRecentFuelRecords(
         GetRecentFuelRecordsParams(vehicleId: vehicleId, limit: 5),
       );
@@ -757,8 +705,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
         ),
         (records) => recentRecords = records,
       );
-
-      // Update analytics cache
       final analytics = FuelAnalytics(
         vehicleId: vehicleId,
         averageConsumption: averageConsumption,
@@ -783,8 +729,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
       }
     }
   }
-
-  // ========== UTILITY METHODS ==========
 
   FuelRecordEntity? getFuelRecordById(String id) {
     try {
@@ -826,8 +770,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
     state = const FuelState();
   }
 
-  // ========== STATISTICS CALCULATION ==========
-
   FuelStatistics _calculateStatistics(List<FuelRecordEntity> records) {
     if (records.isEmpty) {
       return FuelStatistics(
@@ -854,8 +796,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
           (total, record) => total + record.pricePerLiter,
         ) /
         records.length;
-
-    // Calculate average consumption only for records with data
     double averageConsumption = 0.0;
     final recordsWithConsumption =
         records
@@ -902,8 +842,6 @@ class FuelNotifier extends StateNotifier<FuelState> {
   }
 }
 
-// ========== PROVIDERS ==========
-
 /// Main fuel notifier provider
 final fuelNotifierProvider = StateNotifierProvider<FuelNotifier, FuelState>((
   ref,
@@ -925,28 +863,18 @@ final fuelNotifierProvider = StateNotifierProvider<FuelNotifier, FuelState>((
 });
 
 /// Derived providers for easier access
-
-// Filtered records provider
 final filteredFuelRecordsProvider = Provider<List<FuelRecordEntity>>((ref) {
   return ref.watch(fuelNotifierProvider).filteredRecords;
 });
-
-// Selected vehicle ID provider
 final selectedFuelVehicleIdProvider = Provider<String?>((ref) {
   return ref.watch(fuelNotifierProvider).selectedVehicleId;
 });
-
-// Search query provider
 final fuelSearchQueryProvider = Provider<String>((ref) {
   return ref.watch(fuelNotifierProvider).searchQuery;
 });
-
-// Statistics provider
 final fuelStatisticsProvider = Provider<FuelStatistics?>((ref) {
   return ref.watch(fuelNotifierProvider).statistics;
 });
-
-// Analytics provider for specific vehicle
 final fuelAnalyticsProvider = Provider.family<FuelAnalytics?, String>((
   ref,
   vehicleId,
@@ -954,8 +882,6 @@ final fuelAnalyticsProvider = Provider.family<FuelAnalytics?, String>((
   final analytics = ref.watch(fuelNotifierProvider).analytics;
   return analytics[vehicleId];
 });
-
-// Offline queue providers
 final fuelPendingCountProvider = Provider<int>((ref) {
   return ref.watch(fuelNotifierProvider).pendingRecordsCount;
 });
@@ -971,8 +897,6 @@ final fuelIsOnlineProvider = Provider<bool>((ref) {
 final fuelIsSyncingProvider = Provider<bool>((ref) {
   return ref.watch(fuelNotifierProvider).isSyncing;
 });
-
-// Loading and error providers
 final fuelIsLoadingProvider = Provider<bool>((ref) {
   return ref.watch(fuelNotifierProvider).isLoading;
 });

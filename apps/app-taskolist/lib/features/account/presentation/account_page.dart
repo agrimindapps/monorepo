@@ -63,27 +63,16 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header do usuário
           _buildUserHeader(user),
           const SizedBox(height: 24),
-
-          // Status da assinatura
           _buildSubscriptionSection(subscriptionState),
           const SizedBox(height: 24),
-
-          // Configurações da conta
           _buildAccountSection(user),
           const SizedBox(height: 24),
-
-          // Configurações do app
           _buildAppSection(),
           const SizedBox(height: 24),
-
-          // Seção de dados
           _buildDataSection(),
           const SizedBox(height: 24),
-
-          // Ações da conta
           _buildAccountActions(user),
         ],
       ),
@@ -96,7 +85,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            // Avatar
             CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.primaryColor.withAlpha(26),
@@ -112,8 +100,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                       : null,
             ),
             const SizedBox(width: 16),
-
-            // Informações do usuário
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,8 +117,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 8),
-
-                  // Status badges
                   Wrap(
                     spacing: 8,
                     children: [
@@ -160,8 +144,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                 ],
               ),
             ),
-
-            // Botão editar perfil
             IconButton(
               onPressed: () => _showEditProfileDialog(user),
               icon: const Icon(Icons.edit),
@@ -431,8 +413,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       ),
     );
   }
-
-  // Dialog methods
   void _showEditProfileDialog(UserEntity user) {
     _displayNameController.text = user.displayName;
 
@@ -522,8 +502,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       error: (error, stackTrace) {},
     );
   }
-
-  // Action methods
   void _updateProfile() async {
     final authService = ref.read(taskManagerAuthServiceProvider);
     final newName = _displayNameController.text.trim();
@@ -537,8 +515,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       );
       return;
     }
-
-    // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(
@@ -561,8 +537,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
 
     final result = await authService.updateProfile(displayName: newName);
-
-    // Remover loading snackbar
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -588,7 +562,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
   }
 
   void _sendEmailVerification() {
-    // TODO: Implementar verificação de email
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Verificação de email será implementada em breve'),
@@ -618,8 +591,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
 
   void _deleteAccount() async {
     final authService = ref.read(taskManagerAuthServiceProvider);
-
-    // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(
@@ -642,8 +613,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
 
     final result = await authService.deleteAccount();
-
-    // Remover loading snackbar
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -658,7 +627,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
           );
         },
         (_) {
-          // Conta excluída com sucesso - usuário já foi deslogado
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Conta excluída permanentemente'),
@@ -666,8 +634,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
               duration: Duration(seconds: 3),
             ),
           );
-
-          // Voltar para a tela de login (o auth guard deve redirecionar automaticamente)
           Navigator.of(context).popUntil((route) => route.isFirst);
         },
       );

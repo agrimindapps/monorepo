@@ -23,7 +23,6 @@ class CalorieReviewStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título do step
           Text(
             'Revisão e Cálculo',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -43,35 +42,22 @@ class CalorieReviewStep extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Resumo das informações básicas
                   _buildBasicInfoSummary(context),
                   const SizedBox(height: 16),
-
-                  // Resumo do estado fisiológico
                   _buildPhysiologicalSummary(context),
                   const SizedBox(height: 16),
-
-                  // Resumo de atividade e condição corporal
                   _buildActivityConditionSummary(context),
                   const SizedBox(height: 16),
-
-                  // Resumo de condições especiais
                   if (_hasSpecialConditions())
                     _buildSpecialConditionsSummary(context),
                   
                   const SizedBox(height: 24),
-
-                  // Estimativa prévia
                   _buildPreviewCard(context),
                 ],
               ),
             ),
           ),
-
-          // Error display
           if (error != null) _buildErrorCard(context),
-
-          // Botão de cálculo
           const SizedBox(height: 16),
           _buildCalculateButton(context),
         ],
@@ -205,7 +191,6 @@ class CalorieReviewStep extends StatelessWidget {
   }
 
   Widget _buildPreviewCard(BuildContext context) {
-    // Calcular uma estimativa rápida para preview
     final estimatedRer = _calculateEstimatedRer();
     final estimatedMultiplier = _calculateEstimatedMultiplier();
     final estimatedDer = estimatedRer * estimatedMultiplier;
@@ -375,13 +360,9 @@ class CalorieReviewStep extends StatelessWidget {
 
   double _calculateEstimatedMultiplier() {
     double multiplier = input.physiologicalState.baseFactor;
-    
-    // Adicionar bônus de lactação
     if (input.isLactating && input.numberOfOffspring != null) {
       multiplier += 0.25 * input.numberOfOffspring!;
     }
-    
-    // Aplicar outros fatores
     multiplier *= input.activityLevel.factor;
     multiplier *= input.bodyConditionScore.factor;
     multiplier *= input.environmentalCondition.factor;

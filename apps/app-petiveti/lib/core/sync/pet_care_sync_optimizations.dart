@@ -46,14 +46,10 @@ class PetCareSyncOptimizations {
   /// Inicializa modo de emergência
   Future<void> _initializeEmergencyMode() async {
     developer.log('Initializing emergency mode', name: 'PetCareOptimizations');
-
-    // Timer para verificar dados de emergência a cada minuto
     _emergencyCheckTimer = Timer.periodic(
       const Duration(minutes: 1),
       (_) => _checkEmergencyData(),
     );
-
-    // Identificar dados de emergência existentes
     await _identifyEmergencyData();
   }
 
@@ -62,8 +58,6 @@ class PetCareSyncOptimizations {
   Future<void> _identifyEmergencyData() async {
     try {
       final appName = _config!.appSyncConfig.appName;
-
-      // Verificar medicações críticas
       final medicationsResult = await UnifiedSyncManager.instance.findAll<MedicationSyncEntity>(appName);
       medicationsResult.fold(
         (failure) => developer.log('Error loading medications: ${failure.message}'),
@@ -76,8 +70,6 @@ class PetCareSyncOptimizations {
           }
         },
       );
-
-      // Verificar consultas de emergência
       final appointmentsResult = await UnifiedSyncManager.instance.findAll<AppointmentSyncEntity>(appName);
       appointmentsResult.fold(
         (failure) => developer.log('Error loading appointments: ${failure.message}'),
@@ -90,8 +82,6 @@ class PetCareSyncOptimizations {
           }
         },
       );
-
-      // Verificar animais com dados médicos críticos
       final animalsResult = await UnifiedSyncManager.instance.findAll<AnimalSyncEntity>(appName);
       animalsResult.fold(
         (failure) => developer.log('Error loading animals: ${failure.message}'),
@@ -123,12 +113,8 @@ class PetCareSyncOptimizations {
       }
 
       developer.log('Checking emergency data sync status', name: 'PetCareOptimizations');
-
-      // Verificar se dados de emergência estão sincronizados
       final appName = _config!.appSyncConfig.appName;
       bool needsEmergencySync = false;
-
-      // Verificar medicações críticas
       for (final entityId in _emergencyEntityIds) {
         final medicationResult = await UnifiedSyncManager.instance.findById<MedicationSyncEntity>(
           appName,
@@ -161,19 +147,14 @@ class PetCareSyncOptimizations {
     final appName = _config!.appSyncConfig.appName;
 
     try {
-      // Priorizar medicações
       final medicationResult = await UnifiedSyncManager.instance.forceSyncEntity<MedicationSyncEntity>(appName);
       if (medicationResult.isLeft()) {
         developer.log('Emergency medication sync failed', name: 'PetCareOptimizations');
       }
-
-      // Sincronizar consultas urgentes
       final appointmentResult = await UnifiedSyncManager.instance.forceSyncEntity<AppointmentSyncEntity>(appName);
       if (appointmentResult.isLeft()) {
         developer.log('Emergency appointment sync failed', name: 'PetCareOptimizations');
       }
-
-      // Sincronizar animais com dados críticos
       final animalResult = await UnifiedSyncManager.instance.forceSyncEntity<AnimalSyncEntity>(appName);
       if (animalResult.isLeft()) {
         developer.log('Emergency animal sync failed', name: 'PetCareOptimizations');
@@ -263,19 +244,14 @@ class PetCareSyncOptimizations {
   int optimizeBatchSize(String entityType, int defaultBatchSize) {
     switch (entityType) {
       case 'MedicationSyncEntity':
-        // Medicações em batches pequenos para sync rápido
         return 10;
       case 'AppointmentSyncEntity':
-        // Consultas em batches médios
         return 20;
       case 'WeightSyncEntity':
-        // Peso pode ser em batches maiores (dados menos críticos)
         return 50;
       case 'AnimalSyncEntity':
-        // Animais em batches pequenos (dados importantes)
         return 15;
       case 'UserSettingsSyncEntity':
-        // Configurações individuais
         return 5;
       default:
         return defaultBatchSize;
@@ -286,10 +262,8 @@ class PetCareSyncOptimizations {
   ConflictResolutionStrategy getConflictResolution(String entityType, Map<String, dynamic> context) {
     switch (entityType) {
       case 'MedicationSyncEntity':
-        // Medicações: versão mais recente sempre vence (segurança)
         return ConflictResolutionStrategy.timestamp;
       case 'AppointmentSyncEntity':
-        // Consultas: resolver baseado em prioridade
         final priority = context['priority'] as String?;
         if (priority == 'emergency') {
           return ConflictResolutionStrategy.timestamp;
@@ -297,17 +271,14 @@ class PetCareSyncOptimizations {
           return ConflictResolutionStrategy.manual;
         }
       case 'WeightSyncEntity':
-        // Peso: manter ambas as versões se possível
         return ConflictResolutionStrategy.manual;
       case 'AnimalSyncEntity':
-        // Animais: dados médicos sempre vencem
         if (context['has_emergency_data'] == true) {
           return ConflictResolutionStrategy.timestamp;
         } else {
           return ConflictResolutionStrategy.version;
         }
       case 'UserSettingsSyncEntity':
-        // Configurações: local sempre vence
         return ConflictResolutionStrategy.localWins;
       default:
         return ConflictResolutionStrategy.timestamp;

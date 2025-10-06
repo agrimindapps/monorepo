@@ -24,8 +24,6 @@ class GetDiagnosticosByDefensivoUseCase implements app_usecase.UseCase<List<Diag
     debugPrint('  - Praga: ${params.praga ?? 'null'}');
     debugPrint('  - Search Query: ${params.searchQuery ?? 'null'}');
     debugPrint('  - Parâmetros válidos: ${params.isValid}');
-
-    // Validação de entrada
     if (params.idDefensivo.isEmpty) {
       debugPrint('❌ ERRO: ID do defensivo está vazio');
       return const Left(
@@ -50,8 +48,6 @@ class GetDiagnosticosByDefensivoUseCase implements app_usecase.UseCase<List<Diag
         (diagnosticos) {
           debugPrint('✅ SUCESSO no repository');
           debugPrint('Diagnósticos brutos encontrados: ${diagnosticos.length}');
-          
-          // Aplicar filtros se fornecidos
           var filteredDiagnosticos = diagnosticos;
           debugPrint('=== APLICANDO FILTROS ===');
           
@@ -83,8 +79,6 @@ class GetDiagnosticosByDefensivoUseCase implements app_usecase.UseCase<List<Diag
                 .toList();
             debugPrint('Filtro busca "$query": $beforeSearchFilter → ${filteredDiagnosticos.length}');
           }
-          
-          // Ordenar por cultura e depois por nome
           debugPrint('Ordenando diagnósticos...');
           filteredDiagnosticos.sort((a, b) {
             final culturaComparison = a.cultura.compareTo(b.cultura);

@@ -7,13 +7,9 @@ import '../../domain/usecases/get_promo_content.dart';
 import '../../domain/usecases/submit_pre_registration.dart';
 import '../../domain/usecases/track_analytics.dart';
 import '../states/promo_state.dart';
-
-// Providers para os use cases
 final getPromoContentProvider = Provider<GetPromoContent>((ref) => di.getIt<GetPromoContent>());
 final submitPreRegistrationProvider = Provider<SubmitPreRegistration>((ref) => di.getIt<SubmitPreRegistration>());
 final trackAnalyticsProvider = Provider<TrackAnalytics>((ref) => di.getIt<TrackAnalytics>());
-
-// Provider principal para o estado da promo
 final promoProvider = StateNotifierProvider<PromoNotifier, PromoState>((ref) {
   return PromoNotifier(
     ref.read(getPromoContentProvider),

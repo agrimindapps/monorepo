@@ -58,8 +58,6 @@ class StatisticsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 50),
-
-          // Grid de estatísticas
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1000),
             child: isMobile ? _buildMobileStats() : _buildDesktopStats(),
@@ -191,7 +189,6 @@ class StatisticsSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Ícone
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -205,8 +202,6 @@ class StatisticsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Número
           Text(
             number,
             style: TextStyle(
@@ -216,8 +211,6 @@ class StatisticsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-
-          // Título
           Text(
             title,
             style: const TextStyle(
@@ -228,8 +221,6 @@ class StatisticsSection extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-
-          // Subtítulo
           Text(
             subtitle,
             style: TextStyle(

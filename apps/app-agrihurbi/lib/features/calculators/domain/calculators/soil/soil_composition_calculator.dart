@@ -124,8 +124,6 @@ class SoilCompositionCalculator extends CalculatorEntity {
       final double bulkDensity = double.parse(inputs['bulk_density'].toString());
       final double cec = double.parse(inputs['cec'].toString());
       final double baseSaturation = double.parse(inputs['base_saturation'].toString());
-
-      // Validar soma das frações
       final double totalFractions = sandPercentage + siltPercentage + clayPercentage;
       final double totalDiff = totalFractions - 100.0;
       if ((totalDiff < 0 ? -totalDiff : totalDiff) > 2.0) {
@@ -135,24 +133,14 @@ class SoilCompositionCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-
-      // Classificação textural
       final Map<String, dynamic> textureAnalysis = _classifyTexture(
         sandPercentage, siltPercentage, clayPercentage);
-
-      // Análise de propriedades físicas
       final Map<String, dynamic> physicalProperties = _analyzePhysicalProperties(
         textureAnalysis, bulkDensity, organicMatter);
-
-      // Análise de propriedades químicas
       final Map<String, dynamic> chemicalProperties = _analyzeChemicalProperties(
         soilPH, cec, baseSaturation, organicMatter);
-
-      // Qualidade do solo
       final Map<String, dynamic> soilQuality = _assessSoilQuality(
         physicalProperties, chemicalProperties, textureAnalysis);
-
-      // Recomendações de manejo
       final List<String> recommendations = _generateManagementRecommendations(
         textureAnalysis, physicalProperties, chemicalProperties, soilQuality);
 
@@ -257,10 +245,7 @@ class SoilCompositionCalculator extends CalculatorEntity {
     double bulkDensity,
     double organicMatter,
   ) {
-    // Porosidade total
     final double totalPorosity = (1 - (bulkDensity / 2.65)) * 100;
-
-    // Capacidade de retenção de água
     double waterRetention = 0.0;
     final String textureClass = textureAnalysis['texture_class'] as String;
     
@@ -284,8 +269,6 @@ class SoilCompositionCalculator extends CalculatorEntity {
         waterRetention = 15.0;
     }
     waterRetention *= (1 + organicMatter / 10); // Ajuste por MO
-
-    // Permeabilidade
     double permeability = 0.0;
     switch (textureClass) {
       case 'Areia':
@@ -306,13 +289,9 @@ class SoilCompositionCalculator extends CalculatorEntity {
       default:
         permeability = 5.0;
     }
-
-    // Risco de compactação
     double compactionRisk = bulkDensity * 50; // Simplificado
     if (textureClass.contains('Argila')) compactionRisk *= 1.3;
     compactionRisk = math.min(100, compactionRisk);
-
-    // Estabilidade de agregados
     double aggregateStability = organicMatter * 15; // Influência da MO
     if (textureClass.contains('Franco')) aggregateStability *= 1.2;
     aggregateStability = math.min(100, aggregateStability);
@@ -332,7 +311,6 @@ class SoilCompositionCalculator extends CalculatorEntity {
     double baseSaturation,
     double organicMatter,
   ) {
-    // Avaliação do pH
     String phClassification;
     double phScore = 0.0;
     
@@ -352,8 +330,6 @@ class SoilCompositionCalculator extends CalculatorEntity {
       phClassification = 'Muito Alcalino';
       phScore = 50.0;
     }
-
-    // Avaliação da CTC
     String cecClassification;
     double cecScore = 0.0;
     
@@ -370,8 +346,6 @@ class SoilCompositionCalculator extends CalculatorEntity {
       cecClassification = 'Muito Alta';
       cecScore = 100.0;
     }
-
-    // Nível de fertilidade
     double fertilityLevel = (phScore + cecScore + baseSaturation + organicMatter * 10) / 4;
     fertilityLevel = math.min(100, fertilityLevel);
 
@@ -430,32 +404,22 @@ class SoilCompositionCalculator extends CalculatorEntity {
     final double compactionRisk = physicalProperties['compaction_risk'] as double;
     final double fertilityLevel = chemicalProperties['fertility_level'] as double;
     final String phClassification = chemicalProperties['ph_classification'] as String;
-
-    // Recomendações por textura
     if (textureClass.contains('Areia')) {
       recommendations.add('Solo arenoso: aumentar matéria orgânica para melhorar retenção de água e nutrientes.');
     } else if (textureClass.contains('Argila')) {
       recommendations.add('Solo argiloso: evitar tráfego em condições úmidas para prevenir compactação.');
     }
-
-    // Recomendações por compactação
     if (compactionRisk > 70) {
       recommendations.add('Alto risco de compactação: considerar descompactação mecânica ou biológica.');
     }
-
-    // Recomendações por fertilidade
     if (fertilityLevel < 60) {
       recommendations.add('Fertilidade baixa: implementar programa de correção e adubação.');
     }
-
-    // Recomendações por pH
     if (phClassification.contains('Ácido')) {
       recommendations.add('Solo ácido: realizar calagem para elevar pH e V%.');
     } else if (phClassification.contains('Alcalino')) {
       recommendations.add('Solo alcalino: monitorar disponibilidade de micronutrientes.');
     }
-
-    // Recomendações gerais
     recommendations.add('Implementar práticas conservacionistas para manter qualidade do solo.');
     recommendations.add('Monitorar regularmente através de análises físico-químicas.');
 

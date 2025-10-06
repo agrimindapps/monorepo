@@ -26,8 +26,6 @@ import 'package:flutter/semantics.dart';
 class AccessibilityUtils {
   AccessibilityUtils._();
 
-  // ========== SEMANTIC HELPERS ==========
-
   /// **Enhanced Button Semantics**
   /// 
   /// Creates accessible button semantics with proper labels, hints, and states.
@@ -101,13 +99,9 @@ class AccessibilityUtils {
   }) {
     String semanticLabel = label;
     String? semanticHint = hint;
-    
-    // Add position information
     if (index != null && totalItems != null) {
       semanticLabel = '$label, item ${index + 1} de $totalItems';
     }
-    
-    // Add sub-items hint
     if (hasSubItems) {
       semanticHint = '${semanticHint ?? ''}${semanticHint?.isNotEmpty == true ? '. ' : ''}Possui sub-itens. Toque duas vezes para expandir.';
     }
@@ -154,30 +148,20 @@ class AccessibilityUtils {
   }) {
     String semanticLabel = label;
     List<String> hintParts = [];
-    
-    // Add required indicator
     if (isRequired) {
       semanticLabel = '$semanticLabel, obrigatório';
     }
-    
-    // Add placeholder hint
     if (hint != null) {
       hintParts.add(hint);
     }
-    
-    // Add helper text
     if (helperText != null) {
       hintParts.add(helperText);
     }
-    
-    // Add validation state
     if (errorText != null) {
       hintParts.add('Erro: $errorText');
     } else if (isValid == true) {
       hintParts.add('Campo válido');
     }
-    
-    // Add character count
     if (characterCount != null && maxLength != null) {
       hintParts.add('$characterCount de $maxLength caracteres');
     }
@@ -189,8 +173,6 @@ class AccessibilityUtils {
       child: child,
     );
   }
-
-  // ========== LIVE REGIONS ==========
 
   /// **Live Region Announcement**
   /// 
@@ -253,8 +235,6 @@ class AccessibilityUtils {
     
     announcement;
   }
-
-  // ========== FOCUS MANAGEMENT ==========
 
   /// **Focus Helper**
   /// 
@@ -319,8 +299,6 @@ class AccessibilityUtils {
       }
     }
   }
-
-  // ========== COLOR CONTRAST ==========
 
   /// **Contrast Ratio Calculator**
   /// 
@@ -394,8 +372,6 @@ class AccessibilityUtils {
         level: level, isLargeText: isLargeText)) {
       return baseColor;
     }
-    
-    // Try making it darker
     Color adjustedColor = baseColor;
     for (int i = 1; i <= 10; i++) {
       adjustedColor = Color.lerp(baseColor, Colors.black, i * 0.1)!;
@@ -404,8 +380,6 @@ class AccessibilityUtils {
         return adjustedColor;
       }
     }
-    
-    // Try making it lighter
     adjustedColor = baseColor;
     for (int i = 1; i <= 10; i++) {
       adjustedColor = Color.lerp(baseColor, Colors.white, i * 0.1)!;
@@ -414,23 +388,16 @@ class AccessibilityUtils {
         return adjustedColor;
       }
     }
-    
-    // Fallback to black or white
     return calculateContrastRatio(Colors.black, background) > 
            calculateContrastRatio(Colors.white, background) 
         ? Colors.black 
         : Colors.white;
   }
 
-  // ========== HELPER METHODS ==========
-
   static double _calculateLuminance(Color color) {
-    // Convert to sRGB
     final r = _sRGBToLinear(color.r / 255.0);
     final g = _sRGBToLinear(color.g / 255.0);
     final b = _sRGBToLinear(color.b / 255.0);
-    
-    // Calculate luminance using WCAG formula
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
@@ -441,8 +408,6 @@ class AccessibilityUtils {
       return ((value + 0.055) / 1.055).abs();
     }
   }
-
-  // ========== TESTING HELPERS ==========
 
   /// **Accessibility Test Helper**
   /// 
@@ -475,8 +440,6 @@ class AccessibilityUtils {
     bool isTextField = false,
     bool enabled = true,
   }) {
-    // This would be implemented with flutter test framework
-    // For now, it serves as documentation of testing approach
   }
 }
 
@@ -502,34 +465,22 @@ enum WCAGLevel {
   AAA,
 }
 
-// ========== ACCESSIBILITY CONSTANTS ==========
-
 /// **Accessibility Constants**
 /// 
 /// Common accessibility-related constants and values.
 class AccessibilityConstants {
   AccessibilityConstants._();
-
-  // Touch target minimums
   static const double minTouchTarget = 44.0;  // iOS/Android minimum
   static const double recommendedTouchTarget = 48.0;  // Material Design
-
-  // Text size minimums
   static const double minReadableTextSize = 14.0;
   static const double largeTextSize = 18.0;
   static const double boldLargeTextSize = 14.0;
-
-  // Contrast ratios
   static const double minContrastRatioNormal = 4.5;  // WCAG AA normal text
   static const double minContrastRatioLarge = 3.0;   // WCAG AA large text
   static const double enhancedContrastRatioNormal = 7.0;  // WCAG AAA normal text
   static const double enhancedContrastRatioLarge = 4.5;   // WCAG AAA large text
-
-  // Animation durations
   static const Duration focusAnimationDuration = Duration(milliseconds: 200);
   static const Duration announceDelay = Duration(milliseconds: 100);
-  
-  // Common semantic labels
   static const String closeButtonLabel = 'Fechar';
   static const String backButtonLabel = 'Voltar';
   static const String menuButtonLabel = 'Abrir menu';

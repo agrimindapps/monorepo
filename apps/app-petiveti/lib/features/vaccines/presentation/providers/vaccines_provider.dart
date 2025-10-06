@@ -15,8 +15,6 @@ import '../../domain/usecases/mark_vaccine_completed.dart';
 import '../../domain/usecases/schedule_vaccine_reminder.dart';
 import '../../domain/usecases/search_vaccines.dart';
 import '../../domain/usecases/update_vaccine.dart';
-
-// State classes
 class VaccinesState {
   final List<Vaccine> vaccines;
   final List<Vaccine> overdueVaccines;
@@ -58,15 +56,11 @@ class VaccinesState {
 
   List<Vaccine> get filteredVaccines {
     List<Vaccine> filtered = List.from(vaccines);
-
-    // Apply search query
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((vaccine) =>
           vaccine.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
           vaccine.veterinarian.toLowerCase().contains(searchQuery.toLowerCase())).toList();
     }
-
-    // Apply filter
     switch (filter) {
       case VaccinesFilter.all:
         return filtered;
@@ -116,8 +110,6 @@ extension VaccinesFilterExtension on VaccinesFilter {
     }
   }
 }
-
-// State notifier
 class VaccinesNotifier extends StateNotifier<VaccinesState> {
   final GetVaccines _getVaccines;
   final GetVaccineById _getVaccineById;
@@ -137,9 +129,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     required GetVaccinesByAnimal getVaccinesByAnimal,
     required GetOverdueVaccines getOverdueVaccines,
     required GetUpcomingVaccines getUpcomingVaccines,
-    // TODO: Add GetVaccineCalendar and GetVaccineStatistics when use cases are implemented
-    // required GetVaccineCalendar getVaccineCalendar,
-    // required GetVaccineStatistics getVaccineStatistics,
     required SearchVaccines searchVaccines,
     required AddVaccine addVaccine,
     required UpdateVaccine updateVaccine,
@@ -151,8 +140,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
         _getVaccinesByAnimal = getVaccinesByAnimal,
         _getOverdueVaccines = getOverdueVaccines,
         _getUpcomingVaccines = getUpcomingVaccines,
-        // _getVaccineCalendar = getVaccineCalendar,
-        // _getVaccineStatistics = getVaccineStatistics,
         _searchVaccines = searchVaccines,
         _addVaccine = addVaccine,
         _updateVaccine = updateVaccine,
@@ -231,7 +218,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Add the vaccine to current state optimistically
         final updatedVaccines = [vaccine, ...state.vaccines];
         state = state.copyWith(
           vaccines: updatedVaccines,
@@ -247,7 +233,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Update the vaccine in current state
         final updatedVaccines = state.vaccines.map((v) {
           return v.id == vaccine.id ? vaccine : v;
         }).toList();
@@ -266,7 +251,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Remove the vaccine from current state
         final updatedVaccines = state.vaccines.where((v) => v.id != id).toList();
         state = state.copyWith(
           vaccines: updatedVaccines,
@@ -282,7 +266,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (completedVaccine) {
-        // Update the vaccine as completed in current state
         final updatedVaccines = state.vaccines.map((v) {
           return v.id == id ? completedVaccine : v;
         }).toList();
@@ -302,7 +285,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (updatedVaccine) {
-        // Update the vaccine with reminder in current state
         final updatedVaccines = state.vaccines.map((v) {
           return v.id == vaccineId ? updatedVaccine : v;
         }).toList();
@@ -357,8 +339,6 @@ class VaccinesNotifier extends StateNotifier<VaccinesState> {
     state = state.copyWith(searchQuery: '');
   }
 }
-
-// Providers
 final vaccinesProvider = StateNotifierProvider<VaccinesNotifier, VaccinesState>((ref) {
   return VaccinesNotifier(
     getVaccines: di.getIt<GetVaccines>(),
@@ -366,9 +346,6 @@ final vaccinesProvider = StateNotifierProvider<VaccinesNotifier, VaccinesState>(
     getVaccinesByAnimal: di.getIt<GetVaccinesByAnimal>(),
     getOverdueVaccines: di.getIt<GetOverdueVaccines>(),
     getUpcomingVaccines: di.getIt<GetUpcomingVaccines>(),
-    // TODO: Add when use cases are implemented
-    // getVaccineCalendar: di.getIt<GetVaccineCalendar>(),
-    // getVaccineStatistics: di.getIt<GetVaccineStatistics>(),
     searchVaccines: di.getIt<SearchVaccines>(),
     addVaccine: di.getIt<AddVaccine>(),
     updateVaccine: di.getIt<UpdateVaccine>(),
@@ -377,14 +354,10 @@ final vaccinesProvider = StateNotifierProvider<VaccinesNotifier, VaccinesState>(
     scheduleVaccineReminder: di.getIt<ScheduleVaccineReminder>(),
   );
 });
-
-// Individual vaccine provider
 final vaccineProvider = FutureProvider.family<Vaccine?, String>((ref, id) async {
   final notifier = ref.read(vaccinesProvider.notifier);
   return await notifier.getVaccineById(id);
 });
-
-// Future provider for vaccine calendar
 final vaccineCalendarProvider = FutureProvider.family<Map<DateTime, List<Vaccine>>, DateTime>((ref, startDate) async {
   final useCase = di.getIt<GetVaccineCalendar>();
   final endDate = startDate.add(const Duration(days: 30)); // 30 days calendar
@@ -395,17 +368,11 @@ final vaccineCalendarProvider = FutureProvider.family<Map<DateTime, List<Vaccine
     (calendar) => calendar,
   );
 });
-
-// Selected vaccine provider for maintaining selection across pages
 final selectedVaccineProvider = StateProvider<Vaccine?>((ref) => null);
-
-// Filter provider
 final vaccinesFilterProvider = Provider<VaccinesFilter>((ref) {
   final state = ref.watch(vaccinesProvider);
   return state.filter;
 });
-
-// Statistics provider
 final vaccineStatisticsProvider = FutureProvider<Map<String, int>>((ref) async {
   final useCase = di.getIt<GetVaccineStatistics>();
   final result = await useCase(GetVaccineStatisticsParams.all());

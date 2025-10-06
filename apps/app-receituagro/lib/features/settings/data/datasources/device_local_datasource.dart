@@ -34,8 +34,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
     try {
       final cacheKey = '${userId}_devices';
       final timestampKey = '${userId}_devices_timestamp';
-
-      // Verificar se o cache ainda é válido
       final timestampResult = await _localStorage.get<int>(
         key: timestampKey,
         box: _devicesBox,
@@ -49,13 +47,10 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
             final now = DateTime.now();
 
             if (now.difference(cachedAt) > _cacheExpiry) {
-              // Cache expirado, limpar
               await _clearUserCache(userId);
               return const Right(<DeviceEntity>[]);
             }
           }
-
-          // Recuperar dispositivos do cache
           final cachedResult = await _localStorage
               .getList<Map<String, dynamic>>(key: cacheKey, box: _devicesBox);
 
@@ -65,8 +60,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
             if (cached.isEmpty) {
               return const Right(<DeviceEntity>[]);
             }
-
-            // Converter para entities
             final devices =
                 cached
                     .map((deviceMap) => DeviceEntity.fromJson(deviceMap))
@@ -94,11 +87,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
     try {
       final cacheKey = '${userId}_devices';
       final timestampKey = '${userId}_devices_timestamp';
-
-      // Converter entities para maps
       final deviceMaps = devices.map((device) => device.toJson()).toList();
-
-      // Armazenar dispositivos
       final saveDevicesResult = await _localStorage
           .saveList<Map<String, dynamic>>(
             key: cacheKey,
@@ -109,8 +98,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       if (saveDevicesResult.isLeft()) {
         return saveDevicesResult;
       }
-
-      // Armazenar timestamp
       final saveTimestampResult = await _localStorage.save<int>(
         key: timestampKey,
         data: DateTime.now().millisecondsSinceEpoch,
@@ -131,7 +118,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   @override
   Future<Either<Failure, DeviceEntity?>> getDeviceByUuid(String uuid) async {
     try {
-      // Buscar em todos os caches de usuários
       final keysResult = await _localStorage.getKeys(box: _devicesBox);
 
       return await keysResult.fold((failure) async => const Right(null), (
@@ -194,11 +180,8 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       final devicesResult = await getCachedDevices(userId);
 
       return devicesResult.fold((failure) => Left(failure), (devices) async {
-        // Remover dispositivo da lista
         final updatedDevices =
             devices.where((device) => device.uuid != deviceUuid).toList();
-
-        // Atualizar cache
         return await cacheDevices(userId, updatedDevices);
       });
     } catch (e) {
@@ -220,20 +203,15 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       final devicesResult = await getCachedDevices(userId);
 
       return devicesResult.fold((failure) => Left(failure), (devices) async {
-        // Encontrar e atualizar dispositivo
         final updatedDevices =
             devices.map((existingDevice) {
               return existingDevice.uuid == device.uuid
                   ? device
                   : existingDevice;
             }).toList();
-
-        // Se o dispositivo não existe, adicionar
         if (!devices.any((d) => d.uuid == device.uuid)) {
           updatedDevices.add(device);
         }
-
-        // Atualizar cache
         return await cacheDevices(userId, updatedDevices);
       });
     } catch (e) {

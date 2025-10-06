@@ -27,8 +27,6 @@ abstract class BaseProvider extends ChangeNotifier {
   ProviderState _state = ProviderState.initial;
   AppError? _error;
   bool _disposed = false;
-
-  // State getters
   ProviderState get state => _state;
   AppError? get error => _error;
   bool get isLoading => _state == ProviderState.loading;
@@ -48,8 +46,6 @@ abstract class BaseProvider extends ChangeNotifier {
     final previousState = _state;
     _state = newState;
     _error = error;
-
-    // Log state changes in debug mode
     _logger.logProviderStateChange(
       providerName,
       newState.name,
@@ -181,7 +177,6 @@ abstract class BaseProvider extends ChangeNotifier {
   /// Override this to implement retry logic
   @protected
   void onRetry() {
-    // Override in subclasses
   }
 
   /// Handle stream subscriptions with error handling
@@ -313,9 +308,6 @@ mixin PaginatedProviderMixin<T> on BaseProvider {
       } else {
         _items.addAll(pageData);
       }
-      
-      // Assume no next page if we got less than expected
-      // Override this logic in subclasses if needed
       _hasNextPage = pageData.length >= getPageSize();
     } else {
       _hasNextPage = false;

@@ -60,8 +60,6 @@ class DataExportNotifier extends _$DataExportNotifier {
     _requestExportUseCase = ref.read(requestExportUseCaseProvider);
     _getHistoryUseCase = ref.read(getExportHistoryUseCaseProvider);
     _repository = ref.read(dataExportRepositoryProvider);
-
-    // Load initial history
     try {
       final history = await _getHistoryUseCase(_currentUserId);
       return DataExportState(exportHistory: history);
@@ -134,8 +132,6 @@ class DataExportNotifier extends _$DataExportNotifier {
         dataTypes: dataTypes,
         format: format,
       );
-
-      // Add to history
       final currentState = state.valueOrNull ?? const DataExportState();
       final updatedHistory = [request, ...currentState.exportHistory];
 
@@ -145,8 +141,6 @@ class DataExportNotifier extends _$DataExportNotifier {
           isLoading: false,
         ),
       );
-
-      // Start monitoring progress
       await _monitorExportProgress(request);
 
       return request;
@@ -189,11 +183,7 @@ class DataExportNotifier extends _$DataExportNotifier {
             ),
           ),
         );
-
-        // Simulate processing time
         await Future<void>.delayed(const Duration(seconds: 3));
-
-        // Check if request was completed or failed
         final updatedHistory = await _getHistoryUseCase(_currentUserId);
         final updatedRequest = updatedHistory.firstWhere(
           (r) => r.id == request.id,
@@ -222,8 +212,6 @@ class DataExportNotifier extends _$DataExportNotifier {
           return;
         }
       }
-
-      // Mark as completed if reached the end
       final currentState = state.valueOrNull ?? const DataExportState();
       state = AsyncValue.data(
         currentState.copyWith(
@@ -441,8 +429,6 @@ class DataExportNotifier extends _$DataExportNotifier {
     return nextAllowedTime.difference(DateTime.now());
   }
 }
-
-// Dependency Providers
 @riverpod
 CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(Ref ref) {
   return GetIt.instance<CheckExportAvailabilityUseCase>();

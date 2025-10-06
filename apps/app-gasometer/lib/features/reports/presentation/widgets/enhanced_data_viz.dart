@@ -214,7 +214,6 @@ class VisualStatisticCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with icon and title
             Row(
               children: [
                 Container(
@@ -257,8 +256,6 @@ class VisualStatisticCard extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Main value
             SemanticText(
               mainValue,
               style: TextStyle(
@@ -278,8 +275,6 @@ class VisualStatisticCard extends StatelessWidget {
                 ),
               ),
             ],
-            
-            // Mini chart visualization
             if (chartData?.isNotEmpty == true) ...[
               const SizedBox(height: 16),
               SizedBox(
@@ -290,8 +285,6 @@ class VisualStatisticCard extends StatelessWidget {
                 ),
               ),
             ],
-            
-            // Comparisons
             if (comparisons?.isNotEmpty == true) ...[
               const SizedBox(height: 16),
               ...comparisons!.map((comparison) => Padding(
@@ -393,18 +386,10 @@ class MiniLineChartPainter extends CustomPainter {
         gradientPath.lineTo(x, y);
       }
     }
-    
-    // Complete gradient path
     gradientPath.lineTo(size.width, size.height);
     gradientPath.close();
-    
-    // Draw gradient area
     canvas.drawPath(gradientPath, gradientPaint);
-    
-    // Draw line
     canvas.drawPath(path, paint);
-    
-    // Draw points
     final pointPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
@@ -497,7 +482,6 @@ class EnhancedSummaryDashboard extends StatelessWidget {
                     .toList(),
               );
             } else if (isTablet) {
-              // Grid layout for tablet
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -511,7 +495,6 @@ class EnhancedSummaryDashboard extends StatelessWidget {
                 itemBuilder: (context, index) => _buildMetricCard(context, metrics[index]),
               );
             } else {
-              // Row layout for desktop
               return Row(
                 children: metrics
                     .asMap()

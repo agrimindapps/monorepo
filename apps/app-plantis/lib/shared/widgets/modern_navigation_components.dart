@@ -27,7 +27,6 @@ class ModernNavigationList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main Navigation Section
           if (isExpanded || expandAnimation.value > 0.5) ...[
             AnimatedBuilder(
               animation: expandAnimation,
@@ -53,8 +52,6 @@ class ModernNavigationList extends StatelessWidget {
             ),
             const SizedBox(height: 4),
           ],
-
-          // Main Navigation Items
           Expanded(
             child: ListView.builder(
               itemCount: destinations.length,
@@ -284,7 +281,6 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                   ),
                   child: Row(
                     children: [
-                      // Icon Container
                       Container(
                         width: 48,
                         height: 48,
@@ -292,7 +288,6 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            // Main Icon
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.all(8),
@@ -324,8 +319,6 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                 ),
                               ),
                             ),
-
-                            // Badge
                             if (widget.badge != null && widget.badge! > 0)
                               Positioned(
                                 right: -2,
@@ -358,8 +351,6 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                   ),
                                 ),
                               ),
-
-                            // New Indicator
                             if (widget.isNew)
                               Positioned(
                                 right: -4,
@@ -385,8 +376,6 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                           ],
                         ),
                       ),
-
-                      // Label and Description
                       AnimatedBuilder(
                         animation: widget.expandAnimation,
                         builder: (context, child) {
@@ -445,8 +434,6 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                           );
                         },
                       ),
-
-                      // Selection Indicator
                       if (widget.isSelected)
                         Container(
                           width: 3,
@@ -504,7 +491,6 @@ class ModernSidebarFooter extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // Avatar
                 Container(
                   width: 40,
                   height: 40,
@@ -534,8 +520,6 @@ class ModernSidebarFooter extends StatelessWidget {
                 ),
 
                 const SizedBox(width: 12),
-
-                // User Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,8 +547,6 @@ class ModernSidebarFooter extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // Settings Button
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: colorScheme.surface,

@@ -110,34 +110,18 @@ class YieldPredictionCalculator extends CalculatorEntity {
       final String pestDiseasePressure = inputs['pest_disease_pressure'].toString();
       final String technologyLevel = inputs['technology_level'].toString();
       final String cultivarPotential = inputs['cultivar_potential'].toString();
-
-      // Obter potencial base da cultura
       final Map<String, dynamic> cropData = _getCropYieldData(cropType);
-      
-      // Calcular fatores limitantes
       final Map<String, dynamic> limitingFactors = _calculateLimitingFactors(
         soilFertility, waterAvailability, weatherConditions, pestDiseasePressure);
-
-      // Calcular eficiência de manejo
       final Map<String, dynamic> managementEfficiency = _calculateManagementEfficiency(
         technologyLevel, cultivarPotential, plantPopulation, cropData);
-
-      // Ajuste por estágio de desenvolvimento
       final Map<String, dynamic> stageAdjustment = _calculateStageAdjustment(growthStage);
-
-      // Calcular produtividade estimada
       final Map<String, dynamic> yieldPrediction = _calculateYieldPrediction(
         cropData, limitingFactors, managementEfficiency, stageAdjustment);
-
-      // Análise de gap de produtividade
       final Map<String, dynamic> yieldGapAnalysis = _analyzeYieldGap(
         yieldPrediction, cropData, limitingFactors);
-
-      // Cenários
       final Map<String, dynamic> scenarios = _generateScenarios(
         cropData, limitingFactors, managementEfficiency);
-
-      // Recomendações
       final List<String> recommendations = _generateYieldRecommendations(
         yieldPrediction, yieldGapAnalysis, limitingFactors, cropType);
 
@@ -285,8 +269,6 @@ class YieldPredictionCalculator extends CalculatorEntity {
     final double pestFactor = pestFactors[pestDiseasePressure] ?? 0.9;
 
     final double overallFactor = fertFactor * waterFactor * weatherFactor * pestFactor;
-
-    // Identificar fator mais limitante
     final Map<String, double> factors = {
       'Fertilidade': fertFactor,
       'Água': waterFactor,
@@ -335,8 +317,6 @@ class YieldPredictionCalculator extends CalculatorEntity {
 
     final double techFactor = technologyFactors[technologyLevel] ?? 0.85;
     final double cultivarFactor = cultivarFactors[cultivarPotential] ?? 0.9;
-
-    // Fator de população
     final int optimalPop = cropData['optimal_population'] as int;
     final double popRatio = plantPopulation / optimalPop;
     double popFactor = 1.0;

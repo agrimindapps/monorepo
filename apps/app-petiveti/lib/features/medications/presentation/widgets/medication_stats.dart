@@ -29,14 +29,10 @@ class MedicationStats extends ConsumerWidget {
     final medications = medicationsState.medications;
     final activeMedications = medicationsState.activeMedications;
     final expiringMedications = medicationsState.expiringMedications;
-
-    // Calculate statistics
     final totalMedications = medications.length;
     final activeCount = activeMedications.length;
     final completedCount = medications.where((m) => m.status == MedicationStatus.completed).length;
     final expiringCount = expiringMedications.length;
-
-    // Calculate by type
     final typeStats = <MedicationType, int>{};
     for (final medication in medications) {
       typeStats[medication.type] = (typeStats[medication.type] ?? 0) + 1;
@@ -47,7 +43,6 @@ class MedicationStats extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Overall statistics
           Text(
             'Estatísticas Gerais',
             style: theme.textTheme.titleLarge?.copyWith(
@@ -107,8 +102,6 @@ class MedicationStats extends ConsumerWidget {
           ),
           
           const SizedBox(height: 32),
-          
-          // Status breakdown
           Text(
             'Distribuição por Status',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -120,8 +113,6 @@ class MedicationStats extends ConsumerWidget {
           _buildStatusChart(context, medications),
           
           const SizedBox(height: 32),
-          
-          // Type breakdown
           Text(
             'Medicamentos por Tipo',
             style: theme.textTheme.titleMedium?.copyWith(

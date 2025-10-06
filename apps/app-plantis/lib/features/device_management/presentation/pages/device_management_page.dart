@@ -86,21 +86,13 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
       body: deviceManagementAsync.when(
         data: (deviceState) => Column(
           children: [
-            // Mensagens de feedback
             _buildFeedbackMessages(deviceState),
-
-            // Status geral
             _buildGeneralStatus(deviceState),
-
-            // Conteúdo das abas
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  // Aba de dispositivos
                   _buildDevicesTab(deviceState),
-
-                  // Aba de estatísticas
                   _buildStatisticsTab(deviceState),
                 ],
               ),
@@ -280,12 +272,9 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
 
     return const Column(
       children: [
-        // Ações rápidas
         DeviceActionsWidget(),
 
         SizedBox(height: 8),
-
-        // Lista de dispositivos
         Expanded(child: DeviceListWidget()),
       ],
     );

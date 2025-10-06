@@ -42,7 +42,6 @@ class HydrationNotifier extends StateNotifier<HydrationState> {
     try {
       _performCalculation = di.getIt<PerformCalculation>();
     } catch (e) {
-      // Se não conseguir obter do DI, usar instância direta
       _performCalculation = PerformCalculation(di.getIt());
     }
   }
@@ -57,7 +56,6 @@ class HydrationNotifier extends StateNotifier<HydrationState> {
     );
 
     try {
-      // Validar inputs usando o HydrationInput
       final hydrationInput = HydrationInput.fromMap(inputs);
       final validationErrors = hydrationInput.validate();
       if (validationErrors.isNotEmpty) {
@@ -67,18 +65,13 @@ class HydrationNotifier extends StateNotifier<HydrationState> {
         );
         return;
       }
-
-      // Realizar cálculo usando o método da BaseCalculator
       final result = _calculator.performCalculation(hydrationInput);
-
-      // Salvar no histórico se o use case estiver disponível
       try {
         await _performCalculation(
           calculatorId: _calculator.id,
           inputs: inputs,
         );
       } catch (e) {
-        // Continuar mesmo se não conseguir salvar no histórico
         print('Aviso: Não foi possível salvar no histórico: $e');
       }
 

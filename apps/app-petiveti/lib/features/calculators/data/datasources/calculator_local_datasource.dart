@@ -50,8 +50,6 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   }) async {
     final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
     var histories = box.values.toList();
-
-    // Aplicar filtros
     if (calculatorId != null) {
       histories = histories.where((CalculationHistoryModel h) => h.calculatorId == calculatorId).toList();
     }
@@ -67,11 +65,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
     if (toDate != null) {
       histories = histories.where((CalculationHistoryModel h) => h.createdAt.isBefore(toDate)).toList();
     }
-
-    // Ordenar por data (mais recente primeiro)
     histories.sort((CalculationHistoryModel a, CalculationHistoryModel b) => b.createdAt.compareTo(a.createdAt));
-
-    // Aplicar limite
     if (limit != null && limit > 0) {
       histories = histories.take(limit).toList();
     }

@@ -145,9 +145,6 @@ class BoxConfiguration extends Equatable {
       lazy: map['lazy'] as bool? ?? false,
       version: map['version'] as int? ?? 1,
       metadata: map['metadata'] as Map<String, dynamic>?,
-      // Note: customAdapters e encryption não podem ser recriados a partir do Map
-      // pois contêm objetos complexos. Estes campos devem ser definidos durante
-      // a criação da configuração, não durante desserialização
     );
   }
 

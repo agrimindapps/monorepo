@@ -36,7 +36,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
 
   @override
   Widget build(BuildContext context) {
-    // Usar provider para carregar dados do usuário
     ref.listen(expensesProvider, (previous, next) {
       if (next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -47,8 +46,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
         );
       }
     });
-
-    // Inicializar carregamento se necessário
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(expensesProvider.notifier).loadExpenses(widget.userId);
     });

@@ -41,7 +41,6 @@ class PremiumRepositoryImpl implements PremiumRepository {
   @override
   Future<Either<core.Failure, PremiumStatus>> getPremiumStatus() async {
     try {
-      // Usa o status do sync service que já consolida todas as fontes
       final status = _syncService.currentStatus;
       return Right(status);
     } catch (e) {
@@ -93,7 +92,6 @@ class PremiumRepositoryImpl implements PremiumRepository {
   @override
   Future<Either<core.Failure, bool>> startFreeTrial() async {
     try {
-      // Para desenvolvimento, usar licença local
       final result = await generateLocalLicense(days: 7);
       return result.fold(
         (failure) => Left(failure),
@@ -107,7 +105,6 @@ class PremiumRepositoryImpl implements PremiumRepository {
   @override
   Future<Either<core.Failure, bool>> isEligibleForTrial() async {
     try {
-      // Elegível se não tem premium ativo
       final hasActive = await hasActivePremium();
       return hasActive.fold(
         (failure) => Left(failure),
@@ -206,8 +203,6 @@ class PremiumRepositoryImpl implements PremiumRepository {
   Future<Either<core.Failure, void>> generateLocalLicense({int days = 30}) async {
     try {
       await localDataSource.generateLocalLicense(days: days);
-
-      // Força sync para atualizar todas as fontes
       await _syncService.forceSync();
 
       return const Right(null);
@@ -220,8 +215,6 @@ class PremiumRepositoryImpl implements PremiumRepository {
   Future<Either<core.Failure, void>> revokeLocalLicense() async {
     try {
       await localDataSource.revokeLocalLicense();
-
-      // Força sync para atualizar todas as fontes
       await _syncService.forceSync();
 
       return const Right(null);
@@ -266,8 +259,6 @@ class PremiumRepositoryImpl implements PremiumRepository {
     String? secret,
   }) async {
     try {
-      // Note: O webhook data source está injetado no sync service
-      // Este método é uma interface conveniente no repository
       return const Right(null);
     } catch (e) {
       return const Left(core.SubscriptionServerFailure());
@@ -276,16 +267,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
   /// Maps local Failure types to core.Failure types
   core.Failure _mapFailure(dynamic failure) {
-    // The local datasources return local Failure types,
-    // but the domain needs core.Failure types
     String? message;
     try {
       message = (failure as dynamic).message?.toString();
     } catch (_) {
       message = failure.toString();
     }
-
-    // Map based on failure type name
     final typeName = failure.runtimeType.toString();
     if (typeName.contains('Network')) {
       return core.SubscriptionNetworkFailure(message);

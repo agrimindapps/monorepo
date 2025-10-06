@@ -151,7 +151,6 @@ class DefensivosGroupListWidget extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Badge com contador
         if (grupo.quantidadeItens > 0)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -170,8 +169,6 @@ class DefensivosGroupListWidget extends StatelessWidget {
           ),
         
         const SizedBox(width: 8),
-        
-        // Seta de navegação
         Icon(
           Icons.chevron_right,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.4),

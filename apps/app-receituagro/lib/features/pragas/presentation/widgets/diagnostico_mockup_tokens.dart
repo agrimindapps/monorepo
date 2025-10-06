@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 /// 
 /// Responsabilidade: centralizar constantes visuais para consistência
 class DiagnosticoMockupTokens {
-  // ========================================
-  // CORES EXTRAÍDAS DO MOCKUP
-  // ========================================
   
   /// Verde principal usado em ícones e elementos de destaque
   static const Color primaryGreen = Color(0xFF4CAF50);
@@ -35,10 +32,6 @@ class DiagnosticoMockupTokens {
   
   /// Cor da borda dos campos de filtro
   static const Color filterBorderColor = Color(0xFFE0E0E0);
-  
-  // ========================================
-  // DIMENSÕES EXTRAÍDAS DO MOCKUP
-  // ========================================
   
   /// Altura dos cards de diagnóstico
   static const double cardHeight = 80.0;
@@ -88,10 +81,6 @@ class DiagnosticoMockupTokens {
   /// Padding dos filtros
   static const EdgeInsets filterPadding = EdgeInsets.symmetric(horizontal: 16.0);
   
-  // ========================================
-  // TIPOGRAFIA BASEADA NO MOCKUP
-  // ========================================
-  
   /// Estilo do nome do produto no card
   static const TextStyle cardProductNameStyle = TextStyle(
     fontSize: 16.0,
@@ -131,10 +120,6 @@ class DiagnosticoMockupTokens {
     color: textSecondary,
   );
   
-  // ========================================
-  // SHADOWS E ELEVAÇÕES
-  // ========================================
-  
   /// Shadow sutil dos cards com melhorias visuais baseadas no detalhe de defensivos
   static const List<BoxShadow> cardShadow = [
     BoxShadow(
@@ -161,10 +146,6 @@ class DiagnosticoMockupTokens {
     ),
   ];
   
-  // ========================================
-  // ÍCONES ESPECÍFICOS
-  // ========================================
-  
   /// Ícone usado no card de diagnóstico (químico/pesticida)
   static const IconData cardIcon = Icons.science;
   
@@ -183,10 +164,6 @@ class DiagnosticoMockupTokens {
   /// Ícone de navegação (chevron)
   static const IconData chevronIcon = Icons.chevron_right;
   
-  // ========================================
-  // STRINGS ESPECÍFICAS
-  // ========================================
-  
   /// Text placeholder para dosagem premium
   static const String hiddenDosage = '••• mg/L';
   
@@ -199,10 +176,6 @@ class DiagnosticoMockupTokens {
   /// Text padrão do dropdown
   static const String dropdownDefaultValue = 'Todas';
   
-  // ========================================
-  // DURAÇÃO DE ANIMAÇÕES
-  // ========================================
-  
   /// Duração padrão para animações de filtro
   static const Duration filterAnimationDuration = Duration(milliseconds: 200);
   
@@ -211,10 +184,6 @@ class DiagnosticoMockupTokens {
 
   /// Duração para animações de focus
   static const Duration focusAnimationDuration = Duration(milliseconds: 250);
-
-  // ========================================
-  // HELPERS THEME-AWARE
-  // ========================================
 
   /// Retorna shadow adequada baseada no tema do contexto
   static List<BoxShadow> getCardShadow(BuildContext context) {

@@ -283,9 +283,6 @@ class CoreHiveStorageService implements IBoxStorageService {
       if (closeResult.isError) {
         return closeResult;
       }
-
-      // Note: Hive doesn't have a direct deleteBox method
-      // This would require manual file deletion or recreation
       debugPrint('$serviceName: Box closed: $boxName (Note: Physical deletion not implemented)');
       return Result.success(null);
 

@@ -28,8 +28,6 @@ class DataExportProvider extends ChangeNotifier {
        _requestExportUseCase = requestExportUseCase,
        _getHistoryUseCase = getHistoryUseCase,
        _repository = repository;
-
-  // Getters
   ExportProgress get currentProgress => _currentProgress;
   ExportAvailabilityResult? get availabilityResult => _availabilityResult;
   List<ExportRequest> get exportHistory => _exportHistory;
@@ -102,11 +100,7 @@ class DataExportProvider extends ChangeNotifier {
         dataTypes: dataTypes,
         format: format,
       );
-
-      // Add to history
       _exportHistory.insert(0, request);
-
-      // Start monitoring progress
       await _monitorExportProgress(request);
 
       return request;
@@ -121,7 +115,6 @@ class DataExportProvider extends ChangeNotifier {
   /// Monitor export progress
   Future<void> _monitorExportProgress(ExportRequest request) async {
     try {
-      // Simulate progress monitoring with realistic steps
       final progressSteps = [
         (0.1, 'Coletando dados das plantas...'),
         (0.25, 'Processando tarefas e lembretes...'),
@@ -144,11 +137,7 @@ class DataExportProvider extends ChangeNotifier {
                   : null,
         );
         notifyListeners();
-
-        // Simulate processing time
         await Future<void>.delayed(const Duration(seconds: 3));
-
-        // Check if request was completed or failed
         final updatedHistory = await _getHistoryUseCase(_currentUserId);
         final updatedRequest = updatedHistory.firstWhere(
           (r) => r.id == request.id,
@@ -171,8 +160,6 @@ class DataExportProvider extends ChangeNotifier {
           return;
         }
       }
-
-      // Mark as completed if reached the end
       _currentProgress = const ExportProgress.completed();
       notifyListeners();
     } catch (e) {
@@ -270,12 +257,8 @@ class DataExportProvider extends ChangeNotifier {
 
       final comments = await _repository.getUserPlantCommentsData(userId);
       stats[DataType.plantComments] = comments.length;
-
-      // Count custom care configurations
       final customCareCount = plants.where((p) => p.config != null).length;
       stats[DataType.customCare] = customCareCount;
-
-      // Count active reminders (incomplete tasks)
       final reminderCount = tasks.where((t) => t.status != 'completed').length;
       stats[DataType.reminders] = reminderCount;
 
@@ -307,7 +290,6 @@ class DataExportProvider extends ChangeNotifier {
 
   /// Check if user can request new export (rate limiting)
   bool canRequestExport() {
-    // Check if there's a recent request (within last hour)
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
 
     final recentRequest = _exportHistory.where(
@@ -339,8 +321,6 @@ class DataExportProvider extends ChangeNotifier {
     );
     return nextAllowedTime.difference(DateTime.now());
   }
-
-  // Helper methods
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
@@ -357,7 +337,6 @@ class DataExportProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Clean up any resources
     super.dispose();
   }
 }

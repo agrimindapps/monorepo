@@ -29,7 +29,6 @@ class UuidGenerator {
   }
   
   static String _generateVariant() {
-    // UUID version 4 variant bits
     const variants = ['8', '9', 'a', 'b'];
     return variants[_random.nextInt(4)];
   }

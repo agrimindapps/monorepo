@@ -16,7 +16,6 @@ class DiscreteSyncIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        // For now, hide sync indicator until we implement proper Riverpod providers
         return const SizedBox.shrink();
       },
     );
@@ -175,7 +174,6 @@ class FloatingSyncIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        // For now, hide sync indicator until we implement proper Riverpod providers
         return const SizedBox.shrink();
       },
     );
@@ -283,7 +281,6 @@ class SyncDotIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        // For now, hide sync indicator until we implement proper Riverpod providers
         return const SizedBox.shrink();
       },
     );

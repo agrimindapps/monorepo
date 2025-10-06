@@ -48,17 +48,10 @@ class InjectionContainer {
   /// Throws exception if initialization fails.
   static Future<void> init() async {
     try {
-      // Initialize Firebase first
       await Firebase.initializeApp();
-
-      // Register Core Services (Order matters due to dependencies)
-
-      // 1. BoxRegistryService - Required by HiveStorageService
       getIt.registerLazySingleton<IBoxRegistryService>(
         () => BoxRegistryService(),
       );
-
-      // 2. Firebase Services
       getIt.registerLazySingleton<IAuthRepository>(() => FirebaseAuthService());
 
       getIt.registerLazySingleton<ICrashlyticsRepository>(
@@ -68,17 +61,12 @@ class InjectionContainer {
       getIt.registerLazySingleton<IStorageRepository>(
         () => FirebaseStorageService(),
       );
-
-      // 3. Analytics - usa Mock em debug, Firebase em produção
       getIt.registerLazySingleton<IAnalyticsRepository>(
         () =>
             EnvironmentConfig.isDebugMode
                 ? MockAnalyticsService()
                 : FirebaseAnalyticsService(),
       );
-
-      // 4. Hive Storage - Depends on IBoxRegistryService
-      // Skip on Web platform due to Hive limitations
       if (!kIsWeb) {
         getIt.registerLazySingleton<ILocalStorageRepository>(
           () => HiveStorageService(getIt<IBoxRegistryService>()),
@@ -88,19 +76,11 @@ class InjectionContainer {
           '⚠️ [Core Package] ILocalStorageRepository skipped on Web platform (Hive limitations)',
         );
       }
-
-      // 5. RevenueCat para gerenciar assinaturas
       getIt.registerLazySingleton<ISubscriptionRepository>(
         () => RevenueCatService(),
       );
-
-      // 5.5. UUID Service - Geração de identificadores únicos
       getIt.registerLazySingleton<UuidService>(() => UuidService());
-
-      // 5.6. Dio Service - Cliente HTTP centralizado
       getIt.registerLazySingleton<DioService>(() => DioService());
-
-      // 6. License System - License Repository and Service
       getIt.registerLazySingleton<LicenseRepository>(
         () => LicenseLocalStorage(),
       );
@@ -108,8 +88,6 @@ class InjectionContainer {
       getIt.registerLazySingleton<LicenseService>(
         () => LicenseService(getIt<LicenseRepository>()),
       );
-
-      // Register Use Cases with explicit types
       getIt.registerLazySingleton<LoginUseCase>(
         () => LoginUseCase(
           getIt<IAuthRepository>(),
@@ -123,8 +101,6 @@ class InjectionContainer {
           getIt<IAnalyticsRepository>(),
         ),
       );
-
-      // 7. New SOLID Sync Services (with feature flags)
       _registerSyncServices();
     } catch (e) {
       if (kDebugMode) {
@@ -145,8 +121,6 @@ class InjectionContainer {
         '[InjectionContainer] Sync feature flags: ${flags.getDebugInfo()}',
       );
     }
-
-    // Cache Manager
     if (flags.useNewCacheManager) {
       getIt.registerLazySingleton<ICacheManager>(() => CacheManagerImpl());
 
@@ -154,8 +128,6 @@ class InjectionContainer {
         debugPrint('[InjectionContainer] Registered new CacheManager');
       }
     }
-
-    // Network Monitor
     if (flags.useNewNetworkMonitor) {
       getIt.registerLazySingleton<INetworkMonitor>(() => NetworkMonitorImpl());
 
@@ -163,8 +135,6 @@ class InjectionContainer {
         debugPrint('[InjectionContainer] Registered new NetworkMonitor');
       }
     }
-
-    // Sync Service Factory
     if (flags.useNewSyncServiceFactory) {
       getIt.registerLazySingleton<SyncServiceFactory>(
         () => SyncServiceFactory.instance,
@@ -174,8 +144,6 @@ class InjectionContainer {
         debugPrint('[InjectionContainer] Registered SyncServiceFactory');
       }
     }
-
-    // Sync Orchestrator (depends on Cache and Network Monitor)
     if (flags.useNewSyncOrchestrator &&
         flags.useNewCacheManager &&
         flags.useNewNetworkMonitor) {

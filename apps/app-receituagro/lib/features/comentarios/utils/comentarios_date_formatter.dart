@@ -46,13 +46,9 @@ class ComentariosDateFormatter {
   static String formatDisplayDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-
-    // Show relative for recent dates
     if (difference.inDays < 7) {
       return formatRelativeDate(date);
     }
-
-    // Show absolute for older dates
     return formatAbsoluteDate(date);
   }
 

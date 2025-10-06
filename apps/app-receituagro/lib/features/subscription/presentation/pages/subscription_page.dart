@@ -32,7 +32,6 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   @override
   void initState() {
     super.initState();
-    // Load subscription data on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(subscriptionNotifierProvider.notifier).loadSubscriptionData();
     });
@@ -44,7 +43,6 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
     return subscriptionState.when(
       data: (state) {
-        // Show messages if exist
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _showMessages(context, state);
         });
@@ -68,10 +66,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                 child: Column(
                   children: [
-                    // Header com título e botão de fechar
                     _buildHeader(context),
-
-                    // Conteúdo principal
                     Expanded(
                       child: state.isLoading
                           ? _buildLoadingView()
@@ -144,19 +139,14 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
       padding: EdgeInsets.all(8.0),
       child: Column(
         children: [
-          // Status da subscription ativa
           SubscriptionStatusWidget(),
 
           SizedBox(height: 24),
-
-          // Lista de recursos/benefícios
           SubscriptionBenefitsWidget(
             showModernStyle: false, // Estilo card para subscription ativa
           ),
 
           SizedBox(height: 24),
-
-          // Ações de gerenciamento
           PaymentActionsWidget(
             showSubscriptionManagement: true,
           ),
@@ -173,8 +163,6 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
         child: Column(
           children: [
             SizedBox(height: 20),
-
-            // Título principal
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -190,27 +178,19 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             ),
 
             SizedBox(height: 24),
-
-            // Seleção de planos
             SubscriptionPlansWidget(),
 
             SizedBox(height: 24),
-
-            // Lista de benefícios/recursos
             SubscriptionBenefitsWidget(
               showModernStyle: true, // Estilo moderno para marketing
             ),
 
             SizedBox(height: 32),
-
-            // Botão principal de compra
             PaymentActionsWidget(
               showPurchaseButton: true,
             ),
 
             SizedBox(height: 16),
-
-            // Links de rodapé (Termos, Privacidade, Restaurar)
             PaymentActionsWidget(
               showFooterLinks: true,
             ),

@@ -151,7 +151,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
   Widget _buildFullPreview() {
     return Stack(
       children: [
-        // Image preview
         SizedBox(
           width: double.infinity,
           height: double.infinity,
@@ -166,8 +165,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ),
           ),
         ),
-
-        // Overlay with actions
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(11),
@@ -183,8 +180,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ),
           ),
         ),
-
-        // Action buttons
         Positioned(
           top: 8,
           right: 8,
@@ -206,8 +201,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
             ],
           ),
         ),
-
-        // Status indicator
         Positioned(
           bottom: 8,
           left: 8,
@@ -243,7 +236,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
       padding: const EdgeInsets.all(12.0),
       child: Row(
         children: [
-          // Thumbnail
           Container(
             width: 56,
             height: 56,
@@ -271,8 +263,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
           ),
 
           const SizedBox(width: 12),
-
-          // Info and actions
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,8 +509,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
         _isUploading = true;
         _uploadProgress = 0.0;
       });
-
-      // Simulate progress updates
       _simulateProgress();
 
       final XFile? image = await _imagePicker.pickImage(
@@ -560,7 +548,6 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
   }
 
   void _simulateProgress() {
-    // Simulate upload progress for better UX
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_isUploading && mounted) {
         setState(() {

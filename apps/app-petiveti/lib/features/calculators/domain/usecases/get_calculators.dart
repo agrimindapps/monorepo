@@ -72,8 +72,6 @@ class GetMostUsedCalculators {
   Future<List<Calculator>> call({int limit = 10}) async {
     final usageStats = await _repository.getCalculatorUsageStats();
     final allCalculators = await _repository.getCalculators();
-    
-    // Ordenar por quantidade de uso (decrescente)
     allCalculators.sort((a, b) {
       final usageA = usageStats[a.id] ?? 0;
       final usageB = usageStats[b.id] ?? 0;

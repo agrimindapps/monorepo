@@ -28,23 +28,17 @@ class MaintenancesState extends Equatable {
     this.stats = const {},
   });
 
-  // ==================== Data ====================
-
   /// Lista completa de manutenções (sem filtros)
   final List<MaintenanceEntity> maintenances;
 
   /// Lista filtrada/ordenada para exibição
   final List<MaintenanceEntity> filteredMaintenances;
 
-  // ==================== UI State ====================
-
   /// Indica se está carregando dados
   final bool isLoading;
 
   /// Mensagem de erro atual (null se não houver)
   final String? errorMessage;
-
-  // ==================== Filters ====================
 
   /// ID do veículo selecionado para filtro
   final String? selectedVehicleId;
@@ -64,8 +58,6 @@ class MaintenancesState extends Equatable {
   /// Texto de busca para filtrar por título/descrição/oficina
   final String searchQuery;
 
-  // ==================== Sorting ====================
-
   /// Campo usado para ordenação
   /// Valores válidos: 'serviceDate', 'cost', 'type', 'odometer', 'title', 'status'
   final String sortBy;
@@ -73,14 +65,10 @@ class MaintenancesState extends Equatable {
   /// Direção da ordenação (true = ascendente, false = descendente)
   final bool sortAscending;
 
-  // ==================== Statistics ====================
-
   /// Estatísticas calculadas da lista filtrada
   /// Inclui: totalRecords, totalCost, averageCost, monthlyCost,
   ///         byType, countByType, byStatus, etc.
   final Map<String, dynamic> stats;
-
-  // ==================== Computed Properties ====================
 
   /// Indica se há filtros ativos
   bool get hasActiveFilters =>
@@ -99,8 +87,6 @@ class MaintenancesState extends Equatable {
 
   /// Indica se há erro
   bool get hasError => errorMessage != null;
-
-  // ==================== CopyWith ====================
 
   MaintenancesState copyWith({
     List<MaintenanceEntity>? maintenances,
@@ -154,8 +140,6 @@ class MaintenancesState extends Equatable {
       searchQuery: '',
     );
   }
-
-  // ==================== Equatable ====================
 
   @override
   List<Object?> get props => [

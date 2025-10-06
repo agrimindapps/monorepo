@@ -13,8 +13,6 @@ import 'state/plants_state_manager.dart';
 
 /// === SOLID-COMPLIANT PROVIDERS ===
 /// Providers que seguem princípios SOLID com Dependency Injection
-
-// DI Factory singleton
 final solidDIFactoryProvider = Provider<SolidDIFactory>((ref) {
   return SolidDIFactory.instance;
 });
@@ -59,8 +57,6 @@ final plantsCareCalculatorProvider = Provider<PlantsCareCalculator>((ref) {
 /// Provider para PlantsStateManager (usando Provider simples)
 final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
-  
-  // Usar DI puro em vez de Service Locator
   final dataService = ref.read(plantsDataServiceProvider);
   final filterService = ref.read(plantsFilterServiceProvider);
   final careCalculator = ref.read(plantsCareCalculatorProvider);
@@ -79,8 +75,6 @@ final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
 /// autoDispose garante que dispose() é chamado quando não há mais listeners
 final solidPlantFormStateManagerProvider = ChangeNotifierProvider.autoDispose<PlantFormStateManager>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
-
-  // Usar DI puro em vez de Service Locator
   final validationService = ref.read(formValidationServiceProvider);
   final imageService = ref.read(imageManagementServiceProvider);
 
@@ -173,8 +167,6 @@ final solidImageValidationProvider = Provider.family<ImageListValidation, List<S
 /// Provider para inicialização das dependências SOLID
 final solidDIInitializationProvider = Provider<bool>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
-  
-  // Configurar DI baseado no ambiente
   const isDevelopment = kDebugMode;
   
   if (isDevelopment) {
@@ -191,12 +183,9 @@ final solidDIInitializationProvider = Provider<bool>((ref) {
 
 /// Provider que expõe interface compatível com o antigo PlantsProvider
 final migrationPlantsProvider = Provider((ref) {
-  // Garantir que SOLID DI está inicializado
   ref.watch(solidDIInitializationProvider);
   
   final solidState = ref.watch(solidPlantsStateProvider);
-  
-  // Retornar objeto compatível com código legado
   return MigrationPlantsAdapter(
     allPlants: solidState.allPlants,
     filteredPlants: solidState.filteredPlants,
@@ -208,12 +197,9 @@ final migrationPlantsProvider = Provider((ref) {
 
 /// Provider que expõe interface compatível com o antigo PlantFormProvider
 final migrationPlantFormProvider = Provider((ref) {
-  // Garantir que SOLID DI está inicializado
   ref.watch(solidDIInitializationProvider);
   
   final solidState = ref.watch(solidPlantFormStateProvider);
-  
-  // Retornar objeto compatível com código legado
   return MigrationPlantFormAdapter(
     name: solidState.name,
     species: solidState.species,

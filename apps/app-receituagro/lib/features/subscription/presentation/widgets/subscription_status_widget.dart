@@ -49,20 +49,13 @@ class SubscriptionStatusWidget extends ConsumerWidget {
             ),
             child: Column(
               children: [
-                // Icon de sucesso
                 _buildSuccessIcon(),
 
                 const SizedBox(height: 16),
-
-                // Título celebrativo
                 _buildCelebrationTitle(),
 
                 const SizedBox(height: 8),
-
-                // Descrição dos benefícios
                 _buildBenefitsDescription(),
-
-                // Informações do plano atual (se disponível)
                 if (subscriptionState.currentSubscription != null) ...[
                   const SizedBox(height: 16),
                   _buildSubscriptionDetails(subscriptionState.currentSubscription, notifier),
@@ -121,7 +114,6 @@ class SubscriptionStatusWidget extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          // Informação do plano
           Text(
             'Plano: ${subscription.productId}',
             style: const TextStyle(
@@ -129,8 +121,6 @@ class SubscriptionStatusWidget extends ConsumerWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-
-          // Data de renovação (se disponível)
           if (subscription.expirationDate != null) ...[
             const SizedBox(height: 4),
             Text(

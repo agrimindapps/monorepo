@@ -7,7 +7,6 @@ part 'fuel_supply_model.g.dart';
 /// Fuel Supply (Abastecimento) model with Firebase sync support
 /// TypeId: 1 - New sequential numbering
 @HiveType(typeId: 1)
-// ignore: must_be_immutable
 class FuelSupplyModel extends BaseSyncModel {
 
   FuelSupplyModel({
@@ -146,18 +145,14 @@ class FuelSupplyModel extends BaseSyncModel {
 
   /// FIXED: fromJson now correctly handles Firebase Timestamp objects
   factory FuelSupplyModel.fromJson(Map<String, dynamic> json) {
-    // Check if this is Firebase data (contains Timestamp objects)
     final hasTimestamp = json.values.any((value) => value is Timestamp);
     
     if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
-      // Use Firebase parsing for data from remote source
       return FuelSupplyModel.fromFirebaseMap(json);
     } else {
-      // Use Hive parsing for local data
       return FuelSupplyModel.fromHiveMap(json);
     }
   }
-  // Base sync fields (required for Hive generation)
   @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -167,8 +162,6 @@ class FuelSupplyModel extends BaseSyncModel {
   @HiveField(6) @override final int version;
   @HiveField(7) @override final String? userId;
   @HiveField(8) @override final String? moduleName;
-
-  // Fuel supply specific fields - using English names aligned with Entity
   @HiveField(10) final String vehicleId;
   @HiveField(11) final int date;
   @HiveField(12) final double odometer;

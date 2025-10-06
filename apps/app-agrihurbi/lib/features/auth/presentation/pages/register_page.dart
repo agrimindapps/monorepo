@@ -60,8 +60,6 @@ class _RegisterPageState extends State<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-
-                // Header
                 Text(
                   'Criar conta',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -82,8 +80,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 32),
-
-                // Name Field
                 TextFormField(
                   controller: _nameController,
                   keyboardType: TextInputType.name,
@@ -96,8 +92,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Email Field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -110,8 +104,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Phone Field (Optional)
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
@@ -124,8 +116,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -150,8 +140,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Confirm Password Field
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
@@ -180,8 +168,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 32),
-
-                // Register Button
                 Consumer(
                   builder: (context, ref, child) {
                     final authProvider = ref.watch(authProviderProvider);
@@ -208,8 +194,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Login Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -225,8 +209,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Error Message
                 Consumer(
                   builder: (context, ref, child) {
                     final authProvider = ref.watch(authProviderProvider);
@@ -297,13 +279,11 @@ class _RegisterPageState extends State<RegisterPage> {
       result.fold(
         (failure) {
           if (mounted) {
-            // ✅ Double check before using context
             ErrorHandler.showErrorSnackbar(context, failure);
           }
         },
         (user) {
           if (mounted) {
-            // ✅ Double check before using context
             ErrorHandler.showSuccessSnackbar(
               context,
               SuccessMessages.registerSuccess,

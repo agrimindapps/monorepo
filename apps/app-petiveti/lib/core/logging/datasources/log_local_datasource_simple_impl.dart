@@ -28,7 +28,6 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
       final jsonString = jsonEncode(logEntry.toJson());
       await _logsBox!.put(logEntry.id, jsonString);
     } catch (e) {
-      // Silently fail if logging fails - don't break the app
       print('Warning: Failed to save log: $e');
     }
   }
@@ -50,8 +49,6 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
         try {
           final json = jsonDecode(jsonString) as Map<String, dynamic>;
           final log = _logEntryFromJson(json);
-
-          // Apply filters
           if (level != null && log.level != level) continue;
           if (category != null && log.category != category) continue;
           if (startDate != null && log.timestamp.isBefore(startDate)) continue;
@@ -59,15 +56,10 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
 
           logs.add(log);
         } catch (e) {
-          // Skip invalid logs
           continue;
         }
       }
-
-      // Sort by timestamp (newest first)
       logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-      // Apply limit
       if (limit != null && limit > 0) {
         return logs.take(limit).toList();
       }
@@ -109,7 +101,6 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
             keysToDelete.add(entry.key.toString());
           }
         } catch (e) {
-          // If we can't parse the timestamp, delete it
           keysToDelete.add(entry.key.toString());
         }
       }
@@ -136,13 +127,9 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
       if (_logsBox == null) return {};
 
       final counts = <LogLevel, int>{};
-
-      // Initialize counts
       for (final level in LogLevel.values) {
         counts[level] = 0;
       }
-
-      // Count logs by level
       for (final jsonString in _logsBox!.values) {
         try {
           final json = jsonDecode(jsonString) as Map<String, dynamic>;
@@ -153,7 +140,6 @@ class LogLocalDataSourceSimpleImpl implements LogLocalDataSource {
           );
           counts[level] = (counts[level] ?? 0) + 1;
         } catch (e) {
-          // Skip invalid logs
           continue;
         }
       }

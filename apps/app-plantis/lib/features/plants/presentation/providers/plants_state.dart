@@ -83,8 +83,6 @@ class PlantsState extends Equatable {
     }
     return PlantsState(error: message);
   }
-
-  // Computed properties (getters)
   bool get hasError => error != null;
   bool get isEmpty => plants.isEmpty && !isLoading;
   bool get hasPlants => plants.isNotEmpty;

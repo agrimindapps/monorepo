@@ -84,8 +84,6 @@ class PlantTaskMonitoringService {
       1,
       increment: true,
     );
-
-    // Validar task criada
     final validation = PlantTaskValidationService.validatePlantTask(
       task,
       plant,
@@ -112,8 +110,6 @@ class PlantTaskMonitoringService {
       1,
       increment: true,
     );
-
-    // Calcular tempo até conclusão
     if (task.completedDate != null) {
       final daysToComplete =
           task.completedDate!.difference(task.scheduledDate).inDays;
@@ -188,8 +184,6 @@ class PlantTaskMonitoringService {
     _updateMetric('last_validation_valid_tasks', validation.validTasks);
     _updateMetric('last_validation_invalid_tasks', validation.invalidTasks);
     _updateMetric('validation_runs_total', 1, increment: true);
-
-    // Gerar alertas baseados na validação
     if (validation.invalidTasks > 0) {
       _recordAlert(PlantTaskAlert.validationIssues(validation));
     }
@@ -217,8 +211,6 @@ class PlantTaskMonitoringService {
 
     _updateMetric('last_health_score', report.healthScore);
     _updateMetric('health_reports_total', 1, increment: true);
-
-    // Gerar alerta se saúde estiver baixa
     if (report.healthScore < 70) {
       _recordAlert(PlantTaskAlert.lowHealthScore(report.healthScore));
     }
@@ -325,8 +317,6 @@ class PlantTaskMonitoringService {
   /// Registra evento interno
   void _recordEvent(PlantTaskEvent event) {
     _events.add(event);
-
-    // Limpar eventos antigos periodicamente
     if (_events.length > _maxEvents * 1.2) {
       clearOldEvents();
     }
@@ -335,8 +325,6 @@ class PlantTaskMonitoringService {
   /// Registra alerta interno
   void _recordAlert(PlantTaskAlert alert) {
     _alerts.add(alert);
-
-    // Limpar alertas antigos periodicamente
     if (_alerts.length > _maxAlerts * 1.2) {
       clearOldEvents();
     }

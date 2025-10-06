@@ -19,10 +19,7 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
     
     return Column(
       children: [
-        // Estatísticas do histórico
         if (history.isNotEmpty) _buildStatisticsCard(stats),
-        
-        // Lista do histórico
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -257,7 +254,6 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Interpretação resumida
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -280,8 +276,6 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        
-        // Métricas resumidas
         Row(
           children: [
             if (result.idealWeightEstimate != null)
@@ -310,8 +304,6 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 12),
-        
-        // Recomendação principal
         if (result.recommendations.isNotEmpty) ...[
           const Text(
             'Recomendação Principal:',
@@ -413,7 +405,6 @@ class BodyConditionHistoryPanel extends ConsumerWidget {
         );
         break;
       case 'share':
-        // TODO: Implementar compartilhamento
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Compartilhamento será implementado em breve')),
         );

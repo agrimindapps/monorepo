@@ -188,7 +188,6 @@ abstract class BaseDataMigrationService implements DataMigrationService {
     String? details,
     Duration? estimatedTime,
   }) {
-    // Implementação será fornecida pela classe concreta
     if (kDebugMode) {
       debugPrint('Migration Progress: ${(percentage * 100).toInt()}% - $operation');
     }
@@ -201,7 +200,6 @@ abstract class BaseDataMigrationService implements DataMigrationService {
     required String accountUserId,
   }) async {
     try {
-      // Basic validation
       if (anonymousUserId.isEmpty) {
         return const Left(ValidationFailure('ID de usuário anônimo inválido'));
       }

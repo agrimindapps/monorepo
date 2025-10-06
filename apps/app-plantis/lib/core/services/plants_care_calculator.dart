@@ -135,14 +135,10 @@ class PlantsCareCalculator {
   PlantCareHistory calculateCareHistory(Plant plant, int days) {
     final endDate = DateTime.now();
     final startDate = endDate.subtract(Duration(days: days));
-    
-    // Simular histórico baseado na frequência de rega
     final List<DateTime> wateringDates = [];
     
     if (plant.lastWatered != null && plant.wateringFrequency != null) {
       var currentDate = plant.lastWatered!;
-      
-      // Trabalhar para trás a partir da última rega
       while (currentDate.isAfter(startDate)) {
         if (currentDate.isBefore(endDate) || currentDate.isAtSameMomentAs(endDate)) {
           wateringDates.add(currentDate);
@@ -166,13 +162,10 @@ class PlantsCareCalculator {
     final now = DateTime.now();
     
     if (plant.lastWatered == null) {
-      // Se nunca foi regada, sugerir hoje
       return now;
     }
     
     final nextDate = calculateNextWateringDate(plant);
-    
-    // Se já passou da data, sugerir hoje
     if (nextDate != null && nextDate.isBefore(now)) {
       return now;
     }

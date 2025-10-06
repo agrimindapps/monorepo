@@ -30,22 +30,16 @@ class DeviceIdentityService {
   /// Obtém ou cria um UUID único e persistente para o dispositivo
   Future<String> getDeviceUuid() async {
     try {
-      // 1. Tentar recuperar UUID existente
       String? existingUuid = await _secureStorage.read(key: _deviceUuidKey);
       if (existingUuid != null && existingUuid.isNotEmpty) {
         return existingUuid;
       }
-
-      // 2. Gerar novo UUID baseado em características únicas do dispositivo
       final deviceData = await _getDeviceIdentifiers();
       final uuid = _generateStableUuid(deviceData);
-
-      // 3. Armazenar de forma segura
       await _secureStorage.write(key: _deviceUuidKey, value: uuid);
 
       return uuid;
     } catch (e) {
-      // Fallback: gerar UUID baseado apenas em timestamp
       final fallbackUuid = _generateFallbackUuid();
       await _secureStorage.write(key: _deviceUuidKey, value: fallbackUuid);
       return fallbackUuid;
@@ -55,31 +49,22 @@ class DeviceIdentityService {
   /// Obtém informações completas do dispositivo
   Future<DeviceInfo> getDeviceInfo() async {
     try {
-      // Verificar cache
       final cachedInfo = await _getCachedDeviceInfo();
       if (cachedInfo != null && _isCacheValid(cachedInfo)) {
         return cachedInfo;
       }
-
-      // Obter informações atuais
       final deviceInfo = await _getCurrentDeviceInfo();
-
-      // Armazenar em cache
       await _cacheDeviceInfo(deviceInfo);
 
       return deviceInfo;
     } catch (e) {
-      // Retornar informações básicas em caso de erro
       return DeviceInfo.fallback();
     }
   }
 
   /// Força atualização das informações do dispositivo
   Future<DeviceInfo> refreshDeviceInfo() async {
-    // Limpar cache
     await _secureStorage.delete(key: _deviceInfoKey);
-
-    // Obter informações atualizadas
     return await getDeviceInfo();
   }
 
@@ -90,8 +75,6 @@ class DeviceIdentityService {
       if (cachedInfo == null) return false;
 
       final currentInfo = await _getCurrentDeviceInfo();
-
-      // Verificar mudanças críticas
       return cachedInfo.platform != currentInfo.platform ||
           cachedInfo.model != currentInfo.model ||
           cachedInfo.systemVersion != currentInfo.systemVersion;
@@ -188,12 +171,9 @@ class DeviceIdentityService {
         identifiers['androidId'] = androidInfo.id;
         identifiers['fingerprint'] = androidInfo.fingerprint;
       }
-
-      // Adicionar informações da aplicação
       final packageInfo = await PackageInfo.fromPlatform();
       identifiers['packageName'] = packageInfo.packageName;
     } catch (e) {
-      // Em caso de erro, usar identificadores mínimos
       identifiers['platform'] = Platform.operatingSystem;
       identifiers['timestamp'] =
           DateTime.now().millisecondsSinceEpoch.toString();
@@ -204,17 +184,12 @@ class DeviceIdentityService {
 
   /// Gera UUID estável baseado em características do dispositivo
   String _generateStableUuid(Map<String, String> identifiers) {
-    // Criar string determinística com os identificadores
     final sortedKeys = identifiers.keys.toList()..sort();
     final identifierString = sortedKeys
         .map((key) => '$key=${identifiers[key]}')
         .join('|');
-
-    // Gerar hash SHA-256
     final bytes = utf8.encode(identifierString);
     final digest = sha256.convert(bytes);
-
-    // Converter para formato UUID (32 caracteres hexadecimais)
     final hexString = digest.toString();
     return '${hexString.substring(0, 8)}-'
         '${hexString.substring(8, 12)}-'
@@ -254,7 +229,6 @@ class DeviceIdentityService {
       final jsonData = jsonEncode(data);
       await _secureStorage.write(key: _deviceInfoKey, value: jsonData);
     } catch (e) {
-      // Ignorar erros de cache
     }
   }
 

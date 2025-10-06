@@ -191,15 +191,12 @@ class FavoritoRepositoryImpl implements FavoritoRepository {
   @override
   Stream<List<FavoritoEntity>> watchFavoritos() async* {
     try {
-      // Como não temos stream nativo, simulamos com refresh periódico
       while (true) {
         final favoritosResult = await getAllFavoritos();
         yield favoritosResult.fold(
           (failure) => <FavoritoEntity>[],
           (favoritos) => favoritos,
         );
-
-        // Aguarda 5 segundos antes do próximo refresh
         await Future<void>.delayed(const Duration(seconds: 5));
       }
     } catch (e) {

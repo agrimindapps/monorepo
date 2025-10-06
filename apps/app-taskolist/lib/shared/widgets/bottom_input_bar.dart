@@ -121,7 +121,6 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
       child: SafeArea(
         child: Row(
           children: [
-            // Ícone de adicionar
             Container(
               width: 40,
               height: 40,
@@ -136,8 +135,6 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
               ),
             ),
             const SizedBox(width: 12),
-
-            // Campo de entrada
             Expanded(
               child: TextField(
                 controller: _controller,
@@ -173,8 +170,6 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
                 maxLines: _isExpanded ? 3 : 1,
               ),
             ),
-
-            // Botões de ação (quando expandido)
             if (_isExpanded) ...[
               const SizedBox(width: 8),
               _buildActionButton(

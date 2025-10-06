@@ -117,10 +117,8 @@ class CalculatorEmptyStateWidget extends StatelessWidget {
   void _handleDefaultAction(BuildContext context) {
     switch (type) {
       case CalculatorEmptyStateType.noSearchResults:
-        // Implementar limpeza de filtros via callback ou provider
         break;
       case CalculatorEmptyStateType.error:
-        // Implementar retry via callback ou provider
         break;
       default:
         break;

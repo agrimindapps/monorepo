@@ -123,7 +123,6 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   @override
   Future<Either<Failure, bool>> isEligibleForTrial() async {
     try {
-      // Verifica elegibilidade baseada em não ter assinatura ativa
       final hasActiveResult = await hasActiveSubscription();
       return hasActiveResult.fold(
         (failure) => Left(failure),

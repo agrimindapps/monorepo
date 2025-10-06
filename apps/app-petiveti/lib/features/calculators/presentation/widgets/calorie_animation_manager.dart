@@ -28,8 +28,6 @@ class CalorieAnimationManager {
         curve: Curves.easeInOut,
       ),
     );
-    
-    // Start initial animation
     _fadeController!.forward();
   }
 
@@ -84,8 +82,6 @@ class CalorieAnimationManager {
   /// Dispose of animation resources
   void dispose() {
     if (_isDisposed) return;
-    
-    // Stop animation before disposing
     if (_fadeController != null && _fadeController!.isAnimating) {
       _fadeController!.stop();
     }

@@ -182,13 +182,8 @@ class MarketLocalDataSourceImpl implements MarketLocalDataSource {
   Future<void> saveSearchQuery(String query) async {
     await _ensureBoxesAreOpen();
     final searchHistory = await getSearchHistory();
-    
-    // Remove if already exists to avoid duplicates
     searchHistory.remove(query);
-    // Add to beginning
     searchHistory.insert(0, query);
-    
-    // Keep only last 20 searches
     if (searchHistory.length > 20) {
       searchHistory.removeRange(20, searchHistory.length);
     }

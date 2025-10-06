@@ -68,16 +68,10 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
   @override
   void initState() {
     super.initState();
-    
-    // Create focus node if not provided
     if (widget.focusNode == null) {
       _focusNode = FocusNode();
     }
-    
-    // Listen to focus changes
     focusNode.addListener(_onFocusChanged);
-    
-    // Initial validation if autovalidate is enabled
     if (widget.autovalidate) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _validateField();
@@ -88,8 +82,6 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
   @override
   void dispose() {
     focusNode.removeListener(_onFocusChanged);
-    
-    // Dispose focus node if we created it
     if (widget.focusNode == null) {
       _focusNode.dispose();
     }
@@ -102,22 +94,15 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Field label
         if (widget.config.label != null) ...[
           _buildLabel(context),
           const SizedBox(height: 8),
         ],
-        
-        // Main field widget
         _buildFieldWithDecoration(context),
-        
-        // Error text
         if (shouldShowError) ...[
           const SizedBox(height: 4),
           _buildErrorText(context),
         ],
-        
-        // Hint text
         if (widget.config.hint != null && !shouldShowError) ...[
           const SizedBox(height: 4),
           _buildHintText(context),
@@ -154,8 +139,6 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
   /// Build field with decoration
   Widget _buildFieldWithDecoration(BuildContext context) {
     final field = widget.buildField(context, this);
-    
-    // Apply padding if specified
     if (widget.config.padding != null) {
       return Padding(
         padding: widget.config.padding!,
@@ -193,18 +176,13 @@ abstract class BaseFormFieldState<T extends BaseFormField> extends State<T> {
   /// Handle value changes
   void onValueChanged(dynamic value) {
     _hasInteracted = true;
-    
-    // Validate the new value
     _validateField(value);
-    
-    // Notify parent of change
     widget.onChanged?.call(widget.config.key, value);
   }
   
   /// Handle focus changes
   void _onFocusChanged() {
     if (!focusNode.hasFocus && _hasInteracted) {
-      // Validate on focus lost
       _validateField();
     }
   }
@@ -312,14 +290,10 @@ mixin TextInputMixin<T extends BaseFormField> on BaseFormFieldState<T> {
   @override
   void initState() {
     super.initState();
-    
-    // Initialize text controller with initial value
     final initialValue = widget.config.initialValue;
     _textController = TextEditingController(
       text: initialValue?.toString() ?? '',
     );
-    
-    // Listen to text changes
     _textController.addListener(_onTextChanged);
   }
   

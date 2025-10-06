@@ -10,8 +10,6 @@ void main() {
   for (var filePath in modelFiles) {
     final file = File(filePath);
     var content = file.readAsStringSync();
-
-    // Remover campos duplicados e comentar linhas com warnings
     content = content.replaceAllMapped(
       RegExp(r'(@override\s+)?(@HiveField\(\d+\)\s+)?final\s+(\w+)\s+(\w+);'),
       (match) {

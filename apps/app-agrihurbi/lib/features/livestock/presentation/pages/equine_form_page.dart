@@ -26,8 +26,6 @@ class EquineFormPage extends ConsumerStatefulWidget {
 class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-
-  // Controladores dos campos
   final _commonNameController = TextEditingController();
   final _registrationIdController = TextEditingController();
   final _originCountryController = TextEditingController();
@@ -35,8 +33,6 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   final _geneticInfluencesController = TextEditingController();
   final _heightController = TextEditingController();
   final _weightController = TextEditingController();
-
-  // Estado do formulário
   EquineTemperament? _selectedTemperament;
   CoatColor? _selectedCoat;
   EquinePrimaryUse? _selectedPrimaryUse;
@@ -65,11 +61,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   Future<void> _loadEquineData() async {
     if (widget.isEditing) {
       final provider = ref.read(equinesProvider);
-
-      // Tenta buscar o equino local primeiro
       var equine = provider.getEquineById(widget.equineId!);
-
-      // Se não encontrou local, carrega do servidor
       if (equine == null) {
         final success = await provider.loadEquineById(widget.equineId!);
         if (success) {
@@ -487,8 +479,6 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
       _scrollToFirstError();
       return;
     }
-
-    // TODO: Implementar salvamento quando EquinesProvider estiver completo
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Funcionalidade de equinos em desenvolvimento'),
@@ -536,7 +526,6 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   }
 
   void _deleteEquine() async {
-    // TODO: Implementar exclusão quando EquinesProvider estiver completo
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(

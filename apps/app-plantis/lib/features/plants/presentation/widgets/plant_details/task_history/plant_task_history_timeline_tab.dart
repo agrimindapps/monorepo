@@ -24,13 +24,9 @@ class _PlantTaskHistoryTimelineTabState
     with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late TextEditingController _searchController;
-
-  // Filtros
   TaskType? _selectedType;
   String _selectedPeriod = 'all'; // all, week, month, quarter, year
   String _searchQuery = '';
-
-  // Paginação
   int _currentPage = 0;
   final int _itemsPerPage = 20;
   bool _isLoadingMore = false;
@@ -58,13 +54,9 @@ class _PlantTaskHistoryTimelineTabState
   /// Filtra e ordena as tarefas baseado nos critérios
   List<PlantTask> _getFilteredTasks() {
     List<PlantTask> filtered = [...widget.completedTasks];
-
-    // Filtro por tipo
     if (_selectedType != null) {
       filtered = filtered.where((task) => task.type == _selectedType).toList();
     }
-
-    // Filtro por período
     if (_selectedPeriod != 'all') {
       final now = DateTime.now();
       DateTime? startDate;
@@ -92,8 +84,6 @@ class _PlantTaskHistoryTimelineTabState
             }).toList();
       }
     }
-
-    // Filtro por busca
     if (_searchQuery.isNotEmpty) {
       filtered =
           filtered.where((task) {
@@ -106,8 +96,6 @@ class _PlantTaskHistoryTimelineTabState
                     false);
           }).toList();
     }
-
-    // Ordenar por data de conclusão (mais recente primeiro)
     filtered.sort(
       (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
         a.completedDate ?? DateTime(1970),
@@ -146,8 +134,6 @@ class _PlantTaskHistoryTimelineTabState
       _isLoadingMore = true;
       _currentPage++;
     });
-
-    // Simular delay de carregamento
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
@@ -181,10 +167,7 @@ class _PlantTaskHistoryTimelineTabState
       opacity: _fadeController,
       child: Column(
         children: [
-          // Seção de filtros e busca
           _buildFiltersSection(context),
-
-          // Timeline de tarefas
           Expanded(
             child:
                 filteredTasks.isEmpty
@@ -215,7 +198,6 @@ class _PlantTaskHistoryTimelineTabState
       ),
       child: Column(
         children: [
-          // Barra de busca
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
@@ -250,8 +232,6 @@ class _PlantTaskHistoryTimelineTabState
           ),
 
           const SizedBox(height: 16),
-
-          // Filtros por chips
           Row(
             children: [
               Expanded(
@@ -259,17 +239,12 @@ class _PlantTaskHistoryTimelineTabState
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      // Filtro por período
                       _buildPeriodFilter(context),
 
                       const SizedBox(width: 8),
-
-                      // Filtro por tipo
                       _buildTypeFilter(context),
 
                       const SizedBox(width: 8),
-
-                      // Botão limpar filtros
                       if (_selectedType != null ||
                           _selectedPeriod != 'all' ||
                           _searchQuery.isNotEmpty)
@@ -508,21 +483,16 @@ class _PlantTaskHistoryTimelineTabState
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          // Timeline agrupada por data
           ...groupedTasks.entries.map((entry) {
             final dateKey = entry.key;
             final dayTasks = entry.value;
 
             return _buildTimelineGroup(context, dateKey, dayTasks);
           }),
-
-          // Botão carregar mais
           if (hasMoreTasks) ...[
             const SizedBox(height: 24),
             _buildLoadMoreButton(context),
           ],
-
-          // Indicador final
           if (!hasMoreTasks && groupedTasks.isNotEmpty) ...[
             const SizedBox(height: 32),
             _buildTimelineEnd(context),
@@ -542,7 +512,6 @@ class _PlantTaskHistoryTimelineTabState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header da data
         Container(
           margin: const EdgeInsets.only(bottom: 16, top: 16),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -593,8 +562,6 @@ class _PlantTaskHistoryTimelineTabState
             ],
           ),
         ),
-
-        // Tarefas do dia
         ...dayTasks.asMap().entries.map((entry) {
           final index = entry.key;
           final task = entry.value;
@@ -613,7 +580,6 @@ class _PlantTaskHistoryTimelineTabState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Timeline indicator
         Column(
           children: [
             Container(
@@ -642,8 +608,6 @@ class _PlantTaskHistoryTimelineTabState
         ),
 
         const SizedBox(width: 16),
-
-        // Task card
         Expanded(
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),

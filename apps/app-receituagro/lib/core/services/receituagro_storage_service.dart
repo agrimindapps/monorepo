@@ -72,20 +72,16 @@ class _StubHiveStorageService implements _IStorageStub {
 
   @override
   Future<void> dispose() async {
-    // Não faz nada
   }
 }
 
 /// Adapter para ReceitaAgroStorageService que usa HiveStorageService do core
 /// Preserva a interface existente enquanto migra para o serviço padronizado
 class ReceitaAgroStorageService {
-  // Nomes das boxes específicas do ReceitaAgro
   static const String _preferencesBox = 'receituagro_preferences';
   static const String _cacheBox = 'receituagro_cache';
   static const String _favoritesBox = 'receituagro_favorites';
   static const String _offlineDataBox = 'receituagro_offline_data';
-
-  // Usando o storage service (real ou stub)
   final dynamic _storage;
   bool _isInitialized = false;
 
@@ -98,8 +94,6 @@ class ReceitaAgroStorageService {
 
   Future<void> initialize() async {
     if (_isInitialized) return;
-
-    // Inicializa o storage service (real ou stub)
     final result = await _storage.initialize();
 
     result.fold(
@@ -108,8 +102,6 @@ class ReceitaAgroStorageService {
       (_) => _isInitialized = true,
     );
   }
-
-  // Preferences - usando HiveStorageService
   Future<void> savePreference(String key, dynamic value) async {
     final result =
         await _storage.save(key: key, data: value, box: _preferencesBox);
@@ -121,8 +113,6 @@ class ReceitaAgroStorageService {
   }
 
   T? getPreference<T>(String key, {T? defaultValue}) {
-    // Implementação temporária - deve ser async no futuro
-    // Por enquanto retorna valor padrão para manter compatibilidade
     try {
       return defaultValue;
     } catch (e) {
@@ -147,14 +137,11 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
-
-  // Cache - usando HiveStorageService com TTL
   Future<void> saveToCache(String key, dynamic value,
       {Duration? expiry}) async {
     Either<String, void> result;
 
     if (expiry != null) {
-      // Usar TTL do HiveStorageService
       result = (await _storage.saveWithTTL(
         key: key,
         data: value,
@@ -162,7 +149,6 @@ class ReceitaAgroStorageService {
         box: _cacheBox,
       )) as Either<String, void>;
     } else {
-      // Salvar sem expiração
       result = (await _storage.save(key: key, data: value, box: _cacheBox))
           as Either<String, void>;
     }
@@ -174,8 +160,6 @@ class ReceitaAgroStorageService {
   }
 
   T? getFromCache<T>(String key) {
-    // Por enquanto, retorna null e implementaremos versão async posteriormente
-    // Mantemos compatibilidade com interface existente
     try {
       return null; // Implementação temporária
     } catch (e) {
@@ -190,8 +174,6 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
-
-  // Favorites - usando HiveStorageService
   Future<void> addFavorite(
       String type, String id, Map<String, dynamic> data) async {
     final key = '${type}_$id';
@@ -223,7 +205,6 @@ class ReceitaAgroStorageService {
   }
 
   bool isFavorite(String type, String id) {
-    // Implementação temporária - deve ser async no futuro
     try {
       return false; // Por enquanto retorna false
     } catch (e) {
@@ -232,7 +213,6 @@ class ReceitaAgroStorageService {
   }
 
   List<Map<String, dynamic>> getFavoritesByType(String type) {
-    // Implementação temporária - deve ser async no futuro
     try {
       return []; // Por enquanto retorna lista vazia
     } catch (e) {
@@ -241,15 +221,12 @@ class ReceitaAgroStorageService {
   }
 
   List<Map<String, dynamic>> getAllFavorites() {
-    // Implementação temporária - deve ser async no futuro
     try {
       return []; // Por enquanto retorna lista vazia
     } catch (e) {
       return [];
     }
   }
-
-  // Offline Data - usando HiveStorageService
   Future<void> saveOfflineData(
       String collection, List<Map<String, dynamic>> data) async {
     final result = await _storage.saveOfflineData(
@@ -264,7 +241,6 @@ class ReceitaAgroStorageService {
   }
 
   List<Map<String, dynamic>>? getOfflineData(String collection) {
-    // Implementação temporária - deve ser async no futuro
     try {
       return null; // Por enquanto retorna null
     } catch (e) {
@@ -277,7 +253,6 @@ class ReceitaAgroStorageService {
     String itemId,
     Map<String, dynamic> updatedItem,
   ) async {
-    // Implementação temporária - mantém lógica básica
     final data = getOfflineData(collection);
     if (data == null) return;
 
@@ -305,8 +280,6 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
-
-  // Notification Preferences - usando HiveStorageService
   Future<void> saveNotificationPreference(String type, bool enabled) async {
     final result = await _storage.save(
       key: 'notification_$type',
@@ -321,7 +294,6 @@ class ReceitaAgroStorageService {
   }
 
   bool getNotificationPreference(String type, {bool defaultValue = true}) {
-    // Implementação temporária - deve ser async no futuro
     try {
       return defaultValue; // Por enquanto retorna valor padrão
     } catch (e) {
@@ -344,8 +316,6 @@ class ReceitaAgroStorageService {
 
     return preferences;
   }
-
-  // Search History - usando HiveStorageService
   Future<void> addSearchHistory(String query, String type) async {
     final history = getSearchHistory(type);
     history.remove(query);
@@ -368,7 +338,6 @@ class ReceitaAgroStorageService {
   }
 
   List<String> getSearchHistory(String type) {
-    // Implementação temporária - deve ser async no futuro
     try {
       return []; // Por enquanto retorna lista vazia
     } catch (e) {
@@ -387,10 +356,7 @@ class ReceitaAgroStorageService {
       (_) {},
     );
   }
-
-  // App Statistics - usando HiveStorageService
   Future<void> incrementStatistic(String key) async {
-    // Busca valor atual (implementação temporária)
     int current = 0; // Por enquanto começa com 0
 
     final result = await _storage.save(
@@ -406,7 +372,6 @@ class ReceitaAgroStorageService {
   }
 
   int getStatistic(String key) {
-    // Implementação temporária - deve ser async no futuro
     try {
       return 0; // Por enquanto retorna 0
     } catch (e) {
@@ -415,15 +380,12 @@ class ReceitaAgroStorageService {
   }
 
   Map<String, int> getAllStatistics() {
-    // Implementação temporária - deve ser async no futuro
     try {
       return {}; // Por enquanto retorna mapa vazio
     } catch (e) {
       return {};
     }
   }
-
-  // Cleanup - usando HiveStorageService
   Future<void> dispose() async {
     await _storage.dispose();
   }

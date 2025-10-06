@@ -28,7 +28,6 @@ abstract class ProfileStateHandlers {
       padding: ProfileConstants.pageContentPadding,
       child: Column(
         children: [
-          // Profile header skeleton
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -37,7 +36,6 @@ abstract class ProfileStateHandlers {
             ),
             child: Column(
               children: [
-                // Avatar skeleton
                 Container(
                   width: 80,
                   height: 80,
@@ -47,7 +45,6 @@ abstract class ProfileStateHandlers {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Name skeleton
                 Container(
                   width: 150,
                   height: 20,
@@ -57,7 +54,6 @@ abstract class ProfileStateHandlers {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Email skeleton
                 Container(
                   width: 200,
                   height: 16,
@@ -70,8 +66,6 @@ abstract class ProfileStateHandlers {
             ),
           ),
           const SizedBox(height: ProfileConstants.headerTopSpacing),
-          
-          // Menu sections skeleton
           ..._buildMenuSectionsSkeleton(),
         ],
       ),
@@ -203,7 +197,6 @@ abstract class ProfileStateHandlers {
       ),
       child: Column(
         children: [
-          // User avatar
           CircleAvatar(
             radius: 40,
             backgroundColor: Colors.white,
@@ -221,7 +214,6 @@ abstract class ProfileStateHandlers {
                 : _buildDefaultAvatar(user.displayName),
           ),
           const SizedBox(height: 16),
-          // User name
           Text(
             user.displayName,
             style: const TextStyle(
@@ -231,7 +223,6 @@ abstract class ProfileStateHandlers {
             ),
           ),
           const SizedBox(height: 4),
-          // User email
           Text(
             user.email,
             style: TextStyle(
@@ -239,7 +230,6 @@ abstract class ProfileStateHandlers {
               color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
-          // Account type indicator
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -320,7 +310,6 @@ abstract class ProfileStateHandlers {
     return List.generate(3, (index) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section title skeleton
         Container(
           width: 120,
           height: 18,
@@ -330,7 +319,6 @@ abstract class ProfileStateHandlers {
           ),
         ),
         const SizedBox(height: 12),
-        // Menu items skeleton
         DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.grey[200],

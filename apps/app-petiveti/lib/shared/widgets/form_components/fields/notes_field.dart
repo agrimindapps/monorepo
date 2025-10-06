@@ -89,7 +89,6 @@ class NotesField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label com indicador de obrigatório
         if (label != null) ...[
           Row(
             children: [
@@ -115,8 +114,6 @@ class NotesField extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-
-        // Campo de texto
         TextFormField(
           controller: controller,
           initialValue: initialValue,
@@ -168,12 +165,9 @@ class NotesField extends StatelessWidget {
               fontSize: 12,
               color: AppColors.textSecondary,
             ),
-            // Remove contador padrão se maxLength for definido
             counterText: maxLength != null ? '' : null,
           ),
         ),
-
-        // Contador customizado se maxLength for definido
         if (maxLength != null) _buildCharacterCounter(),
       ],
     );

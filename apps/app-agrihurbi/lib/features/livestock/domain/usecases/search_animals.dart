@@ -18,13 +18,10 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
   
   @override
   Future<Either<Failure, SearchAnimalsResult>> call(SearchAnimalsParams params) async {
-    // Validação dos parâmetros
     final validation = _validateSearchParams(params);
     if (validation != null) {
       return Left(ValidationFailure(message: validation));
     }
-    
-    // Se busca é específica por tipo, usar métodos específicos
     if (params.animalType != null) {
       switch (params.animalType!) {
         case AnimalType.bovine:
@@ -33,8 +30,6 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
           return await _searchEquinesOnly(params);
       }
     }
-    
-    // Busca unificada em ambos os tipos
     return await _searchAllAnimals(params);
   }
   
@@ -96,7 +91,6 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
   
   /// Busca unificada em todos os animais
   Future<Either<Failure, SearchAnimalsResult>> _searchAllAnimals(SearchAnimalsParams params) async {
-    // Converter para SearchAnimalsParams do repository
     final repoParams = repo.SearchAnimalsParams(
       query: params.query,
       breed: params.breed,
@@ -106,14 +100,11 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
       limit: params.limit,
       offset: params.offset,
     );
-    
-    // Buscar usando o método unificado do repository
     final unifiedResult = await repository.searchAllAnimals(repoParams);
     
     return unifiedResult.fold(
       (failure) => Left(failure),
       (animals) {
-        // Separar bovinos e equinos dos resultados
         final bovines = animals.whereType<BovineEntity>().toList();
         final equines = animals.whereType<EquineEntity>().toList();
         
@@ -129,17 +120,12 @@ class SearchAnimalsUseCase implements UseCase<SearchAnimalsResult, SearchAnimals
   
   /// Valida os parâmetros de busca
   String? _validateSearchParams(SearchAnimalsParams params) {
-    // Query muito curta para full-text search
     if (params.query != null && params.query!.trim().length < 2) {
       return 'Termo de busca deve ter pelo menos 2 caracteres';
     }
-    
-    // Limite excessivo
     if (params.limit > 100) {
       return 'Limite máximo de resultados é 100';
     }
-    
-    // Offset negativo
     if (params.offset < 0) {
       return 'Offset deve ser maior ou igual a zero';
     }
@@ -192,11 +178,9 @@ class SearchAnimalsParams {
     this.animalType,
     this.sortBy = SortField.name,
     this.sortOrder = SortOrder.asc,
-    // Filtros específicos de bovinos
     this.aptitude,
     this.breedingSystem,
     this.purpose,
-    // Filtros específicos de equinos
     this.temperament,
     this.coat,
     this.primaryUse,
@@ -212,13 +196,9 @@ class SearchAnimalsParams {
   final AnimalType? animalType;
   final SortField sortBy;
   final SortOrder sortOrder;
-  
-  // Bovine-specific filters
   final BovineAptitude? aptitude;
   final BreedingSystem? breedingSystem;
   final String? purpose;
-  
-  // Equine-specific filters
   final EquineTemperament? temperament;
   final CoatColor? coat;
   final EquinePrimaryUse? primaryUse;

@@ -5,7 +5,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../di/core_package_integration.dart';
-// Enhanced error handler removed - using core package services
 import '../services/receituagro_validation_service.dart';
 
 /// Integration Validator for Core Package services
@@ -18,19 +17,10 @@ class IntegrationValidator {
     final results = <String, ValidationTest>{};
     
     try {
-      // Test Core Package service registrations
       results.addAll(await _testServiceRegistrations());
-      
-      // Test Core Package service functionality
       results.addAll(await _testServiceFunctionality());
-      
-      // Test ReceitaAgro-specific integrations
       results.addAll(await _testReceitaAgroIntegrations());
-      
-      // Test cross-app compatibility
       results.addAll(await _testCrossAppCompatibility());
-      
-      // Generate final report
       final totalTests = results.length;
       final passedTests = results.values.where((test) => test.passed).length;
       final integrationScore = (passedTests / totalTests * 100).round();
@@ -58,8 +48,6 @@ class IntegrationValidator {
   /// Test Core Package service registrations
   static Future<Map<String, ValidationTest>> _testServiceRegistrations() async {
     final tests = <String, ValidationTest>{};
-    
-    // Test Enhanced Services
     tests['enhanced_logging_service'] = ValidationTest(
       'EnhancedLoggingService Registration',
       _sl.isRegistered<core.EnhancedLoggingService>(),
@@ -91,8 +79,6 @@ class IntegrationValidator {
           ? 'Successfully registered' 
           : 'Not registered - validation may be inconsistent',
     );
-    
-    // Test Network Services
     tests['connectivity_service'] = ValidationTest(
       'EnhancedConnectivityService Registration',
       _sl.isRegistered<core.EnhancedConnectivityService>(),
@@ -108,8 +94,6 @@ class IntegrationValidator {
           ? 'Successfully registered' 
           : 'Not registered - network requests may be inconsistent',
     );
-    
-    // Test Storage Services
     tests['enhanced_storage_service'] = ValidationTest(
       'EnhancedStorageService Registration',
       _sl.isRegistered<core.EnhancedStorageService>(),
@@ -117,8 +101,6 @@ class IntegrationValidator {
           ? 'Successfully registered' 
           : 'Not registered - advanced storage features unavailable',
     );
-    
-    // Test Cross-App Services
     tests['monorepo_auth_cache'] = ValidationTest(
       'MonorepoAuthCache Registration',
       _sl.isRegistered<core.MonorepoAuthCache>(),
@@ -133,18 +115,13 @@ class IntegrationValidator {
   /// Test Core Package service functionality
   static Future<Map<String, ValidationTest>> _testServiceFunctionality() async {
     final tests = <String, ValidationTest>{};
-    
-    // Enhanced Error Handler removed - service no longer available
     tests['enhanced_error_handler'] = const ValidationTest(
       'EnhancedErrorHandler Registration',
       true,
       'EnhancedErrorHandler removed - using core package error handling',
     );
-    
-    // Test ReceitaAgro Validation Service
     try {
       if (_sl.isRegistered<ReceitaAgroValidationService>()) {
-        // Simple registration test without requiring initialization
         tests['receituagro_validation'] = const ValidationTest(
           'ReceitaAgroValidationService Registration',
           true,
@@ -171,11 +148,7 @@ class IntegrationValidator {
   /// Test ReceitaAgro-specific integrations
   static Future<Map<String, ValidationTest>> _testReceitaAgroIntegrations() async {
     final tests = <String, ValidationTest>{};
-    
-    // Test HiveStorageService integration
     try {
-      // HiveStorageService may not be available in core package
-      // Using a more generic storage service check
       tests['hive_storage_integration'] = ValidationTest(
         'Storage Service Integration',
         _sl.isRegistered<core.EnhancedStorageService>(),
@@ -183,12 +156,6 @@ class IntegrationValidator {
             ? 'Storage service properly integrated' 
             : 'Storage service not available',
       );
-      
-      // Hive service check (commented out as it may not exist)
-      // if (_sl.isRegistered<HiveStorageService>()) {
-      //   final hiveService = _sl<HiveStorageService>();
-      //   // Basic functionality test would go here
-      // }
     } catch (e) {
       tests['hive_storage_integration'] = ValidationTest(
         'Storage Service Integration',
@@ -196,22 +163,18 @@ class IntegrationValidator {
         'Storage service integration error: $e',
       );
     }
-    
-    // Test Firebase services integration (interfaces may not exist in core package)
     try {
       tests['firebase_analytics_integration'] = const ValidationTest(
         'Firebase Analytics Integration',
         false, // Commented out as interface may not exist
         'Firebase Analytics interface check disabled - may not be available in core package',
       );
-      // _sl.isRegistered<IAnalyticsRepository>()
       
       tests['firebase_crashlytics_integration'] = const ValidationTest(
         'Firebase Crashlytics Integration',
         false, // Commented out as interface may not exist  
         'Firebase Crashlytics interface check disabled - may not be available in core package',
       );
-      // _sl.isRegistered<ICrashlyticsRepository>()
     } catch (e) {
       tests['firebase_services_error'] = ValidationTest(
         'Firebase Services Check',
@@ -219,15 +182,12 @@ class IntegrationValidator {
         'Firebase services check failed: $e',
       );
     }
-    
-    // Test RevenueCat integration (interface may not exist in core package)
     try {
       tests['revenue_cat_integration'] = const ValidationTest(
         'RevenueCat Integration',
         false, // Commented out as interface may not exist
         'RevenueCat interface check disabled - may not be available in core package',
       );
-      // _sl.isRegistered<ISubscriptionRepository>()
     } catch (e) {
       tests['revenue_cat_integration'] = ValidationTest(
         'RevenueCat Integration',
@@ -242,8 +202,6 @@ class IntegrationValidator {
   /// Test cross-app compatibility features
   static Future<Map<String, ValidationTest>> _testCrossAppCompatibility() async {
     final tests = <String, ValidationTest>{};
-    
-    // Test MonorepoAuthCache
     tests['cross_app_auth'] = ValidationTest(
       'Cross-App Authentication',
       _sl.isRegistered<core.MonorepoAuthCache>(),
@@ -251,15 +209,11 @@ class IntegrationValidator {
           ? 'Cross-app authentication enabled' 
           : 'Cross-app authentication disabled',
     );
-    
-    // Test consistent theming (using app-specific theming)
     tests['consistent_theming'] = const ValidationTest(
       'Consistent Theming',
       true,
       'Using core package ThemeProvider for unified theme management',
     );
-    
-    // Test database inspector for development
     tests['database_inspector'] = ValidationTest(
       'Database Inspector',
       _sl.isRegistered<core.DatabaseInspectorService>(),
@@ -317,10 +271,7 @@ class IntegrationValidator {
   /// Quick health check for production
   static bool quickHealthCheck() {
     try {
-      // Check for available core services instead of specific interfaces
       final criticalServices = <bool>[];
-      
-      // Test each service individually to avoid exceptions
       try {
         criticalServices.add(_sl.isRegistered<core.EnhancedStorageService>());
       } catch (e) {
@@ -332,8 +283,6 @@ class IntegrationValidator {
       } catch (e) {
         criticalServices.add(false);
       }
-      
-      // EnhancedErrorHandler removed - using core package services
       criticalServices.add(true); // Consider as registered since we use core package
       
       return criticalServices.any((registered) => registered); // At least one service working

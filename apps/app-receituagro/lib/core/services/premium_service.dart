@@ -8,8 +8,6 @@ import '../../features/analytics/analytics_service.dart';
 import 'cloud_functions_service.dart';
 import 'remote_config_service.dart';
 
-// Remove direct RevenueCat imports - use core ISubscriptionRepository instead
-
 /// Premium subscription products for ReceitaAgro
 enum ReceitaAgroPremiumProduct {
   monthly('receituagro_premium_monthly'),
@@ -115,7 +113,6 @@ class PremiumStatus {
 /// Handles subscription management, premium features, and RevenueCat integration
 /// Now uses core ISubscriptionRepository instead of direct purchases_flutter calls
 class ReceitaAgroPremiumService extends ChangeNotifier {
-  // Dependencies - required via constructor injection
   final ReceitaAgroAnalyticsService _analytics;
   final ReceitaAgroCloudFunctionsService _cloudFunctions;
   final ReceitaAgroRemoteConfigService _remoteConfig;
@@ -163,16 +160,12 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   String? _lastError;
   bool _isLoading = false;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStreamSubscription;
-
-  // Getters
   bool get initialized => _initialized;
   PremiumStatus get status => _status;
   List<ProductInfo> get availableProducts => _availableProducts;
   SubscriptionEntity? get currentSubscription => _currentSubscription;
   String? get lastError => _lastError;
   bool get isLoading => _isLoading;
-
-  // Premium status shortcuts
   bool get isPremium => _status.isPremium;
   bool get isActive => _status.isActive;
   bool get isTrialActive => _status.isTrialActive;
@@ -184,14 +177,11 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      // Skip initialization on web platform
       if (kIsWeb) {
         developer.log(
           '🌐 Premium Service: Skipping on web platform',
           name: 'PremiumService',
         );
-
-        // Set mock status for web
         _status = PremiumStatus.free();
         _initialized = true;
         _setLoading(false);
@@ -202,8 +192,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
         );
         return;
       }
-
-      // Listen to subscription status stream from core
       _subscriptionStreamSubscription = _subscriptionRepository.subscriptionStatus.listen(
         _handleSubscriptionUpdate,
         onError: (Object error) {
@@ -214,8 +202,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
           );
         },
       );
-
-      // Load initial data from core repository
       await _loadCurrentSubscription();
       await _loadProducts();
 
@@ -278,11 +264,8 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
           return Left(errorMessage);
         },
         (subscription) async {
-          // Update local status
           _currentSubscription = subscription;
           _updatePremiumStatusFromEntity(subscription);
-
-          // Sync with cloud functions
           await _syncSubscriptionWithCloudFunctions(subscription);
 
           await _analytics.logSubscriptionEvent(
@@ -339,7 +322,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
           return Left(errorMessage);
         },
         (subscriptions) async {
-          // Update local status with the first active subscription
           if (subscriptions.isNotEmpty) {
             final activeSubscription = subscriptions.firstWhere(
               (sub) => sub.isActive,
@@ -347,8 +329,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
             );
             _currentSubscription = activeSubscription;
             _updatePremiumStatusFromEntity(activeSubscription);
-
-            // Sync with cloud functions
             await _syncSubscriptionWithCloudFunctions(activeSubscription);
           }
 
@@ -381,7 +361,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
 
   /// Check if user has access to a premium feature
   bool hasFeatureAccess(PremiumFeature feature) {
-    // Check remote config for feature toggles first
     switch (feature) {
       case PremiumFeature.advancedDiagnostics:
         if (!_remoteConfig.isFeatureEnabled(ReceitaAgroFeatureFlag.enableAdvancedDiagnostics)) {
@@ -424,9 +403,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   /// Show premium upgrade screen
   Future<void> showPremiumUpgrade(PremiumFeature requestedFeature) async {
     await _analytics.logPremiumAttempt(requestedFeature.toString());
-    
-    // This would typically navigate to a premium screen
-    // For now, just log the event
     developer.log(
       '💰 Premium upgrade requested for feature: $requestedFeature',
       name: 'PremiumService',
@@ -489,7 +465,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     _currentSubscription = subscription;
     if (subscription != null) {
       _updatePremiumStatusFromEntity(subscription);
-      // Sync with cloud functions
       _syncSubscriptionWithCloudFunctions(subscription);
     } else {
       _status = PremiumStatus.free();
@@ -590,8 +565,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     if (_isDisposed) return;
 
     _isDisposed = true;
-
-    // Cancel subscription stream listener
     try {
       _subscriptionStreamSubscription?.cancel();
 

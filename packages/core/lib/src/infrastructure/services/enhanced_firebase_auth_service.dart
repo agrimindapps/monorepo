@@ -25,7 +25,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
     required String password,
   }) async {
     try {
-      // Pre-authentication security checks
       final securityResult = await _performSecurityChecks(
         email,
         password,
@@ -36,14 +35,10 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
           securityResult.fold((failure) => failure, (_) => throw Exception()),
         );
       }
-
-      // Proceed with authentication using parent implementation
       final authResult = await super.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      // Post-authentication security recording
       await _recordAuthResult(email, authResult);
 
       return authResult;
@@ -54,11 +49,7 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
         );
         debugPrint('Stack trace: $stackTrace');
       }
-
-      // Record failed attempt for any exception
       await _securityService.recordFailedLoginAttempt(email);
-
-      // Return appropriate failure
       return Left(AuthFailure(e.toString()));
     }
   }
@@ -70,7 +61,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
     required String displayName,
   }) async {
     try {
-      // Pre-registration security checks
       final securityResult = await _performSecurityChecks(
         email,
         password,
@@ -81,8 +71,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
           securityResult.fold((failure) => failure, (_) => throw Exception()),
         );
       }
-
-      // Enhanced password validation for registration
       final passwordValidation = _securityService.validatePasswordStrength(
         password,
       );
@@ -93,12 +81,8 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
           ),
         );
       }
-
-      // Input sanitization for display name
       final sanitizedDisplayName = _securityService.sanitizeInput(displayName);
       final sanitizedEmail = _securityService.sanitizeInput(email);
-
-      // Proceed with registration using parent implementation
       return super.signUpWithEmailAndPassword(
         email: sanitizedEmail,
         password: password, // Don't sanitize password
@@ -122,7 +106,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
     required String newPassword,
   }) async {
     try {
-      // Validate new password strength
       final passwordValidation = _securityService.validatePasswordStrength(
         newPassword,
       );
@@ -133,14 +116,10 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
           ),
         );
       }
-
-      // Input safety check
       if (!_securityService.isInputSafe(currentPassword) ||
           !_securityService.isInputSafe(newPassword)) {
         return const Left(AuthFailure('Invalid input detected'));
       }
-
-      // Proceed with password update using parent implementation
       return super.updatePassword(
         currentPassword: currentPassword,
         newPassword: newPassword,
@@ -158,7 +137,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
-      // Get current user email before signing out for security cleanup
       final currentUserResult = await getCurrentUser();
       String? userEmail;
 
@@ -166,11 +144,7 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
         (failure) => userEmail = null,
         (user) => userEmail = user?.email,
       );
-
-      // Proceed with sign out using parent implementation
       final result = await super.signOut();
-
-      // Clear security data for user
       if (userEmail != null) {
         await _securityService.clearUserSecurityData(userEmail!);
       }
@@ -185,8 +159,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
       return Left(AuthFailure(e.toString()));
     }
   }
-
-  // Security-specific methods
 
   /// Get security status report for a user
   Future<Either<Failure, SecurityStatusReport>> getSecurityStatus(
@@ -250,15 +222,12 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
     return _securityService.sanitizeInput(input);
   }
 
-  // Private security methods
-
   Future<Either<Failure, void>> _performSecurityChecks(
     String email,
     String password, {
     required bool isSignIn,
   }) async {
     try {
-      // Account lockout check
       final isLocked = await _securityService.isAccountLockedOut(email);
       if (isLocked) {
         final remainingTime = await _securityService.getRemainingLockoutTime(
@@ -272,8 +241,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
           ),
         );
       }
-
-      // Rate limiting check
       final endpoint = isSignIn ? 'login' : 'register';
       final isRateLimited = await _securityService.isRateLimited(
         endpoint,
@@ -286,8 +253,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
           ),
         );
       }
-
-      // Input validation
       if (!_securityService.isInputSafe(email) ||
           !_securityService.isInputSafe(password)) {
         return const Left(AuthFailure('Invalid input detected'));
@@ -317,8 +282,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
       }
     }
   }
-
-  // Utility method to get current user safely
   Future<Either<Failure, core_entities.UserEntity?>> getCurrentUser() async {
     try {
       final user = _firebaseAuth.currentUser;
@@ -338,10 +301,6 @@ class EnhancedFirebaseAuthService extends FirebaseAuthService {
       return Left(AuthFailure('Error getting current user: $e'));
     }
   }
-
-  // Getter for access to firebase instance (for compatibility)
   FirebaseAuth get firebaseAuth => _firebaseAuth;
-
-  // Getter for access to security service
   SecurityService get securityService => _securityService;
 }

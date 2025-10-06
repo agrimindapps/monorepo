@@ -23,7 +23,6 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
     Map<String, dynamic>? parameters,
   }) async {
     try {
-      // Não executar no web ou se analytics estiver desabilitado
       if (kIsWeb || !EnvironmentConfig.enableAnalytics) {
         if (EnvironmentConfig.enableLogging) {
           developer.log('📊 Analytics (${kIsWeb ? 'WEB' : 'DEBUG'}): $eventName - $parameters', name: 'FirebaseAnalytics');
@@ -340,23 +339,17 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
     for (final entry in parameters.entries) {
       final key = entry.key;
       final value = entry.value;
-
-      // Firebase Analytics aceita apenas String, num, bool
       if (value is String) {
-        // Limita tamanho de strings
         sanitized[key] = value.length > 100 ? value.substring(0, 100) : value;
       } else if (value is num || value is bool) {
         sanitized[key] = value as Object;
       } else if (value != null) {
-        // Converte outros tipos para string
         final stringValue = value.toString();
         sanitized[key] = stringValue.length > 100 
             ? stringValue.substring(0, 100) 
             : stringValue;
       }
     }
-
-    // Adiciona informações de contexto automaticamente
     sanitized['environment'] = EnvironmentConfig.environmentName;
     sanitized['app_version'] = '1.0.0'; // TODO: Pegar versão real
 

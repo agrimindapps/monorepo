@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 /// Centralized error handling utility
 class ErrorHandler {
-  // Private constructor to prevent instantiation
   ErrorHandler._();
   /// Show error snackbar based on failure type
   static void showErrorSnackbar(

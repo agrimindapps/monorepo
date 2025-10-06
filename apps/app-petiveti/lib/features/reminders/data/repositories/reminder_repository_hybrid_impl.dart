@@ -33,8 +33,6 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       if (await isConnected) {
         try {
           final remoteReminders = await remoteDataSource.getReminders(userId);
-          
-          // Sync remote data to local
           for (final remoteReminder in remoteReminders) {
             final localReminder = localReminders.firstWhere(
               (local) => local.id == remoteReminder.id,
@@ -80,8 +78,6 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       if (await isConnected) {
         try {
           final remoteReminders = await remoteDataSource.getTodayReminders(userId);
-          
-          // Sync and return updated data
           for (final remoteReminder in remoteReminders) {
             final localReminder = localReminders.firstWhere(
               (local) => local.id == remoteReminder.id,
@@ -115,8 +111,6 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       if (await isConnected) {
         try {
           final remoteReminders = await remoteDataSource.getOverdueReminders(userId);
-          
-          // Sync and return updated data
           for (final remoteReminder in remoteReminders) {
             final localReminder = localReminders.firstWhere(
               (local) => local.id == remoteReminder.id,
@@ -156,22 +150,16 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
   Future<Either<Failure, void>> addReminder(Reminder reminder) async {
     try {
       final reminderModel = ReminderModel.fromEntity(reminder);
-      
-      // Always save locally first (offline-first)
       await localDataSource.addReminder(reminderModel);
       
       if (await isConnected) {
         try {
-          // Try to sync to remote
           final remoteId = await remoteDataSource.addReminder(reminderModel, reminder.userId);
-          
-          // Update local with remote ID if different
           if (remoteId != reminderModel.id) {
             final updatedModel = reminderModel.copyWith(id: remoteId);
             await localDataSource.updateReminder(updatedModel);
           }
         } catch (e) {
-          // Mark for later sync if remote fails
         }
       }
       
@@ -185,16 +173,12 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
   Future<Either<Failure, void>> updateReminder(Reminder reminder) async {
     try {
       final reminderModel = ReminderModel.fromEntity(reminder);
-      
-      // Always save locally first (offline-first)
       await localDataSource.updateReminder(reminderModel);
       
       if (await isConnected) {
         try {
-          // Try to sync to remote
           await remoteDataSource.updateReminder(reminderModel);
         } catch (e) {
-          // Mark for later sync if remote fails
         }
       }
       
@@ -207,15 +191,12 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
   @override
   Future<Either<Failure, void>> deleteReminder(String reminderId) async {
     try {
-      // Always delete locally first (offline-first)
       await localDataSource.deleteReminder(reminderId);
       
       if (await isConnected) {
         try {
-          // Try to sync to remote
           await remoteDataSource.deleteReminder(reminderId);
         } catch (e) {
-          // Mark for later sync if remote fails
         }
       }
       
@@ -243,7 +224,6 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
         try {
           await remoteDataSource.updateReminder(completedReminder);
         } catch (e) {
-          // Mark for later sync
         }
       }
       
@@ -271,7 +251,6 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
         try {
           await remoteDataSource.updateReminder(snoozedReminder);
         } catch (e) {
-          // Mark for later sync
         }
       }
       

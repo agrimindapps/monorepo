@@ -36,7 +36,6 @@ class SubscriptionFeaturesCardWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título da seção
             const Text(
               'Recursos Premium:',
               style: TextStyle(
@@ -47,8 +46,6 @@ class SubscriptionFeaturesCardWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Lista de recursos
             ..._premiumFeatures.map((feature) => _buildFeatureItem(feature)),
           ],
         ),
@@ -63,7 +60,6 @@ class SubscriptionFeaturesCardWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ícone de check
           Icon(
             Icons.check_circle,
             color: Colors.green.shade600,
@@ -71,8 +67,6 @@ class SubscriptionFeaturesCardWidget extends StatelessWidget {
           ),
           
           const SizedBox(width: 12),
-          
-          // Texto do recurso
           Expanded(
             child: Text(
               feature,

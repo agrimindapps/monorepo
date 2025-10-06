@@ -20,7 +20,6 @@ class HowItWorks extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Título da seção com gradiente
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -61,8 +60,6 @@ class HowItWorks extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 60),
-
-          // Container de largura total para os passos
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(
@@ -166,7 +163,6 @@ class HowItWorks extends StatelessWidget {
   ) {
     return Column(
       children: [
-        // Container do número do passo
         Container(
           width: 80,
           height: 80,
@@ -202,8 +198,6 @@ class HowItWorks extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-
-        // Título
         Text(
           title,
           style: TextStyle(
@@ -214,8 +208,6 @@ class HowItWorks extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
-
-        // Descrição
         Text(
           description,
           style: const TextStyle(

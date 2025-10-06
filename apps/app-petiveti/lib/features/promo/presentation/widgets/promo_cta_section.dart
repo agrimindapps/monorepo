@@ -29,17 +29,12 @@ class PromoCTASection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // CTA Header
           _buildCTAHeader(context, isMobile),
           
           const SizedBox(height: 40),
-          
-          // CTA Buttons
           _buildCTAButtons(context, isMobile),
           
           const SizedBox(height: 40),
-          
-          // Store Buttons
           _buildStoreButtons(context, isMobile),
         ],
       ),
@@ -76,8 +71,6 @@ class PromoCTASection extends StatelessWidget {
         ),
         
         const SizedBox(height: 24),
-        
-        // Launch countdown
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
@@ -115,7 +108,6 @@ class PromoCTASection extends StatelessWidget {
       runSpacing: 12,
       alignment: WrapAlignment.center,
       children: [
-        // Main CTA button
         ElevatedButton.icon(
           onPressed: onPreRegisterPressed,
           icon: const Icon(Icons.notifications_active, size: 20),
@@ -134,11 +126,8 @@ class PromoCTASection extends StatelessWidget {
             ),
           ),
         ),
-        
-        // Secondary button
         OutlinedButton.icon(
           onPressed: () {
-            // Scroll to top
             Scrollable.ensureVisible(
               context,
               duration: const Duration(milliseconds: 800),
@@ -183,15 +172,12 @@ class PromoCTASection extends StatelessWidget {
           runSpacing: 12,
           alignment: WrapAlignment.center,
           children: [
-            // Google Play Store
             _buildStoreButton(
               'EM BREVE NA',
               'GOOGLE PLAY',
               Icons.android,
               Colors.black87,
             ),
-            
-            // App Store
             _buildStoreButton(
               'EM BREVE NA',
               'APP STORE',

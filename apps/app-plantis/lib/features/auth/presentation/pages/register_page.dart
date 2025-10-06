@@ -60,7 +60,6 @@ class RegisterPage extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Logo and title
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -89,8 +88,6 @@ class RegisterPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Tab navigation
                     Row(
                       children: [
                         Expanded(
@@ -140,8 +137,6 @@ class RegisterPage extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 32),
-
-                    // Progress indicator
                     Consumer(
                       builder: (context, ref, _) {
                         final registerState = ref.watch(registerNotifierProvider);
@@ -169,8 +164,6 @@ class RegisterPage extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 48),
-
-                    // Leaf icon
                     Container(
                       width: 80,
                       height: 80,
@@ -185,8 +178,6 @@ class RegisterPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Title
                     Text(
                       'Criar Nova Conta',
                       style: Theme.of(
@@ -197,8 +188,6 @@ class RegisterPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Social login buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -214,8 +203,6 @@ class RegisterPage extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-
-                    // Or text
                     const Text(
                       'ou',
                       style: TextStyle(
@@ -224,8 +211,6 @@ class RegisterPage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Continue button
                     Consumer(
                       builder: (context, ref, _) {
                         return SizedBox(
@@ -255,8 +240,6 @@ class RegisterPage extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 24),
-
-                    // Terms text
                     const Text(
                       'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',
                       textAlign: TextAlign.center,

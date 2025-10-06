@@ -56,7 +56,6 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
     try {
       return DateTime.parse(licenseString);
     } catch (e) {
-      // Se não conseguir parsear, remove a licença inválida
       await revokeLocalLicense();
       return null;
     }

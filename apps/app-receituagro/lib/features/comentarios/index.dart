@@ -1,18 +1,11 @@
-// Main page
-// Providers/Bindings
 export 'comentarios_page.dart';
-// Constants
 export 'constants/comentarios_design_tokens.dart';
 export 'data/comentario_edit_state.dart';
-// Models
 export 'data/comentario_model.dart';
 export 'data/comentarios_state.dart';
 export 'di/comentarios_bindings.dart';
-// Services
 export 'domain/comentarios_service.dart';
-// Controllers
 export 'presentation/comentarios_controller.dart';
-// Widgets
 export 'views/widgets/add_comentario_dialog.dart';
 export 'views/widgets/comentario_card.dart';
 export 'views/widgets/comments_list_widget.dart';

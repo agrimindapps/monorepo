@@ -12,8 +12,6 @@ import '../../features/auth/domain/usecases/register_usecase.dart' as app_auth;
 
 part 'auth_providers.g.dart';
 
-// === AUTH STATE ===
-
 /// State para autenticação
 class AuthState {
   const AuthState({
@@ -45,8 +43,6 @@ class AuthState {
   }
 }
 
-// === AUTH NOTIFIER (MODERN RIVERPOD) ===
-
 /// Notifier para autenticação
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
@@ -63,8 +59,6 @@ class AuthNotifier extends _$AuthNotifier {
     _logoutUseCase = di.getIt<app_auth.LogoutUseCase>();
     _getCurrentUserUseCase = di.getIt<app_auth.GetCurrentUserUseCase>();
     _refreshUserUseCase = di.getIt<app_auth.RefreshUserUseCase>();
-
-    // Initialize auth state
     _initialize();
 
     return const AuthState();
@@ -171,8 +165,6 @@ class AuthNotifier extends _$AuthNotifier {
     state = state.copyWith(errorMessage: null);
   }
 }
-
-// === DERIVED PROVIDERS ===
 
 /// Provider derivado para verificar se o usuário está autenticado
 @riverpod

@@ -14,7 +14,6 @@ class RevokeDeviceUseCase implements UseCase<void, RevokeDeviceParams> {
   @override
   Future<Either<Failure, void>> call(RevokeDeviceParams params) async {
     try {
-      // Verifica se o dispositivo existe primeiro
       final deviceResult = await _deviceRepository.getDeviceByUuid(params.deviceUuid);
       
       return await deviceResult.fold(
@@ -39,8 +38,6 @@ class RevokeDeviceUseCase implements UseCase<void, RevokeDeviceParams> {
               ),
             );
           }
-          
-          // Revoga o dispositivo
           return await _deviceRepository.revokeDevice(
             userId: params.userId,
             deviceUuid: params.deviceUuid,

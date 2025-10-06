@@ -15,11 +15,7 @@
 /// );
 /// ```
 library;
-
-// Import to ensure proper resolution
 import '../architecture/i_field_factory.dart';
-
-// Re-export all field configuration classes
 export '../architecture/i_field_factory.dart'
     show
         FieldConfig,
@@ -36,8 +32,6 @@ export '../architecture/i_field_factory.dart'
         CustomFieldConfig,
         DropdownOption,
         RadioOption;
-
-// Additional field configuration utilities and builders
 
 /// Builder for creating text field configurations
 class TextFieldConfigBuilder {
@@ -466,18 +460,12 @@ class FieldConfigValidator {
   /// Validate a field configuration
   static List<String> validate(FieldConfig config) {
     final errors = <String>[];
-    
-    // Check key
     if (config.key.isEmpty) {
       errors.add('Field key cannot be empty');
     }
-    
-    // Check for invalid characters in key
     if (!RegExp(r'^[a-zA-Z_][a-zA-Z0-9_]*$').hasMatch(config.key)) {
       errors.add('Field key must be a valid identifier');
     }
-    
-    // Type-specific validations
     if (config is NumberFieldConfig) {
       if (config.minValue != null && config.maxValue != null) {
         if (config.minValue! > config.maxValue!) {
@@ -504,8 +492,6 @@ class FieldConfigValidator {
       if (config.options.isEmpty) {
         errors.add('Dropdown must have at least one option');
       }
-      
-      // Check for duplicate option values
       final values = config.options.map((o) => o.value).toList();
       final uniqueValues = values.toSet();
       if (values.length != uniqueValues.length) {
@@ -519,16 +505,12 @@ class FieldConfigValidator {
   /// Validate a list of field configurations
   static Map<String, List<String>> validateFields(List<FieldConfig> configs) {
     final results = <String, List<String>>{};
-    
-    // Validate individual fields
     for (final config in configs) {
       final errors = validate(config);
       if (errors.isNotEmpty) {
         results[config.key] = errors;
       }
     }
-    
-    // Check for duplicate keys
     final keys = configs.map((c) => c.key).toList();
     final uniqueKeys = keys.toSet();
     if (keys.length != uniqueKeys.length) {

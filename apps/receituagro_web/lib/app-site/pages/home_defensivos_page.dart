@@ -27,7 +27,6 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
   }
 
   void testeSupabase() async {
-    // Usar cache para evitar fetching desnecessário
     await DefensivosRepository().fetchAllDefensivos(forceRefresh: false);
   }
 
@@ -62,14 +61,6 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   toolbarHeight: 70,
-      //   backgroundColor: Colors.white.withValues(alpha: 0.7), // Cor com transparência
-      //   title: SizedBox(
-      //     width: 1120,
-      //     child: rowOpcoesMenuSuperior(),
-      //   ),
-      // ),
       body: SingleChildScrollView(
         child: Center(
           child: SizedBox(
@@ -183,86 +174,6 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
     );
   }
 
-  // Widget _rowOpcoesFiltrar() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.center,
-  //     children: [
-  //       const SizedBox(
-  //         width: 1,
-  //         height: 60,
-  //       ),
-  //       Padding(
-  //         padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
-  //         child: TextButton(
-  //           style: ButtonStyle(
-  //             backgroundColor: WidgetStateProperty.all(Colors.transparent),
-  //             foregroundColor: WidgetStateProperty.all(Colors.green),
-  //           ),
-  //           onPressed: () {
-  //             DefensivosRepository().carregaDados('fabricantes', '');
-  //             Navigator.pushNamed(context, '/defensivos/listar');
-  //           },
-  //           child: const Text(
-  //             'Fabricantes',
-  //             style: TextStyle(color: Colors.black),
-  //           ),
-  //         ),
-  //       ),
-  //       Padding(
-  //         padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
-  //         child: TextButton(
-  //           style: ButtonStyle(
-  //             backgroundColor: WidgetStateProperty.all(Colors.transparent),
-  //             foregroundColor: WidgetStateProperty.all(Colors.green),
-  //           ),
-  //           onPressed: () {
-  //             DefensivosRepository().carregaDados('classeAgronomica', '');
-  //             Navigator.of(context).pushNamed('/defensivos/listar');
-  //           },
-  //           child: const Text(
-  //             'Classe Agronomica',
-  //             style: TextStyle(color: Colors.black),
-  //           ),
-  //         ),
-  //       ),
-  //       Padding(
-  //         padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
-  //         child: TextButton(
-  //           style: ButtonStyle(
-  //             backgroundColor: WidgetStateProperty.all(Colors.transparent),
-  //             foregroundColor: WidgetStateProperty.all(Colors.green),
-  //           ),
-  //           onPressed: () {
-  //             DefensivosRepository().carregaDados('ingredienteAtivo', '');
-  //             Navigator.of(context).pushNamed('/defensivos/listar');
-  //           },
-  //           child: const Text(
-  //             'Ingrediente Ativo',
-  //             style: TextStyle(color: Colors.black),
-  //           ),
-  //         ),
-  //       ),
-  //       Padding(
-  //         padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
-  //         child: TextButton(
-  //           style: ButtonStyle(
-  //             backgroundColor: WidgetStateProperty.all(Colors.transparent),
-  //             foregroundColor: WidgetStateProperty.all(Colors.green),
-  //           ),
-  //           onPressed: () {
-  //             DefensivosRepository().carregaDados('modoAcao', '');
-  //             Navigator.of(context).pushNamed('/defensivos/listar');
-  //           },
-  //           child: const Text(
-  //             'Modo de Ação',
-  //             style: TextStyle(color: Colors.black),
-  //           ),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _todosOsDefensivos() {
     return Align(
       alignment: Alignment.centerRight,
@@ -286,7 +197,6 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (context.shouldUseColumnLayout) {
-          // Layout para telas menores (smartphones)
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -297,7 +207,6 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
             ],
           );
         } else {
-          // Layout para telas maiores (tablets, desktops)
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -360,99 +269,6 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
       },
     );
   }
-
-  // Widget _cardBotoesCategorias() {
-  //   return Card(
-  //     child: Container(
-  //       padding: const EdgeInsets.all(8.0),
-  //       width: double.infinity,
-  //       child: Column(
-  //         children: [
-  //           Row(
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               TextButtonTopIcon(
-  //                 iconText: DefensivosRepository()
-  //                     .homePage
-  //                     .value
-  //                     .fabricantes
-  //                     .toString(),
-  //                 title: 'Fabricantes',
-  //                 width: MediaQuery.of(context).size.width / 2.3,
-  //                 onPress: () {
-  //                   DefensivosRepository().carregaDados('fabricantes', '');
-  //                   Navigator.pushNamed(context, '/defensivos/listar');
-  //                 },
-  //               ),
-  //               TextButtonTopIcon(
-  //                 iconText: DefensivosRepository()
-  //                     .homePage
-  //                     .value
-  //                     .classeAgronomica
-  //                     .toString(),
-  //                 title: 'Classe Agronomica',
-  //                 width: MediaQuery.of(context).size.width / 2.3,
-  //                 onPress: () {
-  //                   DefensivosRepository().carregaDados('classeAgronomica', '');
-  //                   Navigator.of(context).pushNamed('/defensivos/listar');
-  //                 },
-  //               ),
-  //             ],
-  //           ),
-  //           Row(
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               TextButtonTopIcon(
-  //                 iconText: DefensivosRepository()
-  //                     .homePage
-  //                     .value
-  //                     .ingredienteAtivo
-  //                     .toString(),
-  //                 title: 'Ingrediente Ativo',
-  //                 width: MediaQuery.of(context).size.width / 2.3,
-  //                 onPress: () {
-  //                   DefensivosRepository().carregaDados('ingredienteAtivo', '');
-  //                   Navigator.of(context).pushNamed('/defensivos/listar');
-  //                 },
-  //               ),
-  //               TextButtonTopIcon(
-  //                 iconText:
-  //                     DefensivosRepository().homePage.value.modoAcao.toString(),
-  //                 title: 'Modo de Ação',
-  //                 width: MediaQuery.of(context).size.width / 2.3,
-  //                 onPress: () {
-  //                   DefensivosRepository().carregaDados('modoAcao', '');
-  //                   Navigator.of(context).pushNamed('/defensivos/listar');
-  //                 },
-  //               ),
-  //             ],
-  //           ),
-  //           Row(
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             mainAxisAlignment: MainAxisAlignment.center,
-  //             children: [
-  //               TextButtonTopIcon(
-  //                 iconText: DefensivosRepository()
-  //                     .homePage
-  //                     .value
-  //                     .defensivos
-  //                     .toString(),
-  //                 title: 'Defensivos',
-  //                 width: MediaQuery.of(context).size.width / 1.12,
-  //                 onPress: () {
-  //                   DefensivosRepository().carregaDados('defensivos', '');
-  //                   Navigator.of(context).pushNamed('/defensivos/listar');
-  //                 },
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _menuPromo() {
     return LayoutBuilder(
@@ -637,8 +453,6 @@ class _DefensivosGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final repository = DefensivosRepository();
-
-      // Usar ResponsiveHelper para obter crossAxisCount
       final crossAxisCount = context.crossAxisCount(type: GridType.card);
       final mainAxisSpacing =
           context.responsiveSpacing(type: SpacingType.small);

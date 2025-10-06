@@ -175,8 +175,6 @@ class CaloriePage extends ConsumerStatefulWidget {
 
 class _CaloriePageState extends ConsumerState<CaloriePage> 
     with TickerProviderStateMixin {
-  
-  // Specialized handlers for different concerns
   late PageController _pageController;
   late CalorieAnimationManager _animationManager;
   late CalorieNavigationHandler _navigationHandler;
@@ -190,34 +188,24 @@ class _CaloriePageState extends ConsumerState<CaloriePage>
   }
 
   void _initializeComponents() {
-    // Initialize page controller
     _pageController = PageController();
-    
-    // Initialize animation manager
     _animationManager = CalorieAnimationManager();
     _animationManager.initialize(this);
-    
-    // Initialize navigation handler
     _navigationHandler = CalorieNavigationHandler(
       pageController: _pageController,
       ref: ref,
       onTransition: _animationManager.animateTransition,
     );
-    
-    // Initialize dialog manager
     _dialogManager = CalorieDialogManager(
       context: context,
       ref: ref,
     );
-    
-    // Initialize menu handler
     _menuHandler = CalorieMenuHandler(
       dialogManager: _dialogManager,
       ref: ref,
       onPresetLoaded: () => _navigationHandler.goToPage(CalorieConstants.reviewStepIndex),
       onReset: () => _navigationHandler.resetToFirstStep(),
       onHistoryItemSelected: () {
-        // Navigate to results or review step after loading history
       },
     );
   }

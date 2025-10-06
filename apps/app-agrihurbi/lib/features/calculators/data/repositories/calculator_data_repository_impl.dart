@@ -9,8 +9,6 @@ import '../../domain/repositories/calculator_data_repository.dart';
 @LazySingleton(as: ICalculatorDataRepository)
 class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
 
-  // ============= CROP REQUIREMENTS DATA =============
-
   @override
   Future<CropRequirementsData> getCropRequirements(String cropType, double expectedYield) async {
     final Map<String, Map<String, double>> cropData = {
@@ -47,8 +45,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
       'Café', 'Algodão', 'Cana-de-açúcar', 'Tomate', 'Batata'
     ];
   }
-
-  // ============= SOIL TEXTURE DATA =============
 
   @override
   Future<SoilTextureData> getSoilTextureFactors(String soilTexture) async {
@@ -113,8 +109,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     return ['Arenoso', 'Franco-arenoso', 'Franco', 'Franco-argiloso', 'Argiloso'];
   }
 
-  // ============= FERTILIZER DATA =============
-
   @override
   Future<List<FertilizerProduct>> getFertilizerProducts() async {
     return [
@@ -178,8 +172,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
         return null;
     }
   }
-
-  // ============= APPLICATION SCHEDULE DATA =============
 
   @override
   Future<List<ApplicationSchedule>> getApplicationSchedule(String cropType) async {
@@ -255,8 +247,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     }
   }
 
-  // ============= PREVIOUS CROP EFFECTS DATA =============
-
   @override
   Future<PreviousCropEffect> getPreviousCropEffect(String previousCrop) async {
     switch (previousCrop) {
@@ -298,8 +288,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     }
   }
 
-  // ============= AGRONOMIC RECOMMENDATIONS DATA =============
-
   @override
   Future<List<String>> getAgronomicRecommendations({
     required String cropType,
@@ -310,8 +298,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     required double kNeed,
   }) async {
     final List<String> recommendations = [];
-
-    // Recomendações por nutriente
     if (nNeed > 150) {
       recommendations.add('Alto requerimento de N. Considere aplicação parcelada em 3 vezes para aumentar eficiência.');
     } else if (nNeed < 50) {
@@ -325,8 +311,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
     if (kNeed > 120) {
       recommendations.add('Alto requerimento de K. Em solos arenosos, aplique parceladamente para evitar lixiviação.');
     }
-
-    // Recomendações por textura
     switch (soilTexture) {
       case 'Arenoso':
         recommendations.add('Solo arenoso: parcelar N e K em 2-3 aplicações para evitar perdas por lixiviação.');
@@ -338,15 +322,11 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
         recommendations.add('Solo franco: textura ideal, manter manejo balanceado de nutrientes.');
         break;
     }
-
-    // Recomendações por matéria orgânica
     if (organicMatter < 2.0) {
       recommendations.add('Baixo teor de MO (${organicMatter.toStringAsFixed(1)}%). Considere adubação orgânica complementar.');
     } else if (organicMatter > 5.0) {
       recommendations.add('Alto teor de MO (${organicMatter.toStringAsFixed(1)}%). Monitore disponibilidade de micronutrientes.');
     }
-
-    // Recomendações específicas por cultura
     switch (cropType) {
       case 'Milho':
         recommendations.add('Milho: aplicar N em V6 (6 folhas) para máxima eficiência de absorção.');
@@ -361,8 +341,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
         recommendations.add('Algodão: atenção especial ao boro e enxofre para qualidade da fibra.');
         break;
     }
-
-    // Recomendações gerais
     recommendations.addAll([
       'Realizar análise foliar aos 60-80 dias para acompanhamento nutricional.',
       'Considerar aplicação de micronutrientes conforme análise de solo específica.',
@@ -372,8 +350,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
 
     return recommendations;
   }
-
-  // ============= UNIT CONVERSION DATA =============
 
   @override
   Future<double> getConversionFactor(String fromUnit, String toUnit) async {
@@ -396,8 +372,6 @@ class CalculatorDataRepositoryImpl implements ICalculatorDataRepository {
 
     return conversionTable[fromUnit]?[toUnit] ?? 1.0;
   }
-
-  // ============= VALIDATION RANGES DATA =============
 
   @override
   Future<ValidationRanges> getValidationRanges(String parameterType) async {

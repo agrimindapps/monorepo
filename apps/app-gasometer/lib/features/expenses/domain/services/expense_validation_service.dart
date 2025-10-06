@@ -21,11 +21,7 @@ class ExpenseValidationService {
   ) {
     final errors = <String, String>{};
     final warnings = <String, String>{};
-
-    // Validar compatibilidade com o veículo
     _validateVehicleCompatibility(record, vehicle, errors);
-
-    // Validar sequência de odômetro
     _validateOdometerSequence(
       record,
       vehicle,
@@ -33,14 +29,8 @@ class ExpenseValidationService {
       errors,
       warnings,
     );
-
-    // Validar padrões de valor por tipo
     _validateValuePatterns(record, previousExpenses, warnings);
-
-    // Validar duplicatas por data e tipo
     _validateDuplicates(record, previousExpenses, errors, warnings);
-
-    // Validar frequência de despesas recorrentes
     _validateRecurringExpenses(record, previousExpenses, warnings);
 
     return ValidationResult(
@@ -56,12 +46,9 @@ class ExpenseValidationService {
     VehicleEntity vehicle,
     Map<String, String> errors,
   ) {
-    // Verificar se o veículo está ativo
     if (!vehicle.isActive) {
       errors['vehicle'] = 'Veículo está inativo';
     }
-
-    // Verificar se o odômetro não regrediu muito
     if (record.odometer < vehicle.currentOdometer - 1000) {
       errors['odometer'] =
           'Odômetro muito abaixo do atual do veículo (${vehicle.currentOdometer.toStringAsFixed(0)} km)';
@@ -77,21 +64,15 @@ class ExpenseValidationService {
     Map<String, String> warnings,
   ) {
     if (previousExpenses.isEmpty) return;
-
-    // Ordenar por data para encontrar o registro mais próximo
     final sortedExpenses = List<ExpenseEntity>.from(previousExpenses)
       ..sort((a, b) => b.date.compareTo(a.date));
 
     final lastExpense = sortedExpenses.first;
-
-    // Verificar se odômetro não regrediu
     if (record.odometer < lastExpense.odometer) {
       errors['odometer'] =
           'Odômetro menor que a última despesa (${lastExpense.odometer.toStringAsFixed(0)} km)';
       return;
     }
-
-    // Verificar diferença suspeita
     final difference = record.odometer - lastExpense.odometer;
     final daysDifference =
         record.date.difference(lastExpense.date).inDays.abs();
@@ -100,8 +81,6 @@ class ExpenseValidationService {
       warnings['odometer'] =
           'Diferença muito grande desde última despesa: ${difference.toStringAsFixed(0)} km';
     }
-
-    // Alertar para rodagem muito alta em pouco tempo
     if (daysDifference > 0 &&
         daysDifference < 30 &&
         difference / daysDifference > 300) {
@@ -125,8 +104,6 @@ class ExpenseValidationService {
             .toList();
 
     if (sameType.isEmpty) return;
-
-    // Para despesas recorrentes, verificar se o valor está muito diferente da média
     if (record.type.isRecurring && sameType.length >= 2) {
       final avgAmount =
           sameType.fold<double>(0, (sum, expense) => sum + expense.amount) /
@@ -139,8 +116,6 @@ class ExpenseValidationService {
             'Valor ${record.amount > avgAmount ? 'acima' : 'abaixo'} da média ($percentDiff% de diferença)';
       }
     }
-
-    // Verificar valores extremos por categoria
     final typeProperties = record.type.properties;
     if (typeProperties.maxExpectedValue != null &&
         record.amount > typeProperties.maxExpectedValue!) {
@@ -171,13 +146,10 @@ class ExpenseValidationService {
     );
 
     if (sameDate.isNotEmpty) {
-      // Para despesas não recorrentes, isso pode ser um erro
       if (!record.type.isRecurring) {
         warnings['date'] =
             'Já existe despesa de ${record.type.displayName} nesta data';
       }
-
-      // Para despesas de mesmo tipo, valor e data, pode ser duplicata
       final exactDuplicates = sameDate.where(
         (expense) =>
             (expense.amount - record.amount).abs() < 0.01 &&
@@ -208,8 +180,6 @@ class ExpenseValidationService {
             .toList();
 
     if (sameType.isEmpty) return;
-
-    // Ordenar por data
     sameType.sort((a, b) => b.date.compareTo(a.date));
     final lastSameType = sameType.first;
 
@@ -217,8 +187,6 @@ class ExpenseValidationService {
       record.date,
       lastSameType.date,
     );
-
-    // Alertas baseados no tipo de despesa
     switch (record.type) {
       case ExpenseType.insurance:
         if (monthsDifference < 11) {
@@ -254,30 +222,20 @@ class ExpenseValidationService {
 
     final sortedExpenses = List<ExpenseEntity>.from(expenses)
       ..sort((a, b) => a.date.compareTo(b.date));
-
-    // Calcular estatísticas gerais
     final totalAmount = sortedExpenses.fold<double>(
       0,
       (sum, e) => sum + e.amount,
     );
     final averageAmount = totalAmount / sortedExpenses.length;
-
-    // Agrupar por tipo
     final expensesByType = <ExpenseType, List<ExpenseEntity>>{};
     for (final expense in sortedExpenses) {
       expensesByType.putIfAbsent(expense.type, () => []).add(expense);
     }
-
-    // Calcular gastos por tipo
     final expensesByTypeAmount = expensesByType.map(
       (type, expenses) =>
           MapEntry(type, expenses.fold<double>(0, (sum, e) => sum + e.amount)),
     );
-
-    // Detectar anomalias
     final anomalies = _detectExpenseAnomalies(sortedExpenses);
-
-    // Calcular tendências
     final trends = _calculateExpenseTrends(sortedExpenses);
 
     return ExpensePatternAnalysis(
@@ -296,8 +254,6 @@ class ExpenseValidationService {
   /// Detecta anomalias nos registros de despesas
   List<ExpenseAnomaly> _detectExpenseAnomalies(List<ExpenseEntity> expenses) {
     final anomalies = <ExpenseAnomaly>[];
-
-    // Calcular médias por tipo
     final typeAverages = <ExpenseType, double>{};
     final typeGroups = <ExpenseType, List<ExpenseEntity>>{};
 
@@ -310,14 +266,11 @@ class ExpenseValidationService {
           expenses.fold<double>(0, (sum, e) => sum + e.amount) /
           expenses.length;
     });
-
-    // Detectar outliers de valor
     for (final expense in expenses) {
       final average = typeAverages[expense.type]!;
       final deviation = (expense.amount - average).abs() / average;
 
       if (deviation > 1.0) {
-        // Mais de 100% de desvio
         anomalies.add(
           ExpenseAnomaly(
             expenseId: expense.id,
@@ -331,8 +284,6 @@ class ExpenseValidationService {
         );
       }
     }
-
-    // Detectar frequência anômala
     final recurringTypes = expenses.where((e) => e.type.isRecurring).toList();
     final frequencyMap = <ExpenseType, List<ExpenseEntity>>{};
 
@@ -352,7 +303,6 @@ class ExpenseValidationService {
         );
 
         if (monthsDiff < 6) {
-          // Menos de 6 meses entre despesas anuais
           anomalies.add(
             ExpenseAnomaly(
               expenseId: typeExpenses[i].id,
@@ -372,8 +322,6 @@ class ExpenseValidationService {
   /// Calcula tendências de gastos
   Map<String, dynamic> _calculateExpenseTrends(List<ExpenseEntity> expenses) {
     if (expenses.length < 2) return {};
-
-    // Agrupar por mês
     final monthlyTotals = <String, double>{};
 
     for (final expense in expenses) {
@@ -384,8 +332,6 @@ class ExpenseValidationService {
 
     final months = monthlyTotals.keys.toList()..sort();
     if (months.length < 2) return {};
-
-    // Calcular tendência (simples: comparar últimos 3 meses com 3 anteriores)
     final recentMonths =
         months.length >= 6
             ? months.sublist(months.length - 3)
@@ -432,10 +378,6 @@ class ExpenseValidationService {
     return months.abs();
   }
 
-  // ========================================================================
-  // FORM VALIDATION METHODS (consolidated from ExpenseValidatorService)
-  // ========================================================================
-
   /// Valida tipo de despesa
   String? validateExpenseType(ExpenseType? value) {
     if (value == null) {
@@ -459,8 +401,6 @@ class ExpenseValidationService {
     if (trimmed.length > 100) {
       return 'Descrição muito longa (máximo 100 caracteres)';
     }
-
-    // Verificar caracteres válidos
     if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)]+$').hasMatch(trimmed)) {
       return 'Caracteres inválidos na descrição';
     }
@@ -492,8 +432,6 @@ class ExpenseValidationService {
     if (amount > 999999.99) {
       return 'Valor muito alto';
     }
-
-    // Validações contextuais por tipo de despesa
     if (expenseType != null) {
       final validationError = _validateAmountByType(amount, expenseType);
       if (validationError != null) return validationError;
@@ -527,24 +465,16 @@ class ExpenseValidationService {
     if (odometer > 9999999) {
       return 'Valor muito alto';
     }
-
-    // Validação contextual com odômetro inicial do veículo
     if (initialOdometer != null && odometer < initialOdometer) {
       return 'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)';
     }
-
-    // Validação contextual com odômetro atual
     if (currentOdometer != null && odometer < currentOdometer - 1000) {
       return 'Odômetro muito abaixo do atual';
     }
-
-    // Validação com último registro de despesa
     if (lastExpenseOdometer != null) {
       if (odometer < lastExpenseOdometer) {
         return 'Odômetro menor que a última despesa';
       }
-
-      // Alerta para diferença muito grande (mais de 5000km)
       if (odometer - lastExpenseOdometer > 5000) {
         return 'Diferença muito grande desde a última despesa';
       }
@@ -566,8 +496,6 @@ class ExpenseValidationService {
     if (selectedDate.isAfter(today)) {
       return 'Data não pode ser futura';
     }
-
-    // Não permitir datas muito antigas (mais de 10 anos para despesas)
     final tenYearsAgo = today.subtract(const Duration(days: 365 * 10));
     if (selectedDate.isBefore(tenYearsAgo)) {
       return 'Data muito antiga (máximo 10 anos)';
@@ -588,8 +516,6 @@ class ExpenseValidationService {
       if (trimmed.length > 100) {
         return 'Localização muito longa';
       }
-
-      // Verificar caracteres válidos para endereços
       if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)\/]+$').hasMatch(trimmed)) {
         return 'Caracteres inválidos na localização';
       }
@@ -620,32 +546,20 @@ class ExpenseValidationService {
     double? lastExpenseOdometer,
   }) {
     final errors = <String, String>{};
-
-    // Validar tipo
     final typeError = validateExpenseType(expenseType);
     if (typeError != null) errors['expenseType'] = typeError;
-
-    // Validar descrição
     final descriptionError = validateDescription(description);
     if (descriptionError != null) errors['description'] = descriptionError;
-
-    // Validar valor
     final amountError = validateAmount(amount, expenseType: expenseType);
     if (amountError != null) errors['amount'] = amountError;
-
-    // Validar odômetro
     final odometerError = validateOdometer(
       odometer,
       currentOdometer: vehicle?.currentOdometer,
       lastExpenseOdometer: lastExpenseOdometer,
     );
     if (odometerError != null) errors['odometer'] = odometerError;
-
-    // Validar data
     final dateError = validateDate(date);
     if (dateError != null) errors['date'] = dateError;
-
-    // Validar campos opcionais
     final locationError = validateLocation(location);
     if (locationError != null) errors['location'] = locationError;
 
@@ -663,8 +577,6 @@ class ExpenseValidationService {
     List<ExpenseEntity>? previousExpenses,
   }) {
     final warnings = <String>[];
-
-    // Verificar despesas duplicadas no mesmo dia
     if (previousExpenses != null) {
       final sameDate = previousExpenses.where((expense) {
         return expense.type == expenseType &&
@@ -678,8 +590,6 @@ class ExpenseValidationService {
           'Já existe despesa do tipo ${expenseType.displayName} nesta data',
         );
       }
-
-      // Verificar padrões suspeitos de valor
       if (expenseType.isRecurring) {
         final sameType = previousExpenses.where(
           (expense) => expense.type == expenseType,
@@ -803,7 +713,6 @@ class ExpenseValidationService {
         break;
 
       case ExpenseType.other:
-        // Sem validações específicas para "Outro"
         break;
     }
 

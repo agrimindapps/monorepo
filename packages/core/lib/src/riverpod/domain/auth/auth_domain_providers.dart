@@ -9,8 +9,6 @@ import '../../common_providers.dart';
 /// Providers de domínio unificados para autenticação
 /// Consolidam lógica de auth comum entre todos os apps do monorepo
 
-// ========== CORE AUTH PROVIDERS ==========
-
 /// Provider principal para estado de autenticação
 /// Unifica auth state entre gasometer, plantis, receituagro, etc.
 final unifiedAuthProvider =
@@ -57,8 +55,6 @@ final firebaseAuthStreamProvider = StreamProvider<User?>((ref) {
   return FirebaseAuth.instance.authStateChanges();
 });
 
-// ========== APP-SPECIFIC AUTH PROVIDERS ==========
-
 /// Provider para configurações específicas de auth por app
 final authConfigProvider = Provider.family<AuthConfig, String>((ref, appId) {
   return AuthConfig.forApp(appId);
@@ -72,8 +68,6 @@ final authFeaturesProvider = Provider.family<AuthFeatures, String>((
   final config = ref.watch(authConfigProvider(appId));
   return AuthFeatures.fromConfig(config);
 });
-
-// ========== DERIVED PROVIDERS ==========
 
 /// Provider para informações do perfil do usuário
 final userProfileProvider = Provider<UserProfile?>((ref) {
@@ -95,16 +89,12 @@ final userProfileProvider = Provider<UserProfile?>((ref) {
 final userPermissionsProvider = Provider<Set<String>>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
   if (user == null) return <String>{};
-
-  // Lógica de permissões baseada no usuário
-  // Será implementada por cada app conforme necessário
   return <String>{'basic_access'};
 });
 
 /// Provider para limitações do usuário (premium vs free)
 final userLimitationsProvider = Provider<UserLimitations>((ref) {
   final user = ref.watch(domainCurrentUserProvider);
-  // TODO: Implementar verificação de premium via subscription providers
   const isPremium =
       false; // Temporário - será integrado com subscription providers
 
@@ -116,8 +106,6 @@ final userLimitationsProvider = Provider<UserLimitations>((ref) {
     hasAdvancedFeatures: isPremium,
   );
 });
-
-// ========== ACTION PROVIDERS ==========
 
 /// Provider para ações de autenticação
 final authActionsProvider = Provider<AuthActions>((ref) {
@@ -135,8 +123,6 @@ final authActionsProvider = Provider<AuthActions>((ref) {
     updateProfile: notifier.updateProfile,
   );
 });
-
-// ========== UTILITY PROVIDERS ==========
 
 /// Provider para token de autenticação atual
 final authTokenProvider = FutureProvider<String?>((ref) async {
@@ -166,8 +152,6 @@ final sessionInfoProvider = Provider<SessionInfo?>((ref) {
     lastActivity: DateTime.now(),
   );
 });
-
-// ========== MODELS ==========
 
 /// Status simplificado de autenticação
 enum AuthStatus { loading, authenticated, unauthenticated, error }
@@ -342,15 +326,12 @@ class AuthActions {
   });
 }
 
-// ========== NOTIFIER IMPLEMENTATION ==========
-
 /// Notifier unificado para autenticação
 class UnifiedAuthNotifier extends BaseAuthNotifier {
   @override
   Future<void> login(String email, String password) async {
     setLoading();
     try {
-      // Usar FirebaseAuthService do core
       final authService = FirebaseAuthService();
       final result = await authService.signInWithEmailAndPassword(
         email: email,
@@ -394,8 +375,6 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
       );
 
       result.fold((failure) => setError(failure.message), (user) {
-        // Atualizar perfil com dados adicionais
-        // updateProfile(userData);
         setAuthenticated(user.toJson());
       });
     } catch (e) {
@@ -430,12 +409,9 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
       setUnauthenticated();
     }
   }
-
-  // Métodos específicos para social login
   Future<void> loginWithGoogle() async {
     setLoading();
     try {
-      // Implementar Google Sign-In
       setError('Google Sign-In não implementado ainda');
     } catch (e) {
       setError('Erro no login com Google: $e');
@@ -445,7 +421,6 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
   Future<void> loginWithApple() async {
     setLoading();
     try {
-      // Implementar Apple Sign-In
       setError('Apple Sign-In não implementado ainda');
     } catch (e) {
       setError('Erro no login com Apple: $e');
@@ -491,8 +466,6 @@ class UnifiedAuthNotifier extends BaseAuthNotifier {
         if (updates['photoURL'] != null) {
           await user.updatePhotoURL(updates['photoURL'] as String?);
         }
-
-        // Atualizar estado - usar extensão when para acessar o estado
         state.when(
           loading: () {},
           authenticated: (user) => setAuthenticated({...user, ...updates}),

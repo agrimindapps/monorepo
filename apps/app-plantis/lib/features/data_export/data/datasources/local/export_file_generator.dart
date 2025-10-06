@@ -53,8 +53,6 @@ class ExportFileGenerator {
       },
       'user_data': <String, dynamic>{},
     };
-
-    // Process each data type
     for (final entry in exportData.entries) {
       final dataType = entry.key;
       final data = entry.value;
@@ -99,16 +97,12 @@ class ExportFileGenerator {
   /// Generate CSV content
   String _generateCsvContent(Map<DataType, dynamic> exportData) {
     final csvRows = <List<String>>[];
-
-    // Header
     csvRows.add([
       'Export Info',
       'Plantis - LGPD Data Export',
       DateTime.now().toIso8601String(),
     ]);
     csvRows.add([]); // Empty row
-
-    // Process each data type
     for (final entry in exportData.entries) {
       final dataType = entry.key;
       final data = entry.value;
@@ -138,8 +132,6 @@ class ExportFileGenerator {
 
       csvRows.add([]); // Empty row between sections
     }
-
-    // Simple CSV conversion without external package
     return csvRows.map((row) => row.join(',')).join('\n');
   }
 
@@ -158,8 +150,6 @@ class ExportFileGenerator {
     buffer.writeln('    <compliance>LGPD</compliance>');
     buffer.writeln('  </export_info>');
     buffer.writeln('  <user_data>');
-
-    // Process each data type
     for (final entry in exportData.entries) {
       final dataType = entry.key;
       final data = entry.value;
@@ -177,8 +167,6 @@ class ExportFileGenerator {
 
   /// Generate PDF content (simplified version)
   String _generatePdfContent(Map<DataType, dynamic> exportData) {
-    // For simplicity, generate a text file with PDF extension
-    // In a real implementation, you would use a PDF library like `pdf` package
     final buffer = StringBuffer();
     buffer.writeln('PLANTIS - EXPORTAÇÃO DE DADOS LGPD');
     buffer.writeln('Data: ${DateTime.now()}');
@@ -194,8 +182,6 @@ class ExportFileGenerator {
 
     return buffer.toString();
   }
-
-  // JSON formatting helpers
   Map<String, dynamic> _formatPlantsForJson(List<PlantExportData> plants) {
     return {
       'count': plants.length,
@@ -316,8 +302,6 @@ class ExportFileGenerator {
       'last_sync_date': settings.lastSyncDate?.toIso8601String(),
     };
   }
-
-  // CSV formatting helpers
   List<List<String>> _formatPlantsForCsv(List<PlantExportData> plants) {
     final rows = <List<String>>[];
     rows.add([
@@ -402,8 +386,6 @@ class ExportFileGenerator {
 
     return rows;
   }
-
-  // XML formatting helpers
   void _formatDataForXml(StringBuffer buffer, dynamic data, String indent) {
     if (data is List) {
       for (int i = 0; i < data.length; i++) {
@@ -444,8 +426,6 @@ class ExportFileGenerator {
     try {
       final fileName =
           'export_${request.id}_${DateTime.now().millisecondsSinceEpoch}.${_getFileExtension(request.format)}';
-
-      // Get downloads directory
       final downloadsDir =
           await _fileRepository.getDownloadsDirectory() ??
           await _fileRepository.getDocumentsDirectory();
@@ -455,8 +435,6 @@ class ExportFileGenerator {
         path: filePath,
         content: content,
       );
-
-      // Check if the operation was successful
       if (result.success) {
         return result.path ?? filePath;
       } else {

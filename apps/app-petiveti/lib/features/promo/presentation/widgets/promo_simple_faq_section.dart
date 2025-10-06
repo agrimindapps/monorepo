@@ -26,12 +26,9 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
       color: Colors.white,
       child: Column(
         children: [
-          // Section Header
           _buildSectionHeader(context, isMobile),
           
           const SizedBox(height: 60),
-          
-          // FAQ List
           Container(
             constraints: const BoxConstraints(maxWidth: 800),
             child: Column(
@@ -75,8 +72,6 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
             textAlign: TextAlign.center,
           ),
         ),
-        
-        // Accent line
         Container(
           margin: const EdgeInsets.only(top: 24),
           width: 60,
@@ -115,7 +110,6 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
       ),
       child: Column(
         children: [
-          // Question
           InkWell(
             onTap: () {
               setState(() {
@@ -147,8 +141,6 @@ class _PromoSimpleFaqSectionState extends State<PromoSimpleFaqSection> {
               ),
             ),
           ),
-          
-          // Answer
           if (isExpanded)
             Container(
               width: double.infinity,

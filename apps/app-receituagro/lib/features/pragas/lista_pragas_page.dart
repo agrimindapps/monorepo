@@ -38,15 +38,12 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     super.initState();
     _currentPragaType = widget.pragaType ?? '1';
     _searchController.addListener(_onSearchChanged);
-
-    // Inicialização única e ordenada via Riverpod
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final notifier = ref.read(pragasNotifierProvider.notifier);
       try {
         await notifier.loadStats();
         await notifier.loadPragasByTipo(_currentPragaType);
       } catch (e) {
-        // Erro será tratado pelo provider
       }
     });
   }
@@ -82,8 +79,6 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     }
   }
 
-  // Métodos de filtragem migrados para PragasNotifier
-
   void _clearSearch() async {
     _searchDebounceTimer?.cancel();
     _searchController.clear();
@@ -106,14 +101,11 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     setState(() {
       _isAscending = !_isAscending;
     });
-
-    // Aplica ordenação diretamente na lista atual
     final notifier = ref.read(pragasNotifierProvider.notifier);
     notifier.sortPragas(_isAscending);
   }
 
   void _handleItemTap(PragaEntity praga) {
-    // Usar navegação direta do Flutter - mais confiável para páginas secundárias
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder:
@@ -425,15 +417,11 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     if (state.errorMessage != null) {
       return 'Erro no carregamento';
     }
-
-    // Usa as estatísticas da sessão em vez do count filtrado
     final stats = state.stats;
     if (stats != null) {
       final totalSessao = _getTotalPorTipo(stats);
       return '$totalSessao registros na sessão';
     }
-
-    // Fallback caso stats não esteja carregado
     return 'Carregando estatísticas...';
   }
 

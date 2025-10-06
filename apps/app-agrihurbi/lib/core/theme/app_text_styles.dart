@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 /// Centralized text styles with constant values
 /// This provides consistency and eliminates scattered TextStyle definitions
 class AppTextStyles {
-  // Private constructor to prevent instantiation
   AppTextStyles._();
-
-  // =====================================================================
-  // DISPLAY STYLES
-  // =====================================================================
   
   /// Display Large - For large headlines (32sp)
   static const TextStyle displayLarge = TextStyle(
@@ -34,10 +29,6 @@ class AppTextStyles {
     color: Color(0xFF212121),
     height: 1.2,
   );
-
-  // =====================================================================
-  // HEADLINE STYLES
-  // =====================================================================
   
   /// Headline Large - For section headers (22sp)
   static const TextStyle headlineLarge = TextStyle(
@@ -62,10 +53,6 @@ class AppTextStyles {
     color: Color(0xFF212121),
     height: 1.4,
   );
-
-  // =====================================================================
-  // TITLE STYLES
-  // =====================================================================
   
   /// Title Large - For card titles and important labels (16sp)
   static const TextStyle titleLarge = TextStyle(
@@ -90,10 +77,6 @@ class AppTextStyles {
     color: Color(0xFF212121),
     height: 1.4,
   );
-
-  // =====================================================================
-  // BODY STYLES
-  // =====================================================================
   
   /// Body Large - For main body text (16sp)
   static const TextStyle bodyLarge = TextStyle(
@@ -118,10 +101,6 @@ class AppTextStyles {
     color: Color(0xFF757575),
     height: 1.6,
   );
-
-  // =====================================================================
-  // LABEL STYLES
-  // =====================================================================
   
   /// Label Large - For prominent labels and buttons (14sp)
   static const TextStyle labelLarge = TextStyle(
@@ -146,10 +125,6 @@ class AppTextStyles {
     color: Color(0xFF757575),
     height: 1.4,
   );
-
-  // =====================================================================
-  // COMPONENT SPECIFIC STYLES
-  // =====================================================================
   
   /// Button text style
   static const TextStyle button = TextStyle(
@@ -216,10 +191,6 @@ class AppTextStyles {
     letterSpacing: 0.5,
     height: 1.4,
   );
-
-  // =====================================================================
-  // STATUS SPECIFIC STYLES
-  // =====================================================================
   
   /// Success text style
   static const TextStyle success = TextStyle(
@@ -248,10 +219,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     color: Color(0xFF1976D2),
   );
-
-  // =====================================================================
-  // HELPER METHODS
-  // =====================================================================
   
   /// Get market trend text style based on value
   static TextStyle getMarketTrendStyle(double changeValue) {
@@ -287,17 +254,14 @@ class AppTextStyles {
   static TextStyle getResponsiveStyle(BuildContext context, TextStyle baseStyle) {
     final width = MediaQuery.of(context).size.width;
     if (width >= 1024) {
-      // Desktop
       return baseStyle.copyWith(
         fontSize: (baseStyle.fontSize ?? 14) * 1.2,
       );
     } else if (width >= 768) {
-      // Tablet
       return baseStyle.copyWith(
         fontSize: (baseStyle.fontSize ?? 14) * 1.1,
       );
     }
-    // Mobile
     return baseStyle;
   }
 }

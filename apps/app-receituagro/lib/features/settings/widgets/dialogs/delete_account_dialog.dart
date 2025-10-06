@@ -49,8 +49,6 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
         children: [
           const Text('Esta ação é irreversível e resultará em:'),
           const SizedBox(height: 16),
-
-          // Lista de consequências com ícones estilizados
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -111,8 +109,6 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           ),
 
           const SizedBox(height: 16),
-
-          // Nota sobre cancelamento estilizada
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -147,8 +143,6 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
           ),
 
           const SizedBox(height: 16),
-
-          // Campo de confirmação estilizado
           const Text(
             'Para confirmar, digite CONCORDO abaixo:',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -228,7 +222,6 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
   }
 
   /// Método estático para mostrar o diálogo
-  // ignore: unused_element
   static Future<bool?> show(BuildContext context) async {
     return showDialog<bool>(
       context: context,

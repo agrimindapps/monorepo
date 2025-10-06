@@ -22,7 +22,6 @@ class ExpensesErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de erro
             Container(
               width: 120,
               height: 120,
@@ -38,8 +37,6 @@ class ExpensesErrorState extends StatelessWidget {
             ),
             
             const SizedBox(height: GasometerDesignTokens.spacingXl),
-            
-            // Título
             SemanticText.heading(
               'Erro ao carregar despesas',
               style: TextStyle(
@@ -51,8 +48,6 @@ class ExpensesErrorState extends StatelessWidget {
             ),
             
             const SizedBox(height: GasometerDesignTokens.spacingMd),
-            
-            // Descrição do erro
             SemanticText.subtitle(
               error,
               style: TextStyle(
@@ -64,8 +59,6 @@ class ExpensesErrorState extends StatelessWidget {
             ),
             
             const SizedBox(height: GasometerDesignTokens.spacingXxl),
-            
-            // Botão de tentar novamente
             SemanticButton(
               semanticLabel: 'Tentar carregar despesas novamente',
               semanticHint: 'Recarrega a lista de despesas após erro',
@@ -91,8 +84,6 @@ class ExpensesErrorState extends StatelessWidget {
             ),
             
             const SizedBox(height: GasometerDesignTokens.spacingXl),
-            
-            // Sugestões
             _buildSuggestionsSection(context),
           ],
         ),

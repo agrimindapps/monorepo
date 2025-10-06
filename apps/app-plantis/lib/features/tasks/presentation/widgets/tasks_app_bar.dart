@@ -125,7 +125,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
   }
 
   void _applyAllFilters() {
-    // Apply the primary filter (first active filter or all)
     final primaryFilter =
         _activeFilters.isNotEmpty ? _activeFilters.first : TasksFilterType.all;
 
@@ -219,9 +218,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
               constraints: const BoxConstraints(maxWidth: 1120),
               child: Column(
                 children: [
-                  // Active filter chips
                   if (_totalActiveFilters > 0) _buildActiveFilterChips(theme),
-                  // Quick filters
                   Container(
                     padding: const EdgeInsets.only(
                       left: 20,
@@ -237,7 +234,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
                               data: (tasksState) {
                                 return Row(
                                   children: [
-                                    // Para hoje button
                                     _FilterButton(
                                       text: AppStrings.todayQuickFilter,
                                       isSelected:
@@ -249,7 +245,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
                                           ),
                                     ),
                                     const SizedBox(width: 16),
-                                    // Próximas button
                                     _FilterButton(
                                       text: AppStrings.upcomingQuickFilterFormat
                                           .replaceAll(
@@ -300,7 +295,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
               ),
             ),
             const Spacer(),
-            // Badge with total tasks
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
@@ -357,8 +351,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
 
   Widget _buildActiveFilterChips(ThemeData theme) {
     final allChips = <Widget>[];
-
-    // Filter chips
     for (final filter in _activeFilters) {
       allChips.add(
         _buildFilterChip(
@@ -368,8 +360,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
         ),
       );
     }
-
-    // Task type chips
     for (final taskType in _activeTaskTypes) {
       allChips.add(
         _buildFilterChip(
@@ -379,8 +369,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
         ),
       );
     }
-
-    // Priority chips
     for (final priority in _activePriorities) {
       allChips.add(
         _buildFilterChip(
@@ -390,8 +378,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
         ),
       );
     }
-
-    // Plant filter chip
     if (_selectedPlantFilter != null) {
       allChips.add(
         _buildFilterChip(
@@ -489,9 +475,6 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
     _applyAllFilters();
   }
 
-  // Note: Task type and priority name methods moved to TaskDisplayUtils
-  // for centralized display logic and better maintainability
-
   void _handleFilterChange(TasksFilterType filter) {
     ref.read(tasksProvider.notifier).setFilter(filter);
     widget.onFilterChanged?.call(filter);
@@ -533,8 +516,6 @@ class _FilterButton extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            // Badge functionality removed as it was unused
-            // Badge display removed as it was unused
           ],
         ),
       ),
@@ -608,7 +589,6 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
         builder: (context, scrollController) {
           return Column(
             children: [
-              // Handle bar
               Container(
                 width: 40,
                 height: 4,
@@ -618,7 +598,6 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              // Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -640,7 +619,6 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Content
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -677,7 +655,6 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                   ],
                 ),
               ),
-              // Apply button
               Container(
                 padding: const EdgeInsets.all(20),
                 child: ElevatedButton(
@@ -868,7 +845,4 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
     );
     Navigator.pop(context);
   }
-
-  // Note: Task type and priority display methods now use TaskDisplayUtils
-  // for centralized logic and consistency across the app
 }

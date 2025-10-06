@@ -67,23 +67,15 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
 
   @override
   Future<RemoteConfigState> build() async {
-    // Get service from DI
     _remoteConfigService = ReceitaAgroRemoteConfigService.instance;
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _refreshTimer?.cancel();
     });
 
     try {
-      // Initialize remote config service
       await _remoteConfigService.initialize();
-
-      // Load initial values
       final featureFlags = await _loadFeatureFlags();
       final configurations = await _loadConfigurations();
-
-      // Setup auto-refresh if enabled
       _setupAutoRefresh(featureFlags);
 
       if (EnvironmentConfig.enableLogging) {
@@ -102,8 +94,6 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
       );
     } catch (e, stackTrace) {
       if (EnvironmentConfig.enableAnalytics) {
-        // Log to Crashlytics in production
-        // FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
 
       developer.log(
@@ -125,8 +115,6 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
     if (currentState == null) {
       return;
     }
-
-    // Set loading
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
@@ -152,7 +140,6 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
           );
         }
       } else {
-        // No update needed
         state = AsyncValue.data(currentState.copyWith(isLoading: false));
       }
     } catch (e) {
@@ -175,7 +162,6 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
   bool isFeatureEnabled(ReceitaAgroFeatureFlag feature) {
     final currentState = state.value;
     if (currentState == null || !currentState.isInitialized) {
-      // Return value from service directly
       return _remoteConfigService.isFeatureEnabled(feature);
     }
 
@@ -280,7 +266,6 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
 
     for (final config in ReceitaAgroConfigKey.values) {
       switch (config) {
-        // Int configs
         case ReceitaAgroConfigKey.maxDevicesPerSubscription:
         case ReceitaAgroConfigKey.subscriptionGracePeriodHours:
         case ReceitaAgroConfigKey.maxCacheSize:
@@ -291,18 +276,12 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
         case ReceitaAgroConfigKey.onboardingStepsCount:
           configs[config] = _remoteConfigService.getIntConfig(config);
           break;
-
-        // Double configs
         case ReceitaAgroConfigKey.imageQualityLevel:
           configs[config] = _remoteConfigService.getDoubleConfig(config);
           break;
-
-        // JSON configs
         case ReceitaAgroConfigKey.themeConfiguration:
           configs[config] = _remoteConfigService.getJsonConfig(config);
           break;
-
-        // String configs (default)
         default:
           configs[config] = _remoteConfigService.getStringConfig(config);
           break;
@@ -314,7 +293,6 @@ class RemoteConfigNotifier extends _$RemoteConfigNotifier {
 
   /// Setup auto-refresh timer
   void _setupAutoRefresh(Map<ReceitaAgroFeatureFlag, bool> featureFlags) {
-    // Only setup auto-refresh in debug mode or if explicitly enabled
     final enableRefresh = EnvironmentConfig.isDebugMode ||
         (featureFlags[ReceitaAgroFeatureFlag.enableDetailedAnalytics] ?? false);
 

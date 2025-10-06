@@ -11,13 +11,11 @@ class SyncSettingsUseCase {
 
   Future<Either<Failure, void>> call() async {
     try {
-      // Carrega as configurações (o repository já gerencia cache/remote)
       final result = await _repository.loadSettings();
 
       return result.fold(
         (failure) => Left(failure),
         (settings) {
-          // Configurações carregadas com sucesso
           return const Right(null);
         },
       );
@@ -37,7 +35,6 @@ class SyncUserProfileUseCase {
 
   Future<Either<Failure, UserEntity?>> call() async {
     try {
-      // Aguarda o usuário atual (com timeout para evitar travamento)
       final user = await _authRepository.currentUser
           .timeout(const Duration(seconds: 5))
           .first;
@@ -45,8 +42,6 @@ class SyncUserProfileUseCase {
       if (user == null) {
         return const Right(null);
       }
-
-      // Usuário carregado com sucesso
       return Right(user);
     } catch (e) {
       return Left(

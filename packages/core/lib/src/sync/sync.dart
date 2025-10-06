@@ -8,35 +8,23 @@
 /// import 'package:core/src/sync/sync.dart';
 /// ```
 library;
-
-// Background Sync & Throttling - Phase 8 components
 export 'background/background_sync_manager.dart';
-// Configuration - Feature flags for gradual migration
 export 'config/sync_feature_flags.dart';
-// Examples - Reference implementations for apps
-// export 'examples/example_sync_service.dart'; // Disabled until implementation is complete
-
-// Factories - For dynamic service creation following OCP
 export 'factories/sync_service_factory.dart';
-// Implementations - SOLID-compliant implementations of the interfaces
 export 'implementations/cache_manager_impl.dart';
 export 'implementations/network_monitor_impl.dart';
 export 'implementations/sync_orchestrator_impl.dart';
-// Core Interfaces - Define contracts for sync components
 export 'interfaces/i_cache_manager.dart';
 export 'interfaces/i_network_monitor.dart';
 export 'interfaces/i_sync_orchestrator.dart';
 export 'interfaces/i_sync_service.dart';
 export 'migration/app_migration_helper.dart';
-// Migration Components - For gradual transition from UnifiedSyncManager
 export 'migration/legacy_sync_bridge.dart';
 export 'migration/migration_cli.dart';
-// App-Specific Sync Services - Replacements for UnifiedSyncManager
 export 'services/gasometer_sync_service.dart';
 export 'services/plantis_sync_service.dart';
 export 'services/receituagro_sync_service.dart';
 export 'services/sync_logger.dart';
 export 'throttling/sync_queue.dart';
 export 'throttling/sync_throttler.dart';
-// Legacy support - The original UnifiedSyncManager (being phased out)
 export 'unified_sync_manager.dart';

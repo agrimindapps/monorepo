@@ -67,22 +67,15 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
         data: (featureFlagsState) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Main Validation Card
             _buildValidationCard(context, state, featureFlagsState),
 
             if (widget.showFullDetails) ...[
               const SizedBox(height: 16),
-
-              // Device-specific Premium Status
               _buildDeviceStatusCard(context, state),
 
               const SizedBox(height: 16),
-
-              // Cross-platform Sync Status
               _buildSyncStatusCard(context, state, featureFlagsState),
             ],
-
-            // Action Buttons
             if (widget.showFullDetails) ...[
               const SizedBox(height: 16),
               _buildActionButtons(context),
@@ -135,7 +128,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
       ),
       child: Row(
         children: [
-          // Status Animation
           AnimatedBuilder(
             animation: hasActiveSubscription ? _pulseAnimation : _pulseController,
             builder: (context, child) {
@@ -160,8 +152,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
           ),
           
           const SizedBox(width: 16),
-          
-          // Status Information
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,8 +179,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
               ],
             ),
           ),
-          
-          // Validation Status
           if (isValidationEnabled)
             Container(
               padding: const EdgeInsets.all(8),
@@ -281,8 +269,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
               ],
             ),
             const SizedBox(height: 12),
-            
-            // Device Premium Status Items
             _buildStatusItem(
               context,
               'Validação Local',
@@ -318,9 +304,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
     final theme = Theme.of(context);
     final notifier = ref.read(featureFlagsNotifierProvider.notifier);
     final isSyncEnabled = notifier.isContentSynchronizationEnabled;
-
-    // Sincronização cross-platform ainda não implementada no SubscriptionState
-    // Usar valores padrão por enquanto
     final isIOSPremiumActive = subscriptionState.hasActiveSubscription;
     final isAndroidPremiumActive = subscriptionState.hasActiveSubscription;
     const isWebPremiumActive = false; // Web ainda não tem subscription
@@ -370,7 +353,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
             const SizedBox(height: 12),
 
             if (isSyncEnabled) ...[
-              // Sync Status Items
               _buildSyncItem(
                 context,
                 'iOS',
@@ -494,7 +476,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
   Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
-        // Restore Purchases Button
         Expanded(
           child: OutlinedButton.icon(
             onPressed: _isValidating ? null : _restorePurchases,
@@ -510,8 +491,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
         ),
         
         const SizedBox(width: 12),
-        
-        // Sync Premium Status Button
         Expanded(
           child: ElevatedButton.icon(
             onPressed: _isValidating ? null : _syncPremiumStatus,
@@ -540,7 +519,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
     if (widget.onRestorePressed != null) {
       widget.onRestorePressed!();
     } else {
-      // Default restore logic
       await ref.read(subscriptionNotifierProvider.notifier).restorePurchases();
 
       if (mounted) {
@@ -563,7 +541,6 @@ class _PremiumValidationWidgetState extends ConsumerState<PremiumValidationWidge
       if (widget.onSyncPressed != null) {
         widget.onSyncPressed!();
       } else {
-        // Default sync logic
         final notifier = ref.read(subscriptionNotifierProvider.notifier);
         await notifier.validatePremiumStatus();
         await notifier.syncPremiumStatus();

@@ -40,8 +40,6 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
           ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
         ),
         const SizedBox(height: 30),
-
-        // Campo de email
         AuthTextFieldWidget(
           controller: formNotifier.emailController,
           label: 'Email',
@@ -50,22 +48,16 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
           keyboardType: TextInputType.emailAddress,
           validator: formNotifier.validateEmail,
         ),
-
-        // Mensagem de erro
         if (_errorMessage != null) ...[
           const SizedBox(height: 16),
           _buildErrorMessage(context, _errorMessage!),
         ],
-
-        // Mensagem de sucesso
         if (_successMessageShown) ...[
           const SizedBox(height: 16),
           _buildSuccessMessage(context),
         ],
 
         const SizedBox(height: 30),
-
-        // Botão de enviar
         AuthButtonWidget(
           text: 'Enviar Link',
           isLoading: _isLoading,
@@ -73,8 +65,6 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
         ),
 
         const SizedBox(height: 20),
-
-        // Voltar para login
         Center(
           child: TextButton.icon(
             onPressed: () => formNotifier.hideRecoveryForm(),
@@ -142,8 +132,6 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
   Future<void> _handleResetPassword() async {
     final formNotifier = ref.read(loginFormNotifierProvider.notifier);
     final email = formNotifier.emailController.text.trim();
-
-    // Validar email
     if (email.isEmpty) {
       setState(() {
         _errorMessage = 'Email é obrigatório';
@@ -181,8 +169,6 @@ class _RecoveryFormWidgetState extends ConsumerState<RecoveryFormWidget> {
           _successMessageShown = true;
           _isLoading = false;
         });
-
-        // Aguardar 3 segundos e voltar para login
         await Future<void>.delayed(const Duration(seconds: 3));
         if (mounted) {
           formNotifier.hideRecoveryForm();

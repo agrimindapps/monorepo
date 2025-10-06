@@ -57,11 +57,7 @@ class NavigationOptimizer {
     final result = await Navigator.of(context).push(route);
     
     _updateNavigationMetrics(routeName, startTime);
-    
-    // Remove da cache após uso
     _preloadedRoutes.remove(routeName);
-    
-    // Prediz próxima navegação
     _predictAndPreload();
     
     return result;
@@ -73,7 +69,6 @@ class NavigationOptimizer {
     
     for (final prediction in predictions.take(2)) {
       if (!_preloadedRoutes.containsKey(prediction.routeName)) {
-        // Agendar preload para próximo frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _preloadPredictedRoute(prediction.routeName);
         });
@@ -85,8 +80,6 @@ class NavigationOptimizer {
     if (_navigationHistory.length < 2) return [];
     
     final predictions = <String, int>{};
-    
-    // Analisa padrões sequenciais
     for (int i = 0; i < _navigationHistory.length - 1; i++) {
       final current = _navigationHistory[i];
       final next = _navigationHistory[i + 1];
@@ -94,8 +87,6 @@ class NavigationOptimizer {
       final key = '$current->$next';
       predictions[key] = (predictions[key] ?? 0) + 1;
     }
-    
-    // Converte para predições ordenadas
     final sortedPredictions = predictions.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     
@@ -110,7 +101,6 @@ class NavigationOptimizer {
   }
 
   void _preloadPredictedRoute(String routeName) {
-    // Implementar preload baseado no tipo de rota
     switch (routeName) {
       case '/animals':
         preloadRoute(routeName, () => _createAnimalsPage());
@@ -122,7 +112,6 @@ class NavigationOptimizer {
         preloadRoute(routeName, () => _createCalculatorsPage());
         break;
       default:
-        // Preload genérico
         break;
     }
   }
@@ -187,8 +176,6 @@ class NavigationOptimizer {
     
     return metrics.take(10).toList();
   }
-
-  // Placeholder pages for preloading
   Widget _createAnimalsPage() => const Scaffold(body: Center(child: Text('Animals')));
   Widget _createMedicationsPage() => const Scaffold(body: Center(child: Text('Medications')));
   Widget _createCalculatorsPage() => const Scaffold(body: Center(child: Text('Calculators')));
@@ -198,8 +185,6 @@ class NavigationOptimizer {
 class OptimizedRouter {
   static final Map<String, WidgetBuilder> _routes = {};
   static final Map<String, Widget> _cachedWidgets = {};
-  
-  // Prevent instantiation
   OptimizedRouter._();
   
   static void registerRoute(String name, WidgetBuilder builder) {
@@ -256,7 +241,6 @@ class OptimizedPageRoute<T> extends MaterialPageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    // Transição otimizada para performance
     return FadeTransition(
       opacity: animation,
       child: child,

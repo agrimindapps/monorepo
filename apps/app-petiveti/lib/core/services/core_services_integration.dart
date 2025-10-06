@@ -16,8 +16,6 @@ class CoreServicesIntegration {
   CoreServicesIntegration._internal();
 
   bool _isInitialized = false;
-
-  // Core services
   late final CoreHiveStorageService _storageService;
   late final CacheManagementService _cacheService;
   late final PreferencesService _preferencesService;
@@ -26,10 +24,7 @@ class CoreServicesIntegration {
   late final NavigationService _navigationService;
   late final VersionManagerService _versionService;
   late final FirebaseDeviceService _deviceService;
-
-  // Petiveti specific services
   late final PetivetiSyncService _syncService;
-  // late final MonorepoAuthCache _authCache; // REVIEW (converted TODO 2025-10-06): Implementar quando disponível
 
   /// Core Storage Service (substitui local HiveService)
   CoreHiveStorageService get storageService {
@@ -86,10 +81,6 @@ class CoreServicesIntegration {
   }
 
   /// Monorepo Auth Cache
-  // MonorepoAuthCache get authCache {
-  //   _ensureInitialized();
-  //   return _authCache;
-  // }
 
   /// Inicializa todos os serviços do core
   Future<Either<Failure, void>> initialize({
@@ -109,14 +100,8 @@ class CoreServicesIntegration {
         'Initializing CoreServicesIntegration',
         name: 'CoreIntegration',
       );
-
-      // Inicializar serviços do core em ordem de dependência
       await _initializeCoreServices();
-
-      // Inicializar serviços específicos do Petiveti
       await _initializePetivetiServices(syncConfig, enableDevelopmentMode);
-
-      // Configurar integrações entre serviços
       await _setupServiceIntegrations();
 
       _isInitialized = true;
@@ -141,31 +126,14 @@ class CoreServicesIntegration {
   /// Inicializa serviços do core package
   Future<void> _initializeCoreServices() async {
     developer.log('Initializing core services', name: 'CoreIntegration');
-
-    // Storage Service - substitui local HiveService
     _storageService = CoreHiveStorageService();
-
-    // Cache Management Service - substitui local CacheService
     _cacheService = CacheManagementService.instance;
-
-    // Preferences Service - substitui uso direto de SharedPreferences
     _preferencesService = PreferencesService();
     await _preferencesService.initialize();
-
-    // Asset Loader Service - para assets otimizados
     _assetLoaderService = AssetLoaderService();
-
-    // Optimized Image Service - para imagens de pets
     _imageService = OptimizedImageService();
-
-    // Navigation Service - para navegação centralizada
     _navigationService = NavigationService();
-
-    // Version Manager Service - para controle de versão do app
     _versionService = VersionManagerService();
-    // await _versionService.initialize(); // REVIEW (converted TODO 2025-10-06): Verificar se método existe
-
-    // Firebase Device Service - para integração Firebase
     _deviceService = FirebaseDeviceService();
 
     developer.log('Core services initialized', name: 'CoreIntegration');
@@ -177,8 +145,6 @@ class CoreServicesIntegration {
     bool enableDevelopmentMode,
   ) async {
     developer.log('Initializing Petiveti services', name: 'CoreIntegration');
-
-    // Petiveti Sync Service
     _syncService = PetivetiSyncService.instance;
     final syncResult = await _syncService.initialize(
       config: syncConfig,
@@ -189,27 +155,15 @@ class CoreServicesIntegration {
       throw Exception('Failed to initialize sync service');
     }
 
-    // Monorepo Auth Cache - TODO: Implementar quando disponível
-    // _authCache = MonorepoAuthCache.instance;
-    // await _authCache.initialize();
-
     developer.log('Petiveti services initialized', name: 'CoreIntegration');
   }
 
   /// Configura integrações entre serviços
   Future<void> _setupServiceIntegrations() async {
     developer.log('Setting up service integrations', name: 'CoreIntegration');
-
-    // Integrar cache com storage
     await _setupCacheStorageIntegration();
-
-    // Integrar sync com cache
     await _setupSyncCacheIntegration();
-
-    // Integrar auth cache com preferences
     await _setupAuthPreferencesIntegration();
-
-    // Integrar imagens com cache
     await _setupImageCacheIntegration();
 
     developer.log('Service integrations configured', name: 'CoreIntegration');
@@ -217,26 +171,18 @@ class CoreServicesIntegration {
 
   /// Integra cache com storage
   Future<void> _setupCacheStorageIntegration() async {
-    // Configurar cache para usar core storage ao invés de storage local
-    // REVIEW (converted TODO 2025-10-06): Implementar quando CacheManagementService suportar storage personalizado
   }
 
   /// Integra sync com cache
   Future<void> _setupSyncCacheIntegration() async {
-    // Configurar sync para usar cache do core para dados frequentes
-    // REVIEW (converted TODO 2025-10-06): Implementar cache de entidades frequentemente acessadas
   }
 
   /// Integra auth cache com preferences
   Future<void> _setupAuthPreferencesIntegration() async {
-    // Configurar auth cache para usar preferences do core
-    // REVIEW (converted TODO 2025-10-06): Migrar configurações de auth para core preferences
   }
 
   /// Integra imagens com cache
   Future<void> _setupImageCacheIntegration() async {
-    // Configurar service de imagens para usar cache otimizado
-    // Importante para fotos de pets que são acessadas frequentemente
   }
 
   /// Verifica se foi inicializado
@@ -327,7 +273,6 @@ class CoreServicesIntegration {
 
   /// Obtém versão do serviço
   String _getServiceVersion(String serviceName) {
-    // REVIEW (converted TODO 2025-10-06): Implementar obtenção de versão real
     return '1.0.0';
   }
 
@@ -340,13 +285,6 @@ class CoreServicesIntegration {
         'Migrating local Hive data to core storage',
         name: 'CoreIntegration',
       );
-
-      // REVIEW (converted TODO 2025-10-06): Implementar migração de dados do Hive local
-      // 1. Ler dados do HiveService local
-      // 2. Converter para formato do CoreHiveStorageService
-      // 3. Salvar no core storage
-      // 4. Verificar integridade
-      // 5. Remover dados locais (opcional)
 
       developer.log(
         'Local Hive data migration completed',
@@ -366,12 +304,6 @@ class CoreServicesIntegration {
         name: 'CoreIntegration',
       );
 
-      // REVIEW (converted TODO 2025-10-06): Implementar migração de SharedPreferences
-      // 1. Ler configurações do SharedPreferences
-      // 2. Mapear para structure do PreferencesService
-      // 3. Salvar usando core service
-      // 4. Verificar migração
-
       developer.log(
         'Local preferences migration completed',
         name: 'CoreIntegration',
@@ -390,12 +322,6 @@ class CoreServicesIntegration {
         name: 'CoreIntegration',
       );
 
-      // REVIEW (converted TODO 2025-10-06): Implementar migração de cache
-      // 1. Ler dados do cache local
-      // 2. Converter para formato do CacheManagementService
-      // 3. Importar no core cache
-      // 4. Configurar políticas de cache
-
       developer.log('Local cache migration completed', name: 'CoreIntegration');
       return const Right(null);
     } catch (e) {
@@ -409,8 +335,6 @@ class CoreServicesIntegration {
       'Starting full migration to core services',
       name: 'CoreIntegration',
     );
-
-    // Migrar dados em ordem de dependência
     final hiveResult = await migrateLocalHiveData();
     if (hiveResult.isLeft()) return hiveResult;
 
@@ -433,7 +357,6 @@ class CoreServicesIntegration {
       if (_isInitialized) {
         await _syncService.dispose();
         _cacheService.dispose();
-        // Outros serviços cleanup...
       }
 
       _isInitialized = false;

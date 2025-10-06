@@ -13,8 +13,6 @@ class ValidationService {
   factory ValidationService() => _instance;
   ValidationService._internal();
   static final ValidationService _instance = ValidationService._internal();
-
-  // Cache para validações complexas
   final Map<String, Timer> _debounceTimers = {};
   final Map<String, ValidationResult> _validationCache = {};
 
@@ -191,8 +189,6 @@ class ValidationService {
           ? ValidationResult.error('$fieldName é obrigatório')
           : ValidationResult.success();
     }
-
-    // Remove formatação monetária
     final cleanValue = value
         .replaceAll('R\$', '')
         .replaceAll('.', '')
@@ -250,7 +246,6 @@ class ValidationService {
     ValidationResult Function() validator, {
     Duration delay = const Duration(milliseconds: 300),
   }) async {
-    // Cancela timer anterior se existir
     _debounceTimers[key]?.cancel();
 
     final completer = Completer<ValidationResult>();
@@ -294,10 +289,7 @@ class ValidationService {
     }
 
     final cleanValue = sanitizeInput(value.replaceAll(RegExp(r'[^A-Z0-9]'), ''));
-    
-    // Placa Mercosul: ABC1D23
     final mercosulRegex = RegExp(r'^[A-Z]{3}[0-9][A-Z][0-9]{2}$');
-    // Placa antiga: ABC1234
     final antigaRegex = RegExp(r'^[A-Z]{3}[0-9]{4}$');
     
     if (!mercosulRegex.hasMatch(cleanValue) && !antigaRegex.hasMatch(cleanValue)) {
@@ -318,8 +310,6 @@ class ValidationService {
     if (cleanValue.length != 17) {
       return ValidationResult.error('Chassi deve ter 17 caracteres');
     }
-    
-    // Chassi não pode conter I, O, Q
     if (RegExp(r'[IOQ]').hasMatch(cleanValue)) {
       return ValidationResult.error('Chassi não pode conter as letras I, O ou Q');
     }
@@ -369,15 +359,11 @@ class ValidationService {
     if (odometer > 9999999) {
       return ValidationResult.error('Valor do odômetro muito alto');
     }
-
-    // Validação contextual com odômetro inicial
     if (initialOdometer != null && odometer < initialOdometer) {
       return ValidationResult.error(
         'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)'
       );
     }
-
-    // Validação contextual com odômetro atual
     if (currentOdometer != null) {
       if (odometer < currentOdometer - 1000) {
         return ValidationResult.error('Odômetro muito abaixo do atual');
@@ -415,8 +401,6 @@ class ValidationService {
     if (liters > 999.999) {
       return ValidationResult.error('Quantidade muito alta');
     }
-
-    // Validação contextual com capacidade do tanque
     if (tankCapacity != null && liters > tankCapacity * 1.1) {
       return ValidationResult.warning(
         'Quantidade excede capacidade do tanque (${tankCapacity.toStringAsFixed(0)}L)'
@@ -459,8 +443,6 @@ class ValidationService {
     for (final entry in formData.entries) {
       final key = entry.key;
       final value = entry.value;
-      
-      // Aplica validações baseadas no nome do campo
       if (key.contains('email')) {
         results[key] = validateEmail(value?.toString());
       } else if (key.contains('placa') || key.contains('plate')) {
@@ -527,18 +509,12 @@ extension ValidationServiceExtension on ValidationService {
     bool isRenavam = false,
   }) {
     final validations = <ValidationResult>[];
-
-    // Validação obrigatória
     if (required) {
       validations.add(validateRequired(value, fieldName));
     }
-
-    // Se campo está vazio e não é obrigatório, retorna sucesso
     if ((value == null || value.isEmpty) && !required) {
       return ValidationResult.success();
     }
-
-    // Validações de comprimento
     if (minLength != null || maxLength != null) {
       validations.add(validateLength(
         value, 
@@ -547,8 +523,6 @@ extension ValidationServiceExtension on ValidationService {
         maxLength: maxLength ?? 255,
       ));
     }
-
-    // Validações específicas
     if (isEmail) {
       validations.add(validateEmail(value));
     } else if (isPhone) {
@@ -568,8 +542,6 @@ extension ValidationServiceExtension on ValidationService {
     } else if (isRenavam) {
       validations.add(validateRenavam(value));
     }
-
-    // Validação por padrão regex
     if (pattern != null && value != null && value.isNotEmpty) {
       final regex = RegExp(pattern);
       if (!regex.hasMatch(value)) {

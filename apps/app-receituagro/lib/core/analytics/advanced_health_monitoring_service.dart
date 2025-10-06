@@ -91,8 +91,6 @@ class AdvancedHealthMonitoringService {
   late IAnalyticsRepository _analytics;
   late ICrashlyticsRepository _crashlytics;
   bool _isInitialized = false;
-
-  // Health monitoring data
   final List<SystemHealthReport> _healthHistory = [];
   final Map<String, int> _alertCounts = {};
   final Map<String, DateTime> _lastAlertTimes = {};
@@ -110,11 +108,7 @@ class AdvancedHealthMonitoringService {
 
     _analytics = analytics;
     _crashlytics = crashlytics;
-
-    // Setup default alert configurations
     _setupDefaultAlerts();
-
-    // Start health monitoring
     await _startHealthMonitoring();
 
     _isInitialized = true;
@@ -160,17 +154,12 @@ class AdvancedHealthMonitoringService {
 
   /// Start health monitoring
   Future<void> _startHealthMonitoring() async {
-    // Run health checks every 2 minutes
     _healthCheckTimer = Timer.periodic(const Duration(minutes: 2), (_) async {
       await performHealthCheck();
     });
-
-    // Clean up old alerts every hour
     _alertCleanupTimer = Timer.periodic(const Duration(hours: 1), (_) {
       _cleanupOldAlerts();
     });
-
-    // Initial health check
     await performHealthCheck();
   }
 
@@ -179,8 +168,6 @@ class AdvancedHealthMonitoringService {
     try {
       final timestamp = DateTime.now();
       final componentResults = <ComponentHealthResult>[];
-
-      // Check each system component
       componentResults.add(await _checkDatabaseHealth());
       componentResults.add(await _checkNetworkHealth());
       componentResults.add(await _checkStorageHealth());
@@ -188,11 +175,7 @@ class AdvancedHealthMonitoringService {
       componentResults.add(await _checkPerformanceHealth());
       componentResults.add(await _checkAuthenticationHealth());
       componentResults.add(await _checkSyncHealth());
-
-      // Determine overall status
       final overallStatus = _determineOverallStatus(componentResults);
-
-      // Collect system metrics
       final systemMetrics = await _collectSystemMetrics();
 
       final report = SystemHealthReport(
@@ -201,17 +184,11 @@ class AdvancedHealthMonitoringService {
         systemMetrics: systemMetrics,
         timestamp: timestamp,
       );
-
-      // Store in history (keep last 50 reports)
       _healthHistory.add(report);
       if (_healthHistory.length > 50) {
         _healthHistory.removeAt(0);
       }
-
-      // Check for alerts
       await _processAlerts(report);
-
-      // Log to analytics
       await _analytics.logEvent(
         'health_check_completed',
         parameters: report.toJson(),
@@ -225,8 +202,6 @@ class AdvancedHealthMonitoringService {
         reason: 'Health check failed',
         fatal: false,
       );
-
-      // Return failed status
       return SystemHealthReport(
         overallStatus: HealthStatus.failed,
         componentResults: [],
@@ -240,8 +215,6 @@ class AdvancedHealthMonitoringService {
   Future<ComponentHealthResult> _checkDatabaseHealth() async {
     try {
       final startTime = DateTime.now();
-
-      // Simulate database check - in production, this would test actual DB connections
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       final duration = DateTime.now().difference(startTime);
@@ -287,8 +260,6 @@ class AdvancedHealthMonitoringService {
   Future<ComponentHealthResult> _checkNetworkHealth() async {
     try {
       final startTime = DateTime.now();
-
-      // Check connectivity to Firebase
       final result = await InternetAddress.lookup('firebase.google.com');
       
       final duration = DateTime.now().difference(startTime);
@@ -332,7 +303,6 @@ class AdvancedHealthMonitoringService {
   /// Check storage health
   Future<ComponentHealthResult> _checkStorageHealth() async {
     try {
-      // Mock storage metrics - in production, get actual values
       const totalSpace = 32 * 1024 * 1024 * 1024; // 32GB
       const usedSpace = 24 * 1024 * 1024 * 1024; // 24GB
       const availableSpace = totalSpace - usedSpace;
@@ -378,7 +348,6 @@ class AdvancedHealthMonitoringService {
   /// Check memory health
   Future<ComponentHealthResult> _checkMemoryHealth() async {
     try {
-      // Mock memory metrics - in production, get actual values
       const totalMemory = 8 * 1024 * 1024 * 1024; // 8GB
       const usedMemory = 4.5 * 1024 * 1024 * 1024; // 4.5GB
       const availableMemory = totalMemory - usedMemory;
@@ -424,7 +393,6 @@ class AdvancedHealthMonitoringService {
   /// Check performance health
   Future<ComponentHealthResult> _checkPerformanceHealth() async {
     try {
-      // Mock performance metrics
       const avgResponseTime = 850; // ms
       const errorRate = 2.1; // %
       const throughput = 45; // requests/second
@@ -469,7 +437,6 @@ class AdvancedHealthMonitoringService {
   /// Check authentication health
   Future<ComponentHealthResult> _checkAuthenticationHealth() async {
     try {
-      // Mock auth health check
       const activeUsers = 1250;
       const authErrors = 5;
       const tokenRefreshRate = 98.5; // %
@@ -513,7 +480,6 @@ class AdvancedHealthMonitoringService {
   /// Check sync health
   Future<ComponentHealthResult> _checkSyncHealth() async {
     try {
-      // Mock sync health metrics
       const pendingSyncs = 15;
       const failedSyncs = 2;
       const syncSuccessRate = 96.8; // %
@@ -594,7 +560,6 @@ class AdvancedHealthMonitoringService {
   /// Check if alert should be triggered
   Future<bool> _shouldTriggerAlert(
       AlertConfig config, SystemHealthReport report) async {
-    // Simple condition checking - in production, this would be more sophisticated
     switch (config.name) {
       case 'high_error_rate':
         final errorRate = report.componentResults
@@ -665,25 +630,17 @@ class AdvancedHealthMonitoringService {
   Future<void> _triggerAlert(AlertConfig config, SystemHealthReport report) async {
     final now = DateTime.now();
     final alertKey = config.name;
-
-    // Check rate limiting
     final lastAlert = _lastAlertTimes[alertKey];
     if (lastAlert != null &&
         now.difference(lastAlert) < config.threshold) {
       return; // Too soon to trigger again
     }
-
-    // Check max occurrences
     final count = _alertCounts[alertKey] ?? 0;
     if (count >= config.maxOccurrences) {
       return; // Max occurrences reached
     }
-
-    // Trigger alert
     _alertCounts[alertKey] = count + 1;
     _lastAlertTimes[alertKey] = now;
-
-    // Log alert
     await _analytics.logEvent(
       'health_alert_triggered',
       parameters: {
@@ -693,8 +650,6 @@ class AdvancedHealthMonitoringService {
         'timestamp': now.toIso8601String(),
       },
     );
-
-    // In production, this would send actual notifications
     if (kDebugMode) {
       print('🚨 Health Alert: ${config.name} - ${config.condition}');
     }
@@ -717,8 +672,6 @@ class AdvancedHealthMonitoringService {
     final cutoff = now.subtract(const Duration(hours: 24));
 
     _lastAlertTimes.removeWhere((key, time) => time.isBefore(cutoff));
-    
-    // Reset alert counts daily
     if (now.hour == 0 && now.minute < 5) {
       _alertCounts.clear();
     }

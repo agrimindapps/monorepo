@@ -17,8 +17,6 @@ class DiagnosticoIntegrationService {
   final CulturaHiveRepository _culturaRepo;
   final PragasHiveRepository _pragasRepo;
   final FitossanitarioInfoHiveRepository _fitossanitarioInfoRepo;
-
-  // Cache interno para performance
   final Map<String, FitossanitarioHive> _defensivoCache = {};
   final Map<String, CulturaHive> _culturaCache = {};
   final Map<String, PragasHive> _pragaCache = {};
@@ -41,13 +39,9 @@ class DiagnosticoIntegrationService {
     try {
       final diagnostico = await _diagnosticoRepo.getByIdOrObjectId(idReg);
       if (diagnostico == null) return null;
-
-      // Buscar dados relacionados com cache
       final defensivo = await _getDefensivoById(diagnostico.fkIdDefensivo);
       final cultura = await _getCulturaById(diagnostico.fkIdCultura);
       final praga = await _getPragaById(diagnostico.fkIdPraga);
-      
-      // Buscar informações adicionais do defensivo se existir
       FitossanitarioInfoHive? infoDefensivo;
       if (defensivo != null) {
         infoDefensivo = await _getInfoDefensivoById(defensivo.idReg);
@@ -61,7 +55,6 @@ class DiagnosticoIntegrationService {
         infoDefensivo: infoDefensivo,
       );
     } catch (e) {
-      // TODO: Implement proper logging
       return null;
     }
   }
@@ -81,7 +74,6 @@ class DiagnosticoIntegrationService {
 
       return detalhados;
     } catch (e) {
-      // TODO: Implement proper logging
       return [];
     }
   }
@@ -101,7 +93,6 @@ class DiagnosticoIntegrationService {
 
       return detalhados;
     } catch (e) {
-      // TODO: Implement proper logging
       return [];
     }
   }
@@ -121,7 +112,6 @@ class DiagnosticoIntegrationService {
 
       return detalhados;
     } catch (e) {
-      // TODO: Implement proper logging
       return [];
     }
   }
@@ -135,8 +125,6 @@ class DiagnosticoIntegrationService {
     try {
       final result = await _diagnosticoRepo.getAll();
       List<DiagnosticoHive> diagnosticos = result.isSuccess ? result.data! : [];
-
-      // Aplicar filtros
       if (culturaId != null && culturaId.isNotEmpty) {
         diagnosticos = diagnosticos.where((d) => d.fkIdCultura == culturaId).toList();
       }
@@ -148,8 +136,6 @@ class DiagnosticoIntegrationService {
       if (defensivoId != null && defensivoId.isNotEmpty) {
         diagnosticos = diagnosticos.where((d) => d.fkIdDefensivo == defensivoId).toList();
       }
-
-      // Converter para diagnósticos detalhados
       final List<DiagnosticoDetalhado> detalhados = [];
       for (final diagnostico in diagnosticos) {
         final detalhado = await getDiagnosticoCompleto(diagnostico.idReg);
@@ -160,7 +146,6 @@ class DiagnosticoIntegrationService {
 
       return detalhados;
     } catch (e) {
-      // TODO: Implement proper logging
       return [];
     }
   }
@@ -174,8 +159,6 @@ class DiagnosticoIntegrationService {
 
       for (final defensivo in defensivos) {
         final info = await _getInfoDefensivoById(defensivo.idReg);
-        
-        // Buscar diagnósticos relacionados
         final diagnosticosRelacionados = await buscarPorDefensivo(defensivo.idReg);
         
         defensivosCompletos.add(DefensivoCompleto(
@@ -187,7 +170,6 @@ class DiagnosticoIntegrationService {
 
       return defensivosCompletos;
     } catch (e) {
-      // TODO: Implement proper logging
       return [];
     }
   }
@@ -196,23 +178,15 @@ class DiagnosticoIntegrationService {
   Future<List<PragaPorCultura>> getPragasPorCultura(String culturaId) async {
     try {
       print('=== OTIMIZADO: Carregando pragas para cultura $culturaId ===');
-      
-      // 1. Buscar APENAS os diagnósticos básicos da cultura (sem join completo)
       final diagnosticosBrutos = await _diagnosticoRepo.findByCultura(culturaId);
       print('Encontrados ${diagnosticosBrutos.length} diagnósticos básicos');
       
       if (diagnosticosBrutos.isEmpty) return [];
-      
-      // 2. Coletar IDs únicos que precisamos buscar
       final pragaIds = diagnosticosBrutos.map((d) => d.fkIdPraga).toSet();
       final defensivoIds = diagnosticosBrutos.map((d) => d.fkIdDefensivo).toSet();
       print('IDs únicos - Pragas: ${pragaIds.length}, Defensivos: ${defensivoIds.length}');
-      
-      // 3. Carregar em lote todas as pragas e defensivos necessários
       final pragasMap = <String, PragasHive>{};
       final defensivosMap = <String, FitossanitarioHive>{};
-      
-      // Carregar pragas em cache
       for (final pragaId in pragaIds) {
         if (!_pragaCache.containsKey(pragaId)) {
           final result = await _pragasRepo.getByKey(pragaId);
@@ -224,8 +198,6 @@ class DiagnosticoIntegrationService {
           pragasMap[pragaId] = _pragaCache[pragaId]!;
         }
       }
-      
-      // Carregar defensivos em cache
       for (final defensivoId in defensivoIds) {
         if (!_defensivoCache.containsKey(defensivoId)) {
           final result = await _fitossanitarioRepo.getByKey(defensivoId);
@@ -237,8 +209,6 @@ class DiagnosticoIntegrationService {
           defensivosMap[defensivoId] = _defensivoCache[defensivoId]!;
         }
       }
-      
-      // 4. Agrupar diagnósticos por praga e criar objetos DetalhadorS
       final Map<String, List<DiagnosticoDetalhado>> pragasMapDetalhado = {};
       
       for (final diagnostico in diagnosticosBrutos) {
@@ -246,8 +216,6 @@ class DiagnosticoIntegrationService {
         if (!pragasMapDetalhado.containsKey(pragaId)) {
           pragasMapDetalhado[pragaId] = [];
         }
-        
-        // Criar DiagnosticoDetalhado apenas com dados já carregados
         final diagnosticoDetalhado = DiagnosticoDetalhado(
           diagnostico: diagnostico,
           defensivo: defensivosMap[diagnostico.fkIdDefensivo],
@@ -258,8 +226,6 @@ class DiagnosticoIntegrationService {
         
         pragasMapDetalhado[pragaId]!.add(diagnosticoDetalhado);
       }
-
-      // 5. Converter para resultado final
       final List<PragaPorCultura> pragasPorCultura = [];
       for (final entry in pragasMapDetalhado.entries) {
         final praga = pragasMap[entry.key];
@@ -392,11 +358,8 @@ class DiagnosticoDetalhado {
   
   /// Propriedades adicionais para widgets especializados
   bool get isCritico {
-    // Considera crítico se: dosagem alta, toxicidade classe I ou II, ou problema de dados
     final dosageValue = double.tryParse(diagnostico.dsMax) ?? 0;
     final isHighDosage = dosageValue > 1000; // Exemplo: dosagem > 1L/ha
-    
-    // Verifica se tem dados incompletos críticos
     final hasCriticalMissingData = defensivo == null || cultura == null || praga == null;
     
     return isHighDosage || hasCriticalMissingData;
@@ -411,18 +374,14 @@ class DiagnosticoDetalhado {
   }
   
   bool get temAplicacaoTerrestre {
-    // Verifica se tem aplicação terrestre baseado na formulação do defensivo
     final formulacao = defensivo?.formulacao?.toLowerCase() ?? '';
     return formulacao.contains('sc') || formulacao.contains('ec') || formulacao.contains('wg') || formulacao.isEmpty;
   }
   
   bool get temAplicacaoAerea {
-    // Verifica se tem aplicação aérea baseado na formulação do defensivo  
     final formulacao = defensivo?.formulacao?.toLowerCase() ?? '';
     return formulacao.contains('ul') || formulacao.contains('eo');
   }
-
-  // Getter para compatibilidade com código legado
   List<FitossanitarioHive> get defensivos {
     return defensivo != null ? [defensivo!] : [];
   }

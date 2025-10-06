@@ -21,7 +21,6 @@ class PromoTestimonialsSection extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Section Title
           Text(
             'Depoimentos',
             style: theme.textTheme.displaySmall?.copyWith(
@@ -97,7 +96,6 @@ class PromoTestimonialsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Stars Rating
           Row(
             children: List.generate(5, (index) => 
               Icon(
@@ -109,8 +107,6 @@ class PromoTestimonialsSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          
-          // Testimonial Text
           Text(
             '"${testimonial.text}"',
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -120,11 +116,8 @@ class PromoTestimonialsSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          
-          // Author Info
           Row(
             children: [
-              // Avatar
               CircleAvatar(
                 radius: 20,
                 backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -140,8 +133,6 @@ class PromoTestimonialsSection extends StatelessWidget {
               ),
               
               const SizedBox(width: 12),
-              
-              // Author details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

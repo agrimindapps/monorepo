@@ -25,8 +25,6 @@ class AuthState {
   final bool isInitialized;
   final bool isPremium;
   final AuthOperation? currentOperation;
-
-  // Device validation state
   final bool isValidatingDevice;
   final String? deviceValidationError;
   final bool deviceLimitExceeded;
@@ -42,8 +40,6 @@ class AuthState {
     this.deviceValidationError,
     this.deviceLimitExceeded = false,
   });
-
-  // Computed getters
   bool get isAuthenticated => currentUser != null;
   bool get isAnonymous => currentUser?.provider.name == 'anonymous';
 
@@ -70,8 +66,6 @@ class AuthState {
       deviceLimitExceeded: deviceLimitExceeded ?? this.deviceLimitExceeded,
     );
   }
-
-  // Nullify user variant
   AuthState withoutUser() {
     return AuthState(
       currentUser: null,
@@ -107,7 +101,6 @@ class AuthNotifier extends _$AuthNotifier {
 
   @override
   Future<AuthState> build() async {
-    // Initialize dependencies
     _loginUseCase = ref.read(loginUseCaseProvider);
     _logoutUseCase = ref.read(logoutUseCaseProvider);
     _authRepository = ref.read(authRepositoryProvider);
@@ -119,21 +112,14 @@ class AuthNotifier extends _$AuthNotifier {
     _revokeDeviceUseCase = ref.read(revokeDeviceUseCaseProvider);
     _enhancedDeletionService = ref.read(enhancedAccountDeletionServiceProvider);
     _analytics = ref.read(analyticsProviderProvider);
-
-    // Setup stream subscriptions
     _initializeAuthState();
-
-    // Return initial state
     return const AuthState();
   }
 
   void _initializeAuthState() {
-    // Listen to user changes
     _userSubscription = _authRepository.currentUser.listen(
       (user) async {
         final currentState = state.valueOrNull ?? const AuthState();
-
-        // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
         if (user == null && await shouldUseAnonymousMode()) {
           if (kDebugMode) {
             debugPrint(
@@ -143,13 +129,9 @@ class AuthNotifier extends _$AuthNotifier {
           await signInAnonymously();
           return;
         }
-
-        // Update state with new user
         state = AsyncValue.data(
           currentState.copyWith(currentUser: user),
         );
-
-        // Complete auth initialization
         await _completeAuthInitialization(user);
       },
       onError: (Object error) {
@@ -169,8 +151,6 @@ class AuthNotifier extends _$AuthNotifier {
         _authStateNotifier.updateInitializationStatus(true);
       },
     );
-
-    // Listen to subscription changes
     if (_subscriptionRepository != null) {
       _subscriptionStream =
           _subscriptionRepository.subscriptionStatus.listen((subscription) {
@@ -184,8 +164,6 @@ class AuthNotifier extends _$AuthNotifier {
         _authStateNotifier.updatePremiumStatus(isPremium);
       });
     }
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _userSubscription?.cancel();
       _subscriptionStream?.cancel();
@@ -196,18 +174,12 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _completeAuthInitialization(UserEntity? user) async {
     try {
       final currentState = state.valueOrNull ?? const AuthState();
-
-      // Update AuthStateNotifier with user changes
       _authStateNotifier.updateUser(user);
-
-      // Sync with RevenueCat when user logs in (not anonymous)
       if (user != null &&
           !currentState.isAnonymous &&
           _subscriptionRepository != null) {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
-
-        // Trigger background sync without blocking
         _triggerBackgroundSyncIfNeeded(user.id);
       } else {
         state = AsyncValue.data(
@@ -316,11 +288,7 @@ class AuthNotifier extends _$AuthNotifier {
             currentOperation: null,
           ),
         );
-
-        // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
-
-        // Log login event
         _analytics?.logLogin('email');
       },
     );
@@ -332,15 +300,10 @@ class AuthNotifier extends _$AuthNotifier {
       await login(email, password);
 
       final currentState = state.valueOrNull ?? const AuthState();
-
-      // Login successful - validate device and trigger sync
       if (currentState.isAuthenticated &&
           !currentState.isAnonymous &&
           currentState.errorMessage == null) {
-        // Validate device FIRST (critical for security)
         await _validateDeviceAfterLogin();
-
-        // If device validation passed, trigger sync in background
         if (!currentState.deviceLimitExceeded &&
             currentState.currentUser != null) {
           _triggerBackgroundSyncIfNeeded(currentState.currentUser!.id);
@@ -451,14 +414,10 @@ class AuthNotifier extends _$AuthNotifier {
         '🚫 Limite de dispositivos excedido - fazendo logout automático',
       );
     }
-
-    // Log analytics event
     await _analytics?.logEvent('device_limit_exceeded', {
       'user_id': currentState.currentUser?.id ?? 'unknown',
       'device_count': 3,
     });
-
-    // Force logout after a brief delay to show error message
     unawaited(Future.delayed(const Duration(milliseconds: 1500), () {
       final newState = state.valueOrNull ?? const AuthState();
       if (newState.deviceLimitExceeded) {
@@ -477,8 +436,6 @@ class AuthNotifier extends _$AuthNotifier {
     }
 
     final currentState = state.valueOrNull ?? const AuthState();
-
-    // Execute in background without blocking
     unawaited(Future.delayed(const Duration(milliseconds: 100), () {
       if (currentState.isAuthenticated && !currentState.isAnonymous) {
         _backgroundSyncProvider.startBackgroundSync(
@@ -514,11 +471,7 @@ class AuthNotifier extends _$AuthNotifier {
         currentOperation: AuthOperation.logout,
       ),
     );
-
-    // 1. CRITICAL: Cleanup current device BEFORE logout
     await _performDeviceCleanupOnLogout();
-
-    // 2. Continue with normal logout
     final result = await _logoutUseCase();
 
     result.fold(
@@ -540,15 +493,9 @@ class AuthNotifier extends _$AuthNotifier {
                 currentOperation: null,
               ),
         );
-
-        // Reset sync state for next session
         _backgroundSyncProvider?.resetSyncState();
-
-        // Update AuthStateNotifier with logout
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
-
-        // Log logout event
         _analytics?.logLogout();
       },
     );
@@ -591,8 +538,6 @@ class AuthNotifier extends _$AuthNotifier {
             currentOperation: null,
           ),
         );
-
-        // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
       },
     );
@@ -631,11 +576,7 @@ class AuthNotifier extends _$AuthNotifier {
             currentOperation: null,
           ),
         );
-
-        // Update AuthStateNotifier with anonymous user
         _authStateNotifier.updateUser(user);
-
-        // Save anonymous preference
         _saveAnonymousPreference();
       },
     );
@@ -744,7 +685,6 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (_) {
-        // Log password reset event
         _analytics?.logEvent('password_reset_requested', {'method': 'email'});
         return true;
       },
@@ -770,11 +710,7 @@ class AuthNotifier extends _$AuthNotifier {
       if (kDebugMode) {
         debugPrint('🧹 Device cleanup: Starting device revocation on logout');
       }
-
-      // Get current device UUID
       final currentDevice = await DeviceModel.fromCurrentDevice();
-
-      // CRITICAL: Check if device is valid (non-Web)
       if (currentDevice == null) {
         if (kDebugMode) {
           debugPrint(
@@ -783,8 +719,6 @@ class AuthNotifier extends _$AuthNotifier {
         }
         return;
       }
-
-      // Revoke this device (allow self-revoke on logout)
       final revokeResult = await _revokeDeviceUseCase(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
@@ -800,8 +734,6 @@ class AuthNotifier extends _$AuthNotifier {
               '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
             );
           }
-
-          // Log error for analytics/monitoring
           _analytics?.logEvent('device_cleanup_failed', {
             'context': 'logout',
             'error': failure.message,
@@ -813,8 +745,6 @@ class AuthNotifier extends _$AuthNotifier {
           if (kDebugMode) {
             debugPrint('✅ Device cleanup: Current device revoked successfully');
           }
-
-          // Log success for analytics
           _analytics?.logEvent('device_cleanup_success', {
             'context': 'logout',
             'device_uuid': currentDevice.uuid,
@@ -828,8 +758,6 @@ class AuthNotifier extends _$AuthNotifier {
           '❌ Device cleanup: Unexpected error during logout cleanup - $e',
         );
       }
-
-      // Log critical error
       unawaited(_analytics?.logEvent('device_cleanup_error', {
             'context': 'logout',
             'error': e.toString(),
@@ -862,7 +790,6 @@ class AuthNotifier extends _$AuthNotifier {
     );
 
     try {
-      // Use Enhanced Account Deletion Service
       final result = await _enhancedDeletionService.deleteAccount(
         password: password,
         userId: currentState.currentUser!.id,
@@ -883,7 +810,6 @@ class AuthNotifier extends _$AuthNotifier {
         },
         (deletionResult) {
           if (deletionResult.isSuccess) {
-            // Success - perform logout cleanup
             _performPostDeletionCleanup();
             return true;
           } else {
@@ -923,16 +849,10 @@ class AuthNotifier extends _$AuthNotifier {
             currentOperation: null,
           ),
     );
-
-    // Reset sync state for next session
     _backgroundSyncProvider?.resetSyncState();
-
-    // Update AuthStateNotifier
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
   }
-
-  // Sync-related getters - delegated to BackgroundSyncProvider
   bool get isSyncInProgress =>
       _backgroundSyncProvider?.isSyncInProgress ?? false;
 
@@ -942,10 +862,6 @@ class AuthNotifier extends _$AuthNotifier {
   String get syncMessage =>
       _backgroundSyncProvider?.currentSyncMessage ?? 'Sincronizando dados...';
 }
-
-// ============================================================================
-// DEPENDENCY PROVIDERS
-// ============================================================================
 
 @riverpod
 LoginUseCase loginUseCase(Ref ref) {

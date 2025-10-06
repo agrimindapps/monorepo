@@ -135,7 +135,6 @@ class DefensivosStatsGrid extends ConsumerWidget {
     HomeDefensivosState data,
   ) {
     final theme = Theme.of(context);
-    // ignore: unused_local_variable
     final isMediumDevice =
         MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
     final buttonWidth =

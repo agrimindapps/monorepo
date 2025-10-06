@@ -32,7 +32,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   @override
   Future<List<TaskModel>> getTasks(String userId) async {
     try {
-      // Using simple query to avoid composite index requirement
       final querySnapshot =
           await _getTasksCollection(
             userId,
@@ -47,8 +46,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 }),
               )
               .toList();
-
-      // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
       });
@@ -65,7 +62,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     String userId,
   ) async {
     try {
-      // Using simple query to avoid composite index requirement
       final querySnapshot =
           await _getTasksCollection(userId)
               .where('plant_id', isEqualTo: plantId)
@@ -81,8 +77,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 }),
               )
               .toList();
-
-      // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
       });
@@ -99,7 +93,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     String userId,
   ) async {
     try {
-      // Using simple query to avoid composite index requirement
       final querySnapshot =
           await _getTasksCollection(userId)
               .where('status', isEqualTo: status.key)
@@ -115,8 +108,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 }),
               )
               .toList();
-
-      // Apply sorting on client-side to avoid composite index
       tasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
       });
@@ -131,7 +122,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   Future<List<TaskModel>> getOverdueTasks(String userId) async {
     try {
       final now = DateTime.now();
-      // Using simple query to avoid composite index requirement
       final querySnapshot =
           await _getTasksCollection(
             userId,
@@ -146,8 +136,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 }),
               )
               .toList();
-
-      // Apply filtering and sorting on client-side to avoid composite index
       final filteredTasks =
           tasks.where((task) {
             return task.status == TaskStatus.pending &&
@@ -170,8 +158,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
       final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-
-      // Using simple query to avoid composite index requirement
       final querySnapshot =
           await _getTasksCollection(
             userId,
@@ -186,8 +172,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 }),
               )
               .toList();
-
-      // Apply filtering and sorting on client-side to avoid composite index
       final filteredTasks =
           tasks.where((task) {
             return task.status == TaskStatus.pending &&
@@ -212,8 +196,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     try {
       final now = DateTime.now();
       final nextWeek = now.add(const Duration(days: 7));
-
-      // Using simple query to avoid composite index requirement
       final querySnapshot =
           await _getTasksCollection(
             userId,
@@ -228,8 +210,6 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
                 }),
               )
               .toList();
-
-      // Apply filtering and sorting on client-side to avoid composite index
       final filteredTasks =
           tasks.where((task) {
             return task.status == TaskStatus.pending &&

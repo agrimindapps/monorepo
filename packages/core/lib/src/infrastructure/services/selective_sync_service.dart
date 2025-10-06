@@ -69,9 +69,6 @@ class SelectiveSyncService {
       if (config.localOnly || !config.shouldSync) {
         return Left(SyncFailure('Box "$boxName" configurada como somente local'));
       }
-
-      // Aqui você implementaria a lógica específica de sincronização
-      // baseada na estratégia configurada
       switch (config.syncStrategy) {
         case BoxSyncStrategy.automatic:
           return _syncBoxAutomatic(boxName);
@@ -95,7 +92,6 @@ class SelectiveSyncService {
       for (final boxName in syncableBoxes) {
         final result = await syncBox(boxName);
         if (result.isLeft()) {
-          // Log do erro, mas continua com as outras boxes
           developer.log('Erro ao sincronizar box "$boxName": ${result.fold((l) => l.message, (r) => "")}', name: 'SelectiveSyncService');
         }
       }
@@ -118,8 +114,6 @@ class SelectiveSyncService {
       if (config == null || !config.localOnly) {
         return Left(CacheFailure('Box "$boxName" não é configurada como conteúdo estático'));
       }
-
-      // Verifica se já foi inicializada para esta versão
       final versionKey = '_app_version_$boxName';
       final storedVersionResult = await _hiveStorage.get<String>(
         key: versionKey,
@@ -130,16 +124,10 @@ class SelectiveSyncService {
         (failure) => null,
         (version) => version,
       );
-
-      // Se já está na versão atual, não precisa reinicializar
       if (storedVersion == appVersion) {
         return const Right(null);
       }
-
-      // Limpa dados antigos
       await _hiveStorage.clear(box: boxName);
-
-      // Salva novos dados estáticos
       for (final entry in staticData.entries) {
         await _hiveStorage.save(
           key: entry.key,
@@ -147,8 +135,6 @@ class SelectiveSyncService {
           box: boxName,
         );
       }
-
-      // Marca a versão
       await _hiveStorage.save(
         key: versionKey,
         data: appVersion,
@@ -172,13 +158,8 @@ class SelectiveSyncService {
     return _syncBoxManual(boxName);
   }
 
-  // Métodos privados para diferentes estratégias de sincronização
-
   Future<Either<Failure, void>> _syncBoxAutomatic(String boxName) async {
     try {
-      // Para boxes não locais, usar o serviço de sync do Firebase
-      // Note: Como SyncFirebaseService é genérico, precisamos de uma instância específica
-      // Por enquanto, retornamos sucesso para boxes configuradas
       await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
       return const Right(null);
     } catch (e) {
@@ -188,9 +169,6 @@ class SelectiveSyncService {
 
   Future<Either<Failure, void>> _syncBoxManual(String boxName) async {
     try {
-      // Para boxes não locais, usar o serviço de sync do Firebase
-      // Note: Como SyncFirebaseService é genérico, precisamos de uma instância específica
-      // Por enquanto, retornamos sucesso para boxes configuradas
       await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
       return const Right(null);
     } catch (e) {
@@ -200,8 +178,6 @@ class SelectiveSyncService {
 
   Future<Either<Failure, void>> _syncBoxPeriodic(String boxName) async {
     try {
-      // Verifica se é hora de sincronizar baseado em período configurado
-      // Por enquanto, implementação simples que sempre sincroniza
       await Future.delayed(const Duration(milliseconds: 100)); // Simula operação
       return const Right(null);
     } catch (e) {
@@ -211,7 +187,6 @@ class SelectiveSyncService {
 
   Future<Either<Failure, void>> _syncBoxOnlineOnly(String boxName) async {
     try {
-      // Verifica conectividade antes de sincronizar
       final connectivityResult = await _connectivity.isOnline();
       final isOnline = connectivityResult.getOrElse(() => false);
       

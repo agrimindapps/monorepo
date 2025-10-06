@@ -34,16 +34,12 @@ class _EnhancedVehiclesPageState extends ConsumerState<EnhancedVehiclesPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Mobile header - only show on mobile
             if (ResponsiveLayout.isMobile(context))
               _MobileHeader(),
-            
-            // Desktop/Tablet content with responsive container
             Expanded(
               child: ResponsiveContentArea(
                 child: Column(
                   children: [
-                    // Desktop header
                     if (!ResponsiveLayout.isMobile(context))
                       ResponsivePageHeader(
                         title: 'Gerenciamento de Veículos',
@@ -235,8 +231,6 @@ class _ResponsiveVehiclesGrid extends StatelessWidget {
       builder: (context, constraints) {
         final columns = ResponsiveBreakpoints.getGridColumns(constraints.maxWidth);
         final spacing = AdaptiveSpacing.md(context);
-        
-        // Calcular largura efetiva para distribuir uniformemente na largura total
         final double availableWidth = constraints.maxWidth;
         final double totalSpacing = (columns - 1) * spacing + (2 * spacing); // spacing lateral
         final double effectiveWidth = availableWidth - totalSpacing;
@@ -284,7 +278,6 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Vehicle header with icon and info
           Row(
             children: [
               Container(
@@ -329,8 +322,6 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
           ),
           
           SizedBox(height: AdaptiveSpacing.md(context)),
-          
-          // Vehicle details
           Expanded(
             child: Column(
               children: [
@@ -352,8 +343,6 @@ class _ResponsiveVehicleCard extends ConsumerWidget {
                   value: '${_formatNumber(vehicle.currentOdometer)} km',
                 ),
                 const Spacer(),
-                
-                // Action buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

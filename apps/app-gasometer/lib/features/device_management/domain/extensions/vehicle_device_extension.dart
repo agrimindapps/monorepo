@@ -124,8 +124,6 @@ class VehicleDeviceStatistics {
     final activeDevices = devices.where((d) => d.isActive).toList();
     final trustedDevices = devices.where((d) => d.isTrusted).toList();
     final recentlyActiveDevices = devices.where((d) => d.isRecentlyActive).toList();
-
-    // Ordena por prioridade de sync (maior prioridade primeiro)
     final syncPriorityDevices = List<DeviceEntity>.from(devices)
       ..sort((a, b) => b.syncPriority.compareTo(a.syncPriority));
 

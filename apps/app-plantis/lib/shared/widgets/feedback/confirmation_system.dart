@@ -820,7 +820,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Container(
               width: 40,
               height: 4,
@@ -830,8 +829,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Icon
             if (icon != null) ...[
               Container(
                 width: 64,
@@ -844,8 +841,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
             ],
-
-            // Title
             Text(
               title,
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -854,8 +849,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-
-            // Message
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -864,8 +857,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-
-            // Actions
             Row(
               children: [
                 Expanded(
@@ -899,8 +890,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Bottom padding for safe area
             SizedBox(height: mediaQuery.padding.bottom + 16),
           ],
         ),
@@ -965,7 +954,6 @@ class ConfirmationColors {
 
 /// Contextos pré-definidos para confirmações
 class ConfirmationContexts {
-  // Deletar planta
   static Future<bool> deletePlant(BuildContext context, String plantName) {
     return ConfirmationSystem.showDestructiveConfirmation(
       context: context,
@@ -978,8 +966,6 @@ class ConfirmationContexts {
       requiresDoubleConfirmation: true,
     );
   }
-
-  // Deletar tarefa
   static Future<bool> deleteTask(BuildContext context, String taskName) {
     return ConfirmationSystem.showConfirmation(
       context: context,
@@ -990,8 +976,6 @@ class ConfirmationContexts {
       type: ConfirmationType.warning,
     );
   }
-
-  // Logout
   static Future<bool> logout(BuildContext context) {
     return ConfirmationSystem.showBottomSheetConfirmation(
       context: context,
@@ -1004,8 +988,6 @@ class ConfirmationContexts {
       type: ConfirmationType.warning,
     );
   }
-
-  // Reset de dados
   static Future<bool> resetData(BuildContext context) {
     return ConfirmationSystem.showDestructiveConfirmation(
       context: context,
@@ -1018,8 +1000,6 @@ class ConfirmationContexts {
       requiresDoubleConfirmation: true,
     );
   }
-
-  // Cancelar premium
   static Future<bool> cancelPremium(BuildContext context) {
     return ConfirmationSystem.showConfirmation(
       context: context,
@@ -1032,8 +1012,6 @@ class ConfirmationContexts {
       type: ConfirmationType.warning,
     );
   }
-
-  // Restaurar backup
   static Future<bool> restoreBackup(BuildContext context) {
     return ConfirmationSystem.showConfirmation(
       context: context,
@@ -1046,8 +1024,6 @@ class ConfirmationContexts {
       type: ConfirmationType.info,
     );
   }
-
-  // Criar backup
   static Future<bool> createBackup(BuildContext context) {
     return ConfirmationSystem.showConfirmation(
       context: context,
@@ -1058,8 +1034,6 @@ class ConfirmationContexts {
       type: ConfirmationType.info,
     );
   }
-
-  // Nome da planta
   static Future<String?> plantName(BuildContext context, {String? current}) {
     return ConfirmationSystem.showInputConfirmation(
       context: context,
@@ -1076,8 +1050,6 @@ class ConfirmationContexts {
       },
     );
   }
-
-  // Configurações de backup
   static Future<List<String>?> backupOptions(BuildContext context) {
     return ConfirmationSystem.showChecklistConfirmation(
       context: context,

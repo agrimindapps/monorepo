@@ -35,7 +35,6 @@ class SettingsLocalDataSource {
       final settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
       return SettingsData.fromMap(settingsMap);
     } catch (e) {
-      // Em caso de erro, retorna null para usar configurações padrão
       return null;
     }
   }
@@ -129,15 +128,10 @@ class SettingsLocalDataSource {
 
   /// Migra configurações de formato antigo se necessário
   Future<void> migrateFromLegacySettings() async {
-    // Se já tem configurações unificadas, não precisa migrar
     if (await hasStoredSettings()) return;
-
-    // Migrar de configurações fragmentadas (legacy)
     final notificationSettings = await _migrateLegacyNotificationSettings();
     final backupSettings = await _migrateLegacyBackupSettings();
     final themeSettings = await _migrateLegacyThemeSettings();
-
-    // Criar configurações unificadas com valores migrados
     final unifiedSettings = SettingsData(
       app: AppSettings.defaultSettings(),
       notifications: notificationSettings,
@@ -152,7 +146,6 @@ class SettingsLocalDataSource {
   /// Migra configurações legacy de notificações
   Future<NotificationSettings> _migrateLegacyNotificationSettings() async {
     try {
-      // Keys do provider antigo
       final taskReminders =
           _prefs.getBool('notifications_task_reminders') ?? true;
       final overdueNotifications =
@@ -165,8 +158,6 @@ class SettingsLocalDataSource {
           _prefs.getInt('notifications_daily_summary_hour') ?? 8;
       final dailySummaryMinute =
           _prefs.getInt('notifications_daily_summary_minute') ?? 0;
-
-      // Migrar task type settings
       final Map<String, bool> taskTypeSettings = {};
       const taskTypes = [
         'Regar',
@@ -204,8 +195,6 @@ class SettingsLocalDataSource {
   /// Migra configurações legacy de backup
   Future<BackupSettings> _migrateLegacyBackupSettings() async {
     try {
-      // Backup settings podem não existir no formato antigo
-      // Retorna configurações padrão
       return BackupSettings.defaultSettings();
     } catch (e) {
       return BackupSettings.defaultSettings();
@@ -215,8 +204,6 @@ class SettingsLocalDataSource {
   /// Migra configurações legacy de tema
   Future<ThemeSettings> _migrateLegacyThemeSettings() async {
     try {
-      // Theme settings podem estar em outro provider
-      // Por padrão, seguir sistema
       return ThemeSettings.defaultSettings();
     } catch (e) {
       return ThemeSettings.defaultSettings();
@@ -244,7 +231,6 @@ class SettingsLocalDataSource {
       final settings = SettingsData.fromMap(settingsData);
       await saveSettings(settings);
     } catch (e) {
-      // Em caso de erro, não importa
       throw Exception('Erro ao importar configurações: $e');
     }
   }

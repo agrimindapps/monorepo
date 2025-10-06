@@ -17,15 +17,11 @@ class CalculatorSearchProvider extends ChangeNotifier {
     required SearchCalculators searchCalculators,
   }) : _searchCalculators = searchCalculators;
 
-  // === STATE MANAGEMENT ===
-
   bool _isSearching = false;
   String _searchQuery = '';
   CalculatorCategory? _selectedCategory;
   List<CalculatorEntity> _filteredCalculators = [];
   String? _errorMessage;
-
-  // === GETTERS ===
 
   bool get isSearching => _isSearching;
   String get searchQuery => _searchQuery;
@@ -36,8 +32,6 @@ class CalculatorSearchProvider extends ChangeNotifier {
   bool get hasResults => _filteredCalculators.isNotEmpty;
   bool get hasActiveFilters => _searchQuery.isNotEmpty || _selectedCategory != null;
   int get totalResults => _filteredCalculators.length;
-
-  // === SEARCH OPERATIONS ===
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
@@ -83,13 +77,9 @@ class CalculatorSearchProvider extends ChangeNotifier {
   /// Aplica filtros a uma lista de calculadoras
   List<CalculatorEntity> applyFilters(List<CalculatorEntity> calculators) {
     var filtered = List<CalculatorEntity>.from(calculators);
-
-    // Filtrar por categoria
     if (_selectedCategory != null) {
       filtered = filtered.where((calc) => calc.category == _selectedCategory).toList();
     }
-
-    // Filtrar por busca de texto
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((calc) =>
@@ -106,8 +96,6 @@ class CalculatorSearchProvider extends ChangeNotifier {
   Future<void> searchAndFilter(List<CalculatorEntity> allCalculators) async {
     _isSearching = true;
     notifyListeners();
-
-    // Simula um pequeno delay para UX
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
     applyFilters(allCalculators);
@@ -115,8 +103,6 @@ class CalculatorSearchProvider extends ChangeNotifier {
     _isSearching = false;
     notifyListeners();
   }
-
-  // === ADVANCED SEARCH ===
 
   /// Busca avançada com múltiplos critérios
   List<CalculatorEntity> advancedSearch({
@@ -127,34 +113,21 @@ class CalculatorSearchProvider extends ChangeNotifier {
     List<String>? tags,
   }) {
     var filtered = List<CalculatorEntity>.from(calculators);
-
-    // Filtrar por nome
     if (nameQuery != null && nameQuery.isNotEmpty) {
       final query = nameQuery.toLowerCase();
       filtered = filtered.where((calc) =>
         calc.name.toLowerCase().contains(query)
       ).toList();
     }
-
-    // Filtrar por descrição
     if (descriptionQuery != null && descriptionQuery.isNotEmpty) {
       final query = descriptionQuery.toLowerCase();
       filtered = filtered.where((calc) =>
         calc.description.toLowerCase().contains(query)
       ).toList();
     }
-
-    // Filtrar por categoria
     if (category != null) {
       filtered = filtered.where((calc) => calc.category == category).toList();
     }
-
-    // Filtrar por tags (se implementado na entidade)
-    // if (tags != null && tags.isNotEmpty) {
-    //   filtered = filtered.where((calc) =>
-    //     tags.any((tag) => calc.tags?.contains(tag) ?? false)
-    //   ).toList();
-    // }
 
     _filteredCalculators = filtered;
     notifyListeners();
@@ -167,8 +140,6 @@ class CalculatorSearchProvider extends ChangeNotifier {
     List<CalculatorEntity> calculators,
     {bool mostPopular = true}
   ) {
-    // Implementar ordenação por popularidade quando dados estiverem disponíveis
-    // Por enquanto, retorna lista original
     return calculators;
   }
 
@@ -177,16 +148,11 @@ class CalculatorSearchProvider extends ChangeNotifier {
     List<CalculatorEntity> calculators,
     {int daysBack = 30}
   ) {
-    // final cutoffDate = DateTime.now().subtract(Duration(days: daysBack));
 
     return calculators.where((calc) {
-      // Assumindo que existe um campo de data de criação ou atualização
-      // return calc.createdAt?.isAfter(cutoffDate) ?? false;
       return true; // Por enquanto, retorna todos
     }).toList();
   }
-
-  // === FILTER MANAGEMENT ===
 
   /// Limpa todos os filtros
   void clearAllFilters() {
@@ -219,23 +185,16 @@ class CalculatorSearchProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // === SEARCH SUGGESTIONS ===
-
   /// Obtém sugestões de busca baseadas em calculadoras existentes
   List<String> getSearchSuggestions(List<CalculatorEntity> calculators) {
     final suggestions = <String>{};
     
     for (final calculator in calculators) {
-      // Adiciona nome da calculadora
       suggestions.add(calculator.name);
-      
-      // Adiciona palavras do nome (se tiver mais de uma palavra)
       final nameWords = calculator.name.split(' ');
       if (nameWords.length > 1) {
         suggestions.addAll(nameWords.where((word) => word.length > 2));
       }
-      
-      // Adiciona categoria
       suggestions.add(calculator.category.displayName);
     }
     
@@ -256,8 +215,6 @@ class CalculatorSearchProvider extends ChangeNotifier {
         .toList();
   }
 
-  // === SEARCH HISTORY ===
-
   final List<String> _searchHistory = [];
   
   List<String> get searchHistory => _searchHistory.toList();
@@ -265,14 +222,8 @@ class CalculatorSearchProvider extends ChangeNotifier {
   /// Adiciona termo ao histórico de busca
   void addToSearchHistory(String query) {
     if (query.trim().isEmpty) return;
-    
-    // Remove se já existe
     _searchHistory.remove(query);
-    
-    // Adiciona no início
     _searchHistory.insert(0, query);
-    
-    // Limita a 10 itens
     if (_searchHistory.length > 10) {
       _searchHistory.removeRange(10, _searchHistory.length);
     }

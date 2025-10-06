@@ -52,71 +52,58 @@ abstract class WeightLocalDataSource {
 }
 
 class WeightLocalDataSourceImpl implements WeightLocalDataSource {
-  // TODO: Implementar com Hive quando os adapters estiverem disponíveis
   
   @override
   Future<List<WeightModel>> getWeights() async {
-    // Placeholder implementation
     return [];
   }
 
   @override
   Future<List<WeightModel>> getWeightsByAnimalId(String animalId) async {
-    // Placeholder implementation
     return [];
   }
 
   @override
   Future<WeightModel?> getLatestWeightByAnimalId(String animalId) async {
-    // Placeholder implementation
     return null;
   }
 
   @override
   Future<WeightModel?> getWeightById(String id) async {
-    // Placeholder implementation
     return null;
   }
 
   @override
   Future<void> cacheWeight(WeightModel weight) async {
-    // Placeholder implementation
   }
 
   @override
   Future<void> cacheWeights(List<WeightModel> weights) async {
-    // Placeholder implementation
   }
 
   @override
   Future<void> updateWeight(WeightModel weight) async {
-    // Placeholder implementation
   }
 
   @override
   Future<void> deleteWeight(String id) async {
-    // Placeholder implementation
   }
 
   @override
   Future<void> hardDeleteWeight(String id) async {
-    // Placeholder implementation
   }
 
   @override
   Future<void> clearCache() async {
-    // Placeholder implementation
   }
 
   @override
   Stream<List<WeightModel>> watchWeights() {
-    // Placeholder implementation
     return Stream.value([]);
   }
 
   @override
   Stream<List<WeightModel>> watchWeightsByAnimalId(String animalId) {
-    // Placeholder implementation
     return Stream.value([]);
   }
 
@@ -126,19 +113,16 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    // Placeholder implementation
     return [];
   }
 
   @override
   Future<int> getWeightsCount(String animalId) async {
-    // Placeholder implementation
     return 0;
   }
 
   @override
   Future<Map<String, double>> getWeightStatistics(String animalId) async {
-    // Placeholder implementation
     return {
       'min': 0.0,
       'max': 0.0,

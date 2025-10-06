@@ -56,15 +56,11 @@ class ExpenseSummary extends Equatable {
       0,
       (sum, expense) => sum + expense.amount,
     );
-
-    // Category breakdown
     final categoryBreakdown = <ExpenseCategory, double>{};
     for (final expense in expenses) {
       categoryBreakdown[expense.category] =
           (categoryBreakdown[expense.category] ?? 0) + expense.amount;
     }
-
-    // Monthly breakdown (last 12 months)
     final monthlyBreakdown = <String, double>{};
     for (int i = 0; i < 12; i++) {
       final date = DateTime(now.year, now.month - i, 1);
@@ -82,8 +78,6 @@ class ExpenseSummary extends Equatable {
         (sum, expense) => sum + expense.amount,
       );
     }
-
-    // Most expensive category
     var mostExpensiveCategory = ExpenseCategory.other;
     double maxCategoryAmount = 0;
     categoryBreakdown.forEach((category, amount) {
@@ -92,8 +86,6 @@ class ExpenseSummary extends Equatable {
         mostExpensiveCategory = category;
       }
     });
-
-    // Most used payment method
     final paymentMethodCount = <PaymentMethod, int>{};
     for (final expense in expenses) {
       paymentMethodCount[expense.paymentMethod] =

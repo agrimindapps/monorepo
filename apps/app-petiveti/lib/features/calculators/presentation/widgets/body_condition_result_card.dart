@@ -16,29 +16,18 @@ class BodyConditionResultCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Score principal
         _buildMainScoreCard(),
         const SizedBox(height: 16),
-        
-        // Interpretação
         _buildInterpretationCard(),
         const SizedBox(height: 16),
-        
-        // Métricas detalhadas
         _buildMetricsGrid(),
         const SizedBox(height: 16),
-        
-        // Recomendações
         _buildRecommendationsSection(),
         const SizedBox(height: 16),
-        
-        // Notas veterinárias (se aplicável)
         if (result.veterinaryNotes.isNotEmpty)
           _buildVeterinaryNotesSection(),
           
         const SizedBox(height: 16),
-        
-        // Ações sugeridas
         _buildActionButtonsSection(context),
       ],
     );
@@ -487,14 +476,12 @@ class BodyConditionResultCard extends StatelessWidget {
   }
 
   void _shareResult(BuildContext context) {
-    // TODO: Implementar compartilhamento
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Compartilhamento será implementado em breve')),
     );
   }
 
   void _saveResult(BuildContext context) {
-    // TODO: Implementar salvamento
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Resultado salvo no histórico!')),
     );

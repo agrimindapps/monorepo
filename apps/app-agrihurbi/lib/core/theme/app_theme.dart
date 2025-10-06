@@ -6,11 +6,7 @@ import 'design_tokens.dart';
 /// Application theme configuration using Design Tokens
 /// This consolidates all theme-related constants and eliminates duplication
 class AppTheme {
-  // Private constructor to prevent instantiation
   AppTheme._();
-  
-  // Convenience color getters
-  // Consider using DesignTokens directly for new code
   static Color get primaryColor => DesignTokens.primaryColor;
   static Color get secondaryColor => DesignTokens.secondaryColor;
   static Color get accentColor => DesignTokens.accentColor;
@@ -25,8 +21,6 @@ class AppTheme {
   static Color get textLightColor => DesignTokens.textLightColor;
   static Color get borderColor => DesignTokens.borderColor;
   static Color get dividerColor => DesignTokens.dividerColor;
-  
-  // Theme type enum
   static const light = ThemeMode.light;
   static const dark = ThemeMode.dark;
   static const system = ThemeMode.system;
@@ -46,8 +40,6 @@ class AppTheme {
         onSurface: DesignTokens.textPrimaryColor,
         onError: DesignTokens.textLightColor,
       ),
-      
-      // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: DesignTokens.primaryColor,
         foregroundColor: DesignTokens.textLightColor,
@@ -55,8 +47,6 @@ class AppTheme {
         centerTitle: true,
         titleTextStyle: AppTextStyles.appBarTitle,
       ),
-      
-      // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: DesignTokens.primaryColor,
@@ -98,8 +88,6 @@ class AppTheme {
           textStyle: AppTextStyles.button,
         ),
       ),
-      
-      // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -125,8 +113,6 @@ class AppTheme {
         fillColor: DesignTokens.surfaceColor,
         contentPadding: const EdgeInsets.all(16),
       ),
-      
-      // Card Theme
       cardTheme: CardThemeData(
         color: DesignTokens.surfaceColor,
         elevation: 2,
@@ -135,21 +121,15 @@ class AppTheme {
         ),
         margin: const EdgeInsets.all(8),
       ),
-      
-      // Divider Theme
       dividerTheme: const DividerThemeData(
         color: DesignTokens.dividerColor,
         thickness: 1,
         space: 1,
       ),
-      
-      // Icon Theme
       iconTheme: const IconThemeData(
         color: DesignTokens.textSecondaryColor,
         size: 24,
       ),
-      
-      // Text Theme
       textTheme: const TextTheme(
         displayLarge: AppTextStyles.displayLarge,
         displayMedium: AppTextStyles.displayMedium,
@@ -185,8 +165,6 @@ class AppTheme {
         onSurface: DesignTokens.textLightColor,
         onError: DesignTokens.textLightColor,
       ),
-      
-      // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: DesignTokens.backgroundDarkColor,
         foregroundColor: DesignTokens.textLightColor,
@@ -194,8 +172,6 @@ class AppTheme {
         centerTitle: true,
         titleTextStyle: AppTextStyles.appBarTitle,
       ),
-      
-      // Button Themes (similar to light theme but with dark adaptations)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: DesignTokens.primaryColor,
@@ -211,8 +187,6 @@ class AppTheme {
           elevation: 1,
         ),
       ),
-      
-      // Card Theme
       cardTheme: CardThemeData(
         color: DesignTokens.backgroundDarkColor,
         elevation: 2,

@@ -41,11 +41,7 @@ class GasometerSyncErrorHandler {
       operationType: operationType,
       data: data,
     );
-
-    // Log específico para analytics do Gasometer
     await _logGasometerError(gasometerError);
-
-    // Adicionar ao stream para listeners
     if (!_errorController.isClosed) {
       _errorController.add(gasometerError);
     }
@@ -60,8 +56,6 @@ class GasometerSyncErrorHandler {
     String? operationType,
     Map<String, dynamic>? data,
   }) {
-    
-    // Detectar tipo de erro baseado no modelo e operação
     final errorType = _detectGasometerErrorType(modelType, operationType, originalError, data);
     
     final userMessage = _generateUserMessage(errorType, modelType, data);
@@ -91,8 +85,6 @@ class GasometerSyncErrorHandler {
     Map<String, dynamic>? data,
   ) {
     final errorString = originalError.toString().toLowerCase();
-    
-    // Erros específicos por modelo
     switch (modelType?.toLowerCase()) {
       case 'vehicle':
       case 'vehicles':
@@ -131,13 +123,9 @@ class GasometerSyncErrorHandler {
       case 'analytics':
         return GasometerSyncErrorType.analyticsCorrupted;
     }
-
-    // Erros de premium/licenciamento
     if (errorString.contains('premium') || errorString.contains('subscription')) {
       return GasometerSyncErrorType.premiumFeatureBlocked;
     }
-
-    // Erro padrão baseado no modelo
     switch (modelType?.toLowerCase()) {
       case 'vehicle':
         return GasometerSyncErrorType.vehicleDataConflict;
@@ -353,8 +341,6 @@ class GasometerSyncErrorHandler {
           'has_fallback_data': error.fallbackData != null,
         },
       );
-      
-      // Log específico para problemas automotivos
       await _analytics.logEvent('gasometer_sync_issue', {
         'issue_type': error.type.name,
         'affected_feature': error.modelType ?? 'general',

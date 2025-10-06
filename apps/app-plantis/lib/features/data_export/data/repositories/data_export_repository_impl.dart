@@ -8,12 +8,8 @@ class DataExportRepositoryImpl implements DataExportRepository {
   final PlantsExportDataSource _plantsDataSource;
   final SettingsExportDataSource _settingsDataSource;
   final ExportFileGenerator _fileGenerator;
-
-  // Rate limiting: allow only one export per hour
   static const Duration _exportCooldown = Duration(hours: 1);
   static DateTime? _lastExportTime;
-
-  // In-memory storage for demonstration
   static final Map<String, ExportRequest> _exportRequests = {};
 
   DataExportRepositoryImpl({
@@ -30,7 +26,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
     required Set<DataType> requestedDataTypes,
   }) async {
     try {
-      // Check rate limiting
       if (_lastExportTime != null) {
         final timeSinceLastExport = DateTime.now().difference(_lastExportTime!);
         if (timeSinceLastExport < _exportCooldown) {
@@ -92,20 +87,16 @@ class DataExportRepositoryImpl implements DataExportRepository {
             break;
 
           case DataType.userProfile:
-            // For user profile, we would need to access auth data
-            // For now, assume it's available if user is authenticated
             availableTypes[dataType] = userId.isNotEmpty;
             totalSize += 512;
             break;
 
           case DataType.customCare:
-            // Custom care data would be part of plant configs
             availableTypes[dataType] = true;
             totalSize += 256;
             break;
 
           case DataType.reminders:
-            // Reminders would be notifications/tasks data
             availableTypes[dataType] = true;
             totalSize += 512;
             break;
@@ -134,7 +125,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
     required ExportFormat format,
   }) async {
     try {
-      // Update rate limiting
       _lastExportTime = DateTime.now();
 
       final request = ExportRequest(
@@ -150,11 +140,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
           'compliance': 'LGPD',
         },
       );
-
-      // Save request to storage
       await _saveExportRequest(request);
-
-      // Start processing in background
       _processExportRequest(request);
 
       return request;
@@ -170,8 +156,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
           _exportRequests.values
               .where((request) => request.userId == userId)
               .toList();
-
-      // Sort by date (newest first)
       requests.sort((a, b) => b.requestDate.compareTo(a.requestDate));
       return requests;
     } catch (e) {
@@ -195,9 +179,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
       if (request.downloadUrl == null) {
         throw Exception('URL de download não disponível');
       }
-
-      // In a real implementation, this would handle the actual download
-      // For now, we simulate a successful download
       await Future<void>.delayed(const Duration(seconds: 2));
 
       return true;
@@ -210,8 +191,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
   Future<bool> deleteExport(String exportId) async {
     try {
       _exportRequests.remove(exportId);
-
-      // In a real implementation, also delete the actual file
       return true;
     } catch (e) {
       throw Exception('Erro ao deletar exportação: ${e.toString()}');
@@ -255,12 +234,9 @@ class DataExportRepositoryImpl implements DataExportRepository {
   /// Process export request in background
   Future<void> _processExportRequest(ExportRequest request) async {
     try {
-      // Update status to processing
       await _updateExportRequest(
         request.copyWith(status: ExportRequestStatus.processing),
       );
-
-      // Collect all requested data
       final exportData = <DataType, dynamic>{};
 
       for (final dataType in request.dataTypes) {
@@ -292,7 +268,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
             };
             break;
           case DataType.all:
-            // Include all available data types
             exportData[DataType.plants] = await getUserPlantsData(
               request.userId,
             );
@@ -316,14 +291,10 @@ class DataExportRepositoryImpl implements DataExportRepository {
             exportData[dataType] = 'Data not available';
         }
       }
-
-      // Generate export file
       final filePath = await generateExportFile(
         request: request,
         exportData: exportData,
       );
-
-      // Update request with completion
       await _updateExportRequest(
         request.copyWith(
           status: ExportRequestStatus.completed,
@@ -332,7 +303,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
         ),
       );
     } catch (e) {
-      // Update request with error
       await _updateExportRequest(
         request.copyWith(
           status: ExportRequestStatus.failed,

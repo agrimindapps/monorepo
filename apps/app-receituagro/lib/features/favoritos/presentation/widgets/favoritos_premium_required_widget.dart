@@ -20,7 +20,6 @@ class FavoritosPremiumRequiredWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de premium
             Container(
               width: 80,
               height: 80,
@@ -40,8 +39,6 @@ class FavoritosPremiumRequiredWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 24),
-            
-            // Título
             Text(
               'Recurso Premium',
               style: TextStyle(
@@ -53,8 +50,6 @@ class FavoritosPremiumRequiredWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 12),
-            
-            // Descrição
             Text(
               'Os diagnósticos salvos são um recurso exclusivo para usuários Premium.\n\nFaça upgrade e tenha acesso a todos os recursos do app!',
               style: TextStyle(
@@ -66,13 +61,9 @@ class FavoritosPremiumRequiredWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 32),
-            
-            // Lista de benefícios
             _buildBenefitsList(isDark),
             
             const SizedBox(height: 32),
-            
-            // Botão de upgrade
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -172,7 +163,5 @@ class FavoritosPremiumRequiredWidget extends StatelessWidget {
 
   /// Manipula ação de upgrade
   void _handleUpgradePressed(BuildContext context) {
-    // TODO: Navegar para página de assinatura
-    // Navigator.pushNamed(context, '/subscription');
   }
 }

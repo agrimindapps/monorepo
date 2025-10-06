@@ -144,32 +144,20 @@ class AppointmentSyncEntity extends BaseSyncEntity {
       'notes': notes,
       'status': status.toString().split('.').last,
       'cost': cost,
-
-      // Emergência e prioridade
       'is_emergency': isEmergency,
       'priority': priority.toString().split('.').last,
-
-      // Clínica
       'clinic_name': clinicName,
       'clinic_address': clinicAddress,
       'clinic_phone': clinicPhone,
       'veterinarian_id': veterinarianId,
-
-      // Agendamento
       'reminder_sent_at': reminderSentAt?.toIso8601String(),
       'confirmation_required': confirmationRequired,
       'confirmed_at': confirmedAt?.toIso8601String(),
       'cancellation_reason': cancellationReason,
-
-      // Follow-up
       'follow_up_required': followUpRequired,
       'follow_up_date': followUpDate?.toIso8601String(),
-
-      // Multi-user
       'document_urls': documentUrls,
       'prescriptions': prescriptions,
-
-      // Metadados computados
       'is_upcoming': isUpcoming,
       'is_past': isPast,
       'is_today': isToday,
@@ -180,8 +168,6 @@ class AppointmentSyncEntity extends BaseSyncEntity {
       'has_prescriptions': hasPrescriptions,
       'hours_until_appointment': timeUntilAppointment?.inHours,
     };
-
-    // Remover valores nulos
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -199,8 +185,6 @@ class AppointmentSyncEntity extends BaseSyncEntity {
       version: (baseFields['version'] as int?) ?? 1,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-
-      // Campos específicos da consulta
       animalId: map['animal_id'] as String,
       veterinarianName: map['veterinarian_name'] as String,
       date: DateTime.parse(map['date'] as String),
@@ -209,18 +193,12 @@ class AppointmentSyncEntity extends BaseSyncEntity {
       notes: map['notes'] as String?,
       status: _parseAppointmentStatus(map['status'] as String?),
       cost: (map['cost'] as num?)?.toDouble(),
-
-      // Emergência e prioridade
       isEmergency: map['is_emergency'] as bool? ?? false,
       priority: _parseAppointmentPriority(map['priority'] as String?),
-
-      // Clínica
       clinicName: map['clinic_name'] as String?,
       clinicAddress: map['clinic_address'] as String?,
       clinicPhone: map['clinic_phone'] as String?,
       veterinarianId: map['veterinarian_id'] as String?,
-
-      // Agendamento
       reminderSentAt: map['reminder_sent_at'] != null
         ? DateTime.parse(map['reminder_sent_at'] as String)
         : null,
@@ -229,14 +207,10 @@ class AppointmentSyncEntity extends BaseSyncEntity {
         ? DateTime.parse(map['confirmed_at'] as String)
         : null,
       cancellationReason: map['cancellation_reason'] as String?,
-
-      // Follow-up
       followUpRequired: map['follow_up_required'] as bool? ?? false,
       followUpDate: map['follow_up_date'] != null
         ? DateTime.parse(map['follow_up_date'] as String)
         : null,
-
-      // Multi-user
       documentUrls: (map['document_urls'] as List<dynamic>?)
         ?.map((e) => e as String)
         .toList() ?? [],

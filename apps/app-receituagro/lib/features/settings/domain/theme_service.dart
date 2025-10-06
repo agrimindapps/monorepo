@@ -33,7 +33,6 @@ class MockThemeService extends ChangeNotifier implements IThemeService {
       case ThemeMode.light:
         return false;
       case ThemeMode.system:
-        // In a real implementation, this would check system theme
         return false;
     }
   }

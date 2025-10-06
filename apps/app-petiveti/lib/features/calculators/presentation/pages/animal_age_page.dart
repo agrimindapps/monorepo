@@ -434,12 +434,10 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
     String resultText;
 
     if (_conversionType == 'to_human') {
-      // Animal para humano
       resultAge = _convertAnimalToHuman(inputAge, _selectedSpecies);
       final speciesName = _selectedSpecies == 'dog' ? 'cão' : 'gato';
       resultText = '${inputAge.toInt()} ano${inputAge != 1 ? 's' : ''} de $speciesName = ${resultAge.toInt()} anos humanos';
     } else {
-      // Humano para animal  
       resultAge = _convertHumanToAnimal(inputAge, _selectedSpecies);
       final speciesName = _selectedSpecies == 'dog' ? 'cão' : 'gato';
       resultText = '${inputAge.toInt()} anos humanos = ${resultAge.toStringAsFixed(1)} anos de $speciesName';

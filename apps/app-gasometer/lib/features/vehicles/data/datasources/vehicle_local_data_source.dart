@@ -20,7 +20,6 @@ class VehicleLocalDataSourceImpl implements VehicleLocalDataSource {
   @override
   Future<List<VehicleModel>> getAllVehicles() async {
     try {
-      // Aguardar inicialização antes de acessar os dados
       await _localDataService.initialize();
       final vehiclesData = _localDataService.getAllVehicles();
       return vehiclesData.map((data) => VehicleModel.fromJson(data)).toList();

@@ -185,8 +185,6 @@ class BodyConditionPage extends ConsumerStatefulWidget {
 
 class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
     with SingleTickerProviderStateMixin {
-  
-  // Specialized handlers for different concerns
   late TabController _tabController;
   late BodyConditionTabController _tabHandler;
   late BodyConditionMenuHandler _menuHandler;
@@ -198,16 +196,11 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
   }
 
   void _initializeComponents() {
-    // Initialize tab controller
     _tabController = TabController(length: BodyConditionConstants.tabCount, vsync: this);
-    
-    // Initialize tab handler
     _tabHandler = BodyConditionTabController(
       tabController: _tabController,
       ref: ref,
     );
-    
-    // Initialize menu handler
     _menuHandler = BodyConditionMenuHandler(
       context: context,
       ref: ref,
@@ -371,7 +364,6 @@ class _BodyConditionPageState extends ConsumerState<BodyConditionPage>
 
   /// Build floating action button
   Widget? _buildFloatingActionButton(BodyConditionState state) {
-    // Show FAB only on input tab
     if (!_tabHandler.isInputTab) return null;
 
     return FloatingActionButton.extended(

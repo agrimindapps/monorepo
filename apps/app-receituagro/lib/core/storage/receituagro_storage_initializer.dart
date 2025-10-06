@@ -13,10 +13,7 @@ class ReceitaAgroStorageInitializer {
     IBoxRegistryService boxRegistry,
   ) async {
     try {
-      // Obtém todas as configurações de boxes do ReceitaAgro
       final configurations = ReceitaAgroBoxes.getConfigurations();
-
-      // Registra cada box no registry
       for (final config in configurations) {
         final result = await boxRegistry.registerBox(config);
         
@@ -96,18 +93,11 @@ class ReceitaAgroStorageInitializer {
     required int toVersion,
   }) async {
     try {
-      // Por enquanto, não há migrações implementadas
-      // Quando necessário, adicionar lógica de migração aqui
       
       if (fromVersion == toVersion) {
         return const Right(null);
       }
-
-      // Log da migração (em produção, usar logger apropriado)
       print('ReceitaAgro: Migrando dados da versão $fromVersion para $toVersion');
-
-      // Implementar lógica de migração conforme necessário
-      // Exemplo: renomear chaves, converter formatos, etc.
 
       return const Right(null);
     } catch (e) {

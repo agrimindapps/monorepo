@@ -99,8 +99,6 @@ class DetalhePragaState {
   DetalhePragaState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // Getters de conveniência
   bool get hasError => errorMessage != null;
   bool get hasComentarios => comentarios.isNotEmpty;
   bool get hasPragaData => pragaData != null;
@@ -123,7 +121,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
   @override
   Future<DetalhePragaState> build() async {
-    // Get dependencies from DI
     _favoritosRepository = di.sl<FavoritosHiveRepository>();
     _pragasRepository = di.sl<PragasHiveRepository>();
     _pragasInfRepository = di.sl<PragasInfHiveRepository>();
@@ -131,11 +128,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     _premiumService = di.sl<IPremiumService>();
     _comentariosService = di.sl<ComentariosService>();
     _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
-
-    // Setup premium status listener
     _setupPremiumStatusListener();
-
-    // Cleanup subscription on dispose
     ref.onDispose(() {
       _premiumStatusSubscription?.cancel();
     });
@@ -209,7 +202,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      // Buscar praga pelo ID
       final allPragasResult = await _pragasRepository.getAll();
       PragasHive? pragaData;
 
@@ -259,8 +251,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   Future<void> _loadFavoritoState() async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Busca a praga real pelo nome para obter o ID único
     final allPragasResult = await _pragasRepository.getAll();
     PragasHive? pragaData;
 
@@ -285,7 +275,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         ),
       );
     } catch (e) {
-      // Fallback para repository direto
       final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
       state = AsyncValue.data(
         currentState.copyWith(
@@ -325,7 +314,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         ),
       );
     } catch (e) {
-      // Fallback para repository direto
       final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
       state = AsyncValue.data(
         currentState.copyWith(
@@ -344,16 +332,12 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     try {
       PragasInfHive? pragaInfo;
       PlantasInfHive? plantaInfo;
-
-      // Para pragas do tipo "inseto" (tipoPraga = "1")
       if (currentState.pragaData!.tipoPraga == '1') {
         pragaInfo = await _pragasInfRepository.findByIdReg(currentState.pragaData!.idReg);
       }
-      // Para pragas do tipo "planta" (tipoPraga = "3")
       else if (currentState.pragaData!.tipoPraga == '3') {
         plantaInfo = await _plantasInfRepository.findByIdReg(currentState.pragaData!.idReg);
       }
-      // Para doenças (tipoPraga = "2")
       else if (currentState.pragaData!.tipoPraga == '2') {
         pragaInfo = await _pragasInfRepository.findByIdReg(currentState.pragaData!.idReg);
       }
@@ -365,7 +349,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         ),
       );
     } catch (e) {
-      // Error logged internally
     }
   }
 
@@ -500,15 +483,12 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.itemId;
-
-    // Atualiza UI imediatamente
     state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
 
     try {
       final success = await _favoritosProvider.toggleFavorito('praga', itemId);
 
       if (!success) {
-        // Revert on failure
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,
@@ -521,7 +501,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError());
       return true;
     } catch (e) {
-      // Fallback para repository direto
       try {
         final itemData = {
           'nome': currentState.pragaData?.nomeComum ?? currentState.pragaName,
@@ -546,7 +525,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError());
         return true;
       } catch (fallbackError) {
-        // Revert on error
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,

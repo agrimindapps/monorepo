@@ -55,8 +55,6 @@ class CalculatorModel extends CalculatorEntity {
 
   /// Converte para entidade de domínio
   CalculatorEntity toEntity() {
-    // Retorna uma instância específica baseada no ID
-    // Por ora, retorna uma instância genérica
     return GenericCalculatorEntity(
       id: id,
       name: name,
@@ -71,7 +69,6 @@ class CalculatorModel extends CalculatorEntity {
 
   @override
   CalculationResult calculate(Map<String, dynamic> inputs) {
-    // Implementação genérica - deve ser sobrescrita pelas calculadoras específicas
     return CalculationError(
       calculatorId: id,
       errorMessage: 'Cálculo não implementado para esta calculadora',

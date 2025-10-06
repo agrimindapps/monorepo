@@ -30,17 +30,11 @@ class NotificationManager
     if (_isInitialized) return true;
 
     try {
-      // Obtém o serviço do DI
       _notificationService = sl<PlantisNotificationService>();
-
-      // Inicializa o serviço de notificações
       final result = await _notificationService!.initialize();
 
       if (result) {
-        // Programa todas as notificações iniciais
         await _notificationService!.initializeAllNotifications();
-
-        // Verifica tarefas atrasadas na inicialização
         await _notificationService!.checkAndNotifyOverdueTasks();
 
         _isInitialized = true;
@@ -167,7 +161,6 @@ class NotificationManager
   @override
   Future<bool> isNotificationScheduled(String identifier) async {
     if (_notificationService == null) return false;
-    // Assumir que o identifier é no formato plantId_careType
     final parts = identifier.split('_');
     if (parts.length >= 2) {
       final plantId = parts[0];

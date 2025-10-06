@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
-// ignore: must_be_immutable
 abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
   BaseSyncModel({
     required super.id,
@@ -16,7 +15,6 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
     super.moduleName = 'gasometer',
   });
   void removeFromHive() {
-    // Stub implementation to satisfy HiveObjectMixin
   }
 
   /// Convert to Hive-compatible map (using millisecond timestamps)
@@ -160,7 +158,6 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
         return null;
       }
     } else if (value is int) {
-      // Handle milliseconds since epoch
       try {
         return DateTime.fromMillisecondsSinceEpoch(value);
       } catch (e) {

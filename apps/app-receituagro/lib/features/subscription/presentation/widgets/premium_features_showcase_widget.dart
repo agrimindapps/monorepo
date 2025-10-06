@@ -57,7 +57,6 @@ class _PremiumFeaturesShowcaseWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // Watch both providers from Riverpod
     final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
     final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
 
@@ -74,7 +73,6 @@ class _PremiumFeaturesShowcaseWidgetState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with Premium Status
                   _buildHeader(
                     context,
                     featureFlags,
@@ -82,13 +80,9 @@ class _PremiumFeaturesShowcaseWidgetState
                   ),
 
                   const SizedBox(height: 24),
-
-                  // Feature Categories Tabs
                   _buildFeatureTabs(context),
 
                   const SizedBox(height: 16),
-
-                  // Feature Content
                   SizedBox(
                     height: widget.showFullDetails ? 400 : 300,
                     child: TabBarView(
@@ -112,14 +106,10 @@ class _PremiumFeaturesShowcaseWidgetState
                       ],
                     ),
                   ),
-
-                  // Cross-platform Sync Indicator
                   if (widget.showFullDetails) ...[
                     const SizedBox(height: 24),
                     _buildCrossPlatformIndicator(context, featureFlags),
                   ],
-
-                  // Upgrade CTA
                   if (!subscriptionState.hasActiveSubscription) ...[
                     const SizedBox(height: 24),
                     _buildUpgradeCTA(context),
@@ -171,7 +161,6 @@ class _PremiumFeaturesShowcaseWidgetState
       ),
       child: Row(
         children: [
-          // Status Icon
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -186,8 +175,6 @@ class _PremiumFeaturesShowcaseWidgetState
           ),
 
           const SizedBox(width: 16),
-
-          // Status Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,8 +200,6 @@ class _PremiumFeaturesShowcaseWidgetState
               ],
             ),
           ),
-
-          // Cross-platform Sync Status
           if (hasActiveSubscription &&
               featureFlags.isContentSynchronizationEnabled)
             Container(
@@ -441,7 +426,6 @@ class _PremiumFeaturesShowcaseWidgetState
       ),
       child: Row(
         children: [
-          // Feature Icon
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -462,8 +446,6 @@ class _PremiumFeaturesShowcaseWidgetState
           ),
 
           const SizedBox(width: 16),
-
-          // Feature Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,8 +472,6 @@ class _PremiumFeaturesShowcaseWidgetState
               ],
             ),
           ),
-
-          // Status Indicator
           _buildFeatureStatusIndicator(context, feature, hasActiveSubscription),
         ],
       ),

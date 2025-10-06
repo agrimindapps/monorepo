@@ -30,23 +30,13 @@ class EnhancedLoggingService {
 
   late Directory _logsDir;
   late File _currentLogFile;
-  
-  // Memory buffer para logs recentes
   final List<EnhancedLogEntry> _memoryBuffer = [];
-  
-  // Configurações
   LogLevel _minLevel = LogLevel.info;
   bool _persistLogs = true;
   bool _enableConsoleOutput = kDebugMode;
   bool _enableStructuredLogging = true;
-  
-  // Performance tracking
   final Map<String, PerformanceTracker> _performanceTrackers = {};
-  
-  // Categorias de log
   final Set<String> _enabledCategories = {};
-  
-  // Métricas
   int _totalLogs = 0;
   int _errorCount = 0;
   int _warningCount = 0;
@@ -77,8 +67,6 @@ class EnhancedLoggingService {
       if (_persistLogs) {
         await _initializeFileLogging();
       }
-
-      // Log de inicialização
       await info('Enhanced Logging Service initialized', 
                  category: 'SYSTEM', 
                  metadata: {'minLevel': minLevel.name});
@@ -238,8 +226,6 @@ class EnhancedLoggingService {
       ...?tracker.metadata,
       ...?additionalMetadata,
     };
-
-    // Log como warning se duração é muito alta
     final level = duration.inMilliseconds > 5000 ? LogLevel.warning : LogLevel.info;
     
     await _log(
@@ -267,8 +253,6 @@ class EnhancedLoggingService {
 
     try {
       List<EnhancedLogEntry> results = List.from(_memoryBuffer);
-
-      // Filtros
       if (minLevel != null) {
         results = results.where((log) => log.level.index >= minLevel.index).toList();
       }
@@ -296,11 +280,7 @@ class EnhancedLoggingService {
       if (endDate != null) {
         results = results.where((log) => log.timestamp.isBefore(endDate)).toList();
       }
-
-      // Ordena por timestamp (mais recentes primeiro)
       results.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-      // Aplica limite
       if (limit != null && results.length > limit) {
         results = results.take(limit).toList();
       }
@@ -380,7 +360,6 @@ class EnhancedLoggingService {
     String? category,
   }) async {
     try {
-      // Limpa memory buffer
       if (olderThan != null) {
         final cutoff = DateTime.now().subtract(olderThan);
         _memoryBuffer.removeWhere((log) => log.timestamp.isBefore(cutoff));
@@ -391,8 +370,6 @@ class EnhancedLoggingService {
       } else {
         _memoryBuffer.clear();
       }
-
-      // Limpa arquivos se necessário
       if (_persistLogs && olderThan != null) {
         await _cleanOldLogFiles(olderThan);
       }
@@ -414,8 +391,6 @@ class EnhancedLoggingService {
   Future<Result<LoggingStats>> getStats() async {
     try {
       final memoryLogs = _memoryBuffer.length;
-      // final errorLogs = _memoryBuffer.where((log) => log.level == LogLevel.error || log.level == LogLevel.critical).length;
-      // final warningLogs = _memoryBuffer.where((log) => log.level == LogLevel.warning).length;
       
       final categories = _memoryBuffer.map((log) => log.category).where((c) => c != null).toSet();
       
@@ -456,8 +431,6 @@ class EnhancedLoggingService {
     }
   }
 
-  // Métodos privados
-
   Future<void> _log(
     LogLevel level,
     String message, {
@@ -466,10 +439,7 @@ class EnhancedLoggingService {
     Object? error,
     StackTrace? stackTrace,
   }) async {
-    // Verifica se deve logar este nível
     if (level.index < _minLevel.index) return;
-
-    // Verifica categoria se especificada
     if (category != null && _enabledCategories.isNotEmpty && !_enabledCategories.contains(category)) {
       return;
     }
@@ -485,16 +455,10 @@ class EnhancedLoggingService {
       error: error?.toString(),
       stackTrace: stackTrace?.toString(),
     );
-
-    // Adiciona ao buffer de memória
     _addToMemoryBuffer(entry);
-
-    // Output no console se habilitado
     if (_enableConsoleOutput) {
       _outputToConsole(entry);
     }
-
-    // Persiste em arquivo se habilitado
     if (_persistLogs) {
       await _persistToFile(entry);
     }
@@ -502,8 +466,6 @@ class EnhancedLoggingService {
 
   void _addToMemoryBuffer(EnhancedLogEntry entry) {
     _memoryBuffer.add(entry);
-
-    // Mantém apenas os logs mais recentes em memória
     if (_memoryBuffer.length > _maxMemoryLogs) {
       _memoryBuffer.removeAt(0);
     }
@@ -551,18 +513,13 @@ class EnhancedLoggingService {
     if (!await _logsDir.exists()) {
       await _logsDir.create(recursive: true);
     }
-
-    // Cria arquivo de log atual
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
     _currentLogFile = File(path.join(_logsDir.path, 'app_$timestamp.log'));
-
-    // Limpa logs antigos na inicialização
     await _rotateLogFiles();
   }
 
   Future<void> _persistToFile(EnhancedLogEntry entry) async {
     try {
-      // Verifica se precisa rotacionar arquivo
       if (await _currentLogFile.exists()) {
         final size = await _currentLogFile.length();
         if (size > _maxLogFileSize) {
@@ -582,30 +539,22 @@ class EnhancedLoggingService {
 
       await _currentLogFile.writeAsString('$logLine\n', mode: FileMode.append);
     } catch (e) {
-      // Não deve fazer log de erro do logging para evitar loop
       debugPrint('Warning: Falha ao persistir log: $e');
     }
   }
 
   Future<void> _rotateLogFiles() async {
     try {
-      // Lista todos os arquivos de log
       final logFiles = <File>[];
       await for (final entity in _logsDir.list()) {
         if (entity is File && path.extension(entity.path) == '.log') {
           logFiles.add(entity);
         }
       }
-
-      // Ordena por data de modificação (mais antigos primeiro)
       logFiles.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
-
-      // Remove arquivos excessivos
       while (logFiles.length >= _maxLogFiles) {
         await logFiles.removeAt(0).delete();
       }
-
-      // Cria novo arquivo atual
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
       _currentLogFile = File(path.join(_logsDir.path, 'app_$timestamp.log'));
     } catch (e) {
@@ -645,11 +594,7 @@ class EnhancedLoggingService {
 
   String _exportToCsv(List<EnhancedLogEntry> logs) {
     final buffer = StringBuffer();
-    
-    // Header
     buffer.writeln('Timestamp,Level,Category,Message,Error,Metadata');
-    
-    // Data
     for (final log in logs) {
       final row = [
         log.timestamp.toIso8601String(),
@@ -668,7 +613,6 @@ class EnhancedLoggingService {
 
   /// Dispose - limpa recursos
   Future<void> dispose() async {
-    // Salva logs pendentes
     if (_persistLogs) {
       for (final tracker in _performanceTrackers.values) {
         await endPerformanceTracking(tracker.operation, 

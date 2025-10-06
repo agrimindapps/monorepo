@@ -42,7 +42,6 @@ class _CaloriePhysiologicalStepState extends State<CaloriePhysiologicalStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título do step
           Text(
             'Estado Fisiológico',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -62,22 +61,15 @@ class _CaloriePhysiologicalStepState extends State<CaloriePhysiologicalStep> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Seleção do estado fisiológico
                   _buildPhysiologicalStateSelector(),
                   const SizedBox(height: 24),
-
-                  // Campo condicional para número de filhotes
                   if (widget.input.isLactating)
                     _buildOffspringField(),
-
-                  // Informações sobre o estado selecionado
                   _buildStateInfoCard(),
                 ],
               ),
             ),
           ),
-
-          // Erros de validação
           if (widget.validationErrors.isNotEmpty)
             _buildValidationErrors(),
         ],
@@ -375,7 +367,6 @@ class _CaloriePhysiologicalStepState extends State<CaloriePhysiologicalStep> {
   }
 
   void _updatePhysiologicalState(PhysiologicalState state) {
-    // Limpar número de filhotes se não for lactação
     final offspring = state == PhysiologicalState.lactating 
         ? widget.input.numberOfOffspring 
         : null;
@@ -384,8 +375,6 @@ class _CaloriePhysiologicalStepState extends State<CaloriePhysiologicalStep> {
       physiologicalState: state,
       numberOfOffspring: offspring,
     ));
-
-    // Limpar campo se mudou para não-lactação
     if (state != PhysiologicalState.lactating) {
       _offspringController.clear();
     }

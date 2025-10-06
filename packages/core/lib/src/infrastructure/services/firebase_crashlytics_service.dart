@@ -23,14 +23,11 @@ class FirebaseCrashlyticsService implements ICrashlyticsRepository {
     Map<String, dynamic>? additionalInfo,
   }) async {
     try {
-      // Adicionar informações de contexto
       if (additionalInfo != null) {
         for (final entry in additionalInfo.entries) {
           await _crashlytics.setCustomKey(entry.key, entry.value as Object);
         }
       }
-
-      // Definir informações do ambiente
       await _crashlytics.setCustomKey('environment', EnvironmentConfig.environmentName);
       await _crashlytics.setCustomKey('is_debug', EnvironmentConfig.isDebugMode);
 
@@ -312,8 +309,6 @@ class FirebaseCrashlyticsService implements ICrashlyticsRepository {
       }
       await _crashlytics.setCustomKey('environment', EnvironmentConfig.environmentName);
       await _crashlytics.setCustomKey('session_start', DateTime.now().toIso8601String());
-      
-      // Set additional info if provided
       if (additionalInfo != null) {
         for (final entry in additionalInfo.entries) {
           await _crashlytics.setCustomKey(entry.key, entry.value.toString());
@@ -356,8 +351,6 @@ class FirebaseCrashlyticsService implements ICrashlyticsRepository {
     return '${data.substring(0, maxLength)}... [TRUNCATED]';
   }
 }
-
-// Exceptions customizadas para melhor categorização
 class ValidationException implements Exception {
   final String field;
   final String message;

@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../providers/settings_notifier.dart';
-
-// Data classes for granular Selector optimization
 class NotificationStatusData {
   final IconData icon;
   final Color color;
@@ -148,27 +146,18 @@ class NotificationsSettingsPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Status das notificações
                 _buildNotificationStatusCard(context, ref, settings),
 
                 const SizedBox(height: 24),
-
-                // Configurações gerais
                 _buildGeneralSettings(context, ref, settings),
 
                 const SizedBox(height: 24),
-
-                // Configurações de horários
                 _buildTimeSettings(context, ref, settings),
 
                 const SizedBox(height: 24),
-
-                // Configurações por tipo de tarefa
                 _buildTaskTypeSettings(context, ref, settings),
 
                 const SizedBox(height: 32),
-
-                // Ações
                 _buildActions(context, ref, settings),
               ],
             ),

@@ -46,7 +46,6 @@ class PlantDetailsInfo extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Nome da planta
               _buildInfoRow(
                 context,
                 icon: Icons.label_outline,
@@ -55,8 +54,6 @@ class PlantDetailsInfo extends StatelessWidget {
                 color: PlantisColors.primary,
               ),
               const SizedBox(height: 16),
-
-              // Espécie/Nome científico
               if (plant.species != null && plant.species!.isNotEmpty) ...[
                 _buildInfoRow(
                   context,
@@ -67,8 +64,6 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-
-              // Localização
               if (plant.spaceId != null) ...[
                 _buildInfoRow(
                   context,
@@ -79,8 +74,6 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-
-              // Idade da planta
               if (plant.plantingDate != null) ...[
                 _buildInfoRow(
                   context,
@@ -99,8 +92,6 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-
-              // Data de adição
               if (plant.createdAt != null) ...[
                 _buildInfoRow(
                   context,
@@ -111,8 +102,6 @@ class PlantDetailsInfo extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
               ],
-
-              // Última atualização
               if (plant.updatedAt != null &&
                   plant.updatedAt != plant.createdAt) ...[
                 _buildInfoRow(

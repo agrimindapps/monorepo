@@ -87,8 +87,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     if (animalId == null) return vaccines;
     return vaccines.where((vaccine) => vaccine.animalId == animalId).toList();
   }
-
-  // Basic CRUD operations
   @override
   Future<List<VaccineModel>> getVaccines() async {
     final vaccinesBox = await _box;
@@ -146,8 +144,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
       await vaccinesBox.put(vaccine.id, deletedVaccine);
     }
   }
-
-  // Status-based queries
   @override
   Future<List<VaccineModel>> getPendingVaccines([String? animalId]) async {
     final vaccines = await getVaccines();
@@ -205,8 +201,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     final filtered = _filterByAnimal(vaccines, animalId);
     return filtered.where((vaccine) => vaccine.toEntity().isDueSoon).toList();
   }
-
-  // Date-based queries
   @override
   Future<List<VaccineModel>> getVaccinesByDateRange(
     DateTime startDate,
@@ -235,8 +229,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     final endDate = DateTime(year, month + 1, 0);
     return await getVaccinesByDateRange(startDate, endDate, animalId);
   }
-
-  // Reminder functionality
   @override
   Future<List<VaccineModel>> getVaccinesNeedingReminders() async {
     final vaccines = await getVaccines();
@@ -255,8 +247,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
         )
         .toList();
   }
-
-  // Search and filtering
   @override
   Future<List<VaccineModel>> searchVaccines(
     String query, [
@@ -307,8 +297,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
         .where((vaccine) => vaccine.manufacturer == manufacturer)
         .toList();
   }
-
-  // Bulk operations
   @override
   Future<void> addMultipleVaccines(List<VaccineModel> vaccines) async {
     final vaccinesBox = await _box;
@@ -340,8 +328,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
       }
     }
   }
-
-  // Caching and synchronization
   @override
   Future<void> cacheVaccines(List<VaccineModel> vaccines) async {
     await addMultipleVaccines(vaccines);
@@ -352,8 +338,6 @@ class VaccineLocalDataSourceImpl implements VaccineLocalDataSource {
     final vaccinesBox = await _box;
     await vaccinesBox.clear();
   }
-
-  // Reactive streams
   @override
   Stream<List<VaccineModel>> watchVaccines() async* {
     final vaccinesBox = await _box;

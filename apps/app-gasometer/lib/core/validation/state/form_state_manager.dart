@@ -21,8 +21,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
   }) : _currentState = FormState<T>.initial(initialData: initialData),
        _stateController = StreamController<FormState<T>>.broadcast(),
        _tracker = FormStateTracker<T>() {
-    
-    // Start auto-save if enabled
     if (autoSaveEnabled && onAutoSave != null) {
       _startAutoSave();
     }
@@ -59,11 +57,7 @@ class FormStateManager<T> implements IFormStateManager<T> {
     _currentState = _currentState.withFieldUpdate(fieldName, value);
     
     _notifyStateChange(oldState, 'field_update_$fieldName');
-    
-    // Debounced validation
     _scheduleValidation();
-    
-    // Reset auto-save timer
     if (autoSaveEnabled) {
       _resetAutoSave();
     }
@@ -76,11 +70,7 @@ class FormStateManager<T> implements IFormStateManager<T> {
     _currentState = _currentState.withFieldUpdates(fieldUpdates);
     
     _notifyStateChange(oldState, 'fields_update');
-    
-    // Debounced validation
     _scheduleValidation();
-    
-    // Reset auto-save timer
     if (autoSaveEnabled) {
       _resetAutoSave();
     }
@@ -96,8 +86,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
     );
     
     _notifyStateChange(oldState, 'set_form_data');
-    
-    // Reset auto-save timer
     if (autoSaveEnabled) {
       _resetAutoSave();
     }
@@ -110,12 +98,8 @@ class FormStateManager<T> implements IFormStateManager<T> {
     _currentState = FormState<T>.initial(initialData: oldState.data);
     
     _notifyStateChange(oldState, 'reset');
-    
-    // Cancel timers
     _validationTimer?.cancel();
     _autoSaveTimer?.cancel();
-    
-    // Restart auto-save if enabled
     if (autoSaveEnabled && onAutoSave != null) {
       _startAutoSave();
     }
@@ -222,8 +206,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
   void _scheduleValidation() {
     _validationTimer?.cancel();
     _validationTimer = Timer(validationDebounce, () {
-      // Trigger validation through external validator
-      // This is handled by the form builder/controller
     });
   }
   
@@ -237,7 +219,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
           await onAutoSave!(_currentState.data as T);
           await markClean();
         } catch (e) {
-          // Auto-save failed, but don't show error to user
           debugPrint('Auto-save failed: $e');
         }
       }
@@ -274,7 +255,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
   /// Force immediate validation (cancels debounce)
   void forceValidation() {
     _validationTimer?.cancel();
-    // External validation trigger
   }
   
   /// Manually trigger auto-save
@@ -316,8 +296,6 @@ class ProviderFormStateManager<T> extends ChangeNotifier {
       autoSaveInterval: autoSaveInterval,
       onAutoSave: onAutoSave,
     );
-    
-    // Listen to state changes and notify ChangeNotifier
     _manager.addListener((state) => notifyListeners());
   }
   
@@ -337,8 +315,6 @@ class ProviderFormStateManager<T> extends ChangeNotifier {
       autoSaveInterval: autoSaveInterval,
       onAutoSave: onAutoSave,
     );
-    
-    // Set up validation if provided
     if (validator != null) {
       manager._manager.addListener((state) {
         if (state.data != null) {
@@ -352,14 +328,10 @@ class ProviderFormStateManager<T> extends ChangeNotifier {
     return manager;
   }
   late final FormStateManager<T> _manager;
-  
-  // Expose manager interface
   FormState<T> get currentState => _manager.currentState;
   Stream<FormState<T>> get stateStream => _manager.stateStream;
   bool get canSubmit => _manager.canSubmit;
   bool get hasUnsavedChanges => _manager.hasUnsavedChanges;
-  
-  // Delegate methods
   Future<void> updateField(String fieldName, dynamic value) => _manager.updateField(fieldName, value);
   Future<void> updateFields(Map<String, dynamic> fieldUpdates) => _manager.updateFields(fieldUpdates);
   Future<void> setFormData(T data) => _manager.setFormData(data);

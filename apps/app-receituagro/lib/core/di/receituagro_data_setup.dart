@@ -12,11 +12,8 @@ class ReceitaAgroDataSetup {
   static Future<void> initialize() async {
     try {
       developer.log('🔧 [SETUP] Verificando se Hive já está inicializado...', name: 'ReceitaAgroDataSetup');
-      
-      // Verifica se Hive já está inicializado (pelo AppDataManager)
       bool hiveReady = false;
       try {
-        // Tenta verificar se existe uma box padrão aberta
         final testBox = ReceitaAgroHiveService.getCulturas();
         hiveReady = testBox.isNotEmpty;
         developer.log('✅ [SETUP] Hive já inicializado pelo AppDataManager com ${testBox.length} culturas', name: 'ReceitaAgroDataSetup');
@@ -25,14 +22,9 @@ class ReceitaAgroDataSetup {
       }
       
       if (!hiveReady) {
-        // 1. Inicializa o Hive e registra adapters
         await ReceitaAgroHiveService.initialize();
-        
-        // 2. Abre todas as boxes
         await ReceitaAgroHiveService.openBoxes();
       }
-      
-      // 3. Carrega dados adicionais se necessário
       await _loadTestData();
       
       developer.log('✅ [SETUP] ReceitaAgro data setup concluído', name: 'ReceitaAgroDataSetup');
@@ -46,15 +38,11 @@ class ReceitaAgroDataSetup {
   static Future<void> _loadTestData() async {
     try {
       developer.log('🔄 [SETUP] Verificando se dados adicionais precisam ser carregados...', name: 'ReceitaAgroDataSetup');
-      
-      // Verifica se os dados já estão carregados pelo AppDataManager
       bool fitossanitariosLoaded = await FitossanitariosDataLoader.isDataLoaded();
       bool pragasLoaded = await PragasDataLoader.isDataLoaded();
       bool diagnosticosLoaded = await DiagnosticosDataLoader.isDataLoaded();
       
       developer.log('📊 [SETUP] Status: Fitossanitários=$fitossanitariosLoaded, Pragas=$pragasLoaded, Diagnósticos=$diagnosticosLoaded', name: 'ReceitaAgroDataSetup');
-      
-      // Só carrega se não estiver carregado
       if (!fitossanitariosLoaded) {
         developer.log('🛡️ [SETUP] Carregando fitossanitários...', name: 'ReceitaAgroDataSetup');
         await FitossanitariosDataLoader.loadFitossanitariosData();
@@ -79,7 +67,6 @@ class ReceitaAgroDataSetup {
       developer.log('✅ [SETUP] Verificação de dados complementares concluída!', name: 'ReceitaAgroDataSetup');
     } catch (e) {
       developer.log('⚠️ [SETUP] Erro ao carregar dados complementares (AppDataManager já carregou dados principais): $e', name: 'ReceitaAgroDataSetup');
-      // Não propaga o erro - AppDataManager já carregou os dados principais
     }
   }
 
@@ -88,12 +75,8 @@ class ReceitaAgroDataSetup {
   static Future<void> forceReload() async {
     try {
       developer.log('🔄 Forçando recarregamento dos dados...', name: 'ReceitaAgroDataSetup');
-      
-      // Fecha e reabre as boxes
       await ReceitaAgroHiveService.closeBoxes();
       await ReceitaAgroHiveService.openBoxes();
-      
-      // Força recarregamento individual dos loaders
       await FitossanitariosDataLoader.forceReload();
       await PragasDataLoader.forceReload();
       await DiagnosticosDataLoader.forceReload();
@@ -112,11 +95,6 @@ class ReceitaAgroDataSetup {
       
       await ReceitaAgroHiveService.closeBoxes();
       
-      // Implementar limpeza das boxes quando necessário
-      // await Hive.deleteBoxFromDisk('receituagro_pragas');
-      // await Hive.deleteBoxFromDisk('receituagro_culturas');
-      // etc...
-      
       developer.log('✅ Dados limpos!', name: 'ReceitaAgroDataSetup');
     } catch (e) {
       developer.log('❌ Erro ao limpar dados: $e', name: 'ReceitaAgroDataSetup');
@@ -127,7 +105,6 @@ class ReceitaAgroDataSetup {
   /// Obtém estatísticas dos dados carregados
   static Future<Map<String, dynamic>> getDataStats() async {
     try {
-      // Obtém estatísticas dos loaders individuais
       final pragasStats = await PragasDataLoader.getStats();
       final fitossanitariosStats = await FitossanitariosDataLoader.getStats();
       final diagnosticosStats = await DiagnosticosDataLoader.getStats();
@@ -135,8 +112,6 @@ class ReceitaAgroDataSetup {
       final int pragasCount = (pragasStats['total_pragas'] as int?) ?? 0;
       final int fitossanitariosCount = (fitossanitariosStats['total_fitossanitarios'] as int?) ?? 0;
       final int diagnosticosCount = (diagnosticosStats['total_diagnosticos'] as int?) ?? 0;
-      
-      // Obter culturas usando o stub service
       final culturas = ReceitaAgroHiveService.getCulturas();
 
       return {

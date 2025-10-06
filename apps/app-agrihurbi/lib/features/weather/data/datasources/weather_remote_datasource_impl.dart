@@ -1,4 +1,3 @@
-// ignore_for_file: only_throw_errors
 
 import 'package:core/core.dart' show LazySingleton;
 import 'package:dio/dio.dart';
@@ -17,10 +16,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   static const String _baseEndpoint = '/weather';
 
   WeatherRemoteDataSourceImpl(this._dioClient);
-
-  // ============================================================================
-  // WEATHER MEASUREMENTS
-  // ============================================================================
 
   @override
   Future<List<WeatherMeasurementModel>> getAllMeasurements({
@@ -166,7 +161,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       await _dioClient.delete('$_baseEndpoint/measurements/$id');
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        // Consider 404 as success for deletion
         return;
       }
       throw WeatherNetworkFailure('Failed to delete measurement: ${e.message}');
@@ -201,10 +195,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-
-  // ============================================================================
-  // RAIN GAUGES
-  // ============================================================================
 
   @override
   Future<List<RainGaugeModel>> getAllRainGauges() async {
@@ -331,7 +321,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       await _dioClient.delete('$_baseEndpoint/rain-gauges/$id');
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        // Consider 404 as success for deletion
         return;
       }
       throw WeatherNetworkFailure('Failed to delete rain gauge: ${e.message}');
@@ -387,10 +376,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-
-  // ============================================================================
-  // WEATHER STATISTICS
-  // ============================================================================
 
   @override
   Future<List<WeatherStatisticsModel>> getStatistics({
@@ -515,7 +500,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       await _dioClient.delete('$_baseEndpoint/statistics/$id');
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        // Consider 404 as success for deletion
         return;
       }
       throw WeatherNetworkFailure('Failed to delete statistics: ${e.message}');
@@ -523,10 +507,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Unexpected error: $e');
     }
   }
-
-  // ============================================================================
-  // UTILITY METHODS
-  // ============================================================================
 
   @override
   Future<WeatherStatisticsModel> calculateStatistics({

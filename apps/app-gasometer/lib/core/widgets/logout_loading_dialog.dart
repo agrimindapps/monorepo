@@ -55,8 +55,6 @@ class _LogoutLoadingDialogState extends State<LogoutLoadingDialog>
   @override
   void initState() {
     super.initState();
-    
-    // Configurar animação de entrada
     _animationController = AnimationController(
       duration: LoadingDesignTokens.fastDuration,
       vsync: this,
@@ -77,22 +75,13 @@ class _LogoutLoadingDialogState extends State<LogoutLoadingDialog>
       parent: _animationController,
       curve: LoadingDesignTokens.enterCurve,
     ));
-
-    // Iniciar animação e aguardar duração mínima
     _startLoadingProcess();
   }
 
   Future<void> _startLoadingProcess() async {
-    // Animar entrada
     await _animationController.forward();
-    
-    // Aguardar duração mínima
     await Future<void>.delayed(widget.minDuration);
-    
-    // Executar callback se fornecido
     widget.onCompleted?.call();
-    
-    // Fechar dialog se ainda montado
     if (mounted && Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     }
@@ -128,7 +117,6 @@ class _LogoutLoadingDialogState extends State<LogoutLoadingDialog>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Ícone de logout
                       Container(
                         padding: const EdgeInsets.all(LoadingDesignTokens.spacingMd),
                         decoration: BoxDecoration(
@@ -143,8 +131,6 @@ class _LogoutLoadingDialogState extends State<LogoutLoadingDialog>
                       ),
                       
                       const SizedBox(height: LoadingDesignTokens.spacingLg),
-                      
-                      // Indicador de loading
                       SizedBox(
                         width: LoadingDesignTokens.loadingIndicatorSize,
                         height: LoadingDesignTokens.loadingIndicatorSize,
@@ -155,8 +141,6 @@ class _LogoutLoadingDialogState extends State<LogoutLoadingDialog>
                       ),
                       
                       const SizedBox(height: LoadingDesignTokens.spacingLg),
-                      
-                      // Mensagem principal
                       Text(
                         widget.message,
                         style: LoadingDesignTokens.titleTextStyle.copyWith(
@@ -166,8 +150,6 @@ class _LogoutLoadingDialogState extends State<LogoutLoadingDialog>
                       ),
                       
                       const SizedBox(height: LoadingDesignTokens.spacingSm),
-                      
-                      // Mensagem secundária
                       Text(
                         'Aguarde um momento...',
                         style: LoadingDesignTokens.bodyTextStyle.copyWith(

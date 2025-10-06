@@ -248,7 +248,6 @@ mixin LoggableRepositoryMixin {
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      // Log start
       await loggingService.logOperationStart(
         category: repositoryCategory,
         operation: operation,
@@ -258,11 +257,7 @@ mixin LoggableRepositoryMixin {
           ...?metadata,
         },
       );
-
-      // Execute operation
       final result = await operationFunc();
-
-      // Log success
       await loggingService.logOperationSuccess(
         category: repositoryCategory,
         operation: operation,
@@ -275,7 +270,6 @@ mixin LoggableRepositoryMixin {
 
       return result;
     } catch (error, stackTrace) {
-      // Log error
       await loggingService.logOperationError(
         category: repositoryCategory,
         operation: operation,

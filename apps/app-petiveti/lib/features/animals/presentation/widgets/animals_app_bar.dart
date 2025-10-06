@@ -264,8 +264,6 @@ class _AnimalsAppBarState extends ConsumerState<AnimalsAppBar> {
         duration: Duration(seconds: AnimalsConstants.syncDurationSeconds),
       ),
     );
-    
-    // Trigger sync through repository
     await ref.read(animalsProvider.notifier).loadAnimals();
   }
 }
@@ -335,8 +333,6 @@ class _AnimalsFilterBottomSheetState
             ],
           ),
           const SizedBox(height: AnimalsConstants.filterSectionSpacing),
-          
-          // Species Filter
           _buildFilterSection(
             AnimalsConstants.species,
             Semantics(
@@ -366,8 +362,6 @@ class _AnimalsFilterBottomSheetState
               ),
             ),
           ),
-
-          // Gender Filter
           _buildFilterSection(
             AnimalsConstants.gender,
             Semantics(
@@ -397,8 +391,6 @@ class _AnimalsFilterBottomSheetState
               ),
             ),
           ),
-
-          // Size Filter
           _buildFilterSection(
             AnimalsConstants.size,
             Semantics(
@@ -458,8 +450,6 @@ class _AnimalsFilterBottomSheetState
 
   void _applyFilters() {
     final notifier = ref.read(animalsProvider.notifier);
-    
-    // Apply each filter individually to trigger proper state updates
     notifier.updateSpeciesFilter(_tempFilter.speciesFilter);
     notifier.updateGenderFilter(_tempFilter.genderFilter);
     notifier.updateSizeFilter(_tempFilter.sizeFilter);

@@ -15,24 +15,17 @@ class FavoritosDI {
 
   /// Registra APENAS 3 dependências essenciais - ultra simplificado
   static void registerDependencies() {
-    // Verificação de registro duplicado para prevenir erros
     if (_getIt.isRegistered<FavoritosService>()) {
       return; // Já registrado, evita duplicação
     }
-    
-    // 1. Service consolidado (unifica storage, cache, resolver, factory, validator)
     _getIt.registerLazySingleton<FavoritosService>(
       () => FavoritosService(),
     );
-
-    // 2. Repository simplificado (usa apenas o service)
     _getIt.registerLazySingleton<FavoritosRepositorySimplified>(
       () => FavoritosRepositorySimplified(
         service: _getIt<FavoritosService>(),
       ),
     );
-
-    // 3. Provider simplificado (usa repository diretamente, sem use cases)
     _getIt.registerLazySingleton<FavoritosProviderSimplified>(
       () => FavoritosProviderSimplified(
         repository: _getIt<FavoritosRepositorySimplified>(),
@@ -47,7 +40,6 @@ class FavoritosDI {
       _getIt.unregister<FavoritosRepositorySimplified>();
       _getIt.unregister<FavoritosService>();
     } catch (e) {
-      // Ignora erros de unregister
     }
   }
 

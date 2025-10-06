@@ -10,7 +10,6 @@ import '../../../features/plants/domain/repositories/spaces_repository.dart';
 /// Registra o PlantisSyncService do core package
 abstract class SyncDIModule {
   static void init(GetIt sl) {
-    // Registrar PlantisSyncService do core package
     sl.registerLazySingleton<PlantisSyncService>(
       () => PlantisSyncServiceFactory.create(
         plantsRepository: sl<PlantsRepository>(),
@@ -19,9 +18,6 @@ abstract class SyncDIModule {
         plantCommentsRepository: sl<PlantCommentsRepository>(),
       ),
     );
-
-    // Inicializar o service no startup (será chamado pelo app)
-    // A inicialização é lazy, então o service só é criado quando solicitado
   }
 
   /// Inicializa o sync service após o app estar pronto
@@ -33,7 +29,6 @@ abstract class SyncDIModule {
 
       result.fold(
         (failure) {
-          // Log do erro mas não bloqueia o app
           if (kDebugMode) {
             print('⚠️ Failed to initialize Plantis sync service: ${failure.message}');
           }
@@ -42,8 +37,6 @@ abstract class SyncDIModule {
           if (kDebugMode) {
             print('✅ Plantis sync service initialized successfully');
           }
-
-          // Integrar com connectivity monitoring existente
           _setupConnectivityMonitoring(sl);
         },
       );
@@ -59,8 +52,6 @@ abstract class SyncDIModule {
     try {
       final syncService = sl<PlantisSyncService>();
       final connectivityService = sl<ConnectivityService>();
-
-      // Conectar o sync service ao stream de conectividade
       syncService.startConnectivityMonitoring(
         connectivityService.connectivityStream,
       );

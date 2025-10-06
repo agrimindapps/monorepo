@@ -26,28 +26,18 @@ class ReportSummaryEntity extends Equatable {
   final DateTime startDate;
   final DateTime endDate;
   final String period; // 'month', 'year', 'custom'
-
-  // Fuel data
   final double totalFuelSpent;
   final double totalFuelLiters;
   final double averageFuelPrice;
   final int fuelRecordsCount;
-
-  // Distance data
   final double totalDistanceTraveled;
   final double averageConsumption; // km/L
   final double lastOdometerReading;
   final double firstOdometerReading;
-
-  // Maintenance data (optional)
   final double totalMaintenanceSpent;
   final int maintenanceRecordsCount;
-
-  // Expenses data (optional)
   final double totalExpensesSpent;
   final int expenseRecordsCount;
-
-  // Analysis
   final double costPerKm;
   final Map<String, dynamic> trends; // Growth rates, comparisons, etc.
   final Map<String, dynamic> metadata;
@@ -121,8 +111,6 @@ class ReportSummaryEntity extends Equatable {
       metadata: metadata ?? this.metadata,
     );
   }
-
-  // Helper getters
   bool get hasData =>
       fuelRecordsCount > 0 ||
       maintenanceRecordsCount > 0 ||
@@ -141,8 +129,6 @@ class ReportSummaryEntity extends Equatable {
 
   int get totalRecords =>
       fuelRecordsCount + maintenanceRecordsCount + expenseRecordsCount;
-
-  // Formatted getters
   String get formattedTotalFuelSpent =>
       'R\$ ${totalFuelSpent.toStringAsFixed(2)}';
 
@@ -174,8 +160,6 @@ class ReportSummaryEntity extends Equatable {
         return period;
     }
   }
-
-  // Calculate growth rate compared to another report
   double calculateGrowthRate(
     ReportSummaryEntity previousReport,
     String metric,

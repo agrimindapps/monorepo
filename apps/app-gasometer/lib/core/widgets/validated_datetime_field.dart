@@ -101,8 +101,6 @@ class ValidatedDateTimeField extends StatefulWidget {
   
   /// Usar formato 24 horas (apenas para time e dateTime)
   final bool use24HourFormat;
-  
-  // Validação
   /// Validador síncrono
   final String? Function(DateTime?)? validator;
   
@@ -117,12 +115,8 @@ class ValidatedDateTimeField extends StatefulWidget {
   
   /// Se deve mostrar ícone de validação
   final bool showValidationIcon;
-  
-  // Callbacks
   /// Callback quando a edição é completada
   final VoidCallback? onEditingComplete;
-  
-  // Estilo customizado
   /// Decoração customizada
   final InputDecoration? decoration;
 
@@ -151,8 +145,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
     super.initState();
     _selectedValue = widget.initialValue;
     _setupFormatter();
-    
-    // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: GasometerDesignTokens.animationFast,
       vsync: this,
@@ -215,7 +207,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
     widget.onEditingComplete?.call();
     
     if (widget.validateOnChange) {
-      // Cancelar timer anterior se existir
       _debounceTimer?.cancel();
       
       if (value == null) {
@@ -225,14 +216,10 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
         });
         return;
       }
-      
-      // Mostrar estado de validação
       setState(() {
         _validationState = DateTimeValidationState.validating;
         _errorMessage = null;
       });
-      
-      // Configurar debounce
       _debounceTimer = Timer(widget.debounceDuration, () {
         _validateValue(value);
       });
@@ -244,13 +231,9 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
     
     try {
       String? error;
-      
-      // Validação obrigatória para campos required
       if (widget.required && value == null) {
         error = 'Este campo é obrigatório';
       }
-      
-      // Validação de intervalo para campos de data
       if (error == null && value != null && 
           (widget.type == DateTimePickerType.date || widget.type == DateTimePickerType.dateTime)) {
         if (widget.firstDate != null && value.isBefore(widget.firstDate!)) {
@@ -260,13 +243,9 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
           error = 'Data deve ser anterior a ${_dateFormatter.format(widget.lastDate!)}';
         }
       }
-      
-      // Validação síncrona
       if (error == null && widget.validator != null) {
         error = widget.validator!(value);
       }
-      
-      // Validação assíncrona
       if (error == null && widget.asyncValidator != null) {
         error = await widget.asyncValidator!(value);
       }
@@ -282,8 +261,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
           _errorMessage = null;
         }
       });
-      
-      // Animar ícone
       await _iconAnimationController.forward();
       
     } catch (e) {
@@ -360,12 +337,9 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
   }
 
   String? get _displayHelperText {
-    // Priorizar mensagem de erro
     if (_errorMessage != null) {
       return _errorMessage;
     }
-    
-    // Mensagem de helper padrão
     return widget.helperText;
   }
 
@@ -456,11 +430,8 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
   }
 
   Future<DateTime?> _selectDateAndTime() async {
-    // Primeiro selecionar a data
     final date = await _selectDate();
     if (date == null || !mounted) return null;
-    
-    // Depois selecionar o horário
     final time = await showTimePicker(
       context: context,
       initialTime: _selectedValue != null
@@ -527,7 +498,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         if (widget.label != null)
           Padding(
             padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
@@ -552,8 +522,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
               ),
             ),
           ),
-        
-        // Campo de seleção
         InkWell(
           onTap: widget.enabled ? _selectDateTime : null,
           borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
@@ -572,7 +540,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
             ),
             child: Row(
               children: [
-                // Ícone prefixo
                 if (widget.prefixIcon != null) ...[
                   Icon(
                     widget.prefixIcon,
@@ -583,8 +550,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
                   ),
                   const SizedBox(width: GasometerDesignTokens.spacingMd),
                 ],
-                
-                // Texto da data/hora
                 Expanded(
                   child: Text(
                     _displayText.isEmpty ? _hintText : _displayText,
@@ -598,8 +563,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
                     ),
                   ),
                 ),
-                
-                // Ícones e sufixos
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -622,8 +585,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
             ),
           ),
         ),
-        
-        // Helper text
         if (_displayHelperText != null)
           Padding(
             padding: const EdgeInsets.only(
@@ -638,8 +599,6 @@ class _ValidatedDateTimeFieldState extends State<ValidatedDateTimeField>
               ),
             ),
           ),
-        
-        // Indicador de progresso para validação
         if (_validationState == DateTimeValidationState.validating)
           Padding(
             padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingXs),

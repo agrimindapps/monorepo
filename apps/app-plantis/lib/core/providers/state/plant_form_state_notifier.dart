@@ -12,14 +12,11 @@ part 'plant_form_state_notifier.g.dart';
 
 /// Estado do formulário de planta
 class PlantFormState {
-  // Estados de operação
   final bool isLoading;
   final bool isSaving;
   final bool isUploadingImages;
   final String? errorMessage;
   final Plant? originalPlant;
-
-  // Campos do formulário
   final String name;
   final String species;
   final String? spaceId;
@@ -27,14 +24,10 @@ class PlantFormState {
   final DateTime? plantingDate;
   final String? imageBase64;
   final List<String> imageUrls;
-
-  // Configurações de cuidado
   final int? wateringIntervalDays;
   final int? fertilizingIntervalDays;
   final int? pruningIntervalDays;
   final String? waterAmount;
-
-  // Configurações de cuidado estendidas
   final bool? enableWateringCare;
   final DateTime? lastWateringDate;
   final bool? enableFertilizerCare;
@@ -50,8 +43,6 @@ class PlantFormState {
   final bool? enableReplanting;
   final int? replantingIntervalDays;
   final DateTime? lastReplantingDate;
-
-  // Estados de validação
   final Map<String, String> fieldErrors;
   final bool isFormValid;
 
@@ -170,8 +161,6 @@ class PlantFormState {
       isFormValid: isFormValid ?? this.isFormValid,
     );
   }
-
-  // Getters convenientes
   bool get hasError => errorMessage != null;
   bool get isEditMode => originalPlant != null;
   bool get hasChanges => _hasChanges();
@@ -264,8 +253,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
             );
             return;
           }
-
-          // DEBUG: Log dos valores sendo carregados
           if (kDebugMode) {
             print('🌱 loadPlant - Carregando planta: ${plant.name}');
             print('   🔧 plant.config existe? ${plant.config != null}');
@@ -297,7 +284,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
             plantingDate: plant.plantingDate,
             imageBase64: plant.imageBase64,
             imageUrls: List<String>.from(plant.imageUrls),
-            // Carregar configurações
             wateringIntervalDays: plant.config?.wateringIntervalDays,
             fertilizingIntervalDays: plant.config?.fertilizingIntervalDays,
             pruningIntervalDays: plant.config?.pruningIntervalDays,
@@ -365,7 +351,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 7 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && state.wateringIntervalDays == null
             ? 7
@@ -385,7 +370,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 30 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && state.fertilizingIntervalDays == null
             ? 30
@@ -741,8 +725,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     state = const PlantFormState();
   }
 }
-
-// Dependency providers
 @riverpod
 FormValidationService formValidationService(Ref ref) {
   return GetIt.instance<FormValidationService>();

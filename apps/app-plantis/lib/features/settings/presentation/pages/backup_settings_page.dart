@@ -34,7 +34,6 @@ class BackupSettingsPage extends ConsumerWidget {
       body: ResponsiveLayout(
         child: Consumer(
           builder: (context, ref, child) {
-            // Verificação de Premium simplificada por enquanto
             const isPremium = false; // TODO: Implementar verificação de premium
 
             if (!isPremium) {

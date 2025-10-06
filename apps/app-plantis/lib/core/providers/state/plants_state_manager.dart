@@ -76,8 +76,6 @@ class PlantsState {
       showOnlyNeedingWater: showOnlyNeedingWater ?? this.showOnlyNeedingWater,
     );
   }
-
-  // Convenience getters
   bool get isEmpty => allPlants.isEmpty;
   bool get hasError => error != null;
   bool get isGroupedBySpaces => viewMode == ViewMode.groupedBySpaces;
@@ -154,26 +152,19 @@ class PlantsStateManager extends ChangeNotifier {
 
   /// Inicializa o gerenciador
   void _initialize() {
-    // Escutar mudanças no estado de autenticação
     _authSubscription = _authProvider.userStream.listen(_onAuthStateChanged);
-    
-    // Configurar auto-refresh a cada 15 minutos
     _autoRefreshTimer = Timer.periodic(
       const Duration(minutes: 15),
       (_) => refreshPlants(),
     );
-    
-    // Carregar plantas inicial
     loadPlants();
   }
 
   /// Callback para mudanças no estado de auth
   void _onAuthStateChanged(UserEntity? user) {
     if (user != null) {
-      // Usuário logou - carregar plantas
       loadPlants();
     } else {
-      // Usuário deslogou - limpar estado
       _updateState(_state.copyWith(
         allPlants: [],
         filteredPlants: [],
@@ -211,8 +202,6 @@ class PlantsStateManager extends ChangeNotifier {
             isLoading: false,
             clearError: true,
           ));
-          
-          // Aplicar filtros aos dados carregados
           await _applyCurrentFilters();
         },
       );

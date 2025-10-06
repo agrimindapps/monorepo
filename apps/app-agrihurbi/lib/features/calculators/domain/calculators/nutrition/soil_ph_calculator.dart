@@ -145,8 +145,6 @@ class SoilPHCalculator extends CalculatorEntity {
       final double area = double.parse(inputs['area'].toString());
       final double applicationDepth = double.parse(inputs['application_depth'].toString());
       final double limestonePRNT = double.parse(inputs['limestone_prnt'].toString());
-
-      // Validações
       if (targetPH <= currentPH) {
         return CalculationError(
           calculatorId: id,
@@ -154,12 +152,8 @@ class SoilPHCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-
-      // Obter saturação por bases ideal para a cultura
       final double idealBaseSaturation = _getIdealBaseSaturation(cropType);
       final double actualTargetV = math.max(idealBaseSaturation, targetPH * 13.5 - 31.5);
-
-      // Cálculo da necessidade de calcário por diferentes métodos
       final Map<String, double> calculations = _calculateLimestoneNeed(
         currentPH,
         targetPH,
@@ -169,38 +163,22 @@ class SoilPHCalculator extends CalculatorEntity {
         cec,
         clayContent,
       );
-
-      // Escolher método mais apropriado
       final double limestoneNeed = _selectBestMethod(
         calculations,
         currentPH,
         aluminumSaturation,
         clayContent,
       );
-
-      // Ajustar pelo PRNT
       final double adjustedLimestoneNeed = limestoneNeed * (100 / limestonePRNT);
-
-      // Ajustar pela profundidade de aplicação
       final double depthFactor = applicationDepth / 20.0; // Referência 20 cm
       final double finalLimestoneNeed = adjustedLimestoneNeed * depthFactor;
-
-      // Calcular para área total
       final double totalLimestone = finalLimestoneNeed * area;
-
-      // Cronograma de aplicação
       final List<Map<String, dynamic>> applicationSchedule = _generateApplicationSchedule(
         finalLimestoneNeed, cropType, currentPH);
-
-      // Análise de custo-benefício
       final Map<String, dynamic> costAnalysis = _calculateCostAnalysis(
         totalLimestone, currentPH, targetPH, area);
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         currentPH, targetPH, aluminumSaturation, baseSaturation, clayContent, finalLimestoneNeed);
-
-      // Predição de mudanças no solo
       final Map<String, dynamic> soilChanges = _predictSoilChanges(
         currentPH, baseSaturation, aluminumSaturation, finalLimestoneNeed);
 
@@ -312,18 +290,11 @@ class SoilPHCalculator extends CalculatorEntity {
     double cec,
     double clayContent,
   ) {
-    // Método 1: Saturação por Bases
     final double method1 = (cec * (targetV - baseSaturation)) / 100;
-
-    // Método 2: Neutralização do Alumínio
     final double alCmolc = (alSaturation / 100) * cec;
     final double method2 = alCmolc * 2; // Fator 2 para neutralização completa
-
-    // Método 3: Índice SMP (simplificado)
     final double smpBuffer = _estimateSMPBuffer(currentPH, clayContent);
     final double method3 = _smpToLimestone(smpBuffer, targetPH);
-
-    // Método 4: Incubação (baseado em experiência)
     final double deltaH = targetPH - currentPH;
     final double method4 = deltaH * (1.5 + clayContent / 100); // Ajuste por argila
 
@@ -342,25 +313,19 @@ class SoilPHCalculator extends CalculatorEntity {
     double alSaturation,
     double clayContent,
   ) {
-    // Lógica para escolher o melhor método baseado nas condições
     double selectedValue;
     double selectedMethod;
 
     if (currentPH < 5.0 && alSaturation > 20) {
-      // Solo muito ácido com muito Al - usar método do alumínio
       selectedValue = calculations['method2']!;
       selectedMethod = 2.0;
     } else if (clayContent > 50) {
-      // Solo argiloso - usar método SMP
       selectedValue = calculations['method3']!;
       selectedMethod = 3.0;
     } else {
-      // Condições normais - usar saturação por bases
       selectedValue = calculations['method1']!;
       selectedMethod = 1.0;
     }
-
-    // Aplicar check de sanidade - usar média se discrepância muito grande
     final List<double> values = [
       calculations['method1']!,
       calculations['method2']!,
@@ -373,7 +338,6 @@ class SoilPHCalculator extends CalculatorEntity {
       final double maxDiff = values.map((v) => (v - average).abs()).reduce(math.max);
       
       if (maxDiff > average * 0.5) {
-        // Grande discrepância - usar média
         selectedValue = average;
         selectedMethod = 0.0; // Indica método médio
       }
@@ -384,12 +348,10 @@ class SoilPHCalculator extends CalculatorEntity {
   }
 
   double _estimateSMPBuffer(double pH, double clayContent) {
-    // Estimativa simplificada do índice SMP baseado em pH e argila
     return 7.5 - (pH - 4.0) * 0.8 - (clayContent / 100) * 0.5;
   }
 
   double _smpToLimestone(double smpBuffer, double targetPH) {
-    // Conversão simplificada SMP para necessidade de calcário
     if (smpBuffer > 6.0) return 0.0;
     
     final double limeNeed = (6.0 - smpBuffer) * 2.5;
@@ -404,7 +366,6 @@ class SoilPHCalculator extends CalculatorEntity {
     final List<Map<String, dynamic>> schedule = [];
 
     if (limestoneNeed <= 2.0) {
-      // Aplicação única
       schedule.add({
         'periodo': 'Aplicação Única',
         'quantidade': limestoneNeed,
@@ -413,7 +374,6 @@ class SoilPHCalculator extends CalculatorEntity {
         'observacao': 'Incorporar até 20 cm de profundidade'
       });
     } else if (limestoneNeed <= 4.0) {
-      // Duas aplicações
       schedule.addAll([
         {
           'periodo': '1ª Aplicação',
@@ -431,7 +391,6 @@ class SoilPHCalculator extends CalculatorEntity {
         },
       ]);
     } else {
-      // Três aplicações para doses altas
       schedule.addAll([
         {
           'periodo': '1ª Aplicação',
@@ -466,13 +425,10 @@ class SoilPHCalculator extends CalculatorEntity {
     double targetPH,
     double area,
   ) {
-    // Preços estimados
     const double limestonePrice = 120.0; // R\$/t
     const double applicationCost = 50.0; // R\$/ha
     
     final double totalCost = (totalLimestone * limestonePrice) + (area * applicationCost);
-    
-    // Benefícios estimados
     final double phIncrease = targetPH - currentPH;
     final double yieldIncrease = phIncrease * 0.15; // 15% por unidade de pH
     final double annualSavings = yieldIncrease * 2000; // R\$/ha/ano
@@ -491,7 +447,6 @@ class SoilPHCalculator extends CalculatorEntity {
     double currentAl,
     double limestoneNeed,
   ) {
-    // Predições baseadas em experiência de campo
     final double phIncrease = limestoneNeed * 0.3; // Aproximação
     final double finalPH = math.min(currentPH + phIncrease, 7.2);
     
@@ -534,34 +489,24 @@ class SoilPHCalculator extends CalculatorEntity {
     double limestoneNeed,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações baseadas no pH atual
     if (currentPH < 4.5) {
       recommendations.add('Solo extremamente ácido. Aplicar calcário parceladamente.');
     } else if (currentPH > 6.8) {
       recommendations.add('pH próximo ao neutro. Verificar real necessidade de calagem.');
     }
-
-    // Recomendações baseadas no alumínio
     if (alSaturation > 30) {
       recommendations.add('Alta saturação por Al. Priorizar neutralização do alumínio.');
     }
-
-    // Recomendações baseadas na dose
     if (limestoneNeed > 4.0) {
       recommendations.add('Dose alta de calcário. Aplicar parceladamente em 2-3 anos.');
     } else if (limestoneNeed < 1.0) {
       recommendations.add('Dose baixa. Aplicação única será suficiente.');
     }
-
-    // Recomendações por textura
     if (clayContent < 20) {
       recommendations.add('Solo arenoso: usar calcário com maior finura (PRNT >90%).');
     } else if (clayContent > 60) {
       recommendations.add('Solo argiloso: atenção à incorporação uniforme.');
     }
-
-    // Recomendações gerais
     recommendations.add('Aplicar calcário 60-90 dias antes do plantio.');
     recommendations.add('Incorporar o calcário uniformemente até 20 cm de profundidade.');
     recommendations.add('Verificar qualidade do calcário (PRNT, granulometria).');

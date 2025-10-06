@@ -35,16 +35,10 @@ class CurrencyInputFormatter extends TextInputFormatter {
   ) {
     final newText = newValue.text;
     if (newText.isEmpty) return newValue;
-    
-    // Remove todos os caracteres não numéricos
     final digitsOnly = newText.replaceAll(RegExp(r'[^\d]'), '');
     if (digitsOnly.isEmpty) return const TextEditingValue();
-    
-    // Converte para double (dividindo por 100 para centavos)
     final number = double.tryParse(digitsOnly);
     if (number == null) return oldValue;
-    
-    // Formata como moeda brasileira
     final formatted = NumberFormat.currency(
       locale: 'pt_BR',
       symbol: 'R\$',
@@ -66,33 +60,21 @@ class OdometerInputFormatter extends TextInputFormatter {
   ) {
     final newText = newValue.text;
     if (newText.isEmpty) return newValue;
-    
-    // Remove todos os caracteres não numéricos (exceto vírgula e ponto para decimais)
     final digitsOnly = newText.replaceAll(RegExp(r'[^\d,.]'), '');
     if (digitsOnly.isEmpty) return const TextEditingValue();
-    
-    // Converte vírgula para ponto para processamento
     final normalizedText = digitsOnly.replaceAll(',', '.');
     final number = double.tryParse(normalizedText);
     if (number == null) return oldValue;
-    
-    // Limita a 6 dígitos inteiros (999.999 km) e 1 decimal
     if (number > 999999.9) {
       return oldValue;
     }
-    
-    // Formata com separadores de milhares
     final formatter = NumberFormat('#,##0.0', 'pt_BR');
     String formatted = formatter.format(number);
-    
-    // Remove .0 desnecessário se for número inteiro
     if (formatted.endsWith(',0')) {
       formatted = formatted.substring(0, formatted.length - 2);
     }
     
     formatted += ' km';
-    
-    // Calcula a posição do cursor (antes da unidade ' km')
     final cursorPosition = formatted.length - 3;
     
     return TextEditingValue(
@@ -116,8 +98,6 @@ class LicensePlateInputFormatter extends TextInputFormatter {
     }
     
     String formatted = '';
-    
-    // Formato: ABC-1234 ou ABC-1D23
     for (int i = 0; i < newText.length; i++) {
       if (i == 3) {
         formatted += '-';
@@ -140,8 +120,6 @@ class ChassiInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final newText = newValue.text.toUpperCase();
-    
-    // Remove caracteres inválidos (I, O, Q não são permitidos no chassi)
     final filteredText = newText.replaceAll(RegExp(r'[^A-HJ-NPR-Z0-9]'), '');
     
     if (filteredText.length > 17) {
@@ -187,20 +165,12 @@ class DecimalInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final newText = newValue.text;
-    
-    // Permite apenas dígitos, vírgula e ponto
     final filteredText = newText.replaceAll(RegExp(r'[^\d,.]'), '');
-    
-    // Substitui ponto por vírgula para padrão brasileiro
     final normalizedText = filteredText.replaceAll('.', ',');
-    
-    // Verifica se há múltiplas vírgulas
     final commaCount = ','.allMatches(normalizedText).length;
     if (commaCount > 1) {
       return oldValue;
     }
-    
-    // Limita casas decimais
     if (normalizedText.contains(',')) {
       final parts = normalizedText.split(',');
       if (parts.length == 2 && parts[1].length > decimalPlaces) {
@@ -229,8 +199,6 @@ class PhoneInputFormatter extends TextInputFormatter {
     }
     
     String formatted = '';
-    
-    // Formato: (11) 99999-9999
     for (int i = 0; i < digitsOnly.length; i++) {
       if (i == 0) {
         formatted += '(';
@@ -264,8 +232,6 @@ class CpfInputFormatter extends TextInputFormatter {
     }
     
     String formatted = '';
-    
-    // Formato: 999.999.999-99
     for (int i = 0; i < digitsOnly.length; i++) {
       if (i == 3 || i == 6) {
         formatted += '.';
@@ -296,8 +262,6 @@ class CepInputFormatter extends TextInputFormatter {
     }
     
     String formatted = '';
-    
-    // Formato: 99999-999
     for (int i = 0; i < digitsOnly.length; i++) {
       if (i == 5) {
         formatted += '-';

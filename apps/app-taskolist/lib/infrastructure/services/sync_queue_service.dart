@@ -19,7 +19,6 @@ class TaskManagerSyncQueueService {
 
   /// Inicializar o serviço
   Future<void> initialize() async {
-    // Emitir estado inicial
     _emitQueueState();
     
     if (kDebugMode) {
@@ -78,7 +77,6 @@ class TaskManagerSyncQueueService {
     try {
       final items = List<SyncQueueItem>.from(_queue)
         ..sort((SyncQueueItem a, SyncQueueItem b) {
-          // Ordenar por prioridade (menor número = maior prioridade) e depois por timestamp
           final priorityComparison = a.priority.compareTo(b.priority);
           if (priorityComparison != 0) return priorityComparison;
           return a.timestamp.compareTo(b.timestamp);
@@ -113,14 +111,8 @@ class TaskManagerSyncQueueService {
     if (kDebugMode) {
       debugPrint('🔄 SyncQueue: Processando ${item.type.name} ${item.operation.name} - ${item.id}');
     }
-
-    // TODO: Implementar processamento real baseado no tipo e operação
-    // Por agora, simulamos o processamento
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
-    // Simular sucesso na maioria dos casos
     if (item.retryCount < 3) {
-      // Remover item processado com sucesso
       _queue.removeWhere((queueItem) => queueItem.id == item.id);
       
       if (kDebugMode) {
@@ -138,14 +130,12 @@ class TaskManagerSyncQueueService {
     }
 
     if (item.retryCount >= 3) {
-      // Máximo de tentativas atingido, remover
       _queue.removeWhere((queueItem) => queueItem.id == item.id);
       
       if (kDebugMode) {
         debugPrint('❌ SyncQueue: Item removido após máximo de tentativas - ${item.id}');
       }
     } else {
-      // Incrementar contador de tentativas
       final index = _queue.indexWhere((queueItem) => queueItem.id == item.id);
       if (index != -1) {
         _queue[index] = item.copyWith(

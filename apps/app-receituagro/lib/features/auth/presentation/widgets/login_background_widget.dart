@@ -19,7 +19,6 @@ class LoginBackgroundWidget extends StatelessWidget {
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
-        // Gradiente complexo simulando campos em perspectiva
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -43,7 +42,6 @@ class LoginBackgroundWidget extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Layer 1: Gradiente radial secundário para profundidade
           Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
@@ -57,17 +55,14 @@ class LoginBackgroundWidget extends StatelessWidget {
               ),
             ),
           ),
-          // Layer 2: Padrões agrícolas modernos
           CustomPaint(
             painter: _ModernAgriculturalPatternPainter(isDark: isDark),
             size: Size.infinite,
           ),
-          // Layer 3: Elementos geométricos sutis
           CustomPaint(
             painter: _GeometricFieldsPainter(isDark: isDark),
             size: Size.infinite,
           ),
-          // Content - sempre por último
           child,
         ],
       ),
@@ -95,16 +90,11 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
           ? const Color(0xFF81C784) 
           : const Color(0xFF2E7D32)).withValues(alpha: 0.04)
       ..strokeWidth = 0.8;
-
-    // Linhas com perspectiva simulando fileiras de plantio
     const rowSpacing = 45.0;
     for (double i = 0; i <= size.width + 100; i += rowSpacing) {
-      // Linhas principais (mais visíveis)
       final startPoint = Offset(i, 0);
       final endPoint = Offset(i * 0.7, size.height);
       canvas.drawLine(startPoint, endPoint, paint);
-
-      // Linhas secundárias (mais sutis)
       if (i % (rowSpacing * 2) == 0) {
         final secondaryPaint = Paint()
           ..color = paint.color.withValues(alpha: 0.02)
@@ -133,8 +123,6 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
           ? const Color(0xFF66BB6A).withValues(alpha: 0.01)
           : const Color(0xFF4CAF50).withValues(alpha: 0.015))
       ..style = PaintingStyle.fill;
-
-    // Círculos concêntricos simulando sistemas de irrigação
     const seed = 42; // Seed fixo para posições consistentes
     final random = math.Random(seed);
     
@@ -142,14 +130,8 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
       final baseRadius = 30.0 + random.nextDouble() * 40;
-
-      // Círculo externo (stroke)
       canvas.drawCircle(Offset(x, y), baseRadius, strokePaint);
-      
-      // Círculo interno (fill)
       canvas.drawCircle(Offset(x, y), baseRadius * 0.7, fillPaint);
-      
-      // Círculo central (stroke fino)
       canvas.drawCircle(
         Offset(x, y), 
         baseRadius * 0.4, 
@@ -165,8 +147,6 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
   void _drawOrganicElements(Canvas canvas, Size size) {
     const seed = 123;
     final random = math.Random(seed);
-    
-    // Elementos tipo "sementes" distribuídos organicamente
     final seedPaint = Paint()
       ..color = (isDark 
           ? const Color(0xFFA5D6A7).withValues(alpha: 0.015)
@@ -180,8 +160,6 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
       
       canvas.drawCircle(Offset(x, y), radius, seedPaint);
     }
-
-    // Formas de folhas estilizadas mais elaboradas
     final leafPaint = Paint()
       ..color = (isDark 
           ? const Color(0xFF81C784).withValues(alpha: 0.012)
@@ -205,8 +183,6 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
 
   void _drawStylizedLeaf(Canvas canvas, Paint paint) {
     final path = Path();
-    
-    // Folha mais elaborada com curvas naturais
     path.moveTo(0, 0);
     path.quadraticBezierTo(8, -12, 20, -8);
     path.quadraticBezierTo(25, -2, 22, 4);
@@ -214,8 +190,6 @@ class _ModernAgriculturalPatternPainter extends CustomPainter {
     path.quadraticBezierTo(3, 3, 0, 0);
     
     canvas.drawPath(path, paint);
-    
-    // Nervura central da folha
     final nervurePaint = Paint()
       ..color = paint.color.withValues(alpha: paint.color.a * 1.5)
       ..strokeWidth = 0.3;
@@ -300,11 +274,7 @@ class _GeometricFieldsPainter extends CustomPainter {
     for (int i = 0; i < 15; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
-      
-      // Ponto central
       canvas.drawCircle(Offset(x, y), 1.5, paint);
-      
-      // Anel externo sutil
       canvas.drawCircle(
         Offset(x, y), 
         4, 

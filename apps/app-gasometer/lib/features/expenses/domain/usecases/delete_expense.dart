@@ -22,16 +22,12 @@ class DeleteExpenseUseCase implements UseCase<bool, String> {
           ValidationFailure('ID da despesa é obrigatório'),
         );
       }
-
-      // Verificar se existe
       final expense = await _repository.getExpenseById(expenseId);
       if (expense == null) {
         return const Left(
           ValidationFailure('Despesa não encontrada'),
         );
       }
-
-      // Deletar (soft delete)
       final result = await _repository.deleteExpense(expenseId);
 
       return Right(result);

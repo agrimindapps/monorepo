@@ -35,25 +35,18 @@ class BackupScheduler {
 
     _isRunning = true;
     debugPrint('BackupScheduler: Iniciado');
-
-    // Timer periódico para verificar se precisa fazer backup
     _schedulerTimer = Timer.periodic(_checkInterval, (timer) {
       _checkAndExecuteBackup();
     });
-
-    // Monitora conectividade para tentar backup quando voltar online
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
       List<ConnectivityResult> results,
     ) {
       if (results.any((result) => result != ConnectivityResult.none)) {
-        // Voltou a ter conexão, verifica se precisa fazer backup
         Future.delayed(const Duration(seconds: 5), () {
           _checkAndExecuteBackup();
         });
       }
     });
-
-    // Faz verificação inicial
     Future.delayed(const Duration(seconds: 10), () {
       _checkAndExecuteBackup();
     });
@@ -82,35 +75,24 @@ class BackupScheduler {
   /// Verifica se precisa fazer backup e executa se necessário
   Future<void> _checkAndExecuteBackup() async {
     try {
-      // Verifica se usuário tem premium
       if (!await _isPremiumUser()) {
         debugPrint('BackupScheduler: Usuário não é premium, pulando backup');
         return;
       }
-
-      // Verifica se precisa fazer backup
       final shouldBackup = await _backupService.shouldAutoBackup();
       if (!shouldBackup) {
         debugPrint('BackupScheduler: Backup não necessário no momento');
         return;
       }
-
-      // Carrega configurações de backup
       final settings = await _backupService.getBackupSettings();
-
-      // Verifica se backup automático está habilitado
       if (!settings.autoBackupEnabled) {
         debugPrint('BackupScheduler: Backup automático desabilitado');
         return;
       }
-
-      // Verifica conectividade
       if (!await _hasInternetConnection()) {
         debugPrint('BackupScheduler: Sem conexão com internet');
         return;
       }
-
-      // Verifica se deve usar apenas WiFi
       if (settings.wifiOnlyEnabled && !await _isConnectedToWifi()) {
         debugPrint(
           'BackupScheduler: Configurado apenas para WiFi, mas não está no WiFi',
@@ -119,8 +101,6 @@ class BackupScheduler {
       }
 
       debugPrint('BackupScheduler: Iniciando backup automático');
-
-      // Executa o backup
       final result = await _backupService.createBackup();
 
       result.fold(
@@ -128,14 +108,11 @@ class BackupScheduler {
           debugPrint(
             'BackupScheduler: Erro no backup automático: ${failure.message}',
           );
-          // Aqui poderia enviar notificação de erro se necessário
         },
         (backupResult) {
           debugPrint(
             'BackupScheduler: Backup automático concluído com sucesso: ${backupResult.fileName}',
           );
-
-          // Aqui poderia enviar notificação de sucesso se necessário
           _showBackupSuccessNotification(backupResult);
         },
       );
@@ -182,8 +159,6 @@ class BackupScheduler {
 
   /// Mostra notificação de backup concluído com sucesso
   void _showBackupSuccessNotification(BackupResult result) {
-    // TODO: Integrar com sistema de notificações local
-    // Por enquanto apenas faz log
     debugPrint(
       'BackupScheduler: Notificação - Backup realizado com sucesso (${result.fileName})',
     );

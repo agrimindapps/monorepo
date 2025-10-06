@@ -65,8 +65,6 @@ abstract class BaseCalculator<TInput extends CalculatorInput, TResult extends Ca
   /// Obtém os parâmetros de entrada necessários para esta calculadora
   /// Usado para construir formulários dinâmicos
   Map<String, dynamic> getInputParameters();
-
-  // Implementação da interface Calculator
   @override
   CalculationResult calculate(Map<String, dynamic> inputs) {
     final typedInput = createInputFromMap(inputs);

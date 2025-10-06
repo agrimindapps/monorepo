@@ -49,8 +49,6 @@ class OdometerRepository
   /// Initializes the repository
   Future<void> initialize() async {
     _box = await Hive.openBox<OdometerModel>(_boxName);
-
-    // Initialize cache with optimized settings for odometer
     initializeCache(
       maxSize: 100,
       defaultTtl: const Duration(
@@ -73,16 +71,12 @@ class OdometerRepository
       operationFunc: () async {
         final model = _entityToModel(reading);
         await _box.put(reading.id, model);
-
-        // Log local storage
         await logLocalStorage(
           action: 'saved',
           entityType: 'OdometerReading',
           entityId: reading.id,
           metadata: {'storage_type': 'hive'},
         );
-
-        // Remote sync in background (fire-and-forget)
         unawaited(_syncOdometerReadingToRemoteInBackground(reading));
 
         return _modelToEntity(model);
@@ -108,16 +102,12 @@ class OdometerRepository
 
         final model = _entityToModel(reading);
         await _box.put(reading.id, model);
-
-        // Log local storage
         await logLocalStorage(
           action: 'updated',
           entityType: 'OdometerReading',
           entityId: reading.id,
           metadata: {'storage_type': 'hive'},
         );
-
-        // Remote sync in background (fire-and-forget)
         unawaited(_syncOdometerReadingToRemoteInBackground(reading));
 
         return _modelToEntity(model);
@@ -133,8 +123,6 @@ class OdometerRepository
       entityId: readingId,
       operationFunc: () async {
         await _box.delete(readingId);
-
-        // Log local storage
         await logLocalStorage(
           action: 'deleted',
           entityType: 'OdometerReading',
@@ -160,7 +148,6 @@ class OdometerRepository
   /// Loads all odometer readings
   Future<List<OdometerEntity>> getAllOdometerReadings() async {
     try {
-      // Verificar cache primeiro
       const cacheKey = 'all_odometer_readings';
       final cached = getCachedList(cacheKey);
       if (cached != null) {
@@ -169,8 +156,6 @@ class OdometerRepository
 
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache o resultado
       cacheList(cacheKey, entities);
 
       return entities;
@@ -195,7 +180,6 @@ class OdometerRepository
     String vehicleId,
   ) async {
     try {
-      // Verificar cache primeiro
       final cacheKey = vehicleCacheKey(vehicleId, 'odometer_readings');
       final cached = getCachedList(cacheKey);
       if (cached != null) {
@@ -208,13 +192,9 @@ class OdometerRepository
                 (model) => model.vehicleId == vehicleId && !model.isDeleted,
               )
               .toList();
-
-      // Ordenar por data decrescente (mais recente primeiro)
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
 
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache o resultado
       cacheList(cacheKey, entities);
 
       return entities;
@@ -233,8 +213,6 @@ class OdometerRepository
           _box.values
               .where((model) => model.type == typeString && !model.isDeleted)
               .toList();
-
-      // Ordenar por data decrescente
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
 
       return models.map((model) => _modelToEntity(model)).toList();
@@ -258,8 +236,6 @@ class OdometerRepository
                 model.registrationDate <= endMs &&
                 !model.isDeleted;
           }).toList();
-
-      // Ordenar por data decrescente
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
 
       return models.map((model) => _modelToEntity(model)).toList();
@@ -279,8 +255,6 @@ class OdometerRepository
               .toList();
 
       if (models.isEmpty) return null;
-
-      // Encontrar o modelo com a maior data
       final latestModel = models.reduce(
         (a, b) => a.registrationDate > b.registrationDate ? a : b,
       );
@@ -300,8 +274,6 @@ class OdometerRepository
             return !model.isDeleted &&
                 model.description.toLowerCase().contains(lowerQuery);
           }).toList();
-
-      // Ordenar por data decrescente
       models.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
 
       return models.map((model) => _modelToEntity(model)).toList();
@@ -347,8 +319,6 @@ class OdometerRepository
           'totalDistance': 0.0,
         };
       }
-
-      // Ordenar por data
       models.sort((a, b) => a.registrationDate.compareTo(b.registrationDate));
 
       final firstModel = models.first;
@@ -392,8 +362,6 @@ class OdometerRepository
         for (int j = i + 1; j < models.length; j++) {
           final model1 = models[i];
           final model2 = models[j];
-
-          // Considera duplicata se mesmo veículo, valor próximo e data próxima
           final date1 = DateTime.fromMillisecondsSinceEpoch(
             model1.registrationDate,
           );
@@ -475,21 +443,14 @@ class OdometerRepository
     OdometerEntity reading,
   ) async {
     try {
-      // Verificar se está conectado
       if (!await _isConnected()) {
         return;
       }
-
-      // Verificar se tem usuário autenticado
       final userId = await _getCurrentUserId();
       if (userId == null) {
         return;
       }
-
-      // Sincronizar com Firebase
       await _remoteDataSource.addOdometerReading(userId, reading);
-
-      // Log successful sync
       await logRemoteSync(
         action: 'synced',
         entityType: 'OdometerReading',
@@ -502,7 +463,6 @@ class OdometerRepository
         },
       );
     } catch (e) {
-      // Log failed sync
       await logRemoteSync(
         action: 'sync_failed',
         entityType: 'OdometerReading',
@@ -514,8 +474,6 @@ class OdometerRepository
           'type': reading.type.name,
         },
       );
-
-      // Log but don't throw - background sync should be silent
       if (kDebugMode) {
         print('Background sync failed for odometer reading ${reading.id}: $e');
       }
@@ -527,7 +485,6 @@ class OdometerRepository
     try {
       await _box.close();
     } catch (e) {
-      // Log error but don't crash
       if (kDebugMode) {
         print('Erro ao fechar box de odômetro: $e');
       }

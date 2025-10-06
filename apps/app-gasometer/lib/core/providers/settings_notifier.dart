@@ -3,8 +3,6 @@ import 'package:core/core.dart';
 import 'dependency_providers.dart';
 
 part 'settings_notifier.g.dart';
-
-// Settings State class (mantida imutável)
 class SettingsState {
   const SettingsState({
     this.isDarkMode = false,
@@ -95,8 +93,6 @@ class SettingsState {
       isLoading.hashCode ^
       errorMessage.hashCode;
 }
-
-// Settings Notifier com @riverpod code generation
 @riverpod
 class CoreSettingsNotifier extends _$CoreSettingsNotifier {
   static const String _settingsKey = 'gasometer_settings';
@@ -104,16 +100,9 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
 
   @override
   Future<SettingsState> build() async {
-    // Injetar HiveStorageService via dependency provider
     _storage = ref.watch(hiveStorageServiceProvider);
-
-    // Carregar settings iniciais
     return await _loadSettings();
   }
-
-  // =========================================================================
-  // PRIVATE METHODS - Data Loading & Persistence
-  // =========================================================================
 
   Future<SettingsState> _loadSettings() async {
     try {
@@ -121,7 +110,6 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
 
       return result.fold(
         (failure) {
-          // Em caso de falha, retorna defaults com mensagem de erro
           return SettingsState(
             errorMessage: 'Erro ao carregar configurações: ${failure.message}',
           );
@@ -130,7 +118,6 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
           if (settingsMap != null) {
             return SettingsState.fromJson(settingsMap);
           }
-          // Se não há dados salvos, retorna defaults
           return const SettingsState();
         },
       );
@@ -153,7 +140,6 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
 
       result.fold(
         (failure) {
-          // Atualiza state com erro
           state = AsyncValue.data(
             currentState.copyWith(
               errorMessage: 'Erro ao salvar configurações: ${failure.message}',
@@ -161,7 +147,6 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
           );
         },
         (_) {
-          // Success - limpa erro se houver
           if (currentState.errorMessage != null) {
             state = AsyncValue.data(
               currentState.copyWith(errorMessage: null),
@@ -180,10 +165,6 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
       }
     }
   }
-
-  // =========================================================================
-  // PUBLIC METHODS - Settings Management
-  // =========================================================================
 
   Future<void> toggleDarkMode() async {
     final currentState = state.valueOrNull;
@@ -261,20 +242,12 @@ class CoreSettingsNotifier extends _$CoreSettingsNotifier {
     }
   }
 
-  // =========================================================================
-  // HELPER METHODS
-  // =========================================================================
-
   /// Recarrega settings do storage
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(_loadSettings);
   }
 }
-
-// =========================================================================
-// DERIVED PROVIDERS - Seletores específicos
-// =========================================================================
 
 /// Provider para acessar isDarkMode diretamente
 @riverpod

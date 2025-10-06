@@ -13,7 +13,6 @@ import '../constants/odometer_constants.dart';
 class OdometerValidationService {
 
   OdometerValidationService(this._vehiclesNotifier);
-  // Validation constants
   static const double maxAllowedRollbackKm = 100.0;
   static const double maxDailyIncreaseKm = 2000.0;
   static const int maxHistoryYears = 5;
@@ -34,7 +33,6 @@ class OdometerValidationService {
     String? currentOdometerId, // For editing existing records
   }) async {
     try {
-      // Get vehicle data
       final vehicle = await _vehiclesNotifier.getVehicleById(vehicleId);
       if (vehicle == null) {
         return OdometerContextValidationResult(
@@ -43,8 +41,6 @@ class OdometerValidationService {
           errorType: ValidationErrorType.vehicleNotFound,
         );
       }
-
-      // Basic validation first
       final basicValidation = OdometerValidator.validateOdometerWithVehicle(
         odometerValue,
         vehicle,
@@ -57,8 +53,6 @@ class OdometerValidationService {
           errorType: ValidationErrorType.valueOutOfRange,
         );
       }
-
-      // Advanced contextual validations
       final contextResult = await _performContextualValidation(
         vehicle: vehicle,
         odometerValue: odometerValue,
@@ -94,8 +88,6 @@ class OdometerValidationService {
     required double odometerValue,
     String? currentOdometerId,
   }) async {
-    // Check if value is significantly lower than current odometer
-    // (allows for small corrections but prevents major rollbacks)
     
     if (vehicle.currentOdometer - odometerValue > maxAllowedRollbackKm) {
       return OdometerContextValidationResult(
@@ -105,8 +97,6 @@ class OdometerValidationService {
         errorType: ValidationErrorType.significantRollback,
       );
     }
-
-    // Check for unrealistic daily increases
     
     final daysSinceLastUpdate = DateTime.now().difference(vehicle.updatedAt ?? DateTime.now()).inDays;
     
@@ -122,14 +112,6 @@ class OdometerValidationService {
         );
       }
     }
-
-    // Check for duplicate values in recent history
-    // Odometer history validation implementation pending
-    // final hasDuplicateInRecent = await _checkForRecentDuplicate(
-    //   vehicle.id,
-    //   odometerValue,
-    //   currentOdometerId,
-    // );
 
     return const OdometerContextValidationResult(isValid: true);
   }
@@ -160,8 +142,6 @@ class OdometerValidationService {
   }) async {
     final errors = <String, String>{};
     final warnings = <String, String>{};
-
-    // Basic form validation
     final basicFormValidation = OdometerValidator.validateForSubmission(
       vehicleId: vehicleId,
       odometerText: odometerValue.toString(),
@@ -171,8 +151,6 @@ class OdometerValidationService {
     );
 
     errors.addAll(basicFormValidation.errors);
-
-    // Contextual odometer validation
     if (errors['odometer'] == null) {
       final contextValidation = await validateOdometerWithContext(
         vehicleId: vehicleId,
@@ -188,8 +166,6 @@ class OdometerValidationService {
         }
       }
     }
-
-    // Date validation (more comprehensive)
     final dateValidation = _validateRegistrationDate(registrationDate);
     if (dateValidation != null) {
       errors['registrationDate'] = dateValidation;
@@ -206,19 +182,13 @@ class OdometerValidationService {
   /// Validates registration date with business rules
   String? _validateRegistrationDate(DateTime date) {
     final now = DateTime.now();
-    
-    // Check for future dates
     if (date.isAfter(now)) {
       return OdometerConstants.validationMessages['dataFutura']!;
     }
-
-    // Check for dates too far in the past
     final maxYearsAgo = DateTime.now().subtract(const Duration(days: 365 * maxHistoryYears));
     if (date.isBefore(maxYearsAgo)) {
       return 'Data muito antiga. Registros anteriores a $maxHistoryYears anos não são permitidos.';
     }
-
-    // Check for dates in the far future (more than 1 hour ahead, accounting for timezone issues)
     final oneHourFromNow = now.add(const Duration(hours: 1));
     if (date.isAfter(oneHourFromNow)) {
       return 'Data/hora parece estar no futuro. Verifique o horário do dispositivo.';
@@ -263,8 +233,6 @@ class OdometerValidationService {
     try {
       final vehicle = await _vehiclesNotifier.getVehicleById(vehicleId);
       if (vehicle == null) return suggestions;
-
-      // Suggest typical values based on vehicle age
       if (odometerValue == 0) {
         final vehicleAge = DateTime.now().year - vehicle.year;
         const typicalKmPerYear = 15000.0;
@@ -277,8 +245,6 @@ class OdometerValidationService {
           suggestedValue: suggestedValue,
         ));
       }
-
-      // Suggest current vehicle odometer if significantly different
       if ((odometerValue - vehicle.currentOdometer).abs() > significantOdometerDifferenceThreshold) {
         suggestions.add(ValidationSuggestion(
           type: SuggestionType.currentValue,

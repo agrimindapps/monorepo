@@ -67,8 +67,6 @@ class Result<T> {
     if (isSuccess && data != null) {
       return onSuccess(data as T);
     }
-
-    // Ensure we have a valid error before calling onError
     final errorToUse =
         error ??
         const UnexpectedError(
@@ -133,8 +131,6 @@ class RetryPolicy {
     if (retryCondition != null) {
       return retryCondition!(error);
     }
-
-    // Default retry conditions
     return error is NetworkError ||
         error is TimeoutError ||
         error is ServerError &&
@@ -170,7 +166,6 @@ class ErrorHandler {
 
     for (int attempt = 1; attempt <= policy.maxAttempts; attempt++) {
       try {
-        // Log retry attempts (except first)
         if (attempt > 1) {
           _logger.logRetryAttempt(
             operationName ?? 'unknown_operation',
@@ -195,13 +190,9 @@ class ErrorHandler {
             ...?context,
           },
         );
-
-        // Don't retry if it's the last attempt or if error shouldn't be retried
         if (attempt >= policy.maxAttempts || !policy.shouldRetry(lastError)) {
           break;
         }
-
-        // Wait before retrying
         await Future<void>.delayed(policy.getDelay(attempt));
       }
     }
@@ -271,8 +262,6 @@ class ErrorHandler {
         technicalDetails: stackTrace?.toString(),
       );
     }
-
-    // Handle common Flutter/Dart exceptions
     if (error is ArgumentError) {
       return ValidationError(
         message: 'Invalid argument: ${error.message}',
@@ -293,8 +282,6 @@ class ErrorHandler {
         technicalDetails: stackTrace?.toString(),
       );
     }
-
-    // Generic error fallback
     return UnexpectedError(
       message: error.toString(),
       technicalDetails: stackTrace?.toString(),

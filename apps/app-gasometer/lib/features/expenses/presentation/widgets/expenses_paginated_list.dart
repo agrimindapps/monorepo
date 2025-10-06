@@ -61,7 +61,6 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
 
   void _onScroll() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-      // User reached the bottom, load next page
       final asyncState = ref.read(expensesPaginatedNotifierProvider);
       final state = asyncState.valueOrNull;
       if (state != null && state.hasNextPage && !state.isLoadingMore) {
@@ -76,12 +75,9 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
 
     return asyncState.when(
       data: (state) {
-        // Empty state
         if (state.items.isEmpty) {
           return _buildEmpty();
         }
-
-        // Main list with items
         return _buildList(state);
       },
       loading: () => _buildInitialLoading(),
@@ -151,12 +147,9 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
         itemExtent: widget.itemExtent,
         itemCount: itemCount,
         itemBuilder: (context, index) {
-          // Loading more indicator at the bottom
           if (index >= state.itemCount) {
             return _buildLoadMoreIndicator(state);
           }
-
-          // Regular expense item
           final expense = state.items[index];
           return widget.itemBuilder(context, expense, index);
         },
@@ -188,8 +181,6 @@ class _ExpensesPaginatedListState extends ConsumerState<ExpensesPaginatedList> {
         ),
       );
     }
-
-    // End of list indicator
     return Container(
       padding: const EdgeInsets.all(16),
       alignment: Alignment.center,
@@ -222,16 +213,11 @@ class ExpensesPaginatedFilters extends ConsumerWidget {
       data: (state) {
         return Column(
           children: [
-            // Sort controls
             _buildSortControls(context, ref, state),
-
-            // Stats summary if available
             if (showStats && state.cachedStats != null) ...[
               const SizedBox(height: 8),
               _buildStatsCard(state.cachedStats!),
             ],
-
-            // Active filters indicator
             if (state.hasActiveFilters) ...[
               const SizedBox(height: 8),
               _buildActiveFiltersIndicator(context, ref, state),

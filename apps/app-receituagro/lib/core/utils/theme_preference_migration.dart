@@ -16,21 +16,15 @@ class ThemePreferenceMigration {
   static Future<bool> migratePreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      // Check if migration already completed
       final migrationCompleted = prefs.getBool(_migrationCompleteKey) ?? false;
       if (migrationCompleted) {
         debugPrint('Theme preferences migration already completed');
         return false;
       }
-
-      // Check for old preference
       final oldTheme = prefs.getString(_oldKey);
       if (oldTheme != null) {
-        // Check if new key already exists (avoid overwriting)
         final existingNewTheme = prefs.getString(_newKey);
         if (existingNewTheme == null) {
-          // Migrate to new key
           await prefs.setString(_newKey, oldTheme);
           debugPrint('Theme preferences migrated: $oldTheme -> $_newKey');
         } else {
@@ -38,15 +32,11 @@ class ThemePreferenceMigration {
             'Theme preferences: new key already exists, keeping existing value',
           );
         }
-
-        // Remove old key
         await prefs.remove(_oldKey);
         debugPrint('Old theme preference key removed: $_oldKey');
       } else {
         debugPrint('Theme preferences migration: no old preferences found');
       }
-
-      // Mark migration as completed
       await prefs.setBool(_migrationCompleteKey, true);
       debugPrint('Theme preferences migration completed successfully');
       return true;

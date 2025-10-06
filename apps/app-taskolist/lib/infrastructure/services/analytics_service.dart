@@ -7,8 +7,6 @@ class TaskManagerAnalyticsService {
 
   TaskManagerAnalyticsService(this._analyticsRepository);
 
-  // Eventos específicos do Task Manager
-
   Future<void> logTaskCreated({
     required String taskId,
     required String priority,
@@ -152,8 +150,6 @@ class TaskManagerAnalyticsService {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     });
   }
-
-  // Generic event logging method
   Future<void> logEvent(String eventName, {Map<String, dynamic>? parameters}) async {
     await _analyticsRepository.logEvent(eventName, parameters: {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
@@ -161,8 +157,6 @@ class TaskManagerAnalyticsService {
       ...?parameters,
     });
   }
-
-  // Delegate methods do core
   Future<void> setUserId(String? userId) => _analyticsRepository.setUserId(userId);
 
   Future<void> setUserProperties(Map<String, String> properties) => 

@@ -61,8 +61,6 @@ class CulturasState {
   CulturasState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // UI helpers
   bool get hasData => culturas.isNotEmpty;
   bool get hasFilteredData => filteredCulturas.isNotEmpty;
   bool get hasError => errorMessage != null;
@@ -96,7 +94,6 @@ class CulturasNotifier extends _$CulturasNotifier {
 
   @override
   Future<CulturasState> build() async {
-    // Get use cases from DI
     _getCulturasUseCase = di.sl<GetCulturasUseCase>();
     _getCulturasByGrupoUseCase = di.sl<GetCulturasByGrupoUseCase>();
     _searchCulturasUseCase = di.sl<SearchCulturasUseCase>();
@@ -132,7 +129,6 @@ class CulturasNotifier extends _$CulturasNotifier {
               filteredCulturas: culturas,
             ).clearError(),
           );
-          // Load grupos after culturas
           _loadGrupos();
         },
       );
@@ -156,7 +152,6 @@ class CulturasNotifier extends _$CulturasNotifier {
 
       result.fold(
         (failure) {
-          // Silent failure for grupos
           print('Erro ao carregar grupos: ${failure.toString()}');
         },
         (grupos) {

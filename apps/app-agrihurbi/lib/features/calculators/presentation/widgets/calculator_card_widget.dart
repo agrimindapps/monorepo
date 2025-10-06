@@ -32,7 +32,6 @@ class CalculatorCardWidget extends StatelessWidget {
       semanticLabel: 'Calculadora ${calculator.name}',
       child: Row(
         children: [
-          // Ícone da categoria
           Container(
             width: 48,
             height: 48,
@@ -48,13 +47,10 @@ class CalculatorCardWidget extends StatelessWidget {
           ),
           
           const SizedBox(width: 16),
-          
-          // Informações da calculadora
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nome da calculadora
                 Text(
                   calculator.name,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -65,8 +61,6 @@ class CalculatorCardWidget extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 4),
-                
-                // Descrição
                 Text(
                   calculator.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -77,20 +71,15 @@ class CalculatorCardWidget extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 8),
-                
-                // Chips de informações
                 Wrap(
                   spacing: 8,
                   children: [
-                    // Categoria (somente se showCategory for true)
                     if (showCategory)
                       _buildInfoChip(
                         context,
                         calculator.category.displayName,
                         CalculatorUIService.getCategoryColor(calculator.category),
                       ),
-                    
-                    // Status da calculadora
                     DSStatusIndicator(
                       status: CalculatorUIService.canExecuteCalculator(calculator) 
                           ? 'active' 
@@ -98,8 +87,6 @@ class CalculatorCardWidget extends StatelessWidget {
                       text: CalculatorUIService.getCalculatorStatus(calculator),
                       isCompact: true,
                     ),
-                    
-                    // Número de parâmetros
                     _buildInfoChip(
                       context,
                       '${calculator.parameters.length} parâmetros',
@@ -110,8 +97,6 @@ class CalculatorCardWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Botão de favorito
           IconButton(
             onPressed: onFavoriteToggle,
             icon: Icon(
@@ -144,12 +129,7 @@ class CalculatorCardWidget extends StatelessWidget {
     );
   }
 
-  // Método removido - funcionalidade movida para CalculatorUIService
-
-  // Método removido - funcionalidade movida para CalculatorUIService
-
   Color _getTextColorForBackground(Color backgroundColor) {
-    // Calcula a luminância para determinar se o texto deve ser claro ou escuro
     final luminance = backgroundColor.computeLuminance();
     return luminance > 0.5 ? Colors.black87 : Colors.white;
   }

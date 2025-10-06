@@ -167,8 +167,6 @@ class PregnancyGestacaoCalculator extends Calculator {
               severity: ResultSeverity.info,
             ))
         .toList();
-
-    // Adicionar alertas específicos
     final alerts = calculationData['alerts'] as List<String>;
     for (final alert in alerts) {
       recommendations.add(
@@ -199,15 +197,11 @@ class PregnancyGestacaoCalculator extends Calculator {
   @override
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-
-    // Validar campos obrigatórios
     for (final field in inputFields) {
       if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
-
-    // Validação específica para data de acasalamento
     if (inputs.containsKey('mating_date')) {
       try {
         final matingDate = DateTime.parse(inputs['mating_date'] as String);
@@ -223,8 +217,6 @@ class PregnancyGestacaoCalculator extends Calculator {
         errors.add('Data de acasalamento inválida');
       }
     }
-
-    // Validação do peso da mãe
     if (inputs.containsKey('mother_weight')) {
       final weight = inputs['mother_weight'];
       if (weight is! double && weight is! int) {
@@ -250,8 +242,6 @@ class PregnancyGestacaoCalculator extends Calculator {
   }) {
     final now = DateTime.now();
     final currentGestationDays = now.difference(matingDate).inDays;
-    
-    // Períodos gestacionais por espécie (em dias)
     final gestationPeriods = {
       'Cão': {'min': 58, 'average': 63, 'max': 68},
       'Gato': {'min': 64, 'average': 67, 'max': 70},
@@ -261,15 +251,11 @@ class PregnancyGestacaoCalculator extends Calculator {
     final averageGestationDays = period['average']!;
     final minGestationDays = period['min']!;
     final maxGestationDays = period['max']!;
-
-    // Calcular datas do parto
     final estimatedDueDate = matingDate.add(Duration(days: averageGestationDays));
     final earliestDueDate = matingDate.add(Duration(days: minGestationDays));
     final latestDueDate = matingDate.add(Duration(days: maxGestationDays));
 
     final daysRemaining = averageGestationDays - currentGestationDays;
-    
-    // Determinar fase da gestação
     String currentStage;
     if (currentGestationDays < 21) {
       currentStage = 'Início (Implantação)';
@@ -284,28 +270,19 @@ class PregnancyGestacaoCalculator extends Calculator {
     } else {
       currentStage = 'Atrasado';
     }
-
-    // Calcular necessidades calóricas
     double calorieMultiplier = 1.0;
     if (currentGestationDays > 30) {
-      // Aumentar calorias gradualmente após 30 dias
       final weeksAfter30 = (currentGestationDays - 30) / 7;
       calorieMultiplier = 1.0 + (weeksAfter30 * 0.25);
       calorieMultiplier = math.min(calorieMultiplier, 2.0); // Máximo 2x
     }
-
-    // Fator baseado no tamanho da ninhada esperada
     if (expectedLitterSize != null) {
       final litterFactor = 1.0 + (expectedLitterSize * 0.1);
       calorieMultiplier *= litterFactor;
     }
-
-    // Calcular calorias base
     final metabolicWeight = math.pow(motherWeight, 0.75).toDouble();
     final baseCalories = species == 'Cão' ? 132.0 : 100.0;
     final recommendedCalories = (metabolicWeight * baseCalories * calorieMultiplier).round();
-
-    // Calcular ganho de peso esperado
     double expectedWeightGainPercent = 0.15; // 15% por padrão
     if (species == 'Cão') {
       if (breedSize.contains('Pequeno')) {
@@ -320,8 +297,6 @@ class PregnancyGestacaoCalculator extends Calculator {
     }
 
     final expectedWeightGain = double.parse((motherWeight * expectedWeightGainPercent).toStringAsFixed(1));
-
-    // Gerar recomendações
     final recommendations = _generateRecommendations(
       currentGestationDays: currentGestationDays,
       daysRemaining: daysRemaining,
@@ -329,8 +304,6 @@ class PregnancyGestacaoCalculator extends Calculator {
       isFirstPregnancy: isFirstPregnancy,
       currentStage: currentStage,
     );
-
-    // Gerar alertas
     final alerts = <String>[];
     if (daysRemaining <= 7 && daysRemaining > 0) {
       alerts.add('Parto iminente! Prepare o local de parto e mantenha contato veterinário.');
@@ -363,8 +336,6 @@ class PregnancyGestacaoCalculator extends Calculator {
     required String currentStage,
   }) {
     final recommendations = <String>[];
-
-    // Recomendações gerais por fase
     if (currentGestationDays < 21) {
       recommendations.addAll([
         'Mantenha alimentação normal de alta qualidade',
@@ -394,15 +365,11 @@ class PregnancyGestacaoCalculator extends Calculator {
         'Tenha contato veterinário de emergência disponível',
       ]);
     }
-
-    // Recomendações específicas por espécie
     if (species == 'Cão') {
       recommendations.add('Temperatura retal normal: 38.0-39.2°C (queda indica trabalho de parto)');
     } else {
       recommendations.add('Temperatura retal normal: 38.1-39.2°C (monitorar nas últimas semanas)');
     }
-
-    // Recomendações para primeira gestação
     if (isFirstPregnancy) {
       recommendations.addAll([
         'Consultas veterinárias mais frequentes (quinzenais no final)',
@@ -410,8 +377,6 @@ class PregnancyGestacaoCalculator extends Calculator {
         'Monitore mais de perto sinais de complicações',
       ]);
     }
-
-    // Alertas de parto próximo
     if (daysRemaining <= 14) {
       recommendations.addAll([
         'Meça temperatura retal diariamente (manhã e noite)',

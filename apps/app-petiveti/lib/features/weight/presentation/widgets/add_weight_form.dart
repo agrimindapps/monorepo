@@ -38,15 +38,12 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
 
   void _loadInitialData() {
     if (widget.weight != null) {
-      // Editing mode
       final weight = widget.weight!;
       _weightController.text = weight.weight.toString();
       _notesController.text = weight.notes ?? '';
       _selectedDate = weight.date;
       _bodyConditionScore = weight.bodyConditionScore;
     }
-
-    // Load animals for selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(animalsProvider.notifier).loadAnimals();
     });
@@ -88,7 +85,6 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Animal Selection
             PetiVetiFormComponents.animalRequired(
               value: _selectedAnimal?.id,
               onChanged: (animalId) {
@@ -101,8 +97,6 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
               },
             ),
             const SizedBox(height: 24),
-
-            // Weight Input
             Text(
               'Peso',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -148,8 +142,6 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
               },
             ),
             const SizedBox(height: 24),
-
-            // Date Selection
             DateTimePickerField.date(
               value: _selectedDate,
               onChanged: (date) {
@@ -164,8 +156,6 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
               lastDate: DateTime.now(),
             ),
             const SizedBox(height: 24),
-
-            // Body Condition Score
             Text(
               'Condição Corporal (Opcional)',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -269,15 +259,11 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Notes
             PetiVetiFormComponents.notesGeneral(
               controller: _notesController,
               isRequired: false,
             ),
             const SizedBox(height: 32),
-
-            // Save Button
             widget.weight != null
                 ? PetiVetiFormComponents.submitUpdate(
                   onSubmit: _saveWeight,
@@ -289,8 +275,6 @@ class _AddWeightFormState extends ConsumerState<AddWeightForm> {
                   itemName: 'Registro de Peso',
                 ),
             const SizedBox(height: 16),
-
-            // Quick weight suggestions (for new records)
             if (widget.weight == null && _selectedAnimal != null) ...[
               const Divider(),
               const SizedBox(height: 16),

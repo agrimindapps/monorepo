@@ -27,7 +27,6 @@ class PlantsFilterBar extends StatelessWidget {
         itemCount: spaces.length + 1, // +1 para "Todos"
         itemBuilder: (context, index) {
           if (index == 0) {
-            // Filtro "Todos"
             return _FilterChip(
               label: 'Todos',
               isSelected: selectedSpaceId == null,

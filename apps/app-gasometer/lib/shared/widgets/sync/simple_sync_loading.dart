@@ -57,36 +57,11 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
 
   /// Monitora automaticamente o estado da sincronização usando UnifiedSyncProvider
   void _startListeningToSync() {
-    // TODO: Replace with Riverpod UnifiedSyncProvider
-    // final syncProvider = ref.read(unifiedSyncProviderNotifier);
-
-    // Placeholder implementation without provider dependencies
     _syncSubscription = Stream.periodic(const Duration(seconds: 2))
         .listen((_) {
       if (!mounted) return;
-
-      // Simulate sync completion after 2 seconds
       _autoClose();
     });
-
-    // TODO: Implement actual sync monitoring with Riverpod
-    // _syncSubscription = Stream.periodic(const Duration(milliseconds: 500))
-    //     .listen((_) {
-    //   if (!mounted) return;
-
-    //   // Atualizar mensagem baseada no status do sync
-    //   final newMessage = _getSyncMessage(syncProvider.syncStatus);
-    //   if (_currentMessage != newMessage) {
-    //     setState(() {
-    //       _currentMessage = newMessage;
-    //     });
-    //   }
-
-    //   // Fechar automaticamente quando sincronização termina
-    //   if (syncProvider.syncStatus != SyncStatus.syncing) {
-    //     _autoClose();
-    //   }
-    // });
   }
 
   /// Fecha automaticamente o loading
@@ -122,7 +97,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Ícone automotivo do Gasometer
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -136,8 +110,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                
-                // Loading indicator circular
                 const SizedBox(
                   width: 24,
                   height: 24,
@@ -147,8 +119,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
-                // Mensagem estática (mais simples)
                 Text(
                   _currentMessage,
                   style: const TextStyle(
@@ -159,8 +129,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                
-                // Submensagem contextual
                 Text(
                   'Seus dados estarão atualizados em instantes',
                   style: TextStyle(

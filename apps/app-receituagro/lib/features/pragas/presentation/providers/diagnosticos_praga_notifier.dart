@@ -95,8 +95,6 @@ class DiagnosticosPragaState {
   DiagnosticosPragaState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // Getters de conveniência
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
 
@@ -147,7 +145,6 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
 
   @override
   Future<DiagnosticosPragaState> build() async {
-    // Get repositories from DI
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
     _culturaRepository = di.sl<CulturaHiveRepository>();
     _pragasRepository = di.sl<PragasHiveRepository>();
@@ -177,17 +174,13 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
           );
         },
         (diagnosticosEntities) async {
-          // Converte entidades para o modelo usado na UI
           final diagnosticosList = <DiagnosticoModel>[];
 
           for (final entity in diagnosticosEntities) {
-            // SEMPRE resolver nome da cultura usando fkIdCultura
             String culturaNome = 'Não especificado';
             if (entity.idCultura.isNotEmpty) {
               culturaNome = await _resolveCulturaNome(entity.idCultura);
             }
-
-            // SEMPRE resolver nome da praga usando fkIdPraga
             String pragaNome = pragaName ?? '';
             if (pragaNome.isEmpty && entity.idPraga.isNotEmpty) {
               pragaNome = await _resolvePragaNome(entity.idPraga);
@@ -195,8 +188,6 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
             if (pragaNome.isEmpty) {
               pragaNome = 'Praga não identificada';
             }
-
-            // SEMPRE resolver nome do defensivo usando fkIdDefensivo
             String defensivoNome = '';
             if (entity.idDefensivo.isNotEmpty) {
               defensivoNome = await _resolveDefensivoNome(entity.idDefensivo);
@@ -241,7 +232,6 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
         return culturaData.cultura;
       }
     } catch (e) {
-      // Error logged internally
     }
     return 'Não especificado';
   }
@@ -254,7 +244,6 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
         return pragaData.nomeComum;
       }
     } catch (e) {
-      // Error logged internally
     }
     return '';
   }
@@ -267,7 +256,6 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
         return defensivoData.nomeComum;
       }
     } catch (e) {
-      // Error logged internally
     }
     return '';
   }

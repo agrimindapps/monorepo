@@ -7,10 +7,7 @@ class AppDataInspectorInitializer {
     if (!kDebugMode) return; // Apenas em modo debug
 
     final inspector = DatabaseInspectorService.instance;
-
-    // Registrar todas as boxes customizadas do app-plantis
     inspector.registerCustomBoxes([
-      // Módulo de Plantas
       const CustomBoxType(
         key: 'plants',
         displayName: 'Plantas',
@@ -18,8 +15,6 @@ class AppDataInspectorInitializer {
         description:
             'Dados completos das plantas cadastradas, incluindo informações básicas, cuidados e imagens',
       ),
-
-      // Módulo de Espaços/Ambientes
       const CustomBoxType(
         key: 'spaces',
         displayName: 'Espaços',
@@ -27,8 +22,6 @@ class AppDataInspectorInitializer {
         description:
             'Ambientes onde as plantas estão localizadas (sala, cozinha, varanda, etc)',
       ),
-
-      // Módulo de Tarefas
       const CustomBoxType(
         key: 'tasks',
         displayName: 'Tarefas de Cuidados',
@@ -36,8 +29,6 @@ class AppDataInspectorInitializer {
         description:
             'Lembretes e tarefas de cuidados das plantas (regar, adubar, podar)',
       ),
-
-      // Módulo de Notificações
       const CustomBoxType(
         key: 'notifications_settings',
         displayName: 'Configurações de Notificações',
@@ -51,8 +42,6 @@ class AppDataInspectorInitializer {
         module: 'notifications',
         description: 'Registro de notificações enviadas ao usuário',
       ),
-
-      // Módulo de Configurações
       const CustomBoxType(
         key: 'user_preferences',
         displayName: 'Preferências do Usuário',
@@ -67,24 +56,18 @@ class AppDataInspectorInitializer {
         module: 'settings',
         description: 'Configurações técnicas e de sistema do aplicativo',
       ),
-
-      // Módulo Premium/Licenças
       const CustomBoxType(
         key: 'premium_license',
         displayName: 'Licença Premium',
         module: 'premium',
         description: 'Informações de licença e assinatura premium',
       ),
-
-      // Módulo de Cache
       const CustomBoxType(
         key: 'image_cache',
         displayName: 'Cache de Imagens',
         module: 'cache',
         description: 'Cache de imagens das plantas para melhor performance',
       ),
-
-      // Módulo de Sincronização
       const CustomBoxType(
         key: 'sync_queue',
         displayName: 'Fila de Sincronização',
@@ -98,16 +81,12 @@ class AppDataInspectorInitializer {
         module: 'sync',
         description: 'Informações sobre última sincronização e status',
       ),
-
-      // Módulo de Analytics
       const CustomBoxType(
         key: 'analytics_events',
         displayName: 'Eventos de Analytics',
         module: 'analytics',
         description: 'Eventos de uso do app para análise',
       ),
-
-      // Módulo de Backup
       const CustomBoxType(
         key: 'backup_metadata',
         displayName: 'Metadados de Backup',

@@ -237,7 +237,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   /// - Ensures accessibility with semantic labels
   @override
   Widget build(BuildContext context) {
-    // Setup authentication state listener
     RegisterPageCoordinator.setupAuthListener(ref: ref, context: context);
 
     return Scaffold(

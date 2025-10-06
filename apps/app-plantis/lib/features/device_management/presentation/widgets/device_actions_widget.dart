@@ -17,10 +17,8 @@ class DeviceActionsWidget extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
-            // Primeira linha de ações
             Row(
               children: [
-                // Validar dispositivo atual
                 Expanded(
                   child: _buildActionCard(
                     context: context,
@@ -36,8 +34,6 @@ class DeviceActionsWidget extends ConsumerWidget {
                 ),
 
                 const SizedBox(width: 12),
-
-                // Atualizar lista
                 Expanded(
                   child: _buildActionCard(
                     context: context,
@@ -53,13 +49,10 @@ class DeviceActionsWidget extends ConsumerWidget {
                 ),
               ],
             ),
-
-            // Segunda linha de ações (se aplicável)
             if (deviceState.hasDevices && deviceState.activeDeviceCount > 1) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  // Revogar outros dispositivos
                   Expanded(
                     child: _buildActionCard(
                       context: context,
@@ -75,8 +68,6 @@ class DeviceActionsWidget extends ConsumerWidget {
                   ),
 
                   const SizedBox(width: 12),
-
-                  // Espaço para ação futura ou informação
                   Expanded(
                     child: _buildInfoCard(
                       context: context,
@@ -89,8 +80,6 @@ class DeviceActionsWidget extends ConsumerWidget {
                 ],
               ),
             ],
-
-            // Aviso de limite se necessário
             if (deviceState.hasReachedDeviceLimit) ...[
               const SizedBox(height: 8),
               _buildLimitWarning(context),
@@ -293,7 +282,6 @@ class DeviceActionsWidget extends ConsumerWidget {
                     label: 'Ver Dispositivos',
                     textColor: Colors.white,
                     onPressed: () {
-                      // O usuário já está na tela de dispositivos
                     },
                   )
                   : null,

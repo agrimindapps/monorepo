@@ -46,7 +46,6 @@ class PlantInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Nome da planta
           Text(
             plant.displayName,
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -79,8 +78,6 @@ class PlantInfoSection extends StatelessWidget {
           ],
 
           const SizedBox(height: 16),
-
-          // Informações adicionais
           Row(
             children: [
               Expanded(

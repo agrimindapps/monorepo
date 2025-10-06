@@ -95,7 +95,6 @@ class UnifiedDatePicker {
     String? dateHelpText,
     String? timeHelpText,
   }) async {
-    // Primeiro selecionar a data
     final date = await selectDate(
       context,
       initialDate: initialDateTime,
@@ -105,8 +104,6 @@ class UnifiedDatePicker {
     );
     
     if (date == null || !context.mounted) return null;
-    
-    // Depois selecionar o horário
     final time = await selectTime(
       context,
       initialTime: initialDateTime != null
@@ -210,7 +207,6 @@ class _UnifiedDateFieldState extends State<UnifiedDateField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         if (widget.label.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: UnifiedDesignTokens.spacingSM),
@@ -234,8 +230,6 @@ class _UnifiedDateFieldState extends State<UnifiedDateField> {
               ),
             ),
           ),
-        
-        // Campo de seleção
         InkWell(
           onTap: widget.enabled ? _selectDate : null,
           borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
@@ -255,7 +249,6 @@ class _UnifiedDateFieldState extends State<UnifiedDateField> {
             ),
             child: Row(
               children: [
-                // Ícone prefix
                 if (widget.prefixIcon != null) ...[
                   Icon(
                     widget.prefixIcon,
@@ -266,8 +259,6 @@ class _UnifiedDateFieldState extends State<UnifiedDateField> {
                   ),
                   const SizedBox(width: UnifiedDesignTokens.spacingMD),
                 ],
-                
-                // Texto da data
                 Expanded(
                   child: Text(
                     _displayText.isEmpty
@@ -282,8 +273,6 @@ class _UnifiedDateFieldState extends State<UnifiedDateField> {
                     ),
                   ),
                 ),
-                
-                // Ícone de calendário
                 Icon(
                   Icons.calendar_today,
                   color: widget.enabled
@@ -295,8 +284,6 @@ class _UnifiedDateFieldState extends State<UnifiedDateField> {
             ),
           ),
         ),
-        
-        // Texto de ajuda
         if (widget.helpText != null)
           Padding(
             padding: const EdgeInsets.only(
@@ -390,7 +377,6 @@ class _UnifiedTimeFieldState extends State<UnifiedTimeField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         if (widget.label.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(bottom: UnifiedDesignTokens.spacingSM),
@@ -414,8 +400,6 @@ class _UnifiedTimeFieldState extends State<UnifiedTimeField> {
               ),
             ),
           ),
-        
-        // Campo de seleção
         InkWell(
           onTap: widget.enabled ? _selectTime : null,
           borderRadius: BorderRadius.circular(UnifiedDesignTokens.radiusInput),
@@ -435,7 +419,6 @@ class _UnifiedTimeFieldState extends State<UnifiedTimeField> {
             ),
             child: Row(
               children: [
-                // Ícone prefix
                 if (widget.prefixIcon != null) ...[
                   Icon(
                     widget.prefixIcon,
@@ -446,8 +429,6 @@ class _UnifiedTimeFieldState extends State<UnifiedTimeField> {
                   ),
                   const SizedBox(width: UnifiedDesignTokens.spacingMD),
                 ],
-                
-                // Texto do horário
                 Expanded(
                   child: Text(
                     _displayText.isEmpty
@@ -462,8 +443,6 @@ class _UnifiedTimeFieldState extends State<UnifiedTimeField> {
                     ),
                   ),
                 ),
-                
-                // Ícone de relógio
                 Icon(
                   Icons.access_time,
                   color: widget.enabled
@@ -475,8 +454,6 @@ class _UnifiedTimeFieldState extends State<UnifiedTimeField> {
             ),
           ),
         ),
-        
-        // Texto de ajuda
         if (widget.helpText != null)
           Padding(
             padding: const EdgeInsets.only(

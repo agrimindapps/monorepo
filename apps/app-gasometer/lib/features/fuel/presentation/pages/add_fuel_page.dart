@@ -23,13 +23,10 @@ class AddFuelPage extends ConsumerStatefulWidget {
 }
 
 class _AddFuelPageState extends ConsumerState<AddFuelPage> {
-  // Rate limiting and loading state
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
-
-  // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
 
@@ -38,7 +35,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
   @override
   void initState() {
     super.initState();
-    // Initialization will be done in didChangeDependencies
   }
 
   @override
@@ -58,8 +54,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       debugPrint('[FUEL DEBUG] No vehicle selected');
       return;
     }
-
-    // Initialize form notifier
     final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
     await notifier.initialize(
       vehicleId: vehicleId,
@@ -69,12 +63,9 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     if (widget.editFuelRecordId != null) {
       await _loadFuelRecordForEdit(vehicleId);
     }
-
-    // Notify changes after current build completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
-          // Force rebuild after initialization
         });
       }
     });
@@ -83,8 +74,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
   Future<void> _loadFuelRecordForEdit(String vehicleId) async {
     try {
       final fuelNotifier = ref.read(fuelRiverpodProvider.notifier);
-
-      // Get fuel record by ID
       final record = fuelNotifier.getFuelRecordById(widget.editFuelRecordId!);
 
       if (record != null) {
@@ -100,7 +89,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
 
   @override
   void dispose() {
-    // Clean up timers to prevent memory leaks
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
     super.dispose();
@@ -119,8 +107,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     }
 
     final formState = ref.watch(fuelFormNotifierProvider(vehicleId));
-
-    // Generate subtitle based on vehicle information
     String subtitle = 'Registre o abastecimento do seu veículo';
     if (formState.isInitialized && formState.formModel.vehicle != null) {
       final vehicle = formState.formModel.vehicle!;
@@ -157,18 +143,13 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
     debugPrint('[FUEL DEBUG] Submit button clicked - Rate limit check');
-    
-    // Prevent multiple rapid clicks
     if (_isSubmitting) {
       debugPrint('[FUEL DEBUG] Submit already in progress, ignoring duplicate request');
       return;
     }
 
     debugPrint('[FUEL DEBUG] Starting debounce timer');
-    // Cancel any existing debounce timer
     _debounceTimer?.cancel();
-    
-    // Set debounce timer to prevent rapid consecutive submissions
     _debounceTimer = Timer(_debounceDuration, () {
       if (mounted && !_isSubmitting) {
         debugPrint('[FUEL DEBUG] Debounce timer fired, calling _submitForm()');
@@ -190,22 +171,16 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     }
 
     final formNotifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
-
-    // Double-check form validation
     if (!formNotifier.validateForm()) {
       debugPrint('[FUEL DEBUG] Form validation FAILED - submission aborted');
       return;
     }
 
     debugPrint('[FUEL DEBUG] Form validation PASSED - proceeding with submission');
-
-    // Prevent concurrent submissions
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
     }
-
-    // Set submitting state
     setState(() {
       _isSubmitting = true;
     });
@@ -213,7 +188,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
     final fuelNotifier = ref.read(fuelRiverpodProvider.notifier);
 
     try {
-      // Setup timeout protection
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
           debugPrint('Submit timeout reached, resetting state');
@@ -245,7 +219,6 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       if (success) {
         debugPrint('[FUEL DEBUG] SUCCESS - Closing dialog');
         if (mounted) {
-          // Close dialog with success result for parent context to handle
           Navigator.of(context).pop({
             'success': true,
             'action': widget.editFuelRecordId != null ? 'edit' : 'create',
@@ -269,10 +242,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
         );
       }
     } finally {
-      // Clean up timeout timer
       _timeoutTimer?.cancel();
-
-      // Loading state managed by provider
       if (mounted) {
         setState(() {
           _isSubmitting = false;

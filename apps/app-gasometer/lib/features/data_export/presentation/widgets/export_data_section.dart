@@ -243,8 +243,6 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     );
   }
 
-  // Métodos de ação
-
   Future<void> _handleExportJson(
     BuildContext context,
     String userId,
@@ -310,8 +308,6 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       _showLimitMessage(context);
       return;
     }
-
-    // Por enquanto mostrar mensagem de funcionalidade em desenvolvimento
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Exportação CSV em desenvolvimento'),

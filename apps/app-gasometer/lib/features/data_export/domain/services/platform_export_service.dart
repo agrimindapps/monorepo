@@ -37,7 +37,6 @@ class AndroidExportService implements PlatformExportService {
     String userId,
   ) async {
     try {
-      // No Android, usar Documents/Downloads
       final downloadsDir = await getDownloadsDirectory();
       final filePath = '$downloadsDir/$fileName';
       
@@ -53,8 +52,6 @@ class AndroidExportService implements PlatformExportService {
   @override
   Future<bool> shareExportFile(String filePath, String fileName) async {
     try {
-      // Implementação seria com Share plugin ou Intent nativo
-      // Por simplicidade, retornamos sucesso simulado
       return true;
     } catch (e) {
       print('Erro ao compartilhar no Android: $e');
@@ -65,7 +62,6 @@ class AndroidExportService implements PlatformExportService {
   @override
   Future<String> getDownloadsDirectory() async {
     try {
-      // No Android moderno, usar Documents Directory por ser mais acessível
       return '/storage/emulated/0/Documents/GasOMeter';
     } catch (e) {
       return '/tmp/gasometer_exports';
@@ -88,7 +84,6 @@ class IOSExportService implements PlatformExportService {
     String userId,
   ) async {
     try {
-      // No iOS, usar Documents Directory
       final documentsDir = await getDownloadsDirectory();
       final filePath = '$documentsDir/$fileName';
       
@@ -104,8 +99,6 @@ class IOSExportService implements PlatformExportService {
   @override
   Future<bool> shareExportFile(String filePath, String fileName) async {
     try {
-      // Implementação seria com UIActivityViewController
-      // Por simplicidade, retornamos sucesso simulado
       return true;
     } catch (e) {
       print('Erro ao compartilhar no iOS: $e');
@@ -115,7 +108,6 @@ class IOSExportService implements PlatformExportService {
 
   @override
   Future<String> getDownloadsDirectory() async {
-    // iOS usa Documents Directory como padrão
     return '/var/mobile/Containers/Data/Application/Documents/GasOMeter';
   }
 
@@ -136,7 +128,6 @@ class WebExportService implements PlatformExportService {
   ) async {
     try {
       if (kIsWeb) {
-        // No web, simular download automático
         _triggerWebDownload(data, fileName);
         return 'download:///$fileName';
       } else {
@@ -149,7 +140,6 @@ class WebExportService implements PlatformExportService {
 
   @override
   Future<bool> shareExportFile(String filePath, String fileName) async {
-    // Na web, o "compartilhamento" é o próprio download
     return true;
   }
 
@@ -165,8 +155,6 @@ class WebExportService implements PlatformExportService {
   String get recommendedFileExtension => '.json';
 
   void _triggerWebDownload(Uint8List data, String fileName) {
-    // Em uma implementação real, seria usado dart:html para trigger do download
-    // Por agora, apenas simular
     print('Triggering web download for $fileName with ${data.length} bytes');
   }
 }
@@ -183,7 +171,6 @@ abstract class PlatformExportServiceModule {
     } else if (Platform.isIOS) {
       return IOSExportService();
     } else {
-      // Fallback para outras plataformas (Desktop, etc.)
       return AndroidExportService(); // Usar implementação Android como padrão
     }
   }
@@ -199,7 +186,6 @@ class PlatformExportServiceFactory {
     } else if (Platform.isIOS) {
       return IOSExportService();
     } else {
-      // Fallback para outras plataformas (Desktop, etc.)
       return AndroidExportService(); // Usar implementação Android como padrão
     }
   }

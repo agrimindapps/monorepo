@@ -5,7 +5,6 @@ import '../models/equine_model.dart';
 
 /// Interface para data source local de livestock
 abstract class LivestockLocalDataSource {
-  // === BOVINOS ===
   Future<List<BovineModel>> getAllBovines();
   Future<BovineModel?> getBovineById(String id);
   Future<void> saveBovine(BovineModel bovine);
@@ -16,8 +15,6 @@ abstract class LivestockLocalDataSource {
     String? purpose,
     List<String>? tags,
   });
-  
-  // === EQUINOS ===
   Future<List<EquineModel>> getAllEquines();
   Future<EquineModel?> getEquineById(String id);
   Future<void> saveEquine(EquineModel equine);
@@ -28,8 +25,6 @@ abstract class LivestockLocalDataSource {
     String? primaryUse,
     String? geneticInfluences,
   });
-  
-  // === BACKUP ===
   Future<String> exportData();
   Future<void> importData(String backupData);
 }
@@ -37,7 +32,6 @@ abstract class LivestockLocalDataSource {
 /// Implementação do data source local usando Hive diretamente
 @LazySingleton(as: LivestockLocalDataSource)
 class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
-  // Box names for Hive storage
   static const String _bovinesBoxName = 'bovines';
   static const String _equinesBoxName = 'equines';
   
@@ -48,8 +42,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   
   /// Getter para box de equinos  
   Box<EquineModel> get _equinesBox => Hive.box<EquineModel>(_equinesBoxName);
-  
-  // === BOVINOS ===
   
   @override
   Future<List<BovineModel>> getAllBovines() async {
@@ -72,7 +64,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   @override
   Future<void> saveBovine(BovineModel bovine) async {
     try {
-      // Atualizar timestamps
       final now = DateTime.now();
       final updatedBovine = bovine.copyWith(
         updatedAt: now,
@@ -88,7 +79,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   @override
   Future<void> deleteBovine(String id) async {
     try {
-      // Soft delete - marca como inativo ao invés de remover
       final bovine = _bovinesBox.get(id);
       if (bovine != null) {
         final inactiveBovine = bovine.copyWith(
@@ -142,8 +132,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
     }
   }
   
-  // === EQUINOS ===
-  
   @override
   Future<List<EquineModel>> getAllEquines() async {
     try {
@@ -165,7 +153,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   @override
   Future<void> saveEquine(EquineModel equine) async {
     try {
-      // Atualizar timestamps
       final now = DateTime.now();
       final updatedEquine = equine.copyWith(
         updatedAt: now,
@@ -181,7 +168,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   @override
   Future<void> deleteEquine(String id) async {
     try {
-      // Soft delete - marca como inativo ao invés de remover
       final equine = _equinesBox.get(id);
       if (equine != null) {
         final inactiveEquine = equine.copyWith(
@@ -231,8 +217,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
     }
   }
   
-  // === BACKUP ===
-  
   @override
   Future<String> exportData() async {
     try {
@@ -255,8 +239,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   @override
   Future<void> importData(String backupData) async {
     try {
-      // Implementation would parse the backup data and restore to Hive
-      // This is a simplified version - in production, would need proper JSON parsing
       throw UnimplementedError('Import de dados não implementado ainda');
     } catch (e) {
       throw CacheException('Erro ao importar dados: $e');
@@ -265,7 +247,6 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   
   /// Método para inicializar boxes do Hive
   static Future<void> initializeBoxes() async {
-    // Aguarda abertura dos boxes se não estiverem abertos
     if (!Hive.isBoxOpen(_bovinesBoxName)) {
       await Hive.openBox<BovineModel>(_bovinesBoxName);
     }

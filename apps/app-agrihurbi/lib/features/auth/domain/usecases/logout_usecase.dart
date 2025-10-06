@@ -14,13 +14,11 @@ class LogoutUseCase implements UseCase<void, LogoutParams> {
   
   @override
   Future<Either<Failure, void>> call(LogoutParams params) async {
-    // Executar logout no repository
     final result = await repository.logout();
     
     return result.fold(
       (failure) => Left(failure),
       (success) {
-        // Log adicional se necessário
         if (params.logAnalytics) {
           _logLogoutEvent();
         }
@@ -32,8 +30,6 @@ class LogoutUseCase implements UseCase<void, LogoutParams> {
   
   /// Log do evento de logout para analytics
   void _logLogoutEvent() {
-    // Implementar integração com Firebase Analytics ou similar
-    // Por ora, apenas um placeholder
   }
 }
 

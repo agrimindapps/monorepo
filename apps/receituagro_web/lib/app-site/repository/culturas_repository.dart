@@ -6,8 +6,6 @@ import '../adapters/cultura_adapter.dart';
 class CulturaRepository {
   final SupabaseClient _client = Supabase.instance.client;
 
-  // === LEGACY METHODS (Backward Compatibility) ===
-
   Future<List<Cultura>> getAllCulturas() async {
     try {
       final response = await _client.from('culturas').select();
@@ -50,8 +48,6 @@ class CulturaRepository {
       throw Exception('Erro ao deletar cultura: $e');
     }
   }
-
-  // === CORE ENTITY METHODS (New SOLID Approach) ===
 
   /// Fetches all culturas as Core entities
   Future<List<CulturaEntity>> getAllEntities() async {
@@ -124,8 +120,6 @@ class CulturaRepository {
   Future<List<CulturaEntity>> getEntitiesByPattern(String pattern) async {
     try {
       final allCulturas = await getAllEntities();
-      
-      // Filter by name pattern matching
       return allCulturas.where((cultura) => 
         cultura.nomeComum.toLowerCase().contains(pattern.toLowerCase())
       ).toList();
@@ -156,8 +150,6 @@ class CulturaRepository {
   Future<List<CulturaEntity>> getRotationRecommendations(CulturaEntity currentCultura) async {
     try {
       final allCulturas = await getAllEntities();
-      
-      // Filter different cultures (simplified recommendation logic)
       final compatibleCultures = allCulturas.where((cultura) => 
         cultura.id != currentCultura.id
       ).toList();

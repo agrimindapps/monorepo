@@ -95,8 +95,6 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
       
       final docRef = _getUserExpensesCollection(userId).doc(expense.id);
       await docRef.set(model.toFirebaseMap());
-      
-      // Return the same entity since we're using the provided ID
       return expense;
     } catch (e) {
       throw ServerException('Failed to add expense to remote: $e');
@@ -143,7 +141,6 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
   @override
   Future<List<ExpenseEntity>> searchExpenses(String userId, String query) async {
     try {
-      // Firebase text search is limited, so we'll fetch all and filter locally
       final allExpenses = await getAllExpenses(userId);
       final lowercaseQuery = query.toLowerCase();
       
@@ -207,7 +204,6 @@ class ExpensesRemoteDataSourceImpl implements ExpensesRemoteDataSource {
       final model = ExpenseModel.fromFirebaseMap(data);
       return _modelToEntity(model);
     } catch (e) {
-      // Log the error but don't throw to avoid breaking the entire list
       print('Error converting document to expense entity: $e');
       return null;
     }

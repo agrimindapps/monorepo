@@ -19,8 +19,6 @@ class GetAllExpensesUseCase implements UseCase<List<ExpenseEntity>, NoParams> {
   Future<Either<Failure, List<ExpenseEntity>>> call(NoParams params) async {
     try {
       final expenses = await _repository.getAllExpenses();
-
-      // Ordenar por data (mais recente primeiro)
       expenses.sort((a, b) => b.date.compareTo(a.date));
 
       return Right(expenses);

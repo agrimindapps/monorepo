@@ -101,7 +101,6 @@ class AccountDeletionProgressDialog extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Status icon
                           if (isPast || (isComplete && !hasError))
                             const Icon(
                               Icons.check_circle,
@@ -121,7 +120,6 @@ class AccountDeletionProgressDialog extends StatelessWidget {
                               size: 20,
                             ),
                           const SizedBox(width: 12),
-                          // Step text
                           Expanded(
                             child: Text(
                               steps[index],

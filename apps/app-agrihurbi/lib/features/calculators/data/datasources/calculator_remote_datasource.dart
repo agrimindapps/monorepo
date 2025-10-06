@@ -41,7 +41,6 @@ abstract class CalculatorRemoteDataSource {
 
 @LazySingleton(as: CalculatorRemoteDataSource)
 class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
-  // ignore: unused_field
   final DioClient
   _dioClient; // REVIEW (converted TODO 2025-10-06): Will be used when implementing real API calls
 
@@ -50,11 +49,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
   @override
   Future<Either<Failure, List<CalculatorEntity>>> getAllCalculators() async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final response = await _dioClient.get('/calculators');
-      // return Right(_parseCalculators(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 500));
       return const Right([]);
     } catch (e) {
@@ -67,11 +61,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
   @override
   Future<Either<Failure, CalculatorEntity>> getCalculatorById(String id) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final response = await _dioClient.get('/calculators/$id');
-      // return Right(_parseCalculator(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 300));
       return const Left(NotFoundFailure('Calculadora não encontrada'));
     } catch (e) {
@@ -86,11 +75,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     CalculatorCategory category,
   ) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final response = await _dioClient.get('/calculators?category=${category.name}');
-      // return Right(_parseCalculators(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 400));
       return const Right([]);
     } catch (e) {
@@ -107,11 +91,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     String searchTerm,
   ) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final response = await _dioClient.get('/calculators/search?q=$searchTerm');
-      // return Right(_parseCalculators(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 600));
       return const Right([]);
     } catch (e) {
@@ -127,14 +106,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     Map<String, dynamic> inputs,
   ) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final response = await _dioClient.post(
-      //   '/calculators/$calculatorId/calculate',
-      //   data: inputs,
-      // );
-      // return Right(_parseCalculationResult(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 1000));
       return const Left(
         ServerFailure('Serviço de cálculo temporariamente indisponível'),
@@ -153,18 +124,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     int? limit,
   }) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final queryParams = <String, dynamic>{};
-      // if (userId != null) queryParams['userId'] = userId;
-      // if (calculatorId != null) queryParams['calculatorId'] = calculatorId;
-      // if (startDate != null) queryParams['startDate'] = startDate.toIso8601String();
-      // if (endDate != null) queryParams['endDate'] = endDate.toIso8601String();
-      // if (limit != null) queryParams['limit'] = limit;
-
-      // final response = await _dioClient.get('/calculations/history', queryParameters: queryParams);
-      // return Right(_parseCalculationHistory(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 500));
       return const Right([]);
     } catch (e) {
@@ -177,13 +136,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     CalculationHistory history,
   ) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // final response = await _dioClient.post(
-      //   '/calculations/history',
-      //   data: _historyToJson(history),
-      // );
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 300));
       return const Right(null);
     } catch (e) {
@@ -196,10 +148,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     String historyId,
   ) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implementar chamada real para API
-      // await _dioClient.delete('/calculations/history/$historyId');
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 200));
       return const Right(null);
     } catch (e) {
@@ -212,11 +160,6 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
     String userId,
   ) async {
     try {
-      // TODO: Implementar chamada real para API
-      // final response = await _dioClient.get('/users/$userId/calculator-stats');
-      // return Right(Map<String, int>.from(response.data));
-
-      // Mock temporário para testes
       await Future<void>.delayed(const Duration(milliseconds: 400));
       return const Right({});
     } catch (e) {
@@ -225,11 +168,4 @@ class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
       );
     }
   }
-
-  // REVIEW (converted TODO 2025-10-06): Métodos para parsing de dados quando a API estiver implementada
-  // List<CalculatorEntity> _parseCalculators(dynamic data) { ... }
-  // CalculatorEntity _parseCalculator(dynamic data) { ... }
-  // CalculationResult _parseCalculationResult(dynamic data) { ... }
-  // List<CalculationHistory> _parseCalculationHistory(dynamic data) { ... }
-  // Map<String, dynamic> _historyToJson(CalculationHistory history) { ... }
 }

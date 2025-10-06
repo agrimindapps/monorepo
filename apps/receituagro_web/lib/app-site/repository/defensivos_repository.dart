@@ -7,7 +7,6 @@ import '../core/utils/secure_logger.dart';
 import '../core/services/cache_service.dart';
 
 class DefensivosRepository extends GetxController {
-  // Singleton
   static final DefensivosRepository _singleton =
       DefensivosRepository._internal();
 
@@ -16,12 +15,8 @@ class DefensivosRepository extends GetxController {
   }
 
   DefensivosRepository._internal();
-
-  // Fixed Variables
   final int pageSize = 12;
   List<dynamic> allDefensivosSearch = [];
-
-  // Getx Variables
   RxInt currentPage = 0.obs;
   RxBool isLoading = false.obs;
   RxList<dynamic> filteredDefensivos = [].obs;
@@ -30,14 +25,11 @@ class DefensivosRepository extends GetxController {
     'caracteristicas': {},
     'diagnosticos': [],
   }.obs;
-
-  // Total de páginas baseado nos dados filtrados
   int get totalPages => filteredDefensivos.isEmpty
       ? 1
       : (filteredDefensivos.length / pageSize).ceil();
 
   Future<void> fetchAllDefensivos({bool forceRefresh = false}) async {
-    // Verificar se já temos dados em cache válidos
     if (!forceRefresh && allDefensivosSearch.isNotEmpty) {
       SecureLogger.debug('Usando dados já carregados em memória');
       return;
@@ -49,7 +41,6 @@ class DefensivosRepository extends GetxController {
     isLoading.value = true;
 
     try {
-      // Tentar cache primeiro
       final cachedData = await CacheService.get<List<dynamic>>(
         cacheKey,
         ttl: cacheTtl,
@@ -62,8 +53,6 @@ class DefensivosRepository extends GetxController {
         todosOsDefensivos();
         return;
       }
-
-      // Se não há cache ou forceRefresh, buscar da API
       SecureLogger.debug('Buscando dados da API');
       List<dynamic> allDefensivos = [];
 
@@ -76,19 +65,13 @@ class DefensivosRepository extends GetxController {
       }
 
       allDefensivos.sort((a, b) => a['nomecomum'].compareTo(b['nomecomum']));
-
-      // Salvar no cache
       await CacheService.set(cacheKey, allDefensivos, ttl: cacheTtl);
 
       allDefensivosSearch = allDefensivos;
       todosOsDefensivos();
-
-      // Atualizar cache em background periodicamente
       _scheduleBackgroundRefresh();
     } catch (e) {
       SecureLogger.error('Erro ao buscar defensivos', error: e);
-
-      // Tentar usar dados do cache mesmo que expirados em caso de erro
       final cachedData = await CacheService.get<List<dynamic>>(
         cacheKey,
         ttl: const Duration(days: 7), // Cache extendido em caso de erro
@@ -100,7 +83,6 @@ class DefensivosRepository extends GetxController {
         allDefensivosSearch = cachedData;
         todosOsDefensivos();
       } else {
-        // Mostrar erro user-friendly se necessário
         Get.snackbar(
           'Erro',
           SecureLogger.getUserFriendlyError(e),
@@ -119,7 +101,6 @@ class DefensivosRepository extends GetxController {
     const cacheTtl = Duration(hours: 6); // Cache por 6 horas
 
     try {
-      // Verificar cache primeiro
       final cachedData = await CacheService.get<List<dynamic>>(
         cacheKey,
         ttl: cacheTtl,
@@ -130,8 +111,6 @@ class DefensivosRepository extends GetxController {
         SecureLogger.debug('Detalhes do defensivo carregados do cache');
         return cachedData;
       }
-
-      // Se não há cache, buscar da API
       final response = await Supabase.instance.client
           .from('vw_diagnosticos')
           .select()
@@ -149,8 +128,6 @@ class DefensivosRepository extends GetxController {
       }
 
       final List<Map<dynamic, dynamic>> diagnosticos = response;
-
-      // Salvar no cache
       await CacheService.set(cacheKey, diagnosticos, ttl: cacheTtl);
 
       return diagnosticos;
@@ -171,7 +148,6 @@ class DefensivosRepository extends GetxController {
 
   /// Agenda atualização em background
   void _scheduleBackgroundRefresh() {
-    // Atualizar cache a cada 30 minutos em background
     Timer.periodic(const Duration(minutes: 30), (timer) async {
       if (allDefensivosSearch.isNotEmpty) {
         try {
@@ -207,8 +183,6 @@ class DefensivosRepository extends GetxController {
       defensivosOnScreen.clear();
       return;
     }
-
-    // Validar currentPage está dentro dos limites
     if (currentPage.value < 0) {
       currentPage.value = 0;
     }
@@ -222,10 +196,7 @@ class DefensivosRepository extends GetxController {
     defensivosOnScreen.clear();
 
     int filteredLen = filteredDefensivos.length;
-
-    // Validar bounds do sublist
     if (start >= filteredLen) {
-      // Se start está além do limite, ir para última página válida
       currentPage.value = totalPages - 1;
       start = currentPage.value * pageSize;
       end = start + pageSize;
@@ -264,7 +235,6 @@ class DefensivosRepository extends GetxController {
   }
 
   List<int> get pageNumbers {
-    // retornar tamanho da tela
     double tam = MediaQuery.of(Get.context!).size.width;
 
     int start = currentPage.value - (tam < 600 ? 1 : 2);
@@ -283,7 +253,6 @@ class DefensivosRepository extends GetxController {
   }
 
   Future<void> buscaDefensivos(String text) async {
-    // Garantir que temos dados para buscar
     if (allDefensivosSearch.isEmpty) {
       await fetchAllDefensivos();
     }
@@ -291,7 +260,6 @@ class DefensivosRepository extends GetxController {
     isLoading.value = true;
 
     try {
-      // Realizar a busca em AllDefensivos pelo nomeComum ou IngredienteAtivo
       List result = allDefensivosSearch
           .where((e) =>
               e['nomecomum'].toLowerCase().contains(text.toLowerCase()) ||
@@ -299,22 +267,14 @@ class DefensivosRepository extends GetxController {
           .toList();
 
       result.sort((a, b) => a['nomecomum'].compareTo(b['nomecomum']));
-
-      // Resetar para primeira página
       currentPage.value = 0;
-
-      // Atualizar dados filtrados
       filteredDefensivos.clear();
       filteredDefensivos.assignAll(result);
-
-      // Atualizar itens na tela usando currentItems()
       currentItems();
     } catch (e) {
       SecureLogger.error('Erro ao buscar defensivos por texto', error: e);
       filteredDefensivos.clear();
       defensivosOnScreen.clear();
-
-      // Mostrar erro user-friendly
       Get.snackbar(
         'Erro na Busca',
         SecureLogger.getUserFriendlyError(e),

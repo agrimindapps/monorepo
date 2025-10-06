@@ -20,8 +20,6 @@ class EnvironmentConfig {
   }
 
   static String get environmentName => environment.name;
-
-  // Generic Configuration Methods
   static bool get isDebugMode {
     return environment == Environment.development;
   }
@@ -33,8 +31,6 @@ class EnvironmentConfig {
   static bool get isStagingMode {
     return environment == Environment.staging;
   }
-
-  // Generic Logging Configuration
   static bool get enableLogging {
     return environment != Environment.production;
   }
@@ -42,8 +38,6 @@ class EnvironmentConfig {
   static bool get enableAnalytics {
     return environment == Environment.production || environment == Environment.staging;
   }
-
-  // Generic Storage Configuration (for different environments)
   static String get storagePrefix {
     switch (environment) {
       case Environment.development:
@@ -54,16 +48,11 @@ class EnvironmentConfig {
         return '';
     }
   }
-
-  // Generic API Key Helper
   static String getApiKey(String keyName, {String? fallback}) {
     try {
-      // Use const values for web compatibility
       if (kIsWeb) {
-        // For web, return fallback or dummy key
         return fallback ?? 'dummy_web_key';
       } else {
-        // For native platforms, return fallback since fromEnvironment doesn't work at runtime
         return fallback ?? 'dummy_dev_key';
       }
     } catch (e) {
@@ -73,8 +62,6 @@ class EnvironmentConfig {
       return fallback ?? 'dummy_fallback_key';
     }
   }
-
-  // Generic Firebase Project ID Helper
   static String getFirebaseProjectId(String projectBaseName) {
     switch (environment) {
       case Environment.development:
@@ -85,8 +72,6 @@ class EnvironmentConfig {
         return '$projectBaseName-prod';
     }
   }
-
-  // Generic API Base URL Helper
   static String getApiBaseUrl(String domain) {
     switch (environment) {
       case Environment.development:
@@ -97,8 +82,6 @@ class EnvironmentConfig {
         return 'https://api.$domain';
     }
   }
-
-  // Generic Product ID Helper for subscriptions
   static String getProductId(String baseName) {
     switch (environment) {
       case Environment.development:
@@ -122,7 +105,6 @@ class EnvironmentConfig {
       if (additionalConfig != null) {
         debugPrint('=== Additional Configuration ===');
         additionalConfig.forEach((key, value) {
-          // Only log non-sensitive configuration values
           if (!_isSensitiveKey(key)) {
             debugPrint('$key: $value');
           } else {
@@ -153,8 +135,6 @@ abstract class AppEnvironmentConfig {
 
   /// API domain
   String get apiDomain;
-
-  // Convenience getters using core helpers
   String get firebaseProjectId => 
       EnvironmentConfig.getFirebaseProjectId(firebaseProjectBaseName);
 

@@ -26,16 +26,12 @@ class DatabaseOptimizer {
   }) async {
     final cacheEntry = _queryCache[queryKey];
     final now = DateTime.now();
-
-    // Verifica cache válido
     if (!forceRefresh &&
         cacheEntry != null &&
         !_isCacheExpired(cacheEntry, cacheFor ?? cacheTimeout)) {
       _updateMetrics(queryKey, 0, true); // Cache hit
       return cacheEntry.data as T;
     }
-
-    // Executa query com medição de performance
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -43,14 +39,8 @@ class DatabaseOptimizer {
       stopwatch.stop();
 
       final executionTime = stopwatch.elapsedMilliseconds;
-
-      // Armazena no cache
       _cacheResult(queryKey, result, now);
-
-      // Registra métricas
       _updateMetrics(queryKey, executionTime, false);
-
-      // Detecta queries lentas
       if (executionTime > slowQueryThresholdMs) {
         _recordSlowQuery(queryKey, executionTime);
       }
@@ -76,22 +66,16 @@ class DatabaseOptimizer {
         cacheKey ?? 'hive_${box.name}_${filter.hashCode}_${sortBy.hashCode}';
 
     return executeWithCache(queryKey, () async {
-      // Implementação otimizada para Hive
       List<T> results = [];
 
       if (filter != null) {
-        // Filtragem eficiente
         results = await _efficientFilter(box, filter);
       } else {
         results = box.values.toList();
       }
-
-      // Ordenação se especificada
       if (sortBy != null) {
         results.sort(sortBy);
       }
-
-      // Paginação
       if (offset != null) {
         results = results.skip(offset).toList();
       }
@@ -114,8 +98,6 @@ class DatabaseOptimizer {
 
     for (final batch in batches) {
       await box.putAll(batch);
-
-      // Pequena pausa para não bloquear a UI
       if (batches.length > 1) {
         await Future<void>.delayed(const Duration(milliseconds: 1));
       }
@@ -192,8 +174,6 @@ class DatabaseOptimizer {
     for (final key in keysToRemove) {
       _queryCache.remove(key);
     }
-
-    // Limitar tamanho do cache
     while (_queryCache.length > maxCacheEntries) {
       final oldestKey = _findOldestCacheKey();
       if (oldestKey != null) {
@@ -229,10 +209,7 @@ class DatabaseOptimizer {
 
   /// Otimizações automáticas
   Future<void> runAutoOptimizations() async {
-    // Limpeza de cache
     cleanupCache();
-
-    // Compactação de boxes com muitas operações
     for (final metric in _metrics.values) {
       if (metric.executionCount > 1000 && metric.boxName != null) {
         try {
@@ -241,15 +218,12 @@ class DatabaseOptimizer {
             await optimizedCompact(box);
           }
         } catch (e) {
-          // Ignora erros de compactação
         }
       }
     }
 
     log('Auto-optimization completed', name: 'DatabaseOptimizer');
   }
-
-  // Métodos auxiliares privados
 
   Future<List<T>> _efficientFilter<T>(
     Box<T> box,
@@ -268,8 +242,6 @@ class DatabaseOptimizer {
           results.add(item);
         }
       }
-
-      // Permite outras operações rodarem
       if (i + batchSize < values.length) {
         await Future<void>.delayed(Duration.zero);
       }
@@ -338,8 +310,6 @@ class DatabaseOptimizer {
         timestamp: DateTime.now(),
       ),
     );
-
-    // Manter apenas as 50 queries mais recentes
     if (_slowQueries.length > 50) {
       _slowQueries.removeAt(0);
     }
@@ -377,8 +347,6 @@ class DatabaseOptimizer {
 
   List<String> _generateRecommendations() {
     final recommendations = <String>[];
-
-    // Recomendar índices para queries frequentes
     final frequentQueries =
         _metrics.values.where((m) => m.executionCount > 10).toList()
           ..sort((a, b) => b.executionCount.compareTo(a.executionCount));
@@ -388,8 +356,6 @@ class DatabaseOptimizer {
         'Consider creating indices for frequent queries: ${frequentQueries.take(3).map((q) => q.queryKey).join(', ')}',
       );
     }
-
-    // Recomendar cache para queries lentas
     final slowFrequentQueries =
         _slowQueries
             .where((q) => (_metrics[q.queryKey]?.executionCount ?? 0) > 5)
@@ -400,8 +366,6 @@ class DatabaseOptimizer {
         'Consider implementing caching for slow frequent queries',
       );
     }
-
-    // Recomendar compactação
     if (_metrics.values.any((m) => m.executionCount > 1000)) {
       recommendations.add(
         'Consider running database compaction for heavily used boxes',

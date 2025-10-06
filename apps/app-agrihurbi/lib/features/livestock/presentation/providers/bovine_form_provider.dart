@@ -19,10 +19,6 @@ class BovineFormProvider extends ChangeNotifier {
   /// Expõe o formService para uso externo
   BovineFormService get formService => _formService;
 
-  // =====================================================================
-  // CONTROLLERS POOL - Reutilização otimizada
-  // =====================================================================
-
   static final Map<String, TextEditingController> _controllerPool = {};
 
   TextEditingController _getController(String key) {
@@ -32,10 +28,7 @@ class BovineFormProvider extends ChangeNotifier {
   void _returnController(String key) {
     final controller = _controllerPool[key];
     controller?.clear();
-    // Mantém na pool para reutilização
   }
-
-  // Controllers principais
   late final TextEditingController _commonNameController = _getController(
     'commonName',
   );
@@ -57,8 +50,6 @@ class BovineFormProvider extends ChangeNotifier {
     'purpose',
   );
   late final TextEditingController _tagsController = _getController('tags');
-
-  // Getters para controllers
   TextEditingController get commonNameController => _commonNameController;
   TextEditingController get registrationIdController =>
       _registrationIdController;
@@ -71,10 +62,6 @@ class BovineFormProvider extends ChangeNotifier {
   TextEditingController get purposeController => _purposeController;
   TextEditingController get tagsController => _tagsController;
 
-  // =====================================================================
-  // FORM STATE
-  // =====================================================================
-
   BovineAptitude? _selectedAptitude;
   BreedingSystem? _selectedBreedingSystem;
   List<String> _selectedTags = [];
@@ -82,18 +69,12 @@ class BovineFormProvider extends ChangeNotifier {
   bool _isInitialized = false;
   bool _hasUnsavedChanges = false;
   BovineFormData? _originalData;
-
-  // Getters para estado
   BovineAptitude? get selectedAptitude => _selectedAptitude;
   BreedingSystem? get selectedBreedingSystem => _selectedBreedingSystem;
   List<String> get selectedTags => List.unmodifiable(_selectedTags);
   bool get isActive => _isActive;
   bool get isInitialized => _isInitialized;
   bool get hasUnsavedChanges => _hasUnsavedChanges;
-
-  // =====================================================================
-  // INITIALIZATION
-  // =====================================================================
 
   /// Inicializa o formulário para criação
   void initializeForCreation() {
@@ -153,10 +134,7 @@ class BovineFormProvider extends ChangeNotifier {
   }
 
   void _setupListeners() {
-    // Remove listeners existentes para evitar duplicação
     _removeListeners();
-
-    // Adiciona listeners para detectar mudanças
     _commonNameController.addListener(_onFormChanged);
     _registrationIdController.addListener(_onFormChanged);
     _breedController.addListener(_onFormChanged);
@@ -192,10 +170,6 @@ class BovineFormProvider extends ChangeNotifier {
     }
   }
 
-  // =====================================================================
-  // FIELD UPDATES
-  // =====================================================================
-
   void updateAptitude(BovineAptitude? aptitude) {
     if (_selectedAptitude != aptitude) {
       _selectedAptitude = aptitude;
@@ -229,10 +203,6 @@ class BovineFormProvider extends ChangeNotifier {
     }
   }
 
-  // =====================================================================
-  // VALIDATION
-  // =====================================================================
-
   FormValidationResult validateForm() {
     final formData = _getCurrentFormData();
     return _formService.validateCompleteForm(formData);
@@ -260,10 +230,6 @@ class BovineFormProvider extends ChangeNotifier {
         return null;
     }
   }
-
-  // =====================================================================
-  // DATA PREPARATION
-  // =====================================================================
 
   BovineFormData _getCurrentFormData() {
     return BovineFormData(
@@ -298,10 +264,6 @@ class BovineFormProvider extends ChangeNotifier {
     );
   }
 
-  // =====================================================================
-  // FORM OPERATIONS
-  // =====================================================================
-
   void resetToOriginal() {
     if (_originalData != null) {
       _populateFormFromData(_originalData!);
@@ -333,10 +295,6 @@ class BovineFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // =====================================================================
-  // HELPER METHODS
-  // =====================================================================
-
   int getCharacterCount(String fieldName) {
     switch (fieldName) {
       case 'commonName':
@@ -365,14 +323,8 @@ class BovineFormProvider extends ChangeNotifier {
     return _formService.isNearCharLimit(currentLength.toString(), maxLength);
   }
 
-  // =====================================================================
-  // CLEANUP
-  // =====================================================================
-
   void cleanup() {
     _removeListeners();
-
-    // Retorna controllers para a pool
     _returnController('commonName');
     _returnController('registrationId');
     _returnController('breed');
@@ -393,10 +345,6 @@ class BovineFormProvider extends ChangeNotifier {
     cleanup();
     super.dispose();
   }
-
-  // =====================================================================
-  // STATIC METHODS - Pool Management
-  // =====================================================================
 
   /// Limpa a pool de controllers para liberar memória
   static void clearControllerPool() {

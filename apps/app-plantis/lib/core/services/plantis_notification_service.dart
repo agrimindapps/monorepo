@@ -10,8 +10,6 @@ class PlantisNotificationService {
       PlantisNotificationService._internal();
   factory PlantisNotificationService() => _instance;
   PlantisNotificationService._internal();
-
-  // Usar o serviço do core
   final INotificationRepository _notificationService =
       kIsWeb ? WebNotificationService() : LocalNotificationService();
 
@@ -22,13 +20,11 @@ class PlantisNotificationService {
     if (_isInitialized) return true;
 
     try {
-      // Inicializar com canais específicos do Plantis
       _isInitialized = await _notificationService.initialize(
         defaultChannels: PlantisNotificationConfig.plantisChannels,
       );
 
       if (_isInitialized) {
-        // Configurar callbacks
         _notificationService.setNotificationTapCallback(_onNotificationTapped);
         _notificationService.setNotificationActionCallback(
           _onNotificationAction,
@@ -73,8 +69,6 @@ class PlantisNotificationService {
 
   /// Inicializa todas as notificações (compatibilidade)
   Future<void> initializeAllNotifications() async {
-    // Este método era usado para agendar notificações iniciais
-    // Na nova implementação, isso é feito sob demanda
     if (kDebugMode) {
       print(
         'PlantisNotificationService: initializeAllNotifications - usando agendamento sob demanda',
@@ -84,8 +78,6 @@ class PlantisNotificationService {
 
   /// Verifica e notifica tarefas atrasadas (compatibilidade)
   Future<void> checkAndNotifyOverdueTasks() async {
-    // Este método era usado para verificar tarefas atrasadas
-    // Na nova implementação, isso deve ser feito pelo TaskNotificationService
     if (kDebugMode) {
       print(
         'PlantisNotificationService: checkAndNotifyOverdueTasks - delegado para TaskNotificationService',
@@ -102,7 +94,6 @@ class PlantisNotificationService {
     String? plantName,
     String? plantId,
   }) async {
-    // Adaptar para nova interface
     return await schedulePlantCareNotification(
       plantId: plantId ?? taskId, // Usar plantId se disponível, senão taskId
       plantName: plantName ?? 'Planta',
@@ -158,8 +149,6 @@ class PlantisNotificationService {
 
   /// Agenda cuidados diários para todas as plantas (compatibilidade)
   Future<void> scheduleDailyCareForAllPlants() async {
-    // Este método era usado para agendar notificações diárias
-    // Na nova implementação, isso deve ser feito sob demanda por planta
     if (kDebugMode) {
       print(
         'PlantisNotificationService: scheduleDailyCareForAllPlants - usando agendamento individual por planta',
@@ -190,8 +179,6 @@ class PlantisNotificationService {
         body: body,
         extraData: payload != null ? {'payload': payload} : null,
       );
-
-      // Atualizar com a data agendada
       final scheduledNotification = NotificationEntity(
         id: notification.id,
         title: notification.title,
@@ -348,7 +335,6 @@ class PlantisNotificationService {
               if (!cancelled) allCancelled = false;
             }
           } catch (e) {
-            // Payload inválido, ignorar
           }
         }
       }
@@ -424,9 +410,6 @@ class PlantisNotificationService {
     if (payload != null && kDebugMode) {
       print('Notificação tocada: $payload');
     }
-
-    // TODO: Implementar navegação baseada no payload
-    // Por exemplo: navegar para detalhes da planta se for notificação de cuidado
   }
 
   /// Callback quando ação de notificação é executada
@@ -447,7 +430,6 @@ class PlantisNotificationService {
 
   /// Marca tarefa como concluída
   void _handleMarkDoneAction(String? payload) {
-    // TODO: Implementar marcação de tarefa como concluída
     if (kDebugMode) {
       print('Marcando tarefa como concluída: $payload');
     }
@@ -455,7 +437,6 @@ class PlantisNotificationService {
 
   /// Adia notificação por 1 hora
   void _handleSnoozeAction(String? payload) {
-    // TODO: Reagendar notificação para 1 hora
     if (kDebugMode) {
       print('Adiando notificação: $payload');
     }

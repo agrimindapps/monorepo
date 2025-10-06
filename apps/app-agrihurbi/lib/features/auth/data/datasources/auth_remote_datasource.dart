@@ -140,7 +140,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       debugPrint('AuthRemoteDataSourceImpl: Logout bem-sucedido');
     } catch (e) {
       debugPrint('AuthRemoteDataSourceImpl: Erro no logout - $e');
-      // Logout pode falhar remotamente mas deve continuar localmente
       throw _mapExceptionToFailure(e);
     }
   }
@@ -348,8 +347,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw _mapExceptionToFailure(e);
     }
   }
-
-  // === MÉTODOS PRIVADOS AUXILIARES ===
 
   /// Mapeia códigos de status para failures específicas
   Exception _mapStatusCodeToFailure(int? statusCode, String message) {

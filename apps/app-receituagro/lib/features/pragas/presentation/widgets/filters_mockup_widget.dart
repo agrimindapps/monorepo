@@ -63,7 +63,6 @@ class _FiltersMockupWidgetState extends State<FiltersMockupWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            // Campo de busca "Localizar" com comportamento responsivo e animação
             AnimatedContainer(
               duration: DiagnosticoMockupTokens.focusAnimationDuration,
               width: _isSearchFocused 
@@ -75,8 +74,6 @@ class _FiltersMockupWidgetState extends State<FiltersMockupWidget> {
                 focusNode: _searchFocusNode,
               ),
             ),
-            
-            // Dropdown "Todas" - oculta quando search tem foco com animação
             AnimatedContainer(
               duration: DiagnosticoMockupTokens.focusAnimationDuration,
               width: _isSearchFocused ? 0 : 12, // Espaçamento animado
@@ -254,8 +251,6 @@ class FiltersMockupProviderWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Integrar com provider real
-    // Por enquanto, dados mockados para demonstração
     return builder(
       '', // searchText
       'Todas', // selectedFilter  

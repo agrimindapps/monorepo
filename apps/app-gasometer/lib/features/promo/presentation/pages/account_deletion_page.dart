@@ -15,8 +15,6 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
   final scrollController = ScrollController();
   bool _isDeleting = false;
   bool _confirmationChecked = false;
-
-  // Referências para as seções para navegação
   final GlobalKey _introSection = GlobalKey();
   final GlobalKey _whatDeletedSection = GlobalKey();
   final GlobalKey _consequencesSection = GlobalKey();
@@ -42,16 +40,12 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
     final authState = ref.read(authProvider);
     final authNotifier = ref.read(authProvider.notifier);
     String? currentPassword;
-
-    // For authenticated (non-anonymous) users, request current password
     if (authState.isAuthenticated && !authState.isAnonymous) {
       currentPassword = await _showPasswordDialog();
       if (currentPassword == null || currentPassword.isEmpty) {
         return; // User cancelled or didn't provide password
       }
     }
-
-    // Show final confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -89,10 +83,7 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
     setState(() => _isDeleting = true);
 
     try {
-      // Delete account through AuthNotifier with password
       await authNotifier.deleteAccount(currentPassword: currentPassword);
-
-      // Check if there was an error
       final errorMessage = ref.read(authProvider).errorMessage;
       if (errorMessage != null) {
         if (mounted) {
@@ -106,8 +97,6 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
         }
         return;
       }
-
-      // Show success message and redirect
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -118,15 +107,12 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             duration: Duration(seconds: 3),
           ),
         );
-
-        // Wait a moment then redirect to login
         await Future<void>.delayed(const Duration(seconds: 2));
         if (mounted) {
           context.go('/login');
         }
       }
     } catch (e) {
-      // Error handling is done in AuthProvider
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -169,36 +155,18 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Cabeçalho
                 _buildHeader(),
-
-                // Introdução
                 _buildIntroduction(),
-
-                // O que será deletado
                 _buildWhatWillBeDeleted(),
-
-                // Consequências da exclusão
                 _buildConsequences(),
-
-                // Serviços de terceiros
                 _buildThirdPartyServices(),
-
-                // Processo de exclusão
                 _buildProcess(),
-
-                // Área de confirmação
                 _buildConfirmationSection(),
-
-                // Contato
                 _buildContact(),
-
-                // Rodapé
                 _buildFooter(),
               ],
             ),
           ),
-          // Menu de navegação fixo
           _buildNavBar(),
         ],
       ),
@@ -309,7 +277,6 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Logo
               GestureDetector(
                 onTap: () => context.go('/promo'),
                 child: Row(
@@ -331,8 +298,6 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
                   ],
                 ),
               ),
-
-              // Menu items
               if (isMobile)
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.menu),

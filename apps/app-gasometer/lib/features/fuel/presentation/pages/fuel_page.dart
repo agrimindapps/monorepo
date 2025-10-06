@@ -20,7 +20,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   @override
   void initState() {
     super.initState();
-    // Load fuel records on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(fuelNotifierProvider.notifier).loadFuelRecords();
     });
@@ -38,12 +37,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         child: Column(
           children: [
             _buildHeader(context),
-            // Offline indicator
             if (!isOnline || pendingCount > 0)
               _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
-            // Vehicle selector (simplified for now)
             _buildVehicleSelector(context),
-            // Month selector
             _buildMonthSelector(),
             Expanded(child: _buildContent(context, fuelState)),
           ],
@@ -310,7 +306,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           if (fuelState.hasActiveFilters) {
             ref.read(fuelNotifierProvider.notifier).clearAllFilters();
           } else {
-            // TODO: Implementar navegação para adicionar abastecimento
           }
         },
       );
@@ -415,7 +410,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        // TODO: Implementar navegação para adicionar abastecimento
       },
       tooltip: 'Adicionar abastecimento',
       child: const Icon(Icons.add),

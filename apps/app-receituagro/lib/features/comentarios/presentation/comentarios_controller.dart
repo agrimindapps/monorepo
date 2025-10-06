@@ -123,7 +123,6 @@ class ComentariosController extends ChangeNotifier {
     }
 
     if (!_service.canAddComentario(_state.quantComentarios)) {
-      // This should be handled by UI state, but as fallback
       _showErrorMessage('Limite de comentários atingido');
       return;
     }
@@ -190,8 +189,6 @@ class ComentariosController extends ChangeNotifier {
       _showErrorMessage(_service.getValidationErrorMessage());
       return;
     }
-
-    // Set saving state
     final newEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
     final currentEditState = newEditStates[comentario.id];
     if (currentEditState != null) {
@@ -210,7 +207,6 @@ class ComentariosController extends ChangeNotifier {
       stopEditingComentario(comentario.id);
       _showSuccessMessage(ComentariosDesignTokens.commentUpdatedMessage);
     } catch (e) {
-      // Remove saving state on error
       final errorEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
       final errorEditState = errorEditStates[comentario.id];
       if (errorEditState != null) {
@@ -234,14 +230,10 @@ class ComentariosController extends ChangeNotifier {
   }
 
   void _showErrorMessage(String message) {
-    // This would typically show a snackbar, but since we're using Provider
-    // the view layer should handle this
     debugPrint('Error: $message');
   }
 
   void _showSuccessMessage(String message) {
-    // This would typically show a snackbar, but since we're using Provider
-    // the view layer should handle this
     debugPrint('Success: $message');
   }
 

@@ -14,8 +14,6 @@ import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
-
-// Export enums from services for backward compatibility
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
 
@@ -41,20 +39,13 @@ final plantsProviderProvider = ChangeNotifierProvider<PlantsProvider>((ref) {
 /// - PlantsSortService: Sorting & views
 /// - PlantsCareService: Care analytics
 class PlantsProvider extends ChangeNotifier {
-  // Specialized services
   final PlantsCrudService _crudService;
   final PlantsFilterService _filterService;
   final PlantsSortService _sortService;
   final PlantsCareService _careService;
-
-  // Legacy use cases (kept for search functionality not yet in services)
   final SearchPlantsUseCase _searchPlantsUseCase;
   final AuthStateNotifier _authStateNotifier;
-
-  // Stream subscription for auth state changes
   StreamSubscription<UserEntity?>? _authSubscription;
-
-  // Stream subscription for real-time data changes
   StreamSubscription<List<dynamic>>? _realtimeDataSubscription;
 
   PlantsProvider({
@@ -77,10 +68,7 @@ class PlantsProvider extends ChangeNotifier {
        _careService = PlantsCareService(),
        _searchPlantsUseCase = searchPlantsUseCase,
        _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance {
-    // Initialize auth state listener
     _initializeAuthListener();
-
-    // Initialize real-time data stream
     _initializeRealtimeDataStream();
   }
 
@@ -124,7 +112,6 @@ class PlantsProvider extends ChangeNotifier {
       debugPrint(
         '🔐 PlantsProvider: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
       );
-      // CRITICAL FIX: Only load plants if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         debugPrint('✅ PlantsProvider: Auth is stable, loading plants...');
         loadInitialData();
@@ -132,7 +119,6 @@ class PlantsProvider extends ChangeNotifier {
         debugPrint(
           '🔄 PlantsProvider: No user but auth initialized - clearing plants',
         );
-        // Clear plants when user logs out
         _plants = [];
         _selectedPlant = null;
         _clearError();
@@ -167,8 +153,6 @@ class PlantsProvider extends ChangeNotifier {
         }
         return;
       }
-
-      // Configurar listener com validação e logging detalhado
       _realtimeDataSubscription = dataStream.listen(
         (List<dynamic> plants) {
           if (kDebugMode) {
@@ -179,8 +163,6 @@ class PlantsProvider extends ChangeNotifier {
               '   Auth state: ${_authStateNotifier.isInitialized ? "initialized" : "not initialized"}',
             );
           }
-
-          // Validação: só processar se auth estiver inicializado
           if (!_authStateNotifier.isInitialized) {
             if (kDebugMode) {
               debugPrint(
@@ -189,8 +171,6 @@ class PlantsProvider extends ChangeNotifier {
             }
             return;
           }
-
-          // Converter de entidades sync para entidades de domínio
           final conversionResults = <String, dynamic>{
             'total': plants.length,
             'successful': 0,
@@ -221,8 +201,6 @@ class PlantsProvider extends ChangeNotifier {
               );
             }
           }
-
-          // Atualizar apenas se houve mudanças reais
           if (_hasDataChanged(domainPlants)) {
             final oldCount = _plants.length;
             _plants = _sortService.sortPlants(domainPlants, _sortBy);
@@ -279,17 +257,13 @@ class PlantsProvider extends ChangeNotifier {
   /// ENHANCED: Improved error handling and validation
   Plant? _convertSyncPlantToDomain(dynamic syncPlant) {
     try {
-      // Validação inicial
       if (syncPlant == null) {
         if (kDebugMode) {
           debugPrint('⚠️ PlantsProvider: syncPlant is null, skipping...');
         }
         return null;
       }
-
-      // Se já é uma Plant do domínio, retorna diretamente
       if (syncPlant is Plant) {
-        // Validar que tem ID válido
         if (syncPlant.id.isEmpty) {
           if (kDebugMode) {
             debugPrint(
@@ -300,13 +274,9 @@ class PlantsProvider extends ChangeNotifier {
         }
         return syncPlant;
       }
-
-      // Se for uma entidade de sync, converte para domínio
       if (syncPlant is BaseSyncEntity) {
         try {
           final firebaseMap = syncPlant.toFirebaseMap();
-
-          // Validar que o map tem campos essenciais
           if (!firebaseMap.containsKey('id') ||
               !firebaseMap.containsKey('name')) {
             if (kDebugMode) {
@@ -335,10 +305,7 @@ class PlantsProvider extends ChangeNotifier {
           return null;
         }
       }
-
-      // Se for um Map, converte diretamente
       if (syncPlant is Map<String, dynamic>) {
-        // Validar que tem campos essenciais
         if (!syncPlant.containsKey('id') ||
             !syncPlant.containsKey('name')) {
           if (kDebugMode) {
@@ -359,8 +326,6 @@ class PlantsProvider extends ChangeNotifier {
 
         return plant;
       }
-
-      // Tipo desconhecido
       if (kDebugMode) {
         debugPrint(
           '⚠️ PlantsProvider: Tipo de entidade não suportado: ${syncPlant.runtimeType}',
@@ -383,21 +348,14 @@ class PlantsProvider extends ChangeNotifier {
     if (_plants.length != newPlants.length) {
       return true;
     }
-
-    // Comparar IDs e timestamps de atualização
     for (int i = 0; i < _plants.length; i++) {
       final currentPlant = _plants[i];
       Plant? newPlant;
       try {
         newPlant = newPlants.firstWhere((p) => p.id == currentPlant.id);
       } catch (e) {
-        // Planta não encontrada na lista nova - foi removida
         return true;
       }
-
-      // newPlant is already guaranteed to be non-null after the try-catch
-
-      // Comparar timestamp de atualização
       if (currentPlant.updatedAt != newPlant.updatedAt) {
         return true;
       }
@@ -423,8 +381,6 @@ class PlantsProvider extends ChangeNotifier {
     }
 
     debugPrint('⏳ PlantsProvider: Waiting for auth initialization...');
-
-    // Wait for initialization with timeout
     try {
       await _authStateNotifier.initializedStream
           .where((isInitialized) => isInitialized)
@@ -443,25 +399,17 @@ class PlantsProvider extends ChangeNotifier {
       return false;
     }
   }
-
-  // Load all plants
   Future<void> loadPlants() async {
     if (kDebugMode) {
       print(
         '📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first',
       );
     }
-
-    // CRITICAL FIX: Wait for authentication before loading plants
     if (!await _waitForAuthenticationWithTimeout()) {
       _setError('Aguardando autenticação...');
       return;
     }
-
-    // OFFLINE-FIRST: Try to load local data first
     await _loadLocalDataFirst();
-
-    // Then attempt to sync in background
     _syncInBackground();
   }
 
@@ -471,15 +419,11 @@ class PlantsProvider extends ChangeNotifier {
       if (kDebugMode) {
         print('📦 PlantsProvider: Carregando dados locais primeiro...');
       }
-
-      // Only show loading if no plants exist yet (first load)
       final shouldShowLoading = _plants.isEmpty;
       if (shouldShowLoading) {
         _setLoading(true);
       }
       _clearError();
-
-      // Delegate to CRUD service
       final localResult = await _crudService.getAllPlants();
 
       localResult.fold(
@@ -489,7 +433,6 @@ class PlantsProvider extends ChangeNotifier {
               '⚠️ PlantsProvider: Dados locais não disponíveis: ${_crudService.getErrorMessage(failure)}',
             );
           }
-          // Don't set error yet - try remote sync
         },
         (plants) {
           if (kDebugMode) {
@@ -513,8 +456,6 @@ class PlantsProvider extends ChangeNotifier {
     if (kDebugMode) {
       print('🔄 PlantsProvider: Iniciando sync em background...');
     }
-
-    // Execute sync in background
     Future.delayed(const Duration(milliseconds: 100), () async {
       final result = await _crudService.getAllPlants();
 
@@ -525,7 +466,6 @@ class PlantsProvider extends ChangeNotifier {
               '❌ PlantsProvider: Background sync falhou: ${_crudService.getErrorMessage(failure)}',
             );
           }
-          // Only set error if no local data was loaded
           if (_plants.isEmpty) {
             _setError(_crudService.getErrorMessage(failure));
           }
@@ -558,8 +498,6 @@ class PlantsProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
-  // Get plant by ID
   Future<Plant?> getPlantById(String id) async {
     final result = await _crudService.getPlantById(id);
 
@@ -575,8 +513,6 @@ class PlantsProvider extends ChangeNotifier {
       },
     );
   }
-
-  // Search plants
   Future<void> searchPlants(String query) async {
     _searchQuery = query;
 
@@ -599,8 +535,6 @@ class PlantsProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
-  // Add new plant
   Future<bool> addPlant(AddPlantParams params) async {
     _setLoading(true);
     _clearError();
@@ -622,8 +556,6 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(false);
     return success;
   }
-
-  // Update existing plant
   Future<bool> updatePlant(UpdatePlantParams params) async {
     _setLoading(true);
     _clearError();
@@ -642,8 +574,6 @@ class PlantsProvider extends ChangeNotifier {
           _plants = _sortService.sortPlants(_plants, _sortBy);
           _applyFilters();
         }
-
-        // Update selected plant if it's the same
         if (_selectedPlant?.id == updatedPlant.id) {
           _selectedPlant = updatedPlant;
         }
@@ -655,8 +585,6 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(false);
     return success;
   }
-
-  // Delete plant
   Future<bool> deletePlant(String id) async {
     _setLoading(true);
     _clearError();
@@ -671,8 +599,6 @@ class PlantsProvider extends ChangeNotifier {
       (_) {
         _plants.removeWhere((plant) => plant.id == id);
         _searchResults.removeWhere((plant) => plant.id == id);
-
-        // Clear selected plant if it was deleted
         if (_selectedPlant?.id == id) {
           _selectedPlant = null;
         }
@@ -685,16 +611,12 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(false);
     return success;
   }
-
-  // Set view mode
   void setViewMode(ViewMode mode) {
     if (_viewMode != mode) {
       _viewMode = mode;
       notifyListeners();
     }
   }
-
-  // Set sort order
   void setSortBy(SortBy sort) {
     if (_sortBy != sort) {
       _sortBy = sort;
@@ -703,16 +625,12 @@ class PlantsProvider extends ChangeNotifier {
       _applyFilters();
     }
   }
-
-  // Set space filter
   void setSpaceFilter(String? spaceId) {
     if (_filterBySpace != spaceId) {
       _filterBySpace = spaceId;
       _applyFilters();
     }
   }
-
-  // Clear search
   void clearSearch() {
     if (_searchQuery.isNotEmpty || _searchResults.isNotEmpty || _isSearching) {
       _searchQuery = '';
@@ -742,21 +660,15 @@ class PlantsProvider extends ChangeNotifier {
 
   /// Check if current view is grouped by spaces
   bool get isGroupedBySpaces => _sortService.isGroupedView(_viewMode);
-
-  // Clear selected plant
   void clearSelectedPlant() {
     if (_selectedPlant != null) {
       _selectedPlant = null;
       notifyListeners();
     }
   }
-
-  // Clear error
   void clearError() {
     _clearError();
   }
-
-  // Get plants by space
   List<Plant> getPlantsBySpace(String spaceId) {
     return _plants.where((plant) => plant.spaceId == spaceId).toList();
   }
@@ -787,28 +699,16 @@ class PlantsProvider extends ChangeNotifier {
       );
     }
   }
-
-  // Get plants count
   int get plantsCount => _crudService.getPlantCount(_plants);
-
-  // Get plants that need watering soon (next 2 days)
   List<Plant> getPlantsNeedingWater() {
     return _careService.getPlantsNeedingWater(_plants);
   }
-
-  // Get plants that need fertilizer soon (next 2 days)
   List<Plant> getPlantsNeedingFertilizer() {
     return _careService.getPlantsNeedingFertilizer(_plants);
   }
-
-  // Get plants by care status
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     return _careService.getPlantsByCareStatus(_plants, status);
   }
-
-  // Care status helper methods now delegated to PlantsCareService
-
-  // Private methods
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
       _isLoading = loading;
@@ -830,8 +730,6 @@ class PlantsProvider extends ChangeNotifier {
     }
   }
 
-  // Sorting now delegated to PlantsSortService
-
   void _applyFilters() {
     List<Plant> filtered = List.from(_plants);
 
@@ -843,17 +741,11 @@ class PlantsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Error handling now delegated to PlantsCrudService
-
   @override
   void dispose() {
-    // Cancel auth state subscription to prevent memory leaks
     _authSubscription?.cancel();
-
-    // Cancel real-time data subscription
     _realtimeDataSubscription?.cancel();
 
     super.dispose();
   }
 }
-// Enums now exported from services - see top of file

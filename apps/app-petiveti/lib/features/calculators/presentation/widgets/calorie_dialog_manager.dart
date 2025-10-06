@@ -167,8 +167,6 @@ class CalorieDialogManager {
       ),
     );
   }
-
-  // Private helper methods
   Widget _buildEmptyHistoryView() {
     return const Center(
       child: Column(

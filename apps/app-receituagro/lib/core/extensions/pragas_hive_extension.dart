@@ -2,7 +2,6 @@ import '../data/models/pragas_hive.dart';
 
 /// Extensão para PragasHive com métodos display compatíveis com PragaModel
 extension PragasHiveExtension on PragasHive {
-  // Computed display properties para compatibilidade com o widget existente
   String get displayName => nomeComum;
   
   String get displaySecondaryName => nomeCientifico.isNotEmpty ? nomeCientifico : '';
@@ -19,8 +18,6 @@ extension PragasHiveExtension on PragasHive {
         return 'Praga';
     }
   }
-
-  // Propriedades adicionais para descrição (usando informações taxonômicas)
   String get displayDescription => 
       ordem?.isNotEmpty == true 
           ? 'Ordem: $ordem${familia?.isNotEmpty == true ? ', Família: $familia' : ''}' 

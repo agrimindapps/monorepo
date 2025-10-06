@@ -66,8 +66,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
 
   final Ref ref;
   final GlobalKey<flutter.FormState> formKey = GlobalKey<flutter.FormState>();
-
-  // Controllers para campos de texto
   final TextEditingController brandController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
@@ -166,7 +164,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
     try {
       final currentImage = state.vehicleImage;
       if (currentImage != null && currentImage.existsSync()) {
-        // Validar ownership do arquivo
         if (await _isFileOwnedByUser(currentImage)) {
           await currentImage.delete();
           state = state.copyWith(
@@ -201,32 +198,20 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   Future<bool> _isFileOwnedByUser(File file) async {
     try {
       final filePath = file.path;
-
-      // Para arquivos temporários de imagem, sempre permitir exclusão
       if (filePath.contains('cache') || filePath.contains('tmp') || filePath.contains('TemporaryItems')) {
         return true;
       }
-
-      // Verificar se arquivo está no diretório do usuário (se userId disponível)
-      // Nota: Sem acesso ao userId aqui, validamos por padrão de diretório permitido
-
-      // Verificar se está em diretórios permitidos
       final allowedDirectories = ['tmp', 'cache', 'Documents', 'files'];
       final isInAllowedDir = allowedDirectories.any((dir) => filePath.contains(dir));
 
       if (!isInAllowedDir) {
         return false;
       }
-
-      // Verificar idade do arquivo
       final fileStats = await file.stat();
       final now = DateTime.now();
       final fileAge = now.difference(fileStats.modified);
-
-      // Permitir exclusão apenas se arquivo for recente (< 24h) ou criado pelo usuário
       return fileAge.inHours < 24;
     } catch (e) {
-      // Em caso de erro na validação, negar exclusão por segurança
       return false;
     }
   }
@@ -256,8 +241,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   /// Valida formulário
   bool validateForm() {
     state = state.copyWith(clearError: true);
-
-    // Validar campos obrigatórios
     final List<String> missingFields = [];
 
     if (brandController.text.trim().isEmpty) {
@@ -292,8 +275,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
       );
       return false;
     }
-
-    // Validar usando FormKey
     if (!formKey.currentState!.validate()) {
       state = state.copyWith(
         error: const local_error.ValidationError(
@@ -309,7 +290,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   /// Cria entidade do veículo a partir dos dados do formulário
   /// Requer userId como parâmetro
   VehicleEntity buildVehicleEntity({String? userId}) {
-    // Obter userId de parâmetro ou do auth state
     String? effectiveUserId = userId;
     if (effectiveUserId == null) {
       final authState = ref.read(authProvider);
@@ -324,8 +304,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
 
     final fuelType = FuelTypeMapper.fromString(state.selectedFuelType);
     final odometerValue = double.tryParse(odometerController.text.replaceAll(',', '.')) ?? 0.0;
-
-    // Aplicar sanitização específica para cada campo
     final sanitizedBrand = InputSanitizer.sanitizeName(brandController.text);
     final sanitizedModel = InputSanitizer.sanitizeName(modelController.text);
     final sanitizedColor = InputSanitizer.sanitizeName(colorController.text);
@@ -415,10 +393,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
         odometerController.text.isNotEmpty;
   }
 }
-
-// ============================================================================
-// PROVIDERS
-// ============================================================================
 
 /// Provider principal do formulário de veículos
 final vehicleFormNotifierProvider = StateNotifierProvider<VehicleFormNotifier, VehicleFormState>((ref) {

@@ -48,8 +48,6 @@ class RainGaugesSummary extends StatelessWidget {
         ),
       );
     }
-
-    // Calculate summary statistics
     final operational = rainGauges.where((g) => g.isOperational).length;
     final needMaintenance = rainGauges.where((g) => g.needsMaintenance).length;
     final totalDailyRainfall = rainGauges.fold<double>(
@@ -74,8 +72,6 @@ class RainGaugesSummary extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Summary statistics
             Row(
               children: [
                 Expanded(
@@ -111,8 +107,6 @@ class RainGaugesSummary extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Rainfall totals
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

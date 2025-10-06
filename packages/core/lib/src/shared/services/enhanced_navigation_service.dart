@@ -51,7 +51,6 @@ class EnhancedNavigationService {
       extension.dispose();
     }
     _extensions.clear();
-    // NavigationService doesn't have dispose method
   }
 
   /// Register a navigation extension
@@ -87,8 +86,6 @@ class EnhancedNavigationService {
 
     try {
       _isNavigating = true;
-
-      // Create navigation state
       final navigationState = NavigationState(
         pageType: pageType ?? routeName,
         route: routeName,
@@ -97,8 +94,6 @@ class EnhancedNavigationService {
         timestamp: DateTime.now(),
         navigationSource: navigationSource,
       );
-
-      // Process with extensions
       final processedConfiguration = await _processWithExtensions(
         navigationState.pageType,
         navigationState.arguments,
@@ -108,23 +103,15 @@ class EnhancedNavigationService {
       final finalState = navigationState.copyWith(
         configuration: processedConfiguration,
       );
-
-      // Try custom navigation first
       final customHandled = await _tryCustomNavigation(finalState);
       if (customHandled) {
         return null;
       }
-
-      // Update navigation stack
       _updateNavigationStack(finalState);
-
-      // Perform navigation
       final result = await _baseNavigationService.navigateTo<T>(
         routeName,
         arguments: arguments,
       );
-
-      // Update current state and notify listeners
       _currentState = finalState;
       _navigationStateController.add(finalState);
 
@@ -153,8 +140,6 @@ class EnhancedNavigationService {
 
     try {
       _isNavigating = true;
-
-      // Create navigation state
       final navigationState = NavigationState(
         pageType: pageType ?? page.runtimeType.toString(),
         arguments: arguments,
@@ -162,8 +147,6 @@ class EnhancedNavigationService {
         timestamp: DateTime.now(),
         navigationSource: navigationSource,
       );
-
-      // Process with extensions
       final processedConfiguration = await _processWithExtensions(
         navigationState.pageType,
         navigationState.arguments,
@@ -173,14 +156,8 @@ class EnhancedNavigationService {
       final finalState = navigationState.copyWith(
         configuration: processedConfiguration,
       );
-
-      // Update navigation stack
       _updateNavigationStack(finalState);
-
-      // Perform navigation
       final result = await _baseNavigationService.push<T>(page);
-
-      // Update current state and notify listeners
       _currentState = finalState;
       _navigationStateController.add(finalState);
 
@@ -201,8 +178,6 @@ class EnhancedNavigationService {
       _baseNavigationService.goBack<T>(result);
       return result;
     }
-
-    // Get current state for history
     final currentState = _currentState;
     if (currentState != null) {
       final timeSpent = DateTime.now().difference(currentState.timestamp);
@@ -214,11 +189,7 @@ class EnhancedNavigationService {
         ),
       );
     }
-
-    // Remove from stack
     _navigationStack.removeLast();
-
-    // Try extension back navigation
     if (currentState != null) {
       for (final extension in _extensions.values) {
         final handled = await extension.handleBackNavigation(currentState);
@@ -227,8 +198,6 @@ class EnhancedNavigationService {
         }
       }
     }
-
-    // Update current state to previous
     _currentState = _navigationStack.isNotEmpty ? _navigationStack.last : null;
     if (_currentState != null) {
       _navigationStateController.add(_currentState!);
@@ -245,7 +214,6 @@ class EnhancedNavigationService {
     String? pageType,
     NavigationConfiguration? configuration,
   }) async {
-    // Remove current page from stack if exists
     if (_navigationStack.isNotEmpty) {
       _navigationStack.removeLast();
     }
@@ -266,7 +234,6 @@ class EnhancedNavigationService {
     String? pageType,
     NavigationConfiguration? configuration,
   }) async {
-    // Clear navigation stack
     _clearNavigationStack();
 
     return await navigateTo<T>(
@@ -374,8 +341,6 @@ class EnhancedNavigationService {
   /// Update navigation stack
   void _updateNavigationStack(NavigationState state) {
     _navigationStack.add(state);
-
-    // Maintain max stack size
     if (_navigationStack.length > _maxStackSize) {
       _navigationStack.removeAt(0);
     }
@@ -384,8 +349,6 @@ class EnhancedNavigationService {
   /// Add entry to navigation history
   void _addToHistory(NavigationHistoryEntry entry) {
     _navigationHistory.add(entry);
-
-    // Maintain max history size
     if (_navigationHistory.length > _maxHistorySize) {
       _navigationHistory.removeAt(0);
     }
@@ -393,7 +356,6 @@ class EnhancedNavigationService {
 
   /// Clear navigation stack
   void _clearNavigationStack() {
-    // Add current states to history before clearing
     for (final state in _navigationStack) {
       final timeSpent = DateTime.now().difference(state.timestamp);
       _addToHistory(
@@ -408,10 +370,6 @@ class EnhancedNavigationService {
     _navigationStack.clear();
     _currentState = null;
   }
-
-  // ==========================================================================
-  // BASE NAVIGATION SERVICE DELEGATION
-  // ==========================================================================
 
   /// Show snackbar (delegated to base service)
   void showSnackBar(String message, {Color? backgroundColor}) {

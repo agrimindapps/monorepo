@@ -33,7 +33,6 @@ class PragaInfoWidget extends ConsumerWidget {
               _buildPragaImage(),
               SpacingTokens.gapSM,
               ..._buildInfoSections(data),
-              // Espaço já incluído no scrollPadding
             ],
           ),
         ),
@@ -49,13 +48,9 @@ class PragaInfoWidget extends ConsumerWidget {
     if (pragaData == null) {
       return [_buildLoadingWidget()];
     }
-
-    // Para pragas do tipo "inseto" (tipoPraga = "1") ou "doença" (tipoPraga = "2")
     if (pragaData.tipoPraga == '1' || pragaData.tipoPraga == '2') {
       return _buildInsectoInfoSections(data);
     }
-
-    // Para pragas do tipo "planta" (tipoPraga = "3")
     if (pragaData.tipoPraga == '3') {
       return _buildPlantaInfoSections(data);
     }
@@ -199,7 +194,6 @@ class PragaInfoWidget extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Calcula altura baseada na largura disponível (proporção 16:9)
           final imageHeight = constraints.maxWidth * 0.56;
 
           return PragaImageWidget(
@@ -304,7 +298,6 @@ class PragaInfoWidget extends ConsumerWidget {
                       size: 20,
                     ),
                     onPressed: () {
-                      // Funcionalidade de áudio
                     },
                   ),
                 ],

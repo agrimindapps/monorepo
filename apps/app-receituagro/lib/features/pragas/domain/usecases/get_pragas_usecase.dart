@@ -52,8 +52,6 @@ class GetPragaByIdUseCase {
     }
 
     final result = await _repository.getById(id);
-    
-    // Marca como acessada se encontrada
     await result.fold(
       (failure) async => null, // Não faz nada em caso de erro
       (praga) async {

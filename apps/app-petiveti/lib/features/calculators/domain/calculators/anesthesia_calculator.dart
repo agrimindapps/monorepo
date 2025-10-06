@@ -100,11 +100,7 @@ class AnesthesiaCalculator extends Calculator {
     final procedureType = inputs['procedure_type'] as String;
     final ageGroup = inputs['age_group'] as String;
     final healthStatus = inputs['health_status'] as String;
-
-    // Selecionar protocolo baseado nos inputs
     final protocol = _selectProtocol(species, procedureType, ageGroup, healthStatus);
-    
-    // Calcular dosagens
     final medications = <Map<String, dynamic>>[];
     
     for (final med in protocol['medications'] as List<Map<String, dynamic>>) {
@@ -121,9 +117,6 @@ class AnesthesiaCalculator extends Calculator {
         'notes': med['notes'],
       });
     }
-
-
-    // Criar ResultItems a partir dos medicamentos
     final resultItems = <ResultItem>[];
     for (final med in medications) {
       resultItems.add(ResultItem(
@@ -132,8 +125,6 @@ class AnesthesiaCalculator extends Calculator {
         description: '${med['route']} - ${med['timing']}',
       ));
     }
-
-    // Criar Recomendações
     final recommendations = [
       ...(protocol['monitoring'] as List<String>).map((monitor) => Recommendation(
         title: 'Monitoramento',
@@ -192,8 +183,6 @@ class AnesthesiaCalculator extends Calculator {
 
   Map<String, dynamic> _selectProtocol(String species, String procedureType, 
                                       String ageGroup, String healthStatus) {
-    // Protocolos baseados em literatura veterinária
-    // Simplificado para demonstração - em produção seria mais complexo
     
     if (procedureType.contains('Sedação leve')) {
       return _getLightSedationProtocol(species, ageGroup, healthStatus);

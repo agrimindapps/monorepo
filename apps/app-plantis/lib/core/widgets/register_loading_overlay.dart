@@ -43,7 +43,6 @@ class RegisterLoadingOverlay extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Loading indicator with plant theme
                       Container(
                         width: 60,
                         height: 60,
@@ -61,8 +60,6 @@ class RegisterLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Loading message
                       Text(
                         message,
                         textAlign: TextAlign.center,
@@ -73,8 +70,6 @@ class RegisterLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-
-                      // Subtitle
                       Text(
                         'Por favor, aguarde...',
                         textAlign: TextAlign.center,
@@ -184,7 +179,6 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Progress indicator
                       Container(
                         width: 80,
                         height: 80,
@@ -213,8 +207,6 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Step indicator
                       Text(
                         'Passo $currentStep de $totalSteps',
                         style: TextStyle(
@@ -224,8 +216,6 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-
-                      // Loading message
                       Text(
                         message,
                         textAlign: TextAlign.center,
@@ -236,8 +226,6 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-
-                      // Subtitle
                       Text(
                         'Por favor, aguarde enquanto processamos suas informações...',
                         textAlign: TextAlign.center,

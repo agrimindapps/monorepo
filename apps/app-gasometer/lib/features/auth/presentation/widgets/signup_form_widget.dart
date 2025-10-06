@@ -33,8 +33,6 @@ class SignupFormWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 30),
-
-          // Campo de nome
           AuthTextFieldWidget(
             controller: notifier.nameController,
             label: 'Nome completo',
@@ -43,8 +41,6 @@ class SignupFormWidget extends ConsumerWidget {
             validator: notifier.validateName,
           ),
           const SizedBox(height: 20),
-
-          // Campo de email
           AuthTextFieldWidget(
             controller: notifier.emailController,
             label: 'Email',
@@ -54,8 +50,6 @@ class SignupFormWidget extends ConsumerWidget {
             validator: notifier.validateEmail,
           ),
           const SizedBox(height: 20),
-
-          // Campo de senha
           AuthTextFieldWidget(
             controller: notifier.passwordController,
             label: 'Senha',
@@ -73,8 +67,6 @@ class SignupFormWidget extends ConsumerWidget {
             validator: notifier.validatePassword,
           ),
           const SizedBox(height: 20),
-
-          // Campo de confirmação de senha
           AuthTextFieldWidget(
             controller: notifier.confirmPasswordController,
             label: 'Confirmar senha',
@@ -91,15 +83,11 @@ class SignupFormWidget extends ConsumerWidget {
             ),
             validator: notifier.validateConfirmPassword,
           ),
-
-          // Mensagem de erro
           if (state.errorMessage != null) ...[
             const SizedBox(height: 16),
             _buildErrorMessage(context, ref, state.errorMessage!),
           ],
           const SizedBox(height: 30),
-
-          // Botão de cadastro
           AuthButtonWidget(
             text: 'Criar Conta',
             isLoading: state.isLoading,
@@ -107,8 +95,6 @@ class SignupFormWidget extends ConsumerWidget {
           ),
 
           const SizedBox(height: 20),
-
-          // Termos e condições
           Center(
             child: RichText(
               textAlign: TextAlign.center,

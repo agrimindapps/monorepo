@@ -18,7 +18,6 @@ class UrlLauncherService {
     url_launcher.LaunchMode mode = url_launcher.LaunchMode.externalApplication,
   }) async {
     try {
-      // Validate URL format
       if (!AppConfig.isValidUrl(url)) {
         return UrlLaunchResult.failure(
           error: UrlLaunchError.invalidUrl,
@@ -28,8 +27,6 @@ class UrlLauncherService {
       }
 
       final uri = Uri.parse(url);
-
-      // Check if URL can be launched
       final canLaunch = await url_launcher.canLaunchUrl(uri);
       if (!canLaunch) {
         return UrlLaunchResult.failure(
@@ -38,12 +35,9 @@ class UrlLauncherService {
           url: url,
         );
       }
-
-      // Attempt to launch URL
       final launched = await _launchUrlSafely(uri, mode);
 
       if (launched) {
-        // Track successful launch for analytics
         _trackUrlLaunch(url, source, analyticsParameters, success: true);
 
         return UrlLaunchResult.success(
@@ -51,7 +45,6 @@ class UrlLauncherService {
           message: 'Link aberto com sucesso',
         );
       } else {
-        // Track failed launch for analytics
         _trackUrlLaunch(url, source, analyticsParameters, success: false);
 
         return UrlLaunchResult.failure(
@@ -61,7 +54,6 @@ class UrlLauncherService {
         );
       }
     } catch (e) {
-      // Track exception for analytics
       _trackUrlLaunch(
         url,
         source,
@@ -83,7 +75,6 @@ class UrlLauncherService {
     try {
       return await url_launcher.launchUrl(uri, mode: mode);
     } catch (e) {
-      // Fallback to external application mode if webview fails
       if (mode != url_launcher.LaunchMode.externalApplication) {
         try {
           return await url_launcher.launchUrl(
@@ -170,8 +161,6 @@ class UrlLauncherService {
 
   /// Launch store page for app rating/review
   Future<UrlLaunchResult> launchStoreReview({String? source}) async {
-    // Platform-specific store URLs would be determined here
-    // For now, using the configured URLs from AppConfig
     final storeUrl =
         defaultTargetPlatform == TargetPlatform.iOS
             ? AppConfig.appStoreUrl
@@ -204,16 +193,6 @@ class UrlLauncherService {
         '${exception != null ? ', exception=$exception' : ''}',
       );
     }
-
-    // TODO: Integrate with actual analytics service
-    // Analytics.track('url_launch', {
-    //   'url': url,
-    //   'source': source ?? 'unknown',
-    //   'success': success,
-    //   'is_external': AppConfig.isExternalUrl(url),
-    //   if (exception != null) 'exception': exception,
-    //   ...?additionalParameters,
-    // });
   }
 }
 

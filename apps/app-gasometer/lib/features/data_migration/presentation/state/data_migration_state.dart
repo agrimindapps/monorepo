@@ -5,16 +5,11 @@ import 'package:core/core.dart';
 /// Manages conflict detection, migration progress, and resolution results
 class DataMigrationState {
   const DataMigrationState({
-    // Conflict detection state
     this.conflictResult,
     this.isDetectingConflicts = false,
-
-    // Migration execution state
     this.migrationResult,
     this.isMigrating = false,
     this.currentProgress,
-
-    // Error state
     this.failure,
   });
 

@@ -69,15 +69,10 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
         onRefresh: _handleRefresh,
         child: CustomScrollView(
           slivers: [
-            // Header com informações gerais
             SliverToBoxAdapter(
               child: _buildHeader(state),
             ),
-
-            // Lista de dispositivos
             _buildDevicesList(state),
-
-            // Footer com informações adicionais
             SliverToBoxAdapter(
               child: _buildFooter(state),
             ),
@@ -391,7 +386,6 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
         }
         break;
       case 'rename':
-        // Implementar renomeação se necessário
         break;
     }
   }

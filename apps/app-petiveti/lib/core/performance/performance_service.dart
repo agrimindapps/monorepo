@@ -211,8 +211,6 @@ class PerformanceService {
 
   void _addEvent(PerformanceEvent event) {
     _events.add(event);
-    
-    // Manter apenas os últimos N eventos
     if (_events.length > maxEventsToKeep) {
       _events.removeAt(0);
     }

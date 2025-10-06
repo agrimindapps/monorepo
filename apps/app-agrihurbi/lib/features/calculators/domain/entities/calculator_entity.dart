@@ -81,10 +81,7 @@ abstract class CalculatorEntity extends Equatable {
   /// Executa o cálculo com validação
   CalculationResult executeCalculation(Map<String, dynamic> inputs) {
     try {
-      // Aplica valores padrão
       final processedInputs = applyDefaults(inputs);
-
-      // Valida inputs
       if (!validateInputs(processedInputs)) {
         final errors = getValidationErrors(processedInputs);
         return CalculationError(
@@ -93,11 +90,7 @@ abstract class CalculatorEntity extends Equatable {
           inputs: processedInputs,
         );
       }
-
-      // Executa o cálculo
       final result = calculate(processedInputs);
-
-      // Verifica se o resultado é válido
       if (!result.isValid) {
         return result;
       }

@@ -29,8 +29,6 @@ class OptimizedReportsContent extends ConsumerWidget {
           selectedVehicleId: selectedVehicleId,
           onVehicleChanged: (String? vehicleId) {
             onVehicleChanged(vehicleId);
-
-            // Load new reports data when vehicle changes
             if (vehicleId != null) {
               reportsNotifier.loadAllReportsForVehicle(vehicleId);
             }

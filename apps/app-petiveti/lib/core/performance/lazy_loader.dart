@@ -16,17 +16,12 @@ class LazyLoader {
     Future<T> Function() loader, {
     bool forceReload = false,
   }) async {
-    // Se já está carregado e não é para forçar reload
     if (_loadedModules.containsKey(moduleKey) && !forceReload) {
       return _loadedModules[moduleKey] as T;
     }
-
-    // Se já está sendo carregado, aguarda o carregamento atual
     if (_loadingCompleters.containsKey(moduleKey)) {
       return await _loadingCompleters[moduleKey]!.future as T;
     }
-
-    // Inicia o carregamento
     final completer = Completer<T>();
     _loadingCompleters[moduleKey] = completer;
 
@@ -128,7 +123,6 @@ class _LazyWidgetState<T> extends State<LazyWidget<T>> {
     
     if (widget.preload) {
       _loadingFuture.catchError((error) {
-        // Preload sem bloquear UI - ignora erros
         return widget.loader();
       }); 
     }
@@ -185,8 +179,6 @@ class LazyModuleKeys {
   static const String profile = 'profile';
   static const String reports = 'reports';
   static const String settings = 'settings';
-  
-  // Features específicas
   static const String calculatorEngine = 'calculator_engine';
   static const String reportGenerator = 'report_generator';
   static const String dataExporter = 'data_exporter';

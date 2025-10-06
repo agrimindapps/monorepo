@@ -210,13 +210,9 @@ class ExpenseFormModel extends Equatable {
   /// Valida todos os campos e retorna mapa de erros
   Map<String, String> validate() {
     final validationErrors = <String, String>{};
-
-    // Validar veículo
     if (vehicleId.isEmpty) {
       validationErrors['vehicleId'] = 'Veículo é obrigatório';
     }
-
-    // Validar descrição
     if (description.trim().isEmpty) {
       validationErrors['description'] = 'Descrição é obrigatória';
     } else if (description.trim().length < 3) {
@@ -226,28 +222,20 @@ class ExpenseFormModel extends Equatable {
       validationErrors['description'] =
           'Descrição muito longa (máximo 100 caracteres)';
     }
-
-    // Validar valor
     if (amount <= 0) {
       validationErrors['amount'] = 'Valor deve ser maior que zero';
     } else if (amount > 999999.99) {
       validationErrors['amount'] = 'Valor muito alto';
     }
-
-    // Validar odômetro
     if (odometer < 0) {
       validationErrors['odometer'] = 'Odômetro não pode ser negativo';
     } else if (odometer > 9999999) {
       validationErrors['odometer'] = 'Valor muito alto';
     }
-
-    // Validar data
     final now = DateTime.now();
     if (date.isAfter(now)) {
       validationErrors['date'] = 'Data não pode ser futura';
     }
-
-    // Validar localização (opcional)
     if (location.trim().isNotEmpty) {
       if (location.trim().length < 2) {
         validationErrors['location'] = 'Localização muito curta';
@@ -255,8 +243,6 @@ class ExpenseFormModel extends Equatable {
         validationErrors['location'] = 'Localização muito longa';
       }
     }
-
-    // Validar observações (opcional)
     if (notes.trim().isNotEmpty && notes.trim().length > 300) {
       validationErrors['notes'] =
           'Observação muito longa (máximo 300 caracteres)';
@@ -269,8 +255,6 @@ class ExpenseFormModel extends Equatable {
   /// Aplica sanitização em todos os campos de texto para segurança
   ExpenseEntity toExpenseEntity() {
     final now = DateTime.now();
-
-    // Sanitizar todos os campos de texto antes da persistência
     final sanitizedDescription = InputSanitizer.sanitizeDescription(
       description,
     );

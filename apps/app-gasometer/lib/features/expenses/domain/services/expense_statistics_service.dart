@@ -31,8 +31,6 @@ class ExpenseStatisticsService {
 
     final totalAmount = expenses.fold<double>(0, (sum, e) => sum + e.amount);
     final averageAmount = totalAmount / expenses.length;
-    
-    // Agrupar por tipo
     final expensesByType = <ExpenseType, double>{};
     final expensesCountByType = <ExpenseType, int>{};
     
@@ -40,8 +38,6 @@ class ExpenseStatisticsService {
       expensesByType[expense.type] = (expensesByType[expense.type] ?? 0) + expense.amount;
       expensesCountByType[expense.type] = (expensesCountByType[expense.type] ?? 0) + 1;
     }
-
-    // Encontrar tipo mais caro
     ExpenseType? mostExpensiveType;
     double maxTypeAmount = 0;
     expensesByType.forEach((type, amount) {
@@ -50,8 +46,6 @@ class ExpenseStatisticsService {
         mostExpensiveType = type;
       }
     });
-
-    // Calcular médias mensais se tiver dados suficientes
     double monthlyAmount = 0;
     if (expenses.length >= 2) {
       final sortedByDate = List<ExpenseEntity>.from(expenses)
@@ -122,12 +116,8 @@ class ExpenseStatisticsService {
         'trend': 'stable',
       };
     }
-
-    // Ordenar por data
     final sorted = List<ExpenseEntity>.from(expenses)
       ..sort((a, b) => a.date.compareTo(b.date));
-
-    // Dividir em dois períodos
     final midPoint = sorted.length ~/ 2;
     final firstHalf = sorted.take(midPoint).toList();
     final secondHalf = sorted.skip(midPoint).toList();
@@ -170,14 +160,10 @@ class ExpenseStatisticsService {
         'thresholdAmount': 0.0,
       };
     }
-
-    // Calcular média e desvio padrão
     final amounts = expenses.map((e) => e.amount).toList();
     final mean = amounts.reduce((a, b) => a + b) / amounts.length;
     final variance = amounts.map((x) => (x - mean) * (x - mean)).reduce((a, b) => a + b) / amounts.length;
     final standardDeviation = variance.sqrt();
-
-    // Definir threshold para anomalias (2 desvios padrão)
     final thresholdAmount = mean + (2 * standardDeviation);
     
     final anomalousExpenses = expenses.where((e) => e.amount > thresholdAmount).toList();
@@ -208,8 +194,6 @@ class ExpenseStatisticsService {
 
     final baseStats = calculateStats(vehicleExpenses);
     final totalAmount = baseStats['totalAmount'] as double;
-    
-    // Calcular custo por quilômetro se possível
     double? costPerKm;
     if (vehicle.currentOdometer > 0) {
       costPerKm = totalAmount / vehicle.currentOdometer;

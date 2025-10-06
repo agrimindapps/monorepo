@@ -80,8 +80,6 @@ class MaintenanceStatisticsService {
           break;
       }
     }
-
-    // Get recent records (sorted by date)
     final sortedRecords = List<MaintenanceEntity>.from(records);
     sortedRecords.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
     final recentRecords = sortedRecords.take(5).toList();

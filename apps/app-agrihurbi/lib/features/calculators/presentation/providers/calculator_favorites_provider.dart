@@ -16,14 +16,10 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
     required ManageFavorites manageFavorites,
   }) : _manageFavorites = manageFavorites;
 
-  // === STATE MANAGEMENT ===
-
   List<String> _favoriteCalculatorIds = [];
   bool _isLoadingFavorites = false;
   bool _isUpdatingFavorite = false;
   String? _errorMessage;
-
-  // === GETTERS ===
 
   List<String> get favoriteCalculatorIds => _favoriteCalculatorIds;
   bool get isLoadingFavorites => _isLoadingFavorites;
@@ -44,8 +40,6 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
         .where((calc) => _favoriteCalculatorIds.contains(calc.id))
         .toList();
   }
-
-  // === FAVORITES OPERATIONS ===
 
   /// Carrega favoritos
   Future<void> loadFavorites() async {
@@ -179,8 +173,6 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
     return await removeMultipleFromFavorites(calculatorIds);
   }
 
-  // === FAVORITES MANAGEMENT ===
-
   /// Sincroniza favoritos locais com o servidor
   Future<void> syncFavorites() async {
     await loadFavorites();
@@ -244,8 +236,6 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-// === FAVORITES STATISTICS CLASS ===
 
 class FavoritesStatistics {
   final int totalFavorites;

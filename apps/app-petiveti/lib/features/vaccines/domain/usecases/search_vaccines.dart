@@ -32,8 +32,6 @@ class SearchVaccinesParams {
     required this.query,
     this.animalId,
   });
-  
-  // Factory constructors for convenience
   factory SearchVaccinesParams.global(String query) => SearchVaccinesParams(query: query);
   factory SearchVaccinesParams.byAnimal(String query, String animalId) => 
     SearchVaccinesParams(query: query, animalId: animalId);

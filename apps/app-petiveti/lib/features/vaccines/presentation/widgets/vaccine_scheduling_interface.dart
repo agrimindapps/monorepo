@@ -25,8 +25,6 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
-  
-  // Form controllers
   final _nameController = TextEditingController();
   final _veterinarianController = TextEditingController();
   final _batchController = TextEditingController();
@@ -40,8 +38,6 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
   bool _isRequired = true;
   bool _enableSmartReminders = true;
   VaccineStatus _status = VaccineStatus.scheduled;
-  
-  // Advanced scheduling options
   bool _isSeriesVaccine = false;
   int _seriesCount = 1;
   int _seriesIntervalDays = 30;
@@ -570,7 +566,6 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
                     trailing: Switch(
                       value: false,
                       onChanged: (value) {
-                        // Implement calendar sync
                       },
                     ),
                   ),
@@ -763,8 +758,6 @@ class _VaccineSchedulingInterfaceState extends ConsumerState<VaccineSchedulingIn
     try {
       if (widget.existingVaccine == null) {
         await ref.read(vaccinesProvider.notifier).addVaccine(vaccine);
-        
-        // If it's a series vaccine, create additional doses
         if (_isSeriesVaccine && _seriesCount > 1) {
           for (int i = 1; i < _seriesCount; i++) {
             final seriesDose = vaccine.copyWith(

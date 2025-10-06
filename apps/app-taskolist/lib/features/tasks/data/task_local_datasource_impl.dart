@@ -49,8 +49,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
   }) async {
     final box = await _taskBox;
     var tasks = box.values.toList();
-
-    // Aplicar filtros
     if (listId != null) {
       tasks = tasks.where((task) => task.listId == listId).toList();
     }
@@ -76,8 +74,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     if (isStarred != null) {
       tasks = tasks.where((task) => task.isStarred == isStarred).toList();
     }
-
-    // Ordenar por posição
     tasks.sort((a, b) => a.position.compareTo(b.position));
 
     return tasks;
@@ -112,7 +108,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     TaskPriority? priority,
     bool? isStarred,
   }) {
-    // Emitir dados iniciais
     getTasks(
       listId: listId,
       userId: userId,
@@ -124,8 +119,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
         _taskStreamController.add(tasks);
       }
     });
-
-    // Retornar stream que será atualizado quando dados mudarem
     return _taskStreamController.stream.asyncMap((_) async {
       return await getTasks(
         listId: listId,
@@ -149,8 +142,6 @@ class TaskLocalDataSourceImpl implements TaskLocalDataSource {
     await _taskStreamController.close();
     await _box?.close();
   }
-
-  // Métodos utilitários para estatísticas
   Future<int> getTaskCount({String? listId, String? userId}) async {
     final tasks = await getTasks(listId: listId, userId: userId);
     return tasks.length;

@@ -38,17 +38,12 @@ class AuthService {
     
     final user = userResult.getOrElse(() => null);
     if (user == null) return false;
-
-    // Check if user has premium status
     if (user.isPremium) {
-      // Verify subscription is not expired
       if (user.premiumExpiresAt != null) {
         return user.premiumExpiresAt!.isAfter(DateTime.now());
       }
       return true; // Lifetime or no expiration
     }
-
-    // Also check subscription repository for most up-to-date status
     final subscriptionResult = await _subscriptionRepository.getCurrentSubscription(user.id);
     return subscriptionResult.fold(
       (failure) => false,
@@ -58,10 +53,7 @@ class AuthService {
 
   /// Check if user can access a specific premium feature
   Future<bool> canAccessPremiumFeature(String featureName) async {
-    // First check if user is authenticated
     if (!(await isAuthenticated())) return false;
-    
-    // Then check premium access
     return await hasPremiumAccess();
   }
 
@@ -110,8 +102,6 @@ class AuthService {
 
   /// Check feature availability based on subscription tier
   bool isFeatureAvailable(PremiumFeature feature) {
-    // This could be expanded to check specific feature entitlements
-    // For now, all premium features require premium subscription
     return true; // Base features are always available
   }
 

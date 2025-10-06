@@ -8,20 +8,12 @@ class LicenseProvider extends ChangeNotifier {
   final LicenseService _licenseService;
 
   LicenseProvider(this._licenseService);
-
-  // Current license info
   LicenseInfo _licenseInfo = const LicenseInfo.noLicense();
   LicenseInfo get licenseInfo => _licenseInfo;
-
-  // Loading state
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-
-  // Error state
   String? _error;
   String? get error => _error;
-
-  // Computed properties
   bool get hasValidLicense => _licenseInfo.hasValidLicense;
   bool get isTrialActive => _licenseInfo.isTrialActive;
   bool get isPremiumActive => _licenseInfo.isPremiumActive;
@@ -29,8 +21,6 @@ class LicenseProvider extends ChangeNotifier {
   String get statusText => _licenseInfo.statusText;
   String get typeText => _licenseInfo.typeText;
   String get remainingText => _licenseInfo.remainingText;
-
-  // Timer for periodic checks
   Timer? _periodicTimer;
 
   /// Initialize the license system
@@ -38,15 +28,12 @@ class LicenseProvider extends ChangeNotifier {
     await _setLoading(true);
 
     try {
-      // Initialize license (creates trial if needed)
       final result = await _licenseService.initializeLicense();
 
       result.fold(
         (failure) => _setError(failure.toString()),
         (license) => _refreshLicenseInfo(),
       );
-
-      // Start periodic checks for expiration
       _startPeriodicCheck();
     } catch (e) {
       _setError('Erro ao inicializar licença: $e');

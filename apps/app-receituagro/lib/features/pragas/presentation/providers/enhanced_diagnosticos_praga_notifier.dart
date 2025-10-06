@@ -116,8 +116,6 @@ class EnhancedDiagnosticosPragaState {
       lastGroupingUpdate: null,
     );
   }
-
-  // Getters de conveniência
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
   bool get hasFilters => searchQuery.isNotEmpty || selectedCultura != 'Todas';
@@ -128,8 +126,6 @@ class EnhancedDiagnosticosPragaState {
 
   List<DiagnosticoEntity> _applyFilters() {
     var filtered = List<DiagnosticoEntity>.from(diagnosticos);
-
-    // Filtro por texto
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((diag) {
         final query = searchQuery.toLowerCase();
@@ -139,8 +135,6 @@ class EnhancedDiagnosticosPragaState {
             diag.idDefensivo.toLowerCase().contains(query);
       }).toList();
     }
-
-    // Filtro por cultura
     if (selectedCultura != 'Todas') {
       filtered = filtered.where((diag) {
         final culturaNome = diag.nomeCultura ?? '';
@@ -188,7 +182,6 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
 
   @override
   Future<EnhancedDiagnosticosPragaState> build() async {
-    // Get dependencies from DI
     _repository = di.sl<IDiagnosticosRepository>();
     _resolver = DiagnosticoEntityResolver.instance;
     _groupingService = DiagnosticoGroupingService.instance;
@@ -200,9 +193,7 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
   /// Inicializa o provider
   Future<void> initialize() async {
     try {
-      // Inicialização de serviços se necessário
     } catch (e) {
-      // Initialization errors are logged internally
     }
   }
 
@@ -343,13 +334,9 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
   Future<void> updateGroupings() async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Verifica cache de agrupamento
     if (currentState.isGroupingCacheValid() && currentState.cachedGrouping.isNotEmpty) {
       return;
     }
-
-    // Gera novo agrupamento usando serviço centralizado
     final filtered = currentState.filteredDiagnosticos;
     final grouped = await _groupingService.groupDiagnosticoEntitiesByCultura(
       filtered,

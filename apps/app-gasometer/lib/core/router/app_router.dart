@@ -20,44 +20,17 @@ import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Web inicia em promo, Mobile/Desktop inicia em login
   const initialRoute = kIsWeb ? '/promo' : '/login';
 
   return GoRouter(
     initialLocation: initialRoute,
     debugLogDiagnostics: true,
-    // Temporarily disable redirect logic to resolve initial route issues
-    // redirect: (context, state) {
-    //   // Simple auth redirect logic for now
-    //   try {
-    //     final authState = ref.read(authProvider);
-    //     final isAuthenticated = authState.isAuthenticated;
-    //     final isOnAuthPage = state.matchedLocation.startsWith('/login');
-
-    //     // If not authenticated and not on auth page, redirect to login
-    //     if (!isAuthenticated && !isOnAuthPage) {
-    //       return '/login';
-    //     }
-
-    //     // If authenticated and on auth page, redirect to vehicles
-    //     if (isAuthenticated && isOnAuthPage) {
-    //       return '/vehicles';
-    //     }
-
-    //     return null; // No redirect needed
-    //   } catch (e) {
-    //     // If authProvider not ready, allow current navigation
-    //     return null;
-    //   }
-    // },
     routes: [
-      // Shell route para páginas principais com navegação
       ShellRoute(
         builder: (context, state, child) {
           return AdaptiveMainNavigation(child: child);
         },
         routes: [
-          // Rota raiz redireciona para veículos
           GoRoute(
             path: '/',
             redirect: (context, state) => '/vehicles',
@@ -148,15 +121,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-
-      // Auth routes (outside main navigation)
       GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
       ),
-
-      // Promo page (outside main navigation) - Para Web
       GoRoute(
         path: '/promo',
         name: 'promo',

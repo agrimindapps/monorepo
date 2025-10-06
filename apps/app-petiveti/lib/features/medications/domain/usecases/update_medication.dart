@@ -12,7 +12,6 @@ class UpdateMedication implements UseCase<void, Medication> {
 
   @override
   Future<Either<Failure, void>> call(Medication medication) async {
-    // Validate medication data
     if (medication.name.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'Nome do medicamento é obrigatório'));
     }

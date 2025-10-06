@@ -170,51 +170,29 @@ class PlantingDensityCalculator extends CalculatorEntity {
       final String machineryType = inputs['machinery_type'].toString();
       final double seedGermination = double.parse(inputs['seed_germination'].toString());
       final double expectedLosses = double.parse(inputs['expected_losses'].toString());
-
-      // Obter dados da cultura
       final Map<String, dynamic> cropData = _getCropDensityData(cropType);
-
-      // Calcular população ótima se não fornecida
       final Map<String, dynamic> optimalDensity = _calculateOptimalDensity(
         cropType, cultivarCycle, plantingObjective, soilFertility, 
         waterAvailability, plantingSeason, cropData);
 
       final int finalTargetPopulation = targetPopulation ?? 
           (optimalDensity['optimal_population'] as int);
-
-      // Calcular espaçamento na linha
       final Map<String, dynamic> spacing = _calculateSpacing(
         finalTargetPopulation, rowSpacing, machineryType, cropData);
-
-      // Calcular necessidades de sementes
       final Map<String, dynamic> seedRequirements = _calculateSeedRequirements(
         finalTargetPopulation, fieldArea, seedGermination, expectedLosses, cropData);
-
-      // Análise do arranjo espacial
       final Map<String, dynamic> spatialArrangement = _analyzeSpatialArrangement(
         rowSpacing, spacing['plant_spacing_cm'] as double, cropType, optimalDensity);
-
-      // Recomendações de ajuste
       final Map<String, dynamic> adjustmentRecommendations = _generateAdjustmentRecommendations(
         finalTargetPopulation, optimalDensity, soilFertility, waterAvailability, cropType);
-
-      // Comparação com padrões
       final Map<String, dynamic> standardComparison = _compareWithStandards(
         finalTargetPopulation, rowSpacing, cropType, plantingObjective);
-
-      // Cronograma de plantio
       final List<Map<String, dynamic>> plantingSchedule = _generatePlantingSchedule(
         fieldArea, spacing, machineryType);
-
-      // Indicadores de eficiência
       final Map<String, dynamic> efficiencyIndicators = _calculateEfficiencyIndicators(
         spatialArrangement, optimalDensity, standardComparison);
-
-      // Análise econômica
       final Map<String, dynamic> economicAnalysis = _calculateEconomicAnalysis(
         seedRequirements, fieldArea, cropType, finalTargetPopulation);
-
-      // Recomendações técnicas
       final List<String> technicalRecommendations = _generateTechnicalRecommendations(
         cropType, spatialArrangement, optimalDensity, adjustmentRecommendations,
         machineryType, soilFertility);
@@ -486,8 +464,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
   ) {
     int basePopulation = cropData['optimal_population'] as int;
     double adjustmentFactor = 1.0;
-
-    // Ajuste por ciclo do cultivar
     final Map<String, double> cycleFactors = {
       'Super Precoce': 1.15,
       'Precoce': 1.10,
@@ -495,8 +471,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       'Tardio': 0.90,
     };
     adjustmentFactor *= (cycleFactors[cultivarCycle] ?? 1.0);
-
-    // Ajuste por objetivo de plantio
     final Map<String, double> objectiveFactors = {
       'Produção de Grãos': 1.0,
       'Silagem': 1.2,
@@ -506,8 +480,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       'Industrialização': 1.05,
     };
     adjustmentFactor *= (objectiveFactors[plantingObjective] ?? 1.0);
-
-    // Ajuste por fertilidade do solo
     final Map<String, double> fertilityFactors = {
       'Muito Baixa': 0.8,
       'Baixa': 0.9,
@@ -516,8 +488,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       'Muito Alta': 1.15,
     };
     adjustmentFactor *= (fertilityFactors[soilFertility] ?? 1.0);
-
-    // Ajuste por disponibilidade hídrica
     final Map<String, double> waterFactors = {
       'Sequeiro': 0.85,
       'Irrigado': 1.15,
@@ -525,8 +495,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       'Supplementar': 1.0,
     };
     adjustmentFactor *= (waterFactors[waterAvailability] ?? 1.0);
-
-    // Ajuste por época de plantio
     final Map<String, double> seasonFactors = {
       'Safra Principal': 1.0,
       'Safrinha': 0.9,
@@ -536,13 +504,9 @@ class PlantingDensityCalculator extends CalculatorEntity {
     adjustmentFactor *= (seasonFactors[plantingSeason] ?? 1.0);
 
     final int optimalPopulation = (basePopulation * adjustmentFactor).round();
-    
-    // Limitar aos valores mínimos e máximos da cultura
     final int minPop = cropData['min_population'] as int;
     final int maxPop = cropData['max_population'] as int;
     final int finalPopulation = math.max(minPop, math.min(maxPop, optimalPopulation));
-
-    // Estimar produtividade baseada na densidade
     final double estimatedYield = _estimateYieldByDensity(
         finalPopulation, basePopulation, cropType, soilFertility, waterAvailability);
 
@@ -565,7 +529,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String soilFertility,
     String waterAvailability,
   ) {
-    // Produtividades base por cultura (kg/ha)
     final Map<String, double> baseYields = {
       'Milho': 8000.0,
       'Soja': 3200.0,
@@ -584,8 +547,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
     };
 
     double baseYield = baseYields[cropType] ?? 5000.0;
-
-    // Ajuste por fertilidade
     final Map<String, double> fertilityYieldFactors = {
       'Muito Baixa': 0.6,
       'Baixa': 0.75,
@@ -594,8 +555,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       'Muito Alta': 1.35,
     };
     baseYield *= (fertilityYieldFactors[soilFertility] ?? 1.0);
-
-    // Ajuste por água
     final Map<String, double> waterYieldFactors = {
       'Sequeiro': 0.8,
       'Irrigado': 1.3,
@@ -603,8 +562,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       'Supplementar': 1.1,
     };
     baseYield *= (waterYieldFactors[waterAvailability] ?? 1.0);
-
-    // Ajuste por densidade (curva de resposta)
     final double densityRatio = currentPopulation / basePopulation;
     double densityFactor = 1.0;
 
@@ -629,22 +586,11 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String machineryType,
     Map<String, dynamic> cropData,
   ) {
-    // Converter espaçamento de cm para metros
     final double rowSpacingM = rowSpacing / 100;
-
-    // Área por planta (m²)
     final double areaPerPlant = 10000.0 / targetPopulation; // m²/planta
-
-    // Espaçamento na linha (m)
     final double plantSpacingM = areaPerPlant / rowSpacingM;
-
-    // Converter para cm
     final double plantSpacingCm = plantSpacingM * 100;
-
-    // Plantas por metro linear
     final double plantsPerMeter = 1.0 / plantSpacingM;
-
-    // Ajuste por tipo de maquinário
     final Map<String, double> machineryPrecision = {
       'Manual': 0.90,
       'Tração Animal': 0.85,
@@ -673,24 +619,15 @@ class PlantingDensityCalculator extends CalculatorEntity {
     double expectedLosses,
     Map<String, dynamic> cropData,
   ) {
-    // Eficiência de estabelecimento
     final double establishmentEfficiency = (seedGermination / 100) * ((100 - expectedLosses) / 100);
-
-    // Número de sementes necessárias por hectare
     final double seedsPerHa = targetPopulation / establishmentEfficiency;
-
-    // Total de sementes para a área
     final double totalSeeds = seedsPerHa * fieldArea;
-
-    // Peso das sementes (kg)
     final double seedWeight1000 = cropData['seed_weight_1000'] as double;
     double seedWeightKg = 0.0;
     
     if (seedWeight1000 > 0) {
       seedWeightKg = (totalSeeds * seedWeight1000) / 1000000; // kg
     }
-
-    // Margem de segurança (5%)
     const double safetyMargin = 1.05;
     final double finalSeedQuantity = totalSeeds * safetyMargin;
     final double finalSeedWeight = seedWeightKg * safetyMargin;
@@ -710,10 +647,7 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String cropType,
     Map<String, dynamic> optimalDensity,
   ) {
-    // Índice de adequação espacial
     final double rectangularity = rowSpacing / plantSpacing;
-    
-    // Faixa ideal de retangularidade por cultura
     final Map<String, Map<String, double>> idealRectangularity = {
       'Milho': {'min': 1.5, 'max': 3.0},
       'Soja': {'min': 0.5, 'max': 2.0},
@@ -724,8 +658,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
 
     final Map<String, double> idealRange = idealRectangularity[cropType] ?? 
                                           idealRectangularity['default']!;
-
-    // Adequação do arranjo
     double adequacyIndex = 100.0;
     if (rectangularity < idealRange['min']!) {
       adequacyIndex = 80.0 - (idealRange['min']! - rectangularity) * 20;
@@ -733,8 +665,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
       adequacyIndex = 80.0 - (rectangularity - idealRange['max']!) * 15;
     }
     adequacyIndex = math.max(0, math.min(100, adequacyIndex));
-
-    // Índice de competição
     final double competitionIndex = 1.0 / math.sqrt(rowSpacing * plantSpacing);
 
     return {
@@ -798,7 +728,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String cropType,
     String plantingObjective,
   ) {
-    // Padrões regionais/técnicos
     final Map<String, Map<String, dynamic>> technicalStandards = {
       'Milho': {
         'embrapa': 65000,
@@ -858,8 +787,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String machineryType,
   ) {
     final List<Map<String, dynamic>> schedule = [];
-
-    // Capacidade operacional por tipo de máquina (ha/h)
     final Map<String, double> workRates = {
       'Manual': 0.05,
       'Tração Animal': 0.3,
@@ -870,8 +797,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
 
     final double workRate = workRates[machineryType] ?? 1.0;
     final double totalTime = fieldArea / workRate;
-
-    // Divisão do trabalho em etapas
     final int phases = math.min(5, (fieldArea / 10).ceil());
     final double areaPerPhase = fieldArea / phases;
     final double timePerPhase = totalTime / phases;
@@ -897,14 +822,8 @@ class PlantingDensityCalculator extends CalculatorEntity {
   ) {
     final double adequacyIndex = spatialArrangement['adequacy_index'] as double;
     final double competitionIndex = spatialArrangement['competition_index'] as double;
-    
-    // Eficiência de área (baseada na adequação do arranjo)
     final double areaEfficiency = adequacyIndex;
-    
-    // Eficiência de aproveitamento de luz
     final double lightEfficiency = math.max(0, 100 - (competitionIndex - 1) * 50);
-    
-    // Índice global de eficiência
     final double globalEfficiency = (areaEfficiency + lightEfficiency) / 2;
 
     return {
@@ -933,7 +852,6 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String cropType,
     int population,
   ) {
-    // Preços médios de sementes (R\$/kg)
     final Map<String, double> seedPrices = {
       'Milho': 25.0,
       'Soja': 15.0,
@@ -953,11 +871,7 @@ class PlantingDensityCalculator extends CalculatorEntity {
     final double seedPrice = seedPrices[cropType] ?? 20.0;
     final double seedWeightKg = seedRequirements['seed_weight_kg'] as double;
     final double seedCost = seedWeightKg * seedPrice;
-
-    // Custo por hectare
     final double costPerHa = seedCost / fieldArea;
-
-    // Análise de custo-benefício (estimativa)
     final double estimatedRevenue = fieldArea * 5000 * 0.60; // Estimativa genérica
     final double costBenefitRatio = seedCost / estimatedRevenue;
 
@@ -978,26 +892,18 @@ class PlantingDensityCalculator extends CalculatorEntity {
     String soilFertility,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações por adequação do arranjo
     final double adequacyIndex = spatialArrangement['adequacy_index'] as double;
     if (adequacyIndex < 80) {
       recommendations.add('Arranjo espacial inadequado - considerar ajustar espaçamento entre fileiras.');
     }
-
-    // Recomendações por densidade
     final int adjustment = adjustmentRecommendations['population_adjustment'] as int;
     if ((adjustment < 0 ? -adjustment : adjustment) > 10000) {
       recommendations.add('Densidade significativamente diferente do ótimo - revisar população de plantas.');
     }
-
-    // Recomendações por competição
     final double competitionIndex = spatialArrangement['competition_index'] as double;
     if (competitionIndex > 3.0) {
       recommendations.add('Alta competição entre plantas - considerar aumentar espaçamento.');
     }
-
-    // Recomendações específicas por cultura
     switch (cropType) {
       case 'Milho':
         recommendations.add('Milho: manter estande uniforme para maximizar produtividade.');
@@ -1009,20 +915,14 @@ class PlantingDensityCalculator extends CalculatorEntity {
         recommendations.add('Feijão: evitar adensamento excessivo que favorece doenças.');
         break;
     }
-
-    // Recomendações por maquinário
     if (machineryType == 'Manual') {
       recommendations.add('Plantio manual: maior atenção à uniformidade do espaçamento.');
     } else if (machineryType.contains('Precisão')) {
       recommendations.add('Plantadeira de precisão: calibrar para distribuição uniforme.');
     }
-
-    // Recomendações por fertilidade
     if (soilFertility == 'Baixa' || soilFertility == 'Muito Baixa') {
       recommendations.add('Solo de baixa fertilidade - considerar densidade menor e adubação adequada.');
     }
-
-    // Recomendações gerais
     recommendations.add('Monitorar emergência para confirmar estande planejado.');
     recommendations.add('Calibrar equipamentos antes do plantio para precisão.');
     recommendations.add('Considerar teste de germinação das sementes.');

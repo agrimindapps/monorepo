@@ -46,7 +46,6 @@ class PromoHeaderSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Textos e botões à esquerda
         Expanded(
           flex: 5,
           child: Column(
@@ -60,8 +59,6 @@ class PromoHeaderSection extends StatelessWidget {
             ],
           ),
         ),
-
-        // Imagem à direita
         Expanded(
           flex: 5,
           child: _buildAppShowcase(),
@@ -89,7 +86,6 @@ class PromoHeaderSection extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título principal
         Text(
           'Cuide das suas Plantas\ncom Amor e Tecnologia',
           style: TextStyle(
@@ -101,8 +97,6 @@ class PromoHeaderSection extends StatelessWidget {
           ),
         ),
         SizedBox(height: 24),
-
-        // Descrição
         Text(
           'O aplicativo mais completo para jardineiros apaixonados. Registre, acompanhe e receba lembretes inteligentes para manter suas plantas sempre saudáveis.',
           style: TextStyle(
@@ -150,7 +144,6 @@ class PromoHeaderSection extends StatelessWidget {
         ),
         OutlinedButton(
           onPressed: () {
-            // TODO: Implementar tour do app
           },
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.white,
@@ -175,13 +168,11 @@ class PromoHeaderSection extends StatelessWidget {
   Widget _buildDownloadBadges(BuildContext context) {
     return Row(
       children: [
-        // Google Play badge
         _buildStoreBadge(
           icon: Icons.android,
           storeName: 'Google Play',
         ),
         const SizedBox(width: 12),
-        // App Store badge
         _buildStoreBadge(
           icon: Icons.apple,
           storeName: 'App Store',
@@ -237,7 +228,6 @@ class PromoHeaderSection extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Círculo decorativo
         Container(
           width: 350,
           height: 350,
@@ -246,8 +236,6 @@ class PromoHeaderSection extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.05),
           ),
         ),
-
-        // Imagem do mockup do app
         Container(
           width: 280,
           height: 520,
@@ -270,14 +258,11 @@ class PromoHeaderSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             child: Stack(
               children: [
-                // Background
                 Container(
                   color: Colors.white,
                   width: double.infinity,
                   height: double.infinity,
                 ),
-
-                // Notch da tela
                 Align(
                   alignment: Alignment.topCenter,
                   child: Container(
@@ -290,8 +275,6 @@ class PromoHeaderSection extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Interface do app (mockup)
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -312,7 +295,6 @@ class PromoHeaderSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      // Cards de plantas simulados
                       _buildPlantCardMockup('Samambaia', PlantisColors.leaf),
                       const SizedBox(height: 12),
                       _buildPlantCardMockup('Suculenta', PlantisColors.water),
@@ -325,8 +307,6 @@ class PromoHeaderSection extends StatelessWidget {
             ),
           ),
         ),
-
-        // Elementos flutuantes decorativos
         Positioned(
           top: 50,
           right: 40,

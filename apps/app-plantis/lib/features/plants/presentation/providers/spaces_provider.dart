@@ -18,13 +18,9 @@ class SpacesState {
     this.isLoading = false,
     this.error,
   });
-
-  // Convenience getters
   bool get isEmpty => spaces.isEmpty;
   bool get hasError => error != null;
   int get spacesCount => spaces.length;
-
-  // Find space by name
   Space? findSpaceByName(String name) {
     try {
       return spaces.firstWhere(
@@ -34,8 +30,6 @@ class SpacesState {
       return null;
     }
   }
-
-  // Get spaces by light condition
   List<Space> getSpacesByLightCondition(String lightCondition) {
     return spaces
         .where((space) => space.lightCondition == lightCondition)
@@ -88,20 +82,16 @@ class SpacesNotifier extends _$SpacesNotifier {
 
   @override
   Future<SpacesState> build() async {
-    // Initialize use cases from DI
     _getSpacesUseCase = ref.read(getSpacesUseCaseProvider);
     _getSpaceByIdUseCase = ref.read(getSpaceByIdUseCaseProvider);
     _addSpaceUseCase = ref.read(addSpaceUseCaseProvider);
     _updateSpaceUseCase = ref.read(updateSpaceUseCaseProvider);
     _deleteSpaceUseCase = ref.read(deleteSpaceUseCaseProvider);
-
-    // Load initial spaces
     final result = await _getSpacesUseCase.call(const NoParams());
 
     return result.fold(
       (failure) => SpacesState(error: _getErrorMessage(failure)),
       (spaces) {
-        // Sort by creation date (newest first)
         final sortedSpaces = List<Space>.from(spaces);
         sortedSpaces.sort(
           (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
@@ -135,7 +125,6 @@ class SpacesNotifier extends _$SpacesNotifier {
         );
       },
       (spaces) {
-        // Sort by creation date (newest first)
         final sortedSpaces = List<Space>.from(spaces);
         sortedSpaces.sort(
           (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
@@ -321,7 +310,6 @@ class SpacesNotifier extends _$SpacesNotifier {
       case NetworkFailure _:
         return 'Sem conexão com a internet';
       case ServerFailure _:
-        // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
@@ -335,8 +323,6 @@ class SpacesNotifier extends _$SpacesNotifier {
     }
   }
 }
-
-// === DEPENDENCY PROVIDERS (GetIt DI) ===
 
 @riverpod
 GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
@@ -362,8 +348,6 @@ UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
 DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
   return GetIt.instance<DeleteSpaceUseCase>();
 }
-
-// === COMPATIBILITY PROVIDERS (for gradual migration) ===
 
 @riverpod
 List<Space> spaces(SpacesRef ref) {

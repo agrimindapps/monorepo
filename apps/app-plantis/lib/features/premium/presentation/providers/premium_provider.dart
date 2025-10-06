@@ -4,7 +4,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
-// import '../../data/services/subscription_sync_service.dart'; // Removido - usar PremiumProviderImproved para sincronização
 
 class PremiumProvider extends ChangeNotifier {
   final ISubscriptionRepository _subscriptionRepository;
@@ -29,8 +28,6 @@ class PremiumProvider extends ChangeNotifier {
        _simpleSubscriptionSyncService = simpleSubscriptionSyncService {
     _initialize();
   }
-
-  // Getters
   SubscriptionEntity? get currentSubscription => _currentSubscription;
   List<ProductInfo> get availableProducts => _availableProducts;
   bool get isLoading => _isLoading;
@@ -41,7 +38,6 @@ class PremiumProvider extends ChangeNotifier {
   PurchaseOperation? get currentOperation => _currentOperation;
 
   bool get _isAnonymousUser {
-    // Verifica se o usuário atual é anônimo através do AuthRepository
     return false; // Simplificado por agora - pode ser expandido depois
   }
 
@@ -57,7 +53,6 @@ class PremiumProvider extends ChangeNotifier {
   DateTime? get expirationDate => _currentSubscription?.expirationDate;
 
   void _initialize() {
-    // Escuta mudanças na assinatura via SimpleSubscriptionSyncService (NOVO)
     if (_simpleSubscriptionSyncService != null) {
       _syncSubscriptionStream = _simpleSubscriptionSyncService
           .subscriptionStatus
@@ -72,7 +67,6 @@ class PremiumProvider extends ChangeNotifier {
             },
           );
     } else {
-      // Fallback para versão original (compatibilidade)
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
         (subscription) async {
           _currentSubscription = subscription;
@@ -84,8 +78,6 @@ class PremiumProvider extends ChangeNotifier {
         },
       );
     }
-
-    // Escuta mudanças de autenticação para sincronizar usuário
     _authStream = _authRepository.currentUser.listen((user) {
       if (user != null) {
         _syncUserSubscription(user.id);
@@ -94,11 +86,7 @@ class PremiumProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
-
-    // Carrega produtos disponíveis
     _loadAvailableProducts();
-
-    // Verifica assinatura atual
     _checkCurrentSubscription();
   }
 
@@ -115,8 +103,6 @@ class PremiumProvider extends ChangeNotifier {
     _errorMessage = null;
     _currentOperation = PurchaseOperation.loadProducts;
     notifyListeners();
-
-    // Usa SimpleSubscriptionSyncService se disponível (NOVO)
     if (_simpleSubscriptionSyncService != null) {
       final result = await _simpleSubscriptionSyncService
           .hasActiveSubscriptionForApp('plantis');
@@ -129,15 +115,12 @@ class PremiumProvider extends ChangeNotifier {
           notifyListeners();
         },
         (hasSubscription) {
-          // A subscription será atualizada via stream
-          // Apenas atualiza estado de loading
           _isLoading = false;
           _currentOperation = null;
           notifyListeners();
         },
       );
     } else {
-      // Fallback para versão original
       final result = await _subscriptionRepository.getCurrentSubscription();
 
       result.fold(
@@ -192,9 +175,6 @@ class PremiumProvider extends ChangeNotifier {
       (subscription) async {
         _currentSubscription = subscription;
 
-        // Nota: Versão simplificada - sem sincronização avançada
-        // Use PremiumProviderImproved para funcionalidades completas
-
         _isLoading = false;
         _currentOperation = null;
         notifyListeners();
@@ -221,7 +201,6 @@ class PremiumProvider extends ChangeNotifier {
       },
       (subscriptions) {
         if (subscriptions.isNotEmpty) {
-          // Pega a assinatura mais recente ativa
           final activeSubscriptions =
               subscriptions.where((s) => s.isActive).toList();
 
@@ -260,20 +239,14 @@ class PremiumProvider extends ChangeNotifier {
     _currentOperation = null;
     notifyListeners();
   }
-
-  // Métodos para verificar funcionalidades específicas
   bool canCreateUnlimitedPlants() => isPremium;
   bool canAccessAdvancedFeatures() => isPremium;
   bool canExportData() => isPremium;
   bool canUseCustomReminders() => isPremium;
   bool canAccessPremiumThemes() => isPremium;
   bool canBackupToCloud() => isPremium;
-
-  // Verifica se uma funcionalidade específica está disponível
   bool hasFeature(String featureId) {
     if (!isPremium) return false;
-
-    // Lista de features premium
     const premiumFeatures = [
       'unlimited_plants',
       'advanced_reminders',
@@ -290,7 +263,6 @@ class PremiumProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Cancel all stream subscriptions to prevent memory leaks
     _subscriptionStream?.cancel();
     _subscriptionStream = null;
 

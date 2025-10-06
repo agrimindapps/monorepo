@@ -6,12 +6,8 @@ class FuelFormatterService {
   factory FuelFormatterService() => _instance;
   FuelFormatterService._internal();
   static final FuelFormatterService _instance = FuelFormatterService._internal();
-
-  // Cache para formatações recentes (memoização)
   final Map<String, String> _formatCache = {};
   static const int _maxCacheSize = 100;
-
-  // Constantes de formatação
   static const String decimalSeparator = ',';
   static const String dotSeparator = '.';
   static const int litrosDecimals = 3;
@@ -108,13 +104,9 @@ class _LitersFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-
-    // Permitir apenas números e vírgula/ponto decimal
     if (!RegExp(r'^\d{0,4}[,.]?\d{0,3}$').hasMatch(text)) {
       return oldValue;
     }
-
-    // Substituir ponto por vírgula
     final formattedText = text.replaceAll('.', ',');
 
     return TextEditingValue(
@@ -132,13 +124,9 @@ class _PriceFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-
-    // Permitir até 9,999 com 3 casas decimais
     if (!RegExp(r'^\d{0,1}[,.]?\d{0,3}$').hasMatch(text)) {
       return oldValue;
     }
-
-    // Substituir ponto por vírgula
     final formattedText = text.replaceAll('.', ',');
 
     return TextEditingValue(
@@ -156,13 +144,9 @@ class _OdometerFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-
-    // Permitir até 999999,9 km
     if (!RegExp(r'^\d{0,6}[,.]?\d{0,1}$').hasMatch(text)) {
       return oldValue;
     }
-
-    // Substituir ponto por vírgula
     final formattedText = text.replaceAll('.', ',');
 
     return TextEditingValue(

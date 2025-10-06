@@ -26,10 +26,6 @@ class AnalyticsProvider {
   /// Direct access to enhanced service for advanced features
   EnhancedAnalyticsService get enhancedService => _enhancedService;
 
-  // ==========================================================================
-  // BACKWARD COMPATIBILITY METHODS
-  // ==========================================================================
-
   /// Logs screen view with enhanced error handling
   Future<void> logScreenView(String screenName) async {
     await _enhancedService.setCurrentScreen(screenName);
@@ -71,10 +67,6 @@ class AnalyticsProvider {
     );
   }
 
-  // ==========================================================================
-  // AUTH EVENTS
-  // ==========================================================================
-
   Future<void> logLogin(String method) async {
     await _enhancedService.logAuthEvent(
       'login',
@@ -93,10 +85,6 @@ class AnalyticsProvider {
     await _enhancedService.logAuthEvent('logout');
   }
 
-  // ==========================================================================
-  // APP LIFECYCLE EVENTS
-  // ==========================================================================
-
   Future<void> logAppOpen() async {
     await _enhancedService.logEvent('app_open', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
@@ -105,17 +93,9 @@ class AnalyticsProvider {
     await _enhancedService.logEvent('app_background', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
 
-  // ==========================================================================
-  // FEATURE USAGE EVENTS
-  // ==========================================================================
-
   Future<void> logFeatureUsed(String featureName) async {
     await _enhancedService.logEvent('feature_used', {'feature': featureName});
   }
-
-  // ==========================================================================
-  // PLANTIS-SPECIFIC EVENTS (Enhanced with typed events)
-  // ==========================================================================
 
   Future<void> logPlantCreated({Map<String, dynamic>? additionalData}) async {
     await _enhancedService.logAppSpecificEvent(
@@ -201,10 +181,6 @@ class AnalyticsProvider {
     );
   }
 
-  // ==========================================================================
-  // PREMIUM EVENTS
-  // ==========================================================================
-
   Future<void> logSubscriptionPurchased(String productId, double price) async {
     await _enhancedService.logPurchaseEvent(
       productId: productId,
@@ -228,10 +204,6 @@ class AnalyticsProvider {
     });
   }
 
-  // ==========================================================================
-  // SEARCH AND DISCOVERY EVENTS
-  // ==========================================================================
-
   Future<void> logSearch(String query, int resultCount) async {
     await _enhancedService.logEvent('search', {
       'query': query,
@@ -246,10 +218,6 @@ class AnalyticsProvider {
       'content_id': contentId,
     });
   }
-
-  // ==========================================================================
-  // ENGAGEMENT EVENTS
-  // ==========================================================================
 
   Future<void> logUserEngagement(String action, int durationSeconds) async {
     await _enhancedService.logEvent('user_engagement', {
@@ -273,10 +241,6 @@ class AnalyticsProvider {
     });
   }
 
-  // ==========================================================================
-  // DEVELOPMENT AND TESTING
-  // ==========================================================================
-
   Future<void> testCrash() async {
     await _enhancedService.testCrash();
   }
@@ -297,10 +261,6 @@ class AnalyticsProvider {
       });
     }
   }
-
-  // ==========================================================================
-  // CONVENIENCE GETTERS
-  // ==========================================================================
 
   /// Whether analytics is enabled in the current environment
   bool get isAnalyticsEnabled => EnvironmentConfig.enableAnalytics;

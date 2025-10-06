@@ -35,12 +35,10 @@ class LoginBackgroundWidget extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background pattern
           CustomPaint(
             painter: _BackgroundPatternPainter(isDark: isDark),
             size: Size.infinite,
           ),
-          // Content
           child,
         ],
       ),
@@ -63,8 +61,6 @@ class _BackgroundPatternPainter extends CustomPainter {
     final Color secondaryColor = isDark
         ? Colors.amber.shade200.withValues(alpha: 0.02)
         : Colors.blue.shade200.withValues(alpha: 0.03);
-
-    // Linhas diagonais
     final linePaint = Paint()
       ..color = primaryColor
       ..strokeWidth = 1.2;
@@ -74,8 +70,6 @@ class _BackgroundPatternPainter extends CustomPainter {
       canvas.drawLine(
           Offset(size.width - i, 0), Offset(size.width, i), linePaint);
     }
-
-    // Pontos pequenos
     final dotPaint = Paint()
       ..color = secondaryColor
       ..style = PaintingStyle.fill;
@@ -85,8 +79,6 @@ class _BackgroundPatternPainter extends CustomPainter {
         canvas.drawCircle(Offset(i.toDouble(), j.toDouble()), 2.5, dotPaint);
       }
     }
-
-    // Círculos maiores
     final accentPaint = Paint()
       ..color = isDark
           ? Colors.white.withValues(alpha: 0.02)

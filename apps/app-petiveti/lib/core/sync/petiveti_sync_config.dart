@@ -158,7 +158,6 @@ class PetivetiSyncConfig {
 
   /// Converte para lista de registros de entidades
   List<EntitySyncRegistration> get entityRegistrations => [
-    // Animal - CRÍTICO
     EntitySyncRegistration<AnimalSyncEntity>(
       entityType: AnimalSyncEntity,
       collectionName: 'animals',
@@ -171,8 +170,6 @@ class PetivetiSyncConfig {
       priority: entity_sync.SyncPriority.high,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
-
-    // Medications - CRÍTICO (informações médicas)
     EntitySyncRegistration<MedicationSyncEntity>(
       entityType: MedicationSyncEntity,
       collectionName: 'medications',
@@ -187,8 +184,6 @@ class PetivetiSyncConfig {
       priority: emergencyDataConfig.emergencySyncPriority,
       conflictStrategy: ConflictStrategy.version,
     ),
-
-    // Appointments - CRÍTICO (consultas veterinárias)
     EntitySyncRegistration<AppointmentSyncEntity>(
       entityType: AppointmentSyncEntity,
       collectionName: 'appointments',
@@ -201,8 +196,6 @@ class PetivetiSyncConfig {
       priority: entity_sync.SyncPriority.high,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
-
-    // Weight - IMPORTANTE (monitoramento de saúde)
     EntitySyncRegistration<WeightSyncEntity>(
       entityType: WeightSyncEntity,
       collectionName: 'weights',
@@ -215,8 +208,6 @@ class PetivetiSyncConfig {
       priority: entity_sync.SyncPriority.normal,
       conflictStrategy: ConflictStrategy.timestamp,
     ),
-
-    // User Settings - IMPORTANTE
     EntitySyncRegistration<UserSettingsSyncEntity>(
       entityType: UserSettingsSyncEntity,
       collectionName: 'user_settings',

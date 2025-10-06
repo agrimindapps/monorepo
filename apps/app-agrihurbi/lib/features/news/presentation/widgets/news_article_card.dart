@@ -79,7 +79,6 @@ class NewsArticleCard extends StatelessWidget {
               image: NetworkImage(article.imageUrl),
               fit: BoxFit.cover,
               onError: (error, stackTrace) {
-                // Handle image loading error
               },
             ),
           ),

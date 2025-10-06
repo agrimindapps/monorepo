@@ -99,8 +99,6 @@ class ExpenseFormState extends Equatable {
     fieldErrors,
   ];
 
-  // ==================== Computed Properties ====================
-
   /// Verifica se tem comprovante (local ou remoto)
   bool get hasReceiptImage =>
       receiptImagePath != null || receiptImageUrl != null;
@@ -132,8 +130,6 @@ class ExpenseFormState extends Equatable {
 
   /// Verifica se um campo tem erro
   bool hasFieldError(String field) => fieldErrors.containsKey(field);
-
-  // ==================== CopyWith Methods ====================
 
   ExpenseFormState copyWith({
     String? id,

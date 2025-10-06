@@ -302,8 +302,6 @@ class CalculatorErrorHandler {
         isRecoverable: true,
       );
     }
-
-    // Erro genérico
     return CalculatorError(
       code: CalculatorErrorCode.unknownError,
       message: 'Erro inesperado: ${exception.toString()}',

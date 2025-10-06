@@ -16,13 +16,9 @@ class ValidationHelpers {
     if (trimmedName.length > 100) {
       return 'Nome não pode ter mais de 100 caracteres';
     }
-
-    // Enhanced security: check for malicious characters that could be used for injection
     if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedName)) {
       return 'Nome contém caracteres não permitidos';
     }
-
-    // Allow only letters, spaces, hyphens, apostrophes, and accented characters
     if (!RegExp(r"^[a-zA-ZÀ-ÿ\s\-']+$").hasMatch(trimmedName)) {
       return 'Nome deve conter apenas letras';
     }
@@ -38,20 +34,14 @@ class ValidationHelpers {
     }
 
     final email = value.trim().toLowerCase();
-
-    // Enhanced email validation with security checks
     if (!RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     ).hasMatch(email)) {
       return 'Por favor, insira um email válido';
     }
-
-    // Prevent multiple @ symbols
     if (email.split('@').length != 2) {
       return 'Email contém formato inválido';
     }
-
-    // Check for suspicious patterns that could indicate injection attempts
     if (email.contains('..') ||
         email.startsWith('.') ||
         email.endsWith('.') ||
@@ -59,8 +49,6 @@ class ValidationHelpers {
         email.contains('.@')) {
       return 'Email contém caracteres não permitidos';
     }
-
-    // Maximum email length for security
     if (email.length > 320) {
       return 'Email muito longo';
     }
@@ -74,8 +62,6 @@ class ValidationHelpers {
     if (value == null || value.isEmpty) {
       return 'Por favor, insira sua senha';
     }
-
-    // Consistent minimum length requirement (8 characters)
     if (value.length < 8) {
       return 'A senha deve ter pelo menos 8 caracteres';
     }
@@ -83,13 +69,9 @@ class ValidationHelpers {
     if (value.length > 128) {
       return 'Senha muito longa';
     }
-
-    // Enhanced security: require letters and numbers
     if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
       return 'A senha deve conter letras e números';
     }
-
-    // Check for common weak patterns
     final commonWeakPatterns = [
       r'12345',
       r'abcde',
@@ -128,16 +110,10 @@ class ValidationHelpers {
     if (value == null || value.trim().isEmpty) {
       return null; // Phone is optional in most cases
     }
-
-    // Remove all non-digit characters
     final digits = value.replaceAll(RegExp(r'\D'), '');
-
-    // Brazilian phone numbers: 10-11 digits (with area code)
     if (digits.length < 10 || digits.length > 11) {
       return 'Número de telefone inválido';
     }
-
-    // Check area code (first two digits should be valid Brazilian area codes)
     final areaCode = digits.substring(0, 2);
     final validAreaCodes = [
       '11', '12', '13', '14', '15', '16', '17', '18', '19', // São Paulo
@@ -239,8 +215,6 @@ class ValidationHelpers {
   /// Removes or escapes potentially dangerous characters while preserving spaces
   static String sanitizeTextInput(String input) {
     if (input.isEmpty) return input;
-
-    // Remove dangerous characters that could be used for injection
     String sanitized = input
         .replaceAll(
           RegExp(r'[<>"\\]'),
@@ -248,8 +222,6 @@ class ValidationHelpers {
         ) // Remove HTML/script injection chars
         .replaceAll(RegExp(r'[\n\r\t]'), ' ') // Replace line breaks with spaces
         .replaceAll(RegExp(r' +'), ' '); // Clean up multiple spaces
-
-    // Limit length to prevent buffer overflow attacks
     if (sanitized.length > 500) {
       sanitized = sanitized.substring(0, 500);
     }
@@ -260,26 +232,17 @@ class ValidationHelpers {
   /// Sanitizes plant name input with specific rules
   static String sanitizePlantName(String input) {
     if (input.isEmpty) return input;
-
-    // First, remove only dangerous injection characters while preserving spaces
     String sanitized = input
         .replaceAll(
           RegExp(r'[<>"\\]'),
           '',
         ) // Remove dangerous HTML/script chars
         .replaceAll(RegExp(r'[\r\t]'), ' '); // Replace tabs/returns with spaces
-
-    // Allow letters, numbers, spaces, accents, and safe punctuation for plant names
-    // Explicitly preserve spaces by using explicit space character in regex
     sanitized = sanitized.replaceAll(
       RegExp(r'[^a-zA-Z\u00C0-\u00FF0-9 \-.,()]'),
       '',
     );
-
-    // Clean up multiple consecutive spaces
     sanitized = sanitized.replaceAll(RegExp(r' +'), ' ');
-
-    // Limit to reasonable plant name length
     if (sanitized.length > 100) {
       sanitized = sanitized.substring(0, 100);
     }
@@ -295,8 +258,6 @@ class ValidationHelpers {
         .replaceAll(RegExp(r'[<>"\\]'), '') // Remove dangerous chars
         .replaceAll(RegExp(r'[\r\t]'), ' ') // Replace tabs with spaces
         .replaceAll(RegExp(r'\n{3,}'), '\n\n'); // Limit consecutive newlines
-
-    // Limit notes to reasonable length
     if (sanitized.length > 1000) {
       sanitized = sanitized.substring(0, 1000);
     }

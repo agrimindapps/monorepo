@@ -28,7 +28,6 @@ PlatformExportService platformExportService(Ref ref) {
 GasometerAnalyticsService? gasometerAnalyticsService(
   Ref ref,
 ) {
-  // TODO: Integrar com GetIt quando disponível
   return null;
 }
 
@@ -73,8 +72,6 @@ class DataExportNotifier extends _$DataExportNotifier {
         outputFormats: ['json'],
         includeAttachments: includeAttachments,
       );
-
-      // Log analytics de início
       await _analyticsService?.logDataExportStarted(
         userId: userId,
         categories: categories,
@@ -86,8 +83,6 @@ class DataExportNotifier extends _$DataExportNotifier {
         request,
         onProgress: _updateProgress,
       );
-
-      // Log analytics de conclusão
       await _analyticsService?.logDataExportCompleted(
         userId: userId,
         success: result.success,
@@ -97,7 +92,6 @@ class DataExportNotifier extends _$DataExportNotifier {
       );
 
       if (result.success) {
-        // Tentar compartilhar arquivo se a plataforma suportar
         if (_platformService.supportsSharing && result.filePath != null) {
           await _platformService.shareExportFile(
             result.filePath!,
@@ -146,7 +140,6 @@ class DataExportNotifier extends _$DataExportNotifier {
 
       state = state.copyWith(exportEstimate: estimate);
     } catch (e) {
-      // Apenas log - não precisamos falhar se estimativa falhar
       print('Erro ao estimar tamanho da exportação: $e');
       state = state.copyWith(exportEstimate: {});
     }
@@ -195,8 +188,6 @@ class DataExportNotifier extends _$DataExportNotifier {
   void clearProgress() {
     state = state.clearProgress();
   }
-
-  // Métodos privados auxiliares
 
   Future<void> _checkCanExport(String userId) async {
     try {

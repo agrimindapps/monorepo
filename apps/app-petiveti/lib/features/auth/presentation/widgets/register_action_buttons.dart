@@ -200,15 +200,12 @@ class RegisterActionButtons extends ConsumerWidget {
   /// Processes registration form using the coordinator.
   /// Validates form and submits registration request.
   Future<void> _handleRegister(BuildContext context, WidgetRef ref) async {
-    // Validate form before proceeding
     if (!RegisterPageCoordinator.validateRegistrationForm(
       formKey: formKey,
       termsAccepted: acceptedTerms,
     )) {
       return;
     }
-
-    // Handle registration through coordinator
     await RegisterPageCoordinator.handleRegistration(
       ref: ref,
       context: context,

@@ -22,8 +22,6 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
   final ScrollController _scrollController = ScrollController();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-
-  // Keys para navegação entre seções
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
   final GlobalKey _testimonialsKey = GlobalKey();
@@ -69,39 +67,23 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
     return Scaffold(
       body: Stack(
         children: [
-          // Conteúdo principal com animação de fade
           FadeTransition(
             opacity: _fadeAnimation,
             child: SingleChildScrollView(
               controller: _scrollController,
               child: Column(
                 children: [
-                  // Header com hero section e mockup do app
                   const PromoHeaderSection(),
-
-                  // Seção de funcionalidades com carousel
                   PromoFeaturesCarousel(key: _featuresKey),
-
-                  // Seção de estatísticas
                   const PromoStatisticsSection(),
-
-                  // Seção de como funciona
                   _HowItWorksSection(key: _howItWorksKey),
-
-                  // Seção de depoimentos
                   _TestimonialsSection(key: _testimonialsKey),
-
-                  // Call to action final
                   const PromoCallToAction(),
-
-                  // Footer
                   const _FooterSection(),
                 ],
               ),
             ),
           ),
-
-          // Navigation bar fixo no topo
           Positioned(
             top: 0,
             left: 0,
@@ -502,10 +484,8 @@ class _FooterSection extends StatelessWidget {
         context.go(AppRouter.termsOfService);
         break;
       case 'Sobre':
-        // Pode adicionar uma página sobre ou rolar para o topo
         break;
       case 'Contato':
-        // Pode adicionar uma página de contato
         break;
     }
   }

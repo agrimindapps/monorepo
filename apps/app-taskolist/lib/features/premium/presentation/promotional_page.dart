@@ -21,7 +21,6 @@ class PromotionalPage extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Conteúdo principal
           SingleChildScrollView(
             child: Column(
               children: [
@@ -34,7 +33,6 @@ class PromotionalPage extends ConsumerWidget {
               ],
             ),
           ),
-          // AppBar flutuante
           Positioned(top: 0, left: 0, right: 0, child: _buildFloatingAppBar()),
         ],
       ),
@@ -48,7 +46,6 @@ class PromotionalPage extends ConsumerWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            // Botão de Login
             Builder(
               builder:
                   (context) => ElevatedButton.icon(
@@ -113,7 +110,6 @@ class _HeaderSection extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Logo/Ícone
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -128,8 +124,6 @@ class _HeaderSection extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
-
-              // Título principal
               Text(
                 'Task Manager',
                 textAlign: TextAlign.center,
@@ -142,8 +136,6 @@ class _HeaderSection extends StatelessWidget {
               ),
 
               const SizedBox(height: 16),
-
-              // Subtítulo
               Text(
                 'Organize tudo. Alcance mais.',
                 textAlign: TextAlign.center,
@@ -155,8 +147,6 @@ class _HeaderSection extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-
-              // Descrição
               Container(
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Text(
@@ -171,8 +161,6 @@ class _HeaderSection extends StatelessWidget {
               ),
 
               const SizedBox(height: 48),
-
-              // Botões de ação
               isMobile
                   ? _buildMobileButtons(context)
                   : _buildDesktopButtons(context),
@@ -323,7 +311,6 @@ class _FeaturesSection extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 1200),
         child: Column(
           children: [
-            // Título da seção
             RichText(
               textAlign: TextAlign.center,
               text: const TextSpan(
@@ -363,8 +350,6 @@ class _FeaturesSection extends StatelessWidget {
             ),
 
             const SizedBox(height: 60),
-
-            // Grid de funcionalidades
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -406,7 +391,6 @@ class _FeaturesSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Ícone
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -417,8 +401,6 @@ class _FeaturesSection extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-
-          // Título
           Text(
             title,
             textAlign: TextAlign.center,
@@ -430,8 +412,6 @@ class _FeaturesSection extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
-          // Descrição
           Text(
             description,
             textAlign: TextAlign.center,
@@ -465,7 +445,6 @@ class _HowItWorksSection extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 1200),
         child: Column(
           children: [
-            // Título da seção
             Text(
               'Como Funciona',
               textAlign: TextAlign.center,
@@ -477,8 +456,6 @@ class _HowItWorksSection extends StatelessWidget {
             ),
 
             const SizedBox(height: 60),
-
-            // Steps
             Column(
               children: [
                 _buildStep(
@@ -517,7 +494,6 @@ class _HowItWorksSection extends StatelessWidget {
   ) {
     return Row(
       children: [
-        // Número
         Container(
           width: 60,
           height: 60,
@@ -538,8 +514,6 @@ class _HowItWorksSection extends StatelessWidget {
         ),
 
         const SizedBox(width: 24),
-
-        // Conteúdo
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,8 +534,6 @@ class _HowItWorksSection extends StatelessWidget {
             ],
           ),
         ),
-
-        // Ícone
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(

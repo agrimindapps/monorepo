@@ -45,13 +45,10 @@ class BodyConditionTabController {
 
   /// Handle tab change events
   void onTabChanged(int index) {
-    // Add any logic needed when tab changes
-    // For example, clearing certain states or triggering actions
   }
 
   /// Calculate and automatically move to result tab
   void calculateAndNavigateToResult() {
-    // This will be called from the FloatingActionButton
     goToResultTab();
   }
 
@@ -86,7 +83,5 @@ class BodyConditionTabController {
 
   /// Dispose of resources (handled by parent widget)
   void dispose() {
-    // Tab controller is disposed by the parent widget
-    // This method is here for consistency and future extensibility
   }
 }

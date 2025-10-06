@@ -9,7 +9,6 @@ part 'vehicle_model.g.dart';
 /// Vehicle model with Firebase sync support
 /// TypeId: 0 - New sequential numbering  
 @HiveType(typeId: 0)
-// ignore: must_be_immutable
 class VehicleModel extends BaseSyncModel {
 
   VehicleModel({
@@ -185,22 +184,17 @@ class VehicleModel extends BaseSyncModel {
 
   /// FIXED: fromJson now correctly handles Firebase Timestamp objects
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
-    // Check if this is Firebase data (contains Timestamp objects)
     final hasTimestamp = json.values.any((value) => value is Timestamp);
     
     if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
-      // Use Firebase parsing for data from remote source
       return VehicleModel.fromFirebaseMap(json);
     } else {
-      // Use Hive parsing for local data
       return VehicleModel.fromHiveMap(json);
     }
   }
   @override
   void removeFromHive() {
-    // Stub implementation to satisfy HiveObjectMixin
   }
-  // Base sync fields (required for Hive generation)
   @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -210,8 +204,6 @@ class VehicleModel extends BaseSyncModel {
   @HiveField(6) @override final int version;
   @HiveField(7) @override final String? userId;
   @HiveField(8) @override final String? moduleName;
-
-  // Vehicle specific fields  
   @HiveField(10) final String marca;
   @HiveField(11) final String modelo;
   @HiveField(12) final int ano;
@@ -225,8 +217,6 @@ class VehicleModel extends BaseSyncModel {
   @HiveField(20) final double valorVenda;
   @HiveField(21) final double odometroAtual;
   @HiveField(22) final String? foto;
-
-  // Cache para conversões DateTime
   DateTime? _cachedCreatedAt;
   DateTime? _cachedUpdatedAt;
   DateTime? _cachedLastSyncAt;

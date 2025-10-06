@@ -62,8 +62,6 @@ class PremiumState {
   PremiumState clearError() {
     return copyWith(lastError: null);
   }
-
-  // Premium status shortcuts
   bool get isPremium => status.isPremium;
   bool get isActive => status.isActive;
   bool get isTrialActive => status.isTrialActive;
@@ -81,13 +79,10 @@ class PremiumNotifier extends _$PremiumNotifier {
 
   @override
   Future<PremiumState> build() async {
-    // Get services from DI
     _analytics = di.sl<ReceitaAgroAnalyticsService>();
     _cloudFunctions = di.sl<ReceitaAgroCloudFunctionsService>();
     _remoteConfig = ReceitaAgroRemoteConfigService.instance;
     _subscriptionRepository = di.sl<ISubscriptionRepository>();
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _subscriptionStreamSubscription?.cancel();
       if (EnvironmentConfig.enableLogging) {
@@ -99,7 +94,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     });
 
     try {
-      // Skip initialization on web platform
       if (kIsWeb) {
         developer.log(
           '🌐 Premium Service: Skipping on web platform',
@@ -111,8 +105,6 @@ class PremiumNotifier extends _$PremiumNotifier {
           status: PremiumStatus.free(),
         );
       }
-
-      // Listen to subscription status stream
       _subscriptionStreamSubscription = _subscriptionRepository.subscriptionStatus.listen(
         _handleSubscriptionUpdate,
         onError: (Object error) {
@@ -123,8 +115,6 @@ class PremiumNotifier extends _$PremiumNotifier {
           );
         },
       );
-
-      // Load initial data
       final currentSubscription = await _loadCurrentSubscription();
       final availableProducts = await _loadProducts();
 
@@ -180,8 +170,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     if (currentState == null || !currentState.isInitialized) {
       return const Left('Premium Service not initialized');
     }
-
-    // Set loading
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
@@ -201,10 +189,7 @@ class PremiumNotifier extends _$PremiumNotifier {
           return Left(errorMessage);
         },
         (subscription) async {
-          // Update local status
           final newStatus = _createPremiumStatusFromEntity(subscription);
-
-          // Sync with cloud functions
           await _syncSubscriptionWithCloudFunctions(subscription);
 
           await _analytics.logSubscriptionEvent(
@@ -257,8 +242,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     if (currentState == null || !currentState.isInitialized) {
       return const Left('Premium Service not initialized');
     }
-
-    // Set loading
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
@@ -273,7 +256,6 @@ class PremiumNotifier extends _$PremiumNotifier {
           return Left(errorMessage);
         },
         (subscriptions) async {
-          // Update local status with the first active subscription
           SubscriptionEntity? activeSubscription;
           PremiumStatus newStatus = PremiumStatus.free();
 
@@ -283,8 +265,6 @@ class PremiumNotifier extends _$PremiumNotifier {
               orElse: () => subscriptions.first,
             );
             newStatus = _createPremiumStatusFromEntity(activeSubscription);
-
-            // Sync with cloud functions
             await _syncSubscriptionWithCloudFunctions(activeSubscription);
           }
 
@@ -328,8 +308,6 @@ class PremiumNotifier extends _$PremiumNotifier {
   bool hasFeatureAccess(PremiumFeature feature) {
     final currentState = state.value;
     if (currentState == null) return false;
-
-    // Check remote config for feature toggles first
     switch (feature) {
       case PremiumFeature.advancedDiagnostics:
         if (!_remoteConfig.isFeatureEnabled(ReceitaAgroFeatureFlag.enableAdvancedDiagnostics)) {
@@ -375,9 +353,6 @@ class PremiumNotifier extends _$PremiumNotifier {
   /// Show premium upgrade screen
   Future<void> showPremiumUpgrade(PremiumFeature requestedFeature) async {
     await _analytics.logPremiumAttempt(requestedFeature.toString());
-
-    // This would typically navigate to a premium screen
-    // For now, just log the event
     developer.log(
       '💰 Premium upgrade requested for feature: $requestedFeature',
       name: 'PremiumNotifier',
@@ -474,7 +449,6 @@ class PremiumNotifier extends _$PremiumNotifier {
 
     if (subscription != null) {
       final newStatus = _createPremiumStatusFromEntity(subscription);
-      // Sync with cloud functions
       _syncSubscriptionWithCloudFunctions(subscription);
       state = AsyncValue.data(
         currentState.copyWith(

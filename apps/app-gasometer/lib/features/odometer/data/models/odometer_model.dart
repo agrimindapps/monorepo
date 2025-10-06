@@ -7,7 +7,6 @@ part 'odometer_model.g.dart';
 /// Odometer model with Firebase sync support
 /// TypeId: 2 - New sequential numbering
 @HiveType(typeId: 2)
-// ignore: must_be_immutable
 class OdometerModel extends BaseSyncModel {
 
   OdometerModel({
@@ -110,7 +109,6 @@ class OdometerModel extends BaseSyncModel {
   }
 
   factory OdometerModel.fromJson(Map<String, dynamic> json) => OdometerModel.fromHiveMap(json);
-  // Base sync fields (required for Hive generation)
   @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -120,8 +118,6 @@ class OdometerModel extends BaseSyncModel {
   @HiveField(6) @override final int version;
   @HiveField(7) @override final String? userId;
   @HiveField(8) @override final String? moduleName;
-
-  // Odometer specific fields
   @HiveField(10) final String vehicleId;
   @HiveField(11) final int registrationDate;
   @HiveField(12) final double value;

@@ -21,8 +21,6 @@ class PromoPage extends ConsumerStatefulWidget {
 
 class _PromoPageState extends ConsumerState<PromoPage> {
   final ScrollController _scrollController = ScrollController();
-
-  // Keys para navegação entre seções
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
   final GlobalKey _testimonialsKey = GlobalKey();
@@ -43,18 +41,13 @@ class _PromoPageState extends ConsumerState<PromoPage> {
   }
 
   void _checkAuthenticationAndRedirect() {
-    // Verificar se o widget ainda está montado antes de acessar o context
     if (!mounted) return;
 
     final authState = ref.read(authProvider);
-
-    // Se o usuário estiver autenticado (incluindo anônimo), redirecionar para a página interna
     if (authState.isAuthenticated) {
       debugPrint(
         '🔐 Usuário autenticado na página promocional, redirecionando para página interna',
       );
-
-      // Verificar novamente se ainda está montado antes da navegação
       if (mounted) {
         context.go('/');
       }
@@ -77,42 +70,24 @@ class _PromoPageState extends ConsumerState<PromoPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Conteúdo principal
           SingleChildScrollView(
             controller: _scrollController,
             child: Column(
               children: [
-                // Header com hero section
                 const HeaderSection(),
-
-                // Seção de funcionalidades
                 FeaturesCarousel(
                   key: _featuresKey,
                   features: _getFeaturesList(),
                 ),
-
-                // Seção como funciona
                 HowItWorks(key: _howItWorksKey),
-
-                // Seção de estatísticas
                 const StatisticsSection(),
-
-                // Seção de depoimentos
                 TestimonialsSection(key: _testimonialsKey),
-
-                // Seção de perguntas frequentes
                 FaqSection(key: _faqKey),
-
-                // Call to action final
                 const CallToAction(),
-
-                // Footer
                 const FooterSection(),
               ],
             ),
           ),
-
-          // Navigation bar fixo no topo
           Positioned(
             top: 0,
             left: 0,

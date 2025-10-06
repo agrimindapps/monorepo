@@ -131,7 +131,6 @@ class EnhancedStatsCard extends StatelessWidget {
   Widget _buildStatsRows(BuildContext context) {
     return Column(
       children: [
-        // Primeira linha do grid 2x2: Este Mês | Mês Anterior
         Row(
           children: [
             Expanded(
@@ -154,7 +153,6 @@ class EnhancedStatsCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        // Segunda linha do grid 2x2: Este Ano | Ano Anterior
         Row(
           children: [
             Expanded(

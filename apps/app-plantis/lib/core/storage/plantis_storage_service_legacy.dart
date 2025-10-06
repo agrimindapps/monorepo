@@ -17,12 +17,8 @@ class PlantisStorageService {
   Future<Result<void>> initialize() async {
     try {
       if (_isInitialized) return Result.success(null);
-
-      // Get core services
       _boxRegistry = GetIt.I<IBoxRegistryService>();
       _storage = GetIt.I<ILocalStorageRepository>();
-
-      // Register plantis-specific boxes
       await _registerPlantisBoxes();
 
       _isInitialized = true;
@@ -175,7 +171,6 @@ class PlantisStorageService {
     required String plantId,
   }) async {
     await _ensureInitialized();
-    // This would require filtering by plant ID in a real implementation
     final result = await _storage.getValues<T>(box: PlantisBoxes.care_logs);
     return result.toResult();
   }

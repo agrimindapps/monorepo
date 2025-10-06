@@ -167,7 +167,6 @@ class _AddMedicationFormState extends ConsumerState<AddMedicationForm> {
     return PetiVetiFormComponents.medicationTypeDropdown(
       value: _selectedType.name,
       onChanged: (dynamic value) {
-        // Converter string de volta para enum
         if (value is String) {
           final type = MedicationType.values.firstWhere((t) => t.name == value);
           setState(() => _selectedType = type);

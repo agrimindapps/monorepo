@@ -98,7 +98,6 @@ class DiagnosticoMockupCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Nome do produto - linha 1
         Text(
           diagnostico.nome,
           style: DiagnosticoMockupTokens.cardProductNameStyle.copyWith(
@@ -108,8 +107,6 @@ class DiagnosticoMockupCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 1),
-
-        // Ingrediente ativo - linha 2
         Text(
           diagnostico.ingredienteAtivo,
           style: DiagnosticoMockupTokens.cardIngredientStyle.copyWith(
@@ -119,8 +116,6 @@ class DiagnosticoMockupCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 1),
-
-        // Dosagem - linha 3 (oculta se premium)
         Text(
           _getDosageText(),
           style: DiagnosticoMockupTokens.cardDosageStyle.copyWith(
@@ -138,15 +133,12 @@ class DiagnosticoMockupCard extends StatelessWidget {
     return const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Ícone premium (sempre visível no mockup)
         Icon(
           DiagnosticoMockupTokens.premiumIcon,
           color: DiagnosticoMockupTokens.premiumWarning,
           size: DiagnosticoMockupTokens.premiumIconSize,
         ),
         SizedBox(width: 8),
-
-        // Chevron de navegação
         Icon(
           DiagnosticoMockupTokens.chevronIcon,
           color: DiagnosticoMockupTokens.chevronColor,
@@ -183,7 +175,6 @@ class DiagnosticoMockupCardPremium extends StatelessWidget {
     return FutureBuilder<bool>(
       future: _checkPremiumStatus(),
       builder: (context, snapshot) {
-        // Se está carregando, assume não premium (oculta dosagem)
         final isUserPremium = snapshot.data ?? false;
 
         return DiagnosticoMockupCard(
@@ -201,7 +192,6 @@ class DiagnosticoMockupCardPremium extends StatelessWidget {
       final premiumService = sl<IPremiumService>();
       return await premiumService.isPremiumUser();
     } catch (e) {
-      // Em caso de erro, assume não premium por segurança
       return false;
     }
   }

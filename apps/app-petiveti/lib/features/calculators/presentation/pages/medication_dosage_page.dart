@@ -134,15 +134,10 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header com informações importantes
           _buildSafetyHeader(),
           const SizedBox(height: 16),
-          
-          // Seletor de medicamento
           const MedicationSelectorWidget(),
           const SizedBox(height: 16),
-          
-          // Formulário de entrada
           const MedicationDosageInputForm(),
           const SizedBox(height: 80), // Espaço para FAB
         ],
@@ -464,26 +459,19 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
 
   /// Implementa confirmação dupla para doses críticas
   Future<void> _handleCalculateWithSafetyCheck(MedicationDosageProvider provider) async {
-    // Pre-validação para identificar riscos
     final preValidation = DosageValidationService.preValidate(provider.input);
     
     if (preValidation.requiresDoubleConfirmation) {
       final confirmed = await _showCriticalDoseConfirmation(preValidation.warnings);
       if (!confirmed) return;
     }
-    
-    // Proceder com cálculo
     await provider.calculateDosage();
-    
-    // Validação pós-cálculo
     if (provider.output != null && provider.selectedMedication != null) {
       final postValidation = DosageValidationService.validateCalculation(
         provider.input,
         provider.output!,
         provider.selectedMedication!,
       );
-      
-      // Se ainda há questões críticas após o cálculo
       if (postValidation.isCritical && !postValidation.isValid) {
         final confirmed = await _showCriticalDoseConfirmation(
           postValidation.criticalErrors + postValidation.warnings,
@@ -494,14 +482,11 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
         );
         
         if (!confirmed) {
-          // Se não confirmou, limpar resultado
           provider.clearAll();
           return;
         }
       }
     }
-    
-    // Ir para tab de resultado
     _tabController.animateTo(1);
   }
 

@@ -28,22 +28,17 @@ class PromotionalNotificationManager {
 
   /// Inicializa o manager
   Future<void> initialize() async {
-    // Configurar listeners baseados em comportamento do usuário
     await _setupBehavioralTriggers();
   }
 
   /// Configura triggers baseados no comportamento do usuário
   Future<void> _setupBehavioralTriggers() async {
-    // Implementar lógica para detectar momentos oportunos para promoções
-    // Ex: após pesquisar defensivos, visualizar pragas específicas, etc.
   }
 
   /// Verifica se pode mostrar notificação promocional
   Future<bool> canShowPromotionalNotification() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      // Verificar última vez que mostrou promoção
       final lastShown = prefs.getInt(_keyLastPromotionalShown) ?? 0;
       final lastShownTime = DateTime.fromMillisecondsSinceEpoch(lastShown);
       final timeSinceLastShown = DateTime.now().difference(lastShownTime);
@@ -51,14 +46,10 @@ class PromotionalNotificationManager {
       if (timeSinceLastShown < _minIntervalBetweenPromotions) {
         return false;
       }
-
-      // Verificar limite semanal
       final weeklyCount = await _getWeeklyPromotionalCount();
       if (weeklyCount >= _maxPromotionsPerWeek) {
         return false;
       }
-
-      // Verificar se usuário habilitou notificações promocionais
       final userPreferences = await getUserNotificationPreferences();
       if (!userPreferences.promotionalEnabled) {
         return false;
@@ -230,13 +221,9 @@ class PromotionalNotificationManager {
     PromotionalNotification notification,
   ) async {
     try {
-      // Para desenvolvimento, mostrar imediatamente
-      // Em produção, usar Firebase Functions para agendar
       if (kDebugMode) {
         await _messagingService.sendTestPromotionalNotification();
       }
-
-      // Registrar que mostrou uma promoção
       await _recordPromotionalShown(notification);
 
       return true;
@@ -252,18 +239,12 @@ class PromotionalNotificationManager {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      // Atualizar timestamp da última promoção
       await prefs.setInt(
         _keyLastPromotionalShown,
         DateTime.now().millisecondsSinceEpoch,
       );
-
-      // Incrementar contador semanal
       final weeklyCount = await _getWeeklyPromotionalCount();
       await prefs.setInt(_keyPromotionalCount, weeklyCount + 1);
-
-      // Salvar histórico da notificação
       await _saveNotificationHistory(notification);
     } catch (e) {
       debugPrint('Error recording promotional shown: $e');
@@ -275,8 +256,6 @@ class PromotionalNotificationManager {
     try {
       final prefs = await SharedPreferences.getInstance();
       final count = prefs.getInt(_keyPromotionalCount) ?? 0;
-
-      // Reset contador se passou uma semana
       final lastReset = prefs.getInt('${_keyPromotionalCount}_reset') ?? 0;
       final lastResetTime = DateTime.fromMillisecondsSinceEpoch(lastReset);
       final weeksSinceReset =
@@ -308,8 +287,6 @@ class PromotionalNotificationManager {
         final data = jsonDecode(prefsJson) as Map<String, dynamic>;
         return NotificationPreferences.fromJson(data);
       }
-
-      // Preferências padrão
       return NotificationPreferences.defaultPreferences();
     } catch (e) {
       debugPrint('Error getting user preferences: $e');
@@ -327,8 +304,6 @@ class PromotionalNotificationManager {
         _keyUserPreferences,
         jsonEncode(preferences.toJson()),
       );
-
-      // Atualizar subscrições no Firebase
       if (preferences.promotionalEnabled) {
         await _messagingService.subscribeToPromotionalNotifications();
       } else {
@@ -348,8 +323,6 @@ class PromotionalNotificationManager {
       final historyJson = prefs.getStringList('notification_history') ?? [];
 
       historyJson.add(jsonEncode(notification.toJson()));
-
-      // Manter apenas últimas 50 notificações
       if (historyJson.length > 50) {
         historyJson.removeRange(0, historyJson.length - 50);
       }

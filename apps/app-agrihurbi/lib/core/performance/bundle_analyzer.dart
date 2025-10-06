@@ -62,8 +62,6 @@ class BundleAnalyzer {
   static final BundleAnalyzer _instance = BundleAnalyzer._internal();
   factory BundleAnalyzer() => _instance;
   BundleAnalyzer._internal();
-
-  // Métricas coletadas
   final Map<String, BundleMetrics> _metrics = {};
 
   /// Executa análise completa do bundle
@@ -107,11 +105,6 @@ class BundleAnalyzer {
     final assetSizes = <String, int>{};
 
     try {
-      // Lista assets do bundle
-      // final assetManifest = await rootBundle.loadString('AssetManifest.json');
-      // No ambiente real, você analisaria o manifest para obter tamanhos reais
-      
-      // Simulação de análise de assets
       final commonAssets = {
         'images/logos': 250 * 1024, // 250KB
         'images/icons': 180 * 1024, // 180KB
@@ -135,7 +128,6 @@ class BundleAnalyzer {
     final librarySizes = <String, int>{};
 
     try {
-      // Estimativas baseadas em dependências conhecidas
       final estimatedSizes = {
         'flutter_framework': 8500 * 1024, // ~8.5MB
         'dart_runtime': 2200 * 1024, // ~2.2MB
@@ -166,21 +158,11 @@ class BundleAnalyzer {
 
     try {
       final stopwatch = Stopwatch()..start();
-
-      // Simula medições de performance
       await Future<void>.delayed(const Duration(milliseconds: 10));
       metrics['app_startup_ms'] = stopwatch.elapsedMilliseconds.toDouble();
-
-      // Métricas de memória (estimadas)
       metrics['memory_usage_mb'] = 45.0 + (DateTime.now().millisecondsSinceEpoch % 1000) / 100;
-      
-      // FPS médio (simulado)
       metrics['average_fps'] = 58.0 + (DateTime.now().millisecondsSinceEpoch % 100) / 50;
-      
-      // Tempo de renderização médio
       metrics['avg_frame_time_ms'] = 16.7 + (DateTime.now().millisecondsSinceEpoch % 50) / 100;
-
-      // Eficiência de cache
       metrics['cache_efficiency'] = 0.85 + (DateTime.now().millisecondsSinceEpoch % 100) / 1000;
 
       developer.log('Métricas de performance coletadas', name: 'BundleAnalyzer');
@@ -198,8 +180,6 @@ class BundleAnalyzer {
     Map<String, double> performanceMetrics,
   ) {
     final recommendations = <String>[];
-
-    // Análise de assets
     final totalAssetSize = assetSizes.values.fold(0, (sum, size) => sum + size);
     if (totalAssetSize > 1024 * 1024) { // > 1MB
       recommendations.add('ASSETS: Considere comprimir imagens e otimizar assets (${(totalAssetSize / (1024 * 1024)).toStringAsFixed(1)}MB)');
@@ -209,14 +189,10 @@ class BundleAnalyzer {
     if (imageSize > 500 * 1024) { // > 500KB
       recommendations.add('IMAGES: Use formatos WebP e SVG quando possível para reduzir tamanho');
     }
-
-    // Análise de dependências
     final totalLibSize = librarySizes.values.fold(0, (sum, size) => sum + size);
     if (totalLibSize > 15 * 1024 * 1024) { // > 15MB
       recommendations.add('DEPS: Bundle muito grande (${(totalLibSize / (1024 * 1024)).toStringAsFixed(1)}MB) - revise dependências desnecessárias');
     }
-
-    // Análise de performance
     final memoryUsage = performanceMetrics['memory_usage_mb'] ?? 0;
     if (memoryUsage > 100) {
       recommendations.add('MEMORY: Alto uso de memória (${memoryUsage.toStringAsFixed(1)}MB) - implemente lazy loading');
@@ -231,8 +207,6 @@ class BundleAnalyzer {
     if (frameTime > 20) {
       recommendations.add('RENDER: Tempo de frame alto (${frameTime.toStringAsFixed(1)}ms) - reduza complexidade de widgets');
     }
-
-    // Recomendações específicas para o app
     if (librarySizes.containsKey('app_code')) {
       final appCodeSize = librarySizes['app_code']!;
       if (appCodeSize > 2 * 1024 * 1024) { // > 2MB

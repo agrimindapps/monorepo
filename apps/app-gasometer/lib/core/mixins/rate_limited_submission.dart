@@ -37,20 +37,15 @@ mixin RateLimitedSubmission<T extends StatefulWidget> on State<T> {
     void Function(dynamic error)? onError,
     bool force = false,
   }) async {
-    // Verificar se já está submetendo
     if (_isSubmitting && !force) {
       debugPrint('RateLimitedSubmission: Tentativa de submissão ignorada - já processando');
       return;
     }
-    
-    // Verificar rate limiting
     if (!force && _lastSubmission != null) {
       final timeSinceLastSubmission = DateTime.now().difference(_lastSubmission!);
       if (timeSinceLastSubmission < minimumInterval) {
         final remainingTime = minimumInterval - timeSinceLastSubmission;
         debugPrint('RateLimitedSubmission: Rate limit ativo - aguarde ${remainingTime.inMilliseconds}ms');
-        
-        // Mostrar feedback para o usuário
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -63,24 +58,15 @@ mixin RateLimitedSubmission<T extends StatefulWidget> on State<T> {
         return;
       }
     }
-    
-    // Cancelar debounce anterior
     _debounceTimer?.cancel();
-    
-    // Configurar debounce
     _debounceTimer = Timer(submitDebounce, () async {
       if (!mounted) return;
       
       try {
-        // Atualizar estado de loading
         setState(() {
           _isSubmitting = true;
         });
-        
-        // Registrar timestamp da submissão
         _lastSubmission = DateTime.now();
-        
-        // Executar a submissão
         await onSubmit();
         
         debugPrint('RateLimitedSubmission: Submissão concluída com sucesso');
@@ -88,12 +74,9 @@ mixin RateLimitedSubmission<T extends StatefulWidget> on State<T> {
       } catch (error, stackTrace) {
         debugPrint('RateLimitedSubmission: Erro na submissão - $error');
         debugPrint('StackTrace: $stackTrace');
-        
-        // Chamar callback de erro se fornecido
         if (onError != null) {
           onError(error);
         } else {
-          // Feedback padrão de erro
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -106,7 +89,6 @@ mixin RateLimitedSubmission<T extends StatefulWidget> on State<T> {
         }
         
       } finally {
-        // Sempre resetar o estado de loading
         if (mounted) {
           setState(() {
             _isSubmitting = false;
@@ -196,10 +178,7 @@ mixin ConfigurableRateLimitedSubmission<T extends StatefulWidget> on State<T> {
     void Function(String message)? onRateLimitExceeded,
     bool force = false,
   }) async {
-    // Verificar se já está submetendo
     if (_isSubmitting && !force) return;
-    
-    // Verificar rate limiting por contagem
     if (!force && _submissionCount >= maxSubmissionsPerPeriod) {
       final message = 'Muitas tentativas. Aguarde ${submissionCountResetPeriod.inMinutes} minuto(s)';
       debugPrint('ConfigurableRateLimitedSubmission: $message');
@@ -217,19 +196,13 @@ mixin ConfigurableRateLimitedSubmission<T extends StatefulWidget> on State<T> {
       }
       return;
     }
-    
-    // Verificar intervalo mínimo
     if (!force && _lastSubmission != null) {
       final timeSinceLastSubmission = DateTime.now().difference(_lastSubmission!);
       if (timeSinceLastSubmission < minimumInterval) {
         return;
       }
     }
-    
-    // Cancelar debounce anterior
     _debounceTimer?.cancel();
-    
-    // Configurar debounce
     _debounceTimer = Timer(submitDebounce, () async {
       if (!mounted) return;
       
@@ -237,8 +210,6 @@ mixin ConfigurableRateLimitedSubmission<T extends StatefulWidget> on State<T> {
         setState(() {
           _isSubmitting = true;
         });
-        
-        // Incrementar contador e configurar reset
         _submissionCount++;
         _lastSubmission = DateTime.now();
         _setupCountReset();

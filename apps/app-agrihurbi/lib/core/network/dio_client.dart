@@ -23,8 +23,6 @@ class DioClient {
         'Accept': 'application/json',
       },
     );
-
-    // Add request interceptor
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -41,8 +39,6 @@ class DioClient {
         },
       ),
     );
-
-    // Add auth interceptor
     _dio.interceptors.add(AuthInterceptor());
   }
 
@@ -124,18 +120,12 @@ class DioClient {
 class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // TODO: Add token from secure storage
-    // final token = await getToken();
-    // if (token != null) {
-    //   options.headers['Authorization'] = 'Bearer $token';
-    // }
     super.onRequest(options, handler);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (err.response?.statusCode == 401) {
-      // TODO: Handle token refresh or redirect to login
     }
     super.onError(err, handler);
   }

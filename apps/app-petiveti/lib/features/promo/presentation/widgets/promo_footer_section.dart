@@ -26,7 +26,6 @@ class PromoFooterSection extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          // Call to Action
           Container(
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
@@ -55,8 +54,6 @@ class PromoFooterSection extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 24),
-                
-                // Store buttons
                 if (isMobile)
                   Column(
                     children: [
@@ -91,8 +88,6 @@ class PromoFooterSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 48),
-          
-          // Contact and Social
           if (isMobile) ...[
             _buildContactInfo(theme),
             const SizedBox(height: 32),
@@ -109,8 +104,6 @@ class PromoFooterSection extends StatelessWidget {
           ],
           
           const SizedBox(height: 32),
-          
-          // Footer bottom
           Container(
             padding: const EdgeInsets.only(top: 24),
             decoration: BoxDecoration(

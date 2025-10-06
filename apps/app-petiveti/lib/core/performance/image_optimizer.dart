@@ -30,20 +30,14 @@ class ImageOptimizer {
     bool useCache = true,
   }) async {
     final cacheKey = _generateCacheKey(source, width, height, quality);
-    
-    // Verifica cache de memória primeiro
     if (useCache && _memoryCache.containsKey(cacheKey)) {
       final cachedImage = _memoryCache[cacheKey]!;
       cachedImage.lastAccessed = DateTime.now();
       return cachedImage.image;
     }
-
-    // Verifica se já está sendo carregada
     if (_loadingImages.containsKey(cacheKey)) {
       return await _loadingImages[cacheKey]!;
     }
-
-    // Inicia carregamento
     final loadingFuture = _loadImageInternal(source, width, height, quality);
     _loadingImages[cacheKey] = loadingFuture;
 
@@ -69,7 +63,6 @@ class ImageOptimizer {
         await loadImage(source, quality: ImageQuality.low);
         _preloadedImages.add(source);
       } catch (e) {
-        // Ignora erros de preload
       }
     });
 
@@ -84,12 +77,8 @@ class ImageOptimizer {
       _preloadedImages.clear();
       return;
     }
-
-    // Limpeza inteligente - remove imagens menos acessadas
     final entries = _memoryCache.entries.toList();
     entries.sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
-
-    // Remove 30% das imagens menos acessadas
     final removeCount = (entries.length * 0.3).round();
     for (int i = 0; i < removeCount; i++) {
       final entry = entries[i];
@@ -117,8 +106,6 @@ class ImageOptimizer {
   ) async {
     try {
       Uint8List? bytes;
-
-      // Carrega bytes baseado no tipo de source
       if (source.startsWith('http')) {
         bytes = await _loadNetworkImage(source);
       } else if (source.startsWith('assets/')) {
@@ -128,13 +115,9 @@ class ImageOptimizer {
       }
 
       if (bytes == null) return null;
-
-      // Redimensiona se necessário
       if (width != null || height != null) {
         bytes = await _resizeImage(bytes, width, height, quality);
       }
-
-      // Converte para ui.Image
       final codec = await ui.instantiateImageCodec(
         bytes,
         targetWidth: width,
@@ -160,7 +143,6 @@ class ImageOptimizer {
         return Uint8List.fromList(bytes);
       }
     } catch (e) {
-      // Log error
     }
     return null;
   }
@@ -181,7 +163,6 @@ class ImageOptimizer {
         return await file.readAsBytes();
       }
     } catch (e) {
-      // Log error
     }
     return null;
   }
@@ -192,15 +173,11 @@ class ImageOptimizer {
     int? height,
     ImageQuality quality,
   ) async {
-    // Implementação básica - em produção usar package como image
-    // Por agora retorna bytes originais
     return bytes;
   }
 
   void _cacheImage(String key, ui.Image image) {
     final sizeBytes = _estimateImageSize(image);
-    
-    // Verifica se há espaço suficiente
     while (_memoryCache.length >= maxMemoryCache || 
            (_currentCacheSize + sizeBytes) > (maxCacheSizeMB * 1024 * 1024)) {
       _removeOldestCacheEntry();
@@ -232,12 +209,10 @@ class ImageOptimizer {
   }
 
   int _estimateImageSize(ui.Image image) {
-    // Estimativa básica: largura * altura * 4 bytes por pixel (RGBA)
     return image.width * image.height * 4;
   }
 
   double _calculateHitRate() {
-    // Implementação simplificada
     return _memoryCache.isNotEmpty ? 0.8 : 0.0;
   }
 }
@@ -468,7 +443,6 @@ class _OptimizedImageGridState extends State<OptimizedImageGrid> {
   }
 
   void _preloadVisibleImages() {
-    // Pré-carrega as primeiras imagens visíveis
     final visibleCount = (widget.crossAxisCount * 3).clamp(1, widget.imageSources.length);
     final visibleSources = widget.imageSources.take(visibleCount).toList();
     

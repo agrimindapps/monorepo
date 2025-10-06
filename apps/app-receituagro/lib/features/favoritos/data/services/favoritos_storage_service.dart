@@ -10,8 +10,6 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Princípio: Single Responsibility - Apenas storage
 class FavoritosStorageService implements IFavoritosStorage {
   final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
-
-  // Constantes para chaves de storage
   static const Map<String, String> _storageKeys = {
     'defensivo': 'defensivos',
     'praga': 'pragas',
@@ -43,8 +41,6 @@ class FavoritosStorageService implements IFavoritosStorage {
 
       final tipoKey = _storageKeys[tipo];
       if (tipoKey == null) return false;
-
-      // Adiciona com dados básicos para cache
       final itemData = {
         'id': id,
         'tipo': tipo,
@@ -119,10 +115,6 @@ class FavoritosStorageService implements IFavoritosStorage {
   @override
   Future<void> syncFavorites() async {
     try {
-      // Implementação para sincronização local - força reload do cache
-      // Futura integração com Firebase será implementada quando necessário
-
-      // Por enquanto, invalida estatísticas para forçar reload
       final stats = await _repository.getFavoritosStats();
       developer.log(
         'Favoritos sincronizados - Stats: $stats',
@@ -141,7 +133,6 @@ class FavoritosStorageService implements IFavoritosStorage {
 /// Implementação do cache para favoritos
 /// Princípio: Single Responsibility - Apenas cache
 class FavoritosCacheService implements IFavoritosCache {
-  // Cache integrado com sistema unificado do core
   final Map<String, dynamic> _memoryCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
 
@@ -150,7 +141,6 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       final timestamp = _cacheTimestamps[key];
       if (timestamp != null) {
-        // Verifica se ainda está válido (5 minutos)
         if (DateTime.now().difference(timestamp).inMinutes > 5) {
           await remove(key);
           return null;
@@ -169,7 +159,6 @@ class FavoritosCacheService implements IFavoritosCache {
       _memoryCache[key] = data;
       _cacheTimestamps[key] = DateTime.now();
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -179,7 +168,6 @@ class FavoritosCacheService implements IFavoritosCache {
       _memoryCache.remove(key);
       _cacheTimestamps.remove(key);
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -193,7 +181,6 @@ class FavoritosCacheService implements IFavoritosCache {
         await remove(key);
       }
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -203,7 +190,6 @@ class FavoritosCacheService implements IFavoritosCache {
       _memoryCache.clear();
       _cacheTimestamps.clear();
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -238,8 +224,6 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'modoAcao': defensivo.modoAcao ?? '',
         };
       }
-
-      // Fallback se não encontrar dados
       return {
         'nomeComum': 'Defensivo $id',
         'ingredienteAtivo': 'Não disponível',
@@ -264,8 +248,6 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'familia': praga.familia ?? '',
         };
       }
-
-      // Fallback se não encontrar dados
       return {
         'nomeComum': 'Praga $id',
         'nomeCientifico': 'Não disponível',
@@ -292,8 +274,6 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'modoAcao': '', // Campo não disponível no DiagnosticoHive
         };
       }
-
-      // Fallback se não encontrar dados
       return {
         'nomePraga': 'Praga $id',
         'nomeDefensivo': 'Defensivo não encontrado',
@@ -316,8 +296,6 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
           'nomeComum': cultura.nomeComum,
         };
       }
-
-      // Fallback se não encontrar dados
       return {
         'nomeCultura': 'Cultura $id',
         'descricao': 'Descrição não disponível',

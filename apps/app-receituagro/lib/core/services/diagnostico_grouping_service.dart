@@ -24,8 +24,6 @@ class DiagnosticoGroupingService {
   DiagnosticoGroupingService._internal();
 
   final DiagnosticoEntityResolver _resolver = DiagnosticoEntityResolver.instance;
-  
-  // Cache de agrupamentos
   final Map<String, Map<String, dynamic>> _groupingCache = {};
   DateTime? _lastCacheUpdate;
   static const Duration _cacheTTL = Duration(minutes: 15);
@@ -62,8 +60,6 @@ class DiagnosticoGroupingService {
     
     for (final item in items) {
       final idCultura = getIdCultura(item);
-
-      // ✅ CORRETO: Usa apenas ID para resolver, NUNCA nome cached
       String culturaNome = defaultGroupName;
       if (idCultura != null && idCultura.isNotEmpty) {
         culturaNome = await _resolver.resolveCulturaNome(
@@ -74,16 +70,12 @@ class DiagnosticoGroupingService {
 
       grouped.putIfAbsent(culturaNome, () => []).add(item);
     }
-
-    // Ordena grupos se solicitado
     if (sortGroups) {
       final sortedEntries = grouped.entries.toList()
         ..sort((a, b) => a.key.compareTo(b.key));
       grouped.clear();
       grouped.addAll(Map.fromEntries(sortedEntries));
     }
-
-    // Ordena itens dentro dos grupos se solicitado
     if (sortItemsInGroup) {
       grouped.forEach((key, list) {
         if (itemComparator != null) {
@@ -91,8 +83,6 @@ class DiagnosticoGroupingService {
         }
       });
     }
-
-    // Cache resultado
     _groupingCache[cacheKey] = {
       'data': grouped,
       'type': T,
@@ -118,8 +108,6 @@ class DiagnosticoGroupingService {
     
     for (final item in items) {
       final idDefensivo = getIdDefensivo(item);
-
-      // ✅ CORRETO: Usa apenas ID para resolver, NUNCA nome cached
       String defensivoNome = defaultGroupName;
       if (idDefensivo != null && idDefensivo.isNotEmpty) {
         defensivoNome = await _resolver.resolveDefensivoNome(
@@ -159,8 +147,6 @@ class DiagnosticoGroupingService {
     
     for (final item in items) {
       final idPraga = getIdPraga(item);
-
-      // ✅ CORRETO: Usa apenas ID para resolver, NUNCA nome cached
       String pragaNome = defaultGroupName;
       if (idPraga != null && idPraga.isNotEmpty) {
         pragaNome = await _resolver.resolvePragaNome(
@@ -195,15 +181,11 @@ class DiagnosticoGroupingService {
     bool sortSecondaryGroups = true,
   }) {
     final result = <String, Map<String, List<T>>>{};
-    
-    // Primeiro nível de agrupamento
     final primaryGroups = <String, List<T>>{};
     for (final item in items) {
       final primaryKey = primaryGrouper(item);
       primaryGroups.putIfAbsent(primaryKey, () => []).add(item);
     }
-    
-    // Segundo nível de agrupamento
     for (final entry in primaryGroups.entries) {
       final secondaryGroups = <String, List<T>>{};
       
@@ -245,7 +227,6 @@ class DiagnosticoGroupingService {
     bool sortGroups = true,
     bool includeEmptyGroups = false,
   }) {
-    // Aplica filtro se fornecido
     final filteredItems = filter != null 
         ? items.where(filter).toList()
         : items;
@@ -256,8 +237,6 @@ class DiagnosticoGroupingService {
       final groupKey = grouper(item);
       grouped.putIfAbsent(groupKey, () => []).add(item);
     }
-    
-    // Aplica filtros de tamanho de grupo
     if (minGroupSize != null) {
       grouped.removeWhere((key, list) => list.length < minGroupSize);
     }
@@ -269,8 +248,6 @@ class DiagnosticoGroupingService {
         }
       });
     }
-    
-    // Remove grupos vazios se necessário
     if (!includeEmptyGroups) {
       grouped.removeWhere((key, list) => list.isEmpty);
     }
@@ -333,7 +310,6 @@ class DiagnosticoGroupingService {
       if (obj is Map<String, dynamic>) {
         return obj[property]?.toString();
       } else {
-        // Reflexão simples para propriedades de objetos
         switch (property) {
           case 'idCultura':
             return obj.idCultura?.toString();
@@ -355,21 +331,17 @@ class DiagnosticoGroupingService {
 
   /// Comparador por relevância para DiagnosticoEntity
   int _compareByRelevance(DiagnosticoEntity a, DiagnosticoEntity b) {
-    // Prioriza diagnósticos mais completos
     final aCompletude = a.completude.index;
     final bCompletude = b.completude.index;
     
     if (aCompletude != bCompletude) {
       return bCompletude.compareTo(aCompletude); // Decrescente
     }
-    
-    // Depois por nome do defensivo
     return (a.nomeDefensivo ?? '').compareTo(b.nomeDefensivo ?? '');
   }
 
   /// Comparador por relevância para DiagnosticoHive
   int _compareHiveByRelevance(DiagnosticoHive a, DiagnosticoHive b) {
-    // Prioriza diagnósticos com mais informações
     final aScore = _calculateHiveRelevanceScore(a);
     final bScore = _calculateHiveRelevanceScore(b);
     

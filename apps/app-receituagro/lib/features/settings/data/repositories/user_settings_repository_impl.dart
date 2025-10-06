@@ -82,15 +82,10 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
   @override
   Future<void> importSettings(String userId, Map<String, dynamic> data) async {
     try {
-      // Validate imported data
       if (!_isValidImportData(data)) {
         throw RepositoryException('Invalid import data format');
       }
-      
-      // Create entity from imported data
       final settings = _mapToEntity(data);
-      
-      // Ensure user ID matches
       final correctedSettings = settings.copyWith(userId: userId);
       
       await saveUserSettings(correctedSettings);
@@ -106,8 +101,6 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
       final key = _keyPrefix + userId;
       
       await prefs.remove(key);
-      
-      // Also remove sync preference
       final syncKey = _syncPrefix + userId;
       await prefs.remove(syncKey);
     } catch (e) {
@@ -203,13 +196,10 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
 
   /// Validate imported data structure
   bool _isValidImportData(Map<String, dynamic> data) {
-    // Check for required keys
     const requiredKeys = ['userId', 'language', 'createdAt'];
     for (final key in requiredKeys) {
       if (!data.containsKey(key)) return false;
     }
-    
-    // Check data types
     if (data['userId'] is! String) return false;
     if (data['language'] is! String) return false;
     if (data['createdAt'] is! int) return false;
@@ -219,19 +209,12 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
 
   /// Simple JSON string parser (in real app, use dart:convert)
   Map<String, dynamic> _parseJsonString(String jsonString) {
-    // This is a simplified implementation
-    // In real app, use json.decode from dart:convert
     final map = <String, dynamic>{};
-    
-    // For now, return empty map to avoid implementation complexity
-    // In real implementation, properly parse JSON
     return map;
   }
 
   /// Simple JSON string serializer (in real app, use dart:convert)
   String _mapToJsonString(Map<String, dynamic> map) {
-    // This is a simplified implementation
-    // In real app, use json.encode from dart:convert
     return map.toString();
   }
 

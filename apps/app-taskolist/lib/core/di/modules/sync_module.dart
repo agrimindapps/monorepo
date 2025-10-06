@@ -7,15 +7,11 @@ import '../injection.dart' as local_di;
 /// Integra TaskolistSyncService com TaskManagerSyncService existente
 abstract class TaskolistSyncDIModule {
   static void init() {
-    // Registrar TaskolistSyncService do core package
-    // Este service adiciona logging estruturado e monitoring ao TaskManagerSyncService
     local_di.getIt.registerLazySingleton<TaskolistSyncService>(
       () => TaskolistSyncServiceFactory.create(
         taskManagerSyncService: null, // Will be integrated later with existing sync
       ),
     );
-
-    // Inicialização é lazy, service só é criado quando solicitado
   }
 
   /// Inicializa o sync service após o app estar pronto
@@ -27,7 +23,6 @@ abstract class TaskolistSyncDIModule {
 
       result.fold(
         (Failure failure) {
-          // Log do erro mas não bloqueia o app
           if (kDebugMode) {
             print('⚠️ Failed to initialize Taskolist sync service: ${failure.message}');
           }
@@ -36,8 +31,6 @@ abstract class TaskolistSyncDIModule {
           if (kDebugMode) {
             print('✅ Taskolist sync service initialized successfully');
           }
-
-          // Integrar com connectivity monitoring existente
           _setupConnectivityMonitoring();
         },
       );
@@ -52,11 +45,7 @@ abstract class TaskolistSyncDIModule {
   static void _setupConnectivityMonitoring() {
     try {
       final syncService = local_di.getIt<TaskolistSyncService>();
-
-      // ConnectivityService from core package
       final connectivityService = ConnectivityService.instance;
-
-      // Conectar o sync service ao stream de conectividade
       syncService.startConnectivityMonitoring(
         connectivityService.connectivityStream,
       );

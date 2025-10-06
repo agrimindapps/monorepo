@@ -21,27 +21,17 @@ class EnhancedAuthenticationManager extends ConsumerStatefulWidget {
 
 class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenticationManager>
     with TickerProviderStateMixin {
-  
-  // Animation controllers
   late AnimationController _fadeController;
   late AnimationController _scaleController;
   late AnimationController _slideController;
-  
-  // Animations
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
-  
-  // Biometric authentication state
   bool _biometricsAvailable = false;
   bool _biometricsEnabled = false;
   String _biometricType = '';
-  
-  // Remember me functionality
   bool _rememberMe = false;
   bool _hasStoredCredentials = false;
-  
-  // Loading states
   bool _isBiometricLoading = false;
   bool _isCheckingStoredAuth = true;
   
@@ -92,8 +82,6 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       parent: _slideController,
       curve: Curves.easeOutCubic,
     ));
-    
-    // Start animations
     _fadeController.forward();
     _scaleController.forward();
     _slideController.forward();
@@ -479,11 +467,8 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
       ),
     );
   }
-
-  // Helper Methods
   Future<void> _checkBiometricAvailability() async {
     try {
-      // Simulate biometric check - in real implementation, use local_auth package
       await Future<void>.delayed(const Duration(milliseconds: 500));
       
       setState(() {
@@ -501,7 +486,6 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
 
   Future<void> _checkStoredAuthentication() async {
     try {
-      // Simulate checking stored credentials
       await Future<void>.delayed(const Duration(seconds: 1));
       
       setState(() {
@@ -509,8 +493,6 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
         _rememberMe = true;
         _isCheckingStoredAuth = false;
       });
-      
-      // If biometric is enabled and available, show biometric option
       if (_biometricsAvailable && _biometricsEnabled) {
         _showBiometricPrompt();
       }
@@ -526,12 +508,9 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
     setState(() => _isBiometricLoading = true);
     
     try {
-      // Simulate biometric authentication
       await Future<void>.delayed(const Duration(seconds: 2));
       
       await HapticFeedback.lightImpact();
-      
-      // Simulate successful authentication
       final success = await ref.read(authProvider.notifier).signInWithEmail('stored@example.com', 'stored_password');
       
       if (success) {
@@ -579,7 +558,6 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              // Simulate clearing stored credentials
               setState(() {
                 _hasStoredCredentials = false;
                 _rememberMe = false;
@@ -635,14 +613,11 @@ class _EnhancedAuthenticationManagerState extends ConsumerState<EnhancedAuthenti
   }
 
   void _showFullLoginForm() {
-    // Navigate to full login form
     Navigator.pop(context);
   }
 
   void _showSuccessAnimation() {
     HapticFeedback.mediumImpact();
-    
-    // Show success feedback
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Row(

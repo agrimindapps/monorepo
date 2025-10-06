@@ -32,9 +32,7 @@ class PromoScreenshotsSection extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background decorative elements
           _buildBackgroundElements(),
-          // Main content
           _buildContent(context, isMobile),
         ],
       ),
@@ -160,7 +158,6 @@ class PromoScreenshotsSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Screenshot placeholder
           Expanded(
             child: Container(
               margin: const EdgeInsets.all(20),
@@ -196,7 +193,6 @@ class PromoScreenshotsSection extends StatelessWidget {
               ),
             ),
           ),
-          // Screenshot description
           Padding(
             padding: const EdgeInsets.all(20),
             child: Text(

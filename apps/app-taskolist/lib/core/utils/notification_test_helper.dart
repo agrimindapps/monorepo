@@ -68,14 +68,8 @@ class NotificationTestHelper {
   ) async {
     if (kDebugMode) {
       debugPrint('🧪 Running all notification tests...');
-      
-      // Testar lembrete (10 segundos)
       await testTaskReminderNotification(notificationService);
-      
-      // Aguardar um pouco
       await Future<void>.delayed(const Duration(seconds: 2));
-      
-      // Testar deadline (15 segundos)  
       await testTaskDeadlineNotification(notificationService);
       
       debugPrint('🧪 All notification tests scheduled. Check notifications in 10-15 seconds.');
@@ -84,8 +78,6 @@ class NotificationTestHelper {
       debugPrint('   • Mark Done → Should complete task');
       debugPrint('   • Snooze 1h → Should reschedule');
       debugPrint('   • Extend → Should open task details');
-      
-      // Agendar cancelamento após 30 segundos para limpeza
       Future<void>.delayed(const Duration(seconds: 30), () {
         testCancelNotifications(notificationService);
       });

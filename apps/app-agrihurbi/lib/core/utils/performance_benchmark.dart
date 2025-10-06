@@ -126,8 +126,6 @@ class PerformanceBenchmark {
     buffer.writeln('Gerado em: ${DateTime.now()}');
     buffer.writeln('Total de operações medidas: ${_results.length}');
     buffer.writeln();
-    
-    // Agrupa por operação
     final operationNames = _results.map((r) => r.operationName).toSet();
     
     for (final operation in operationNames) {
@@ -137,8 +135,6 @@ class PerformanceBenchmark {
       buffer.writeln('Tempo médio: ${stats.averageDuration.toStringAsFixed(1)}ms');
       buffer.writeln('Tempo mínimo: ${stats.minDuration}ms');
       buffer.writeln('Tempo máximo: ${stats.maxDuration}ms');
-      
-      // Classificação de performance
       String classification;
       if (stats.averageDuration < 50) {
         classification = '✅ EXCELENTE';
@@ -152,8 +148,6 @@ class PerformanceBenchmark {
       buffer.writeln('Classificação: $classification');
       buffer.writeln();
     }
-    
-    // Comparativo antes/depois se existirem medições
     _addComparativeAnalysis(buffer);
     
     return buffer.toString();
@@ -182,7 +176,6 @@ class PerformanceBenchmark {
   }
   
   static void _addComparativeAnalysis(StringBuffer buffer) {
-    // Procura por pares "antes/depois" nas operações
     final beforeAfterPairs = <String, List<BenchmarkResult>>{};
     
     for (final result in _results) {

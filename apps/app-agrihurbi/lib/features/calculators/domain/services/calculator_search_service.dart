@@ -37,27 +37,17 @@ class CalculatorSearchService {
     List<CalculatorEntity> items,
     SearchCriteria criteria,
   ) {
-    // Benchmark de performance
     final stopwatch = Stopwatch()..start();
-    
-    // Single-pass filtering com early returns
     final filteredItems = items.where((item) {
-      // 1. Filtro de favoritos (early return se aplicável)
       if (criteria.showOnlyFavorites && !criteria.favoriteIds.contains(item.id)) {
         return false;
       }
-      
-      // 2. Filtro de categoria
       if (criteria.category != null && item.category != criteria.category) {
         return false;
       }
-      
-      // 3. Filtro de complexidade
       if (criteria.complexity != null && item.complexity != criteria.complexity!) {
         return false;
       }
-      
-      // 4. Filtro de tags (otimizado com contains)
       if (criteria.tags.isNotEmpty) {
         final hasRequiredTags = criteria.tags.every(
           (tag) => item.tags.contains(tag)
@@ -66,8 +56,6 @@ class CalculatorSearchService {
           return false;
         }
       }
-      
-      // 5. Busca textual (última verificação mais custosa)
       if (criteria.query != null && criteria.query!.trim().isNotEmpty) {
         return _matchesTextQuery(item, criteria.query!.toLowerCase());
       }
@@ -76,8 +64,6 @@ class CalculatorSearchService {
     }).toList();
     
     stopwatch.stop();
-    
-    // Ordenação (O(n log n))
     _sortCalculators(filteredItems, criteria.sortOrder);
     
     return filteredItems;
@@ -92,8 +78,6 @@ class CalculatorSearchService {
       ...item.tags,
       ...item.parameters.map((p) => '${p.name} ${p.description}'),
     ].join(' ').toLowerCase();
-    
-    // Split query para buscar múltiplas palavras (AND logic)
     final queryWords = query.split(' ').where((w) => w.isNotEmpty).toList();
     
     return queryWords.every((word) => searchableText.contains(word));
@@ -128,9 +112,6 @@ class CalculatorSearchService {
         break;
     }
   }
-  
-  // ===== MÉTODOS DEPRECATED =====
-  // Mantidos para não quebrar código existente
   
   @Deprecated('Use optimizedSearch com SearchCriteria para melhor performance')
   static List<CalculatorEntity> searchCalculators(

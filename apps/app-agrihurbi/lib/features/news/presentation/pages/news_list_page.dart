@@ -28,8 +28,6 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
-    // Initialize news provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(newsProviderProvider).initialize();
     });
@@ -405,7 +403,6 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              // Navigate to subscription page
               Navigator.pushNamed(context, '/subscription');
             },
             child: const Text('Ver Planos'),
@@ -451,7 +448,6 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
             Navigator.pop(context);
             if (query.isNotEmpty) {
               ref.read(newsProviderProvider).searchNews(query: query);
-              // Navigate to search results page
               Navigator.pushNamed(context, '/news/search', arguments: query);
             }
           },
@@ -467,7 +463,6 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
               final query = _searchController.text.trim();
               if (query.isNotEmpty) {
                 ref.read(newsProviderProvider).searchNews(query: query);
-                // Navigate to search results page
                 Navigator.pushNamed(context, '/news/search', arguments: query);
               }
             },
@@ -547,8 +542,6 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   void _shareArticle(NewsArticleEntity article) {
-    // Implement share functionality
-    // This could use share_plus package
     print('Sharing article: ${article.title}');
   }
 

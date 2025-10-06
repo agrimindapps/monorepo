@@ -116,8 +116,6 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
       _isRetrying = true;
       if (!isAutoRetry) _retryCount++;
     });
-
-    // Shake animation for manual retries
     if (!isAutoRetry) {
       await _shakeController.forward();
       _shakeController.reset();

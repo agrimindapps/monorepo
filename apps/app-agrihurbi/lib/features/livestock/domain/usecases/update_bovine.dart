@@ -15,12 +15,9 @@ class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
   
   @override
   Future<Either<Failure, BovineEntity>> call(UpdateBovineParams params) async {
-    // Validação básica do ID
     if (params.bovine.id.isEmpty) {
       return const Left(ValidationFailure('ID do bovino é obrigatório para atualização'));
     }
-    
-    // Verificar se o bovino existe
     final existingBovineResult = await repository.getBovineById(params.bovine.id);
     if (existingBovineResult.isLeft()) {
       return Left(
@@ -34,14 +31,10 @@ class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
     }
     
     final existingBovine = existingBovineResult.fold((l) => throw UnimplementedError(), (r) => r);
-    
-    // Validação dos dados de atualização
     final validation = _validateUpdateData(params.bovine);
     if (validation != null) {
       return Left(ValidationFailure(validation));
     }
-    
-    // Verificar se registrationId não conflita com outros bovinos
     if (params.bovine.registrationId != existingBovine.registrationId && 
         params.bovine.registrationId.isNotEmpty) {
       final duplicateCheck = await _checkDuplicateRegistrationId(params.bovine.registrationId, params.bovine.id);
@@ -49,22 +42,16 @@ class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
         return Left(duplicateCheck);
       }
     }
-    
-    // Preparar entidade para atualização
     final now = DateTime.now();
     final bovineToUpdate = params.bovine.copyWith(
       updatedAt: now,
       createdAt: existingBovine.createdAt, // Preservar data de criação
     );
-    
-    // Controle de versão otimista se habilitado
     if (params.enableOptimisticLocking && params.lastUpdatedAt != null) {
       if (existingBovine.updatedAt?.isAfter(params.lastUpdatedAt!) == true) {
         return const Left(ValidationFailure('Bovino foi modificado por outro usuário. Recarregue e tente novamente.'));
       }
     }
-    
-    // Atualizar no repositório
     return await repository.updateBovine(bovineToUpdate);
   }
   
@@ -81,16 +68,12 @@ class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
     if (bovine.originCountry.trim().isEmpty) {
       return 'País de origem é obrigatório';
     }
-    
-    // Validar formato do registrationId se fornecido
     if (bovine.registrationId.isNotEmpty) {
       final regIdPattern = RegExp(r'^[A-Z0-9\-_]{3,20}$');
       if (!regIdPattern.hasMatch(bovine.registrationId)) {
         return 'ID de registro deve conter apenas letras maiúsculas, números, hífens e underscores (3-20 caracteres)';
       }
     }
-    
-    // Validar tags se fornecidas
     if (bovine.tags.any((tag) => tag.trim().isEmpty)) {
       return 'Tags não podem estar vazias';
     }
@@ -100,8 +83,6 @@ class UpdateBovineUseCase implements UseCase<BovineEntity, UpdateBovineParams> {
   
   /// Verifica se o registrationId já existe em outro bovino
   Future<Failure?> _checkDuplicateRegistrationId(String registrationId, String currentId) async {
-    // Esta verificação será implementada quando o repository estiver completo
-    // Por ora, retornamos null (sem duplicata)
     return null;
   }
 }

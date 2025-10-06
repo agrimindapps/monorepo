@@ -23,7 +23,6 @@ import '../di_module.dart';
 class MedicationsModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
-    // Data sources
     getIt.registerLazySingleton<MedicationLocalDataSource>(
       () => MedicationLocalDataSourceImpl(),
     );
@@ -31,15 +30,11 @@ class MedicationsModule implements DIModule {
     getIt.registerLazySingleton<MedicationRemoteDataSource>(
       () => MedicationRemoteDataSourceImpl(),
     );
-
-    // Repository
     getIt.registerLazySingleton<MedicationRepository>(
       () => MedicationRepositoryLocalOnlyImpl(
         localDataSource: getIt<MedicationLocalDataSource>(),
       ),
     );
-
-    // Use cases
     getIt.registerLazySingleton<GetMedications>(
       () => GetMedications(getIt<MedicationRepository>()),
     );

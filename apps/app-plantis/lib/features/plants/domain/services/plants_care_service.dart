@@ -21,8 +21,6 @@ class PlantsCareService {
     return plants.where((plant) {
       final config = plant.config;
       if (config == null) return false;
-
-      // Check if watering care is enabled and has valid interval
       if (config.enableWateringCare == true &&
           config.wateringIntervalDays != null) {
         final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
@@ -33,8 +31,6 @@ class PlantsCareService {
         return nextWatering.isBefore(threshold) ||
             nextWatering.isAtSameMomentAs(threshold);
       }
-
-      // Fallback to old logic for backward compatibility
       if (config.wateringIntervalDays != null) {
         final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
         final nextWatering = lastWatering.add(
@@ -57,8 +53,6 @@ class PlantsCareService {
     return plants.where((plant) {
       final config = plant.config;
       if (config == null) return false;
-
-      // Check if fertilizer care is enabled and has valid interval
       if (config.enableFertilizerCare == true &&
           config.fertilizingIntervalDays != null) {
         final lastFertilizer =
@@ -70,8 +64,6 @@ class PlantsCareService {
         return nextFertilizer.isBefore(threshold) ||
             nextFertilizer.isAtSameMomentAs(threshold);
       }
-
-      // Fallback to old logic for backward compatibility
       if (config.fertilizingIntervalDays != null) {
         final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
         final nextFertilizer = lastFertilizer.add(
@@ -118,8 +110,6 @@ class PlantsCareService {
   bool _checkWaterStatus(Plant plant, DateTime now, int dayThreshold) {
     final config = plant.config;
     if (config == null) return false;
-
-    // Use new care system if enabled
     if (config.enableWateringCare == true &&
         config.wateringIntervalDays != null) {
       final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
@@ -132,8 +122,6 @@ class PlantsCareService {
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
-
-    // Fallback to old system
     if (config.wateringIntervalDays != null) {
       final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
       final nextWatering = lastWatering.add(
@@ -153,8 +141,6 @@ class PlantsCareService {
   bool _checkFertilizerStatus(Plant plant, DateTime now, int dayThreshold) {
     final config = plant.config;
     if (config == null) return false;
-
-    // Use new care system if enabled
     if (config.enableFertilizerCare == true &&
         config.fertilizingIntervalDays != null) {
       final lastFertilizer =
@@ -168,8 +154,6 @@ class PlantsCareService {
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
-
-    // Fallback to old system
     if (config.fertilizingIntervalDays != null) {
       final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
       final nextFertilizer = lastFertilizer.add(
@@ -200,8 +184,6 @@ class PlantsCareService {
     final hasFertilizerCare =
         config?.enableFertilizerCare == true ||
         config?.fertilizingIntervalDays != null;
-
-    // Plant is good if it doesn't need water or fertilizer within 2 days
     return (hasWaterCare ? waterGood : true) &&
         (hasFertilizerCare ? fertilizerGood : true);
   }

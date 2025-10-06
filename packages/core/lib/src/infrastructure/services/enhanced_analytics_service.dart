@@ -126,19 +126,14 @@ class EnhancedAnalyticsService {
     }
 
     try {
-      // Set custom keys for better context
       if (customKeys != null && customKeys.isNotEmpty) {
         await _crashlytics.setCustomKeys(keys: customKeys.cast<String, String>());
       }
-
-      // Record in Crashlytics
       await _crashlytics.recordError(
         exception: error,
         stackTrace: stackTrace ?? StackTrace.current,
         reason: reason,
       );
-
-      // Optionally log as analytics event for business metrics
       if (logAsAnalyticsEvent) {
         final errorResult = await _analytics.logError(
           error: error.toString(),
@@ -155,7 +150,6 @@ class EnhancedAnalyticsService {
         debugPrint('🔥 Error recorded: ${error.toString()}');
       }
     } catch (e) {
-      // Last resort - at least log to debug
       if (_config.enableDebugLogging) {
         debugPrint('❌ Failed to record error: $e');
       }
@@ -283,7 +277,6 @@ class EnhancedAnalyticsService {
         reason: 'Enhanced Analytics Error: $context (App: ${_config.appIdentifier})',
       );
     } catch (e) {
-      // Final fallback - just debug print
       if (_config.enableDebugLogging) {
         debugPrint('❌ Critical error recording analytics error: $e');
       }
@@ -358,8 +351,6 @@ abstract class PlantisEvent extends AppEvent {
   static final premiumFeatureAttempted = _PlantisEvent('premium_feature_attempted', {'category': 'premium', 'action': 'attempt'});
   static final careLogAdded = _PlantisEvent('care_log_added', {'category': 'care', 'action': 'log'});
   static final plantPhotoAdded = _PlantisEvent('plant_photo_added', {'category': 'photos', 'action': 'add'});
-
-  // Private constructor
   PlantisEvent._();
 }
 

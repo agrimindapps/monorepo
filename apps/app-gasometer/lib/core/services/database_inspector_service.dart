@@ -114,8 +114,6 @@ class GasOMeterDatabaseInspectorService {
   Map<String, dynamic> getGasOMeterStats() {
     final generalStats = getGeneralStats();
     final availableBoxes = getAvailableHiveBoxes();
-    
-    // Calcular estatísticas por módulo
     final moduleStats = <String, Map<String, dynamic>>{};
     
     for (final boxKey in availableBoxes) {
@@ -168,8 +166,6 @@ class GasOMeterDatabaseInspectorService {
         'error': stats['error'],
       });
     }
-
-    // Ordenar por módulo e depois por nome
     boxesInfo.sort((a, b) {
       final moduleComparison = (a['module'] as String).compareTo(b['module'] as String);
       if (moduleComparison != 0) return moduleComparison;

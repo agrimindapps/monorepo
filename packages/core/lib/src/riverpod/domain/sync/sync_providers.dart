@@ -3,8 +3,6 @@ import 'package:core/core.dart';
 /// Providers unificados para sincronização e conectividade
 /// Consolidam offline/online sync entre todos os apps do monorepo
 
-// ========== CONNECTIVITY PROVIDERS ==========
-
 /// Provider para stream de conectividade
 final connectivityStreamProvider = StreamProvider<ConnectivityResult>((ref) {
   return Connectivity().onConnectivityChanged.map((list) => list.first);
@@ -41,8 +39,6 @@ final connectionTypeProvider = Provider<ConnectionType>((ref) {
   }
 });
 
-// ========== SYNC STATE PROVIDERS ==========
-
 /// Provider principal para estado de sincronização
 final syncStateProvider =
     StateNotifierProvider<OfflineSyncStateNotifier, OfflineSyncState>((ref) {
@@ -78,8 +74,6 @@ final pendingItemsCountProvider = Provider<int>((ref) {
   );
 });
 
-// ========== APP-SPECIFIC SYNC PROVIDERS ==========
-
 /// Provider para sincronização específica por app
 final appSyncProvider =
     StateNotifierProvider.family<AppSyncNotifier, AppOfflineSyncState, String>((
@@ -106,13 +100,10 @@ final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
 /// Provider para limitações de sync baseadas em premium
 final syncLimitsProvider = Provider.family<SyncLimits, String>((ref, appId) {
   final user = ref.watch(domainCurrentUserProvider);
-  // REVIEW (converted TODO 2025-10-06): Integrar com subscription providers para verificar premium
   const isPremium = false; // Temporário até integração ser feita
 
   return SyncLimits.forApp(appId, isPremium);
 });
-
-// ========== OFFLINE PROVIDERS ==========
 
 /// Provider para capacidades offline por app
 final offlineCapabilitiesProvider =
@@ -129,9 +120,6 @@ final offlineDataProvider = FutureProvider.family<OfflineData, String>((
   if (!capabilities.hasOfflineSupport) {
     return OfflineData.empty();
   }
-
-  // TODO: Implementar SelectiveSyncService com HiveStorage
-  // Por enquanto, retornar OfflineData vazio
   return OfflineData.empty();
 });
 
@@ -140,12 +128,8 @@ final offlineCacheSizeProvider = FutureProvider.family<int, String>((
   ref,
   appId,
 ) async {
-  // TODO: Implementar SelectiveSyncService com HiveStorage
-  // Por enquanto, retornar 0
   return 0;
 });
-
-// ========== SYNC ACTIONS PROVIDERS ==========
 
 /// Provider para ações de sincronização
 final syncActionsProvider = Provider<SyncActions>((ref) {
@@ -160,8 +144,6 @@ final syncActionsProvider = Provider<SyncActions>((ref) {
         (appId) => ref.read(appSyncProvider(appId).notifier).startSync(),
   );
 });
-
-// ========== SYNC CONFLICTS PROVIDERS ==========
 
 /// Provider para conflitos de sincronização
 final syncConflictsProvider = StateProvider<List<SyncConflict>>((ref) => []);
@@ -191,8 +173,6 @@ final conflictResolutionProvider = Provider<ConflictResolution>((ref) {
   );
 });
 
-// ========== BANDWIDTH OPTIMIZATION PROVIDERS ==========
-
 /// Provider para configurações de bandwidth
 final bandwidthConfigProvider = StateProvider<BandwidthConfig>((ref) {
   final connectionType = ref.watch(connectionTypeProvider);
@@ -206,8 +186,6 @@ final dataEconomyModeProvider = Provider<bool>((ref) {
 
   return config.useDataEconomy || connectionType == ConnectionType.cellular;
 });
-
-// ========== MODELS ==========
 
 /// Estados de sincronização
 abstract class OfflineSyncState {
@@ -400,8 +378,6 @@ class SyncLimits {
         allowLargeFileSync: true,
       );
     }
-
-    // Free tier limits por app
     switch (appId) {
       case 'gasometer':
         return const SyncLimits(
@@ -658,8 +634,6 @@ class ConflictResolution {
   });
 }
 
-// ========== NOTIFIER IMPLEMENTATIONS ==========
-
 /// Notifier para estado de sincronização
 class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
   OfflineSyncStateNotifier() : super(const SyncIdle());
@@ -667,8 +641,6 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
   late final SelectiveSyncService _syncService;
 
   void _initialize() {
-    // TODO: Implementar inicialização do SelectiveSyncService com HiveStorage
-    // Por enquanto, manter sem inicialização
   }
 
   Future<void> startSync() async {
@@ -677,9 +649,6 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
     try {
       state = const SyncSyncing();
       _initialize();
-
-      // TODO: Implementar performSync real
-      // Por enquanto, simular sync com progresso
       for (int i = 0; i <= 100; i += 25) {
         state = SyncSyncing(
           progress: i.toDouble(),
@@ -687,8 +656,6 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
         );
         await Future.delayed(const Duration(milliseconds: 500));
       }
-
-      // Simular sucesso da sincronização
       state = SyncSuccess(SyncInfo(lastSync: DateTime.now(), errors: []));
     } catch (e) {
       state = SyncFailed(
@@ -699,21 +666,14 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
 
   Future<void> stopSync() async {
     if (state is! SyncSyncing) return;
-
-    // TODO: Implementar cancelSync no service
-    // Por enquanto, apenas parar
     state = const SyncIdle();
   }
 
   Future<void> forceSync() async {
-    // TODO: Implementar clearSyncCache no service
-    // Por enquanto, apenas iniciar sync
     await startSync();
   }
 
   Future<void> clearOfflineData(String appId) async {
-    // TODO: Implementar clearOfflineData no service
-    // Por enquanto, não fazer nada
   }
 }
 
@@ -729,8 +689,6 @@ class AppSyncNotifier extends StateNotifier<AppOfflineSyncState> {
     state = const AppSyncSyncing();
 
     try {
-      // TODO: Implementar sincronização real do app
-      // Por enquanto, simular sincronização bem-sucedida
       await Future.delayed(const Duration(seconds: 2));
       state = const AppSyncComplete();
     } catch (e) {
@@ -744,8 +702,6 @@ class AppSyncNotifier extends StateNotifier<AppOfflineSyncState> {
     }
   }
 }
-
-// ========== UTILITY FUNCTIONS ==========
 
 bool _shouldSync(DateTime? lastSync) {
   if (lastSync == null) return true;
@@ -762,9 +718,6 @@ Future<void> _resolveConflict(
   final conflicts = ref.read(syncConflictsProvider);
   final updatedConflicts = conflicts.where((c) => c.id != conflictId).toList();
   ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
-
-  // Implementar resolução real baseada no tipo
-  // await SyncService().resolveConflict(conflictId, type);
 }
 
 Future<void> _resolveConflictWithMerge(
@@ -775,12 +728,8 @@ Future<void> _resolveConflictWithMerge(
   final conflicts = ref.read(syncConflictsProvider);
   final updatedConflicts = conflicts.where((c) => c.id != conflictId).toList();
   ref.read(syncConflictsProvider.notifier).state = updatedConflicts;
-
-  // await SyncService().resolveConflictWithMerge(conflictId, mergedData);
 }
 
 Future<void> _resolveAllConflicts(ProviderRef ref, ResolutionType type) async {
   ref.read(syncConflictsProvider.notifier).state = [];
-
-  // await SyncService().resolveAllConflicts(type);
 }

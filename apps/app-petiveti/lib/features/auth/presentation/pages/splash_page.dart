@@ -50,12 +50,10 @@ class _SplashPageState extends ConsumerState<SplashPage>
   }
 
   void _checkAuthState() {
-    // CORREÇÃO: Aguardar DI estar pronto antes de acessar authProvider
     Future.delayed(SplashConstants.splashMinimumDuration, () async {
       if (!mounted) return; // Check if widget is still mounted
       
       try {
-        // Tentar acessar authProvider de forma segura
         final authState = ref.read(authProvider);
         
         if (authState.isAuthenticated) {
@@ -64,7 +62,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
           context.go(SplashConstants.promoRoute);
         }
       } catch (e) {
-        // Se authProvider ainda não está pronto, aguardar mais um pouco
         await Future<void>.delayed(const Duration(milliseconds: 500));
         if (!mounted) return;
         
@@ -76,7 +73,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
             context.go(SplashConstants.promoRoute);
           }
         } catch (e2) {
-          // Se ainda não conseguiu, ir para promo como fallback
           if (mounted) {
             context.go(SplashConstants.promoRoute);
           }
@@ -87,7 +83,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
 
   @override
   void dispose() {
-    // Dispose animation controller safely
     if (_animationController.isAnimating) {
       _animationController.stop();
     }
@@ -112,7 +107,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo with accessibility
                     Semantics(
                       label: 'Logo do PetiVeti',
                       image: true,
@@ -137,8 +131,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
                       ),
                     ),
                     const SizedBox(height: SplashConstants.logoToTitleSpacing),
-                    
-                    // App Name with accessibility
                     Semantics(
                       label: 'Nome do aplicativo: ${SplashConstants.appName}',
                       header: true,
@@ -151,8 +143,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
                       ),
                     ),
                     const SizedBox(height: SplashConstants.titleToTaglineSpacing),
-                    
-                    // Tagline with accessibility
                     Semantics(
                       label: 'Slogan do aplicativo: ${SplashConstants.appTagline}',
                       child: Text(
@@ -163,8 +153,6 @@ class _SplashPageState extends ConsumerState<SplashPage>
                       ),
                     ),
                     const SizedBox(height: SplashConstants.taglineToIndicatorSpacing),
-                    
-                    // Loading indicator with accessibility
                     Semantics(
                       label: 'Carregando aplicativo',
                       hint: 'Aguarde enquanto o PetiVeti está sendo inicializado',

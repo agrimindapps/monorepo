@@ -43,8 +43,6 @@ class _PragasDialogState extends State<PragasDialog> {
 
       try {
         _formKey.currentState?.save();
-
-        // Sanitizar dados antes de salvar
         final sanitizedNomeComum = FormValidators.sanitizeInput(_nomeComum);
         final sanitizedNomeCientifico =
             FormValidators.sanitizeInput(_nomeCientifico);

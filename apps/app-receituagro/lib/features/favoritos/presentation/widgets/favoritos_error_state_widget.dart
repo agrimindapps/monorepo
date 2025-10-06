@@ -34,7 +34,6 @@ class _FavoritosErrorStateWidgetState extends State<FavoritosErrorStateWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de erro
             Container(
               width: 80,
               height: 80,
@@ -50,8 +49,6 @@ class _FavoritosErrorStateWidgetState extends State<FavoritosErrorStateWidget> {
             ),
             
             const SizedBox(height: 24),
-            
-            // Título do erro
             Text(
               'Erro ao carregar favoritos',
               style: TextStyle(
@@ -63,8 +60,6 @@ class _FavoritosErrorStateWidgetState extends State<FavoritosErrorStateWidget> {
             ),
             
             const SizedBox(height: 12),
-            
-            // Mensagem de erro detalhada
             if (widget.errorMessage != null) ...[
               Text(
                 widget.errorMessage!,
@@ -86,8 +81,6 @@ class _FavoritosErrorStateWidgetState extends State<FavoritosErrorStateWidget> {
               ),
               const SizedBox(height: 24),
             ],
-            
-            // Botão de retry
             ElevatedButton.icon(
               onPressed: _isRetrying ? null : _handleRetry,
               icon: _isRetrying 
@@ -124,7 +117,6 @@ class _FavoritosErrorStateWidgetState extends State<FavoritosErrorStateWidget> {
     
     try {
       widget.onRetry();
-      // Aguardar um pouco para mostrar o feedback visual
       await Future<void>.delayed(const Duration(milliseconds: 500));
     } finally {
       if (mounted) {

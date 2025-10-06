@@ -23,12 +23,10 @@ class SyncService<T extends BaseSyncModel> {
        _conflictResolver = conflictResolver,
        _syncQueue = syncQueue,
        _syncOperations = syncOperations {
-    // Initialize sync operations when service is created
     _initializeSyncQueue();
   }
 
   void _initializeSyncQueue() {
-    // Start processing any pending offline items
     _syncOperations.processOfflineQueue();
   }
 
@@ -43,8 +41,6 @@ class SyncService<T extends BaseSyncModel> {
 
       return await remoteResult.fold(
         (failure) async {
-          // If no remote entity exists, create new
-          // Add to sync queue for offline processing
           _addToSyncQueue(localEntity, 'create');
           final syncResult = await _repository.sync(localEntity);
           return syncResult.fold(
@@ -53,11 +49,8 @@ class SyncService<T extends BaseSyncModel> {
           );
         },
         (remoteEntity) async {
-          // Conflict detection and resolution
           if (_hasConflict(localEntity, remoteEntity)) {
             final resolvedEntity = _resolveConflict(localEntity, remoteEntity);
-
-            // Add resolved entity to sync queue
             _addToSyncQueue(resolvedEntity, 'update');
 
             final syncResult = await _repository.sync(resolvedEntity);
@@ -66,8 +59,6 @@ class SyncService<T extends BaseSyncModel> {
               (syncedEntity) => Right(syncedEntity),
             );
           }
-
-          // No conflict, sync local entity
           _addToSyncQueue(localEntity, 'update');
           final syncResult = await _repository.sync(localEntity);
           return syncResult.fold(

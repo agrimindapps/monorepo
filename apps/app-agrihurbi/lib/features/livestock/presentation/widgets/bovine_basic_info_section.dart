@@ -43,8 +43,6 @@ class BovineBasicInfoSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
-          // Nome Comum
           DSTextField(
             label: 'Nome Comum *',
             hint: 'Ex: Nelore, Angus, Brahman',
@@ -56,8 +54,6 @@ class BovineBasicInfoSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          
-          // ID de Registro
           DSTextField(
             label: 'ID de Registro',
             hint: 'Ex: BR-001-2024',
@@ -69,8 +65,6 @@ class BovineBasicInfoSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 8),
-          
-          // Helper text para ID
           Row(
             children: [
               Icon(
@@ -91,8 +85,6 @@ class BovineBasicInfoSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          
-          // Raça
           DSTextField(
             label: 'Raça *',
             hint: 'Ex: Nelore, Angus, Brahman',
@@ -104,8 +96,6 @@ class BovineBasicInfoSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          
-          // País de Origem
           DSTextField(
             label: 'País de Origem *',
             hint: 'Ex: Brasil, Índia, Escócia',
@@ -117,8 +107,6 @@ class BovineBasicInfoSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 8),
-          
-          // Lista de países suportados
           _buildSupportedCountriesHint(context),
         ],
       ),
@@ -253,8 +241,6 @@ class _RegistrationIdFieldState extends State<RegistrationIdField> {
           validator: widget.formService.validateRegistrationId,
           onChanged: widget.onChanged,
         ),
-        
-        // Contador de caracteres (quando próximo do limite)
         if (_showCharCount)
           Padding(
             padding: const EdgeInsets.only(top: 4, left: 12),
@@ -283,16 +269,11 @@ class _RegistrationIdFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Permite apenas letras maiúsculas, números, hífen e underscore
     final filteredText = newValue.text.toUpperCase().replaceAll(
       RegExp(r'[^A-Z0-9\-_]'), 
       '',
     );
-    
-    // Aplica formatação automática para padrões brasileiros
     String formattedText = filteredText;
-    
-    // Se começar com BR e não tiver hífen, adiciona automaticamente
     if (formattedText.startsWith('BR') && 
         formattedText.length > 2 && 
         !formattedText.contains('-') &&

@@ -45,7 +45,6 @@ class ExerciseNotifier extends StateNotifier<ExerciseState> {
     );
 
     try {
-      // Validar inputs
       final validationErrors = _calculator.getValidationErrors(inputs);
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
@@ -54,8 +53,6 @@ class ExerciseNotifier extends StateNotifier<ExerciseState> {
         );
         return;
       }
-
-      // Realizar cálculo
       final result = await _performCalculation(
         calculatorId: _calculator.id,
         inputs: inputs,
@@ -116,18 +113,11 @@ final exerciseProvider = StateNotifierProvider<ExerciseNotifier, ExerciseState>(
 
 /// Provider para obter histórico de cálculos de exercício
 final exerciseHistoryProvider = FutureProvider<List<CalculationResult>>((ref) async {
-  // TODO: Implementar busca do histórico no repositório
-  // final repository = di.getIt<CalculatorRepository>();
-  // final history = await repository.getCalculationHistory(calculatorId: 'exercise');
-  // return history.map((h) => h.result).toList();
   return <CalculationResult>[];
 });
 
 /// Provider para verificar se a calculadora é favorita
 final exerciseIsFavoriteProvider = FutureProvider<bool>((ref) async {
-  // TODO: Implementar verificação de favorito
-  // final repository = di.getIt<CalculatorRepository>();
-  // return await repository.isFavoriteCalculator('exercise');
   return false;
 });
 

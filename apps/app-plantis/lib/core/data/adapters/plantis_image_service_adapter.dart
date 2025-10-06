@@ -29,10 +29,6 @@ class PlantisImageServiceAdapter {
   }) : _coreImageService = coreImageService,
        _preloaderService = preloaderService ?? ImagePreloaderService.instance;
 
-  // ==========================================================================
-  // CORE IMAGE SERVICE METHODS (Direct delegation)
-  // ==========================================================================
-
   /// Pick single image from gallery (backward compatible)
   Future<Result<File>> pickImageFromGallery() {
     return _coreImageService.pickImageFromGallery();
@@ -110,10 +106,6 @@ class PlantisImageServiceAdapter {
     );
   }
 
-  // ==========================================================================
-  // ENHANCED PRELOADING METHODS (ImagePreloaderService integration)
-  // ==========================================================================
-
   /// Preload single image (ImagePreloaderService compatibility)
   void preloadImage(String imageUrl, {bool priority = false}) {
     if (imageUrl.isEmpty) return;
@@ -147,10 +139,6 @@ class PlantisImageServiceAdapter {
   Map<String, dynamic> getStats() {
     return _preloaderService.getStats();
   }
-
-  // ==========================================================================
-  // ENHANCED CONVENIENCE METHODS (New functionality)
-  // ==========================================================================
 
   /// Pick and upload image in one operation (new convenience method)
   Future<Result<ImageUploadResult>> pickAndUploadFromGallery({
@@ -223,8 +211,6 @@ class PlantisImageServiceAdapter {
       uploadType: uploadType,
       onProgress: onProgress,
     );
-
-    // Preload the uploaded image for faster display
     uploadResult.fold(
       (error) => null,
       (result) => preloadImage(result.downloadUrl, priority: true),
@@ -232,10 +218,6 @@ class PlantisImageServiceAdapter {
 
     return uploadResult;
   }
-
-  // ==========================================================================
-  // MIGRATION HELPERS (Backward compatibility)
-  // ==========================================================================
 
   /// Get ImageService configuration (for inspection)
   ImageServiceConfig get config => _coreImageService.config;
@@ -270,8 +252,6 @@ class PlantisImageServiceAdapter {
   Map<String, dynamic> validateConfiguration() {
     final issues = <String>[];
     final warnings = <String>[];
-
-    // Check core service configuration
     if (config.maxWidth <= 0 || config.maxHeight <= 0) {
       issues.add('Invalid image dimensions in core service');
     }
@@ -287,8 +267,6 @@ class PlantisImageServiceAdapter {
     if (config.folders.isEmpty) {
       warnings.add('No custom folders configured, using default folder only');
     }
-
-    // Check preloader service
     final preloaderStats = _preloaderService.getStats();
     if (preloaderStats['queue_size'] as int > 50) {
       warnings.add('Large preloader queue size may impact memory usage');
@@ -305,8 +283,6 @@ class PlantisImageServiceAdapter {
 
   /// Cleanup resources (optional, for disposal)
   void dispose() {
-    // ImagePreloaderService is a singleton, so we don't dispose it
-    // Core ImageService doesn't require disposal
     debugPrint('🔌 PlantisImageServiceAdapter disposed');
   }
 }

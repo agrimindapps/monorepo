@@ -59,7 +59,6 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   
   /// Initialize the form provider after creation
   Future<void> initializeFormProvider(T provider) async {
-    // Default empty implementation, override if needed
   }
   
   /// Build the form content - must be implemented by child classes
@@ -74,10 +73,7 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   /// Called after successful form submission
   void onFormSubmitSuccess() {
     if (mounted) {
-      // Fechar o dialog imediatamente após sucesso local
       Navigator.of(context).pop(true);
-      
-      // Mostrar confirmação após fechar o dialog
       showSuccessSnackbar(isEditMode 
           ? '$pageTitle atualizado com sucesso!' 
           : '$pageTitle cadastrado com sucesso!');
@@ -114,7 +110,6 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   @override
   void dispose() {
     if (_isInitialized) {
-      // ✅ TYPE SAFETY FIX: No more dangerous casting, use interface method
       _formProvider.dispose();
     }
     super.dispose();
@@ -125,8 +120,6 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
     if (!_isInitialized) {
       return _buildLoadingScaffold();
     }
-    
-// Directly use the form provider without Provider package
       return Stack(
         children: [
           _buildFormScaffold(context, _formProvider),
@@ -186,7 +179,6 @@ abstract class BaseFormPageState<T extends ChangeNotifier> extends State<BaseFor
   }
   
   Widget _buildFormBody(BuildContext context, T formProvider) {
-    // Check for errors and show them
     final error = getLastError(formProvider as IFormProvider);
     if (error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

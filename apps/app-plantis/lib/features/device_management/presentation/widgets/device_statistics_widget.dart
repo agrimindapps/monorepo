@@ -17,7 +17,6 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
   @override
   void initState() {
     super.initState();
-    // Load statistics on init
     Future.microtask(() => ref.read(deviceManagementProvider.notifier).loadStatistics());
   }
 
@@ -38,22 +37,15 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Resumo geral
               _buildOverviewCard(context, stats),
 
               const SizedBox(height: 16),
-
-              // Distribuição por plataforma
               _buildPlatformDistribution(context, stats),
 
               const SizedBox(height: 16),
-
-              // Atividade recente
               _buildActivitySection(context, stats),
 
               const SizedBox(height: 16),
-
-              // Recomendações (se disponível)
               _buildRecommendations(context, stats),
 
               const SizedBox(height: 80),
@@ -118,8 +110,6 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
             ),
 
             const SizedBox(height: 20),
-
-            // Grid de métricas
             Row(
               children: [
                 Expanded(
@@ -171,8 +161,6 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
             ),
 
             const SizedBox(height: 16),
-
-            // Barra de progresso do limite
             _buildLimitProgressBar(context, stats),
           ],
         ),
@@ -306,8 +294,6 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
             ),
 
             const SizedBox(height: 12),
-
-            // Insight sobre diversidade de plataformas
             if (stats.plantisMetrics != null)
               _buildPlatformInsight(context, stats),
           ],

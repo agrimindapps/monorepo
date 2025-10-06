@@ -21,16 +21,12 @@ class DeleteOdometerReadingUseCase implements UseCase<bool, String> {
           ValidationFailure('ID da leitura é obrigatório'),
         );
       }
-
-      // Verificar se leitura existe
       final existing = await _repository.getOdometerReadingById(readingId);
       if (existing == null) {
         return const Left(
           ValidationFailure('Leitura de odômetro não encontrada'),
         );
       }
-
-      // Deletar leitura
       final success = await _repository.deleteOdometerReading(readingId);
 
       return Right(success);

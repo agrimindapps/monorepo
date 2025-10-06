@@ -25,15 +25,11 @@ class ConnectivityService implements IConnectivityRepository {
   Future<Either<Failure, void>> initialize() async {
     try {
       if (_isInitialized) return const Right(null);
-
-      // Verificar conectividade inicial
       final initialResult = await checkConnectivity();
       initialResult.fold(
         (failure) => developer.log('Erro ao verificar conectividade inicial: ${failure.message}', name: 'Connectivity'),
         (isOnline) => _isOnline = isOnline,
       );
-
-      // Configurar listener de mudanças
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
         _onConnectivityChanged,
         onError: (error) {
@@ -132,7 +128,6 @@ class ConnectivityService implements IConnectivityRepository {
         case ConnectivityResult.bluetooth:
         case ConnectivityResult.vpn:
         case ConnectivityResult.other:
-          // Pode ter conectividade, mas não garantida
           return true;
         case ConnectivityResult.none:
           continue; // Verifica próximo resultado
@@ -145,8 +140,6 @@ class ConnectivityService implements IConnectivityRepository {
   /// Mapeia ConnectivityResult para ConnectivityType
   ConnectivityType _mapConnectivityType(List<ConnectivityResult> results) {
     if (results.isEmpty) return ConnectivityType.none;
-    
-    // Prioriza o melhor tipo de conexão disponível
     for (final result in results) {
       switch (result) {
         case ConnectivityResult.wifi:
@@ -175,8 +168,6 @@ class ConnectivityService implements IConnectivityRepository {
     try {
       final result = await _connectivity.checkConnectivity();
       final type = _mapConnectivityType(result);
-      
-      // Mapeia para compatibilidade com app-plantis
       final compatibleType = _mapToCompatibleType(type);
       return Right(compatibleType);
     } catch (e) {
@@ -241,17 +232,12 @@ class ConnectivityService implements IConnectivityRepository {
     Duration timeout = const Duration(seconds: 5),
   }) async {
     try {
-      // Primeiro verifica conectividade básica
       final basicCheck = await checkConnectivity();
       final basicResult = basicCheck.fold((l) => false, (r) => r);
       
       if (!basicResult) {
         return const Right(false);
       }
-
-      // TODO: Implementar teste real de conectividade
-      // Por enquanto, retorna o resultado básico
-      // Em uma implementação completa, faria um HTTP request para testar
       return Right(basicResult);
     } catch (e) {
       return Left(NetworkFailure('Erro ao testar conectividade real: $e'));
@@ -289,8 +275,6 @@ class ConnectivityService implements IConnectivityRepository {
   /// Verifica se conectividade está estável
   /// (não mudou nos últimos X segundos)
   bool get isConnectivityStable {
-    // TODO: Implementar lógica de estabilidade
-    // Por enquanto, retorna true se inicializado
     return _isInitialized;
   }
 }

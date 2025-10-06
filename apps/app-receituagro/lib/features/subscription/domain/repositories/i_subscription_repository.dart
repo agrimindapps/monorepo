@@ -1,8 +1,6 @@
 import 'package:core/core.dart' hide ISubscriptionRepository;
 import 'package:core/core.dart';
 
-// Usando as entidades do core package
-
 /// Interface local para repositório de assinaturas do ReceitaAgro
 /// Estende funcionalidades específicas do app sobre o ISubscriptionRepository do core
 abstract class IAppSubscriptionRepository {

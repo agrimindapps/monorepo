@@ -11,17 +11,13 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
 
   @override
   Future<Either<Failure, Plant>> call(UpdatePlantParams params) async {
-    // Validate plant data
     final validationResult = _validatePlant(params);
     if (validationResult != null) {
       return Left(validationResult);
     }
-
-    // Get existing plant first
     final existingResult = await repository.getPlantById(params.id);
 
     return existingResult.fold((failure) => Left(failure), (existingPlant) {
-      // Update plant with new data and timestamp
       final updatedPlant = existingPlant.copyWith(
         name: params.name.trim(),
         species: params.species?.trim(),

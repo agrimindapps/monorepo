@@ -18,11 +18,7 @@ class FuelValidationService {
   ) {
     final errors = <String, String>{};
     final warnings = <String, String>{};
-
-    // Validar compatibilidade com o veículo
     _validateVehicleCompatibility(record, vehicle, errors);
-
-    // Validar sequência de odômetro
     _validateOdometerSequence(
       record,
       vehicle,
@@ -30,14 +26,8 @@ class FuelValidationService {
       errors,
       warnings,
     );
-
-    // Validar consumo (se possível calcular)
     _validateConsumption(record, previousRecord, warnings);
-
-    // Validar preços (detecção de anomalias)
     _validatePriceAnomalies(record, warnings);
-
-    // Validar capacidade do tanque
     _validateTankCapacity(record, vehicle, errors, warnings);
 
     return ValidationResult(
@@ -53,13 +43,10 @@ class FuelValidationService {
     VehicleEntity vehicle,
     Map<String, String> errors,
   ) {
-    // Verificar se o veículo suporta o tipo de combustível
     if (!vehicle.supportsFuelType(record.fuelType)) {
       errors['fuelType'] =
           'Veículo ${vehicle.displayName} não suporta ${record.fuelType.displayName}';
     }
-
-    // Verificar se o veículo está ativo
     if (!vehicle.isActive) {
       errors['vehicle'] = 'Veículo está inativo';
     }
@@ -73,13 +60,10 @@ class FuelValidationService {
     Map<String, String> errors,
     Map<String, String> warnings,
   ) {
-    // Verificar se odômetro não regrediu em relação ao atual do veículo
     if (record.odometer < vehicle.currentOdometer - 100) {
       errors['odometer'] =
           'Odômetro muito abaixo do atual (${vehicle.currentOdometer.toStringAsFixed(0)} km)';
     }
-
-    // Verificar sequência com registro anterior
     if (previousRecord != null) {
       if (record.odometer < previousRecord.odometer) {
         errors['odometer'] =
@@ -88,14 +72,10 @@ class FuelValidationService {
 
       final difference = record.odometer - previousRecord.odometer;
       final daysDifference = record.date.difference(previousRecord.date).inDays;
-
-      // Alerta para diferenças suspeitas
       if (difference > FuelConstants.maxOdometerDifference) {
         warnings['odometer'] =
             'Diferença muito grande desde último registro: ${difference.toStringAsFixed(0)} km';
       }
-
-      // Alerta para rodagem diária muito alta
       if (daysDifference > 0 && difference / daysDifference > 500) {
         warnings['odometer'] =
             'Média diária muito alta: ${(difference / daysDifference).toStringAsFixed(0)} km/dia';
@@ -119,8 +99,6 @@ class FuelValidationService {
     if (distance <= 0) return;
 
     final consumption = distance / record.liters;
-
-    // Alertas para consumo anômalo
     if (consumption < 3.0) {
       warnings['consumption'] =
           'Consumo muito baixo: ${consumption.toStringAsFixed(1)} km/l';
@@ -135,7 +113,6 @@ class FuelValidationService {
     FuelRecordEntity record,
     Map<String, String> warnings,
   ) {
-    // Preços muito baixos ou muito altos podem indicar erro
     if (record.pricePerLiter < 3.0) {
       warnings['pricePerLiter'] =
           'Preço muito baixo: ${record.formattedPricePerLiter}';
@@ -143,8 +120,6 @@ class FuelValidationService {
       warnings['pricePerLiter'] =
           'Preço muito alto: ${record.formattedPricePerLiter}';
     }
-
-    // Validar coerência do valor total
     final expectedTotal = record.liters * record.pricePerLiter;
     final difference = (record.totalPrice - expectedTotal).abs();
 
@@ -163,13 +138,10 @@ class FuelValidationService {
   ) {
     final tankCapacity = vehicle.tankCapacity;
     if (tankCapacity == null) return;
-
-    // Erro se muito acima da capacidade
     if (record.liters > tankCapacity * 1.2) {
       errors['liters'] =
           'Quantidade muito acima da capacidade (${tankCapacity.toStringAsFixed(0)}L)';
     }
-    // Aviso se próximo do limite
     else if (record.liters > tankCapacity * FuelConstants.maxTankOverfill) {
       warnings['liters'] =
           'Quantidade próxima do limite da capacidade (${tankCapacity.toStringAsFixed(0)}L)';
@@ -187,8 +159,6 @@ class FuelValidationService {
 
     final sortedRecords = List<FuelRecordEntity>.from(records)
       ..sort((a, b) => a.date.compareTo(b.date));
-
-    // Calcular estatísticas
     final totalLiters = sortedRecords.fold<double>(
       0,
       (sum, r) => sum + r.liters,
@@ -202,8 +172,6 @@ class FuelValidationService {
     final averagePricePerLiter =
         sortedRecords.fold<double>(0, (sum, r) => sum + r.pricePerLiter) /
         sortedRecords.length;
-
-    // Calcular consumo médio (apenas para tanques cheios consecutivos)
     final consumptions = <double>[];
     for (int i = 1; i < sortedRecords.length; i++) {
       final current = sortedRecords[i];
@@ -222,8 +190,6 @@ class FuelValidationService {
             ? consumptions.fold<double>(0, (sum, c) => sum + c) /
                 consumptions.length
             : null;
-
-    // Detectar anomalias
     final anomalies = _detectAnomalies(sortedRecords);
 
     return FuelPatternAnalysis(
@@ -242,8 +208,6 @@ class FuelValidationService {
   /// Detecta anomalias nos registros
   List<FuelAnomaly> _detectAnomalies(List<FuelRecordEntity> records) {
     final anomalies = <FuelAnomaly>[];
-
-    // Calcular médias para detectar outliers
     final averagePrice =
         records.fold<double>(0, (sum, r) => sum + r.pricePerLiter) /
         records.length;
@@ -251,7 +215,6 @@ class FuelValidationService {
         records.fold<double>(0, (sum, r) => sum + r.liters) / records.length;
 
     for (final record in records) {
-      // Preço muito diferente da média
       if ((record.pricePerLiter - averagePrice).abs() > averagePrice * 0.3) {
         anomalies.add(
           FuelAnomaly(
@@ -264,8 +227,6 @@ class FuelValidationService {
           ),
         );
       }
-
-      // Quantidade muito diferente da média
       if ((record.liters - averageLiters).abs() > averageLiters * 0.5) {
         anomalies.add(
           FuelAnomaly(

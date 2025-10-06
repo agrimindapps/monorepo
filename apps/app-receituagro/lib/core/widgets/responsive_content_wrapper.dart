@@ -30,9 +30,6 @@ class ResponsiveContentWrapper extends StatelessWidget {
     if (!applyMaxWidth) {
       return child;
     }
-
-    // Usa padding externo padrão se não especificado
-    // ignore: unused_local_variable
     final effectivePadding = padding ?? SpacingTokens.externalPadding;
 
     return Center(

@@ -87,10 +87,8 @@ class MaintenanceFormatterService {
     final cleanPhone = phone.replaceAll(RegExp(r'\D'), '');
 
     if (cleanPhone.length == 11) {
-      // (99) 99999-9999
       return '(${cleanPhone.substring(0, 2)}) ${cleanPhone.substring(2, 7)}-${cleanPhone.substring(7)}';
     } else if (cleanPhone.length == 10) {
-      // (99) 9999-9999
       return '(${cleanPhone.substring(0, 2)}) ${cleanPhone.substring(2, 6)}-${cleanPhone.substring(6)}';
     }
 

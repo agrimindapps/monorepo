@@ -19,7 +19,6 @@ class CalorieStepIndicator extends StatelessWidget {
     
     return Column(
       children: [
-        // Indicador visual de steps
         Row(
           children: List.generate(totalSteps, (index) {
             final isActive = index <= currentStep;
@@ -29,7 +28,6 @@ class CalorieStepIndicator extends StatelessWidget {
             return Expanded(
               child: Row(
                 children: [
-                  // Círculo do step
                   Container(
                     width: 32,
                     height: 32,
@@ -64,8 +62,6 @@ class CalorieStepIndicator extends StatelessWidget {
                             ),
                     ),
                   ),
-                  
-                  // Linha conectora (exceto no último step)
                   if (index < totalSteps - 1)
                     Expanded(
                       child: Container(
@@ -83,15 +79,11 @@ class CalorieStepIndicator extends StatelessWidget {
         ),
         
         const SizedBox(height: 12),
-        
-        // Labels dos steps
         Row(
           children: _buildStepLabels(theme),
         ),
         
         const SizedBox(height: 8),
-        
-        // Indicador de progresso linear
         LinearProgressIndicator(
           value: isComplete ? 1.0 : (currentStep + 1) / totalSteps,
           backgroundColor: theme.disabledColor.withValues(alpha: 0.3),
@@ -99,8 +91,6 @@ class CalorieStepIndicator extends StatelessWidget {
         ),
         
         const SizedBox(height: 8),
-        
-        // Texto de progresso
         Text(
           isComplete 
               ? 'Cálculo concluído!'

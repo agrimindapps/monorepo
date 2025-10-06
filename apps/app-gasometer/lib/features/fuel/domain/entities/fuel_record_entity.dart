@@ -67,14 +67,9 @@ class FuelRecordEntity extends BaseSyncEntity { // km/l
     distanceTraveled,
     consumption,
   ];
-  
-  
-  // Additional properties not in model
   String? get address => null; // Not available in current entity
   List<String>? get photos => null; // Not available in current entity
   Map<String, dynamic>? get metadata => null; // Not available in current entity
-  
-  // Formatted getters
   String get formattedPricePerLiter => 'R\$ ${pricePerLiter.toStringAsFixed(3)}';
   
   @override

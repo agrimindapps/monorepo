@@ -19,14 +19,10 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
 
   Future<Box> get box async {
     if (_box != null) return _box!;
-
-    // If box is already open (by UnifiedSync), reuse it
     if (Hive.isBoxOpen(_boxName)) {
       _box = Hive.box(_boxName);
       return _box!;
     }
-
-    // Otherwise open it
     _box = await Hive.openBox(_boxName);
     return _box!;
   }
@@ -47,8 +43,6 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
           }
         }
       }
-
-      // Sort by creation date (newest first)
       spaces.sort(
         (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
           a.createdAt ?? DateTime.now(),
@@ -114,14 +108,10 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   Future<void> deleteSpace(String id) async {
     try {
       final hiveBox = await box;
-
-      // Get existing space first
       final spaceJson = hiveBox.get(id) as String?;
       if (spaceJson != null) {
         final spaceData = jsonDecode(spaceJson) as Map<String, dynamic>;
         final space = SpaceModel.fromJson(spaceData);
-
-        // Soft delete - mark as deleted
         final deletedSpace = space.copyWith(
           isDeleted: true,
           updatedAt: DateTime.now(),

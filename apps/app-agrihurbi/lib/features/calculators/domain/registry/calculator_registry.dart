@@ -40,29 +40,20 @@ class CalculatorRegistry {
 
   /// Registra todas as factories das calculadoras
   void _registerCalculatorFactories() {
-    // Irrigation Calculators
     _calculatorFactories['water_need_calculator'] = () => const WaterNeedCalculator();
-
-    // Nutrition Calculators
     _calculatorFactories['organic_fertilizer_calculator'] = () => const OrganicFertilizerCalculator();
     _calculatorFactories['npk_calculator'] = () => const NPKCalculator();
     _calculatorFactories['soil_ph_calculator'] = () => const SoilPHCalculator();
     _calculatorFactories['fertilizer_dosing_calculator'] = () => const FertilizerDosingCalculator();
     _calculatorFactories['compost_calculator'] = () => const CompostCalculator();
-
-    // Livestock Calculators
     _calculatorFactories['feed_calculator'] = () => const FeedCalculator();
     _calculatorFactories['breeding_cycle_calculator'] = () => const BreedingCycleCalculator();
     _calculatorFactories['grazing_calculator'] = () => const GrazingCalculator();
     _calculatorFactories['weight_gain_calculator'] = () => const WeightGainCalculator();
-
-    // Crop Calculators
     _calculatorFactories['planting_density_calculator'] = () => const PlantingDensityCalculator();
     _calculatorFactories['harvest_timing_calculator'] = () => const HarvestTimingCalculator();
     _calculatorFactories['seed_rate_calculator'] = () => const SeedRateCalculator();
     _calculatorFactories['yield_prediction_calculator'] = () => const YieldPredictionCalculator();
-
-    // Soil Calculators
     _calculatorFactories['soil_composition_calculator'] = () => const SoilCompositionCalculator();
     _calculatorFactories['drainage_calculator'] = () => const DrainageCalculator();
   }
@@ -72,13 +63,9 @@ class CalculatorRegistry {
     if (!_initialized) {
       throw StateError('CalculatorRegistry não foi inicializado. Chame initialize() primeiro.');
     }
-
-    // Verifica se já está no cache
     if (_calculators.containsKey(calculatorId)) {
       return _calculators[calculatorId];
     }
-
-    // Cria nova instância se existe factory
     final factory = _calculatorFactories[calculatorId];
     if (factory != null) {
       final calculator = factory();
@@ -173,16 +160,12 @@ class CalculatorRegistry {
         warnings: warnings,
       );
     }
-
-    // Validar cada calculadora registrada
     for (final entry in _calculatorFactories.entries) {
       final id = entry.key;
       final factory = entry.value;
 
       try {
         final calculator = factory();
-        
-        // Validações básicas
         if (calculator.id != id) {
           errors.add('Calculadora $id tem ID inconsistente: ${calculator.id}');
         }
@@ -194,13 +177,10 @@ class CalculatorRegistry {
         if (calculator.parameters.isEmpty) {
           warnings.add('Calculadora $id não tem parâmetros definidos');
         }
-
-        // Testar cálculo básico
         try {
           final emptyParams = <String, dynamic>{};
           calculator.calculate(emptyParams);
         } catch (e) {
-          // Esperado para parâmetros vazios, apenas verificando se não trava
         }
 
       } catch (e) {
@@ -222,16 +202,11 @@ class CalculatorDependencyConfigurator {
 
   /// Configura todas as dependências das calculadoras
   static void configure() {
-    // Inicializar registry
     final registry = CalculatorRegistry();
     registry.initialize();
-
-    // Registrar no CalculatorEngine
     final engine = CalculatorEngine();
     final allCalculators = registry.getAllCalculators();
     engine.registerCalculators(allCalculators);
-
-    // Pré-carregar calculadoras frequentes
     registry.preloadFrequentCalculators();
   }
 

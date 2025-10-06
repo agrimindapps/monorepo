@@ -19,8 +19,6 @@ import 'connectivity_service.dart';
 class SyncFirebaseService<T extends BaseSyncEntity> 
     with SyncEntityMixin 
     implements ISyncRepository<T> {
-  
-  // Singleton por tipo
   static final Map<String, SyncFirebaseService> _instances = {};
   
   /// Factory constructor para Singleton por coleção
@@ -55,27 +53,19 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   final T Function(Map<String, dynamic>) fromMap;
   final Map<String, dynamic> Function(T) toMap;
   final SyncConfig config;
-
-  // Dependências
   late final ILocalStorageRepository _localStorage;
   late final ConnectivityService _connectivity;
   late final FirebaseFirestore _firestore;
   late final FirebaseAuth _auth;
-
-  // Estado interno
   bool _isInitialized = false;
   SyncStatus _currentStatus = SyncStatus.offline;
   String? _currentUserId;
   Timer? _syncTimer;
-  
-  // Streams
   final StreamController<List<T>> _dataController = StreamController<List<T>>.broadcast();
   final StreamController<SyncStatus> _statusController = StreamController<SyncStatus>.broadcast();
   StreamSubscription<bool>? _connectivitySubscription;
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription<QuerySnapshot>? _firestoreSubscription;
-
-  // Cache de dados locais
   List<T> _localData = [];
   DateTime? _lastSyncTime;
 
@@ -83,28 +73,16 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   Future<Either<Failure, void>> initialize() async {
     try {
       if (_isInitialized) return const Right(null);
-
-      // Inicializar dependências
       _localStorage = getIt<ILocalStorageRepository>();
       _connectivity = ConnectivityService.instance;
       _firestore = FirebaseFirestore.instance;
       _auth = FirebaseAuth.instance;
-
-      // Inicializar serviços
       await _localStorage.initialize();
       await _connectivity.initialize();
-
-      // Configurar listeners
       _setupConnectivityListener();
       _setupAuthListener();
-
-      // Carregar dados locais iniciais
       await _loadLocalData();
-
-      // Inicializar status
       await _updateSyncStatus();
-
-      // Configurar sincronização automática
       _setupAutoSync();
 
       _isInitialized = true;
@@ -128,14 +106,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       final id = item.id.isEmpty ? _generateId() : item.id;
       final itemWithId = item.copyWith(id: id) as T;
       final dirtyItem = itemWithId.markAsDirty() as T;
-      
-      // Salvar localmente primeiro (offline-first)
       final localResult = await _saveLocal(dirtyItem);
       if (localResult.isLeft()) {
         return localResult.fold((failure) => Left(failure), (_) => const Right(''));
       }
-
-      // Tentar sincronizar se online
       if (_canSync()) {
         _syncItemInBackground(dirtyItem);
       }
@@ -163,16 +137,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         itemsToSave.add(dirtyItem);
         ids.add(id);
       }
-
-      // Salvar em lote localmente
       for (final item in itemsToSave) {
         final result = await _saveLocal(item);
         if (result.isLeft()) {
           return result.fold((failure) => Left(failure), (_) => const Right([]));
         }
       }
-
-      // Tentar sincronizar se online
       if (_canSync()) {
         _syncBatchInBackground(itemsToSave);
       }
@@ -312,13 +282,9 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       await _ensureInitialized();
       
       var results = _localData.where((item) => !item.isDeleted);
-      
-      // Aplicar filtros básicos
       for (final entry in filters.entries) {
         final key = entry.key;
         final value = entry.value;
-        
-        // Filtros básicos na BaseSyncEntity
         switch (key) {
           case 'userId':
             results = results.where((item) => item.userId == value);
@@ -329,7 +295,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           case 'isDirty':
             results = results.where((item) => item.isDirty == value);
             break;
-          // Adicione mais filtros conforme necessário
         }
       }
       
@@ -355,8 +320,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
             return updatedAt != null && updatedAt.isAfter(cutoff);
           })
           .toList();
-
-      // Ordenar por data mais recente
       results.sort((a, b) {
         final aDate = a.updatedAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
         final bDate = b.updatedAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -390,13 +353,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
       for (final item in _localData) {
         if (item.isDeleted) continue;
-
-        // Converter para Map para busca
         final itemMap = toMap(item);
         bool matches = false;
 
         if (searchFields != null) {
-          // Buscar apenas nos campos especificados
           for (final field in searchFields) {
             final value = itemMap[field]?.toString().toLowerCase() ?? '';
             if (value.contains(queryLower)) {
@@ -405,7 +365,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
             }
           }
         } else {
-          // Buscar em todos os campos string
           for (final value in itemMap.values) {
             if (value is String && value.toLowerCase().contains(queryLower)) {
               matches = true;
@@ -442,8 +401,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       if (unsyncedItems.isNotEmpty) {
         await _performBatchSync(unsyncedItems);
       }
-
-      // Puxar dados do Firebase também
       await _pullFromFirebase();
 
       _lastSyncTime = DateTime.now();
@@ -473,9 +430,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   Future<Either<Failure, List<T>>> getConflictedItems() async {
     try {
       await _ensureInitialized();
-      
-      // TODO: Implementar lógica de detecção de conflitos
-      // Por enquanto retorna lista vazia
       return const Right([]);
     } catch (e) {
       return Left(CacheFailure('Erro ao obter itens em conflito: $e'));
@@ -551,8 +505,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   @override
   Stream<bool> get connectivityStream => _connectivity.connectivityStream;
 
-  // Métodos privados de implementação
-
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
       final result = await initialize();
@@ -569,8 +521,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }
 
   bool _canSync() {
-    // Allow manual sync even if realtime is disabled
-    // Only check if user is authenticated and not offline
     return _currentUserId != null &&
            _currentStatus != SyncStatus.offline;
   }
@@ -646,7 +596,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         _updateSyncStatus();
         
         if (isOnline && _currentUserId != null) {
-          // Tentar sincronizar quando voltar online
           _syncUnsyncedItemsInBackground();
         }
       },
@@ -666,11 +615,9 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           _updateSyncStatus();
           
           if (_currentUserId != null) {
-            // Novo usuário logado, configurar listeners do Firestore
             _setupFirestoreListener();
             _syncUnsyncedItemsInBackground();
           } else {
-            // Usuário deslogado, remover listeners
             _removeFirestoreListener();
           }
         }
@@ -752,22 +699,17 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           T itemToSave = remoteItem;
 
           if (localItem != null) {
-            // Resolver conflito
             if (localItem.version > remoteItem.version || 
                 (localItem.version == remoteItem.version && localItem.isDirty)) {
-              // Local é mais recente, manter local mas remover flag dirty se não há conflito real
               if (!localItem.isDirty) {
                 itemToSave = localItem.markAsSynced() as T;
               } else {
-                // Há conflito real, manter local
                 return;
               }
             } else {
-              // Remoto é mais recente
               itemToSave = remoteItem.markAsSynced() as T;
             }
           } else {
-            // Item não existe localmente, adicionar
             itemToSave = remoteItem.markAsSynced() as T;
           }
 
@@ -787,7 +729,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         (failure) => developer.log('Item remoto deletado não existe localmente: $id', name: 'SyncService'),
         (localItem) async {
           if (localItem != null && !localItem.isDeleted) {
-            // Marcar como deletado localmente também
             final deletedItem = localItem.markAsDeleted().markAsSynced() as T;
             await _saveLocal(deletedItem);
           }
@@ -810,7 +751,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       } else if (_currentUserId == null) {
         newStatus = SyncStatus.localOnly;
       } else {
-        // Online e autenticado, verificar se há itens para sincronizar
         final unsyncedCount = _localData.where((item) => item.needsSync).length;
         newStatus = unsyncedCount > 0 ? SyncStatus.syncing : SyncStatus.synced;
       }
@@ -870,25 +810,18 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           .doc(item.id);
 
       if (item.isDeleted) {
-        // Deletar do Firebase
         await docRef.delete();
         developer.log('Item ${item.id} deletado do Firebase', name: 'SyncService');
       } else {
-        // Criar/atualizar no Firebase
         final firebaseData = item.toFirebaseMap();
         await docRef.set(firebaseData, SetOptions(merge: true));
         developer.log('Item ${item.id} sincronizado com Firebase', name: 'SyncService');
       }
-
-      // Marcar como sincronizado localmente
       final syncedItem = item.markAsSynced(syncTime: DateTime.now()) as T;
       await _saveLocal(syncedItem);
 
     } catch (e) {
       developer.log('Erro ao sincronizar item ${item.id}: $e', name: 'SyncService');
-      
-      // TODO: Implementar retry com backoff exponencial
-      // TODO: Salvar erro para relatório posterior
     }
   }
 
@@ -917,8 +850,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       }
 
       await batch.commit();
-
-      // Marcar todos como sincronizados
       final syncTime = DateTime.now();
       for (final item in itemsToUpdate) {
         final syncedItem = item.markAsSynced(syncTime: syncTime) as T;
@@ -926,8 +857,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       }
 
       developer.log('Lote de ${itemsToUpdate.length} itens sincronizado', name: 'SyncService');
-
-      // Se há mais itens, sincronizar o próximo lote
       if (items.length > config.batchSize) {
         final remainingItems = items.skip(config.batchSize).toList();
         await _performBatchSync(remainingItems);
@@ -951,8 +880,6 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           .collection(collectionName);
 
       Query query = collection;
-      
-      // Se há última sincronização, buscar apenas itens modificados depois dela
       if (_lastSyncTime != null) {
         query = query.where('updated_at', isGreaterThan: Timestamp.fromDate(_lastSyncTime!));
       }

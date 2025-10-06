@@ -104,14 +104,12 @@ class ReceiptImagePicker extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            // Imagem otimizada com cache de memória
             SizedBox(
               width: double.infinity,
               height: double.infinity,
               child: Image.file(
                 File(imagePath!),
                 fit: BoxFit.cover,
-                // Otimizações de memória para reduzir uso de RAM
                 cacheHeight: 200,
                 cacheWidth: 300,
                 errorBuilder: (context, error, stackTrace) {
@@ -138,8 +136,6 @@ class ReceiptImagePicker extends StatelessWidget {
                 },
               ),
             ),
-            
-            // Overlay com ações
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -155,21 +151,17 @@ class ReceiptImagePicker extends StatelessWidget {
                 ),
               ),
             ),
-            
-            // Botões de ação
             Positioned(
               top: 8,
               right: 8,
               child: Row(
                 children: [
-                  // Visualizar
                   _buildActionButton(
                     icon: Icons.zoom_in,
                     onPressed: () => _showImageDialog(context),
                     tooltip: 'Visualizar',
                   ),
                   const SizedBox(width: 8),
-                  // Remover
                   _buildActionButton(
                     icon: Icons.delete,
                     onPressed: onImageRemoved,
@@ -179,8 +171,6 @@ class ReceiptImagePicker extends StatelessWidget {
                 ],
               ),
             ),
-            
-            // Botão trocar imagem
             Positioned(
               bottom: 8,
               left: 8,
@@ -198,8 +188,6 @@ class ReceiptImagePicker extends StatelessWidget {
                 ),
               ),
             ),
-            
-            // Indicador de comprovante
             Positioned(
               bottom: 8,
               right: 8,
@@ -269,7 +257,6 @@ class ReceiptImagePicker extends StatelessWidget {
         backgroundColor: Colors.transparent,
         child: Stack(
           children: [
-            // Imagem em tela cheia otimizada
             Center(
               child: Container(
                 constraints: BoxConstraints(
@@ -281,15 +268,12 @@ class ReceiptImagePicker extends StatelessWidget {
                   child: Image.file(
                     File(imagePath!),
                     fit: BoxFit.contain,
-                    // Otimizações para visualização em tela cheia
                     cacheHeight: 600,
                     cacheWidth: 400,
                   ),
                 ),
               ),
             ),
-            
-            // Botão fechar
             Positioned(
               top: 40,
               right: 20,

@@ -75,7 +75,6 @@ class FavoritosDataService extends ChangeNotifier {
   }
 
   Future<void> _carregarFavoritosDiagnosticos() async {
-    // Premium check removido - usando dados reais via Hive
     try {
       final dados = await _repository?.getFavoritosDiagnosticos() ?? <FavoritoDiagnosticoModel>[];
       _favoritosData = _favoritosData.copyWith(diagnosticos: dados);
@@ -144,15 +143,11 @@ class FavoritosDataService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ============ PREMIUM VERIFICATION METHODS ============
-
   /// Verifica se pode adicionar mais favoritos
   bool canAddFavorite() {
     if (_premiumService?.isPremium == true) {
       return true; // Usuários premium têm favoritos ilimitados
     }
-    
-    // Usuários gratuitos têm limite
     final totalFavorites = getTotalFavoritesCount();
     const freeLimit = 20; // Limite para usuários gratuitos
     return totalFavorites < freeLimit;

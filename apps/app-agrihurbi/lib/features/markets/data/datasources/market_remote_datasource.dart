@@ -79,8 +79,6 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       'limit': limit,
       'offset': offset,
     };
-
-    // Add filter parameters
     if (filter != null) {
       if (filter.types?.isNotEmpty == true) {
         queryParameters['types'] = filter.types!.map((t) => t.name).join(',');
@@ -134,8 +132,6 @@ class MarketRemoteDataSourceImpl implements MarketRemoteDataSource {
       'q': query,
       'limit': limit,
     };
-
-    // Add filter parameters
     if (filter != null) {
       if (filter.types?.isNotEmpty == true) {
         queryParameters['types'] = filter.types!.map((t) => t.name).join(',');
@@ -378,12 +374,9 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     int limit = 50,
     int offset = 0,
   }) async {
-    // Simulate network delay
     await Future<void>.delayed(const Duration(milliseconds: 500));
     
     var markets = _generateMockMarkets();
-    
-    // Apply filters
     if (filter != null) {
       if (filter.types?.isNotEmpty == true) {
         markets = markets.where((m) => filter.types!.contains(m.type)).toList();
@@ -396,8 +389,6 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
         ).toList();
       }
     }
-    
-    // Apply pagination
     final startIndex = offset.clamp(0, markets.length);
     final endIndex = (offset + limit).clamp(0, markets.length);
     
@@ -522,8 +513,6 @@ class MarketRemoteDataSourceMock implements MarketRemoteDataSource {
     String interval = '1d',
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
-    // Generate mock history data
     final history = <PriceHistoryModel>[];
     final days = endDate.difference(startDate).inDays;
     var currentPrice = 100.0;

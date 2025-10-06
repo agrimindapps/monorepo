@@ -30,8 +30,6 @@ class MaintenanceValidatorService {
     if (trimmed.length > 100) {
       return 'Título muito longo (máximo 100 caracteres)';
     }
-
-    // Verificar caracteres válidos
     if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)]+$').hasMatch(trimmed)) {
       return 'Caracteres inválidos no título';
     }
@@ -83,8 +81,6 @@ class MaintenanceValidatorService {
     if (cost > 999999.99) {
       return 'Valor muito alto';
     }
-
-    // Validações contextuais por tipo de manutenção
     if (type != null) {
       final validationError = _validateCostByType(cost, type);
       if (validationError != null) return validationError;
@@ -117,24 +113,16 @@ class MaintenanceValidatorService {
     if (odometer > 9999999) {
       return 'Valor muito alto';
     }
-
-    // Validação contextual com odômetro inicial do veículo
     if (initialOdometer != null && odometer < initialOdometer) {
       return 'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)';
     }
-
-    // Validação contextual com odômetro atual
     if (currentOdometer != null && odometer < currentOdometer - 5000) {
       return 'Odômetro muito abaixo do atual';
     }
-
-    // Validação com última manutenção
     if (lastMaintenanceOdometer != null) {
       if (odometer < lastMaintenanceOdometer) {
         return 'Odômetro menor que a última manutenção';
       }
-      
-      // Alerta para diferença muito grande (mais de 50.000km)
       if (odometer - lastMaintenanceOdometer > 50000) {
         return 'Diferença muito grande desde a última manutenção';
       }
@@ -156,15 +144,12 @@ class MaintenanceValidatorService {
     if (selectedDate.isAfter(today)) {
       return 'Data não pode ser futura';
     }
-
-    // Para manutenções preventivas/revisões, não permitir datas muito antigas
     if ((type == MaintenanceType.preventive || type == MaintenanceType.inspection)) {
       final twoYearsAgo = today.subtract(const Duration(days: 365 * 2));
       if (selectedDate.isBefore(twoYearsAgo)) {
         return 'Data muito antiga para este tipo de manutenção';
       }
     } else {
-      // Para outras manutenções, limite de 5 anos
       final fiveYearsAgo = today.subtract(const Duration(days: 365 * 5));
       if (selectedDate.isBefore(fiveYearsAgo)) {
         return 'Data muito antiga (máximo 5 anos)';
@@ -225,8 +210,6 @@ class MaintenanceValidatorService {
     if (trimmed.length > 100) {
       return 'Nome muito longo';
     }
-    
-    // Verificar caracteres válidos para nomes
     if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)\/&]+$').hasMatch(trimmed)) {
       return 'Caracteres inválidos no nome';
     }
@@ -237,15 +220,11 @@ class MaintenanceValidatorService {
   /// Valida telefone
   String? validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) return null; // Opcional
-
-    // Remove formatação
     final cleaned = value.replaceAll(RegExp(r'[^\d]'), '');
     
     if (cleaned.length < 10 || cleaned.length > 11) {
       return 'Telefone deve ter 10 ou 11 dígitos';
     }
-
-    // Validar formato brasileiro
     if (cleaned.length == 11 && !cleaned.startsWith(RegExp(r'[1-9][1-9]9'))) {
       return 'Formato de celular inválido';
     }
@@ -302,8 +281,6 @@ class MaintenanceValidatorService {
     double? lastMaintenanceOdometer,
   }) {
     final errors = <String, String>{};
-
-    // Validar campos obrigatórios
     final typeError = validateType(type);
     if (typeError != null) errors['type'] = typeError;
 
@@ -325,8 +302,6 @@ class MaintenanceValidatorService {
 
     final dateError = validateServiceDate(serviceDate, type: type);
     if (dateError != null) errors['serviceDate'] = dateError;
-
-    // Validar campos opcionais
     final workshopNameError = validateWorkshopName(workshopName);
     if (workshopNameError != null) errors['workshopName'] = workshopNameError;
 
@@ -338,8 +313,6 @@ class MaintenanceValidatorService {
 
     final notesError = validateNotes(notes);
     if (notesError != null) errors['notes'] = notesError;
-
-    // Validações de próxima manutenção
     if (nextServiceDate != null && serviceDate != null) {
       final nextDateError = validateNextServiceDate(nextServiceDate, serviceDate);
       if (nextDateError != null) errors['nextServiceDate'] = nextDateError;
@@ -399,8 +372,6 @@ class MaintenanceValidatorService {
     List<MaintenanceEntity>? previousMaintenances,
   }) {
     final warnings = <String>[];
-
-    // Verificar manutenções duplicadas no mesmo dia
     if (previousMaintenances != null) {
       final sameDate = previousMaintenances.where((maintenance) {
         return maintenance.type == type &&
@@ -412,8 +383,6 @@ class MaintenanceValidatorService {
       if (sameDate.isNotEmpty) {
         warnings.add('Já existe manutenção do tipo ${type.displayName} nesta data');
       }
-
-      // Verificar padrões suspeitos de valor
       final sameType = previousMaintenances.where((m) => m.type == type);
       if (sameType.isNotEmpty) {
         final avgCost = sameType.fold<double>(0, (sum, m) => sum + m.cost) / sameType.length;
@@ -421,8 +390,6 @@ class MaintenanceValidatorService {
           warnings.add('Valor muito diferente da média para ${type.displayName}');
         }
       }
-
-      // Verificar intervalos muito curtos entre manutenções do mesmo tipo
       final recentSameType = sameType.where((m) {
         final daysDiff = serviceDate.difference(m.serviceDate).inDays;
         return daysDiff >= 0 && daysDiff < 30; // Menos de 30 dias
@@ -439,36 +406,26 @@ class MaintenanceValidatorService {
   /// Sugere tipo baseado na descrição/título
   MaintenanceType suggestTypeFromDescription(String description) {
     final descLower = description.toLowerCase();
-    
-    // Palavras-chave para preventiva
     if (descLower.contains('prevent') || descLower.contains('troca') || 
         descLower.contains('filtro') || descLower.contains('óleo') ||
         descLower.contains('oleo') || descLower.contains('pneu')) {
       return MaintenanceType.preventive;
     }
-    
-    // Palavras-chave para revisão
     if (descLower.contains('revisão') || descLower.contains('revisao') || 
         descLower.contains('inspeção') || descLower.contains('inspecao') ||
         descLower.contains('check')) {
       return MaintenanceType.inspection;
     }
-    
-    // Palavras-chave para emergencial
     if (descLower.contains('emergência') || descLower.contains('emergencia') ||
         descLower.contains('urgente') || descLower.contains('guincho') ||
         descLower.contains('pane') || descLower.contains('socorro')) {
       return MaintenanceType.emergency;
     }
-    
-    // Palavras-chave para corretiva
     if (descLower.contains('reparo') || descLower.contains('conserto') ||
         descLower.contains('quebra') || descLower.contains('defeito') ||
         descLower.contains('problema') || descLower.contains('falha')) {
       return MaintenanceType.corrective;
     }
-    
-    // Default: preventiva
     return MaintenanceType.preventive;
   }
 }

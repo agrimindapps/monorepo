@@ -13,8 +13,6 @@ class AnimalRepositoryImpl implements AnimalRepository {
   final AnimalLocalDataSource localDataSource;
   final AnimalRemoteDataSource remoteDataSource;
   final Connectivity connectivity;
-  
-  // TODO: Get from auth service
   String get _currentUserId => 'temp_user_id';
 
   AnimalRepositoryImpl({
@@ -51,18 +49,13 @@ class AnimalRepositoryImpl implements AnimalRepository {
   Future<Either<Failure, void>> addAnimal(Animal animal) async {
     try {
       final animalModel = AnimalModel.fromEntity(animal);
-      
-      // Save locally first
       await localDataSource.addAnimal(animalModel);
-      
-      // Try to sync to remote if online
       final connectivityResult = await connectivity.checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.wifi) || 
           connectivityResult.contains(ConnectivityResult.mobile)) {
         try {
           await remoteDataSource.addAnimal(animalModel, _currentUserId);
         } catch (e) {
-          // Mark for sync later if remote fails
           print('Remote sync failed, will retry later: $e');
         }
       }
@@ -79,18 +72,13 @@ class AnimalRepositoryImpl implements AnimalRepository {
   Future<Either<Failure, void>> updateAnimal(Animal animal) async {
     try {
       final animalModel = AnimalModel.fromEntity(animal);
-      
-      // Update locally first
       await localDataSource.updateAnimal(animalModel);
-      
-      // Try to sync to remote if online
       final connectivityResult = await connectivity.checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.wifi) || 
           connectivityResult.contains(ConnectivityResult.mobile)) {
         try {
           await remoteDataSource.updateAnimal(animalModel);
         } catch (e) {
-          // Mark for sync later if remote fails
           print('Remote sync failed, will retry later: $e');
         }
       }
@@ -106,17 +94,13 @@ class AnimalRepositoryImpl implements AnimalRepository {
   @override
   Future<Either<Failure, void>> deleteAnimal(String id) async {
     try {
-      // Delete locally first (soft delete)
       await localDataSource.deleteAnimal(id);
-      
-      // Try to sync to remote if online
       final connectivityResult = await connectivity.checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.wifi) || 
           connectivityResult.contains(ConnectivityResult.mobile)) {
         try {
           await remoteDataSource.deleteAnimal(id);
         } catch (e) {
-          // Mark for sync later if remote fails
           print('Remote sync failed, will retry later: $e');
         }
       }
@@ -137,11 +121,7 @@ class AnimalRepositoryImpl implements AnimalRepository {
           !connectivityResult.contains(ConnectivityResult.mobile)) {
         return const Left(NetworkFailure(message: 'Sem conexão com internet'));
       }
-
-      // Get remote animals
       final remoteAnimals = await remoteDataSource.getAnimals(_currentUserId);
-      
-      // Update local cache with remote data
       for (final remoteAnimal in remoteAnimals) {
         await localDataSource.updateAnimal(remoteAnimal);
       }

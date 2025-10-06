@@ -35,7 +35,6 @@ class CalculatorEngineV2 {
     final startTime = DateTime.now();
 
     try {
-      // 1. Obter estratégia
       final strategy = _strategyRegistry.getStrategy(strategyId);
       if (strategy == null) {
         return CompleteCalculationResult.error(
@@ -47,8 +46,6 @@ class CalculatorEngineV2 {
           ),
         );
       }
-
-      // 2. Validação (se habilitada)
       ValidationResult? validationResult;
       if (opts.performValidation) {
         validationResult = await _validationService.validateWithStrategy(
@@ -68,8 +65,6 @@ class CalculatorEngineV2 {
           );
         }
       }
-
-      // 3. Execução do cálculo
       final executionResult = await _executionService.executeWithStrategy(
         strategyId,
         validationResult?.sanitizedInputs ?? inputs,
@@ -88,8 +83,6 @@ class CalculatorEngineV2 {
           ),
         );
       }
-
-      // 4. Formatação dos resultados (se habilitada)
       FormattedCalculationResult? formattedResult;
       if (opts.formatResults) {
         formattedResult = await _formattingService.formatResult(
@@ -137,7 +130,6 @@ class CalculatorEngineV2 {
     String? preferredStrategyType,
     CalculationOptions? options,
   }) async {
-    // Buscar estratégia compatível
     final compatibleStrategy = _findBestStrategy(inputs, preferredStrategyType);
 
     if (compatibleStrategy == null) {
@@ -150,8 +142,6 @@ class CalculatorEngineV2 {
         ),
       );
     }
-
-    // Executar com a estratégia encontrada
     return await calculateComplete(
       strategyId: compatibleStrategy.strategyId,
       inputs: inputs,
@@ -177,8 +167,6 @@ class CalculatorEngineV2 {
         );
 
         results[request.id] = result;
-
-        // Parar em caso de erro se configurado
         if (!result.isSuccess && opts.stopOnFirstError) {
           break;
         }
@@ -280,21 +268,15 @@ class CalculatorEngineV2 {
   Future<EngineHealthCheck> performHealthCheck() async {
     final issues = <String>[];
     final warnings = <String>[];
-
-    // Verificar registry
     final registryValidation = _strategyRegistry.validateRegistry();
     if (!registryValidation.isValid) {
       issues.addAll(registryValidation.errors);
     }
     warnings.addAll(registryValidation.warnings);
-
-    // Verificar disponibilidade de estratégias
     final strategies = _strategyRegistry.getAllStrategies();
     if (strategies.isEmpty) {
       issues.add('Nenhuma estratégia registrada');
     }
-
-    // Teste básico de cada componente
     try {
       _validationService.validateRequiredInputs([], {});
       _executionService.getAvailableStrategies();
@@ -312,15 +294,11 @@ class CalculatorEngineV2 {
     );
   }
 
-  // ============= MÉTODOS PRIVADOS =============
-
   ICalculatorStrategy? _findBestStrategy(
     Map<String, dynamic> inputs,
     String? preferredType,
   ) {
     final allStrategies = _strategyRegistry.getAllStrategies();
-
-    // Primeiro, tentar estratégias do tipo preferido
     if (preferredType != null) {
       final preferredStrategies =
           allStrategies
@@ -337,8 +315,6 @@ class CalculatorEngineV2 {
         }
       }
     }
-
-    // Se não encontrou no tipo preferido, buscar em todas
     for (final strategy in allStrategies) {
       if (strategy.canProcess(inputs)) {
         return strategy;
@@ -348,8 +324,6 @@ class CalculatorEngineV2 {
     return null;
   }
 }
-
-// ============= CONFIGURATION CLASSES =============
 
 class CalculationOptions {
   final bool performValidation;
@@ -376,8 +350,6 @@ class BatchOptions {
     this.timeout,
   });
 }
-
-// ============= RESULT CLASSES =============
 
 class CompleteCalculationResult {
   final bool isSuccess;
@@ -549,8 +521,6 @@ class EngineHealthCheck {
     required this.statistics,
   });
 }
-
-// ============= ENUMS =============
 
 enum EngineErrorType {
   strategyNotFound,

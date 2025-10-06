@@ -8,8 +8,6 @@ import '../../domain/entities/equine_entity.dart';
 /// 
 /// Registra todos os enums necessários para serialização Hive
 
-// === BOVINE ENUMS ===
-
 /// Adapter para BovineAptitude
 class BovineAptitudeAdapter extends TypeAdapter<BovineAptitude> {
   @override
@@ -43,8 +41,6 @@ class BreedingSystemAdapter extends TypeAdapter<BreedingSystem> {
     writer.writeByte(obj.index);
   }
 }
-
-// === EQUINE ENUMS ===
 
 /// Adapter para EquineTemperament
 class EquineTemperamentAdapter extends TypeAdapter<EquineTemperament> {
@@ -97,15 +93,10 @@ class EquinePrimaryUseAdapter extends TypeAdapter<EquinePrimaryUse> {
   }
 }
 
-// === REGISTRATION HELPER ===
-
 /// Registra todos os adapters de enums para o Hive
 void registerLivestockEnumAdapters() {
-  // Bovine enums
   Hive.registerAdapter(BovineAptitudeAdapter());
   Hive.registerAdapter(BreedingSystemAdapter());
-  
-  // Equine enums
   Hive.registerAdapter(EquineTemperamentAdapter());
   Hive.registerAdapter(CoatColorAdapter());
   Hive.registerAdapter(EquinePrimaryUseAdapter());

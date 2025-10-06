@@ -31,12 +31,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       debugPrint('AuthRepositoryImpl: Iniciando login para $email');
-      
-      // Verifica conectividade
       final hasConnection = await _hasNetworkConnection();
       
       if (hasConnection) {
-        // Tenta login remoto
         final remoteResult = await _loginRemote(email, password);
         
         return remoteResult.fold(
@@ -45,7 +42,6 @@ class AuthRepositoryImpl implements AuthRepository {
             return Left(failure);
           },
           (userModel) async {
-            // Salva no cache local
             await _cacheUserLocally(userModel);
             debugPrint('AuthRepositoryImpl: Login remoto bem-sucedido - ${userModel.id}');
             return Right(userModel.toEntity());
@@ -73,8 +69,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       debugPrint('AuthRepositoryImpl: Iniciando registro para $email');
-      
-      // Registro requer conectividade (não faz sentido offline)
       final hasConnection = await _hasNetworkConnection();
       
       if (!hasConnection) {
@@ -82,8 +76,6 @@ class AuthRepositoryImpl implements AuthRepository {
           'Conexão com a internet necessária para criar nova conta.',
         ));
       }
-      
-      // Tenta registro remoto
       final remoteResult = await _registerRemote(name, email, password, phone);
       
       return remoteResult.fold(
@@ -92,7 +84,6 @@ class AuthRepositoryImpl implements AuthRepository {
           return Left(failure);
         },
         (userModel) async {
-          // Salva no cache local
           await _cacheUserLocally(userModel);
           debugPrint('AuthRepositoryImpl: Registro bem-sucedido - ${userModel.id}');
           return Right(userModel.toEntity());
@@ -109,11 +100,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       debugPrint('AuthRepositoryImpl: Iniciando logout');
-      
-      // Sempre limpa dados locais primeiro (prioridade)
       await _clearLocalUserData();
-      
-      // Tenta logout remoto se conectado
       final hasConnection = await _hasNetworkConnection();
       
       if (hasConnection) {
@@ -121,7 +108,6 @@ class AuthRepositoryImpl implements AuthRepository {
           await _remoteDataSource.logout();
           debugPrint('AuthRepositoryImpl: Logout remoto bem-sucedido');
         } catch (e) {
-          // Falha remota não deve impedir logout local
           debugPrint('AuthRepositoryImpl: Falha no logout remoto (ignorada): $e');
         }
       }
@@ -139,8 +125,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
     try {
       debugPrint('AuthRepositoryImpl: Obtendo usuário atual');
-      
-      // Sempre busca do cache local primeiro (local-first)
       final cachedUser = await _localDataSource.getLastUser();
       
       if (cachedUser != null) {
@@ -163,8 +147,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       debugPrint('AuthRepositoryImpl: Atualizando dados do usuário $userId');
-      
-      // Busca dados atuais do cache
       final cachedUser = await _localDataSource.getLastUser();
       
       if (cachedUser == null) {
@@ -174,8 +156,6 @@ class AuthRepositoryImpl implements AuthRepository {
       if (cachedUser.id != userId) {
         return const Left(ValidationFailure('ID do usuário não corresponde ao logado'));
       }
-      
-      // Se tem conectividade, busca dados atualizados
       final hasConnection = await _hasNetworkConnection();
       
       if (hasConnection) {
@@ -191,8 +171,6 @@ class AuthRepositoryImpl implements AuthRepository {
           debugPrint('AuthRepositoryImpl: Falha na atualização remota - $e');
         }
       }
-      
-      // Retorna dados do cache se não conseguiu atualizar
       debugPrint('AuthRepositoryImpl: Retornando dados do cache');
       return Right(cachedUser.toEntity());
     } catch (e, stackTrace) {
@@ -228,17 +206,11 @@ class AuthRepositoryImpl implements AuthRepository {
       if (cachedUser == null || cachedUser.id != userId) {
         return const Left(ValidationFailure('Usuário não encontrado'));
       }
-      
-      // Prepara dados atualizados
       final updatedUser = cachedUser.copyWith(
         displayName: name ?? cachedUser.displayName,
         photoUrl: profileImageUrl ?? cachedUser.photoUrl,
       );
-      
-      // Salva localmente primeiro
       await _cacheUserLocally(updatedUser);
-      
-      // Tenta sincronizar remotamente se conectado
       final hasConnection = await _hasNetworkConnection();
       
       if (hasConnection) {
@@ -276,8 +248,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       debugPrint('AuthRepositoryImpl: Alterando senha');
-      
-      // Alteração de senha requer conectividade
       final hasConnection = await _hasNetworkConnection();
       
       if (!hasConnection) {
@@ -306,8 +276,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       debugPrint('AuthRepositoryImpl: Solicitando redefinição de senha para $email');
-      
-      // Recuperação de senha requer conectividade
       final hasConnection = await _hasNetworkConnection();
       
       if (!hasConnection) {
@@ -334,8 +302,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       debugPrint('AuthRepositoryImpl: Redefinindo senha com token');
-      
-      // Reset de senha requer conectividade
       final hasConnection = await _hasNetworkConnection();
       
       if (!hasConnection) {
@@ -420,8 +386,6 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(UnknownFailure('Erro na renovação de token: ${e.toString()}'));
     }
   }
-
-  // === MÉTODOS PRIVADOS AUXILIARES ===
 
   /// Verifica se há conexão de rede
   Future<bool> _hasNetworkConnection() async {

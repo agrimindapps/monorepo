@@ -14,7 +14,6 @@ class GetFavoritoDefensivosUseCase {
   /// Retorna `Either<Failure, List<FavoritoDefensivoEntity>>`
   Future<Either<Failure, List<FavoritoDefensivoEntity>>> call() async {
     try {
-      // Busca diretamente os defensivos favoritos usando interface específica
       final defensivosFavoritos = await _repository.getDefensivos();
       
       return Right(defensivosFavoritos);

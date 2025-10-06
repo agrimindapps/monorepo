@@ -26,15 +26,10 @@ class ImageServiceAdapter implements IImageService {
       return await result.fold(
         (error) async => Left(CacheFailure(error.message)),
         (file) async {
-          // Converter File para base64 string
           try {
             final bytes = await file.readAsBytes();
             final base64String = base64Encode(bytes);
-
-            // Detectar MIME type da imagem
             final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
-
-            // Retornar data URL completo
             return Right('data:$mimeType;base64,$base64String');
           } catch (e) {
             return Left(CacheFailure('Erro ao processar imagem: $e'));
@@ -53,15 +48,10 @@ class ImageServiceAdapter implements IImageService {
       return await result.fold(
         (error) async => Left(CacheFailure(error.message)),
         (file) async {
-          // Converter File para base64 string
           try {
             final bytes = await file.readAsBytes();
             final base64String = base64Encode(bytes);
-
-            // Detectar MIME type da imagem
             final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
-
-            // Retornar data URL completo
             return Right('data:$mimeType;base64,$base64String');
           } catch (e) {
             return Left(CacheFailure('Erro ao processar imagem: $e'));
@@ -117,7 +107,6 @@ class ImageManagementService {
   
   /// Factory usando dependency injection
   factory ImageManagementService.create({IImageService? imageService}) {
-    // Em produção, isso viria do container de DI
     final service = imageService ?? ImageServiceAdapter(ImageService());
     return ImageManagementService(imageService: service);
   }
@@ -229,7 +218,6 @@ class ImageManagementService {
     }
     
     try {
-      // Validar todas as imagens primeiro
       for (final image in base64Images) {
         if (!_isValidBase64Image(image)) {
           return const Left(ValidationFailure('Uma ou mais imagens são inválidas'));
@@ -270,17 +258,12 @@ class ImageManagementService {
     if (base64Image.trim().isEmpty) return false;
     
     try {
-      // Verificar se tem header válido
       if (!base64Image.startsWith('data:image/')) {
         return false;
       }
-      
-      // Verificar tamanho mínimo (header + alguns dados)
       if (base64Image.length < 100) {
         return false;
       }
-      
-      // Verificar tamanho máximo (10MB em base64 ≈ 13.7MB)
       const maxSizeBytes = 14 * 1024 * 1024; // 14MB para margem
       if (base64Image.length > maxSizeBytes) {
         return false;
@@ -336,8 +319,6 @@ class ImageManagementService {
         errors.add('Imagem ${i + 1} é inválida');
       }
     }
-    
-    // Verificar duplicatas
     final uniqueImages = images.toSet();
     if (uniqueImages.length != images.length) {
       errors.add('Existem imagens duplicadas');

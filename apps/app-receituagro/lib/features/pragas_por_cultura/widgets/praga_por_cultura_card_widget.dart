@@ -353,7 +353,6 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
   Widget _buildFooter(ThemeData theme) {
     return Row(
       children: [
-        // Principais defensivos
         if (pragaPorCultura.defensivosRelacionados.isNotEmpty) ...[
           const Icon(
             FontAwesomeIcons.vial,
@@ -375,8 +374,6 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
         ],
         
         const Spacer(),
-        
-        // Botão para ver defensivos
         if (onVerDefensivos != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

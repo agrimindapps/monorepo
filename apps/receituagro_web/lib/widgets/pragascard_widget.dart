@@ -47,19 +47,6 @@ class PragaCard extends StatelessWidget {
                   ),
                 ),
               ),
-              // FutureBuilder(
-              //   future: Future.value(Image.asset(imageUrl).image),
-              //   builder: (BuildContext context, AsyncSnapshot<ImageProvider<Object>> snapshot) {
-              //     if (snapshot.connectionState == ConnectionState.done) {
-              //       return Padding(
-              //         padding: const EdgeInsets.all(2.0),
-              //         child: ,
-              //       );
-              //     } else {
-              //       return const Center(child: CircularProgressIndicator());
-              //     }
-              //   },
-              // ),
             ),
             SizedBox(
               height: 50,

@@ -24,13 +24,9 @@ class LocalDataService {
     if (_isInitialized) return;
 
     try {
-      // Note: Hive.initFlutter() já foi chamado no main.dart
-      // Abrir as boxes
       _vehiclesBox = await Hive.openBox(_vehiclesBoxName);
       _fuelRecordsBox = await Hive.openBox(_fuelRecordsBoxName);
       _maintenanceBox = await Hive.openBox(_maintenanceBoxName);
-
-      // Inicializar SharedPreferences
       _prefs = await SharedPreferences.getInstance();
 
       _isInitialized = true;
@@ -58,8 +54,6 @@ class LocalDataService {
       rethrow;
     }
   }
-
-  // ===== VEHICLES =====
 
   /// Salva um veículo localmente
   Future<void> saveVehicle(String id, Map<String, dynamic> vehicleData) async {
@@ -91,8 +85,6 @@ class LocalDataService {
     await _ensureInitialized();
     await _vehiclesBox.delete(id);
   }
-
-  // ===== FUEL RECORDS =====
 
   /// Salva um registro de combustível
   Future<void> saveFuelRecord(String id, Map<String, dynamic> fuelData) async {
@@ -141,8 +133,6 @@ class LocalDataService {
     await _ensureInitialized();
     await _fuelRecordsBox.delete(id);
   }
-
-  // ===== MAINTENANCE =====
 
   /// Salva um registro de manutenção
   Future<void> saveMaintenanceRecord(
@@ -195,8 +185,6 @@ class LocalDataService {
     await _maintenanceBox.delete(id);
   }
 
-  // ===== USER PREFERENCES =====
-
   /// Salva preferências do usuário
   Future<void> saveUserPreferences(Map<String, dynamic> preferences) async {
     await _ensureInitialized();
@@ -245,8 +233,6 @@ class LocalDataService {
     await _ensureInitialized();
     await _prefs!.remove('${_userPreferencesKey}_$key');
   }
-
-  // ===== STATISTICS =====
 
   /// Obtém estatísticas de consumo
   Map<String, dynamic> getConsumptionStats(String vehicleId) {

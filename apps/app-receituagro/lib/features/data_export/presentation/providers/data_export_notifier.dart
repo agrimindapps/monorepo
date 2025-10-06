@@ -75,13 +75,9 @@ class DataExportNotifier extends _$DataExportNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
-      // Simulate availability check
       await Future<void>.delayed(const Duration(seconds: 2));
-
-      // Mock availability result - in real implementation, this would call repository
       final availableTypes = <DataType, bool>{};
       for (final dataType in requestedDataTypes) {
-        // Simulate that some data types might not be available
         availableTypes[dataType] = dataType != DataType.diagnostics; // Example: diagnostics not available
       }
 
@@ -127,12 +123,8 @@ class DataExportNotifier extends _$DataExportNotifier {
         requestDate: DateTime.now(),
         status: ExportRequestStatus.pending,
       );
-
-      // Add to history
       final updatedHistory = [...currentState.exportHistory, request];
       state = AsyncValue.data(currentState.copyWith(exportHistory: updatedHistory));
-
-      // Start processing
       await _processExportRequest(request);
 
       return request;
@@ -153,10 +145,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     if (currentState == null) return;
 
     try {
-      // Update request status to processing
       _updateExportRequest(request.copyWith(status: ExportRequestStatus.processing));
-
-      // Simulate export process with progress updates
       const totalSteps = 5;
       final steps = [
         'Coletando dados do perfil...',
@@ -174,12 +163,8 @@ class DataExportNotifier extends _$DataExportNotifier {
         );
 
         state = AsyncValue.data(currentState.copyWith(currentProgress: updatedProgress));
-
-        // Simulate processing time
         await Future<void>.delayed(const Duration(seconds: 3));
       }
-
-      // Mark as completed
       const completedProgress = ExportProgress.completed();
       state = AsyncValue.data(currentState.copyWith(currentProgress: completedProgress));
 
@@ -226,10 +211,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
-      // Simulate loading from repository
       await Future<void>.delayed(const Duration(seconds: 1));
-
-      // Mock history data - in real implementation, this would call repository
       final history = [
         ExportRequest(
           id: '1',
@@ -269,8 +251,6 @@ class DataExportNotifier extends _$DataExportNotifier {
       if (request.downloadUrl == null) {
         throw Exception('URL de download não disponível');
       }
-
-      // In real implementation, this would handle file download
       await Future<void>.delayed(const Duration(seconds: 2));
 
       return true;
@@ -290,8 +270,6 @@ class DataExportNotifier extends _$DataExportNotifier {
     try {
       final updatedHistory = currentState.exportHistory.where((req) => req.id != exportId).toList();
       state = AsyncValue.data(currentState.copyWith(exportHistory: updatedHistory));
-
-      // In real implementation, this would delete the file from storage
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       return true;

@@ -19,16 +19,12 @@ class RevokeDeviceUseCase {
       if (kDebugMode) {
         debugPrint('🔐 RevokeDevice: Revoking device ${params.deviceUuid}');
       }
-
-      // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
-
-      // Verifica se o dispositivo existe
       final deviceResult = await _deviceRepository.getDeviceByUuid(
         params.deviceUuid,
       );
@@ -59,12 +55,8 @@ class RevokeDeviceUseCase {
             ),
           );
         }
-
-        // Verifica se é o dispositivo atual (se deve impedir)
         if (params.preventSelfRevoke) {
           final currentDevice = await DeviceModel.fromCurrentDevice();
-
-          // CRITICAL: Skip check if platform not supported
           if (currentDevice != null && device.uuid == currentDevice.uuid) {
             if (kDebugMode) {
               debugPrint('❌ RevokeDevice: Cannot revoke current device');
@@ -77,8 +69,6 @@ class RevokeDeviceUseCase {
             );
           }
         }
-
-        // Executa a revogação
         if (kDebugMode) {
           debugPrint('🔐 RevokeDevice: Executing revocation');
         }
@@ -133,23 +123,17 @@ class RevokeAllOtherDevicesUseCase {
       if (kDebugMode) {
         debugPrint('🔐 RevokeAllOther: Revoking all other devices');
       }
-
-      // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
-
-      // Obtém UUID do dispositivo atual
       String? currentDeviceUuid;
       if (params?.currentDeviceUuid != null) {
         currentDeviceUuid = params!.currentDeviceUuid;
       } else {
         final currentDevice = await DeviceModel.fromCurrentDevice();
-
-        // CRITICAL: Check if platform is supported
         if (currentDevice == null) {
           if (kDebugMode) {
             debugPrint(
@@ -166,8 +150,6 @@ class RevokeAllOtherDevicesUseCase {
 
         currentDeviceUuid = currentDevice.uuid;
       }
-
-      // Obtém lista atual de dispositivos para contagem
       final devicesResult = await _deviceRepository.getUserDevices(userId);
       final deviceCount = devicesResult.fold(
         (failure) => 0,
@@ -188,8 +170,6 @@ class RevokeAllOtherDevicesUseCase {
           ),
         );
       }
-
-      // Executa a revogação em massa
       if (kDebugMode) {
         debugPrint('🔐 RevokeAllOther: Revoking $deviceCount other devices');
       }

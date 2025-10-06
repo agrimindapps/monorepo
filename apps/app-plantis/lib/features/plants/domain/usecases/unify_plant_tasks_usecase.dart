@@ -33,8 +33,6 @@ class UnifyPlantTasksUseCase
           '🔄 UnifyPlantTasksUseCase: Iniciando unificação do sistema de tarefas',
         );
       }
-
-      // 1. Carregar dados necessários
       final loadResult = await _loadAllData();
       if (loadResult.isLeft()) {
         return loadResult.map(
@@ -45,8 +43,6 @@ class UnifyPlantTasksUseCase
       final data = loadResult.getOrElse(
         () => throw Exception('Dados não encontrados'),
       );
-
-      // 2. Analisar conflitos
       final conflicts = PlantTaskTaskAdapter.findConflictingTaskIds(
         plantTasks: data.plantTasks,
         existingTasks: data.existingTasks,
@@ -60,8 +56,6 @@ class UnifyPlantTasksUseCase
         }
         return Right(UnificationResult.conflict(conflicts, data));
       }
-
-      // 3. Executar unificação
       final unificationResult = await _executeUnification(data, params);
 
       return unificationResult;
@@ -79,7 +73,6 @@ class UnifyPlantTasksUseCase
   /// Carrega todos os dados necessários para a unificação
   Future<Either<Failure, UnificationData>> _loadAllData() async {
     try {
-      // Carregar em paralelo para otimizar performance
       final results = await Future.wait([
         plantTasksRepository.getPlantTasks(),
         tasksRepository.getTasks(),
@@ -89,8 +82,6 @@ class UnifyPlantTasksUseCase
       final plantTasksResult = results[0] as Either<Failure, List<PlantTask>>;
       final tasksResult = results[1] as Either<Failure, List<task_entity.Task>>;
       final plantsResult = results[2] as Either<Failure, List<Plant>>;
-
-      // Verificar se todos os resultados são sucessos
       return plantTasksResult.fold(
         (failure) => Left(failure),
         (plantTasks) => tasksResult.fold(
@@ -130,8 +121,6 @@ class UnifyPlantTasksUseCase
       if (kDebugMode) {
         print('🔄 UnifyPlantTasksUseCase: Executando unificação');
       }
-
-      // 1. Converter PlantTasks para Tasks
       final unifiedTasks = PlantTaskTaskAdapter.mergePlantTasksWithTasks(
         plantTasks: data.plantTasks,
         existingTasks: data.existingTasks,
@@ -143,13 +132,9 @@ class UnifyPlantTasksUseCase
           '✅ UnifyPlantTasksUseCase: ${unifiedTasks.length} tasks unificadas',
         );
       }
-
-      // 2. Sincronizar com repositório de Tasks (se solicitado)
       if (params.syncWithTasksRepository) {
         await _syncUnifiedTasks(unifiedTasks, data);
       }
-
-      // 3. Gerar relatório
       final report = PlantTaskTaskAdapter.generateMigrationReport(
         plantTasks: data.plantTasks,
         existingTasks: data.existingTasks,
@@ -186,9 +171,6 @@ class UnifyPlantTasksUseCase
         '🔄 UnifyPlantTasksUseCase: Sincronizando ${tasks.length} tasks unificadas',
       );
     }
-
-    // TODO: Implementar sincronização baseada na estratégia escolhida
-    // Por enquanto, apenas log do que seria feito
 
     final tasksFromPlantTasks =
         tasks

@@ -28,16 +28,6 @@ class AppMigrationHelper {
         'Initializing App Migration Helper',
         name: 'AppMigrationHelper',
       );
-
-      // Registrar serviços de migração para cada app
-      // NOTE: Estes services precisam ser instanciados com repositories reais via DI
-      // Por ora, deixamos comentado até que a migração seja feita em cada app
-      // _migrationServices['gasometer'] = GasometerSyncService();
-      // _migrationServices['plantis'] = PlantisSyncService();
-      // _migrationServices['receituagro'] = ReceitaAgroSyncService();
-      // _migrationServices['petiveti'] = PetiVetiSyncService();
-
-      // Inicializar todos os serviços
       for (final entry in _migrationServices.entries) {
         await entry.value.initialize();
         developer.log(
@@ -80,20 +70,10 @@ class AppMigrationHelper {
           NotFoundFailure('No migration service available for app: $appName'),
         );
       }
-
-      // Testar conectividade
       final hasConnectivity = await service.checkConnectivity();
-
-      // Testar se o serviço pode sincronizar
       final canSync = service.canSync;
-
-      // Obter estatísticas atuais
       final stats = await service.getStatistics();
-
-      // Verificar se há sync pendente
       final hasPending = await service.hasPendingSync;
-
-      // Simular um sync de teste (apenas um item para verificar)
       Either<Failure, ServiceSyncResult>? testSyncResult;
       try {
         testSyncResult = await service.syncSpecific(['test_migration_item']);
@@ -150,8 +130,6 @@ class AppMigrationHelper {
       );
 
       final startTime = DateTime.now();
-
-      // Passo 1: Verificar compatibilidade
       final compatibilityResult = await testMigrationCompatibility(appName);
 
       final compatibilityReport = compatibilityResult.fold(
@@ -169,8 +147,6 @@ class AppMigrationHelper {
       }
 
       final steps = <MigrationStep>[];
-
-      // Passo 2: Backup do estado atual (dry run apenas simula)
       if (!dryRun) {
         steps.add(
           MigrationStep(
@@ -191,8 +167,6 @@ class AppMigrationHelper {
           ),
         );
       }
-
-      // Passo 3: Ativar feature flag (se solicitado)
       if (enableFeatureFlag && !dryRun) {
         final flags = SyncFeatureFlags.instance;
         flags.enableForApp(appName);
@@ -219,8 +193,6 @@ class AppMigrationHelper {
           ),
         );
       }
-
-      // Passo 4: Testar nova arquitetura
       final service = _migrationServices[appName]!;
       final testSyncResult = await service.sync();
 
@@ -252,8 +224,6 @@ class AppMigrationHelper {
           ),
         );
       }
-
-      // Passo 5: Validação final
       steps.add(
         MigrationStep(
           name: 'final_validation',
@@ -300,12 +270,8 @@ class AppMigrationHelper {
         'Rolling back migration for $appName',
         name: 'AppMigrationHelper',
       );
-
-      // Desativar feature flag
       final flags = SyncFeatureFlags.instance;
       flags.disableForApp(appName);
-
-      // Usar LegacySyncBridge para garantir que volta para legacy
       await LegacySyncBridge.instance.rollbackAppToLegacy(appName);
 
       developer.log(
@@ -352,8 +318,6 @@ class AppMigrationHelper {
     return result;
   }
 
-  // Métodos privados para assessments
-
   List<String> _assessMigrationRisks(
     String appName,
     SyncStatistics stats,
@@ -389,18 +353,12 @@ class AppMigrationHelper {
   }
 
   DateTime _calculateRecommendedMigrationTime(SyncStatistics stats) {
-    // Recomendar migração em horário de baixo uso (baseado no histórico)
     final now = DateTime.now();
 
     if (stats.lastSyncTime == null) {
-      // Se nunca sincronizou, pode migrar imediatamente
       return now;
     }
-
-    // Recomendar para a próxima madrugada (menos uso)
     var recommended = DateTime(now.year, now.month, now.day + 1, 3, 0);
-
-    // Se já passou das 3h hoje, agendar para amanhã
     if (now.hour >= 3) {
       recommended = recommended.add(const Duration(days: 1));
     }

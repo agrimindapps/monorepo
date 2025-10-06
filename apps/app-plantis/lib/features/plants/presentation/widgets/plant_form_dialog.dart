@@ -47,7 +47,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
   @override
   void dispose() {
     _scrollController.dispose();
-    // Provider disposal will be handled automatically by ChangeNotifierProvider
     super.dispose();
   }
 
@@ -109,10 +108,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
-            // Header moderno
             _buildModernHeader(colorScheme, isEditing),
-
-            // Content
             Expanded(
               child: Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
@@ -130,8 +126,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 },
               ),
             ),
-
-            // Footer com actions
             _buildFooter(colorScheme),
           ],
         ),
@@ -144,7 +138,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
       padding: const EdgeInsets.fromLTRB(24, 24, 16, 0),
       child: Row(
         children: [
-          // Ícone da planta com background
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -158,8 +151,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             ),
           ),
           const SizedBox(width: 16),
-
-          // Título e subtítulo
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,8 +174,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               ],
             ),
           ),
-
-          // Botão fechar
           IconButton(
             onPressed: () => _handleClose(),
             icon: const Icon(Icons.close),
@@ -302,14 +291,11 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Informações Básicas
             _buildSectionTitle('Informações Básicas', Icons.info_outline),
             const SizedBox(height: 16),
             const PlantFormBasicInfo(),
 
             const SizedBox(height: 24),
-
-            // Configurações de Cuidado
             _buildSectionTitle(
               'Configurações de Cuidado',
               Icons.settings_outlined,
@@ -360,14 +346,11 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Botão Cancelar
               TextButton(
                 onPressed: formState.isSaving ? null : () => _handleClose(),
                 child: const Text('Cancelar'),
               ),
               const SizedBox(width: 16),
-
-              // Botão Salvar
               FilledButton(
                 onPressed:
                     (formState.isFormValid && !formState.isSaving)
@@ -413,23 +396,17 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
 
       if (mounted) {
         if (success) {
-          // Procurar o PlantsProvider no contexto ou usar DI
           PlantsProvider? plantsProvider;
           try {
             plantsProvider = di.sl<PlantsProvider>();
           } catch (e) {
-            // Se não conseguir obter o provider, apenas exibir sucesso
             print(
               'Aviso: Não foi possível atualizar a lista automaticamente',
             );
           }
-
-          // Atualizar a lista de plantas se o provider estiver disponível
           if (plantsProvider != null) {
             await plantsProvider.refreshPlants();
           }
-
-          // Se for edição, também atualizar o PlantDetailsProvider
           if (widget.plantId != null && mounted) {
             if (kDebugMode) {
               print(
@@ -465,8 +442,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               }
             }
           }
-
-          // Mostrar snackbar de sucesso
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

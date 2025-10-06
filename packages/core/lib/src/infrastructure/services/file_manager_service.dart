@@ -17,13 +17,6 @@ class FileManagerService implements IFileRepository {
   factory FileManagerService() => _instance;
   FileManagerService._internal();
 
-  // static const MethodChannel _channel = MethodChannel('file_manager_service');
-  // domain.CacheConfig? _cacheConfig;
-
-  // ==========================================================================
-  // OPERAÇÕES BÁSICAS DE ARQUIVO
-  // ==========================================================================
-
   @override
   Future<bool> exists(String path) async {
     try {
@@ -334,10 +327,6 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // NAVEGAÇÃO E BUSCA
-  // ==========================================================================
-
   @override
   Future<List<domain.FileInfoEntity>> listDirectory({
     required String path,
@@ -384,13 +373,9 @@ class FileManagerService implements IFileRepository {
         final fileInfo = await getFileInfo(entity.path);
         if (fileInfo != null) {
           bool matches = true;
-
-          // Verificar padrão do nome
           if (namePattern != null) {
             matches = matches && fileInfo.name.contains(namePattern);
           }
-
-          // Verificar filtro
           if (filter != null) {
             matches = matches && _matchesFilter(fileInfo, filter);
           }
@@ -432,10 +417,6 @@ class FileManagerService implements IFileRepository {
   String getFileNameWithoutExtension(String path) {
     return path_helper.basenameWithoutExtension(path);
   }
-
-  // ==========================================================================
-  // DIRETÓRIOS DO SISTEMA
-  // ==========================================================================
 
   @override
   Future<String> getDocumentsDirectory() async {
@@ -504,10 +485,6 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // COMPRESSÃO E DESCOMPRESSÃO
-  // ==========================================================================
-
   @override
   Future<domain.FileOperationResult> compress({
     required List<String> sourcePaths,
@@ -516,8 +493,6 @@ class FileManagerService implements IFileRepository {
   }) async {
     try {
       final archive = Archive();
-
-      // Adicionar arquivos ao arquivo
       for (String sourcePath in sourcePaths) {
         if (await isFile(sourcePath)) {
           final file = File(sourcePath);
@@ -528,8 +503,6 @@ class FileManagerService implements IFileRepository {
           await _addDirectoryToArchive(archive, sourcePath);
         }
       }
-
-      // Comprimir
       late List<int> compressedData;
       final compressionType = config?.type ?? domain.CompressionType.zip;
 
@@ -545,8 +518,6 @@ class FileManagerService implements IFileRepository {
         default:
           throw UnsupportedError('Compression type not supported: $compressionType');
       }
-
-      // Salvar arquivo comprimido
       final outputFile = File(destinationPath);
       await outputFile.parent.create(recursive: true);
       await outputFile.writeAsBytes(compressedData);
@@ -573,8 +544,6 @@ class FileManagerService implements IFileRepository {
     try {
       final file = File(sourcePath);
       final bytes = await file.readAsBytes();
-      
-      // Determinar tipo de arquivo pela extensão
       final extension = getFileExtension(sourcePath).toLowerCase();
       Archive? archive;
 
@@ -584,15 +553,12 @@ class FileManagerService implements IFileRepository {
           break;
         case '.gz':
           final decompressed = const GZipDecoder().decodeBytes(bytes);
-          // Para arquivos gzip simples, criar um arquivo
           final outputPath = joinPaths([destinationPath, getFileNameWithoutExtension(sourcePath)]);
           await File(outputPath).writeAsBytes(decompressed);
           return domain.FileOperationResult(success: true, path: outputPath);
         default:
           throw UnsupportedError('Archive format not supported: $extension');
       }
-
-      // Extrair arquivos
       if (archive.isNotEmpty) {
         await Directory(destinationPath).create(recursive: true);
         
@@ -648,14 +614,9 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // CACHE E LIMPEZA
-  // ==========================================================================
-
   @override
   Future<bool> configurateCache(domain.CacheConfig config) async {
     try {
-      // _cacheConfig = config;
       return true;
     } catch (e) {
       debugPrint('❌ Error configuring cache: $e');
@@ -734,10 +695,6 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // UTILITÁRIOS
-  // ==========================================================================
-
   @override
   Future<String> getMimeType(String path) async {
     try {
@@ -769,7 +726,6 @@ class FileManagerService implements IFileRepository {
   @override
   Future<domain.FilePermissionsEntity?> getPermissions(String path) async {
     try {
-      // Simulação básica de permissões - implementar lógica específica por plataforma
       return const domain.FilePermissionsEntity(
         readable: true,
         writable: true,
@@ -787,7 +743,6 @@ class FileManagerService implements IFileRepository {
     required domain.FilePermissionsEntity permissions,
   }) async {
     try {
-      // Implementar lógica específica por plataforma
       return true;
     } catch (e) {
       debugPrint('❌ Error setting permissions: $e');
@@ -834,10 +789,6 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // COMPARTILHAMENTO
-  // ==========================================================================
-
   @override
   Future<bool> shareFiles({
     required List<String> filePaths,
@@ -845,8 +796,6 @@ class FileManagerService implements IFileRepository {
     String? text,
   }) async {
     try {
-      // Implementar usando plugin de compartilhamento
-      // Por enquanto, apenas log
       debugPrint('📤 Sharing files: $filePaths');
       return true;
     } catch (e) {
@@ -861,7 +810,6 @@ class FileManagerService implements IFileRepository {
     String? subject,
   }) async {
     try {
-      // Implementar usando plugin de compartilhamento
       debugPrint('📤 Sharing text: $text');
       return true;
     } catch (e) {
@@ -873,7 +821,6 @@ class FileManagerService implements IFileRepository {
   @override
   Future<bool> openFile(String path) async {
     try {
-      // Implementar usando plugin de abertura de arquivos
       debugPrint('📂 Opening file: $path');
       return true;
     } catch (e) {
@@ -881,10 +828,6 @@ class FileManagerService implements IFileRepository {
       return false;
     }
   }
-
-  // ==========================================================================
-  // BACKUP E RESTAURAÇÃO
-  // ==========================================================================
 
   @override
   Future<domain.FileOperationResult> createBackup({
@@ -936,16 +879,9 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // MONITORAMENTO
-  // ==========================================================================
-
   @override
   Stream<domain.FileInfoEntity> watchDirectory(String path) {
     final controller = StreamController<domain.FileInfoEntity>();
-    
-    // Implementar watcher de diretório
-    // Por enquanto, retornar stream vazio
     controller.close();
     
     return controller.stream;
@@ -969,38 +905,24 @@ class FileManagerService implements IFileRepository {
     }
   }
 
-  // ==========================================================================
-  // MÉTODOS AUXILIARES PRIVADOS
-  // ==========================================================================
-
   bool _matchesFilter(domain.FileInfoEntity fileInfo, domain.FileFilter? filter) {
     if (filter == null) return true;
-
-    // Verificar extensões
     if (filter.extensions != null && filter.extensions!.isNotEmpty) {
       if (!filter.extensions!.contains(fileInfo.extension.toLowerCase())) {
         return false;
       }
     }
-
-    // Verificar tipos MIME
     if (filter.mimeTypes != null && filter.mimeTypes!.isNotEmpty) {
       if (!filter.mimeTypes!.contains(fileInfo.mimeType)) {
         return false;
       }
     }
-
-    // Verificar tamanho mínimo
     if (filter.minSize != null && fileInfo.size < filter.minSize!) {
       return false;
     }
-
-    // Verificar tamanho máximo
     if (filter.maxSize != null && fileInfo.size > filter.maxSize!) {
       return false;
     }
-
-    // Verificar data de modificação
     if (filter.modifiedAfter != null && fileInfo.lastModified.isBefore(filter.modifiedAfter!)) {
       return false;
     }
@@ -1008,13 +930,9 @@ class FileManagerService implements IFileRepository {
     if (filter.modifiedBefore != null && fileInfo.lastModified.isAfter(filter.modifiedBefore!)) {
       return false;
     }
-
-    // Verificar arquivos ocultos
     if (!filter.includeHidden && fileInfo.isHidden) {
       return false;
     }
-
-    // Verificar diretórios
     if (!filter.includeDirectories && fileInfo.isDirectory) {
       return false;
     }

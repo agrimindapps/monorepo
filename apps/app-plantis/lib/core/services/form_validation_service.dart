@@ -27,8 +27,6 @@ class FormValidationService {
     if (trimmedName.length > maxNameLength) {
       return ValidationResult.error('Nome deve ter no máximo $maxNameLength caracteres');
     }
-    
-    // Validar caracteres inválidos
     if (!_isValidPlantText(trimmedName)) {
       return ValidationResult.error('Nome contém caracteres inválidos');
     }
@@ -191,8 +189,6 @@ class FormValidationService {
     String? waterAmount,
   }) {
     final errors = <String, String>{};
-    
-    // Validar rega
     if (enableWateringCare == true) {
       final result = validateCareConfiguration(
         isEnabled: true,
@@ -203,8 +199,6 @@ class FormValidationService {
         errors['watering'] = result.error!;
       }
     }
-    
-    // Validar fertilização
     if (enableFertilizerCare == true) {
       final result = validateCareConfiguration(
         isEnabled: true,
@@ -215,8 +209,6 @@ class FormValidationService {
         errors['fertilizing'] = result.error!;
       }
     }
-    
-    // Validar luz solar
     if (enableSunlightCare == true) {
       final result = validateCareConfiguration(
         isEnabled: true,
@@ -227,8 +219,6 @@ class FormValidationService {
         errors['sunlight'] = result.error!;
       }
     }
-    
-    // Validar inspeção de pragas
     if (enablePestInspection == true) {
       final result = validateCareConfiguration(
         isEnabled: true,
@@ -239,8 +229,6 @@ class FormValidationService {
         errors['pestInspection'] = result.error!;
       }
     }
-    
-    // Validar poda
     if (enablePruning == true) {
       final result = validateCareConfiguration(
         isEnabled: true,
@@ -251,8 +239,6 @@ class FormValidationService {
         errors['pruning'] = result.error!;
       }
     }
-    
-    // Validar replantio
     if (enableReplanting == true) {
       final result = validateCareConfiguration(
         isEnabled: true,
@@ -263,8 +249,6 @@ class FormValidationService {
         errors['replanting'] = result.error!;
       }
     }
-    
-    // Validar quantidade de água
     final waterAmountResult = validateWaterAmount(waterAmount);
     if (waterAmountResult.hasError) {
       errors['waterAmount'] = waterAmountResult.error!;
@@ -294,8 +278,6 @@ class FormValidationService {
     String? waterAmount,
   }) {
     final errors = <String, String>{};
-    
-    // Validar campos básicos
     final nameResult = validatePlantName(name);
     if (nameResult.hasError) {
       errors['name'] = nameResult.error!;
@@ -315,8 +297,6 @@ class FormValidationService {
     if (plantingDateResult.hasError) {
       errors['plantingDate'] = plantingDateResult.error!;
     }
-    
-    // Validar configurações de cuidado
     final careValidation = validatePlantCareConfiguration(
       enableWateringCare: enableWateringCare,
       wateringIntervalDays: wateringIntervalDays,
@@ -350,7 +330,6 @@ class FormValidationService {
   
   /// Helper para validar texto de plantas (nome, espécie)
   bool _isValidPlantText(String text) {
-    // Permite letras, números, espaços, hífens, parênteses e alguns caracteres especiais
     final validPattern = RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\(\)\.\,\&]+$');
     return validPattern.hasMatch(text);
   }

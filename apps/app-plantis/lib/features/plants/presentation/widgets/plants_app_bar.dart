@@ -32,7 +32,6 @@ class PlantsAppBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       child: Column(
         children: [
-          // Search bar with grid button
           Row(
             children: [
               Expanded(
@@ -107,20 +106,15 @@ class PlantsAppBar extends StatelessWidget {
               ),
 
               const SizedBox(width: 8),
-
-              // Grid/List toggle button (always visible)
               GestureDetector(
                 onTap: () {
                   ViewMode newMode;
-
-                  // Se está agrupado, alterna entre os modos agrupados
                   if (viewMode == ViewMode.groupedBySpaces ||
                       viewMode == ViewMode.groupedBySpacesGrid) {
                     newMode = ViewMode.groupedBySpacesList;
                   } else if (viewMode == ViewMode.groupedBySpacesList) {
                     newMode = ViewMode.groupedBySpacesGrid;
                   } else {
-                    // Se não está agrupado, alterna normalmente
                     newMode =
                         viewMode == ViewMode.grid
                             ? ViewMode.list

@@ -29,8 +29,6 @@ class LoginFormWidget extends ConsumerWidget {
             ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
           ),
           const SizedBox(height: 20),
-
-          // Campo de email
           AuthTextFieldWidget(
             controller: formNotifier.emailController,
             label: 'Email',
@@ -39,12 +37,9 @@ class LoginFormWidget extends ConsumerWidget {
             keyboardType: TextInputType.emailAddress,
             validator: formNotifier.validateEmail,
             onFieldSubmitted: (_) {
-              // Focar no próximo campo
             },
           ),
           const SizedBox(height: 16),
-
-          // Campo de senha
           AuthTextFieldWidget(
             controller: formNotifier.passwordController,
             label: 'Senha',
@@ -65,18 +60,12 @@ class LoginFormWidget extends ConsumerWidget {
             onFieldSubmitted: (_) => _handleLogin(context, ref),
           ),
           const SizedBox(height: 12),
-
-          // Lembrar-me e Esqueceu senha
           _buildRememberMeAndForgotPassword(context, ref),
-
-          // Mensagem de erro
           if (formState.errorMessage != null) ...[
             const SizedBox(height: 16),
             _buildErrorMessage(context, ref, formState.errorMessage!),
           ],
           const SizedBox(height: 20),
-
-          // Botão de login
           AuthButtonWidget(
             text: 'Entrar',
             isLoading: formState.isLoading,
@@ -84,8 +73,6 @@ class LoginFormWidget extends ConsumerWidget {
           ),
 
           const SizedBox(height: 20),
-
-          // Divider
           const Row(
             children: [
               Expanded(child: Divider()),
@@ -104,13 +91,9 @@ class LoginFormWidget extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Botões de login social
           const SocialLoginButtonsWidget(),
 
           const SizedBox(height: 16),
-
-          // Botão de modo anônimo
           _buildAnonymousLoginButton(context, ref),
         ],
       ),

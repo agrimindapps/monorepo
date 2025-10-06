@@ -23,7 +23,6 @@ class CalculateWeatherStatistics {
     bool forceRecalculate = false,
   }) async {
     try {
-      // Validate inputs
       final validationResult = _validateInputs(locationId, period, startDate, endDate);
       if (validationResult.isLeft()) {
         return validationResult.fold(
@@ -31,8 +30,6 @@ class CalculateWeatherStatistics {
           (_) => throw Exception('Unexpected validation success'),
         );
       }
-
-      // Get weather measurements for the period
       final measurementsResult = await _repository.getMeasurementsByDateRange(
         startDate,
         endDate,
@@ -49,8 +46,6 @@ class CalculateWeatherStatistics {
               _getMinimumRequiredMeasurements(period),
             ));
           }
-
-          // Check if we have enough data for reliable statistics
           final minRequired = _getMinimumRequiredMeasurements(period);
           if (measurements.length < minRequired) {
             return Left(InsufficientWeatherDataFailure(
@@ -59,8 +54,6 @@ class CalculateWeatherStatistics {
               minRequired,
             ));
           }
-
-          // Calculate statistics
           final statistics = await _calculateStatistics(
             locationId,
             period,
@@ -68,8 +61,6 @@ class CalculateWeatherStatistics {
             endDate,
             measurements,
           );
-
-          // Save calculated statistics
           final saveResult = await _repository.calculateStatistics(
             locationId: locationId,
             period: period,
@@ -226,10 +217,6 @@ class CalculateWeatherStatistics {
     }
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
   /// Validate calculation inputs
   Either<WeatherFailure, void> _validateInputs(
     String locationId,
@@ -255,8 +242,6 @@ class CalculateWeatherStatistics {
         'Start date must be before end date'
       ));
     }
-
-    // Check if date range is reasonable for the period
     final daysDifference = endDate.difference(startDate).inDays;
     switch (period.toLowerCase()) {
       case 'daily':
@@ -325,37 +310,27 @@ class CalculateWeatherStatistics {
     List<WeatherMeasurementEntity> measurements,
   ) async {
     final locationName = measurements.first.locationName;
-    
-    // Basic temperature statistics
     final temperatures = measurements.map((m) => m.temperature).toList();
     final avgTemperature = _calculateMean(temperatures);
     final minTemperature = temperatures.reduce(math.min);
     final maxTemperature = temperatures.reduce(math.max);
     final temperatureVariance = _calculateVariance(temperatures, avgTemperature);
-
-    // Humidity statistics
     final humidities = measurements.map((m) => m.humidity).toList();
     final avgHumidity = _calculateMean(humidities);
     final minHumidity = humidities.reduce(math.min);
     final maxHumidity = humidities.reduce(math.max);
     final humidityVariance = _calculateVariance(humidities, avgHumidity);
-
-    // Pressure statistics
     final pressures = measurements.map((m) => m.pressure).toList();
     final avgPressure = _calculateMean(pressures);
     final minPressure = pressures.reduce(math.min);
     final maxPressure = pressures.reduce(math.max);
     final pressureVariance = _calculateVariance(pressures, avgPressure);
-
-    // Wind statistics
     final windSpeeds = measurements.map((m) => m.windSpeed).toList();
     final avgWindSpeed = _calculateMean(windSpeeds);
     final maxWindSpeed = windSpeeds.reduce(math.max);
     final windDirections = measurements.map((m) => m.windDirection).toList();
     final avgWindDirection = _calculateCircularMean(windDirections);
     final predominantWindDirection = _calculatePredominantWindDirection(windDirections);
-
-    // Precipitation statistics
     final rainfalls = measurements.map((m) => m.rainfall).toList();
     final totalRainfall = rainfalls.reduce((a, b) => a + b);
     final nonZeroRainfalls = rainfalls.where((r) => r > 0).toList();
@@ -363,20 +338,14 @@ class CalculateWeatherStatistics {
     final maxDailyRainfall = rainfalls.reduce(math.max);
     final rainyDays = nonZeroRainfalls.length;
     final dryDays = measurements.length - rainyDays;
-
-    // UV and visibility statistics
     final uvIndices = measurements.map((m) => m.uvIndex).toList();
     final avgUVIndex = _calculateMean(uvIndices);
     final maxUVIndex = uvIndices.reduce(math.max);
     final visibilities = measurements.map((m) => m.visibility).toList();
     final avgVisibility = _calculateMean(visibilities);
     final minVisibility = visibilities.reduce(math.min);
-
-    // Weather condition analysis
     final conditionCounts = _calculateWeatherConditionCounts(measurements);
     final predominantCondition = _findPredominantCondition(conditionCounts);
-
-    // Agricultural metrics
     final favorableConditions = measurements.where((m) => m.isFavorableForAgriculture).toList();
     final favorableDays = favorableConditions.length;
     final unfavorableDays = measurements.length - favorableDays;
@@ -384,21 +353,15 @@ class CalculateWeatherStatistics {
     final avgHeatIndex = _calculateMean(heatIndices);
     final dewPoints = measurements.map((m) => m.dewPoint).toList();
     final avgDewPoint = _calculateMean(dewPoints);
-
-    // Data quality metrics
     final totalMeasurements = measurements.length;
     final validMeasurements = measurements.where((m) => m.qualityScore > 0.5).length;
     final dataCompleteness = validMeasurements / totalMeasurements;
     final qualityScores = measurements.map((m) => m.qualityScore).toList();
     final avgDataQuality = _calculateMean(qualityScores);
-
-    // Trend analysis (simplified - would need previous period data for accurate trends)
     final temperatureTrend = _calculateSimpleTrend(temperatures);
     final humidityTrend = _calculateSimpleTrend(humidities);
     final pressureTrend = _calculateSimpleTrend(pressures);
     final rainfallTrend = _calculateSimpleTrend(rainfalls);
-
-    // Anomaly detection
     final anomalies = _detectAnomalies(measurements);
     final anomalyScore = anomalies.length / measurements.length;
 
@@ -497,8 +460,6 @@ class CalculateWeatherStatistics {
   /// Calculate predominant wind direction
   String _calculatePredominantWindDirection(List<double> directions) {
     if (directions.isEmpty) return 'N';
-    
-    // Group directions into compass sectors
     final sectorCounts = <String, int>{};
     const sectors = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
                      'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
@@ -554,8 +515,6 @@ class CalculateWeatherStatistics {
   /// Detect weather anomalies
   List<String> _detectAnomalies(List<WeatherMeasurementEntity> measurements) {
     final anomalies = <String>[];
-    
-    // Calculate thresholds (simplified approach)
     final temperatures = measurements.map((m) => m.temperature).toList();
     final tempMean = _calculateMean(temperatures);
     final tempStdDev = math.sqrt(_calculateVariance(temperatures, tempMean));
@@ -565,22 +524,15 @@ class CalculateWeatherStatistics {
     final humidityStdDev = math.sqrt(_calculateVariance(humidities, humidityMean));
     
     for (final measurement in measurements) {
-      // Temperature anomalies (beyond 2 standard deviations)
       if ((measurement.temperature - tempMean).abs() > 2 * tempStdDev) {
         anomalies.add('extreme_temperature_${measurement.id}');
       }
-      
-      // Humidity anomalies
       if ((measurement.humidity - humidityMean).abs() > 2 * humidityStdDev) {
         anomalies.add('extreme_humidity_${measurement.id}');
       }
-      
-      // High wind speed
       if (measurement.windSpeed > 80) {
         anomalies.add('high_wind_speed_${measurement.id}');
       }
-      
-      // Heavy rainfall
       if (measurement.rainfall > 100) {
         anomalies.add('heavy_rainfall_${measurement.id}');
       }

@@ -94,8 +94,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       print('🌱 AddPlantUseCase.call() - params.name: ${params.name}');
       print('🌱 AddPlantUseCase.call() - params.id: ${params.id}');
     }
-
-    // Validate plant data
     final validationResult = _validatePlant(params);
     if (validationResult != null) {
       if (kDebugMode) {
@@ -105,16 +103,12 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
       }
       return Left(validationResult);
     }
-
-    // Create plant with timestamps
     final now = DateTime.now();
     final generatedId = params.id ?? _generateId();
 
     if (kDebugMode) {
       print('🌱 AddPlantUseCase.call() - Criando planta com id: $generatedId');
     }
-
-    // Get current user ID from auth state notifier
     final currentUser = AuthStateNotifier.instance.currentUser;
     if (currentUser == null) {
       return const Left(AuthFailure('Usuário não está autenticado'));
@@ -140,8 +134,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     if (kDebugMode) {
       print('🌱 AddPlantUseCase.call() - Chamando repository.addPlant()');
     }
-
-    // Salvar planta primeiro
     final plantResult = await repository.addPlant(plant);
 
     return plantResult.fold(
@@ -160,8 +152,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
           print('   - savedPlant.name: ${savedPlant.name}');
           print('   - savedPlant.createdAt: ${savedPlant.createdAt}');
         }
-
-        // Gerar tarefas automáticas se há configuração
         if (savedPlant.config != null) {
           if (kDebugMode) {
             print('🌱 AddPlantUseCase.call() - Gerando tarefas iniciais');
@@ -169,13 +159,9 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
               '🌱 AddPlantUseCase.call() - Config ativa para: ${PlantaConfigModel.fromPlantConfig(plantaId: savedPlant.id, plantConfig: savedPlant.config).activeCareTypes}',
             );
           }
-
-          // Gerar PlantTasks automáticas (NOVA FUNCIONALIDADE CRÍTICA)
           final plantTasksResult = await _generatePlantTasksWithErrorHandling(
             savedPlant,
           );
-
-          // Gerar Tasks tradicionais se o use case estiver disponível (manter compatibilidade)
           if (generateInitialTasksUseCase != null) {
             final taskGenerationResult =
                 await _generateInitialTasksWithErrorHandling(savedPlant);
@@ -266,8 +252,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
           '🌱 _generatePlantTasksWithErrorHandling - Iniciando geração de PlantTasks',
         );
       }
-
-      // Gerar PlantTasks usando o PlantTaskGenerator
       final plantTasks = plantTaskGenerator.generateTasksForPlant(plant);
 
       if (plantTasks.isEmpty) {
@@ -291,8 +275,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
           );
         }
       }
-
-      // CRÍTICO: Persistir PlantTasks em repositório
       if (plantTasksRepository != null) {
         if (kDebugMode) {
           print(
@@ -368,8 +350,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
           '🌱 _generateInitialTasksWithErrorHandling - Iniciando conversão de config',
         );
       }
-
-      // Converter PlantConfig para PlantaConfigModel com validação
       final configModel = _convertToPlantaConfigModel(plant);
 
       if (configModel.activeCareTypes.isEmpty) {

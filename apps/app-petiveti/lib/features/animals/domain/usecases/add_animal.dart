@@ -12,7 +12,6 @@ class AddAnimal extends UseCase<void, Animal> {
 
   @override
   Future<Either<Failure, void>> call(Animal params) async {
-    // Validation
     if (params.name.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'Nome do animal é obrigatório'));
     }

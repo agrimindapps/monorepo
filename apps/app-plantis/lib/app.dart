@@ -11,10 +11,7 @@ class PlantisApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Migrado para Riverpod puro - sem mais dependências do Provider package
     final router = AppRouter.router(ref);
-    
-    // Tema simplificado - será migrado para Riverpod posteriormente
     const currentThemeMode = ThemeMode.system;
 
     return DesktopKeyboardShortcuts(

@@ -114,13 +114,9 @@ class CacheManagementService {
 
   late ILocalStorageRepository _localStorage;
   bool _isInitialized = false;
-
-  // In-memory caches with different strategies
   final Map<String, Map<String, CacheEntry>> _memoryCaches = {};
   final Map<String, CacheConfig> _cacheConfigs = {};
   final Map<String, List<String>> _lruOrders = {};
-  
-  // Statistics tracking
   final Map<String, int> _hitCounts = {};
   final Map<String, int> _missCounts = {};
   final Map<String, int> _evictionCounts = {};
@@ -136,11 +132,7 @@ class CacheManagementService {
     if (_isInitialized) return;
 
     _localStorage = localStorage;
-
-    // Setup default cache configurations
     await _setupDefaultCaches();
-
-    // Start background tasks
     _startCleanupTimer();
     _startStatsCollection();
 
@@ -153,7 +145,6 @@ class CacheManagementService {
 
   /// Setup default cache configurations for ReceitauAgro
   Future<void> _setupDefaultCaches() async {
-    // Image cache - large capacity, disk persistent
     await createCache(
       'images',
       const CacheConfig(
@@ -164,8 +155,6 @@ class CacheManagementService {
         storageKey: 'receituagro_image_cache',
       ),
     );
-
-    // API responses cache - medium capacity, memory only
     await createCache(
       'api_responses',
       const CacheConfig(
@@ -175,8 +164,6 @@ class CacheManagementService {
         persistToDisk: false,
       ),
     );
-
-    // Search results cache - small capacity, session based
     await createCache(
       'search_results',
       const CacheConfig(
@@ -186,8 +173,6 @@ class CacheManagementService {
         persistToDisk: false,
       ),
     );
-
-    // Static data cache - permanent, disk persistent
     await createCache(
       'static_data',
       const CacheConfig(
@@ -197,8 +182,6 @@ class CacheManagementService {
         storageKey: 'receituagro_static_cache',
       ),
     );
-
-    // User preferences cache - permanent, disk persistent
     await createCache(
       'user_prefs',
       const CacheConfig(
@@ -208,8 +191,6 @@ class CacheManagementService {
         storageKey: 'receituagro_user_prefs',
       ),
     );
-
-    // Diagnostics cache - medium TTL, memory only
     await createCache(
       'diagnostics',
       const CacheConfig(
@@ -230,8 +211,6 @@ class CacheManagementService {
     _missCounts[cacheKey] = 0;
     _evictionCounts[cacheKey] = 0;
     _hitTimes[cacheKey] = [];
-
-    // Load from disk if persistent
     if (config.persistToDisk && config.storageKey != null) {
       await _loadCacheFromDisk(cacheKey, config.storageKey!);
     }
@@ -261,21 +240,13 @@ class CacheManagementService {
         _recordMiss(cacheKey, startTime);
         return null;
       }
-
-      // Check if expired
       if (entry.isExpired) {
         await _removeFromCache(cacheKey, itemKey);
         _recordMiss(cacheKey, startTime);
         return null;
       }
-
-      // Update LRU order
       await _updateLRU(cacheKey, itemKey);
-
-      // Record hit
       _recordHit(cacheKey, startTime);
-
-      // Parse data if needed
       if (parser != null && entry.data is! T) {
         return parser(entry.data);
       }
@@ -305,8 +276,6 @@ class CacheManagementService {
       if (cache == null || config == null) {
         throw Exception('Cache $cacheKey not found');
       }
-
-      // Calculate expiration
       DateTime? expiresAt;
       switch (config.strategy) {
         case CacheStrategy.ttl:
@@ -316,33 +285,21 @@ class CacheManagementService {
           }
           break;
         case CacheStrategy.session:
-          // Expires when app restarts (no specific time)
           break;
         case CacheStrategy.permanent:
         case CacheStrategy.memory:
         case CacheStrategy.lru:
-          // No expiration
           break;
       }
-
-      // Create cache entry
       final entry = CacheEntry<T>(
         data: data,
         createdAt: DateTime.now(),
         expiresAt: expiresAt,
         metadata: metadata ?? {},
       );
-
-      // Check size limits and evict if necessary
       await _ensureCacheSize(cacheKey);
-
-      // Store in cache
       cache[itemKey] = entry;
-
-      // Update LRU order
       await _updateLRU(cacheKey, itemKey);
-
-      // Persist to disk if needed
       if (config.persistToDisk && config.storageKey != null) {
         await _persistCacheToDisk(cacheKey, config.storageKey!);
       }
@@ -435,14 +392,8 @@ class CacheManagementService {
       if (kDebugMode) {
         print('📦 Starting cache preload...');
       }
-
-      // Preload static data
       await _preloadStaticData();
-
-      // Preload user preferences
       await _preloadUserPreferences();
-
-      // Preload frequently accessed images
       await _preloadFrequentImages();
 
       if (kDebugMode) {
@@ -464,17 +415,11 @@ class CacheManagementService {
 
       for (final cacheKey in _memoryCaches.keys) {
         final stats = getStats(cacheKey);
-        
-        // Adjust cache size based on hit ratio
         if (stats.hitRatio > 0.8 && stats.currentSize > 0) {
-          // High hit ratio - consider increasing size
           await _optimizeCacheSize(cacheKey, increase: true);
         } else if (stats.hitRatio < 0.3 && stats.currentSize > 10) {
-          // Low hit ratio - consider decreasing size
           await _optimizeCacheSize(cacheKey, increase: false);
         }
-
-        // Clean expired entries
         await _cleanExpiredEntries(cacheKey);
       }
 
@@ -487,8 +432,6 @@ class CacheManagementService {
       }
     }
   }
-
-  // ===== PRIVATE METHODS =====
 
   Future<void> _removeFromCache(String cacheKey, String itemKey) async {
     final cache = _memoryCaches[cacheKey];
@@ -540,8 +483,6 @@ class CacheManagementService {
     final duration = DateTime.now().difference(startTime);
     final hitTimes = _hitTimes[cacheKey] ?? [];
     hitTimes.add(duration);
-    
-    // Keep only last 100 hit times for average calculation
     if (hitTimes.length > 100) {
       hitTimes.removeAt(0);
     }
@@ -668,19 +609,16 @@ class CacheManagementService {
   }
 
   Future<void> _preloadStaticData() async {
-    // Mock preload - in production, load actual static data
     await put('static_data', 'app_config', {'version': '1.0.0'});
     await put('static_data', 'feature_flags', {'new_ui': true});
   }
 
   Future<void> _preloadUserPreferences() async {
-    // Mock preload - in production, load actual user preferences
     await put('user_prefs', 'theme', 'light');
     await put('user_prefs', 'language', 'pt-BR');
   }
 
   Future<void> _preloadFrequentImages() async {
-    // Mock preload - in production, preload frequently accessed images
     final commonImages = ['logo.png', 'placeholder.png', 'default_avatar.png'];
     
     for (final image in commonImages) {
@@ -696,8 +634,6 @@ class CacheManagementService {
     final newSize = increase 
         ? (currentSize * 1.2).round() 
         : (currentSize * 0.8).round();
-
-    // Update config (in production, this might need persistence)
     _cacheConfigs[cacheKey] = CacheConfig(
       ttl: config.ttl,
       maxSize: newSize,

@@ -57,20 +57,13 @@ class HttpClientService {
     required bool enableRetry,
     required bool enableLogging,
   }) {
-    // Auth Interceptor - adiciona token automaticamente
     _dio.interceptors.add(_AuthInterceptor());
-
-    // Cache Interceptor
     if (enableCache) {
       _dio.interceptors.add(_CacheInterceptor());
     }
-
-    // Retry Interceptor
     if (enableRetry) {
       _dio.interceptors.add(_RetryInterceptor());
     }
-
-    // Logging Interceptor (apenas em debug)
     if (enableLogging && kDebugMode) {
       _dio.interceptors.add(LogInterceptor(
         requestHeader: true,
@@ -81,8 +74,6 @@ class HttpClientService {
         logPrint: (obj) => debugPrint(obj.toString()),
       ));
     }
-
-    // Error Handler Interceptor
     _dio.interceptors.add(_ErrorHandlerInterceptor());
   }
 
@@ -373,7 +364,6 @@ class HttpClientService {
   }
 
   String _getErrorMessage(int statusCode, dynamic data) {
-    // Tenta extrair mensagem específica do response
     if (data is Map<String, dynamic>) {
       final message = data['message'] ?? 
                      data['error'] ?? 
@@ -381,8 +371,6 @@ class HttpClientService {
                      data['msg'];
       if (message != null) return message.toString();
     }
-
-    // Mensagens padrão por status code
     switch (statusCode) {
       case 400: return 'Requisição inválida';
       case 401: return 'Não autorizado - Faça login novamente';
@@ -421,7 +409,6 @@ class _CacheInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // Apenas GET requests são cacheadas
     if (options.method.toUpperCase() != 'GET') {
       return handler.next(options);
     }
@@ -430,7 +417,6 @@ class _CacheInterceptor extends Interceptor {
     final cached = _cache[key];
 
     if (cached != null && !cached.isExpired) {
-      // Retorna do cache
       handler.resolve(Response<dynamic>(
         requestOptions: options,
         data: cached.data,
@@ -445,13 +431,10 @@ class _CacheInterceptor extends Interceptor {
 
   @override
   void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
-    // Cache apenas responses de sucesso
     if (response.statusCode == 200 && 
         response.requestOptions.method.toUpperCase() == 'GET') {
       final key = _getCacheKey(response.requestOptions);
       _cache[key] = CacheItem(response.data);
-      
-      // Limpa cache antigo periodicamente
       _cleanExpiredCache();
     }
 
@@ -478,8 +461,6 @@ class _RetryInterceptor extends Interceptor {
 
     if ((retryCount as int) < _maxRetries && _shouldRetry(err)) {
       err.requestOptions.extra['retryCount'] = retryCount + 1;
-      
-      // Delay antes do retry
       await Future<void>.delayed(Duration(milliseconds: _retryDelay * (retryCount + 1)));
       
       try {
@@ -497,7 +478,6 @@ class _RetryInterceptor extends Interceptor {
         handler.resolve(response);
         return;
       } catch (e) {
-        // Continua para o próximo retry ou falha
       }
     }
 
@@ -505,7 +485,6 @@ class _RetryInterceptor extends Interceptor {
   }
 
   bool _shouldRetry(DioException err) {
-    // Retry em casos específicos
     return err.type == DioExceptionType.connectionTimeout ||
            err.type == DioExceptionType.sendTimeout ||
            err.type == DioExceptionType.receiveTimeout ||
@@ -519,7 +498,6 @@ class _RetryInterceptor extends Interceptor {
 class _ErrorHandlerInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    // Log do erro
     debugPrint('HTTP Error: ${err.message}');
     debugPrint('URL: ${err.requestOptions.uri}');
     debugPrint('Status: ${err.response?.statusCode}');

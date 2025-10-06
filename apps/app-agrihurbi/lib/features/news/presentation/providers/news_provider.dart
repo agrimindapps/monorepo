@@ -41,8 +41,6 @@ class NewsProvider with ChangeNotifier {
     this._repository,
   );
 
-  // === STATE VARIABLES ===
-
   List<NewsArticleEntity> _articles = [];
   List<NewsArticleEntity> _premiumArticles = [];
   List<NewsArticleEntity> _favoriteArticles = [];
@@ -62,8 +60,6 @@ class NewsProvider with ChangeNotifier {
 
   DateTime? _lastRSSUpdate;
   List<String> _rssSources = [];
-
-  // === GETTERS ===
 
   List<NewsArticleEntity> get articles => _articles;
   List<NewsArticleEntity> get premiumArticles => _premiumArticles;
@@ -87,8 +83,6 @@ class NewsProvider with ChangeNotifier {
 
   bool get hasError => _errorMessage != null;
   bool get hasData => _articles.isNotEmpty;
-
-  // === NEWS OPERATIONS ===
 
   /// Load news articles with optional filter
   Future<void> loadNews({
@@ -202,8 +196,6 @@ class NewsProvider with ChangeNotifier {
     }
   }
 
-  // === FAVORITES MANAGEMENT ===
-
   /// Load favorite articles
   Future<void> loadFavorites() async {
     try {
@@ -233,7 +225,6 @@ class NewsProvider with ChangeNotifier {
           return false;
         },
         (_) {
-          // Refresh favorites list
           loadFavorites();
           return true;
         },
@@ -255,7 +246,6 @@ class NewsProvider with ChangeNotifier {
           return false;
         },
         (_) {
-          // Refresh favorites list
           loadFavorites();
           return true;
         },
@@ -277,8 +267,6 @@ class NewsProvider with ChangeNotifier {
     }
   }
 
-  // === RSS FEEDS MANAGEMENT ===
-
   /// Refresh RSS feeds
   Future<void> refreshRSSFeeds() async {
     if (_isRefreshing) return;
@@ -292,9 +280,7 @@ class NewsProvider with ChangeNotifier {
       result.fold(
         (failure) => _setError('Erro ao atualizar feeds: ${failure.message}'),
         (_) async {
-          // Update last RSS update time
           await _updateLastRSSTime();
-          // Reload news after refresh
           await loadNews(refresh: true);
         },
       );
@@ -314,7 +300,6 @@ class NewsProvider with ChangeNotifier {
         notifyListeners();
       });
     } catch (e) {
-      // Silent fail
     }
   }
 
@@ -377,8 +362,6 @@ class NewsProvider with ChangeNotifier {
     }
   }
 
-  // === COMMODITY PRICES ===
-
   /// Load commodity prices
   Future<void> loadCommodityPrices({
     List<CommodityType>? types,
@@ -424,8 +407,6 @@ class NewsProvider with ChangeNotifier {
     }
   }
 
-  // === FILTER MANAGEMENT ===
-
   /// Apply news filter
   void applyFilter(NewsFilter filter) {
     _currentFilter = filter;
@@ -452,8 +433,6 @@ class NewsProvider with ChangeNotifier {
     applyFilter(filter);
   }
 
-  // === UTILITY METHODS ===
-
   /// Initialize provider
   Future<void> initialize() async {
     await Future.wait([
@@ -473,8 +452,6 @@ class NewsProvider with ChangeNotifier {
       loadMarketSummary(),
     ]);
   }
-
-  // === PRIVATE METHODS ===
 
   void _setLoadingNews(bool loading) {
     _isLoadingNews = loading;

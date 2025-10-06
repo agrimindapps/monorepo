@@ -44,7 +44,6 @@ class TaskListWidget extends ConsumerWidget {
             ),
           ),
       data: (tasks) {
-        // Aplicar filtros
         final filteredTasks = _filterTasks(tasks);
 
         if (filteredTasks.isEmpty) {
@@ -93,17 +92,12 @@ class TaskListWidget extends ConsumerWidget {
 
   List<TaskEntity> _filterTasks(List<TaskEntity> tasks) {
     List<TaskEntity> filtered = List.from(tasks);
-
-    // Filtrar por tag primeiro (se especificada)
     if (selectedTag != null && selectedTag!.isNotEmpty) {
       filtered =
           filtered.where((task) => task.tags.contains(selectedTag)).toList();
     }
-
-    // Aplicar filtro de tipo
     switch (taskFilter) {
       case TaskFilter.all:
-        // Não aplicar filtro adicional
         break;
       case TaskFilter.today:
         filtered = filtered.where((task) => task.isDueToday).toList();
@@ -188,20 +182,13 @@ class TaskListWidget extends ConsumerWidget {
     int oldIndex,
     int newIndex,
   ) {
-    // Ajustar newIndex se for maior que oldIndex (comportamento padrão do ReorderableListView)
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-
-    // Criar nova lista com ordem atualizada
     final reorderedTasks = List<TaskEntity>.from(tasks);
     final movedTask = reorderedTasks.removeAt(oldIndex);
     reorderedTasks.insert(newIndex, movedTask);
-
-    // Extrair IDs na nova ordem
     final taskIds = reorderedTasks.map((task) => task.id).toList();
-
-    // Chamar método de reordenação
     ref.read(taskNotifierProvider.notifier).reorderTasks(taskIds);
   }
 }

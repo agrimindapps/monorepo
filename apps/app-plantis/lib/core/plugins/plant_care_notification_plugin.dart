@@ -32,8 +32,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   @override
   Future<void> onRegister(IEnhancedNotificationRepository repository) async {
     _repository = repository;
-
-    // Register all plant care templates
     await _registerPlantCareTemplates();
 
     if (kDebugMode) {
@@ -43,7 +41,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
 
   @override
   Future<void> onUnregister() async {
-    // Cleanup any plugin-specific resources
     if (kDebugMode) {
       debugPrint('🌱 PlantCareNotificationPlugin unregistered');
     }
@@ -55,12 +52,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
     Map<String, dynamic> data,
   ) async {
     try {
-      // Validate required plant care data
       if (!_validatePlantCareData(templateId, data)) {
         return null;
       }
-
-      // Process template based on type
       switch (templateId) {
         case 'watering_reminder':
           return _createWateringReminder(data);
@@ -133,16 +127,12 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   @override
   Future<List<String>> validateConfiguration() async {
     final errors = <String>[];
-
-    // Validate that all templates are registered
     for (final templateId in supportedTemplates) {
       final template = await _repository.getTemplate(templateId);
       if (template == null) {
         errors.add('Template not registered: $templateId');
       }
     }
-
-    // Validate repository is available
     try {
       await _repository.getGlobalSettings();
     } catch (e) {
@@ -151,8 +141,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
 
     return errors;
   }
-
-  // Public API Methods
 
   /// Schedules a plant care reminder
   Future<bool> schedulePlantCareReminder({
@@ -298,11 +286,8 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
     }
   }
 
-  // Private Helper Methods
-
   Future<void> _registerPlantCareTemplates() async {
     final templates = [
-      // Watering reminder template
       NotificationTemplate(
         id: 'watering_reminder',
         title: '💧 {{plant_name}} precisa de água!',
@@ -327,8 +312,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           ),
         ],
       ),
-
-      // Fertilizing reminder template
       NotificationTemplate(
         id: 'fertilizing_reminder',
         title: '🌱 Hora de adubar {{plant_name}}!',
@@ -353,8 +336,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           ),
         ],
       ),
-
-      // Repotting reminder template
       NotificationTemplate(
         id: 'repotting_reminder',
         title: '🪴 {{plant_name}} precisa de vaso novo!',
@@ -375,8 +356,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           ),
         ],
       ),
-
-      // Pest inspection reminder template
       NotificationTemplate(
         id: 'pest_inspection_reminder',
         title: '🔍 Verificar {{plant_name}}',
@@ -398,8 +377,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           ),
         ],
       ),
-
-      // General care reminder template
       NotificationTemplate(
         id: 'general_care_reminder',
         title: '🌿 Cuidar de {{plant_name}}',
@@ -423,8 +400,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
           ),
         ],
       ),
-
-      // Overdue care notification template
       NotificationTemplate(
         id: 'plant_care_overdue',
         title: '⏰ {{plant_name}} precisa de atenção!',
@@ -447,8 +422,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
         ],
       ),
     ];
-
-    // Register all templates
     for (final template in templates) {
       await _repository.registerTemplate(template);
     }
@@ -459,12 +432,9 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   }
 
   bool _validatePlantCareData(String templateId, Map<String, dynamic> data) {
-    // Common required fields
     if (!data.containsKey('plant_id') || !data.containsKey('plant_name')) {
       return false;
     }
-
-    // Template-specific validations
     switch (templateId) {
       case 'plant_care_overdue':
         return data.containsKey('care_type');
@@ -761,27 +731,19 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
     }
   }
 
-  // Action Handlers
-
   Future<void> _handleNotificationTap(Map<String, dynamic> params) async {
-    // TODO: Implement navigation to plant details
-    // This would typically navigate to the specific plant's detail page
     if (kDebugMode) {
       debugPrint('🌱 Plant notification tapped: ${params['plant_id']}');
     }
   }
 
   Future<void> _handleMarkWatered(Map<String, dynamic> params) async {
-    // TODO: Implement marking plant as watered
-    // This would typically update the plant's last watered date
     if (kDebugMode) {
       debugPrint('🌱 Marked plant as watered: ${params['plant_id']}');
     }
   }
 
   Future<void> _handleMarkFertilized(Map<String, dynamic> params) async {
-    // TODO: Implement marking plant as fertilized
-    // This would typically update the plant's last fertilized date
     if (kDebugMode) {
       debugPrint('🌱 Marked plant as fertilized: ${params['plant_id']}');
     }
@@ -789,7 +751,6 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
 
   Future<void> _handleSnoozeReminder(Map<String, dynamic> params) async {
     try {
-      // Reschedule notification for 1 hour later
       final plantId = params['plant_id'] as String;
       final careType = params['care_type'] as String;
       final newDate = DateTime.now().add(const Duration(hours: 1));
@@ -811,23 +772,18 @@ class PlantCareNotificationPlugin extends NotificationPlugin {
   }
 
   Future<void> _handleRescheduleCare(Map<String, dynamic> params) async {
-    // TODO: Implement rescheduling care task
-    // This would typically open a date picker to reschedule
     if (kDebugMode) {
       debugPrint('🌱 Reschedule care requested: ${params['plant_id']}');
     }
   }
 
   Future<void> _handleViewPlantDetails(Map<String, dynamic> params) async {
-    // TODO: Implement navigation to plant details
-    // This would navigate to the plant's detail page
     if (kDebugMode) {
       debugPrint('🌱 View plant details requested: ${params['plant_id']}');
     }
   }
 
   Future<void> _handleDismissNotification(Map<String, dynamic> params) async {
-    // Notification is automatically dismissed, just log the action
     if (kDebugMode) {
       debugPrint('🌱 Plant notification dismissed: ${params['plant_id']}');
     }

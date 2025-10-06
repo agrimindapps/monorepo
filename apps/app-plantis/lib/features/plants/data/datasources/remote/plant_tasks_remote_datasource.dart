@@ -153,8 +153,6 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
         'isDirty': false,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      // Return task with Firebase-generated ID
       final savedTask = task.copyWith(
         id: docRef.id,
         isDirty: false,
@@ -277,8 +275,6 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
           '🗑️ PlantTasksRemoteDataSource: Deletando plant task $id do Firebase',
         );
       }
-
-      // Soft delete - mark as deleted
       await _getUserPlantTasksCollection(userId).doc(id).update({
         'isDeleted': true,
         'updatedAt': FieldValue.serverTimestamp(),

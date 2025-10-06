@@ -194,7 +194,6 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         children: [
-          // Period selector
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -221,8 +220,6 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
           ),
           
           const SizedBox(height: 8),
-          
-          // Chart type and options
           Row(
             children: [
               Expanded(
@@ -496,8 +493,6 @@ class _WeightChartVisualizationState extends ConsumerState<WeightChartVisualizat
       totalChangeColor = Colors.green;
       totalChangeIcon = Icons.trending_flat;
     }
-    
-    // Calculate trend
     String trendDescription;
     Color trendColor;
     IconData trendIcon;
@@ -558,8 +553,6 @@ class WeightChartPainter extends CustomPainter {
     final pointPaint = Paint()
       ..color = Colors.blue
       ..style = PaintingStyle.fill;
-    
-    // Calculate chart bounds
     const padding = EdgeInsets.all(40);
     final chartRect = Rect.fromLTWH(
       padding.left,
@@ -567,23 +560,15 @@ class WeightChartPainter extends CustomPainter {
       size.width - padding.horizontal,
       size.height - padding.vertical,
     );
-    
-    // Draw axes
     _drawAxes(canvas, chartRect);
-    
-    // Draw weight data
     if (chartType == ChartType.line) {
       _drawLineChart(canvas, chartRect, paint, pointPaint);
     } else {
       _drawBarChart(canvas, chartRect, paint);
     }
-    
-    // Draw trend line if enabled
     if (showTrendLine && weights.length > 1) {
       _drawTrendLine(canvas, chartRect);
     }
-    
-    // Draw labels
     _drawLabels(canvas, chartRect);
   }
 
@@ -591,15 +576,11 @@ class WeightChartPainter extends CustomPainter {
     final axisPaint = Paint()
       ..color = theme.colorScheme.outline.withValues(alpha: 0.3)
       ..strokeWidth = 1;
-    
-    // Y axis
     canvas.drawLine(
       Offset(chartRect.left, chartRect.top),
       Offset(chartRect.left, chartRect.bottom),
       axisPaint,
     );
-    
-    // X axis
     canvas.drawLine(
       Offset(chartRect.left, chartRect.bottom),
       Offset(chartRect.right, chartRect.bottom),
@@ -631,8 +612,6 @@ class WeightChartPainter extends CustomPainter {
       } else {
         path.lineTo(x, y);
       }
-      
-      // Draw point
       canvas.drawCircle(Offset(x, y), 4, pointPaint);
     }
     
@@ -664,13 +643,10 @@ class WeightChartPainter extends CustomPainter {
   }
 
   void _drawTrendLine(Canvas canvas, Rect chartRect) {
-    // Simple linear regression for trend line
     final trendPaint = Paint()
       ..color = Colors.orange
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-    
-    // Calculate trend (simplified)
     final firstWeight = weights.last.weight;
     final lastWeight = weights.first.weight;
     
@@ -689,8 +665,6 @@ class WeightChartPainter extends CustomPainter {
   }
 
   void _drawLabels(Canvas canvas, Rect chartRect) {
-    // This would include axis labels and value indicators
-    // Simplified for brevity
   }
 
   @override

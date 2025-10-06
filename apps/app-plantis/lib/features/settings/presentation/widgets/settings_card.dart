@@ -263,7 +263,6 @@ class _SettingsCardState extends State<SettingsCard>
               ),
               child: Column(
                 children: [
-                  // Header
                   GestureDetector(
                     onTap: () {
                       if (widget.onHeaderTap != null) {
@@ -346,8 +345,6 @@ class _SettingsCardState extends State<SettingsCard>
                       ),
                     ),
                   ),
-
-                  // Expandable content
                   if (widget.expandable)
                     SizeTransition(
                       sizeFactor: _expandAnimation,

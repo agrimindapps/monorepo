@@ -33,7 +33,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
       body: ResponsiveLayout(
         child: Column(
           children: [
-            // Header seguindo mockup
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
               child: PlantisHeader(
@@ -59,12 +58,10 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Header com informações do usuário
                             PlantisCard(
                               padding: const EdgeInsets.all(20.0),
                               child: Row(
                                 children: [
-                                  // Avatar with edit functionality
                                   Stack(
                                     children: [
                                       CircleAvatar(
@@ -148,8 +145,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                                     ],
                                   ),
                                   const SizedBox(width: 16),
-
-                                  // User Info
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment:
@@ -220,8 +215,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                             ),
 
                             const SizedBox(height: 24),
-
-                            // Card especial para usuário anônimo
                             if (isAnonymous) ...[
                               Container(
                                 padding: const EdgeInsets.all(16),
@@ -293,8 +286,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                               ),
                               const SizedBox(height: 24),
                             ],
-
-                            // Informações detalhadas da conta (apenas para usuários registrados)
                             if (!isAnonymous) ...[
                               _buildAccountInfoSection(
                                 context,
@@ -303,20 +294,14 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                               ),
                               const SizedBox(height: 24),
                             ],
-
-                            // Controle de Dispositivos (apenas para usuários registrados)
                             if (!isAnonymous) ...[
                               _buildDeviceManagementSectionSimple(context),
                               const SizedBox(height: 24),
                             ],
-
-                            // Dados e Sincronização (apenas para usuários registrados)
                             if (!isAnonymous) ...[
                               _buildDataSyncSection(context, authState),
                               const SizedBox(height: 24),
                             ],
-
-                            // Ações de Conta - Subgrupo separado
                             PlantisCard(
                               child: Column(
                                 children: [
@@ -593,7 +578,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
         PlantisCard(
           child: Column(
             children: [
-              // Status resumido dos dispositivos
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
@@ -622,8 +606,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showComingSoonDialog(context),
               ),
-
-              // Ações rápidas
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -802,7 +784,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Informação sobre o que será exportado
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -1017,8 +998,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
   }
 
   void _performExport(BuildContext context, String format) {
-    // TODO: Implement actual export logic with provider
-    // For now, show a success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -1213,7 +1192,6 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     BuildContext context,
     local.AuthState authState,
   ) async {
-    // Show progress dialog
     unawaited(
       showDialog<void>(
         context: context,
@@ -1223,17 +1201,10 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
 
     try {
-      // Simulate some processing time for better UX
       await Future<void>.delayed(const Duration(milliseconds: 800));
-
-      // Perform actual logout
       await ref.read(local.authProvider.notifier).logout();
-
-      // Close progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-
-        // Show success message and navigate
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Logout realizado com sucesso'),
@@ -1246,11 +1217,8 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
         context.go('/welcome');
       }
     } catch (e) {
-      // Close progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -1323,7 +1291,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
   }
 
   void _startProgressSteps() {
-    // Cycle through progress steps
     Timer.periodic(const Duration(milliseconds: 600), (timer) {
       if (mounted) {
         setState(() {
@@ -1359,7 +1326,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated logout icon
               Container(
                 width: 64,
                 height: 64,
@@ -1378,8 +1344,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 24),
-
-              // Title
               Text(
                 'Saindo da Conta',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -1390,8 +1354,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 16),
-
-              // Progress indicator
               SizedBox(
                 width: 40,
                 height: 40,
@@ -1404,8 +1366,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 20),
-
-              // Dynamic progress text
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: Text(
@@ -1420,8 +1380,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 16),
-
-              // Info message
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -1505,7 +1463,6 @@ class __DataClearDialogState extends State<_DataClearDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Ícone centralizado
           Container(
             width: 64,
             height: 64,
@@ -1517,8 +1474,6 @@ class __DataClearDialogState extends State<_DataClearDialog> {
           ),
 
           const SizedBox(height: 20),
-
-          // Título
           const Text(
             'Limpar Dados do App',
             style: TextStyle(
@@ -1530,8 +1485,6 @@ class __DataClearDialogState extends State<_DataClearDialog> {
           ),
 
           const SizedBox(height: 16),
-
-          // Conteúdo alinhado à esquerda
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1896,8 +1849,6 @@ class __AccountDeletionDialogState
               _isConfirmationValid
                   ? () async {
                     Navigator.of(context).pop();
-
-                    // TODO: Implement deleteAccount method in Riverpod AuthNotifier
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -1951,8 +1902,6 @@ class __AccountDeletionDialogState
       ),
     );
   }
-
-  // ignore: unused_element
   void _showDeletionSuccessDialog(BuildContext context) {
     showDialog<void>(
       context: context,
@@ -1996,7 +1945,6 @@ class __AccountDeletionDialogState
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // Navegar para tela de welcome/inicial
                   context.go('/welcome');
                 },
                 style: ElevatedButton.styleFrom(

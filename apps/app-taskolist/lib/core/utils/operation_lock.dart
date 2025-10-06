@@ -21,23 +21,16 @@ class OperationLock {
     bool reentrant = false,
   }) async {
     final effectiveTimeout = timeout ?? _defaultTimeout;
-    
-    // Se é reentrante e já tem lock, incrementa contador
     if (reentrant && _locks.containsKey(key)) {
       _lockCounts[key] = (_lockCounts[key] ?? 0) + 1;
       return LockGuard._(this, key, reentrant: true);
     }
-    
-    // Se já existe lock, aguarda
     while (_locks.containsKey(key)) {
       final existingLock = _locks[key]!;
-      
-      // Verifica timeout
       final lockTimestamp = _lockTimestamps[key];
       if (lockTimestamp != null) {
         final elapsed = DateTime.now().difference(lockTimestamp);
         if (elapsed > effectiveTimeout) {
-          // Lock expirado, força liberação
           if (kDebugMode) {
             print('Warning: Lock $key expired after $elapsed');
           }
@@ -45,8 +38,6 @@ class OperationLock {
           break;
         }
       }
-      
-      // Aguarda com timeout
       try {
         await existingLock.future.timeout(
           effectiveTimeout,
@@ -56,15 +47,11 @@ class OperationLock {
         );
       } catch (e) {
         if (e is TimeoutException) {
-          // Força liberação se timeout
           _releaseLock(key);
           break;
         }
-        // Outros erros, continua aguardando
       }
     }
-    
-    // Adquire o lock
     final completer = Completer<void>();
     _locks[key] = completer;
     _lockCounts[key] = 1;
@@ -76,18 +63,13 @@ class OperationLock {
   /// Tenta adquirir um lock sem aguardar
   /// Retorna null se o lock não está disponível
   LockGuard? tryAcquire(String key, {bool reentrant = false}) {
-    // Se é reentrante e já tem lock, incrementa contador
     if (reentrant && _locks.containsKey(key)) {
       _lockCounts[key] = (_lockCounts[key] ?? 0) + 1;
       return LockGuard._(this, key, reentrant: true);
     }
-    
-    // Se já existe lock, retorna null
     if (_locks.containsKey(key)) {
       return null;
     }
-    
-    // Adquire o lock
     final completer = Completer<void>();
     _locks[key] = completer;
     _lockCounts[key] = 1;
@@ -133,10 +115,8 @@ class OperationLock {
     final count = _lockCounts[key] ?? 0;
     
     if (count > 1) {
-      // Lock reentrante, apenas decrementa
       _lockCounts[key] = count - 1;
     } else {
-      // Libera completamente
       final completer = _locks.remove(key);
       _lockCounts.remove(key);
       _lockTimestamps.remove(key);
@@ -298,10 +278,8 @@ class TaskService {
   final _locks = GlobalLocks.instance;
   
   Future<String> createTask(Task task) async {
-    // Adquire lock para criação
     final guard = await _locks.acquireCreateLock('task', entityId: task.id);
     try {
-      // Operação crítica protegida
       return await _performCreateTask(task);
     } finally {
       guard.release();
@@ -309,7 +287,6 @@ class TaskService {
   }
   
   Future<void> updateTask(Task task) async {
-    // Usa synchronized para simplificar
     await _locks.synchronized(
       'update_task_${task.id}',
       () async {
@@ -319,7 +296,6 @@ class TaskService {
   }
   
   Future<void> batchDelete(List<String> taskIds) async {
-    // Lock para operação batch com timeout maior
     await _locks.synchronized(
       'batch_delete_tasks',
       () async {
@@ -332,18 +308,15 @@ class TaskService {
   }
   
   Future<String> _performCreateTask(Task task) async {
-    // Implementação real
     await Future<void>.delayed(const Duration(milliseconds: 100));
     return 'task_id';
   }
   
   Future<void> _performUpdateTask(Task task) async {
-    // Implementação real
     await Future<void>.delayed(const Duration(milliseconds: 50));
   }
   
   Future<void> _deleteTask(String id) async {
-    // Implementação real
     await Future<void>.delayed(const Duration(milliseconds: 20));
   }
 }

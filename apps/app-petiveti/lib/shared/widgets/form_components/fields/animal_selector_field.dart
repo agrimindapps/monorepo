@@ -70,7 +70,6 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
   void initState() {
     super.initState();
     if (widget.autoLoad) {
-      // Carrega animais automaticamente
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(animalsProvider.notifier).loadAnimals();
       });
@@ -84,7 +83,6 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         if (widget.label != null) ...[
           Text(
             widget.label!,
@@ -96,18 +94,13 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
           ),
           const SizedBox(height: 8),
         ],
-
-        // Estado de carregamento
         if (animalsState.isLoading) ...[
           _buildLoadingState(),
         ] else if (animalsState.error != null) ...[
-          // Estado de erro
           _buildErrorState(animalsState.error!),
         ] else if (animalsState.animals.isEmpty) ...[
-          // Estado vazio
           _buildEmptyState(),
         ] else ...[
-          // Dropdown com animais
           _buildAnimalDropdown(animalsState.animals),
         ],
       ],
@@ -212,7 +205,6 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
   Widget _buildAnimalListItem(Animal animal) {
     return Row(
       children: [
-        // Avatar do animal
         CircleAvatar(
           radius: 16,
           backgroundColor: _getSpeciesColor(animal.species.name).withValues(alpha: 0.2),
@@ -231,8 +223,6 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
         ),
 
         const SizedBox(width: 12),
-
-        // Informações do animal
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,8 +247,6 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
             ],
           ),
         ),
-
-        // Indicador de espécie
         Container(
           width: 8,
           height: 8,

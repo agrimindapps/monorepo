@@ -9,8 +9,6 @@ import '../../features/tasks/domain/entities/task.dart';
 class BackupDataTransformerService {
   const BackupDataTransformerService();
 
-  // ===== TRANSFORMAÇÕES PARA BACKUP =====
-
   /// Converte Plant para JSON para backup
   Map<String, dynamic> plantToJson(Plant plant) {
     try {
@@ -23,12 +21,10 @@ class BackupDataTransformerService {
         'imageUrls': plant.imageUrls,
         'plantingDate': plant.plantingDate?.toIso8601String(),
         'notes': plant.notes,
-        // 'config': plant.config, // TODO: Implementar serialização do PlantConfig
         'isFavorited': plant.isFavorited,
         'userId': plant.userId,
         'createdAt': plant.createdAt?.toIso8601String(),
         'updatedAt': plant.updatedAt?.toIso8601String(),
-        // Metadados específicos para backup
         '_backup_version': '1.0',
         '_backup_timestamp': DateTime.now().toIso8601String(),
       };
@@ -58,7 +54,6 @@ class BackupDataTransformerService {
         'nextDueDate': task.nextDueDate?.toIso8601String(),
         'createdAt': task.createdAt?.toIso8601String(),
         'updatedAt': task.updatedAt?.toIso8601String(),
-        // Metadados específicos para backup
         '_backup_version': '1.0',
         '_backup_timestamp': DateTime.now().toIso8601String(),
       };
@@ -81,7 +76,6 @@ class BackupDataTransformerService {
         'userId': space.userId,
         'createdAt': space.createdAt?.toIso8601String(),
         'updatedAt': space.updatedAt?.toIso8601String(),
-        // Metadados específicos para backup
         '_backup_version': '1.0',
         '_backup_timestamp': DateTime.now().toIso8601String(),
       };
@@ -90,8 +84,6 @@ class BackupDataTransformerService {
       rethrow;
     }
   }
-
-  // ===== TRANSFORMAÇÕES DE RESTORE =====
 
   /// Cria Plant a partir de dados de backup
   Plant createPlantFromBackupData(Map<String, dynamic> data, String userId) {
@@ -125,7 +117,6 @@ class BackupDataTransformerService {
         title: data['title'] as String,
         description: data['description'] as String?,
         plantId: data['plantId'] as String,
-        // plantName removed from Task entity - will be resolved dynamically from plantId
         userId: userId,
         type: _parseTaskType(data['type'] as String?),
         priority: _parseTaskPriority(data['priority'] as String?),
@@ -167,8 +158,6 @@ class BackupDataTransformerService {
     }
   }
 
-  // ===== MERGE DE DADOS =====
-
   /// Merge dados de Plant existente com dados do backup
   Plant mergePlantData(Plant existing, Plant backup) {
     return existing.copyWith(
@@ -201,8 +190,6 @@ class BackupDataTransformerService {
       updatedAt: DateTime.now(),
     );
   }
-
-  // ===== UTILITÁRIOS PRIVADOS =====
 
   /// Parse DateTime obrigatório
   DateTime? _parseDateTime(dynamic value) {

@@ -51,8 +51,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_handleTabChange);
-
-    // Load data via Riverpod
     Future.microtask(() {
       _loadData();
     });
@@ -71,8 +69,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
       debugPrint('=== DETALHE DEFENSIVO: Iniciando carregamento ===');
       debugPrint('Defensivo: ${widget.defensivoName}');
       debugPrint('Fabricante: ${widget.fabricante}');
-
-      // FORCE DEBUG: Verificar diagnósticos antes de carregar
       await _debugDiagnosticosStatus();
 
       final startTime = DateTime.now();
@@ -80,8 +76,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
       await ref
           .read(detalheDefensivoNotifierProvider.notifier)
           .initializeData(widget.defensivoName, widget.fabricante);
-
-      // Carrega diagnósticos se os dados do defensivo foram carregados com sucesso
       final state = ref.read(detalheDefensivoNotifierProvider);
       state.whenData((data) async {
         if (data.defensivoData != null) {
@@ -98,8 +92,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
                 defensivoIdReg,
                 nomeDefensivo: defensivoData.nomeComum,
               );
-
-          // Record access to this defensivo for "Últimos Acessados"
           await _recordDefensivoAccess(defensivoData);
 
           final endTime = DateTime.now();
@@ -113,7 +105,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     } catch (e) {
       debugPrint('❌ ERRO ao carregar dados: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
-      // O estado de erro será gerenciado pelos notifiers individuais
     }
   }
 
@@ -121,8 +112,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   Future<void> _debugDiagnosticosStatus() async {
     try {
       debugPrint('🔧 [FORCE DEBUG] Verificando status dos diagnósticos...');
-
-      // Tentar acessar o repository diretamente
       final repository = sl<DiagnosticoHiveRepository>();
       final result = await repository.getAll();
       final allDiagnosticos =
@@ -135,14 +124,10 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         debugPrint(
           '⚠️ [FORCE DEBUG] Nenhum diagnóstico no repository, tentando forçar carregamento...',
         );
-
-        // Tentar carregar via DiagnosticosDataLoader
         debugPrint(
           '🔄 [FORCE DEBUG] Chamando DiagnosticosDataLoader.loadDiagnosticosData()...',
         );
         await DiagnosticosDataLoader.loadDiagnosticosData();
-
-        // Verificar novamente
         final newResult = await repository.getAll();
         final newCount = newResult.isSuccess ? newResult.data!.length : 0;
         debugPrint(
@@ -151,8 +136,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
         if (newCount > 0) {
           debugPrint('✅ [FORCE DEBUG] Carregamento bem-sucedido!');
-
-          // Verificar sample dos dados
           final sampleResult = await repository.getAll();
           final sample =
               sampleResult.isSuccess
@@ -180,14 +163,10 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
             '[$i] SAMPLE: fkIdDefensivo="${diag.fkIdDefensivo}", nome="${diag.nomeDefensivo}"',
           );
         }
-
-        // INVESTIGAÇÃO: Procurar pelo ID específico do defensivo atual
         debugPrint(
           '🔍 [INVESTIGAÇÃO] Procurando diagnósticos para defensive atual...',
         );
       }
-
-      // NOVA INVESTIGAÇÃO: Buscar por padrões de ID
       await _investigateIdPatterns(repository, allDiagnosticos);
     } catch (e) {
       debugPrint('❌ [FORCE DEBUG] Erro: $e');
@@ -201,7 +180,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     List<dynamic> allDiagnosticos,
   ) async {
     try {
-      // Quando chegar na parte de carregar o defensivo, investigar
       final state = ref.read(detalheDefensivoNotifierProvider);
       FitossanitarioHive? defensivoData;
       state.whenData((data) {
@@ -217,13 +195,9 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
       debugPrint('Defensivo procurado:');
       debugPrint('  - ID: "$defensivoId"');
       debugPrint('  - Nome: "$defensivoNome"');
-
-      // Buscar por correspondência exata
       final exactMatches =
           allDiagnosticos.where((d) => d.fkIdDefensivo == defensivoId).toList();
       debugPrint('Correspondências exatas por ID: ${exactMatches.length}');
-
-      // Buscar por nome do defensivo nos diagnósticos
       final nameMatches =
           allDiagnosticos
               .where(
@@ -245,8 +219,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           debugPrint('      nomeCultura: "${match.nomeCultura}"');
         }
       }
-
-      // Analisar padrões de ID
       final allDefensivoIds =
           allDiagnosticos
               .map((d) => d.fkIdDefensivo as String)
@@ -276,7 +248,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   /// Record access to this defensivo for history tracking
   Future<void> _recordDefensivoAccess(FitossanitarioHive defensivoData) async {
     try {
-      // Use the AccessHistoryService through dependency injection if available
       final accessHistoryService = AccessHistoryService();
       await accessHistoryService.recordDefensivoAccess(
         id: defensivoData.idReg,
@@ -481,7 +452,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               DefensivoInfoCardsWidget(defensivo: entity),
-              // Espaço já incluído no scrollPadding
             ],
           ),
         );
@@ -497,7 +467,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   }
 
   Future<void> _handleFavoriteToggle() async {
-    // Adicionar haptic feedback inicial
     unawaited(HapticFeedback.lightImpact());
 
     debugPrint(
@@ -509,8 +478,6 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         .toggleFavorito(widget.defensivoName, widget.fabricante);
 
     if (!mounted) return;
-
-    // Feedback com SnackBar para melhor UX
     final state = ref.read(detalheDefensivoNotifierProvider);
     state.whenData((data) {
       if (success) {

@@ -117,8 +117,6 @@ class GasometerAccountData extends AccountData {
   /// Higher scores indicate more established data that user might prefer to keep
   int _calculateDataMaturityScore() {
     int score = 0;
-    
-    // Account age adds significant value
     if (accountAge != null) {
       final days = accountAge!.inDays;
       if (days > 365) {
@@ -129,11 +127,7 @@ class GasometerAccountData extends AccountData {
         score += 10; // Moderately old account
       }
     }
-    
-    // More vehicles indicate established usage
     score += vehicleCount * 15;
-    
-    // Historical fuel records are valuable
     if (fuelRecordCount > 50) {
       score += 25;
     } else if (fuelRecordCount > 20) {
@@ -141,11 +135,7 @@ class GasometerAccountData extends AccountData {
     } else if (fuelRecordCount > 5) {
       score += 5;
     }
-    
-    // Maintenance history is valuable
     score += maintenanceRecordCount * 5;
-    
-    // Large distance indicates long-term usage
     if (totalDistance > 10000) {
       score += 20;
     } else if (totalDistance > 5000) {

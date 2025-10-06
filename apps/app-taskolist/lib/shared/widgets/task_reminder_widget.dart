@@ -43,8 +43,6 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Toggle entre lembrete rápido e personalizado
             ToggleButtons(
               isSelected: [isQuickReminder, !isQuickReminder],
               onPressed: (index) {
@@ -77,8 +75,6 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
             ],
 
             const SizedBox(height: 16),
-
-            // Botões de ação
             Row(
               children: [
                 Expanded(
@@ -247,8 +243,6 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
 
   Future<void> _selectDateTime() async {
     final now = DateTime.now();
-
-    // Selecionar data
     final selectedDate = await showDatePicker(
       context: context,
       initialDate: selectedDateTime ?? now.add(const Duration(hours: 1)),
@@ -257,8 +251,6 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     );
 
     if (selectedDate == null) return;
-
-    // Selecionar hora
     if (!mounted) return;
     final selectedTime = await showTimePicker(
       context: context,

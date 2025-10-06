@@ -1,16 +1,11 @@
-// ignore_for_file: overridden_fields
 
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
-// Note: Hive adapter not generated - keeping @HiveType for future
-
 /// Espaco model with Firebase sync support
 /// TypeId: 1 - Sequential numbering
 @HiveType(typeId: 1)
-// ignore: must_be_immutable
 class EspacoModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
   @HiveField(0)
   final String id;
@@ -35,8 +30,6 @@ class EspacoModel extends BaseSyncModel {
   @override
   @HiveField(8)
   final String? moduleName;
-
-  // Espaco specific fields
   @HiveField(10)
   final String nome;
   @HiveField(11)
@@ -215,8 +208,6 @@ class EspacoModel extends BaseSyncModel {
       dataCriacao: dataCriacao ?? this.dataCriacao,
     );
   }
-
-  // Legacy compatibility methods
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();

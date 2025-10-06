@@ -108,50 +108,25 @@ class IrrigationTimeCalculator extends CalculatorEntity {
       final String systemType = inputs['system_type'].toString();
       final double windSpeed = inputs['wind_speed'] != null ? 
                               double.parse(inputs['wind_speed'].toString()) : 0.0;
-
-      // Cálculo do volume necessário
       final double areaM2 = CalculatorMath.hectareToSquareMeters(irrigatedArea);
       final double volumeNeededM3 = (waterDepth / 1000) * areaM2; // m³
       final double volumeNeededLiters = CalculatorMath.cubicToLiters(volumeNeededM3);
-
-      // Considerando eficiência do sistema
       final double realVolumeNeeded = volumeNeededLiters / systemEfficiency;
-
-      // Cálculo do tempo básico
       final double basicTimeHours = realVolumeNeeded / flowRate;
-      // ignore: unused_local_variable
       final double basicTimeMinutes = basicTimeHours * 60; // TODO: Use in time breakdown analysis
-
-      // Fator de correção para vento (afeta principalmente aspersão)
       final double windFactor = _calculateWindFactor(systemType, windSpeed);
-      
-      // Fator de correção para uniformidade
       final double uniformityFactor = _calculateUniformityFactor(uniformity);
-
-      // Tempo corrigido
       final double correctedTimeHours = basicTimeHours * windFactor * uniformityFactor;
       final double correctedTimeMinutes = correctedTimeHours * 60;
-
-      // Cálculos adicionais
       final double intensityApplication = flowRate / areaM2 * 1000; // mm/h
       final double applicationRate = waterDepth / correctedTimeHours; // mm/h real
-      
-      // Número de setores (para sistemas setorizados)
       final int numberOfSectors = _calculateOptimalSectors(systemType, irrigatedArea);
       final double sectorTime = correctedTimeHours / numberOfSectors;
-
-      // Tempo para diferentes frações da lâmina
-      // ignore: unused_local_variable
       final double time25 = correctedTimeMinutes * 0.25; // TODO: Use in partial irrigation scenarios
       final double time50 = correctedTimeMinutes * 0.50;
-      // ignore: unused_local_variable
       final double time75 = correctedTimeMinutes * 0.75; // TODO: Use in stress management
-
-      // Consumo energético estimado
       final double powerEstimated = _estimatePower(flowRate, systemType);
       final double energyConsumption = powerEstimated * correctedTimeHours;
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         systemType, windSpeed, correctedTimeHours, intensityApplication, uniformity);
 
@@ -237,7 +212,6 @@ class IrrigationTimeCalculator extends CalculatorEntity {
   }
 
   double _calculateWindFactor(String systemType, double windSpeed) {
-    // Fator de correção para vento
     switch (systemType) {
       case 'Aspersão Convencional':
       case 'Aspersão Autopropelido':
@@ -260,7 +234,6 @@ class IrrigationTimeCalculator extends CalculatorEntity {
   }
 
   double _calculateUniformityFactor(double uniformity) {
-    // Fator de correção baseado na uniformidade
     if (uniformity < 0.70) return 1.25; // Baixa uniformidade
     if (uniformity < 0.80) return 1.15; // Uniformidade regular
     if (uniformity < 0.90) return 1.05; // Boa uniformidade
@@ -268,7 +241,6 @@ class IrrigationTimeCalculator extends CalculatorEntity {
   }
 
   int _calculateOptimalSectors(String systemType, double area) {
-    // Calcula número ótimo de setores baseado no tipo e área
     switch (systemType) {
       case 'Aspersão Convencional':
         if (area > 10) return (area / 5).ceil();
@@ -290,7 +262,6 @@ class IrrigationTimeCalculator extends CalculatorEntity {
   }
 
   double _estimatePower(double flowRate, String systemType) {
-    // Estimativa grosseira da potência baseada na vazão
     final double flowRateM3h = flowRate / 1000;
     
     switch (systemType) {
@@ -315,32 +286,22 @@ class IrrigationTimeCalculator extends CalculatorEntity {
     double uniformity,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações baseadas no tempo
     if (timeHours < 0.5) {
       recommendations.add('Tempo muito curto. Verifique se a vazão não está excessiva.');
     } else if (timeHours > 12) {
       recommendations.add('Tempo muito longo. Considere aumentar a vazão ou setorizar.');
     }
-
-    // Recomendações baseadas no vento
     if (windSpeed > 3.0 && (systemType.contains('Aspersão'))) {
       recommendations.add('Vento forte. Evite irrigar nas horas mais ventosas.');
     }
-
-    // Recomendações baseadas na intensidade
     if (intensity > 25) {
       recommendations.add('Intensidade alta. Risco de escoamento superficial.');
     } else if (intensity < 5) {
       recommendations.add('Intensidade baixa. Boa para infiltração.');
     }
-
-    // Recomendações baseadas na uniformidade
     if (uniformity < 0.75) {
       recommendations.add('Baixa uniformidade. Revise espaçamento e pressão dos emissores.');
     }
-
-    // Recomendações específicas por sistema
     switch (systemType) {
       case 'Aspersão Convencional':
         recommendations.add('Monitore pressão e sobreposição dos aspersores.');

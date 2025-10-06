@@ -24,8 +24,6 @@ abstract class MedicationRemoteDataSource {
 }
 
 class MedicationRemoteDataSourceImpl implements MedicationRemoteDataSource {
-  // This will be implemented when Firebase integration is ready
-  // For now, all methods throw UnimplementedError
   
   @override
   Future<List<MedicationModel>> getMedications() async {

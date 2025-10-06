@@ -22,8 +22,6 @@ class LivestockSearchPage extends ConsumerStatefulWidget {
 class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   final _searchController = TextEditingController();
   final _scrollController = ScrollController();
-  
-  // Filtros de busca
   String _searchQuery = '';
   Set<String> _selectedAnimalTypes = {'bovine', 'equine'};
   String? _selectedBreed;
@@ -76,24 +74,12 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
 
     final provider = ref.read(livestockProviderProvider);
     List<AnimalBaseEntity> results = [];
-
-    // Coleta bovinos se selecionados
     if (_selectedAnimalTypes.contains('bovine')) {
       final bovines = provider.filteredBovines.where((bovine) {
         return _matchesFilters(bovine) && _matchesSearch(bovine);
       }).cast<AnimalBaseEntity>().toList();
       results.addAll(bovines);
     }
-
-    // TODO: Implementar busca de equinos quando provider estiver completo
-    // if (_selectedAnimalTypes.contains('equine')) {
-    //   final equines = provider.allEquines.where((equine) {
-    //     return _matchesFilters(equine) && _matchesSearch(equine);
-    //   }).cast<AnimalBaseEntity>().toList();
-    //   results.addAll(equines);
-    // }
-
-    // Aplicar ordenação
     _sortResults(results);
 
     setState(() {
@@ -103,18 +89,13 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   }
 
   bool _matchesFilters(AnimalBaseEntity animal) {
-    // Filtro de status ativo
     if (_showActiveOnly && !animal.isActive) return false;
-
-    // Filtros específicos por tipo
     if (animal is BovineEntity) {
       if (_selectedBreed != null && animal.breed != _selectedBreed) return false;
       if (_selectedAptitude != null && animal.aptitude != _selectedAptitude) return false;
     } else if (animal is EquineEntity) {
       if (_selectedTemperament != null && animal.temperament != _selectedTemperament) return false;
     }
-
-    // Filtro de país de origem
     if (_selectedOriginCountry != null && animal.originCountry != _selectedOriginCountry) {
       return false;
     }
@@ -131,8 +112,6 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
       animal.registrationId.toLowerCase(),
       animal.originCountry.toLowerCase(),
     ];
-
-    // Adiciona campos específicos por tipo
     if (animal is BovineEntity) {
       searchFields.addAll([
         animal.breed.toLowerCase(),
@@ -172,7 +151,6 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
             comparison = a.temperament.displayName
                 .compareTo(b.temperament.displayName);
           } else {
-            // Mixed types, sort by type first
             comparison = a.runtimeType.toString().compareTo(b.runtimeType.toString());
           }
           break;
@@ -272,8 +250,6 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),
-              
-              // Tipos de Animal
               Text('Tipos de Animal:', style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 8),
               Row(
@@ -310,8 +286,6 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              
-              // Ordenação
               Row(
                 children: [
                   Expanded(
@@ -350,8 +324,6 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              
-              // Status
               SwitchListTile(
                 title: const Text('Apenas ativos'),
                 value: _showActiveOnly,
@@ -608,7 +580,6 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
     if (animal is BovineEntity) {
       success = await provider.deleteBovine(animal.id);
     } else if (animal is EquineEntity) {
-      // TODO: Implementar exclusão de equinos
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Exclusão de equinos em desenvolvimento'),

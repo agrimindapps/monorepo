@@ -22,15 +22,11 @@ class SettingsProvider with ChangeNotifier {
 
   SettingsProvider(this._manageSettings);
 
-  // === STATE VARIABLES ===
-
   SettingsEntity? _settings;
   bool _isLoadingSettings = false;
   bool _isSavingSettings = false;
   String? _errorMessage;
   String? _successMessage;
-
-  // === GETTERS ===
 
   SettingsEntity? get settings => _settings;
   bool get isLoadingSettings => _isLoadingSettings;
@@ -41,34 +37,24 @@ class SettingsProvider with ChangeNotifier {
   bool get hasError => _errorMessage != null;
   bool get hasSuccess => _successMessage != null;
   bool get isInitialized => _settings != null;
-
-  // Theme settings
   AppTheme get theme => _settings?.theme ?? AppTheme.system;
   String get language => _settings?.language ?? 'pt_BR';
-
-  // Notification settings
   NotificationSettings get notifications =>
       _settings?.notifications ?? const NotificationSettings();
   bool get pushNotificationsEnabled => notifications.pushNotifications;
   bool get newsNotificationsEnabled => notifications.newsNotifications;
   bool get marketAlertsEnabled => notifications.marketAlerts;
   bool get weatherAlertsEnabled => notifications.weatherAlerts;
-
-  // Data settings
   DataSettings get dataSettings =>
       _settings?.dataSettings ?? const DataSettings();
   bool get autoSyncEnabled => dataSettings.autoSync;
   bool get wifiOnlySyncEnabled => dataSettings.wifiOnlySync;
   bool get cacheImagesEnabled => dataSettings.cacheImages;
   DataExportFormat get exportFormat => dataSettings.exportFormat;
-
-  // Privacy settings
   PrivacySettings get privacy => _settings?.privacy ?? const PrivacySettings();
   bool get analyticsEnabled => privacy.analyticsEnabled;
   bool get crashReportingEnabled => privacy.crashReportingEnabled;
   bool get shareUsageDataEnabled => privacy.shareUsageData;
-
-  // Display settings
   DisplaySettings get display => _settings?.display ?? const DisplaySettings();
   double get fontSize => display.fontSize;
   bool get highContrastEnabled => display.highContrast;
@@ -76,22 +62,16 @@ class SettingsProvider with ChangeNotifier {
   String get dateFormat => display.dateFormat;
   String get currency => display.currency;
   String get unitSystem => display.unitSystem;
-
-  // Security settings
   SecuritySettings get security =>
       _settings?.security ?? const SecuritySettings();
   bool get biometricAuthEnabled => security.biometricAuth;
   bool get requireAuthOnOpenEnabled => security.requireAuthOnOpen;
   int get autoLockMinutes => security.autoLockMinutes;
-
-  // Backup settings
   BackupSettings get backup => _settings?.backup ?? const BackupSettings();
   bool get autoBackupEnabled => backup.autoBackup;
   BackupFrequency get backupFrequency => backup.frequency;
   bool get includeImagesInBackup => backup.includeImages;
   BackupStorage get backupStorage => backup.storage;
-
-  // === SETTINGS OPERATIONS ===
 
   /// Load settings
   Future<void> loadSettings() async {
@@ -178,8 +158,6 @@ class SettingsProvider with ChangeNotifier {
     }
   }
 
-  // === THEME SETTINGS ===
-
   /// Update theme
   Future<bool> updateTheme(AppTheme newTheme) async {
     if (_settings == null) return false;
@@ -203,8 +181,6 @@ class SettingsProvider with ChangeNotifier {
 
     return await saveSettings(updatedSettings);
   }
-
-  // === NOTIFICATION SETTINGS ===
 
   /// Update notification settings
   Future<bool> updateNotificationSettings(
@@ -253,8 +229,6 @@ class SettingsProvider with ChangeNotifier {
     return await updateNotificationSettings(newNotifications);
   }
 
-  // === DATA SETTINGS ===
-
   /// Update data settings
   Future<bool> updateDataSettings(DataSettings newDataSettings) async {
     if (_settings == null) return false;
@@ -297,8 +271,6 @@ class SettingsProvider with ChangeNotifier {
     return await updateDataSettings(newDataSettings);
   }
 
-  // === PRIVACY SETTINGS ===
-
   /// Update privacy settings
   Future<bool> updatePrivacySettings(PrivacySettings newPrivacy) async {
     if (_settings == null) return false;
@@ -334,8 +306,6 @@ class SettingsProvider with ChangeNotifier {
     final newPrivacy = privacy.copyWith(locationTracking: enabled);
     return await updatePrivacySettings(newPrivacy);
   }
-
-  // === DISPLAY SETTINGS ===
 
   /// Update display settings
   Future<bool> updateDisplaySettings(DisplaySettings newDisplay) async {
@@ -385,8 +355,6 @@ class SettingsProvider with ChangeNotifier {
     return await updateDisplaySettings(newDisplay);
   }
 
-  // === SECURITY SETTINGS ===
-
   /// Update security settings
   Future<bool> updateSecuritySettings(SecuritySettings newSecurity) async {
     if (_settings == null) return false;
@@ -416,8 +384,6 @@ class SettingsProvider with ChangeNotifier {
     final newSecurity = security.copyWith(autoLockMinutes: minutes);
     return await updateSecuritySettings(newSecurity);
   }
-
-  // === BACKUP SETTINGS ===
 
   /// Update backup settings
   Future<bool> updateBackupSettings(BackupSettings newBackup) async {
@@ -454,8 +420,6 @@ class SettingsProvider with ChangeNotifier {
     final newBackup = backup.copyWith(storage: storage);
     return await updateBackupSettings(newBackup);
   }
-
-  // === DATA EXPORT/IMPORT ===
 
   /// Export settings
   Future<Map<String, dynamic>?> exportSettings() async {
@@ -506,8 +470,6 @@ class SettingsProvider with ChangeNotifier {
     }
   }
 
-  // === UTILITY METHODS ===
-
   /// Initialize provider
   Future<void> initialize() async {
     await loadSettings();
@@ -533,8 +495,6 @@ class SettingsProvider with ChangeNotifier {
       'lastUpdated': _settings!.lastUpdated,
     };
   }
-
-  // === PRIVATE METHODS ===
 
   void _setLoadingSettings(bool loading) {
     _isLoadingSettings = loading;

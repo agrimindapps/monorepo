@@ -25,15 +25,12 @@ class DataExportRepositoryImpl implements DataExportRepository {
     final startTime = DateTime.now();
 
     try {
-      // Validar request
       if (!await validateExportRequest(request)) {
         return ExportResult.failure(
           errorMessage: 'Solicitação de exportação inválida',
           processingTime: DateTime.now().difference(startTime),
         );
       }
-
-      // Verificar rate limiting
       if (!await canExportData(request.userId)) {
         return ExportResult.failure(
           errorMessage:
@@ -41,11 +38,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
           processingTime: DateTime.now().difference(startTime),
         );
       }
-
-      // Reportar progresso inicial
       onProgress?.call(ExportProgress.initial());
-
-      // Coletar dados do usuário
       onProgress?.call(
         ExportProgress.processing('Coletando dados do usuário...', 0.1),
       );
@@ -53,8 +46,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
         request,
         onProgress,
       );
-
-      // Gerar metadados
       final metadata = ExportMetadata(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         generatedAt: DateTime.now(),
@@ -70,14 +61,10 @@ class DataExportRepositoryImpl implements DataExportRepository {
         fileSizeMb: 0, // Será calculado depois
         checksum: '', // Será calculado depois
       );
-
-      // Processar em isolate para não bloquear a UI
       onProgress?.call(
         ExportProgress.processing('Gerando arquivos de exportação...', 0.7),
       );
       final exportFiles = await _processExportInIsolate(userData, metadata);
-
-      // Salvar arquivo final
       onProgress?.call(ExportProgress.processing('Salvando arquivo...', 0.9));
       final jsonData = exportFiles['json'];
       if (jsonData == null) {
@@ -88,8 +75,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
       }
 
       final filePath = await _saveExportFile(jsonData, request.userId);
-
-      // Calcular metadados finais
       final fileSize = await File(filePath).length();
       final checksum = _exportService.generateChecksum(jsonData);
 
@@ -97,11 +82,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
         fileSizeMb: (fileSize / (1024 * 1024)).ceil(),
         checksum: checksum,
       );
-
-      // Registrar exportação realizada
       await _recordExport(request.userId);
-
-      // Cleanup de arquivos temporários em background
       _cleanupTemporaryFiles();
 
       onProgress?.call(ExportProgress.completed());
@@ -130,8 +111,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
     final lastExport = DateTime.fromMillisecondsSinceEpoch(lastExportTimestamp);
     final now = DateTime.now();
     final difference = now.difference(lastExport);
-
-    // Limite de 1 exportação por dia
     return difference.inHours >= 24;
   }
 
@@ -160,8 +139,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
           if (file is File) {
             final stat = await file.stat();
             final age = now.difference(stat.modified);
-
-            // Remove arquivos temporários mais antigos que 1 hora
             if (age.inHours >= 1) {
               await file.delete();
             }
@@ -175,24 +152,17 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
   @override
   Future<bool> validateExportRequest(ExportRequest request) async {
-    // Validações básicas
     if (request.userId.isEmpty) return false;
     if (request.includedCategories.isEmpty) return false;
     if (request.outputFormats.isEmpty) return false;
-
-    // Validar categorias
     final validCategories = ExportDataCategory.getAllKeys();
     for (final category in request.includedCategories) {
       if (!validCategories.contains(category)) return false;
     }
-
-    // Validar formatos
     final validFormats = ['json', 'csv'];
     for (final format in request.outputFormats) {
       if (!validFormats.contains(format)) return false;
     }
-
-    // Validar intervalo de datas
     if (request.startDate != null && request.endDate != null) {
       if (request.startDate!.isAfter(request.endDate!)) return false;
     }
@@ -203,7 +173,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
   @override
   Future<Map<String, dynamic>> estimateExportSize(ExportRequest request) async {
     try {
-      // Simular coleta para estimativa (sem salvar)
       final userData = await _exportService.collectUserData(request, null);
 
       int totalRecords = 0;
@@ -216,8 +185,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
           totalRecords += 1;
         }
       }
-
-      // Estimar tamanho do JSON
       final jsonData = await _exportService.generateJsonExport(
         userData,
         ExportMetadata(
@@ -254,15 +221,11 @@ class DataExportRepositoryImpl implements DataExportRepository {
     }
   }
 
-  // Métodos privados auxiliares
-
   Future<Map<String, Uint8List>> _processExportInIsolate(
     Map<String, dynamic> userData,
     ExportMetadata metadata,
   ) async {
     try {
-      // Para esta implementação, vamos processar no thread principal
-      // Em produção, seria ideal usar um Isolate real
       final jsonData = await _exportService.generateJsonExport(
         userData,
         metadata,
@@ -311,7 +274,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
   }
 
   void _cleanupTemporaryFiles() async {
-    // Executar cleanup em background
     try {
       await cleanupTemporaryFiles();
     } catch (e) {
@@ -322,7 +284,6 @@ class DataExportRepositoryImpl implements DataExportRepository {
   Map<String, dynamic> _parseJson(String jsonString) {
     try {
       return Map<String, dynamic>.from(
-        // Aqui deveria usar json.decode, mas vamos simular
         <String, dynamic>{},
       );
     } catch (e) {

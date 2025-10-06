@@ -9,15 +9,11 @@ class SecureStorageService {
       _instance ??= SecureStorageService._();
 
   SecureStorageService._();
-
-  // Use core's EnhancedSecureStorageService
   late final EnhancedSecureStorageService _coreStorage =
       EnhancedSecureStorageService(
     appIdentifier: 'plantis',
     config: const SecureStorageConfig.plantis(),
   );
-
-  // Keys for sensitive data
   static const String _userCredentialsKey = 'user_credentials';
   static const String _locationDataKey = 'location_data';
   static const String _personalInfoKey = 'personal_info';

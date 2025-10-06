@@ -11,7 +11,6 @@ class FooterSection extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
       child: Column(
         children: [
-          // Links de políticas
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -34,8 +33,6 @@ class FooterSection extends StatelessWidget {
           ),
 
           const SizedBox(height: 30),
-
-          // Direitos autorais e redes sociais
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -51,15 +48,12 @@ class FooterSection extends StatelessWidget {
               Row(
                 children: [
                   _buildSocialIcon(Icons.facebook, () {
-                    // TODO: Link para Facebook
                   }),
                   const SizedBox(width: 16),
                   _buildSocialIcon(Icons.language, () {
-                    // TODO: Link para Instagram/Site
                   }),
                   const SizedBox(width: 16),
                   _buildSocialIcon(Icons.email, () {
-                    // TODO: Link para contato
                   }),
                 ],
               ),
@@ -67,8 +61,6 @@ class FooterSection extends StatelessWidget {
           ),
 
           const SizedBox(height: 20),
-
-          // Logo e tagline do footer
           Column(
             children: [
               Row(

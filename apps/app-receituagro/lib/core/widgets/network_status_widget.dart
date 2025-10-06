@@ -83,15 +83,11 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   void _initializeNetworkMonitoring() async {
     _connectivityService = ConnectivityService.instance;
     await _connectivityService.initialize();
-
-    // Listen to connectivity changes
     _connectivitySubscription = _connectivityService.connectivityStream.listen((isOnline) async {
       await _updateNetworkStatus(isOnline);
       setState(() {});
       widget.onStatusChanged?.call(_currentStatus);
     });
-
-    // Get initial status
     _checkInitialNetworkStatus();
   }
 
@@ -117,15 +113,12 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   /// Update network status based on connectivity
   Future<void> _updateNetworkStatus(bool isOnline) async {
     if (isOnline) {
-      // Get current connection type
       final connectivityResult = await _connectivityService.getConnectivityType();
       final connectivityType = connectivityResult.fold(
         (failure) => ConnectivityType.none,
         (type) => type,
       );
       _connectionType = connectivityType;
-
-      // Set status and quality based on connection type
       switch (connectivityType) {
         case ConnectivityType.wifi:
           _currentStatus = NetworkStatus.connected;
@@ -205,7 +198,6 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Connection Type Icon
               if (widget.showConnectionType)
                 Icon(
                   _getConnectionTypeIcon(),
@@ -214,15 +206,11 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
                 ),
               
               const SizedBox(width: 4),
-              
-              // Status Icon
               Icon(
                 _getStatusIcon(),
                 size: 16,
                 color: _getStatusColor(context),
               ),
-              
-              // Quality Indicator
               if (widget.showQualityIndicator) ...[
                 const SizedBox(width: 4),
                 _buildQualityIndicator(context),
@@ -252,7 +240,6 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Status Icon with Animation
           AnimatedBuilder(
             animation: _pulseAnimation,
             builder: (context, child) {
@@ -268,8 +255,6 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
           ),
           
           const SizedBox(width: 6),
-          
-          // Status Text
           Text(
             _getStatusText(),
             style: theme.textTheme.bodySmall?.copyWith(
@@ -278,8 +263,6 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
               fontSize: style.fontSize,
             ),
           ),
-          
-          // Connection Type
           if (widget.showConnectionType && _connectionType != ConnectivityType.none) ...[
             const SizedBox(width: 4),
             Text(
@@ -296,14 +279,10 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
               color: _getStatusColor(context).withValues(alpha: 0.7),
             ),
           ],
-          
-          // Quality Indicator
           if (widget.showQualityIndicator && _connectionQuality != ConnectionQuality.none) ...[
             const SizedBox(width: 6),
             _buildQualityIndicator(context),
           ],
-          
-          // Retry Counter (when disconnected)
           if (_currentStatus == NetworkStatus.disconnected && _retryAttempts > 0) ...[
             const SizedBox(width: 6),
             Container(

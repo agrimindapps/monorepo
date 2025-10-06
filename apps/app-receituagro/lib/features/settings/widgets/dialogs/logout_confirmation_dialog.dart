@@ -19,7 +19,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Ícone
             Container(
               width: 64,
               height: 64,
@@ -35,8 +34,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
             ),
             
             const SizedBox(height: 20),
-            
-            // Título
             Text(
               'Sair da Conta',
               style: SettingsDesignTokens.getSectionTitleStyle(context).copyWith(
@@ -46,8 +43,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Informações sobre as consequências
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -64,8 +59,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 12),
-                  
-                  // Item 1
                   _buildInfoItem(
                     context,
                     icon: Icons.smartphone,
@@ -74,8 +67,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 8),
-                  
-                  // Item 2
                   _buildInfoItem(
                     context,
                     icon: Icons.link_off,
@@ -84,8 +75,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 8),
-                  
-                  // Item 3 - Informação positiva
                   _buildInfoItem(
                     context,
                     icon: Icons.login,
@@ -98,11 +87,8 @@ class LogoutConfirmationDialog extends StatelessWidget {
             ),
             
             const SizedBox(height: 24),
-            
-            // Botões
             Row(
               children: [
-                // Botão Cancelar
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -126,8 +112,6 @@ class LogoutConfirmationDialog extends StatelessWidget {
                 ),
                 
                 const SizedBox(width: 12),
-                
-                // Botão Sair
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(true),

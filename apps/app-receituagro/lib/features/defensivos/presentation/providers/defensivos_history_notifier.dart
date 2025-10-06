@@ -49,8 +49,6 @@ class DefensivosHistoryState {
   DefensivosHistoryState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // Convenience getters
   bool get hasRecentDefensivos => recentDefensivos.isNotEmpty;
   bool get hasNewDefensivos => newDefensivos.isNotEmpty;
 }
@@ -64,11 +62,8 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
 
   @override
   Future<DefensivosHistoryState> build() async {
-    // Get dependencies from DI
     _repository = di.sl<FitossanitarioHiveRepository>();
     _historyService = AccessHistoryService();
-
-    // Load history on initialization
     return await _loadHistory();
   }
 
@@ -76,8 +71,6 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
   Future<DefensivosHistoryState> _loadHistory() async {
     try {
       final allDefensivos = await _repository.getActiveDefensivos();
-
-      // If no data, return empty lists
       if (allDefensivos.isEmpty) {
         return DefensivosHistoryState.initial();
       }
@@ -91,7 +84,6 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
         errorMessage: null,
       );
     } catch (e) {
-      // Use random selection as fallback
       final allDefensivos = await _repository.getActiveDefensivos();
       if (allDefensivos.isNotEmpty) {
         return DefensivosHistoryState(
@@ -167,10 +159,7 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
   /// Load history data and combine with random selection
   Future<Map<String, List<FitossanitarioHive>>> _loadHistoryData(List<FitossanitarioHive> allDefensivos) async {
     try {
-      // Load access history
       final historyItems = await _historyService.getDefensivosHistory();
-
-      // If no defensivos, return empty lists
       if (allDefensivos.isEmpty) {
         return {
           'recent': <FitossanitarioHive>[],
@@ -200,8 +189,6 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
           historicDefensivos.add(defensivo);
         }
       }
-
-      // ÚLTIMOS ACESSADOS: Se não há histórico, inicializar com 10 aleatórios
       List<FitossanitarioHive> recentDefensivos;
       if (historicDefensivos.isEmpty) {
         print('⚠️ Nenhum histórico de acesso encontrado. Inicializando "Últimos Acessados" com 10 defensivos aleatórios.');
@@ -210,8 +197,6 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
         print('✅ ${historicDefensivos.length} defensivos encontrados no histórico de acesso.');
         recentDefensivos = historicDefensivos;
       }
-
-      // NOVOS DEFENSIVOS: Usar lógica baseada em createdAt
       final newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
 
       return {
@@ -220,7 +205,6 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
       };
     } catch (e) {
       print('❌ Erro ao carregar histórico: $e');
-      // In case of error, use random selection as fallback for both lists
       if (allDefensivos.isNotEmpty) {
         print('🔄 Usando seleção aleatória como fallback para ambas as listas');
         return {

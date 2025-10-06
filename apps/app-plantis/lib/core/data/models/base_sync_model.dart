@@ -6,7 +6,6 @@ import '../../sync/sync_status.dart' as local;
 /// Integrates with core package's BaseSyncEntity for Firebase sync
 ///
 /// Note: Cannot be @immutable due to HiveObjectMixin requirements
-// ignore: must_be_immutable
 abstract class BaseSyncModel extends BaseSyncEntity
     with HiveObjectMixin, SyncEntityMixin {
   /// Field to track last user who modified the entity
@@ -224,5 +223,4 @@ abstract class BaseSyncModel extends BaseSyncEntity
   }
 
   /// Getters úteis do core herdados automaticamente
-  // needsSync, isLocalOnly, timeSinceLastSync já estão disponíveis via herança
 }

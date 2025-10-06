@@ -413,12 +413,8 @@ class RainGaugeModel extends Equatable {
     final weekStartDay = DateTime(weekStart.year, weekStart.month, weekStart.day);
     final monthStart = DateTime(now.year, now.month, 1);
     final yearStart = DateTime(now.year, 1, 1);
-
-    // Calculate time since last measurement for rate calculation
     final timeDiff = measurementTime.difference(lastMeasurement).inHours;
     final rate = timeDiff > 0 ? newRainfall / timeDiff : 0.0;
-
-    // Update accumulations based on measurement time
     double newDaily = dailyAccumulation;
     double newWeekly = weeklyAccumulation;
     double newMonthly = monthlyAccumulation;

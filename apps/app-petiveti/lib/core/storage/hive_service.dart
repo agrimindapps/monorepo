@@ -1,7 +1,5 @@
 import 'package:core/core.dart' show Hive, HiveX, Box;
 import 'package:hive/hive.dart';
-
-// Generated Adapters
 import '../../features/animals/data/models/animal_model.dart';
 import '../../features/appointments/data/models/appointment_model.dart';
 import '../../features/medications/data/models/medication_model.dart';
@@ -17,64 +15,42 @@ class HiveService {
 
   /// Inicializa o Hive e registra todos os adapters
   Future<void> init() async {
-    // Inicializar Hive com Flutter
     await Hive.initFlutter();
-
-    // Registrar adapters gerados
     _registerGeneratedAdapters();
-
-    // Abrir boxes essenciais
     await _openEssentialBoxes();
   }
 
   /// Registra todos os adapters gerados pelo build_runner
   void _registerGeneratedAdapters() {
-    // Animals
     if (!Hive.isAdapterRegistered(11)) {
       Hive.registerAdapter(AnimalModelAdapter());
     }
-
-    // Appointments
     if (!Hive.isAdapterRegistered(12)) {
       Hive.registerAdapter(AppointmentModelAdapter() as TypeAdapter);
     }
-
-    // Medications
     if (!Hive.isAdapterRegistered(13)) {
       Hive.registerAdapter(MedicationModelAdapter());
     }
-
-    // Vaccines
     if (!Hive.isAdapterRegistered(14)) {
       Hive.registerAdapter(VaccineModelAdapter());
     }
-
-    // Weight
     if (!Hive.isAdapterRegistered(15)) {
       Hive.registerAdapter(WeightModelAdapter());
     }
-
-    // Adapters para novos modelos serão adicionados aqui conforme necessário
   }
 
   /// Abre boxes essenciais que são usados frequentemente
   Future<void> _openEssentialBoxes() async {
     try {
-      // Boxes principais
       await Hive.openBox<AnimalModel>(HiveBoxNames.animals);
       await Hive.openBox<AppointmentModel>(HiveBoxNames.appointments);
       await Hive.openBox<MedicationModel>(HiveBoxNames.medications);
       await Hive.openBox<VaccineModel>(HiveBoxNames.vaccines);
       await Hive.openBox<WeightModel>(HiveBoxNames.weights);
-
-      // Boxes para configurações e cache
       await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.settings);
       await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.cache);
-
-      // Logging box (JSON strings for now)
       await Hive.openBox<String>('logs_json');
     } catch (e) {
-      // Log do erro mas não falha a inicialização
       print('Erro ao abrir boxes: $e');
     }
   }
@@ -147,8 +123,6 @@ class HiveService {
   /// Backup de dados para um arquivo
   Future<bool> backupData() async {
     try {
-      // Implementar backup dos dados importantes
-      // Por agora retorna true como placeholder
       return true;
     } catch (e) {
       print('Erro no backup: $e');
@@ -159,8 +133,6 @@ class HiveService {
   /// Restaura dados de um backup
   Future<bool> restoreData(String backupPath) async {
     try {
-      // Implementar restauração dos dados
-      // Por agora retorna true como placeholder
       return true;
     } catch (e) {
       print('Erro na restauração: $e');
@@ -171,7 +143,6 @@ class HiveService {
 
 /// Nomes de todas as boxes utilizadas no app
 class HiveBoxNames {
-  // Boxes principais de dados
   static const String animals = 'animals';
   static const String appointments = 'appointments';
   static const String medications = 'medications';
@@ -179,14 +150,10 @@ class HiveBoxNames {
   static const String weights = 'weights';
   static const String reminders = 'reminders';
   static const String expenses = 'expenses';
-
-  // Boxes de sistema
   static const String settings = 'settings';
   static const String cache = 'cache';
   static const String userPreferences = 'user_preferences';
   static const String syncQueue = 'sync_queue';
-
-  // Boxes de autenticação e assinatura
   static const String auth = 'auth';
   static const String subscription = 'subscription';
 
@@ -210,20 +177,15 @@ class HiveBoxNames {
 
 /// Chaves utilizadas nas boxes de configuração
 class HiveKeys {
-  // Settings
   static const String firstLaunch = 'first_launch';
   static const String darkMode = 'dark_mode';
   static const String language = 'language';
   static const String notifications = 'notifications';
   static const String autoSync = 'auto_sync';
   static const String lastSyncTimestamp = 'last_sync_timestamp';
-
-  // Auth
   static const String currentUser = 'current_user';
   static const String authToken = 'auth_token';
   static const String rememberLogin = 'remember_login';
-
-  // Cache
   static const String lastAppVersion = 'last_app_version';
   static const String cacheVersion = 'cache_version';
 }

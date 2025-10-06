@@ -28,7 +28,6 @@ part 'maintenance_form_notifier.g.dart';
 /// - Persistência offline com sincronização
 @riverpod
 class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
-  // TextEditingControllers gerenciados internamente
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late final TextEditingController costController;
@@ -38,15 +37,11 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   late final TextEditingController workshopAddressController;
   late final TextEditingController nextOdometerController;
   late final TextEditingController notesController;
-
-  // Services e use cases injetados via GetIt
   late final MaintenanceFormatterService _formatter;
   late final MaintenanceValidatorService _validator;
   late final ReceiptImageService _receiptImageService;
   late final GetVehicleById _getVehicleById;
   late final ImagePicker _imagePicker;
-
-  // Timers de debounce
   Timer? _costDebounceTimer;
   Timer? _odometerDebounceTimer;
   Timer? _titleDebounceTimer;
@@ -54,7 +49,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
 
   @override
   MaintenanceFormState build() {
-    // Inicializa controllers
     titleController = TextEditingController();
     descriptionController = TextEditingController();
     costController = TextEditingController();
@@ -64,26 +58,17 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     workshopAddressController = TextEditingController();
     nextOdometerController = TextEditingController();
     notesController = TextEditingController();
-
-    // Inicializa services via GetIt
     _formatter = MaintenanceFormatterService();
     _validator = MaintenanceValidatorService();
     _receiptImageService = getIt<ReceiptImageService>();
     _getVehicleById = getIt<GetVehicleById>();
     _imagePicker = ImagePicker();
-
-    // Adiciona listeners aos controllers
     _initializeControllers();
-
-    // Cleanup ao descartar
     ref.onDispose(() {
-      // Cancela timers
       _costDebounceTimer?.cancel();
       _odometerDebounceTimer?.cancel();
       _titleDebounceTimer?.cancel();
       _descriptionDebounceTimer?.cancel();
-
-      // Remove listeners
       titleController.removeListener(_onTitleChanged);
       descriptionController.removeListener(_onDescriptionChanged);
       costController.removeListener(_onCostChanged);
@@ -93,8 +78,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       workshopAddressController.removeListener(_onWorkshopAddressChanged);
       nextOdometerController.removeListener(_onNextOdometerChanged);
       notesController.removeListener(_onNotesChanged);
-
-      // Dispose controllers
       titleController.dispose();
       descriptionController.dispose();
       costController.dispose();
@@ -108,8 +91,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
 
     return const MaintenanceFormState();
   }
-
-  // ==================== Initialization ====================
 
   /// Adiciona listeners aos controllers
   void _initializeControllers() {
@@ -139,7 +120,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Carrega dados do veículo
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
 
       await vehicleResult.fold(
@@ -175,7 +155,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Carrega dados do veículo
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: maintenance.vehicleId));
 
       await vehicleResult.fold(
@@ -222,8 +201,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     notesController.text = state.notes;
   }
 
-  // ==================== Field Change Handlers ====================
-
   void _onTitleChanged() {
     _titleDebounceTimer?.cancel();
     _titleDebounceTimer = Timer(
@@ -235,8 +212,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
           title: sanitized,
           hasChanges: true,
         ).clearFieldError('title');
-
-        // Sugerir tipo baseado no título se ainda não foi definido
         if (sanitized.isNotEmpty && state.type == MaintenanceType.preventive) {
           final suggestedType = _validator.suggestTypeFromDescription(sanitized);
           if (suggestedType != MaintenanceType.preventive) {
@@ -304,7 +279,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   void _onWorkshopPhoneChanged() {
     final formatted = _formatter.formatPhone(workshopPhoneController.text);
     if (formatted != workshopPhoneController.text) {
-      // Atualizar o campo com a formatação
       workshopPhoneController.value = workshopPhoneController.value.copyWith(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
@@ -343,8 +317,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       hasChanges: true,
     ).clearFieldError('notes');
   }
-
-  // ==================== UI Actions ====================
 
   /// Atualiza tipo de manutenção
   void updateType(MaintenanceType type) {
@@ -433,8 +405,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     state = state.clearImageError();
   }
 
-  // ==================== Form Validation ====================
-
   /// Valida campo específico (para TextFormField)
   String? validateField(String field, String? value) {
     switch (field) {
@@ -503,8 +473,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     return errors.isEmpty;
   }
 
-  // ==================== Date/Time Pickers ====================
-
   /// Abre picker de data do serviço
   Future<void> pickServiceDate(BuildContext context) async {
     final date = await showDatePicker(
@@ -529,7 +497,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     );
 
     if (date != null) {
-      // Manter hora atual
       final currentTime = TimeOfDay.fromDateTime(state.serviceDate ?? DateTime.now());
       final newDateTime = DateTime(
         date.year,
@@ -607,8 +574,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     }
   }
 
-  // ==================== Image Management ====================
-
   /// Captura imagem usando câmera
   Future<void> captureReceiptImage() async {
     try {
@@ -659,14 +624,10 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       state = state.copyWith(
         isUploadingImage: true,
       ).clearImageError();
-
-      // Valida imagem
       final isValid = await _receiptImageService.isValidImage(imagePath);
       if (!isValid) {
         throw Exception('Arquivo de imagem inválido');
       }
-
-      // Processa imagem (comprimir + upload se online)
       final result = await _receiptImageService.processMaintenanceReceiptImage(
         userId: state.userId,
         maintenanceId: _generateTemporaryId(),
@@ -741,7 +702,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
       debugPrint('[MAINTENANCE FORM] Image synced to Firebase: ${result.downloadUrl}');
     } catch (e) {
       debugPrint('[MAINTENANCE FORM] Failed to sync image: $e');
-      // Não exibe erro para usuário, continua com imagem local
       state = state.copyWith(isUploadingImage: false);
     }
   }
@@ -750,8 +710,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   String _generateTemporaryId() {
     return 'temp_${DateTime.now().millisecondsSinceEpoch}';
   }
-
-  // ==================== Form Actions ====================
 
   /// Limpa formulário
   void clearForm() {

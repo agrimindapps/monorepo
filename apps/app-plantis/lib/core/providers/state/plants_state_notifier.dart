@@ -129,23 +129,15 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     _filterService = ref.read(plantsFilterServiceProvider);
     _careCalculator = ref.read(plantsCareCalculatorProvider);
     _authProvider = ref.read(authStateProviderProviderProvider);
-
-    // Setup auth subscription
     _authSubscription = _authProvider.userStream.listen(_onAuthStateChanged);
-
-    // Setup auto-refresh timer
     _autoRefreshTimer = Timer.periodic(
       const Duration(minutes: 15),
       (_) => refreshPlants(),
     );
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _authSubscription?.cancel();
       _autoRefreshTimer?.cancel();
     });
-
-    // Load initial plants
     return await _loadPlantsInternal();
   }
 
@@ -459,8 +451,6 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     state = AsyncValue.data(currentState.copyWith(clearError: true));
   }
 }
-
-// Dependency Providers
 @riverpod
 PlantsDataService plantsDataService(Ref ref) {
   return GetIt.instance<PlantsDataService>();

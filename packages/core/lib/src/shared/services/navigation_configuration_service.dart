@@ -64,7 +64,6 @@ class NavigationConfigurationService implements INavigationConfiguration {
   @override
   void importConfiguration(Map<String, dynamic> config) {
     try {
-      // Import custom configurations
       final custom = config['custom'] as Map<String, dynamic>?;
       if (custom != null) {
         _configurations.clear();
@@ -74,8 +73,6 @@ class NavigationConfigurationService implements INavigationConfiguration {
           );
         });
       }
-
-      // Import default configurations if provided
       final defaults = config['defaults'] as Map<String, dynamic>?;
       if (defaults != null) {
         defaults.forEach((key, value) {
@@ -133,7 +130,6 @@ class NavigationConfigurationService implements INavigationConfiguration {
 
   /// Initialize default configurations for common page types
   void _initializeDefaultConfigurations() {
-    // Default configuration for all pages
     _defaultConfigurations['default'] = const NavigationConfiguration(
       showBottomNavigation: true,
       showBackButton: true,
@@ -141,40 +137,30 @@ class NavigationConfigurationService implements INavigationConfiguration {
       showAppBar: true,
       showLoading: false,
     );
-
-    // Settings pages - typically no bottom nav
     _defaultConfigurations['settings'] = const NavigationConfiguration(
       showBottomNavigation: false,
       showBackButton: true,
       canGoBack: true,
       showAppBar: true,
     );
-
-    // Modal pages - no bottom nav, custom back handling
     _defaultConfigurations['modal'] = const NavigationConfiguration(
       showBottomNavigation: false,
       showBackButton: true,
       canGoBack: true,
       showAppBar: false,
     );
-
-    // Detail pages - standard configuration
     _defaultConfigurations['detail'] = const NavigationConfiguration(
       showBottomNavigation: false,
       showBackButton: true,
       canGoBack: true,
       showAppBar: true,
     );
-
-    // List pages - show bottom nav
     _defaultConfigurations['list'] = const NavigationConfiguration(
       showBottomNavigation: true,
       showBackButton: true,
       canGoBack: true,
       showAppBar: true,
     );
-
-    // Loading pages - show loading state
     _defaultConfigurations['loading'] = const NavigationConfiguration(
       showBottomNavigation: false,
       showBackButton: false,
@@ -182,16 +168,12 @@ class NavigationConfigurationService implements INavigationConfiguration {
       showAppBar: false,
       showLoading: true,
     );
-
-    // Full screen pages - minimal UI
     _defaultConfigurations['fullscreen'] = const NavigationConfiguration(
       showBottomNavigation: false,
       showBackButton: false,
       canGoBack: true,
       showAppBar: false,
     );
-
-    // Premium pages - special handling
     _defaultConfigurations['premium'] = const NavigationConfiguration(
       showBottomNavigation: false,
       showBackButton: true,

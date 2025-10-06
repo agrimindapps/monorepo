@@ -285,7 +285,6 @@ class StandardLoadingView extends StatelessWidget {
   /// Loading compacto para ações específicas
   Widget _buildActionLoading(BuildContext context, Color color) {
     if (child != null) {
-      // Wrap existing widget with loading overlay
       return Stack(
         children: [
           child!,
@@ -330,8 +329,6 @@ class StandardLoadingView extends StatelessWidget {
         ],
       );
     }
-    
-    // Standalone action loading
     return SizedBox(
       height: height ?? 60,
       child: Center(
@@ -365,7 +362,6 @@ class StandardLoadingView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Skeleton para título
         Container(
           width: 120,
           height: 24,
@@ -379,7 +375,6 @@ class StandardLoadingView extends StatelessWidget {
             ),
           ),
         ),
-        // Skeleton para itens da lista
         ...List.generate(
           itemCount,
           (index) => Container(
@@ -398,7 +393,6 @@ class StandardLoadingView extends StatelessWidget {
               padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
               child: Row(
                 children: [
-                  // Skeleton para ícone
                   Container(
                     width: 48,
                     height: 48,
@@ -408,7 +402,6 @@ class StandardLoadingView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: GasometerDesignTokens.spacingLg),
-                  // Skeleton para texto
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

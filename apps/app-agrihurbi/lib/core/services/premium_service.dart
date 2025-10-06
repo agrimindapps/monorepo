@@ -19,8 +19,6 @@ class PremiumService {
   Future<bool> hasActiveSubscription() async {
     try {
       final result = await _revenueCatService.hasActiveSubscription();
-      
-      // Handle Either<Failure, bool> return type
       final hasSubscription = result.fold(
         (failure) => false, // Return false on failure
         (success) => success, // Return the boolean result
@@ -43,8 +41,6 @@ class PremiumService {
           'error': e.toString(),
         },
       );
-      
-      // Default to false on error
       return false;
     }
   }
@@ -124,8 +120,6 @@ class PremiumService {
           'error': e.toString(),
         },
       );
-      
-      // Default to blocked on error for premium features
       return PremiumAccessResult.blocked(
         'Erro ao verificar acesso. Tente novamente.',
         calculatorId,
@@ -172,8 +166,6 @@ class PremiumService {
           'error': e.toString(),
         },
       );
-      
-      // Default to blocked on error for premium features
       return PremiumAccessResult.blocked(
         'Erro ao verificar acesso. Tente novamente.',
         featureId,
@@ -197,14 +189,10 @@ class PremiumService {
   Future<SubscriptionInfo> getSubscriptionInfo() async {
     try {
       final result = await _revenueCatService.hasActiveSubscription();
-      
-      // Handle Either<Failure, bool> return type
       final hasSubscription = result.fold(
         (failure) => false,
         (success) => success,
       );
-      
-      // Se não tem assinatura, retorna informações básicas
       if (!hasSubscription) {
         return SubscriptionInfo(
           hasActiveSubscription: false,
@@ -213,8 +201,6 @@ class PremiumService {
           features: _getFreeFeatures(),
         );
       }
-      
-      // TODO: Implementar obtenção de detalhes da assinatura do RevenueCat
       return SubscriptionInfo(
         hasActiveSubscription: true,
         subscriptionType: 'premium',
@@ -223,8 +209,6 @@ class PremiumService {
       );
     } catch (e) {
       debugPrint('PremiumService: Erro ao obter info da assinatura - $e');
-      
-      // Default to free on error
       return SubscriptionInfo(
         hasActiveSubscription: false,
         subscriptionType: 'free',

@@ -119,8 +119,6 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
       }
       
       var defensivos = result.data!;
-
-      // Aplicar filtros
       if (fabricante != null && fabricante.isNotEmpty) {
         defensivos = defensivos
             .where((d) => d.fabricante?.toLowerCase().contains(fabricante.toLowerCase()) == true)
@@ -138,8 +136,6 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
             .where((d) => d.ingredienteAtivo?.toLowerCase().contains(ingredienteAtivo.toLowerCase()) == true)
             .toList();
       }
-
-      // Aplicar paginação
       if (offset != null && offset > 0) {
         if (offset >= defensivos.length) {
           return const Right([]);
@@ -185,8 +181,6 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
               (d.classeAgronomica?.toLowerCase().contains(searchQuery) == true))
           .map((hive) => DefensivoModel.fromHive(hive))
           .toList();
-
-      // Ordenar por relevância (nome comum primeiro)
       filteredDefensivos.sort((a, b) {
         final aComumMatch = a.nomeComum.toLowerCase().contains(searchQuery);
         final bComumMatch = b.nomeComum.toLowerCase().contains(searchQuery);
@@ -205,8 +199,6 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
   @override
   Stream<List<DefensivoEntity>> watchDefensivos() async* {
     try {
-      // Como o Hive não oferece streams nativamente, 
-      // podemos simular com refresh periódico
       while (true) {
         final result = await _hiveRepository.getAll();
         if (result.isError) {
@@ -221,8 +213,6 @@ class DefensivoRepositoryImpl implements DefensivoRepository {
             .toList();
         
         yield models;
-        
-        // Aguarda 5 segundos antes do próximo refresh
         await Future<void>.delayed(const Duration(seconds: 5));
       }
     } catch (e) {

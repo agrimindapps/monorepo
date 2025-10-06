@@ -24,8 +24,6 @@ class GetOverdueVaccinesParams {
   final String? animalId;
   
   const GetOverdueVaccinesParams({this.animalId});
-  
-  // Factory constructors for convenience
   factory GetOverdueVaccinesParams.all() => const GetOverdueVaccinesParams();
   factory GetOverdueVaccinesParams.byAnimal(String animalId) => GetOverdueVaccinesParams(animalId: animalId);
 }

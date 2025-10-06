@@ -36,12 +36,8 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Preview section
             if (_previewResult != null && _previewResult!.success)
               _buildPreviewSection(),
-            
-            // Loading indicator
             if (_isProcessing)
               const Padding(
                 padding: EdgeInsets.all(24),
@@ -53,16 +49,12 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
                   ],
                 ),
               ),
-            
-            // Action buttons
             if (!_isProcessing) ...[
               const SizedBox(height: 16),
               _buildActionButtons(context),
             ],
             
             const SizedBox(height: 16),
-            
-            // Cancel/Close buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -127,7 +119,6 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
   Widget _buildActionButtons(BuildContext context) {
     return Column(
       children: [
-        // Camera button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
@@ -140,8 +131,6 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
           ),
         ),
         const SizedBox(height: 12),
-        
-        // Gallery button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
@@ -153,8 +142,6 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
             ),
           ),
         ),
-        
-        // Remove button (only if user has avatar)
         Consumer(
           builder: (context, ref, _) {
             final currentUser = ref.watch(currentUserProvider);

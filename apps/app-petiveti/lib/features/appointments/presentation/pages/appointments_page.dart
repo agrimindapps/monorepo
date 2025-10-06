@@ -6,8 +6,6 @@ import '../providers/appointments_provider.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/appointments_auto_reload_manager.dart';
 import '../widgets/empty_appointments_state.dart';
-
-// Provider para animal ID selecionado (parâmetro independente)
 final selectedAnimalIdProvider = StateProvider<String?>((ref) => null);
 
 class AppointmentsPage extends ConsumerStatefulWidget {
@@ -27,12 +25,10 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   @override
   void initState() {
     super.initState();
-    // Auto-reload is now handled by AppointmentsAutoReloadManager widget
   }
 
   @override
   void dispose() {
-    // Dispose all animation controllers
     for (final controller in _slideAnimations.values) {
       controller.dispose();
     }
@@ -78,10 +74,8 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
     return AppointmentsAutoReloadManager(
       selectedAnimalId: selectedAnimalId,
       onReloadStart: () {
-        // Optional: Show loading indicator
       },
       onReloadComplete: () {
-        // Optional: Hide loading indicator
       },
       onReloadError: (error) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -107,7 +101,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
       ),
       body: Column(
         children: [
-          // Animal selector info with accessibility
           if (selectedAnimalId != null)
             Semantics(
               label: 'Animal selecionado para consultas',
@@ -156,8 +149,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                 ),
               ),
             ),
-
-          // Content
           Expanded(
             child: _buildContent(context, appointmentState, appointments, selectedAnimalId),
           ),
@@ -310,7 +301,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                 return await _showDeleteDialogForDismiss(context, appointment);
               },
               onDismissed: (direction) {
-                // Already handled in confirmDismiss
               },
               child: SlideTransition(
                 position: Tween<Offset>(
@@ -438,7 +428,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                 setState(() => _isDeleting = true);
                 
                 try {
-                  // Set the item as being deleted for visual feedback
                   this.setState(() => _itemBeingDeleted = appointment.id);
                   
                   final success = await ref
@@ -449,8 +438,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                     Navigator.of(context).pop(success);
                     if (success) {
                       _showResultSnackBar(context, success, 'consulta excluída');
-                      
-                      // Animate out the item
                       final fadeController = _fadeAnimations[appointment.id];
                       if (fadeController != null) {
                         await fadeController.reverse();
@@ -489,7 +476,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
 
   void _showDeleteDialog(BuildContext context, Appointment appointment) async {
     await _showDeleteDialogForDismiss(context, appointment);
-    // Handle the result if needed for non-dismissible calls
   }
   
   void _showResultSnackBar(BuildContext context, bool success, String action) {

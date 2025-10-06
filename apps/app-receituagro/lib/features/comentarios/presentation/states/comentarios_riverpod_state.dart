@@ -44,36 +44,21 @@ import '../../domain/entities/comentario_entity.dart';
 /// ```
 
 class ComentariosRiverpodState extends Equatable {
-  // ========================================================================
-  // DATA STATE
-  // ========================================================================
   
   /// List of all loaded comentarios
   final List<ComentarioEntity> comentarios;
   
   /// Flag indicating if initial data load has completed successfully
   final bool hasLoaded;
-
-  // ========================================================================
-  // LOADING STATE
-  // ========================================================================
   
   /// General loading state for data fetching operations
   final bool isLoading;
   
   /// Operation-specific loading state for add/delete/update operations
   final bool isOperating;
-
-  // ========================================================================
-  // ERROR STATE
-  // ========================================================================
   
   /// Current error message, null if no error
   final String? error;
-
-  // ========================================================================
-  // FILTER STATE
-  // ========================================================================
   
   /// Current search text for filtering comentarios
   final String searchText;
@@ -83,10 +68,6 @@ class ComentariosRiverpodState extends Equatable {
   
   /// Tool filter - filters by ferramenta (empty string means no filter) 
   final String filterTool;
-
-  // ========================================================================
-  // CONSTRUCTOR
-  // ========================================================================
 
   const ComentariosRiverpodState({
     this.comentarios = const [],
@@ -98,10 +79,6 @@ class ComentariosRiverpodState extends Equatable {
     this.filterContext = '',
     this.filterTool = '',
   });
-
-  // ========================================================================
-  // COPY WITH METHOD
-  // ========================================================================
 
   /// Creates a copy of this state with updated values
   ComentariosRiverpodState copyWith({
@@ -144,10 +121,6 @@ class ComentariosRiverpodState extends Equatable {
       filterTool: filterTool,
     );
   }
-
-  // ========================================================================
-  // COMPUTED PROPERTIES
-  // ========================================================================
 
   /// Check if any loading operation is in progress
   bool get hasAnyLoading => isLoading || isOperating;
@@ -200,10 +173,6 @@ class ComentariosRiverpodState extends Equatable {
     return contexts;
   }
 
-  // ========================================================================
-  // EQUATABLE IMPLEMENTATION
-  // ========================================================================
-
   @override
   List<Object?> get props => [
     comentarios,
@@ -215,10 +184,6 @@ class ComentariosRiverpodState extends Equatable {
     filterContext,
     filterTool,
   ];
-
-  // ========================================================================
-  // STRING REPRESENTATION
-  // ========================================================================
 
   @override
   String toString() {
@@ -233,10 +198,6 @@ class ComentariosRiverpodState extends Equatable {
         '  filterTool: "$filterTool"\n'
         ')';
   }
-
-  // ========================================================================
-  // STATE PRESETS
-  // ========================================================================
 
   /// Initial loading state
   static const ComentariosRiverpodState loading = ComentariosRiverpodState(
@@ -260,19 +221,10 @@ class ComentariosRiverpodState extends Equatable {
     hasLoaded: true,
   );
 
-  // ========================================================================
-  // VALIDATION METHODS
-  // ========================================================================
-
   /// Validate state consistency (useful for debugging)
   bool isStateValid() {
-    // Can't be loading and operating at the same time
     if (isLoading && isOperating) return false;
-    
-    // If hasLoaded is true, shouldn't be in initial loading
     if (hasLoaded && isLoading && comentarios.isEmpty) return false;
-    
-    // Error state should not have concurrent loading
     if (hasError && (isLoading || isOperating)) return false;
     
     return true;

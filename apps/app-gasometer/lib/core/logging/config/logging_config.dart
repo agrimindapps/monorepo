@@ -6,7 +6,6 @@ import '../entities/log_entry.dart';
 class LoggingConfigModule {
   /// Configura o sistema de logging
   static Future<void> configure() async {
-    // Registrar TypeAdapters para Hive
     if (!Hive.isAdapterRegistered(20)) {
       Hive.registerAdapter(LogEntryAdapter());
     }
@@ -15,26 +14,17 @@ class LoggingConfigModule {
 
 /// Configurações padrão do sistema de logging
 class LoggingConfig {
-  // Configurações de persistência local
   static const String localBoxName = 'logs';
   static const int maxLocalLogs = 10000;
   static const int maxDaysToKeep = 30;
-
-  // Configurações de sync remoto
   static const int syncBatchSize = 500;
   static const Duration syncTimeout = Duration(seconds: 30);
   static const Duration syncRetryDelay = Duration(seconds: 5);
-
-  // Configurações de performance
   static const Duration operationLogThreshold = Duration(milliseconds: 1000);
   static const bool logDebugInProduction = false;
   static const bool logAnalyticsEvents = true;
-
-  // Configurações de cache
   static const Duration cacheCleanupInterval = Duration(hours: 6);
   static const int maxCacheSize = 1000;
-
-  // Configurações de filtragem
   static final List<String> sensitiveKeys = [
     'password',
     'token',

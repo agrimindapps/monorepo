@@ -11,10 +11,6 @@ import 'reports_state.dart';
 
 part 'reports_notifier.g.dart';
 
-// ============================================================================
-// Use Cases Providers (from GetIt)
-// ============================================================================
-
 @riverpod
 GenerateMonthlyReport generateMonthlyReport(Ref ref) {
   return getIt<GenerateMonthlyReport>();
@@ -60,10 +56,6 @@ ExportReportToCSV exportReportToCSV(Ref ref) {
   return getIt<ExportReportToCSV>();
 }
 
-// ============================================================================
-// Reports State Notifier
-// ============================================================================
-
 @riverpod
 class ReportsNotifier extends _$ReportsNotifier {
   @override
@@ -71,19 +63,11 @@ class ReportsNotifier extends _$ReportsNotifier {
     return const ReportsState();
   }
 
-  // ============================================================================
-  // Vehicle Selection
-  // ============================================================================
-
   void setSelectedVehicle(String vehicleId) {
     if (state.selectedVehicleId != vehicleId) {
       state = ReportsState(selectedVehicleId: vehicleId);
     }
   }
-
-  // ============================================================================
-  // Generate Reports
-  // ============================================================================
 
   Future<void> generateCurrentMonthReport({String? vehicleId}) async {
     final id = vehicleId ?? state.selectedVehicleId;
@@ -188,10 +172,6 @@ class ReportsNotifier extends _$ReportsNotifier {
     );
   }
 
-  // ============================================================================
-  // Compare Reports
-  // ============================================================================
-
   Future<void> compareCurrentMonthWithPrevious({String? vehicleId}) async {
     final id = vehicleId ?? state.selectedVehicleId;
     if (id.isEmpty) return;
@@ -268,10 +248,6 @@ class ReportsNotifier extends _$ReportsNotifier {
       },
     );
   }
-
-  // ============================================================================
-  // Load Analytics
-  // ============================================================================
 
   Future<void> loadEfficiencyTrends({int months = 12, String? vehicleId}) async {
     final id = vehicleId ?? state.selectedVehicleId;
@@ -377,32 +353,20 @@ class ReportsNotifier extends _$ReportsNotifier {
     );
   }
 
-  // ============================================================================
-  // Load All Reports
-  // ============================================================================
-
   Future<void> loadAllReportsForVehicle(String vehicleId) async {
     setSelectedVehicle(vehicleId);
-
-    // Load main reports in parallel
     await Future.wait([
       generateCurrentMonthReport(vehicleId: vehicleId),
       generateCurrentYearReport(vehicleId: vehicleId),
       compareCurrentMonthWithPrevious(vehicleId: vehicleId),
       compareCurrentYearWithPrevious(vehicleId: vehicleId),
     ]);
-
-    // Load analytics separately to avoid overloading
     await Future.wait([
       loadEfficiencyTrends(vehicleId: vehicleId),
       loadCostAnalysis(vehicleId: vehicleId),
       loadUsagePatterns(vehicleId: vehicleId),
     ]);
   }
-
-  // ============================================================================
-  // Export Report
-  // ============================================================================
 
   Future<String?> exportCurrentMonthToCSV() async {
     if (state.currentMonthReport == null) return null;
@@ -432,10 +396,6 @@ class ReportsNotifier extends _$ReportsNotifier {
     return csvContent;
   }
 
-  // ============================================================================
-  // Utility Methods
-  // ============================================================================
-
   void clearError() {
     if (state.errorMessage != null) {
       state = state.copyWith(errorMessage: null);
@@ -445,10 +405,6 @@ class ReportsNotifier extends _$ReportsNotifier {
   void clearAllData() {
     state = ReportsState(selectedVehicleId: state.selectedVehicleId);
   }
-
-  // ============================================================================
-  // Private Helpers
-  // ============================================================================
 
   String _mapFailureToMessage(Failure failure) {
     if (failure is ValidationFailure) {
@@ -468,10 +424,6 @@ class ReportsNotifier extends _$ReportsNotifier {
     }
   }
 }
-
-// ============================================================================
-// Derived State Providers (Computed Values)
-// ============================================================================
 
 @riverpod
 bool hasError(Ref ref) {
@@ -504,10 +456,6 @@ bool hasAnalytics(Ref ref) {
       state.costAnalysis != null ||
       state.usagePatterns != null;
 }
-
-// ============================================================================
-// UI Helpers - Formatted Stats
-// ============================================================================
 
 @riverpod
 Map<String, String> currentMonthStats(Ref ref) {

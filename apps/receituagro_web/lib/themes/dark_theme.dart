@@ -126,8 +126,6 @@ ThemeData darkTheme = ThemeData(
   ),
   cardTheme: CardThemeData(
     color: const Color.fromRGBO(38, 41, 46, 1),
-    // shadowColor: Colors.grey.shade900,
-    // surfaceTintColor: Colors.grey.shade800,
     elevation: 4,
     margin: const EdgeInsets.all(0),
     shape: RoundedRectangleBorder(
@@ -159,7 +157,6 @@ ThemeData darkTheme = ThemeData(
           : GetPlatform.isAndroid
               ? Brightness.light
               : Brightness.dark,
-      // Aplique uma systemNavigationBarColor transparente para suporte ao modo escuro
       systemNavigationBarColor: const Color.fromRGBO(38, 41, 46, 1),
       systemNavigationBarDividerColor:
           Colors.transparent, // Divisor transparente para consistência

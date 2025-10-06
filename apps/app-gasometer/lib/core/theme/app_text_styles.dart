@@ -4,8 +4,6 @@ import 'app_colors.dart';
 /// Definição dos estilos de texto do aplicativo GasOMeter
 class AppTextStyles {
   AppTextStyles._();
-
-  // Display styles
   static const TextStyle displayLarge = TextStyle(
     inherit: false,
     fontSize: 57,
@@ -29,8 +27,6 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.onSurface,
   );
-
-  // Headline styles
   static const TextStyle headlineLarge = TextStyle(
     inherit: false,
     fontSize: 32,
@@ -54,8 +50,6 @@ class AppTextStyles {
     letterSpacing: 0,
     color: AppColors.onSurface,
   );
-
-  // Title styles
   static const TextStyle titleLarge = TextStyle(
     inherit: false,
     fontSize: 22,
@@ -79,8 +73,6 @@ class AppTextStyles {
     letterSpacing: 0.1,
     color: AppColors.onSurface,
   );
-
-  // Label styles
   static const TextStyle labelLarge = TextStyle(
     inherit: false,
     fontSize: 14,
@@ -104,8 +96,6 @@ class AppTextStyles {
     letterSpacing: 0.5,
     color: AppColors.onSurface,
   );
-
-  // Body styles
   static const TextStyle bodyLarge = TextStyle(
     inherit: false,
     fontSize: 16,
@@ -129,8 +119,6 @@ class AppTextStyles {
     letterSpacing: 0.4,
     color: AppColors.onSurface,
   );
-
-  // Estilos específicos do Premium
   static const TextStyle premiumTitle = TextStyle(
     inherit: false,
     fontSize: 24,
@@ -162,8 +150,6 @@ class AppTextStyles {
     letterSpacing: 0.25,
     color: AppColors.onSurface,
   );
-
-  // Estilos de botões
   static const TextStyle buttonLarge = TextStyle(
     inherit: false,
     fontSize: 16,

@@ -124,31 +124,17 @@ class DrainageCalculator extends CalculatorEntity {
       final double drainageCoefficient = double.parse(inputs['drainage_coefficient'].toString());
       final String cropType = inputs['crop_type'].toString();
       final String drainageMethod = inputs['drainage_method'].toString();
-
-      // Obter parâmetros do solo
       final Map<String, dynamic> soilParameters = _getSoilParameters(soilType);
-
-      // Calcular coeficiente de escoamento
       final Map<String, dynamic> runoffAnalysis = _calculateRunoffCoefficient(
         soilType, slopePercentage, cropType, annualRainfall);
-
-      // Calcular vazão de projeto
       final Map<String, dynamic> designFlow = _calculateDesignFlow(
         fieldArea, designStorm, runoffAnalysis, returnPeriod);
-
-      // Dimensionar sistema de drenagem
       final Map<String, dynamic> drainageSystem = _designDrainageSystem(
         fieldArea, drainageCoefficient, drainageMethod, soilParameters);
-
-      // Calcular espaçamento de drenos
       final Map<String, dynamic> drainSpacing = _calculateDrainSpacing(
         soilParameters, drainageCoefficient, slopePercentage);
-
-      // Análise econômica
       final Map<String, dynamic> economicAnalysis = _calculateDrainageCosts(
         fieldArea, drainageSystem, drainageMethod);
-
-      // Recomendações
       final List<String> recommendations = _generateDrainageRecommendations(
         soilType, drainageMethod, runoffAnalysis, drainageSystem);
 
@@ -277,7 +263,6 @@ class DrainageCalculator extends CalculatorEntity {
     String cropType,
     double rainfall,
   ) {
-    // Coeficiente base por tipo de solo
     final Map<String, double> baseCoefficients = {
       'Arenoso': 0.15,
       'Franco-arenoso': 0.25,
@@ -288,15 +273,11 @@ class DrainageCalculator extends CalculatorEntity {
     };
 
     double runoffCoefficient = baseCoefficients[soilType] ?? 0.35;
-
-    // Ajuste por declividade
     if (slope > 5.0) {
       runoffCoefficient += 0.1;
     } else if (slope < 1.0) {
       runoffCoefficient -= 0.05;
     }
-
-    // Ajuste por cultura
     final Map<String, double> cropFactors = {
       'Arroz': 0.8, // Cultura inundada
       'Milho': 1.0,
@@ -307,8 +288,6 @@ class DrainageCalculator extends CalculatorEntity {
     };
 
     runoffCoefficient *= (cropFactors[cropType] ?? 1.0);
-
-    // Limitar valores
     runoffCoefficient = math.max(0.1, math.min(0.9, runoffCoefficient));
 
     return {
@@ -324,8 +303,6 @@ class DrainageCalculator extends CalculatorEntity {
     String returnPeriod,
   ) {
     final double runoffCoeff = runoffAnalysis['runoff_coefficient'] as double;
-
-    // Fator de ajuste por período de retorno
     final Map<String, double> returnFactors = {
       '5 anos': 1.0,
       '10 anos': 1.15,
@@ -335,13 +312,9 @@ class DrainageCalculator extends CalculatorEntity {
     };
 
     final double returnFactor = returnFactors[returnPeriod] ?? 1.15;
-    
-    // Vazão pelo método racional: Q = C × I × A / 360
     final double peakFlow = (runoffCoeff * intensity * area * 10000) / 3600; // m³/s
 
     final double adjustedFlow = peakFlow * returnFactor;
-
-    // Tempo de concentração (estimativa)
     final double timeOfConcentration = math.pow(area, 0.3) * 10; // minutos
 
     return {
@@ -360,8 +333,6 @@ class DrainageCalculator extends CalculatorEntity {
   ) {
     double drainSpacing = 50.0; // metros
     double drainDepth = 1.2; // metros
-
-    // Ajustar baseado no método
     switch (method) {
       case 'Drenos Subterrâneos':
         drainSpacing = 30.0;
@@ -380,16 +351,12 @@ class DrainageCalculator extends CalculatorEntity {
         drainDepth = 0.6;
         break;
     }
-
-    // Ajustar pela permeabilidade
     final double permeability = soilParams['permeability'] as double;
     if (permeability < 0.1) {
       drainSpacing *= 0.7; // Solo menos permeável = drenos mais próximos
     } else if (permeability > 0.3) {
       drainSpacing *= 1.3; // Solo mais permeável = drenos mais afastados
     }
-
-    // Calcular comprimento total
     final double areaM2 = area * 10000;
     final double fieldLength = math.sqrt(areaM2);
     final int numberOfDrains = (fieldLength / drainSpacing).ceil();
@@ -410,20 +377,12 @@ class DrainageCalculator extends CalculatorEntity {
     double slope,
   ) {
     final double permeability = soilParams['permeability'] as double;
-    
-    // Fórmula de Hooghoudt simplificada
     const double drainDepth = 1.2; // metros
     final double drainageRate = drainageCoeff / 1000; // m/dia
-    
-    // Espaçamento baseado na permeabilidade
     double spacing = math.sqrt((8 * permeability * drainDepth) / drainageRate);
-    
-    // Ajustar pela declividade
     if (slope > 3.0) {
       spacing *= 1.2; // Maior declividade permite maior espaçamento
     }
-    
-    // Limites práticos
     spacing = math.max(20, math.min(100, spacing));
 
     return {
@@ -439,8 +398,6 @@ class DrainageCalculator extends CalculatorEntity {
     String method,
   ) {
     final double totalLength = drainageSystem['total_drain_length'] as double;
-    
-    // Custos por metro linear (R\$/m)
     final Map<String, double> unitCosts = {
       'Drenos Subterrâneos': 35.0,
       'Canais Superficiais': 15.0,
@@ -469,20 +426,14 @@ class DrainageCalculator extends CalculatorEntity {
     final List<String> recommendations = [];
 
     final double runoffCoeff = runoffAnalysis['runoff_coefficient'] as double;
-
-    // Recomendações por tipo de solo
     if (soilType.contains('Argiloso')) {
       recommendations.add('Solo argiloso: considerar drenos subterrâneos próximos para remoção do excesso.');
     } else if (soilType.contains('Arenoso')) {
       recommendations.add('Solo arenoso: atenção ao espaçamento dos drenos para não sobre-drenar.');
     }
-
-    // Recomendações por escoamento
     if (runoffCoeff > 0.6) {
       recommendations.add('Alto escoamento superficial: implementar práticas conservacionistas.');
     }
-
-    // Recomendações por método
     switch (method) {
       case 'Drenos Subterrâneos':
         recommendations.add('Drenos subterrâneos: manter sistema de manutenção regular.');

@@ -42,15 +42,10 @@ class EnhancedSecurityService {
   );
 
   final LocalAuthentication _localAuth = LocalAuthentication();
-  
-  // Rate limiting
   final Map<String, List<DateTime>> _rateLimitMap = {};
   final Map<String, int> _failedAttempts = {};
-  
-  // Security configuration
   bool _biometricsEnabled = false;
   int _maxFailedAttempts = 5;
-  // Duration _lockoutDuration = const Duration(minutes: 15); // Reserved for future use
   
   bool _initialized = false;
 
@@ -64,16 +59,11 @@ class EnhancedSecurityService {
 
     try {
       _maxFailedAttempts = maxFailedAttempts;
-      // _lockoutDuration = lockoutDuration; // Reserved for future use
-
-      // Verifica disponibilidade biométrica
       if (enableBiometrics) {
         final isAvailable = await _localAuth.canCheckBiometrics;
         final isDeviceSupported = await _localAuth.isDeviceSupported();
         _biometricsEnabled = isAvailable && isDeviceSupported;
       }
-
-      // Inicializa salt master se não existir
       await _ensureMasterSalt();
 
       _initialized = true;
@@ -90,8 +80,6 @@ class EnhancedSecurityService {
     }
   }
 
-  // ========== CRIPTOGRAFIA ==========
-
   /// Criptografa dados usando AES-256-GCM
   Future<Result<String>> encrypt(String data, {String? customKey}) async {
     if (!_initialized) {
@@ -103,15 +91,9 @@ class EnhancedSecurityService {
       final keyString = customKey ?? await _getOrCreateKey('default');
       final keyBytes = _deriveKey(keyString, await _getMasterSalt());
       final key = Key(keyBytes);
-
-      // Generate unique IV for each encryption
       final iv = IV.fromSecureRandom(16);
-
-      // Use AES-256-GCM for authenticated encryption
       final encrypter = Encrypter(AES(key, mode: AESMode.gcm));
       final encrypted = encrypter.encrypt(data, iv: iv);
-
-      // Format: version:iv:encrypted_data
       final result = '$_encryptionVersion:${iv.base64}:${encrypted.base64}';
 
       return Result.success(result);
@@ -135,7 +117,6 @@ class EnhancedSecurityService {
     }
 
     try {
-      // Check if it's legacy Base64 encrypted data
       if (encryptedData.startsWith(_legacyPrefix) || !encryptedData.contains(':')) {
         return _decryptLegacyData(encryptedData, customKey);
       }
@@ -151,12 +132,9 @@ class EnhancedSecurityService {
       }
 
       final version = parts[0];
-
-      // Handle different encryption versions
       if (version == _encryptionVersion) {
         return _decryptAESData(parts, customKey);
       } else {
-        // Assume it's legacy format without version prefix
         return _decryptLegacyData(encryptedData, customKey);
       }
     } catch (e, stackTrace) {
@@ -176,8 +154,6 @@ class EnhancedSecurityService {
     try {
       final salt = customSalt ?? await _getMasterSalt();
       final bytes = utf8.encode(password + salt);
-      
-      // Simula PBKDF2 com múltiplas iterações de SHA-256
       List<int> hash = bytes;
       for (int i = 0; i < _defaultIterations; i++) {
         hash = sha256.convert(hash).bytes;
@@ -233,8 +209,6 @@ class EnhancedSecurityService {
     }
   }
 
-  // ========== TOKENS E CHAVES ==========
-
   /// Gera token seguro
   Future<Result<String>> generateSecureToken({int length = 32}) async {
     try {
@@ -281,8 +255,6 @@ class EnhancedSecurityService {
     try {
       final random = Random.secure();
       final bytes = List.generate(16, (_) => random.nextInt(256));
-      
-      // Define bits de versão (4) e variante (10)
       bytes[6] = (bytes[6] & 0x0f) | 0x40;
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
       
@@ -301,8 +273,6 @@ class EnhancedSecurityService {
       );
     }
   }
-
-  // ========== AUTENTICAÇÃO BIOMÉTRICA ==========
 
   /// Verifica se biometria está disponível
   Future<Result<BiometricInfo>> getBiometricInfo() async {
@@ -366,8 +336,6 @@ class EnhancedSecurityService {
     }
   }
 
-  // ========== SECURE STORAGE ==========
-
   /// Armazena dados com criptografia adicional
   Future<Result<void>> secureStore(String key, String value, {bool requireBiometrics = false}) async {
     try {
@@ -384,8 +352,6 @@ class EnhancedSecurityService {
           );
         }
       }
-
-      // Criptografa o valor antes de armazenar
       final encryptResult = await encrypt(value);
       if (encryptResult.isError) return Result.error(encryptResult.error!);
       
@@ -424,8 +390,6 @@ class EnhancedSecurityService {
       if (encryptedValue == null) {
         return Result.success(null);
       }
-
-      // Descriptografa o valor
       final decryptResult = await decrypt(encryptedValue);
       if (decryptResult.isError) return Result.error(decryptResult.error!);
       
@@ -459,8 +423,6 @@ class EnhancedSecurityService {
     }
   }
 
-  // ========== RATE LIMITING ==========
-
   /// Verifica se operação está sendo feita com muita frequência
   Future<Result<bool>> checkRateLimit(String operation, {
     int maxAttempts = 10,
@@ -469,8 +431,6 @@ class EnhancedSecurityService {
     try {
       final now = DateTime.now();
       final attempts = _rateLimitMap[operation] ?? [];
-      
-      // Remove tentativas antigas
       attempts.removeWhere((attempt) => 
         now.difference(attempt) > timeWindow);
       
@@ -519,15 +479,11 @@ class EnhancedSecurityService {
     }
   }
 
-  // ========== VALIDAÇÃO E SANITIZAÇÃO ==========
-
   /// Sanitiza input removendo caracteres perigosos
   String sanitizeInput(String input, {bool allowHtml = false}) {
     if (allowHtml) {
-      // Remove apenas scripts perigosos
       return input.replaceAll(RegExp(r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>', caseSensitive: false), '');
     } else {
-      // Remove todos os caracteres HTML/XML
       return input
           .replaceAll(RegExp(r'<[^>]*>'), '')
           .replaceAll(RegExp(r'&[^;]+;'), '')
@@ -537,7 +493,6 @@ class EnhancedSecurityService {
 
   /// Valida se string contém apenas caracteres seguros
   bool isInputSafe(String input) {
-    // Verifica caracteres perigosos comuns
     final dangerousPatterns = [
       RegExp(r'<script', caseSensitive: false),
       RegExp(r'javascript:', caseSensitive: false),
@@ -587,32 +542,23 @@ class EnhancedSecurityService {
     }
   }
 
-  // ========== MÉTODOS PRIVADOS ==========
-
   /// Deriva chave usando PBKDF2
   Uint8List _deriveKey(String key, String salt) {
     final keyBytes = utf8.encode(key);
     final saltBytes = utf8.encode(salt);
-
-    // Simula PBKDF2 com múltiplas iterações de SHA-256
     List<int> derivedKey = [...keyBytes, ...saltBytes];
     for (int i = 0; i < _defaultIterations; i++) {
       derivedKey = sha256.convert(derivedKey).bytes;
     }
-
-    // Retorna os primeiros 32 bytes para AES-256
     return Uint8List.fromList(derivedKey.take(32).toList());
   }
 
   /// Descriptografa dados legacy usando Base64
   Future<Result<String>> _decryptLegacyData(String encryptedData, String? customKey) async {
     try {
-      // Remove legacy prefix se presente
       final data = encryptedData.startsWith(_legacyPrefix)
           ? encryptedData.substring(_legacyPrefix.length)
           : encryptedData;
-
-      // Para dados legacy, simplesmente decodifica Base64
       final decoded = utf8.decode(base64Decode(data));
 
       return Result.success(decoded);

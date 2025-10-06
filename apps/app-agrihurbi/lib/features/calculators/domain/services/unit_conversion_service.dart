@@ -6,8 +6,6 @@ import '../entities/calculator_parameter.dart';
 /// com precisão e validação adequadas para uso agrícola
 class UnitConversionService {
   UnitConversionService._();
-
-  // Fatores de conversão base para diferentes categorias
   
   /// Conversões de área (base: metros quadrados)
   static const Map<ParameterUnit, double> _areaConversions = {
@@ -53,12 +51,9 @@ class UnitConversionService {
     required ParameterUnit toUnit,
   }) {
     try {
-      // Se as unidades são iguais, não há conversão
       if (fromUnit == toUnit) {
         return ConversionResult.success(value, fromUnit, toUnit);
       }
-
-      // Determinar categoria e executar conversão
       final category = _getUnitCategory(fromUnit);
       
       if (category != _getUnitCategory(toUnit)) {
@@ -262,8 +257,6 @@ class UnitConversionService {
   ) {
     final fromFactor = conversionFactors[fromUnit] ?? 1.0;
     final toFactor = conversionFactors[toUnit] ?? 1.0;
-    
-    // Converter para base e depois para unidade final
     final baseValue = value * fromFactor;
     return baseValue / toFactor;
   }
@@ -274,7 +267,6 @@ class UnitConversionService {
     ParameterUnit fromUnit,
     ParameterUnit toUnit,
   ) {
-    // Por enquanto, apenas Celsius é suportado
     if (fromUnit == ParameterUnit.celsius && toUnit == ParameterUnit.celsius) {
       return value;
     }
@@ -311,14 +303,12 @@ class UnitConversionService {
   }
 
   static double _convertPressureToBase(double value, ParameterUnit unit) {
-    // Base: bar
     if (unit == ParameterUnit.bar) return value;
     if (unit == ParameterUnit.atm) return value / 0.986923;
     throw UnsupportedError('Unidade de pressão não suportada: $unit');
   }
 
   static double _convertPressureFromBase(double baseValue, ParameterUnit unit) {
-    // Base: bar
     if (unit == ParameterUnit.bar) return baseValue;
     if (unit == ParameterUnit.atm) return baseValue * 0.986923;
     throw UnsupportedError('Unidade de pressão não suportada: $unit');
@@ -330,19 +320,13 @@ class UnitConversionService {
     ParameterUnit fromUnit,
     ParameterUnit toUnit,
   ) {
-    // Conversões básicas de concentração
-    // Nota: Algumas conversões podem precisar de densidade específica
     
     if (fromUnit == toUnit) return value;
-    
-    // ppm para mg/L (para água, são aproximadamente iguais)
     if (fromUnit == ParameterUnit.ppm && toUnit == ParameterUnit.mgL) {
       return value;
     } else if (fromUnit == ParameterUnit.mgL && toUnit == ParameterUnit.ppm) {
       return value;
     }
-    
-    // mg/L para mg/dm³ (são iguais)
     if ((fromUnit == ParameterUnit.mgL && toUnit == ParameterUnit.mgdm3) ||
         (fromUnit == ParameterUnit.mgdm3 && toUnit == ParameterUnit.mgL)) {
       return value;

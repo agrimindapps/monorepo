@@ -39,8 +39,6 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
   @override
   void initState() {
     super.initState();
-
-    // Configurar animações
     _pulseController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -57,8 +55,6 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
       begin: const Offset(0, -1),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOut));
-
-    // Configurar listener de emergência
     _setupEmergencyListener();
   }
 
@@ -169,7 +165,6 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header com ícone e título
                   Row(
                     children: [
                       Container(
@@ -221,13 +216,9 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
                   ),
 
                   const SizedBox(height: 12),
-
-                  // Detalhes da emergência
                   _buildEmergencyDetails(),
 
                   const SizedBox(height: 16),
-
-                  // Ações
                   Row(
                     children: [
                       Expanded(
@@ -341,7 +332,6 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
 
   /// Manipula sincronização de emergência
   Future<void> _handleEmergencySync() async {
-    // Mostrar indicador de carregamento
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -364,7 +354,6 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
 
         result.fold(
           (failure) {
-            // Mostrar erro
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Erro na sincronização: ${failure.message}'),
@@ -378,15 +367,12 @@ class _EmergencySyncBannerState extends State<EmergencySyncBanner>
             );
           },
           (_) {
-            // Sucesso
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Dados de emergência sincronizados com sucesso!'),
                 backgroundColor: Colors.green,
               ),
             );
-
-            // Esconder banner após sucesso
             if (!widget.persistentMode) {
               _dismissBanner();
             }

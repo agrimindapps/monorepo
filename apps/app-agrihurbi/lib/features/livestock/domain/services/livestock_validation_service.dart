@@ -11,18 +11,12 @@ import '../entities/equine_entity.dart';
 @singleton
 class LivestockValidationService {
 
-  // === BOVINE VALIDATION ===
-
   /// Valida uma entidade bovine completa
   ValidationResult validateBovine(BovineEntity bovine) {
     final errors = <String>[];
     final warnings = <String>[];
-
-    // Validações obrigatórias
     errors.addAll(_validateBaseAnimalFields(bovine));
     errors.addAll(_validateBovineSpecificFields(bovine));
-
-    // Validações de alerta
     warnings.addAll(_generateBovineWarnings(bovine));
 
     return ValidationResult(
@@ -74,18 +68,12 @@ class LivestockValidationService {
     return warnings;
   }
 
-  // === EQUINE VALIDATION ===
-
   /// Valida uma entidade equine completa
   ValidationResult validateEquine(EquineEntity equine) {
     final errors = <String>[];
     final warnings = <String>[];
-
-    // Validações obrigatórias
     errors.addAll(_validateBaseAnimalFields(equine));
     errors.addAll(_validateEquineSpecificFields(equine));
-
-    // Validações de alerta
     warnings.addAll(_generateEquineWarnings(equine));
 
     return ValidationResult(
@@ -98,9 +86,6 @@ class LivestockValidationService {
   /// Valida campos específicos de equino
   List<String> _validateEquineSpecificFields(EquineEntity equine) {
     final errors = <String>[];
-
-    // Adicionar validações específicas quando a entidade estiver completa
-    // Por enquanto, apenas validação base
 
     return errors;
   }
@@ -115,8 +100,6 @@ class LivestockValidationService {
 
     return warnings;
   }
-
-  // === BASE ANIMAL VALIDATION ===
 
   /// Valida campos base comuns a todos os animais
   List<String> _validateBaseAnimalFields(AnimalBaseEntity animal) {
@@ -137,16 +120,12 @@ class LivestockValidationService {
     if (animal.originCountry.trim().isEmpty) {
       errors.add('País de origem é obrigatório');
     }
-
-    // Validação de duplicação de registration ID seria feita no repository
     if (!_isValidRegistrationIdFormat(animal.registrationId)) {
       errors.add('Formato do ID de registro inválido');
     }
 
     return errors;
   }
-
-  // === BATCH VALIDATION ===
 
   /// Valida uma lista de bovinos
   BatchValidationResult validateBovinesBatch(List<BovineEntity> bovines) {
@@ -176,18 +155,14 @@ class LivestockValidationService {
     );
   }
 
-  // === FIELD-SPECIFIC VALIDATION ===
-
   /// Valida formato do ID de registro
   bool _isValidRegistrationIdFormat(String registrationId) {
-    // Formato básico: pelo menos 3 caracteres, alfanumérico
     final regex = RegExp(r'^[a-zA-Z0-9]{3,}$');
     return regex.hasMatch(registrationId.trim());
   }
 
   /// Valida país de origem
   bool isValidOriginCountry(String country) {
-    // Lista básica de países válidos - pode ser expandida
     final validCountries = {
       'Brasil', 'Argentina', 'Uruguai', 'Estados Unidos', 'Canadá',
       'França', 'Inglaterra', 'Holanda', 'Alemanha', 'Suíça',
@@ -225,21 +200,12 @@ class LivestockValidationService {
     return errors;
   }
 
-  // === BUSINESS RULES VALIDATION ===
-
   /// Valida regras de negócio para criação de animal
   BusinessValidationResult validateAnimalCreationRules(AnimalBaseEntity animal) {
     final issues = <String>[];
-    
-    // Regra: Animais não podem ter o mesmo registration ID
-    // Esta validação seria feita no repository com acesso aos dados
-
-    // Regra: Deve ter pelo menos uma imagem
     if (animal.imageUrls.isEmpty) {
       issues.add('Animal deve ter pelo menos uma imagem');
     }
-
-    // Regra: País de origem deve ser válido
     if (!isValidOriginCountry(animal.originCountry)) {
       issues.add('País de origem não reconhecido: ${animal.originCountry}');
     }
@@ -250,8 +216,6 @@ class LivestockValidationService {
     );
   }
 }
-
-// === VALIDATION RESULT CLASSES ===
 
 class ValidationResult {
   final bool isValid;

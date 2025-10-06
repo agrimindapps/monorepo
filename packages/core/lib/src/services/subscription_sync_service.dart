@@ -1,6 +1,3 @@
-// TEMPORARY STUB FILE TO RESOLVE BUILD ERRORS
-// This is a stub version of the advanced subscription sync service
-// Will be replaced with proper implementation later
 
 import 'package:dartz/dartz.dart';
 
@@ -8,20 +5,14 @@ import '../domain/entities/subscription_entity.dart';
 import '../domain/repositories/i_local_storage_repository.dart';
 import '../domain/repositories/i_subscription_repository.dart';
 import '../shared/utils/failure.dart';
-
-// Missing enums - stub implementations
 enum SubscriptionStatus { active, cancelled, expired, gracePeriod, unknown }
 
 enum SubscriptionTier { free, premium, pro }
 
 enum Store { appStore, playStore, stripe, promotional, unknown }
-
-// Stub class for sync operations
 class SyncOperations {
   const SyncOperations();
 }
-
-// Stub class for sync queue
 class SyncQueue {
   const SyncQueue();
 }

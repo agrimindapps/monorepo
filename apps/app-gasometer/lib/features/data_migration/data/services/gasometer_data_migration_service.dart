@@ -24,7 +24,6 @@ class GasometerDataMigrationService implements DataMigrationService {
     required String accountUserId,
   }) async {
     try {
-      // Validate preconditions
       final validationResult = await validateBasicPreconditions(
         anonymousUserId: anonymousUserId,
         accountUserId: accountUserId,
@@ -36,8 +35,6 @@ class GasometerDataMigrationService implements DataMigrationService {
           (_) => throw Exception('Unexpected validation result'),
         );
       }
-
-      // Get anonymous user data
       final anonymousDataResult = await _dataSource.getAnonymousData(anonymousUserId);
       if (anonymousDataResult.isLeft()) {
         return anonymousDataResult.fold(
@@ -45,8 +42,6 @@ class GasometerDataMigrationService implements DataMigrationService {
           (_) => throw Exception('Unexpected result'),
         );
       }
-
-      // Get account user data
       final accountDataResult = await _dataSource.getAccountData(accountUserId);
       if (accountDataResult.isLeft()) {
         return accountDataResult.fold(
@@ -57,8 +52,6 @@ class GasometerDataMigrationService implements DataMigrationService {
 
       final anonymousData = anonymousDataResult.getOrElse(() => throw Exception('No anonymous data'));
       final accountData = accountDataResult.getOrElse(() => throw Exception('No account data'));
-
-      // Analyze conflict
       final conflict = _analyzeDataConflict(anonymousData, accountData);
       
       return Right(conflict);
@@ -100,21 +93,16 @@ class GasometerDataMigrationService implements DataMigrationService {
     required String accountUserId,
   }) async {
     try {
-      // Basic validation
       final basicValidation = await validateBasicPreconditions(
         anonymousUserId: anonymousUserId,
         accountUserId: accountUserId,
       );
       
       if (basicValidation.isLeft()) return basicValidation;
-
-      // Check network connectivity
       final hasConnectivity = await _dataSource.checkNetworkConnectivity();
       if (!hasConnectivity) {
         return const Left(NetworkFailure('Conectividade necessária para migração'));
       }
-
-      // Verify user authentication
       final isAnonymousValid = await _dataSource.validateAnonymousUser(anonymousUserId);
       if (!isAnonymousValid) {
         return const Left(AuthFailure('Usuário anônimo inválido'));
@@ -150,8 +138,6 @@ class GasometerDataMigrationService implements DataMigrationService {
     }
   }
 
-  // Private implementation
-
   final StreamController<MigrationProgress> _progressController = 
       StreamController<MigrationProgress>.broadcast();
 
@@ -173,7 +159,6 @@ class GasometerDataMigrationService implements DataMigrationService {
     required String accountUserId,
   }) async {
     try {
-      // Basic validation
       if (anonymousUserId.isEmpty) {
         return const Left(ValidationFailure('ID de usuário anônimo inválido'));
       }
@@ -196,16 +181,9 @@ class GasometerDataMigrationService implements DataMigrationService {
     GasometerAnonymousData anonymousData,
     GasometerAccountData accountData,
   ) {
-    // Determine if there's a conflict
     final hasConflict = _hasSignificantConflict(anonymousData, accountData);
-    
-    // Generate conflict details
     final conflictDetails = _generateConflictDetails(anonymousData, accountData);
-    
-    // Determine recommendation
     final recommendation = _generateRecommendation(anonymousData, accountData);
-    
-    // Determine available choices
     final availableChoices = _getAvailableChoices(anonymousData, accountData);
     
     return DataConflictResult(
@@ -222,17 +200,12 @@ class GasometerDataMigrationService implements DataMigrationService {
     GasometerAnonymousData anonymousData,
     GasometerAccountData accountData,
   ) {
-    // No conflict if both are empty
     if (!anonymousData.hasSignificantData && !accountData.hasSignificantData) {
       return false;
     }
-    
-    // No conflict if only one has data
     if (anonymousData.hasSignificantData != accountData.hasSignificantData) {
       return false;
     }
-    
-    // Conflict if both have significant data
     return anonymousData.hasSignificantData && accountData.hasSignificantData;
   }
 
@@ -258,22 +231,15 @@ class GasometerDataMigrationService implements DataMigrationService {
     GasometerAnonymousData anonymousData,
     GasometerAccountData accountData,
   ) {
-    // If no conflict, no recommendation needed
     if (!_hasSignificantConflict(anonymousData, accountData)) {
       return null;
     }
-    
-    // If account data is well-established, recommend keeping it
     if (accountData.isEstablishedData) {
       return DataResolutionChoice.keepAccountData;
     }
-    
-    // If anonymous data is valuable and account data is minimal
     if (anonymousData.isValuableData && !accountData.hasSignificantData) {
       return DataResolutionChoice.keepAnonymousData;
     }
-    
-    // Default to keeping account data for safety
     return DataResolutionChoice.keepAccountData;
   }
 
@@ -281,15 +247,10 @@ class GasometerDataMigrationService implements DataMigrationService {
     GasometerAnonymousData anonymousData,
     GasometerAccountData accountData,
   ) {
-    // Always allow cancel
     final choices = <DataResolutionChoice>[DataResolutionChoice.cancel];
-    
-    // If there's significant anonymous data, allow keeping it
     if (anonymousData.hasSignificantData) {
       choices.insert(0, DataResolutionChoice.keepAnonymousData);
     }
-    
-    // Always allow keeping account data (even if empty)
     choices.insert(0, DataResolutionChoice.keepAccountData);
     
     return choices;
@@ -310,8 +271,6 @@ class GasometerDataMigrationService implements DataMigrationService {
       }
 
       _emitProgress(0.1, 'Iniciando limpeza de dados anônimos');
-
-      // Delete anonymous data from local storage
       _emitProgress(0.3, 'Removendo dados locais anônimos');
       final localCleanupResult = await _dataSource.cleanAnonymousLocalData(
         anonymousData.userId,
@@ -323,8 +282,6 @@ class GasometerDataMigrationService implements DataMigrationService {
           (_) => throw Exception('Unexpected result'),
         );
       }
-
-      // Delete anonymous data from remote storage
       _emitProgress(0.6, 'Removendo dados remotos anônimos');
       final remoteCleanupResult = await _dataSource.cleanAnonymousRemoteData(
         anonymousData.userId,
@@ -336,8 +293,6 @@ class GasometerDataMigrationService implements DataMigrationService {
           (_) => throw Exception('Unexpected result'),
         );
       }
-
-      // Delete anonymous Firebase account
       _emitProgress(0.9, 'Removendo conta anônima');
       final accountDeletionResult = await _dataSource.deleteAnonymousAccount(
         anonymousData.userId,
@@ -375,8 +330,6 @@ class GasometerDataMigrationService implements DataMigrationService {
     DataConflictResult conflictResult,
     Map<String, dynamic> additionalParams,
   ) async {
-    // This choice guides user to create a new account
-    // We don't perform any data operations, just return success
     return const Right(DataMigrationResult(
       success: true,
       choiceExecuted: DataResolutionChoice.keepAnonymousData,

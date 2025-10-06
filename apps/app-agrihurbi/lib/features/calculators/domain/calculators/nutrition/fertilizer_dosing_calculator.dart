@@ -148,14 +148,10 @@ class FertilizerDosingCalculator extends CalculatorEntity {
       final double waterQuality = double.parse(inputs['water_quality'].toString());
       final double waterPH = double.parse(inputs['water_ph'].toString());
       final double fertilizerPurity = double.parse(inputs['fertilizer_purity'].toString());
-
-      // Obter dados do fertilizante
       final Map<String, dynamic> fertilizerData = _getFertilizerData(fertilizerType);
       final double nutrientContent = fertilizerData['nutrient_content'] as double;
       final String primaryNutrient = fertilizerData['primary_nutrient'] as String;
       final double solubility = fertilizerData['solubility'] as double;
-
-      // Validar concentração baseada na solubilidade
       final double maxConcentration = solubility * 0.8; // 80% da solubilidade máxima
       if (targetConcentration > maxConcentration) {
         return CalculationError(
@@ -164,34 +160,20 @@ class FertilizerDosingCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-
-      // Calcular dosagem básica
       final double basicDosage = _calculateBasicDosage(
         targetConcentration, solutionVolume, nutrientContent, fertilizerPurity);
-
-      // Ajustes baseados no tipo de aplicação
       final Map<String, dynamic> adjustments = _calculateAdjustments(
         applicationType, basicDosage, waterQuality, waterPH, tankMixing);
 
       final double adjustedDosage = adjustments['adjusted_dosage'] as double;
-
-      // Calcular volumes e concentrações para diferentes cenários
       final Map<String, dynamic> calculations = _calculateVolumesAndConcentrations(
         adjustedDosage, solutionVolume, areaToCover, applicationRate, targetConcentration);
-
-      // Análise de compatibilidade
       final Map<String, dynamic> compatibility = _analyzeCompatibility(
         fertilizerType, waterPH, waterQuality, tankMixing);
-
-      // Cronograma de aplicação
       final List<Map<String, dynamic>> applicationSchedule = _generateApplicationSchedule(
         applicationType, targetConcentration, primaryNutrient);
-
-      // Custos
       final Map<String, dynamic> costAnalysis = _calculateCostAnalysis(
         adjustedDosage, solutionVolume, areaToCover, fertilizerType);
-
-      // Recomendações de segurança e técnicas
       final List<String> recommendations = _generateRecommendations(
         applicationType, fertilizerType, targetConcentration, waterQuality, waterPH);
 
@@ -361,7 +343,6 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     double nutrientContent,
     double purity,
   ) {
-    // Fórmula: Dosagem (g) = (Concentração ppm × Volume L) / (Teor nutriente % × Pureza %)
     return (concentration * volume) / ((nutrientContent / 100) * (purity / 100));
   }
 
@@ -373,8 +354,6 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     bool tankMixing,
   ) {
     double adjustmentFactor = 1.0;
-    
-    // Ajuste por tipo de aplicação
     switch (applicationType) {
       case 'Aplicação Foliar':
         adjustmentFactor *= 0.8; // Menor concentração para foliar
@@ -389,22 +368,16 @@ class FertilizerDosingCalculator extends CalculatorEntity {
         adjustmentFactor *= 1.2; // Concentração maior para localizada
         break;
     }
-
-    // Ajuste por qualidade da água
     if (waterQuality > 1.5) {
       adjustmentFactor *= 0.9; // Reduzir em águas salinas
     } else if (waterQuality < 0.3) {
       adjustmentFactor *= 1.05; // Aumentar em águas muito puras
     }
-
-    // Ajuste por pH da água
     if (waterPH > 8.0) {
       adjustmentFactor *= 0.95; // Reduzir em águas alcalinas
     } else if (waterPH < 6.0) {
       adjustmentFactor *= 1.05; // Aumentar em águas ácidas
     }
-
-    // Ajuste por mistura de tanque
     if (tankMixing) {
       adjustmentFactor *= 0.9; // Reduzir para evitar incompatibilidades
     }
@@ -422,22 +395,11 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     double applicationRate,
     double targetConcentration,
   ) {
-    // Volume necessário para a área
     final double totalVolumeNeeded = area * applicationRate;
-    
-    // Quantidade total de fertilizante
     final double totalFertilizer = (dosage / solutionVolume) * totalVolumeNeeded / 1000; // kg
-    
-    // Área que o volume preparado cobre
     final double solutionYield = solutionVolume / applicationRate;
-    
-    // Concentração final real
     final double finalConcentration = targetConcentration;
-    
-    // CE estimada (aproximação)
     final double estimatedEC = (dosage / solutionVolume) * 0.002; // Conversão aproximada
-    
-    // Unidade da dosagem
     String dosageUnit = dosage < 1000 ? 'g' : 'kg';
     if (dosageUnit == 'kg') {
       dosage = dosage / 1000;
@@ -462,11 +424,7 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     final List<Map<String, dynamic>> warnings = [];
     final fertilizerData = _getFertilizerData(fertilizer);
     final double phEffect = fertilizerData['ph_effect'] as double;
-    
-    // pH estimado final
     final double estimatedPH = waterPH + phEffect;
-    
-    // Verificar compatibilidades
     if (estimatedPH < 5.0) {
       warnings.add({
         'tipo': 'pH Baixo',
@@ -569,7 +527,6 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     double area,
     String fertilizer,
   ) {
-    // Preços estimados por kg (R\$/kg)
     final Map<String, double> prices = {
       'Ureia (45% N)': 3.50,
       'MAP (11-52-0)': 4.20,
@@ -604,8 +561,6 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     double waterPH,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações por tipo de aplicação
     switch (applicationType) {
       case 'Aplicação Foliar':
         recommendations.add('Aplicar nas horas mais frescas do dia para evitar fitotoxidez.');
@@ -620,13 +575,9 @@ class FertilizerDosingCalculator extends CalculatorEntity {
         recommendations.add('Oxigenar solução para evitar problemas radiculares.');
         break;
     }
-
-    // Recomendações por concentração
     if (concentration > 2000) {
       recommendations.add('Concentração alta - fazer teste em pequena área primeiro.');
     }
-
-    // Recomendações por qualidade da água
     if (waterQuality > 1.5) {
       recommendations.add('Água salina - reduzir concentrações e monitorar plantas.');
     }
@@ -634,8 +585,6 @@ class FertilizerDosingCalculator extends CalculatorEntity {
     if (waterPH < 6.0 || waterPH > 8.0) {
       recommendations.add('pH da água fora da faixa ideal - considerar correção.');
     }
-
-    // Recomendações gerais de segurança
     recommendations.add('Usar equipamentos de proteção individual durante preparo.');
     recommendations.add('Preparar apenas a quantidade necessária para o dia.');
     recommendations.add('Armazenar fertilizantes em local seco e arejado.');

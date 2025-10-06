@@ -19,10 +19,7 @@ class DebouncedSearchManager {
   /// [query] - Texto da busca
   /// [onSearch] - Callback que será executado com o texto da busca
   void searchWithDebounce(String query, void Function(String) onSearch) {
-    // Cancela busca anterior pendente
     _debounceTimer?.cancel();
-    
-    // Agenda nova busca após delay
     _debounceTimer = Timer(_debounceDelay, () {
       onSearch(query);
     });

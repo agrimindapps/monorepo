@@ -92,8 +92,6 @@ class ValidatedFormField extends StatefulWidget {
   final int? maxLength;
   final bool obscureText;
   final TextAlign textAlign;
-  
-  // Validação
   final ValidationType validationType;
   final String? Function(String?)? customValidator;
   final bool validateOnChange;
@@ -101,26 +99,18 @@ class ValidatedFormField extends StatefulWidget {
   final bool showValidationIcon;
   final bool showCharacterCount;
   final Duration debounceDuration;
-  
-  // Parâmetros específicos de validação
   final double? minValue;
   final double? maxValue;
   final int? minLength;
   final int? maxLengthValidation;
   final String? pattern;
-  
-  // Contexto específico para validações automotivas
   final double? currentOdometer;
   final double? initialOdometer;
   final double? tankCapacity;
-  
-  // Callbacks
   final ValueChanged<String>? onChanged;
   final VoidCallback? onEditingComplete;
   final ValueChanged<String>? onSubmitted;
   final ValueChanged<ValidationResult>? onValidationChanged;
-  
-  // Estilo
   final InputDecoration? decoration;
   final TextStyle? textStyle;
 
@@ -151,8 +141,6 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
     super.initState();
     _controller = widget.controller ?? TextEditingController();
     _validationService = ValidationService();
-    
-    // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -163,8 +151,6 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
         curve: Curves.easeInOut,
       ),
     );
-    
-    // Listener para mudanças no texto
     _controller.addListener(_onTextChanged);
   }
 
@@ -182,11 +168,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
 
   void _onTextChanged() {
     final text = _controller.text;
-    
-    // Chamar callback imediatamente
     widget.onChanged?.call(text);
-    
-    // Se validação onChange estiver desabilitada, apenas limpar estado se campo vazio
     if (!widget.validateOnChange) {
       if (text.isEmpty) {
         setState(() {
@@ -197,11 +179,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       }
       return;
     }
-    
-    // Cancelar timer anterior se existir
     _debounceTimer?.cancel();
-    
-    // Validação com debounce
     if (text.isEmpty && !widget.required) {
       setState(() {
         _validationState = ValidationState.initial;
@@ -210,13 +188,9 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       widget.onValidationChanged?.call(_lastValidationResult);
       return;
     }
-    
-    // Mostrar estado de validação
     setState(() {
       _validationState = ValidationState.validating;
     });
-    
-    // Configurar debounce
     _debounceTimer = Timer(widget.debounceDuration, () {
       _performValidation(text);
     });
@@ -227,15 +201,12 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
     
     try {
       ValidationResult result;
-      
-      // Validação customizada tem prioridade
       if (widget.customValidator != null) {
         final error = widget.customValidator!(text);
         result = error != null 
             ? ValidationResult.error(error)
             : ValidationResult.success();
       } else {
-        // Usar validação predefinida baseada no tipo
         result = _getValidationForType(text);
       }
       
@@ -251,11 +222,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           _validationState = ValidationState.valid;
         }
       });
-      
-      // Notificar mudança de validação
       widget.onValidationChanged?.call(result);
-      
-      // Animar ícone
       _iconAnimationController.forward();
       
     } catch (e) {
@@ -429,17 +396,12 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
   }
 
   String? get _displayHelperText {
-    // Priorizar mensagem de validação
     if (_lastValidationResult.hasMessage) {
       return _lastValidationResult.message;
     }
-    
-    // Mensagem de helper padrão
     if (widget.helperText != null) {
       return widget.helperText;
     }
-    
-    // Contador de caracteres se habilitado
     if (widget.showCharacterCount && widget.maxLength != null) {
       final current = _controller.text.length;
       final max = widget.maxLength!;
@@ -482,7 +444,6 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           onEditingComplete: widget.onEditingComplete,
           onFieldSubmitted: widget.onSubmitted,
           onTap: () {
-            // Reset validation state quando campo ganha foco se não está validando em tempo real
             if (!widget.validateOnChange && _validationState == ValidationState.invalid) {
               setState(() {
                 _validationState = ValidationState.initial;
@@ -491,13 +452,11 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
             }
           },
           onTapOutside: (_) {
-            // Validar quando campo perde foco
             if (widget.validateOnFocusOut) {
               final text = _controller.text;
               _performValidation(text);
             }
           },
-          // Validação no FormField é delegada ao nosso sistema
           validator: (_) => _lastValidationResult.isValid ? null : _lastValidationResult.message,
           decoration: widget.decoration?.copyWith(
             labelText: widget.required && widget.label != null 
@@ -584,8 +543,6 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                 : '',
           ),
         ),
-        
-        // Indicador de progresso para validação
         if (_validationState == ValidationState.validating)
           Padding(
             padding: const EdgeInsets.only(top: 4.0),

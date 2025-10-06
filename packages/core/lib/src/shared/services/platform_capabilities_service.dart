@@ -7,8 +7,6 @@ import 'package:flutter/foundation.dart';
 class PlatformCapabilitiesService {
   const PlatformCapabilitiesService();
 
-  // ===== Platform Detection =====
-
   /// Check if running on mobile platform (Android or iOS)
   bool get isMobile => defaultTargetPlatform == TargetPlatform.android ||
                       defaultTargetPlatform == TargetPlatform.iOS;
@@ -59,8 +57,6 @@ class PlatformCapabilitiesService {
     }
   }
 
-  // ===== Platform Capabilities =====
-
   /// Check if platform supports native notifications
   bool get supportsNativeNotifications => isMobile || isDesktop;
 
@@ -82,8 +78,6 @@ class PlatformCapabilitiesService {
   /// Check if platform requires network-only storage
   bool get requiresNetworkStorage => isWeb;
 
-  // ===== Display & UI Capabilities =====
-
   /// Check if platform typically uses bottom navigation
   bool get prefersBottomNavigation => isMobile;
 
@@ -96,8 +90,6 @@ class PlatformCapabilitiesService {
   /// Check if platform supports widgets/shortcuts
   bool get supportsHomeScreenWidgets => isMobile;
 
-  // ===== Performance Hints =====
-
   /// Check if platform should use lightweight animations
   bool get shouldUseLightweightAnimations => isWeb;
 
@@ -106,8 +98,6 @@ class PlatformCapabilitiesService {
 
   /// Check if platform should cache data locally
   bool get shouldCacheLocally => !isWeb;
-
-  // ===== Debug Utilities =====
 
   /// Get detailed platform information as Map
   Map<String, dynamic> get platformInfo => {

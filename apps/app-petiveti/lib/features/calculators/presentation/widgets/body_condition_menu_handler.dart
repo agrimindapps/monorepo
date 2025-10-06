@@ -34,7 +34,6 @@ class BodyConditionMenuHandler {
         _handleExportAction();
         break;
       default:
-        // Unknown action - handle gracefully
         break;
     }
   }
@@ -76,8 +75,6 @@ class BodyConditionMenuHandler {
       _showErrorSnackBar('Nenhum resultado para exportar');
       return;
     }
-    
-    // Validate data before export
     if (!_validateExportData(output)) {
       _showErrorSnackBar('Dados insuficientes para exportação segura');
       return;
@@ -118,7 +115,6 @@ class BodyConditionMenuHandler {
 
   /// Validate export data before proceeding
   bool _validateExportData(dynamic output) {
-    // Critical veterinary data validations before export
     final bcsScore = (output as dynamic)?.bcsScore as double? ?? 0.0;
     if (bcsScore < 1.0 || bcsScore > 9.0) {
       return false; // Invalid BCS score
@@ -128,8 +124,6 @@ class BodyConditionMenuHandler {
     if (input.currentWeight <= 0.0 || input.currentWeight > 150.0) {
       return false; // Invalid weight
     }
-    
-    // Check if essential data is present
     final results = (output as dynamic)?.results as List? ?? [];
     if (results.isEmpty) {
       return false; // No calculated results
@@ -173,12 +167,6 @@ class BodyConditionMenuHandler {
 
   /// Perform secure export
   void _performSecureExport(dynamic output) {
-    // Secure export implementation
-    // In a real implementation, this would:
-    // - Sanitize data
-    // - Remove sensitive information
-    // - Generate PDF or other format
-    // - Secure sharing
     
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -206,6 +194,5 @@ class BodyConditionMenuHandler {
 
   /// Dispose of resources
   void dispose() {
-    // No resources to dispose in this handler
   }
 }

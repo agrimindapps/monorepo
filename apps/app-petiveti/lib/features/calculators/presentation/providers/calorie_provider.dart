@@ -96,7 +96,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
 
   /// Atualiza entrada da calculadora
   void updateInput(CalorieInput input) {
-    // Validar entrada imediatamente
     final validationErrors = _strategy.validateInput(input);
     
     state = state.copyWith(
@@ -106,8 +105,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
       error: null,
     );
   }
-
-  // Métodos para atualizar campos específicos da entrada
 
   void updateSpecies(AnimalSpecies species) {
     final newInput = state.input.copyWith(species: species);
@@ -168,8 +165,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
     final newInput = state.input.copyWith(notes: notes);
     updateInput(newInput);
   }
-
-  // Navegação do formulário step-by-step
 
   void nextStep() {
     if (!state.isLastStep) {
@@ -234,8 +229,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
 
     try {
       final result = _strategy.calculate(state.input);
-      
-      // Adicionar ao histórico
       final newHistory = [...state.history, result];
       
       state = state.copyWith(
@@ -311,8 +304,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   void loadFromHistory(int index) {
     if (index >= 0 && index < state.history.length) {
       final historicalResult = state.history[index];
-      
-      // Carregar entrada do resultado histórico
       updateInput(historicalResult.input);
       state = state.copyWith(output: historicalResult);
     }
@@ -382,8 +373,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   /// Salva cálculo atual como favorito (em implementação futura)
   void saveAsFavorite() {
     if (state.hasResult) {
-      // TODO: Implementar salvamento em storage local
-      // Placeholder para funcionalidade futura
     }
   }
 }
@@ -476,41 +465,29 @@ final calorieCanProceedProvider = Provider<bool>((ref) {
 final calorieSuggestionsProvider = Provider<List<String>>((ref) {
   final input = ref.watch(calorieInputProvider);
   final suggestions = <String>[];
-
-  // Sugestões baseadas na espécie
   if (input.species == AnimalSpecies.cat && input.weight > 6) {
     suggestions.add('⚠️ Peso elevado para gatos - considere avaliação veterinária');
   } else if (input.species == AnimalSpecies.dog && input.weight < 2) {
     suggestions.add('💡 Para cães pequenos, monitore alimentação mais frequentemente');
   }
-
-  // Sugestões baseadas na idade
   if (input.age < 6) {
     suggestions.add('🍼 Filhotes necessitam alimentação mais frequente (3-4x/dia)');
   } else if (input.age > 84) {
     suggestions.add('👴 Animais idosos podem precisar de dieta especial');
   }
-
-  // Sugestões baseadas no estado fisiológico
   if (input.isPregnant) {
     suggestions.add('🤰 Aumente calorias gradualmente durante gestação');
   } else if (input.isLactating) {
     suggestions.add('🤱 Ofereça alimentação livre durante lactação');
   }
-
-  // Sugestões baseadas na condição corporal
   if (input.bodyConditionScore == BodyConditionScore.overweight) {
     suggestions.add('⚖️ Considere programa de perda de peso supervisionado');
   } else if (input.bodyConditionScore == BodyConditionScore.underweight) {
     suggestions.add('🍽️ Aumente frequência de refeições e monitorar ganho de peso');
   }
-
-  // Sugestões baseadas em condições médicas
   if (input.medicalCondition != MedicalCondition.none) {
     suggestions.add('🏥 Consulte veterinário para dieta terapêutica específica');
   }
-
-  // Sugestões para campos não preenchidos
   if (input.idealWeight == null && input.bodyConditionScore != BodyConditionScore.ideal) {
     suggestions.add('🎯 Informe peso ideal para cálculos mais precisos');
   }

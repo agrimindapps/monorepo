@@ -23,8 +23,6 @@ class _WeightPageState extends ConsumerState<WeightPage> {
   @override
   void initState() {
     super.initState();
-    
-    // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(weightsProvider.notifier).loadWeights();
       ref.read(animalsProvider.notifier).loadAnimals();
@@ -41,7 +39,6 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       appBar: AppBar(
         title: const Text('Controle de Peso'),
         actions: [
-          // Animal filter
           if (animalsState.animals.isNotEmpty)
             PopupMenuButton<String?>(
               icon: Icon(
@@ -100,8 +97,6 @@ class _WeightPageState extends ConsumerState<WeightPage> {
                     )),
               ],
             ),
-          
-          // Advanced features menu
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (action) {
@@ -219,11 +214,8 @@ class _WeightPageState extends ConsumerState<WeightPage> {
 
     return Column(
       children: [
-        // Statistics header
         if (weightsState.statistics != null && weights.isNotEmpty)
           _buildStatisticsHeader(context, weightsState),
-        
-        // Weight list
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
@@ -400,8 +392,6 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           const SizedBox(height: 32),
           FilledButton.icon(
             onPressed: () {
-              // Navigate to animals page or add animal
-              // This would typically be handled by the router
             },
             icon: const Icon(Icons.pets),
             label: const Text('Cadastrar Animal'),
@@ -634,7 +624,6 @@ class _WeightPageState extends ConsumerState<WeightPage> {
         builder: (context) => WeightGoalManagement(
           animalId: _selectedAnimalId,
           onGoalsUpdated: () {
-            // Refresh weights
             if (_selectedAnimalId != null) {
               ref.read(weightsProvider.notifier).loadWeightsByAnimal(_selectedAnimalId!);
             } else {

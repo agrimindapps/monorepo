@@ -75,8 +75,6 @@ class HomeDefensivosState {
   HomeDefensivosState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // UI helpers
   bool get hasData => totalDefensivos > 0;
   bool get hasRecentDefensivos => recentDefensivos.isNotEmpty;
   bool get hasNewDefensivos => newDefensivos.isNotEmpty;
@@ -142,18 +140,14 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
   @override
   Future<HomeDefensivosState> build() async {
-    // Get dependencies from DI
     _repository = di.sl<FitossanitarioHiveRepository>();
     _historyService = AccessHistoryService();
-
-    // Load data automatically on build
     return _loadInitialData();
   }
 
   /// Load initial data
   Future<HomeDefensivosState> _loadInitialData() async {
     try {
-      // Load statistics and history concurrently
       final results = await Future.wait([
         _loadStatisticsData(),
         _loadHistoryData(),
@@ -281,7 +275,6 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
-      // Load statistics and history concurrently
       await Future.wait([
         _loadStatistics(),
         _loadHistory(),
@@ -302,10 +295,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     if (currentState == null) return;
 
     try {
-      // Load data from repository
       var defensivos = await _repository.getActiveDefensivos();
-
-      // If no data, check if data is being loaded
       if (defensivos.isEmpty) {
         final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
 
@@ -324,8 +314,6 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
           }
         }
       }
-
-      // Calculate statistics
       final stats = _calculateStatistics(defensivos);
 
       state = AsyncValue.data(
@@ -368,7 +356,6 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
       await _loadHistoryIntoState(allDefensivos);
     } catch (e) {
-      // Use random selection as fallback
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
           ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 3)
@@ -392,7 +379,6 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     if (currentState == null) return;
 
     try {
-      // Load access history
       final historyItems = await _historyService.getDefensivosHistory();
 
       if (allDefensivos.isEmpty) {
@@ -427,13 +413,9 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
           historicDefensivos.add(defensivo);
         }
       }
-
-      // Recent defensivos: if no history, initialize with 10 random
       final recentDefensivos = historicDefensivos.isEmpty
           ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10)
           : historicDefensivos;
-
-      // New defensivos: use createdAt logic
       final newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
 
       state = AsyncValue.data(
@@ -443,7 +425,6 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
         ),
       );
     } catch (e) {
-      // Fallback to random selection
       final recentDefensivos = allDefensivos.isNotEmpty
           ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10)
           : <FitossanitarioHive>[];

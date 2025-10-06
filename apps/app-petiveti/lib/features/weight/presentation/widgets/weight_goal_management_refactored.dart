@@ -140,8 +140,6 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
       ),
     );
   }
-
-  // Business logic methods
   List<Map<String, dynamic>> _getMockActiveGoals() {
     return [
       {
@@ -217,7 +215,6 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
   }
 
   void _markGoalAsCompleted(Map<String, dynamic> goal) {
-    // TODO: Mark goal as completed in the repository
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Meta "${goal['title']}" concluída com sucesso!'),
@@ -225,14 +222,12 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
         action: SnackBarAction(
           label: 'Ver Histórico',
           onPressed: () {
-            // Navigate to goals history
           },
         ),
       ),
     );
     
     setState(() {
-      // Refresh the goals list
     });
   }
 
@@ -300,15 +295,12 @@ class _WeightGoalManagementRefactoredState extends ConsumerState<WeightGoalManag
   }
 
   void _scheduleVeterinaryConsultation() {
-    // Navigate to veterinary consultation booking
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Redirecionando para agendamento de consulta...'),
         duration: Duration(seconds: 2),
       ),
     );
-    
-    // TODO: Navigate to veterinary booking screen
   }
 
   String _formatDate(DateTime date) {

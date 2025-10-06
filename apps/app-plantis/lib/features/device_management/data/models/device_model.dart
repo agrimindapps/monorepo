@@ -110,8 +110,6 @@ class DeviceModel extends DeviceEntity {
     final deviceInfoPlugin = DeviceInfoPlugin();
     final packageInfo = await PackageInfo.fromPlatform();
     final now = DateTime.now();
-
-    // ✅ ANDROID - Plataforma permitida
     if (Platform.isAndroid) {
       final androidInfo = await deviceInfoPlugin.androidInfo;
 
@@ -137,8 +135,6 @@ class DeviceModel extends DeviceEntity {
         isActive: true,
       );
     }
-
-    // ✅ iOS - Plataforma permitida
     else if (Platform.isIOS) {
       final iosInfo = await deviceInfoPlugin.iosInfo;
 
@@ -162,8 +158,6 @@ class DeviceModel extends DeviceEntity {
         isActive: true,
       );
     }
-
-    // ❌ WEB e outras plataformas - BLOQUEADAS
     else {
       if (kDebugMode) {
         debugPrint(
@@ -173,9 +167,6 @@ class DeviceModel extends DeviceEntity {
           '   Apenas Android e iOS são suportados para gerenciamento de dispositivos',
         );
       }
-
-      // Retorna null para indicar que a plataforma não é suportada
-      // O código que chama este método deve tratar o null adequadamente
       return null;
     }
   }

@@ -49,22 +49,16 @@ class AuthProvider extends ChangeNotifier {
     _initializeAuthState();
   }
 
-  // === ESTADO PRIVADO ===
-
   UserEntity? _currentUser;
   bool _isLoading = false;
   bool _isLoggedIn = false;
   bool _isInitializing = true;
-
-  // Estados específicos de operações
   bool _isLoggingIn = false;
   bool _isRegistering = false;
   bool _isLoggingOut = false;
   bool _isRefreshing = false;
 
   String? _errorMessage;
-
-  // === GETTERS PÚBLICOS ===
 
   UserEntity? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
@@ -254,7 +248,6 @@ class AuthProvider extends ChangeNotifier {
       return result.fold(
         (Failure failure) {
           debugPrint('AuthProvider: Falha no logout - ${failure.message}');
-          // Mesmo com falha, limpa estado local
           _clearUserState();
           _setError('Falha no logout, mas sessão local foi encerrada');
           return Left<Failure, void>(failure);
@@ -268,7 +261,6 @@ class AuthProvider extends ChangeNotifier {
     } catch (e, stackTrace) {
       debugPrint('AuthProvider: Erro inesperado no logout - $e');
       debugPrint('StackTrace: $stackTrace');
-      // Sempre limpa estado local, mesmo com erro
       _clearUserState();
       final error = 'Erro no logout: ${e.toString()}';
       _setError(error);
@@ -346,8 +338,6 @@ class AuthProvider extends ChangeNotifier {
     await _initializeAuthState();
   }
 
-  // === MÉTODOS PRIVADOS ===
-
   /// Define estado de carregamento
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
@@ -405,7 +395,6 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('AuthProvider: Iniciando exclusão de conta');
 
       if (_enhancedDeletionService != null) {
-        // Use Enhanced Account Deletion Service if available
         final result = await _enhancedDeletionService.deleteAccount(
           password: password ?? '',
           userId: _currentUser!.id,
@@ -439,7 +428,6 @@ class AuthProvider extends ChangeNotifier {
           },
         );
       } else {
-        // Fallback: Basic account deletion (requires implementation)
         debugPrint(
           'AuthProvider: EnhancedAccountDeletionService not available',
         );

@@ -50,8 +50,6 @@ class UserSettingsState {
   }
 
   bool get hasSettings => settings != null;
-
-  // Settings getters for easier access
   bool get isDarkTheme => settings?.isDarkTheme ?? false;
   bool get notificationsEnabled => settings?.notificationsEnabled ?? true;
   bool get soundEnabled => settings?.soundEnabled ?? true;
@@ -59,8 +57,6 @@ class UserSettingsState {
   bool get isDevelopmentMode => settings?.isDevelopmentMode ?? false;
   bool get speechToTextEnabled => settings?.speechToTextEnabled ?? false;
   bool get analyticsEnabled => settings?.analyticsEnabled ?? true;
-
-  // Computed properties
   String get accessibilityLevel => settings?.accessibilityLevel ?? 'basic';
   bool get hasPremiumFeatures => settings?.hasPremiumFeatures ?? false;
   bool get needsMigration => settings?.needsMigration ?? false;
@@ -74,7 +70,6 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
 
   @override
   Future<UserSettingsState> build() async {
-    // Get use cases from DI
     _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
     _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
 
@@ -282,16 +277,12 @@ class UserSettingsNotifier extends _$UserSettingsNotifier {
 
     try {
       state = AsyncValue.data(currentState.clearError());
-
-      // Basic validation
       if (!data.containsKey('isDarkTheme') || !data.containsKey('language')) {
         state = AsyncValue.data(
           currentState.copyWith(error: 'Invalid import data format'),
         );
         return false;
       }
-
-      // Create settings entity from import data
       final importedSettings = UserSettingsEntity(
         userId: currentState.currentUserId, // Use current user, not imported user
         isDarkTheme: data['isDarkTheme'] as bool? ?? false,

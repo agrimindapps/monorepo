@@ -72,7 +72,5 @@ class SampleData {
   }
 
   static Future<void> populateSampleData() async {
-    // Este método pode ser usado para popular dados de exemplo
-    // quando a aplicação for executada pela primeira vez
   }
 }

@@ -36,10 +36,6 @@ import '../states/comentarios_riverpod_state.dart';
 /// - **Error Boundaries**: Each provider handles its own errors gracefully
 /// - **Performance**: Selective rebuilds only when specific state changes
 
-// ============================================================================
-// DEPENDENCY INJECTION PROVIDERS
-// ============================================================================
-
 /// Repository dependency injection
 final comentariosRepositoryProvider = Provider<IComentariosRepository>((ref) {
   return di.sl<IComentariosRepository>();
@@ -58,10 +54,6 @@ final deleteComentariosUseCaseProvider = Provider<DeleteComentarioUseCase>((ref)
   return DeleteComentarioUseCase(ref.read(comentariosRepositoryProvider));
 });
 
-// ============================================================================
-// STATE MANAGEMENT PROVIDERS  
-// ============================================================================
-
 /// Main comentarios state provider
 /// Manages loading, comments list, filtering and operations
 final comentariosStateProvider = StateNotifierProvider<ComentariosStateNotifier, ComentariosRiverpodState>((ref) {
@@ -79,21 +71,13 @@ final comentariosFilteredProvider = Provider<List<ComentarioEntity>>((ref) {
   final searchText = state.searchText;
   final filterContext = state.filterContext;
   final filterTool = state.filterTool;
-
-  // Apply filters
   var filtered = comentarios;
-
-  // Context filter
   if (filterContext.isNotEmpty) {
     filtered = filtered.where((c) => c.pkIdentificador == filterContext).toList();
   }
-
-  // Tool filter  
   if (filterTool.isNotEmpty) {
     filtered = filtered.where((c) => c.ferramenta == filterTool).toList();
   }
-
-  // Search filter
   if (searchText.isNotEmpty) {
     final query = searchText.toLowerCase();
     filtered = filtered.where((c) =>
@@ -116,10 +100,7 @@ final comentariosStatsProvider = Provider<ComentariosStats>((ref) {
   final byContext = <String, int>{};
 
   for (final comentario in comentarios) {
-    // Tool statistics
     byTool[comentario.ferramenta] = (byTool[comentario.ferramenta] ?? 0) + 1;
-    
-    // Context statistics (only if has context)
     if (comentario.pkIdentificador.isNotEmpty) {
       byContext[comentario.pkIdentificador] = (byContext[comentario.pkIdentificador] ?? 0) + 1;
     }
@@ -144,10 +125,6 @@ final comentariosErrorProvider = Provider<String?>((ref) {
   return ref.watch(comentariosStateProvider).error;
 });
 
-// ============================================================================
-// STATE NOTIFIER IMPLEMENTATION
-// ============================================================================
-
 /// State notifier that manages comentarios business logic
 class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
   final GetComentariosUseCase _getComentariosUseCase;
@@ -162,10 +139,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
        _addComentariosUseCase = addComentariosUseCase,
        _deleteComentariosUseCase = deleteComentariosUseCase,
        super(const ComentariosRiverpodState());
-
-  // ========================================================================
-  // DATA LOADING METHODS
-  // ========================================================================
 
   /// Load all comentarios
   Future<void> loadComentarios() async {
@@ -239,7 +212,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
       List<ComentarioEntity> comentarios;
 
       if (pkIdentificador != null && ferramenta != null) {
-        // Load all first, then filter in memory (more flexible)
         final allComentarios = await _getComentariosUseCase();
         comentarios = allComentarios.where((c) =>
           c.pkIdentificador == pkIdentificador && c.ferramenta == ferramenta
@@ -267,10 +239,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
     }
   }
 
-  // ========================================================================
-  // CRUD OPERATIONS
-  // ========================================================================
-
   /// Add new comentario
   Future<void> addComentario(ComentarioEntity comentario) async {
     if (state.isOperating) return; // Prevent concurrent operations
@@ -279,15 +247,11 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
 
     try {
       await _addComentariosUseCase(comentario);
-      
-      // Update local state optimistically
       final updatedList = [...state.comentarios, comentario];
       state = state.copyWith(
         comentarios: updatedList,
         isOperating: false,
       );
-
-      // Refresh from repository to ensure consistency
       await _refreshComentarios();
     } catch (e) {
       state = state.copyWith(
@@ -305,8 +269,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
 
     try {
       await _deleteComentariosUseCase(comentarioId);
-
-      // Update local state optimistically
       final updatedList = state.comentarios
           .where((c) => c.id != comentarioId)
           .toList();
@@ -315,8 +277,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
         comentarios: updatedList,
         isOperating: false,
       );
-
-      // Refresh from repository to ensure consistency
       await _refreshComentarios();
     } catch (e) {
       state = state.copyWith(
@@ -325,10 +285,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
       );
     }
   }
-
-  // ========================================================================
-  // SEARCH AND FILTERING
-  // ========================================================================
 
   /// Update search text
   void updateSearchText(String searchText) {
@@ -359,18 +315,12 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
     );
   }
 
-  // ========================================================================
-  // UTILITY METHODS
-  // ========================================================================
-
   /// Refresh comentarios from repository
   Future<void> _refreshComentarios() async {
     try {
-      // Don't change loading state for refresh
       final comentarios = await _getComentariosUseCase();
       state = state.copyWith(comentarios: comentarios);
     } catch (e) {
-      // Silent failure for refresh - keep existing data
     }
   }
 
@@ -410,10 +360,6 @@ class ComentariosStateNotifier extends StateNotifier<ComentariosRiverpodState> {
     state = const ComentariosRiverpodState();
   }
 }
-
-// ============================================================================
-// DATA CLASSES
-// ============================================================================
 
 /// Statistics data class
 class ComentariosStats {

@@ -19,13 +19,10 @@ class AddExpenseUseCase implements UseCase<ExpenseEntity?, ExpenseEntity> {
   @override
   Future<Either<Failure, ExpenseEntity?>> call(ExpenseEntity params) async {
     try {
-      // Validações básicas
       final validation = _validateExpense(params);
       if (validation != null) {
         return Left(ValidationFailure(validation));
       }
-
-      // Salvar despesa
       final result = await _repository.saveExpense(params);
 
       if (result == null) {

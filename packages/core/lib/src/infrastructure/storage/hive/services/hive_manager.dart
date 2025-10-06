@@ -34,8 +34,6 @@ class HiveManager implements IHiveManager {
 
     try {
       _appName = appName;
-      
-      // Inicializa Hive com path específico do app
       await Hive.initFlutter('${appName}_storage');
       
       _isInitialized = true;
@@ -67,13 +65,10 @@ class HiveManager implements IHiveManager {
     }
 
     try {
-      // Retorna box se já estiver aberta
       if (_openBoxes.containsKey(boxName)) {
         final box = _openBoxes[boxName] as Box<T>;
         return Result.success(box);
       }
-
-      // Abre nova box
       final Box<T> box;
       if (Hive.isBoxOpen(boxName)) {
         box = Hive.box<T>(boxName);
@@ -158,8 +153,6 @@ class HiveManager implements IHiveManager {
   Future<Result<void>> registerAdapter<T>(TypeAdapter<T> adapter) async {
     try {
       final typeId = adapter.typeId;
-      
-      // Verifica se já está registrado
       if (Hive.isAdapterRegistered(typeId)) {
         debugPrint('HiveManager: Adapter already registered for typeId: $typeId');
         return Result.success(null);
@@ -198,13 +191,8 @@ class HiveManager implements IHiveManager {
     }
 
     try {
-      // Fecha todas as boxes primeiro
       await closeAllBoxes();
-
-      // Deleta todos os dados
       await Hive.deleteFromDisk();
-      
-      // Reinicializa se necessário
       if (_appName != null) {
         _isInitialized = false;
         final reinitResult = await initialize(_appName!);

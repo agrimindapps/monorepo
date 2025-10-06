@@ -4,13 +4,9 @@ import 'package:flutter/foundation.dart';
 import '../../features/plants/data/repositories/plant_comments_repository_impl.dart';
 import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../data/models/comentario_model.dart';
-
-// Repository Provider
 final plantCommentsRepositoryProvider = Provider<PlantCommentsRepository>((ref) {
   return PlantCommentsRepositoryImpl();
 });
-
-// Comments State
 @immutable
 class CommentsState {
   final List<ComentarioModel> comments;
@@ -66,15 +62,11 @@ class CommentsNotifier extends AutoDisposeAsyncNotifier<CommentsState> {
   /// Load comments for a specific plant
   Future<void> loadComments(String plantId) async {
     final currentState = state.valueOrNull ?? CommentsState.initial();
-
-    // Skip if already loaded for this plant and not loading
     if (currentState.currentPlantId == plantId &&
         currentState.hasComments &&
         !currentState.isLoading) {
       return;
     }
-
-    // Set loading state
     state = AsyncData(
       currentState.copyWith(
         isLoading: true,
@@ -148,7 +140,6 @@ class CommentsNotifier extends AutoDisposeAsyncNotifier<CommentsState> {
         if (kDebugMode) {
           print('✅ Added comment: ${comment.id}');
         }
-        // Insert at the beginning (newest first)
         final updatedComments = [comment, ...currentState.comments];
         state = AsyncData(
           currentState.copyWith(
@@ -317,16 +308,12 @@ final plantCommentsProvider =
 
     return commentsState.when(
       data: (state) {
-        // Auto-load comments if not loaded for this plant
         if (state.currentPlantId != plantId && !state.isLoading) {
-          // Trigger load asynchronously
           Future.microtask(() {
             ref.read(commentsProvider.notifier).loadComments(plantId);
           });
           return const AsyncLoading();
         }
-
-        // Return comments if loaded for this plant
         if (state.currentPlantId == plantId) {
           if (state.errorMessage != null) {
             return AsyncError(

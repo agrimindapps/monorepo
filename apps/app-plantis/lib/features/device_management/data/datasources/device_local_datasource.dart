@@ -41,13 +41,9 @@ abstract class DeviceLocalDataSource {
 /// Implementação com cache persistente usando Hive
 class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   final ILocalStorageRepository _storageService;
-
-  // Cache keys para Hive
   static const String _devicesBoxKey = 'devices_cache';
   static const String _userDevicesBoxKey = 'user_devices_cache';
   static const String _statisticsBoxKey = 'device_statistics_cache';
-
-  // Cache em memória para performance
   final Map<String, List<DeviceModel>> _memoryUserDevicesCache = {};
   final Map<String, DeviceModel> _memoryDevicesCache = {};
   bool _isMemoryCacheInitialized = false;
@@ -60,7 +56,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
     if (_isMemoryCacheInitialized) return;
 
     try {
-      // Carrega todos os dados do Hive para memória na primeira vez
       final deviceKeysResult = await _storageService.getKeys(
         box: _devicesBoxKey,
       );
@@ -214,11 +209,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   ) async {
     try {
       await _ensureMemoryCacheInitialized();
-
-      // Atualiza cache em memória
       _memoryUserDevicesCache[userId] = devices;
-
-      // Salva dispositivos individualmente no Hive
       for (final device in devices) {
         _memoryDevicesCache[device.uuid] = device;
         await _storageService.save(
@@ -227,8 +218,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
           box: _devicesBoxKey,
         );
       }
-
-      // Salva lista de UUIDs dos dispositivos do usuário
       final deviceUuids = devices.map((d) => d.uuid).toList();
       await _storageService.save(
         key: userId,
@@ -251,11 +240,7 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   Future<Either<Failure, void>> saveDevice(DeviceModel device) async {
     try {
       await _ensureMemoryCacheInitialized();
-
-      // Atualiza cache em memória
       _memoryDevicesCache[device.uuid] = device;
-
-      // Salva no Hive
       await _storageService.save(
         key: device.uuid,
         data: device.toJson(),
@@ -275,21 +260,14 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   Future<Either<Failure, void>> removeDevice(String deviceUuid) async {
     try {
       await _ensureMemoryCacheInitialized();
-
-      // Remove do cache em memória
       _memoryDevicesCache.remove(deviceUuid);
-
-      // Remove do Hive
       await _storageService.remove(key: deviceUuid, box: _devicesBoxKey);
-
-      // Remove das listas de usuários também
       for (final userId in _memoryUserDevicesCache.keys.toList()) {
         final devices = _memoryUserDevicesCache[userId] ?? [];
         final originalLength = devices.length;
         devices.removeWhere((device) => device.uuid == deviceUuid);
 
         if (devices.length != originalLength) {
-          // Lista mudou, atualiza Hive
           if (devices.isEmpty) {
             _memoryUserDevicesCache.remove(userId);
             await _storageService.remove(key: userId, box: _userDevicesBoxKey);
@@ -320,14 +298,10 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
       await _ensureMemoryCacheInitialized();
 
       final devices = _memoryUserDevicesCache[userId] ?? [];
-
-      // Remove dispositivos individuais do cache e Hive
       for (final device in devices) {
         _memoryDevicesCache.remove(device.uuid);
         await _storageService.remove(key: device.uuid, box: _devicesBoxKey);
       }
-
-      // Remove lista do usuário
       _memoryUserDevicesCache.remove(userId);
       await _storageService.remove(key: userId, box: _userDevicesBoxKey);
 
@@ -350,14 +324,10 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   ) async {
     try {
       await _ensureMemoryCacheInitialized();
-
-      // Primeiro tenta cache de estatísticas
       final cachedStatsResult = await _storageService.get<Map<String, dynamic>>(
         key: userId,
         box: _statisticsBoxKey,
       );
-
-      // Se há cache válido (menos de 1 hora), usa ele
       final hasCachedStats = cachedStatsResult.fold(
         (failure) => false,
         (data) => data != null,
@@ -383,8 +353,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
           }
         }
       }
-
-      // Calcula estatísticas em tempo real
       final devices = _memoryUserDevicesCache[userId] ?? [];
       final activeDevices = devices.where((d) => d.isActive).length;
       final totalDevices = devices.length;
@@ -395,8 +363,6 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
         'inactive_devices': totalDevices - activeDevices,
         'last_updated': DateTime.now().toIso8601String(),
       };
-
-      // Salva estatísticas com timestamp para cache
       final statsToCache = Map<String, dynamic>.from(stats);
       statsToCache['timestamp'] = DateTime.now().millisecondsSinceEpoch;
       await _storageService.save(
@@ -419,11 +385,8 @@ class DeviceLocalDataSourceImpl implements DeviceLocalDataSource {
   @override
   Future<Either<Failure, void>> clearAll() async {
     try {
-      // Limpa cache em memória
       _memoryUserDevicesCache.clear();
       _memoryDevicesCache.clear();
-
-      // Limpa todas as boxes do Hive
       await _storageService.clear(box: _devicesBoxKey);
       await _storageService.clear(box: _userDevicesBoxKey);
       await _storageService.clear(box: _statisticsBoxKey);

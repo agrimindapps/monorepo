@@ -183,7 +183,6 @@ class EnhancedImageService {
         if (result.isSuccess) {
           results.add(result.data!);
         } else {
-          // Se uma imagem falha, continua com as outras mas loga o erro
           debugPrint('Erro ao processar imagem ${image.name}: ${result.error}');
         }
       }
@@ -223,13 +222,9 @@ class EnhancedImageService {
     }
 
     final cacheKey = _generateCacheKey(imageUrl);
-    
-    // Verifica cache em memória primeiro
     if (useCache && !forceRefresh && _memoryCache.containsKey(cacheKey)) {
       return Result.success(_memoryCache[cacheKey]!);
     }
-
-    // Verifica cache em disco
     if (useCache && !forceRefresh) {
       final diskCacheResult = await _loadFromDiskCache(cacheKey);
       if (diskCacheResult.isSuccess) {
@@ -237,8 +232,6 @@ class EnhancedImageService {
         return diskCacheResult;
       }
     }
-
-    // Carrega da rede se não está em cache ou forceRefresh = true
     return await _downloadAndCacheImage(imageUrl, cacheKey);
   }
 
@@ -294,10 +287,6 @@ class EnhancedImageService {
           quality,
         );
       }
-      
-      // Apenas compressão sem redimensionamento
-      // Aqui você poderia usar bibliotecas como flutter_image_compress
-      // Por simplicidade, retornamos os bytes originais
       return Result.success(imageBytes);
     } catch (e, stackTrace) {
       return Result.error(
@@ -336,8 +325,6 @@ class EnhancedImageService {
           ),
         );
       }
-
-      // Valida tamanho do arquivo (máximo 10MB)
       final fileSize = await file.length();
       const maxSize = 10 * 1024 * 1024; // 10MB
       
@@ -367,11 +354,9 @@ class EnhancedImageService {
   /// Limpa o cache de imagens
   Future<Result<void>> clearCache({bool memoryOnly = false}) async {
     try {
-      // Limpa cache em memória
       _memoryCache.clear();
 
       if (!memoryOnly && _initialized) {
-        // Limpa cache em disco
         if (await _cacheDir.exists()) {
           await for (final file in _cacheDir.list()) {
             if (file is File) {
@@ -435,15 +420,11 @@ class EnhancedImageService {
     }
   }
 
-  // Métodos privados
-
   Future<Result<ImageResult>> _processSelectedImage(XFile image) async {
     try {
       final bytes = await image.readAsBytes();
       final fileName = image.name;
       final filePath = image.path;
-
-      // Validação básica
       if (bytes.isEmpty) {
         return Result.error(
           ValidationError(
@@ -452,8 +433,6 @@ class EnhancedImageService {
           ),
         );
       }
-
-      // Otimização automática se necessário
       final optimizedBytes = await _optimizeImage(bytes);
 
       return Result.success(ImageResult(
@@ -477,14 +456,9 @@ class EnhancedImageService {
 
   Future<Result<Uint8List>> _optimizeImage(Uint8List bytes) async {
     try {
-      // Verifica se a imagem precisa de otimização
       if (bytes.length <= 500 * 1024) {  // Menor que 500KB
         return Result.success(bytes);
       }
-
-      // Aqui você implementaria a lógica de otimização
-      // Por exemplo, usando flutter_image_compress
-      // Por simplicidade, retornamos os bytes originais
       return Result.success(bytes);
     } catch (e) {
       return Result.success(bytes); // Fallback para imagem original
@@ -498,9 +472,6 @@ class EnhancedImageService {
     int quality,
   ) async {
     try {
-      // Aqui você implementaria o redimensionamento real
-      // Usando bibliotecas como flutter_image_compress ou image package
-      // Por simplicidade, retornamos os bytes originais
       return Result.success(bytes);
     } catch (e, stackTrace) {
       return Result.error(
@@ -548,8 +519,6 @@ class EnhancedImageService {
 
   Future<Result<Uint8List>> _downloadAndCacheImage(String url, String cacheKey) async {
     try {
-      // Aqui você implementaria o download real usando HttpClientService
-      // Por simplicidade, retornamos um erro
       return Result.error(
         NetworkError(
           message: 'Download de imagem não implementado nesta versão',

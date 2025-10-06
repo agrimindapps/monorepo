@@ -115,25 +115,13 @@ class CaloricNeedsCalculator extends Calculator {
     final activityLevel = inputs['activity_level'] as String;
     final physiologicalState = inputs['physiological_state'] as String;
     final bodyCondition = inputs['body_condition'] as double;
-
-    // Calcular RER (Resting Energy Requirement)
     final rer = _calculateRER(weight);
-    
-    // Calcular DER (Daily Energy Requirement)
     final der = _calculateDER(rer, species, lifeStage, activityLevel, physiologicalState);
-    
-    // Ajustar baseado na condição corporal
     final adjustedDER = _adjustForBodyCondition(der, bodyCondition);
-    
-    // Calcular quantidade de ração (assumindo 350 kcal/100g para ração premium)
     final foodAmountGrams = (adjustedDER / 3.5).round();
-    
-    // Gerar recomendações
     final recommendations = _generateRecommendations(
       adjustedDER, species, lifeStage, activityLevel, physiologicalState, bodyCondition
     );
-
-    // Create result items directly
     final resultItems = [
       ResultItem(
         label: 'Necessidade Energética de Repouso (RER)',
@@ -201,7 +189,6 @@ class CaloricNeedsCalculator extends Calculator {
   }
 
   double _calculateRER(double weight) {
-    // RER = 70 * (peso em kg)^0.75
     return (70 * pow(weight, 0.75)).toDouble();
   }
 
@@ -209,8 +196,6 @@ class CaloricNeedsCalculator extends Calculator {
                       String activityLevel, String physiologicalState) {
     double multiplier = 1.0;
     final rerValue = rer;
-
-    // Fatores por fase da vida
     switch (lifeStage) {
       case 'Filhote (até 4 meses)':
         multiplier = species == 'Cão' ? 3.0 : 2.5;
@@ -225,8 +210,6 @@ class CaloricNeedsCalculator extends Calculator {
         multiplier = 1.4;
         break;
     }
-
-    // Ajustes por atividade
     switch (activityLevel) {
       case 'Sedentário':
         multiplier *= 0.8;
@@ -244,8 +227,6 @@ class CaloricNeedsCalculator extends Calculator {
         multiplier *= 1.6;
         break;
     }
-
-    // Ajustes por estado fisiológico
     switch (physiologicalState) {
       case 'Gestante':
         multiplier *= species == 'Cão' ? 1.5 : 1.4;
@@ -269,10 +250,8 @@ class CaloricNeedsCalculator extends Calculator {
 
   double _adjustForBodyCondition(double der, double bodyCondition) {
     if (bodyCondition < 4) {
-      // Abaixo do peso - aumentar 10-20%
       return der * 1.15;
     } else if (bodyCondition > 6) {
-      // Acima do peso - reduzir 10-20%
       return der * 0.85;
     }
     return der;
@@ -282,12 +261,8 @@ class CaloricNeedsCalculator extends Calculator {
                                        String lifeStage, String activityLevel, 
                                        String physiologicalState, double bodyCondition) {
     final recommendations = <String>[];
-
-    // Recomendações gerais
     recommendations.add('Divida a alimentação em 2-3 refeições por dia');
     recommendations.add('Forneça água fresca sempre disponível');
-
-    // Recomendações por fase da vida
     if (lifeStage.contains('Filhote')) {
       recommendations.add('Use ração específica para filhotes com alta densidade energética');
       recommendations.add('Alimente 3-4 vezes por dia até 6 meses de idade');
@@ -295,8 +270,6 @@ class CaloricNeedsCalculator extends Calculator {
       recommendations.add('Use ração específica para animais seniores');
       recommendations.add('Monitore peso regularmente para prevenir obesidade');
     }
-
-    // Recomendações por condição corporal
     if (bodyCondition < 4) {
       recommendations.add('Aumente gradualmente a quantidade de ração');
       recommendations.add('Considere alimentos com maior densidade calórica');
@@ -304,8 +277,6 @@ class CaloricNeedsCalculator extends Calculator {
       recommendations.add('Implemente plano de redução de peso supervisionado');
       recommendations.add('Aumente a atividade física gradualmente');
     }
-
-    // Recomendações por estado fisiológico
     if (physiologicalState == 'Gestante') {
       recommendations.add('Aumente gradualmente a alimentação durante a gestação');
       recommendations.add('Use ração para filhotes no terço final da gestação');

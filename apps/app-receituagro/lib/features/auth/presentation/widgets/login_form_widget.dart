@@ -33,8 +33,6 @@ class LoginFormWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 30),
-
-          // Campo de email
           AuthTextFieldWidget(
             controller: loginNotifier.emailController,
             label: 'Email',
@@ -43,12 +41,9 @@ class LoginFormWidget extends ConsumerWidget {
             keyboardType: TextInputType.emailAddress,
             validator: loginNotifier.validateEmail,
             onFieldSubmitted: (_) {
-              // Focar no próximo campo
             },
           ),
           const SizedBox(height: 20),
-
-          // Campo de senha
           AuthTextFieldWidget(
             controller: loginNotifier.passwordController,
             label: 'Senha',
@@ -70,13 +65,9 @@ class LoginFormWidget extends ConsumerWidget {
             onFieldSubmitted: (_) => _handleLogin(context, ref),
           ),
           const SizedBox(height: 15),
-
-          // Esqueceu senha
           _buildForgotPassword(context, ref),
 
           const SizedBox(height: 30),
-
-          // Botão de login
           AuthButtonWidget(
             text: 'Entrar',
             isLoading: loginState.isLoading,
@@ -84,8 +75,6 @@ class LoginFormWidget extends ConsumerWidget {
           ),
 
           const SizedBox(height: 30),
-
-          // Botão de voltar ao perfil
           Center(
             child: TextButton.icon(
               onPressed: () => _navigateBackToProfile(context),
@@ -153,7 +142,6 @@ class LoginFormWidget extends ConsumerWidget {
     if (loginState.isAuthenticated && onLoginSuccess != null) {
       onLoginSuccess!();
     } else if (loginState.errorMessage != null) {
-      // Mostrar erro via SnackBar superior
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -198,8 +186,6 @@ class LoginFormWidget extends ConsumerWidget {
           ),
         ),
       );
-
-      // Limpar erro após mostrar
       loginNotifier.clearError();
     }
   }

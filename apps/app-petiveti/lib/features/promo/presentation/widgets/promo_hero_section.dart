@@ -34,9 +34,7 @@ class PromoHeroSection extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background decorative elements
           _buildBackgroundElements(),
-          // Main content
           SafeArea(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
@@ -59,7 +57,6 @@ class PromoHeroSection extends StatelessWidget {
     return Positioned.fill(
       child: Stack(
         children: [
-          // Decorative circles
           Positioned(
             top: -100,
             right: -100,
@@ -94,16 +91,12 @@ class PromoHeroSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 60),
-        // Hero image
         _buildHeroImage(context, isMobile: true),
         const SizedBox(height: 32),
-        // Text content
         _buildTextContent(context, isMobile: true),
         const SizedBox(height: 32),
-        // Action buttons
         _buildActionButtons(context, isMobile: true),
         const SizedBox(height: 40),
-        // Store buttons
         _buildStoreButtons(context, isMobile: true),
         const SizedBox(height: 40),
       ],
@@ -115,7 +108,6 @@ class PromoHeroSection extends StatelessWidget {
       constraints: const BoxConstraints(maxWidth: 1200),
       child: Row(
         children: [
-          // Left side - Text content
           Expanded(
             flex: isTablet ? 3 : 3,
             child: Column(
@@ -133,7 +125,6 @@ class PromoHeroSection extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 80),
-          // Right side - Hero image
           Expanded(
             flex: isTablet ? 2 : 2,
             child: _buildHeroImage(context),
@@ -147,7 +138,6 @@ class PromoHeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
-        // App Name
         Text(
           appName,
           style: TextStyle(
@@ -158,8 +148,6 @@ class PromoHeroSection extends StatelessWidget {
           ),
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
-        
-        // Accent line
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
           width: 80,
@@ -169,8 +157,6 @@ class PromoHeroSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        
-        // Tagline
         Text(
           appTagline,
           style: TextStyle(
@@ -181,8 +167,6 @@ class PromoHeroSection extends StatelessWidget {
           ),
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
-        
-        // Launch Status Badge
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -201,8 +185,6 @@ class PromoHeroSection extends StatelessWidget {
         ),
         
         const SizedBox(height: 20),
-        
-        // Description
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
           child: Text(
@@ -285,7 +267,6 @@ class PromoHeroSection extends StatelessWidget {
       runSpacing: 12,
       alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
       children: [
-        // Pre-register button
         ElevatedButton.icon(
           onPressed: onPreRegisterPressed,
           icon: const Icon(Icons.notifications_active, size: 20),
@@ -304,11 +285,8 @@ class PromoHeroSection extends StatelessWidget {
             ),
           ),
         ),
-        
-        // Learn more button
         OutlinedButton.icon(
           onPressed: () {
-            // Scroll to features section
             Scrollable.ensureVisible(
               context,
               duration: const Duration(milliseconds: 800),
@@ -340,15 +318,12 @@ class PromoHeroSection extends StatelessWidget {
       runSpacing: 12,
       alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
       children: [
-        // Google Play Store
         _buildStoreButton(
           'EM BREVE NA',
           'GOOGLE PLAY',
           Icons.android,
           Colors.black87,
         ),
-        
-        // App Store
         _buildStoreButton(
           'EM BREVE NA',
           'APP STORE',

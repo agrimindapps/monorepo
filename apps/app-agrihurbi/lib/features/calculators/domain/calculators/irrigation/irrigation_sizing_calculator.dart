@@ -84,12 +84,8 @@ class IrrigationSizingCalculator extends CalculatorEntity {
       final double pipeLength = double.parse(inputs['pipe_length'].toString()); // m
       final double operatingHours = double.parse(inputs['operating_hours'].toString()); // h
       final String systemType = inputs['system_type'].toString();
-
-      // Conversões
       final double flowRateM3h = flowRate / 1000; // m³/h
       final double flowRateM3s = flowRateM3h / 3600; // m³/s
-
-      // Cálculo da potência da bomba
       const double waterDensity = 1000; // kg/m³
       const double gravity = 9.81; // m/s²
       const double pumpEfficiency = 0.75; // 75% eficiência típica
@@ -97,26 +93,16 @@ class IrrigationSizingCalculator extends CalculatorEntity {
       final double powerKW = (flowRateM3s * totalHead * waterDensity * gravity) / 
                             (1000 * pumpEfficiency);
       final double powerCV = powerKW / 0.736; // Conversão para CV
-
-      // Cálculo do diâmetro da tubulação
       final double velocity = _getRecommendedVelocity(systemType);
       final double pipeDiameter = CalculatorMath.roundTo(
         2 * math.sqrt((flowRateM3s / (math.pi * velocity))), 3);
       final double pipeDiameterMm = pipeDiameter * 1000;
-
-      // Perda de carga na tubulação (Hazen-Williams)
       final double pipeHead = _calculatePipeHeadLoss(
         flowRateM3h, pipeDiameter, pipeLength);
-
-      // Consumo energético
       final double dailyConsumption = powerKW * operatingHours; // kWh/dia
       final double monthlyConsumption = dailyConsumption * 30; // kWh/mês
-
-      // Dimensionamento de aspersores (se aplicável)
       final Map<String, double> sprinklerData = _calculateSprinklerSpacing(
         flowRate, systemType);
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         powerKW, velocity, systemType, pipeHead, totalHead);
 
@@ -211,7 +197,6 @@ class IrrigationSizingCalculator extends CalculatorEntity {
   }
 
   double _calculatePipeHeadLoss(double flowM3h, double diameter, double length) {
-    // Fórmula de Hazen-Williams simplificada
     const double c = 130; // Coeficiente para PVC
     final double j = 10.643 * math.pow(flowM3h, 1.852) /
                     (math.pow(c, 1.852) * math.pow(diameter, 4.871));
@@ -222,8 +207,6 @@ class IrrigationSizingCalculator extends CalculatorEntity {
     if (systemType != 'Aspersão' && systemType != 'Microaspersão') {
       return {};
     }
-
-    // Valores típicos para dimensionamento
     final double sprinklerFlow = systemType == 'Aspersão' ? 600.0 : 200.0; // L/h por aspersor
     final double spacing = systemType == 'Aspersão' ? 12.0 : 6.0; // metros
     final double quantity = flowRate / sprinklerFlow;
@@ -242,28 +225,20 @@ class IrrigationSizingCalculator extends CalculatorEntity {
     double totalHead,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações sobre potência
     if (powerKW < 1.0) {
       recommendations.add('Sistema de baixa potência. Considere bomba monofásica.');
     } else if (powerKW > 10.0) {
       recommendations.add('Sistema de alta potência. Requer bomba trifásica.');
     }
-
-    // Recomendações sobre velocidade
     if (velocity < 1.0) {
       recommendations.add('Velocidade baixa. Pode reduzir diâmetro da tubulação.');
     } else if (velocity > 3.0) {
       recommendations.add('Velocidade alta. Aumente diâmetro para reduzir perdas.');
     }
-
-    // Recomendações sobre perdas
     final double lossPercentage = (pipeHead / totalHead) * 100;
     if (lossPercentage > 20) {
       recommendations.add('Perdas de carga elevadas (${lossPercentage.toStringAsFixed(1)}%). Revise dimensionamento.');
     }
-
-    // Recomendações por tipo de sistema
     switch (systemType) {
       case 'Gotejamento':
         recommendations.add('Sistema de gotejamento: use filtros e monitore pressão.');

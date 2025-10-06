@@ -18,8 +18,6 @@ extension PlanTypeExtension on PlanType {
 }
 
 enum PlanStatus { active, expired, cancelled, paused, pending }
-
-// Alias for backward compatibility
 typedef SubscriptionStatus = PlanStatus;
 
 enum PlanDuration { weekly, monthly, yearly, lifetime }

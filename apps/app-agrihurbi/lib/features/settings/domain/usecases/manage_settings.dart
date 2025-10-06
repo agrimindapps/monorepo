@@ -109,7 +109,6 @@ class ManageSettings {
   /// Import settings from Map data
   ResultFuture<SettingsEntity> importSettings(Map<String, dynamic> data) async {
     try {
-      // Validate import data structure
       if (!data.containsKey('settings') || !data.containsKey('version')) {
         return const Left(
           GeneralFailure(message: 'Formato de dados inválido para importação'),
@@ -117,14 +116,11 @@ class ManageSettings {
       }
 
       final settingsData = data['settings'] as Map<String, dynamic>;
-
-      // Get current settings as base
       final currentSettingsResult = await _repository.getSettings();
       return currentSettingsResult.fold((failure) => Left(failure), (
         currentSettings,
       ) async {
         try {
-          // Parse imported data
           final importedSettings = SettingsEntity(
             userId: settingsData['userId'] as String? ?? currentSettings.userId,
             theme: _parseTheme(settingsData['theme'] as String?),
@@ -156,8 +152,6 @@ class ManageSettings {
             ),
             lastUpdated: DateTime.now(),
           );
-
-          // Save imported settings
           return await _repository.updateSettings(importedSettings);
         } catch (e) {
           return Left(
@@ -171,8 +165,6 @@ class ManageSettings {
       );
     }
   }
-
-  // Helper methods for parsing imported data
   AppTheme _parseTheme(String? themeStr) {
     if (themeStr == null) return AppTheme.system;
     return AppTheme.values.firstWhere(

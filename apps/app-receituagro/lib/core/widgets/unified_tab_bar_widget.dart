@@ -119,8 +119,6 @@ class UnifiedTabBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    // Cores com fallback para tema
     final effectivePrimaryColor = primaryColor ?? colorScheme.primary;
     final effectiveBackgroundColor =
         backgroundColor ?? colorScheme.primaryContainer;
@@ -221,7 +219,6 @@ class _TabContent extends StatelessWidget {
   }
 
   double _getAnimationValue() {
-    // Calcula valor de animação baseado na posição do controller
     if (!tabController.indexIsChanging) {
       return tabController.index == tabIndex ? 1.0 : 0.0;
     }
@@ -277,11 +274,8 @@ class _TabContent extends StatelessWidget {
   Widget _buildText(
       bool isActive, double animationValue, BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Texto adaptável baseado no tamanho da tela
     String displayText = tabData.text;
     if (screenWidth < 600 && tabData.text.length > 8) {
-      // Abrevia texto em telas pequenas
       final words = tabData.text.split(' ');
       if (words.length > 1) {
         displayText = '${words[0]}${words[0].length < 6 ? '...' : ''}';

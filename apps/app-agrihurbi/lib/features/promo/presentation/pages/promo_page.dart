@@ -12,22 +12,11 @@ class PromoPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Navigation Bar
             _buildNavigationBar(context),
-
-            // Hero Section
             _buildHeroSection(context),
-
-            // Features Section
             _buildFeaturesSection(context),
-
-            // Statistics Section
             _buildStatisticsSection(context),
-
-            // Call to Action
             _buildCallToAction(context),
-
-            // Footer
             _buildFooter(context),
           ],
         ),
@@ -51,7 +40,6 @@ class PromoPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo
           Row(
             children: [
               Icon(Icons.agriculture, color: Colors.green.shade700, size: 32),
@@ -66,8 +54,6 @@ class PromoPage extends StatelessWidget {
               ),
             ],
           ),
-
-          // Login Button
           ElevatedButton.icon(
             onPressed: () => context.go('/login'),
             icon: const Icon(Icons.login, size: 18),

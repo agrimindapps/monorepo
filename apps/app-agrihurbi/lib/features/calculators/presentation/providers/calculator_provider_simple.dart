@@ -37,8 +37,6 @@ class CalculatorProvider extends ChangeNotifier {
        _executeCalculation = executeCalculation,
        _getCalculationHistory = getCalculationHistory;
 
-  // === STATE MANAGEMENT ===
-
   /// Estados de loading
   bool _isLoading = false;
   bool _isCalculating = false;
@@ -65,8 +63,6 @@ class CalculatorProvider extends ChangeNotifier {
 
   /// Favoritos armazenados por ID
   final Set<String> _favoriteIds = {};
-
-  // === GETTERS ===
 
   bool get isLoading => _isLoading;
   bool get isCalculating => _isCalculating;
@@ -96,8 +92,6 @@ class CalculatorProvider extends ChangeNotifier {
   int get totalCalculators => _calculators.length;
   int get totalFilteredCalculators => _filteredCalculators.length;
   int get totalHistoryItems => _calculationHistory.length;
-
-  // === OPERAÇÕES PRINCIPAIS ===
 
   /// Carrega todas as calculadoras
   Future<void> loadCalculators() async {
@@ -170,8 +164,6 @@ class CalculatorProvider extends ChangeNotifier {
     );
   }
 
-  // === OPERAÇÕES DE CÁLCULO ===
-
   /// Atualiza input de cálculo
   void updateInput(String parameterId, dynamic value) {
     _currentInputs[parameterId] = value;
@@ -226,8 +218,6 @@ class CalculatorProvider extends ChangeNotifier {
     return success;
   }
 
-  // === OPERAÇÕES DE BUSCA E FILTROS ===
-
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
     _searchQuery = query;
@@ -258,14 +248,10 @@ class CalculatorProvider extends ChangeNotifier {
   /// Aplica filtros à lista de calculadoras
   void _applyFilters() {
     var filtered = List<CalculatorEntity>.from(_calculators);
-
-    // Filtrar por categoria
     if (_selectedCategory != null) {
       filtered =
           filtered.where((calc) => calc.category == _selectedCategory).toList();
     }
-
-    // Filtrar por busca
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered =
@@ -280,8 +266,6 @@ class CalculatorProvider extends ChangeNotifier {
 
     _filteredCalculators = filtered;
   }
-
-  // === OPERAÇÕES DE HISTÓRICO ===
 
   /// Carrega histórico de cálculos
   Future<void> loadCalculationHistory() async {
@@ -326,8 +310,6 @@ class CalculatorProvider extends ChangeNotifier {
     return true;
   }
 
-  // === OPERAÇÕES AUXILIARES ===
-
   /// Limpa mensagens de erro
   void clearError() {
     _errorMessage = null;
@@ -343,8 +325,6 @@ class CalculatorProvider extends ChangeNotifier {
   void applyHistoryResult(CalculationHistory historyItem) {
     _currentResult = historyItem.result;
     _currentInputs = Map<String, dynamic>.from(historyItem.result.inputs);
-
-    // Tenta encontrar e selecionar a calculadora
     try {
       final calculator = _calculators.firstWhere(
         (calc) => calc.id == historyItem.calculatorId,

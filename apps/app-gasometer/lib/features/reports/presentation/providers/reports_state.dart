@@ -18,22 +18,14 @@ class ReportsState extends Equatable {
     this.errorMessage,
     this.selectedVehicleId = '',
   });
-
-  // Current reports
   final ReportSummaryEntity? currentMonthReport;
   final ReportSummaryEntity? currentYearReport;
   final ReportSummaryEntity? customReport;
-
-  // Comparisons
   final ReportComparisonEntity? monthlyComparison;
   final ReportComparisonEntity? yearlyComparison;
-
-  // Analytics data
   final Map<String, dynamic>? efficiencyTrends;
   final Map<String, dynamic>? costAnalysis;
   final Map<String, dynamic>? usagePatterns;
-
-  // State flags
   final bool isLoading;
   final String? errorMessage;
   final String selectedVehicleId;

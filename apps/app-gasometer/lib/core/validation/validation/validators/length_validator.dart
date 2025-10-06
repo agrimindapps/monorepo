@@ -70,13 +70,9 @@ class LengthValidator extends BaseFieldValidator {
   @override
   ValidationResult performValidation(dynamic value) {
     final length = _getLength(value);
-    
-    // Check minimum length
     if (minLength != null && length < minLength!) {
       return ValidationResult.invalid(_getMinLengthMessage());
     }
-    
-    // Check maximum length
     if (maxLength != null && length > maxLength!) {
       return ValidationResult.invalid(_getMaxLengthMessage());
     }
@@ -190,13 +186,9 @@ class WordCountValidator extends StringValidator {
   @override
   ValidationResult validateString(String value) {
     final wordCount = _countWords(value.trim());
-    
-    // Check minimum words
     if (minWords != null && wordCount < minWords!) {
       return ValidationResult.invalid(_getMinWordsMessage());
     }
-    
-    // Check maximum words
     if (maxWords != null && wordCount > maxWords!) {
       return ValidationResult.invalid(_getMaxWordsMessage());
     }
@@ -290,13 +282,9 @@ class CharacterCountValidator extends StringValidator {
     final charCount = excludeWhitespace 
         ? value.replaceAll(RegExp(r'\s'), '').length
         : value.length;
-    
-    // Check minimum characters
     if (minChars != null && charCount < minChars!) {
       return ValidationResult.invalid(_getMinCharsMessage());
     }
-    
-    // Check maximum characters
     if (maxChars != null && charCount > maxChars!) {
       return ValidationResult.invalid(_getMaxCharsMessage());
     }

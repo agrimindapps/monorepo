@@ -290,8 +290,6 @@ class EnhancedErrorWidget extends StatelessWidget {
 
   Widget _buildFullActions(BuildContext context) {
     final actions = <Widget>[];
-
-    // Primary action (retry or custom)
     if (showRetryButton && onRetry != null && error.isRecoverable) {
       actions.add(
         ElevatedButton.icon(
@@ -304,8 +302,6 @@ class EnhancedErrorWidget extends StatelessWidget {
         ),
       );
     }
-
-    // Secondary action (go back)
     if (showGoBackButton && onGoBack != null) {
       actions.add(
         OutlinedButton.icon(
@@ -318,8 +314,6 @@ class EnhancedErrorWidget extends StatelessWidget {
         ),
       );
     }
-
-    // Custom action
     if (customActionButton != null) {
       actions.add(customActionButton!);
     }

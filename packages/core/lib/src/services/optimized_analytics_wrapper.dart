@@ -42,19 +42,14 @@ class OptimizedAnalyticsWrapper {
     Map<String, dynamic>? parameters,
     bool forceCritical = false,
   }) async {
-    // Eventos críticos são enviados imediatamente
     if (forceCritical || _isCriticalEvent(eventName)) {
       await _analytics.logEvent(eventName, parameters: parameters);
       return;
     }
-
-    // Debounce para eventos repetitivos
     if (_shouldDebounce(eventName)) {
       _debounceEvent(eventName, parameters);
       return;
     }
-
-    // Adicionar ao buffer para batch processing
     _addToBuffer(eventName, parameters);
   }
 
@@ -65,7 +60,6 @@ class OptimizedAnalyticsWrapper {
 
   /// Verifica se deve fazer debounce
   bool _shouldDebounce(String eventName) {
-    // Eventos de sincronização e navegação devem ter debounce
     return eventName.contains('sync') ||
         eventName.contains('page_view') ||
         eventName.contains('scroll') ||
@@ -74,10 +68,7 @@ class OptimizedAnalyticsWrapper {
 
   /// Aplica debounce em evento
   void _debounceEvent(String eventName, Map<String, dynamic>? parameters) {
-    // Cancela timer anterior se existir
     _debounceTimers[eventName]?.cancel();
-
-    // Cria novo timer
     _debounceTimers[eventName] = Timer(_debounceDuration, () {
       _addToBuffer(eventName, parameters);
       _debounceTimers.remove(eventName);
@@ -91,8 +82,6 @@ class OptimizedAnalyticsWrapper {
       parameters: parameters,
       timestamp: DateTime.now(),
     ));
-
-    // Flush automático se buffer estiver cheio
     if (_eventBuffer.length >= _maxBufferSize) {
       _flushBuffer();
     }
@@ -113,11 +102,7 @@ class OptimizedAnalyticsWrapper {
 
     final eventsToSend = List<_AnalyticsEvent>.from(_eventBuffer);
     _eventBuffer.clear();
-
-    // Agrupa eventos similares
     final groupedEvents = _groupSimilarEvents(eventsToSend);
-
-    // Envia eventos agrupados
     for (final event in groupedEvents) {
       try {
         await _analytics.logEvent(
@@ -139,24 +124,18 @@ class OptimizedAnalyticsWrapper {
   /// Agrupa eventos similares para reduzir volume
   List<_AnalyticsEvent> _groupSimilarEvents(List<_AnalyticsEvent> events) {
     final Map<String, List<_AnalyticsEvent>> eventsByName = {};
-
-    // Agrupa por nome
     for (final event in events) {
       eventsByName.putIfAbsent(event.name, () => []).add(event);
     }
 
     final groupedEvents = <_AnalyticsEvent>[];
-
-    // Para cada grupo de eventos
     for (final entry in eventsByName.entries) {
       final eventName = entry.key;
       final eventList = entry.value;
 
       if (eventList.length == 1) {
-        // Evento único, adiciona normalmente
         groupedEvents.add(eventList.first);
       } else {
-        // Múltiplos eventos do mesmo tipo, agrupa
         groupedEvents.add(_AnalyticsEvent(
           name: eventName,
           parameters: {
@@ -176,7 +155,6 @@ class OptimizedAnalyticsWrapper {
 
   /// Força flush imediato de todos eventos pendentes
   Future<void> flush() async {
-    // Cancela todos debounce timers e adiciona ao buffer
     for (final timer in _debounceTimers.values) {
       timer.cancel();
     }

@@ -61,8 +61,6 @@ class SecureLogger {
       final sanitizedError = _sanitizeError(error);
       debugPrint('[ERROR] Error details: $sanitizedError');
     }
-
-    // Stack trace apenas em desenvolvimento
     if (stackTrace != null && !_isProduction) {
       debugPrint('[ERROR] Stack trace: $stackTrace');
     }
@@ -73,15 +71,12 @@ class SecureLogger {
     String sanitized = message;
 
     for (String keyword in _sensitiveKeywords) {
-      // Remove valores após palavras-chave sensíveis
       RegExp regex = RegExp(
         '$keyword[\\s]*[:=][\\s]*[\\S]+',
         caseSensitive: false,
       );
       sanitized = sanitized.replaceAll(regex, '$keyword: [FILTERED]');
     }
-
-    // Remove URLs completas, mantendo apenas o domínio
     RegExp urlRegex = RegExp(
       r'https?://[^\s]+',
       caseSensitive: false,
@@ -128,8 +123,6 @@ class SecureLogger {
     if (errorString.contains('validation') || errorString.contains('invalid')) {
       return 'Dados inválidos. Verifique as informações e tente novamente.';
     }
-
-    // Mensagem genérica para outros erros
     return 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
   }
 }

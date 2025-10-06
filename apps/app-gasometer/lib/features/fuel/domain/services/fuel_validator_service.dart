@@ -26,8 +26,6 @@ class FuelValidatorService {
     if (liters > 999.999) {
       return 'Quantidade muito alta';
     }
-
-    // Validação contextual com capacidade do tanque
     if (tankCapacity != null && liters > tankCapacity * 1.1) {
       return 'Quantidade excede capacidade do tanque';
     }
@@ -72,8 +70,6 @@ class FuelValidatorService {
     if (totalPrice > 9999.99) {
       return 'Valor muito alto';
     }
-
-    // Validação contextual - alerta para valores muito altos
     if (maxExpected != null && totalPrice > maxExpected * 2) {
       return 'Valor parece muito alto para este veículo';
     }
@@ -105,24 +101,16 @@ class FuelValidatorService {
     if (odometer > 9999999) {
       return 'Valor muito alto';
     }
-
-    // Validação contextual com odômetro inicial do veículo
     if (initialOdometer != null && odometer < initialOdometer) {
       return 'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)';
     }
-
-    // Validação contextual com odômetro atual
     if (currentOdometer != null && odometer < currentOdometer - 1000) {
       return 'Odômetro muito abaixo do atual';
     }
-
-    // Validação com último registro
     if (lastRecordOdometer != null) {
       if (odometer < lastRecordOdometer) {
         return 'Odômetro menor que o último registro';
       }
-      
-      // Alerta para diferença muito grande (mais de 2000km)
       if (odometer - lastRecordOdometer > 2000) {
         return 'Diferença muito grande desde o último registro';
       }
@@ -152,8 +140,6 @@ class FuelValidatorService {
     if (selectedDate.isAfter(today)) {
       return 'Data não pode ser futura';
     }
-
-    // Não permitir datas muito antigas (mais de 5 anos)
     final fiveYearsAgo = today.subtract(const Duration(days: 365 * 5));
     if (selectedDate.isBefore(fiveYearsAgo)) {
       return 'Data muito antiga';
@@ -171,8 +157,6 @@ class FuelValidatorService {
       if (value.trim().length > 100) {
         return 'Nome muito longo';
       }
-      
-      // Verificar caracteres válidos
       if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.&]+$').hasMatch(value.trim())) {
         return 'Caracteres inválidos no nome';
       }
@@ -203,19 +187,13 @@ class FuelValidatorService {
     double? lastRecordOdometer,
   }) {
     final errors = <String, String>{};
-
-    // Validar litros
     final litersError = validateLiters(
       liters,
       tankCapacity: vehicle?.tankCapacity,
     );
     if (litersError != null) errors['liters'] = litersError;
-
-    // Validar preço por litro
     final priceError = validatePricePerLiter(pricePerLiter);
     if (priceError != null) errors['pricePerLiter'] = priceError;
-
-    // Validar odômetro
     final odometerError = validateOdometer(
       odometer,
       initialOdometer: 0, // Assuming initial odometer is 0 for now
@@ -223,16 +201,10 @@ class FuelValidatorService {
       lastRecordOdometer: lastRecordOdometer,
     );
     if (odometerError != null) errors['odometer'] = odometerError;
-
-    // Validar tipo de combustível
     final fuelTypeError = validateFuelType(fuelType);
     if (fuelTypeError != null) errors['fuelType'] = fuelTypeError;
-
-    // Validar data
     final dateError = validateDate(date);
     if (dateError != null) errors['date'] = dateError;
-
-    // Validar campos opcionais
     final gasStationError = validateGasStationName(gasStationName);
     if (gasStationError != null) errors['gasStationName'] = gasStationError;
 
@@ -256,8 +228,6 @@ class FuelValidatorService {
   ) {
     final calculated = calculateTotalPrice(liters, pricePerLiter);
     final difference = (calculated - totalPrice).abs();
-
-    // Permitir diferença máxima de 1 centavo (erro de arredondamento)
     if (difference > 0.01) {
       return 'Valor total não confere com o cálculo';
     }

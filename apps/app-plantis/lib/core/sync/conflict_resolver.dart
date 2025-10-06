@@ -22,7 +22,6 @@ class ConflictResolver {
       case ConflictResolutionStrategy.merge:
         return _mergeData(conflictData);
       case ConflictResolutionStrategy.manual:
-        // TODO: Implementar interface de resolução manual
         throw UnimplementedError('Resolução manual ainda não implementada');
     }
   }
@@ -64,7 +63,6 @@ class ConflictResolver {
       lastSyncAt: now,
       isDirty: true,
       isDeleted: local.isDeleted || remote.isDeleted,
-      // Incremented version
       version: local.version + 1,
       userId: local.userId ?? remote.userId,
       moduleName: local.moduleName ?? remote.moduleName,
@@ -82,7 +80,6 @@ class ConflictResolver {
 
   /// Merge específico para TaskModel
   TaskModel _mergeTaskModel(TaskModel local, TaskModel remote) {
-    // Convert to Task entities to access getters
     final localTask = local as Task;
     final remoteTask = remote as Task;
 

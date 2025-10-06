@@ -60,8 +60,6 @@ class _AppointmentsAutoReloadManagerState
   void initState() {
     super.initState();
     _lastAnimalId = widget.selectedAnimalId;
-    
-    // Perform initial load if animal is selected
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.selectedAnimalId != null) {
         _performReloadWithDebounce(widget.selectedAnimalId!, isInitial: true);
@@ -78,8 +76,6 @@ class _AppointmentsAutoReloadManagerState
   @override
   void didUpdateWidget(AppointmentsAutoReloadManager oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // Check if animal selection has changed
     if (widget.selectedAnimalId != _lastAnimalId) {
       _handleAnimalChange(oldWidget.selectedAnimalId, widget.selectedAnimalId);
       _lastAnimalId = widget.selectedAnimalId;
@@ -94,15 +90,12 @@ class _AppointmentsAutoReloadManagerState
   /// @param previousAnimalId Previously selected animal ID
   /// @param newAnimalId Newly selected animal ID
   void _handleAnimalChange(String? previousAnimalId, String? newAnimalId) {
-    // If we had a previous animal and now have a different one, reload
     if (previousAnimalId != null && newAnimalId != null && previousAnimalId != newAnimalId) {
       _performReloadWithDebounce(newAnimalId);
     }
-    // If we now have an animal selected for the first time
     else if (previousAnimalId == null && newAnimalId != null) {
       _performReloadWithDebounce(newAnimalId, isInitial: true);
     }
-    // If animal was deselected, clear the appointments
     else if (previousAnimalId != null && newAnimalId == null) {
       _clearAppointments();
     }
@@ -116,24 +109,16 @@ class _AppointmentsAutoReloadManagerState
   /// @param animalId Animal ID to load appointments for
   /// @param isInitial Whether this is the initial load
   void _performReloadWithDebounce(String animalId, {bool isInitial = false}) {
-    // Cancel existing timer
     _debounceTimer?.cancel();
-    
-    // For initial loads, don't debounce
     if (isInitial) {
       _performReload(animalId, isInitial: true);
       return;
     }
-    
-    // Check if we recently loaded for this animal (cache check)
     final lastLoadTime = _lastLoadTimes[animalId];
     final now = DateTime.now();
     if (lastLoadTime != null && now.difference(lastLoadTime).inSeconds < 30) {
-      // Skip reload if we loaded recently (within 30 seconds)
       return;
     }
-    
-    // Set debounce timer
     _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       _performReload(animalId);
     });
@@ -147,22 +132,13 @@ class _AppointmentsAutoReloadManagerState
   /// @param animalId Animal ID to load appointments for
   /// @param isInitial Whether this is the initial load
   Future<void> _performReload(String animalId, {bool isInitial = false}) async {
-    // Prevent concurrent reloads
     if (_isReloading) return;
     
     try {
       _isReloading = true;
-      
-      // Notify reload start
       widget.onReloadStart?.call();
-      
-      // Load appointments using the provider
       await ref.read(appointmentsProvider.notifier).loadAppointments(animalId);
-      
-      // Update cache timestamp
       _lastLoadTimes[animalId] = DateTime.now();
-      
-      // Check if the operation was successful
       final state = ref.read(appointmentsProvider);
       if (state.errorMessage != null) {
         widget.onReloadError?.call(state.errorMessage!);
@@ -170,7 +146,6 @@ class _AppointmentsAutoReloadManagerState
         widget.onReloadComplete?.call();
       }
     } catch (error) {
-      // Handle any unexpected errors
       widget.onReloadError?.call(error.toString());
     } finally {
       _isReloading = false;
@@ -181,7 +156,6 @@ class _AppointmentsAutoReloadManagerState
   /// 
   /// Clears the current appointments when no animal is selected.
   void _clearAppointments() {
-    // Clear appointments through the provider
     ref.read(appointmentsProvider.notifier).clearAppointments();
   }
 
@@ -193,7 +167,6 @@ class _AppointmentsAutoReloadManagerState
   Future<void> manualReload() async {
     final animalId = widget.selectedAnimalId;
     if (animalId != null) {
-      // Clear cache entry for manual reloads
       _lastLoadTimes.remove(animalId);
       await _performReload(animalId);
     }
@@ -228,7 +201,6 @@ mixin AppointmentsAutoReloadMixin<T extends StatefulWidget> on State<T> {
   
   /// Override this method to handle reload errors
   void onAppointmentsReloadError(String error) {
-    // Default implementation - show error message
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -243,8 +215,6 @@ mixin AppointmentsAutoReloadMixin<T extends StatefulWidget> on State<T> {
   void initState() {
     super.initState();
     _trackedAnimalId = currentAnimalId;
-    
-    // Initial load
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (currentAnimalId != null) {
         onAppointmentsReload(currentAnimalId!);
@@ -255,8 +225,6 @@ mixin AppointmentsAutoReloadMixin<T extends StatefulWidget> on State<T> {
   @override
   void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // Check for animal ID changes
     if (currentAnimalId != _trackedAnimalId) {
       if (currentAnimalId != null) {
         onAppointmentsReload(currentAnimalId!);

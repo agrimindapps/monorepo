@@ -84,8 +84,6 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
     if (animalsState.animals.isEmpty) {
       return const EmptyAnimalsState();
     }
-
-    // Show filtered empty state if filters are applied but no results
     if (animalsState.filter.hasActiveFilters && filteredAnimals.isEmpty) {
       return UIComponents.searchEmptyState(
         onClearFilters: () {
@@ -105,11 +103,9 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
         child: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
-        // Performance optimization: provide itemExtent for better performance
         itemExtent: 120, // Approximate height of AnimalCard
         itemCount: _getItemCount(filteredAnimals.length, uiState),
         itemBuilder: (context, index) {
-          // Show loading indicator for last item when loading more
           if (index >= filteredAnimals.length) {
             return _buildLoadingIndicator();
           }

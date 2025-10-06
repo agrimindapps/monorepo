@@ -20,10 +20,7 @@ extension DiagnosticoDetalhadoExtension on DiagnosticoDetalhado {
 
   /// Verifica se é um diagnóstico crítico (baseado em critérios específicos)
   bool get isCritico {
-    // Exemplo de critérios: dosagem máxima alta, praga perigosa, etc.
     if (praga?.tipoPraga == 'Crítica') return true;
-    
-    // Verificar dosagem
     final dosMaxDouble = double.tryParse(diagnostico.dsMax);
     if (dosMaxDouble != null && dosMaxDouble > 5.0) return true;
     

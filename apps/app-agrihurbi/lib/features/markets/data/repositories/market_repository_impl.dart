@@ -33,7 +33,6 @@ class MarketRepositoryImpl implements MarketRepository {
     int offset = 0,
   }) async {
     try {
-      // Try to get fresh data if connected
       if (await _networkInfo.isConnected) {
         try {
           final remoteMarkets = await _remoteDataSource.getMarkets(
@@ -41,18 +40,14 @@ class MarketRepositoryImpl implements MarketRepository {
             limit: limit,
             offset: offset,
           );
-          
-          // Cache the results
           await _localDataSource.cacheMarkets(remoteMarkets);
           await _localDataSource.cacheLastUpdate(DateTime.now());
           
           return Right(remoteMarkets.map((m) => m.toEntity()).toList());
         } catch (e) {
-          // If remote fails, fallback to cache
           return _getCachedMarkets();
         }
       } else {
-        // No connection, use cached data
         return _getCachedMarkets();
       }
     } catch (e) {
@@ -78,7 +73,6 @@ class MarketRepositoryImpl implements MarketRepository {
   @override
   ResultFuture<MarketEntity> getMarketById(String id) async {
     try {
-      // Try cached first
       final cachedMarket = await _localDataSource.getCachedMarket(id);
       
       if (await _networkInfo.isConnected) {
@@ -110,7 +104,6 @@ class MarketRepositoryImpl implements MarketRepository {
     int limit = 20,
   }) async {
     try {
-      // Save search query for history
       await _localDataSource.saveSearchQuery(query);
       
       if (await _networkInfo.isConnected) {
@@ -121,15 +114,12 @@ class MarketRepositoryImpl implements MarketRepository {
         );
         return Right(remoteResults.map((m) => m.toEntity()).toList());
       } else {
-        // Search in cached data
         final cachedMarkets = await _localDataSource.getCachedMarkets();
         final filteredMarkets = cachedMarkets.where((market) {
           final matchesQuery = market.name.toLowerCase().contains(query.toLowerCase()) ||
                              market.symbol.toLowerCase().contains(query.toLowerCase());
           
           if (!matchesQuery) return false;
-          
-          // Apply additional filters if provided
           if (filter?.types?.isNotEmpty == true) {
             if (!filter!.types!.contains(market.type)) return false;
           }
@@ -179,7 +169,6 @@ class MarketRepositoryImpl implements MarketRepository {
           await _localDataSource.cacheMarketSummary(remoteSummary);
           return Right(remoteSummary.toEntity());
         } catch (e) {
-          // Fallback to cached summary
           final cachedSummary = await _localDataSource.getCachedMarketSummary();
           if (cachedSummary != null) {
             return Right(cachedSummary.toEntity());
@@ -354,19 +343,16 @@ class MarketRepositoryImpl implements MarketRepository {
 
   @override
   ResultFuture<List<MarketAlert>> getMarketAlerts() async {
-    // TODO: Implement alerts functionality
     return const Right([]);
   }
 
   @override
   ResultFuture<void> createMarketAlert(MarketAlert alert) async {
-    // TODO: Implement alerts functionality
     return const Right(null);
   }
 
   @override
   ResultFuture<void> deleteMarketAlert(String alertId) async {
-    // TODO: Implement alerts functionality
     return const Right(null);
   }
 
@@ -386,13 +372,11 @@ class MarketRepositoryImpl implements MarketRepository {
 
   @override
   ResultFuture<List<String>> getSupportedExchanges() async {
-    // Mock implementation - in real app, this would come from API
     return const Right(['BMF', 'CBOT', 'NYSE', 'NASDAQ']);
   }
 
   @override
   ResultFuture<List<MarketTypeInfo>> getMarketTypes() async {
-    // Mock implementation - in real app, this would come from API/cache
     final types = MarketType.values.map((type) => MarketTypeInfo(
       type: type,
       description: type.description,
@@ -409,7 +393,6 @@ class MarketRepositoryImpl implements MarketRepository {
     MarketType? type,
     int limit = 10,
   }) async {
-    // TODO: Implement market news functionality
     return const Right([]);
   }
 

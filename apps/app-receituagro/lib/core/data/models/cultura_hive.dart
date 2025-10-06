@@ -53,8 +53,6 @@ class CulturaHive extends HiveObject {
       'cultura': cultura,
     };
   }
-
-  // Getters convenientes para compatibilidade com código legado
   String get nome => cultura;
   String get nomeComum => cultura;
   String get nomeCientifico => cultura; // Por enquanto, vamos usar o mesmo valor

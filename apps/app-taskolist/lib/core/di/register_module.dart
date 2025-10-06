@@ -3,7 +3,6 @@ import 'package:core/core.dart';
 /// Module for registering external dependencies from core package
 @module
 abstract class RegisterModule {
-  // Firebase Services from core
   @lazySingleton
   IAnalyticsRepository get analyticsRepository => FirebaseAnalyticsService();
 

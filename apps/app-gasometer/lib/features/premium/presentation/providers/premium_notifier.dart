@@ -49,8 +49,6 @@ class PremiumNotifierState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
-
-  // Getters de conveniência
   bool get isPremium => premiumStatus.isPremium;
   bool get canPurchasePremium => !isPremium;
   DateTime? get expirationDate => premiumStatus.expirationDate;
@@ -111,13 +109,10 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   GenerateLocalLicense? _generateLocalLicense;
   RevokeLocalLicense? _revokeLocalLicense;
   PremiumRepository? _premiumRepository;
-
-  // Stream subscription para cleanup
   StreamSubscription<PremiumStatus>? _statusSubscription;
 
   @override
   Future<PremiumNotifierState> build() async {
-    // Obtém dependências do GetIt via providers
     _checkPremiumStatus = ref.read(checkPremiumStatusProvider);
     _canUseFeature = ref.read(canUseFeatureProvider);
     _canAddVehicle = ref.read(canAddVehicleProvider);
@@ -129,23 +124,17 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     _generateLocalLicense = ref.read(generateLocalLicenseProvider);
     _revokeLocalLicense = ref.read(revokeLocalLicenseProvider);
     _premiumRepository = ref.read(premiumRepositoryProvider);
-
-    // Verifica status inicial
     final result = await _checkPremiumStatus!(const NoParams());
     final premiumStatus = result.fold(
       (failure) => PremiumStatus.free,
       (status) => status,
     );
-
-    // Escuta mudanças no stream do repository e armazena subscription
     _statusSubscription = _premiumRepository!.premiumStatus.listen((status) {
       state = core.AsyncValue.data(
         state.valueOrNull?.copyWith(premiumStatus: status) ??
             PremiumNotifierState(premiumStatus: status),
       );
     });
-
-    // Registra cleanup quando o provider for disposed
     ref.onDispose(() {
       _statusSubscription?.cancel();
       _statusSubscription = null;
@@ -153,10 +142,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
 
     return PremiumNotifierState(premiumStatus: premiumStatus);
   }
-
-  // =========================================================================
-  // STATUS MANAGEMENT
-  // =========================================================================
 
   /// Força uma verificação do status premium
   Future<void> refreshPremiumStatus() async {
@@ -185,10 +170,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       _updateError('Erro inesperado na sincronização: $e');
     }
   }
-
-  // =========================================================================
-  // PRODUCTS MANAGEMENT
-  // =========================================================================
 
   /// Obtém produtos disponíveis para compra
   Future<void> loadAvailableProducts() async {
@@ -231,10 +212,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     );
   }
 
-  // =========================================================================
-  // PURCHASE MANAGEMENT
-  // =========================================================================
-
   /// Compra premium
   Future<bool> purchaseProduct(String productId) async {
     if (_purchasePremium == null) return false;
@@ -274,8 +251,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
                 ) ??
                 const PremiumNotifierState(isProcessingPurchase: false),
           );
-
-          // Atualiza o status após a compra
           refreshPremiumStatus();
           return true;
         },
@@ -332,8 +307,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
                 ) ??
                 const PremiumNotifierState(isProcessingPurchase: false),
           );
-
-          // Atualiza o status após restaurar
           refreshPremiumStatus();
           return success;
         },
@@ -352,10 +325,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
       return false;
     }
   }
-
-  // =========================================================================
-  // LOCAL LICENSE MANAGEMENT (DEV)
-  // =========================================================================
 
   /// Gera licença local para desenvolvimento
   Future<void> generateLocalLicense({int days = 30}) async {
@@ -399,10 +368,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     }
   }
 
-  // =========================================================================
-  // FEATURE CHECKS
-  // =========================================================================
-
   /// Verifica se pode usar uma feature específica
   Future<bool> hasFeature(String featureId) async {
     return await _canUseFeatureById(featureId);
@@ -434,8 +399,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     );
     return result.fold((failure) => false, (canAdd) => canAdd);
   }
-
-  // Métodos de conveniência para features específicas do GasOMeter
   Future<bool> canAddUnlimitedVehicles() async =>
       state.valueOrNull?.isPremium ?? false;
   Future<bool> canAccessAdvancedReports() async =>
@@ -461,10 +424,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     return result.fold((failure) => false, (canUse) => canUse);
   }
 
-  // =========================================================================
-  // SYNC STATUS STREAM
-  // =========================================================================
-
   /// Stream de eventos de sincronização (para debug/monitoramento)
   Stream<String> get syncStatus {
     if (_premiumRepository == null) return Stream.value('Não disponível');
@@ -488,10 +447,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     });
   }
 
-  // =========================================================================
-  // ERROR MANAGEMENT
-  // =========================================================================
-
   /// Limpa mensagem de erro
   void clearError() {
     final currentState = state.valueOrNull;
@@ -512,10 +467,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     }
   }
 }
-
-// =========================================================================
-// PROVIDER DEFINITIONS
-// =========================================================================
 
 /// Provider para PremiumNotifier
 final premiumNotifierProvider =
@@ -540,8 +491,6 @@ final canPurchasePremiumProvider = core.Provider<bool>((ref) {
   final premiumAsync = ref.watch(premiumNotifierProvider);
   return premiumAsync.valueOrNull?.canPurchasePremium ?? true;
 });
-
-// Providers de dependências (use cases e repository)
 final checkPremiumStatusProvider = core.Provider<CheckPremiumStatus>((ref) {
   return core.GetIt.instance<CheckPremiumStatus>();
 });

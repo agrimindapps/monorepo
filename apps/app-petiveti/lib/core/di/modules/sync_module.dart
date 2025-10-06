@@ -4,24 +4,6 @@ import 'package:flutter/foundation.dart';
 /// Integra PetivetiSyncService com repositories existentes
 abstract class PetivetiSyncDIModule {
   static void init() {
-    // REVIEW (converted TODO 2025-10-06): PetivetiSyncService not yet implemented in core package
-    // Uncomment when service becomes available
-    //
-    // Registrar PetivetiSyncService do core package
-    // Este service adiciona logging estruturado e monitoring aos repositories
-    // GetIt.instance.registerLazySingleton<PetivetiSyncService>(
-    //   () => PetivetiSyncServiceFactory.create(
-    //     animalRepository: null, // Will be integrated with existing repositories
-    //     appointmentRepository: null,
-    //     medicationRepository: null,
-    //     vaccineRepository: null,
-    //     weightRepository: null,
-    //     expenseRepository: null,
-    //     reminderRepository: null,
-    //   ),
-    // );
-
-    // Inicialização é lazy, service só é criado quando solicitado
     if (kDebugMode) {
       print(
         'PetivetiSyncDIModule: Sync service registration skipped (awaiting implementation)',
@@ -32,7 +14,6 @@ abstract class PetivetiSyncDIModule {
   /// Inicializa o sync service após o app estar pronto
   /// E conecta com o connectivity monitoring existente
   static Future<void> initializeSyncService() async {
-    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -40,7 +21,6 @@ abstract class PetivetiSyncDIModule {
 
       result.fold(
         (Failure failure) {
-          // Log do erro mas não bloqueia o app
           if (kDebugMode) {
             print('⚠️ Failed to initialize Petiveti sync service: ${failure.message}');
           }
@@ -61,7 +41,6 @@ abstract class PetivetiSyncDIModule {
 
   /// Executa sync inicial após o usuário fazer login
   static Future<void> performInitialSync() async {
-    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -105,7 +84,6 @@ abstract class PetivetiSyncDIModule {
 
   /// Limpa dados de sync (útil para logout)
   static Future<void> clearSyncData() async {
-    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -124,7 +102,6 @@ abstract class PetivetiSyncDIModule {
 
   /// Obtém estatísticas de sincronização
   static Future<void> printSyncStatistics() async {
-    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -150,7 +127,6 @@ abstract class PetivetiSyncDIModule {
 
   /// Sync específico para animais
   static Future<void> syncAnimals() async {
-    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -178,7 +154,6 @@ abstract class PetivetiSyncDIModule {
 
   /// Sync específico para dados veterinários
   static Future<void> syncVeterinaryData() async {
-    // TODO: Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();

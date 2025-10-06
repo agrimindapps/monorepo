@@ -28,7 +28,6 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
 
   @override
   void dispose() {
-    // Properly dispose controller to prevent memory leaks
     _contentController.dispose();
     super.dispose();
   }

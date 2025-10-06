@@ -58,19 +58,12 @@ class CalculatorFormattingService {
     String? prefix,
     String? suffix,
   }) {
-    // Arredondamento
     final factor = math.pow(10, decimalPlaces);
     final rounded = (value * factor).round() / factor;
-
-    // Formatação básica
     String formatted = rounded.toStringAsFixed(decimalPlaces);
-
-    // Separador de milhares
     if (useThousandsSeparator && rounded >= 1000) {
       formatted = _addThousandsSeparator(formatted);
     }
-
-    // Adicionar prefixo e sufixo
     if (prefix != null) formatted = '$prefix$formatted';
     if (unit.isNotEmpty) formatted = '$formatted $unit';
     if (suffix != null) formatted = '$formatted$suffix';
@@ -114,7 +107,6 @@ class CalculatorFormattingService {
     String unit = 'kg',
     int decimalPlaces = 1,
   }) {
-    // Auto-conversão para toneladas se muito grande
     if (value >= 1000 && unit == 'kg') {
       return formatValue(value / 1000, decimalPlaces: decimalPlaces, unit: 't');
     }
@@ -127,7 +119,6 @@ class CalculatorFormattingService {
     String unit = 'L',
     int decimalPlaces = 1,
   }) {
-    // Auto-conversão para m³ se muito grande
     if (value >= 1000 && unit == 'L') {
       return formatValue(
         value / 1000,
@@ -181,8 +172,6 @@ class CalculatorFormattingService {
       confidence: _calculateConfidence(result),
     );
   }
-
-  // ============= MÉTODOS PRIVADOS =============
 
   Future<List<FormattedResultValue>> _formatResultValues(
     List<CalculationResultValue> values,
@@ -275,12 +264,9 @@ class CalculatorFormattingService {
   }
 
   String _addThousandsSeparator(String number) {
-    // Separar parte decimal
     final parts = number.split('.');
     final integerPart = parts[0];
     final decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-    // Adicionar separadores a cada 3 dígitos
     final regex = RegExp(r'(\d)(?=(\d{3})+(?!\d))');
     final formattedInteger = integerPart.replaceAll(regex, r'$1.');
 
@@ -379,8 +365,6 @@ class CalculatorFormattingService {
 
   List<String> _extractKeyInsights(CalculationResult result) {
     final insights = <String>[];
-
-    // Insights baseados nos valores primários
     final primaryValues = result.values.where((v) => v.isPrimary).toList();
 
     if (primaryValues.length >= 3) {
@@ -389,8 +373,6 @@ class CalculatorFormattingService {
       );
       insights.add('${maxValue.label} é o maior valor calculado');
     }
-
-    // Insights baseados em recomendações
     if ((result.recommendations?.length ?? 0) > 5) {
       insights.add(
         'Múltiplas recomendações indicam necessidade de atenção especial',
@@ -401,7 +383,6 @@ class CalculatorFormattingService {
   }
 
   double _calculateConfidence(CalculationResult result) {
-    // Algoritmo simples para calcular confiança baseado na completude dos dados
     double confidence = 0.8; // Base
 
     if (result.values.isNotEmpty) confidence += 0.1;
@@ -411,8 +392,6 @@ class CalculatorFormattingService {
     return math.min(confidence, 1.0);
   }
 }
-
-// ============= DATA CLASSES =============
 
 class FormattingOptions {
   final int decimalPlaces;

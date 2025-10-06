@@ -14,15 +14,11 @@ class LivestockStatisticsProvider extends ChangeNotifier {
   LivestockStatisticsProvider({
     required LivestockRepository repository,
   }) : _repository = repository;
-
-  // === STATE MANAGEMENT ===
   
   bool _isLoading = false;
   Map<String, dynamic>? _statistics;
   String? _errorMessage;
   DateTime? _lastUpdate;
-
-  // === GETTERS ===
   
   bool get isLoading => _isLoading;
   Map<String, dynamic>? get statistics => _statistics;
@@ -33,8 +29,6 @@ class LivestockStatisticsProvider extends ChangeNotifier {
   bool get needsUpdate => 
     _lastUpdate == null || 
     DateTime.now().difference(_lastUpdate!).inMinutes > 30;
-
-  // Getters específicos para estatísticas comuns
   int get totalAnimals => (_statistics?['totalAnimals'] as int?) ?? 0;
   int get totalBovines => (_statistics?['totalBovines'] as int?) ?? 0;
   int get totalEquines => (_statistics?['totalEquines'] as int?) ?? 0;
@@ -48,8 +42,6 @@ class LivestockStatisticsProvider extends ChangeNotifier {
   double get equinesPercentage => totalAnimals > 0 
     ? (totalEquines / totalAnimals * 100) 
     : 0.0;
-
-  // === STATISTICS OPERATIONS ===
 
   /// Carrega estatísticas do rebanho
   Future<void> loadStatistics({bool forceRefresh = false}) async {

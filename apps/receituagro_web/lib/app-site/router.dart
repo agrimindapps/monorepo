@@ -19,8 +19,6 @@ class Routes {
         return MaterialPageRoute(
           builder: (_) => DefensivosDetalhesPage(id: args['id']),
         );
-
-      // Quando em processo de atualizacao
       case '/desenvolvimento':
         return MaterialPageRoute(builder: (_) => const DesenvolvimentoPage());
       default:

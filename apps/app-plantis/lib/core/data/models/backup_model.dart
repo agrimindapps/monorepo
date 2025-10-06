@@ -81,7 +81,6 @@ class BackupModel {
 
   /// Verifica se o backup é compatível com a versão atual
   bool get isCompatible {
-    // Por enquanto, apenas versão 1.0 é suportada
     return version == '1.0';
   }
 

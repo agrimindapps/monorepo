@@ -91,15 +91,9 @@ class MedicationDosageCalculator extends Calculator {
     final dosagePerKg = dosageInfo['dosage'] as double;
     final unit = dosageInfo['unit'] as String;
     final warnings = dosageInfo['warnings'] as List<String>;
-
-    // Calcular dose total
     final totalDose = weight * dosagePerKg;
-    
-    // Calcular dose por administração
     final frequencyNumber = _getFrequencyNumber(frequency);
     final dosePerAdministration = totalDose / frequencyNumber;
-
-    // Criar ResultItems
     final resultItems = [
       ResultItem(
         label: 'Dose por Administração',
@@ -116,8 +110,6 @@ class MedicationDosageCalculator extends Calculator {
         value: frequency,
       ),
     ];
-
-    // Criar Recomendações
     final recommendations = warnings.map((warning) => Recommendation(
       title: 'Atenção',
       message: warning,
@@ -147,15 +139,11 @@ class MedicationDosageCalculator extends Calculator {
   @override
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-
-    // Validar campos obrigatórios
     for (final field in inputFields) {
       if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
-
-    // Validar peso
     if (inputs.containsKey('weight')) {
       final weight = inputs['weight'];
       if (weight is! double && weight is! int) {
@@ -175,8 +163,6 @@ class MedicationDosageCalculator extends Calculator {
   }
 
   Map<String, dynamic> _getMedicationDosage(String medication, String species) {
-    // Base de dados simplificada de dosagens
-    // Em produção, isso viria de uma base de dados veterinária
     final dosages = {
       'Amoxicilina': {
         'Cão': {'dosage': 20.0, 'unit': 'mg', 'warnings': ['Administrar com alimento']},

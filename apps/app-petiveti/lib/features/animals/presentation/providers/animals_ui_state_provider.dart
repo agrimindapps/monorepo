@@ -71,8 +71,6 @@ class AnimalsUIStateNotifier extends StateNotifier<AnimalsUIState> {
     if (state.isLoadingMore || state.hasReachedMax) return;
 
     state = state.copyWith(isLoadingMore: true);
-
-    // Check if we've reached the maximum
     final nextDisplayCount = state.displayItemCount + state.itemsPerPage;
     final hasReachedMax = nextDisplayCount >= totalItems;
 
@@ -113,11 +111,7 @@ final animalsUIStateProvider =
 final filteredAnimalsProvider = Provider<List<Animal>>((ref) {
   final animalsState = ref.watch(animalsProvider);
   final uiState = ref.watch(animalsUIStateProvider);
-
-  // Use the new comprehensive filtering system from AnimalsProvider
   List<Animal> filteredAnimals = animalsState.displayedAnimals;
-
-  // Apply pagination
   final maxItems = uiState.displayItemCount;
   final paginatedAnimals = filteredAnimals.take(maxItems).toList();
 

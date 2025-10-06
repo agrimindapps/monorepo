@@ -57,8 +57,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
   final auth_usecases.UpdateProfile _updateProfile;
   final EnhancedAccountDeletionService _enhancedDeletionService;
-
-  // Rate limiting properties
   DateTime? _lastLoginAttempt;
   DateTime? _lastRegisterAttempt;
   int _loginAttempts = 0;
@@ -92,8 +90,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       ),
       (user) async {
         final isAnonymous = user?.isAnonymous ?? false;
-        
-        // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
         if (user == null && await shouldUseAnonymousMode()) {
           await signInAnonymously();
           return;
@@ -107,8 +103,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       },
     );
   }
-
-  // Rate limiting helper methods
   bool _canAttemptLogin() {
     if (_lastLoginAttempt == null) return true;
     
@@ -141,7 +135,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> signInWithEmail(String email, String password) async {
-    // Check rate limiting
     if (!_canAttemptLogin()) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -149,8 +142,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return false;
     }
-
-    // Record attempt
     _lastLoginAttempt = DateTime.now();
     _loginAttempts++;
 
@@ -168,7 +159,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       },
       (user) {
-        // Reset attempts on successful login
         _loginAttempts = 0;
         _lastLoginAttempt = null;
         
@@ -184,7 +174,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Login com sincronização automática de dados dos pets
   /// Adaptado do padrão usado no gasometer e plantis para o contexto do PetiVeti
   Future<bool> loginAndSync(String email, String password, {bool showSyncOverlay = true}) async {
-    // Check rate limiting
     if (!_canAttemptLogin()) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -192,15 +181,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return false;
     }
-
-    // Record attempt
     _lastLoginAttempt = DateTime.now();
     _loginAttempts++;
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
     try {
-      // 1. Fazer login primeiro
       final params = auth_usecases.SignInWithEmailParams(email: email, password: password);
       final loginResult = await _signInWithEmail(params);
       
@@ -213,7 +199,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           );
         },
         (user) async {
-          // Reset attempts on successful login
           _loginAttempts = 0;
           _lastLoginAttempt = null;
           
@@ -228,9 +213,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (!loginSuccess) {
         return false;
       }
-      
-      // 2. Para o PetiVeti, a "sincronização" é mais simples inicialmente
-      // Podemos simular um carregamento de dados iniciais dos pets
       await _performPetDataSync();
       
       return true;
@@ -247,19 +229,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Simula sincronização de dados dos pets
   /// No futuro, aqui seria onde carregaríamos dados do Firebase, cache local, etc.
   Future<void> _performPetDataSync() async {
-    // Simular carregamento de dados iniciais
     await Future<void>.delayed(const Duration(milliseconds: 1500));
-    
-    // Aqui no futuro poderíamos:
-    // - Carregar lista de pets do usuário
-    // - Sincronizar lembretes pendentes
-    // - Atualizar dados de medicações
-    // - Verificar consultas próximas
-    // - etc.
   }
 
   Future<bool> signUpWithEmail(String email, String password, String? name) async {
-    // Check rate limiting
     if (!_canAttemptRegister()) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -267,8 +240,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       return false;
     }
-
-    // Record attempt
     _lastRegisterAttempt = DateTime.now();
     _registerAttempts++;
 
@@ -286,7 +257,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       },
       (user) {
-        // Reset attempts on successful registration
         _registerAttempts = 0;
         _lastRegisterAttempt = null;
         
@@ -387,8 +357,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user: user,
           isAnonymous: true,
         );
-        
-        // Salvar preferência de modo anônimo
         _saveAnonymousPreference();
         
         return true;
@@ -457,7 +425,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading);
 
     try {
-      // Use Enhanced Account Deletion Service
       final result = await _enhancedDeletionService.deleteAccount(
         password: password ?? '',
         userId: state.user!.id,
@@ -504,14 +471,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
-
-  // Anonymous authentication helper methods
   Future<void> _saveAnonymousPreference() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('use_anonymous_mode', true);
     } catch (e) {
-      // Ignora erros de persistência para não afetar o fluxo principal
     }
   }
 
@@ -529,7 +493,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('use_anonymous_mode');
     } catch (e) {
-      // Ignora erros de persistência
     }
   }
 
@@ -556,8 +519,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     di.getIt<EnhancedAccountDeletionService>(),
   );
 });
-
-// Convenience providers
 final authStateProvider = Provider<AuthState>((ref) {
   return ref.watch(authProvider);
 });

@@ -128,8 +128,6 @@ class WeatherMeasurementEntity extends Equatable {
 
     final T = temperature;
     final relativeHumidity = humidity;
-
-    // Simplified heat index formula (Rothfusz regression)
     final heatIndex =
         -8.78469475556 +
         1.61139411 * T +
@@ -148,8 +146,6 @@ class WeatherMeasurementEntity extends Equatable {
   double get dewPoint {
     final T = temperature;
     final relativeHumidity = humidity;
-
-    // Magnus formula approximation
     const a = 17.27;
     const b = 237.7;
 

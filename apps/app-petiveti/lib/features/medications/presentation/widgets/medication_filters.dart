@@ -14,7 +14,6 @@ class MedicationFilters extends ConsumerWidget {
 
     return Row(
       children: [
-        // Type filter
         Expanded(
           child: DropdownButtonFormField<MedicationType?>(
             value: typeFilter,
@@ -40,8 +39,6 @@ class MedicationFilters extends ConsumerWidget {
         ),
         
         const SizedBox(width: 12),
-        
-        // Status filter
         Expanded(
           child: DropdownButtonFormField<MedicationStatus?>(
             value: statusFilter,
@@ -67,8 +64,6 @@ class MedicationFilters extends ConsumerWidget {
         ),
         
         const SizedBox(width: 12),
-        
-        // Clear filters button
         IconButton(
           onPressed: () {
             ref.read(medicationTypeFilterProvider.notifier).state = null;

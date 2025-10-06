@@ -113,7 +113,6 @@ class CulturaSelectorWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header do seletor
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -172,8 +171,6 @@ class CulturaSelectorWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Dropdown de culturas
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: DropdownButtonFormField<String>(
@@ -189,7 +186,6 @@ class CulturaSelectorWidget extends StatelessWidget {
               ),
               dropdownColor: theme.cardColor,
               items: [
-                // Opção para todas as culturas - PRIMEIRO ITEM
                 DropdownMenuItem<String>(
                   value: 'todas',
                   child: Row(
@@ -221,7 +217,6 @@ class CulturaSelectorWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Item vazio para limpar seleção
                 const DropdownMenuItem<String>(
                   value: '',
                   child: Text(
@@ -232,7 +227,6 @@ class CulturaSelectorWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Culturas disponíveis
                 ...culturas.map((cultura) {
                   return DropdownMenuItem<String>(
                     value: cultura['id'],
@@ -274,8 +268,6 @@ class CulturaSelectorWidget extends StatelessWidget {
               ),
             ),
           ),
-          
-          // Cultura selecionada (se houver)
           if (culturaIdSelecionada != null && culturaIdSelecionada!.isNotEmpty) ...[
             Container(
               margin: const EdgeInsets.all(12),

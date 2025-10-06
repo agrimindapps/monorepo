@@ -20,7 +20,6 @@ import 'secure_storage_service.dart';
 /// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupServiceRefactored {
   final IBackupRepository _backupRepository;
-  // ignore: unused_field
   final BackupValidationService _validationService;
   final BackupDataTransformerService _transformerService;
   final BackupRestoreService _restoreService;
@@ -65,13 +64,9 @@ class BackupServiceRefactored {
       }
 
       debugPrint('📦 Iniciando criação de backup para usuário: ${user.id}');
-
-      // Coleta dados usando repositories injetados
       final plantsResult = await plantsRepository.getPlants();
       final spacesResult = await spacesRepository.getSpaces();
       final tasksResult = await tasksRepository.getTasks();
-
-      // Verifica se alguma operação falhou
       if (plantsResult.isLeft()) {
         await _auditService.logBackupCreation(
           userId: user.id,
@@ -86,8 +81,6 @@ class BackupServiceRefactored {
       final plants = plantsResult.getOrElse(() => []);
       final spaces = spacesResult.getOrElse(() => []);
       final tasks = tasksResult.getOrElse(() => []);
-
-      // Cria metadados do backup
       final metadata = BackupMetadata(
         plantsCount: plants.length,
         tasksCount: tasks.length,
@@ -99,8 +92,6 @@ class BackupServiceRefactored {
           'device_info': await _getDeviceInfo(),
         },
       );
-
-      // Usa transformer service para converter dados
       final backupData = BackupData(
         plants:
             plants
@@ -115,8 +106,6 @@ class BackupServiceRefactored {
         settings: await _loadUserSettings(),
         userPreferences: await _loadUserPreferences(),
       );
-
-      // Cria o backup
       final backup = BackupModel(
         version: '1.0',
         timestamp: DateTime.now(),
@@ -124,8 +113,6 @@ class BackupServiceRefactored {
         metadata: metadata,
         data: backupData,
       );
-
-      // Faz upload do backup
       final uploadResult = await _backupRepository.uploadBackup(backup);
 
       return await uploadResult.fold(
@@ -140,23 +127,18 @@ class BackupServiceRefactored {
           return Left(failure);
         },
         (result) async {
-          // Salva timestamp do último backup
           await _storageService.setString(
             _lastBackupKey,
             DateTime.now().toIso8601String(),
           );
 
           final totalItems = plants.length + spaces.length + tasks.length;
-
-          // Log de sucesso
           await _auditService.logBackupCreation(
             userId: user.id,
             backupId: result.backupId ?? 'unknown',
             itemsCount: totalItems,
             isSuccess: true,
           );
-
-          // Limpa backups antigos baseado na configuração
           final settings = await getBackupSettings();
           if (settings.maxBackupsToKeep > 0) {
             await _cleanupOldBackups(user.id, settings.maxBackupsToKeep);
@@ -203,8 +185,6 @@ class BackupServiceRefactored {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Baixa o backup
       final backupResult = await _backupRepository.downloadBackup(backupId);
 
       if (backupResult.isLeft()) {
@@ -217,8 +197,6 @@ class BackupServiceRefactored {
       final backup = backupResult.getOrElse(
         () => throw StateError('No backup data'),
       );
-
-      // Delega para o service especializado de restore
       return await _restoreService.restoreBackup(backup, user.id, options);
     } catch (e) {
       return Left(UnknownFailure('Erro ao restaurar backup: ${e.toString()}'));
@@ -234,8 +212,6 @@ class BackupServiceRefactored {
       }
 
       final result = await _backupRepository.deleteBackup(backupId);
-
-      // Log da operação
       await _auditService.logBackupDeletion(
         userId: user.id,
         backupId: backupId,
@@ -317,10 +293,7 @@ class BackupServiceRefactored {
     }
   }
 
-  // ===== MÉTODOS PRIVADOS =====
-
   Future<UserEntity?> _getCurrentUser() async {
-    // Implementação simplificada - na prática obteria do AuthRepository
     try {
       final authRepository = sl<IAuthRepository>();
       final result = await authRepository.currentUser.first;
@@ -332,7 +305,6 @@ class BackupServiceRefactored {
   }
 
   Future<Map<String, dynamic>> _loadUserSettings() async {
-    // Implementação simplificada - carregaria configurações reais
     return {
       'notifications_enabled': true,
       'theme_mode': 'system',
@@ -341,7 +313,6 @@ class BackupServiceRefactored {
   }
 
   Future<Map<String, dynamic>> _loadUserPreferences() async {
-    // Implementação simplificada - carregaria preferências reais
     return {
       'view_mode': 'grid',
       'sort_by': 'name',
@@ -389,7 +360,6 @@ class BackupServiceRefactored {
   }
 
   Future<Map<String, dynamic>> _getDeviceInfo() async {
-    // Implementação simplificada - na prática usaria device_info_plus
     return {
       'platform': _getCurrentPlatform(),
       'timestamp': DateTime.now().toIso8601String(),

@@ -36,30 +36,20 @@ class BovineCardWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header com imagem e informações básicas
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Imagem do bovino
                   _buildBovineImage(context),
                   const SizedBox(width: 12.0),
-                  
-                  // Informações principais
                   Expanded(
                     child: _buildBovineInfo(context),
                   ),
-                  
-                  // Menu de ações (se habilitado)
                   if (showActions)
                     _buildActionsMenu(context),
                 ],
               ),
-              
-              // Tags e informações adicionais
               const SizedBox(height: 8.0),
               _buildBovineMetadata(context),
-              
-              // Status e última atualização
               const SizedBox(height: 8.0),
               _buildStatusInfo(context),
             ],
@@ -116,7 +106,6 @@ class BovineCardWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Nome comum
         Text(
           bovine.commonName,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -127,8 +116,6 @@ class BovineCardWidget extends StatelessWidget {
         ),
         
         const SizedBox(height: 4.0),
-        
-        // Raça
         Text(
           bovine.breed,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -140,8 +127,6 @@ class BovineCardWidget extends StatelessWidget {
         ),
         
         const SizedBox(height: 2.0),
-        
-        // ID de registro
         Text(
           'ID: ${bovine.registrationId}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -152,8 +137,6 @@ class BovineCardWidget extends StatelessWidget {
         ),
         
         const SizedBox(height: 2.0),
-        
-        // País de origem
         Row(
           children: [
             Icon(
@@ -220,7 +203,6 @@ class BovineCardWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Aptidão e sistema de criação
         Row(
           children: [
             _buildChip(
@@ -238,8 +220,6 @@ class BovineCardWidget extends StatelessWidget {
             ),
           ],
         ),
-        
-        // Tags (se houver)
         if (bovine.tags.isNotEmpty) ...[
           const SizedBox(height: 8.0),
           Wrap(
@@ -310,7 +290,6 @@ class BovineCardWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Status ativo/inativo
         Row(
           children: [
             Icon(
@@ -332,8 +311,6 @@ class BovineCardWidget extends StatelessWidget {
             ),
           ],
         ),
-        
-        // Data de última atualização
         if (bovine.updatedAt != null)
           Text(
             _formatDate(bovine.updatedAt!),
@@ -388,7 +365,6 @@ class CompactBovineCardWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              // Imagem pequena
               ClipRRect(
                 borderRadius: BorderRadius.circular(6.0),
                 child: bovine.imageUrls.isNotEmpty
@@ -403,8 +379,6 @@ class CompactBovineCardWidget extends StatelessWidget {
               ),
               
               const SizedBox(width: 8.0),
-              
-              // Informações essenciais
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,8 +402,6 @@ class CompactBovineCardWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              
-              // Indicador de aptidão
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
                 decoration: BoxDecoration(

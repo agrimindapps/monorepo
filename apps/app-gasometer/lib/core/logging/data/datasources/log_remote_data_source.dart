@@ -24,8 +24,6 @@ class LogRemoteDataSourceImpl implements LogRemoteDataSource {
   Future<void> syncLogs(List<LogEntry> logs) async {
     try {
       if (logs.isEmpty) return;
-      
-      // Group logs by user
       final Map<String, List<LogEntry>> logsByUser = {};
       
       for (final log in logs) {
@@ -36,8 +34,6 @@ class LogRemoteDataSourceImpl implements LogRemoteDataSource {
           logsByUser[log.userId]!.add(log);
         }
       }
-      
-      // Batch write for each user
       for (final entry in logsByUser.entries) {
         final userId = entry.key;
         final userLogs = entry.value;
@@ -92,8 +88,6 @@ class LogRemoteDataSourceImpl implements LogRemoteDataSource {
           .collection('logs');
 
       final querySnapshot = await collectionRef.get();
-      
-      // Delete in batches of 500 (Firestore limit)
       const batchSize = 500;
       final batches = <WriteBatch>[];
       
@@ -109,8 +103,6 @@ class LogRemoteDataSourceImpl implements LogRemoteDataSource {
         
         batches.add(batch);
       }
-      
-      // Execute all batches
       for (final batch in batches) {
         await batch.commit();
       }

@@ -40,7 +40,6 @@ class _CalorieSpecialConditionsStepState extends State<CalorieSpecialConditionsS
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título do step
           Text(
             'Condições Especiais',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -84,26 +83,17 @@ class _CalorieSpecialConditionsStepState extends State<CalorieSpecialConditionsS
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Condições ambientais
                   _buildEnvironmentalConditionsCard(),
                   const SizedBox(height: 20),
-
-                  // Condições médicas
                   _buildMedicalConditionsCard(),
                   const SizedBox(height: 20),
-
-                  // Notas adicionais
                   _buildNotesField(),
                   const SizedBox(height: 20),
-
-                  // Resumo dos ajustes
                   _buildAdjustmentsSummary(),
                 ],
               ),
             ),
           ),
-
-          // Erros de validação
           if (widget.validationErrors.isNotEmpty)
             _buildValidationErrors(),
         ],

@@ -67,16 +67,12 @@ class VehicleFormatterService {
   /// Formats vehicle license plate
   String formatLicensePlate(String licensePlate) {
     if (licensePlate.isEmpty) return 'Sem placa';
-
-    // Brazilian plate format: ABC-1234 or ABC1D234 (Mercosul)
     final cleanPlate = licensePlate.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
 
     if (cleanPlate.length == 7) {
-      // Check if it's Mercosul format (ABC1D23)
       if (RegExp(r'^[A-Z]{3}\d[A-Z]\d{2}$').hasMatch(cleanPlate)) {
         return '${cleanPlate.substring(0, 3)}-${cleanPlate.substring(3)}';
       }
-      // Old format (ABC1234)
       return '${cleanPlate.substring(0, 3)}-${cleanPlate.substring(3)}';
     }
 

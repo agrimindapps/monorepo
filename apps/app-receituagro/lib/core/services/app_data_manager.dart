@@ -9,10 +9,8 @@ import '../data/repositories/fitossanitario_info_hive_repository.dart';
 import '../data/repositories/plantas_inf_hive_repository.dart';
 import '../data/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_inf_hive_repository.dart';
-// auto_version_control_service.dart - removed (unused)
 import 'data_initialization_service.dart';
 import 'hive_adapter_registry.dart';
-// version_manager_service.dart moved to core
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -21,7 +19,6 @@ abstract class IAppDataManager {
   Future<Map<String, dynamic>> getDataStats();
   Future<bool> isDataReady();
   DataInitializationService get dataService;
-  // AutoVersionControlService get versionControlService; // Service removed
   Future<void> dispose();
   bool get isInitialized;
 }
@@ -31,7 +28,6 @@ abstract class IAppDataManager {
 /// Agora integrado com sistema de controle automático de versão
 class AppDataManager implements IAppDataManager {
   late final DataInitializationService _dataService;
-  // late final AutoVersionControlService _versionControlService; // Service removed
   bool _isInitialized = false;
 
   /// Construtor que permite injeção de dependência
@@ -49,26 +45,14 @@ class AppDataManager implements IAppDataManager {
         'Iniciando inicialização do sistema de dados com controle de versão...',
         name: 'AppDataManager',
       );
-
-      // 1. Inicializa o Hive
       await _initializeHive();
-
-      // 2. Registra adapters
       await HiveAdapterRegistry.registerAdapters();
-
-      // 3. Abre boxes
       await HiveAdapterRegistry.openBoxes();
-
-      // 4. Cria instâncias dos serviços
       await _createServices();
-
-      // 5. Version control removed - using direct data initialization
       developer.log(
         'Inicializando dados diretamente...',
         name: 'AppDataManager',
       );
-
-      // 6. Verifica se dados estão carregados
       final isDataReady = await _dataService.isDataLoaded();
       if (!isDataReady) {
         return Left(
@@ -99,8 +83,6 @@ class AppDataManager implements IAppDataManager {
   Future<void> _initializeHive() async {
     try {
       developer.log('Inicializando Hive...', name: 'AppDataManager');
-
-      // Inicializa Hive com Flutter (usa configuração padrão multiplataforma)
       await Hive.initFlutter();
 
       developer.log('Hive inicializado com sucesso', name: 'AppDataManager');
@@ -117,12 +99,8 @@ class AppDataManager implements IAppDataManager {
         'Criando instâncias dos serviços...',
         name: 'AppDataManager',
       );
-
-      // Serviços base
       final assetLoader = AssetLoaderService();
       final versionManager = VersionManagerService();
-
-      // Repositórios
       final culturaRepo = CulturaHiveRepository();
       final pragasRepo = PragasHiveRepository();
       final fitossanitarioRepo = FitossanitarioHiveRepository();
@@ -130,8 +108,6 @@ class AppDataManager implements IAppDataManager {
       final fitossanitarioInfoRepo = FitossanitarioInfoHiveRepository();
       final plantasInfRepo = PlantasInfHiveRepository();
       final pragasInfRepo = PragasInfHiveRepository();
-
-      // Serviço de inicialização de dados (mantido para compatibilidade)
       _dataService = DataInitializationService(
         assetLoader: assetLoader,
         versionManager: versionManager,
@@ -143,9 +119,6 @@ class AppDataManager implements IAppDataManager {
         plantasInfRepository: plantasInfRepo,
         pragasInfRepository: pragasInfRepo,
       );
-
-      // NOVO: Serviço de controle automático de versão
-      // _versionControlService = AutoVersionControlService.create(); // Service removed
 
       developer.log(
         'Serviços criados com sucesso (incluindo controle de versão)',
@@ -169,9 +142,6 @@ class AppDataManager implements IAppDataManager {
         'Forçando recarregamento de dados...',
         name: 'AppDataManager',
       );
-
-      // Force reload via data service - TODO: Implement forceReload method
-      // await _dataService.forceReload();
       developer.log('Force reload requested but method not implemented', name: 'AppDataManager');
       
       return const Right(null);
@@ -194,7 +164,6 @@ class AppDataManager implements IAppDataManager {
     }
 
     try {
-      // Obtém estatísticas do serviço de dados
       final dataStats = await _dataService.getLoadingStats();
 
       return {

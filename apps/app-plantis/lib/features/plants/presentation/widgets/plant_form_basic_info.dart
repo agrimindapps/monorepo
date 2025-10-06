@@ -31,7 +31,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }
 
   void _setupStateListener() {
-    // Listen para mudanças no state e atualizar controllers automaticamente
     ref.listenManual(
       solidPlantFormStateProvider,
       (previous, next) {
@@ -50,7 +49,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }
 
   void _syncControllersWithState(PlantFormState formState) {
-    // Atualizar apenas se valor mudou (evita rebuild desnecessário)
     if (_nameController.text != formState.name) {
       _updateControllerSafely(_nameController, formState.name);
     }
@@ -66,8 +64,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   void _updateControllerSafely(TextEditingController controller, String newValue) {
     final selection = controller.selection;
     controller.text = newValue;
-
-    // Restaurar cursor position se ainda válido
     if (selection.isValid && selection.baseOffset <= newValue.length) {
       controller.selection = selection;
     }
@@ -86,12 +82,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Image section
         _buildImageSection(context),
 
         const SizedBox(height: 20),
-
-        // Basic information form
         _buildBasicInfoForm(context),
       ],
     );
@@ -104,7 +97,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Show upload progress or images
         if (formState.isUploadingImages)
           _buildUploadProgress(context)
         else if (formState.imageUrls.isNotEmpty)
@@ -426,7 +418,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-            // Plant name (required) with security validation
             _buildTextField(
               controller: _nameController,
               label: 'Nome da planta',
@@ -434,7 +425,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               isRequired: true,
               errorText: fieldErrors['name'],
               onChanged: (value) {
-                // Não sanitizar em tempo real para não interferir na digitação
                 formManager.setName(value);
               },
               validator: (value) => _validatePlantName(value),
@@ -446,14 +436,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             ),
 
             const SizedBox(height: 12),
-
-            // Plant species (optional) with security validation
             _buildTextField(
               controller: _speciesController,
               label: 'Espécie',
               hint: 'Ex: Rosa gallica',
               onChanged: (value) {
-                // Não sanitizar em tempo real para não interferir na digitação
                 formManager.setSpecies(value);
               },
               validator: (value) => _validateSpecies(value),
@@ -465,8 +452,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             ),
 
             const SizedBox(height: 12),
-
-            // Space selector
             SpaceSelectorWidget(
               selectedSpaceId: formState.spaceId,
               onSpaceChanged:
@@ -475,8 +460,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             ),
 
             const SizedBox(height: 12),
-
-            // Planting date (optional)
             _buildDateField(
               context: context,
               label: 'Data de plantio',
@@ -490,15 +473,12 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             ),
 
             const SizedBox(height: 12),
-
-            // Notes (optional) with security validation
             _buildTextField(
               controller: _notesController,
               label: 'Observações',
               hint: 'Adicione notas sobre a planta...',
               maxLines: 4,
               onChanged: (value) {
-                // Não sanitizar em tempo real para não interferir na digitação
                 formManager.setNotes(value);
               },
               validator: (value) => _validateNotes(value),
@@ -699,21 +679,17 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     String? value,
   ) async {
     if (value == null) {
-      // "Sem espaço" selecionado
       formManager.setSpaceId(null);
       return;
     }
 
     if (value.startsWith('CREATE_NEW:')) {
-      // Criar novo espaço
       final spaceName = value.substring('CREATE_NEW:'.length);
       if (spaceName.trim().isEmpty) return;
 
       try {
         final spacesNotifier = ref.read(spacesProvider.notifier);
         await spacesNotifier.loadSpaces(); // Garantir que temos a lista atual
-
-        // Verificar se já existe um espaço com esse nome
         final spacesState = ref.read(spacesProvider);
         final existingSpace = spacesState.maybeWhen(
           data: (state) => state.findSpaceByName(spaceName),
@@ -721,7 +697,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         );
 
         if (existingSpace != null) {
-          // Usar o espaço existente
           formManager.setSpaceId(existingSpace.id);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -735,14 +710,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           }
           return;
         }
-
-        // Criar novo espaço
         final success = await spacesNotifier.addSpace(
           AddSpaceParams(name: spaceName),
         );
 
         if (success && mounted) {
-          // Buscar o espaço recém-criado
           await spacesNotifier.loadSpaces();
           final updatedState = ref.read(spacesProvider);
           final newSpace = updatedState.maybeWhen(
@@ -780,7 +752,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         }
       }
     } else {
-      // Espaço existente selecionado
       formManager.setSpaceId(value);
     }
   }
@@ -908,8 +879,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         },
       );
     }
-
-    // For local files or other formats
     return Container(
       width: width,
       height: height,

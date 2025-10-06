@@ -27,13 +27,10 @@ class AddExpensePage extends ConsumerStatefulWidget {
 }
 
 class _AddExpensePageState extends ConsumerState<AddExpensePage> {
-  // Rate limiting and loading state
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
-
-  // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
 
@@ -42,7 +39,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   @override
   void initState() {
     super.initState();
-    // Initialization will be done in didChangeDependencies
   }
 
   @override
@@ -57,8 +53,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   void _initializeProviders() {
     final authState = ref.read(authProvider);
     final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
-
-    // Use addPostFrameCallback to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await formNotifier.initialize(
         vehicleId: widget.vehicleId ?? '',
@@ -75,8 +69,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     try {
       final expensesNotifier = ref.read(expensesNotifierProvider.notifier);
       final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
-
-      // Primeiro garantir que os dados foram carregados
       await expensesNotifier.loadExpenses();
 
       final expensesState = ref.read(expensesNotifierProvider);
@@ -93,7 +85,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   
   @override
   void dispose() {
-    // Clean up timers to prevent memory leaks
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
     super.dispose();
@@ -104,8 +95,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   Widget build(BuildContext context) {
     final formState = ref.watch(expenseFormNotifierProvider);
     final isInitialized = formState.vehicle != null;
-
-    // Generate subtitle based on vehicle information
     String subtitle = 'Registre uma despesa do seu veículo';
     if (isInitialized && formState.vehicle != null) {
       final vehicle = formState.vehicle!;
@@ -136,16 +125,11 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
 
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
-    // Prevent multiple rapid clicks
     if (_isSubmitting) {
       debugPrint('Submit already in progress, ignoring duplicate request');
       return;
     }
-
-    // Cancel any existing debounce timer
     _debounceTimer?.cancel();
-    
-    // Set debounce timer to prevent rapid consecutive submissions
     _debounceTimer = Timer(_debounceDuration, () {
       if (mounted && !_isSubmitting) {
         _submitForm();
@@ -156,19 +140,13 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
     final formNotifier = ref.read(expenseFormNotifierProvider.notifier);
-
-    // Double-check form validation
     if (!formNotifier.validateForm()) {
       return;
     }
-
-    // Prevent concurrent submissions
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
     }
-
-    // Set submitting state
     setState(() {
       _isSubmitting = true;
     });
@@ -176,7 +154,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
     final expensesNotifier = ref.read(expensesNotifierProvider.notifier);
 
     try {
-      // Setup timeout protection
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
           debugPrint('Submit timeout reached, resetting state');
@@ -190,11 +167,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         }
       });
 
-      // Provider will handle its own loading state
-
       final formState = ref.read(expenseFormNotifierProvider);
-
-      // Converter ExpenseFormState para ExpenseFormModel
       final formModel = _stateToModel(formState);
 
       bool success;
@@ -206,7 +179,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
 
       if (success) {
         if (mounted) {
-          // Close dialog with success result for parent context to handle
           Navigator.of(context).pop({
             'success': true,
             'action': widget.editExpenseId != null ? 'edit' : 'create',
@@ -214,7 +186,6 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         }
       } else {
         if (mounted) {
-          // Show error in dialog context (before closing)
           final expensesState = ref.read(expensesNotifierProvider);
           final errorMessage = expensesState.error ?? 'Erro ao salvar despesa';
           _showErrorDialog('Erro', errorMessage);
@@ -229,10 +200,7 @@ class _AddExpensePageState extends ConsumerState<AddExpensePage> {
         );
       }
     } finally {
-      // Clean up timeout timer
       _timeoutTimer?.cancel();
-
-      // Loading state managed by provider
       if (mounted) {
         setState(() {
           _isSubmitting = false;

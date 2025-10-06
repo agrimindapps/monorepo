@@ -47,14 +47,10 @@ class SyncThrottler {
   Duration _calculateEffectiveInterval(String serviceId) {
     final failures = _failureCount[serviceId] ?? 0;
     if (failures == 0) return minInterval;
-
-    // Backoff exponencial: minInterval * (multiplier ^ failures)
     final backoffFactor = backoffMultiplier * failures;
     final backoffInterval = Duration(
       milliseconds: (minInterval.inMilliseconds * backoffFactor).round(),
     );
-
-    // Limitar ao máximo configurado
     return backoffInterval > maxBackoffInterval
         ? maxBackoffInterval
         : backoffInterval;
@@ -93,13 +89,8 @@ class SyncThrottler {
     String serviceId,
     Future<void> Function() syncOperation,
   ) async {
-    // Cancelar timer anterior se existir
     _debounceTimers[serviceId]?.cancel();
-
-    // Criar novo completer para aguardar debounce
     final completer = Completer<void>();
-
-    // Configurar novo timer
     _debounceTimers[serviceId] = Timer(debounceDuration, () async {
       _debounceTimers.remove(serviceId);
 

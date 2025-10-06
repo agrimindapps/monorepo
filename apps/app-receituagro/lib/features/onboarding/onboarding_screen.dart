@@ -274,11 +274,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Widget _buildStepActions(OnboardingStep step) {
     return Column(
       children: [
-        // Step-specific actions
         if (step.id == 'notifications') ...[
           ElevatedButton(
             onPressed: () async {
-              // Request notification permissions
               await _completeStep();
             },
             child: const Text('Permitir Notificações'),
@@ -293,8 +291,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           ),
           const SizedBox(height: 12),
         ],
-        
-        // Default actions
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -330,7 +326,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // Progress indicators
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(_steps.length, (index) {
@@ -349,8 +344,6 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             }),
           ),
           const SizedBox(height: 16),
-          
-          // Navigation buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

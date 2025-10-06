@@ -46,7 +46,6 @@ class PremiumFeatureWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Ícone do recurso
           Container(
             width: 48,
             height: 48,
@@ -63,8 +62,6 @@ class PremiumFeatureWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          
-          // Informações do recurso
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,8 +122,6 @@ class PremiumFeatureWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Botão de ação
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -157,7 +152,6 @@ class PremiumFeatureWidget extends StatelessWidget {
                     const SizedBox(height: 4),
                     TextButton(
                       onPressed: () {
-                        // Mostra uma prévia do que o recurso faz
                         _showPreview(context);
                       },
                       child: Text(

@@ -205,10 +205,6 @@ class AdvancedDietResult extends CalculationResult {
     super.calculatedAt,
   });
 
-  // primaryResult é herdado da classe base e retorna ResultItem?
-
-  // summary será definido no constructor quando criar o resultado
-
   @override
   List<Object?> get props => [
         dailyCalories,
@@ -244,33 +240,19 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   @override
   AdvancedDietResult performCalculation(AdvancedDietInput input) {
     _validateInput(input);
-
-    // Calcular necessidades calóricas
     final dailyCalories = _calculateDailyCalories(input);
-    
-    // Calcular macronutrientes
     final macronutrients = _calculateMacronutrients(input, dailyCalories);
-    
-    // Calcular micronutrientes
     final vitamins = _calculateVitamins(input);
     final minerals = _calculateMinerals(input);
-    
-    // Calcular necessidade hídrica
     final waterRequirement = _calculateWaterRequirement(input);
-    
-    // Determinar frequência e quantidade de refeições
     final mealsPerDay = _determineMealsPerDay(input);
     final gramsPerMeal = _calculateGramsPerMeal(input, dailyCalories);
-    
-    // Gerar recomendações específicas
     final recommendedIngredients = _getRecommendedIngredients(input);
     final avoidedIngredients = _getAvoidedIngredients(input);
     final supplementRecommendations = _getSupplementRecommendations(input);
     final feedingInstructions = _getFeedingInstructions(input);
     final macroBreakdown = _getMacronutrientBreakdown(macronutrients);
     final specialConsiderations = _getSpecialConsiderations(input);
-
-    // Criar lista de ResultItem para o resultado estruturado
     final results = <ResultItem>[
       ResultItem(
         label: 'Calorias Diárias',
@@ -335,27 +317,17 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 
   double _calculateDailyCalories(AdvancedDietInput input) {
-    // Fórmula base RER (Resting Energy Requirement)
-    // RER = 70 * (peso em kg)^0.75
     double rer = 70 * math.pow(input.weight, 0.75).toDouble();
-    
-    // Fatores multiplicadores baseados em estágio de vida e atividade
     double multiplier = _getCalorieMultiplier(input);
     
     double der = rer * multiplier; // Daily Energy Requirement
-    
-    // Ajustes especiais
     if (input.isPregnant) {
-      // Aumentar 25-50% dependendo do estágio da gestação
       der *= 1.5;
     }
     
     if (input.isLactating && input.numberOfPuppies != null) {
-      // Lactação: RER * (1.2 + 0.3 * número de filhotes)
       der = rer * (1.2 + 0.3 * input.numberOfPuppies!);
     }
-    
-    // Ajuste para condição corporal
     if (input.bodyCondition == BodyCondition.overweight) {
       der *= 0.8; // Reduzir 20% para perda de peso
     } else if (input.bodyCondition == BodyCondition.obese) {
@@ -363,8 +335,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
     } else if (input.bodyCondition == BodyCondition.underweight) {
       der *= 1.2; // Aumentar 20% para ganho de peso
     }
-    
-    // Ajuste para condições de saúde
     if (input.healthCondition == HealthCondition.diabetes) {
       der *= 0.9; // Ligeira redução para controle glicêmico
     } else if (input.healthCondition == HealthCondition.kidneyDisease) {
@@ -376,8 +346,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
 
   double _getCalorieMultiplier(AdvancedDietInput input) {
     double multiplier = 1.0;
-    
-    // Multiplicador por estágio de vida
     switch (input.lifeStage) {
       case LifeStage.puppy:
         multiplier = input.species == AnimalSpecies.dog ? 3.0 : 2.5;
@@ -392,8 +360,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
         multiplier = 1.2;
         break;
     }
-    
-    // Ajuste por atividade
     switch (input.activityLevel) {
       case ActivityLevel.sedentary:
         multiplier *= 0.8;
@@ -414,8 +380,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
         multiplier *= 2.0;
         break;
     }
-    
-    // Ajuste para castração
     if (input.isNeutered && input.lifeStage == LifeStage.adult) {
       multiplier *= 0.9; // Redução de 10% para animais castrados
     }
@@ -424,13 +388,7 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 
   Map<String, double> _calculateMacronutrients(AdvancedDietInput input, double calories) {
-    // Percentuais de macronutrientes baseados na espécie e condições
     Map<String, double> percentages = _getMacronutrientPercentages(input);
-    
-    // Converter percentuais em gramas
-    // Proteína e carboidrato: 4 kcal/g
-    // Gordura: 9 kcal/g
-    // Fibra: não conta para calorias principais
     
     double proteinCalories = calories * percentages['protein']! / 100;
     double fatCalories = calories * percentages['fat']! / 100;
@@ -455,7 +413,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
         'fiber': 0.5, // g/kg peso
       };
     } else {
-      // Gatos são carnívoros obrigatórios
       base = {
         'protein': 45.0, // %
         'fat': 20.0, // %
@@ -463,16 +420,12 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
         'fiber': 0.3, // g/kg peso
       };
     }
-    
-    // Ajustes por estágio de vida
     if (input.lifeStage == LifeStage.puppy) {
       base['protein'] = base['protein']! * 1.5; // Filhotes precisam mais proteína
       base['fat'] = base['fat']! * 1.3;
     } else if (input.lifeStage == LifeStage.senior) {
       base['protein'] = base['protein']! * 1.2; // Idosos precisam proteína de qualidade
     }
-    
-    // Ajustes por condições de saúde
     if (input.healthCondition == HealthCondition.kidneyDisease) {
       base['protein'] = base['protein']! * 0.8; // Reduzir proteína
     } else if (input.healthCondition == HealthCondition.diabetes) {
@@ -487,7 +440,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 
   Map<String, double> _calculateVitamins(AdvancedDietInput input) {
-    // Necessidades diárias de vitaminas baseadas no peso
     final vitamins = <String, double>{};
     
     vitamins['A'] = input.weight * 100; // UI/kg
@@ -501,8 +453,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
     vitamins['C'] = input.species == AnimalSpecies.cat ? 0 : input.weight * 1; // mg/kg (cães só se estressados)
     vitamins['Folato'] = input.weight * 0.002; // mg/kg
     vitamins['Niacina'] = input.weight * 0.2; // mg/kg
-    
-    // Ajustes por condições especiais
     if (input.isPregnant || input.isLactating) {
       vitamins.forEach((key, value) => vitamins[key] = value * 1.5);
     }
@@ -515,7 +465,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 
   Map<String, double> _calculateMinerals(AdvancedDietInput input) {
-    // Necessidades diárias de minerais baseadas no peso
     final minerals = <String, double>{};
     
     minerals['Cálcio'] = input.weight * 120; // mg/kg
@@ -529,8 +478,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
     minerals['Manganês'] = input.weight * 0.12; // mg/kg
     minerals['Iodo'] = input.weight * 0.035; // mg/kg
     minerals['Selênio'] = input.weight * 0.003; // mg/kg
-    
-    // Ajustes por condições especiais
     if (input.healthCondition == HealthCondition.heartDisease) {
       minerals['Sódio'] = minerals['Sódio']! * 0.5; // Reduzir sódio
     }
@@ -543,15 +490,10 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 
   double _calculateWaterRequirement(AdvancedDietInput input) {
-    // Necessidade base: 50-60 mL/kg/dia
     double waterNeed = input.weight * 55;
-    
-    // Ajustes baseados na dieta
     if (input.dietType == DietType.raw || input.dietType == DietType.homemade) {
       waterNeed *= 0.8; // Alimentos úmidos requerem menos água adicional
     }
-    
-    // Ajustes por condições de saúde
     if (input.healthCondition == HealthCondition.kidneyDisease) {
       waterNeed *= 1.5; // Aumentar hidratação
     } else if (input.healthCondition == HealthCondition.diabetes) {
@@ -578,7 +520,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
   }
 
   double _calculateGramsPerMeal(AdvancedDietInput input, double calories) {
-    // Assumindo ração comercial média (3.5 kcal/g)
     double caloriesPerGram = 3.5;
     
     if (input.dietType == DietType.raw) {
@@ -595,8 +536,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
 
   List<String> _getRecommendedIngredients(AdvancedDietInput input) {
     final ingredients = <String>[];
-    
-    // Proteínas
     if (input.species == AnimalSpecies.dog) {
       ingredients.addAll([
         '🍖 Frango sem pele',
@@ -612,8 +551,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
         '🐏 Cordeiro',
       ]);
     }
-    
-    // Carboidratos (principalmente para cães)
     if (input.species == AnimalSpecies.dog) {
       ingredients.addAll([
         '🍠 Batata doce',
@@ -622,8 +559,6 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
         '🥒 Abobrinha',
       ]);
     }
-    
-    // Ajustes por condições de saúde
     if (input.healthCondition == HealthCondition.diabetes) {
       ingredients.addAll([
         '🥬 Vegetais folhosos',
@@ -650,13 +585,9 @@ class AdvancedDietCalculator extends BaseCalculator<AdvancedDietInput, AdvancedD
       '🥑 Abacate',
       '🧂 Alimentos salgados',
     ];
-    
-    // Alergias específicas
     if (input.allergies != null) {
       avoided.addAll(input.allergies!.map((allergy) => '❌ $allergy'));
     }
-    
-    // Condições de saúde específicas
     if (input.healthCondition == HealthCondition.diabetes) {
       avoided.addAll([
         '🍬 Açúcares simples',

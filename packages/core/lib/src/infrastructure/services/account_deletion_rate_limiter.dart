@@ -18,8 +18,6 @@ class AccountDeletionRateLimiter {
   bool canAttemptDeletion(String userId) {
     final attempts = _deletionAttempts[userId] ?? [];
     final now = DateTime.now();
-
-    // Remove tentativas fora da janela de tempo
     attempts.removeWhere(
       (time) => now.difference(time) > windowDuration,
     );

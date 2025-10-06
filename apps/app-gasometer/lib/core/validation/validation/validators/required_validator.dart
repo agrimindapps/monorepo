@@ -59,12 +59,9 @@ class RequiredValidator extends BaseFieldValidator {
   
   @override
   ValidationResult handleNullOrEmpty(dynamic value) {
-    // Null values are always invalid for required fields
     if (value == null) {
       return ValidationResult.invalid(errorMessage);
     }
-    
-    // Empty strings are invalid
     if (value is String) {
       final stringValue = trimWhitespace ? value.trim() : value;
       if (stringValue.isEmpty) {
@@ -77,7 +74,6 @@ class RequiredValidator extends BaseFieldValidator {
   
   @override
   ValidationResult performValidation(dynamic value) {
-    // String validation
     if (value is String) {
       final stringValue = trimWhitespace ? value.trim() : value;
       if (stringValue.isEmpty) {
@@ -85,29 +81,21 @@ class RequiredValidator extends BaseFieldValidator {
       }
       return ValidationResult.valid();
     }
-    
-    // Numeric validation
     if (value is num) {
       if (treatZeroAsEmpty && value == 0) {
         return ValidationResult.invalid(errorMessage);
       }
       return ValidationResult.valid();
     }
-    
-    // Collection validation
     if (value is Iterable || value is Map) {
       if (treatEmptyCollectionAsEmpty && getLength(value) == 0) {
         return ValidationResult.invalid(errorMessage);
       }
       return ValidationResult.valid();
     }
-    
-    // Boolean validation (false is considered valid)
     if (value is bool) {
       return ValidationResult.valid();
     }
-    
-    // Any other non-null value is considered valid
     return ValidationResult.valid();
   }
   
@@ -192,8 +180,6 @@ class ConditionalRequiredValidator extends BaseFieldValidator {
     if (!isRequired()) {
       return ValidationResult.valid();
     }
-    
-    // Apply same logic as RequiredValidator
     return RequiredValidator(
       errorMessage: errorMessage,
       trimWhitespace: trimWhitespace,
@@ -205,8 +191,6 @@ class ConditionalRequiredValidator extends BaseFieldValidator {
     if (!isRequired()) {
       return ValidationResult.valid();
     }
-    
-    // Apply same logic as RequiredValidator
     return RequiredValidator(
       errorMessage: errorMessage,
       trimWhitespace: trimWhitespace,
@@ -216,7 +200,6 @@ class ConditionalRequiredValidator extends BaseFieldValidator {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    // Note: Cannot compare function equality, so we compare other properties
     return other is ConditionalRequiredValidator &&
            other.errorMessage == errorMessage &&
            other.trimWhitespace == trimWhitespace;

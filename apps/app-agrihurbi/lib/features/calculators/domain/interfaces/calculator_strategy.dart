@@ -158,8 +158,6 @@ class StrategyMetadata {
   });
 }
 
-// ============= DOMAIN MODELS PARA NUTRITION =============
-
 class NutritionalRequirements {
   final double nitrogen;
   final double phosphorus;
@@ -252,8 +250,6 @@ class ApplicationTiming {
   });
 }
 
-// ============= DOMAIN MODELS PARA IRRIGATION =============
-
 class WaterRequirement {
   final double dailyRequirement;
   final double weeklyRequirement;
@@ -308,8 +304,6 @@ class IrrigationEvent {
   });
 }
 
-// ============= DOMAIN MODELS PARA CROPS =============
-
 class PlantingDensity {
   final double plantsPerHectare;
   final double seedsPerMeter;
@@ -351,8 +345,6 @@ class SeedRate {
     required this.adjustmentReason,
   });
 }
-
-// ============= DOMAIN MODELS PARA LIVESTOCK =============
 
 class FeedRequirements {
   final double dailyFeedAmount;
@@ -409,8 +401,6 @@ class GrazingCapacity {
     required this.managementRecommendations,
   });
 }
-
-// ============= DOMAIN MODELS PARA SOIL =============
 
 class SoilComposition {
   final double clayPercentage;

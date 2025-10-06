@@ -463,17 +463,14 @@ class PrescriptionExportWidget extends StatelessWidget {
   }
 
   void _exportToPDF() {
-    // TODO: Implementar exportação para PDF
     debugPrint('Exportar para PDF');
   }
 
   void _shareText() {
-    // TODO: Implementar compartilhamento
     debugPrint('Compartilhar prescrição');
   }
 
   void _copyToClipboard() {
-    // TODO: Implementar cópia para clipboard
     debugPrint('Copiar para clipboard');
   }
 }

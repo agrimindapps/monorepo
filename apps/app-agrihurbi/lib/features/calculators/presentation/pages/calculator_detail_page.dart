@@ -30,8 +30,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   bool _showResults = false;
-
-  // Services para funcionalidades avançadas
   CalculatorTemplateService? _templateService;
 
   @override
@@ -45,8 +43,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
   Future<void> _initializeServices() async {
     try {
-      // Inicializar services locais se necessário
-      // Por enquanto, vai usar o provider quando disponível
     } catch (e) {
       debugPrint('Erro ao inicializar serviços: $e');
     }
@@ -70,12 +66,10 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           },
         ),
         actions: [
-          // Botão de favoritos (implementação futura)
           IconButton(
             onPressed: () => _toggleFavorite(),
             icon: const Icon(Icons.favorite_border),
           ),
-          // Menu de opções
           PopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(value),
             itemBuilder:
@@ -196,25 +190,18 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabeçalho da calculadora
           _buildCalculatorHeader(context, calculator),
 
           const SizedBox(height: 24),
-
-          // Formulário de entrada
           Form(
             key: _formKey,
             child: _buildParametersForm(context, provider, calculator),
           ),
 
           const SizedBox(height: 24),
-
-          // Botões de ação
           _buildActionButtons(context, provider),
 
           const SizedBox(height: 24),
-
-          // Exibição de resultados
           if (_showResults && provider.currentResult != null)
             _buildResultsSection(context, provider),
 
@@ -456,11 +443,8 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       setState(() {
         _showResults = true;
       });
-
-      // Scroll para os resultados
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          // ✅ Safety check before using scroll controller
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 500),
@@ -470,7 +454,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       });
 
       if (mounted) {
-        // ✅ Safety check before using context
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Cálculo executado com sucesso!'),
@@ -480,7 +463,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       }
     } else {
       if (mounted) {
-        // ✅ Safety check before using context
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(provider.errorMessage ?? 'Erro ao executar cálculo'),
@@ -503,12 +485,10 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     if (!mounted || provider.selectedCalculator == null) return;
 
     try {
-      // Tenta usar o provider de features
       CalculatorFeaturesProvider? featuresProvider;
       try {
         featuresProvider = ref.read(calculatorFeaturesProvider);
       } catch (e) {
-        // Provider não disponível, usar service direto
         if (_templateService == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -521,8 +501,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       }
 
       final calculator = provider.selectedCalculator!;
-
-      // Carregar templates disponíveis
       List<CalculationTemplate> templates;
       if (featuresProvider != null) {
         templates = await featuresProvider.getTemplatesForCalculator(
@@ -545,8 +523,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
         }
         return;
       }
-
-      // Mostrar dialog de seleção
       if (!mounted) return;
       final selectedTemplate = await showDialog<CalculationTemplate>(
         context: context,
@@ -554,10 +530,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       );
 
       if (selectedTemplate != null && mounted) {
-        // Aplicar valores do template
         provider.updateInputs(selectedTemplate.inputValues);
-
-        // Marcar como usado
         if (featuresProvider != null) {
           await featuresProvider.markTemplateAsUsed(selectedTemplate.id);
         } else {
@@ -595,12 +568,10 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     if (calculator == null) return;
 
     try {
-      // Tenta usar o provider de features
       CalculatorFeaturesProvider? featuresProvider;
       try {
         featuresProvider = ref.read(calculatorFeaturesProvider);
       } catch (e) {
-        // Provider não disponível, mostrar mensagem
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -655,15 +626,11 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
     try {
       final calculator = provider.selectedCalculator!;
-
-      // Gerar texto para compartilhamento
       final shareText = _generateResultShareText(
         calculator.name,
         result.inputs,
         result.values,
       );
-
-      // Copiar para clipboard
       await Clipboard.setData(ClipboardData(text: shareText));
 
       if (mounted) {
@@ -673,8 +640,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             backgroundColor: Colors.green,
           ),
         );
-
-        // Mostrar preview do conteúdo
         await showDialog<void>(
           context: context,
           builder:
@@ -725,21 +690,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
     try {
       final calculator = provider.selectedCalculator!;
-
-      // Criar item do histórico (em implementação real seria salvo no repository)
-      // final historyItem = CalculationHistory(
-      //   id: 'history_${DateTime.now().millisecondsSinceEpoch}',
-      //   userId: 'current_user', // TODO: Implementar sistema de usuários
-      //   calculatorId: calculator.id,
-      //   calculatorName: calculator.name,
-      //   createdAt: DateTime.now(),
-      //   result: result,
-      //   notes: null,
-      //   tags: null,
-      // );
-
-      // Adicionar ao histórico do provider (simulação)
-      // Em implementação real, usaria o repository
       debugPrint('Salvando cálculo da ${calculator.name} no histórico');
 
       if (mounted) {
@@ -787,14 +737,11 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     if (calculator == null) return;
 
     try {
-      // Gerar texto para compartilhamento da calculadora
       final shareText =
           'Confira a calculadora "${calculator.name}" no AgriHurbi!\n\n'
           '${calculator.description}\n\n'
           'Uma ferramenta essencial para gestão agrícola.\n'
           'Categoria: ${calculator.category.displayName}';
-
-      // Copiar para clipboard
       await Clipboard.setData(ClipboardData(text: shareText));
 
       if (mounted) {
@@ -806,8 +753,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             backgroundColor: Colors.green,
           ),
         );
-
-        // Mostrar preview
         await showDialog<void>(
           context: context,
           builder:
@@ -860,14 +805,12 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     }
 
     try {
-      // Mostrar dialog para nome do template
       final templateName = await showDialog<String>(
         context: context,
         builder: (context) => _buildSaveTemplateDialog(),
       );
 
       if (templateName != null && templateName.isNotEmpty && mounted) {
-        // Criar template
         final template = CalculationTemplate(
           id: '', // Será gerado pelo service
           name: templateName,
@@ -880,13 +823,10 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           userId: 'current_user', // TODO: Implementar sistema de usuários
           isPublic: false,
         );
-
-        // Tenta usar o provider de features
         CalculatorFeaturesProvider? featuresProvider;
         try {
           featuresProvider = ref.read(calculatorFeaturesProvider);
         } catch (e) {
-          // Provider não disponível, usar service direto se disponível
           if (_templateService == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -897,8 +837,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             return;
           }
         }
-
-        // Salvar template
         bool success = false;
         if (featuresProvider != null) {
           success = await featuresProvider.saveTemplate(template);
@@ -1059,8 +997,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       } else {
         throw Exception('Formato não suportado');
       }
-
-      // Copiar para clipboard
       await Clipboard.setData(ClipboardData(text: exportData));
 
       if (mounted) {
@@ -1072,8 +1008,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             backgroundColor: Colors.green,
           ),
         );
-
-        // Mostrar preview
         await showDialog<void>(
           context: context,
           builder:
@@ -1127,14 +1061,10 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     final timestamp = DateTime.now().toIso8601String();
 
     var csv = 'Calculadora,Tipo,Parâmetro,Valor,Unidade,Timestamp\n';
-
-    // Adicionar inputs
     for (final entry in result.inputs.entries) {
       csv +=
           '"$calculatorName",Entrada,"${entry.key}","${entry.value}","","$timestamp"\n';
     }
-
-    // Adicionar resultados
     for (final value in result.values) {
       csv +=
           '"$calculatorName",Resultado,"${value.label}","${value.value}","${value.unit}","$timestamp"\n';
@@ -1166,8 +1096,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       'interpretation': result.interpretation,
       'recommendations': result.recommendations,
     };
-
-    // Formatação simples do JSON (sem dependência externa)
     return data.toString().replaceAllMapped(
       RegExp(r'(\w+): (.+?)(?=, \w+:|})'),
       (match) => '"${match.group(1)}": ${_formatJsonValue(match.group(2)!)}',
@@ -1226,7 +1154,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  // TODO: Implementar funcionalidades avançadas
                 },
                 child: const Text('Solicitar Funcionalidade'),
               ),

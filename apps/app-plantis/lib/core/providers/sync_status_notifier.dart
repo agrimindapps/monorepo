@@ -33,8 +33,6 @@ class SyncStatusState {
       pendingItems: pendingItems ?? this.pendingItems,
     );
   }
-
-  // Computed properties
   int get pendingItemsCount => pendingItems.length;
   bool get isIdle => currentState == SyncState.idle;
   bool get isSyncing => currentState == SyncState.syncing;
@@ -61,8 +59,6 @@ class SyncStatusState {
 class SyncStatusNotifier extends _$SyncStatusNotifier {
   late final ConnectivityService _connectivityService;
   late final local.SyncQueue _syncQueue;
-
-  // Stream subscriptions for proper disposal
   StreamSubscription<ConnectivityType>? _networkSubscription;
   StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
 
@@ -70,22 +66,15 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
   SyncStatusState build() {
     _connectivityService = ref.read(connectivityServiceProvider);
     _syncQueue = ref.read(syncQueueProvider);
-
-    // Setup cleanup
     ref.onDispose(() {
       _networkSubscription?.cancel();
       _queueSubscription?.cancel();
     });
-
-    // Initialize listeners
     _initializeListeners();
-
-    // Return initial state
     return const SyncStatusState();
   }
 
   void _initializeListeners() {
-    // Listen to network status changes
     _networkSubscription = _connectivityService.networkStatusStream.listen(
       (status) {
         switch (status) {
@@ -105,8 +94,6 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
         }
       },
     );
-
-    // Listen to sync queue changes
     _queueSubscription = _syncQueue.queueStream.listen((items) {
       final newState = items.isEmpty ? SyncState.idle : SyncState.syncing;
 
@@ -161,8 +148,6 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
     }
   }
 }
-
-// Dependency Providers
 @riverpod
 ConnectivityService connectivityService(Ref ref) {
   return GetIt.instance<ConnectivityService>();

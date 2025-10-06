@@ -32,8 +32,6 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
     super.initState();
     _coordinator = AnimalsPageCoordinator(ref: ref);
     _listController = AnimalsListController(context: context, ref: ref);
-    
-    // Initialize data loading after widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _coordinator.initializePage();
     });
@@ -53,7 +51,6 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
             onEditAnimal: _listController.editAnimal,
             onDeleteAnimal: _listController.deleteAnimal,
           ),
-          // Error handling overlay
           AnimalsErrorHandler(
             coordinator: _coordinator,
           ),

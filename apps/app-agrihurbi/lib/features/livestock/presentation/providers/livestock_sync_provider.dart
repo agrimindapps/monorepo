@@ -14,16 +14,12 @@ class LivestockSyncProvider extends ChangeNotifier {
   LivestockSyncProvider({
     required LivestockRepository repository,
   }) : _repository = repository;
-
-  // === STATE MANAGEMENT ===
   
   bool _isSyncing = false;
   DateTime? _lastSyncTime;
   String? _errorMessage;
   SyncStatus _syncStatus = SyncStatus.idle;
   double _syncProgress = 0.0;
-
-  // === GETTERS ===
   
   bool get isSyncing => _isSyncing;
   DateTime? get lastSyncTime => _lastSyncTime;
@@ -51,8 +47,6 @@ class LivestockSyncProvider extends ChangeNotifier {
     }
   }
 
-  // === SYNC OPERATIONS ===
-
   /// Força sincronização manual
   Future<bool> forceSyncNow({
     void Function(double)? onProgress,
@@ -70,7 +64,6 @@ class LivestockSyncProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simula progresso se callback fornecido
       if (showProgress && onProgress != null) {
         _updateProgress(0.1, onProgress);
         await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -107,8 +100,6 @@ class LivestockSyncProvider extends ChangeNotifier {
     } finally {
       _isSyncing = false;
       notifyListeners();
-      
-      // Reset status após 3 segundos
       Future.delayed(const Duration(seconds: 3), () {
         if (_syncStatus != SyncStatus.idle) {
           _syncStatus = SyncStatus.idle;
@@ -152,8 +143,6 @@ class LivestockSyncProvider extends ChangeNotifier {
     _syncProgress = 0.0;
     notifyListeners();
   }
-
-  // === PRIVATE METHODS ===
 
   void _updateProgress(double progress, void Function(double) onProgress) {
     _syncProgress = progress;

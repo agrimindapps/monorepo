@@ -194,25 +194,18 @@ class BodyConditionOutputFactory {
     String? breed,
     bool hasMetabolicConditions = false,
   }) {
-    // Determinar classificação baseada no score
     final classification = _getClassificationFromScore(bcsScore);
-    
-    // Estimar peso ideal se não fornecido
     final weightEstimate = idealWeight ?? _estimateIdealWeight(
       species: species,
       currentWeight: currentWeight,
       bcsScore: bcsScore,
       breed: breed,
     );
-    
-    // Calcular ajuste de peso necessário
     final weightAdjustment = _calculateWeightAdjustment(
       currentWeight: currentWeight,
       idealWeight: weightEstimate,
       bcsScore: bcsScore,
     );
-    
-    // Gerar interpretação e recomendações
     final interpretation = _generateInterpretation(bcsScore, classification);
     final recommendations = _generateRecommendations(
       bcsScore: bcsScore,
@@ -296,8 +289,6 @@ class BodyConditionOutputFactory {
     required int bcsScore,
     String? breed,
   }) {
-    // Estimativa baseada no score atual
-    // BCS 5 = peso ideal, cada ponto = ~10-15% de diferença
     final adjustmentFactor = (5 - bcsScore) * 0.125; // 12.5% por ponto
     return currentWeight * (1 + adjustmentFactor);
   }
@@ -337,7 +328,6 @@ class BodyConditionOutputFactory {
     final recommendations = <BcsRecommendation>[];
 
     if (bcsScore <= 3) {
-      // Animal magro - aumentar alimentação
       recommendations.add(BcsRecommendation(
         type: NutritionalRecommendationType.increaseFood,
         title: 'Programa de Ganho de Peso',
@@ -355,7 +345,6 @@ class BodyConditionOutputFactory {
         additionalNotes: bcsScore == 1 ? 'URGENTE: Desnutrição severa requer supervisão veterinária imediata.' : null,
       ));
     } else if (bcsScore >= 7) {
-      // Animal com sobrepeso/obeso - reduzir alimentação
       recommendations.add(BcsRecommendation(
         type: NutritionalRecommendationType.decreaseFood,
         title: 'Programa de Emagrecimento',
@@ -374,7 +363,6 @@ class BodyConditionOutputFactory {
         additionalNotes: bcsScore >= 8 ? 'Obesidade requer acompanhamento veterinário para evitar complicações.' : null,
       ));
     } else {
-      // Animal no peso ideal - manter
       recommendations.add(const BcsRecommendation(
         type: NutritionalRecommendationType.maintain,
         title: 'Manutenção da Condição Ideal',
@@ -389,8 +377,6 @@ class BodyConditionOutputFactory {
         monitoringFrequency: 'Mensal',
       ));
     }
-
-    // Recomendações especiais para animais castrados
     if (isNeutered) {
       recommendations.add(const BcsRecommendation(
         type: NutritionalRecommendationType.specializedDiet,
@@ -404,8 +390,6 @@ class BodyConditionOutputFactory {
         ],
       ));
     }
-
-    // Recomendações para condições metabólicas
     if (hasMetabolicConditions) {
       recommendations.add(const BcsRecommendation(
         type: NutritionalRecommendationType.specializedDiet,
@@ -482,8 +466,6 @@ class BodyConditionOutputFactory {
     } else if (bcsScore == 6 || bcsScore <= 3) {
       riskLevel = 'Moderado';
     }
-
-    // Fatores de risco adicionais
     if (isNeutered && bcsScore >= 6) {
       riskLevel = 'Alto';
     }

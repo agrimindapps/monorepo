@@ -31,7 +31,6 @@ class PremiumFirebaseDataSource {
 
   /// Inicializa sincronização com Firebase
   void _initializeFirebaseSync() {
-    // Escuta mudanças no usuário atual e inicia sync quando logado
     _authService.currentUser.listen((user) {
       if (user != null) {
         _startFirebaseListener(user.id);
@@ -82,7 +81,6 @@ class PremiumFirebaseDataSource {
   void _startPeriodicSync() {
     _stopPeriodicSync();
     _syncTimer = Timer.periodic(const Duration(minutes: 15), (timer) {
-      // Get current user from stream
       _authService.currentUser.first.then((user) {
         if (user != null) {
           _syncPremiumStatus(user.id);
@@ -142,14 +140,12 @@ class PremiumFirebaseDataSource {
     required String userId,
   }) async {
     try {
-      // Busca dados mais recentes do Firebase
       final firebaseResult = await getPremiumStatusFromFirebase(userId: userId);
 
       return firebaseResult.fold((failure) => Left(failure), (
         firebaseStatus,
       ) async {
         if (firebaseStatus != null) {
-          // Notifica sobre atualização
           _statusController.add(firebaseStatus);
           debugPrint('[FirebaseDataSource] Cross-device sync realizado');
         }
@@ -194,13 +190,10 @@ class PremiumFirebaseDataSource {
       }
 
       final data = doc.data() as Map<String, dynamic>;
-
-      // Verifica se cache expirou
       final expiresAtStr = data['cache_expires_at'] as String?;
       if (expiresAtStr != null) {
         final expiresAt = DateTime.parse(expiresAtStr);
         if (DateTime.now().isAfter(expiresAt)) {
-          // Cache expirado, remove
           _firestore.collection('premium_cache').doc(userId).delete();
           return const Right(null);
         }
@@ -297,7 +290,6 @@ class PremiumFirebaseDataSource {
     PremiumStatus localStatus,
     PremiumStatus remoteStatus,
   ) {
-    // Estratégia: sempre priorizar premium
     if (localStatus.isPremium && !remoteStatus.isPremium) {
       return localStatus;
     }
@@ -305,7 +297,6 @@ class PremiumFirebaseDataSource {
       return remoteStatus;
     }
     if (localStatus.isPremium && remoteStatus.isPremium) {
-      // Ambos premium, usar o com expiração mais distante
       if (localStatus.expirationDate != null &&
           remoteStatus.expirationDate != null) {
         return localStatus.expirationDate!.isAfter(remoteStatus.expirationDate!)
@@ -314,7 +305,6 @@ class PremiumFirebaseDataSource {
       }
       return localStatus.expirationDate != null ? localStatus : remoteStatus;
     }
-    // Ambos free, usar qualquer um
     return localStatus;
   }
 

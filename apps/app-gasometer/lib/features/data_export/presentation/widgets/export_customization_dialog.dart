@@ -30,7 +30,6 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
   @override
   void initState() {
     super.initState();
-    // Selecionar todas as categorias por padrão
     _selectedCategories.addAll(_availableCategories.map((e) => e.key));
   }
 
@@ -138,7 +137,6 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
           ),
           child: Column(
             children: [
-              // Opção "Selecionar Todos"
               CheckboxListTile(
                 title: const Text('Selecionar Todos'),
                 subtitle: const Text('Incluir todas as categorias disponíveis'),
@@ -160,7 +158,6 @@ class _ExportCustomizationDialogState extends State<ExportCustomizationDialog> {
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               const Divider(height: 1),
-              // Categorias individuais
               ..._availableCategories.map(
                 (category) => CheckboxListTile(
                   title: Text(category.displayName),

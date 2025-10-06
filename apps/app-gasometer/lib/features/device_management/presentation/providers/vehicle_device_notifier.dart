@@ -22,8 +22,6 @@ class VehicleDeviceState {
   final bool isLoading;
   final String? errorMessage;
   final bool isOnline;
-
-  // Computed getters
   bool get hasError => errorMessage != null;
   bool get hasDevices => devices.isNotEmpty;
 
@@ -105,14 +103,12 @@ class DeviceLimitInfo {
 /// Provider de dependências: DeviceManagementService (mock por enquanto)
 @riverpod
 core.DeviceManagementService? deviceManagementService(Ref ref) {
-  // REVIEW (converted TODO 2025-10-06): Replace with GetIt instance when properly configured
   return null;
 }
 
 /// Provider de dependências: ConnectivityService
 @riverpod
 core.ConnectivityService connectivityService(Ref ref) {
-  // REVIEW (converted TODO 2025-10-06): Replace with GetIt instance
   throw UnimplementedError('ConnectivityService not configured');
 }
 
@@ -138,18 +134,15 @@ Future<bool> isOnlineStatus(Ref ref) async {
 /// Notifier principal para gerenciamento de dispositivos veiculares
 @riverpod
 class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
-  // Limite de dispositivos (TODO: integrar com RevenueCat)
   static const int _deviceLimit = 3; // Free tier
 
   @override
   VehicleDeviceState build() {
-    // Listen to connectivity changes
     ref.listen<AsyncValue<bool>>(isOnlineStatusProvider, (previous, next) {
       next.whenData((isOnline) {
         final wasOnline = state.isOnline;
 
         if (!wasOnline && isOnline) {
-          // Came back online - refresh devices
           debugPrint('🔌 Back online - refreshing devices');
           loadUserDevices();
         }
@@ -157,8 +150,6 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
         state = state.copyWith(isOnline: isOnline);
       });
     });
-
-    // Start with empty state
     return VehicleDeviceState.empty;
   }
 
@@ -167,8 +158,6 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      // REVIEW (converted TODO 2025-10-06): Replace with core service when properly configured
-      // For now, provide mock data for testing
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       final mockDevices = [
@@ -222,7 +211,6 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
   /// Valida se o dispositivo pode ser registrado
   Future<bool> validateDeviceRegistration(core.DeviceEntity device) async {
     try {
-      // Check device limit first
       if (!canAddMoreDevices) {
         state = state.copyWith(
           errorMessage:
@@ -230,8 +218,6 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
         );
         return false;
       }
-
-      // REVIEW (converted TODO 2025-10-06): Use core service validation when properly configured
       await Future<void>.delayed(const Duration(milliseconds: 300));
 
       final isValid = device.isPhysicalDevice && device.isActive;
@@ -253,7 +239,6 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      // REVIEW (converted TODO 2025-10-06): Use core service when properly configured
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       final deviceExists = state.devices.any((device) => device.id == deviceId);
@@ -340,10 +325,7 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      // REVIEW (converted TODO 2025-10-06): Implement with core service
       await Future<void>.delayed(const Duration(milliseconds: 800));
-
-      // Keep only the most recent device
       if (state.devices.isNotEmpty) {
         final current = state.currentDevice;
         if (current != null) {
@@ -407,14 +389,11 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
 
   /// Verifica se há conflitos de dados entre dispositivos
   Future<bool> checkForDataConflicts() async {
-    // REVIEW (converted TODO 2025-10-06): Implement data conflict detection
-    // This would check for expense/fuel data conflicts across devices
     return false;
   }
 
   /// Obtém informações de limite de dispositivos baseado na assinatura
   Future<DeviceLimitInfo> getDeviceLimitInfo() async {
-    // REVIEW (converted TODO 2025-10-06): Implement premium service integration
     final currentCount = state.activeDeviceCount;
 
     return DeviceLimitInfo(

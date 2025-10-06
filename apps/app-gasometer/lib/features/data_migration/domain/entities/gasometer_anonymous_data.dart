@@ -104,25 +104,15 @@ class GasometerAnonymousData extends AnonymousData {
   /// Higher scores indicate more valuable data that user might want to keep
   int _calculateDataValueScore() {
     int score = 0;
-    
-    // Vehicles are highly valuable
     score += vehicleCount * 20;
-    
-    // Fuel records add value, especially if there are many
     score += fuelRecordCount * 2;
-    
-    // Maintenance records are also valuable
     score += maintenanceRecordCount * 3;
-    
-    // Recent data is more valuable
     final daysSinceLastModified = DateTime.now().difference(lastModified).inDays;
     if (daysSinceLastModified < 7) {
       score += 10; // Very recent
     } else if (daysSinceLastModified < 30) {
       score += 5; // Recent
     }
-    
-    // More distance tracked indicates more usage
     if (totalDistance > 1000) {
       score += 5;
     }

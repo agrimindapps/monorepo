@@ -71,7 +71,6 @@ class EquineSearchParams extends SearchAnimalsParams {
 /// Usa Either&lt;Failure, Success&gt; para error handling funcional
 /// Baseada na análise do projeto original com Supabase + arquitetura avançada
 abstract class LivestockRepository {
-  // === OPERAÇÕES BOVINOS ===
   
   /// Obtém lista de todos os bovinos ativos
   Future<Either<Failure, List<BovineEntity>>> getBovines();
@@ -91,8 +90,6 @@ abstract class LivestockRepository {
   /// Busca bovinos com filtros avançados
   Future<Either<Failure, List<BovineEntity>>> searchBovines(BovineSearchParams params);
   
-  // === OPERAÇÕES EQUINOS ===
-  
   /// Obtém lista de todos os equinos ativos
   Future<Either<Failure, List<EquineEntity>>> getEquines();
   
@@ -111,8 +108,6 @@ abstract class LivestockRepository {
   /// Busca equinos com filtros avançados
   Future<Either<Failure, List<EquineEntity>>> searchEquines(EquineSearchParams params);
   
-  // === OPERAÇÕES UNIFICADAS ===
-  
   /// Busca unificada em bovinos e equinos
   Future<Either<Failure, List<AnimalBaseEntity>>> searchAllAnimals(SearchAnimalsParams params);
   
@@ -121,8 +116,6 @@ abstract class LivestockRepository {
   
   /// Remove imagens de animais
   Future<Either<Failure, Unit>> deleteAnimalImages(String animalId, List<String> imageUrls);
-  
-  // === OPERAÇÕES DE SINCRONIZAÇÃO ===
   
   /// Sincroniza dados locais com servidor remoto
   Future<Either<Failure, Unit>> syncLivestockData();

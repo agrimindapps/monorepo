@@ -42,8 +42,6 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void initState() {
     super.initState();
     _plantsProvider = di.sl<PlantsProvider>();
-
-    // Add observer for app lifecycle changes
     WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,13 +59,10 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Refresh when app comes back to foreground
     if (state == AppLifecycleState.resumed) {
       _plantsProvider.refreshPlants();
     }
   }
-
-  // ISearchDelegate implementation
   @override
   void onSearchChanged(String query) {
     if (query.trim().isEmpty) {
@@ -81,20 +76,14 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void onClearSearch() {
     _plantsProvider.clearSearch();
   }
-
-  // IViewModeDelegate implementation
   @override
   void onViewModeChanged(AppBarViewMode mode) {
     _plantsProvider.setViewMode(
       mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
     );
   }
-
-  // IPlantCardActions implementation
   @override
   void onTap(Plant plant) {
-    // Navigate to plant details
-    // TODO: Implement navigation
   }
 
   @override
@@ -106,25 +95,14 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void onRemove(Plant plant) {
     _showRemoveConfirmation(plant);
   }
-
-  // ITaskDataProvider implementation
   @override
   Future<List<TaskInfo>> getPendingTasks(String plantId) async {
     try {
-      // Get PlantTaskProvider from DI
       final plantTaskProvider = di.sl<PlantTaskProvider>();
-
-      // Load tasks if not already loaded for this plant
       await plantTaskProvider.loadTasksForPlant(plantId);
-
-      // Get overdue and upcoming tasks
       final overdueTasks = plantTaskProvider.getOverdueTasksForPlant(plantId);
       final upcomingTasks = plantTaskProvider.getUpcomingTasksForPlant(plantId);
-
-      // Convert to TaskInfo format
       final tasks = <TaskInfo>[];
-
-      // Add overdue tasks
       for (final task in overdueTasks) {
         tasks.add(TaskInfo(
           type: task.type.toString().split('.').last,
@@ -132,8 +110,6 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
           isOverdue: true,
         ));
       }
-
-      // Add upcoming tasks (not overdue)
       for (final task in upcomingTasks) {
         if (!overdueTasks.contains(task)) {
           tasks.add(TaskInfo(
@@ -218,7 +194,6 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
         body: SafeArea(
           child: Column(
             children: [
-              // Enhanced App Bar - Now using Riverpod Consumer
               Consumer(
                 builder: (context, ref, child) {
                   final state = ref.watch(plantsNotifierProvider);
@@ -236,33 +211,23 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                   );
                 },
               ),
-
-              // Content Area - Now using Riverpod Consumer
               Expanded(
                 child: Consumer(
                   builder: (context, ref, child) {
                     final state = ref.watch(plantsNotifierProvider);
-
-                    // Loading state
                     if (state.isLoading && state.plants.isEmpty) {
                       return const PlantsLoadingWidget();
                     }
-
-                    // Error state
                     if (state.error != null && state.plants.isEmpty) {
                       return PlantsErrorWidget(
                         error: state.error!,
                         onRetry: _loadInitialData,
                       );
                     }
-
-                    // Determine which plants to show
                     final plantsToShow =
                         state.searchQuery.isNotEmpty
                             ? state.searchResults
                             : state.plants;
-
-                    // Empty state
                     if (plantsToShow.isEmpty) {
                       return EmptyPlantsWidget(
                         isSearching: state.searchQuery.isNotEmpty,
@@ -271,8 +236,6 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                         onAddPlant: _showAddPlantModal,
                       );
                     }
-
-                    // Plants list with RefreshIndicator
                     return RefreshIndicator(
                       onRefresh: _onRefresh,
                       child: _EnhancedPlantsContent(
@@ -289,8 +252,6 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
             ],
           ),
         ),
-
-      // Enhanced FAB
       floatingActionButton: _EnhancedFAB(
         onAddPlant: _showAddPlantModal,
         onScrollToTop: () {

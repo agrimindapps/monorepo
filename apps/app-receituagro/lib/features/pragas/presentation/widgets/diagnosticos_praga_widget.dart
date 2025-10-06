@@ -41,9 +41,7 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Área de filtros
           const DiagnosticoFilterWidget(),
-          // Lista de diagnósticos com gerenciamento de estados
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(
@@ -66,8 +64,6 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
     final pragaState = ref.read(detalhePragaNotifierProvider).value;
 
     ref.read(diagnosticosPragaNotifierProvider.notifier).clearError();
-
-    // Recarregar diagnósticos se temos os dados da praga
     if (pragaState?.pragaData != null && pragaState!.pragaData!.idReg.isNotEmpty) {
       ref.read(diagnosticosPragaNotifierProvider.notifier).loadDiagnosticos(
         pragaState.pragaData!.idReg,
@@ -107,7 +103,6 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
     final List<Widget> widgets = [];
 
     groupedDiagnostics.forEach((cultura, diagnostics) {
-      // Seção de cultura
       widgets.add(
         DiagnosticoCultureSectionWidget(
           cultura: cultura,
@@ -115,8 +110,6 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
         ),
       );
       widgets.add(SpacingTokens.gapLG);
-
-      // Itens de diagnósticos
       for (int i = 0; i < diagnostics.length; i++) {
         final diagnostic = diagnostics[i];
         widgets.add(
@@ -133,8 +126,6 @@ class DiagnosticosPragaWidget extends ConsumerWidget {
       }
       widgets.add(SpacingTokens.gapXL);
     });
-
-    // Espaço já incluído no scrollPadding
     return widgets;
   }
 

@@ -31,16 +31,10 @@ class PerformanceManager {
     if (_isInitialized) return;
 
     log('Initializing Performance Manager', name: 'PerformanceManager');
-
-    // Inicializar monitoramento de memória
     _memoryManager.startMonitoring();
-
-    // Ativar profiling de widgets em desenvolvimento
     if (kDebugMode) {
       _widgetOptimizer.enableProfiling();
     }
-
-    // Iniciar manutenção automática
     _startAutomaticMaintenance();
 
     _isInitialized = true;
@@ -62,16 +56,9 @@ class PerformanceManager {
     log('Starting auto-optimizations', name: 'PerformanceManager');
 
     try {
-      // Database optimizations
       await _dbOptimizer.runAutoOptimizations();
-
-      // Memory cleanup
       _memoryManager.cleanup();
-
-      // Image cache cleanup
       _imageOptimizer.cleanupCache();
-
-      // Widget profiling cleanup
       _widgetOptimizer.clearProfilingData();
 
       log('Auto-optimizations completed successfully', name: 'PerformanceManager');
@@ -117,8 +104,6 @@ class PerformanceManager {
     _imageOptimizer.cleanupCache(aggressive: true);
     _navOptimizer.clearNavigationCache();
     _widgetOptimizer.clearProfilingData();
-
-    // Forçar garbage collection
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
     log('Aggressive cleanup completed', name: 'PerformanceManager');
@@ -127,8 +112,6 @@ class PerformanceManager {
   /// Detecta problemas de performance críticos
   List<PerformanceCriticalIssue> detectCriticalIssues() {
     final issues = <PerformanceCriticalIssue>[];
-
-    // Verificar vazamentos de memória
     final memoryLeaks = _memoryManager.detectLeaks();
     if (memoryLeaks.hasLeaks) {
       issues.add(PerformanceCriticalIssue(
@@ -138,8 +121,6 @@ class PerformanceManager {
         recommendation: 'Review object disposal and weak references',
       ));
     }
-
-    // Verificar queries lentas
     final dbReport = _dbOptimizer.analyzePerformance();
     if (dbReport.hasSlowQueries) {
       issues.add(PerformanceCriticalIssue(
@@ -149,8 +130,6 @@ class PerformanceManager {
         recommendation: 'Implement query optimization and caching',
       ));
     }
-
-    // Verificar rebuilds excessivos
     final widgetReport = _widgetOptimizer.getRebuildReport();
     if (widgetReport.hasProblematicWidgets) {
       issues.add(PerformanceCriticalIssue(
@@ -160,8 +139,6 @@ class PerformanceManager {
         recommendation: 'Optimize widget tree and state management',
       ));
     }
-
-    // Verificar cache hit rate baixo
     if (dbReport.cacheHitRate < 0.5) {
       issues.add(PerformanceCriticalIssue(
         type: CriticalIssueType.poorCacheHitRate,
@@ -196,21 +173,13 @@ class PerformanceManager {
   /// Benchmark de performance
   Future<PerformanceBenchmark> runBenchmark() async {
     final stopwatch = Stopwatch()..start();
-    
-    // Benchmark de operações comuns
     final results = <String, Duration>{};
-    
-    // Database benchmark
     final dbStart = DateTime.now();
     await _dbOptimizer.runAutoOptimizations();
     results['database_optimization'] = DateTime.now().difference(dbStart);
-    
-    // Memory benchmark
     final memStart = DateTime.now();
     _memoryManager.cleanup();
     results['memory_cleanup'] = DateTime.now().difference(memStart);
-    
-    // Image cache benchmark
     final imgStart = DateTime.now();
     _imageOptimizer.cleanupCache();
     results['image_cleanup'] = DateTime.now().difference(imgStart);
@@ -242,14 +211,10 @@ class PerformanceManager {
     RebuildReport widgetReport,
   ) {
     double score = 10.0;
-
-    // Penalizar por problemas detectados
     if (dbReport.hasSlowQueries) score -= 1.0;
     if (dbReport.hasPoorCacheHitRate) score -= 0.5;
     if (widgetReport.hasProblematicWidgets) score -= 1.0;
     if (imageStats.hitRate < 0.7) score -= 0.5;
-
-    // Bonificar por otimizações
     if (dbReport.cacheHitRate > 0.8) score += 0.5;
     if (imageStats.hitRate > 0.9) score += 0.5;
     if (navReport.preloadedRoutes > 0) score += 0.5;

@@ -16,8 +16,6 @@ class PlantisEnvironmentConfig extends AppEnvironmentConfig {
 
   @override
   String get apiDomain => 'plantisreceituagro.com';
-
-  // Plantis-specific API Keys
   String get weatherApiKey => EnvironmentConfig.getApiKey(
     'WEATHER_API_KEY',
     fallback: 'weather_dummy_key',
@@ -27,14 +25,10 @@ class PlantisEnvironmentConfig extends AppEnvironmentConfig {
     'GOOGLE_MAPS_API_KEY',
     fallback: 'maps_dummy_key',
   );
-
-  // RevenueCat Configuration
   String get revenueCatApiKey => EnvironmentConfig.getApiKey(
     'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
     fallback: 'rcat_dev_dummy_key',
   );
-
-  // Plantis Subscription Products
   String get monthlyProductId =>
       EnvironmentConfig.getProductId('plantis_premium_monthly');
   String get yearlyProductId =>
@@ -57,12 +51,10 @@ class PlantisEnvironmentConfig extends AppEnvironmentConfig {
 /// Plantis-specific box names for local storage
 class PlantisBoxes {
   static const String main = 'plantis_main';
-  // Boxes gerenciadas pelo UnifiedSyncManager (sem prefixo plantis_)
   static const String plants = 'plants';
   static const String spaces = 'spaces';
   static const String tasks = 'tasks';
   static const String comentarios = 'comentarios';
-  // Boxes específicas do Plantis (com prefixo)
   static const String reminders = 'plantis_reminders';
   static const String care_logs = 'plantis_care_logs';
   static const String backups = 'plantis_backups';

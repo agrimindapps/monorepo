@@ -19,11 +19,8 @@ class DiagnosticosDataLoader {
 
     try {
       final List<Map<String, dynamic>> allDiagnosticos = [];
-
-      // Carrega todos os arquivos JSON de diagnósticos (0 a 64)
       for (int i = 0; i <= 64; i++) {
         try {
-          // Use path without 'assets/' prefix for web compatibility
           final String assetPath =
               kIsWeb
                   ? 'database/json/tbdiagnostico/TBDIAGNOSTICO$i.json'
@@ -45,8 +42,6 @@ class DiagnosticosDataLoader {
           }
         }
       }
-
-      // Filtra apenas registros válidos - correção: usar 'IdReg' (maiúsculo) como no JSON
       final List<Map<String, dynamic>> diagnosticos =
           allDiagnosticos
               .where(
@@ -58,14 +53,9 @@ class DiagnosticosDataLoader {
                     item['fkIdPraga'] != null,
               )
               .toList();
-
-      // 2. Salva no repositório Hive usando injeção de dependência
       final repository = di.sl<DiagnosticoHiveRepository>();
-
-      // Carrega diagnósticos através de batch insert
       for (final diagnosticoData in diagnosticos) {
         try {
-          // Converte para DiagnosticoHive
           final diagnosticoHive = DiagnosticoHive.fromJson(diagnosticoData);
           await repository.save(diagnosticoHive);
         } catch (e) {

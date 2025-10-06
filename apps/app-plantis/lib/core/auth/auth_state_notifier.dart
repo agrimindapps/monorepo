@@ -51,14 +51,10 @@ class AuthStateNotifier {
     }
     return _instance!;
   }
-
-  // Internal state
   UserEntity? _currentUser;
   bool _isAuthenticated = false;
   bool _isPremium = false;
   bool _isInitialized = false;
-
-  // Stream controllers for state changes
   final StreamController<UserEntity?> _userController =
       StreamController<UserEntity?>.broadcast();
   final StreamController<bool> _authController =
@@ -67,14 +63,10 @@ class AuthStateNotifier {
       StreamController<bool>.broadcast();
   final StreamController<bool> _initializedController =
       StreamController<bool>.broadcast();
-
-  // Public getters for current state
   UserEntity? get currentUser => _currentUser;
   bool get isAuthenticated => _isAuthenticated;
   bool get isPremium => _isPremium;
   bool get isInitialized => _isInitialized;
-
-  // Public streams for listening to state changes
   Stream<UserEntity?> get userStream => _userController.stream;
   Stream<bool> get authStream => _authController.stream;
   Stream<bool> get premiumStream => _premiumController.stream;
@@ -96,8 +88,6 @@ class AuthStateNotifier {
     if (_currentUser != user) {
       _currentUser = user;
       _isAuthenticated = user != null;
-
-      // Notify listeners
       if (!_userController.isClosed) {
         _userController.add(user);
       }
@@ -189,8 +179,6 @@ class AuthStateNotifier {
     _isAuthenticated = false;
     _isPremium = false;
     _isInitialized = false;
-
-    // Notify all listeners of the reset
     if (!_userController.isClosed) {
       _userController.add(null);
     }
@@ -211,8 +199,6 @@ class AuthStateNotifier {
   /// This is a compatibility method for IAuthStateProvider interface
   Future<void> ensureInitialized() async {
     if (!_isInitialized) {
-      // Wait for initialization - in real implementation this would
-      // wait for Firebase Auth to initialize
       await Future<void>.delayed(Duration.zero);
       updateInitializationStatus(true);
     }
@@ -232,8 +218,6 @@ class AuthStateNotifier {
     _authController.close();
     _premiumController.close();
     _initializedController.close();
-
-    // Clear the singleton instance
     synchronized(_lock, () {
       _instance = null;
     });
@@ -244,7 +228,5 @@ class AuthStateNotifier {
 ///
 /// This ensures that singleton creation is thread-safe across isolates
 void synchronized(Object lock, void Function() callback) {
-  // In Flutter, this is primarily for consistency as most operations
-  // happen on the main isolate, but provides safety for future isolate usage
   callback();
 }

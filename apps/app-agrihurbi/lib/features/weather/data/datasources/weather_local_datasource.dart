@@ -7,9 +7,6 @@ import '../models/weather_statistics_model.dart';
 
 /// Abstract interface for weather local data source operations
 abstract class WeatherLocalDataSource {
-  // ============================================================================
-  // WEATHER MEASUREMENTS
-  // ============================================================================
   
   Future<List<WeatherMeasurementModel>> getAllMeasurements({
     String? locationId,
@@ -41,10 +38,6 @@ abstract class WeatherLocalDataSource {
   Future<void> deleteMeasurements(List<String> ids);
   
   Future<void> clearAllMeasurements();
-
-  // ============================================================================
-  // RAIN GAUGES
-  // ============================================================================
   
   Future<List<RainGaugeModel>> getAllRainGauges();
   
@@ -63,10 +56,6 @@ abstract class WeatherLocalDataSource {
   Future<void> deleteRainGauge(String id);
   
   Future<void> clearAllRainGauges();
-
-  // ============================================================================
-  // WEATHER STATISTICS
-  // ============================================================================
   
   Future<List<WeatherStatisticsModel>> getAllStatistics();
   
@@ -85,10 +74,6 @@ abstract class WeatherLocalDataSource {
   Future<void> deleteStatistics(String id);
   
   Future<void> clearAllStatistics();
-
-  // ============================================================================
-  // CACHE AND SYNC
-  // ============================================================================
   
   Future<void> clearCache();
   
@@ -99,8 +84,6 @@ abstract class WeatherLocalDataSource {
   Future<DateTime?> getLastSyncTime();
   
   Future<void> setLastSyncTime(DateTime timestamp);
-
-  // Advanced search and sync methods
   Future<List<WeatherMeasurementModel>> searchMeasurements({
     String? locationId,
     DateTime? fromDate,
@@ -152,10 +135,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     }
   }
 
-  // ============================================================================
-  // WEATHER MEASUREMENTS IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<List<WeatherMeasurementModel>> getAllMeasurements({
     String? locationId,
@@ -167,13 +146,9 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       
       var measurements = _measurementsBox!.values.toList();
-      
-      // Apply location filter
       if (locationId != null && locationId.isNotEmpty) {
         measurements = measurements.where((m) => m.locationId == locationId).toList();
       }
-      
-      // Apply date range filter
       if (startDate != null || endDate != null) {
         measurements = measurements.where((m) {
           if (startDate != null && m.timestamp.isBefore(startDate)) return false;
@@ -181,11 +156,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
           return true;
         }).toList();
       }
-      
-      // Sort by timestamp (newest first)
       measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      
-      // Apply limit
       if (limit != null && limit > 0) {
         measurements = measurements.take(limit).toList();
       }
@@ -304,10 +275,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     }
   }
 
-  // ============================================================================
-  // RAIN GAUGES IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<List<RainGaugeModel>> getAllRainGauges() async {
     try {
@@ -408,10 +375,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       throw Exception('clearAllRainGauges failed: ${e.toString()}');
     }
   }
-
-  // ============================================================================
-  // WEATHER STATISTICS IMPLEMENTATION
-  // ============================================================================
 
   @override
   Future<List<WeatherStatisticsModel>> getAllStatistics() async {
@@ -514,10 +477,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     }
   }
 
-  // ============================================================================
-  // CACHE AND SYNC IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<void> clearCache() async {
     try {
@@ -595,31 +554,18 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _ensureInitialized();
       
       var measurements = _measurementsBox!.values.where((m) {
-        // Location filter
         if (locationId != null && m.locationId != locationId) return false;
-        
-        // Date range filter
         if (fromDate != null && m.timestamp.isBefore(fromDate)) return false;
         if (toDate != null && m.timestamp.isAfter(toDate)) return false;
-        
-        // Temperature filter
         if (minTemperature != null && m.temperature < minTemperature) return false;
         if (maxTemperature != null && m.temperature > maxTemperature) return false;
-        
-        // Weather condition filter
         if (weatherCondition != null && m.weatherCondition != weatherCondition) return false;
-        
-        // Rainfall filter
         if (minRainfall != null && m.rainfall < minRainfall) return false;
         if (maxRainfall != null && m.rainfall > maxRainfall) return false;
         
         return true;
       }).toList();
-      
-      // Sort by timestamp (newest first)
       measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      
-      // Apply limit
       if (limit != null && limit > 0) {
         measurements = measurements.take(limit).toList();
       }
@@ -635,8 +581,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
   Future<List<WeatherMeasurementModel>> getPendingMeasurements() async {
     try {
       await _ensureInitialized();
-      
-      // Return measurements created locally that haven't been synced
       return _measurementsBox!.values
           .where((m) => m.source.startsWith('manual') || m.source.startsWith('sensor'))
           .toList();
@@ -717,7 +661,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
       await _statisticsBox?.close();
       await _metadataBox?.close();
     } catch (e) {
-      // Log error but don't throw
       print('Warning: Error disposing weather local data source: $e');
     }
   }

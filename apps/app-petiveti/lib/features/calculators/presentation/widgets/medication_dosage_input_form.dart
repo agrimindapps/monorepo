@@ -33,26 +33,18 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
     return Consumer(
       builder: (context, ref, child) {
         final provider = ref.watch(medicationDosageProviderProvider);
-        // Atualizar controllers quando o provider mudar
         _updateControllers(provider);
 
         return Column(
           children: [
-            // Dados básicos do animal
             _buildAnimalDataSection(provider),
             const SizedBox(height: 16),
-
-            // Configuração do medicamento
             if (provider.selectedMedication != null) ...[
               _buildMedicationConfigSection(provider),
               const SizedBox(height: 16),
             ],
-
-            // Condições especiais
             _buildSpecialConditionsSection(provider),
             const SizedBox(height: 16),
-
-            // Notas adicionais
             _buildNotesSection(provider),
           ],
         );
@@ -95,11 +87,8 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Espécie e Peso na mesma linha
             Row(
               children: [
-                // Espécie
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,8 +136,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                   ),
                 ),
                 const SizedBox(width: 16),
-
-                // Peso
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,8 +177,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Grupo de Idade
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -251,8 +236,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Medicamento selecionado
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -292,11 +275,8 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Concentração e Frequência
             Row(
               children: [
-                // Concentração
                 if (medication.concentrations.isNotEmpty)
                   Expanded(
                     child: Column(
@@ -332,8 +312,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
 
                 if (medication.concentrations.isNotEmpty)
                   const SizedBox(width: 16),
-
-                // Frequência
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,8 +349,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Forma farmacêutica (se disponível)
             if (medication.pharmaceuticalForms.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,8 +380,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
                   const SizedBox(height: 16),
                 ],
               ),
-
-            // Flag de emergência
             CheckboxListTile(
               title: const Text('Situação de Emergência'),
               subtitle: const Text(
@@ -451,8 +425,6 @@ class _MedicationDosageInputFormState extends State<MedicationDosageInputForm> {
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 16),
-
-            // Grid de condições
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

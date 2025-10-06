@@ -27,11 +27,7 @@ class DataExportService {
     final userData = <String, dynamic>{};
     int processedCategories = 0;
     final totalCategories = request.includedCategories.length;
-
-    // Reportar progresso inicial
     onProgress?.call(ExportProgress.initial());
-
-    // Coletar dados por categoria
     for (final categoryKey in request.includedCategories) {
       onProgress?.call(
         ExportProgress.collecting(
@@ -70,11 +66,9 @@ class DataExportService {
             userData['app_settings'] = await _collectSettingsData();
             break;
           default:
-            // Categoria desconhecida - ignorar
             continue;
         }
       } catch (e) {
-        // Log do erro mas continua processamento
         print('Erro ao coletar dados da categoria $categoryKey: $e');
         userData['${categoryKey}_error'] = 'Erro na coleta: $e';
       }
@@ -116,17 +110,12 @@ class DataExportService {
   /// Gera arquivo CSV para dados tabulares
   Future<Uint8List> generateCsvExport(Map<String, dynamic> userData) async {
     final csvLines = <String>[];
-
-    // Header CSV
     csvLines.add('Categoria,Item,Campo,Valor,Data_Registro');
-
-    // Processar cada categoria
     for (final entry in userData.entries) {
       final category = entry.key;
       final data = entry.value;
 
       if (data is List) {
-        // Dados em lista (abastecimentos, manutenções, etc.)
         for (int i = 0; i < data.length; i++) {
           final item = data[i];
           if (item is Map<String, dynamic>) {
@@ -144,7 +133,6 @@ class DataExportService {
           }
         }
       } else if (data is Map<String, dynamic>) {
-        // Dados em mapa (perfil, configurações, etc.)
         for (final field in data.entries) {
           csvLines.add(
             _escapeCsvField([
@@ -186,8 +174,6 @@ class DataExportService {
   String generateChecksum(Uint8List data) {
     return data.hashCode.toString();
   }
-
-  // Métodos privados para coleta de dados específicos
 
   Future<Map<String, dynamic>> _collectUserProfile() async {
     try {
@@ -339,8 +325,6 @@ class DataExportService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final settings = <String, dynamic>{};
-
-      // Coletar todas as configurações (sem dados sensíveis)
       for (final key in prefs.getKeys()) {
         if (!_isSensitiveKey(key)) {
           final value = prefs.get(key);
@@ -353,8 +337,6 @@ class DataExportService {
       return {'error': 'Não foi possível acessar configurações: $e'};
     }
   }
-
-  // Métodos auxiliares
 
   bool _isWithinDateRange(Map<String, dynamic> data, ExportRequest request) {
     if (request.startDate == null && request.endDate == null) return true;
@@ -380,7 +362,6 @@ class DataExportService {
   }
 
   String? _extractDate(Map<String, dynamic> data) {
-    // Tenta diferentes campos de data comuns
     for (final dateField in [
       'date',
       'createdAt',
@@ -401,8 +382,6 @@ class DataExportService {
     for (final entry in data.entries) {
       final key = entry.key;
       final value = entry.value;
-
-      // Remove dados sensíveis ou internos
       if (_isSensitiveKey(key)) continue;
 
       sanitized[key] = value;

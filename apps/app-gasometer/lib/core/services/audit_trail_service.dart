@@ -136,8 +136,6 @@ class FinancialAuditTrailService {
     } else {
       _auditBox = Hive.box<FinancialAuditEntry>(_boxName);
     }
-
-    // Clean old entries on initialization
     await _cleanOldEntries();
   }
 
@@ -174,8 +172,6 @@ class FinancialAuditTrailService {
 
     final beforeState = _extractFinancialFields(beforeEntity);
     final afterState = _extractFinancialFields(afterEntity);
-
-    // Only log if there are actual changes in financial fields
     if (_hasFinancialChanges(beforeState, afterState)) {
       final entry = FinancialAuditEntry.create(
         entityId: afterEntity.id,
@@ -351,20 +347,13 @@ class FinancialAuditTrailService {
     };
 
     for (final entry in entries) {
-      // Count by type
       summary['by_type'][entry.eventType] =
           (summary['by_type'][entry.eventType] ?? 0) + 1;
-
-      // Count by entity type
       summary['by_entity'][entry.entityType] =
           (summary['by_entity'][entry.entityType] ?? 0) + 1;
-
-      // High value transactions
       if (entry.isHighValue) {
         summary['high_value_count']++;
       }
-
-      // Total monetary value
       if (entry.monetaryValue != null) {
         summary['total_monetary_value'] += entry.monetaryValue!;
       }
@@ -389,8 +378,6 @@ class FinancialAuditTrailService {
     if (keysToDelete.isNotEmpty) {
       await _auditBox!.deleteAll(keysToDelete);
     }
-
-    // Also limit entries per entity
     await _limitEntriesPerEntity();
   }
 
@@ -399,13 +386,9 @@ class FinancialAuditTrailService {
     if (_auditBox == null) return;
 
     final entitiesMap = <String, List<FinancialAuditEntry>>{};
-
-    // Group by entity
     for (final entry in _auditBox!.values) {
       entitiesMap.putIfAbsent(entry.entityId, () => []).add(entry);
     }
-
-    // Limit entries per entity
     for (final entityId in entitiesMap.keys) {
       final entries = entitiesMap[entityId]!;
       if (entries.length > _maxEntriesPerEntity) {

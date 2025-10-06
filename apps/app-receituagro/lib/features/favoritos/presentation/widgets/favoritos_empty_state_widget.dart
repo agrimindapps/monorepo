@@ -30,7 +30,6 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone principal
             Container(
               width: 80,
               height: 80,
@@ -46,8 +45,6 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 24),
-            
-            // Mensagem principal
             Text(
               message,
               style: TextStyle(
@@ -59,8 +56,6 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 12),
-            
-            // Sugestão de ação
             Text(
               _getActionSuggestion(),
               style: TextStyle(
@@ -71,8 +66,6 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 32),
-            
-            // Botão de ação (opcional)
             _buildActionButton(context),
           ],
         ),
@@ -169,16 +162,12 @@ class FavoritosEmptyStateWidget extends StatelessWidget {
 
   /// Manipula tap na ação
   void _handleActionTap(BuildContext context) {
-    // TODO: Implementar navegação baseada no tipo
     switch (tipo) {
       case TipoFavorito.defensivo:
-        // Navigator.pushNamed(context, '/defensivos');
         break;
       case TipoFavorito.praga:
-        // Navigator.pushNamed(context, '/identificar-praga');
         break;
       case TipoFavorito.diagnostico:
-        // Navigator.pushNamed(context, '/diagnostico');
         break;
     }
   }

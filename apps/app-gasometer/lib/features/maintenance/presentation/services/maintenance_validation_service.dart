@@ -7,13 +7,9 @@ class MaintenanceValidationService {
   /// Validates a complete maintenance record
   Map<String, String> validateMaintenance(MaintenanceEntity maintenance) {
     final errors = <String, String>{};
-
-    // Validate vehicle
     if (maintenance.vehicleId.isEmpty) {
       errors['vehicleId'] = 'Veículo é obrigatório';
     }
-
-    // Validate title
     if (maintenance.title.trim().isEmpty) {
       errors['title'] = 'Título é obrigatório';
     } else if (maintenance.title.trim().length < 3) {
@@ -21,8 +17,6 @@ class MaintenanceValidationService {
     } else if (maintenance.title.trim().length > 100) {
       errors['title'] = 'Título muito longo (máximo 100 caracteres)';
     }
-
-    // Validate description
     if (maintenance.description.trim().isEmpty) {
       errors['description'] = 'Descrição é obrigatória';
     } else if (maintenance.description.trim().length < 5) {
@@ -30,28 +24,20 @@ class MaintenanceValidationService {
     } else if (maintenance.description.trim().length > 500) {
       errors['description'] = 'Descrição muito longa (máximo 500 caracteres)';
     }
-
-    // Validate cost
     if (maintenance.cost < 0) {
       errors['cost'] = 'Custo não pode ser negativo';
     } else if (maintenance.cost > 999999.99) {
       errors['cost'] = 'Custo muito alto';
     }
-
-    // Validate odometer
     if (maintenance.odometer < 0) {
       errors['odometer'] = 'Odômetro não pode ser negativo';
     } else if (maintenance.odometer > 9999999) {
       errors['odometer'] = 'Valor muito alto';
     }
-
-    // Validate service date
     final now = DateTime.now();
     if (maintenance.serviceDate.isAfter(now)) {
       errors['serviceDate'] = 'Data de serviço não pode ser futura';
     }
-
-    // Validate workshop info (optional)
     if (maintenance.workshopName != null && maintenance.workshopName!.trim().isNotEmpty) {
       if (maintenance.workshopName!.trim().length < 2) {
         errors['workshopName'] = 'Nome da oficina muito curto';
@@ -59,16 +45,12 @@ class MaintenanceValidationService {
         errors['workshopName'] = 'Nome da oficina muito longo';
       }
     }
-
-    // Validate workshop phone (optional)
     if (maintenance.workshopPhone != null && maintenance.workshopPhone!.trim().isNotEmpty) {
       final cleanPhone = maintenance.workshopPhone!.replaceAll(RegExp(r'\D'), '');
       if (cleanPhone.length < 10 || cleanPhone.length > 11) {
         errors['workshopPhone'] = 'Telefone inválido (10 ou 11 dígitos)';
       }
     }
-
-    // Validate workshop address (optional)
     if (maintenance.workshopAddress != null && maintenance.workshopAddress!.trim().isNotEmpty) {
       if (maintenance.workshopAddress!.trim().length < 5) {
         errors['workshopAddress'] = 'Endereço muito curto';
@@ -76,15 +58,11 @@ class MaintenanceValidationService {
         errors['workshopAddress'] = 'Endereço muito longo';
       }
     }
-
-    // Validate next service date (optional)
     if (maintenance.nextServiceDate != null) {
       if (maintenance.nextServiceDate!.isBefore(maintenance.serviceDate)) {
         errors['nextServiceDate'] = 'Próxima manutenção deve ser após a data de serviço';
       }
     }
-
-    // Validate next service odometer (optional)
     if (maintenance.nextServiceOdometer != null) {
       if (maintenance.nextServiceOdometer! < maintenance.odometer) {
         errors['nextServiceOdometer'] = 'Próximo odômetro deve ser maior que o atual';
@@ -92,8 +70,6 @@ class MaintenanceValidationService {
         errors['nextServiceOdometer'] = 'Valor muito alto';
       }
     }
-
-    // Validate notes (optional)
     if (maintenance.notes != null && maintenance.notes!.trim().isNotEmpty) {
       if (maintenance.notes!.trim().length > 1000) {
         errors['notes'] = 'Observações muito longas (máximo 1000 caracteres)';
@@ -199,8 +175,6 @@ class MaintenanceValidationService {
   ) {
     return existingMaintenances.any((existing) {
       if (existing.id == maintenance.id) return false; // Same record
-
-      // Check if same vehicle, similar date, and similar odometer
       final sameVehicle = existing.vehicleId == maintenance.vehicleId;
       final sameDate = existing.serviceDate.difference(maintenance.serviceDate).inHours.abs() < 24;
       final sameOdometer = (existing.odometer - maintenance.odometer).abs() < 10;
@@ -223,8 +197,6 @@ class MaintenanceValidationService {
     if (vehicleMaintenances.isEmpty) return true;
 
     final latestMaintenance = vehicleMaintenances.last;
-
-    // Odometer should not decrease
     if (odometer < latestMaintenance.odometer) {
       return false;
     }

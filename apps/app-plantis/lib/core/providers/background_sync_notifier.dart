@@ -107,18 +107,12 @@ class BackgroundSyncNotifier extends _$BackgroundSyncNotifier {
   @override
   BackgroundSyncState build() {
     _backgroundSyncService = ref.read(backgroundSyncServiceProvider);
-
-    // Setup cleanup
     ref.onDispose(() {
       _messageSubscription?.cancel();
       _progressSubscription?.cancel();
       _statusSubscription?.cancel();
     });
-
-    // Listen to service updates
     _listenToSyncUpdates();
-
-    // Return initial state from service
     return BackgroundSyncState(
       isSyncInProgress: _backgroundSyncService.isSyncInProgress,
       hasPerformedInitialSync: _backgroundSyncService.hasPerformedInitialSync,
@@ -163,8 +157,6 @@ class BackgroundSyncNotifier extends _$BackgroundSyncNotifier {
       userId: userId,
       isInitialSync: isInitialSync,
     );
-
-    // Update state after sync starts
     state = state.copyWith(
       isSyncInProgress: _backgroundSyncService.isSyncInProgress,
       hasPerformedInitialSync: _backgroundSyncService.hasPerformedInitialSync,

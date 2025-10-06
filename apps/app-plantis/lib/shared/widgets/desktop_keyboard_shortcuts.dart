@@ -24,7 +24,6 @@ class DesktopKeyboardShortcuts extends StatefulWidget {
 class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
   @override
   Widget build(BuildContext context) {
-    // Só aplicar shortcuts em desktop/web
     if (!kIsWeb &&
         !PlatformHelper.isMacOS &&
         !PlatformHelper.isWindows &&
@@ -33,7 +32,6 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
     }
 
     final shortcuts = <LogicalKeySet, Intent>{
-      // Navegação básica
       LogicalKeySet(
         LogicalKeyboardKey.control,
         LogicalKeyboardKey.digit1,
@@ -46,8 +44,6 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
         LogicalKeyboardKey.control,
         LogicalKeyboardKey.digit3,
       ): const NavigateToIntent('/settings'),
-
-      // Ações comuns
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
           const CreateNewPlantIntent(),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
@@ -55,18 +51,12 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
       LogicalKeySet(LogicalKeyboardKey.escape): const EscapeIntent(),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyQ):
           const GoBackIntent(),
-
-      // Busca
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF):
           const SearchIntent(),
-
-      // Refresh
       LogicalKeySet(LogicalKeyboardKey.f5): const RefreshIntent(),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyR):
           const RefreshIntent(),
     };
-
-    // Adicionar shortcuts customizados
     if (widget.customShortcuts != null) {
       for (final entry in widget.customShortcuts!.entries) {
         shortcuts[LogicalKeySet.fromSet({entry.key.trigger})] = CustomIntent(
@@ -92,8 +82,6 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
     );
   }
 }
-
-// Intents (intenções)
 class NavigateToIntent extends Intent {
   final String route;
   const NavigateToIntent(this.route);
@@ -127,8 +115,6 @@ class CustomIntent extends Intent {
   final VoidCallback callback;
   const CustomIntent(this.callback);
 }
-
-// Actions (ações)
 class NavigateToAction extends Action<NavigateToIntent> {
   @override
   Object? invoke(NavigateToIntent intent) {
@@ -226,8 +212,6 @@ class CustomAction extends Action<CustomIntent> {
     return null;
   }
 }
-
-// Notifiers para comunicação global
 class SaveNotifier extends InheritedNotifier<ValueNotifier<void>> {
   const SaveNotifier({
     super.key,
@@ -279,8 +263,6 @@ class RefreshNotifier extends InheritedWidget {
     return refresh != oldWidget.refresh;
   }
 }
-
-// Widget helper para exibir shortcuts disponíveis
 class KeyboardShortcutsHelp extends StatelessWidget {
   const KeyboardShortcutsHelp({super.key});
 
@@ -339,8 +321,6 @@ class KeyboardShortcutsHelp extends StatelessWidget {
     );
   }
 }
-
-// Extension para facilitar uso
 extension DesktopKeyboardShortcutsExtension on Widget {
   /// Aplica atalhos de teclado desktop
   Widget withKeyboardShortcuts({
@@ -352,8 +332,6 @@ extension DesktopKeyboardShortcutsExtension on Widget {
     );
   }
 }
-
-// Helper para detectar plataforma
 class PlatformHelper {
   const PlatformHelper._(); // Private constructor to prevent instantiation
 

@@ -21,15 +21,10 @@ class HiveStorageService implements ILocalStorageRepository {
   Future<Either<Failure, void>> initialize() async {
     try {
       if (_isInitialized) return const Right(null);
-
-      // Inicializa o BoxRegistryService primeiro
       final registryResult = await _boxRegistry.initialize();
       if (registryResult.isLeft()) {
         return registryResult.fold((failure) => Left(failure), (_) => const Right(null));
       }
-
-      // Registra as boxes core comuns (genéricas)
-      // Apps específicos devem registrar suas próprias boxes via BoxRegistryService
       await _registerCoreBoxes();
 
       _isInitialized = true;
@@ -50,7 +45,6 @@ class HiveStorageService implements ILocalStorageRepository {
     for (final config in coreBoxes) {
       final result = await _boxRegistry.registerBox(config);
       if (result.isLeft()) {
-        // Log o erro mas continua - boxes core devem sempre funcionar
         if (kDebugMode) {
           debugPrint('Warning: Failed to register core box "${config.name}"');
         }
@@ -180,10 +174,7 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-
-      // Handle Map conversion properly to avoid LinkedMap issues
       final values = targetBox.values.map((dynamic value) {
-        // Convert LinkedMap to Map<String, dynamic> if needed
         if (value is Map && value is! Map<String, dynamic>) {
           return Map<String, dynamic>.from(value) as T;
         }
@@ -315,7 +306,6 @@ class HiveStorageService implements ILocalStorageRepository {
         );
 
         if (DateTime.now().isAfter(expiresAt)) {
-          // Dados expirados, remover
           remove(key: key, box: box);
           return const Right(null);
         }

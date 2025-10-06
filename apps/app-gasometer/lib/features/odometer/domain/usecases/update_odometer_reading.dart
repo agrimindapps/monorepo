@@ -18,21 +18,16 @@ class UpdateOdometerReadingUseCase implements UseCase<OdometerEntity?, OdometerE
   @override
   Future<Either<Failure, OdometerEntity?>> call(OdometerEntity params) async {
     try {
-      // Validações
       final validation = _validateOdometerReading(params);
       if (validation != null) {
         return Left(ValidationFailure(validation));
       }
-
-      // Verificar se leitura existe
       final existing = await _repository.getOdometerReadingById(params.id);
       if (existing == null) {
         return const Left(
           ValidationFailure('Leitura de odômetro não encontrada'),
         );
       }
-
-      // Atualizar leitura
       final updatedReading = params.copyWith(
         updatedAt: DateTime.now(),
       );

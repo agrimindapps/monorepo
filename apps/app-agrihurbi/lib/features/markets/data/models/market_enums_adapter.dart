@@ -4,8 +4,6 @@ import 'package:core/core.dart';
 /// Hive Type Adapters for Market Enums
 /// 
 /// Register these adapters before using Hive with market models
-
-// Market Type Adapter
 class MarketTypeAdapter extends TypeAdapter<MarketType> {
   @override
   final int typeId = 7; // Ensure unique typeId across the app
@@ -21,8 +19,6 @@ class MarketTypeAdapter extends TypeAdapter<MarketType> {
     writer.writeByte(obj.index);
   }
 }
-
-// Market Status Adapter
 class MarketStatusAdapter extends TypeAdapter<MarketStatus> {
   @override
   final int typeId = 8; // Ensure unique typeId across the app

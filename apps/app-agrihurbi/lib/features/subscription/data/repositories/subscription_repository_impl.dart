@@ -20,12 +20,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, List<SubscriptionPlan>>> getAvailablePlans() async {
     try {
-      // First try to get from remote (RevenueCat)
       final remotePlans = await remoteDataSource.getAvailablePlans();
       await localDataSource.cachePlans(remotePlans);
       return Right(remotePlans);
     } on ServerException catch (e) {
-      // Fallback to cached plans if remote fails
       try {
         final cachedPlans = await localDataSource.getAvailablePlans();
         return Right(cachedPlans);
@@ -46,7 +44,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     String userId,
   ) async {
     try {
-      // Try remote first for most up-to-date subscription status
       final remoteSubscription = await remoteDataSource.getCurrentSubscription(
         userId,
       );
@@ -54,14 +51,11 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         await localDataSource.cacheSubscription(remoteSubscription);
         return Right(remoteSubscription);
       }
-
-      // Fallback to cache
       final cachedSubscription = await localDataSource.getCurrentSubscription(
         userId,
       );
       return Right(cachedSubscription);
     } on ServerException catch (_) {
-      // If remote fails, try cache
       try {
         final cachedSubscription = await localDataSource.getCurrentSubscription(
           userId,
@@ -85,7 +79,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     String planId,
   ) async {
     try {
-      // Use RevenueCat to make the purchase
       final subscription = await remoteDataSource.subscribeToPlan(
         userId,
         planId,
@@ -172,7 +165,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     String newPlanId,
   ) async {
     try {
-      // Use RevenueCat to upgrade the plan
       final upgradedSubscription = await remoteDataSource.upgradePlan(
         userId,
         newPlanId,

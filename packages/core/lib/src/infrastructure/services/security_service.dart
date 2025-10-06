@@ -9,13 +9,9 @@ class SecurityService {
   static SecurityService get instance => _instance ??= SecurityService._();
 
   SecurityService._();
-
-  // Configurable policies
   PasswordPolicy _passwordPolicy = const PasswordPolicy.standard();
   LockoutPolicy _lockoutPolicy = const LockoutPolicy.standard();
   final Map<String, RateLimitConfig> _rateLimitConfigs = {};
-
-  // State tracking
   final Map<String, List<DateTime>> _rateLimitTracking = {};
   Timer? _cleanupTimer;
 
@@ -36,7 +32,6 @@ class SecurityService {
 
   /// Initialize security service
   void initialize() {
-    // Start periodic cleanup of rate limit tracking
     _cleanupTimer = Timer.periodic(
       const Duration(minutes: 5),
       (_) => _cleanupOldRateLimitData(),
@@ -60,8 +55,6 @@ class SecurityService {
       final lockoutTime = DateTime.fromMillisecondsSinceEpoch(lockoutTimestamp);
       final isStillLocked =
           DateTime.now().difference(lockoutTime) < _lockoutPolicy.duration;
-
-      // If lockout has expired, clear the lockout
       if (!isStillLocked) {
         await _clearLockout(userIdentifier);
       }
@@ -117,8 +110,6 @@ class SecurityService {
           '⚠️ Failed login attempt $newAttempts/${_lockoutPolicy.maxAttempts} for $userIdentifier',
         );
       }
-
-      // Lock account if max attempts reached
       if (newAttempts >= _lockoutPolicy.maxAttempts) {
         await _lockAccount(userIdentifier);
       }
@@ -157,24 +148,16 @@ class SecurityService {
     final config = _rateLimitConfigs[endpoint] ?? const RateLimitConfig.standard();
     final key = '${endpoint}_$userIdentifier';
     final now = DateTime.now();
-
-    // Get existing timestamps for this key
     final timestamps = _rateLimitTracking[key] ?? <DateTime>[];
-
-    // Remove timestamps older than the rate limit window
     timestamps.removeWhere(
       (timestamp) => now.difference(timestamp) > config.windowDuration,
     );
-
-    // Check if rate limit is exceeded
     if (timestamps.length >= config.maxRequests) {
       if (kDebugMode) {
         debugPrint('🚦 Rate limit exceeded for $endpoint by $userIdentifier');
       }
       return true;
     }
-
-    // Add current timestamp
     timestamps.add(now);
     _rateLimitTracking[key] = timestamps;
 
@@ -209,8 +192,6 @@ class SecurityService {
         !password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
       issues.add('Password must contain at least one special character');
     }
-
-    // Check for common weak patterns
     if (_isCommonPassword(password)) {
       issues.add('Password is too common, please choose a stronger password');
     }
@@ -234,7 +215,6 @@ class SecurityService {
 
   /// Check for input validation (prevent injection attacks)
   bool isInputSafe(String input) {
-    // Check for common injection patterns
     final dangerousPatterns = [
       RegExp(r'<script[^>]*>.*?</script>', caseSensitive: false),
       RegExp(r'javascript:', caseSensitive: false),
@@ -262,8 +242,6 @@ class SecurityService {
   /// Sanitize input string
   String sanitizeInput(String input) {
     String sanitized = input;
-
-    // Escape and remove dangerous characters
     sanitized = sanitized
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
@@ -271,8 +249,6 @@ class SecurityService {
         .replaceAll("'", '&#x27;')
         .replaceAll('\\', '')
         .trim();
-
-    // Limit length to prevent buffer overflow attempts
     if (sanitized.length > 1000) {
       sanitized = sanitized.substring(0, 1000);
     }
@@ -297,8 +273,6 @@ class SecurityService {
     try {
       await _clearFailedAttempts(userIdentifier);
       await _clearLockout(userIdentifier);
-
-      // Clear rate limit tracking
       _rateLimitTracking.removeWhere((key, _) => key.contains(userIdentifier));
 
       if (kDebugMode) {
@@ -323,8 +297,6 @@ class SecurityService {
       rateLimitWindows: _rateLimitTracking.length,
     );
   }
-
-  // Private methods
   Future<void> _lockAccount(String userIdentifier) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -366,7 +338,6 @@ class SecurityService {
     final now = DateTime.now();
 
     _rateLimitTracking.forEach((key, timestamps) {
-      // Use the appropriate config for cleanup
       final endpoint = key.split('_').first;
       final config = _rateLimitConfigs[endpoint] ?? const RateLimitConfig.standard();
 
@@ -374,8 +345,6 @@ class SecurityService {
         (timestamp) => now.difference(timestamp) > config.windowDuration,
       );
     });
-
-    // Remove empty entries
     _rateLimitTracking.removeWhere((key, timestamps) => timestamps.isEmpty);
   }
 
@@ -420,8 +389,6 @@ class SecurityService {
     for (final char in password.split('')) {
       charCount[char] = (charCount[char] ?? 0) + 1;
     }
-
-    // Check if any character appears more than maxRepeating times
     return charCount.values.any((count) => count > maxRepeating);
   }
 
@@ -429,21 +396,15 @@ class SecurityService {
     if (!isValid) return PasswordStrength.weak;
 
     int score = 0;
-
-    // Length bonus
     if (password.length >= 12) {
       score += 2;
     } else if (password.length >= 8) {
       score += 1;
     }
-
-    // Character variety
     if (password.contains(RegExp(r'[A-Z]'))) score += 1;
     if (password.contains(RegExp(r'[a-z]'))) score += 1;
     if (password.contains(RegExp(r'[0-9]'))) score += 1;
     if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) score += 1;
-
-    // Bonus for mixed case and special chars
     if (password.contains(RegExp(r'[A-Z]')) &&
         password.contains(RegExp(r'[a-z]')) &&
         password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {

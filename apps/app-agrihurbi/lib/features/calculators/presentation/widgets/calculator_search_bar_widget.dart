@@ -35,7 +35,6 @@ class CalculatorSearchBarWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Campo de busca principal
           TextField(
             controller: controller,
             decoration: InputDecoration(
@@ -69,8 +68,6 @@ class CalculatorSearchBarWidget extends StatelessWidget {
           ),
           
           const SizedBox(height: 12),
-          
-          // Dicas de busca
           _buildSearchHints(context),
         ],
       ),

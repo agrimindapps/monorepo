@@ -16,8 +16,6 @@ import '../providers/background_sync_provider.dart';
 import '../services/data_sanitization_service.dart';
 import '../widgets/loading_overlay.dart';
 
-// part 'auth_providers.g.dart';
-
 /// Auth State model for Riverpod state management
 class AuthState {
   final UserEntity? currentUser;
@@ -114,8 +112,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   late final ISubscriptionRepository? _subscriptionRepository;
   late final LoginUseCase _loginUseCase;
   late final LogoutUseCase _logoutUseCase;
-
-  // Stream subscriptions
   StreamSubscription<UserEntity?>? _userSubscription;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
 
@@ -137,7 +133,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   @override
   Future<AuthState> build() async {
-    // Initialize dependencies
     _authStateNotifier = AuthStateNotifier.instance;
     _authRepository = di.sl<IAuthRepository>();
     _loginUseCase = di.sl<LoginUseCase>();
@@ -167,14 +162,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     } catch (e) {
       _revokeDeviceUseCase = null;
     }
-
-    // Setup cleanup on dispose
     ref.onDispose(() {
       _userSubscription?.cancel();
       _subscriptionStream?.cancel();
     });
-
-    // Initialize auth state
     await _initializeAuthState();
 
     return const AuthState();
@@ -184,11 +175,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     _userSubscription = _authRepository.currentUser.listen(
       (user) async {
         final currentState = state.valueOrNull ?? const AuthState();
-
-        // Update state with new user
         state = AsyncData(currentState.copyWith(currentUser: user));
-
-        // Handle anonymous mode if needed
         if (user == null && await shouldUseAnonymousMode()) {
           if (kDebugMode) {
             debugPrint(
@@ -198,8 +185,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
           await signInAnonymously();
           return;
         }
-
-        // Complete auth initialization
         await _completeAuthInitialization(user);
       },
       onError: (Object error) {
@@ -218,8 +203,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         }
       },
     );
-
-    // Listen to subscription changes
     if (_subscriptionRepository != null) {
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
         subscription,
@@ -235,25 +218,17 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> _completeAuthInitialization(UserEntity? user) async {
     try {
       final currentState = state.valueOrNull ?? const AuthState();
-
-      // Update AuthStateNotifier with user changes
       _authStateNotifier.updateUser(user);
-
-      // Sync with RevenueCat when user logs in (not anonymous)
       bool isPremium = false;
       if (user != null && !isAnonymous && _subscriptionRepository != null) {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
         isPremium = currentState.isPremium;
-
-        // Trigger background sync
         _triggerBackgroundSyncIfNeeded(user.id);
       } else {
         isPremium = false;
         _authStateNotifier.updatePremiumStatus(false);
       }
-
-      // Mark as initialized
       if (kDebugMode) {
         debugPrint(
           '✅ AuthProvider: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: $isPremium',
@@ -326,8 +301,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       }
       return;
     }
-
-    // Execute in background without blocking
     Future.delayed(const Duration(milliseconds: 100), () {
       final currentState = state.valueOrNull;
       if (currentState?.isAuthenticated == true && !isAnonymous) {
@@ -338,8 +311,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   bool get isAnonymous =>
       state.value?.currentUser?.provider.name == 'anonymous';
-
-  // Public methods
   Future<void> login(String email, String password) async {
     final currentState = state.valueOrNull ?? const AuthState();
     state = AsyncData(
@@ -374,11 +345,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
             clearOperation: true,
           ),
         );
-
-        // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
-
-        // Log login event
         _analytics?.logLogin('email');
       },
     );
@@ -386,18 +353,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   Future<void> loginAndNavigate(String email, String password) async {
     try {
-      // First do normal login
       await login(email, password);
 
       final currentState = state.valueOrNull;
-      // Login successful - validate device and trigger sync
       if (currentState?.isAuthenticated == true &&
           !isAnonymous &&
           currentState?.errorMessage == null) {
-        // Validate device FIRST (critical for security)
         await _validateDeviceAfterLogin();
-
-        // If device validation passed, trigger sync in background
         if (currentState?.deviceLimitExceeded != true) {
           _triggerBackgroundSyncIfNeeded(currentState!.currentUser!.id);
         }
@@ -406,7 +368,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       if (kDebugMode) {
         debugPrint('Erro durante login: $e');
       }
-      // Error is already handled in login() method
     }
   }
 
@@ -446,8 +407,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
               isValidatingDevice: false,
             ),
           );
-
-          // If device limit exceeded, force logout
           if (failure.code == 'DEVICE_LIMIT_EXCEEDED') {
             final updatedState = state.valueOrNull ?? const AuthState();
             state = AsyncData(updatedState.copyWith(deviceLimitExceeded: true));
@@ -471,8 +430,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
                 deviceValidationError: validationResult.message,
               ),
             );
-
-            // If device limit exceeded, force logout
             if (validationResult.status == DeviceValidationStatus.exceeded) {
               final updatedState = state.valueOrNull ?? const AuthState();
               state = AsyncData(
@@ -506,14 +463,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         '🚫 Limite de dispositivos excedido - fazendo logout automático',
       );
     }
-
-    // Log analytics event
     await _analytics?.logEvent('device_limit_exceeded', {
       'user_id': state.value?.currentUser?.id ?? 'unknown',
       'device_count': 3,
     });
-
-    // Force logout after delay
     Future.delayed(const Duration(milliseconds: 1500), () {
       final currentState = state.valueOrNull;
       if (currentState?.deviceLimitExceeded == true) {
@@ -531,11 +484,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         clearError: true,
       ),
     );
-
-    // Device cleanup before logout
     await _performDeviceCleanupOnLogout();
-
-    // Continue with logout
     final result = await _logoutUseCase();
 
     result.fold(
@@ -551,15 +500,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       },
       (_) {
         state = const AsyncData(AuthState());
-
-        // Reset sync state
         _syncProvider?.resetSyncState();
-
-        // Update AuthStateNotifier
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
-
-        // Log logout event
         _analytics?.logLogout();
       },
     );
@@ -601,8 +544,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
             clearOperation: true,
           ),
         );
-
-        // Update AuthStateNotifier
         _authStateNotifier.updateUser(user);
       },
     );
@@ -640,11 +581,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
             clearOperation: true,
           ),
         );
-
-        // Update AuthStateNotifier
         _authStateNotifier.updateUser(user);
-
-        // Save anonymous preference
         _saveAnonymousPreference();
       },
     );
@@ -685,7 +622,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         return false;
       },
       (_) {
-        // Log event
         _analytics?.logEvent('password_reset_requested', {'method': 'email'});
 
         return true;
@@ -707,8 +643,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       ),
     );
   }
-
-  // Device cleanup methods (simplified versions)
   Future<void> _performDeviceCleanupOnLogout() async {
     if (_revokeDeviceUseCase == null ||
         state.value?.currentUser == null ||
@@ -718,8 +652,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     try {
       final currentDevice = await DeviceModel.fromCurrentDevice();
-
-      // CRITICAL: Skip if platform not supported (Web, etc)
       if (currentDevice == null) {
         return;
       }

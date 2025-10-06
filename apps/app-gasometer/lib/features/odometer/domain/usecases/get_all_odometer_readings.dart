@@ -19,8 +19,6 @@ class GetAllOdometerReadingsUseCase implements UseCase<List<OdometerEntity>, NoP
   Future<Either<Failure, List<OdometerEntity>>> call(NoParams params) async {
     try {
       final readings = await _repository.getAllOdometerReadings();
-
-      // Ordenar por data (mais recente primeiro)
       readings.sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
 
       return Right(readings);

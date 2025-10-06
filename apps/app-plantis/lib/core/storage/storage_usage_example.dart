@@ -16,8 +16,6 @@ class StorageUsageExample {
       data: plantData,
       box: PlantisBoxes.plants,
     );
-
-    // Tratar resultado
     result.fold(
       (failure) => print('Erro ao salvar: ${failure.message}'),
       (_) => print('Planta salva com sucesso!'),
@@ -32,8 +30,6 @@ class StorageUsageExample {
       key: 'plant-123',
       box: PlantisBoxes.plants,
     );
-
-    // Tratar resultado
     result.fold(
       (failure) => print('Erro ao recuperar: ${failure.message}'),
       (plant) => print('Planta recuperada: ${plant?['name']}'),
@@ -47,8 +43,6 @@ class StorageUsageExample {
     final result = await storage.getValues<Map<String, dynamic>>(
       box: PlantisBoxes.plants,
     );
-
-    // Tratar resultado
     result.fold(
       (Failure failure) => print('Erro ao listar: ${failure.message}'),
       (List<Map<String, dynamic>> plants) =>
@@ -64,8 +58,6 @@ class StorageUsageExample {
       key: 'plant-123',
       box: PlantisBoxes.plants,
     );
-
-    // Tratar resultado
     result.fold(
       (Failure failure) => print('Erro ao deletar: ${failure.message}'),
       (_) => print('Planta deletada com sucesso!'),

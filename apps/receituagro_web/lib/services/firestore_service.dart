@@ -9,8 +9,6 @@ class FirestoreService {
       persistenceEnabled: true,
     );
   }
-
-  // Getters para expor as funções no topo
   Future<int?> Function(String) get countDocuments => _countDocuments;
   Future<void> Function(String, List<dynamic>) get saveBatch => _saveBatch;
   Future<List<dynamic>> Function(String, String, String) get searchByField =>
@@ -34,8 +32,6 @@ class FirestoreService {
       return 0;
     }
   }
-
-  // Função interna para salvar um lote de documentos
   Future<void> _saveBatch(String collection, List<dynamic> data) async {
     const int maxBatchSize = 200;
     WriteBatch batch = _firestore.batch();
@@ -53,8 +49,6 @@ class FirestoreService {
       batch = _firestore.batch();
     }
   }
-
-  // Função interna para buscar documentos por campo
   Future<List<dynamic>> _searchByField(
       String collection, String field, String searchTerm) async {
     QuerySnapshot querySnapshot = await _firestore
@@ -70,8 +64,6 @@ class FirestoreService {
 
     return result.map((doc) => doc.data() as dynamic).toList();
   }
-
-  // Função interna para buscar documentos aleatórios
   Future<List<dynamic>> _getRandomDocuments(String collection) async {
     QuerySnapshot querySnapshot =
         await _firestore.collection(collection).limit(12).get();

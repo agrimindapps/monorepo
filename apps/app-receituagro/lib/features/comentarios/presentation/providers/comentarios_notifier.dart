@@ -101,13 +101,9 @@ class ComentariosState {
       errorSuggestions: [],
     );
   }
-
-  // UI helpers
   bool get hasComentarios => comentarios.isNotEmpty;
   int get totalCount => comentarios.length;
   int get activeCount => comentarios.where((c) => c.status).length;
-
-  // Statistics
   Map<String, int> get statistics {
     final stats = <String, int>{};
     stats['total'] = comentarios.length;
@@ -115,8 +111,6 @@ class ComentariosState {
     stats['today'] = comentarios.where((c) => c.ageCategory == 'today').length;
     stats['week'] = comentarios.where((c) => c.ageCategory == 'week').length;
     stats['month'] = comentarios.where((c) => c.ageCategory == 'month').length;
-
-    // Count by tool
     final toolCounts = <String, int>{};
     for (final comentario in comentarios.where((c) => c.status)) {
       toolCounts[comentario.ferramenta] = (toolCounts[comentario.ferramenta] ?? 0) + 1;
@@ -125,8 +119,6 @@ class ComentariosState {
 
     return stats;
   }
-
-  // Available filters for UI
   List<String> get availableTools {
     final tools = comentarios
         .where((c) => c.status)
@@ -227,7 +219,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
   @override
   Future<ComentariosState> build() async {
-    // Get use cases from DI
     _getComentariosUseCase = di.sl<GetComentariosUseCase>();
     _addComentarioUseCase = di.sl<AddComentarioUseCase>();
     _deleteComentarioUseCase = di.sl<DeleteComentarioUseCase>();
@@ -366,8 +357,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   Future<bool> addComentario(ComentarioEntity comentario) async {
     final currentState = state.value;
     if (currentState == null) return false;
-
-    // Prevent race conditions
     if (currentState.isOperating) {
       return false;
     }
@@ -381,8 +370,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     try {
       await _addComentarioUseCase(comentario);
-
-      // Update local state immediately for better UX
       final updatedComentarios = [comentario, ...currentState.comentarios];
       _clearFilterCache();
 
@@ -395,8 +382,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       );
 
       _applyFilters(immediate: true);
-
-      // Background sync to ensure data consistency
       unawaited(_syncDataInBackground());
 
       return true;
@@ -434,7 +419,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
       _applyFilters(immediate: true);
     } catch (e) {
-      // Silently handle background sync errors
       final finalState = state.value;
       if (finalState != null) {
         state = AsyncValue.data(
@@ -450,8 +434,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   Future<bool> deleteComentario(String id) async {
     final currentState = state.value;
     if (currentState == null) return false;
-
-    // Prevent race conditions
     if (currentState.isOperating) {
       return false;
     }
@@ -465,8 +447,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     try {
       await _deleteComentarioUseCase(id);
-
-      // Update local state immediately for better UX
       final updatedComentarios = currentState.comentarios.where((c) => c.id != id).toList();
       _clearFilterCache();
 
@@ -591,13 +571,11 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
   /// Apply current filters to comentarios list with debounce and optimization
   void _applyFilters({bool immediate = false}) {
-    // Cancel previous debounce timer
     _filterDebounceTimer?.cancel();
 
     if (immediate) {
       _performFiltering();
     } else {
-      // Use debounce to prevent excessive filtering operations
       _filterDebounceTimer = Timer(const Duration(milliseconds: 300), () {
         _performFiltering();
       });
@@ -608,36 +586,22 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   void _performFiltering() {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Generate hash for current filter state
     final currentFilterHash = _generateFilterHash(currentState);
-
-    // Use cached results if filter state hasn't changed
     if (_lastFilterHash == currentFilterHash && _cachedFilteredResults != null) {
       state = AsyncValue.data(currentState.copyWith(filteredComentarios: _cachedFilteredResults));
       return;
     }
-
-    // Perform filtering with optimized algorithm
     List<ComentarioEntity> filtered = currentState.comentarios;
-
-    // Apply date filter first (usually most selective)
     if (currentState.selectedFilter != 'all') {
       filtered = filtered.where((c) => c.ageCategory == currentState.selectedFilter).toList();
     }
-
-    // Apply tool filter
     if (currentState.selectedTool != null) {
       filtered = filtered.where((c) => c.ferramenta == currentState.selectedTool).toList();
     }
-
-    // Apply search query with optimized string matching
     if (currentState.searchQuery.isNotEmpty) {
       final query = currentState.searchQuery.toLowerCase();
       filtered = _performOptimizedSearch(filtered, query);
     }
-
-    // Cache results and update state
     _cachedFilteredResults = filtered;
     _lastFilterHash = currentFilterHash;
 
@@ -652,15 +616,10 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   /// Perform optimized search with early termination and better string matching
   List<ComentarioEntity> _performOptimizedSearch(List<ComentarioEntity> items, String query) {
     if (query.isEmpty) return items;
-
-    // Pre-compile search terms for better performance
     final searchTerms = query.split(' ').where((term) => term.isNotEmpty).map((term) => term.toLowerCase()).toList();
 
     return items.where((comentario) {
-      // Create searchable text once per item
       final searchableText = '${comentario.titulo} ${comentario.conteudo} ${comentario.ferramenta}'.toLowerCase();
-
-      // All search terms must be present (AND logic)
       return searchTerms.every((term) => searchableText.contains(term));
     }).toList();
   }

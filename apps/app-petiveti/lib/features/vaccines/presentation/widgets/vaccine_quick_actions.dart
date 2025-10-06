@@ -144,7 +144,6 @@ class VaccineQuickActions extends ConsumerWidget {
                   action: SnackBarAction(
                     label: 'Desfazer',
                     onPressed: () {
-                      // Implement undo functionality if needed
                     },
                   ),
                 ),
@@ -189,7 +188,6 @@ class VaccineQuickActions extends ConsumerWidget {
       builder: (context) => _RescheduleDatePicker(
         vaccine: vaccine,
         onRescheduled: (newDate) {
-          // Update vaccine with new date
           final updatedVaccine = vaccine.copyWith(nextDueDate: newDate);
           ref.read(vaccinesProvider.notifier).updateVaccine(updatedVaccine);
           
@@ -232,7 +230,6 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
   @override
   void initState() {
     super.initState();
-    // Set reminder for 1 day before due date by default
     final defaultReminderDate = widget.vaccine.nextDueDate!.subtract(
       const Duration(days: 1),
     );

@@ -84,8 +84,6 @@ class BackupSettingsState {
       lastRestoreResult: lastRestoreResult ?? this.lastRestoreResult,
     );
   }
-
-  // Derived state
   bool get hasBackups => backups.isNotEmpty;
   bool get canCreateBackup => !isCreatingBackup && !isRestoringBackup;
   bool get canRestoreBackup => !isCreatingBackup && !isRestoringBackup && hasBackups;
@@ -93,10 +91,6 @@ class BackupSettingsState {
   /// Verifica se há conexão com internet
   bool get isOnline => true; // Simplificado - verificação será feita nos métodos
 }
-
-// ============================================================================
-// DEPENDENCY PROVIDERS
-// ============================================================================
 
 @riverpod
 BackupService backupServiceDep(BackupServiceDepRef ref) {
@@ -108,10 +102,6 @@ Connectivity connectivityDep(ConnectivityDepRef ref) {
   return getIt<Connectivity>();
 }
 
-// ============================================================================
-// BACKUP SETTINGS NOTIFIER
-// ============================================================================
-
 @riverpod
 class BackupSettingsNotifier extends _$BackupSettingsNotifier {
   late final BackupService _backupService;
@@ -122,36 +112,24 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
   Future<BackupSettingsState> build() async {
     _backupService = ref.read(backupServiceDepProvider);
     _connectivity = ref.read(connectivityDepProvider);
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _connectivitySubscription?.cancel();
     });
-
-    // Initialize
     return await _initialize();
   }
 
   /// Inicializa o provider
   Future<BackupSettingsState> _initialize() async {
     try {
-      // Load settings
       final settings = await _backupService.getBackupSettings();
-
-      // Load backups
       final backupsResult = await _backupService.listBackups();
       final backups = backupsResult.fold(
         (failure) => <BackupInfo>[],
         (backupList) => backupList,
       );
-
-      // Load last backup time
       final lastBackupTime = await _backupService.getLastBackupTimestamp();
-
-      // Monitor connectivity
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
         (List<ConnectivityResult> results) {
-          // Atualiza UI quando conectividade muda
           final currentState = state.valueOrNull ?? BackupSettingsState.initial();
           state = AsyncValue.data(currentState); // Trigger rebuild
         },
@@ -239,8 +217,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
       );
       return;
     }
-
-    // Verifica se deve usar apenas WiFi
     if (currentState.settings.wifiOnlyEnabled && !(await isOnWifi)) {
       state = AsyncValue.data(
         currentState.copyWith(
@@ -260,7 +236,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
     );
 
     try {
-      // Simula progresso durante o backup
       _updateBackupProgress(0.1);
 
       final result = await _backupService.createBackup();
@@ -288,8 +263,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
               backupProgress: 1.0,
             ),
           );
-
-          // Recarrega lista de backups
           loadBackups();
         },
       );
@@ -327,7 +300,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
     );
 
     try {
-      // Fase 1: Validação (0% - 10%)
       _updateRestoreProgress(0.0, 'Validando integridade do backup...');
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
@@ -336,15 +308,11 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
 
       _updateRestoreProgress(0.1, 'Criando backup de segurança...');
       await Future<void>.delayed(const Duration(milliseconds: 700));
-
-      // Fase 2: Preparação (10% - 20%)
       _updateRestoreProgress(0.15, 'Preparando restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       _updateRestoreProgress(0.2, 'Iniciando processo de restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
-
-      // Executar restore com progress tracking
       final result = await _executeRestoreWithProgress(backupId, options);
 
       result.fold(
@@ -376,8 +344,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
 
       _updateRestoreProgress(1.0, 'Restore concluído!');
       await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      // Limpa status message após conclusão
       state = AsyncValue.data(
         (state.valueOrNull ?? BackupSettingsState.initial()).copyWith(
           isRestoringBackup: false,
@@ -403,7 +369,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
     RestoreOptions options,
   ) async {
     try {
-      // Simular progress tracking das diferentes fases
       if (options.restorePlants) {
         _updateRestoreProgress(0.3, 'Restaurando plantas...');
         await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -426,8 +391,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
 
       _updateRestoreProgress(0.95, 'Finalizando restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
-
-      // Chamar o método real do serviço
       return await _backupService.restoreBackup(backupId, options);
     } catch (e) {
       return Left(UnknownFailure('Erro no progress tracking: ${e.toString()}'));
@@ -493,7 +456,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
 
   /// Recarrega dados
   Future<void> refresh() async {
-    // Re-initialize
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _initialize());
   }
@@ -512,8 +474,6 @@ class BackupSettingsNotifier extends _$BackupSettingsNotifier {
       ),
     );
   }
-
-  // Métodos privados para atualizar progresso
 
   void _updateBackupProgress(double progress) {
     state = AsyncValue.data(

@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 /// Design Tokens - Central source of truth for all design constants
 /// This replaces scattered magic numbers and consolidates design decisions
 abstract class DesignTokens {
-  // Private constructor to prevent instantiation
   DesignTokens._();
-
-  // =====================================================================
-  // COLOR CONSTANTS
-  // =====================================================================
   
   /// Primary colors
   static const Color primaryColor = Color(0xFF2E7D32); // Green for agriculture
@@ -60,10 +55,6 @@ abstract class DesignTokens {
   static const Color marketDownColor = Color(0xFFD32F2F);
   static const Color marketNeutralColor = Color(0xFF9E9E9E);
   static const Color marketPendingColor = Color(0xFFFF9800);
-
-  // =====================================================================
-  // SPACING CONSTANTS
-  // =====================================================================
   
   /// Base spacing unit (4dp)
   static const double spacingBase = 4.0;
@@ -82,10 +73,6 @@ abstract class DesignTokens {
   static const double sectionSpacing = spacingLg;
   static const double itemSpacing = spacingSm;
   static const double buttonPadding = spacingMd;
-
-  // =====================================================================
-  // TYPOGRAPHY CONSTANTS
-  // =====================================================================
   
   /// Font weights
   static const FontWeight fontWeightLight = FontWeight.w300;
@@ -115,10 +102,6 @@ abstract class DesignTokens {
   static const double letterSpacingTight = -0.5;
   static const double letterSpacingNormal = 0.0;
   static const double letterSpacingWide = 0.5;
-
-  // =====================================================================
-  // BORDER RADIUS CONSTANTS
-  // =====================================================================
   
   static const double borderRadiusNone = 0.0;
   static const double borderRadiusXs = 2.0;
@@ -134,10 +117,6 @@ abstract class DesignTokens {
   static const BorderRadius buttonBorderRadius = BorderRadius.all(Radius.circular(borderRadiusMd));
   static const BorderRadius inputBorderRadius = BorderRadius.all(Radius.circular(borderRadiusMd));
   static const BorderRadius chipBorderRadius = BorderRadius.all(Radius.circular(borderRadiusXl));
-
-  // =====================================================================
-  // ELEVATION CONSTANTS
-  // =====================================================================
   
   static const double elevationNone = 0.0;
   static const double elevationSm = 1.0;
@@ -152,10 +131,6 @@ abstract class DesignTokens {
   static const double appBarElevation = elevationNone;
   static const double drawerElevation = elevationXl;
   static const double modalElevation = elevationXxl;
-
-  // =====================================================================
-  // ICON SIZE CONSTANTS
-  // =====================================================================
   
   static const double iconSizeXs = 16.0;
   static const double iconSizeSm = 20.0;
@@ -163,10 +138,6 @@ abstract class DesignTokens {
   static const double iconSizeLg = 32.0;
   static const double iconSizeXl = 40.0;
   static const double iconSizeXxl = 48.0;
-
-  // =====================================================================
-  // ANIMATION DURATION CONSTANTS
-  // =====================================================================
   
   static const Duration animationDurationFast = Duration(milliseconds: 150);
   static const Duration animationDurationMedium = Duration(milliseconds: 300);
@@ -176,10 +147,6 @@ abstract class DesignTokens {
   static const Duration buttonPressAnimation = animationDurationFast;
   static const Duration pageTransitionAnimation = animationDurationMedium;
   static const Duration modalAnimation = animationDurationMedium;
-
-  // =====================================================================
-  // COMPONENT DIMENSION CONSTANTS
-  // =====================================================================
   
   /// Button heights
   static const double buttonHeightSmall = 32.0;
@@ -202,19 +169,11 @@ abstract class DesignTokens {
   static const double avatarSmall = 32.0;
   static const double avatarMedium = 48.0;
   static const double avatarLarge = 64.0;
-
-  // =====================================================================
-  // BREAKPOINT CONSTANTS (for responsive design)
-  // =====================================================================
   
   static const double breakpointMobile = 480.0;
   static const double breakpointTablet = 768.0;
   static const double breakpointDesktop = 1024.0;
   static const double breakpointLargeDesktop = 1440.0;
-
-  // =====================================================================
-  // HELPER METHODS
-  // =====================================================================
   
   /// Get primary color swatch for ThemeData
   static MaterialColor get primarySwatch {

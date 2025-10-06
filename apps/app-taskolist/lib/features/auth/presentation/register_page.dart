@@ -184,12 +184,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-
-                // Header moderno
                 _buildModernHeader(context),
                 const SizedBox(height: 40),
-
-                // Campo Nome
                 _buildModernTextField(
                   controller: _nameController,
                   label: 'Nome completo',
@@ -207,8 +203,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-
-                // Campo Email
                 _buildModernTextField(
                   controller: _emailController,
                   label: 'Email',
@@ -225,8 +219,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-
-                // Campo Senha
                 _buildModernTextField(
                   controller: _passwordController,
                   label: 'Senha',
@@ -248,8 +240,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-
-                // Campo Confirmar Senha
                 _buildModernTextField(
                   controller: _confirmPasswordController,
                   label: 'Confirmar senha',
@@ -273,18 +263,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   },
                 ),
                 const SizedBox(height: 32),
-
-                // Botão de Registro Moderno
                 _buildModernButton(),
 
                 const SizedBox(height: 32),
-
-                // Social Login Moderno
                 _buildModernSocialLogin(),
 
                 const SizedBox(height: 32),
-
-                // Link para login
                 _buildLoginLink(),
               ],
             ),

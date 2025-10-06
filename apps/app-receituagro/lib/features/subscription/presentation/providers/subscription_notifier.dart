@@ -74,8 +74,6 @@ class SubscriptionState {
       infoMessage: null,
     );
   }
-
-  // Premium validation properties
   DateTime? get subscriptionExpiryDate => currentSubscription?.expirationDate;
   bool get hasLocalPremiumValidation => hasActiveSubscription;
   bool get isPremiumSyncActive => hasActiveSubscription;
@@ -98,25 +96,19 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
   @override
   Future<SubscriptionState> build() async {
-    // Get use cases from DI
     _getUserPremiumStatusUseCase = di.sl<GetUserPremiumStatusUseCase>();
     _getAvailableProductsUseCase = di.sl<GetAvailableProductsUseCase>();
     _purchaseProductUseCase = di.sl<PurchaseProductUseCase>();
     _restorePurchasesUseCase = di.sl<RestorePurchasesUseCase>();
     _refreshSubscriptionStatusUseCase = di.sl<RefreshSubscriptionStatusUseCase>();
     _manageSubscriptionUseCase = di.sl<ManageSubscriptionUseCase>();
-
-    // Load initial data
     return _loadInitialData();
   }
 
   /// Carrega todos os dados de subscription inicial
   Future<SubscriptionState> _loadInitialData() async {
     try {
-      // Verificar se tem assinatura ativa
       final hasActive = await _checkActiveSubscription();
-
-      // Carregar produtos disponíveis
       final products = await _loadAvailableProducts();
 
       return SubscriptionState(
@@ -207,7 +199,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
               successMessage: 'Assinatura ativada com sucesso!',
             ),
           );
-          // Recarregar dados após compra bem-sucedida
           await loadSubscriptionData();
         },
       );
@@ -227,7 +218,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     if (currentState == null) return;
 
     try {
-      // Encontra o produto baseado no plano selecionado
       final selectedProduct = currentState.availableProducts.firstWhere(
         (product) => currentState.selectedPlan == 'yearly'
             ? product.subscriptionPeriod?.contains('year') == true
@@ -327,8 +317,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   Future<void> openTermsOfUse() async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // TODO: Implementar navegação para termos de uso
     state = AsyncValue.data(
       currentState.copyWith(infoMessage: 'Redirecionando para Termos de Uso...'),
     );
@@ -338,8 +326,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   Future<void> openPrivacyPolicy() async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // TODO: Implementar navegação para política de privacidade
     state = AsyncValue.data(
       currentState.copyWith(
         infoMessage: 'Redirecionando para Política de Privacidade...',
@@ -440,8 +426,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      // For now, this is a placeholder
-      // In a real implementation, this would start a trial period
       await Future<void>.delayed(const Duration(seconds: 1));
 
       state = AsyncValue.data(
@@ -468,7 +452,6 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      // Validate product exists
       currentState.availableProducts.firstWhere(
         (p) => p.productId == planId,
         orElse: () => throw Exception('Product not found: $planId'),

@@ -78,8 +78,6 @@ class DetalheDiagnosticoState {
   DetalheDiagnosticoState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // UI helpers
   bool get hasError => errorMessage != null;
   bool get hasDiagnostico => diagnostico != null;
 }
@@ -98,14 +96,11 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
   @override
   Future<DetalheDiagnosticoState> build() async {
-    // Get dependencies from DI
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
     _hiveRepository = di.sl<DiagnosticoHiveRepository>();
     _favoritosRepository = di.sl<FavoritosHiveRepository>();
     _premiumService = di.sl<IPremiumService>();
     _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
-
-    // Setup premium status listener
     _setupPremiumStatusListener();
 
     return DetalheDiagnosticoState.initial();
@@ -119,17 +114,14 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
-      // Try Clean Architecture repository first
       final result = await _diagnosticosRepository.getById(diagnosticoId);
 
       await result.fold(
         (failure) async {
-          // Fallback to Hive repository
           throw Exception('Erro no repository Clean Architecture: $failure');
         },
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
-            // Load Hive data for UI compatibility
             final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(diagnosticoId);
             final diagnosticoData =
                 diagnosticoHive != null
@@ -161,7 +153,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         },
       );
     } catch (e) {
-      // Fallback to Hive repository
       try {
         final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(diagnosticoId);
         if (diagnosticoHive != null) {
@@ -234,7 +225,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
-      // Fallback to repository
       final isFavorited = await _favoritosRepository.isFavorito(
         'diagnosticos',
         diagnosticoId,
@@ -252,8 +242,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return false;
 
     final wasAlreadyFavorited = currentState.isFavorited;
-
-    // Optimistic update
     state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
 
     try {
@@ -263,14 +251,12 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
 
       if (!success) {
-        // Revert on failure
         state = AsyncValue.data(currentState.copyWith(isFavorited: wasAlreadyFavorited));
         return false;
       }
 
       return true;
     } catch (e) {
-      // Fallback to old system
       try {
         final success =
             wasAlreadyFavorited
@@ -291,7 +277,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
         return true;
       } catch (fallbackError) {
-        // Revert on error
         state = AsyncValue.data(currentState.copyWith(isFavorited: wasAlreadyFavorited));
         return false;
       }
@@ -309,34 +294,24 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return '';
 
     final buffer = StringBuffer();
-
-    // Header
     buffer.writeln('🔬 DIAGNÓSTICO RECEITUAGRO');
     buffer.writeln('═' * 30);
     buffer.writeln();
-
-    // Basic info
     buffer.writeln('📋 INFORMAÇÕES GERAIS');
     buffer.writeln('• Defensivo: $nomeDefensivo');
     buffer.writeln('• Praga: $nomePraga');
     buffer.writeln('• Cultura: $cultura');
     buffer.writeln();
-
-    // Active ingredient
     if (currentState.diagnosticoData['ingredienteAtivo']?.isNotEmpty ?? false) {
       buffer.writeln('🧪 INGREDIENTE ATIVO');
       buffer.writeln('• ${currentState.diagnosticoData['ingredienteAtivo']}');
       buffer.writeln();
     }
-
-    // Classifications
     buffer.writeln('⚠️ CLASSIFICAÇÕES');
     buffer.writeln('• Toxicológica: ${currentState.diagnosticoData['toxico'] ?? 'N/A'}');
     buffer.writeln('• Ambiental: ${currentState.diagnosticoData['classAmbiental'] ?? 'N/A'}');
     buffer.writeln('• Agronômica: ${currentState.diagnosticoData['classeAgronomica'] ?? 'N/A'}');
     buffer.writeln();
-
-    // Technical details
     buffer.writeln('🔧 DETALHES TÉCNICOS');
     if (currentState.diagnosticoData['formulacao']?.isNotEmpty ?? false) {
       buffer.writeln('• Formulação: ${currentState.diagnosticoData['formulacao']}');
@@ -348,8 +323,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       buffer.writeln('• Registro MAPA: ${currentState.diagnosticoData['mapa']}');
     }
     buffer.writeln();
-
-    // Application instructions
     buffer.writeln('💧 INSTRUÇÕES DE APLICAÇÃO');
     if (currentState.diagnosticoData['dosagem']?.isNotEmpty ?? false) {
       buffer.writeln('• Dosagem: ${currentState.diagnosticoData['dosagem']}');
@@ -367,15 +340,11 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       buffer.writeln('• Intervalo de Segurança: ${currentState.diagnosticoData['intervaloSeguranca']}');
     }
     buffer.writeln();
-
-    // Technology if available
     if (currentState.diagnosticoData['tecnologia']?.isNotEmpty ?? false) {
       buffer.writeln('🎯 TECNOLOGIA DE APLICAÇÃO');
       buffer.writeln(currentState.diagnosticoData['tecnologia']);
       buffer.writeln();
     }
-
-    // Footer
     buffer.writeln('═' * 30);
     buffer.writeln('📱 Gerado pelo ReceitaAgro');
     buffer.writeln('Sua ferramenta de diagnóstico agrícola');

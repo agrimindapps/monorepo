@@ -120,7 +120,6 @@ class HomePragasRecentWidget extends StatelessWidget {
   }
 
   void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName, PragaEntity praga) {
-    // Registra o acesso através do provider
     state.recordPragaAccess(praga);
     
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();

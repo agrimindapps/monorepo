@@ -39,14 +39,9 @@ class OfflineSyncQueueService {
     if (_isInitialized) return;
 
     try {
-      // Load persisted queue from storage
       await _loadQueueFromStorage();
-
-      // Check initial connectivity
       final connectivityResults = await _connectivity.checkConnectivity();
       _isOnline = _isConnected(connectivityResults);
-
-      // Listen to connectivity changes
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
         List<ConnectivityResult> results,
       ) {
@@ -60,14 +55,10 @@ class OfflineSyncQueueService {
           debugPrint('📴 Connectivity lost - queueing operations');
         }
       });
-
-      // Start periodic queue processing
       _processTimer = Timer.periodic(
         const Duration(minutes: 2),
         (_) => _processQueueWhenOnline(),
       );
-
-      // If online, process any existing queue items
       if (_isOnline && _queue.isNotEmpty) {
         _processQueueWhenOnline();
       }
@@ -84,17 +75,12 @@ class OfflineSyncQueueService {
   /// Add operation to sync queue
   Future<void> queueOperation(QueuedOperation operation) async {
     try {
-      // Add to in-memory queue
       _queue.add(operation);
-
-      // Persist to storage
       await _saveQueueToStorage();
 
       debugPrint(
         '📝 Queued ${operation.type} operation (${_queue.length} total)',
       );
-
-      // If online, try to process immediately
       if (_isOnline) {
         _processQueueWhenOnline();
       }
@@ -215,18 +201,15 @@ class OfflineSyncQueueService {
           final success = await _executeOperation(operation);
 
           if (success) {
-            // Remove from queue
             _queue.remove(operation);
             await _saveQueueToStorage();
             debugPrint('✅ Operation ${operation.type} completed');
           } else if (operation.shouldRetry()) {
-            // Increment retry count
             operation.retryCount++;
             debugPrint(
               '⚠️ Operation ${operation.type} failed, retry ${operation.retryCount}/${operation.maxRetries}',
             );
           } else {
-            // Max retries reached, remove from queue
             _queue.remove(operation);
             await _saveQueueToStorage();
             debugPrint(
@@ -243,8 +226,6 @@ class OfflineSyncQueueService {
             await _saveQueueToStorage();
           }
         }
-
-        // Small delay between operations to prevent overwhelming
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
 
@@ -262,8 +243,6 @@ class OfflineSyncQueueService {
       } catch (e) {
         debugPrint('❌ Error updating processing flag: $e');
       }
-
-      // Schedule retry if there are still items and we're online
       if (_queue.isNotEmpty && _isOnline) {
         _scheduleRetry();
       }
@@ -272,8 +251,6 @@ class OfflineSyncQueueService {
 
   Future<bool> _executeOperation(QueuedOperation operation) async {
     try {
-      // This would be implemented by specific services
-      // For now, we'll simulate the operation execution
 
       switch (operation.type) {
         case 'add_task':
@@ -293,28 +270,22 @@ class OfflineSyncQueueService {
       return false;
     }
   }
-
-  // These methods would be implemented by injecting the appropriate use cases
   Future<bool> _executeAddTask(QueuedOperation operation) async {
-    // Simulate API call - in real implementation, this would call AddTaskUseCase
     await Future<void>.delayed(const Duration(milliseconds: 500));
     return true; // Simulate success
   }
 
   Future<bool> _executeCompleteTask(QueuedOperation operation) async {
-    // Simulate API call - in real implementation, this would call CompleteTaskUseCase
     await Future<void>.delayed(const Duration(milliseconds: 300));
     return true; // Simulate success
   }
 
   Future<bool> _executeUpdateTask(QueuedOperation operation) async {
-    // Simulate API call - in real implementation, this would call UpdateTaskUseCase
     await Future<void>.delayed(const Duration(milliseconds: 400));
     return true; // Simulate success
   }
 
   Future<bool> _executeDeleteTask(QueuedOperation operation) async {
-    // Simulate API call - in real implementation, this would call DeleteTaskUseCase
     await Future<void>.delayed(const Duration(milliseconds: 200));
     return true; // Simulate success
   }

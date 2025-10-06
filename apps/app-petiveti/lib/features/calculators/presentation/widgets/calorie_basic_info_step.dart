@@ -57,7 +57,6 @@ class _CalorieBasicInfoStepState extends State<CalorieBasicInfoStep> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título do step
           Text(
             'Informações Básicas',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -77,34 +76,21 @@ class _CalorieBasicInfoStepState extends State<CalorieBasicInfoStep> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Seleção da espécie
                   _buildSpeciesSelector(),
                   const SizedBox(height: 24),
-
-                  // Peso atual
                   _buildWeightField(),
                   const SizedBox(height: 16),
-
-                  // Peso ideal (opcional)
                   _buildIdealWeightField(),
                   const SizedBox(height: 16),
-
-                  // Idade
                   _buildAgeField(),
                   const SizedBox(height: 16),
-
-                  // Raça (opcional)
                   _buildBreedField(),
                   const SizedBox(height: 24),
-
-                  // Dicas
                   _buildTipsCard(),
                 ],
               ),
             ),
           ),
-
-          // Erros de validação
           if (widget.validationErrors.isNotEmpty)
             _buildValidationErrors(),
         ],

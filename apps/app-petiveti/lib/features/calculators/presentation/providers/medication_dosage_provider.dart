@@ -17,10 +17,7 @@ final medicationDosageProviderProvider = ChangeNotifierProvider<MedicationDosage
 
 /// Provider para gerenciamento de state da calculadora de dosagem de medicamentos
 class MedicationDosageProvider with ChangeNotifier {
-  // Strategy para cálculos
   late final MedicationDosageStrategy _strategy;
-  
-  // Estado atual da calculadora
   MedicationDosageInput _input = const MedicationDosageInput(
     species: Species.dog,
     weight: 10.0,
@@ -34,24 +31,16 @@ class MedicationDosageProvider with ChangeNotifier {
   MedicationDosageOutput? _output;
   bool _isCalculating = false;
   String? _error;
-  
-  // Cache de dados
   List<MedicationData>? _allMedications;
   List<MedicationData> _filteredMedications = [];
   String _searchQuery = '';
-  
-  // Histórico de cálculos
   final List<MedicationDosageOutput> _calculationHistory = [];
-  
-  // Medicamentos favoritos
   final List<String> _favoriteMedications = [];
 
   MedicationDosageProvider() {
     _initializeStrategy();
     _loadInitialData();
   }
-
-  // Getters
   MedicationDosageInput get input => _input;
   MedicationDosageOutput? get output => _output;
   bool get isCalculating => _isCalculating;
@@ -61,8 +50,6 @@ class MedicationDosageProvider with ChangeNotifier {
   List<MedicationDosageOutput> get calculationHistory => List.unmodifiable(_calculationHistory);
   List<String> get favoriteMedications => List.unmodifiable(_favoriteMedications);
   String get searchQuery => _searchQuery;
-  
-  // Getters computados
   bool get hasValidInput => _validateCurrentInput();
   bool get hasCriticalAlerts => _output?.hasCriticalAlerts ?? false;
   bool get isSafeToAdminister => _output?.isSafeToAdminister ?? false;
@@ -117,8 +104,6 @@ class MedicationDosageProvider with ChangeNotifier {
   void updateMedicationId(String medicationId) {
     _input = _input.copyWith(medicationId: medicationId);
     _clearResults();
-    
-    // Auto-preencher concentração padrão se disponível
     final medication = _getMedicationById(medicationId);
     if (medication != null && medication.concentrations.isNotEmpty) {
       _input = _input.copyWith(concentration: medication.concentrations.first.value);
@@ -270,8 +255,6 @@ class MedicationDosageProvider with ChangeNotifier {
       
       final result = _strategy.calculate(_input);
       _output = result;
-      
-      // Registrar cálculo no sistema de auditoria médica
       VersionedMedicationDatabase.instance.logDosageCalculation(
         medicationId: _input.medicationId,
         calculatedDose: result.dosagePerKg,
@@ -288,8 +271,6 @@ class MedicationDosageProvider with ChangeNotifier {
           'criticalAlerts': result.alerts.where((a) => a.level == AlertLevel.danger).length,
         },
       );
-      
-      // Adicionar ao histórico
       _addToHistory(result);
       
       _error = null;
@@ -304,7 +285,6 @@ class MedicationDosageProvider with ChangeNotifier {
 
   /// Cálculo com debounce para updates automáticos
   void _performCalculationDebounced() {
-    // Implementar debounce se necessário
     calculateDosage();
   }
 
@@ -347,8 +327,6 @@ class MedicationDosageProvider with ChangeNotifier {
   /// Adiciona cálculo ao histórico
   void _addToHistory(MedicationDosageOutput result) {
     _calculationHistory.insert(0, result);
-    
-    // Manter apenas os últimos 20 cálculos
     if (_calculationHistory.length > 20) {
       _calculationHistory.removeRange(20, _calculationHistory.length);
     }
@@ -372,11 +350,8 @@ class MedicationDosageProvider with ChangeNotifier {
   void loadFromHistory(int index) {
     if (index >= 0 && index < _calculationHistory.length) {
       final historicalResult = _calculationHistory[index];
-      
-      // Reconstruir input baseado no resultado histórico
       final medication = _getMedicationById(historicalResult.medicationName.toLowerCase().replaceAll(' ', '_'));
       if (medication != null) {
-        // Note: Isso é uma simplificação. Em produção, seria melhor salvar o input original
         _input = MedicationDosageInput(
           species: Species.dog, // Derivar do histórico se possível
           weight: historicalResult.totalDailyDose / historicalResult.dosagePerKg,
@@ -399,13 +374,9 @@ class MedicationDosageProvider with ChangeNotifier {
     if (_output == null) return '';
     
     final buffer = StringBuffer();
-    
-    // Cabeçalho
     buffer.writeln('=== PRESCRIÇÃO VETERINÁRIA ===');
     buffer.writeln('Data: ${DateTime.now().toString().split(' ')[0]}');
     buffer.writeln();
-    
-    // Dados do animal
     buffer.writeln('DADOS DO ANIMAL:');
     buffer.writeln('Espécie: ${_input.species.displayName}');
     buffer.writeln('Peso: ${_input.weight.toStringAsFixed(1)} kg');
@@ -415,8 +386,6 @@ class MedicationDosageProvider with ChangeNotifier {
       buffer.writeln('Condições especiais: ${_input.specialConditions.map((c) => c.displayName).join(', ')}');
     }
     buffer.writeln();
-    
-    // Prescrição
     buffer.writeln('PRESCRIÇÃO:');
     buffer.writeln('Medicamento: ${_output!.medicationName}');
     buffer.writeln('Dosagem: ${_output!.dosePerAdministration.toStringAsFixed(2)} ${_output!.unit}');
@@ -428,8 +397,6 @@ class MedicationDosageProvider with ChangeNotifier {
     buffer.writeln('Frequência: ${_output!.administrationsPerDay}x ao dia');
     buffer.writeln('Intervalo: ${_output!.intervalBetweenDoses}');
     buffer.writeln();
-    
-    // Instruções
     buffer.writeln('INSTRUÇÕES DE ADMINISTRAÇÃO:');
     buffer.writeln('Via: ${_output!.instructions.route}');
     buffer.writeln('Timing: ${_output!.instructions.timing}');
@@ -438,8 +405,6 @@ class MedicationDosageProvider with ChangeNotifier {
       buffer.writeln('Preparo: ${_output!.instructions.dilution}');
     }
     buffer.writeln();
-    
-    // Alertas
     if (_output!.alerts.isNotEmpty) {
       buffer.writeln('ALERTAS E PRECAUÇÕES:');
       for (final alert in _output!.alerts) {
@@ -450,8 +415,6 @@ class MedicationDosageProvider with ChangeNotifier {
       }
       buffer.writeln();
     }
-    
-    // Monitoramento
     if (_output!.monitoringInfo != null) {
       buffer.writeln('MONITORAMENTO:');
       buffer.writeln('Parâmetros: ${_output!.monitoringInfo!.parametersToMonitor.join(', ')}');
@@ -459,8 +422,6 @@ class MedicationDosageProvider with ChangeNotifier {
       buffer.writeln('Sinais de alerta: ${_output!.monitoringInfo!.warningSignsToWatch.join(', ')}');
       buffer.writeln();
     }
-    
-    // Rodapé
     buffer.writeln('=== CALCULADO POR PETIVETI APP ===');
     
     return buffer.toString();
@@ -489,7 +450,6 @@ class MedicationDosageProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    // Cleanup se necessário
     super.dispose();
   }
 }

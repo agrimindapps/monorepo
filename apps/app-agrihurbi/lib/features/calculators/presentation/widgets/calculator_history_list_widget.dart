@@ -28,7 +28,6 @@ class CalculatorHistoryListWidget extends StatelessWidget {
       controller: scrollController,
       padding: const EdgeInsets.all(8.0),
       itemCount: history.length,
-      // Otimizações de performance:
       addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       cacheExtent: 400.0,
@@ -49,15 +48,12 @@ class CalculatorHistoryListWidget extends StatelessWidget {
       onTap: () => onReapply(historyItem),
       child: Row(
         children: [
-          // Ícone da calculadora
           CircleAvatar(
             backgroundColor: Theme.of(context).colorScheme.primary,
             child: const Icon(Icons.calculate, color: Colors.white),
           ),
           
           const SizedBox(width: 16),
-          
-          // Informações principais
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,8 +79,6 @@ class CalculatorHistoryListWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Menu de ações
           PopupMenuButton<String>(
             onSelected: (value) => _handleHistoryAction(context, value, historyItem),
             itemBuilder: (context) => [
@@ -150,8 +144,6 @@ class CalculatorHistoryListWidget extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
               onDelete(historyItem);
-              
-              // Mostrar feedback de sucesso
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Item removido do histórico'),

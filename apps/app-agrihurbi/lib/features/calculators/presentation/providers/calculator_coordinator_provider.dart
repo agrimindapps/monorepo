@@ -35,16 +35,12 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
         _searchProvider = searchProvider {
     _initializeProviders();
   }
-
-  // === PROVIDERS ACCESS ===
   
   CalculatorManagementProvider get managementProvider => _managementProvider;
   CalculatorExecutionProvider get executionProvider => _executionProvider;
   CalculatorHistoryProvider get historyProvider => _historyProvider;
   CalculatorFavoritesProvider get favoritesProvider => _favoritesProvider;
   CalculatorSearchProvider get searchProvider => _searchProvider;
-
-  // === AGGREGATED GETTERS ===
 
   /// Verifica se alguma operação está em andamento
   bool get isAnyOperationInProgress =>
@@ -96,8 +92,6 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
   /// Resultado do último cálculo
   CalculationResult? get currentCalculationResult => _executionProvider.currentResult;
 
-  // === COORDINATED OPERATIONS ===
-
   /// Inicialização completa do sistema de calculadoras
   Future<void> initializeSystem() async {
     debugPrint('CalculatorCoordinatorProvider: Inicializando sistema de calculadoras');
@@ -114,16 +108,10 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
   /// Seleciona e prepara calculadora para uso
   Future<bool> selectAndPrepareCalculator(String calculatorId) async {
     debugPrint('CalculatorCoordinatorProvider: Selecionando calculadora - $calculatorId');
-    
-    // Carrega calculadora se necessário
     final loadSuccess = await _managementProvider.loadCalculatorById(calculatorId);
     if (!loadSuccess) return false;
-
-    // Seleciona na gestão
     final calculator = _managementProvider.selectedCalculator;
     if (calculator == null) return false;
-
-    // Configura no provider de execução
     _executionProvider.setActiveCalculator(calculator);
     
     debugPrint('CalculatorCoordinatorProvider: Calculadora selecionada e preparada - $calculatorId');
@@ -142,12 +130,8 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
       debugPrint('CalculatorCoordinatorProvider: Nenhuma calculadora selecionada');
       return false;
     }
-
-    // Executa cálculo
     final executionSuccess = await _executionProvider.executeCalculation();
     if (!executionSuccess) return false;
-
-    // Salva no histórico se solicitado
     if (saveToHistory && _executionProvider.currentResult != null) {
       await _historyProvider.saveToHistory(
         calculatorId: calculator.id,
@@ -168,13 +152,9 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
         .firstOrNull;
     
     if (historyItem == null) return;
-
-    // Seleciona calculadora correspondente
     _managementProvider.selectCalculator(
       _managementProvider.findCalculatorById(historyItem.calculatorId)
     );
-
-    // Aplica resultado na execução
     _executionProvider.applyPreviousResult(historyItem.result);
     
     debugPrint('CalculatorCoordinatorProvider: Resultado do histórico aplicado - $historyId');
@@ -238,8 +218,6 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
     debugPrint('CalculatorCoordinatorProvider: Sistema resetado');
   }
 
-  // === CONVENIENCE METHODS ===
-
   /// Verifica se calculadora é favorita
   bool isCalculatorFavorite(String calculatorId) =>
     _favoritesProvider.isCalculatorFavorite(calculatorId);
@@ -256,10 +234,7 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
   FavoritesStatistics get favoritesStatistics =>
     _favoritesProvider.getFavoritesStatistics();
 
-  // === PRIVATE METHODS ===
-
   void _initializeProviders() {
-    // Escuta mudanças de todos os providers especializados
     _managementProvider.addListener(_onProviderChanged);
     _executionProvider.addListener(_onProviderChanged);
     _historyProvider.addListener(_onProviderChanged);
@@ -270,13 +245,11 @@ class CalculatorCoordinatorProvider extends ChangeNotifier {
   }
 
   void _onProviderChanged() {
-    // Propaga mudanças para listeners do coordenador
     notifyListeners();
   }
 
   @override
   void dispose() {
-    // Remove listeners dos providers especializados
     _managementProvider.removeListener(_onProviderChanged);
     _executionProvider.removeListener(_onProviderChanged);
     _historyProvider.removeListener(_onProviderChanged);

@@ -49,7 +49,6 @@ class WeatherCurrentCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header with location and time
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -85,8 +84,6 @@ class WeatherCurrentCard extends StatelessWidget {
         ),
         
         const SizedBox(height: 20),
-        
-        // Main temperature display
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,8 +106,6 @@ class WeatherCurrentCard extends StatelessWidget {
             ),
           ],
         ),
-        
-        // Weather condition
         Center(
           child: Text(
             _getWeatherDescription(),
@@ -123,8 +118,6 @@ class WeatherCurrentCard extends StatelessWidget {
         ),
         
         const SizedBox(height: 20),
-        
-        // Weather details grid
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -194,8 +187,6 @@ class WeatherCurrentCard extends StatelessWidget {
             ],
           ),
         ),
-        
-        // Additional calculated values
         if (_shouldShowCalculatedValues()) ...[
           const SizedBox(height: 16),
           Container(
@@ -219,8 +210,6 @@ class WeatherCurrentCard extends StatelessWidget {
             ),
           ),
         ],
-        
-        // Agricultural suitability indicator
         const SizedBox(height: 16),
         _buildAgriculturalIndicator(),
       ],

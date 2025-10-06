@@ -111,13 +111,9 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
             ],
           ),
           const SizedBox(height: 16),
-          
-          // Tags Section
           _buildTagsSection(context),
           
           const SizedBox(height: 16),
-          
-          // Tipo de Animal
           DSTextField(
             label: 'Tipo de Animal *',
             hint: 'Ex: Bovino, Zebu',
@@ -129,13 +125,9 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
           ),
           
           const SizedBox(height: 16),
-          
-          // Origem Detalhada
           _buildOriginField(context),
           
           const SizedBox(height: 16),
-          
-          // Características Físicas
           _buildCharacteristicsField(context),
         ],
       ),
@@ -146,7 +138,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Campo de input de tags
         TextFormField(
           controller: widget.tagsController,
           focusNode: _tagsFocusNode,
@@ -181,8 +172,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
         ),
         
         const SizedBox(height: 8),
-        
-        // Instruções e contador
         Row(
           children: [
             Icon(
@@ -208,8 +197,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
               ),
           ],
         ),
-        
-        // Tags ativas
         if (_currentTags.isNotEmpty) ...[
           const SizedBox(height: 12),
           Wrap(
@@ -232,8 +219,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
             }).toList(),
           ),
         ],
-        
-        // Tags sugeridas
         const SizedBox(height: 8),
         _buildSuggestedTags(context),
       ],
@@ -253,8 +238,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
       'adulto',
       'comercial',
     ];
-
-    // Filtra tags que ainda não foram adicionadas
     final availableTags = suggestedTags
         .where((tag) => !_currentTags.contains(tag.toLowerCase()))
         .toList();
@@ -314,8 +297,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
         ),
         
         const SizedBox(height: 8),
-        
-        // Exemplos de origem
         ExpansionTile(
           title: Text(
             'Exemplos de Origem',
@@ -413,8 +394,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
         ),
         
         const SizedBox(height: 8),
-        
-        // Contador de caracteres
         ValueListenableBuilder<TextEditingValue>(
           valueListenable: widget.characteristicsController,
           builder: (context, value, child) {
@@ -448,8 +427,6 @@ class _BovineAdditionalInfoSectionState extends State<BovineAdditionalInfoSectio
         ),
         
         const SizedBox(height: 8),
-        
-        // Dicas para características
         _buildCharacteristicsGuide(context),
       ],
     );

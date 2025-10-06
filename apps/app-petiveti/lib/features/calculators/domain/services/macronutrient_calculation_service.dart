@@ -6,16 +6,9 @@ import '../entities/advanced_diet_input.dart';
 class MacronutrientCalculationService {
   /// Calculate macronutrient distribution for the pet
   Map<String, double> calculateMacronutrients(AdvancedDietInput input, double totalCalories) {
-    // Get base macronutrient percentages
     final baseRatios = _getBaseMacronutrientRatios(input);
-    
-    // Apply health condition adjustments
     final adjustedRatios = _adjustForHealthConditions(baseRatios, input);
-    
-    // Apply life stage adjustments
     final finalRatios = _adjustForLifeStage(adjustedRatios, input);
-    
-    // Calculate gram amounts based on calories
     final proteinCalories = totalCalories * finalRatios['protein']!;
     final fatCalories = totalCalories * finalRatios['fat']!;
     final carbCalories = totalCalories * finalRatios['carbs']!;
@@ -55,7 +48,6 @@ class MacronutrientCalculationService {
   }
 
   Map<String, double> _getCatMacronutrientRatios(DietType dietType) {
-    // Cats are obligate carnivores - higher protein, lower carbs
     switch (dietType) {
       case DietType.commercial:
         return {'protein': 0.35, 'fat': 0.20, 'carbs': 0.45};
@@ -74,35 +66,29 @@ class MacronutrientCalculationService {
     
     switch (input.healthCondition) {
       case HealthCondition.kidneyDisease:
-        // Reduce protein, increase fat for energy
         adjusted['protein'] = adjusted['protein']! * 0.7;
         adjusted['fat'] = adjusted['fat']! * 1.3;
         break;
         
       case HealthCondition.diabetes:
-        // Lower carbs, higher protein and fat
         adjusted['carbs'] = adjusted['carbs']! * 0.6;
         adjusted['protein'] = adjusted['protein']! * 1.2;
         break;
         
       case HealthCondition.heartDisease:
-        // Moderate protein, lower sodium (affects protein sources)
         adjusted['protein'] = adjusted['protein']! * 0.9;
         break;
         
       case HealthCondition.liverDisease:
-        // High quality protein, moderate levels
         adjusted['protein'] = adjusted['protein']! * 0.8;
         break;
         
       case HealthCondition.gastrointestinal:
-        // Easily digestible, lower fat
         adjusted['fat'] = adjusted['fat']! * 0.7;
         adjusted['carbs'] = adjusted['carbs']! * 1.1;
         break;
         
       case HealthCondition.cancer:
-        // Higher protein and fat, lower carbs
         adjusted['protein'] = adjusted['protein']! * 1.3;
         adjusted['fat'] = adjusted['fat']! * 1.2;
         adjusted['carbs'] = adjusted['carbs']! * 0.8;
@@ -110,11 +96,8 @@ class MacronutrientCalculationService {
         
       case HealthCondition.healthy:
       case HealthCondition.allergies:
-        // No adjustments needed
         break;
     }
-    
-    // Normalize to ensure ratios sum to 1.0
     return _normalizeRatios(adjusted);
   }
 
@@ -124,29 +107,23 @@ class MacronutrientCalculationService {
     
     switch (input.lifeStage) {
       case LifeStage.puppy:
-        // Higher protein and fat for growth
         adjusted['protein'] = adjusted['protein']! * 1.4;
         adjusted['fat'] = adjusted['fat']! * 1.3;
         break;
         
       case LifeStage.senior:
-        // Higher quality protein, easier digestion
         adjusted['protein'] = adjusted['protein']! * 1.1;
         adjusted['fat'] = adjusted['fat']! * 0.9;
         break;
         
       case LifeStage.geriatric:
-        // Easily digestible nutrients
         adjusted['protein'] = adjusted['protein']! * 1.2;
         adjusted['fat'] = adjusted['fat']! * 0.8;
         break;
         
       case LifeStage.adult:
-        // No adjustments needed
         break;
     }
-    
-    // Special conditions
     if (input.isPregnant || input.isLactating) {
       adjusted['protein'] = adjusted['protein']! * 1.5;
       adjusted['fat'] = adjusted['fat']! * 1.4;
@@ -168,16 +145,11 @@ class MacronutrientCalculationService {
 
   /// Calculate fiber requirement
   double _calculateFiberRequirement(AdvancedDietInput input, double totalCalories) {
-    // Base fiber: 2-4% of dry matter
     double basePercentage = input.species == AnimalSpecies.dog ? 0.03 : 0.025;
-    
-    // Adjust for health conditions
     if (input.healthCondition == HealthCondition.diabetes ||
         input.healthCondition == HealthCondition.gastrointestinal) {
       basePercentage *= 1.5;
     }
-    
-    // Assuming 350-400 kcal per 100g dry food
     double estimatedDryWeight = totalCalories / 3.75; // kcal per gram
     
     return estimatedDryWeight * basePercentage;

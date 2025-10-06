@@ -36,7 +36,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Ícone de sucesso
             const Icon(
               Icons.check_circle,
               color: Colors.white,
@@ -44,8 +43,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Título principal
             const Text(
               '🎉 Você é Premium!',
               style: TextStyle(
@@ -56,8 +53,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 8),
-            
-            // Subtítulo
             const Text(
               'Tenha acesso ilimitado a todos os recursos',
               textAlign: TextAlign.center,
@@ -70,8 +65,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
             
             if (subscription != null) ...[
               const SizedBox(height: 16),
-              
-              // Detalhes da assinatura
               _buildSubscriptionDetails(),
             ],
           ],
@@ -92,7 +85,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Tipo de assinatura
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -116,8 +108,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
           ),
           
           const SizedBox(height: 8),
-          
-          // Data de expiração
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -160,8 +150,6 @@ class SubscriptionActiveStatusCardWidget extends StatelessWidget {
   String _formatExpirationDate() {
     final expirationDate = subscription?.expirationDate;
     if (expirationDate == null) return 'Indefinido';
-    
-    // Formatar data DD/MM/YYYY
     return '${expirationDate.day.toString().padLeft(2, '0')}/'
            '${expirationDate.month.toString().padLeft(2, '0')}/'
            '${expirationDate.year}';

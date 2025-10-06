@@ -86,22 +86,16 @@ class FirebaseService {
   }) async {
     try {
       Query query = _firestore.collection(collection);
-
-      // Aplicar filtros WHERE
       if (where != null) {
         for (final condition in where) {
           query = _applyWhereCondition(query, condition);
         }
       }
-
-      // Aplicar ordenação
       if (orderBy != null) {
         for (final order in orderBy) {
           query = query.orderBy(order.field, descending: order.descending);
         }
       }
-
-      // Aplicar limite
       if (limit != null) {
         query = query.limit(limit);
       }
@@ -226,22 +220,16 @@ class FirebaseService {
     required T Function(Map<String, dynamic>) fromMap,
   }) {
     Query query = _firestore.collection(collection);
-
-    // Aplicar filtros WHERE
     if (where != null) {
       for (final condition in where) {
         query = _applyWhereCondition(query, condition);
       }
     }
-
-    // Aplicar ordenação
     if (orderBy != null) {
       for (final order in orderBy) {
         query = query.orderBy(order.field, descending: order.descending);
       }
     }
-
-    // Aplicar limite
     if (limit != null) {
       query = query.limit(limit);
     }

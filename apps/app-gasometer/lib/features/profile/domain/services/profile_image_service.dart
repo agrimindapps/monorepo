@@ -47,15 +47,11 @@ class GasometerProfileImageService {
           '🖼️ GasometerProfileImageService: Processing image to base64',
         );
       }
-
-      // Validar arquivo
       if (!await imageFile.exists()) {
         return Result.failure(
           const ValidationFailure('Arquivo de imagem não encontrado'),
         );
       }
-
-      // Verificar tamanho do arquivo (máximo 5MB)
       final fileSizeInBytes = await imageFile.length();
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
@@ -64,19 +60,13 @@ class GasometerProfileImageService {
           const ValidationFailure('Imagem muito grande. Máximo permitido: 5MB'),
         );
       }
-
-      // Ler bytes da imagem
       final imageBytes = await imageFile.readAsBytes();
-
-      // Decodificar imagem
       final image = img.decodeImage(imageBytes);
       if (image == null) {
         return Result.failure(
           const ValidationFailure('Formato de imagem não suportado'),
         );
       }
-
-      // Redimensionar se necessário (máximo 512x512)
       img.Image resizedImage = image;
       if (image.width > 512 || image.height > 512) {
         resizedImage = img.copyResize(
@@ -92,14 +82,8 @@ class GasometerProfileImageService {
           );
         }
       }
-
-      // Converter para JPEG com qualidade 85
       final jpegBytes = img.encodeJpg(resizedImage, quality: 85);
-
-      // Converter para base64
       final base64String = base64Encode(jpegBytes);
-
-      // Log de analytics
       await _analytics.logUserAction(
         'profile_image_processed',
         parameters: {
@@ -140,14 +124,11 @@ class GasometerProfileImageService {
   /// Valida imagem antes do processamento
   Result<void> validateImageFile(File imageFile) {
     try {
-      // Verificar se o arquivo existe
       if (!imageFile.existsSync()) {
         return Result.failure(
           const ValidationFailure('Arquivo não encontrado'),
         );
       }
-
-      // Verificar extensão
       final extension = imageFile.path.toLowerCase();
       final validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
@@ -159,8 +140,6 @@ class GasometerProfileImageService {
           ),
         );
       }
-
-      // Verificar tamanho do arquivo
       final fileSizeInBytes = imageFile.lengthSync();
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
@@ -230,14 +209,8 @@ class GasometerProfileImageService {
           const ValidationFailure('Não foi possível decodificar a imagem'),
         );
       }
-
-      // Criar thumbnail quadrada
       final thumbnail = img.copyResizeCropSquare(image, size: size);
-
-      // Converter para JPEG
       final jpegBytes = img.encodeJpg(thumbnail, quality: 75);
-
-      // Converter para base64
       final thumbnailBase64 = base64Encode(jpegBytes);
 
       return Result.success(thumbnailBase64);

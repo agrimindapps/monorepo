@@ -23,7 +23,6 @@ class PragasListView extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) => _buildPragaCard(context, index),
         childCount: pragasPorCultura.length,
-        // Performance optimization para listas grandes
         addRepaintBoundaries: true,
         addSemanticIndexes: true,
       ),

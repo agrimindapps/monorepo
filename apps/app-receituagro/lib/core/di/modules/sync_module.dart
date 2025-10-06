@@ -5,15 +5,11 @@ import 'package:flutter/foundation.dart';
 /// Integra ReceitaAgroSyncService com UnifiedSyncManager existente
 abstract class SyncDIModule {
   static void init(GetIt sl) {
-    // Registrar ReceitaAgroSyncService do core package
-    // Este service adiciona logging estruturado e monitoring ao UnifiedSyncManager
     sl.registerLazySingleton<ReceitaAgroSyncService>(
       () => ReceitaAgroSyncServiceFactory.create(
         unifiedSyncManager: UnifiedSyncManager.instance,
       ),
     );
-
-    // Inicialização é lazy, service só é criado quando solicitado
   }
 
   /// Inicializa o sync service após o app estar pronto
@@ -25,7 +21,6 @@ abstract class SyncDIModule {
 
       result.fold(
         (failure) {
-          // Log do erro mas não bloqueia o app
           if (kDebugMode) {
             print('⚠️ Failed to initialize ReceitaAgro sync service: ${failure.message}');
           }
@@ -34,8 +29,6 @@ abstract class SyncDIModule {
           if (kDebugMode) {
             print('✅ ReceitaAgro sync service initialized successfully');
           }
-
-          // Integrar com connectivity monitoring existente
           _setupConnectivityMonitoring(sl);
         },
       );
@@ -50,10 +43,7 @@ abstract class SyncDIModule {
   static void _setupConnectivityMonitoring(GetIt sl) {
     try {
       final syncService = sl<ReceitaAgroSyncService>();
-      // Use singleton instance instead of GetIt - ConnectivityService não está registrado no DI
       final connectivityService = ConnectivityService.instance;
-
-      // Conectar o sync service ao stream de conectividade
       syncService.startConnectivityMonitoring(
         connectivityService.connectivityStream,
       );

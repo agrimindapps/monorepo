@@ -119,10 +119,7 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   @override
   Future<ProfileState> build() async {
-    // Get repository from DI
     _profileRepository = di.sl<ProfileRepository>();
-
-    // Load initial state from repository
     return ProfileState(
       isUploading: false,
       isPickingImage: false,
@@ -168,7 +165,6 @@ class ProfileNotifier extends _$ProfileNotifier {
     }
 
     try {
-      // Picking phase
       state = AsyncValue.data(
         currentState.copyWith(isPickingImage: true).clearError(),
       );
@@ -186,8 +182,6 @@ class ProfileNotifier extends _$ProfileNotifier {
       }
 
       final imageFile = pickResult.data!;
-
-      // Validation phase
       final validationResult = _profileRepository.validateProfileImage(imageFile);
       if (validationResult.isError) {
         state = AsyncValue.data(
@@ -198,8 +192,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         );
         return false;
       }
-
-      // Upload phase
       state = AsyncValue.data(
         currentState.copyWith(
           isPickingImage: false,
@@ -222,8 +214,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         );
         return false;
       }
-
-      // Success
       final updatedState = await _refreshState();
       state = AsyncValue.data(
         updatedState.copyWith(
@@ -267,8 +257,6 @@ class ProfileNotifier extends _$ProfileNotifier {
       state = AsyncValue.data(
         currentState.copyWith(isUploading: true, uploadProgress: 0.0).clearError(),
       );
-
-      // Validation
       final validationResult = _profileRepository.validateProfileImage(imageFile);
       if (validationResult.isError) {
         state = AsyncValue.data(
@@ -279,8 +267,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         );
         return false;
       }
-
-      // Upload
       final uploadResult = await _profileRepository.uploadProfileImage(
         imageFile,
         onProgress: _updateProgress,
@@ -295,8 +281,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         );
         return false;
       }
-
-      // Success
       final updatedState = await _refreshState();
       state = AsyncValue.data(
         updatedState.copyWith(
@@ -349,8 +333,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         );
         return false;
       }
-
-      // Success
       final updatedState = await _refreshState();
       state = AsyncValue.data(
         updatedState.copyWith(
@@ -399,8 +381,6 @@ class ProfileNotifier extends _$ProfileNotifier {
         );
         return false;
       }
-
-      // Success
       final updatedState = await _refreshState();
       state = AsyncValue.data(updatedState.copyWith(isUploading: false).clearError());
 
@@ -425,8 +405,6 @@ class ProfileNotifier extends _$ProfileNotifier {
   void reset() {
     state = AsyncValue.data(ProfileState.initial());
   }
-
-  // ===== PRIVATE METHODS =====
 
   void _updateProgress(double progress) {
     final currentState = state.value;

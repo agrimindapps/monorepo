@@ -5,8 +5,6 @@ import '../features/fuel/domain/entities/fuel_record_entity.dart';
 import '../features/maintenance/domain/entities/maintenance_entity.dart';
 import '../features/vehicles/domain/entities/vehicle_entity.dart';
 import 'extensions/user_entity_gasometer_extension.dart';
-
-// Funções auxiliares para contornar problema do analyzer
 VehicleEntity _vehicleFromFirebaseMap(Map<String, dynamic> map) {
   return VehicleEntity.fromFirebaseMap(map);
 }
@@ -43,47 +41,36 @@ abstract final class GasometerSyncConfig {
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
-        // Veículos - Entidade principal do app
         EntitySyncRegistration<VehicleEntity>.simple(
           entityType: VehicleEntity,
           collectionName: 'vehicles',
           fromMap: _vehicleFromFirebaseMap,
           toMap: (vehicle) => vehicle.toFirebaseMap(),
         ),
-
-        // Registros de Combustível - Dados frequentes e volumosos
         EntitySyncRegistration<FuelRecordEntity>.simple(
           entityType: FuelRecordEntity,
           collectionName: 'fuel_records',
           fromMap: _fuelRecordFromFirebaseMap,
           toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
         ),
-
-        // Despesas - Dados financeiros importantes
         EntitySyncRegistration<ExpenseEntity>.simple(
           entityType: ExpenseEntity,
           collectionName: 'expenses',
           fromMap: _expenseFromFirebaseMap,
           toMap: (expense) => expense.toFirebaseMap(),
         ),
-
-        // Manutenções - Registros de manutenção dos veículos
         EntitySyncRegistration<MaintenanceEntity>.simple(
           entityType: MaintenanceEntity,
           collectionName: 'maintenance_records',
           fromMap: _maintenanceFromFirebaseMap,
           toMap: (maintenance) => maintenance.toFirebaseMap(),
         ),
-
-        // Usuários (profile compartilhado entre apps)
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: _userEntityFromFirebaseMap,
           toMap: (user) => user.toFirebaseMap(),
         ),
-
-        // Assinaturas (subscription compartilhada entre apps)
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
@@ -168,8 +155,6 @@ abstract final class GasometerSyncConfig {
           syncInterval: const Duration(hours: 8),
           batchSize: 30, // Menor batch para dados críticos
         ),
-
-        // Registros de combustível - Dados frequentes, batches pequenos
         EntitySyncRegistration<FuelRecordEntity>(
           entityType: FuelRecordEntity,
           collectionName: 'fuel_records',
@@ -180,8 +165,6 @@ abstract final class GasometerSyncConfig {
           syncInterval: const Duration(hours: 6), // Sync mais frequente para dados financeiros
           batchSize: 15, // Batch pequeno para dados financeiros críticos
         ),
-
-        // Despesas - Dados financeiros críticos, resolução manual de conflitos
         EntitySyncRegistration<ExpenseEntity>(
           entityType: ExpenseEntity,
           collectionName: 'expenses',

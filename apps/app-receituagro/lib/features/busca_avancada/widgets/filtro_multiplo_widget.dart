@@ -127,7 +127,6 @@ class FiltroMultiploWidget extends StatelessWidget {
   Widget _buildFiltrosGrid(ThemeData theme) {
     return Column(
       children: [
-        // Primeira linha: Cultura e Praga
         Row(
           children: [
             Expanded(
@@ -158,8 +157,6 @@ class FiltroMultiploWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        
-        // Segunda linha: Defensivo (full width)
         _buildDropdownFiltro(
           theme: theme,
           label: 'Defensivo',
@@ -202,7 +199,6 @@ class FiltroMultiploWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header do filtro
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -261,8 +257,6 @@ class FiltroMultiploWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Dropdown
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: DropdownButtonFormField<String>(
@@ -309,7 +303,6 @@ class FiltroMultiploWidget extends StatelessWidget {
 
     return Row(
       children: [
-        // Botão Limpar
         if (temFiltroAtivo)
           Expanded(
             child: OutlinedButton.icon(
@@ -330,8 +323,6 @@ class FiltroMultiploWidget extends StatelessWidget {
           ),
         
         if (temFiltroAtivo) const SizedBox(width: 16),
-        
-        // Botão Buscar
         Expanded(
           child: ElevatedButton.icon(
             onPressed: (!temFiltroAtivo || isLoading) ? null : onBuscarPressed,

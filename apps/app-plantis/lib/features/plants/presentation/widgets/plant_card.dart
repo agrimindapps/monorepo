@@ -59,13 +59,9 @@ class PlantCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 8),
-
-                // Avatar da planta centralizado
                 Center(child: _buildPlantAvatar()),
 
                 const SizedBox(height: 16),
-
-                // Nome da planta
                 Text(
                   plant.displayName,
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -79,8 +75,6 @@ class PlantCard extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 4),
-
-                // Espécie
                 Text(
                   plant.displaySpecies,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -98,8 +92,6 @@ class PlantCard extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Badge de cuidados pendentes
                 Center(
                   child: PlantTasksHelper.buildTaskBadge(ref, plant.id),
                 ),

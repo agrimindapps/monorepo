@@ -32,27 +32,17 @@ class EnhancedStorageService {
   static const String _backupDirectory = 'storage_backups';
   static const int _maxMemoryCacheSize = 50 * 1024 * 1024; // 50MB
   static const int _compressionThreshold = 1024; // 1KB
-
-  // Storage backends
   late final SharedPreferences _prefs;
   late final FlutterSecureStorage _secureStorage;
   late final Directory _fileDir;
   late final Directory _backupDir;
-  
-  // Hive boxes por categoria
   final Map<String, Box> _hiveBoxes = {};
-  
-  // Memory cache para performance
   final Map<String, _CacheItem> _memoryCache = {};
   int _memoryCacheSize = 0;
-  
-  // Configurações
   bool _initialized = false;
   bool _encryptionEnabled = true;
   bool _compressionEnabled = true;
   bool _backupEnabled = true;
-  
-  // Métricas
   int _readOperations = 0;
   int _writeOperations = 0;
   int _cacheHits = 0;
@@ -71,11 +61,7 @@ class EnhancedStorageService {
       _encryptionEnabled = enableEncryption;
       _compressionEnabled = enableCompression;
       _backupEnabled = enableBackup;
-
-      // Inicializa SharedPreferences
       _prefs = await SharedPreferences.getInstance();
-
-      // Inicializa Secure Storage
       _secureStorage = const FlutterSecureStorage(
         aOptions: AndroidOptions(
           encryptedSharedPreferences: true,
@@ -84,8 +70,6 @@ class EnhancedStorageService {
           accessibility: KeychainAccessibility.first_unlock_this_device,
         ),
       );
-
-      // Inicializa diretórios
       final appDir = await getApplicationDocumentsDirectory();
       _fileDir = Directory(path.join(appDir.path, 'enhanced_storage'));
       _backupDir = Directory(path.join(appDir.path, _backupDirectory));
@@ -94,13 +78,9 @@ class EnhancedStorageService {
       if (_backupEnabled) {
         await _backupDir.create(recursive: true);
       }
-
-      // Inicializa Hive se ainda não foi inicializado
       if (!Hive.isAdapterRegistered(0)) {
         await Hive.initFlutter();
       }
-
-      // Abre boxes do Hive
       for (final boxName in hiveBoxes) {
         try {
           final box = await Hive.openBox(boxName);
@@ -154,12 +134,9 @@ class EnhancedStorageService {
       );
       
       if (result.isSuccess) {
-        // Adiciona ao memory cache se apropriado
         if (_shouldCacheInMemory(key, processedValue)) {
           _addToMemoryCache(key, processedValue, ttl);
         }
-        
-        // Backup automático se habilitado
         if (_backupEnabled && storageType != StorageType.memory) {
           await _createBackup(key, processedValue, storageType);
         }
@@ -192,8 +169,6 @@ class EnhancedStorageService {
 
     try {
       _readOperations++;
-      
-      // Tenta memory cache primeiro
       final cacheResult = _getFromMemoryCache<T>(key);
       if (cacheResult != null) {
         _cacheHits++;
@@ -201,16 +176,12 @@ class EnhancedStorageService {
       }
       
       _cacheMisses++;
-      
-      // Tenta o storage preferido primeiro
       if (preferredType != null) {
         final result = await _retrieveByType<T>(key, preferredType, category ?? 'default');
         if (result.isSuccess && result.data != null) {
           return result;
         }
       }
-      
-      // Fallback: tenta todos os storages na ordem de prioridade
       final storageOrder = [
         StorageType.hive,
         StorageType.sharedPreferences,
@@ -221,15 +192,12 @@ class EnhancedStorageService {
       for (final storageType in storageOrder) {
         final result = await _retrieveByType<T>(key, storageType, category ?? 'default');
         if (result.isSuccess && result.data != null) {
-          // Adiciona ao cache para próximas consultas
           if (_shouldCacheInMemory(key, result.data)) {
             _addToMemoryCache(key, result.data, null);
           }
           return result;
         }
       }
-      
-      // Se não encontrou em lugar nenhum, retorna default
       return Result.success(defaultValue);
     } catch (e, stackTrace) {
       return Result.error(
@@ -252,25 +220,16 @@ class EnhancedStorageService {
 
     try {
       final results = <Result<void>>[];
-      
-      // Remove do memory cache
       _memoryCache.remove(key);
-      
-      // Remove de todos os storages
       results.add(await _removeFromHive(key, category ?? 'default'));
       results.add(await _removeFromSharedPreferences(key));
       results.add(await _removeFromSecureStorage(key));
       results.add(await _removeFromFile(key));
-      
-      // Remove backup se existir
       if (_backupEnabled) {
         await _removeBackup(key);
       }
-      
-      // Verifica se houve algum erro crítico
       final errors = results.where((r) => r.isError).toList();
       if (errors.isNotEmpty) {
-        // Loga os erros mas não falha a operação se pelo menos um storage foi limpo
         debugPrint('Alguns storages falharam ao remover $key: $errors');
       }
       
@@ -295,12 +254,9 @@ class EnhancedStorageService {
     }
 
     try {
-      // Verifica memory cache
       if (_memoryCache.containsKey(key)) {
         return Result.success(true);
       }
-      
-      // Verifica em todos os storages
       final storageChecks = [
         _existsInHive(key, category ?? 'default'),
         _existsInSharedPreferences(key),
@@ -426,8 +382,6 @@ class EnhancedStorageService {
           await _fileDir.create(recursive: true);
         }
       }
-      
-      // Limpa backups se especificado
       if (storageType == null && _backupEnabled) {
         if (await _backupDir.exists()) {
           await _backupDir.delete(recursive: true);
@@ -457,12 +411,8 @@ class EnhancedStorageService {
 
     try {
       final stats = StorageStats();
-      
-      // Memory cache stats
       stats.memoryCacheItems = _memoryCache.length;
       stats.memoryCacheSize = _memoryCacheSize;
-      
-      // Hive stats
       for (final entry in _hiveBoxes.entries) {
         final box = entry.value;
         stats.hiveBoxes[entry.key] = {
@@ -470,8 +420,6 @@ class EnhancedStorageService {
           'path': box.path,
         };
       }
-      
-      // File storage stats
       if (await _fileDir.exists()) {
         int fileCount = 0;
         int totalSize = 0;
@@ -486,8 +434,6 @@ class EnhancedStorageService {
         stats.fileStorageItems = fileCount;
         stats.fileStorageSize = totalSize;
       }
-      
-      // Operations stats
       stats.readOperations = _readOperations;
       stats.writeOperations = _writeOperations;
       stats.cacheHits = _cacheHits;
@@ -527,14 +473,10 @@ class EnhancedStorageService {
         'version': '1.0',
         'data': <String, dynamic>{},
       };
-      
-      // Backup Hive boxes
       for (final entry in _hiveBoxes.entries) {
         final box = entry.value;
         backupData['data']['hive_${entry.key}'] = Map<String, dynamic>.from(box.toMap());
       }
-      
-      // Backup SharedPreferences
       final prefsKeys = _prefs.getKeys();
       final prefsData = <String, dynamic>{};
       for (final key in prefsKeys) {
@@ -544,8 +486,6 @@ class EnhancedStorageService {
         }
       }
       backupData['data']['shared_preferences'] = prefsData;
-      
-      // Salva backup
       await backupFile.writeAsString(jsonEncode(backupData));
       
       return Result.success(backupFile.path);
@@ -585,8 +525,6 @@ class EnhancedStorageService {
       if (clearFirst) {
         await clear();
       }
-      
-      // Restaura Hive boxes
       for (final entry in data.entries) {
         final key = entry.key;
         final value = entry.value as Map<String, dynamic>;
@@ -601,8 +539,6 @@ class EnhancedStorageService {
           for (final prefEntry in value.entries) {
             final prefKey = prefEntry.key;
             final prefValue = prefEntry.value;
-            
-            // Restaura baseado no tipo
             if (prefValue is String) {
               await _prefs.setString(prefKey, prefValue);
             } else if (prefValue is int) {
@@ -631,8 +567,6 @@ class EnhancedStorageService {
     }
   }
 
-  // Métodos privados de determinação de storage
-
   StorageType _determineStorageType<T>(T value, bool encrypt) {
     if (encrypt) return StorageType.secureStorage;
     
@@ -653,8 +587,6 @@ class EnhancedStorageService {
 
   Future<dynamic> _processValue<T>(T value, bool encrypt, bool compress) async {
     dynamic processedValue = value;
-    
-    // Serialização se necessário
     if (value is! String && value is! num && value is! bool && value is! Uint8List) {
       try {
         processedValue = jsonEncode(value);
@@ -662,24 +594,15 @@ class EnhancedStorageService {
         processedValue = value.toString();
       }
     }
-    
-    // Compressão se habilitada e valor grande
     if (_compressionEnabled && compress && processedValue is String) {
       if (processedValue.length > _compressionThreshold) {
-        // Implementar compressão aqui se necessário
-        // Por simplicidade, mantemos o valor original
       }
     }
-    
-    // Criptografia se necessária
     if (_encryptionEnabled && encrypt && processedValue is String) {
-      // A criptografia será feita pelo FlutterSecureStorage
     }
     
     return processedValue;
   }
-
-  // Métodos privados de storage específicos
   
   Future<Result<void>> _storeByType(
     String key,
@@ -718,8 +641,6 @@ class EnhancedStorageService {
         return Result.success(value);
     }
   }
-
-  // Implementações específicas de cada storage (simplificadas)
   
   Future<Result<void>> _storeInHive(String key, dynamic value, String category) async {
     try {
@@ -847,8 +768,6 @@ class EnhancedStorageService {
       );
     }
   }
-
-  // Memory cache management
   
   bool _shouldCacheInMemory(String key, dynamic value) {
     if (_memoryCacheSize >= _maxMemoryCacheSize) return false;
@@ -873,8 +792,6 @@ class EnhancedStorageService {
       timestamp: DateTime.now(),
       ttl: ttl,
     );
-    
-    // Remove item existente se houver
     final existing = _memoryCache[key];
     if (existing != null) {
       _memoryCacheSize -= existing.size;
@@ -882,16 +799,12 @@ class EnhancedStorageService {
     
     _memoryCache[key] = item;
     _memoryCacheSize += item.size;
-    
-    // Limpa cache antigo se necessário
     _cleanupMemoryCache();
   }
 
   T? _getFromMemoryCache<T>(String key) {
     final item = _memoryCache[key];
     if (item == null) return null;
-    
-    // Verifica TTL
     if (item.isExpired) {
       _memoryCache.remove(key);
       _memoryCacheSize -= item.size;
@@ -902,7 +815,6 @@ class EnhancedStorageService {
   }
 
   void _cleanupMemoryCache() {
-    // Remove itens expirados
     final expiredKeys = _memoryCache.entries
         .where((entry) => entry.value.isExpired)
         .map((entry) => entry.key)
@@ -914,8 +826,6 @@ class EnhancedStorageService {
         _memoryCacheSize -= item.size;
       }
     }
-    
-    // Se ainda está muito grande, remove os mais antigos
     while (_memoryCacheSize > _maxMemoryCacheSize && _memoryCache.isNotEmpty) {
       final oldestKey = _memoryCache.entries
           .reduce((a, b) => a.value.timestamp.isBefore(b.value.timestamp) ? a : b)
@@ -927,8 +837,6 @@ class EnhancedStorageService {
       }
     }
   }
-
-  // Métodos auxiliares de verificação de existência
   Future<Result<bool>> _existsInHive(String key, String category) async {
     final box = _hiveBoxes[category];
     return Result.success(box?.containsKey(key) ?? false);
@@ -951,8 +859,6 @@ class EnhancedStorageService {
     final file = File(path.join(_fileDir.path, '$key.dat'));
     return Result.success(await file.exists());
   }
-
-  // Métodos de remoção por storage
   Future<Result<void>> _removeFromHive(String key, String category) async {
     try {
       final box = _hiveBoxes[category];
@@ -992,8 +898,6 @@ class EnhancedStorageService {
       return Result.error(StorageError(message: 'Erro ao remover arquivo: $e', code: 'FILE_REMOVE_ERROR'));
     }
   }
-
-  // Métodos de backup
   Future<void> _createBackup(String key, dynamic value, StorageType type) async {
     try {
       final backupKey = '${type.name}_$key';

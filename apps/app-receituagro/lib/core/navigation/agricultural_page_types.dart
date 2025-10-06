@@ -1,74 +1,49 @@
 /// Agricultural-specific page types for ReceitaAgro navigation
 enum AgriculturalPageType {
-  // Home and main sections
   home('home'),
   dashboard('dashboard'),
-
-  // Defensive (Defensivos) related pages
   listaDefensivos('lista_defensivos'),
   defensivosAgrupados('defensivos_agrupados'),
   defensivosCategoria('defensivos_categoria'),
   detalheDefensivo('detalhe_defensivo'),
   defensivosSearch('defensivos_search'),
   defensivosAdvancedSearch('defensivos_advanced_search'),
-
-  // Pest (Pragas) related pages
   listaPragas('lista_pragas'),
   pragasAgrupadas('pragas_agrupadas'),
   pragasCategoria('pragas_categoria'),
   detalhePraga('detalhe_praga'),
   pragasSearch('pragas_search'),
   pragasAdvancedSearch('pragas_advanced_search'),
-
-  // Culture (Culturas) related pages
   listaCulturas('lista_culturas'),
   culturasAgrupadas('culturas_agrupadas'),
   detalheCultura('detalhe_cultura'),
   culturasSearch('culturas_search'),
-
-  // Diagnostics (Diagnósticos) related pages
   listaDiagnosticos('lista_diagnosticos'),
   detalheDiagnostico('detalhe_diagnostico'),
   diagnosticoWizard('diagnostico_wizard'),
   diagnosticoResult('diagnostico_result'),
-
-  // Favorites and user content
   favoritos('favoritos'),
   favoritosDefensivos('favoritos_defensivos'),
   favoritosPragas('favoritos_pragas'),
   favoritosCulturas('favoritos_culturas'),
-
-  // Settings and user account
   settings('settings'),
   profile('profile'),
   notifications('notifications'),
   about('about'),
   help('help'),
-
-  // Premium and subscription
   premium('premium'),
   subscription('subscription'),
-
-  // Agricultural workflows
   cropManagement('crop_management'),
   pestTreatment('pest_treatment'),
   seasonalPlanning('seasonal_planning'),
   fieldOperations('field_operations'),
-
-  // Search and filters
   globalSearch('global_search'),
   advancedFilters('advanced_filters'),
-
-  // Loading and error states
   loading('loading'),
   error('error'),
   offline('offline'),
-
-  // Modal and overlay pages
   modal('modal'),
   popup('popup'),
-
-  // External integrations
   webView('web_view'),
   external('external');
 

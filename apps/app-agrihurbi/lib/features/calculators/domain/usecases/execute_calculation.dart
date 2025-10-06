@@ -41,7 +41,6 @@ class ExecuteCalculation {
     final startTime = DateTime.now();
     
     try {
-      // Check if calculator requires premium access
       final isPremiumCalculator = _isPremiumCalculator(calculatorId);
       
       if (isPremiumCalculator) {
@@ -58,8 +57,6 @@ class ExecuteCalculation {
           return const Left(ValidationFailure(message: 'Esta calculadora requer assinatura premium'));
         }
       }
-      
-      // Analytics: track calculation attempt
       await _analyticsService.logEvent(
         'calculation_attempt',
         parameters: {
@@ -70,8 +67,6 @@ class ExecuteCalculation {
       );
       
       final result = await repository.executeCalculation(calculatorId, inputs);
-      
-      // Analytics: track calculation result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
       
       await result.fold(
@@ -155,7 +150,6 @@ class ExecuteCalculationWithHistory {
     final startTime = DateTime.now();
     
     try {
-      // Check premium access
       final isPremiumCalculator = _isPremiumCalculator(calculatorId);
       
       if (isPremiumCalculator) {
@@ -173,8 +167,6 @@ class ExecuteCalculationWithHistory {
           return const Left(ValidationFailure(message: 'Esta calculadora requer assinatura premium'));
         }
       }
-      
-      // Analytics: track calculation with history attempt
       await _analyticsService.logEvent(
         'calculation_with_history_attempt',
         parameters: {
@@ -187,8 +179,6 @@ class ExecuteCalculationWithHistory {
           'is_premium': isPremiumCalculator,
         },
       );
-      
-      // Executa o cálculo
       final calculationResult = await repository.executeCalculation(
         calculatorId,
         inputs,
@@ -208,8 +198,6 @@ class ExecuteCalculationWithHistory {
         },
         (result) async {
           final duration = DateTime.now().difference(startTime).inMilliseconds;
-          
-          // Se o cálculo foi bem-sucedido, salva no histórico
           if (result.isValid) {
             final history = CalculationHistory(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -223,8 +211,6 @@ class ExecuteCalculationWithHistory {
             );
 
             final saveResult = await repository.saveCalculationToHistory(history);
-            
-            // Track history save result
             await saveResult.fold(
               (failure) async {
                 await _analyticsService.logEvent(
@@ -247,8 +233,6 @@ class ExecuteCalculationWithHistory {
               },
             );
           }
-          
-          // Analytics: track successful calculation with history
           await _analyticsService.logEvent(
             'calculation_with_history_success',
             parameters: {

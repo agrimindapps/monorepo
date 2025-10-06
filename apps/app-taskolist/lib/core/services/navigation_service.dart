@@ -35,7 +35,6 @@ class NavigationService {
       }
     } catch (e) {
       debugPrint('❌ Error navigating from notification: $e');
-      // Fallback para página principal
       if (context.mounted) {
         _navigateToHome(context);
       }
@@ -49,7 +48,6 @@ class NavigationService {
     TaskDetailFocus focus
   ) async {
     try {
-      // Buscar task no provider
       final taskProviderFuture = _container.read(tasksProvider.future);
       
       try {
@@ -58,8 +56,6 @@ class NavigationService {
           (t) => t.id == taskId,
           orElse: () => throw TaskNotFoundException(taskId),
         );
-        
-        // Navegar para página de detalhes
         if (context.mounted) {
           Navigator.of(context).push(
             MaterialPageRoute<dynamic>(
@@ -74,8 +70,6 @@ class NavigationService {
         debugPrint('❌ Task $taskId not found');
         if (context.mounted) {
           _navigateToHome(context);
-          
-          // Mostrar snackbar informando que task não foi encontrada
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Tarefa não encontrada: $taskId'),
@@ -104,7 +98,6 @@ class NavigationService {
   
   /// Navegar para revisão semanal (placeholder para futura implementação)
   static Future<void> _navigateToWeeklyReview(BuildContext context) async {
-    // TODO: Implementar página de revisão semanal
     _navigateToHome(context);
     
     if (context.mounted) {
@@ -119,7 +112,6 @@ class NavigationService {
   
   /// Navegar para view de produtividade (placeholder para futura implementação)  
   static Future<void> _navigateToProductivityView(BuildContext context) async {
-    // TODO: Implementar página de produtividade diária
     _navigateToHome(context);
     
     if (context.mounted) {

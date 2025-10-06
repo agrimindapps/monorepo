@@ -72,7 +72,6 @@ class PragaCardImageSection extends StatelessWidget {
               enablePreloading: properties.enableImagePreloading,
               errorWidget: _buildIconFallback(double.infinity),
             ),
-            // Gradient overlay para melhor legibilidade do texto
             Positioned(
               bottom: 0,
               left: 0,

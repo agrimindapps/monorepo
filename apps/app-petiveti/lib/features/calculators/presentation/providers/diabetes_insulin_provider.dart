@@ -42,7 +42,6 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
     try {
       _performCalculation = di.getIt<PerformCalculation>();
     } catch (e) {
-      // Se não conseguir obter do DI, usar instância direta
       _performCalculation = PerformCalculation(di.getIt());
     }
   }
@@ -57,7 +56,6 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
     );
 
     try {
-      // Validar inputs primeiro
       final validationErrors = _calculator.getValidationErrors(inputs);
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
@@ -66,8 +64,6 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
         );
         return;
       }
-
-      // Verificar condições críticas
       final glucoseLevel = inputs['glucoseLevel'] as double;
       if (glucoseLevel < 80) {
         state = state.copyWith(
@@ -77,18 +73,13 @@ class DiabetesInsulinNotifier extends StateNotifier<DiabetesInsulinState> {
         );
         return;
       }
-
-      // Realizar cálculo
       final result = _calculator.calculate(inputs);
-
-      // Salvar no histórico se o use case estiver disponível
       try {
         await _performCalculation(
           calculatorId: _calculator.id,
           inputs: inputs,
         );
       } catch (e) {
-        // Continuar mesmo se não conseguir salvar no histórico
         print('Aviso: Não foi possível salvar no histórico: $e');
       }
 

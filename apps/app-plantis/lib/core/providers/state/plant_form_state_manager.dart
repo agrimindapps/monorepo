@@ -12,14 +12,11 @@ import '../../services/image_management_service.dart';
 
 /// Estado do formulário de planta
 class PlantFormState {
-  // Estados de operação
   final bool isLoading;
   final bool isSaving;
   final bool isUploadingImages;
   final String? errorMessage;
   final Plant? originalPlant;
-  
-  // Campos do formulário
   final String name;
   final String species;
   final String? spaceId;
@@ -27,14 +24,10 @@ class PlantFormState {
   final DateTime? plantingDate;
   final String? imageBase64;
   final List<String> imageUrls;
-  
-  // Configurações de cuidado
   final int? wateringIntervalDays;
   final int? fertilizingIntervalDays;
   final int? pruningIntervalDays;
   final String? waterAmount;
-  
-  // Configurações de cuidado estendidas
   final bool? enableWateringCare;
   final DateTime? lastWateringDate;
   final bool? enableFertilizerCare;
@@ -50,8 +43,6 @@ class PlantFormState {
   final bool? enableReplanting;
   final int? replantingIntervalDays;
   final DateTime? lastReplantingDate;
-  
-  // Estados de validação
   final Map<String, String> fieldErrors;
   final bool isFormValid;
   
@@ -164,8 +155,6 @@ class PlantFormState {
       isFormValid: isFormValid ?? this.isFormValid,
     );
   }
-  
-  // Getters convenientes
   bool get hasError => errorMessage != null;
   bool get isEditMode => originalPlant != null;
   bool get hasChanges => _hasChanges();
@@ -271,8 +260,6 @@ class PlantFormStateManager extends ChangeNotifier {
             ));
             return;
           }
-
-          // DEBUG: Log dos valores sendo carregados
           if (kDebugMode) {
             print('🌱 loadPlant - Carregando planta: ${plant.name}');
             print('   🔧 plant.config existe? ${plant.config != null}');
@@ -294,7 +281,6 @@ class PlantFormStateManager extends ChangeNotifier {
             plantingDate: plant.plantingDate,
             imageBase64: plant.imageBase64,
             imageUrls: List<String>.from(plant.imageUrls),
-            // Carregar configurações
             wateringIntervalDays: plant.config?.wateringIntervalDays,
             fertilizingIntervalDays: plant.config?.fertilizingIntervalDays,
             pruningIntervalDays: plant.config?.pruningIntervalDays,
@@ -305,8 +291,6 @@ class PlantFormStateManager extends ChangeNotifier {
             lastFertilizerDate: plant.config?.lastFertilizerDate,
             clearError: true,
           ));
-
-          // DEBUG: Log do estado após atualização
           if (kDebugMode) {
             print('✅ loadPlant - Estado atualizado:');
             print('   💧 _state.enableWateringCare: ${_state.enableWateringCare}');
@@ -376,7 +360,6 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 7 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && _state.wateringIntervalDays == null ? 7 : _state.wateringIntervalDays);
 
@@ -394,7 +377,6 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 30 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && _state.fertilizingIntervalDays == null ? 30 : _state.fertilizingIntervalDays);
 
@@ -575,7 +557,6 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Constrói parâmetros para adicionar planta
   AddPlantParams _buildAddParams() {
-    // DEBUG: Log dos valores antes de criar PlantConfig
     if (kDebugMode) {
       print('🆕 _buildAddParams - Criando nova planta:');
       print('   💧 _state.enableWateringCare: ${_state.enableWateringCare}');
@@ -611,7 +592,6 @@ class PlantFormStateManager extends ChangeNotifier {
   
   /// Constrói parâmetros para atualizar planta
   UpdatePlantParams _buildUpdateParams() {
-    // DEBUG: Log dos valores antes de atualizar PlantConfig
     if (kDebugMode) {
       print('🔄 _buildUpdateParams - Atualizando planta:');
       print('   💧 _state.enableWateringCare: ${_state.enableWateringCare}');
@@ -652,7 +632,6 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 7 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && _state.sunlightIntervalDays == null ? 7 : _state.sunlightIntervalDays);
 
@@ -670,7 +649,6 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 14 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && _state.pestInspectionIntervalDays == null ? 14 : _state.pestInspectionIntervalDays);
 
@@ -688,7 +666,6 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 30 dias
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && _state.pruningIntervalDays == null ? 30 : _state.pruningIntervalDays);
 
@@ -706,7 +683,6 @@ class PlantFormStateManager extends ChangeNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    // Se está habilitando o cuidado e não tem intervalo definido, usa padrão de 180 dias (6 meses)
     final effectiveIntervalDays = intervalDays ??
         (enabled == true && _state.replantingIntervalDays == null ? 180 : _state.replantingIntervalDays);
 
@@ -759,10 +735,7 @@ class PlantFormStateManager extends ChangeNotifier {
   /// Dispose - Libera recursos e limpa listeners
   @override
   void dispose() {
-    // Limpar state para ajudar garbage collector
     _state = const PlantFormState();
-
-    // Dispose de ChangeNotifier listeners
     super.dispose();
 
     if (kDebugMode) {

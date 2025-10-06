@@ -159,8 +159,6 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       }
 
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
-
-      // Persist tasks if repository available
       if (_repository != null && tasks.isNotEmpty) {
         final result = await _repository.addPlantTasks(tasks);
 
@@ -187,7 +185,6 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           },
         );
       } else {
-        // Fallback - keep in memory
         final updatedTasks = Map<String, List<PlantTask>>.from(
           currentState.plantTasks,
         );
@@ -226,7 +223,6 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       final task = tasks[taskIndex];
 
       if (task.isCompleted) {
-        // Mark as pending
         final pendingTask = task.copyWith(
           status: TaskStatus.pending,
           completedDate: null,
@@ -237,15 +233,12 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           await _repository.updatePlantTask(pendingTask);
         }
       } else {
-        // Mark as completed
         final completedTask = task.markAsCompleted();
         tasks[taskIndex] = completedTask;
 
         if (_repository != null) {
           await _repository.updatePlantTask(completedTask);
         }
-
-        // Generate next task
         final nextTask = _taskGenerationService.generateNextTask(
           completedTask,
           completionDate: DateTime.now(),
@@ -304,8 +297,6 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       if (_repository != null) {
         await _repository.updatePlantTask(completedTask);
       }
-
-      // Generate next task with real completion date
       final nextTask = _taskGenerationService.generateNextTask(
         completedTask,
         completionDate: completionDate,
@@ -397,21 +388,15 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
     try {
       final currentState = state.valueOrNull ?? const PlantTaskState();
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
-
-      // Delete old tasks
       if (_repository != null) {
         await _repository.deletePlantTasksByPlantId(plant.id);
       }
-
-      // Remove from memory
       final updatedTasks = Map<String, List<PlantTask>>.from(
         currentState.plantTasks,
       );
       updatedTasks.remove(plant.id);
 
       state = AsyncValue.data(currentState.copyWith(plantTasks: updatedTasks));
-
-      // Generate new tasks
       await generateTasksForPlant(plant);
     } catch (e) {
       final currentState = state.valueOrNull ?? const PlantTaskState();

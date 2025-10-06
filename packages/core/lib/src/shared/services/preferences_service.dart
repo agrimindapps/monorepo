@@ -12,8 +12,6 @@ class PreferencesService {
   Box<dynamic>? _prefsBox;
   bool _isInitialized = false;
   static const String _boxName = 'receituagro_user_preferences';
-
-  // Chaves das preferências
   static const String _keyNotificationsPragas = 'notifications_pragas_detectadas';
   static const String _keyNotificationsLembretes = 'notifications_lembretes_aplicacao';
 

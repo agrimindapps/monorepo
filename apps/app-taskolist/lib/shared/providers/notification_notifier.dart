@@ -7,18 +7,10 @@ import '../../infrastructure/services/notification_service.dart';
 
 part 'notification_notifier.g.dart';
 
-// =============================================================================
-// DEPENDENCY PROVIDERS (Services from GetIt)
-// =============================================================================
-
 @riverpod
 TaskManagerNotificationService notificationService(NotificationServiceRef ref) {
   return di.getIt<TaskManagerNotificationService>();
 }
-
-// =============================================================================
-// FUTURE PROVIDERS (Async data fetching)
-// =============================================================================
 
 /// Provider para status de permissões
 @riverpod
@@ -65,10 +57,6 @@ Future<bool> isNotificationScheduled(
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.isNotificationScheduled(notificationId);
 }
-
-// =============================================================================
-// STATE CLASS (Notification Settings)
-// =============================================================================
 
 class NotificationSettings {
   final bool taskRemindersEnabled;
@@ -126,10 +114,6 @@ class NotificationSettings {
   }
 }
 
-// =============================================================================
-// NOTIFIER (Synchronous Settings State)
-// =============================================================================
-
 @riverpod
 class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
   @override
@@ -177,10 +161,6 @@ class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
   }
 }
 
-// =============================================================================
-// ACTIONS PROVIDER (Notification Actions)
-// =============================================================================
-
 @riverpod
 NotificationActions notificationActions(NotificationActionsRef ref) {
   final notificationService = ref.watch(notificationServiceProvider);
@@ -209,7 +189,6 @@ class NotificationActions {
     );
 
     if (success) {
-      // Invalidar providers relacionados
       _ref.invalidate(pendingNotificationsProvider);
       _ref.invalidate(notificationStatsProvider);
     }
@@ -289,7 +268,6 @@ class NotificationActions {
         minute: settings.weeklyReviewMinute,
       );
     } else {
-      // Cancelar se existir
       const weeklyReviewId = TaskManagerNotificationService.generalBaseId + 1;
       return await _notificationService.cancelNotification(weeklyReviewId);
     }
@@ -327,8 +305,6 @@ class NotificationActions {
   /// Solicita permissões de notificação
   Future<core.NotificationPermissionEntity> requestPermissions() async {
     final permission = await _notificationService.requestPermissions();
-
-    // Invalidar provider de permissões
     _ref.invalidate(notificationPermissionProvider);
 
     return permission;

@@ -26,7 +26,6 @@ class SyncCoordinatorService {
 
   /// Initialize the sync coordinator
   void initialize() {
-    // Start the queue processor
     _queueProcessor = Timer.periodic(
       const Duration(milliseconds: 100),
       (_) => _processQueue(),
@@ -45,8 +44,6 @@ class SyncCoordinatorService {
     Duration retryDelay = const Duration(seconds: 2),
   }) async {
     final completer = Completer<T>();
-
-    // Check if we should throttle this operation
     if (minimumInterval != null) {
       final lastTime = _lastOperationTime[operationType];
       if (lastTime != null) {
@@ -74,13 +71,10 @@ class SyncCoordinatorService {
       maxRetries: maxRetries,
       retryDelay: retryDelay,
     );
-
-    // If operation of this type is already active, queue this one
     if (_activeOperations.containsKey(operationType)) {
       debugPrint('🔄 Queuing $operationType operation (already active)');
       _operationQueue.add(syncOp);
     } else {
-      // Execute immediately
       _executeOperation(syncOp);
     }
 
@@ -100,7 +94,6 @@ class SyncCoordinatorService {
 
   /// Cancel all operations of a specific type
   void cancelOperations(String operationType) {
-    // Cancel active operation
     final activeOp = _activeOperations[operationType];
     if (activeOp != null) {
       activeOp.completer.completeError(
@@ -109,8 +102,6 @@ class SyncCoordinatorService {
       _activeOperations.remove(operationType);
       debugPrint('❌ Cancelled active operation: $operationType');
     }
-
-    // Remove queued operations of this type
     _operationQueue.removeWhere((op) {
       final shouldRemove = op.type == operationType;
       if (shouldRemove) {
@@ -127,15 +118,12 @@ class SyncCoordinatorService {
 
   /// Clear all operations
   void clearAllOperations() {
-    // Cancel active operations
     for (final op in _activeOperations.values) {
       op.completer.completeError(
         const SyncCancelledException('All operations were cleared'),
       );
     }
     _activeOperations.clear();
-
-    // Cancel queued operations
     while (_operationQueue.isNotEmpty) {
       final op = _operationQueue.removeFirst();
       op.completer.completeError(
@@ -166,22 +154,18 @@ class SyncCoordinatorService {
         debugPrint(
           '🔄 Retrying ${operation.type} in ${operation.retryDelay.inSeconds}s',
         );
-
-        // Schedule retry
         Timer(operation.retryDelay, () {
           if (_activeOperations.containsKey(operation.type)) {
             _executeOperation(operation);
           }
         });
       } else {
-        // Max retries reached
         operation.completer.completeError(error);
         debugPrint(
           '💥 ${operation.type} failed after ${operation.maxRetries} attempts',
         );
       }
     } finally {
-      // Only remove from active if not retrying
       if (operation.currentRetry >= operation.maxRetries - 1 ||
           operation.completer.isCompleted) {
         _activeOperations.remove(operation.type);
@@ -197,13 +181,11 @@ class SyncCoordinatorService {
     _isProcessing = true;
 
     try {
-      // Process operations by priority
       final sortedOps =
           _operationQueue.toList()
             ..sort((a, b) => b.priority.compareTo(a.priority));
 
       for (final operation in sortedOps) {
-        // Check if this operation type is still active
         if (!_activeOperations.containsKey(operation.type)) {
           _operationQueue.remove(operation);
           _executeOperation(operation);

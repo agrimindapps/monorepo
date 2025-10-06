@@ -68,15 +68,12 @@ class MicronutrientCalculationService {
 
   /// Calculate weight factor for nutrient scaling
   double _getWeightFactor(double weight) {
-    // Use metabolic weight (weight^0.75) for more accurate scaling
     return math.pow(weight, 0.75) / math.pow(10, 0.75); // Normalized to 10kg base
   }
 
   /// Adjust vitamins based on health conditions and life stage
   Map<String, double> _adjustVitaminsForConditions(Map<String, double> vitamins, AdvancedDietInput input) {
     Map<String, double> adjusted = Map.from(vitamins);
-    
-    // Life stage adjustments
     switch (input.lifeStage) {
       case LifeStage.puppy:
         adjusted = _multiplyValues(adjusted, 1.5);
@@ -92,8 +89,6 @@ class MicronutrientCalculationService {
       case LifeStage.adult:
         break;
     }
-    
-    // Health condition adjustments
     switch (input.healthCondition) {
       case HealthCondition.kidneyDisease:
         adjusted['vitamin_d_iu'] = adjusted['vitamin_d_iu']! * 0.8;
@@ -125,8 +120,6 @@ class MicronutrientCalculationService {
       case HealthCondition.gastrointestinal:
         break;
     }
-    
-    // Special conditions
     if (input.isPregnant || input.isLactating) {
       adjusted['folic_acid_mg'] = adjusted['folic_acid_mg']! * 2.0;
       adjusted['vitamin_b12_mg'] = adjusted['vitamin_b12_mg']! * 1.5;
@@ -138,8 +131,6 @@ class MicronutrientCalculationService {
   /// Adjust minerals based on health conditions and life stage
   Map<String, double> _adjustMineralsForConditions(Map<String, double> minerals, AdvancedDietInput input) {
     Map<String, double> adjusted = Map.from(minerals);
-    
-    // Life stage adjustments
     switch (input.lifeStage) {
       case LifeStage.puppy:
         adjusted['calcium_mg'] = adjusted['calcium_mg']! * 1.8;
@@ -153,8 +144,6 @@ class MicronutrientCalculationService {
       case LifeStage.adult:
         break;
     }
-    
-    // Health condition adjustments
     switch (input.healthCondition) {
       case HealthCondition.kidneyDisease:
         adjusted['phosphorus_mg'] = adjusted['phosphorus_mg']! * 0.6;
@@ -182,8 +171,6 @@ class MicronutrientCalculationService {
       case HealthCondition.cancer:
         break;
     }
-    
-    // Special conditions
     if (input.isPregnant || input.isLactating) {
       adjusted['calcium_mg'] = adjusted['calcium_mg']! * 1.5;
       adjusted['phosphorus_mg'] = adjusted['phosphorus_mg']! * 1.4;

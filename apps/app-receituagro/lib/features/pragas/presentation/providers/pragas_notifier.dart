@@ -67,13 +67,9 @@ class PragasState {
   PragasState clearSelection() {
     return copyWith(selectedPraga: null);
   }
-
-  // Getters de conveniência por tipo
   List<PragaEntity> get insetos => pragas.where((p) => p.isInseto).toList();
   List<PragaEntity> get doencas => pragas.where((p) => p.isDoenca).toList();
   List<PragaEntity> get plantas => pragas.where((p) => p.isPlanta).toList();
-
-  // UI helpers
   bool get hasData => pragas.isNotEmpty;
   bool get hasRecentPragas => recentPragas.isNotEmpty;
   bool get hasSuggestedPragas => suggestedPragas.isNotEmpty;
@@ -112,7 +108,6 @@ class PragasNotifier extends _$PragasNotifier {
 
   @override
   Future<PragasState> build() async {
-    // Get use cases from DI
     _getPragasUseCase = di.sl<GetPragasUseCase>();
     _getPragasByTipoUseCase = di.sl<GetPragasByTipoUseCase>();
     _getPragaByIdUseCase = di.sl<GetPragaByIdUseCase>();
@@ -122,15 +117,12 @@ class PragasNotifier extends _$PragasNotifier {
     _getSuggestedPragasUseCase = di.sl<GetSuggestedPragasUseCase>();
     _getPragasStatsUseCase = di.sl<GetPragasStatsUseCase>();
     _historyService = AccessHistoryService();
-
-    // Load initial data
     return await _loadInitialData();
   }
 
   /// Load initial data
   Future<PragasState> _loadInitialData() async {
     try {
-      // Load data concurrently
       final results = await Future.wait([
         _loadRecentPragasData(),
         _loadSuggestedPragasData(limit: 10),
@@ -214,7 +206,6 @@ class PragasNotifier extends _$PragasNotifier {
       final result = await _getSuggestedPragasUseCase.execute(limit: limit);
       return await result.fold(
         (failure) async {
-          // Fallback to random selection
           final allPragasResult = await _getPragasUseCase.execute();
           return allPragasResult.fold(
             (failure) => <PragaEntity>[],
@@ -223,7 +214,6 @@ class PragasNotifier extends _$PragasNotifier {
         },
         (pragas) async {
           if (pragas.isEmpty) {
-            // Fallback to random selection
             final allPragasResult = await _getPragasUseCase.execute();
             return allPragasResult.fold(
               (failure) => <PragaEntity>[],
@@ -293,7 +283,6 @@ class PragasNotifier extends _$PragasNotifier {
           );
         },
         (pragas) {
-          // Ordena alfabeticamente por nome comum
           pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
           state = AsyncValue.data(
             currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
@@ -326,7 +315,6 @@ class PragasNotifier extends _$PragasNotifier {
           );
         },
         (pragas) {
-          // Ordena alfabeticamente por nome comum
           pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
           state = AsyncValue.data(
             currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
@@ -362,8 +350,6 @@ class PragasNotifier extends _$PragasNotifier {
           state = AsyncValue.data(
             currentState.copyWith(isLoading: false, selectedPraga: praga).clearError(),
           );
-
-          // Atualiza lista de recentes após acessar
           await loadRecentPragas();
         },
       );
@@ -393,7 +379,6 @@ class PragasNotifier extends _$PragasNotifier {
           );
         },
         (pragas) {
-          // Ordena alfabeticamente por nome comum
           pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
           state = AsyncValue.data(
             currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
@@ -413,8 +398,6 @@ class PragasNotifier extends _$PragasNotifier {
     if (currentState == null) return;
 
     final trimmedTerm = searchTerm.trim();
-
-    // Early return for empty search
     if (trimmedTerm.isEmpty) {
       state = AsyncValue.data(currentState.copyWith(pragas: []));
       return;
@@ -434,7 +417,6 @@ class PragasNotifier extends _$PragasNotifier {
           );
         },
         (pragas) {
-          // Results are already sorted by relevance in repository
           state = AsyncValue.data(
             currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
           );
@@ -453,14 +435,10 @@ class PragasNotifier extends _$PragasNotifier {
     if (currentState == null) return;
 
     try {
-      // Tenta carregar do histórico primeiro
       final historyItems = await _historyService.getPragasHistory();
 
       if (historyItems.isNotEmpty) {
-        // Converte histórico para PragaEntity
         final historicPragas = <PragaEntity>[];
-
-        // Para fazer a conversão, precisamos carregar todas as pragas uma vez
         final allPragasResult = await _getPragasUseCase.execute();
         allPragasResult.fold(
           (failure) => throw Exception(failure.message),
@@ -480,8 +458,6 @@ class PragasNotifier extends _$PragasNotifier {
                 historicPragas.add(praga);
               }
             }
-
-            // Combina histórico com seleção aleatória se necessário
             final recentPragas = RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
               historicPragas,
               allPragas,
@@ -493,7 +469,6 @@ class PragasNotifier extends _$PragasNotifier {
           },
         );
       } else {
-        // Fallback para use case original se não há histórico
         final result = await _getRecentPragasUseCase.execute();
         result.fold(
           (failure) {
@@ -517,13 +492,11 @@ class PragasNotifier extends _$PragasNotifier {
     if (currentState == null) return;
 
     try {
-      // Tenta usar o use case original, mas com fallback para seleção aleatória
       try {
         final result = await _getSuggestedPragasUseCase.execute(limit: limit);
         await result.fold(
           (failure) async => throw Exception(failure.message),
           (pragas) async {
-            // Se não retornou sugestões, usa seleção aleatória inteligente
             if (pragas.isEmpty) {
               final allPragasResult = await _getPragasUseCase.execute();
               allPragasResult.fold(
@@ -542,7 +515,6 @@ class PragasNotifier extends _$PragasNotifier {
           },
         );
       } catch (e) {
-        // Em caso de erro, usa seleção aleatória como fallback
         final allPragasResult = await _getPragasUseCase.execute();
         allPragasResult.fold(
           (failure) => throw Exception(failure.message),

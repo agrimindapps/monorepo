@@ -178,8 +178,6 @@ class TaskHistory extends Equatable {
       ),
     );
   }
-
-  // Criar histórico a partir de uma tarefa completada
   factory TaskHistory.fromCompletedTask(
     task_entity.Task task, {
     String? notes,
@@ -205,8 +203,6 @@ class TaskHistory extends Equatable {
       updatedAt: now,
     );
   }
-
-  // Propriedades computadas
   bool get wasCompletedOnTime =>
       completedAt.isBefore(originalDueDate) ||
       completedAt.isAtSameMomentAs(originalDueDate);

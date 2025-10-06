@@ -21,12 +21,9 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
 
   @override
   String? get upgradeUrl => 'https://example.com/premium';
-
-  // Status Management
   @override
   Future<void> checkPremiumStatus() async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
-    // Mock implementation - no change to status
   }
 
   @override
@@ -68,14 +65,9 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
     notifyListeners();
     _statusController.add(_status.isActive);
   }
-
-  // Feature Access
   @override
   bool canUseFeature(String featureName) {
-    // Mock: premium users can use all features, free users have limited access
     if (_status.isActive) return true;
-    
-    // Mock some free features
     const freeFeatures = ['basic_search', 'limited_results'];
     return freeFeatures.contains(featureName);
   }
@@ -89,8 +81,6 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   @override
   int getFeatureLimit(String featureName) {
     if (_status.isActive) return -1; // Unlimited for premium
-    
-    // Mock limits for free users
     switch (featureName) {
       case 'search_results':
         return 10;
@@ -122,12 +112,9 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
       'export_data',
     ];
   }
-
-  // Trial Management
   @override
   Future<bool> isTrialAvailable() async {
     await Future<void>.delayed(const Duration(milliseconds: 100));
-    // Mock: trial available if no subscription
     return !_status.isActive && !_status.isTestSubscription;
   }
 
@@ -149,8 +136,6 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
     }
     return false;
   }
-
-  // Test Subscription
   @override
   Future<void> generateTestSubscription() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -176,11 +161,8 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
       _statusController.add(false);
     }
   }
-
-  // Navigation
   @override
   Future<void> navigateToPremium() async {
-    // Mock navigation
     if (kDebugMode) print('Navigate to premium page');
   }
 

@@ -31,19 +31,14 @@ class DiagnosticoMapper {
   static Future<DiagnosticoEntity> fromDiagnosticosEntityWithResolution(
     diag_entity.DiagnosticoEntity entity,
   ) async {
-    // ✅ SEMPRE resolve nome da cultura usando fkIdCultura (NUNCA usa nomeCultura cached)
     String culturaNome = 'Não especificado';
     if (entity.idCultura.isNotEmpty) {
       culturaNome = await _resolveCulturaNome(entity.idCultura);
     }
-
-    // ✅ SEMPRE resolve nome da praga usando fkIdPraga (NUNCA usa nomePraga cached)
     String pragaNome = 'Praga não identificada';
     if (entity.idPraga.isNotEmpty) {
       pragaNome = await _resolvePragaNome(entity.idPraga);
     }
-
-    // ✅ SEMPRE resolve nome do defensivo usando fkIdDefensivo
     String defensivoNome = 'Defensivo não identificado';
     if (entity.idDefensivo.isNotEmpty) {
       defensivoNome = await _resolveDefensivoNome(entity.idDefensivo);
@@ -71,7 +66,6 @@ class DiagnosticoMapper {
         return defensivoData.nomeComum;
       }
     } catch (e) {
-      // Silently fail
     }
     return 'Defensivo não identificado';
   }
@@ -85,7 +79,6 @@ class DiagnosticoMapper {
         return culturaData.cultura;
       }
     } catch (e) {
-      // Silently fail
     }
     return 'Não especificado';
   }
@@ -99,7 +92,6 @@ class DiagnosticoMapper {
         return pragaData.nomeComum;
       }
     } catch (e) {
-      // Silently fail
     }
     return 'Praga não identificada';
   }

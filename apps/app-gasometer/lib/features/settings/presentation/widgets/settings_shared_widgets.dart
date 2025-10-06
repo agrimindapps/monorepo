@@ -147,8 +147,6 @@ class SettingsItem extends StatelessWidget {
     );
   }
 }
-
-// Placeholder sections - to be replaced with actual implementations
 class SettingsAccountSection extends StatelessWidget {
   const SettingsAccountSection({super.key});
 

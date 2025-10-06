@@ -45,7 +45,6 @@ class ErrorDisplay extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with icon and title
           Row(
             children: [
               if (showIcon) ...[
@@ -78,8 +77,6 @@ class ErrorDisplay extends StatelessWidget {
               ),
             ],
           ),
-
-          // Action buttons
           if (onRetry != null || onDismiss != null) ...[
             const SizedBox(height: 16),
             Row(
@@ -217,8 +214,6 @@ class AuthErrorDisplay extends StatelessWidget {
         'retryText': 'Tentar Novamente',
       };
     }
-
-    // Generic error
     return {
       'title': 'Erro de Autenticação',
       'message':
@@ -321,8 +316,6 @@ class PurchaseErrorDisplay extends StatelessWidget {
         'canRetry': false,
       };
     }
-
-    // Generic purchase error
     return {
       'title': 'Erro na Compra',
       'message':
@@ -373,7 +366,6 @@ class SuccessDisplay extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with icon and title
           Row(
             children: [
               if (showIcon) ...[
@@ -406,8 +398,6 @@ class SuccessDisplay extends StatelessWidget {
               ),
             ],
           ),
-
-          // Dismiss button
           if (onDismiss != null) ...[
             const SizedBox(height: 16),
             Row(

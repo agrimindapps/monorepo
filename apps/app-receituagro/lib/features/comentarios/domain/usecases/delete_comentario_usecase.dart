@@ -10,24 +10,17 @@ class DeleteComentarioUseCase {
 
   /// Soft deletes a comentario after comprehensive validation
   Future<void> call(String comentarioId) async {
-    // Get the comentario first to validate
     final comentario = await _repository.getComentarioById(comentarioId);
     
     if (comentario == null) {
       throw ComentarioNotFoundException('Comentário não encontrado');
     }
-
-    // Comprehensive business validation (async)
     await _validateDeletion(comentario);
-    
-    // Perform soft delete
     await _repository.deleteComentario(comentarioId);
   }
 
   /// Hard deletes a comentario (admin/cleanup function)
   Future<void> hardDelete(String comentarioId) async {
-    // This would be used for admin purposes or cleanup
-    // Implementation would depend on repository capabilities
     throw UnimplementedError('Hard delete not yet implemented');
   }
 
@@ -40,34 +33,22 @@ class DeleteComentarioUseCase {
     
     final statsAfter = await _repository.getUserCommentStats();
     final deletedAfter = statsAfter['deleted'] ?? 0;
-    
-    // Return number of comments cleaned up
     return deletedBefore - deletedAfter;
   }
 
   /// Comprehensive business validation for deletion
   Future<void> _validateDeletion(ComentarioEntity comentario) async {
-    // Business rule: Only active comments can be deleted
     if (!comentario.status) {
       throw AlreadyDeletedException('Comentário já foi deletado');
     }
-
-    // Business rule: Comments older than 1 year cannot be deleted
-    // (for audit purposes)
     final daysSinceCreation = DateTime.now().difference(comentario.createdAt).inDays;
     if (daysSinceCreation > 365) {
       throw DeletionNotAllowedException(
         'Comentários com mais de 1 ano não podem ser deletados para fins de auditoria'
       );
     }
-
-    // Business rule: Rate limiting for deletions
     await _checkDeletionRateLimit();
-
-    // Business rule: Context-specific deletion rules
     await _validateContextualDeletion(comentario);
-
-    // Business rule: Check for important/system comments
     _validateSystemCommentDeletion(comentario);
   }
 
@@ -87,30 +68,19 @@ class DeleteComentarioUseCase {
       if (e is DeletionNotAllowedException) {
         rethrow;
       }
-      // If we can't check rate limits, allow deletion
     }
   }
 
   /// Get recent deletions for rate limiting
   Future<List<ComentarioEntity>> _getRecentDeletions(DateTime since) async {
-    // This would typically query deleted comments with timestamps
-    // For now, return empty list as we don't have access to deletion history
     return [];
   }
 
   /// Validate contextual deletion rules
   Future<void> _validateContextualDeletion(ComentarioEntity comentario) async {
     try {
-      // Business rule: Comments in certain contexts might have special rules
-      // For example, comments on critical diagnostics might require admin approval
-      
-      // Check if this is a critical context
       if (_isCriticalContext(comentario.pkIdentificador)) {
-        // In a real app, this might check user permissions
-        // For now, we'll allow deletion but log it
       }
-
-      // Check if comment has references or dependencies
       final hasReferences = await _checkCommentReferences(comentario.id);
       if (hasReferences) {
         throw DeletionNotAllowedException(
@@ -121,47 +91,33 @@ class DeleteComentarioUseCase {
       if (e is DeletionNotAllowedException) {
         rethrow;
       }
-      // Graceful handling for context validation errors
     }
   }
 
   /// Check if context is considered critical
   bool _isCriticalContext(String pkIdentificador) {
-    // This would implement business logic to identify critical contexts
-    // For example, certain diseases or pests might be marked as critical
     return false; // Placeholder implementation
   }
 
   /// Check if comment has references that prevent deletion
   Future<bool> _checkCommentReferences(String comentarioId) async {
-    // In a real implementation, this would check:
-    // - If comment is referenced by other comments
-    // - If comment is bookmarked by many users
-    // - If comment is part of a knowledge base entry
     return false; // Placeholder implementation
   }
 
   /// Validate system comment deletion rules
   void _validateSystemCommentDeletion(ComentarioEntity comentario) {
-    // Business rule: Certain comments might be marked as system-generated
-    // and should not be deletable by regular users
     
     if (_isSystemGeneratedComment(comentario)) {
       throw DeletionNotAllowedException(
         'Comentários gerados pelo sistema não podem ser excluídos'
       );
     }
-
-    // Business rule: High-value comments (with many interactions) need confirmation
     if (_isHighValueComment(comentario)) {
-      // In a real app, this might require additional confirmation
-      // For now, we'll allow it but could add a warning mechanism
     }
   }
 
   /// Check if comment is system-generated
   bool _isSystemGeneratedComment(ComentarioEntity comentario) {
-    // Check for system-generated patterns
     return comentario.titulo.startsWith('[SISTEMA]') ||
            comentario.ferramenta == 'system' ||
            comentario.conteudo.contains('[AUTO-GENERATED]');
@@ -169,8 +125,6 @@ class DeleteComentarioUseCase {
 
   /// Check if comment is considered high-value
   bool _isHighValueComment(ComentarioEntity comentario) {
-    // Business logic to identify valuable comments
-    // Could be based on length, quality indicators, user engagement, etc.
     
     final isDetailed = comentario.conteudo.length > 500;
     final hasStructuredContent = comentario.conteudo.contains('\n') && 

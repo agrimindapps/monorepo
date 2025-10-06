@@ -17,12 +17,8 @@ import '../../../../core/widgets/loading_overlay.dart';
 import '../../utils/auth_validators.dart';
 import '../widgets/device_validation_overlay.dart';
 import '../widgets/forgot_password_dialog.dart';
-
-// Constantes para SharedPreferences
 const String _kRememberedEmailKey = 'remembered_email';
 const String _kRememberMeKey = 'remember_me';
-
-// Data class for granular Selector optimization
 class AuthLoadingState {
   final bool isLoading;
   final String? currentOperation;
@@ -55,23 +51,17 @@ class AuthPage extends ConsumerStatefulWidget {
 class _AuthPageState extends ConsumerState<AuthPage>
     with TickerProviderStateMixin, LoadingStateMixin, AccessibilityFocusMixin {
   late TabController _tabController;
-
-  // Enhanced animations inspired by gasometer
   late AnimationController _animationController;
   late AnimationController _backgroundController;
   late Animation<double> _fadeInAnimation;
   late Animation<double> _slideAnimation;
   late Animation<double> _backgroundAnimation;
   late Animation<double> _logoAnimation;
-
-  // Login controllers
   final _loginFormKey = GlobalKey<FormState>();
   final _loginEmailController = TextEditingController();
   final _loginPasswordController = TextEditingController();
   bool _obscureLoginPassword = true;
   bool _rememberMe = false;
-
-  // Register controllers
   final _registerFormKey = GlobalKey<FormState>();
   final _registerNameController = TextEditingController();
   final _registerEmailController = TextEditingController();
@@ -79,8 +69,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
   final _registerConfirmPasswordController = TextEditingController();
   bool _obscureRegisterPassword = true;
   bool _obscureRegisterConfirmPassword = true;
-
-  // Focus nodes para navegação por teclado - inicialização segura
   FocusNode? _emailFocusNode;
   FocusNode? _passwordFocusNode;
   FocusNode? _loginButtonFocusNode;
@@ -93,15 +81,11 @@ class _AuthPageState extends ConsumerState<AuthPage>
   @override
   void initState() {
     super.initState();
-
-    // Initialize TabController
     _tabController = TabController(
       length: 2,
       vsync: this,
       initialIndex: widget.initialTab,
     );
-
-    // Inicializar focus nodes de forma imediata mas segura
     _emailFocusNode = getFocusNode('email');
     _passwordFocusNode = getFocusNode('password');
     _loginButtonFocusNode = getFocusNode('login_button');
@@ -112,8 +96,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
       'register_confirm_password',
     );
     _registerButtonFocusNode = getFocusNode('register_button');
-
-    // Enhanced animation setup inspired by gasometer
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -141,20 +123,15 @@ class _AuthPageState extends ConsumerState<AuthPage>
     _backgroundAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _backgroundController, curve: Curves.linear),
     );
-
-    // Logo animation for modern branding
     _logoAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
       ),
     );
-
-    // Delay animation start slightly to ensure proper layout
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _animationController.forward();
-        // Carregar credenciais lembradas após a inicialização
         _loadRememberedCredentials();
       }
     });
@@ -179,11 +156,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
     final prefs = await SharedPreferences.getInstance();
 
     if (_rememberMe) {
-      // Salvar email e estado do "Lembrar-me"
       await prefs.setString(_kRememberedEmailKey, _loginEmailController.text);
       await prefs.setBool(_kRememberMeKey, true);
     } else {
-      // Limpar email salvo se "Lembrar-me" foi desmarcado
       await prefs.remove(_kRememberedEmailKey);
       await prefs.setBool(_kRememberMeKey, false);
     }
@@ -209,11 +184,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
       showLoading(message: 'Fazendo login...');
 
       final router = GoRouter.of(context);
-
-      // Salvar email se "Lembrar-me" estiver marcado
       await _saveRememberedCredentials();
-
-      // Usar Riverpod AuthNotifier
       final authNotifier = ref.read(authProvider.notifier);
 
       try {
@@ -225,8 +196,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
         if (!mounted) return;
 
         hideLoading();
-
-        // Verificar se login foi bem-sucedido
         final authState = ref.read(authProvider);
         if (authState.hasValue && authState.value!.isAuthenticated) {
           router.go('/plants');
@@ -256,8 +225,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
         if (!mounted) return;
 
         hideLoading();
-
-        // Verificar se registro foi bem-sucedido
         final authState = ref.read(authProvider);
         if (authState.hasValue && authState.value!.isAuthenticated) {
           router.go('/plants');
@@ -345,8 +312,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     if (!mounted) return;
 
                     hideLoading();
-
-                    // Verificar se login anônimo foi bem-sucedido
                     final authState = ref.read(authProvider);
                     if (authState.hasValue &&
                         authState.value!.isAuthenticated) {
@@ -390,7 +355,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                   ),
                 ),
               ),
-              // Device validation overlay
               const DeviceValidationOverlay(),
             ],
           ),
@@ -415,11 +379,8 @@ class _AuthPageState extends ConsumerState<AuthPage>
       ),
       child: Stack(
         children: [
-          // Enhanced background pattern with plant motifs
           _buildPlantBackgroundPattern(),
-          // Floating plant elements
           _buildFloatingPlantElements(),
-          // Main content
           child,
         ],
       ),
@@ -473,9 +434,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        // Left side with Inside Garden branding
         Expanded(flex: 5, child: _buildPlantBrandingSide()),
-        // Right side with form
         Expanded(
           flex: 4,
           child: FadeTransition(
@@ -518,12 +477,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Só mostra o branding completo se não tiver teclado visível
                   if (!isKeyboardVisible) ...[
                     _buildMobileBranding(),
                     const SizedBox(height: 16),
                   ] else ...[
-                    // Versão compacta quando teclado está visível
                     _buildCompactBranding(),
                     const SizedBox(height: 12),
                   ],
@@ -562,7 +519,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Enhanced logo with animation
               ScaleTransition(
                 scale: _logoAnimation,
                 child: _buildModernLogo(isWhite: true, size: 40),
@@ -597,7 +553,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 ),
               ),
               const SizedBox(height: 40),
-              // Animated plant illustration
               Expanded(
                 child: Center(
                   child: AnimatedBuilder(
@@ -628,7 +583,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 ),
               ),
               const SizedBox(height: 30),
-              // Security indicator
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -742,10 +696,8 @@ class _AuthPageState extends ConsumerState<AuthPage>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Modern tab navigation inspired by gasometer
         _buildModernTabNavigation(),
         const SizedBox(height: 24),
-        // Form content
         AnimatedBuilder(
           animation: _tabController,
           builder: (context, child) {
@@ -794,7 +746,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Login Tab
               _buildTab(
                 title: 'Entrar',
                 isActive: _tabController.index == 0,
@@ -803,7 +754,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 },
               ),
               const SizedBox(width: 40),
-              // Register Tab
               _buildTab(
                 title: 'Cadastrar',
                 isActive: _tabController.index == 1,
@@ -861,7 +811,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Enhanced Email field
           AccessibleTextField(
             controller: _loginEmailController,
             focusNode: _emailFocusNode,
@@ -885,8 +834,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             prefixIcon: const Icon(Icons.email_outlined),
           ),
           const SizedBox(height: 16),
-
-          // Enhanced Password field
           AccessibleTextField(
             controller: _loginPasswordController,
             focusNode: _passwordFocusNode,
@@ -929,7 +876,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                   setState(() {
                     _obscureLoginPassword = !_obscureLoginPassword;
                   });
-                  // Anunciar mudança para screen readers
                   final message =
                       _obscureLoginPassword ? 'Senha oculta' : 'Senha visível';
                   SemanticsService.announce(message, ui.TextDirection.ltr);
@@ -941,24 +887,14 @@ class _AuthPageState extends ConsumerState<AuthPage>
             },
           ),
           const SizedBox(height: 16),
-
-          // Enhanced remember me and forgot password
           _buildRememberAndForgotSection(),
           const SizedBox(height: 20),
-
-          // Enhanced error message
           _buildErrorMessage(),
-
-          // Enhanced login button
           _buildAccessibleLoginButton(),
           const SizedBox(height: 16),
-
-          // Enhanced divider with social login
           _buildSocialLoginSection(),
 
           const SizedBox(height: 16),
-
-          // Enhanced anonymous login
           _buildAnonymousLoginSection(),
         ],
       ),
@@ -983,7 +919,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                       setState(() {
                         _rememberMe = !_rememberMe;
                       });
-                      // Salvar ou limpar credenciais imediatamente quando o estado mudar
                       _saveRememberedCredentials();
                     },
                     borderRadius: BorderRadius.circular(8),
@@ -1197,8 +1132,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
           ],
         ),
         const SizedBox(height: 20),
-
-        // Social buttons row similar to GasOMeter
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -1222,8 +1155,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
           ],
         ),
         const SizedBox(height: 12),
-
-        // Disclaimer text with asterisk
         Text(
           '* Opções de login social estarão disponíveis em breve',
           textAlign: TextAlign.center,
@@ -1346,7 +1277,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Enhanced Name field
           AccessibleTextField(
             controller: _registerNameController,
             focusNode: _registerNameFocusNode,
@@ -1362,8 +1292,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             prefixIcon: const Icon(Icons.person_outline),
           ),
           const SizedBox(height: 16),
-
-          // Enhanced Email field
           AccessibleTextField(
             controller: _registerEmailController,
             focusNode: _registerEmailFocusNode,
@@ -1387,8 +1315,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             prefixIcon: const Icon(Icons.email_outlined),
           ),
           const SizedBox(height: 16),
-
-          // Enhanced Password field
           AccessibleTextField(
             controller: _registerPasswordController,
             focusNode: _registerPasswordFocusNode,
@@ -1432,7 +1358,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                   setState(() {
                     _obscureRegisterPassword = !_obscureRegisterPassword;
                   });
-                  // Anunciar mudança para screen readers
                   final message =
                       _obscureRegisterPassword
                           ? 'Senha oculta'
@@ -1443,8 +1368,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             ),
           ),
           const SizedBox(height: 16),
-
-          // Enhanced Confirm Password field
           AccessibleTextField(
             controller: _registerConfirmPasswordController,
             focusNode: _registerConfirmPasswordFocusNode,
@@ -1487,7 +1410,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
                     _obscureRegisterConfirmPassword =
                         !_obscureRegisterConfirmPassword;
                   });
-                  // Anunciar mudança para screen readers
                   final message =
                       _obscureRegisterConfirmPassword
                           ? 'Confirmação de senha oculta'
@@ -1501,15 +1423,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
             },
           ),
           const SizedBox(height: 20),
-
-          // Enhanced error message
           _buildErrorMessage(),
-
-          // Enhanced register button
           _buildAccessibleRegisterButton(),
           const SizedBox(height: 16),
-
-          // Terms text with clickable links
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -1732,7 +1648,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
   Widget _buildFloatingPlantElements() {
     return Stack(
       children: [
-        // Top right floating leaf
         Positioned(
           top: 80,
           right: 40,
@@ -1756,7 +1671,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             },
           ),
         ),
-        // Bottom left flower
         Positioned(
           bottom: 120,
           left: 30,
@@ -1780,7 +1694,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
             },
           ),
         ),
-        // Middle floating seed
         Positioned(
           top: 200,
           left: 60,
@@ -1818,13 +1731,10 @@ class PlantBackgroundPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Base organic shapes
     final basePaint =
         Paint()
           ..color = primaryColor.withValues(alpha: 0.03)
           ..style = PaintingStyle.fill;
-
-    // Floating organic circles (like seeds)
     for (int i = 0; i < 6; i++) {
       final x =
           (size.width * (i + 1) / 7) + (40 * math.sin(animation * 1.5 + i));
@@ -1834,8 +1744,6 @@ class PlantBackgroundPatternPainter extends CustomPainter {
 
       canvas.drawCircle(Offset(x, y), radius, basePaint);
     }
-
-    // Leaf-like curved lines
     final linePaint =
         Paint()
           ..color = primaryColor.withValues(alpha: 0.04)
@@ -1858,8 +1766,6 @@ class PlantBackgroundPatternPainter extends CustomPainter {
 
       canvas.drawPath(path, linePaint);
     }
-
-    // Subtle dots pattern (like pollen or small seeds)
     final dotPaint =
         Paint()
           ..color = primaryColor.withValues(alpha: 0.02)

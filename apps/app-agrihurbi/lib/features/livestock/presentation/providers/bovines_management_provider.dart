@@ -28,8 +28,6 @@ class BovinesManagementProvider extends ChangeNotifier {
         _updateBovine = updateBovine,
         _deleteBovine = deleteBovine;
 
-  // === STATE MANAGEMENT ===
-
   List<BovineEntity> _bovines = [];
   BovineEntity? _selectedBovine;
   
@@ -40,8 +38,6 @@ class BovinesManagementProvider extends ChangeNotifier {
   bool _isDeleting = false;
   
   String? _errorMessage;
-
-  // === GETTERS ===
 
   List<BovineEntity> get bovines => _bovines;
   BovineEntity? get selectedBovine => _selectedBovine;
@@ -64,8 +60,6 @@ class BovinesManagementProvider extends ChangeNotifier {
   
   /// Verifica se tem bovino selecionado
   bool get hasSelectedBovine => _selectedBovine != null;
-
-  // === BOVINES CRUD OPERATIONS ===
 
   /// Carrega todos os bovinos
   Future<void> loadBovines() async {
@@ -142,8 +136,6 @@ class BovinesManagementProvider extends ChangeNotifier {
         final index = _bovines.indexWhere((b) => b.id == updatedBovine.id);
         if (index != -1) {
           _bovines[index] = updatedBovine;
-          
-          // Atualiza o selecionado se for o mesmo
           if (_selectedBovine?.id == updatedBovine.id) {
             _selectedBovine = updatedBovine;
           }
@@ -174,12 +166,9 @@ class BovinesManagementProvider extends ChangeNotifier {
         debugPrint('BovinesManagementProvider: Erro ao deletar bovino - ${failure.message}');
       },
       (_) {
-        // Marca como inativo (soft delete)
         final index = _bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
           _bovines[index] = _bovines[index].copyWith(isActive: false);
-          
-          // Limpa seleção se foi o selecionado
           if (_selectedBovine?.id == bovineId) {
             _selectedBovine = null;
           }
@@ -198,8 +187,6 @@ class BovinesManagementProvider extends ChangeNotifier {
   /// Remove permanentemente um bovino da lista local
   void removeBovineFromList(String bovineId) {
     _bovines.removeWhere((bovine) => bovine.id == bovineId);
-    
-    // Limpa seleção se foi o removido
     if (_selectedBovine?.id == bovineId) {
       _selectedBovine = null;
     }

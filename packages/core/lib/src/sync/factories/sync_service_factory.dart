@@ -8,8 +8,6 @@ class SyncServiceFactory {
   static SyncServiceFactory get instance => _instance;
   
   SyncServiceFactory._internal();
-  
-  // Registry de criadores de serviços
   final Map<String, ISyncService Function()> _creators = {};
   final Map<String, ServiceMetadata> _metadata = {};
   
@@ -140,13 +138,10 @@ class SyncServiceFactory {
       final canCreate = remaining.where((serviceId) {
         final metadata = _metadata[serviceId];
         if (metadata == null) return true;
-        
-        // Verificar se todas as dependências já foram criadas
         return metadata.dependencies.every((dep) => result.contains(dep));
       }).toList();
       
       if (canCreate.isEmpty) {
-        // Circular dependency ou dependency não registrada
         developer.log(
           'Cannot resolve dependencies for remaining services: $remaining',
           name: 'SyncServiceFactory',

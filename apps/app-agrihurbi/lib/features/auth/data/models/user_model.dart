@@ -58,7 +58,6 @@ class UserModel extends UserEntity {
     isActive: true, // Valor padrão para compatibilidade
     createdAt: userModelCreatedAt,
     updatedAt: userModelUpdatedAt,
-    // Novos parâmetros do BaseSyncEntity
     lastSyncAt: null,
     isDirty: false,
     isDeleted: false,
@@ -81,7 +80,6 @@ class UserModel extends UserEntity {
       isActive: true, // Valor padrão para compatibilidade
       createdAt: userModelCreatedAt,
       updatedAt: userModelUpdatedAt,
-      // Campos de sincronização
       lastSyncAt: null,
       isDirty: false,
       isDeleted: false,
@@ -167,8 +165,6 @@ class UserModel extends UserEntity {
     String? userId,
     String? moduleName,
   }) {
-    // UserModel mapeia apenas os campos que tem implementação local
-    // Os demais parâmetros são aceitos para compatibilidade mas serão valores padrão
     return UserModel(
       userModelId: id ?? userModelId,
       userModelDisplayName: displayName ?? userModelDisplayName,

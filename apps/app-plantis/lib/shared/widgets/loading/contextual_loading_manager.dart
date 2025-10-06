@@ -20,8 +20,6 @@ class ContextualLoadingManager {
       type: type,
       startTime: DateTime.now(),
     );
-
-    // Auto-timeout para evitar loadings infinitos
     if (timeout != null) {
       Future.delayed(timeout, () => stopLoading(context));
     }

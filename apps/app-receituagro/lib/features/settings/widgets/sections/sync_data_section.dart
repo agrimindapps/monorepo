@@ -20,8 +20,6 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   /// Executa sincronização manual
   Future<void> _performManualSync() async {
     if (_isSyncing) return;
-
-    // Get auth state from Riverpod
     final authState = ref.read(receitaAgroAuthNotifierProvider).value;
 
     if (authState == null || !authState.isAuthenticated) {
@@ -34,7 +32,6 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
     });
 
     try {
-      // Usar sincronização real do AuthNotifier
       final success = await ref.read(receitaAgroAuthNotifierProvider.notifier).forceSyncUserData();
 
       if (mounted) {
@@ -75,13 +72,10 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    // Watch auth state from Riverpod
     final authAsync = ref.watch(receitaAgroAuthNotifierProvider);
 
     return authAsync.when(
       data: (authState) {
-        // Só mostra seção para usuários autenticados
         if (!authState.isAuthenticated || authState.isAnonymous) {
           return const SizedBox.shrink();
         }
@@ -104,7 +98,6 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Ícone
               Container(
                 width: 48,
                 height: 48,
@@ -120,8 +113,6 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
               ),
               
               const SizedBox(width: 16),
-              
-              // Título e subtítulo
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,8 +132,6 @@ class _SyncDataSectionState extends ConsumerState<SyncDataSection> {
                   ],
                 ),
               ),
-              
-              // Ícone de ação (sync)
               _isSyncing
                   ? const SizedBox(
                       width: 20,

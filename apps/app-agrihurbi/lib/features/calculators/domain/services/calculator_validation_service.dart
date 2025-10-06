@@ -46,8 +46,6 @@ class CalculatorValidationService {
         sanitizedInputs[param.id] = result.sanitizedValue;
       }
     }
-
-    // Validações cruzadas
     final crossValidation = await _performCrossValidation(
       parameters,
       sanitizedInputs,
@@ -119,8 +117,6 @@ class CalculatorValidationService {
     Map<String, dynamic> inputs,
   ) async {
     final warnings = <String>[];
-
-    // Verificar produtividade realística
     final expectedYield =
         double.tryParse(inputs['expected_yield']?.toString() ?? '0') ?? 0;
     if (await _isYieldUnrealistic(cropType, expectedYield)) {
@@ -128,14 +124,10 @@ class CalculatorValidationService {
         'Produtividade esperada (${expectedYield}t/ha) pode estar acima da média para $cropType',
       );
     }
-
-    // Verificar coerência entre solo e cultura
     final soilTexture = inputs['soil_texture']?.toString() ?? '';
     if (await _isSoilIncompatible(cropType, soilTexture)) {
       warnings.add('$cropType pode não ser ideal para solos $soilTexture');
     }
-
-    // Verificar matéria orgânica adequada
     final organicMatter =
         double.tryParse(inputs['organic_matter']?.toString() ?? '0') ?? 0;
     if (organicMatter < 2.0) {
@@ -160,8 +152,6 @@ class CalculatorValidationService {
     final soilN = double.tryParse(inputs['soil_n']?.toString() ?? '0') ?? 0;
     final soilP = double.tryParse(inputs['soil_p']?.toString() ?? '0') ?? 0;
     final soilK = double.tryParse(inputs['soil_k']?.toString() ?? '0') ?? 0;
-
-    // Validar N
     if (soilN < 10) {
       warnings.add(
         'Nitrogênio muito baixo no solo (${soilN}mg/dm³). Considere adubação nitrogenada intensiva.',
@@ -171,8 +161,6 @@ class CalculatorValidationService {
         'Nitrogênio muito alto no solo (${soilN}mg/dm³). Risco de lixiviação.',
       );
     }
-
-    // Validar P
     if (soilP < 5) {
       warnings.add(
         'Fósforo muito baixo no solo (${soilP}mg/dm³). Pode limitar desenvolvimento radicular.',
@@ -182,8 +170,6 @@ class CalculatorValidationService {
         'Fósforo muito alto no solo (${soilP}mg/dm³). Pode interferir na absorção de micronutrientes.',
       );
     }
-
-    // Validar K
     if (soilK < 40) {
       warnings.add(
         'Potássio baixo no solo (${soilK}mg/dm³). Importante para qualidade e resistência.',
@@ -193,8 +179,6 @@ class CalculatorValidationService {
         'Potássio muito alto no solo (${soilK}mg/dm³). Pode causar desequilíbrio nutricional.',
       );
     }
-
-    // Validar relações entre nutrientes
     if (soilP > 0 && soilK > 0) {
       final relacaoKP = soilK / soilP;
       if (relacaoKP < 2.0) {
@@ -236,35 +220,26 @@ class CalculatorValidationService {
     );
   }
 
-  // ============= MÉTODOS PRIVADOS =============
-
   Future<SingleParameterValidationResult> _validateSingleParameter(
     CalculatorParameter param,
     dynamic value,
   ) async {
-    // Verificar se é obrigatório
     if (param.required && (value == null || value.toString().trim().isEmpty)) {
       return SingleParameterValidationResult(
         isValid: false,
         errorMessage: '${param.name} é obrigatório',
       );
     }
-
-    // Se não é obrigatório e está vazio, é válido
     if (!param.required && (value == null || value.toString().trim().isEmpty)) {
       return SingleParameterValidationResult(
         isValid: true,
         sanitizedValue: param.defaultValue,
       );
     }
-
-    // Validar tipo
     final typeValidation = _validateParameterType(param, value);
     if (!typeValidation.isValid) {
       return typeValidation;
     }
-
-    // Validar range se aplicável
     if (param.type == ParameterType.decimal ||
         param.type == ParameterType.number) {
       final rangeValidation = await validateParameterRange(param.id, value);
@@ -288,8 +263,6 @@ class CalculatorValidationService {
         sanitizedValue: rangeValidation.sanitizedValue,
       );
     }
-
-    // Para outros tipos, usar validação básica do parâmetro
     if (param.isValid(value)) {
       return SingleParameterValidationResult(
         isValid: true,
@@ -365,8 +338,6 @@ class CalculatorValidationService {
   ) async {
     final errors = <String, String>{};
     final warnings = <String, String>{};
-
-    // Exemplo: validar se área é coerente com produção total esperada
     final area = double.tryParse(inputs['area']?.toString() ?? '0') ?? 0;
     final expectedYield =
         double.tryParse(inputs['expected_yield']?.toString() ?? '0') ?? 0;
@@ -374,7 +345,6 @@ class CalculatorValidationService {
     if (area > 0 && expectedYield > 0) {
       final totalProduction = area * expectedYield;
       if (totalProduction > 10000) {
-        // > 10 mil toneladas
         warnings['area'] =
             'Produção total muito alta (${totalProduction.toStringAsFixed(0)}t). Verifique área e produtividade.';
       }
@@ -387,7 +357,6 @@ class CalculatorValidationService {
     String cropType,
     double expectedYield,
   ) async {
-    // Produtividades consideradas altas por cultura
     final Map<String, double> realisticYields = {
       'Milho': 15.0,
       'Soja': 5.0,
@@ -406,7 +375,6 @@ class CalculatorValidationService {
   }
 
   Future<bool> _isSoilIncompatible(String cropType, String soilTexture) async {
-    // Incompatibilidades conhecidas (simplificado)
     final incompatibilities = {
       'Arroz': ['Arenoso'], // Arroz prefere solos com retenção
       'Batata': ['Argiloso'], // Batata prefere solos mais soltos
@@ -415,8 +383,6 @@ class CalculatorValidationService {
     return incompatibilities[cropType]?.contains(soilTexture) ?? false;
   }
 }
-
-// ============= RESULT CLASSES =============
 
 class ParameterValidationResult {
   final bool isValid;

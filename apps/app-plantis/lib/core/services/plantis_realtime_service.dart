@@ -19,8 +19,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
   bool _isRealtimeActive = false;
   AppLifecycleState _currentLifecycleState = AppLifecycleState.resumed;
   Timer? _backgroundTimer;
-
-  // Streams para monitoramento
   final StreamController<bool> _realtimeStatusController =
       StreamController<bool>.broadcast();
   final StreamController<String> _syncEventController =
@@ -31,10 +29,7 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     if (_isInitialized) return;
 
     try {
-      // Registrar observer do lifecycle
       WidgetsBinding.instance.addObserver(this);
-
-      // Configurar sync baseado no estado inicial
       await _configureSyncMode();
 
       _isInitialized = true;
@@ -55,7 +50,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     if (_isRealtimeActive) return;
 
     try {
-      // Usar configuração real-time otimizada
       await PlantisSyncConfig.configure();
 
       _isRealtimeActive = true;
@@ -74,7 +68,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     if (!_isRealtimeActive) return;
 
     try {
-      // Voltar para configuração por intervalos
       await PlantisSyncConfig.configure();
 
       _isRealtimeActive = false;
@@ -158,11 +151,7 @@ class PlantisRealtimeService with WidgetsBindingObserver {
   /// App voltou para foreground - ativar real-time
   void _handleAppResumed() async {
     _backgroundTimer?.cancel();
-
-    // Força sync imediato ao retornar
     await forceSync();
-
-    // Ativa real-time se não estiver ativo
     if (!_isRealtimeActive) {
       await enableRealtime();
     }
@@ -172,7 +161,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
 
   /// App foi para background - otimizar para economia de bateria
   void _handleAppPaused() async {
-    // Continuar real-time por mais 5 minutos em background
     _backgroundTimer = Timer(const Duration(minutes: 5), () async {
       if (_currentLifecycleState != AppLifecycleState.resumed) {
         await disableRealtime();
@@ -188,7 +176,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
 
   /// App foi ocultado - preparar para economia de bateria
   void _handleAppHidden() async {
-    // Desativar real-time imediatamente se oculto
     await disableRealtime();
     _syncEventController.add('App oculto - sync por intervalos');
   }
@@ -202,7 +189,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
   /// Configura modo de sync baseado nas condições atuais
   Future<void> _configureSyncMode() async {
     try {
-      // Verificar se deve usar real-time ou intervalos
       final shouldUseRealtime = _shouldUseRealtime();
 
       if (shouldUseRealtime && !_isRealtimeActive) {
@@ -220,12 +206,9 @@ class PlantisRealtimeService with WidgetsBindingObserver {
 
   /// Determina se deve usar real-time baseado nas condições atuais
   bool _shouldUseRealtime() {
-    // Real-time apenas em foreground ou recém saiu de foreground
     if (_currentLifecycleState == AppLifecycleState.resumed) {
       return true;
     }
-
-    // Se está em background mas timer ainda não expirou
     if (_currentLifecycleState == AppLifecycleState.paused &&
         _backgroundTimer?.isActive == true) {
       return true;

@@ -2,22 +2,15 @@ import 'package:flutter/material.dart';
 
 /// Cores específicas do Plantis (foco em plantas e natureza)
 class PlantisColors {
-  // Primary colors (green theme for nature/plants)
   static const Color primary = Color(0xFF0D945A); // Deep green
   static const Color primaryLight = Color(0xFF4DB377); // Light green
   static const Color primaryDark = Color(0xFF0A7548); // Dark green
-
-  // Secondary colors
   static const Color secondary = Color(0xFF98D8C8); // Mint green
   static const Color secondaryLight = Color(0xFFC9FFF9); // Very light mint
   static const Color secondaryDark = Color(0xFF69A697); // Dark mint
-
-  // Tertiary/Nature colors
   static const Color accent = Color(0xFF4CAF50); // Natural green
   static const Color accentLight = Color(0xFFC8E6C9); // Light green
   static const Color accentDark = Color(0xFF2E7D32); // Dark green
-
-  // Plant-themed colors
   static const Color leaf = Color(0xFF4CAF50); // Leaf green
   static const Color leafLight = Color(0xFFE8F5E8); // Light leaf
   static const Color leafDark = Color(0xFF1B5E20); // Dark leaf
@@ -37,21 +30,15 @@ class PlantisColors {
   static const Color sun = Color(0xFFFFC107); // Sun yellow
   static const Color sunLight = Color(0xFFFFF9C4); // Light sun
   static const Color sunDark = Color(0xFFE65100); // Dark sun
-
-  // Semantic colors
   static const Color success = Color(0xFF27AE60); // Success green
   static const Color successLight = Color(0xFFD4EFDF); // Light success
   static const Color error = Color(0xFFE74C3C); // Error red
   static const Color errorLight = Color(0xFFFDEDEA); // Light error
   static const Color warning = Color(0xFFF39C12); // Warning orange
   static const Color warningLight = Color(0xFFFEF5E7); // Light warning
-
-  // Text colors
   static const Color textPrimary = Color(0xFF2C3E50); // Dark text
   static const Color textSecondary = Color(0xFF7F8C8D); // Light text
   static const Color textTertiary = Color(0xFFBDC3C7); // Very light text
-
-  // Brand gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -87,8 +74,6 @@ class PlantisColors {
     end: Alignment.bottomRight,
     colors: [error, errorLight],
   );
-
-  // Helper methods
 
   /// Cor de fundo padrão que suporta tema claro e escuro
   static Color getPageBackgroundColor(BuildContext context) {

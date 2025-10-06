@@ -35,7 +35,6 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    // Loading state
     if (state.isLoading && state.defensivosListFiltered.isEmpty) {
       return DefensivosAgrupadosLoadingSkeletonWidget(
         viewMode: state.selectedViewMode,
@@ -43,8 +42,6 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
         itemCount: 12,
       );
     }
-
-    // Empty state
     if (state.defensivosListFiltered.isEmpty) {
       return DefensivosAgrupadosEmptyStateWidget(
         category: category,
@@ -54,8 +51,6 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
         navigationLevel: state.navigationLevel,
       );
     }
-
-    // Content with list/grid
     return _buildListContainer(context);
   }
 

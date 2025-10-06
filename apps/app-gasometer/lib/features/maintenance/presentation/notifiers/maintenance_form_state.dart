@@ -5,7 +5,6 @@ import '../../domain/entities/maintenance_entity.dart';
 
 /// Estado imutável do formulário de manutenção para Riverpod
 class MaintenanceFormState extends Equatable {
-  // ==================== Constructors ====================
 
   const MaintenanceFormState({
     this.id = '',
@@ -76,8 +75,6 @@ class MaintenanceFormState extends Equatable {
     );
   }
 
-  // ==================== Fields ====================
-
   final String id;
   final String userId;
   final String vehicleId;
@@ -89,29 +86,17 @@ class MaintenanceFormState extends Equatable {
   final double cost;
   final DateTime? serviceDate;
   final double odometer;
-
-  // Workshop information
   final String workshopName;
   final String workshopPhone;
   final String workshopAddress;
-
-  // Next service
   final DateTime? nextServiceDate;
   final double? nextServiceOdometer;
-
-  // Attachments
   final List<String> photosPaths;
   final List<String> invoicesPaths;
-
-  // Parts and technical information
   final Map<String, String> parts;
   final String notes;
-
-  // Receipt image (single)
   final String? receiptImagePath;
   final String? receiptImageUrl;
-
-  // Form state
   final bool isLoading;
   final bool isUploadingImage;
   final bool hasChanges;
@@ -119,8 +104,6 @@ class MaintenanceFormState extends Equatable {
   final String? errorMessage;
   final String? imageUploadError;
   final Map<String, String> fieldErrors;
-
-  // ==================== Equatable Props ====================
 
   @override
   List<Object?> get props => [
@@ -154,8 +137,6 @@ class MaintenanceFormState extends Equatable {
     imageUploadError,
     fieldErrors,
   ];
-
-  // ==================== Computed Properties ====================
 
   /// Verifica se tem comprovante (local ou remoto)
   bool get hasReceiptImage =>
@@ -234,8 +215,6 @@ class MaintenanceFormState extends Equatable {
 
   /// Verifica se um campo específico tem erro
   bool hasFieldError(String field) => fieldErrors.containsKey(field);
-
-  // ==================== CopyWith Methods ====================
 
   MaintenanceFormState copyWith({
     String? id,

@@ -60,7 +60,6 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
     setState(() => _isLoading = true);
 
     try {
-      // Get AuthRepository from GetIt (injectable)
       final authRepository = GetIt.I<AuthRepository>();
       final result = await authRepository.signInWithGoogle();
 

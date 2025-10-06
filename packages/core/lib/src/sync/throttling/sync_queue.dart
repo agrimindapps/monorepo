@@ -37,11 +37,8 @@ class SyncQueueItem {
 
   /// Compara prioridade para ordenação na fila
   int compareTo(SyncQueueItem other) {
-    // Maior prioridade primeiro
     final priorityComparison = other.priority.value.compareTo(priority.value);
     if (priorityComparison != 0) return priorityComparison;
-
-    // Se mesma prioridade, FIFO (primeiro enfileirado primeiro)
     return enqueuedAt.compareTo(other.enqueuedAt);
   }
 }
@@ -73,13 +70,11 @@ class SyncQueue {
 
   /// Adiciona item à fila com prioridade
   bool enqueue(SyncQueueItem item) {
-    // Verificar se já existe item para este service na fila
     final existingIndex = _queue
         .toList()
         .indexWhere((queueItem) => queueItem.serviceId == item.serviceId);
 
     if (existingIndex != -1) {
-      // Substituir item existente se nova prioridade for maior
       final existing = _queue.elementAt(existingIndex);
       if (item.priority.value > existing.priority.value) {
         _queue.remove(existing);
@@ -87,23 +82,16 @@ class SyncQueue {
         _eventController.add(SyncQueueEvent.itemUpdated(item));
         return true;
       } else {
-        // Ignorar item de menor prioridade
         _eventController.add(SyncQueueEvent.itemIgnored(item));
         return false;
       }
     }
-
-    // Verificar limite de tamanho da fila
     if (_queue.length >= maxQueueSize) {
       _eventController.add(SyncQueueEvent.queueFull(item));
       return false;
     }
-
-    // Adicionar novo item
     _addToQueue(item);
     _eventController.add(SyncQueueEvent.itemEnqueued(item));
-
-    // Iniciar processamento se não estiver rodando
     if (!_isProcessing) {
       _processQueue();
     }
@@ -134,7 +122,6 @@ class SyncQueue {
         _eventController.add(SyncQueueEvent.itemStarted(_currentItem!));
 
         try {
-          // Executar sync com timeout se especificado
           final result = _currentItem!.timeout != null
               ? await _currentItem!.syncOperation()
                   .timeout(_currentItem!.timeout!)

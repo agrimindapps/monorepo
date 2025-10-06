@@ -37,11 +37,8 @@ class PragaCardGridMode extends StatelessWidget {
           borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
           child: Stack(
             children: [
-              // Imagem da praga ocupando todo o card
               _buildFullImage(),
-              // Gradiente overlay para legibilidade do texto
               _buildGradientOverlay(),
-              // Conteúdo textual sobreposto
               _buildOverlayContent(),
             ],
           ),
@@ -130,8 +127,6 @@ class PragaCardGridMode extends StatelessWidget {
       ),
     );
   }
-
-  // ignore: unused_element
   Color _getTypeColor() {
     switch (properties.praga.tipoPraga) {
       case '1': // Insetos
@@ -144,8 +139,6 @@ class PragaCardGridMode extends StatelessWidget {
         return const Color(0xFF757575); // Cinza
     }
   }
-
-  // ignore: unused_element
   IconData _getTypeIcon() {
     switch (properties.praga.tipoPraga) {
       case '1': // Insetos

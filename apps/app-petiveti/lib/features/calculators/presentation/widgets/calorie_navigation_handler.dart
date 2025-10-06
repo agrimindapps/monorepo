@@ -30,21 +30,13 @@ class CalorieNavigationHandler {
       _isTransitioning = true;
       
       if (isLastStep) {
-        // Show loading state for calculation
         ref.read(calorieProvider.notifier).setTransitionLoading(true);
         await Future<void>.delayed(const Duration(milliseconds: 200));
-        
-        // Execute calculation
         ref.read(calorieProvider.notifier).calculate();
       } else {
-        // Show loading state for step transition
         ref.read(calorieProvider.notifier).setTransitionLoading(true);
-        
-        // Move to next step
         ref.read(calorieProvider.notifier).nextStep();
         final currentStep = ref.read(calorieProvider).currentStep;
-        
-        // Animate to next page with loading feedback
         await _animateToPageWithLoading(currentStep);
       }
     } finally {
@@ -59,8 +51,6 @@ class CalorieNavigationHandler {
     
     try {
       _isTransitioning = true;
-      
-      // Show loading state for step transition
       ref.read(calorieProvider.notifier).setTransitionLoading(true);
       
       ref.read(calorieProvider.notifier).previousStep();
@@ -105,8 +95,6 @@ class CalorieNavigationHandler {
   /// Enhanced page animation with loading feedback
   Future<void> _animateToPageWithLoading(int page) async {
     if (!pageController.hasClients) return;
-    
-    // Add a small delay to show loading state
     await Future<void>.delayed(const Duration(milliseconds: 150));
     
     await pageController.animateToPage(
@@ -116,8 +104,6 @@ class CalorieNavigationHandler {
     );
     
     onTransition?.call();
-    
-    // Brief pause after transition for visual feedback
     await Future<void>.delayed(const Duration(milliseconds: 100));
   }
 
@@ -126,13 +112,10 @@ class CalorieNavigationHandler {
 
   /// Check if can navigate to specific step
   bool canNavigateToStep(int step) {
-    // Add validation logic here if needed
     return step >= 0 && step < 5; // 5 steps total
   }
 
   /// Dispose of resources
   void dispose() {
-    // Navigation handler doesn't need disposal,
-    // but can be extended if needed
   }
 }

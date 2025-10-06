@@ -5,32 +5,23 @@ import '../../domain/entities/maintenance_entity.dart';
 class MaintenanceConstants {
   
   MaintenanceConstants._();
-  // Limites de validação
   static const double minCost = 0.01;
   static const double maxCost = 999999.99;
   static const double maxOdometer = 9999999.0;
-  
-  // Limites específicos por tipo (valores esperados)
   static const double preventiveMinExpected = 50.0;
   static const double preventiveMaxExpected = 5000.0;
   static const double correctiveMaxExpected = 15000.0;
   static const double inspectionMinExpected = 100.0;
   static const double inspectionMaxExpected = 1000.0;
   static const double emergencyMaxExpected = 20000.0;
-  
-  // Formatação
   static const String decimalSeparator = ',';
   static const String dotSeparator = '.';
   static const String thousandSeparator = '.';
   static const String currencySymbol = 'R\$';
   static const int amountDecimals = 2;
   static const int odometerDecimals = 1;
-  
-  // Validação de datas
   static const int maxYearsBack = 5;
   static const int maxYearsForward = 3;
-  
-  // Validação de texto
   static const int maxTitleLength = 100;
   static const int minTitleLength = 3;
   static const int maxDescriptionLength = 500;
@@ -40,29 +31,19 @@ class MaintenanceConstants {
   static const int maxAddressLength = 200;
   static const int minAddressLength = 10;
   static const int maxNotesLength = 1000;
-  
-  // Intervalos de manutenção (em km)
   static const double maxOdometerDifference = 50000.0; // Diferença máxima entre manutenções
   static const double maxNextServiceInterval = 100000.0; // Intervalo máximo para próxima manutenção
   static const double typicalPreventiveInterval = 10000.0; // Intervalo típico para preventiva
   static const double typicalInspectionInterval = 20000.0; // Intervalo típico para revisão
-  
-  // Cache
   static const int maxCacheSize = 100;
-  
-  // Debounce timers (milliseconds)
   static const int costDebounceMs = 300;
   static const int odometerDebounceMs = 200;
   static const int descriptionDebounceMs = 500;
   static const int titleDebounceMs = 400;
-  
-  // Regex patterns
   static const String costPattern = r'^\d{0,8}[,.]?\d{0,2}$';
   static const String odometerPattern = r'^\d{0,6}[,.]?\d{0,1}$';
   static const String titlePattern = r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)]+$';
   static const String phonePattern = r'^\(\d{2}\)\s\d{4,5}-\d{4}$';
-  
-  // Mensagens de erro padrão
   static const String requiredFieldError = 'Campo obrigatório';
   static const String invalidValueError = 'Valor inválido';
   static const String tooHighValueError = 'Valor muito alto';
@@ -72,12 +53,8 @@ class MaintenanceConstants {
   static const String invalidCharactersError = 'Caracteres inválidos';
   static const String tooShortError = 'Muito curto';
   static const String tooLongError = 'Muito longo';
-  
-  // Unidades de medida
   static const String kilometerUnit = 'km';
   static const String currencyUnit = 'R\$';
-  
-  // Mapeamento de tipos de manutenção com propriedades
   static const Map<MaintenanceType, MaintenanceTypeProperties> typeProperties = {
     MaintenanceType.preventive: MaintenanceTypeProperties(
       displayName: 'Preventiva',
@@ -116,8 +93,6 @@ class MaintenanceConstants {
       description: 'Reparo urgente e imprevisto',
     ),
   };
-  
-  // Mapeamento de status com propriedades
   static const Map<MaintenanceStatus, MaintenanceStatusProperties> statusProperties = {
     MaintenanceStatus.pending: MaintenanceStatusProperties(
       displayName: 'Pendente',
@@ -144,31 +119,21 @@ class MaintenanceConstants {
       description: 'Manutenção cancelada',
     ),
   };
-  
-  // Status do formulário
   static const String formStatusIdle = 'idle';
   static const String formStatusLoading = 'loading';
   static const String formStatusError = 'error';
   static const String formStatusSuccess = 'success';
-  
-  // Configurações de UI
   static const double formMaxHeight = 750.0;
   static const double sectionSpacing = 20.0;
   static const double fieldSpacing = 14.0;
   static const double buttonHeight = 48.0;
   static const double cardBorderRadius = 12.0;
-  
-  // Configurações de animação
   static const int animationDurationMs = 250;
   static const int loadingMinDurationMs = 500;
-  
-  // Títulos das seções
   static const String basicInfoSectionTitle = 'Informações Básicas';
   static const String workshopSectionTitle = 'Dados da Oficina';
   static const String nextServiceSectionTitle = 'Próxima Manutenção';
   static const String attachmentsSectionTitle = 'Anexos e Observações';
-  
-  // Placeholders de campos
   static const String titlePlaceholder = 'Ex: Troca de óleo e filtro';
   static const String descriptionPlaceholder = 'Descreva detalhadamente a manutenção realizada...';
   static const String costPlaceholder = '0,00';
@@ -177,8 +142,6 @@ class MaintenanceConstants {
   static const String workshopPhonePlaceholder = '(11) 99999-9999';
   static const String workshopAddressPlaceholder = 'Endereço completo da oficina';
   static const String notesPlaceholder = 'Observações adicionais sobre a manutenção...';
-  
-  // Labels de campos
   static const String typeLabel = 'Tipo de Manutenção *';
   static const String statusLabel = 'Status';
   static const String titleLabel = 'Título/Nome *';
@@ -192,17 +155,11 @@ class MaintenanceConstants {
   static const String nextServiceDateLabel = 'Data da Próxima';
   static const String nextServiceOdometerLabel = 'Odômetro da Próxima';
   static const String notesLabel = 'Observações';
-  
-  // Padrões de data brasileiros
   static const String datePattern = 'dd/MM/yyyy';
   static const String timePattern = 'HH:mm';
   static const String dateTimePattern = 'dd/MM/yyyy HH:mm';
-  
-  // Configurações de relatórios
   static const double reportCostThousands = 1000.0;
   static const double reportCostTenThousands = 10000.0;
-  
-  // Níveis de urgência
   static const Map<String, UrgencyProperties> urgencyProperties = {
     'overdue': UrgencyProperties(
       displayName: 'Vencida',

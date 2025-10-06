@@ -28,8 +28,6 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this); // Added dashboard tab
-    
-    // Load vaccines on page initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(vaccinesProvider.notifier).loadVaccines();
     });
@@ -488,7 +486,6 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
       MaterialPageRoute<void>(
         builder: (context) => VaccineSchedulingInterface(
           onScheduled: () {
-            // Refresh vaccines list
             ref.read(vaccinesProvider.notifier).loadVaccines();
           },
         ),

@@ -180,7 +180,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     );
 
     if (date != null) {
-      // Atualizar a data de vencimento da tarefa
       final updatedTask = widget.task.copyWith(
         dueDate: date,
         updatedAt: DateTime.now(),
@@ -216,7 +215,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
       ),
       child: Column(
         children: [
-          // Header
           Container(
             padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
             decoration: BoxDecoration(color: Theme.of(context).primaryColor),
@@ -258,15 +256,12 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
               ],
             ),
           ),
-
-          // Content
           Expanded(
             child:
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : CustomScrollView(
                       slivers: [
-                        // Header Card
                         SliverToBoxAdapter(
                           child: TaskHeaderCard(
                             task: widget.task,
@@ -275,8 +270,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                             descriptionController: _descriptionController,
                           ),
                         ),
-
-                        // Details Card
                         SliverToBoxAdapter(
                           child: TaskDetailsCard(
                             task: widget.task,
@@ -292,8 +285,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                             onDateTap: _showDatePicker,
                           ),
                         ),
-
-                        // Anotações Card
                         SliverToBoxAdapter(
                           child: Card(
                             margin: const EdgeInsets.symmetric(
@@ -344,8 +335,6 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                             ),
                           ),
                         ),
-
-                        // Subtarefas Card
                         SliverToBoxAdapter(
                           child: Card(
                             margin: const EdgeInsets.symmetric(
@@ -373,13 +362,9 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                             ),
                           ),
                         ),
-
-                        // Comentários Section
                         SliverToBoxAdapter(
                           child: TaskCommentsSection(taskId: widget.task.id),
                         ),
-
-                        // Bottom spacing
                         const SliverToBoxAdapter(child: SizedBox(height: 24)),
                       ],
                     ),

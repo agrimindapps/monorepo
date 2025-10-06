@@ -199,7 +199,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       icon: Icons.attach_money_outlined,
       actionLabel: 'Adicionar despesa',
       onAction: () {
-        // TODO: Implementar navegação para adicionar despesa
       },
     );
   }
@@ -207,7 +206,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        // TODO: Implementar navegação para adicionar despesa
       },
       tooltip: 'Adicionar despesa',
       child: const Icon(Icons.add),

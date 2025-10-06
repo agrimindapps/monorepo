@@ -62,18 +62,11 @@ class _LicenseStatusView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // License status card
           _LicenseStatusCard(licenseState: licenseState),
           const SizedBox(height: 24),
-
-          // Features overview
           _FeaturesOverviewCard(licenseState: licenseState, ref: ref),
           const SizedBox(height: 24),
-
-          // Actions section
           _ActionsSection(licenseState: licenseState, ref: ref),
-
-          // Development tools (debug mode only)
           if (kDebugMode) ...[
             const SizedBox(height: 24),
             _DevelopmentTools(licenseState: licenseState, ref: ref),
@@ -92,7 +85,6 @@ class _LicenseStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: unused_local_variable
     final theme = Theme.of(context);
     final licenseInfo = licenseState.licenseInfo;
 
@@ -163,8 +155,6 @@ class _LicenseStatusCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // License details
               _buildDetailRow(
                 context,
                 'Status',
@@ -380,8 +370,6 @@ class _ActionsSection extends StatelessWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-
-            // Upgrade to premium button
             if (!licenseState.isPremiumActive) ...[
               SizedBox(
                 width: double.infinity,
@@ -401,8 +389,6 @@ class _ActionsSection extends StatelessWidget {
               ),
               const SizedBox(height: 12),
             ],
-
-            // Refresh license button
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -429,8 +415,6 @@ class _ActionsSection extends StatelessWidget {
   }
 
   void _navigateToPremium(BuildContext context) {
-    // Navigate to premium subscription page
-    // This would be implemented based on your app's navigation system
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Navegação para página premium'),
@@ -471,8 +455,6 @@ class _DevelopmentTools extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Extend trial button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -486,8 +468,6 @@ class _DevelopmentTools extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
-            // Reset license button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(

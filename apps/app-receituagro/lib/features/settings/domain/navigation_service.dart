@@ -29,8 +29,6 @@ class MockNavigationService implements INavigationService {
   @override
   Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) async {
     if (_context == null) return null;
-    
-    // Mock navigation
     debugPrint('Navigate to: $routeName');
     await Future<void>.delayed(const Duration(milliseconds: 100));
     return null;

@@ -66,7 +66,6 @@ class FormSectionHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header com título e ícone
         Padding(
           padding: EdgeInsets.symmetric(
             vertical:
@@ -93,8 +92,6 @@ class FormSectionHeader extends StatelessWidget {
             ],
           ),
         ),
-
-        // Conteúdo da seção
         Padding(padding: contentPadding ?? EdgeInsets.zero, child: child),
       ],
     );

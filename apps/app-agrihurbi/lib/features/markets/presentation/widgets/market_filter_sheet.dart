@@ -54,8 +54,6 @@ class _MarketFilterSheetState extends State<MarketFilterSheet> {
             ],
           ),
           const SizedBox(height: 20),
-          
-          // Market Types
           Text(
             'Tipos de Mercado',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -87,8 +85,6 @@ class _MarketFilterSheetState extends State<MarketFilterSheet> {
           ),
           
           const SizedBox(height: 32),
-          
-          // Apply Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

@@ -27,59 +27,42 @@ part 'expense_form_notifier.g.dart';
 /// - Persistência offline com sincronização
 @riverpod
 class ExpenseFormNotifier extends _$ExpenseFormNotifier {
-  // TextEditingControllers gerenciados internamente
   late final TextEditingController descriptionController;
   late final TextEditingController amountController;
   late final TextEditingController odometerController;
   late final TextEditingController locationController;
   late final TextEditingController notesController;
-
-  // Services e use cases injetados via GetIt
   late final ExpenseFormatterService _formatter;
   late final ExpenseValidationService _validator;
   late final ReceiptImageService _receiptImageService;
   late final GetVehicleById _getVehicleById;
   late final ImagePicker _imagePicker;
-
-  // Timers de debounce
   Timer? _amountDebounceTimer;
   Timer? _odometerDebounceTimer;
   Timer? _descriptionDebounceTimer;
 
   @override
   ExpenseFormState build() {
-    // Inicializa controllers
     descriptionController = TextEditingController();
     amountController = TextEditingController();
     odometerController = TextEditingController();
     locationController = TextEditingController();
     notesController = TextEditingController();
-
-    // Inicializa services via GetIt
     _formatter = ExpenseFormatterService();
     _validator = const ExpenseValidationService();
     _receiptImageService = getIt<ReceiptImageService>();
     _getVehicleById = getIt<GetVehicleById>();
     _imagePicker = ImagePicker();
-
-    // Adiciona listeners aos controllers
     _initializeControllers();
-
-    // Cleanup ao descartar
     ref.onDispose(() {
-      // Cancela timers
       _amountDebounceTimer?.cancel();
       _odometerDebounceTimer?.cancel();
       _descriptionDebounceTimer?.cancel();
-
-      // Remove listeners
       descriptionController.removeListener(_onDescriptionChanged);
       amountController.removeListener(_onAmountChanged);
       odometerController.removeListener(_onOdometerChanged);
       locationController.removeListener(_onLocationChanged);
       notesController.removeListener(_onNotesChanged);
-
-      // Dispose controllers
       descriptionController.dispose();
       amountController.dispose();
       odometerController.dispose();
@@ -89,8 +72,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
 
     return const ExpenseFormState();
   }
-
-  // ==================== Initialization ====================
 
   /// Adiciona listeners aos controllers
   void _initializeControllers() {
@@ -116,7 +97,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Carrega dados do veículo
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
 
       await vehicleResult.fold(
@@ -152,7 +132,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Carrega dados do veículo
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: expense.vehicleId));
 
       await vehicleResult.fold(
@@ -193,8 +172,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     notesController.text = state.notes;
   }
 
-  // ==================== Field Change Handlers ====================
-
   void _onDescriptionChanged() {
     _descriptionDebounceTimer?.cancel();
     _descriptionDebounceTimer = Timer(
@@ -207,8 +184,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
           description: sanitized,
           hasChanges: true,
         ).clearFieldError('description');
-
-        // Sugestão de categoria baseada na descrição
         if (sanitized.isNotEmpty && state.expenseType == ExpenseType.other) {
           final suggestedType =
               _validator.suggestCategoryFromDescription(sanitized);
@@ -270,8 +245,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     ).clearFieldError('notes');
   }
 
-  // ==================== UI Actions ====================
-
   /// Atualiza tipo de despesa
   void updateExpenseType(ExpenseType expenseType) {
     if (state.expenseType == expenseType) return;
@@ -301,8 +274,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   void clearImageError() {
     state = state.clearImageError();
   }
-
-  // ==================== Form Validation ====================
 
   /// Valida campo específico (para TextFormField)
   String? validateField(String field, String? value) {
@@ -346,8 +317,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     return errors.isEmpty;
   }
 
-  // ==================== Date/Time Pickers ====================
-
   /// Abre picker de data
   Future<void> pickDate(BuildContext context) async {
     final date = await showDatePicker(
@@ -373,7 +342,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     );
 
     if (date != null) {
-      // Manter hora atual
       final currentTime = TimeOfDay.fromDateTime(state.date ?? DateTime.now());
       final newDateTime = DateTime(
         date.year,
@@ -422,8 +390,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       updateDate(newDateTime);
     }
   }
-
-  // ==================== Image Management ====================
 
   /// Captura imagem usando câmera
   Future<void> captureReceiptImage() async {
@@ -475,14 +441,10 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       state = state.copyWith(
         isUploadingImage: true,
       ).clearImageError();
-
-      // Valida imagem
       final isValid = await _receiptImageService.isValidImage(imagePath);
       if (!isValid) {
         throw Exception('Arquivo de imagem inválido');
       }
-
-      // Processa imagem (comprimir + upload se online)
       final result = await _receiptImageService.processExpenseReceiptImage(
         userId: state.userId,
         expenseId: _generateTemporaryId(),
@@ -557,7 +519,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
       debugPrint('[EXPENSE FORM] Image synced to Firebase: ${result.downloadUrl}');
     } catch (e) {
       debugPrint('[EXPENSE FORM] Failed to sync image: $e');
-      // Não exibe erro para usuário, continua com imagem local
       state = state.copyWith(isUploadingImage: false);
     }
   }
@@ -566,8 +527,6 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   String _generateTemporaryId() {
     return 'temp_${DateTime.now().millisecondsSinceEpoch}';
   }
-
-  // ==================== Form Actions ====================
 
   /// Limpa formulário
   void clearForm() {

@@ -17,7 +17,6 @@ class GetUserDevicesUseCase {
     GetUserDevicesParams? params,
   ]) async {
     try {
-      // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
@@ -25,19 +24,14 @@ class GetUserDevicesUseCase {
 
       final userId = currentUser.id;
       final activeOnly = params?.activeOnly ?? false;
-
-      // Busca dispositivos do repository
       final result = await _deviceRepository.getUserDevices(userId);
 
       return result.fold((failure) => Left(failure), (devices) {
-        // Filtra apenas ativos se solicitado
         if (activeOnly) {
           final activeDevices =
               devices.where((device) => device.isActive).toList();
           return Right(activeDevices);
         }
-
-        // Ordena por última atividade (mais recente primeiro)
         final sortedDevices = List<DeviceModel>.from(devices)
           ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
 

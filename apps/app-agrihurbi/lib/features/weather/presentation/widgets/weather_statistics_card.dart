@@ -19,7 +19,6 @@ class WeatherStatisticsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -49,8 +48,6 @@ class WeatherStatisticsCard extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Main statistics grid
             Row(
               children: [
                 Expanded(
@@ -96,8 +93,6 @@ class WeatherStatisticsCard extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Temperature range
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -138,8 +133,6 @@ class WeatherStatisticsCard extends StatelessWidget {
             ),
             
             const SizedBox(height: 12),
-            
-            // Days summary
             Row(
               children: [
                 Expanded(
@@ -159,8 +152,6 @@ class WeatherStatisticsCard extends StatelessWidget {
                 ),
               ],
             ),
-            
-            // Trends if available
             if (_hasTrends()) ...[
               const SizedBox(height: 12),
               const Divider(),
@@ -181,8 +172,6 @@ class WeatherStatisticsCard extends StatelessWidget {
                 ],
               ),
             ],
-            
-            // Period info
             const SizedBox(height: 12),
             Text(
               'Período: ${_formatDate(statistics.startDate)} - ${_formatDate(statistics.endDate)}',

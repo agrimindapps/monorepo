@@ -37,7 +37,6 @@ class PragaCardContentSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Nome principal
         Text(
           properties.praga.nomeFormatado,
           style: TextStyle(
@@ -50,8 +49,6 @@ class PragaCardContentSection extends StatelessWidget {
         ),
         
         const SizedBox(height: 4),
-        
-        // Nome científico
         if (properties.praga.nomeCientifico.isNotEmpty)
           Text(
             properties.praga.nomeCientifico,
@@ -75,7 +72,6 @@ class PragaCardContentSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Nome principal
           Text(
             properties.praga.nomeFormatado,
             style: TextStyle(
@@ -88,8 +84,6 @@ class PragaCardContentSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 4),
-          
-          // Nome científico (igual ao mockup)
           if (properties.praga.nomeCientifico.isNotEmpty)
             Text(
               properties.praga.nomeCientifico,

@@ -12,7 +12,6 @@ class AddWeight implements UseCase<void, Weight> {
 
   @override
   Future<Either<Failure, void>> call(Weight weight) async {
-    // Validate weight data
     if (weight.animalId.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'ID do animal é obrigatório'));
     }

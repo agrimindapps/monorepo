@@ -15,10 +15,7 @@ class DataSanitizationService {
     }
 
     final displayName = user?.displayName ?? '';
-
-    // Para usuários autenticados, validar se o nome não contém caracteres suspeitos
     if (displayName.contains(RegExp(r'[<>"&]'))) {
-      // Limpar caracteres HTML/XSS potenciais
       final cleanedName = displayName.replaceAll(RegExp(r'[<>"&]'), '').trim();
       return cleanedName.isEmpty ? _anonymousDisplayName : cleanedName;
     }
@@ -33,8 +30,6 @@ class DataSanitizationService {
     }
 
     final email = user?.email ?? '';
-
-    // Validar formato básico do email
     if (!email.contains('@') || email.length < 5) {
       return _anonymousEmail;
     }
@@ -45,8 +40,6 @@ class DataSanitizationService {
 
       final username = parts[0];
       final domain = parts[1];
-
-      // Mascarar username mantendo apenas primeiro e último caractere
       if (username.length <= 2) {
         return '••@$domain';
       } else if (username.length <= 4) {
@@ -57,7 +50,6 @@ class DataSanitizationService {
         return '$masked@$domain';
       }
     } catch (e) {
-      // Em caso de erro, retornar email anônimo
       if (kDebugMode) {
         debugPrint('Erro ao sanitizar email: $e');
       }
@@ -72,20 +64,14 @@ class DataSanitizationService {
     }
 
     final phone = user?.phone ?? '';
-
-    // Remover caracteres não numéricos
     final digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
 
     if (digitsOnly.length < 10) {
       return _maskedPhonePlaceholder;
     }
-
-    // Mascarar mantendo apenas os 2 primeiros e 2 últimos dígitos
     if (digitsOnly.length == 11) {
-      // Formato: (XX) XXXXX-XXXX -> (XX) •••••-••XX
       return '(${digitsOnly.substring(0, 2)}) •••••-••${digitsOnly.substring(9)}';
     } else if (digitsOnly.length == 10) {
-      // Formato: (XX) XXXX-XXXX -> (XX) ••••-••XX
       return '(${digitsOnly.substring(0, 2)}) ••••-••${digitsOnly.substring(8)}';
     }
 
@@ -133,8 +119,6 @@ class DataSanitizationService {
 
     final photoUrl = user?.photoUrl;
     if (photoUrl == null || photoUrl.isEmpty) return false;
-
-    // Validar se a URL é segura (HTTPS)
     try {
       final uri = Uri.parse(photoUrl);
       return uri.scheme == 'https' && uri.host.isNotEmpty;
@@ -149,12 +133,10 @@ class DataSanitizationService {
   /// Remove dados sensíveis de logs e debug
   static String sanitizeForLogging(String message) {
     return message
-        // Remover emails
         .replaceAll(
           RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
           '***@***.***',
         )
-        // Remover possíveis senhas (palavra seguida de :)
         .replaceAll(
           RegExp(
             r'(password|senha|pass|pwd)\s*[:=]\s*\S+',
@@ -162,12 +144,10 @@ class DataSanitizationService {
           ),
           r'$1: ***',
         )
-        // Remover telefones
         .replaceAll(
           RegExp(r'\(?\d{2}\)?\s*\d{4,5}[-\s]?\d{4}'),
           '(**) *****-****',
         )
-        // Remover possíveis tokens (sequências longas alfanuméricas)
         .replaceAll(RegExp(r'\b[A-Za-z0-9]{20,}\b'), '***TOKEN***');
   }
 
@@ -186,13 +166,9 @@ class DataSanitizationService {
   /// Valida formato de email de forma segura
   static bool isValidEmailFormat(String email) {
     if (email.isEmpty) return false;
-
-    // RFC 5322 regex simplificado e seguro
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$',
     );
-
-    // Validações adicionais de segurança
     if (email.length > 254) return false; // RFC 5321
     if (email.contains('..')) return false; // Evitar dots consecutivos
     if (email.startsWith('.') || email.endsWith('.')) return false;
@@ -202,7 +178,6 @@ class DataSanitizationService {
 
   /// Cria configuração de suporte sanitizada (sem emails hardcoded)
   static Map<String, String> getSupportContactInfo() {
-    // Emails movidos para configuração segura, não hardcoded
     return {
       'email': _getSupportEmail(),
       'response_time': 'Respondemos em até 48 horas úteis',
@@ -212,7 +187,6 @@ class DataSanitizationService {
 
   /// Obtém email de suporte de forma segura
   static String _getSupportEmail() {
-    // Em produção, isso deveria vir de uma variável de ambiente ou configuração remota
     if (kDebugMode) {
       return 'dev.suporte@plantis.app';
     }
@@ -226,13 +200,9 @@ class DataSanitizationService {
     for (final entry in data.entries) {
       final key = entry.key;
       final value = entry.value;
-
-      // Remover campos que podem conter PII
       if (_isPotentialPII(key)) {
         continue; // Não incluir dados potencialmente sensíveis
       }
-
-      // Sanitizar valores string
       if (value is String) {
         sanitized[key] = sanitizeForLogging(value);
       } else {

@@ -276,8 +276,6 @@ class EstatisticasCulturaWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          
-          // Usar Column em vez de Row com Expanded para evitar constraint issues
           Column(
             children: [
               _buildDropdownFiltro(
@@ -339,7 +337,6 @@ class EstatisticasCulturaWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header do filtro
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -381,8 +378,6 @@ class EstatisticasCulturaWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Dropdown
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: DropdownButtonFormField<String>(

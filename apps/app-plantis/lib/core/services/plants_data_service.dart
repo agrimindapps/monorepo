@@ -43,21 +43,15 @@ class PlantsDataService {
   /// Carrega todas as plantas do usuário
   Future<Either<Failure, List<Plant>>> loadPlants() async {
     try {
-      // Garantir que auth está inicializado
       await _authProvider.ensureInitialized();
-
-      // Verificar se usuário está autenticado
       if (!_authProvider.isAuthenticated) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Buscar plantas
       final result = await _getPlantsUseCase.call(const NoParams());
       
       return result.fold(
         (failure) => Left(failure),
         (plants) {
-          // Filtrar apenas plantas não deletadas
           final activePlants = plants.where((plant) => !plant.isDeleted).toList();
           return Right(activePlants);
         },
@@ -70,7 +64,6 @@ class PlantsDataService {
   /// Adiciona uma nova planta
   Future<Either<Failure, Plant>> addPlant(AddPlantParams params) async {
     try {
-      // Verificar autenticação
       if (!_authProvider.isAuthenticated) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
@@ -89,7 +82,6 @@ class PlantsDataService {
   /// Atualiza uma planta existente
   Future<Either<Failure, Plant>> updatePlant(UpdatePlantParams params) async {
     try {
-      // Verificar autenticação
       if (!_authProvider.isAuthenticated) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
@@ -108,7 +100,6 @@ class PlantsDataService {
   /// Remove uma planta (soft delete)
   Future<Either<Failure, void>> deletePlant(String plantId) async {
     try {
-      // Verificar autenticação
       if (!_authProvider.isAuthenticated) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }

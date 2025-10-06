@@ -210,8 +210,6 @@ class ExerciseCalculator extends Calculator {
         severity: _getExerciseNeedSeverity(calculationData['exercise_need_level'] as String),
       ),
     ];
-
-    // Adicionar calorias queimadas se relevante
     if (calculationData['calories_burned'] != null) {
       results.add(
         ResultItem(
@@ -230,8 +228,6 @@ class ExerciseCalculator extends Calculator {
               severity: ResultSeverity.info,
             ))
         .toList();
-
-    // Adicionar alertas de segurança
     final safetyAlerts = calculationData['safety_alerts'] as List<String>;
     for (final alert in safetyAlerts) {
       recommendations.add(
@@ -262,15 +258,11 @@ class ExerciseCalculator extends Calculator {
   @override
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-
-    // Validar campos obrigatórios
     for (final field in inputFields) {
       if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
-
-    // Validação específica para idade
     if (inputs.containsKey('age_years')) {
       final age = inputs['age_years'];
       if (age is! double && age is! int) {
@@ -282,8 +274,6 @@ class ExerciseCalculator extends Calculator {
         }
       }
     }
-
-    // Validação do peso
     if (inputs.containsKey('weight')) {
       final weight = inputs['weight'];
       if (weight is! double && weight is! int) {
@@ -295,8 +285,6 @@ class ExerciseCalculator extends Calculator {
         }
       }
     }
-
-    // Validação do tempo disponível
     if (inputs.containsKey('available_time')) {
       final time = inputs['available_time'];
       if (time is! double && time is! int) {
@@ -322,29 +310,14 @@ class ExerciseCalculator extends Calculator {
     required String exerciseGoal,
     required double availableTime,
   }) {
-    // Base de exercício por minutos por dia
     int baseExerciseMinutes = _getBaseExerciseMinutes(species, breedGroup);
-    
-    // Ajustar por idade
     double ageMultiplier = _getAgeMultiplier(ageYears, species);
-    
-    // Ajustar por condições de saúde
     double healthMultiplier = _getHealthMultiplier(healthConditions);
-    
-    // Ajustar por objetivo
     double goalMultiplier = _getGoalMultiplier(exerciseGoal);
-    
-    // Calcular minutos recomendados
     int recommendedMinutes = (baseExerciseMinutes * ageMultiplier * healthMultiplier * goalMultiplier).round();
     recommendedMinutes = math.max(15, math.min(recommendedMinutes, 180)); // Entre 15 e 180 min
-    
-    // Distribuir o exercício
     final distribution = _distributeExercise(recommendedMinutes, breedGroup, species);
-    
-    // Calcular calorias queimadas (estimativa)
     final caloriesBurned = _calculateCalories(weight, recommendedMinutes, currentActivityLevel);
-    
-    // Gerar recomendações
     final recommendations = _generateRecommendations(
       species: species,
       breedGroup: breedGroup,
@@ -354,16 +327,12 @@ class ExerciseCalculator extends Calculator {
       recommendedMinutes: recommendedMinutes,
       availableTime: availableTime.toInt(),
     );
-    
-    // Gerar alertas de segurança
     final safetyAlerts = _generateSafetyAlerts(
       ageYears: ageYears,
       healthConditions: healthConditions,
       recommendedMinutes: recommendedMinutes,
       species: species,
     );
-
-    // Classificar nível de necessidade de exercício
     String exerciseNeedLevel;
     if (recommendedMinutes >= 120) {
       exerciseNeedLevel = 'Muito Alto';
@@ -397,8 +366,6 @@ class ExerciseCalculator extends Calculator {
     if (species == 'Gato') {
       return breedGroup.contains('Apartamento') ? 30 : 45;
     }
-
-    // Para cães
     final breedExerciseNeeds = {
       'Cão de Trabalho (Pastor, Border Collie)': 120,
       'Cão Esportivo (Retriever, Pointer)': 90,
@@ -422,7 +389,6 @@ class ExerciseCalculator extends Calculator {
       if (ageYears < 12) return 0.8; // Sênior
       return 0.6; // Geriátrico
     } else {
-      // Cães
       if (ageYears < 1) return 0.8; // Filhotes - limitado
       if (ageYears < 2) return 1.2; // Jovens - muita energia
       if (ageYears < 7) return 1.0; // Adultos
@@ -483,8 +449,6 @@ class ExerciseCalculator extends Calculator {
         'play_description': 'Brincadeiras com brinquedos, exploração',
       };
     }
-
-    // Para cães
     final walkMinutes = (totalMinutes * 0.6).round();
     final intenseMinutes = (totalMinutes * 0.25).round();
     final playMinutes = totalMinutes - walkMinutes - intenseMinutes;
@@ -521,10 +485,7 @@ class ExerciseCalculator extends Calculator {
   }
 
   int? _calculateCalories(double weight, int exerciseMinutes, String activityLevel) {
-    // Estimativa baseada em peso e intensidade
     double baseCaloriesPerKgPerMinute = 0.8; // Valor médio
-    
-    // Ajustar por nível de atividade atual
     double intensityMultiplier;
     switch (activityLevel) {
       case 'Sedentário (pouco ou nenhum exercício)':
@@ -559,8 +520,6 @@ class ExerciseCalculator extends Calculator {
     required int availableTime,
   }) {
     final recommendations = <String>[];
-
-    // Recomendações gerais por espécie
     if (species == 'Cão') {
       recommendations.addAll([
         'Varie os tipos de exercício para manter o interesse',
@@ -574,15 +533,11 @@ class ExerciseCalculator extends Calculator {
         'Alterne períodos de atividade intensa com descanso',
       ]);
     }
-
-    // Recomendações por grupo de raça
     if (breedGroup.contains('Trabalho')) {
       recommendations.add('Forneça atividades que estimulem a mente (puzzles, treinamentos)');
     } else if (breedGroup.contains('Companhia')) {
       recommendations.add('Foque em exercícios de baixo impacto e curta duração');
     }
-
-    // Recomendações por condição de saúde
     if (healthConditions.contains('Articulares')) {
       recommendations.addAll([
         'Prefira natação ou caminhadas em superfícies macias',
@@ -596,8 +551,6 @@ class ExerciseCalculator extends Calculator {
         'Consulte veterinário antes de aumentar intensidade',
       ]);
     }
-
-    // Recomendações por objetivo
     if (exerciseGoal == 'Perda de Peso') {
       recommendations.addAll([
         'Combine exercício com dieta balanceada',
@@ -611,8 +564,6 @@ class ExerciseCalculator extends Calculator {
         'Inclua treinamento de obediência durante o exercício',
       ]);
     }
-
-    // Ajustes por tempo disponível
     if (availableTime < recommendedMinutes) {
       recommendations.addAll([
         'Divida o exercício em sessões menores ao longo do dia',
@@ -631,8 +582,6 @@ class ExerciseCalculator extends Calculator {
     required String species,
   }) {
     final alerts = <String>[];
-
-    // Alertas por idade
     if (ageYears < 0.5) {
       alerts.add('Filhotes muito novos: limite exercício forçado, permita brincadeiras naturais');
     } else if (ageYears > 12 && species == 'Cão') {
@@ -640,8 +589,6 @@ class ExerciseCalculator extends Calculator {
     } else if (ageYears > 15 && species == 'Gato') {
       alerts.add('Gato sênior: observe limitações articulares, mantenha atividade suave');
     }
-
-    // Alertas por condições de saúde
     if (healthConditions.contains('Cardíacos')) {
       alerts.add('ATENÇÃO: Problemas cardíacos requerem supervisão veterinária constante');
     }
@@ -649,13 +596,9 @@ class ExerciseCalculator extends Calculator {
     if (healthConditions.contains('Respiratórios')) {
       alerts.add('Evite exercício em dias quentes ou com alta umidade');
     }
-
-    // Alertas por intensidade de exercício
     if (recommendedMinutes > 120) {
       alerts.add('Exercício intenso: aumente gradualmente, observe sinais de sobrecarga');
     }
-
-    // Alertas gerais
     alerts.addAll([
       'Sempre forneça água fresca disponível durante e após exercício',
       'Evite exercício intenso 1-2 horas após alimentação',

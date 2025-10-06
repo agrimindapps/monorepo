@@ -20,8 +20,6 @@ class SubscriptionSyncService {
        _authRepository = authRepository,
        _subscriptionRepository = subscriptionRepository,
        _analytics = analytics;
-
-  // Stream controllers para eventos em tempo real
   final _syncEventsController =
       StreamController<PlantisSubscriptionSyncEvent>.broadcast();
   final _subscriptionController =
@@ -34,8 +32,6 @@ class SubscriptionSyncService {
   /// Stream reativo da assinatura atual
   Stream<SubscriptionEntity?> get subscriptionStream =>
       _subscriptionController.stream;
-
-  // Estado interno
   Timer? _syncTimer;
   bool _isSyncing = false;
   final Map<String, int> _retryCount = {};
@@ -51,8 +47,6 @@ class SubscriptionSyncService {
     try {
       _isSyncing = true;
       await _analytics.logEvent('plantis_subscription_sync_started');
-
-      // 1. Obter status atual do RevenueCat
       final subscriptionResult =
           await _subscriptionRepository.getCurrentSubscription();
 
@@ -64,32 +58,21 @@ class SubscriptionSyncService {
           throw Exception(failure.message);
         },
         (currentSubscription) async {
-          // 2. Obter informações do usuário atual
           final currentUser = await _getCurrentUser();
           if (currentUser == null) {
             throw Exception('Usuário não autenticado');
           }
-
-          // 3. Preparar dados para sincronização
           final subscriptionData = await _prepareSubscriptionData(
             currentSubscription,
             currentUser,
           );
-
-          // 4. Verificar conflitos com outros dispositivos
           final conflicts = await _checkDeviceConflicts(subscriptionData);
 
           if (conflicts.isNotEmpty) {
             await _resolveConflicts(conflicts, subscriptionData);
           }
-
-          // 5. Sincronizar com Firebase
           await _saveToFirebase(subscriptionData);
-
-          // 6. Processar features específicas do Plantis
           await _processPlantisFeatures(currentSubscription);
-
-          // 7. Emitir evento de sucesso
           _syncEventsController.add(
             PlantisSubscriptionSyncEvent.success(
               subscription: currentSubscription,
@@ -140,8 +123,6 @@ class SubscriptionSyncService {
         'plantis_revenuecat_webhook_received',
         parameters: {'event_type': eventType, 'user_id': userId},
       );
-
-      // Processar diferentes tipos de eventos
       switch (eventType) {
         case 'INITIAL_PURCHASE':
           await _handleInitialPurchase(webhookData);
@@ -170,8 +151,6 @@ class SubscriptionSyncService {
             parameters: {'event_type': eventType},
           );
       }
-
-      // Sempre sincronizar após processar webhook
       await syncSubscriptionStatus();
     } catch (e) {
       await _analytics.logEvent(
@@ -194,14 +173,11 @@ class SubscriptionSyncService {
     final now = DateTime.now();
 
     return {
-      // Dados básicos da assinatura
       'userId': user.id,
       'deviceId': deviceId,
       'devicePlatform': defaultTargetPlatform.name,
       'appName': 'plantis',
       'appVersion': await _getAppVersion(),
-
-      // Status da assinatura
       'isPremium': subscription?.isActive ?? false,
       'productId': subscription?.productId,
       'status': subscription?.status.name ?? 'free',
@@ -209,20 +185,14 @@ class SubscriptionSyncService {
       'isActive': subscription?.isActive ?? false,
       'isInTrial': subscription?.isInTrial ?? false,
       'willRenew': subscription?.status == SubscriptionStatus.active,
-
-      // Datas importantes
       'purchaseDate': subscription?.purchaseDate?.millisecondsSinceEpoch,
       'expirationDate': subscription?.expirationDate?.millisecondsSinceEpoch,
       'originalPurchaseDate':
           subscription?.originalPurchaseDate?.millisecondsSinceEpoch,
       'lastUpdated': now.millisecondsSinceEpoch,
       'lastSyncedAt': FieldValue.serverTimestamp(),
-
-      // Metadados da loja
       'store': subscription?.store.name ?? 'unknown',
       'isSandbox': subscription?.isSandbox ?? false,
-
-      // Features específicas do Plantis
       'premiumFeatures': _getPremiumFeaturesEnabled(subscription),
       'plantLimitOverride':
           subscription?.isActive == true ? -1 : 5, // Ilimitado para premium
@@ -232,8 +202,6 @@ class SubscriptionSyncService {
       'canBackupToCloud': subscription?.isActive ?? false,
       'canIdentifyPlants': subscription?.isActive ?? false,
       'canDiagnoseDiseases': subscription?.isActive ?? false,
-
-      // Metadados de sincronização
       'syncVersion': await _getNextSyncVersion(user.id),
       'conflictResolutionStrategy': 'server_wins',
       'syncSource': 'mobile_app',
@@ -246,8 +214,6 @@ class SubscriptionSyncService {
   ) async {
     try {
       final userId = currentData['userId'] as String;
-
-      // Obter status de todos os dispositivos do usuário
       final deviceSnapshot =
           await _firestore
               .collection('users')
@@ -302,11 +268,7 @@ class SubscriptionSyncService {
             'device2': conflict.device2Id,
           },
         );
-
-        // Para assinaturas, sempre usar dados mais recentes (timestamp mais alto)
         final resolution = _resolveConflict(conflict, currentData);
-
-        // Aplicar resolução ao Firebase
         await _applyConflictResolution(resolution);
       } catch (e) {
         await _analytics.logEvent(
@@ -323,7 +285,6 @@ class SubscriptionSyncService {
     final deviceId = subscriptionData['deviceId'] as String;
 
     await _firestore.runTransaction((transaction) async {
-      // 1. Salvar status atual na coleção principal
       final currentRef = _firestore
           .collection('users')
           .doc(userId)
@@ -331,8 +292,6 @@ class SubscriptionSyncService {
           .doc('current');
 
       transaction.set(currentRef, subscriptionData, SetOptions(merge: true));
-
-      // 2. Salvar informações do dispositivo
       final deviceRef = _firestore
           .collection('users')
           .doc(userId)
@@ -345,8 +304,6 @@ class SubscriptionSyncService {
         'lastSyncAt': FieldValue.serverTimestamp(),
         'subscriptionData': subscriptionData,
       }, SetOptions(merge: true));
-
-      // 3. Adicionar ao histórico
       final historyRef = _firestore.collection('subscription_history').doc();
 
       transaction.set(historyRef, {
@@ -366,21 +323,13 @@ class SubscriptionSyncService {
       if (user == null) return;
 
       final isPremium = subscription?.isActive ?? false;
-
-      // Configurar limites de plantas
       await _updatePlantLimits(user.id, isPremium);
-
-      // Ativar/desativar funcionalidades premium
       await _updatePremiumFeatures(user.id, subscription);
-
-      // Configurar notificações avançadas
       if (isPremium) {
         await _enableAdvancedNotifications(user.id);
       } else {
         await _disableAdvancedNotifications(user.id);
       }
-
-      // Configurar backup em nuvem
       await _configurePlantisCloudBackup(user.id, isPremium);
 
       await _analytics.logEvent(
@@ -503,8 +452,6 @@ class SubscriptionSyncService {
     try {
       final currentUser = await _getCurrentUser();
       if (currentUser == null) return;
-
-      // Registrar evento no Firebase
       await _firestore.collection('purchase_events').add({
         'userId': currentUser.id,
         'productId': productId,
@@ -516,8 +463,6 @@ class SubscriptionSyncService {
         'purchaseContext': 'plant_care_app',
         'expectedFeatures': _getExpectedFeaturesFromProduct(productId),
       });
-
-      // Registrar no analytics
       await _analytics.logEvent(
         'plantis_purchase_completed',
         parameters: {
@@ -531,8 +476,6 @@ class SubscriptionSyncService {
       debugPrint('[PlantisSync] Erro ao logar evento de compra: $e');
     }
   }
-
-  // Webhook handlers para eventos do RevenueCat
 
   Future<void> _handleInitialPurchase(Map<String, dynamic> webhookData) async {
     final event = webhookData['event'] as Map<String, dynamic>;
@@ -641,8 +584,6 @@ class SubscriptionSyncService {
     );
   }
 
-  // Utility methods
-
   Future<UserEntity?> _getCurrentUser() async {
     final userStream = _authRepository.currentUser.first;
     return await userStream;
@@ -707,8 +648,6 @@ class SubscriptionSyncService {
 
       final currentVersion = doc.data()?['version'] as int? ?? 0;
       final nextVersion = currentVersion + 1;
-
-      // Atualizar a versão
       await _firestore
           .collection('users')
           .doc(userId)
@@ -728,13 +667,11 @@ class SubscriptionSyncService {
 
   /// Obtém ID único do dispositivo
   Future<String> _getDeviceId() async {
-    // Implementação simplificada - em produção, usar device_info_plus
     return '${defaultTargetPlatform.name}_${DateTime.now().millisecondsSinceEpoch}';
   }
 
   /// Obtém versão da aplicação
   Future<String> _getAppVersion() async {
-    // Implementação simplificada - em produção, usar package_info_plus
     return '1.0.0';
   }
 
@@ -784,8 +721,6 @@ class SubscriptionSyncService {
     final conflictTimestamp =
         conflict.conflictingData['subscriptionData']?['lastUpdated'] as int? ??
         0;
-
-    // Usar dados mais recentes
     final useCurrentData = currentTimestamp >= conflictTimestamp;
 
     return ConflictResolution(
@@ -856,8 +791,6 @@ class SubscriptionSyncService {
         'retry_count': _retryCount[retryKey].toString(),
       },
     );
-
-    // Implementar retry exponencial
     if (_retryCount[retryKey]! < maxRetries) {
       final delay = Duration(seconds: pow(2, _retryCount[retryKey]!).toInt());
       Timer(delay, () => syncSubscriptionStatus());
@@ -983,10 +916,6 @@ class SubscriptionSyncService {
     _subscriptionController.close();
   }
 }
-
-// =============================================================================
-// MODELOS DE DADOS PARA EVENTOS E SINCRONIZAÇÃO
-// =============================================================================
 
 /// Tipos de eventos de sincronização específicos do Plantis
 enum PlantisSubscriptionSyncEventType {

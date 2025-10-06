@@ -107,7 +107,6 @@ class PremiumStatusHive extends HiveObject {
     String userId,
     dynamic subscriptionEntity,
   ) {
-    // Adaptar conforme estrutura real do SubscriptionEntity
     return PremiumStatusHive(
       userId: userId,
       isActive: (subscriptionEntity?.isActive as bool?) ?? false,

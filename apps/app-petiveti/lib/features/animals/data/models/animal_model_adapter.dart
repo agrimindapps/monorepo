@@ -82,8 +82,6 @@ class AnimalModelAdapter extends TypeAdapter<AnimalModel> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
-
-// Enum Adapters for Animal
 class AnimalSpeciesAdapter extends TypeAdapter<AnimalSpecies> {
   @override
   final int typeId = 10;

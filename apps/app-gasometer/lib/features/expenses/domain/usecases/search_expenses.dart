@@ -22,8 +22,6 @@ class SearchExpensesUseCase implements UseCase<List<ExpenseEntity>, String> {
       }
 
       final expenses = await _repository.searchExpenses(query);
-
-      // Ordenar por data (mais recente primeiro)
       expenses.sort((a, b) => b.date.compareTo(a.date));
 
       return Right(expenses);

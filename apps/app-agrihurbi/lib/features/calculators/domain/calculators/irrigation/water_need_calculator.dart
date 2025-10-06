@@ -82,24 +82,14 @@ class WaterNeedCalculator extends CalculatorEntity {
       final double area = double.parse(inputs['area'].toString());
       final double efficiency = double.parse(inputs['efficiency'].toString()) / 100;
       final String cropStage = inputs['crop_stage'].toString();
-
-      // Cálculo da evapotranspiração da cultura (ETc)
       final double etc = eto * kc;
-
-      // Cálculo do volume necessário por dia (L/dia)
       final double dailyVolumeM3 = (etc / 1000) * CalculatorMath.hectareToSquareMeters(area);
       final double dailyVolumeLiters = CalculatorMath.cubicToLiters(dailyVolumeM3);
-
-      // Considerando a eficiência do sistema
       final double realVolumeLiters = dailyVolumeLiters / efficiency;
       final double realVolumeM3 = CalculatorMath.litersTocubic(realVolumeLiters);
-
-      // Cálculos adicionais
       final double weeklyVolumeLiters = realVolumeLiters * 7;
       final double monthlyVolumeLiters = realVolumeLiters * 30;
       final double literPerHectarePerDay = realVolumeLiters / area;
-
-      // Recomendações baseadas no estádio da cultura
       final List<String> recommendations = _generateRecommendations(
         etc,
         cropStage,
@@ -167,15 +157,11 @@ class WaterNeedCalculator extends CalculatorEntity {
     double efficiency,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações baseadas na ETc
     if (etc < 2.0) {
       recommendations.add('Baixa demanda hídrica. Monitore a umidade do solo.');
     } else if (etc > 7.0) {
       recommendations.add('Alta demanda hídrica. Aumente a frequência de irrigação.');
     }
-
-    // Recomendações baseadas no estádio
     switch (cropStage) {
       case 'Inicial':
         recommendations.add('Estádio inicial: mantenha solo úmido mas evite encharcamento.');
@@ -190,8 +176,6 @@ class WaterNeedCalculator extends CalculatorEntity {
         recommendations.add('Estádio final: reduza a irrigação próximo à colheita.');
         break;
     }
-
-    // Recomendações baseadas na eficiência
     if (efficiency < 0.6) {
       recommendations.add('Eficiência baixa. Considere melhorias no sistema de irrigação.');
     } else if (efficiency > 0.9) {

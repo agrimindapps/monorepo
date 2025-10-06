@@ -35,13 +35,10 @@ class CompleteTaskWithRegenerationUseCase
     CompleteTaskWithRegenerationParams params,
   ) async {
     try {
-      // Validação dos parâmetros
       final validationResult = _validateParams(params);
       if (validationResult != null) {
         return Left(validationResult);
       }
-
-      // Buscar tarefa atual
       final currentTaskResult = await tasksRepository.getTaskById(
         params.taskId,
       );
@@ -58,8 +55,6 @@ class CompleteTaskWithRegenerationUseCase
         (_) => throw Exception(),
         (task) => task,
       );
-
-      // Buscar dados da planta para obter configuração
       final plantResult = await plantsRepository.getPlantById(
         currentTask.plantId,
       );
@@ -73,8 +68,6 @@ class CompleteTaskWithRegenerationUseCase
         (_) => throw Exception(),
         (plant) => plant,
       );
-
-      // Marcar tarefa atual como concluída
       final completedTask = currentTask.copyWithTaskData(
         status: task_entity.TaskStatus.completed,
         completedAt: params.completionDate,
@@ -92,8 +85,6 @@ class CompleteTaskWithRegenerationUseCase
         (_) => throw Exception(),
         (task) => task,
       );
-
-      // Gerar próxima tarefa se a planta tem configuração
       task_entity.Task? nextTask;
       if (plant.config != null &&
           _shouldGenerateNextTask(currentTask, plant.config)) {
@@ -159,16 +150,11 @@ class CompleteTaskWithRegenerationUseCase
     task_entity.Task currentTask,
     dynamic plantConfig,
   ) {
-    // Converter tipo de task para tipo de cuidado
     final careType = _mapTaskTypeToCareType(currentTask.type);
     if (careType == null) return false;
-
-    // Verificar se o tipo de cuidado ainda está ativo na configuração
     if (plantConfig.isCareTypeActive != null) {
       return plantConfig.isCareTypeActive(careType) as bool;
     }
-
-    // Fallback: sempre gerar próxima tarefa se não conseguir verificar
     return true;
   }
 
@@ -179,10 +165,7 @@ class CompleteTaskWithRegenerationUseCase
     dynamic plant,
   ) async {
     try {
-      // Converter PlantConfig para PlantaConfigModel
       final configModel = _convertToPlantaConfigModel(plant);
-
-      // Gerar próxima tarefa usando o service
       final generationResult = taskGenerationService.generateNextTask(
         completedTask: currentTask,
         completionDate: completionDate,
@@ -201,8 +184,6 @@ class CompleteTaskWithRegenerationUseCase
           ValidationFailure('Nenhuma próxima tarefa foi gerada'),
         );
       }
-
-      // Salvar próxima tarefa
       final saveResult = await tasksRepository.addTask(nextTask);
       return saveResult;
     } catch (e) {

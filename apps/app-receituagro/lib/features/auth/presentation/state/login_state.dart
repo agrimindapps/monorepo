@@ -3,24 +3,14 @@ import 'package:flutter/material.dart';
 /// Immutable state for the login feature
 /// Manages auth mode, UI states, and form visibility
 class LoginState {
-  // Auth modes
   final bool isSignUpMode;
   final bool isShowingRecoveryForm;
-
-  // Password visibility
   final bool obscurePassword;
   final bool obscureConfirmPassword;
-
-  // Form state
   final bool rememberMe;
-
-  // Loading and error states (from auth provider)
   final bool isLoading;
   final bool isAuthenticated;
   final String? errorMessage;
-
-  // Text editing controllers (managed by page, not state)
-  // Stored here for convenience
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController nameController;

@@ -22,11 +22,8 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
   String _selectedClearType = 'all'; // 'all', 'selective'
   final Set<String> _selectedModules = {};
   Map<String, dynamic>? _lastClearResult;
-  
-  // ✅ MEMORY LEAK FIX: Add disposal for proper cleanup
   @override
   void dispose() {
-    // Cancel any pending operations if possible
     super.dispose();
   }
 
@@ -46,7 +43,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
         _isLoading = false;
       });
     } catch (e) {
-      // ✅ MEMORY LEAK FIX: Check mounted before calling setState
       if (mounted) {
         setState(() => _isLoading = false);
         _showSnackBar('Erro ao carregar estatísticas: $e', isError: true);
@@ -79,19 +75,14 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else ...[
-              // Current stats display
               if (_currentStats != null)
                 _CurrentStatsCard(stats: _currentStats!),
               
               const SizedBox(height: 16),
-              
-              // Clear type selection
               _ClearTypeSelector(
                 selectedType: _selectedClearType,
                 onChanged: (type) => setState(() => _selectedClearType = type),
               ),
-              
-              // Module selection for selective clearing
               if (_selectedClearType == 'selective')
                 _ModuleSelector(
                   selectedModules: _selectedModules,
@@ -99,8 +90,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
                 ),
               
               const SizedBox(height: 16),
-              
-              // Last clear results
               if (_lastClearResult != null)
                 _ClearResults(results: _lastClearResult!),
             ],
@@ -146,7 +135,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
   }
 
   Future<void> _performClear() async {
-    // Double confirmation for destructive action
     final confirmed = await _showConfirmationDialog();
     if (!confirmed) return;
 
@@ -157,7 +145,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
       
       if (_selectedClearType == 'all') {
         result = await _dataCleaner.clearAllData();
-        // ✅ MEMORY LEAK FIX: Check mounted before using context
         if (mounted) {
           _showSnackBar(
             'Limpeza completa concluída! '
@@ -166,7 +153,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
           );
         }
       } else {
-        // Clear selected modules
         result = {
           'totalClearedBoxes': 0,
           'totalClearedPreferences': 0,
@@ -185,8 +171,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
         }
         
         result['duration'] = DateTime.now().difference(startTime).inMilliseconds;
-        
-        // ✅ MEMORY LEAK FIX: Check mounted before using context
         if (mounted) {
           _showSnackBar(
             'Limpeza seletiva concluída! '
@@ -194,8 +178,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
           );
         }
       }
-      
-      // ✅ MEMORY LEAK FIX: Check mounted before calling setState
       if (mounted) {
         setState(() {
           _lastClearResult = result;
@@ -203,12 +185,9 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
           _selectedModules.clear();
         });
       }
-      
-      // Reload stats
       await _loadCurrentStats();
       
     } catch (e) {
-      // ✅ MEMORY LEAK FIX: Check mounted before using context
       if (mounted) {
         setState(() => _isClearing = false);
         _showSnackBar('Erro durante a limpeza: $e', isError: true);
@@ -242,7 +221,6 @@ class _ClearDataDialogState extends State<ClearDataDialog> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    // ✅ MEMORY LEAK FIX: Only show snackbar if widget is still mounted
     if (!mounted) return;
     
     ScaffoldMessenger.of(context).showSnackBar(

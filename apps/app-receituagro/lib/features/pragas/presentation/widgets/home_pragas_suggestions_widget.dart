@@ -40,7 +40,6 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header da seção
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: ReceitaAgroSpacing.horizontalPadding,
@@ -67,13 +66,9 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
           ),
         ),
         const SizedBox(height: 12),
-
-        // Carrossel
         _buildCarousel(context),
 
         const SizedBox(height: 12),
-
-        // Indicadores de página
         _buildDotIndicators(context),
       ],
     );

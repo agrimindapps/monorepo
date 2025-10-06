@@ -1,37 +1,24 @@
 /// Application constants
 class AppConstants {
-  // App Information
   static const String appName = 'AgriHurbi';
   static const String appVersion = '1.0.0';
-  
-  // API Configuration
   static const String baseUrl = 'https://api.agrihurbi.com';
   static const String apiVersion = 'v1';
   static const String apiTimeout = '30000'; // 30 seconds
-  
-  // Storage Keys
   static const String accessTokenKey = 'access_token';
   static const String refreshTokenKey = 'refresh_token';
   static const String userDataKey = 'user_data';
   static const String settingsKey = 'app_settings';
   static const String themeKey = 'theme_mode';
-  
-  // Hive Box Names
   static const String userBox = 'user_box';
   static const String livestockBox = 'livestock_box';
   static const String calculatorsBox = 'calculators_box';
   static const String weatherBox = 'weather_box';
   static const String settingsBox = 'settings_box';
-  
-  // Default Values
   static const int defaultPageSize = 20;
   static const int maxRetryAttempts = 3;
   static const Duration cacheTimeout = Duration(hours: 24);
-  
-  // Weather API
   static const String weatherApiKey = 'YOUR_WEATHER_API_KEY';
-  
-  // Calculator Types
   static const List<String> calculatorTypes = [
     'nutrition',
     'breeding',
@@ -54,8 +41,6 @@ class AppConstants {
     'labor_cost',
     'profit_margin',
   ];
-  
-  // Livestock Categories
   static const List<String> livestockCategories = [
     'cattle',
     'horses',
@@ -64,8 +49,6 @@ class AppConstants {
     'pigs',
     'poultry',
   ];
-  
-  // Equipment Categories
   static const List<String> equipmentCategories = [
     'tractors',
     'implements',
@@ -84,26 +67,16 @@ class RouteNames {
   static const String home = '/home';
   static const String profile = '/profile';
   static const String settings = '/settings';
-  
-  // Livestock
   static const String livestock = '/livestock';
   static const String livestockDetail = '/livestock/detail';
   static const String addLivestock = '/livestock/add';
   static const String editLivestock = '/livestock/edit';
-  
-  // Calculators
   static const String calculators = '/calculators';
   static const String calculatorDetail = '/calculators/detail';
-  
-  // Weather
   static const String weather = '/weather';
   static const String weatherDetail = '/weather/detail';
-  
-  // News
   static const String news = '/news';
   static const String newsDetail = '/news/detail';
-  
-  // Markets
   static const String markets = '/markets';
   static const String marketDetail = '/markets/detail';
 }

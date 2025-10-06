@@ -5,7 +5,6 @@ import '../../../../core/services/diagnostico_compatibility_service.dart';
 import '../../../../core/theme/spacing_tokens.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../providers/enhanced_diagnosticos_praga_notifier.dart';
-// import 'diagnostico_dialog_widget.dart'; // TODO: Criar versão para DiagnosticoEntity
 
 /// Widget aprimorado para exibir diagnósticos relacionados à praga
 ///
@@ -48,13 +47,9 @@ class _EnhancedDiagnosticosPragaWidgetState
   Future<void> _initializeProvider() async {
     final notifier = ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier);
     await notifier.initialize();
-
-    // Carrega dados baseado no que foi fornecido
     if (widget.pragaId?.isNotEmpty == true) {
       await notifier.loadDiagnosticos(widget.pragaId!);
     } else {
-      // Se não temos pragaId, precisamos buscar pela praga primeiro
-      // Para isso, este widget agora requer pragaId obrigatório
       debugPrint('⚠️ Enhanced widget requer pragaId para funcionar corretamente');
     }
   }
@@ -200,7 +195,6 @@ class _EnhancedDiagnosticosPragaWidgetState
       ),
       child: Column(
         children: [
-          // Campo de busca
           Row(
             children: [
               Expanded(
@@ -253,8 +247,6 @@ class _EnhancedDiagnosticosPragaWidgetState
               ],
             ],
           ),
-
-          // Dropdown de culturas
           if (state.availableCulturas.length > 2) ...[
             const SizedBox(height: SpacingTokens.xs),
             DropdownButtonFormField<String>(
@@ -408,11 +400,8 @@ class _EnhancedDiagnosticosPragaWidgetState
     final widgets = <Widget>[];
 
     grouped.forEach((cultura, diagnosticos) {
-      // Cabeçalho da cultura
       widgets.add(_buildCultureHeader(context, cultura, diagnosticos.length));
       widgets.add(const SizedBox(height: SpacingTokens.sm));
-
-      // Items de diagnósticos
       for (int i = 0; i < diagnosticos.length; i++) {
         final diagnostico = diagnosticos[i];
         widgets.add(_buildDiagnosticoItem(context, diagnostico));
@@ -543,7 +532,6 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   /// Constrói indicador de compatibilidade
   Widget _buildCompatibilityIndicator(BuildContext context, DiagnosticoEntity diagnostico) {
-    // Get the compatibility service from the notifier
     final notifier = ref.read(enhancedDiagnosticosPragaNotifierProvider.notifier);
 
     return FutureBuilder<CompatibilityValidation?>(
@@ -610,7 +598,6 @@ class _EnhancedDiagnosticosPragaWidgetState
 
   /// Mostra modal de detalhes do diagnóstico
   void _showDiagnosticoDialog(BuildContext context, DiagnosticoEntity diagnostico) {
-    // TODO: Implementar dialog para DiagnosticoEntity
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(

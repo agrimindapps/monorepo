@@ -37,14 +37,10 @@ class AddMaintenancePage extends ConsumerStatefulWidget {
 
 class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   final Map<String, ValidationResult> _validationResults = {};
-
-  // Rate limiting and loading state
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
-
-  // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
 
@@ -53,7 +49,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   @override
   void initState() {
     super.initState();
-    // Initialization will be done in didChangeDependencies
   }
 
   @override
@@ -77,12 +72,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     if (widget.maintenanceToEdit != null) {
       await notifier.initializeWithMaintenance(widget.maintenanceToEdit!);
     }
-
-    // Notify changes after current build completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {
-          // Force rebuild after initialization
         });
       }
     });
@@ -90,7 +82,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
 
   @override
   void dispose() {
-    // Clean up timers to prevent memory leaks
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
     super.dispose();
@@ -99,8 +90,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(maintenanceFormNotifierProvider);
-
-    // Generate subtitle based on vehicle information
     String subtitle = 'Registre a manutenção do seu veículo';
     if (formState.isInitialized && formState.vehicle != null) {
       final vehicle = formState.vehicle!;
@@ -146,10 +135,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       ],
     );
   }
-
-
-
-  // 1ª Seção: Informações do Serviço (O QUE foi feito e QUANDO)
   Widget _buildServiceInfoSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
@@ -210,8 +195,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       ),
     );
   }
-
-  // 2ª Seção: Detalhes do Serviço (ONDE foi feito e COMO)
   Widget _buildServiceDetailsSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     return FormSectionHeader(
@@ -225,7 +208,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             hint: 'Nome da oficina ou local da manutenção',
             required: true,
             onChanged: (value) {
-              // O notifier já está conectado ao controller
             },
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -235,15 +217,12 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             hint: 'Descreva os serviços realizados, peças trocadas, etc.',
             required: true,
             onChanged: (value) {
-              // O notifier já está conectado ao controller
             },
           ),
         ],
       ),
     );
   }
-
-  // 3ª Seção: Informações Financeiras e Técnicas (QUANTO custou e quilometragem)
   Widget _buildFinancialInfoSection() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
@@ -257,7 +236,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
             label: 'Custo Total',
             required: true,
             onChanged: (value) {
-              // O notifier já está conectado ao controller
             },
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -289,11 +267,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       description: 'Anexe uma foto do comprovante da manutenção (opcional)',
     );
   }
-
-
-
-
-  // 5ª Seção: Programação de Próxima Manutenção (Opcional)
   Widget _buildNextServiceDate() {
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
     final formState = ref.watch(maintenanceFormNotifierProvider);
@@ -342,18 +315,13 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
     debugPrint('[MAINTENANCE DEBUG] Submit button clicked - Rate limit check');
-    
-    // Prevent multiple rapid clicks
     if (_isSubmitting) {
       debugPrint('[MAINTENANCE DEBUG] Submit already in progress, ignoring duplicate request');
       return;
     }
 
     debugPrint('[MAINTENANCE DEBUG] Starting debounce timer');
-    // Cancel any existing debounce timer
     _debounceTimer?.cancel();
-    
-    // Set debounce timer to prevent rapid consecutive submissions
     _debounceTimer = Timer(_debounceDuration, () {
       if (mounted && !_isSubmitting) {
         debugPrint('[MAINTENANCE DEBUG] Debounce timer fired, calling _submitForm()');
@@ -369,22 +337,16 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     debugPrint('[MAINTENANCE DEBUG] _submitForm() called - Starting validation');
 
     final notifier = ref.read(maintenanceFormNotifierProvider.notifier);
-
-    // Double-check form validation
     if (!notifier.validateForm()) {
       debugPrint('[MAINTENANCE DEBUG] Form validation FAILED - submission aborted');
       return;
     }
 
     debugPrint('[MAINTENANCE DEBUG] Form validation PASSED - proceeding with submission');
-
-    // Prevent concurrent submissions
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
     }
-
-    // Set submitting state
     setState(() {
       _isSubmitting = true;
     });
@@ -392,7 +354,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     final maintenancesNotifier = ref.read(maintenancesNotifierProvider.notifier);
 
     try {
-      // Setup timeout protection
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
           debugPrint('Submit timeout reached, resetting state');
@@ -407,14 +368,10 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       });
 
       final formState = ref.read(maintenanceFormNotifierProvider);
-
-      // Map receipt images to photosPaths if present
       final List<String> allPhotosPaths = [
         ...formState.photosPaths,
         if (formState.receiptImagePath != null) formState.receiptImagePath!,
       ];
-
-      // Create temporary entity for conversion to FormModel
       final MaintenanceEntity tempEntity = MaintenanceEntity(
         id: widget.maintenanceToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         vehicleId: formState.vehicleId,
@@ -439,8 +396,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         updatedAt: DateTime.now(),
         metadata: const {},
       );
-
-      // Convert to MaintenanceFormModel expected by the notifier
       final MaintenanceFormModel formModel = MaintenanceFormModel.fromMaintenanceEntity(tempEntity);
 
       debugPrint('[MAINTENANCE DEBUG] Created maintenance form model: ${formModel.toString()}');
@@ -458,7 +413,6 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
 
       if (success && mounted) {
         debugPrint('[MAINTENANCE DEBUG] SUCCESS - Closing dialog');
-        // Close dialog with success result for parent context to handle
         Navigator.of(context).pop({
           'success': true,
           'action': widget.maintenanceToEdit != null ? 'edit' : 'create',
@@ -473,10 +427,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         );
       }
     } finally {
-      // Clean up timeout timer
       _timeoutTimer?.cancel();
-
-      // Loading state managed by notifier
       if (mounted) {
         setState(() {
           _isSubmitting = false;
@@ -503,11 +454,5 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
 
 
   /// ✅ REMOVED: Old dropdown method no longer needed with EnhancedDropdown
-
-  // Campo de data do serviço removido - agora usa CustomRangeDateTimeField
-
-  // Campo de próxima manutenção removido - agora usa FutureDateTimeField
-
-  // Métodos de seleção de data removidos - agora são tratados pelos DateTimeField components
 
 }

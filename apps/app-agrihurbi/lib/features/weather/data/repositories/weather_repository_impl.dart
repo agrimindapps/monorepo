@@ -34,10 +34,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     }
   }
 
-  // ============================================================================
-  // WEATHER MEASUREMENTS IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> getAllMeasurements({
     String? locationId,
@@ -46,20 +42,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
     int? limit,
   }) async {
     try {
-      // Always try local first (offline-first strategy)
       final localMeasurements = await _localDataSource.getAllMeasurements(
         locationId: locationId,
         startDate: startDate,
         endDate: endDate,
         limit: limit,
       );
-
-      // If we have local data, return it immediately
       if (localMeasurements.isNotEmpty) {
         return Right(localMeasurements.map((model) => model.toEntity()).toList());
       }
-
-      // If no local data and we're online, try remote
       if (await _isOnline) {
         try {
           final remoteMeasurements = await _remoteDataSource.getAllMeasurements(
@@ -68,21 +59,16 @@ class WeatherRepositoryImpl implements WeatherRepository {
             endDate: endDate,
             limit: limit,
           );
-
-          // Cache remote data locally
           await _localDataSource.saveMeasurements(remoteMeasurements);
 
           return Right(remoteMeasurements.map((model) => model.toEntity()).toList());
         } catch (e) {
-          // If remote fails but we have local data, return local
           if (localMeasurements.isNotEmpty) {
             return Right(localMeasurements.map((model) => model.toEntity()).toList());
           }
           return Left(WeatherNetworkFailure(e.toString()));
         }
       }
-
-      // Offline and no local data
       return Right(localMeasurements.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(WeatherMeasurementFetchFailure(e.toString()));
@@ -92,18 +78,13 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> getMeasurementById(String id) async {
     try {
-      // Try local first
       final localMeasurement = await _localDataSource.getMeasurementById(id);
       if (localMeasurement != null) {
         return Right(localMeasurement.toEntity());
       }
-
-      // If not found locally and online, try remote
       if (await _isOnline) {
         try {
           final remoteMeasurement = await _remoteDataSource.getMeasurementById(id);
-          
-          // Cache remotely fetched measurement
           await _localDataSource.saveMeasurement(remoteMeasurement);
           
           return Right(remoteMeasurement.toEntity());
@@ -121,18 +102,13 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> getLatestMeasurement([String? locationId]) async {
     try {
-      // Try local first
       final localMeasurement = await _localDataSource.getLatestMeasurement(locationId);
       if (localMeasurement != null) {
         return Right(localMeasurement.toEntity());
       }
-
-      // If no local data and online, try remote
       if (await _isOnline) {
         try {
           final remoteMeasurement = await _remoteDataSource.getLatestMeasurement(locationId);
-          
-          // Cache the latest measurement
           await _localDataSource.saveMeasurement(remoteMeasurement);
           
           return Right(remoteMeasurement.toEntity());
@@ -174,22 +150,14 @@ class WeatherRepositoryImpl implements WeatherRepository {
   ) async {
     try {
       final model = WeatherMeasurementModel.fromEntity(measurement);
-
-      // Always save locally first (offline-first)
       await _localDataSource.saveMeasurement(model);
-
-      // If online, try to sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.createMeasurement(model);
-          
-          // Update local with server response (might have different ID or timestamps)
           await _localDataSource.updateMeasurement(remoteModel);
           
           return Right(remoteModel.toEntity());
         } catch (e) {
-          // If remote save fails, still return the local version
-          // It will be synced later
           return Right(model.toEntity());
         }
       }
@@ -208,21 +176,14 @@ class WeatherRepositoryImpl implements WeatherRepository {
       final model = WeatherMeasurementModel.fromEntity(measurement.copyWith(
         updatedAt: DateTime.now(),
       ));
-
-      // Update locally first
       await _localDataSource.updateMeasurement(model);
-
-      // If online, try to sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.updateMeasurement(model);
-          
-          // Update local with server response
           await _localDataSource.updateMeasurement(remoteModel);
           
           return Right(remoteModel.toEntity());
         } catch (e) {
-          // If remote update fails, still return the local version
           return Right(model.toEntity());
         }
       }
@@ -236,16 +197,11 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, void>> deleteMeasurement(String id) async {
     try {
-      // Delete locally first
       await _localDataSource.deleteMeasurement(id);
-
-      // If online, try to delete from remote
       if (await _isOnline) {
         try {
           await _remoteDataSource.deleteMeasurement(id);
         } catch (e) {
-          // Log error but don't fail the local deletion
-          // Remote deletion will be handled by sync later
         }
       }
 
@@ -268,7 +224,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     int? limit,
   }) async {
     try {
-      // Use local data source search functionality
       final localResults = await _localDataSource.searchMeasurements(
         locationId: locationId,
         fromDate: fromDate,
@@ -287,27 +242,16 @@ class WeatherRepositoryImpl implements WeatherRepository {
     }
   }
 
-  // ============================================================================
-  // RAIN GAUGES IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> getAllRainGauges() async {
     try {
-      // Try local first
       final localGauges = await _localDataSource.getAllRainGauges();
-
-      // If we have local data, return it
       if (localGauges.isNotEmpty) {
         return Right(localGauges.map((model) => model.toEntity()).toList());
       }
-
-      // If no local data and online, try remote
       if (await _isOnline) {
         try {
           final remoteGauges = await _remoteDataSource.getAllRainGauges();
-          
-          // Cache remote data locally
           await _localDataSource.saveRainGauges(remoteGauges);
           
           return Right(remoteGauges.map((model) => model.toEntity()).toList());
@@ -325,18 +269,13 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, RainGaugeEntity>> getRainGaugeById(String id) async {
     try {
-      // Try local first
       final localGauge = await _localDataSource.getRainGaugeById(id);
       if (localGauge != null) {
         return Right(localGauge.toEntity());
       }
-
-      // If not found locally and online, try remote
       if (await _isOnline) {
         try {
           final remoteGauge = await _remoteDataSource.getRainGaugeById(id);
-          
-          // Cache the gauge
           await _localDataSource.saveRainGauge(remoteGauge);
           
           return Right(remoteGauge.toEntity());
@@ -390,21 +329,14 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Either<WeatherFailure, RainGaugeEntity>> createRainGauge(RainGaugeEntity rainGauge) async {
     try {
       final model = RainGaugeModel.fromEntity(rainGauge);
-
-      // Save locally first
       await _localDataSource.saveRainGauge(model);
-
-      // If online, try to sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.createRainGauge(model);
-          
-          // Update local with server response
           await _localDataSource.updateRainGauge(remoteModel);
           
           return Right(remoteModel.toEntity());
         } catch (e) {
-          // If remote save fails, still return the local version
           return Right(model.toEntity());
         }
       }
@@ -421,21 +353,14 @@ class WeatherRepositoryImpl implements WeatherRepository {
       final model = RainGaugeModel.fromEntity(rainGauge.copyWith(
         updatedAt: DateTime.now(),
       ));
-
-      // Update locally first
       await _localDataSource.updateRainGauge(model);
-
-      // If online, try to sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.updateRainGauge(model);
-          
-          // Update local with server response
           await _localDataSource.updateRainGauge(remoteModel);
           
           return Right(remoteModel.toEntity());
         } catch (e) {
-          // If remote update fails, still return the local version
           return Right(model.toEntity());
         }
       }
@@ -449,15 +374,11 @@ class WeatherRepositoryImpl implements WeatherRepository {
   @override
   Future<Either<WeatherFailure, void>> deleteRainGauge(String id) async {
     try {
-      // Delete locally first
       await _localDataSource.deleteRainGauge(id);
-
-      // If online, try to delete from remote
       if (await _isOnline) {
         try {
           await _remoteDataSource.deleteRainGauge(id);
         } catch (e) {
-          // Log error but don't fail the local deletion
         }
       }
 
@@ -474,22 +395,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
     DateTime measurementTime,
   ) async {
     try {
-      // Get existing gauge
       final existingGauge = await _localDataSource.getRainGaugeById(gaugeId);
       if (existingGauge == null) {
         return Left(RainGaugeNotFoundFailure(gaugeId));
       }
-
-      // Update measurements
       final updatedModel = existingGauge.updateMeasurements(
         newRainfall: newRainfall,
         measurementTime: measurementTime,
       );
-
-      // Save locally
       await _localDataSource.updateRainGauge(updatedModel);
-
-      // If online, try to sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.updateRainGaugeMeasurement(
@@ -497,13 +411,10 @@ class WeatherRepositoryImpl implements WeatherRepository {
             newRainfall,
             measurementTime,
           );
-          
-          // Update local with server response
           await _localDataSource.updateRainGauge(remoteModel);
           
           return Right(remoteModel.toEntity());
         } catch (e) {
-          // If remote update fails, still return the local version
           return Right(updatedModel.toEntity());
         }
       }
@@ -523,24 +434,17 @@ class WeatherRepositoryImpl implements WeatherRepository {
     bool resetYearly = false,
   }) async {
     try {
-      // Get existing gauge
       final existingGauge = await _localDataSource.getRainGaugeById(gaugeId);
       if (existingGauge == null) {
         return Left(RainGaugeNotFoundFailure(gaugeId));
       }
-
-      // Reset accumulations
       final updatedModel = existingGauge.resetAccumulations(
         resetDaily: resetDaily,
         resetWeekly: resetWeekly,
         resetMonthly: resetMonthly,
         resetYearly: resetYearly,
       );
-
-      // Save locally
       await _localDataSource.updateRainGauge(updatedModel);
-
-      // If online, sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.updateRainGauge(updatedModel);
@@ -563,22 +467,15 @@ class WeatherRepositoryImpl implements WeatherRepository {
     double calibrationFactor,
   ) async {
     try {
-      // Get existing gauge
       final existingGauge = await _localDataSource.getRainGaugeById(gaugeId);
       if (existingGauge == null) {
         return Left(RainGaugeNotFoundFailure(gaugeId));
       }
-
-      // Update calibration
       final updatedModel = existingGauge.copyWith(
         calibrationFactor: calibrationFactor,
         updatedAt: DateTime.now(),
       );
-
-      // Save locally
       await _localDataSource.updateRainGauge(updatedModel);
-
-      // If online, sync to remote
       if (await _isOnline) {
         try {
           final remoteModel = await _remoteDataSource.updateRainGauge(updatedModel);
@@ -595,10 +492,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     }
   }
 
-  // ============================================================================
-  // WEATHER STATISTICS IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<Either<WeatherFailure, WeatherStatisticsEntity>> getWeatherStatistics({
     required String locationId,
@@ -607,7 +500,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime endDate,
   }) async {
     try {
-      // Try local first
       final localStats = await _localDataSource.getStatisticsByLocation(locationId);
       final matchingStats = localStats.where((stats) =>
           stats.period == period &&
@@ -617,8 +509,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
       if (matchingStats.isNotEmpty) {
         return Right(matchingStats.first.toEntity());
       }
-
-      // If not found locally and online, try remote or calculate
       if (await _isOnline) {
         try {
           final remoteStats = await _remoteDataSource.calculateStatistics(
@@ -627,8 +517,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
             startDate: startDate,
             endDate: endDate,
           );
-
-          // Cache the statistics
           await _localDataSource.saveStatistics(remoteStats);
 
           return Right(remoteStats.toEntity());
@@ -672,8 +560,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime endDate,
     bool forceRecalculate = false,
   }) async {
-    // Implementation would use the CalculateWeatherStatistics use case
-    // For now, delegate to remote data source if online
     if (await _isOnline) {
       try {
         final remoteStats = await _remoteDataSource.calculateStatistics(
@@ -682,8 +568,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
           startDate: startDate,
           endDate: endDate,
         );
-
-        // Cache the statistics
         await _localDataSource.saveStatistics(remoteStats);
 
         return Right(remoteStats.toEntity());
@@ -702,8 +586,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime endDate,
     String? comparisonPeriod,
   }) async {
-    // Implementation would analyze historical data for trends
-    // For now, return a simplified implementation
     try {
       final measurements = await getAllMeasurements(
         locationId: locationId,
@@ -717,8 +599,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
           if (measurementList.isEmpty) {
             return const Left(InsufficientWeatherDataFailure('trends', 0, 30));
           }
-
-          // Calculate simple trends
           final trends = {
             'location_id': locationId,
             'period_start': startDate.toIso8601String(),
@@ -743,7 +623,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    // Implementation would analyze measurements for anomalies
     try {
       final measurements = await getAllMeasurements(
         locationId: locationId,
@@ -757,7 +636,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
           final anomalies = <String>[];
           
           for (final measurement in measurementList) {
-            // Simple anomaly detection
             if (measurement.temperature > 45 || measurement.temperature < -20) {
               anomalies.add('extreme_temperature_${measurement.id}');
             }
@@ -777,10 +655,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     }
   }
 
-  // ============================================================================
-  // REAL-TIME DATA AND SYNC IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> getCurrentWeatherFromAPI(
     double latitude,
@@ -795,8 +669,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
         latitude,
         longitude,
       );
-
-      // Cache the measurement
       await _localDataSource.saveMeasurement(remoteMeasurement);
 
       return Right(remoteMeasurement.toEntity());
@@ -822,8 +694,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
         longitude,
         days: days,
       );
-
-      // Cache the forecast measurements
       await _localDataSource.saveMeasurements(remoteForecast);
 
       return Right(remoteForecast.map((model) => model.toEntity()).toList());
@@ -841,22 +711,16 @@ class WeatherRepositoryImpl implements WeatherRepository {
       }
 
       int syncedCount = 0;
-
-      // Upload pending measurements
       final pendingResult = await uploadPendingMeasurements();
       pendingResult.fold(
         (failure) => <String, dynamic>{}, // Log but continue
         (count) => syncedCount += count,
       );
-
-      // Download updates
       final updatesResult = await downloadWeatherUpdates();
       updatesResult.fold(
         (failure) => <String, dynamic>{}, // Log but continue
         (count) => syncedCount += count,
       );
-
-      // Update last sync time
       await _localDataSource.setLastSyncTime(DateTime.now());
 
       return Right(syncedCount);
@@ -878,8 +742,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
       }
 
       final uploadedMeasurements = await _remoteDataSource.uploadMeasurements(pendingMeasurements);
-
-      // Mark as synced
       final ids = uploadedMeasurements.map((m) => m.id).toList();
       await _localDataSource.markMeasurementsAsSynced(ids);
 
@@ -897,14 +759,10 @@ class WeatherRepositoryImpl implements WeatherRepository {
       }
 
       final lastSync = since ?? await _localDataSource.getLastSyncTime();
-      
-      // Download measurements
       final measurements = await _remoteDataSource.downloadMeasurements(since: lastSync);
       if (measurements.isNotEmpty) {
         await _localDataSource.saveMeasurements(measurements);
       }
-
-      // Download rain gauges
       final rainGauges = await _remoteDataSource.downloadRainGauges(since: lastSync);
       if (rainGauges.isNotEmpty) {
         await _localDataSource.saveRainGauges(rainGauges);
@@ -916,15 +774,9 @@ class WeatherRepositoryImpl implements WeatherRepository {
     }
   }
 
-  // ============================================================================
-  // Additional methods with simplified implementations
-  // ============================================================================
-
   @override
   Future<Either<WeatherFailure, bool>> validateMeasurement(WeatherMeasurementEntity measurement) async {
-    // Implementation would validate measurement data
     try {
-      // Basic validation logic
       if (measurement.temperature < -100 || measurement.temperature > 70) return const Right(false);
       if (measurement.humidity < 0 || measurement.humidity > 100) return const Right(false);
       if (measurement.pressure < 800 || measurement.pressure > 1200) return const Right(false);
@@ -941,7 +793,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    // Implementation would analyze data quality
     try {
       final measurements = await getAllMeasurements(
         locationId: locationId,
@@ -968,9 +819,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
       return Left(WeatherDataFailure(e.toString()));
     }
   }
-
-  // Implement remaining abstract methods with basic functionality...
-  // For brevity, showing simplified implementations
 
   @override
   Future<Either<WeatherFailure, int>> cleanWeatherData({
@@ -1069,7 +917,6 @@ class WeatherRepositoryImpl implements WeatherRepository {
 
   @override
   Stream<WeatherMeasurementEntity> subscribeToWeatherUpdates(String? locationId) {
-    // Implementation would use StreamController for real-time updates
     return const Stream.empty();
   }
 

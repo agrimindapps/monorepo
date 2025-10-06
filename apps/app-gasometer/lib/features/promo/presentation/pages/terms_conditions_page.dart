@@ -10,8 +10,6 @@ class TermsConditionsPage extends StatefulWidget {
 
 class _TermsConditionsPageState extends State<TermsConditionsPage> {
   final scrollController = ScrollController();
-
-  // Referências para as seções para navegação
   final GlobalKey _introSection = GlobalKey();
   final GlobalKey _usageSection = GlobalKey();
   final GlobalKey _thirdPartySection = GlobalKey();
@@ -47,36 +45,18 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Cabeçalho
                 _buildHeader(),
-
-                // Introdução
                 _buildIntroduction(),
-
-                // Uso do App e Propriedade Intelectual
                 _buildUsageSection(),
-
-                // Serviços de Terceiros
                 _buildThirdPartySection(),
-
-                // Responsabilidades e Limitações
                 _buildResponsibilitiesSection(),
-
-                // Atualizações do App
                 _buildUpdatesSection(),
-
-                // Alterações nos Termos
                 _buildChangesSection(),
-
-                // Contato
                 _buildContactSection(),
-
-                // Rodapé
                 _buildFooter(),
               ],
             ),
           ),
-          // Menu de navegação fixo
           _buildNavBar(),
         ],
       ),
@@ -101,7 +81,6 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 70), // Espaço para a barra de navegação
-          // Header padronizado aplicado ao conteúdo principal
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -191,7 +170,6 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Logo
               GestureDetector(
                 onTap: () => context.go('/promo'),
                 child: Row(
@@ -213,8 +191,6 @@ class _TermsConditionsPageState extends State<TermsConditionsPage> {
                   ],
                 ),
               ),
-
-              // Menu items
               if (isMobile)
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.menu),

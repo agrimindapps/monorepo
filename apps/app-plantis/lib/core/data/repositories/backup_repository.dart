@@ -37,16 +37,10 @@ class BackupRepository implements IBackupRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Converte backup para bytes
       final jsonString = backup.toJsonString();
       final bytes = Uint8List.fromList(utf8.encode(jsonString));
-
-      // Define o caminho no Firebase Storage
       final path = '$_backupsPath/${user.id}/${backup.fileName}';
       final ref = _storage.ref().child(path);
-
-      // Metadata do arquivo
       final metadata = SettableMetadata(
         contentType: 'application/json',
         customMetadata: {
@@ -58,14 +52,10 @@ class BackupRepository implements IBackupRepository {
           'spacesCount': backup.metadata.spacesCount.toString(),
         },
       );
-
-      // Upload com retry logic
       UploadTask? uploadTask;
       for (int attempt = 0; attempt < _maxRetries; attempt++) {
         try {
           uploadTask = ref.putData(bytes, metadata);
-
-          // Timeout para o upload
           final result = await uploadTask.timeout(
             const Duration(seconds: _timeoutSeconds),
           );
@@ -106,14 +96,10 @@ class BackupRepository implements IBackupRepository {
 
       final result = await ref.listAll();
       final backupInfos = <BackupInfo>[];
-
-      // Processa cada arquivo de backup
       for (final item in result.items) {
         try {
           final metadata = await item.getMetadata();
           final downloadUrl = await item.getDownloadURL();
-
-          // Extrai informações dos metadados
           final customMeta = metadata.customMetadata ?? {};
           final timestampStr = customMeta['timestamp'];
           final plantsCount =
@@ -143,12 +129,9 @@ class BackupRepository implements IBackupRepository {
             backupInfos.add(backupInfo);
           }
         } catch (e) {
-          // Log erro para item específico, mas continua processando outros
           debugPrint('Erro ao processar backup ${item.name}: $e');
         }
       }
-
-      // Ordena por data (mais recente primeiro)
       backupInfos.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       return Right(backupInfos);
@@ -167,8 +150,6 @@ class BackupRepository implements IBackupRepository {
 
       final path = '$_backupsPath/${user.id}/$backupId';
       final ref = _storage.ref().child(path);
-
-      // Download com retry logic
       for (int attempt = 0; attempt < _maxRetries; attempt++) {
         try {
           final bytes = await ref.getData().timeout(
@@ -226,8 +207,6 @@ class BackupRepository implements IBackupRepository {
         if (backups.length <= maxBackups) {
           return const Right(null);
         }
-
-        // Remove backups mais antigos
         final backupsToDelete = backups.skip(maxBackups);
 
         for (final backup in backupsToDelete) {

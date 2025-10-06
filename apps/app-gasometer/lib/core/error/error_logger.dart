@@ -20,20 +20,14 @@ class ErrorLogger {
     Map<String, dynamic>? additionalContext,
   }) {
     final errorData = error.toMap();
-
-    // Add additional context
     if (additionalContext != null) {
       errorData['additionalContext'] = additionalContext;
     }
-
-    // Add stack trace if available
     if (stackTrace != null) {
       errorData['stackTrace'] = stackTrace.toString();
     }
 
     _logWithSeverity(error.severity, errorData);
-
-    // In production, send to crash reporting service
     if (kReleaseMode && error.severity.index >= ErrorSeverity.error.index) {
       _sendToCrashReporting(error, stackTrace, additionalContext);
     }
@@ -113,8 +107,6 @@ class ErrorLogger {
     String stateName,
     Map<String, dynamic>? stateData,
   ) {
-    // Disabled verbose state change logging to reduce console noise
-    // Only enable for specific debugging scenarios when needed
     return;
   }
 
@@ -188,18 +180,15 @@ class ErrorLogger {
 
   String _formatLogData(Map<String, dynamic> data) {
     try {
-      // Format for readability in debug mode
       if (kDebugMode) {
         final buffer = StringBuffer();
         data.forEach((key, value) {
           if (key != 'stackTrace') {
-            // Skip stack trace in main log
             buffer.write('$key: ${_formatValue(value)} ');
           }
         });
         return buffer.toString().trim();
       } else {
-        // JSON format for production logs
         return jsonEncode(data);
       }
     } catch (e) {
@@ -225,10 +214,6 @@ class ErrorLogger {
     StackTrace? stackTrace,
     Map<String, dynamic>? additionalContext,
   ) {
-    // TODO: Implement integration with crash reporting service
-    // Examples: Firebase Crashlytics, Sentry, Bugsnag
-
-    // For now, just print in release mode for debugging
     if (kReleaseMode) {
       print('CRASH_REPORT: ${error.toMap()}');
     }
@@ -239,8 +224,6 @@ class ErrorLogger {
 extension AppErrorLogging on AppError {
   /// Log this error using the default logger
   void log({StackTrace? stackTrace, Map<String, dynamic>? additionalContext}) {
-    // In a real implementation, you would get the logger from DI
-    // For now, create a new instance
     final logger = ErrorLogger();
     logger.logError(
       this,

@@ -29,8 +29,6 @@ class LicenseState {
       error: clearError ? null : (error ?? this.error),
     );
   }
-
-  // Computed properties
   bool get hasValidLicense => licenseInfo.hasValidLicense;
   bool get isTrialActive => licenseInfo.isTrialActive;
   bool get isPremiumActive => licenseInfo.isPremiumActive;
@@ -63,14 +61,11 @@ class LicenseNotifier extends _$LicenseNotifier {
   @override
   Future<LicenseState> build() async {
     _licenseService = ref.read(licenseServiceProvider);
-
-    // Cancel timer on dispose
     ref.onDispose(() {
       _periodicTimer?.cancel();
     });
 
     try {
-      // Initialize license (creates trial if needed)
       final result = await _licenseService.initializeLicense();
 
       final licenseInfo = await result.fold(
@@ -78,7 +73,6 @@ class LicenseNotifier extends _$LicenseNotifier {
           if (kDebugMode) {
             debugPrint('[LicenseNotifier] Initialization error: $failure');
           }
-          // Get current license info even on failure
           final infoResult = await _licenseService.getLicenseInfo();
           return infoResult.fold(
             (_) => const LicenseInfo.noLicense(),
@@ -93,8 +87,6 @@ class LicenseNotifier extends _$LicenseNotifier {
           );
         },
       );
-
-      // Start periodic checks for expiration
       _startPeriodicCheck();
 
       return LicenseState(licenseInfo: licenseInfo);
@@ -345,14 +337,10 @@ class LicenseNotifier extends _$LicenseNotifier {
     return const LicenseState(licenseInfo: LicenseInfo.noLicense());
   }
 }
-
-// Dependency provider
 @riverpod
 LicenseService licenseService(Ref ref) {
   return GetIt.instance<LicenseService>();
 }
-
-// Feature access providers
 @riverpod
 Future<bool> canAddUnlimitedPlants(Ref ref) async {
   final notifier = await ref.watch(licenseNotifierProvider.future);

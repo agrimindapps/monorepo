@@ -20,11 +20,8 @@ class GetUserDevicesUseCase implements UseCase<List<DeviceEntity>, GetUserDevice
       return result.fold(
         (failure) => Left(failure),
         (devices) {
-          // Ordena dispositivos por última atividade (mais recente primeiro)
           final sortedDevices = List<DeviceEntity>.from(devices)
             ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
-          
-          // Filtra apenas ativos se solicitado
           if (params.activeOnly) {
             final activeDevices = sortedDevices.where((device) => device.isActive).toList();
             return Right(activeDevices);

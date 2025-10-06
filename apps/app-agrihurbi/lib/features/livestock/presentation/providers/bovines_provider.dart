@@ -41,8 +41,6 @@ class BovinesProvider extends ChangeNotifier {
        _updateBovine = updateBovine,
        _deleteBovine = deleteBovine;
 
-  // === STATE MANAGEMENT ===
-
   List<BovineEntity> _bovines = [];
   BovineEntity? _selectedBovine;
 
@@ -54,8 +52,6 @@ class BovinesProvider extends ChangeNotifier {
 
   String? _errorMessage;
   String _searchQuery = '';
-
-  // === GETTERS ===
 
   List<BovineEntity> get bovines => _bovines;
   BovineEntity? get selectedBovine => _selectedBovine;
@@ -108,8 +104,6 @@ class BovinesProvider extends ChangeNotifier {
     final breeds = activeBovines.map((bovine) => bovine.breed).toSet();
     return breeds.toList()..sort();
   }
-
-  // === OPERAÇÕES PRINCIPAIS ===
 
   /// Carrega todos os bovinos
   Future<void> loadBovines() async {
@@ -198,8 +192,6 @@ class BovinesProvider extends ChangeNotifier {
         final index = _bovines.indexWhere((b) => b.id == updatedBovine.id);
         if (index != -1) {
           _bovines[index] = updatedBovine;
-
-          // Atualiza o selecionado se for o mesmo
           if (_selectedBovine?.id == updatedBovine.id) {
             _selectedBovine = updatedBovine;
           }
@@ -242,10 +234,7 @@ class BovinesProvider extends ChangeNotifier {
       (_) {
         final index = _bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
-          // Soft delete - marca como inativo
           _bovines[index] = _bovines[index].copyWith(isActive: false);
-
-          // Limpa seleção se foi o selecionado
           if (_selectedBovine?.id == bovineId) {
             _selectedBovine = null;
           }
@@ -262,8 +251,6 @@ class BovinesProvider extends ChangeNotifier {
     notifyListeners();
     return success;
   }
-
-  // === OPERAÇÕES DE BUSCA E FILTROS ===
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
@@ -302,7 +289,6 @@ class BovinesProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Primeiro tenta buscar no cache em memória
       final localBovine = getBovineById(id);
       if (localBovine != null) {
         _selectedBovine = localBovine;
@@ -311,8 +297,6 @@ class BovinesProvider extends ChangeNotifier {
         debugPrint('BovinesProvider: Bovino encontrado no cache - $id');
         return true;
       }
-
-      // Se não encontrou no cache, usa o use case (busca Hive + remoto)
       final result = await _getBovineById(GetBovineByIdParams(bovineId: id));
 
       bool success = false;
@@ -324,7 +308,6 @@ class BovinesProvider extends ChangeNotifier {
           );
         },
         (bovine) {
-          // Adiciona ao cache em memória se não estiver presente
           final existingIndex = _bovines.indexWhere((b) => b.id == bovine.id);
           if (existingIndex == -1) {
             _bovines.add(bovine);
@@ -358,8 +341,6 @@ class BovinesProvider extends ChangeNotifier {
         .where((bovine) => bovine.breed.toLowerCase() == breed.toLowerCase())
         .toList();
   }
-
-  // === OPERAÇÕES AUXILIARES ===
 
   /// Limpa mensagens de erro
   void clearError() {

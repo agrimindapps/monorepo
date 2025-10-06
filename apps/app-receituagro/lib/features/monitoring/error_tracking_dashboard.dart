@@ -162,7 +162,6 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
   }
 
   Widget _buildAlertsTab() {
-    // Mock alerts data - in production, this would come from the monitoring service
     final alerts = [
       {
         'name': 'Alto uso de memória',

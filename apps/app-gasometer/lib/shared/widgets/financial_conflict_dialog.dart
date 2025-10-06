@@ -57,18 +57,12 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
-
-            // Entity comparison
             _buildEntityComparison(context, currencyFormatter),
 
             const SizedBox(height: 16),
-
-            // Strategy selection
             _buildStrategySelection(context),
 
             const SizedBox(height: 16),
-
-            // Details toggle
             Row(
               children: [
                 Checkbox(

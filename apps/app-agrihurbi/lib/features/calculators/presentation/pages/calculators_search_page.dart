@@ -39,8 +39,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
   List<CalculatorEntity> _searchResults = [];
   List<String> _availableTags = [];
   bool _isSearching = false;
-
-  // Performance benchmarking
   int _searchCallCount = 0;
 
   @override
@@ -85,7 +83,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
           ref.watch(calculatorProvider); // Watch for reactivity
           return Column(
             children: [
-              // Barra de busca
               CalculatorSearchBarWidget(
                 controller: _searchController,
                 onChanged:
@@ -95,8 +92,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
                     ),
                 isLoading: _isSearching,
               ),
-
-              // Filtros avançados
               CalculatorSearchFiltersWidget(
                 selectedCategory: _selectedCategory,
                 selectedComplexity: _selectedComplexity,
@@ -137,8 +132,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
                 onClearFilters: _clearAllFilters,
                 onApplyFilters: _updateSearchResults,
               ),
-
-              // Resultados da busca
               Expanded(
                 child: CalculatorSearchResultsWidget(
                   searchResults: _searchResults,
@@ -167,8 +160,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
 
     await PerformanceBenchmark.measureAsync('search_otimizada', () async {
       final provider = ref.read(calculatorProvider);
-
-      // Obter IDs dos favoritos para o filtro
       List<String> favoriteIds = [];
       if (_showOnlyFavorites) {
         final favoritesService = CalculatorFavoritesService(
@@ -178,8 +169,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
       }
 
       if (!mounted) return <CalculatorEntity>[];
-
-      // Criar critérios de busca unificados
       final criteria = search_service.SearchCriteria(
         query: query.trim().isEmpty ? null : query.trim(),
         category: _selectedCategory,
@@ -189,8 +178,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
         favoriteIds: favoriteIds,
         showOnlyFavorites: _showOnlyFavorites,
       );
-
-      // Executar busca otimizada em single-pass
       final results = search_service.CalculatorSearchService.optimizedSearch(
         provider.calculators,
         criteria,
@@ -212,8 +199,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
     _performOptimizedSearch(_searchController.text);
   }
 
-  // Método removido - funcionalidade movida para CalculatorSearchResultsWidget
-
   void _extractAvailableTags(List<CalculatorEntity> calculators) {
     setState(() {
       _availableTags = CalculatorUIService.extractAvailableTags(calculators);
@@ -231,10 +216,4 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
     });
     _updateSearchResults();
   }
-
-  // Método removido - funcionalidade movida para widgets
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
-
-  // Método removido - funcionalidade movida para CalculatorSearchFiltersWidget
 }

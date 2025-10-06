@@ -23,8 +23,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   static const String _boxName = 'plants'; // Usa box do UnifiedSyncManager
   Box<dynamic>?
   _box; // Sem tipo específico para aceitar Box<dynamic> ou Box<String>
-
-  // Cache for performance optimization
   List<Plant>? _cachedPlants;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
@@ -33,18 +31,13 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
   Future<Box<dynamic>> get box async {
     if (_box != null) return _box!;
-
-    // Se a box já está aberta (por UnifiedSync ou outro processo), reutiliza
     if (Hive.isBoxOpen(_boxName)) {
       if (kDebugMode) {
         debugPrint('ℹ️ Box "$_boxName" já está aberta - reutilizando');
       }
-      // Pega a box já aberta (pode ser Box<dynamic> ou Box<String>)
       _box = Hive.box(_boxName);
       return _box!;
     }
-
-    // Se não está aberta, abre normalmente
     _box = await Hive.openBox(_boxName);
     return _box!;
   }
@@ -52,7 +45,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   @override
   Future<List<Plant>> getPlants() async {
     try {
-      // Check if cache is still valid
       if (_cachedPlants != null && _cacheTimestamp != null) {
         final now = DateTime.now();
         if (now.difference(_cacheTimestamp!).compareTo(_cacheValidity) < 0) {
@@ -74,7 +66,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
             }
           }
         } catch (e) {
-          // Log corrupted data and remove from Hive
           debugPrint('Found corrupted plant data for key $key: $e');
           try {
             await hiveBox.delete(key);
@@ -84,23 +75,16 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
               'Failed to remove corrupted data for key $key: $deleteError',
             );
           }
-          // Continue processing other plants
           continue;
         }
       }
-
-      // Sort by creation date (newest first)
       plants.sort(
         (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
           a.createdAt ?? DateTime.now(),
         ),
       );
-
-      // Update cache
       _cachedPlants = plants;
       _cacheTimestamp = DateTime.now();
-
-      // Update search index
       await _searchService.updateSearchIndexFromPlants(plants);
 
       return plants;
@@ -125,7 +109,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
         return plant.isDeleted ? null : plant;
       } catch (corruptionError) {
-        // Handle corrupted individual plant data
         debugPrint('Found corrupted plant data for ID $id: $corruptionError');
         try {
           await hiveBox.delete(id);
@@ -156,8 +139,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       }
 
       final hiveBox = await box;
-
-      // Verificar se a planta já existe
       if (hiveBox.containsKey(plant.id)) {
         if (kDebugMode) {
           debugPrint(
@@ -185,8 +166,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           '🌱 PlantsLocalDatasourceImpl.addPlant() - Total de plantas no box: ${hiveBox.length}',
         );
       }
-
-      // Invalidate cache
       _invalidateCache();
     } catch (e) {
       if (kDebugMode) {
@@ -203,8 +182,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       final plantModel = PlantModel.fromEntity(plant);
       final plantJson = jsonEncode(plantModel.toJson());
       await hiveBox.put(plant.id, plantJson);
-
-      // Invalidate cache
       _invalidateCache();
     } catch (e) {
       throw Exception(
@@ -217,14 +194,10 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<void> deletePlant(String id) async {
     try {
       final hiveBox = await box;
-
-      // Get existing plant first
       final plantJson = hiveBox.get(id) as String?;
       if (plantJson != null) {
         final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
         final plant = PlantModel.fromJson(plantData);
-
-        // Soft delete - mark as deleted
         final deletedPlant = plant.copyWith(
           isDeleted: true,
           updatedAt: DateTime.now(),
@@ -233,8 +206,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
         final updatedJson = jsonEncode(deletedPlant.toJson());
         await hiveBox.put(id, updatedJson);
-
-        // Invalidate cache
         _invalidateCache();
       }
     } catch (e) {
@@ -254,8 +225,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       }
 
       final hiveBox = await box;
-
-      // Verificar se existe antes de deletar
       final exists = hiveBox.containsKey(id);
       if (kDebugMode) {
         debugPrint(
@@ -276,8 +245,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           '🗑️ PlantsLocalDatasourceImpl.hardDeletePlant() - Total após remoção: ${hiveBox.length}',
         );
       }
-
-      // Invalidate cache
       _invalidateCache();
     } catch (e) {
       if (kDebugMode) {
@@ -292,7 +259,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   @override
   Future<List<Plant>> searchPlants(String query) async {
     try {
-      // Use optimized search service - now returns Plant entities directly
       final results = await _searchService.searchWithDebounce(
         query,
         const Duration(milliseconds: 300),
@@ -300,7 +266,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
       return results;
     } catch (e) {
-      // Fallback to basic search if search service fails
       try {
         final allPlants = await getPlants();
         final searchQuery = query.toLowerCase().trim();
@@ -339,8 +304,6 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
     try {
       final hiveBox = await box;
       await hiveBox.clear();
-
-      // Clear all caches
       _invalidateCache();
       _searchService.clearCache();
     } catch (e) {

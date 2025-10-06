@@ -282,7 +282,6 @@ class AdaptiveFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Hide FAB on desktop/tablet when sidebar/rail is present
     if (!ResponsiveLayout.isMobile(context)) {
       return const SizedBox.shrink();
     }

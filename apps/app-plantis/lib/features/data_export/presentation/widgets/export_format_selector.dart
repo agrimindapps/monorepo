@@ -90,8 +90,6 @@ class _ExportFormatSelectorState extends State<ExportFormatSelector> {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Format options
         Column(
           children:
               ExportFormat.values.map((format) {
@@ -126,7 +124,6 @@ class _ExportFormatSelectorState extends State<ExportFormatSelector> {
                         ),
                         child: Row(
                           children: [
-                            // Icon container
                             Container(
                               width: 48,
                               height: 48,
@@ -144,8 +141,6 @@ class _ExportFormatSelectorState extends State<ExportFormatSelector> {
                               ),
                             ),
                             const SizedBox(width: 16),
-
-                            // Content
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,8 +198,6 @@ class _ExportFormatSelectorState extends State<ExportFormatSelector> {
                               ),
                             ),
                             const SizedBox(width: 12),
-
-                            // Selection indicator
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               width: 24,
@@ -234,8 +227,6 @@ class _ExportFormatSelectorState extends State<ExportFormatSelector> {
                 );
               }).toList(),
         ),
-
-        // Recommendation card
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),

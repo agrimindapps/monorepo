@@ -328,7 +328,6 @@ class ResultadoBuscaWidget extends StatelessWidget {
   Widget _buildItemFooter(ThemeData theme, DiagnosticoDetalhado diagnostico) {
     return Row(
       children: [
-        // Dosagem
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
@@ -357,8 +356,6 @@ class ResultadoBuscaWidget extends StatelessWidget {
         ),
         
         const Spacer(),
-        
-        // Métodos de aplicação
         if (diagnostico.temAplicacaoTerrestre)
           Container(
             margin: const EdgeInsets.only(left: 4),

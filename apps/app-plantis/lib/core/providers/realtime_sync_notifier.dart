@@ -8,10 +8,6 @@ import '../services/plantis_realtime_service.dart';
 
 part 'realtime_sync_notifier.g.dart';
 
-// =============================================================================
-// DEPENDENCY PROVIDERS
-// =============================================================================
-
 /// Provider do PlantisRealtimeService (singleton)
 @riverpod
 PlantisRealtimeService plantisRealtimeService(PlantisRealtimeServiceRef ref) {
@@ -29,10 +25,6 @@ ConnectivityService connectivityService(ConnectivityServiceRef ref) {
 UnifiedSyncManager unifiedSyncManager(UnifiedSyncManagerRef ref) {
   return UnifiedSyncManager.instance;
 }
-
-// =============================================================================
-// STATE CLASS
-// =============================================================================
 
 /// Estado imutável para sincronização em tempo real
 @immutable
@@ -99,10 +91,6 @@ class RealtimeSyncState {
       enableBackgroundSync: enableBackgroundSync ?? this.enableBackgroundSync,
     );
   }
-
-  // ==========================================================================
-  // COMPUTED GETTERS
-  // ==========================================================================
 
   /// Status readable para UI
   String get statusMessage {
@@ -180,20 +168,13 @@ class RealtimeSyncState {
   }
 }
 
-// =============================================================================
-// ASYNC NOTIFIER
-// =============================================================================
-
 /// Notifier que integra o sistema de real-time sync com a UI
 /// Fornece status e controles de sincronização para a interface
 @riverpod
 class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
-  // Services (via dependency providers)
   late PlantisRealtimeService _realtimeService;
   late ConnectivityService _connectivityService;
   late UnifiedSyncManager _syncManager;
-
-  // Stream subscriptions
   StreamSubscription<bool>? _realtimeStatusSubscription;
   StreamSubscription<String>? _syncEventSubscription;
   StreamSubscription<Map<String, SyncStatus>>? _globalSyncSubscription;
@@ -202,12 +183,9 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
 
   @override
   Future<RealtimeSyncState> build() async {
-    // Inject dependencies
     _realtimeService = ref.read(plantisRealtimeServiceProvider);
     _connectivityService = ref.read(connectivityServiceProvider);
     _syncManager = ref.read(unifiedSyncManagerProvider);
-
-    // Setup cleanup on dispose
     ref.onDispose(() {
       _realtimeStatusSubscription?.cancel();
       _syncEventSubscription?.cancel();
@@ -222,18 +200,13 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
     });
 
     try {
-      // Inicializar serviços
       await _realtimeService.initialize();
       await _connectivityService.initialize();
-
-      // Configurar listeners
       _setupRealtimeStatusListener();
       _setupSyncEventListener();
       _setupGlobalSyncListener();
       _setupSyncEventsListener();
       _setupConnectivityListener();
-
-      // Obter estado inicial
       final initialState = await _getInitialState();
 
       developer.log(
@@ -247,15 +220,9 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
         'Error initializing RealtimeSyncNotifier: $e',
         name: 'RealtimeSyncNotifier',
       );
-
-      // Retornar estado inicial mesmo com erro
       return RealtimeSyncState.initial();
     }
   }
-
-  // ==========================================================================
-  // INITIALIZATION HELPERS
-  // ==========================================================================
 
   /// Obtém estado inicial do sistema
   Future<RealtimeSyncState> _getInitialState() async {
@@ -284,10 +251,6 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
       enableBackgroundSync: true,
     );
   }
-
-  // ==========================================================================
-  // STREAM LISTENERS
-  // ==========================================================================
 
   /// Configura listener do status do real-time
   void _setupRealtimeStatusListener() {
@@ -410,8 +373,6 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
           );
 
           state = AsyncValue.data(updatedState);
-
-          // Notificar o real-time service sobre mudança de conectividade
           _realtimeService.handleConnectivityChange(isOnline);
         }
       },
@@ -423,10 +384,6 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
       },
     );
   }
-
-  // ==========================================================================
-  // PUBLIC METHODS
-  // ==========================================================================
 
   /// Força uma sincronização manual
   Future<void> forceSync() async {
@@ -554,10 +511,6 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
     };
   }
 
-  // ==========================================================================
-  // HELPER METHODS
-  // ==========================================================================
-
   /// Atualiza contagem de mudanças pendentes
   int _getPendingChangesCount() {
     try {
@@ -586,8 +539,6 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   RealtimeSyncState _addRecentEvent(RealtimeSyncState currentState, String event) {
     final timestampedEvent = '${_formatTimestamp(DateTime.now())}: $event';
     final updatedEvents = [timestampedEvent, ...currentState.recentEvents];
-
-    // Manter apenas os últimos 10 eventos
     final trimmedEvents = updatedEvents.length > 10
         ? updatedEvents.sublist(0, 10)
         : updatedEvents;
@@ -635,10 +586,6 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
         '${dateTime.second.toString().padLeft(2, '0')}';
   }
 }
-
-// =============================================================================
-// DERIVED PROVIDERS (CONVENIENTES)
-// =============================================================================
 
 /// Provider para verificar se realtime está ativo
 @riverpod
@@ -716,10 +663,6 @@ List<String> recentSyncEvents(RecentSyncEventsRef ref) {
     error: (_, __) => const [],
   );
 }
-
-// =============================================================================
-// ENUMS
-// =============================================================================
 
 /// Cores para indicador de status de sync
 enum SyncIndicatorColor {

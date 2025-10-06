@@ -7,8 +7,6 @@ import '../../domain/entities/favorito_entity.dart';
 /// Princípio: Usar repository diretamente, eliminando use cases desnecessários
 class FavoritosProviderSimplified extends ChangeNotifier {
   final FavoritosRepositorySimplified _repository;
-
-  // Estados
   List<FavoritoEntity> _allFavoritos = [];
   List<FavoritoDefensivoEntity> _defensivos = [];
   List<FavoritoPragaEntity> _pragas = [];
@@ -23,8 +21,6 @@ class FavoritosProviderSimplified extends ChangeNotifier {
   FavoritosProviderSimplified({
     required FavoritosRepositorySimplified repository,
   }) : _repository = repository;
-
-  // Getters
   List<FavoritoEntity> get allFavoritos => List.unmodifiable(_allFavoritos);
   List<FavoritoDefensivoEntity> get defensivos => List.unmodifiable(_defensivos);
   List<FavoritoPragaEntity> get pragas => List.unmodifiable(_pragas);
@@ -34,8 +30,6 @@ class FavoritosProviderSimplified extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get currentFilter => _currentFilter;
-
-  // Getters de conveniência
   bool get hasDefensivos => _defensivos.isNotEmpty;
   bool get hasPragas => _pragas.isNotEmpty;
   bool get hasDiagnosticos => _diagnosticos.isNotEmpty;
@@ -132,7 +126,6 @@ class FavoritosProviderSimplified extends ChangeNotifier {
       debugPrint('🔄 [PROVIDER-SIMPLIFIED] Resultado repository: $result');
 
       if (result) {
-        // Recarrega os dados após mudança
         debugPrint('🔄 [PROVIDER-SIMPLIFIED] Recarregando dados após toggle...');
         await _reloadAfterToggle(tipo);
         debugPrint('✅ [PROVIDER-SIMPLIFIED] Toggle completado com sucesso');
@@ -285,8 +278,6 @@ class FavoritosProviderSimplified extends ChangeNotifier {
     }
   }
 
-  // ========== MÉTODOS HELPER PRIVADOS ==========
-
   void _separateByType() {
     _defensivos = _allFavoritos.whereType<FavoritoDefensivoEntity>().toList();
     _pragas = _allFavoritos.whereType<FavoritoPragaEntity>().toList();
@@ -309,8 +300,6 @@ class FavoritosProviderSimplified extends ChangeNotifier {
         await loadCulturas();
         break;
     }
-    
-    // Atualiza estatísticas
     await loadStats();
   }
 

@@ -94,8 +94,6 @@ class PlantImageSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-
-        // Imagem principal
         if (plant.primaryImageUrl != null)
           GestureDetector(
             onTap: () => _showImagePreview(context, plant.imageUrls, 0),
@@ -125,8 +123,6 @@ class PlantImageSection extends StatelessWidget {
               ),
             ),
           ),
-
-        // Galeria de imagens adicionais
         if (plant.imageUrls.length > 1) ...[
           const SizedBox(height: 16),
           SizedBox(

@@ -219,19 +219,10 @@ class ErrorLogger {
       debugPrint('   Category: ${error.category.name}');
       debugPrint('   Severity: ${error.severity.name}');
       if (error.code != null) debugPrint('   Code: ${error.code}');
-      // Don't log full stack traces in production builds or when they might contain sensitive data
       if (error.stackTrace != null && error.severity == ErrorSeverity.critical) {
         debugPrint('   Stack: [Stack trace available for critical errors]');
       }
     }
-
-    // Integrate with logging services like Firebase Crashlytics in production
-    // Only send sanitized error information to external services
-    // FirebaseCrashlytics.instance.recordError(
-    //   _sanitizeMessage(error.message),
-    //   null, // Don't send stack traces unless necessary
-    //   information: _sanitizeErrorData(error),
-    // );
   }
 
   /// Registra erro com contexto adicional
@@ -246,8 +237,6 @@ class ErrorLogger {
       'error_severity': error.severity.name,
       'error_code': error.code,
     };
-    
-    // Add non-sensitive additional context separately
     if (additionalContext != null) {
       for (final entry in additionalContext.entries) {
         if (!_isSensitiveKey(entry.key)) {
@@ -260,13 +249,10 @@ class ErrorLogger {
       debugPrint('🚨 AppError with context: ${_sanitizeMessage(error.message)}');
       debugPrint('   Context: $sanitizedContext');
     }
-
-    // Integration with analytics/logging - send only sanitized data
   }
 
   /// Sanitizes error messages to remove sensitive information
   static String _sanitizeMessage(String message) {
-    // Remove common sensitive patterns
     return message
         .replaceAll(RegExp(r'password[\s:=][\w]+', caseSensitive: false), 'password=[REDACTED]')
         .replaceAll(RegExp(r'token[\s:=][\w\-._]+', caseSensitive: false), 'token=[REDACTED]')

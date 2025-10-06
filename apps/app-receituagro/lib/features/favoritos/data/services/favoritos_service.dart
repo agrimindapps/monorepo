@@ -18,16 +18,11 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Princípio: Consolidação de responsabilidades similares para reduzir complexidade
 class FavoritosService {
   final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
-
-  // Cache interno consolidado
   final Map<String, dynamic> _memoryCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
 
-  // ========== STORAGE OPERATIONS ==========
-
   Future<List<String>> getFavoriteIds(String tipo) async {
     try {
-      // Usa tipo direto (singular) sem conversão
       final favoritos = await _repository.getFavoritosByTipoAsync(tipo);
       return favoritos.map((f) => f.itemId).toList();
     } catch (e) {
@@ -42,7 +37,6 @@ class FavoritosService {
     );
 
     try {
-      // Validação de tipo
       if (!TipoFavorito.isValid(tipo)) {
         developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
@@ -52,8 +46,6 @@ class FavoritosService {
         '✅ SYNC: Tipo válido encontrado - tipo=$tipo',
         name: 'FavoritosService',
       );
-
-      // Valida antes de adicionar
       developer.log(
         '🔍 SYNC: Validando se pode adicionar favorito...',
         name: 'FavoritosService',
@@ -69,8 +61,6 @@ class FavoritosService {
         '✅ SYNC: Validação passou - pode adicionar favorito',
         name: 'FavoritosService',
       );
-
-      // Adiciona com dados básicos para cache
       final itemData = {
         'id': id,
         'tipo': tipo,
@@ -86,16 +76,12 @@ class FavoritosService {
         '💾 SYNC: Resultado do salvamento local: $result',
         name: 'FavoritosService',
       );
-
-      // Limpa cache após mudança
       if (result) {
         developer.log(
           '🧹 SYNC: Limpando cache para tipo=$tipo',
           name: 'FavoritosService',
         );
         await _clearCacheForTipo(tipo);
-
-        // Sincroniza com Firestore se usuário autenticado
         developer.log(
           '☁️ SYNC: Iniciando sincronização com Firestore...',
           name: 'FavoritosService',
@@ -107,7 +93,6 @@ class FavoritosService {
             '⚠️ SYNC: Erro na sincronização (funcionamento local mantido): $e',
             name: 'FavoritosService',
           );
-          // Não propaga o erro - favorito já foi salvo localmente
         }
 
         developer.log(
@@ -143,7 +128,6 @@ class FavoritosService {
     );
 
     try {
-      // Validação de tipo
       if (!TipoFavorito.isValid(tipo)) {
         developer.log('❌ SYNC: Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
@@ -163,16 +147,12 @@ class FavoritosService {
         '💾 SYNC: Resultado da remoção local: $result',
         name: 'FavoritosService',
       );
-
-      // Limpa cache após mudança
       if (result) {
         developer.log(
           '🧹 SYNC: Limpando cache para tipo=$tipo',
           name: 'FavoritosService',
         );
         await _clearCacheForTipo(tipo);
-
-        // Sincroniza com Firestore se usuário autenticado
         developer.log(
           '☁️ SYNC: Iniciando sincronização de remoção com Firestore...',
           name: 'FavoritosService',
@@ -184,7 +164,6 @@ class FavoritosService {
             '⚠️ SYNC: Erro na sincronização de remoção (funcionamento local mantido): $e',
             name: 'FavoritosService',
           );
-          // Não propaga o erro - favorito já foi removido localmente
         }
 
         developer.log(
@@ -215,7 +194,6 @@ class FavoritosService {
 
   Future<bool> isFavoriteId(String tipo, String id) async {
     try {
-      // Usa tipo direto (singular) sem conversão
       if (!TipoFavorito.isValid(tipo)) return false;
 
       return await _repository.isFavorito(tipo, id);
@@ -230,7 +208,6 @@ class FavoritosService {
 
   Future<void> clearFavorites(String tipo) async {
     try {
-      // Usa tipo direto (singular) sem conversão
       if (!TipoFavorito.isValid(tipo)) return;
 
       await _repository.clearFavoritosByTipo(tipo);
@@ -250,16 +227,12 @@ class FavoritosService {
     }
   }
 
-  // ========== DATA RESOLVER OPERATIONS ==========
-
   Future<Map<String, dynamic>?> resolveItemData(String tipo, String id) async {
     developer.log(
       '🔍 RESOLVE_DATA: Resolvendo dados para tipo=$tipo, id=$id',
       name: 'FavoritosService',
     );
     final cacheKey = 'resolve_${tipo}_$id';
-
-    // Tenta pegar do cache primeiro
     final cached = await _getFromCache<Map<String, dynamic>?>(cacheKey);
     if (cached != null) {
       developer.log(
@@ -311,8 +284,6 @@ class FavoritosService {
             name: 'FavoritosService',
           );
       }
-
-      // Armazena no cache
       if (data != null) {
         developer.log(
           '✅ RESOLVE_DATA: Dados resolvidos com sucesso - salvando no cache',
@@ -343,8 +314,6 @@ class FavoritosService {
         '🔍 RESOLVE_DEFENSIVO: Buscando defensivo com id=$id',
         name: 'FavoritosService',
       );
-
-      // Usa repository direto em vez do serviço depreciado
       final fitossanitarioRepo = GetIt.instance<FitossanitarioHiveRepository>();
       final result = await fitossanitarioRepo.getAll();
 
@@ -359,8 +328,6 @@ class FavoritosService {
           'fabricante': 'Erro ao carregar',
         };
       }
-
-      // Busca por idReg ou objectId
       final defensivo = result.data!.firstWhere(
         (d) => d.idReg == id || d.objectId == id,
         orElse: () => throw Exception('Defensivo não encontrado'),
@@ -398,8 +365,6 @@ class FavoritosService {
         '🔍 RESOLVE_PRAGA: Buscando praga com id=$id',
         name: 'FavoritosService',
       );
-
-      // Usa repository direto em vez do serviço depreciado
       final pragasRepo = GetIt.instance<PragasHiveRepository>();
       final result = await pragasRepo.getAll();
 
@@ -414,8 +379,6 @@ class FavoritosService {
           'tipoPraga': '1',
         };
       }
-
-      // Busca por idReg ou objectId
       final praga = result.data!.firstWhere(
         (p) => p.idReg == id || p.objectId == id,
         orElse: () => throw Exception('Praga não encontrada'),
@@ -454,8 +417,6 @@ class FavoritosService {
         '🔍 RESOLVE_DIAGNOSTICO: Buscando diagnóstico com id=$id',
         name: 'FavoritosService',
       );
-
-      // Usa repository direto em vez do serviço depreciado
       final diagnosticoRepo = GetIt.instance<DiagnosticoHiveRepository>();
       final result = await diagnosticoRepo.getAll();
 
@@ -471,8 +432,6 @@ class FavoritosService {
           'dosagem': 'Erro ao carregar',
         };
       }
-
-      // Busca por idReg ou objectId
       final diagnostico = result.data!.firstWhere(
         (d) => d.idReg == id || d.objectId == id,
         orElse: () => throw Exception('Diagnóstico não encontrado'),
@@ -514,8 +473,6 @@ class FavoritosService {
         '🔍 RESOLVE_CULTURA: Buscando cultura com id=$id',
         name: 'FavoritosService',
       );
-
-      // Usa repository direto em vez do serviço depreciado
       final culturaRepo = GetIt.instance<CulturaHiveRepository>();
       final result = await culturaRepo.getAll();
 
@@ -530,8 +487,6 @@ class FavoritosService {
           'nomeComum': 'Erro ao carregar',
         };
       }
-
-      // Busca por idReg ou objectId
       final cultura = result.data!.firstWhere(
         (c) => c.idReg == id || c.objectId == id,
         orElse: () => throw Exception('Cultura não encontrada'),
@@ -560,8 +515,6 @@ class FavoritosService {
       };
     }
   }
-
-  // ========== ENTITY FACTORY OPERATIONS ==========
 
   FavoritoEntity createEntity({
     required String tipo,
@@ -606,8 +559,6 @@ class FavoritosService {
     }
   }
 
-  // ========== VALIDATOR OPERATIONS ==========
-
   Future<bool> canAddToFavorites(String tipo, String id) async {
     return isValidTipo(tipo) && isValidId(id) && await existsInData(tipo, id);
   }
@@ -621,7 +572,6 @@ class FavoritosService {
 
       switch (tipo) {
         case TipoFavorito.defensivo:
-          // Usa repository direto em vez do serviço depreciado
           final fitossanitarioRepo =
               GetIt.instance<FitossanitarioHiveRepository>();
           final result = await fitossanitarioRepo.getAll();
@@ -642,7 +592,6 @@ class FavoritosService {
           return exists;
 
         case TipoFavorito.praga:
-          // Usa repository direto em vez do serviço depreciado
           final pragasRepo = GetIt.instance<PragasHiveRepository>();
           final result = await pragasRepo.getAll();
           if (result.isError) {
@@ -662,7 +611,6 @@ class FavoritosService {
           return exists;
 
         case TipoFavorito.diagnostico:
-          // Usa repository direto em vez do serviço depreciado
           final diagnosticoRepo = GetIt.instance<DiagnosticoHiveRepository>();
           final result = await diagnosticoRepo.getAll();
           if (result.isError) {
@@ -682,7 +630,6 @@ class FavoritosService {
           return exists;
 
         case TipoFavorito.cultura:
-          // Usa repository direto em vez do serviço depreciado
           final culturaRepo = GetIt.instance<CulturaHiveRepository>();
           final result = await culturaRepo.getAll();
           if (result.isError) {
@@ -726,8 +673,6 @@ class FavoritosService {
     return id.trim().isNotEmpty;
   }
 
-  // ========== STATS OPERATIONS ==========
-
   Future<FavoritosStats> getStats() async {
     try {
       final stats = await _repository.getFavoritosStats();
@@ -742,13 +687,10 @@ class FavoritosService {
     }
   }
 
-  // ========== CACHE OPERATIONS ==========
-
   Future<T?> _getFromCache<T>(String key) async {
     try {
       final timestamp = _cacheTimestamps[key];
       if (timestamp != null) {
-        // Verifica se ainda está válido (5 minutos)
         if (DateTime.now().difference(timestamp).inMinutes > 5) {
           await _removeFromCache(key);
           return null;
@@ -766,7 +708,6 @@ class FavoritosService {
       _memoryCache[key] = data;
       _cacheTimestamps[key] = DateTime.now();
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -775,7 +716,6 @@ class FavoritosService {
       _memoryCache.remove(key);
       _cacheTimestamps.remove(key);
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -790,7 +730,6 @@ class FavoritosService {
         await _removeFromCache(key);
       }
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
@@ -799,18 +738,12 @@ class FavoritosService {
       _memoryCache.clear();
       _cacheTimestamps.clear();
     } catch (e) {
-      // Ignora erros de cache
     }
   }
 
-  // ========== SYNC OPERATIONS ==========
-
   Future<void> syncFavorites() async {
     try {
-      // Implementação para sincronização local - força reload do cache
       await clearAllCache();
-
-      // Log para debug
       final stats = await getStats();
       developer.log(
         'Favoritos sincronizados - Stats: $stats',
@@ -834,7 +767,6 @@ class FavoritosService {
     );
 
     try {
-      // Verifica se o usuário está autenticado via Firebase Auth (synchronous access)
       final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
       if (userId == null || userId.isEmpty) {
         developer.log(
@@ -848,8 +780,6 @@ class FavoritosService {
         '✅ FIRESTORE SYNC: Usuário autenticado - userId=$userId',
         name: 'FavoritosService',
       );
-
-      // Verifica se há dados válidos para sincronização
       if (id.isEmpty || tipo.isEmpty) {
         developer.log(
           '❌ FIRESTORE SYNC: Dados inválidos para sincronização - pulando',
@@ -862,8 +792,6 @@ class FavoritosService {
         '✅ FIRESTORE SYNC: Dados válidos para sincronização',
         name: 'FavoritosService',
       );
-
-      // Resolve dados do item para sincronização
       developer.log(
         '🔍 FIRESTORE SYNC: Resolvendo dados do item...',
         name: 'FavoritosService',
@@ -881,8 +809,6 @@ class FavoritosService {
         '✅ FIRESTORE SYNC: Dados resolvidos com sucesso: ${resolvedData.keys.toList()}',
         name: 'FavoritosService',
       );
-
-      // Cria entidade de sincronização
       final syncEntityId = 'favorite_${tipo}_$id';
       developer.log(
         '📦 FIRESTORE SYNC: Criando entidade de sincronização com ID: $syncEntityId',
@@ -904,8 +830,6 @@ class FavoritosService {
         '✅ FIRESTORE SYNC: Entidade criada - userId=${syncEntity.userId}',
         name: 'FavoritosService',
       );
-
-      // Executa operação de sincronização via ReceitaAgroSyncConfig
       developer.log(
         '🚀 FIRESTORE SYNC: Executando operação $operation via UnifiedSyncManager...',
         name: 'FavoritosService',
@@ -985,7 +909,6 @@ class FavoritosService {
         name: 'FavoritosService',
         error: e,
       );
-      // Não relança a exceção para não quebrar a operação local
     }
   }
 }

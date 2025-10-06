@@ -17,7 +17,6 @@ class PlantsErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de erro
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -32,8 +31,6 @@ class PlantsErrorWidget extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-
-            // Título
             Text(
               'Ops! Algo deu errado',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -44,8 +41,6 @@ class PlantsErrorWidget extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
-
-            // Mensagem de erro
             Text(
               error,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -55,8 +50,6 @@ class PlantsErrorWidget extends StatelessWidget {
             ),
 
             const SizedBox(height: 32),
-
-            // Botão de retry
             if (onRetry != null) ...[
               ElevatedButton.icon(
                 onPressed: onRetry,

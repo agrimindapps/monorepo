@@ -15,14 +15,11 @@ class ManageComentarioUseCase {
 
   /// Adiciona um novo comentário
   ResultFuture<String> addComentario(AddComentarioParams params) async {
-    // Validação de entrada
     if (!params.isValid) {
       return const Left(
         app_failures.ServerFailure('Dados inválidos para adicionar comentário'),
       );
     }
-
-    // Validação do conteúdo
     if (!_isValidContent(params.conteudo)) {
       return const Left(
         app_failures.ServerFailure('Comentário deve ter entre 5 e 300 caracteres'),

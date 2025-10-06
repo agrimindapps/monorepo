@@ -1,4 +1,3 @@
-// import 'package:fcalcagro/components/ad/banner.dart';
 import 'package:flutter/material.dart';
 
 import '../app-site/const/atualizacao_const.dart';
@@ -84,7 +83,6 @@ class AtualizacaoPageState extends State<AtualizacaoPage> {
           ),
         ),
       ),
-      //bottomSheet: AdBanner()
     );
   }
 }

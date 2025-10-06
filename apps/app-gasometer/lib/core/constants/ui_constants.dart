@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 /// Spacing and sizing constants
 class AppSpacing {
-  // Edge insets
   static const double xsmall = 4.0;
   static const double small = 8.0;
   static const double medium = 12.0;
@@ -14,15 +13,11 @@ class AppSpacing {
   static const double xlarge = 20.0;
   static const double xxlarge = 24.0;
   static const double xxxlarge = 32.0;
-  
-  // Common sized boxes
   static const double spacingXS = 2.0;
   static const double spacingS = 8.0;
   static const double spacingM = 16.0;
   static const double spacingL = 24.0;
   static const double spacingXL = 32.0;
-  
-  // Container and card spacing
   static const double cardPadding = 16.0;
   static const double listItemPadding = 16.0;
   static const double dialogPadding = 24.0;
@@ -30,26 +25,19 @@ class AppSpacing {
 
 /// Icon and image sizing constants
 class AppSizes {
-  // Icon sizes
   static const double iconXS = 16.0;
   static const double iconS = 20.0;
   static const double iconM = 24.0;
   static const double iconL = 32.0;
   static const double iconXL = 48.0;
   static const double iconXXL = 64.0;
-  
-  // Image dimensions
   static const double imageThumbSize = 120.0;
   static const double imagePreviewHeight = 200.0;
   static const double imagePreviewMaxHeight = 400.0;
   static const double imageDialogMaxWidth = 600.0;
-  
-  // Form and input sizes
   static const double inputHeight = 56.0;
   static const double buttonHeight = 48.0;
   static const double minButtonWidth = 120.0;
-  
-  // List and grid constraints
   static const double maxContentWidth = 400.0;
   static const double listItemHeight = 72.0;
   static const int defaultPageSize = 20;
@@ -70,8 +58,6 @@ class AppDurations {
   static const Duration normal = Duration(milliseconds: 300);
   static const Duration slow = Duration(milliseconds: 500);
   static const Duration loading = Duration(milliseconds: 800);
-  
-  // Specific animation durations
   static const Duration shimmerAnimation = Duration(milliseconds: 1200);
   static const Duration fadeTransition = Duration(milliseconds: 250);
   static const Duration slideTransition = Duration(milliseconds: 350);
@@ -122,33 +108,20 @@ class AppConstraints {
   static const double minScreenWidth = 320.0;
   static const double tabletBreakpoint = 768.0;
   static const double desktopBreakpoint = 1024.0;
-  
-  // Form constraints
   static const double maxFormWidth = 500.0;
   static const double minFieldHeight = 48.0;
-  
-  // Dialog constraints
   static const double maxDialogWidth = 600.0;
   static const double minDialogHeight = 200.0;
 }
 
 /// Network and pagination constants
 class AppDefaults {
-  // Pagination
   static const int defaultPageSize = 20;
   static const int maxPageSize = 100;
-  
-  // Timeouts
   static const Duration networkTimeout = Duration(seconds: 30);
   static const Duration cacheExpiration = Duration(hours: 24);
-  
-  // Analytics batch size
   static const int analyticsFlushSize = 50;
-  
-  // Local license default days
   static const int defaultLicenseDays = 30;
-  
-  // Signal strength range
   static const int minSignalStrength = 0;
   static const int maxSignalStrength = 100;
 }

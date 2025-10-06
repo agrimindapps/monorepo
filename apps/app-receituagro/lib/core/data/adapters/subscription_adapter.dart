@@ -52,14 +52,10 @@ abstract class SubscriptionAdapter {
     if (features.isEmpty) {
       return SubscriptionTier.free;
     }
-
-    // Se tem features avançadas, é Pro
     final proFeatures = ['advanced_search', 'export_data', 'offline_mode'];
     if (features.any((f) => proFeatures.contains(f))) {
       return SubscriptionTier.pro;
     }
-
-    // Se tem qualquer feature premium básica, é Premium
     final premiumFeatures = [
       'unlimited_favorites',
       'sync_data',

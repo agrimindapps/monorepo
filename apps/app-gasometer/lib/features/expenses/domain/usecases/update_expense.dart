@@ -19,21 +19,16 @@ class UpdateExpenseUseCase implements UseCase<ExpenseEntity?, ExpenseEntity> {
   @override
   Future<Either<Failure, ExpenseEntity?>> call(ExpenseEntity params) async {
     try {
-      // Validações
       final validation = _validateExpense(params);
       if (validation != null) {
         return Left(ValidationFailure(validation));
       }
-
-      // Verificar se despesa existe
       final existing = await _repository.getExpenseById(params.id);
       if (existing == null) {
         return const Left(
           ValidationFailure('Despesa não encontrada'),
         );
       }
-
-      // Atualizar com isDirty=true para sync
       final updatedExpense = params.copyWith(
         isDirty: true,
         updatedAt: DateTime.now(),

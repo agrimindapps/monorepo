@@ -26,21 +26,16 @@ class AddOdometerPage extends ConsumerStatefulWidget {
 
 class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
   final _formKey = GlobalKey<FormState>();
-
-  // Rate limiting and loading state
   bool _isInitialized = false;
   bool _isSubmitting = false;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
-
-  // Rate limiting constants
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
 
   @override
   void initState() {
     super.initState();
-    // Initialization will be done in didChangeDependencies
   }
   
   @override
@@ -55,14 +50,10 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
   void _initializeProviders() async {
     final authState = ref.read(authProvider);
     final userId = authState.userId;
-
-    // Initialize form data
     if (widget.odometer != null) {
-      // Edit mode
       final notifier = ref.read(odometerFormNotifierProvider.notifier);
       await notifier.initializeWithOdometer(widget.odometer!);
     } else {
-      // New record mode
       final selectedVehicleId = widget.vehicleId ?? '';
       if (selectedVehicleId.isNotEmpty) {
         final notifier = ref.read(odometerFormNotifierProvider.notifier);
@@ -74,8 +65,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
         debugPrint('Warning: No vehicle selected for new odometer record');
       }
     }
-
-    // Force rebuild after initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
@@ -87,7 +76,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
 
   @override
   void dispose() {
-    // Clean up timers to prevent memory leaks
     _debounceTimer?.cancel();
     _timeoutTimer?.cancel();
 
@@ -97,8 +85,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(odometerFormNotifierProvider);
-
-    // Generate subtitle based on vehicle information
     String subtitle = 'Gerencie seus registros de quilometragem';
     if (formState.hasVehicle) {
       final vehicle = formState.vehicle!;
@@ -180,9 +166,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       ),
     );
   }
-
-
-  // New specialized field builders
   Widget _buildOdometerField() {
     final formState = ref.watch(odometerFormNotifierProvider);
     final notifier = ref.read(odometerFormNotifierProvider.notifier);
@@ -194,7 +177,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       currentOdometer: formState.vehicle?.currentOdometer,
       lastReading: null,
       onChanged: (value) {
-        // Controller listener handles the update
       },
     );
   }
@@ -241,30 +223,17 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
       hint: OdometerConstants.fieldHints['descricao'],
       required: false,
       onChanged: (value) {
-        // Controller listener handles the update
       },
     );
   }
-  
-  // Campo de data/hora removido - agora usa CustomRangeDateTimeField
-
-  // Formatadores não são mais necessários - o OdometerField cuida disso
-
-
-  // Método de seleção de data removido - agora é tratado pelo CustomRangeDateTimeField
 
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {
-    // Prevent multiple rapid clicks
     if (_isSubmitting) {
       debugPrint('Submit already in progress, ignoring duplicate request');
       return;
     }
-
-    // Cancel any existing debounce timer
     _debounceTimer?.cancel();
-    
-    // Set debounce timer to prevent rapid consecutive submissions
     _debounceTimer = Timer(_debounceDuration, () {
       if (mounted && !_isSubmitting) {
         _submitForm();
@@ -274,32 +243,21 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
 
   /// Internal submit method with enhanced protection and timeout handling
   Future<void> _submitForm() async {
-    // Double-check form validation
     if (!_formKey.currentState!.validate()) return;
 
     final formNotifier = ref.read(odometerFormNotifierProvider.notifier);
-
-    // Validate form
     if (!formNotifier.validateForm()) {
       debugPrint('Form validation FAILED');
       return;
     }
-
-    // Prevent concurrent submissions
     if (_isSubmitting) {
       debugPrint('Submit already in progress, aborting duplicate submission');
       return;
     }
-
-    // Set submitting state
     setState(() {
       _isSubmitting = true;
     });
-
-    // TODO: Implementar odometerRiverpodProvider (provider global de odômetros)
-    // Por enquanto, apenas mostra mensagem de que a funcionalidade está pendente
     try {
-      // Setup timeout protection
       _timeoutTimer = Timer(_submitTimeout, () {
         if (mounted && _isSubmitting) {
           debugPrint('Submit timeout reached, resetting state');
@@ -312,8 +270,6 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
           );
         }
       });
-
-      // Temporary: Show message about pending implementation
       if (mounted) {
         _showErrorDialog(
           'Implementação Pendente',
@@ -329,10 +285,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage> {
         );
       }
     } finally {
-      // Clean up timeout timer
       _timeoutTimer?.cancel();
-
-      // Reset all loading states
       if (mounted) {
         setState(() {
           _isSubmitting = false;

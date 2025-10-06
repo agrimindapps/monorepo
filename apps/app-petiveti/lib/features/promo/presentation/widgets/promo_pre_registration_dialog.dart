@@ -44,7 +44,6 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
               Container(
                 padding: const EdgeInsets.fromLTRB(24, 24, 8, 16),
                 child: Row(
@@ -65,8 +64,6 @@ class _PromoPreRegistrationDialogState extends ConsumerState<PromoPreRegistratio
                   ],
                 ),
               ),
-              
-              // Content
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: state.preRegistrationSuccess

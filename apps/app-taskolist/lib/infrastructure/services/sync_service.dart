@@ -15,12 +15,8 @@ class TaskManagerSyncService {
   final TaskManagerAnalyticsService _analyticsService;
   final TaskManagerCrashlyticsService _crashlyticsService;
   final TaskRepository _taskRepository;
-
-  // Stream controllers para progresso
   final StreamController<SyncProgress> _progressController = StreamController<SyncProgress>.broadcast();
   final StreamController<String> _messageController = StreamController<String>.broadcast();
-
-  // Estado do sync
   bool _isSyncing = false;
   Timer? _autoSyncTimer;
 
@@ -31,8 +27,6 @@ class TaskManagerSyncService {
   ) {
     _initializeAutoSync();
   }
-
-  // Streams públicos
   Stream<SyncProgress> get progressStream => _progressController.stream;
   Stream<String> get messageStream => _messageController.stream;
   bool get isSyncing => _isSyncing;
@@ -42,8 +36,6 @@ class TaskManagerSyncService {
     if (kDebugMode) {
       debugPrint('🔄 TaskManagerSyncService: Auto-sync inicializado');
     }
-    
-    // Auto-sync a cada 5 minutos para usuários Premium
     _autoSyncTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       if (!_isSyncing) {
         _syncInBackground();
@@ -65,14 +57,11 @@ class TaskManagerSyncService {
     _emitMessage('Iniciando sincronização...');
 
     try {
-      // Log início do sync
       await _analyticsService.logEvent('sync_started', parameters: {
         'user_id': userId,
         'is_premium': isUserPremium,
         'sync_type': 'full',
       });
-
-      // Etapa 1: Sincronizar projetos (1.5s)
       _emitProgress(SyncProgress.inProgress(step: 1, totalSteps: 4, message: 'Sincronizando projetos...'));
       await Future<void>.delayed(const Duration(milliseconds: 1500));
       
@@ -80,8 +69,6 @@ class TaskManagerSyncService {
       if (projectsResult.isLeft()) {
         return _handleSyncError(projectsResult.fold((l) => l, (r) => throw Exception()));
       }
-
-      // Etapa 2: Sincronizar tarefas (2.0s)
       _emitProgress(SyncProgress.inProgress(step: 2, totalSteps: 4, message: 'Sincronizando tarefas...'));
       await Future<void>.delayed(const Duration(milliseconds: 2000));
       
@@ -89,8 +76,6 @@ class TaskManagerSyncService {
       if (tasksResult.isLeft()) {
         return _handleSyncError(tasksResult.fold((l) => l, (r) => throw Exception()));
       }
-
-      // Etapa 3: Sincronizar configurações (1.0s)
       _emitProgress(SyncProgress.inProgress(step: 3, totalSteps: 4, message: 'Sincronizando configurações...'));
       await Future<void>.delayed(const Duration(milliseconds: 1000));
       
@@ -98,16 +83,10 @@ class TaskManagerSyncService {
       if (settingsResult.isLeft()) {
         return _handleSyncError(settingsResult.fold((l) => l, (r) => throw Exception()));
       }
-
-      // Etapa 4: Finalização (0.5s)
       _emitProgress(SyncProgress.inProgress(step: 4, totalSteps: 4, message: 'Finalizando...'));
       await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      // Sucesso
       _emitProgress(SyncProgress.completed());
       _emitMessage('Sincronização concluída com sucesso!');
-
-      // Log sucesso
       await _analyticsService.logEvent('sync_completed', parameters: {
         'user_id': userId,
         'is_premium': isUserPremium,
@@ -131,16 +110,8 @@ class TaskManagerSyncService {
   Future<Either<Failure, void>> _syncProjects(String userId, bool isUserPremium) async {
     try {
       if (!isUserPremium) {
-        // Usuário free: apenas dados locais
         return const Right(null);
       }
-
-      // Premium: sincronizar com Firestore
-      // TODO: Implementar quando ProjectRepository estiver disponível
-      // final localProjects = await _projectRepository.getAllProjects();
-      
-      // Aqui implementaríamos a lógica real de sync com Firestore
-      // Por agora, simulamos o processo
       
       return const Right(null);
     } catch (e) {
@@ -152,16 +123,8 @@ class TaskManagerSyncService {
   Future<Either<Failure, void>> _syncTasks(String userId, bool isUserPremium) async {
     try {
       if (!isUserPremium) {
-        // Usuário free: apenas dados locais
         return const Right(null);
       }
-
-      // Premium: sincronizar com Firestore
-      // TODO: Implementar quando TaskRepository tiver getAllTasks
-      // final localTasks = await _taskRepository.getAllTasks();
-      
-      // Aqui implementaríamos a lógica real de sync com Firestore
-      // Por agora, simulamos o processo
       
       return const Right(null);
     } catch (e) {
@@ -175,9 +138,6 @@ class TaskManagerSyncService {
       if (!isUserPremium) {
         return const Right(null);
       }
-
-      // Sincronizar configurações do usuário Premium
-      // Implementação futura
       
       return const Right(null);
     } catch (e) {
@@ -188,26 +148,18 @@ class TaskManagerSyncService {
   /// Sincronização em background (silenciosa)
   Future<void> _syncInBackground() async {
     try {
-      // Verificar se usuário está logado
       final authService = getIt<IAuthRepository>();
       final currentUser = await authService.currentUser.first;
       
       if (currentUser == null) return;
-
-      // Verificar se é Premium (implementar quando RevenueCat estiver configurado)
       const isUserPremium = false; // TODO: Integrar com RevenueCat
 
       if (!isUserPremium) return;
-
-      // ignore: dead_code
       if (kDebugMode) {
         debugPrint('🔄 TaskManagerSyncService: Executando sync em background');
       }
-
-      // ignore: dead_code
       await syncAll(userId: currentUser.id, isUserPremium: isUserPremium);
     } catch (e) {
-      // Falha silenciosa em background
       if (kDebugMode) {
         debugPrint('❌ TaskManagerSyncService: Erro em background sync: $e');
       }
@@ -218,8 +170,6 @@ class TaskManagerSyncService {
   Either<Failure, void> _handleSyncError(Failure failure, [StackTrace? stackTrace]) {
     _emitProgress(SyncProgress.error(failure.message));
     _emitMessage('Erro: ${failure.message}');
-
-    // Log do erro
     _crashlyticsService.recordError(
       exception: failure,
       stackTrace: stackTrace ?? StackTrace.current,

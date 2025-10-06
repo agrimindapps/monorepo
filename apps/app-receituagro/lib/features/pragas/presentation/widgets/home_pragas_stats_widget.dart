@@ -104,7 +104,6 @@ class HomePragasStatsWidget extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Primeira row: Insetos, Doenças e Plantas
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -137,7 +136,6 @@ class HomePragasStatsWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        // Segunda row: Culturas
         _buildCategoryButton(
           context: context,
           count: '${state.totalCulturas}',
@@ -159,7 +157,6 @@ class HomePragasStatsWidget extends StatelessWidget {
 
     return Column(
       children: [
-        // Primeira row: Insetos, Doenças e Plantas
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -192,7 +189,6 @@ class HomePragasStatsWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        // Segunda row: Culturas
         _buildCategoryButton(
           context: context,
           count: '${state.totalCulturas}',
@@ -247,7 +243,6 @@ class HomePragasStatsWidget extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // Ícone de fundo decorativo
                 Positioned(
                   right: -15,
                   bottom: -15,
@@ -257,7 +252,6 @@ class HomePragasStatsWidget extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.1),
                   ),
                 ),
-                // Conteúdo principal
                 Padding(
                   padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
                   child: Column(
@@ -312,7 +306,6 @@ class HomePragasStatsWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Indicador de toque
                 Positioned(
                   bottom: 8,
                   right: 8,

@@ -55,8 +55,6 @@ class UserAvatarWidget extends ConsumerWidget {
               child: _buildAvatarContent(currentUser, avatarService, theme),
             ),
           ),
-          
-          // Edit indicator
           if (isEditable)
             Positioned(
               bottom: 0,
@@ -85,7 +83,6 @@ class UserAvatarWidget extends ConsumerWidget {
   }
 
   Widget _buildAvatarContent(gasometer_entities.UserEntity? user, AvatarService avatarService, ThemeData theme) {
-    // Priority: local avatar > remote photo > placeholder
     if (user?.hasLocalAvatar == true) {
       final bytes = avatarService.decodeAvatarBytes(user!.avatarBase64);
       if (bytes != null) {

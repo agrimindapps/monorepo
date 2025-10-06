@@ -17,66 +17,40 @@ class PerformanceService implements IPerformanceRepository {
   /// Obtém a instância singleton do PerformanceService
   factory PerformanceService() => _instance;
   PerformanceService._internal();
-
-  // Services
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   final FirebasePerformance _firebasePerformance = FirebasePerformance.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-
-  // Estado do monitoramento
   PerformanceMonitoringState _state = PerformanceMonitoringState.stopped;
   PerformanceConfig _config = const PerformanceConfig();
   PerformanceThresholds _thresholds = const PerformanceThresholds();
-
-  // FPS Tracking
   final StreamController<double> _fpsController = StreamController.broadcast();
   Timer? _fpsTimer;
   final List<double> _fpsHistory = [];
   DateTime? _lastFrameTime;
   final List<Duration> _frameTimes = [];
-
-  // Memory Tracking
   final StreamController<MemoryUsage> _memoryController = StreamController.broadcast();
   Timer? _memoryTimer;
   final List<MemoryUsage> _memoryHistory = [];
-
-  // CPU Tracking
   final StreamController<double> _cpuController = StreamController.broadcast();
   Timer? _cpuTimer;
-
-  // Startup Tracking
   DateTime? _appStartTime;
   DateTime? _firstFrameTime;
   DateTime? _appInteractiveTime;
-
-  // Traces
   final Map<String, DateTime> _activeTraces = {};
   final Map<String, Trace> _firebaseTraces = {};
   final List<TraceResult> _completedTraces = [];
-
-  // Performance History
   final List<PerformanceMetrics> _performanceHistory = [];
   Timer? _metricsCollectionTimer;
-
-  // Alertas
   final StreamController<Map<String, dynamic>> _alertsController = 
       StreamController.broadcast();
   void Function(String, Map<String, dynamic>)? _alertCallback;
-
-  // ==========================================================================
-  // CONTROLE DE MONITORAMENTO
-  // ==========================================================================
 
   @override
   Future<bool> startPerformanceTracking({PerformanceConfig? config}) async {
     try {
       _config = config ?? _config;
       _state = PerformanceMonitoringState.running;
-      
-      // Marcar início se não foi marcado
       _appStartTime ??= DateTime.now();
-
-      // Inicializar monitoramentos baseados na configuração
       if (_config.enableFpsMonitoring) {
         _startFpsTracking();
       }
@@ -88,11 +62,7 @@ class PerformanceService implements IPerformanceRepository {
       if (_config.enableCpuMonitoring) {
         _startCpuTracking();
       }
-
-      // Inicializar coleta de métricas consolidadas
       _startMetricsCollection();
-
-      // Configurar primeiro frame callback
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _firstFrameTime ??= DateTime.now();
         _onFirstFrame();
@@ -110,20 +80,14 @@ class PerformanceService implements IPerformanceRepository {
   Future<bool> stopPerformanceTracking() async {
     try {
       _state = PerformanceMonitoringState.stopped;
-      
-      // Parar todos os timers
       _fpsTimer?.cancel();
       _memoryTimer?.cancel();
       _cpuTimer?.cancel();
       _metricsCollectionTimer?.cancel();
-
-      // Fechar streams
       await _fpsController.close();
       await _memoryController.close();
       await _cpuController.close();
       await _alertsController.close();
-
-      // Parar todos os traces ativos
       for (final traceName in _activeTraces.keys.toList()) {
         await stopTrace(traceName);
       }
@@ -172,17 +136,9 @@ class PerformanceService implements IPerformanceRepository {
     _thresholds = thresholds;
   }
 
-  // ==========================================================================
-  // FPS TRACKING
-  // ==========================================================================
-
   void _startFpsTracking() {
     _fpsTimer?.cancel();
-    
-    // Usar SchedulerBinding para tracking mais preciso
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrame);
-    
-    // Timer para calcular FPS médio
     _fpsTimer = Timer.periodic(_config.fpsMonitoringInterval, (_) {
       _calculateAndEmitFps();
     });
@@ -194,8 +150,6 @@ class PerformanceService implements IPerformanceRepository {
     if (_lastFrameTime != null) {
       final frameTime = now.difference(_lastFrameTime!);
       _frameTimes.add(frameTime);
-      
-      // Manter apenas os últimos 60 frames
       if (_frameTimes.length > 60) {
         _frameTimes.removeAt(0);
       }
@@ -208,8 +162,6 @@ class PerformanceService implements IPerformanceRepository {
     if (_appStartTime != null && _firstFrameTime != null) {
       final timeToFirstFrame = _firstFrameTime!.difference(_appStartTime!);
       debugPrint('⏱️ Time to first frame: ${timeToFirstFrame.inMilliseconds}ms');
-      
-      // Registrar métrica
       recordCustomMetric(
         name: 'time_to_first_frame',
         value: timeToFirstFrame.inMilliseconds.toDouble(),
@@ -221,8 +173,6 @@ class PerformanceService implements IPerformanceRepository {
 
   void _calculateAndEmitFps() {
     if (_frameTimes.isEmpty) return;
-
-    // Calcular FPS baseado nos frame times
     final totalTime = _frameTimes.fold<Duration>(
       Duration.zero, 
       (sum, frameTime) => sum + frameTime,
@@ -241,8 +191,6 @@ class PerformanceService implements IPerformanceRepository {
       if (!_fpsController.isClosed) {
         _fpsController.add(clampedFps);
       }
-
-      // Verificar threshold
       if (clampedFps < _thresholds.minFps) {
         _emitAlert('low_fps', {
           'current_fps': clampedFps,
@@ -282,11 +230,7 @@ class PerformanceService implements IPerformanceRepository {
     final averageFps = relevantData.reduce((a, b) => a + b) / relevantData.length;
     final minFps = relevantData.reduce((a, b) => a < b ? a : b);
     final maxFps = relevantData.reduce((a, b) => a > b ? a : b);
-    
-    // Contar frame drops (FPS < 30)
     final frameDrops = relevantData.where((fps) => fps < 30).length;
-    
-    // Contar jank frames (frame time > 16.67ms = FPS < 60)
     final jankFrames = relevantData.where((fps) => fps < 60).length;
 
     return FpsMetrics(
@@ -306,10 +250,6 @@ class PerformanceService implements IPerformanceRepository {
     return currentFps >= _thresholds.minFps;
   }
 
-  // ==========================================================================
-  // MEMORY TRACKING
-  // ==========================================================================
-
   void _startMemoryTracking() {
     _memoryTimer?.cancel();
     
@@ -317,8 +257,6 @@ class PerformanceService implements IPerformanceRepository {
       try {
         final memoryUsage = await getMemoryUsage();
         _memoryHistory.add(memoryUsage);
-        
-        // Manter apenas os últimos 100 registros
         if (_memoryHistory.length > 100) {
           _memoryHistory.removeAt(0);
         }
@@ -326,8 +264,6 @@ class PerformanceService implements IPerformanceRepository {
         if (!_memoryController.isClosed) {
           _memoryController.add(memoryUsage);
         }
-
-        // Verificar threshold
         if (memoryUsage.usagePercentage > _thresholds.maxMemoryUsagePercent) {
           _emitAlert('high_memory_usage', {
             'current_usage': memoryUsage.usagePercentage,
@@ -344,7 +280,6 @@ class PerformanceService implements IPerformanceRepository {
   @override
   Future<MemoryUsage> getMemoryUsage() async {
     try {
-      // Skip platform checks on web
       if (kIsWeb) {
         return await _getGenericMemoryUsage();
       }
@@ -354,8 +289,6 @@ class PerformanceService implements IPerformanceRepository {
       } else if (Platform.isIOS) {
         return await _getIOSMemoryUsage();
       }
-      
-      // Fallback para outras plataformas
       return await _getGenericMemoryUsage();
     } catch (e) {
       debugPrint('❌ Error getting memory usage: $e');
@@ -369,7 +302,6 @@ class PerformanceService implements IPerformanceRepository {
 
   Future<MemoryUsage> _getAndroidMemoryUsage() async {
     try {
-      // Usar ActivityManager para Android
       const platform = MethodChannel('performance_service');
       final result = await platform.invokeMethod('getMemoryInfo');
       
@@ -381,7 +313,6 @@ class PerformanceService implements IPerformanceRepository {
         nativeHeapSize: result['nativeHeapSize'] as int?,
       );
     } catch (e) {
-      // Fallback usando /proc/meminfo
       return await _getLinuxMemoryUsage();
     }
   }
@@ -435,7 +366,6 @@ class PerformanceService implements IPerformanceRepository {
   }
 
   Future<MemoryUsage> _getGenericMemoryUsage() async {
-    // Para web e desktop, usar estimativas básicas
     return const MemoryUsage(
       usedMemory: 100 * 1024 * 1024,     // 100MB estimado
       totalMemory: 4 * 1024 * 1024 * 1024, // 4GB estimado
@@ -460,10 +390,7 @@ class PerformanceService implements IPerformanceRepository {
 
   @override
   Future<void> forceGarbageCollection() async {
-    // Apenas disponível em debug mode
     if (kDebugMode) {
-      // No Flutter, não há API direta para GC
-      // Podemos tentar forçar através de algumas operações
       try {
         final largeList = List.generate(10000, (i) => i);
         largeList.clear();
@@ -472,10 +399,6 @@ class PerformanceService implements IPerformanceRepository {
       }
     }
   }
-
-  // ==========================================================================
-  // CPU TRACKING
-  // ==========================================================================
 
   void _startCpuTracking() {
     _cpuTimer?.cancel();
@@ -487,8 +410,6 @@ class PerformanceService implements IPerformanceRepository {
         if (!_cpuController.isClosed) {
           _cpuController.add(cpuUsage);
         }
-
-        // Verificar threshold
         if (cpuUsage > _thresholds.maxCpuUsage) {
           _emitAlert('high_cpu_usage', {
             'current_usage': cpuUsage,
@@ -504,7 +425,6 @@ class PerformanceService implements IPerformanceRepository {
   @override
   Future<double> getCpuUsage() async {
     try {
-      // Skip platform checks on web
       if (kIsWeb) {
         return 0.0;
       }
@@ -514,8 +434,6 @@ class PerformanceService implements IPerformanceRepository {
       } else if (Platform.isIOS || Platform.isMacOS) {
         return await _getDarwinCpuUsage();
       }
-      
-      // Fallback
       return 0.0;
     } catch (e) {
       debugPrint('❌ Error getting CPU usage: $e');
@@ -525,7 +443,6 @@ class PerformanceService implements IPerformanceRepository {
 
   Future<double> _getLinuxCpuUsage() async {
     try {
-      // Implementação simplificada usando /proc/stat
       final result = await Process.run('cat', ['/proc/stat']);
       final lines = result.stdout.toString().split('\n');
       
@@ -568,10 +485,6 @@ class PerformanceService implements IPerformanceRepository {
     return cpuUsage <= _thresholds.maxCpuUsage;
   }
 
-  // ==========================================================================
-  // STARTUP METRICS
-  // ==========================================================================
-
   @override
   Future<void> markAppStarted() async {
     _appStartTime = DateTime.now();
@@ -605,16 +518,10 @@ class PerformanceService implements IPerformanceRepository {
     );
   }
 
-  // ==========================================================================
-  // TRACES CUSTOMIZADOS
-  // ==========================================================================
-
   @override
   Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {
     try {
       _activeTraces[traceName] = DateTime.now();
-      
-      // Iniciar trace no Firebase Performance
       if (_config.enableFirebaseIntegration) {
         final trace = _firebasePerformance.newTrace(traceName);
         
@@ -640,8 +547,6 @@ class PerformanceService implements IPerformanceRepository {
       
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
-      
-      // Parar trace no Firebase
       final firebaseTrace = _firebaseTraces.remove(traceName);
       if (firebaseTrace != null) {
         if (metrics != null) {
@@ -693,10 +598,6 @@ class PerformanceService implements IPerformanceRepository {
   @override
   List<String> getActiveTraces() => _activeTraces.keys.toList();
 
-  // ==========================================================================
-  // MÉTRICAS CUSTOMIZADAS
-  // ==========================================================================
-
   @override
   Future<void> recordCustomMetric({
     required String name,
@@ -706,7 +607,6 @@ class PerformanceService implements IPerformanceRepository {
     Map<String, String>? tags,
   }) async {
     try {
-      // Enviar para Firebase Analytics
       await _analytics.logEvent(
         name: 'custom_metric',
         parameters: {
@@ -753,10 +653,6 @@ class PerformanceService implements IPerformanceRepository {
     );
   }
 
-  // ==========================================================================
-  // MÉTRICAS CONSOLIDADAS
-  // ==========================================================================
-
   void _startMetricsCollection() {
     _metricsCollectionTimer?.cancel();
     
@@ -770,8 +666,6 @@ class PerformanceService implements IPerformanceRepository {
     try {
       final metrics = await getCurrentMetrics();
       _performanceHistory.add(metrics);
-      
-      // Manter apenas as últimas 100 entradas
       if (_performanceHistory.length > 100) {
         _performanceHistory.removeAt(0);
       }
@@ -819,10 +713,6 @@ class PerformanceService implements IPerformanceRepository {
     return filtered;
   }
 
-  // ==========================================================================
-  // ALERTAS
-  // ==========================================================================
-
   void _emitAlert(String alertType, Map<String, dynamic> data) {
     final alert = {
       'type': alertType,
@@ -869,16 +759,11 @@ class PerformanceService implements IPerformanceRepository {
     return issues;
   }
 
-  // ==========================================================================
-  // UTILITÁRIOS E OUTROS MÉTODOS
-  // ==========================================================================
-
   @override
   Future<Map<String, dynamic>> getPerformanceReport({
     DateTime? startTime,
     DateTime? endTime,
   }) async {
-    // Implementação básica do relatório
     final metrics = await getCurrentMetrics();
     final fpsMetrics = await getFpsMetrics();
     
@@ -910,7 +795,6 @@ class PerformanceService implements IPerformanceRepository {
     DateTime? startTime,
     DateTime? endTime,
   }) async {
-    // Implementação básica de exportação
     final data = await getPerformanceReport(
       startTime: startTime,
       endTime: endTime,
@@ -926,7 +810,6 @@ class PerformanceService implements IPerformanceRepository {
   @override
   Future<bool> syncWithFirebase() async {
     try {
-      // Sincronização já acontece em tempo real através dos traces
       return true;
     } catch (e) {
       debugPrint('❌ Error syncing with Firebase: $e');

@@ -27,7 +27,6 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   @override
   void initState() {
     super.initState();
-    // Carrega dados iniciais
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(livestockProviderProvider).loadBovines();
     });
@@ -99,14 +98,11 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
       ),
       body: Column(
         children: [
-          // Barra de busca
           LivestockSearchWidget(
             controller: _searchController,
             onChanged: provider.updateSearchQuery,
             hintText: 'Buscar bovinos...',
           ),
-
-          // Filtros (se visível)
           if (_showFilters)
             LivestockFilterWidget(
               selectedBreed: provider.selectedBreed,
@@ -121,8 +117,6 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
               onBreedingSystemChanged: provider.updateBreedingSystemFilter,
               onClearFilters: provider.clearFilters,
             ),
-
-          // Lista de bovinos
           Expanded(child: _buildBovinesList(context, provider)),
         ],
       ),
@@ -251,7 +245,6 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   }
 
   void _handleMenuAction(String action) {
-    // final provider = context.read<LivestockProvider>();
 
     switch (action) {
       case 'sync':

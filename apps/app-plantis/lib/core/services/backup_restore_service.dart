@@ -12,8 +12,6 @@ import 'backup_audit_service.dart';
 import 'backup_data_transformer_service.dart';
 import 'backup_validation_service.dart';
 import 'secure_storage_service.dart';
-
-// Importar as definições que faltam do service original
 class CriticalFailure extends Failure {
   const CriticalFailure(String message) : super(message: message);
 
@@ -145,7 +143,6 @@ class BackupRestoreService {
     bool needsRollback = false;
 
     try {
-      // 1. VALIDAÇÃO DE INTEGRIDADE
       debugPrint('🔍 Validando integridade do backup...');
       final validationResult = await _validationService.validateBackupIntegrity(
         backup,
@@ -167,8 +164,6 @@ class BackupRestoreService {
           (_) => throw StateError('Unexpected success'),
         );
       }
-
-      // 2. CRIAR BACKUP DE SEGURANÇA
       debugPrint('💾 Criando backup de segurança antes do restore...');
       preRestoreBackup = await _createPreRestoreBackup(userId);
 
@@ -185,17 +180,12 @@ class BackupRestoreService {
         );
         return const Left(UnknownFailure(error));
       }
-
-      // 3. EXECUTAR RESTORE COM TRANSAÇÕES ATÔMICAS
       debugPrint('📦 Iniciando restore atômico...');
       needsRollback = true;
 
       final restoredCounts = <String, int>{};
       int totalRestored = 0;
-
-      // Executar restore atômico
       await _executeAtomicRestore(() async {
-        // Restaura plantas
         if (options.restorePlants && backup.data.plants.isNotEmpty) {
           debugPrint('🌱 Restaurando ${backup.data.plants.length} plantas...');
           final plantsRestored = await _restorePlantsWithValidation(
@@ -206,8 +196,6 @@ class BackupRestoreService {
           restoredCounts['plants'] = plantsRestored;
           totalRestored += plantsRestored;
         }
-
-        // Restaura espaços
         if (options.restoreSpaces && backup.data.spaces.isNotEmpty) {
           debugPrint('🏠 Restaurando ${backup.data.spaces.length} espaços...');
           final spacesRestored = await _restoreSpacesWithValidation(
@@ -218,8 +206,6 @@ class BackupRestoreService {
           restoredCounts['spaces'] = spacesRestored;
           totalRestored += spacesRestored;
         }
-
-        // Restaura tarefas
         if (options.restoreTasks && backup.data.tasks.isNotEmpty) {
           debugPrint('✅ Restaurando ${backup.data.tasks.length} tarefas...');
           final tasksRestored = await _restoreTasksWithValidation(
@@ -230,8 +216,6 @@ class BackupRestoreService {
           restoredCounts['tasks'] = tasksRestored;
           totalRestored += tasksRestored;
         }
-
-        // Restaura configurações
         if (options.restoreSettings) {
           debugPrint('⚙️ Restaurando configurações...');
           await _restoreUserSettingsWithValidation(backup.data.settings);
@@ -242,8 +226,6 @@ class BackupRestoreService {
       });
 
       needsRollback = false;
-
-      // 4. LOG DE SUCESSO
       await _auditService.logBackupRestore(
         userId: userId,
         backupId: 'backup_${backup.timestamp.millisecondsSinceEpoch}',
@@ -266,15 +248,11 @@ class BackupRestoreService {
     } catch (e, stackTrace) {
       debugPrint('❌ Erro durante restore: $e');
       debugPrint('Stack trace: $stackTrace');
-
-      // 5. EXECUTAR ROLLBACK EM CASO DE FALHA
       if (needsRollback && preRestoreBackup != null) {
         debugPrint('🔄 Executando rollback...');
         try {
           await _executeRollback(preRestoreBackup, userId);
           debugPrint('✅ Rollback executado com sucesso');
-
-          // Log do rollback
           await _auditService.logRestoreRollback(
             userId: userId,
             backupId: 'backup_${backup.timestamp.millisecondsSinceEpoch}',
@@ -306,8 +284,6 @@ class BackupRestoreService {
           );
         }
       }
-
-      // Log de erro sem rollback
       await _auditService.logBackupRestore(
         userId: userId,
         backupId: 'backup_${backup.timestamp.millisecondsSinceEpoch}',
@@ -321,8 +297,6 @@ class BackupRestoreService {
       return Left(UnknownFailure('Erro ao restaurar backup: ${e.toString()}'));
     }
   }
-
-  // ===== RESTORE DE PLANTAS =====
 
   /// Restaura plantas com validação individual
   Future<int> _restorePlantsWithValidation(
@@ -344,8 +318,6 @@ class BackupRestoreService {
         debugPrint('❌ Falha ao restaurar planta: $e');
       }
     }
-
-    // Se todas falharam, propagar erro
     if (count == 0 && plantsData.isNotEmpty) {
       throw RestoreException(
         'Todas as plantas falharam na restauração: ${errors.join('; ')}',
@@ -366,8 +338,6 @@ class BackupRestoreService {
         plantData,
         userId,
       );
-
-      // Verificar se planta já existe
       final existingPlantsResult = await _plantsRepository.getPlants();
       final existingPlants = existingPlantsResult.getOrElse(() => []);
 
@@ -377,7 +347,6 @@ class BackupRestoreService {
       );
 
       if (existingPlant != null) {
-        // Planta existe - aplicar estratégia de merge
         switch (strategy) {
           case RestoreMergeStrategy.replace:
             await _plantsRepository.updatePlant(plantToRestore);
@@ -394,7 +363,6 @@ class BackupRestoreService {
             return;
         }
       } else {
-        // Planta não existe - criar nova
         await _plantsRepository.addPlant(plantToRestore);
       }
 
@@ -403,8 +371,6 @@ class BackupRestoreService {
       throw RestoreException('Falha ao restaurar planta: ${e.toString()}');
     }
   }
-
-  // ===== RESTORE DE ESPAÇOS =====
 
   Future<int> _restoreSpacesWithValidation(
     List<Map<String, dynamic>> spacesData,
@@ -481,8 +447,6 @@ class BackupRestoreService {
     }
   }
 
-  // ===== RESTORE DE TAREFAS =====
-
   Future<int> _restoreTasksWithValidation(
     List<Map<String, dynamic>> tasksData,
     RestoreMergeStrategy strategy,
@@ -558,8 +522,6 @@ class BackupRestoreService {
     }
   }
 
-  // ===== RESTORE DE CONFIGURAÇÕES =====
-
   Future<void> _restoreUserSettingsWithValidation(
     Map<String, dynamic> settings,
   ) async {
@@ -593,8 +555,6 @@ class BackupRestoreService {
       throw RestoreException('Erro ao restaurar preferências: ${e.toString()}');
     }
   }
-
-  // ===== UTILITÁRIOS DE BACKUP E ROLLBACK =====
 
   /// Cria backup de segurança antes do restore
   Future<Map<String, dynamic>?> _createPreRestoreBackup(String userId) async {
@@ -652,8 +612,6 @@ class BackupRestoreService {
   ) async {
     try {
       debugPrint('🔄 Iniciando rollback para usuário: $userId');
-
-      // Restaurar plantas
       final plantsData = preRestoreBackup['plants'] as List<dynamic>? ?? [];
       for (final plantData in plantsData) {
         await _restoreSinglePlant(
@@ -662,8 +620,6 @@ class BackupRestoreService {
           RestoreMergeStrategy.replace,
         );
       }
-
-      // Restaurar espaços
       final spacesData = preRestoreBackup['spaces'] as List<dynamic>? ?? [];
       for (final spaceData in spacesData) {
         await _restoreSingleSpace(
@@ -672,8 +628,6 @@ class BackupRestoreService {
           RestoreMergeStrategy.replace,
         );
       }
-
-      // Restaurar tarefas
       final tasksData = preRestoreBackup['tasks'] as List<dynamic>? ?? [];
       for (final taskData in tasksData) {
         await _restoreSingleTask(
@@ -682,8 +636,6 @@ class BackupRestoreService {
           RestoreMergeStrategy.replace,
         );
       }
-
-      // Restaurar configurações
       final backupData = preRestoreBackup;
       await _restoreUserSettingsWithValidation(
         backupData['settings'] as Map<String, dynamic>,
@@ -700,12 +652,10 @@ class BackupRestoreService {
   }
 
   Future<Map<String, dynamic>> _loadUserSettings() async {
-    // Implementação simplificada - na prática carregaria do SharedPreferences ou similar
     return {};
   }
 
   Future<Map<String, dynamic>> _loadUserPreferences() async {
-    // Implementação simplificada - na prática carregaria do SecureStorage
     return {};
   }
 }

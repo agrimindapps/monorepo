@@ -81,14 +81,9 @@ class AccessiblePlantCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Imagem da planta ou placeholder
                 _buildPlantImage(context),
                 const SizedBox(width: 16),
-
-                // Informações da planta
                 Expanded(child: _buildPlantInfo(context)),
-
-                // Indicador de status
                 _buildStatusIndicator(context),
               ],
             ),
@@ -536,8 +531,6 @@ class AccessibleSwitch extends StatelessWidget {
           onChanged: (newValue) {
             AccessibilityTokens.performHapticFeedback('selection');
             onChanged(newValue);
-
-            // Anunciar mudança para screen readers
             final message = newValue ? '$label ativado' : '$label desativado';
             SemanticsService.announce(message, TextDirection.ltr);
           },

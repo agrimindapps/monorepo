@@ -198,7 +198,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       icon: Icons.build_outlined,
       actionLabel: 'Adicionar manutenção',
       onAction: () {
-        // TODO: Implementar navegação para adicionar manutenção
       },
     );
   }
@@ -206,7 +205,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        // TODO: Implementar navegação para adicionar manutenção
       },
       tooltip: 'Adicionar manutenção',
       child: const Icon(Icons.add),

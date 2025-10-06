@@ -31,14 +31,11 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // 1. Limpar todas as HiveBoxes do ReceitaAgro
       final boxResults = await _clearAllHiveBoxes();
       results['clearedBoxes'] = boxResults['clearedBoxes'];
       if (boxResults['errors'] != null) {
         results['errors'].addAll(boxResults['errors']);
       }
-
-      // 2. Limpar SharedPreferences específicas do app
       final prefsResults = await _clearAppSharedPreferences();
       results['clearedPreferences'] = prefsResults['clearedKeys'];
       if (prefsResults['errors'] != null) {
@@ -86,8 +83,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
 
       int totalRecords = 0;
       final boxStats = <String, Map<String, dynamic>>{};
-
-      // Estatísticas das boxes
       for (final entry in HiveAdapterRegistry.boxNames.entries) {
         final boxName = entry.value;
         try {
@@ -114,8 +109,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       stats['boxStats'] = boxStats;
       stats['totalBoxes'] = HiveAdapterRegistry.boxNames.length;
       stats['totalRecords'] = totalRecords;
-
-      // Estatísticas SharedPreferences
       try {
         final prefs = await SharedPreferences.getInstance();
         final allKeys = prefs.getKeys();
@@ -244,7 +237,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      // Verificar se todas as boxes estão vazias
       for (final boxName in HiveAdapterRegistry.boxNames.values) {
         if (Hive.isBoxOpen(boxName)) {
           final box = Hive.box<dynamic>(boxName);
@@ -256,8 +248,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
           }
         }
       }
-
-      // Verificar SharedPreferences específicas do app
       final prefs = await SharedPreferences.getInstance();
       final allKeys = prefs.getKeys();
 
@@ -349,8 +339,6 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     try {
       final prefs = await SharedPreferences.getInstance();
       final allKeys = prefs.getKeys();
-
-      // Chaves específicas do app que devem ser limpas
       final appKeys = allKeys.where((key) =>
         key.startsWith('receituagro_') ||
         key.startsWith('agro_') ||

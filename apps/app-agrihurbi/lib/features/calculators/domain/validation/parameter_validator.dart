@@ -24,38 +24,27 @@ class ParameterValidator {
     CalculatorParameter parameter,
     dynamic value,
   ) {
-    // Validação de obrigatoriedade
     if (parameter.required && _isEmpty(value)) {
       return ValidationResult.error(
         parameter.id,
         '${parameter.name} é obrigatório',
       );
     }
-
-    // Se não é obrigatório e está vazio, é válido
     if (!parameter.required && _isEmpty(value)) {
       return ValidationResult.success(parameter.id);
     }
-
-    // Validação por tipo
     final typeValidation = _validateByType(parameter, value);
     if (!typeValidation.isValid) {
       return typeValidation;
     }
-
-    // Validação de range (min/max)
     final rangeValidation = _validateRange(parameter, value);
     if (!rangeValidation.isValid) {
       return rangeValidation;
     }
-
-    // Validação de opções (para selection)
     final optionsValidation = _validateOptions(parameter, value);
     if (!optionsValidation.isValid) {
       return optionsValidation;
     }
-
-    // Validações customizadas
     final customValidation = _validateCustomRules(parameter, value);
     if (!customValidation.isValid) {
       return customValidation;
@@ -191,7 +180,6 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (value is num) {
-      // Validação adicional para área, volume, peso (devem ser positivos)
       if (parameter.type == ParameterType.area ||
           parameter.type == ParameterType.volume ||
           parameter.type == ParameterType.weight) {
@@ -213,8 +201,6 @@ class ParameterValidator {
           _typeErrorMessages[ParameterType.decimal]!,
         );
       }
-      
-      // Validação adicional para tipos específicos
       if (parameter.type == ParameterType.area ||
           parameter.type == ParameterType.volume ||
           parameter.type == ParameterType.weight) {
@@ -359,7 +345,6 @@ class ParameterValidator {
     CalculatorParameter parameter,
     dynamic value,
   ) {
-    // Validações específicas por contexto
     if (parameter.id.contains('ph') && value is num) {
       if (value < 0 || value > 14) {
         return ValidationResult.error(

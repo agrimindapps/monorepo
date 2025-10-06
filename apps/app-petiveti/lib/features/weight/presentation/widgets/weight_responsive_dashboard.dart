@@ -27,8 +27,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
     if (weights.isEmpty) {
       return _buildEmptyDashboard(context);
     }
-
-    // Adaptive layout based on screen size and orientation
     if (isTablet && isLandscape) {
       return _buildTabletLandscapeLayout(context, weightsState, weights);
     } else if (isTablet) {
@@ -71,8 +69,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
       ),
     );
   }
-
-  // Phone Portrait Layout (default mobile layout)
   Widget _buildPhonePortraitLayout(
     BuildContext context,
     WeightsState state,
@@ -90,8 +86,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
       ),
     );
   }
-
-  // Phone Landscape Layout (wider but shorter)
   Widget _buildPhoneLandscapeLayout(
     BuildContext context,
     WeightsState state,
@@ -125,8 +119,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
       ),
     );
   }
-
-  // Tablet Portrait Layout (more space for detailed views)
   Widget _buildTabletPortraitLayout(
     BuildContext context,
     WeightsState state,
@@ -169,8 +161,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
       ),
     );
   }
-
-  // Tablet Landscape Layout (maximum space utilization)
   Widget _buildTabletLandscapeLayout(
     BuildContext context,
     WeightsState state,
@@ -186,7 +176,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Left Column - Charts and main data
                 Expanded(
                   flex: 2,
                   child: Column(
@@ -204,8 +193,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
                 ),
                 
                 const SizedBox(width: 16),
-                
-                // Right Column - Recent records and goals
                 Expanded(
                   child: Column(
                     children: [
@@ -557,7 +544,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
                   const SizedBox(height: 8),
                   FilledButton.tonalIcon(
                     onPressed: () {
-                      // Navigate to goals setup
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Definir Meta'),
@@ -588,8 +574,6 @@ class WeightResponsiveDashboard extends ConsumerWidget {
         color: change > 0 ? Colors.blue : Colors.red,
       ));
     }
-    
-    // Calculate weekly trend if we have enough data
     if (weights.length >= 3) {
       final weekAgo = DateTime.now().subtract(const Duration(days: 7));
       final recentWeights = weights.where((w) => w.date.isAfter(weekAgo)).toList();

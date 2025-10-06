@@ -38,7 +38,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
               return Column(
                 children: [
-                  // Header seguindo mockup
                   PlantisHeader(
                     title: 'Configurações',
                     subtitle: 'Personalize sua experiência',
@@ -89,33 +88,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       ),
                     ],
                   ),
-
-                  // ListView com seções organizadas
                   Expanded(
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
                       children: [
-                        // Seção do Usuário
                         _buildUserSection(context, appTheme, user, authData),
                         const SizedBox(height: 8),
-
-                        // Seção Premium
                         _buildPremiumSectionCard(context, appTheme),
                         const SizedBox(height: 8),
-
-                        // Seção de Configurações
                         _buildConfigSection(context, appTheme, settingsState),
                         const SizedBox(height: 8),
-
-                        // Seção de Suporte
                         _buildSupportSection(context, appTheme),
                         const SizedBox(height: 8),
-
-                        // Seção Sobre (com privacidade e termos)
                         _buildAboutSection(context, appTheme),
                         const SizedBox(height: 8),
-
-                        // Seção de Desenvolvimento (debug only)
                         if (kDebugMode) ...[
                           _buildDevelopmentSection(context, appTheme),
                           const SizedBox(height: 8),
@@ -397,7 +383,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             onTap: () {
               Navigator.push(
                 context,
-                // ignore: inference_failure_on_instance_creation
                 MaterialPageRoute(
                   builder: (context) => const DataInspectorPage(),
                 ),
@@ -586,8 +571,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       ref
                           .read(settingsNotifierProvider.notifier)
                           .toggleTaskReminders(value);
-
-                      // Mostrar feedback ao usuário
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -649,8 +632,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Star rating visual
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(

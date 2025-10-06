@@ -90,10 +90,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     if (kDebugMode) {
       debugPrint('🌐 DeviceRemote: Getting device $deviceUuid from Firestore');
     }
-
-    // O FirebaseDeviceService não tem método específico para buscar por UUID
-    // Vamos buscar todos os dispositivos e filtrar localmente
-    // TODO: Implementar método específico no FirebaseDeviceService se necessário
     return const Right(null);
   }
 
@@ -152,9 +148,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     if (kDebugMode) {
       debugPrint('🌐 DeviceRemote: Revoking all other devices via Firebase');
     }
-
-    // O FirebaseDeviceService não tem método para revogar todos exceto o atual
-    // Vamos implementar obtendo todos os dispositivos e revogando individualmente
     final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(
       userId,
     );
@@ -167,8 +160,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
               userId: userId,
               deviceUuid: device.uuid,
             );
-
-            // Se alguma revogação falhar, retornamos o erro
             if (revokeResult.isLeft()) {
               return revokeResult.fold(
                 (failure) => Left(failure),
@@ -262,9 +253,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     if (kDebugMode) {
       debugPrint('🌐 DeviceRemote: Getting device statistics for $userId');
     }
-
-    // O FirebaseDeviceService não tem método de estatísticas específico
-    // Vamos obter os dispositivos e calcular as estatísticas localmente
     final devicesResult = await _firebaseDeviceService.getDevicesFromFirestore(
       userId,
     );
@@ -294,8 +282,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     if (kDebugMode) {
       debugPrint('🌐 DeviceRemote: Syncing devices for $userId');
     }
-
-    // Para sincronização, simplesmente retornamos os dispositivos do Firestore
     return getUserDevices(userId);
   }
 

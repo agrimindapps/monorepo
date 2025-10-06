@@ -70,14 +70,11 @@ class CalculatorListWidget extends StatelessWidget {
       controller: scrollController,
       padding: const EdgeInsets.all(8.0),
       itemCount: calculators.length,
-      // Otimizações de performance críticas:
       addAutomaticKeepAlives: false, // Reduce memory usage
       addRepaintBoundaries: false, // Reduce painting overhead
       cacheExtent: 500.0, // Cache 500px de conteúdo off-screen
       itemBuilder: (context, index) {
         final calculator = calculators[index];
-
-        // RepaintBoundary isola repaints do widget individual
         return RepaintBoundary(
           child: Consumer(
             builder: (context, ref, child) {
@@ -95,7 +92,6 @@ class CalculatorListWidget extends StatelessWidget {
         );
       },
       separatorBuilder: (context, index) {
-        // Separator otimizado e leve
         return const SizedBox(height: 8.0);
       },
     );

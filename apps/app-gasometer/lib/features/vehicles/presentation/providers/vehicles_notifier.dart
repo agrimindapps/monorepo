@@ -27,20 +27,13 @@ class VehiclesNotifier extends _$VehiclesNotifier {
 
   @override
   Future<List<VehicleEntity>> build() async {
-    // Limpar subscription anterior se existir
     await _vehicleSubscription?.cancel();
-
-    // Verificar autenticação
     final currentUser = ref.read(currentUserProvider);
     if (currentUser == null) {
       _logInfo('User not authenticated, returning empty list');
       return [];
     }
-
-    // Iniciar watch stream para atualizações em tempo real
     _startWatchingVehicles();
-
-    // Carregar veículos iniciais
     _logInfo('Loading initial vehicles for user: ${currentUser.id}');
 
     return await _executeOperation(() async {
@@ -70,11 +63,9 @@ class VehiclesNotifier extends _$VehiclesNotifier {
           result.fold(
             (failure) {
               _logWarning('Stream error: $failure');
-              // Não atualizar estado em caso de erro de stream para evitar quebrar UI
             },
             (vehicles) {
               _logInfo('Stream update: ${vehicles.length} vehicles');
-              // Atualizar estado apenas se dados mudaram
               final currentData = state.when(
                 data: (data) => data,
                 loading: () => null,
@@ -113,8 +104,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
   /// Adiciona novo veículo
   Future<VehicleEntity> addVehicle(VehicleEntity vehicle) async {
     _logInfo('Adding vehicle: ${vehicle.name}');
-
-    // Executar operação e obter veículo adicionado
     VehicleEntity? addedVehicle;
 
     await _executeOperation(() async {
@@ -131,8 +120,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
         (added) {
           _logInfo('Vehicle added successfully: ${added.id}');
           addedVehicle = added;
-
-          // Atualizar lista local imediatamente
           final currentList = state.when(
             data: (data) => data,
             loading: () => <VehicleEntity>[],
@@ -151,8 +138,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
   /// Atualiza veículo existente
   Future<VehicleEntity> updateVehicle(VehicleEntity vehicle) async {
     _logInfo('Updating vehicle: ${vehicle.id}');
-
-    // Executar operação e obter veículo atualizado
     VehicleEntity? updatedVehicle;
 
     await _executeOperation(() async {
@@ -169,8 +154,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
         (updated) {
           _logInfo('Vehicle updated successfully: ${updated.id}');
           updatedVehicle = updated;
-
-          // Atualizar lista local imediatamente
           final currentList = state.when(
             data: (data) => data,
             loading: () => <VehicleEntity>[],
@@ -208,8 +191,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
         },
         (_) {
           _logInfo('Vehicle deleted successfully: $vehicleId');
-
-          // Atualizar lista local imediatamente
           final currentList = state.when(
             data: (data) => data,
             loading: () => <VehicleEntity>[],
@@ -366,10 +347,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     }
   }
 
-  // ============================================================================
-  // HELPER METHODS
-  // ============================================================================
-
   void _logInfo(String message) {
     if (kDebugMode) {
       print('ℹ️ [$notifierName] $message');
@@ -397,10 +374,6 @@ class VehiclesNotifier extends _$VehiclesNotifier {
     }
   }
 }
-
-// ============================================================================
-// PROVIDERS DERIVADOS
-// ============================================================================
 
 /// Provider para veículo selecionado (ID)
 @riverpod

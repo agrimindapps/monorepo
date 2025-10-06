@@ -56,7 +56,6 @@ class AppointmentRepositoryLocalOnlyImpl implements AppointmentRepository {
   @override
   Future<Either<Failure, Appointment>> addAppointment(Appointment appointment) async {
     try {
-      // Create new appointment with generated ID if not provided
       final newAppointment = appointment.id.isEmpty
           ? appointment.copyWith(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -108,8 +107,6 @@ class AppointmentRepositoryLocalOnlyImpl implements AppointmentRepository {
   ) async {
     try {
       final appointmentModels = await localDataSource.getAppointments(animalId);
-      
-      // Filter by date range
       final filteredModels = appointmentModels.where((appointment) {
         final appointmentDate = DateTime.fromMillisecondsSinceEpoch(appointment.dateTimestamp);
         return appointmentDate.isAfter(startDate.subtract(const Duration(days: 1))) &&

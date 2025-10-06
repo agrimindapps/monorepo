@@ -185,7 +185,6 @@ class CalculatorLookupTables {
 
   /// Busca multiplicador metabólico por idade
   static double getAgeMetabolicMultiplier(int ageInMonths) {
-    // Encontra a faixa etária mais próxima
     final sortedAges = ageMetabolicMultipliers.keys.toList()..sort();
 
     for (final age in sortedAges) {

@@ -39,40 +39,17 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     }
 
     try {
-      // 1. Calcular RER (Resting Energy Requirement)
       final rer = _calculateRestingEnergyRequirement(input);
-      
-      // 2. Calcular fatores multiplicadores
       final factors = _calculateMultipliers(input);
-      
-      // 3. Calcular DER (Daily Energy Requirement)
       final der = _calculateDailyEnergyRequirement(rer, factors, input);
-      
-      // 4. Calcular necessidades de macronutrientes
       final macronutrients = _calculateMacronutrients(der, input);
-      
-      // 5. Calcular necessidade hídrica
       final waterNeed = _calculateWaterRequirement(input);
-      
-      // 6. Gerar recomendações de alimentação
       final feedingRec = _generateFeedingRecommendations(der, input);
-      
-      // 7. Gerar conselhos de manejo de peso
       final weightAdvice = _generateWeightManagementAdvice(input);
-      
-      // 8. Gerar ajustes nutricionais
       final nutritionalAdj = _generateNutritionalAdjustments(input);
-      
-      // 9. Gerar considerações especiais
       final specialConsiderations = _generateSpecialConsiderations(input);
-      
-      // 10. Compilar detalhes do cálculo
       final calculationDetails = _generateCalculationDetails(rer, factors, input);
-      
-      // 11. Criar itens de resultado
       final results = _buildResultItems(rer, der, macronutrients, waterNeed, input);
-      
-      // 12. Gerar recomendações e alertas
       final recommendations = _generateRecommendations(input, der, rer);
 
       return CalorieOutput(
@@ -107,8 +84,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
   @override
   List<String> validateInput(CalorieInput input) {
     final errors = <String>[];
-
-    // Validar peso
     if (input.weight <= 0) {
       errors.add('Peso deve ser maior que zero');
     }
@@ -118,8 +93,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     if (input.weight < 0.1) {
       errors.add('Peso muito baixo (mínimo 0.1kg)');
     }
-
-    // Validar peso ideal se fornecido
     if (input.idealWeight != null) {
       if (input.idealWeight! <= 0) {
         errors.add('Peso ideal deve ser maior que zero');
@@ -128,16 +101,12 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
         errors.add('Peso ideal muito alto (máximo 150kg)');
       }
     }
-
-    // Validar idade
     if (input.age < 0) {
       errors.add('Idade não pode ser negativa');
     }
     if (input.age > 300) { // 25 anos
       errors.add('Idade muito alta (máximo 300 meses)');
     }
-
-    // Validar número de filhotes para lactação
     if (input.isLactating && (input.numberOfOffspring == null || input.numberOfOffspring! <= 0)) {
       errors.add('Número de filhotes deve ser informado para animais em lactação');
     }
@@ -145,13 +114,9 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     if (input.numberOfOffspring != null && input.numberOfOffspring! > 20) {
       errors.add('Número de filhotes muito alto (máximo 20)');
     }
-
-    // Validar combinações lógicas
     if (input.isPregnant && input.isLactating) {
       errors.add('Animal não pode estar gestante e lactando simultaneamente');
     }
-
-    // Validar idade vs estado fisiológico
     if (input.isYoung && input.age > 12) {
       errors.add('Estado de crescimento inconsistente com idade acima de 12 meses');
     }
@@ -162,9 +127,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
   /// Calcula RER usando fórmulas veterinárias padrão
   double _calculateRestingEnergyRequirement(CalorieInput input) {
     final weight = input.weight;
-    
-    // Fórmula para animais > 2kg: RER = 70 × peso^0.75
-    // Fórmula para animais ≤ 2kg: RER = 30 × peso + 70
     if (weight > 2.0) {
       return (70 * math.pow(weight, 0.75)).toDouble();
     } else {
@@ -175,33 +137,17 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
   /// Calcula todos os fatores multiplicadores para DER
   Map<String, double> _calculateMultipliers(CalorieInput input) {
     final factors = <String, double>{};
-    
-    // Fator fisiológico base
     factors['physiological'] = input.physiologicalState.baseFactor;
-    
-    // Ajuste para lactação (fator adicional por filhote)
     if (input.isLactating && input.numberOfOffspring != null) {
       factors['lactation_bonus'] = 0.25 * input.numberOfOffspring!;
     } else {
       factors['lactation_bonus'] = 0.0;
     }
-    
-    // Fator de atividade
     factors['activity'] = input.activityLevel.factor;
-    
-    // Fator de condição corporal
     factors['body_condition'] = input.bodyConditionScore.factor;
-    
-    // Fator ambiental
     factors['environmental'] = input.environmentalCondition.factor;
-    
-    // Fator médico
     factors['medical'] = input.medicalCondition.factor;
-    
-    // Ajuste por idade (para animais jovens e idosos)
     factors['age'] = _getAgeAdjustmentFactor(input);
-    
-    // Ajuste por espécie específica
     factors['species'] = _getSpeciesAdjustmentFactor(input);
     
     return factors;
@@ -214,16 +160,10 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     CalorieInput input,
   ) {
     double der = rer;
-    
-    // Aplicar fator fisiológico base
     der *= factors['physiological']!;
-    
-    // Adicionar bônus de lactação se aplicável
     if (input.isLactating) {
       der += rer * factors['lactation_bonus']!;
     }
-    
-    // Aplicar outros fatores multiplicativos
     der *= factors['activity']!;
     der *= factors['body_condition']!;
     der *= factors['environmental']!;
@@ -236,7 +176,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
 
   /// Calcula necessidades de macronutrientes
   Map<String, double> _calculateMacronutrients(double totalCalories, CalorieInput input) {
-    // Percentuais base por espécie (base AAFCO/FEDIAF)
     Map<String, double> proteinPercent, fatPercent, carbPercent;
     
     if (input.species == AnimalSpecies.dog) {
@@ -248,23 +187,17 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
       fatPercent = {'min': 9.0, 'optimal': 20.0};
       carbPercent = {'max': 10.0, 'optimal': 5.0};
     }
-    
-    // Ajustes por estado fisiológico
     if (input.isYoung) {
       proteinPercent['optimal'] = proteinPercent['optimal']! * 1.5;
       fatPercent['optimal'] = fatPercent['optimal']! * 1.3;
     } else if (input.isSenior) {
       proteinPercent['optimal'] = proteinPercent['optimal']! * 1.2;
     }
-    
-    // Ajustes por condições médicas
     if (input.medicalCondition == MedicalCondition.kidneyDisease) {
       proteinPercent['optimal'] = proteinPercent['optimal']! * 0.8;
     } else if (input.medicalCondition == MedicalCondition.diabetes) {
       carbPercent['optimal'] = carbPercent['optimal']! * 0.7;
     }
-    
-    // Converter percentuais em gramas
     final proteinCal = totalCalories * (proteinPercent['optimal']! / 100);
     final fatCal = totalCalories * (fatPercent['optimal']! / 100);
     final carbCal = totalCalories * (carbPercent['optimal']! / 100);
@@ -278,10 +211,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
 
   /// Calcula necessidade hídrica diária
   double _calculateWaterRequirement(CalorieInput input) {
-    // Base: 50-70 ml/kg/dia
     double waterBase = input.weight * 60;
-    
-    // Ajustes por estado fisiológico
     if (input.isLactating) {
       waterBase *= 2.5; // Lactação requer muito mais água
     } else if (input.isPregnant) {
@@ -289,15 +219,11 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     } else if (input.isYoung) {
       waterBase *= 1.5; // Filhotes precisam de mais água
     }
-    
-    // Ajustes por condições médicas
     if (input.medicalCondition == MedicalCondition.kidneyDisease) {
       waterBase *= 1.5;
     } else if (input.medicalCondition == MedicalCondition.diabetes) {
       waterBase *= 1.4;
     }
-    
-    // Ajustes ambientais
     if (input.environmentalCondition == EnvironmentalCondition.hot) {
       waterBase *= 1.3;
     } else if (input.environmentalCondition == EnvironmentalCondition.cold) {
@@ -308,27 +234,18 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
   }
 
   double _getAgeAdjustmentFactor(CalorieInput input) {
-    // Animais muito jovens (< 4 meses)
     if (input.age < 4) return 1.1;
-    
-    // Filhotes (4-12 meses)
     if (input.age < 12) return 1.05;
-    
-    // Adultos (1-7 anos para cães, 1-10 para gatos)
     final seniorAge = input.species == AnimalSpecies.dog ? 84 : 120; // meses
     if (input.age < seniorAge) return 1.0;
-    
-    // Idosos
     return 0.95;
   }
 
   double _getSpeciesAdjustmentFactor(CalorieInput input) {
-    // Gatos têm metabolismo ligeiramente mais alto
     return input.species == AnimalSpecies.cat ? 1.05 : 1.0;
   }
 
   FeedingRecommendations _generateFeedingRecommendations(double der, CalorieInput input) {
-    // Número de refeições baseado na idade
     int mealsPerDay;
     if (input.age < 4) {
       mealsPerDay = 4; // Filhotes muito jovens
@@ -339,11 +256,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     } else {
       mealsPerDay = 2; // Adultos
     }
-    
-    // Gramas por refeição (assumindo ração comercial ~3.5 kcal/g)
     final gramsPerMeal = (der / 3.5) / mealsPerDay;
-    
-    // Horários de alimentação
     List<String> schedule;
     switch (mealsPerDay) {
       case 4:
@@ -355,8 +268,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
       default:
         schedule = ['08:00', '18:00'];
     }
-    
-    // Tipo de alimento recomendado
     String foodType;
     if (input.isYoung) {
       foodType = 'Ração para filhotes (alta energia)';
@@ -367,11 +278,7 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     } else {
       foodType = 'Ração premium para adultos';
     }
-    
-    // Permissão de petiscos (5-10% das calorias)
     final treatAllowance = input.isYoung ? 5.0 : 10.0;
-    
-    // Suplementos necessários
     final supplements = <String>[];
     if (input.isYoung) {
       supplements.add('DHA para desenvolvimento cerebral');
@@ -404,28 +311,23 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
     String monitoringFreq;
     
     if (weightDifference.abs() < 0.5) {
-      // Peso ideal
       weightGoal = 'Manter peso atual';
       timeToTarget = 'N/A - já no peso ideal';
       weeklyChange = 0.0;
       monitoringFreq = 'Mensal';
     } else if (weightDifference > 0) {
-      // Ganho de peso necessário
       weightGoal = 'Ganhar peso gradualmente';
       weeklyChange = math.min(currentWeight * 0.02, 0.5); // 1-2% por semana, máx 500g
       final weeksNeeded = (weightDifference / weeklyChange).ceil();
       timeToTarget = '$weeksNeeded semanas';
       monitoringFreq = 'Semanal';
     } else {
-      // Perda de peso necessária
       weightGoal = 'Perder peso gradualmente';
       weeklyChange = -math.min(currentWeight * 0.02, 0.5); // 1-2% por semana, máx 500g
       final weeksNeeded = (weightDifference.abs() / weeklyChange.abs()).ceil();
       timeToTarget = '$weeksNeeded semanas';
       monitoringFreq = 'Semanal';
     }
-    
-    // Recomendações de exercício
     final exerciseRecs = <String>[];
     if (input.species == AnimalSpecies.dog) {
       if (input.bodyConditionScore == BodyConditionScore.overweight ||
@@ -462,28 +364,21 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
   }
 
   NutritionalAdjustments _generateNutritionalAdjustments(CalorieInput input) {
-    // Proporções base de macronutrientes
     Map<String, double> ratios;
     if (input.species == AnimalSpecies.dog) {
       ratios = {'protein': 25.0, 'fat': 15.0, 'carbohydrate': 50.0, 'fiber': 5.0, 'ash': 5.0};
     } else {
       ratios = {'protein': 45.0, 'fat': 20.0, 'carbohydrate': 5.0, 'fiber': 3.0, 'ash': 7.0};
     }
-    
-    // Ingredientes restritos
     final restricted = <String>[
       'Chocolate', 'Uvas/passas', 'Cebola/alho', 'Abacate', 'Xilitol'
     ];
-    
-    // Ingredientes recomendados
     final recommended = <String>[];
     if (input.species == AnimalSpecies.dog) {
       recommended.addAll(['Frango', 'Arroz integral', 'Batata doce', 'Cenoura']);
     } else {
       recommended.addAll(['Peixe', 'Frango', 'Fígado', 'Taurina']);
     }
-    
-    // Ajustes por condições médicas
     if (input.medicalCondition == MedicalCondition.kidneyDisease) {
       restricted.addAll(['Alimentos ricos em fósforo', 'Excesso de proteína']);
       recommended.addAll(['Proteínas de alta qualidade', 'Alimentos pobres em fósforo']);
@@ -493,8 +388,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
       restricted.addAll(['Açúcares simples', 'Alimentos de alto índice glicêmico']);
       recommended.addAll(['Fibras solúveis', 'Proteínas magras']);
     }
-    
-    // Suplementos vitamínicos e minerais
     final vitaminSupp = <String>[];
     final mineralSupp = <String>[];
     
@@ -507,8 +400,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
       vitaminSupp.addAll(['Vitamina E', 'Vitamina C']);
       mineralSupp.addAll(['Glucosamina', 'Condroitina']);
     }
-    
-    // Fator de digestibilidade
     double digestibility = 0.85; // Base 85%
     if (input.isSenior || input.medicalCondition != MedicalCondition.none) {
       digestibility = 0.80; // Reduzir para casos especiais
@@ -650,8 +541,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
 
   List<Recommendation> _generateRecommendations(CalorieInput input, double der, double rer) {
     final recommendations = <Recommendation>[];
-    
-    // Alertas críticos
     if (der > (rer * 4)) {
       recommendations.add(const Recommendation(
         title: 'Necessidades Calóricas Extremas',
@@ -660,8 +549,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
         actionLabel: 'Consultar veterinário',
       ));
     }
-    
-    // Alertas para condições especiais
     if (input.medicalCondition != MedicalCondition.none) {
       recommendations.add(const Recommendation(
         title: 'Dieta Terapêutica Requerida',
@@ -670,8 +557,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
         actionLabel: 'Solicitar dieta veterinária',
       ));
     }
-    
-    // Alertas para peso
     if (input.bodyConditionScore == BodyConditionScore.obese) {
       recommendations.add(const Recommendation(
         title: 'Programa de Perda de Peso',
@@ -680,8 +565,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
         actionLabel: 'Iniciar programa de emagrecimento',
       ));
     }
-    
-    // Informações gerais
     recommendations.add(const Recommendation(
       title: 'Monitoramento Regular',
       message: 'Pesar o animal semanalmente e ajustar porções conforme necessário',
@@ -694,8 +577,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
   String _generateSummary(double der, FeedingRecommendations feeding) {
     return '${der.round()} kcal/dia • ${feeding.mealsPerDay}x ${feeding.gramsPerMeal.round()}g • ${feeding.foodType}';
   }
-
-  // Implementações dos mixins
   @override
   Map<String, dynamic> getSpeciesParameters(String species) {
     switch (species.toLowerCase()) {
@@ -743,7 +624,6 @@ class CalorieCalculatorStrategy extends CalculatorStrategy<CalorieInput, Calorie
 
   @override
   double applyWeightCorrection(double baseValue, double weightKg, String species) {
-    // Aplicar correções baseadas em peso extremo
     if (weightKg < 2.0) return baseValue * 1.1; // Animais muito pequenos
     if (weightKg > 50.0) return baseValue * 0.95; // Animais muito grandes
     return baseValue;

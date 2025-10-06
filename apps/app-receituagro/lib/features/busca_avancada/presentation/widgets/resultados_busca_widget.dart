@@ -404,11 +404,6 @@ class ResultadosBuscaWidget extends ConsumerWidget {
     BuildContext context,
     DiagnosticoDetalhado diagnostico,
   ) {
-    // Navigator.pushNamed(
-    //   context,
-    //   '/diagnostico-detalhado',
-    //   arguments: diagnostico.diagnostico.idReg,
-    // );
     debugPrint('Navegar para detalhes: ${diagnostico.diagnostico.idReg}');
   }
 }

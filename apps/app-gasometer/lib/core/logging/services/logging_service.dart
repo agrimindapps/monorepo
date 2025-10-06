@@ -72,8 +72,6 @@ class LoggingService {
     );
 
     await _saveLog(logEntry);
-
-    // Send performance analytics
     await _analyticsService.logEvent('operation_completed', {
       'category': category,
       'operation': operation,
@@ -115,16 +113,12 @@ class LoggingService {
     );
 
     await _saveLog(logEntry);
-
-    // Send error analytics
     await _analyticsService.logEvent('operation_error', {
       'category': category,
       'operation': operation,
       'error_type': error.runtimeType.toString(),
       if (duration != null) 'duration_ms': duration,
     });
-
-    // Record error in Crashlytics
     await _analyticsService.recordError(
       error,
       stackTrace,
@@ -219,8 +213,6 @@ class LoggingService {
     await _saveLog(logEntry);
     debugPrint('🐛 [$category] $message');
   }
-
-  // === MÉTODOS ESPECÍFICOS DO GASOMETER ===
 
   /// Log para operações de veículos
   Future<void> logVehicleOperation({
@@ -317,8 +309,6 @@ class LoggingService {
     );
   }
 
-  // === MÉTODOS DE CONSULTA ===
-
   /// Obtém estatísticas dos logs
   Future<Map<String, dynamic>?> getStatistics() async {
     final result = await _logRepository.getLogStatistics();
@@ -409,8 +399,6 @@ class LoggingService {
     );
   }
 
-  // === MÉTODOS PRIVADOS ===
-
   /// Salva log localmente com tratamento de erro
   Future<void> _saveLog(LogEntry logEntry) async {
     try {
@@ -422,7 +410,6 @@ class LoggingService {
           }
         },
         (_) {
-          // Log salvo com sucesso
         },
       );
     } catch (e) {

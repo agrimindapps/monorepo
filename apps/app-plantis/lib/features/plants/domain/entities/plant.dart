@@ -60,7 +60,6 @@ class Plant extends BaseSyncEntity {
   /// Includes robust validation to handle corrupted or null data
   factory Plant.fromPlantaModel(dynamic plantaModel) {
     try {
-      // Validate essential fields
       if (plantaModel == null) {
         throw ArgumentError('PlantaModel cannot be null');
       }
@@ -69,14 +68,11 @@ class Plant extends BaseSyncEntity {
       if (id == null || id.toString().trim().isEmpty) {
         throw ArgumentError('PlantaModel must have a valid ID');
       }
-
-      // Safe conversion with null checks and validation
       String safeName = '';
       try {
         final nome = plantaModel.nome;
         safeName = (nome is String && nome.trim().isNotEmpty) ? nome : '';
       } catch (e) {
-        // Keep default empty name if conversion fails
       }
 
       String? safeSpecies;
@@ -85,7 +81,6 @@ class Plant extends BaseSyncEntity {
         safeSpecies =
             (especie is String && especie.trim().isNotEmpty) ? especie : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       String? safeSpaceId;
@@ -96,7 +91,6 @@ class Plant extends BaseSyncEntity {
                 ? espacoId
                 : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       String? safeImageBase64;
@@ -107,7 +101,6 @@ class Plant extends BaseSyncEntity {
                 ? fotoBase64
                 : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       List<String> safeImageUrls = [];
@@ -123,7 +116,6 @@ class Plant extends BaseSyncEntity {
                   .toList();
         }
       } catch (e) {
-        // Keep empty list if conversion fails
       }
 
       DateTime? safePlantingDate;
@@ -131,7 +123,6 @@ class Plant extends BaseSyncEntity {
         final dataCadastro = plantaModel.dataCadastro;
         safePlantingDate = (dataCadastro is DateTime) ? dataCadastro : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       String? safeNotes;
@@ -142,7 +133,6 @@ class Plant extends BaseSyncEntity {
                 ? observacoes
                 : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       bool safeIsFavorited = false;
@@ -150,7 +140,6 @@ class Plant extends BaseSyncEntity {
         final isFavorited = plantaModel.isFavorited;
         safeIsFavorited = (isFavorited is bool) ? isFavorited : false;
       } catch (e) {
-        // Keep default false if conversion fails
       }
 
       DateTime? safeCreatedAt;
@@ -158,7 +147,6 @@ class Plant extends BaseSyncEntity {
         final createdAt = plantaModel.createdAt;
         safeCreatedAt = (createdAt is DateTime) ? createdAt : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       DateTime? safeUpdatedAt;
@@ -166,7 +154,6 @@ class Plant extends BaseSyncEntity {
         final updatedAt = plantaModel.updatedAt;
         safeUpdatedAt = (updatedAt is DateTime) ? updatedAt : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       DateTime? safeLastSyncAt;
@@ -174,7 +161,6 @@ class Plant extends BaseSyncEntity {
         final lastSyncAt = plantaModel.lastSyncAt;
         safeLastSyncAt = (lastSyncAt is DateTime) ? lastSyncAt : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       bool safeIsDirty = false;
@@ -182,7 +168,6 @@ class Plant extends BaseSyncEntity {
         final isDirty = plantaModel.isDirty;
         safeIsDirty = (isDirty is bool) ? isDirty : false;
       } catch (e) {
-        // Keep default false if conversion fails
       }
 
       bool safeIsDeleted = false;
@@ -190,7 +175,6 @@ class Plant extends BaseSyncEntity {
         final isDeleted = plantaModel.isDeleted;
         safeIsDeleted = (isDeleted is bool) ? isDeleted : false;
       } catch (e) {
-        // Keep default false if conversion fails
       }
 
       int safeVersion = 1;
@@ -198,7 +182,6 @@ class Plant extends BaseSyncEntity {
         final version = plantaModel.version;
         safeVersion = (version is int && version > 0) ? version : 1;
       } catch (e) {
-        // Keep default 1 if conversion fails
       }
 
       String? safeUserId;
@@ -207,7 +190,6 @@ class Plant extends BaseSyncEntity {
         safeUserId =
             (userId is String && userId.trim().isNotEmpty) ? userId : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       String? safeModuleName;
@@ -218,7 +200,6 @@ class Plant extends BaseSyncEntity {
                 ? moduleName
                 : null;
       } catch (e) {
-        // Keep null if conversion fails
       }
 
       return Plant(
@@ -241,10 +222,7 @@ class Plant extends BaseSyncEntity {
         moduleName: safeModuleName,
       );
     } catch (e) {
-      // If conversion completely fails, log error and return a basic plant with minimal data
       print('Error converting PlantaModel to Plant: $e');
-
-      // Try to extract at least the ID for basic functionality
       String fallbackId;
       try {
         fallbackId =
@@ -478,8 +456,6 @@ class PlantConfig extends Equatable {
   final String? soilType;
   final double? idealTemperature;
   final double? idealHumidity;
-
-  // New care fields for Water and Fertilizer
   final bool? enableWateringCare;
   final DateTime? lastWateringDate;
 
@@ -516,8 +492,6 @@ class PlantConfig extends Equatable {
       pestInspectionIntervalDays != null && pestInspectionIntervalDays! > 0;
   bool get hasReplantingSchedule =>
       replantingIntervalDays != null && replantingIntervalDays! > 0;
-
-  // New care schedule getters
   bool get hasWateringCareEnabled => enableWateringCare == true;
   bool get hasFertilizerCareEnabled => enableFertilizerCare == true;
 

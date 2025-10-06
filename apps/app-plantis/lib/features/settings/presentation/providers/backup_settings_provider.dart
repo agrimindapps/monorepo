@@ -36,8 +36,6 @@ class BackupSettingsProvider extends ChangeNotifier {
        _connectivity = connectivity {
     _initialize();
   }
-
-  // Getters
   BackupSettings get settings => _settings;
   List<BackupInfo> get backups => _backups;
   bool get isLoading => _isLoading;
@@ -61,8 +59,6 @@ class BackupSettingsProvider extends ChangeNotifier {
   /// Nota: Esta é uma verificação simplificada. Para verificação completa,
   /// use métodos assíncronos com ping de rede real
   bool get isOnline {
-    // Por enquanto, retorna true para permitir tentativas de backup
-    // Em caso de falha de rede, será capturada nos métodos de backup
     return true;
   }
 
@@ -77,8 +73,6 @@ class BackupSettingsProvider extends ChangeNotifier {
     _loadSettings();
     _loadBackups();
     _loadLastBackupTime();
-
-    // Monitora conectividade
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen((
       List<ConnectivityResult> results,
     ) {
@@ -142,8 +136,6 @@ class BackupSettingsProvider extends ChangeNotifier {
       _setError('Não é possível criar backup no momento');
       return;
     }
-
-    // Verifica se deve usar apenas WiFi
     if (_settings.wifiOnlyEnabled && !(await isOnWifi)) {
       _setError('Backup configurado apenas para WiFi');
       return;
@@ -156,7 +148,6 @@ class BackupSettingsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Simula progresso durante o backup
       _updateBackupProgress(0.1);
 
       final result = await _backupService.createBackup();
@@ -175,8 +166,6 @@ class BackupSettingsProvider extends ChangeNotifier {
             'Backup criado com sucesso! '
             'Tamanho: ${_formatFileSize(backupResult.sizeInBytes ?? 0)}',
           );
-
-          // Recarrega lista de backups
           _loadBackups();
         },
       );
@@ -206,7 +195,6 @@ class BackupSettingsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Fase 1: Validação (0% - 10%)
       _updateRestoreProgress(0.0, 'Validando integridade do backup...');
       await Future<void>.delayed(
         const Duration(milliseconds: 500),
@@ -217,15 +205,11 @@ class BackupSettingsProvider extends ChangeNotifier {
 
       _updateRestoreProgress(0.1, 'Criando backup de segurança...');
       await Future<void>.delayed(const Duration(milliseconds: 700));
-
-      // Fase 2: Preparação (10% - 20%)
       _updateRestoreProgress(0.15, 'Preparando restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       _updateRestoreProgress(0.2, 'Iniciando processo de restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
-
-      // Executar restore com progress tracking
       final result = await _executeRestoreWithProgress(backupId, options);
 
       result.fold(
@@ -267,7 +251,6 @@ class BackupSettingsProvider extends ChangeNotifier {
     RestoreOptions options,
   ) async {
     try {
-      // Simular progress tracking das diferentes fases
       if (options.restorePlants) {
         _updateRestoreProgress(0.3, 'Restaurando plantas...');
         await Future<void>.delayed(const Duration(milliseconds: 1000));
@@ -290,8 +273,6 @@ class BackupSettingsProvider extends ChangeNotifier {
 
       _updateRestoreProgress(0.95, 'Finalizando restauração...');
       await Future<void>.delayed(const Duration(milliseconds: 300));
-
-      // Chamar o método real do serviço
       return await _backupService.restoreBackup(backupId, options);
     } catch (e) {
       return Left(UnknownFailure('Erro no progress tracking: ${e.toString()}'));
@@ -353,8 +334,6 @@ class BackupSettingsProvider extends ChangeNotifier {
     _clearError();
     _clearSuccess();
   }
-
-  // Métodos privados para gerenciamento de estado
 
   void _setLoading(bool loading) {
     _isLoading = loading;

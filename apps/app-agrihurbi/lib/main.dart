@@ -7,26 +7,17 @@ import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/account_deletion_module.dart';
 import 'core/di/modules/sync_module.dart';
 import 'firebase_options.dart';
-
-// Global reference to crashlytics for error handlers
 late ICrashlyticsRepository _crashlyticsRepository;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    // Initialize dependency injection (includes Hive initialization)
     await di.init();
-
-    // Get crashlytics repository from DI
     _crashlyticsRepository = di.getIt<ICrashlyticsRepository>();
-
-    // Configure Crashlytics for Flutter errors
     if (!kIsWeb) {
       FlutterError.onError = (errorDetails) {
         _crashlyticsRepository.recordError(
@@ -46,9 +37,6 @@ Future<void> main() async {
         return true;
       };
     }
-
-    // ===== ACCOUNT DELETION INITIALIZATION =====
-    // Initialize account deletion module after DI is ready
     try {
       print('🔐 MAIN: Initializing account deletion module...');
       AccountDeletionModule.init(di.getIt);
@@ -56,9 +44,6 @@ Future<void> main() async {
     } catch (e) {
       print('❌ MAIN: Account deletion initialization failed: $e');
     }
-
-    // ===== SYNC INITIALIZATION =====
-    // Force sync initialization after DI is ready
     try {
       print('🔄 MAIN: Forcing AgrihUrbi sync initialization...');
       AgrihUrbiSyncDIModule.init();
@@ -67,13 +52,10 @@ Future<void> main() async {
     } catch (e) {
       print('❌ MAIN: Sync initialization failed: $e');
     }
-
-    // ===== FIREBASE SERVICES INITIALIZATION =====
     await _initializeFirebaseServices();
 
     runApp(const ProviderScope(child: AgriHurbiApp()));
   } catch (error) {
-    // Handle initialization errors
     runApp(
       MaterialApp(
         home: Scaffold(
@@ -106,12 +88,8 @@ Future<void> main() async {
 Future<void> _initializeFirebaseServices() async {
   try {
     debugPrint('🚀 Initializing Firebase services...');
-
-    // Get services from DI
     final analyticsRepository = di.getIt<IAnalyticsRepository>();
     final performanceRepository = di.getIt<IPerformanceRepository>();
-
-    // Configure initial context for Crashlytics
     await _crashlyticsRepository.setCustomKey(
       key: 'app_name',
       value: 'AgriHurbi',
@@ -120,12 +98,8 @@ Future<void> _initializeFirebaseServices() async {
       key: 'environment',
       value: kDebugMode ? 'debug' : 'production',
     );
-
-    // Start performance tracking
     await performanceRepository.startPerformanceTracking();
     await performanceRepository.markAppStarted();
-
-    // Log app initialization
     await analyticsRepository.logEvent(
       'app_initialized',
       parameters: {
@@ -140,8 +114,6 @@ Future<void> _initializeFirebaseServices() async {
     debugPrint('✅ Firebase services initialized successfully');
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing Firebase services: $e');
-
-    // Try to record error even if services failed
     try {
       await _crashlyticsRepository.recordError(
         exception: e,
@@ -149,7 +121,6 @@ Future<void> _initializeFirebaseServices() async {
         reason: 'Firebase services initialization failed',
       );
     } catch (_) {
-      // Ignore if Crashlytics also failed
     }
   }
 }

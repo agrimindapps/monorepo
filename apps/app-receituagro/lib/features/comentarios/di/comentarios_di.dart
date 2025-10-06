@@ -12,17 +12,12 @@ import '../domain/usecases/get_comentarios_usecase.dart';
 /// Registers all dependencies required for the comentarios feature.
 class ComentariosDI {
   static void register(GetIt getIt) {
-    // Core services
     if (!getIt.isRegistered<ErrorHandlerService>()) {
       getIt.registerSingleton<ErrorHandlerService>(ErrorHandlerService());
     }
-
-    // Repository layer
     getIt.registerFactory<IComentariosRepository>(
       () => ComentariosRepositoryImpl(getIt<ComentariosHiveRepository>()),
     );
-
-    // Use cases layer
     getIt.registerFactory<GetComentariosUseCase>(
       () => GetComentariosUseCase(getIt<IComentariosRepository>()),
     );
@@ -34,14 +29,10 @@ class ComentariosDI {
     getIt.registerFactory<DeleteComentarioUseCase>(
       () => DeleteComentarioUseCase(getIt<IComentariosRepository>()),
     );
-
-    // ComentariosProvider removed - Riverpod manages lifecycle automatically
-    // Migration complete: Using ComentariosNotifier instead
   }
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
-    // ComentariosProvider unregister removed - not registered anymore
 
     if (getIt.isRegistered<DeleteComentarioUseCase>()) {
       getIt.unregister<DeleteComentarioUseCase>();

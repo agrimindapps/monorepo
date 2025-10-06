@@ -2,20 +2,15 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 class ComentariosDesignTokens {
-  // Colors
   static const Color primaryColor = Color(0xFF4CAF50);
   static const Color warningColor = Color(0xFFFF8F00);
   static const Color warningBackgroundColor = Color(0xFFFFF8E1);
   static const Color warningTextColor = Color(0xFFFF6F00);
   static const Color errorColor = Color(0xFFF44336);
   static const Color successColor = Color(0xFF4CAF50);
-  
-  // Dialog specific colors (moved from hardcoded values)
   static const Color dialogBackgroundDark = Color(0xFF1E1E1E);
   static const Color dialogHeaderDark = Color(0xFF2D2D2D);
   static const Color dialogHeaderLight = Color(0xFFF8F9FA);
-
-  // Icons
   static const IconData commentIcon = FontAwesomeIcons.commentDots;
   static const IconData addIcon = Icons.add;
   static const IconData editIcon = Icons.edit_outlined;
@@ -26,8 +21,6 @@ class ComentariosDesignTokens {
   static const IconData cancelIcon = Icons.close;
   static const IconData infoIcon = Icons.info_outline;
   static const IconData diamondIcon = Icons.diamond;
-
-  // Dimensions
   static const double maxPageWidth = 1120.0;
   static const double maxDialogWidth = 400.0;
   static const double defaultBorderRadius = 12.0;
@@ -35,27 +28,17 @@ class ComentariosDesignTokens {
   static const double cardElevation = 2.0;
   static const double fabBottomPadding = 60.0;
   static const double maxDialogHeight = 500.0; // Moved from hardcoded value
-
-  // Padding & Margins
   static const EdgeInsets defaultPadding = EdgeInsets.all(16.0);
   static const EdgeInsets cardPadding = EdgeInsets.all(24.0);
   static const EdgeInsets pagePadding = EdgeInsets.all(8.0);
   static const EdgeInsets dialogPadding = EdgeInsets.all(24.0);
-
-  // Animation durations
   static const Duration debounceDelay = Duration(milliseconds: 300);
   static const Duration animationDuration = Duration(milliseconds: 200);
-
-  // Text constraints
   static const int minCommentLength = 5;
   static const int maxCommentLength = 300; // Moved from hardcoded value
   static const int maxSearchLength = 100;
-
-  // Premium limits (temporariamente sem limites)
   static const int freeTierMaxComments = 9999999;
   static const int premiumMaxComments = 9999999;
-
-  // UI State Messages
   static const String loadingMessage = 'Carregando comentários...';
   static const String noPermissionTitle = 'Comentários não disponíveis';
   static const String noPermissionDescription = 
@@ -65,15 +48,11 @@ class ComentariosDesignTokens {
   static const String emptySearchMessage = 'Nenhum comentário encontrado.';
   static const String unlockButtonText = 'Desbloquear Agora';
   static const String upgradeToPremiumText = 'Assinar Premium';
-  
-  // Error Messages
   static const String shortCommentError = 'O comentário deve ter pelo menos 5 caracteres';
   static const String saveErrorTitle = 'Erro';
   static const String saveErrorMessage = 'Erro ao salvar comentário';
   static const String deleteErrorMessage = 'Erro ao deletar comentário';
   static const String updateErrorMessage = 'Erro ao atualizar comentário';
-
-  // Success Messages
   static const String commentSavedMessage = 'Comentário salvo com sucesso';
   static const String commentDeletedMessage = 'Comentário removido';
   static const String commentUpdatedMessage = 'Comentário atualizado';

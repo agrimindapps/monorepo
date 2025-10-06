@@ -68,31 +68,21 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
 
   @override
   Future<FeatureFlagsState> build() async {
-    // Get services from DI
     _remoteConfig = ReceitaAgroRemoteConfigService.instance;
     _premiumService = ReceitaAgroPremiumService.instance;
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _refreshTimer?.cancel();
       _premiumService.removeListener(_onPremiumStatusChanged);
     });
 
     try {
-      // Ensure dependencies are initialized
       await _remoteConfig.initialize();
 
       if (!_premiumService.initialized) {
         await _premiumService.initialize();
       }
-
-      // Load initial feature flags
       final initialCache = _calculateCommonFlags();
-
-      // Setup periodic refresh
       _setupPeriodicRefresh();
-
-      // Listen to premium service changes
       _premiumService.addListener(_onPremiumStatusChanged);
 
       if (EnvironmentConfig.enableLogging) {
@@ -123,13 +113,9 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
     if (currentState == null || !currentState.isInitialized) {
       return _remoteConfig.isFeatureEnabled(flag);
     }
-
-    // Use cached value if available
     if (currentState.flagsCache.containsKey(flag)) {
       return currentState.flagsCache[flag]!;
     }
-
-    // Calculate feature availability
     return _calculateFeatureAvailability(flag);
   }
 
@@ -230,33 +216,23 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
       case ReceitaAgroFeatureFlag.enableAdvancedDiagnostics:
       case ReceitaAgroFeatureFlag.enableOfflineMode:
         return true;
-
-      // A/B testing features don't require premium
       case ReceitaAgroFeatureFlag.enableNewUiDesign:
       case ReceitaAgroFeatureFlag.enableImprovedOnboarding:
       case ReceitaAgroFeatureFlag.enableGamification:
         return false;
-
-      // Core features don't require premium
       case ReceitaAgroFeatureFlag.enablePushNotifications:
       case ReceitaAgroFeatureFlag.enableImageOptimization:
       case ReceitaAgroFeatureFlag.enableDataCaching:
       case ReceitaAgroFeatureFlag.enablePreloadContent:
         return false;
-
-      // Analytics follows environment config, not premium
       case ReceitaAgroFeatureFlag.enableDetailedAnalytics:
       case ReceitaAgroFeatureFlag.enablePerformanceMonitoring:
       case ReceitaAgroFeatureFlag.enableCrashReporting:
         return false;
-
-      // Business logic features don't require premium
       case ReceitaAgroFeatureFlag.enableSubscriptionValidation:
       case ReceitaAgroFeatureFlag.enableDeviceManagement:
       case ReceitaAgroFeatureFlag.enableContentSynchronization:
         return false;
-
-      // Premium features themselves
       case ReceitaAgroFeatureFlag.enablePremiumFeatures:
         return false; // This is the master toggle, not premium-gated
     }
@@ -281,8 +257,6 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
   /// Setup periodic refresh
   void _setupPeriodicRefresh() {
     _refreshTimer?.cancel();
-
-    // Refresh every 30 minutes in debug, every 2 hours in production
     final refreshInterval = EnvironmentConfig.isDebugMode
         ? const Duration(minutes: 30)
         : const Duration(hours: 2);

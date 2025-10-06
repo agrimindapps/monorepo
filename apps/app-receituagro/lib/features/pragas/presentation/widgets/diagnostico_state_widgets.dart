@@ -158,12 +158,9 @@ class DiagnosticoStateManager extends ConsumerWidget {
 
     return state.when(
       data: (data) {
-        // Estado vazio
         if (data.groupedDiagnosticos.isEmpty) {
           return const DiagnosticoEmptyWidget();
         }
-
-        // Estado com dados - delega para o builder
         return builder(data.filteredDiagnosticos);
       },
       loading: () => const DiagnosticoLoadingWidget(),

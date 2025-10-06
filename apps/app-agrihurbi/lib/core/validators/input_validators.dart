@@ -6,8 +6,6 @@ import 'dart:developer' as developer;
 /// common security vulnerabilities and ensure data integrity.
 class InputValidators {
   InputValidators._();
-
-  // === EMAIL VALIDATION ===
   
   /// Secure email validation regex
   /// 
@@ -29,8 +27,6 @@ class InputValidators {
     }
 
     final email = value.trim().toLowerCase();
-    
-    // Length validation
     if (email.length > 254) {
       return 'E-mail muito longo';
     }
@@ -38,13 +34,9 @@ class InputValidators {
     if (email.length < 3) {
       return 'E-mail muito curto';
     }
-
-    // Regex validation
     if (!_emailRegex.hasMatch(email)) {
       return 'Formato de e-mail inválido';
     }
-
-    // Additional security checks
     if (email.contains('..') || 
         email.startsWith('.') || 
         email.endsWith('.') ||
@@ -52,8 +44,6 @@ class InputValidators {
         email.endsWith('@')) {
       return 'E-mail contém caracteres inválidos';
     }
-
-    // Local part validation (before @)
     final parts = email.split('@');
     if (parts[0].length > 64) {
       return 'Nome do e-mail muito longo';
@@ -61,8 +51,6 @@ class InputValidators {
 
     return null;
   }
-
-  // === PHONE VALIDATION ===
   
   /// Brazilian phone number patterns
   static final RegExp _brazilianPhoneRegex = RegExp(
@@ -85,8 +73,6 @@ class InputValidators {
     }
 
     final phone = value.trim().replaceAll(RegExp(r'[\s\(\)\-]'), '');
-    
-    // Length validation
     if (phone.length < 8) {
       return 'Telefone muito curto';
     }
@@ -94,27 +80,20 @@ class InputValidators {
     if (phone.length > 17) { // +XX + 15 digits max
       return 'Telefone muito longo';
     }
-
-    // Check for valid characters only
     if (!RegExp(r'^[\+\d]+$').hasMatch(phone)) {
       return 'Telefone contém caracteres inválidos';
     }
-
-    // Validate Brazilian or international format
     final cleanPhone = phone.replaceAll(RegExp(r'[^\d\+]'), '');
     
     if (cleanPhone.startsWith('+55')) {
-      // Brazilian number
       if (!_brazilianPhoneRegex.hasMatch(value.trim())) {
         return 'Formato de telefone brasileiro inválido';
       }
     } else if (cleanPhone.startsWith('+')) {
-      // International number
       if (!_internationalPhoneRegex.hasMatch(cleanPhone)) {
         return 'Formato de telefone internacional inválido';
       }
     } else {
-      // Assume Brazilian without country code
       final brazilianPhone = '+55$cleanPhone';
       if (!_brazilianPhoneRegex.hasMatch(brazilianPhone)) {
         return 'Formato de telefone inválido';
@@ -123,8 +102,6 @@ class InputValidators {
 
     return null;
   }
-
-  // === NAME VALIDATION ===
   
   /// Validates full name with security considerations
   /// 
@@ -135,8 +112,6 @@ class InputValidators {
     }
 
     final name = value.trim();
-    
-    // Length validation
     if (name.length < 2) {
       return 'Nome muito curto';
     }
@@ -144,34 +119,24 @@ class InputValidators {
     if (name.length > 100) {
       return 'Nome muito longo';
     }
-
-    // Character validation - only letters, spaces, and common name characters
     final namePattern = RegExp(r'^[a-zA-ZÀ-ÿ\u0100-\u017F\s\.\-]+$', unicode: true);
     if (!namePattern.hasMatch(name)) {
       return 'Nome contém caracteres inválidos';
     }
-
-    // Structure validation
     final parts = name.split(RegExp(r'\s+'));
     
     if (parts.length < 2) {
       return 'Digite seu nome completo (nome e sobrenome)';
     }
-
-    // Each part must have at least 2 characters
     for (final part in parts) {
       if (part.length < 2) {
         return 'Cada parte do nome deve ter pelo menos 2 caracteres';
       }
     }
-
-    // Prevent malicious patterns
     final maliciousPattern = RegExp(r'[<>"&]');
     if (name.contains(maliciousPattern)) {
       return 'Nome contém caracteres não permitidos';
     }
-
-    // Prevent excessive repetition
     if (RegExp(r'(.)\1{4,}').hasMatch(name)) {
       return 'Nome contém repetições excessivas';
     }
@@ -186,8 +151,6 @@ class InputValidators {
 /// to prevent common authentication vulnerabilities.
 class PasswordValidator {
   PasswordValidator._();
-
-  // Password strength requirements
   static const int _minLength = 8;
   static const int _maxLength = 128;
   
@@ -208,8 +171,6 @@ class PasswordValidator {
     }
 
     final password = value;
-    
-    // Length validation
     if (password.length < _minLength) {
       return 'Senha deve ter pelo menos $_minLength caracteres';
     }
@@ -217,8 +178,6 @@ class PasswordValidator {
     if (password.length > _maxLength) {
       return 'Senha muito longa (máximo $_maxLength caracteres)';
     }
-
-    // Character composition requirements
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
       return 'Senha deve conter pelo menos 1 letra maiúscula';
     }
@@ -234,13 +193,9 @@ class PasswordValidator {
     if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
       return 'Senha deve conter pelo menos 1 caractere especial (!@#\$%^&*(),.?":{}|<>)';
     }
-
-    // Security pattern checks
     if (_hasWeakPatterns(password)) {
       return 'Senha contém padrões inseguros (sequências, repetições)';
     }
-
-    // Common password validation
     if (_isCommonPassword(password.toLowerCase())) {
       return 'Esta senha é muito comum. Escolha uma senha mais segura';
     }
@@ -272,18 +227,12 @@ class PasswordValidator {
   /// 4: Strong
   static int calculatePasswordStrength(String password) {
     int score = 0;
-    
-    // Length bonus
     if (password.length >= 8) score++;
     if (password.length >= 12) score++;
-    
-    // Character variety
     if (RegExp(r'[a-z]').hasMatch(password)) score++;
     if (RegExp(r'[A-Z]').hasMatch(password)) score++;
     if (RegExp(r'[0-9]').hasMatch(password)) score++;
     if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score++;
-    
-    // Penalty for weak patterns
     if (_hasWeakPatterns(password)) score -= 2;
     if (_isCommonPassword(password.toLowerCase())) score -= 2;
     
@@ -293,25 +242,17 @@ class PasswordValidator {
   /// Checks for weak password patterns
   static bool _hasWeakPatterns(String password) {
     final lower = password.toLowerCase();
-    
-    // Sequential characters
     if (RegExp(r'(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)').hasMatch(lower) ||
         RegExp(r'(123|234|345|456|567|678|789|890)').hasMatch(password)) {
       return true;
     }
-    
-    // Reverse sequential
     if (RegExp(r'(zyx|yxw|xwv|wvu|vut|uts|tsr|srq|rqp|qpo|pon|onm|nml|mlk|lkj|kji|jih|ihg|hgf|gfe|fed|edc|dcb|cba)').hasMatch(lower) ||
         RegExp(r'(987|876|765|654|543|432|321|210)').hasMatch(password)) {
       return true;
     }
-    
-    // Repeated characters
     if (RegExp(r'(.)\1{2,}').hasMatch(password)) {
       return true;
     }
-    
-    // Keyboard patterns
     if (RegExp(r'(qwer|asdf|zxcv|1234|qaz|wsx|edc)').hasMatch(lower)) {
       return true;
     }

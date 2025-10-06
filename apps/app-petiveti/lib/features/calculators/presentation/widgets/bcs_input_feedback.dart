@@ -375,8 +375,6 @@ class BcsEstimationPreview extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final state = ref.watch(bodyConditionProvider);
-
-    // Only show if we have enough data for a preliminary estimate
     if (!_hasEnoughDataForEstimate(state)) {
       return const SizedBox.shrink();
     }
@@ -504,11 +502,7 @@ class BcsEstimationPreview extends ConsumerWidget {
   }
 
   double _calculatePreliminaryBcs(BodyConditionState state) {
-    // Simplified BCS estimation based on available data
-    // This would be more sophisticated in a real implementation
     double baseBcs = 5.0; // Average BCS
-    
-    // Adjust based on weight for species
     if (state.input.species == AnimalSpecies.dog) {
       if (state.input.currentWeight < 5) baseBcs += 0.5; // Small dogs tend to be overweight
       if (state.input.currentWeight > 30) baseBcs -= 0.5; // Large dogs tend to be underweight
@@ -516,8 +510,6 @@ class BcsEstimationPreview extends ConsumerWidget {
       if (state.input.currentWeight < 3) baseBcs -= 1.0;
       if (state.input.currentWeight > 6) baseBcs += 1.0;
     }
-    
-    // Adjust based on age
     final age = state.input.animalAge ?? 0;
     if (age > 0) {
       if (age < 12) baseBcs -= 0.5; // Young animals

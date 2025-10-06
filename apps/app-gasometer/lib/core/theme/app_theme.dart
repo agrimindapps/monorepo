@@ -49,34 +49,22 @@ class AppColors {
   factory AppColors() => _instance;
   AppColors._internal();
   static final AppColors _instance = AppColors._internal();
-
-  // Cores primárias
   Color get primary => GasometerColors.primary;
   Color get primaryLight => GasometerColors.primaryLight;
   Color get primaryDark => GasometerColors.primaryDark;
-
-  // Cores secundárias
   Color get secondary => GasometerColors.secondary;
   Color get secondaryLight => GasometerColors.secondaryLight;
   Color get secondaryDark => GasometerColors.secondaryDark;
-
-  // Cores de status
   Color get success => GasometerColors.efficiency;
   Color get warning => GasometerColors.warning;
   Color get error => GasometerColors.danger;
   Color get info => GasometerColors.info;
-
-  // Cores de superficie
   Color get surface => Colors.white;
   Color get surfaceVariant => Colors.grey.shade50;
   Color get onSurface => Colors.black87;
   Color get onSurfaceVariant => Colors.black54;
-
-  // Cores de container de erro
   Color get errorContainer => GasometerColors.danger.withValues(alpha: 0.1);
   Color get onErrorContainer => GasometerColors.danger;
-
-  // Cores de outline
   Color get outline => Colors.grey.shade300;
 }
 
@@ -85,8 +73,6 @@ class AppTextStyles {
   factory AppTextStyles() => _instance;
   AppTextStyles._internal();
   static final AppTextStyles _instance = AppTextStyles._internal();
-
-  // Display styles
   TextStyle? get displayLarge => const TextStyle(
     fontSize: 57,
     fontWeight: FontWeight.w400,
@@ -104,8 +90,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
     letterSpacing: 0,
   );
-
-  // Headline styles
   TextStyle? get headlineLarge => const TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w400,
@@ -123,8 +107,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     letterSpacing: 0,
   );
-
-  // Title styles
   TextStyle? get titleLarge => const TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w500,
@@ -142,8 +124,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
-
-  // Label styles
   TextStyle? get labelLarge => const TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -161,8 +141,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
   );
-
-  // Body styles
   TextStyle? get bodyLarge => const TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,

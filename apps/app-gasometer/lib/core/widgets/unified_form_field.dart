@@ -69,8 +69,6 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-
-    // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: const Duration(milliseconds: 250),
       vsync: this,
@@ -81,8 +79,6 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
         curve: Curves.easeInOut,
       ),
     );
-
-    // Listener para mudanças no texto
     _controller.addListener(_onTextChanged);
   }
 
@@ -100,14 +96,8 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
 
   void _onTextChanged() {
     final text = _controller.text;
-
-    // Chamar callback imediatamente
     widget.onChanged?.call(text);
-
-    // Cancelar timer anterior se existir
     _debounceTimer?.cancel();
-
-    // Se campo vazio e não obrigatório, resetar validação
     if (text.isEmpty && !widget.required) {
       setState(() {
         _validationResult = UnifiedValidationResult.initial();
@@ -115,13 +105,9 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
       widget.onValidationChanged?.call(_validationResult);
       return;
     }
-
-    // Mostrar estado de validação em progresso
     setState(() {
       _validationResult = UnifiedValidationResult.validating();
     });
-
-    // Configurar debounce para validação
     _debounceTimer = Timer(widget.debounceDuration, () {
       _performValidation(text);
     });
@@ -143,11 +129,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
       setState(() {
         _validationResult = result;
       });
-
-      // Notificar mudança de validação
       widget.onValidationChanged?.call(result);
-
-      // Animar ícone se houver mudança de estado
       if (result.status != ValidationStatus.initial &&
           result.status != ValidationStatus.validating) {
         _iconAnimationController.forward();
@@ -187,7 +169,6 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label with Required Indicator
         if (widget.label.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(
@@ -213,8 +194,6 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
               ),
             ),
           ),
-
-        // Input Field
         TextFormField(
           controller: _controller,
           enabled: widget.enabled,
@@ -268,11 +247,8 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
               vertical: UnifiedDesignTokens.spacingMD,
             ),
           ),
-          // Não usar validação nativa do FormField - usar nosso sistema
           validator: null,
         ),
-
-        // Validation Message
         if (_validationResult.message != null)
           Padding(
             padding: const EdgeInsets.only(
@@ -305,7 +281,6 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
 
   Widget? _buildSuffixIcon() {
     if (widget.suffixIcon != null) {
-      // Se há um suffixIcon customizado, combinar com o ícone de validação
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [

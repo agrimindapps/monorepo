@@ -19,22 +19,15 @@ abstract class BaseFieldValidator implements IFieldValidator {
   
   @override
   ValidationResult validate(dynamic value) {
-    // Pre-validation checks
     if (!shouldValidate(value)) {
       return ValidationResult.valid();
     }
-    
-    // Null/empty value handling
     if (value == null || (value is String && value.isEmpty)) {
       return handleNullOrEmpty(value);
     }
-    
-    // Type validation
     if (!isValidType(value)) {
       return ValidationResult.invalid(getTypeErrorMessage(value));
     }
-    
-    // Actual validation logic
     return performValidation(value);
   }
   

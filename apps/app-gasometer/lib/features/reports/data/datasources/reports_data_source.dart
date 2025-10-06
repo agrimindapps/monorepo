@@ -23,13 +23,11 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   @override
   Future<ReportSummaryEntity> generateReport(String vehicleId, DateTime startDate, DateTime endDate, String period) async {
     try {
-      // Get fuel records for the period
       final fuelRecordsResult = await _fuelRepository.getFuelRecordsByVehicle(vehicleId);
       
       return await fuelRecordsResult.fold(
         (failure) => throw CacheException('Erro ao buscar registros de combustível: ${failure.message}'),
         (fuelRecords) async {
-          // Filter records by date range
           final filteredRecords = fuelRecords.where((record) {
             return record.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
                    record.date.isBefore(endDate.add(const Duration(days: 1)));
@@ -38,40 +36,26 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           if (filteredRecords.isEmpty) {
             return _createEmptyReport(vehicleId, startDate, endDate, period);
           }
-
-          // Sort by date
           filteredRecords.sort((a, b) => a.date.compareTo(b.date));
-
-          // Calculate fuel metrics
           final totalFuelSpent = filteredRecords.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
           final totalFuelLiters = filteredRecords.map((r) => r.liters).fold(0.0, (a, b) => a + b);
           final averageFuelPrice = totalFuelLiters > 0 ? totalFuelSpent / totalFuelLiters : 0.0;
           final fuelRecordsCount = filteredRecords.length;
-
-          // Calculate distance metrics
           final totalDistanceTraveled = _calculateTotalDistance(filteredRecords);
-
-          // Calculate odometer readings from fuel records
           double firstOdometerReading = 0.0;
           double lastOdometerReading = 0.0;
           if (filteredRecords.isNotEmpty) {
             firstOdometerReading = filteredRecords.first.odometer;
             lastOdometerReading = filteredRecords.last.odometer;
           }
-
-          // Calculate average consumption
           double averageConsumption = 0.0;
           if (totalDistanceTraveled > 0 && totalFuelLiters > 0) {
             averageConsumption = totalDistanceTraveled / totalFuelLiters;
           }
-
-          // Calculate cost per km
           double costPerKm = 0.0;
           if (totalDistanceTraveled > 0) {
             costPerKm = totalFuelSpent / totalDistanceTraveled;
           }
-
-          // Create trends data
           final trends = await _calculateTrends(vehicleId, filteredRecords);
 
           return ReportSummaryEntity(
@@ -181,8 +165,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
               'monthly_averages': <Map<String, dynamic>>[],
             };
           }
-
-          // Group by month and calculate monthly averages
           final monthlyData = <String, List<double>>{};
           
           for (final record in filteredRecords) {
@@ -206,8 +188,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           }
 
           monthlyAverages.sort((a, b) => (a['month'] as String).compareTo(b['month'] as String));
-
-          // Calculate trend
           String trend = 'stable';
           double efficiencyChange = 0.0;
           
@@ -314,8 +294,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
 
           final totalCost = filteredRecords.map((r) => r.totalPrice).fold(0.0, (a, b) => a + b);
           final averageCostPerFill = totalCost / filteredRecords.length;
-          
-          // Price trend analysis
           final priceTrends = <Map<String, dynamic>>[];
           final monthlyPrices = <String, List<double>>{};
           
@@ -425,8 +403,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           }
 
           filteredRecords.sort((a, b) => a.date.compareTo(b.date));
-
-          // Calculate days between fills
           final daysBetween = <int>[];
           for (int i = 1; i < filteredRecords.length; i++) {
             final days = filteredRecords[i].date.difference(filteredRecords[i - 1].date).inDays;
@@ -436,8 +412,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           final averageDaysBetween = daysBetween.isNotEmpty 
               ? daysBetween.fold(0, (a, b) => a + b) / daysBetween.length
               : 0;
-
-          // Monthly usage patterns
           final monthlyUsage = <String, int>{};
           for (final record in filteredRecords) {
             final monthKey = _generateMonthKey(record.date);
@@ -450,16 +424,12 @@ class ReportsDataSourceImpl implements ReportsDataSource {
           }).toList();
 
           monthlyUsageList.sort((a, b) => (a['month'] as String).compareTo(b['month'] as String));
-
-          // Determine usage frequency
           String usageFrequency = 'medium';
           if (averageDaysBetween < 7) {
             usageFrequency = 'high';
           } else if (averageDaysBetween > 21) {
             usageFrequency = 'low';
           }
-
-          // Usage trend
           String usageTrend = 'stable';
           if (monthlyUsageList.length >= 2) {
             final firstMonth = monthlyUsageList.first['fill_ups'] as int;
@@ -485,8 +455,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
       throw CacheException('Erro ao analisar padrões de uso: ${e.toString()}');
     }
   }
-
-  // Helper methods
   ReportSummaryEntity _createEmptyReport(String vehicleId, DateTime startDate, DateTime endDate, String period) {
     return ReportSummaryEntity(
       vehicleId: vehicleId,
@@ -522,9 +490,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   /// - `cost_trend`: String price trend ('increasing', 'decreasing', 'stable') 
   /// - `usage_pattern`: String usage consistency ('consistent', 'variable', 'irregular')
   Future<Map<String, dynamic>> _calculateTrends(String vehicleId, List<dynamic> records) async {
-    // Simple trend indicators for report metadata
-    // For now, return stable indicators as a placeholder
-    // Future enhancement could implement actual trend analysis
     return {
       'fuel_efficiency': 'stable',
       'cost_trend': 'stable',
@@ -554,21 +519,12 @@ class ReportsDataSourceImpl implements ReportsDataSource {
     int targetYear = endDate.year;
     int targetMonth = endDate.month;
     int targetDay = endDate.day;
-
-    // Subtract months
     targetMonth -= months;
-
-    // Handle year overflow
     while (targetMonth <= 0) {
       targetYear--;
       targetMonth += 12;
     }
-
-    // Handle day overflow for the target month
-    // Get the last day of the target month
     final lastDayOfTargetMonth = DateTime(targetYear, targetMonth + 1, 0).day;
-    
-    // If the original day doesn't exist in the target month, use the last day of that month
     if (targetDay > lastDayOfTargetMonth) {
       targetDay = lastDayOfTargetMonth;
     }
@@ -576,7 +532,6 @@ class ReportsDataSourceImpl implements ReportsDataSource {
     try {
       return DateTime(targetYear, targetMonth, targetDay, endDate.hour, endDate.minute, endDate.second);
     } catch (e) {
-      // Fallback: if somehow the date is still invalid, use the first day of the target month
       return DateTime(targetYear, targetMonth, 1, endDate.hour, endDate.minute, endDate.second);
     }
   }
@@ -593,20 +548,14 @@ class ReportsDataSourceImpl implements ReportsDataSource {
   /// - Diferenças são razoáveis (< 10.000 km entre registros)
   double _calculateTotalDistance(List<FuelRecordEntity> records) {
     if (records.length < 2) return 0.0;
-    
-    // Ordenar por data para garantir sequência correta
     final sortedRecords = [...records]..sort((a, b) => a.date.compareTo(b.date));
     
     double totalDistance = 0.0;
     for (int i = 1; i < sortedRecords.length; i++) {
       final distance = sortedRecords[i].odometer - sortedRecords[i-1].odometer;
-      
-      // Validar se a distância é razoável
       if (distance > 0 && distance < 10000) { // Entre 0 e 10.000 km
         totalDistance += distance;
       }
-      // Se distance <= 0, pode ser reset do hodômetro - ignorar
-      // Se distance >= 10.000, pode ser erro nos dados - ignorar
     }
     
     return totalDistance;

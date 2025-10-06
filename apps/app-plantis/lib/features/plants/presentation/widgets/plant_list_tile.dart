@@ -49,17 +49,13 @@ class PlantListTile extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Avatar/Imagem da planta
                 _buildPlantAvatar(context),
 
                 const SizedBox(width: 16),
-
-                // Conteúdo principal
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header com nome e menu
                       Row(
                         children: [
                           Expanded(
@@ -96,8 +92,6 @@ class PlantListTile extends ConsumerWidget {
                       ),
 
                       const SizedBox(height: 4),
-
-                      // Subtítulo com espécie e localização
                       Row(
                         children: [
                           Text(
@@ -142,8 +136,6 @@ class PlantListTile extends ConsumerWidget {
                       ),
 
                       const SizedBox(height: 12),
-
-                      // Badge de cuidados pendentes
                       PlantTasksHelper.buildTaskBadge(
                         ref,
                         plant.id,
@@ -243,7 +235,6 @@ class PlantListTile extends ConsumerWidget {
                 title: const Text('Editar planta'),
                 onTap: () {
                   Navigator.pop(context);
-                  // Edit functionality not implemented
                 },
               ),
               ListTile(
@@ -251,7 +242,6 @@ class PlantListTile extends ConsumerWidget {
                 title: const Text('Registrar rega'),
                 onTap: () {
                   Navigator.pop(context);
-                  // Water logging not implemented
                 },
               ),
               ListTile(
@@ -262,7 +252,6 @@ class PlantListTile extends ConsumerWidget {
                 ),
                 onTap: () {
                   Navigator.pop(context);
-                  // Delete functionality not implemented
                 },
               ),
               const SizedBox(height: 20),

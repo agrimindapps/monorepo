@@ -145,11 +145,8 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 _buildHeader(theme),
                 const SizedBox(height: 24),
-
-                // Sections
                 ...sections.map(
                   (section) => _buildSection(
                     section.title,
@@ -161,16 +158,12 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
                 ),
 
                 const SizedBox(height: 32),
-
-                // Footer
                 _buildFooter(theme),
 
                 const SizedBox(height: 80),
               ],
             ),
           ),
-
-          // Scroll to top button
           if (_showScrollToTopButton)
             Positioned(
               right: 16,

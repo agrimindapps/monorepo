@@ -26,8 +26,6 @@ import '../../core/theme/app_colors.dart';
 class FormComponents {
   FormComponents._();
 
-  // ========== ENHANCED TEXT FIELDS ==========
-
   /// **Enhanced Text Form Field**
   ///
   /// A text form field with enhanced validation feedback, accessibility support,
@@ -136,8 +134,6 @@ class FormComponents {
             ),
           ),
         ),
-
-        // Validation feedback
         if (validationState != ValidationState.none)
           _buildValidationFeedback(validationState),
       ],
@@ -196,8 +192,6 @@ class FormComponents {
               validationState: validationState,
               onChanged: onChanged,
             ),
-
-            // Password strength indicator
             if (showStrengthIndicator)
               _buildPasswordStrengthIndicator(controller.text),
           ],
@@ -281,8 +275,6 @@ class FormComponents {
     );
   }
 
-  // ========== FORM SECTIONS ==========
-
   /// **Form Section**
   ///
   /// Groups related form fields with consistent styling and spacing.
@@ -319,7 +311,6 @@ class FormComponents {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Section header
                 InkWell(
                   onTap:
                       isCollapsible
@@ -374,8 +365,6 @@ class FormComponents {
                     ),
                   ),
                 ),
-
-                // Description
                 if (description != null && isExpanded) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -386,8 +375,6 @@ class FormComponents {
                     ),
                   ),
                 ],
-
-                // Form fields
                 if (isExpanded) ...[
                   const SizedBox(height: 16),
                   ...children.map(
@@ -404,8 +391,6 @@ class FormComponents {
       },
     );
   }
-
-  // ========== HELPER METHODS ==========
 
   static Color _getValidationColor(
     ValidationState state, {

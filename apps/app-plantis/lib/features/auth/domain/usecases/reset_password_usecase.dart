@@ -19,19 +19,14 @@ class ResetPasswordUseCase {
   /// - Right(void) - Sucesso no envio do email
   /// - Left(Failure) - Erro na operação
   Future<Either<Failure, void>> call(String email) async {
-    // Validação do email antes de enviar
     if (email.trim().isEmpty) {
       return const Left(ValidationFailure('Email é obrigatório'));
     }
 
     final cleanEmail = email.trim().toLowerCase();
-
-    // Validação de formato usando o validador existente
     if (!_isValidEmailFormat(cleanEmail)) {
       return const Left(ValidationFailure('Formato de email inválido'));
     }
-
-    // Enviar email de reset via repository
     return await _authRepository.sendPasswordResetEmail(email: cleanEmail);
   }
 

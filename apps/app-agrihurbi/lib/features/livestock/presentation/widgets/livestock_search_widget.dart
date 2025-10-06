@@ -52,11 +52,7 @@ class _LivestockSearchWidgetState extends State<LivestockSearchWidget> {
     setState(() {
       _showClearButton = widget.controller.text.isNotEmpty;
     });
-
-    // Cancela timer anterior se existir
     _debounceTimer?.cancel();
-
-    // Inicia novo timer para debounce
     _debounceTimer = Timer(widget.debounceDuration, () {
       widget.onChanged?.call(widget.controller.text);
     });
@@ -354,7 +350,6 @@ class SearchResultsCounter extends StatelessWidget {
             const Spacer(),
             TextButton(
               onPressed: () {
-                // Callback para limpar filtros seria passado aqui
               },
               child: const Text('Limpar'),
             ),

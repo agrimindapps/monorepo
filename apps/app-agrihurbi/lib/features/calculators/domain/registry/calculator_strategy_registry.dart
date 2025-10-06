@@ -18,11 +18,7 @@ class CalculatorStrategyRegistry {
   /// Inicializa o registry automaticamente via DI
   void initialize() {
     if (_initialized) return;
-
-    // Limpa o mapa para re-inicialização
     _strategyMap.clear();
-
-    // Registra todas as estratégias injetadas automaticamente
     for (final strategy in _strategies) {
       _strategyMap[strategy.strategyId] = strategy;
     }
@@ -84,8 +80,6 @@ class CalculatorStrategyRegistry {
     if (!_initialized) {
       initialize();
     }
-
-    // Busca primeira estratégia que pode processar os inputs
     for (final strategy in _strategyMap.values) {
       if (strategy.canProcess(inputs)) {
         return strategy;
@@ -153,8 +147,6 @@ class CalculatorStrategyRegistry {
 
     final errors = <String>[];
     final warnings = <String>[];
-
-    // Validar duplicatas de ID
     final seenIds = <String>{};
     for (final strategy in _strategies) {
       if (seenIds.contains(strategy.strategyId)) {
@@ -162,8 +154,6 @@ class CalculatorStrategyRegistry {
       }
       seenIds.add(strategy.strategyId);
     }
-
-    // Validar metadados
     for (final strategy in _strategyMap.values) {
       if (strategy.strategyName.isEmpty) {
         errors.add('Estratégia ${strategy.strategyId} não tem nome definido');
@@ -181,8 +171,6 @@ class CalculatorStrategyRegistry {
         warnings.add('Estratégia ${strategy.strategyId} não define culturas suportadas');
       }
     }
-
-    // Verificar distribuição de tipos
     final nutritionCount = getNutritionStrategies().length;
     final irrigationCount = getIrrigationStrategies().length;
 
@@ -289,9 +277,7 @@ abstract class CalculatorStrategyModule {
   /// de todas as estratégias implementadas no sistema
   List<ICalculatorStrategy> strategies(
     NPKCalculationStrategy npkStrategy,
-    // Outras estratégias serão adicionadas conforme implementadas
   ) => [
     npkStrategy,
-    // Placeholder para futuras estratégias
   ];
 }

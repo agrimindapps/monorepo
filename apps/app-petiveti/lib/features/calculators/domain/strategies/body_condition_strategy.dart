@@ -27,7 +27,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
 
   @override
   BodyConditionOutput calculate(BodyConditionInput input) {
-    // Validar entrada
     final validationErrors = validateInput(input);
     if (validationErrors.isNotEmpty) {
       throw InvalidInputException(
@@ -38,16 +37,9 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
     }
 
     try {
-      // Calcular score BCS baseado nos parâmetros físicos
       final bcsScore = _calculateBcsScore(input);
-      
-      // Estimar peso ideal baseado na espécie e dados do animal
       final idealWeight = _estimateIdealWeight(input, bcsScore);
-      
-      // Aplicar correções por idade, castração, etc.
       final correctedIdealWeight = _applyCorrections(input, idealWeight);
-      
-      // Gerar output usando factory
       return BodyConditionOutputFactory.fromBcsScore(
         bcsScore: bcsScore,
         currentWeight: input.currentWeight,
@@ -70,16 +62,10 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
   @override
   List<String> validateInput(BodyConditionInput input) {
     final errors = <String>[];
-
-    // Usar validação da própria entidade
     errors.addAll(input.validationErrors);
-
-    // Validações específicas da estratégia
     if (!supportedSpecies.contains(input.species.code)) {
       errors.add('Espécie ${input.species.displayName} não suportada');
     }
-
-    // Validação de coerência entre parâmetros
     if (input.animalAge != null && input.animalAge! < 0) {
       errors.add('Idade do animal não pode ser negativa');
     }
@@ -87,8 +73,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
     if (input.animalAge != null && input.animalAge! > 300) {
       errors.add('Idade do animal parece excessiva (máximo 25 anos = 300 meses)');
     }
-
-    // Validação de coerência fisiológica
     final minWeight = _getMinimumWeight(input.species.code, input.animalAge);
     if (input.currentWeight < minWeight) {
       errors.add('Peso atual abaixo do mínimo fisiológico para a espécie (${minWeight}kg)');
@@ -99,39 +83,24 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
 
   /// Calcula o score BCS baseado nos três parâmetros principais
   int _calculateBcsScore(BodyConditionInput input) {
-    // Converter enums para scores numéricos
     final ribScore = input.ribPalpation.score;
     final waistScore = input.waistVisibility.score;
     final abdomenScore = input.abdominalProfile.score;
-
-    // Calcular média ponderada (costelas têm peso maior)
     final weightedAverage = (ribScore * 0.5 + waistScore * 0.3 + abdomenScore * 0.2);
-    
-    // Arredondar para escala BCS 1-9
     var bcsScore = weightedAverage.round();
-    
-    // Ajustes baseados em combinações específicas
     bcsScore = _applyBcsAdjustments(bcsScore, ribScore, waistScore, abdomenScore);
-    
-    // Garantir que está dentro da faixa válida
     return math.max(1, math.min(9, bcsScore));
   }
 
   /// Aplica ajustes finos baseado em combinações de scores
   int _applyBcsAdjustments(int baseScore, int ribScore, int waistScore, int abdomenScore) {
     var adjustedScore = baseScore;
-    
-    // Se costelas muito difíceis de palpar mas outros parâmetros não tão extremos
     if (ribScore == 1 && (waistScore > 2 || abdomenScore > 2)) {
       adjustedScore = math.max(adjustedScore - 1, 1);
     }
-    
-    // Se costelas muito fáceis mas outros não tão extremos
     if (ribScore == 5 && (waistScore < 4 || abdomenScore < 4)) {
       adjustedScore = math.min(adjustedScore + 1, 9);
     }
-    
-    // Inconsistências - priorizar costelas (mais objetivo)
     if ((ribScore - waistScore).abs() > 2 || (ribScore - abdomenScore).abs() > 2) {
       adjustedScore = ((ribScore * 0.6 + baseScore * 0.4).round());
     }
@@ -141,24 +110,14 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
 
   /// Estima peso ideal baseado no BCS atual e dados do animal
   double _estimateIdealWeight(BodyConditionInput input, int bcsScore) {
-    // Se peso ideal foi fornecido, usar como referência
     if (input.idealWeight != null) {
       return input.idealWeight!;
     }
-
-    // Se animal está no peso ideal (BCS 5), usar peso atual
     if (bcsScore == 5) {
       return input.currentWeight;
     }
-
-    // Calcular peso ideal baseado no BCS atual
-    // Cada ponto BCS = aproximadamente 10-15% diferença de peso
     final weightAdjustmentFactor = _getBcsWeightAdjustmentFactor(bcsScore);
-    
-    // Estimar peso ideal retroativamente
     final estimatedIdealWeight = input.currentWeight / (1 + weightAdjustmentFactor);
-    
-    // Validar contra limites fisiológicos conhecidos
     final minWeight = _getMinimumWeight(input.species.code, input.animalAge);
     final maxWeight = _getMaximumWeight(input.species.code, input.animalBreed);
     
@@ -185,8 +144,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
   /// Aplica correções por idade, castração, etc.
   double _applyCorrections(BodyConditionInput input, double baseIdealWeight) {
     var correctedWeight = baseIdealWeight;
-
-    // Correção por idade
     if (input.animalAge != null) {
       correctedWeight = applyAgeCorrection(
         correctedWeight, 
@@ -194,8 +151,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
         input.species.code
       );
     }
-
-    // Correção para animais castrados (tendem a ganhar peso mais facilmente)
     if (input.isNeutered) {
       final adjustment = CalculatorLookupTables.getNeuteredAdjustment(input.species.code);
       correctedWeight *= adjustment;
@@ -221,7 +176,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
     if (species == 'cat') {
       return breed?.toLowerCase().contains('maine') == true ? 12.0 : 8.0;
     } else if (species == 'dog') {
-      // Baseado na raça conhecida
       if (breed != null) {
         final breedLower = breed.toLowerCase();
         if (breedLower.contains('mastiff') || breedLower.contains('great dane')) {
@@ -236,8 +190,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
     }
     return 80.0; // default
   }
-
-  // Implementações dos mixins
 
   @override
   Map<String, dynamic> getSpeciesParameters(String species) {
@@ -262,12 +214,9 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
 
   @override
   double applyAgeCorrection(double baseValue, int ageInMonths, String species) {
-    // Filhotes e idosos têm metabolismo diferente
     if (ageInMonths < 12) {
-      // Filhotes crescendo - peso ideal pode ser menor temporariamente
       return baseValue * 0.9;
     } else if (ageInMonths > 84) {
-      // Idosos - tendem a perder massa muscular
       return baseValue * 0.95;
     }
     
@@ -284,7 +233,6 @@ class BodyConditionStrategy extends CalculatorStrategy<BodyConditionInput, BodyC
 
   @override
   double applyWeightCorrection(double baseValue, double weightKg, String species) {
-    // Para animais muito pequenos ou grandes, aplicar correções
     final params = getSpeciesParameters(species);
     final variability = params['weightVariability'] as double;
     

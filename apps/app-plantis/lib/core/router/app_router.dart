@@ -52,8 +52,6 @@ class AppRouter {
 
   static GoRouter router(WidgetRef ref) {
     final authState = ref.watch(authProvider);
-
-    // BUGFIX: Web deve sempre iniciar em promotional, mobile vai direto para login
     const initialLocation = kIsWeb ? promotional : login;
 
     return GoRouter(
@@ -68,11 +66,7 @@ class AppRouter {
         final isRegistering = state.matchedLocation == register;
         final isOnLanding = state.matchedLocation == landing;
         final isOnPromotional = state.matchedLocation == promotional;
-
-        // Para fins de navegação, usuário anônimo é tratado como não autenticado
         final isReallyAuthenticated = isAuthenticated && !isAnonymous;
-
-        // Lista de rotas públicas (acessíveis sem autenticação)
         final publicRoutes = [
           login,
           register,
@@ -88,8 +82,6 @@ class AppRouter {
               state.matchedLocation.startsWith(route) ||
               state.matchedLocation == route,
         );
-
-        // Lista de rotas protegidas que requerem autenticação
         final protectedRoutes = [
           plants,
           plantDetails,
@@ -111,35 +103,22 @@ class AppRouter {
               state.matchedLocation.startsWith(route) ||
               state.matchedLocation == route,
         );
-
-        // Wait for auth initialization
         if (!isInitialized) {
           return null;
         }
-
-        // Se realmente autenticado e não está no app, redireciona para plantas
         if (isReallyAuthenticated &&
             (isLoggingIn || isRegistering || isOnLanding || isOnPromotional)) {
           return plants;
         }
-
-        // Se acessando rota pública, permitir acesso
         if (isAccessingPublicRoute) {
           return null; // Permitir navegação para rotas públicas
         }
-
-        // Se não realmente autenticado e tentando acessar rota protegida
         if (!isReallyAuthenticated && isAccessingProtectedRoute) {
-          // BUGFIX: Na web, volta para promotional. No mobile, vai para login
           return kIsWeb ? promotional : login;
         }
-
-        // Mobile: Se não autenticado e não está em rota conhecida, vai para landing
         if (!kIsWeb && !isReallyAuthenticated) {
           return landing;
         }
-
-        // Web: Se não autenticado e não está em rota conhecida, vai para promotional
         if (kIsWeb && !isReallyAuthenticated) {
           return promotional;
         }
@@ -147,28 +126,21 @@ class AppRouter {
         return null;
       },
       routes: [
-        // Landing Page Route
         GoRoute(
           path: landing,
           name: 'landing',
           builder: (context, state) => const LandingPage(),
         ),
-
-        // Home Route - Redirects to promotional page
         GoRoute(
           path: home,
           name: 'home',
           builder: (context, state) => const PromotionalPage(),
         ),
-
-        // Promotional Page Route (outside of shell for web landing)
         GoRoute(
           path: promotional,
           name: 'promotional',
           builder: (context, state) => const PromotionalPage(),
         ),
-
-        // Auth Routes - Unified Auth Page
         GoRoute(
           path: login,
           name: 'login',
@@ -181,8 +153,6 @@ class AppRouter {
           builder:
               (context, state) => const AuthPage(initialTab: 1), // Register tab
         ),
-
-        // Main Shell Route with Web Optimized Navigation
         ShellRoute(
           builder:
               (context, state, child) =>
@@ -190,7 +160,6 @@ class AppRouter {
                     child: child,
                   ).withKeyboardShortcuts(),
           routes: [
-            // Plants Routes
             GoRoute(
               path: plants,
               name: 'plants',
@@ -221,8 +190,6 @@ class AppRouter {
                 ),
               ],
             ),
-
-            // Tasks Route
             GoRoute(
               path: tasks,
               name: 'tasks',
@@ -230,29 +197,21 @@ class AppRouter {
                 return const TasksListPage();
               },
             ),
-
-            // Premium Route
             GoRoute(
               path: premium,
               name: 'premium',
               builder: (context, state) => const PremiumSubscriptionPage(),
             ),
-
-            // Settings Route
             GoRoute(
               path: settings,
               name: 'settings',
               builder: (context, state) => const SettingsPage(),
             ),
-
-            // Account Profile Route
             GoRoute(
               path: accountProfile,
               name: 'account-profile',
               builder: (context, state) => const AccountProfilePage(),
             ),
-
-            // Legal Routes
             GoRoute(
               path: termsOfService,
               name: 'terms-of-service',
@@ -268,8 +227,6 @@ class AppRouter {
               name: 'account-deletion-policy',
               builder: (context, state) => const AccountDeletionPage(),
             ),
-
-            // Settings Routes
             GoRoute(
               path: notificationsSettings,
               name: 'notifications-settings',
@@ -294,8 +251,6 @@ class AppRouter {
               name: 'license-status',
               builder: (context, state) => const LicenseStatusPage(),
             ),
-
-            // Data Export Route
             GoRoute(
               path: dataExport,
               name: 'data-export',
@@ -310,8 +265,6 @@ class AppRouter {
     );
   }
 }
-
-// Error Page
 class ErrorPage extends StatelessWidget {
   final Object? error;
 
@@ -347,5 +300,3 @@ class ErrorPage extends StatelessWidget {
     );
   }
 }
-
-// SettingsPage is implemented in presentation/pages/settings_page.dart

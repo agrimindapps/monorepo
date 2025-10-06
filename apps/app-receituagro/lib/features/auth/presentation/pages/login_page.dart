@@ -73,7 +73,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    // Watch login state for auth success navigation
     ref.listen(loginNotifierProvider, (previous, next) {
       if (next.isAuthenticated && mounted) {
         _handleAuthSuccess();
@@ -126,12 +125,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        // Lado esquerdo com branding do ReceitaAgro
         Expanded(
           flex: 5,
           child: _buildBrandingSide(),
         ),
-        // Lado direito com formulário
         Expanded(
           flex: 4,
           child: FadeTransition(
@@ -349,8 +346,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     if (!mounted) return;
     
     debugPrint('✅ LoginPage: Authentication successful, returning to ProfilePage');
-    
-    // Return true to indicate successful authentication
     Navigator.of(context).pop(true);
     
     ScaffoldMessenger.of(context).showSnackBar(

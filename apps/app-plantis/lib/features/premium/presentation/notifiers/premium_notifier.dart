@@ -73,11 +73,7 @@ class PremiumNotifier extends _$PremiumNotifier {
     _simpleSubscriptionSyncService = ref.read(
       simpleSubscriptionSyncServiceProvider,
     );
-
-    // Setup subscriptions
     _setupSubscriptions();
-
-    // Load initial data
     await _loadAvailableProducts();
     await _checkCurrentSubscription();
 
@@ -85,7 +81,6 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   void _setupSubscriptions() {
-    // Escuta mudanças na assinatura via SimpleSubscriptionSyncService
     if (_simpleSubscriptionSyncService != null) {
       _syncSubscriptionStream = _simpleSubscriptionSyncService
           .subscriptionStatus
@@ -96,7 +91,6 @@ class PremiumNotifier extends _$PremiumNotifier {
             );
           });
     } else {
-      // Fallback para versão original (compatibilidade)
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
         subscription,
       ) {
@@ -106,8 +100,6 @@ class PremiumNotifier extends _$PremiumNotifier {
         );
       });
     }
-
-    // Escuta mudanças de autenticação
     _authStream = _authRepository.currentUser.listen((user) {
       if (user != null) {
         _syncUserSubscription(user.id);
@@ -118,8 +110,6 @@ class PremiumNotifier extends _$PremiumNotifier {
         );
       }
     });
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _subscriptionStream?.cancel();
       _syncSubscriptionStream?.cancel();
@@ -144,8 +134,6 @@ class PremiumNotifier extends _$PremiumNotifier {
         currentOperation: PurchaseOperation.loadProducts,
       ),
     );
-
-    // Usa SimpleSubscriptionSyncService se disponível
     if (_simpleSubscriptionSyncService != null) {
       final result = await _simpleSubscriptionSyncService
           .hasActiveSubscriptionForApp('plantis');
@@ -161,14 +149,12 @@ class PremiumNotifier extends _$PremiumNotifier {
           );
         },
         (_) {
-          // Subscription será atualizada via stream
           state = AsyncValue.data(
             currentState.copyWith(isLoading: false, currentOperation: null),
           );
         },
       );
     } else {
-      // Fallback para versão original
       final result = await _subscriptionRepository.getCurrentSubscription();
 
       result.fold(
@@ -316,8 +302,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     final currentState = state.valueOrNull ?? const PremiumState();
     state = AsyncValue.data(currentState.copyWith(currentOperation: null));
   }
-
-  // Feature checks
   bool canCreateUnlimitedPlants() {
     final currentState = state.valueOrNull;
     return currentState?.isPremium ?? false;
@@ -366,8 +350,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     return premiumFeatures.contains(featureId);
   }
 }
-
-// Dependency Providers
 @riverpod
 ISubscriptionRepository subscriptionRepository(Ref ref) {
   return GetIt.instance<ISubscriptionRepository>();

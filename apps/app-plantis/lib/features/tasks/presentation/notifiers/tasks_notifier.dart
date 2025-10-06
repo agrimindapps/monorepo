@@ -47,13 +47,10 @@ class TasksNotifier extends _$TasksNotifier {
   late final AuthStateNotifier _authStateNotifier;
   late final SyncCoordinatorService _syncCoordinator;
   late final OfflineSyncQueueService _offlineQueue;
-
-  // Stream subscription for auth state changes
   StreamSubscription<UserEntity?>? _authSubscription;
 
   @override
   Future<TasksState> build() async {
-    // Initialize dependencies
     _getTasksUseCase = ref.read(getTasksUseCaseProvider);
     _addTaskUseCase = ref.read(addTaskUseCaseProvider);
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
@@ -61,22 +58,14 @@ class TasksNotifier extends _$TasksNotifier {
     _authStateNotifier = AuthStateNotifier.instance;
     _syncCoordinator = SyncCoordinatorService.instance;
     _offlineQueue = OfflineSyncQueueService.instance;
-
-    // Initialize notification service when notifier is created
     await _initializeNotificationService();
-
-    // Initialize auth state listener
     _initializeAuthListener();
-
-    // Setup cleanup on dispose
     ref.onDispose(() {
       _authSubscription?.cancel();
       _syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks);
       _syncCoordinator.cancelOperations(TaskSyncOperations.addTask);
       _syncCoordinator.cancelOperations(TaskSyncOperations.completeTask);
     });
-
-    // Load initial tasks
     return await _loadTasksInternal();
   }
 
@@ -94,10 +83,7 @@ class TasksNotifier extends _$TasksNotifier {
         },
         (tasks) {
           debugPrint('✅ TasksNotifier: Loaded ${tasks.length} tasks');
-
-          // Check overdue tasks and send notifications
           _notificationService.checkOverdueTasks(tasks);
-          // Reschedule all notifications
           _notificationService.rescheduleTaskNotifications(tasks);
 
           return TasksState(
@@ -123,8 +109,6 @@ class TasksNotifier extends _$TasksNotifier {
       debugPrint(
         '🔐 TasksNotifier: Auth state changed - user: ${user?.id}, initialized: ${_authStateNotifier.isInitialized}',
       );
-
-      // Only load tasks if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         debugPrint('✅ TasksNotifier: Auth is stable, loading tasks...');
         loadTasks();
@@ -132,7 +116,6 @@ class TasksNotifier extends _$TasksNotifier {
         debugPrint(
           '🔄 TasksNotifier: No user but auth initialized - clearing tasks',
         );
-        // Clear tasks when user logs out
         state = AsyncValue.data(
           TasksState.initial().copyWith(
             allTasks: <task_entity.Task>[],
@@ -157,27 +140,19 @@ class TasksNotifier extends _$TasksNotifier {
   /// SECURITY: Tasks with null userId are DENIED access to prevent data exposure
   bool _validateTaskOwnership(task_entity.Task task) {
     final currentUser = _authStateNotifier.currentUser;
-
-    // If no user is authenticated, deny access
     if (currentUser == null) {
       debugPrint('🚫 Access denied: No authenticated user');
       return false;
     }
-
-    // SECURITY FIX: Deny access for tasks with null userId
     if (task.userId == null) {
       debugPrint(
         '🚫 Access denied: Task has null userId (potential security risk)',
       );
       return false;
     }
-
-    // SECURITY: Only allow access if task explicitly belongs to current user
     if (task.userId == currentUser.id) {
       return true;
     }
-
-    // If task belongs to different user, deny access
     debugPrint(
       '🚫 Access denied: Task belongs to user ${task.userId}, current user is ${currentUser.id}',
     );
@@ -294,7 +269,6 @@ class TasksNotifier extends _$TasksNotifier {
       );
     } on SyncThrottledException catch (e) {
       debugPrint('⚠️ Load tasks throttled: ${e.message}');
-      // Don't show error to user for throttling
     } catch (e) {
       debugPrint('❌ TasksNotifier: Load tasks failed: $e');
       _updateState(
@@ -308,8 +282,6 @@ class TasksNotifier extends _$TasksNotifier {
 
   Future<void> _loadTasksOperation() async {
     final currentState = state.valueOrNull ?? TasksState.initial();
-
-    // Only show loading if we don't have tasks yet
     final shouldShowLoading = currentState.allTasks.isEmpty;
 
     if (shouldShowLoading) {
@@ -363,10 +335,7 @@ class TasksNotifier extends _$TasksNotifier {
               clearError: true,
             ),
           );
-
-          // Check overdue tasks and send notifications
           _notificationService.checkOverdueTasks(tasks);
-          // Reschedule all notifications
           _notificationService.rescheduleTaskNotifications(tasks);
         },
       );
@@ -412,7 +381,6 @@ class TasksNotifier extends _$TasksNotifier {
     _updateState((current) => current.copyWith(clearError: true));
 
     try {
-      // Ensure task is associated with current user
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         _completeGlobalOperation(TaskLoadingOperation.addingTask);
@@ -423,27 +391,20 @@ class TasksNotifier extends _$TasksNotifier {
         );
         return false;
       }
-
-      // Assign current user to the task
       final taskWithUser = task.withUserId(currentUser.id);
 
       final result = await _addTaskUseCase(AddTaskParams(task: taskWithUser));
 
       return result.fold(
         (failure) {
-          // If it's a network failure, queue for offline sync
           if (_isNetworkFailure(failure)) {
             debugPrint(
               '🌐 Network failure detected, queuing task for offline sync',
             );
-
-            // Create optimistic local task
             final optimisticTask = taskWithUser.copyWith(
               id: DateTime.now().millisecondsSinceEpoch.toString(),
               isDirty: true,
             );
-
-            // Add to local state immediately
             final currentState = state.valueOrNull ?? TasksState.initial();
             final updatedTasks = List<task_entity.Task>.from(currentState.allTasks)
               ..add(optimisticTask);
@@ -463,8 +424,6 @@ class TasksNotifier extends _$TasksNotifier {
                 clearError: true,
               ),
             );
-
-            // Queue for offline sync
             final queuedOperation = QueuedOperation(
               id: optimisticTask.id,
               type: OfflineTaskOperations.addTask,
@@ -505,8 +464,6 @@ class TasksNotifier extends _$TasksNotifier {
               clearError: true,
             ),
           );
-
-          // Schedule notification for the new task
           _notificationService.scheduleTaskNotification(addedTask);
           return true;
         },
@@ -548,7 +505,6 @@ class TasksNotifier extends _$TasksNotifier {
     _updateState((current) => current.copyWith(clearError: true));
 
     try {
-      // Validate ownership before completing task
       final task = _getTaskWithOwnershipValidation(taskId);
 
       final result = await _completeTaskUseCase(
@@ -557,20 +513,15 @@ class TasksNotifier extends _$TasksNotifier {
 
       return result.fold(
         (failure) {
-          // If it's a network failure, queue for offline sync
           if (_isNetworkFailure(failure)) {
             debugPrint(
               '🌐 Network failure detected, queuing task completion for offline sync',
             );
-
-            // Create optimistic local completion
             final completedTask = task.copyWithTaskData(
               status: task_entity.TaskStatus.completed,
               completedAt: DateTime.now(),
               completionNotes: notes,
             );
-
-            // Update local state immediately
             final currentState = state.valueOrNull ?? TasksState.initial();
             final updatedTasks = currentState.allTasks.map((t) {
               return t.id == taskId ? completedTask : t;
@@ -592,8 +543,6 @@ class TasksNotifier extends _$TasksNotifier {
                 clearError: true,
               ),
             );
-
-            // Queue for offline sync
             final queuedOperation = QueuedOperation(
               id: taskId,
               type: OfflineTaskOperations.completeTask,
@@ -606,8 +555,6 @@ class TasksNotifier extends _$TasksNotifier {
             );
 
             _offlineQueue.queueOperation(queuedOperation);
-
-            // Cancel notifications optimistically
             _notificationService.cancelTaskNotifications(taskId);
             _notificationService.rescheduleTaskNotifications(updatedTasks);
 
@@ -644,10 +591,7 @@ class TasksNotifier extends _$TasksNotifier {
               clearError: true,
             ),
           );
-
-          // Cancel notifications for the completed task
           _notificationService.cancelTaskNotifications(taskId);
-          // Reschedule notifications for remaining tasks
           _notificationService.rescheduleTaskNotifications(updatedTasks);
 
           return true;
@@ -776,8 +720,6 @@ class TasksNotifier extends _$TasksNotifier {
     List<task_entity.TaskPriority> selectedPriorities,
   ) {
     List<task_entity.Task> tasks = List.from(allTasks);
-
-    // Apply filter by type
     switch (currentFilter) {
       case TasksFilterType.all:
         break;
@@ -826,43 +768,30 @@ class TasksNotifier extends _$TasksNotifier {
         }
         break;
     }
-
-    // Apply filter by task type
     if (selectedTaskTypes.isNotEmpty) {
       tasks = tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
     }
-
-    // Apply filter by priority
     if (selectedPriorities.isNotEmpty) {
       tasks = tasks
           .where((task) => selectedPriorities.contains(task.priority))
           .toList();
     }
-
-    // Apply search
     if (searchQuery.isNotEmpty) {
       tasks = tasks.where((task) {
         return task.title.toLowerCase().contains(searchQuery) ||
             (task.description?.toLowerCase().contains(searchQuery) ?? false);
       }).toList();
     }
-
-    // Sort by priority and date
     tasks.sort((a, b) {
-      // First by status (pending first)
       if (a.status != b.status) {
         if (a.status == task_entity.TaskStatus.pending) return -1;
         if (b.status == task_entity.TaskStatus.pending) return 1;
       }
-
-      // Then by priority
       final aPriorityIndex = task_entity.TaskPriority.values.indexOf(a.priority);
       final bPriorityIndex = task_entity.TaskPriority.values.indexOf(b.priority);
       if (aPriorityIndex != bPriorityIndex) {
         return bPriorityIndex.compareTo(aPriorityIndex); // Higher priority first
       }
-
-      // Finally by due date
       return a.dueDate.compareTo(b.dueDate);
     });
 
@@ -922,12 +851,8 @@ class TasksNotifier extends _$TasksNotifier {
   Future<int> getScheduledNotificationsCount() async {
     return await _notificationService.getScheduledNotificationsCount();
   }
-
-  // Convenience getters for offline sync status
   bool get hasPendingOfflineOperations => _offlineQueue.hasPendingOperations;
   int get pendingOfflineOperationsCount => _offlineQueue.pendingOperationsCount;
-
-  // Computed getters that delegate to state (for backward compatibility)
   List<task_entity.Task> get highPriorityTasks {
     final currentState = state.valueOrNull ?? TasksState.initial();
     return currentState.filteredTasks
@@ -964,10 +889,6 @@ class UnauthorizedAccessException implements Exception {
   String toString() => 'UnauthorizedAccessException: $message';
 }
 
-// ============================================================================
-// DEPENDENCY PROVIDERS
-// ============================================================================
-
 /// Provider for GetTasksUseCase
 @riverpod
 GetTasksUseCase getTasksUseCase(Ref ref) {
@@ -992,7 +913,5 @@ CompleteTaskUseCase completeTaskUseCase(Ref ref) {
 /// Provider for TasksRepository
 @riverpod
 TasksRepository tasksRepository(Ref ref) {
-  // Use GetIt to retrieve the repository instance
-  // This assumes TasksRepository is registered in the DI container
   return getIt<TasksRepository>();
 }

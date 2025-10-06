@@ -88,8 +88,6 @@ class BuscaAvancadaState {
   BuscaAvancadaState clearError() {
     return copyWith(hasError: false, errorMessage: null);
   }
-
-  // Estado computado
   bool get temFiltrosAtivos =>
       culturaIdSelecionada != null || pragaIdSelecionada != null || defensivoIdSelecionado != null;
 
@@ -145,7 +143,6 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
 
   @override
   Future<BuscaAvancadaState> build() async {
-    // Get dependencies from DI
     _integrationService = di.sl<DiagnosticoIntegrationService>();
     _culturaRepo = di.sl<CulturaHiveRepository>();
     _pragasRepo = di.sl<PragasHiveRepository>();
@@ -165,12 +162,9 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
       List<Map<String, String>> culturas = [];
       List<Map<String, String>> pragas = [];
       List<Map<String, String>> defensivos = [];
-
-      // Carregar culturas
       final culturasResult = await _culturaRepo.getAll();
       culturasResult.fold(
         (error) {
-          // Erro ao carregar culturas
         },
         (culturasData) {
           culturas = culturasData
@@ -182,12 +176,9 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
             ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
         },
       );
-
-      // Carregar pragas
       final pragasResult = await _pragasRepo.getAll();
       pragasResult.fold(
         (error) {
-          // Erro ao carregar pragas
         },
         (pragasData) {
           pragas = pragasData
@@ -199,12 +190,9 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
             ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
         },
       );
-
-      // Carregar defensivos
       final defensivosResult = await _fitossanitarioRepo.getAll();
       defensivosResult.fold(
         (error) {
-          // Erro ao carregar defensivos
         },
         (defensivosData) {
           defensivos = defensivosData
@@ -226,7 +214,6 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
         ),
       );
     } catch (e) {
-      // Erro ao carregar dados dos dropdowns
     }
   }
 
@@ -323,8 +310,6 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
         errorMessage: null,
       ),
     );
-
-    // Limpar cache do serviço
     _integrationService.clearCache();
   }
 

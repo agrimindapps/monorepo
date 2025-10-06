@@ -108,7 +108,6 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
 
   @override
   Future<DefensivosUnificadoState> build() async {
-    // Get use cases from DI
     _getDefensivosAgrupadosUseCase = di.sl<GetDefensivosAgrupadosUseCase>();
     _getDefensivosCompletosUseCase = di.sl<GetDefensivosCompletosUseCase>();
     _getDefensivosComFiltrosUseCase = di.sl<GetDefensivosComFiltrosUseCase>();
@@ -351,18 +350,12 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     }
   }
 
-  // Private methods
-
   /// Aplica filtros localmente (mais rápido para mudanças simples)
   List<DefensivoEntity> _aplicarFiltrosLocais(List<DefensivoEntity> defensivos, String filtroTexto) {
     var filtrados = List<DefensivoEntity>.from(defensivos);
-
-    // Filtrar itens com descrição menor que 3 caracteres
     filtrados = filtrados.where((d) {
       return d.displayName.length >= 3;
     }).toList();
-
-    // Filtro por texto
     if (filtroTexto.isNotEmpty) {
       filtrados = filtrados.where((d) {
         final texto = filtroTexto.toLowerCase();

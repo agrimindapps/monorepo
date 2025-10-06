@@ -21,13 +21,11 @@ class _MainScaffoldState extends State<MainScaffold> {
 
       return 0;
     } catch (e) {
-      // GoRouterState não está disponível no contexto atual
       return 0;
     }
   }
 
   void _onTabTapped(int index) {
-    // Verificar se o contexto tem acesso ao GoRouter antes de navegar
     if (!mounted) return;
 
     try {
@@ -43,7 +41,6 @@ class _MainScaffoldState extends State<MainScaffold> {
           break;
       }
     } catch (e) {
-      // Se a navegação falhar, pode ser que o contexto não tenha acesso ao GoRouter
       debugPrint('Erro na navegação: $e');
     }
   }

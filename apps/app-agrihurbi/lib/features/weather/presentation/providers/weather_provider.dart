@@ -39,52 +39,30 @@ class WeatherProvider with ChangeNotifier {
        _getRainGauges = getRainGauges,
        _calculateWeatherStatistics = calculateWeatherStatistics,
        _weatherRepository = weatherRepository;
-
-  // ============================================================================
-  // STATE MANAGEMENT
-  // ============================================================================
-
-  // Loading states
   bool _isLoading = false;
   bool _isMeasurementsLoading = false;
   bool _isRainGaugesLoading = false;
   bool _isStatisticsLoading = false;
   bool _isSyncing = false;
-
-  // Data states
   List<WeatherMeasurementEntity> _measurements = [];
   List<RainGaugeEntity> _rainGauges = [];
   final List<WeatherStatisticsEntity> _statistics = [];
   WeatherMeasurementEntity? _currentWeather;
   WeatherMeasurementEntity? _latestMeasurement;
-
-  // Filter states
   String? _selectedLocationId;
   String _selectedPeriod = 'daily';
   DateTime? _startDate;
   DateTime? _endDate;
   int _measurementsLimit = 50;
-
-  // Error states
   WeatherFailure? _lastError;
   String? _errorMessage;
-
-  // Pagination states
   bool _hasMoreMeasurements = true;
   int _currentPage = 0;
-
-  // ============================================================================
-  // GETTERS
-  // ============================================================================
-
-  // Loading states
   bool get isLoading => _isLoading;
   bool get isMeasurementsLoading => _isMeasurementsLoading;
   bool get isRainGaugesLoading => _isRainGaugesLoading;
   bool get isStatisticsLoading => _isStatisticsLoading;
   bool get isSyncing => _isSyncing;
-
-  // Data states
   List<WeatherMeasurementEntity> get measurements =>
       List.unmodifiable(_measurements);
   List<RainGaugeEntity> get rainGauges => List.unmodifiable(_rainGauges);
@@ -92,27 +70,19 @@ class WeatherProvider with ChangeNotifier {
       List.unmodifiable(_statistics);
   WeatherMeasurementEntity? get currentWeather => _currentWeather;
   WeatherMeasurementEntity? get latestMeasurement => _latestMeasurement;
-
-  // Filter states
   String? get selectedLocationId => _selectedLocationId;
   String get selectedPeriod => _selectedPeriod;
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
   int get measurementsLimit => _measurementsLimit;
-
-  // Error states
   WeatherFailure? get lastError => _lastError;
   String? get errorMessage => _errorMessage;
   bool get hasError => _lastError != null;
-
-  // Computed states
   bool get hasMeasurements => _measurements.isNotEmpty;
   bool get hasRainGauges => _rainGauges.isNotEmpty;
   bool get hasStatistics => _statistics.isNotEmpty;
   bool get hasMoreMeasurements => _hasMoreMeasurements;
   int get currentPage => _currentPage;
-
-  // Rain gauge computed states
   List<RainGaugeEntity> get activeRainGauges =>
       _rainGauges.where((gauge) => gauge.isActive).toList();
 
@@ -121,8 +91,6 @@ class WeatherProvider with ChangeNotifier {
 
   List<RainGaugeEntity> get rainGaugesNeedingMaintenance =>
       _rainGauges.where((gauge) => gauge.needsMaintenance).toList();
-
-  // Weather summary
   Map<String, dynamic> get weatherSummary {
     if (_latestMeasurement == null) return {};
 
@@ -137,10 +105,6 @@ class WeatherProvider with ChangeNotifier {
     };
   }
 
-  // ============================================================================
-  // INITIALIZATION
-  // ============================================================================
-
   /// Initialize weather provider with default data
   Future<void> initialize({String? locationId}) async {
     _setLoading(true);
@@ -150,8 +114,6 @@ class WeatherProvider with ChangeNotifier {
       if (locationId != null) {
         _selectedLocationId = locationId;
       }
-
-      // Load initial data
       await Future.wait([
         loadMeasurements(),
         loadRainGauges(),
@@ -169,10 +131,6 @@ class WeatherProvider with ChangeNotifier {
       _setLoading(false);
     }
   }
-
-  // ============================================================================
-  // WEATHER MEASUREMENTS
-  // ============================================================================
 
   /// Load weather measurements with current filters
   Future<void> loadMeasurements({bool refresh = false}) async {
@@ -374,8 +332,6 @@ class WeatherProvider with ChangeNotifier {
       result.fold((failure) => _setError(failure), (measurement) {
         _currentWeather = measurement;
         _latestMeasurement = measurement;
-
-        // Add to measurements list if not already present
         final existingIndex = _measurements.indexWhere(
           (m) => m.id == measurement.id,
         );
@@ -409,7 +365,6 @@ class WeatherProvider with ChangeNotifier {
       );
 
       result.fold((failure) => _setError(failure), (forecastMeasurements) {
-        // Add forecast measurements to the list
         for (final measurement in forecastMeasurements) {
           final existingIndex = _measurements.indexWhere(
             (m) => m.id == measurement.id,
@@ -418,8 +373,6 @@ class WeatherProvider with ChangeNotifier {
             _measurements.add(measurement);
           }
         }
-
-        // Sort by timestamp
         _measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
         notifyListeners();
       });
@@ -429,10 +382,6 @@ class WeatherProvider with ChangeNotifier {
       _setLoading(false);
     }
   }
-
-  // ============================================================================
-  // RAIN GAUGES
-  // ============================================================================
 
   /// Load rain gauges
   Future<void> loadRainGauges({bool refresh = false}) async {
@@ -487,10 +436,6 @@ class WeatherProvider with ChangeNotifier {
     }
   }
 
-  // ============================================================================
-  // WEATHER STATISTICS
-  // ============================================================================
-
   /// Load weather statistics
   Future<void> loadStatistics({
     String? locationId,
@@ -513,7 +458,6 @@ class WeatherProvider with ChangeNotifier {
       );
 
       result.fold((failure) => _setError(failure), (statistics) {
-        // Find if statistics already exists and replace, otherwise add
         final existingIndex = _statistics.indexWhere(
           (s) => s.id == statistics.id,
         );
@@ -578,10 +522,6 @@ class WeatherProvider with ChangeNotifier {
     }
   }
 
-  // ============================================================================
-  // SYNC AND DATA MANAGEMENT
-  // ============================================================================
-
   /// Sync weather data
   Future<bool> syncWeatherData() async {
     _setSyncing(true);
@@ -596,7 +536,6 @@ class WeatherProvider with ChangeNotifier {
           return false;
         },
         (syncedCount) {
-          // Refresh data after sync
           Future.wait([
             loadMeasurements(refresh: true),
             loadRainGauges(refresh: true),
@@ -613,17 +552,11 @@ class WeatherProvider with ChangeNotifier {
     }
   }
 
-  // ============================================================================
-  // FILTERS AND SETTINGS
-  // ============================================================================
-
   /// Set location filter
   void setLocationFilter(String? locationId) {
     if (_selectedLocationId != locationId) {
       _selectedLocationId = locationId;
       notifyListeners();
-
-      // Reload data with new filter
       loadMeasurements(refresh: true);
       if (locationId != null) {
         loadRainGaugesByLocation(locationId);
@@ -639,8 +572,6 @@ class WeatherProvider with ChangeNotifier {
       _startDate = startDate;
       _endDate = endDate;
       notifyListeners();
-
-      // Reload data with new filter
       loadMeasurements(refresh: true);
     }
   }
@@ -650,8 +581,6 @@ class WeatherProvider with ChangeNotifier {
     if (_selectedPeriod != period) {
       _selectedPeriod = period;
       notifyListeners();
-
-      // Reload statistics with new period
       loadStatistics();
     }
   }
@@ -672,15 +601,9 @@ class WeatherProvider with ChangeNotifier {
     _selectedPeriod = 'daily';
     _measurementsLimit = 50;
     notifyListeners();
-
-    // Reload data
     loadMeasurements(refresh: true);
     loadRainGauges(refresh: true);
   }
-
-  // ============================================================================
-  // UTILITY METHODS
-  // ============================================================================
 
   /// Get measurements for today
   Future<void> loadTodayMeasurements() async {
@@ -734,10 +657,6 @@ class WeatherProvider with ChangeNotifier {
     if (_measurements.isEmpty) return 0.0;
     return _measurements.map((m) => m.rainfall).reduce((a, b) => a + b);
   }
-
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
 
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
@@ -808,7 +727,6 @@ class WeatherProvider with ChangeNotifier {
   /// Dispose method for cleanup
   @override
   void dispose() {
-    // Clean up any subscriptions or resources
     super.dispose();
   }
 }

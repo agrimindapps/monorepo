@@ -14,8 +14,6 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
   List<Plant> _filteredPlants = [];
   bool _isLoading = false;
   String _searchQuery = '';
-
-  // Getters
   List<Plant> get plants =>
       _filteredPlants.isEmpty && _searchQuery.isEmpty
           ? _plants
@@ -25,11 +23,7 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
   bool get hasPlants => _plants.isNotEmpty;
   bool get isEmpty => _plants.isEmpty && !_isLoading;
   int get plantsCount => _plants.length;
-
-  // Error handling - agora vem do mixin
   String? get errorMessage => lastError?.message;
-
-  // Main methods
   Future<void> loadPlants() async {
     _setLoading(true);
 
@@ -72,14 +66,10 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
 
   Future<void> deletePlant(String id) async {
     await handleEitherOperation(() => _plantsRepository.deletePlant(id));
-
-    // Se chegou até aqui, a operação foi bem-sucedida
     _plants.removeWhere((plant) => plant.id == id);
     _filteredPlants.removeWhere((plant) => plant.id == id);
     notifyListeners();
   }
-
-  // Search functionality
   void searchPlants(String query) {
     _searchQuery = query.trim().toLowerCase();
     _applySearch();
@@ -110,8 +100,6 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
 
     _setLoading(false);
   }
-
-  // Filter methods
   List<Plant> getPlantsBySpace(String spaceId) {
     final plantsToFilter =
         _filteredPlants.isEmpty && _searchQuery.isEmpty
@@ -138,8 +126,6 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
         .where((plant) => plant.createdAt?.isAfter(cutoffDate) ?? false)
         .toList();
   }
-
-  // Utility methods
   Plant? getPlantById(String id) {
     try {
       return _plants.firstWhere((plant) => plant.id == id);
@@ -151,8 +137,6 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
   void refresh() {
     loadPlants();
   }
-
-  // Private methods
   void _applySearch() {
     if (_searchQuery.isEmpty) {
       _filteredPlants.clear();

@@ -23,14 +23,10 @@ class CalculatorManagementProvider extends ChangeNotifier {
         _getCalculatorsByCategory = getCalculatorsByCategory,
         _getCalculatorById = getCalculatorById;
 
-  // === STATE MANAGEMENT ===
-
   List<CalculatorEntity> _calculators = [];
   CalculatorEntity? _selectedCalculator;
   bool _isLoading = false;
   String? _errorMessage;
-
-  // === GETTERS ===
 
   List<CalculatorEntity> get calculators => _calculators;
   CalculatorEntity? get selectedCalculator => _selectedCalculator;
@@ -44,8 +40,6 @@ class CalculatorManagementProvider extends ChangeNotifier {
   List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
     return _calculators.where((calc) => calc.category == category).toList();
   }
-
-  // === CALCULATOR MANAGEMENT OPERATIONS ===
 
   /// Carrega todas as calculadoras
   Future<void> loadCalculators() async {
@@ -84,7 +78,6 @@ class CalculatorManagementProvider extends ChangeNotifier {
         debugPrint('CalculatorManagementProvider: Erro ao carregar calculadoras por categoria - ${failure.message}');
       },
       (calculators) {
-        // Adiciona as calculadoras da categoria se não existirem
         for (final calculator in calculators) {
           if (!_calculators.any((c) => c.id == calculator.id)) {
             _calculators.add(calculator);
@@ -114,8 +107,6 @@ class CalculatorManagementProvider extends ChangeNotifier {
       },
       (calculator) {
         _selectedCalculator = calculator;
-        
-        // Adiciona à lista se não existir
         if (!_calculators.any((c) => c.id == calculator.id)) {
           _calculators.add(calculator);
         }

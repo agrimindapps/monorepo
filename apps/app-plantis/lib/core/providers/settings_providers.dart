@@ -129,7 +129,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   /// Sincroniza com services externos
   Future<void> _syncWithServices() async {
     try {
-      // Sincronizar permissões de notificação
       final hasPermissions =
           await _notificationService.areNotificationsEnabled();
 
@@ -140,8 +139,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
           ),
         );
       }
-
-      // Sincronizar dados da conta
       await _syncAccountSettings();
     } catch (e) {
       debugPrint('Erro ao sincronizar com services: $e');
@@ -151,8 +148,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   /// Sincroniza configurações da conta
   Future<void> _syncAccountSettings() async {
     try {
-      // Por enquanto, usar configurações padrão
-      // TODO: Integrar com stream de usuário do AuthRepository quando necessário
       final accountSettings = AccountSettingsEntity.defaults();
 
       if (state.settings.account != accountSettings) {
@@ -176,8 +171,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         state = state
             .copyWith(settings: newSettings, isLoading: false)
             .withSuccess('Configurações salvas com sucesso');
-
-        // Aplicar efeitos cascata
         _applyCascadeEffects(newSettings);
       });
     } catch (e) {
@@ -218,10 +211,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final updatedSettings = state.settings.copyWith(app: newSettings);
     await updateSettings(updatedSettings);
   }
-
-  // ==========================================================================
-  // MÉTODOS ESPECÍFICOS PARA FACILITAR USO NAS PÁGINAS
-  // ==========================================================================
 
   /// Toggle para lembretes de tarefas
   Future<void> toggleTaskReminders(bool enabled) async {
@@ -300,10 +289,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     await setThemeMode(ThemeMode.system);
   }
 
-  // ==========================================================================
-  // MÉTODOS DE NOTIFICAÇÃO INTEGRADOS
-  // ==========================================================================
-
   /// Abre configurações do sistema para notificações
   Future<void> openNotificationSettings() async {
     try {
@@ -350,10 +335,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     return state.settings.notifications.isTaskTypeEnabled(taskType);
   }
 
-  // ==========================================================================
-  // MÉTODOS DE BACKUP INTEGRADOS (se disponível)
-  // ==========================================================================
-
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
     final backupService = _backupService;
@@ -389,8 +370,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         state = state
             .copyWith(settings: newSettings, isLoading: false)
             .withSuccess('Configurações resetadas com sucesso');
-
-        // Reaplica configurações nos services
         _syncWithServices();
       });
     } catch (e) {
@@ -413,14 +392,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   /// Aplica efeitos cascata quando configurações mudam
   void _applyCascadeEffects(SettingsEntity newSettings) {
-    // Por enquanto não há efeitos cascata específicos
-    // TODO: Implementar quando necessário (e.g., notificar ThemeProvider)
   }
 }
-
-// =============================================================================
-// PROVIDERS PRINCIPAIS
-// =============================================================================
 
 /// Provider do repositório de configurações (obtido via DI)
 final settingsRepositoryProvider = Provider<ISettingsRepository>((ref) {
@@ -436,7 +409,6 @@ final plantisNotificationServiceProvider = Provider<PlantisNotificationService>(
 
 /// Provider do serviço de backup (obtido via DI, opcional)
 final backupServiceProvider = Provider<BackupService?>((ref) {
-  // TODO: Integrar com GetIt ou criar factory
   return null; // Por enquanto opcional
 });
 
@@ -453,10 +425,6 @@ final settingsNotifierProvider =
         backupService: backupService,
       );
     });
-
-// =============================================================================
-// PROVIDERS DERIVADOS PARA FACILITAR USO
-// =============================================================================
 
 /// Provider para SettingsEntity atual
 final settingsProvider = Provider<SettingsEntity>((ref) {
@@ -482,10 +450,6 @@ final settingsErrorProvider = Provider<String?>((ref) {
 final settingsSuccessProvider = Provider<String?>((ref) {
   return ref.watch(settingsNotifierProvider).successMessage;
 });
-
-// =============================================================================
-// PROVIDERS ESPECÍFICOS PARA CONFIGURAÇÕES
-// =============================================================================
 
 /// Provider para configurações de notificação
 final notificationSettingsProvider = Provider<NotificationSettingsEntity>((
@@ -514,10 +478,6 @@ final appSettingsProvider = Provider<AppSettingsEntity>((ref) {
   return ref.watch(settingsProvider).app;
 });
 
-// =============================================================================
-// PROVIDERS DERIVADOS PARA USO ESPECÍFICO
-// =============================================================================
-
 /// Provider para verificar se tem permissões de notificação
 final hasNotificationPermissionsProvider = Provider<bool>((ref) {
   return ref.watch(notificationSettingsProvider).permissionsGranted;
@@ -537,10 +497,6 @@ final notificationsEnabledProvider = Provider<bool>((ref) {
 final isWebPlatformProvider = Provider<bool>((ref) {
   return kIsWeb;
 });
-
-// =============================================================================
-// PROVIDERS DE TEXTO E ICONS (CONVENIENTES)
-// =============================================================================
 
 /// Provider para texto de status das notificações
 final notificationStatusTextProvider = Provider<String>((ref) {

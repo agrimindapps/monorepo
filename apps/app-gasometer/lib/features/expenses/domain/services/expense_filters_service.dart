@@ -93,11 +93,7 @@ class ExpenseFiltersService {
     ExpenseFiltersConfig config,
   ) {
     var filtered = List<ExpenseEntity>.from(expenses);
-
-    // Aplicar filtros
     filtered = _applyAllFilters(filtered, config);
-
-    // Aplicar ordenação
     filtered = _applySort(filtered, config.sortBy, config.sortAscending);
 
     return filtered;
@@ -109,17 +105,12 @@ class ExpenseFiltersService {
     ExpenseFiltersConfig config,
   ) {
     return expenses.where((expense) {
-      // Filtro por veículo
       if (config.vehicleId != null && expense.vehicleId != config.vehicleId) {
         return false;
       }
-
-      // Filtro por tipo
       if (config.type != null && expense.type != config.type) {
         return false;
       }
-
-      // Filtro por período
       if (config.startDate != null) {
         final startOfDay = DateTime(
           config.startDate!.year,
@@ -140,8 +131,6 @@ class ExpenseFiltersService {
         );
         if (expense.date.isAfter(endOfDay)) return false;
       }
-
-      // Filtro por busca de texto
       if (config.searchQuery.isNotEmpty) {
         final query = config.searchQuery.toLowerCase();
         if (!expense.title.toLowerCase().contains(query) &&

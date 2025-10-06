@@ -125,7 +125,6 @@ class CalculatorServiceLocator {
   /// Valida integridade do sistema completo
   static SystemValidationResult validateSystem() {
     final registryValidation = registry.validateRegistry();
-    // Note: CalculatorDependencyConfigurator não existe ainda, usando validação mock
     final dependencyValidation = DependencyValidationResult(
       isValid: true,
       errors: [],
@@ -173,11 +172,7 @@ class CalculatorServiceLocator {
       getAllCalculators(),
       criteria,
     );
-
-    // Remove a própria calculadora das sugestões
     suggestions.removeWhere((item) => item.id == calculator.id);
-
-    // Limita o número de sugestões
     return suggestions.take(maxSuggestions).toList();
   }
 

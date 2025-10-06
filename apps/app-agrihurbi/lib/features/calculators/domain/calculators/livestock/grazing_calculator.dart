@@ -166,39 +166,21 @@ class GrazingCalculator extends CalculatorEntity {
       final double entryHeight = double.parse(inputs['entry_height'].toString());
       final int restPeriod = int.parse(inputs['rest_period'].toString());
       final String supplementationLevel = inputs['supplementation_level'].toString();
-
-      // Obter dados da espécie forrageira
       final Map<String, dynamic> grassData = _getGrassSpeciesData(grassSpecies);
-
-      // Calcular produção forrageira
       final Map<String, dynamic> forageProduction = _calculateForageProduction(
         grassSpecies, soilFertility, season, grassData);
-
-      // Calcular consumo animal
       final Map<String, dynamic> animalConsumption = _calculateAnimalConsumption(
         animalSpecies, averageAnimalWeight, numberOfAnimals, supplementationLevel);
-
-      // Calcular capacidade de suporte
       final Map<String, dynamic> carryingCapacity = _calculateCarryingCapacity(
         forageProduction, animalConsumption, grazingSystem, entryHeight, desiredResidueHeight);
-
-      // Dimensionamento do sistema rotacionado
       final Map<String, dynamic> rotationSystem = _calculateRotationSystem(
         pastureArea, numberOfAnimals, restPeriod, grazingSystem, carryingCapacity);
-
-      // Análise de adequação da carga animal atual
       final Map<String, dynamic> stockingAnalysis = _analyzeCurrentStocking(
         numberOfAnimals, pastureArea, carryingCapacity, averageAnimalWeight);
-
-      // Cronograma de rotação
       final List<Map<String, dynamic>> rotationSchedule = _generateRotationSchedule(
         rotationSystem, grazingSystem);
-
-      // Indicadores zootécnicos
       final Map<String, dynamic> zootechnicalIndicators = _calculateZootechnicalIndicators(
         carryingCapacity, stockingAnalysis, forageProduction, animalConsumption);
-
-      // Recomendações de manejo
       final List<String> managementRecommendations = _generateManagementRecommendations(
         grassSpecies, grazingSystem, stockingAnalysis, season, soilFertility, 
         zootechnicalIndicators);
@@ -412,8 +394,6 @@ class GrazingCalculator extends CalculatorEntity {
     final int baseProduction = grassData['base_production'] as int;
     final Map<String, dynamic> seasonalFactors = grassData['seasonal_factor'] as Map<String, dynamic>;
     final Map<String, dynamic> fertilityFactors = grassData['fertility_response'] as Map<String, dynamic>;
-
-    // Ajuste por estação
     String seasonKey = season.toLowerCase().contains('verão') || season.toLowerCase().contains('águas') 
         ? 'verão'
         : season.toLowerCase().contains('inverno') || season.toLowerCase().contains('seca')
@@ -423,15 +403,9 @@ class GrazingCalculator extends CalculatorEntity {
         : 'ano_todo';
 
     final double seasonalFactor = (seasonalFactors[seasonKey] as num?)?.toDouble() ?? 0.85;
-
-    // Ajuste por fertilidade
     String fertilityKey = soilFertility.toLowerCase().replaceAll(' ', '_');
     final double fertilityFactor = (fertilityFactors[fertilityKey] as num?)?.toDouble() ?? 1.0;
-
-    // Produção total ajustada
     final double adjustedProduction = baseProduction * seasonalFactor * fertilityFactor;
-
-    // Forragem disponível para pastejo (85% da produção - perdas)
     final double availableForage = adjustedProduction * 0.85;
 
     return {
@@ -450,7 +424,6 @@ class GrazingCalculator extends CalculatorEntity {
     int numberOfAnimals,
     String supplementationLevel,
   ) {
-    // Consumo base como % do peso vivo
     final Map<String, double> consumptionRates = {
       'Bovino': 2.5,
       'Ovino': 3.5,
@@ -461,8 +434,6 @@ class GrazingCalculator extends CalculatorEntity {
     };
 
     final double baseConsumptionRate = consumptionRates[animalSpecies] ?? 2.5;
-
-    // Ajuste por suplementação
     final Map<String, double> supplementationFactors = {
       'Sem Suplementação': 1.0,
       'Mineral': 1.0,
@@ -472,15 +443,9 @@ class GrazingCalculator extends CalculatorEntity {
     };
 
     final double supplementationFactor = supplementationFactors[supplementationLevel] ?? 1.0;
-
-    // Consumo diário por animal (kg MS/dia)
     final double dailyConsumptionPerAnimal = (averageWeight * baseConsumptionRate / 100) * supplementationFactor;
-
-    // Consumo total do rebanho
     final double totalDailyConsumption = dailyConsumptionPerAnimal * numberOfAnimals;
     final double totalAnnualConsumption = totalDailyConsumption * 365;
-
-    // Conversão para UA (Unidade Animal = 450 kg)
     final double totalUA = (numberOfAnimals * averageWeight) / 450;
 
     return {
@@ -501,8 +466,6 @@ class GrazingCalculator extends CalculatorEntity {
   ) {
     final double availableForage = forageProduction['available_forage'] as double;
     const double dailyConsumptionUA = 450 * 0.025; // 450 kg × 2.5% = 11.25 kg MS/dia
-
-    // Eficiência de pastejo por sistema
     final Map<String, double> grazingEfficiency = {
       'Contínuo': 0.45,
       'Rotacionado': 0.65,
@@ -512,8 +475,6 @@ class GrazingCalculator extends CalculatorEntity {
     };
 
     final double efficiency = grazingEfficiency[grazingSystem] ?? 0.60;
-
-    // Ajuste por altura de manejo
     double heightFactor = 1.0;
     final double utilizationRate = (entryHeight - exitHeight) / entryHeight;
     if (utilizationRate > 0.7) {
@@ -521,11 +482,7 @@ class GrazingCalculator extends CalculatorEntity {
     } else if (utilizationRate < 0.4) {
       heightFactor = 0.8; // Subutilização
     }
-
-    // Forragem efetivamente utilizada
     final double utilizedForage = availableForage * efficiency * heightFactor;
-
-    // Capacidade de suporte
     final double uaPerHa = utilizedForage / (dailyConsumptionUA * 365);
 
     return {
@@ -553,8 +510,6 @@ class GrazingCalculator extends CalculatorEntity {
         'cycle_length': 365,
       };
     }
-
-    // Para sistemas rotacionados
     int occupationPeriod;
     switch (grazingSystem) {
       case 'Voisin':
@@ -659,11 +614,7 @@ class GrazingCalculator extends CalculatorEntity {
     final double digestibility = forageProduction['digestibility'] as double;
     final double crudeProtein = forageProduction['crude_protein'] as double;
     final double consumptionRate = animalConsumption['consumption_rate_percent'] as double;
-
-    // Pressão de pastejo (oferta de forragem)
     final double grazingPressure = consumptionRate * 1.5; // 150% do consumo como oferta
-
-    // Estimativa de ganho diário baseado na qualidade da forragem
     double estimatedDailyGain = 0.0;
     if (digestibility >= 65 && crudeProtein >= 12) {
       estimatedDailyGain = 0.8; // Forragem de alta qualidade
@@ -674,12 +625,8 @@ class GrazingCalculator extends CalculatorEntity {
     } else {
       estimatedDailyGain = 0.2; // Forragem de qualidade muito baixa
     }
-
-    // Ajuste pelo sistema de pastejo
     final double systemEfficiency = grazingEfficiency / 100;
     estimatedDailyGain *= systemEfficiency;
-
-    // Produtividade por hectare
     final double uaPerHa = carryingCapacity['ua_per_ha'] as double;
     final double productivityPerHa = uaPerHa * 450 * estimatedDailyGain * 365;
 
@@ -701,8 +648,6 @@ class GrazingCalculator extends CalculatorEntity {
     Map<String, dynamic> indicators,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações por adequação do sistema
     final String adequacy = stockingAnalysis['adequacy_classification'] as String;
     switch (adequacy) {
       case 'Sublotado':
@@ -715,8 +660,6 @@ class GrazingCalculator extends CalculatorEntity {
         recommendations.add('Carga animal levemente alta - monitore condição da pastagem.');
         break;
     }
-
-    // Recomendações por sistema de pastejo
     switch (grazingSystem) {
       case 'Contínuo':
         recommendations.add('Pastejo contínuo - considere divisão em piquetes para melhor eficiência.');
@@ -728,36 +671,26 @@ class GrazingCalculator extends CalculatorEntity {
         recommendations.add('Sistema Voisin - monitore ponto ótimo de pastejo diariamente.');
         break;
     }
-
-    // Recomendações por qualidade da forragem
     final double qualityIndex = indicators['forage_quality_index'] as double;
     if (qualityIndex < 50) {
       recommendations.add('Forragem de baixa qualidade - considere suplementação proteica.');
     } else if (qualityIndex > 70) {
       recommendations.add('Forragem de boa qualidade - aproveite para categorias exigentes.');
     }
-
-    // Recomendações por estação
     if (season.contains('Seca') || season.contains('Inverno')) {
       recommendations.add('Período seco - monitore oferta de forragem e considere suplementação.');
       recommendations.add('Considere diferimento de pastagens para o período seco.');
     }
-
-    // Recomendações por fertilidade
     if (soilFertility == 'Baixa') {
       recommendations.add('Solo de baixa fertilidade - investir em correção e adubação.');
     } else if (soilFertility == 'Alta' || soilFertility == 'Muito Alta') {
       recommendations.add('Solo fértil - otimize carga animal para máximo aproveitamento.');
     }
-
-    // Recomendações específicas por espécie forrageira
     if (grassSpecies.contains('Panicum') || grassSpecies.contains('Tanzânia') || grassSpecies.contains('Mombaça')) {
       recommendations.add('Capim de alta exigência - manter fertilidade do solo e manejo adequado.');
     } else if (grassSpecies.contains('Brachiaria')) {
       recommendations.add('Brachiaria - resistente mas responde bem à adubação.');
     }
-
-    // Recomendações gerais
     recommendations.add('Monitorar altura de entrada e saída dos piquetes.');
     recommendations.add('Fazer análise de solo anualmente para adequar adubação.');
     recommendations.add('Considerar consórcio com leguminosas para fixação de nitrogênio.');

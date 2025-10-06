@@ -15,27 +15,17 @@ class NotificationService {
   /// Inicializa o serviço de notificações
   Future<void> initialize() async {
     if (_isInitialized) return;
-
-    // Inicializar timezone
     tz.initializeTimeZones();
-    
-    // Configurações para Android
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    
-    // Configurações para iOS
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-
-    // Configurações gerais
     const initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
-
-    // Inicializar plugin
     await _notificationsPlugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
@@ -321,41 +311,33 @@ class NotificationService {
 
     switch (type) {
       case 'medication':
-        // Navegar para página de medicamentos ou marcar como tomado
         _navigateToMedication(id);
         break;
       case 'vaccine':
-        // Navegar para página de vacinas
         _navigateToVaccine(id);
         break;
       case 'appointment':
-        // Navegar para página de consultas
         _navigateToAppointment(id);
         break;
       case 'weight':
-        // Navegar para página de peso
         _navigateToWeight(id);
         break;
     }
   }
 
   void _navigateToMedication(String medicationId) {
-    // TODO: Implementar navegação via router
     print('Navigate to medication: $medicationId');
   }
 
   void _navigateToVaccine(String vaccineId) {
-    // TODO: Implementar navegação via router
     print('Navigate to vaccine: $vaccineId');
   }
 
   void _navigateToAppointment(String appointmentId) {
-    // TODO: Implementar navegação via router
     print('Navigate to appointment: $appointmentId');
   }
 
   void _navigateToWeight(String animalId) {
-    // TODO: Implementar navegação via router
     print('Navigate to weight for animal: $animalId');
   }
 }

@@ -69,7 +69,6 @@ class FinancialConflictResolver {
     FinancialConflictStrategy? preferredStrategy,
     Map<String, dynamic>? userContext,
   }) async {
-    // Validate entities are the same type and ID
     if (localEntity.runtimeType != remoteEntity.runtimeType) {
       throw ArgumentError('Cannot resolve conflict between different entity types');
     }
@@ -77,8 +76,6 @@ class FinancialConflictResolver {
     if (localEntity.id != remoteEntity.id) {
       throw ArgumentError('Cannot resolve conflict between different entities');
     }
-
-    // For financial data, always flag for review unless explicitly configured otherwise
     final isFinancialData = FinancialValidator.isFinancialData(localEntity);
     final strategy = preferredStrategy ??
         (isFinancialData ? FinancialConflictStrategy.manualReview : FinancialConflictStrategy.mostRecent);
@@ -114,8 +111,6 @@ class FinancialConflictResolver {
         result = await _resolveSmartMerge(localEntity, remoteEntity);
         break;
     }
-
-    // Log the conflict resolution
     await _auditService.logConflictResolution(
       localEntity,
       remoteEntity,
@@ -132,7 +127,6 @@ class FinancialConflictResolver {
     BaseSyncEntity localEntity,
     BaseSyncEntity remoteEntity,
   ) {
-    // Return local entity as temporary resolution, but flag for manual review
     return FinancialConflictResult(
       resolvedEntity: localEntity.copyWith(
         isDirty: true, // Keep dirty to prevent sync until resolved
@@ -294,7 +288,6 @@ class FinancialConflictResolver {
       chosenEntity = remoteEntity;
       resolution = 'Remote chosen - has receipt';
     } else {
-      // Both have receipts or neither has receipts - fall back to most recent
       return _resolveMostRecent(localEntity, remoteEntity);
     }
 
@@ -325,8 +318,6 @@ class FinancialConflictResolver {
     } else if (localEntity is ExpenseModel && remoteEntity is ExpenseModel) {
       return _smartMergeExpense(localEntity, remoteEntity);
     }
-
-    // Fall back to most recent for unknown types
     return _resolveMostRecent(localEntity, remoteEntity);
   }
 
@@ -336,26 +327,18 @@ class FinancialConflictResolver {
     FuelSupplyModel remote,
   ) {
     final warnings = <String>[];
-
-    // Preserve the most complete receipt information
     final String? receiptImageUrl = local.receiptImageUrl?.isNotEmpty == true
         ? local.receiptImageUrl
         : remote.receiptImageUrl;
     final String? receiptImagePath = local.receiptImagePath?.isNotEmpty == true
         ? local.receiptImagePath
         : remote.receiptImagePath;
-
-    // Preserve the most complete gas station name
     final String? gasStationName = local.gasStationName?.isNotEmpty == true
         ? local.gasStationName
         : remote.gasStationName;
-
-    // Preserve the most complete notes
     final String? notes = local.notes?.isNotEmpty == true
         ? local.notes
         : remote.notes;
-
-    // For financial fields, prefer the most recent
     final useLocalFinancials = (local.updatedAt ?? local.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
         .isAfter(remote.updatedAt ?? remote.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0));
 
@@ -396,28 +379,20 @@ class FinancialConflictResolver {
     ExpenseModel remote,
   ) {
     final warnings = <String>[];
-
-    // Preserve the most complete receipt information
     final String? receiptImageUrl = local.receiptImageUrl?.isNotEmpty == true
         ? local.receiptImageUrl
         : remote.receiptImageUrl;
     final String? receiptImagePath = local.receiptImagePath?.isNotEmpty == true
         ? local.receiptImagePath
         : remote.receiptImagePath;
-
-    // Preserve the most complete location and notes
     final String? location = local.location?.isNotEmpty == true
         ? local.location
         : remote.location;
     final String? notes = local.notes?.isNotEmpty == true
         ? local.notes
         : remote.notes;
-
-    // Merge metadata intelligently
     final mergedMetadata = Map<String, dynamic>.from(remote.metadata);
     mergedMetadata.addAll(local.metadata);
-
-    // For financial fields, prefer the most recent
     final useLocalFinancials = (local.updatedAt ?? local.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
         .isAfter(remote.updatedAt ?? remote.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0));
 
@@ -458,16 +433,12 @@ class FinancialConflictResolver {
     BaseSyncEntity localEntity,
     BaseSyncEntity remoteEntity,
   ) {
-    // Financial data always gets manual review by default
     if (FinancialValidator.isFinancialData(localEntity)) {
-      // Check if entities are very similar (might be safe to auto-merge)
       if (_areEntitiesVerySimilar(localEntity, remoteEntity)) {
         return FinancialConflictStrategy.smartMerge;
       }
       return FinancialConflictStrategy.manualReview;
     }
-
-    // For non-financial data, use most recent
     return FinancialConflictStrategy.mostRecent;
   }
 
@@ -476,15 +447,11 @@ class FinancialConflictResolver {
     if (local is FuelSupplyModel && remote is FuelSupplyModel) {
       final priceDiff = (local.totalPrice - remote.totalPrice).abs();
       final litersDiff = (local.liters - remote.liters).abs();
-
-      // Consider similar if price difference is less than R$ 1 and liters less than 0.1L
       return priceDiff < 1.0 && litersDiff < 0.1;
     }
 
     if (local is ExpenseModel && remote is ExpenseModel) {
       final valueDiff = (local.valor - remote.valor).abs();
-
-      // Consider similar if value difference is less than R$ 1
       return valueDiff < 1.0 && local.tipo == remote.tipo;
     }
 

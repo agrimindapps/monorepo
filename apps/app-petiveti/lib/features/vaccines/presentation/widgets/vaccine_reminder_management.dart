@@ -22,14 +22,10 @@ class VaccineReminderManagement extends ConsumerStatefulWidget {
 class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManagement>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
-  // Reminder settings
   bool _enableSmartReminders = true;
   bool _enablePushNotifications = true;
   bool _enableEmailReminders = false;
   bool _enableSmsReminders = false;
-  
-  // Smart reminder configuration
   int _daysBeforeReminder = 7;
   int _urgentReminderDays = 3;
   String _reminderFrequency = 'daily';
@@ -480,7 +476,6 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
   }
 
   Widget _buildHistoryTab(ThemeData theme, VaccinesState state) {
-    // This would show reminder history and analytics
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -528,8 +523,6 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
       ),
     );
   }
-
-  // Helper Methods
   List<Vaccine> _getActiveReminders(List<Vaccine> vaccines) {
     return vaccines.where((v) => 
         !v.isCompleted && 
@@ -585,7 +578,6 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
   }
 
   void _editReminder(Vaccine vaccine) {
-    // Edit reminder functionality
   }
 
   void _snoozeReminder(Vaccine vaccine) {

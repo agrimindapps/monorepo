@@ -1,16 +1,11 @@
-// ignore_for_file: overridden_fields
 
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
-// Note: Hive adapter not generated - keeping @HiveType for future
-
 /// PlantaConfig model with Firebase sync support
 /// TypeId: 4 - Sequential numbering
 @HiveType(typeId: 4)
-// ignore: must_be_immutable
 class PlantaConfigModel extends BaseSyncModel {
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @override
   @HiveField(0)
   final String id;
@@ -35,8 +30,6 @@ class PlantaConfigModel extends BaseSyncModel {
   @override
   @HiveField(8)
   final String? moduleName;
-
-  // PlantaConfig specific fields
   @HiveField(10)
   final String plantaId;
   @HiveField(11)
@@ -314,8 +307,6 @@ class PlantaConfigModel extends BaseSyncModel {
           intervaloReplantarDias ?? this.intervaloReplantarDias,
     );
   }
-
-  // Legacy compatibility methods
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();
@@ -386,8 +377,6 @@ class PlantaConfigModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final id = configId ?? '${plantaId}_config_${now.millisecondsSinceEpoch}';
-
-    // Safe conversion with null checks and proper logic
     bool aguaAtiva = false;
     int intervaloRegaDias = 3; // default
 
@@ -407,7 +396,6 @@ class PlantaConfigModel extends BaseSyncModel {
     int intervaloReplantarDias = 365; // default
 
     try {
-      // Handle water care - prioritize enableWateringCare flag
       final enableWateringCare = plantConfig.enableWateringCare;
       if (enableWateringCare is bool) {
         aguaAtiva = enableWateringCare;
@@ -422,8 +410,6 @@ class PlantaConfigModel extends BaseSyncModel {
       if (wateringInterval is int && wateringInterval > 0) {
         intervaloRegaDias = wateringInterval;
       }
-
-      // Handle fertilizer care - prioritize enableFertilizerCare flag
       final enableFertilizerCare = plantConfig.enableFertilizerCare;
       if (enableFertilizerCare is bool) {
         aduboAtivo = enableFertilizerCare;
@@ -438,36 +424,27 @@ class PlantaConfigModel extends BaseSyncModel {
       if (fertilizingInterval is int && fertilizingInterval > 0) {
         intervaloAdubacaoDias = fertilizingInterval;
       }
-
-      // Handle sunlight care - only active if interval is explicitly set
       final sunlightInterval = plantConfig.sunlightCheckIntervalDays;
       if (sunlightInterval is int && sunlightInterval > 0) {
         banhoSolAtivo = true;
         intervaloBanhoSolDias = sunlightInterval;
       }
-
-      // Handle pest inspection - only active if interval is explicitly set
       final pestInterval = plantConfig.pestInspectionIntervalDays;
       if (pestInterval is int && pestInterval > 0) {
         inspecaoPragasAtiva = true;
         intervaloInspecaoPragasDias = pestInterval;
       }
-
-      // Handle pruning - only active if interval is explicitly set
       final pruningInterval = plantConfig.pruningIntervalDays;
       if (pruningInterval is int && pruningInterval > 0) {
         podaAtiva = true;
         intervaloPodaDias = pruningInterval;
       }
-
-      // Handle replanting - only active if interval is explicitly set
       final replantingInterval = plantConfig.replantingIntervalDays;
       if (replantingInterval is int && replantingInterval > 0) {
         replantarAtivo = true;
         intervaloReplantarDias = replantingInterval;
       }
     } catch (e) {
-      // Log conversion error but don't fail - use defaults
       print('Warning: Error converting PlantConfig to PlantaConfigModel: $e');
     }
 

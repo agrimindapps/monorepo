@@ -23,7 +23,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
     required this.taskRepository,
     required this.commentsRepository,
   }) {
-    // ENHANCED FEATURE: Start real-time connectivity monitoring
     _initializeConnectivityMonitoring();
   }
 
@@ -33,8 +32,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
   final IAuthRepository authService;
   final PlantTasksRepository taskRepository;
   final PlantCommentsRepository commentsRepository;
-
-  // ENHANCED FEATURE: Real-time connectivity monitoring
   StreamSubscription<bool>? _connectivitySubscription;
   bool _isMonitoringConnectivity = false;
 
@@ -46,7 +43,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
   Future<String?> _getCurrentUserIdWithRetry({int maxRetries = 3}) async {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        // Wait for user with increasing timeout per attempt
         final timeoutDuration = Duration(seconds: 2 * attempt);
         final user =
             await authService.currentUser.timeout(timeoutDuration).first;
@@ -54,8 +50,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
         if (user != null && user.id.isNotEmpty) {
           return user.id;
         }
-
-        // If user is null or has empty ID, wait and retry (except on last attempt)
         if (attempt < maxRetries) {
           await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
           continue;
@@ -63,15 +57,10 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
         return null;
       } catch (e) {
-        // Log error for debugging with attempt number
         print('Auth attempt $attempt/$maxRetries failed: $e');
-
-        // If it's the last attempt, return null
         if (attempt >= maxRetries) {
           return null;
         }
-
-        // Wait before retrying, with exponential backoff
         await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
       }
     }
@@ -82,7 +71,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
   /// ENHANCED FEATURE: Initialize real-time connectivity monitoring
   void _initializeConnectivityMonitoring() {
     try {
-      // Check if we have enhanced NetworkInfo capabilities
       final enhanced = networkInfo.asEnhanced;
       if (enhanced == null) {
         if (kDebugMode) {
@@ -92,8 +80,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
         }
         return;
       }
-
-      // Start monitoring connectivity changes
       _connectivitySubscription = enhanced.connectivityStream.listen(
         _onConnectivityChanged,
         onError: (Object error) {
@@ -127,7 +113,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       if (isConnected) {
-        // When connection is restored, trigger background sync
         final userId = await _currentUserId;
         if (userId != null) {
           if (kDebugMode) {
@@ -138,7 +123,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
           _syncPlantsInBackground(userId, connectionRestored: true);
         }
       } else {
-        // When connection is lost, log for monitoring
         if (kDebugMode) {
           print(
             '📱 PlantsRepository: Connection lost - switching to offline mode',
@@ -157,12 +141,8 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        // Return empty list for unauthenticated users (consistent with searchPlants)
-        // This allows UI to show empty state instead of error during auth initialization
         return const Right([]);
       }
-
-      // WEB: usar apenas UnifiedSyncManager (evita conflitos de box)
       if (kIsWeb) {
         if (kDebugMode) {
           print('🌐 PlantsRepository (Web): Using UnifiedSyncManager');
@@ -173,7 +153,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
         );
 
         return result.fold((failure) => Left(failure), (plants) {
-          // Filtrar plantas não deletadas e ordenar
           final activePlants =
               plants.where((p) => !p.isDeleted).toList()..sort(
                 (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
@@ -190,17 +169,10 @@ class PlantsRepositoryImpl implements PlantsRepository {
           return Right(activePlants);
         });
       }
-
-      // MOBILE/DESKTOP: usar datasource legado
       final localPlants = await localDatasource.getPlants();
-
-      // Start background sync immediately (fire and forget)
-      // This ensures local-first approach with background updates
       if (await networkInfo.isConnected) {
         _syncPlantsInBackground(userId);
       }
-
-      // Return local data immediately (empty list is fine for authenticated users)
       return Right(localPlants);
     } on CacheFailure catch (e) {
       if (kDebugMode) {
@@ -216,8 +188,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
       );
     }
   }
-
-  // Background sync method (fire and forget) - ENHANCED with connectivity awareness
   void _syncPlantsInBackground(
     String userId, {
     bool connectionRestored = false,
@@ -234,34 +204,26 @@ class PlantsRepositoryImpl implements PlantsRepository {
               '✅ PlantsRepository: $syncType completed - ${remotePlants.length} plants',
             );
           }
-          // Update local cache with remote data
           for (final plant in remotePlants) {
             localDatasource.updatePlant(plant);
           }
-
-          // ENHANCED FEATURE: Log detailed sync info if monitoring is active
           if (_isMonitoringConnectivity && connectionRestored) {
             _logSyncMetrics(remotePlants.length, syncType);
           }
         })
         .catchError((Object e) {
-          // CRITICAL FIX: Log background sync errors for debugging
           if (kDebugMode) {
             print('⚠️ PlantsRepository: Background sync failed: $e');
           }
         });
   }
-
-  // Background sync method for single plant (fire and forget)
   void _syncSinglePlantInBackground(String plantId, String userId) {
     remoteDatasource
         .getPlantById(plantId, userId)
         .then((remotePlant) {
-          // Update local cache with remote data
           localDatasource.updatePlant(remotePlant);
         })
         .catchError((e) {
-          // Ignore sync errors in background
         });
   }
 
@@ -272,16 +234,10 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (userId == null) {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
-
-      // ALWAYS get from local first for instant response
       final localPlant = await localDatasource.getPlantById(id);
-
-      // Start background sync if connected (fire and forget)
       if (await networkInfo.isConnected) {
         _syncSinglePlantInBackground(id, userId);
       }
-
-      // Return local data immediately (or error if not found)
       if (localPlant != null) {
         return Right(localPlant);
       } else {
@@ -324,8 +280,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
           '🌱 PlantsRepositoryImpl.addPlant() - Salvando localmente primeiro',
         );
       }
-
-      // Always save locally first
       await localDatasource.addPlant(plantModel);
 
       if (kDebugMode) {
@@ -341,7 +295,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
           );
         }
         try {
-          // Try to save remotely
           final remotePlant = await remoteDatasource.addPlant(
             plantModel,
             userId,
@@ -355,8 +308,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
               '🌱 PlantsRepositoryImpl.addPlant() - remotePlant.id: ${remotePlant.id}',
             );
           }
-
-          // Se o ID mudou (local vs remoto), fazer transição segura para evitar duplicação
           if (plantModel.id != remotePlant.id) {
             if (kDebugMode) {
               print(
@@ -367,21 +318,17 @@ class PlantsRepositoryImpl implements PlantsRepository {
             }
 
             try {
-              // PASSO 1: Salvar versão remota PRIMEIRO (source of truth)
               await localDatasource.updatePlant(remotePlant);
 
               if (kDebugMode) {
                 print('✅ Versão remota salva localmente');
               }
-
-              // PASSO 2: Tentar deletar versão local antiga
               try {
                 await localDatasource.hardDeletePlant(plantModel.id);
                 if (kDebugMode) {
                   print('✅ Registro local antigo removido');
                 }
               } catch (deleteError) {
-                // Log warning mas não falhar - remoto já está salvo
                 if (kDebugMode) {
                   print(
                     '⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError',
@@ -390,7 +337,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
                 }
               }
             } catch (updateError) {
-              // Se falhar ao salvar remoto, manter local e propagar erro
               if (kDebugMode) {
                 print('❌ Falha ao salvar versão remota: $updateError');
               }
@@ -399,7 +345,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
               );
             }
           } else {
-            // IDs iguais - atualização simples
             await localDatasource.updatePlant(remotePlant);
 
             if (kDebugMode) {
@@ -419,7 +364,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
               '🌱 PlantsRepositoryImpl.addPlant() - Retornando versão local',
             );
           }
-          // If remote fails, return local version (will sync later)
           return Right(plantModel);
         }
       } else {
@@ -428,7 +372,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
             '🌱 PlantsRepositoryImpl.addPlant() - Offline, retornando versão local',
           );
         }
-        // Offline - return local version
         return Right(plantModel);
       }
     } on CacheFailure catch (e) {
@@ -455,28 +398,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       final plantModel = PlantModel.fromEntity(plant);
-
-      // Always save locally first
       await localDatasource.updatePlant(plantModel);
 
       if (await networkInfo.isConnected) {
         try {
-          // Try to update remotely
           final remotePlant = await remoteDatasource.updatePlant(
             plantModel,
             userId,
           );
-
-          // Update local with sync status
           await localDatasource.updatePlant(remotePlant);
 
           return Right(remotePlant);
         } catch (e) {
-          // If remote fails, return local version (will sync later)
           return Right(plantModel);
         }
       } else {
-        // Offline - return local version
         return Right(plantModel);
       }
     } on CacheFailure catch (e) {
@@ -499,8 +435,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (kDebugMode) {
         print('🗑️ Deleting plant: $id');
       }
-
-      // 1. Delete all related tasks first
       if (kDebugMode) {
         print('🗑️ Deleting tasks for plant: $id');
       }
@@ -511,10 +445,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
             '⚠️ Failed to delete tasks for plant $id: ${tasksResult.fold((f) => f.message, (_) => '')}',
           );
         }
-        // Continue even if task deletion fails
       }
-
-      // 2. Delete all related comments
       if (kDebugMode) {
         print('🗑️ Deleting comments for plant: $id');
       }
@@ -527,16 +458,11 @@ class PlantsRepositoryImpl implements PlantsRepository {
             '⚠️ Failed to delete comments for plant $id: ${commentsResult.fold((f) => f.message, (_) => '')}',
           );
         }
-        // Continue even if comment deletion fails
       }
-
-      // 3. Delete the plant itself (soft delete locally)
       if (kDebugMode) {
         print('🗑️ Deleting plant locally: $id');
       }
       await localDatasource.deletePlant(id);
-
-      // 4. Try to delete remotely if connected
       if (await networkInfo.isConnected) {
         try {
           if (kDebugMode) {
@@ -547,7 +473,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
           if (kDebugMode) {
             print('⚠️ Remote deletion failed, will sync later: $e');
           }
-          // If remote fails, the local soft delete will sync later
         }
       }
 
@@ -570,31 +495,25 @@ class PlantsRepositoryImpl implements PlantsRepository {
     try {
       final userId = await _currentUserId;
       if (userId == null) {
-        // For anonymous users still initializing, return empty search results
         return const Right([]);
       }
 
       if (await networkInfo.isConnected) {
         try {
-          // Try to search remotely first
           final remotePlants = await remoteDatasource.searchPlants(
             query,
             userId,
           );
-
-          // Cache results locally
           for (final plant in remotePlants) {
             await localDatasource.updatePlant(plant);
           }
 
           return Right(remotePlants);
         } catch (e) {
-          // If remote fails, fallback to local search
           final localPlants = await localDatasource.searchPlants(query);
           return Right(localPlants);
         }
       } else {
-        // Offline - search locally
         final localPlants = await localDatasource.searchPlants(query);
         return Right(localPlants);
       }
@@ -617,25 +536,20 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       if (await networkInfo.isConnected) {
         try {
-          // Try to get from remote first
           final remotePlants = await remoteDatasource.getPlantsBySpace(
             spaceId,
             userId,
           );
-
-          // Cache locally
           for (final plant in remotePlants) {
             await localDatasource.updatePlant(plant);
           }
 
           return Right(remotePlants);
         } catch (e) {
-          // If remote fails, fallback to local
           final localPlants = await localDatasource.getPlantsBySpace(spaceId);
           return Right(localPlants);
         }
       } else {
-        // Offline - get from local
         final localPlants = await localDatasource.getPlantsBySpace(spaceId);
         return Right(localPlants);
       }
@@ -667,9 +581,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
   @override
   Stream<List<Plant>> watchPlants() {
-    // For now, return a simple stream that emits current plants
-    // In a more advanced implementation, you might use Firestore snapshots
-    // or a local database with reactive queries
     return Stream.fromFuture(
       getPlants().then(
         (result) => result.fold((failure) => <Plant>[], (plants) => plants),
@@ -688,8 +599,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (!(await networkInfo.isConnected)) {
         return const Left(NetworkFailure('Sem conexão com a internet'));
       }
-
-      // Get all local plants that need sync
       final localPlants = await localDatasource.getPlants();
       final plantsToSync = localPlants.where((plant) => plant.isDirty).toList();
 
@@ -699,8 +608,6 @@ class PlantsRepositoryImpl implements PlantsRepository {
             plantsToSync.map((plant) => PlantModel.fromEntity(plant)).toList(),
             userId,
           );
-
-          // Update local plants to mark as synced
           for (final plant in plantsToSync) {
             final syncedPlant = plant.copyWith(isDirty: false);
             await localDatasource.updatePlant(syncedPlant);

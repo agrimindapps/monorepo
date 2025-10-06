@@ -93,7 +93,6 @@ class ReceiptSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Descrição da seção (se fornecida)
           if (description != null) ...[
             Text(
               description!,
@@ -105,16 +104,12 @@ class ReceiptSection extends StatelessWidget {
             ),
             const SizedBox(height: GasometerDesignTokens.spacingSm),
           ],
-
-          // Picker de imagem
           ReceiptImagePicker(
             imagePath: imagePath,
             hasImage: hasImage,
             onImageSelected: () => _showImagePickerModal(context),
             onImageRemoved: onImageRemoved ?? () {},
           ),
-
-          // Indicadores de status (se habilitados)
           if (showStatusIndicators) ...[
             if (isUploading) _buildUploadingIndicator(),
             if (uploadError != null) _buildErrorIndicator(uploadError!),

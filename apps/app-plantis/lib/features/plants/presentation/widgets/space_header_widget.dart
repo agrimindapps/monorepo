@@ -57,7 +57,6 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
       ),
       child: Row(
         children: [
-          // Space icon
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -72,16 +71,12 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
           ),
 
           const SizedBox(width: 12),
-
-          // Space name (editable if has spaceId)
           Expanded(
             child:
                 _isEditing
                     ? _buildEditingField(theme)
                     : _buildDisplayName(theme),
           ),
-
-          // Plant count badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -96,8 +91,6 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
               ),
             ),
           ),
-
-          // Edit button (only for spaces with ID)
           if (widget.spaceId != null) ...[
             const SizedBox(width: 8),
             IconButton(
@@ -161,8 +154,6 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
       _isEditing = true;
       _controller.text = widget.spaceName;
     });
-
-    // Focus and select all text after widget rebuilds
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
       _controller.selection = TextSelection(
@@ -200,8 +191,6 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
     try {
       final spacesNotifier = ref.read(spacesProvider.notifier);
       final spacesState = ref.read(spacesProvider);
-
-      // Check if name already exists (case insensitive)
       final existingSpace = spacesState.maybeWhen(
         data: (state) => state.findSpaceByName(newName),
         orElse: () => null,

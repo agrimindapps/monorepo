@@ -198,8 +198,6 @@ class LivestockAnalyticsService {
     );
   }
 
-  // === PRIVATE METHODS ===
-
   double _calculatePercentage(int value, int total) {
     return total > 0 ? (value / total * 100) : 0.0;
   }
@@ -226,8 +224,6 @@ class LivestockAnalyticsService {
     return recommendations;
   }
 }
-
-// === DATA CLASSES ===
 
 class LivestockMetrics {
   final int totalAnimals;

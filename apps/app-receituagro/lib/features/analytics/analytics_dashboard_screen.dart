@@ -101,7 +101,6 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
 
   Future<void> _exportReport() async {
     try {
-      // ignore: unused_local_variable
       final report = await _analyticsService.exportAnalyticsReport(
         startDate: _startDate,
         endDate: _endDate,

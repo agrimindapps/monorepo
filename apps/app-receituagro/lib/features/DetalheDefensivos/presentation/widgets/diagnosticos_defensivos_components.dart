@@ -19,10 +19,6 @@ import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart'
 /// a funcionalidade e visual dos diagnósticos da página de pragas, adaptados
 /// para funcionar com defensivos.
 
-// ============================================================================
-// FILTRO DE DIAGNÓSTICOS
-// ============================================================================
-
 /// Widget responsável pelos filtros de diagnósticos
 ///
 /// Responsabilidade única: renderizar e gerenciar filtros de pesquisa e cultura
@@ -68,7 +64,6 @@ class _DiagnosticoDefensivoFilterWidgetState
     return RepaintBoundary(
       child: diagnosticosAsync.when(
         data: (diagnosticosState) {
-          // Extract available cultures from filtersData
           final availableCulturas = diagnosticosState.filtersData?.culturas ?? ['Todas'];
           final selectedCultura = diagnosticosState.currentFilters.idCultura ?? 'Todas';
 
@@ -81,7 +76,6 @@ class _DiagnosticoDefensivoFilterWidgetState
                   child: _SearchField(
                     focusNode: _searchFocusNode,
                     onChanged: (query) {
-                      // Trigger search by pattern
                       ref.read(diagnosticosNotifierProvider.notifier).searchByPattern(query);
                     },
                   ),
@@ -234,10 +228,6 @@ class _CultureDropdown extends StatelessWidget {
     );
   }
 }
-
-// ============================================================================
-// GERENCIAMENTO DE ESTADOS
-// ============================================================================
 
 /// Widget para gerenciamento de estados da lista de diagnósticos
 class DiagnosticoDefensivoStateManager extends ConsumerWidget {
@@ -405,10 +395,6 @@ class DiagnosticoDefensivoEmptyWidget extends StatelessWidget {
   }
 }
 
-// ============================================================================
-// SEÇÃO DE CULTURA
-// ============================================================================
-
 /// Widget para seção de cultura com contador de diagnósticos e dados detalhados
 class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
   final String cultura;
@@ -431,7 +417,6 @@ class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
 
 class _DiagnosticoDefensivoCultureSectionWidgetState
     extends State<DiagnosticoDefensivoCultureSectionWidget> {
-  // ignore: unused_field
   CulturaHive? _culturaData;
   bool _isLoadingCultura = false;
 
@@ -452,8 +437,6 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
 
     try {
       final culturaRepository = sl<CulturaHiveRepository>();
-
-      // Tenta buscar pelos diagnósticos primeiro (usando idCultura)
       for (final diagnostic in widget.diagnosticos!) {
         final idCultura = _getProperty(diagnostic, 'idCultura');
         if (idCultura != null) {
@@ -471,8 +454,6 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
           }
         }
       }
-
-      // Se não encontrou, tenta buscar por nome
       final culturaData = await culturaRepository.findByName(widget.cultura);
       if (mounted) {
         setState(() {
@@ -576,10 +557,6 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
   }
 }
 
-// ============================================================================
-// ITEM DE DIAGNÓSTICO
-// ============================================================================
-
 /// Widget responsável por renderizar um item de diagnóstico na lista
 ///
 /// Responsabilidade única: exibir dados de um diagnóstico específico
@@ -617,10 +594,6 @@ class _DiagnosticoDefensivoListItemWidgetState
   Future<void> _loadPragaData() async {
     try {
       final pragasRepository = sl<PragasHiveRepository>();
-
-
-
-      // Tenta ambos os nomes de propriedade para compatibilidade
       final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
 
@@ -716,7 +689,6 @@ class _DiagnosticoDefensivoListItemWidgetState
     }
 
     if (_pragaData?.nomeCientifico != null) {
-      // Gera caminho da imagem baseado no nome científico
       final imagePath =
           'assets/imagens/bigsize/${_pragaData!.nomeCientifico}.jpg';
 
@@ -770,17 +742,12 @@ class _DiagnosticoDefensivoListItemWidgetState
   /// Conteúdo principal com informações do diagnóstico
   Widget _buildContent(BuildContext context) {
     final theme = Theme.of(context);
-
-    // Dados da praga com formatação específica
     String nomeComumPraga = 'Praga não identificada';
     String nomeCientificoPraga = '';
-
-    // Usar propriedades diretas por enquanto (build method não pode ser async)
     if (widget.diagnostico is DiagnosticoHive) {
       final diagnosticoHive = widget.diagnostico as DiagnosticoHive;
       nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
     } else {
-      // FALLBACK: lógica anterior para outros tipos
       final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
       if (nomePragaModel != null && nomePragaModel.isNotEmpty && nomePragaModel != 'Não especificado') {
         nomeComumPraga = nomePragaModel;
@@ -795,13 +762,9 @@ class _DiagnosticoDefensivoListItemWidgetState
         }
       }
     }
-
-    // Nome científico só vem do repositório de pragas
     if (_pragaData != null) {
       nomeCientificoPraga = _pragaData!.nomeCientifico;
     }
-
-    // Terceira linha: Dosagem
     final dosagemEntity = _getProperty('dosagem');
     String dosagemFormatada = '';
 
@@ -812,7 +775,6 @@ class _DiagnosticoDefensivoListItemWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Primeira linha: nome comum da praga
         Text(
           nomeComumPraga,
           style: TextStyle(
@@ -823,7 +785,6 @@ class _DiagnosticoDefensivoListItemWidgetState
         ),
         if (nomeCientificoPraga.isNotEmpty) ...[
           const SizedBox(height: SpacingTokens.xs),
-          // Segunda linha: Nome científico da praga
           Text(
             nomeCientificoPraga,
             style: TextStyle(
@@ -836,7 +797,6 @@ class _DiagnosticoDefensivoListItemWidgetState
         ],
         if (dosagemFormatada.isNotEmpty) ...[
           const SizedBox(height: SpacingTokens.xs),
-          // Terceira linha: Dosagem
           Text(
             dosagemFormatada,
             style: TextStyle(
@@ -869,7 +829,6 @@ class _DiagnosticoDefensivoListItemWidgetState
         return map[primaryKey]?.toString() ??
             (fallbackKey != null ? map[fallbackKey]?.toString() : null);
       } else {
-        // Tenta acessar como propriedade do objeto
         final primary = _getObjectProperty(widget.diagnostico, primaryKey);
         if (primary != null) return primary.toString();
 
@@ -879,7 +838,6 @@ class _DiagnosticoDefensivoListItemWidgetState
         }
       }
     } catch (e) {
-      // Ignora erros de acesso a propriedades
     }
     return null;
   }
@@ -918,10 +876,6 @@ class _DiagnosticoDefensivoListItemWidgetState
     }
   }
 }
-
-// ============================================================================
-// MODAL DE DETALHES
-// ============================================================================
 
 /// Widget responsável pelo modal de detalhes do diagnóstico
 ///
@@ -967,7 +921,6 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
 class _DiagnosticoDefensivoDialogWidgetState
     extends State<DiagnosticoDefensivoDialogWidget> {
   PragasHive? _pragaData;
-  // ignore: unused_field
   bool _isLoadingPraga = true;
 
   @override
@@ -1013,7 +966,6 @@ class _DiagnosticoDefensivoDialogWidgetState
         return map[primaryKey]?.toString() ?? 
                (secondaryKey != null ? map[secondaryKey]?.toString() : null);
       } else {
-        // Tenta acessar como propriedade do objeto
         switch (primaryKey) {
           case 'nomeDefensivo':
             return widget.diagnostico.nomeDefensivo?.toString();
@@ -1162,8 +1114,6 @@ class _DiagnosticoDefensivoDialogWidgetState
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          
-          // Imagem da praga (se disponível)
           if (_pragaData?.nomeCientifico != null) ...[
             const SizedBox(height: 16),
             _buildPragaImageSection(context),
@@ -1190,7 +1140,6 @@ class _DiagnosticoDefensivoDialogWidgetState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cabeçalho da seção
           Row(
             children: [
               Icon(
@@ -1210,8 +1159,6 @@ class _DiagnosticoDefensivoDialogWidgetState
             ],
           ),
           const SizedBox(height: 12),
-          
-          // Imagem da praga ocupando toda largura
           Container(
             width: double.infinity,
             height: 200,
@@ -1278,8 +1225,6 @@ class _DiagnosticoDefensivoDialogWidgetState
             ),
           ),
           const SizedBox(height: 12),
-          
-          // Informações da praga abaixo da imagem
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1312,7 +1257,6 @@ class _DiagnosticoDefensivoDialogWidgetState
   }
 
   /// Cabeçalho do modal com título e botão de fechar
-  // ignore: unused_element
   Widget _buildHeader(BuildContext context) {
     return _buildModernHeader(context);
   }
@@ -1363,13 +1307,11 @@ class _DiagnosticoDefensivoDialogWidgetState
   }
 
   /// Conteúdo principal do modal
-  // ignore: unused_element
   Widget _buildContent(BuildContext context) {
     return _buildModernContent(context);
   }
 
   /// Constrói uma seção de informação
-  // ignore: unused_element
   Widget _buildInfoSection(String label, String value, BuildContext context) {
     final theme = Theme.of(context);
 

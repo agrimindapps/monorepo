@@ -5,21 +5,7 @@ import '../domain/repositories/i_defensivo_details_repository.dart';
 /// Configuração de injeção de dependência para DetalheDefensivos
 /// Registra todas as dependências seguindo Clean Architecture
 void initDefensivoDetailsDI() {
-  // Repository
   sl.registerLazySingleton<IDefensivoDetailsRepository>(
     () => DefensivoDetailsRepositoryImpl(),
   );
-
-  // Use Cases  
-  // sl.registerLazySingleton(() => GetDefensivoDetailsUsecase(repository: sl()));
-  // sl.registerLazySingleton(() => GetDiagnosticosUsecase(repository: sl()));
-  // sl.registerLazySingleton(() => ToggleFavoriteUsecase(repository: sl()));
-
-  // Providers
-  // sl.registerFactory(() => DetalheDefensivoProvider(
-  //       favoritosRepository: sl(),
-  //       fitossanitarioRepository: sl(),
-  //       comentariosService: sl(),
-  //       premiumService: sl(),
-  //     ));
 }

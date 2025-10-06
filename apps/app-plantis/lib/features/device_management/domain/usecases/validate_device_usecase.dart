@@ -21,24 +21,18 @@ class ValidateDeviceUseCase {
       if (kDebugMode) {
         debugPrint('🔐 ValidateDevice: Starting device validation');
       }
-
-      // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
-
-      // Obtém informações do dispositivo atual ou usa fornecido
       DeviceModel? device;
       if (params?.device != null) {
         device = params!.device;
       } else {
         device = await DeviceModel.fromCurrentDevice();
       }
-
-      // CRITICAL: Verificar se a plataforma é suportada
       if (device == null) {
         if (kDebugMode) {
           debugPrint(
@@ -54,15 +48,11 @@ class ValidateDeviceUseCase {
           ),
         );
       }
-
-      // CRITICAL: Device is now guaranteed non-null for the rest of the method
       final validDevice = device;
 
       if (kDebugMode) {
         debugPrint('🔐 ValidateDevice: Validating device ${validDevice.uuid}');
       }
-
-      // Verifica se já existe e está ativo
       final existingResult = await _deviceRepository.getDeviceByUuid(
         validDevice.uuid,
       );
@@ -76,8 +66,6 @@ class ValidateDeviceUseCase {
               '✅ ValidateDevice: Device already valid, updating activity',
             );
           }
-
-          // Dispositivo já válido, apenas atualiza atividade
           final updateResult = await _deviceRepository.updateLastActivity(
             userId: userId,
             deviceUuid: validDevice.uuid,
@@ -95,8 +83,6 @@ class ValidateDeviceUseCase {
             ),
           );
         }
-
-        // Dispositivo novo ou inativo, verifica limites
         if (kDebugMode) {
           debugPrint('🔐 ValidateDevice: New/inactive device, checking limits');
         }
@@ -110,8 +96,6 @@ class ValidateDeviceUseCase {
             if (kDebugMode) {
               debugPrint('❌ ValidateDevice: Device limit exceeded');
             }
-
-            // Obtém contagem atual para informar ao usuário
             final devicesResult = await _deviceRepository.getUserDevices(
               userId,
             );
@@ -129,8 +113,6 @@ class ValidateDeviceUseCase {
               ),
             );
           }
-
-          // Valida com o servidor
           if (kDebugMode) {
             debugPrint('🔐 ValidateDevice: Validating with server');
           }

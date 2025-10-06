@@ -29,7 +29,6 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
 
     return state.when(
       data: (data) {
-        // Para usuários free, mostra apenas o card premium centralizado
         if (!data.isPremium) {
           return Column(
             children: [
@@ -45,19 +44,14 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
             ],
           );
         }
-
-        // Para usuários premium, mostra campo de comentário + lista
         return SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Add new comment section (campo de cadastro)
               _buildAddCommentSection(data),
               const SizedBox(height: 24),
-
-              // Comments list (sem estado vazio)
               if (data.isLoadingComments)
                 const Center(
                   child: Padding(
@@ -144,7 +138,6 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
                 ),
               ],
             ),
-            // Exibe erro se houver
             if (data.errorMessage != null) ...[
               const SizedBox(height: 8),
               Container(
@@ -289,7 +282,6 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
     final success = await ref.read(detalhePragaNotifierProvider.notifier).addComentario(content);
     if (success) {
       _commentController.clear();
-      // Mostra sucesso
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -299,7 +291,6 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
         );
       }
     } else {
-      // Erro já é gerenciado pelo notifier
       if (mounted) {
         final state = ref.read(detalhePragaNotifierProvider).value;
         ScaffoldMessenger.of(context).showSnackBar(

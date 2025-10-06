@@ -177,7 +177,6 @@ extension LogLevelExtensions on LogLevel {
 
 /// Classe helper para trabalhar com múltiplos LogLevels
 class LogLevelUtils {
-  // Private constructor to prevent instantiation
   LogLevelUtils._();
   /// Obtém todos os níveis ordenados por prioridade (menor para maior)
   static List<LogLevel> get allLevelsByPriority {

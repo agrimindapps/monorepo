@@ -13,8 +13,6 @@ import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
-
-// Export enums from services for backward compatibility
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
 
@@ -118,25 +116,17 @@ class PlantsState {
 /// - PlantsCareService: Care analytics
 @riverpod
 class PlantsNotifier extends _$PlantsNotifier {
-  // Specialized services
   late final PlantsCrudService _crudService;
   late final PlantsFilterService _filterService;
   late final PlantsSortService _sortService;
   late final PlantsCareService _careService;
-
-  // Legacy use cases (kept for search functionality not yet in services)
   late final SearchPlantsUseCase _searchPlantsUseCase;
   late final AuthStateNotifier _authStateNotifier;
-
-  // Stream subscription for auth state changes
   StreamSubscription<UserEntity?>? _authSubscription;
-
-  // Stream subscription for real-time data changes
   StreamSubscription<List<dynamic>>? _realtimeDataSubscription;
 
   @override
   PlantsState build() {
-    // Initialize services
     _crudService = PlantsCrudService(
       getPlantsUseCase: ref.read(getPlantsUseCaseProvider),
       getPlantByIdUseCase: ref.read(getPlantByIdUseCaseProvider),
@@ -150,20 +140,12 @@ class PlantsNotifier extends _$PlantsNotifier {
     _careService = PlantsCareService();
     _searchPlantsUseCase = ref.read(searchPlantsUseCaseProvider);
     _authStateNotifier = AuthStateNotifier.instance;
-
-    // Setup cleanup
     ref.onDispose(() {
       _authSubscription?.cancel();
       _realtimeDataSubscription?.cancel();
     });
-
-    // Initialize auth state listener
     _initializeAuthListener();
-
-    // Initialize real-time data stream
     _initializeRealtimeDataStream();
-
-    // Return initial state
     return const PlantsState();
   }
 
@@ -181,7 +163,6 @@ class PlantsNotifier extends _$PlantsNotifier {
         debugPrint(
           '🔄 PlantsNotifier: No user but auth initialized - clearing plants',
         );
-        // Clear plants when user logs out
         state = state.copyWith(
           plants: [],
           clearSelectedPlant: true,
@@ -331,8 +312,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       return false;
     }
   }
-
-  // Load all plants
   Future<void> loadPlants() async {
     if (!await _waitForAuthenticationWithTimeout()) {
       state = state.copyWith(error: 'Aguardando autenticação...');
@@ -357,7 +336,6 @@ class PlantsNotifier extends _$PlantsNotifier {
 
       localResult.fold(
         (failure) {
-          // Don't set error yet - try remote sync
         },
         (plants) {
           _updatePlantsData(plants);
@@ -399,8 +377,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       isLoading: false,
     );
   }
-
-  // Get plant by ID
   Future<Plant?> getPlantById(String id) async {
     final result = await _crudService.getPlantById(id);
 
@@ -415,8 +391,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
     );
   }
-
-  // Search plants
   Future<void> searchPlants(String query) async {
     if (query.trim().isEmpty) {
       state = state.copyWith(
@@ -449,8 +423,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
     );
   }
-
-  // Add new plant
   Future<bool> addPlant(AddPlantParams params) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -476,8 +448,6 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return success;
   }
-
-  // Update existing plant
   Future<bool> updatePlant(UpdatePlantParams params) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -509,8 +479,6 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return success;
   }
-
-  // Delete plant
   Future<bool> deletePlant(String id) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
@@ -537,15 +505,11 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return success;
   }
-
-  // Set view mode
   void setViewMode(ViewMode mode) {
     if (state.viewMode != mode) {
       state = state.copyWith(viewMode: mode);
     }
   }
-
-  // Set sort order
   void setSortBy(SortBy sort) {
     if (state.sortBy != sort) {
       final sorted = _sortService.sortPlants(state.plants, sort);
@@ -558,8 +522,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     }
   }
-
-  // Set space filter
   void setSpaceFilter(String? spaceId) {
     if (state.filterBySpace != spaceId) {
       state = state.copyWith(
@@ -569,8 +531,6 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     }
   }
-
-  // Clear search
   void clearSearch() {
     if (state.searchQuery.isNotEmpty || state.searchResults.isNotEmpty || state.isSearching) {
       state = state.copyWith(
@@ -586,20 +546,14 @@ class PlantsNotifier extends _$PlantsNotifier {
     final newViewMode = _sortService.toggleGroupedView(state.viewMode);
     state = state.copyWith(viewMode: newViewMode);
   }
-
-  // Clear selected plant
   void clearSelectedPlant() {
     if (state.selectedPlant != null) {
       state = state.copyWith(clearSelectedPlant: true);
     }
   }
-
-  // Clear error
   void clearError() {
     state = state.copyWith(clearError: true);
   }
-
-  // Get plants by space
   List<Plant> getPlantsBySpace(String spaceId) {
     return state.plants.where((plant) => plant.spaceId == spaceId).toList();
   }
@@ -614,23 +568,15 @@ class PlantsNotifier extends _$PlantsNotifier {
     clearError();
     await loadInitialData();
   }
-
-  // Get plants that need watering soon
   List<Plant> getPlantsNeedingWater() {
     return _careService.getPlantsNeedingWater(state.plants);
   }
-
-  // Get plants that need fertilizer soon
   List<Plant> getPlantsNeedingFertilizer() {
     return _careService.getPlantsNeedingFertilizer(state.plants);
   }
-
-  // Get plants by care status
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     return _careService.getPlantsByCareStatus(state.plants, status);
   }
-
-  // Apply filters to plants list
   List<Plant> _applyFilters(List<Plant> plants) {
     List<Plant> filtered = List.from(plants);
 
@@ -641,8 +587,6 @@ class PlantsNotifier extends _$PlantsNotifier {
     return filtered;
   }
 }
-
-// Dependency providers
 @riverpod
 GetPlantsUseCase getPlantsUseCase(Ref ref) {
   return GetIt.instance<GetPlantsUseCase>();

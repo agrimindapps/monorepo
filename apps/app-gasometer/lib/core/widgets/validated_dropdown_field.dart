@@ -116,8 +116,6 @@ class ValidatedDropdownField<T> extends StatefulWidget {
   
   /// Se permite busca nos itens
   final bool searchable;
-  
-  // Validação
   /// Validador síncrono
   final String? Function(T?)? validator;
   
@@ -132,12 +130,8 @@ class ValidatedDropdownField<T> extends StatefulWidget {
   
   /// Se deve mostrar ícone de validação
   final bool showValidationIcon;
-  
-  // Callbacks
   /// Callback quando a edição é completada
   final VoidCallback? onEditingComplete;
-  
-  // Estilo customizado
   /// Decoração customizada
   final InputDecoration? decoration;
 
@@ -153,13 +147,9 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
   Timer? _debounceTimer;
   late AnimationController _iconAnimationController;
   late Animation<double> _iconAnimation;
-  
-  // Overlay controls
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   bool _isExpanded = false;
-  
-  // Search controls
   final TextEditingController _searchController = TextEditingController();
   List<ValidatedDropdownItem<T>> _filteredItems = [];
 
@@ -172,8 +162,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
   void initState() {
     super.initState();
     _filteredItems = widget.items;
-    
-    // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: GasometerDesignTokens.animationFast,
       vsync: this,
@@ -211,7 +199,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
     widget.onChanged?.call(value);
     
     if (widget.validateOnChange) {
-      // Cancelar timer anterior se existir
       _debounceTimer?.cancel();
       
       if (value == null) {
@@ -221,14 +208,10 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
         });
         return;
       }
-      
-      // Mostrar estado de validação
       setState(() {
         _validationState = DropdownValidationState.validating;
         _errorMessage = null;
       });
-      
-      // Configurar debounce
       _debounceTimer = Timer(widget.debounceDuration, () {
         _validateValue(value);
       });
@@ -240,18 +223,12 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
     
     try {
       String? error;
-      
-      // Validação obrigatória para campos required
       if (widget.required && value == null) {
         error = 'Este campo é obrigatório';
       }
-      
-      // Validação síncrona
       if (error == null && widget.validator != null) {
         error = widget.validator!(value);
       }
-      
-      // Validação assíncrona
       if (error == null && widget.asyncValidator != null) {
         error = await widget.asyncValidator!(value);
       }
@@ -267,8 +244,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
           _errorMessage = null;
         }
       });
-      
-      // Animar ícone
       await _iconAnimationController.forward();
       
     } catch (e) {
@@ -345,12 +320,9 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
   }
 
   String? get _displayHelperText {
-    // Priorizar mensagem de erro
     if (_errorMessage != null) {
       return _errorMessage;
     }
-    
-    // Mensagem de helper padrão
     return widget.helperText;
   }
 
@@ -555,8 +527,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
         return searchText.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
-    
-    // Update overlay
     _overlayEntry?.markNeedsBuild();
   }
 
@@ -579,7 +549,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         if (widget.label != null)
           Padding(
             padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
@@ -604,8 +573,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
               ),
             ),
           ),
-        
-        // Campo dropdown
         CompositedTransformTarget(
           link: _layerLink,
           child: InkWell(
@@ -678,8 +645,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
             ),
           ),
         ),
-        
-        // Helper text
         if (_displayHelperText != null)
           Padding(
             padding: const EdgeInsets.only(
@@ -694,8 +659,6 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
               ),
             ),
           ),
-        
-        // Indicador de progresso para validação
         if (_validationState == DropdownValidationState.validating)
           Padding(
             padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingXs),

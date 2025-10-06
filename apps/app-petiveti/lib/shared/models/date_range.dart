@@ -65,8 +65,6 @@ class DateRange extends Equatable {
   /// Get a readable description of the range
   String get description {
     final now = DateTime.now();
-
-    // Check for special cases
     if (startDate.year == now.year &&
         startDate.month == now.month &&
         endDate.year == now.year &&

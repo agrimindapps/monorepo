@@ -15,12 +15,8 @@ class PregnancyPage extends ConsumerStatefulWidget {
 
 class _PregnancyPageState extends ConsumerState<PregnancyPage> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Form controllers
   final _motherWeightController = TextEditingController();
   final _expectedLitterSizeController = TextEditingController();
-  
-  // Form state
   String _selectedSpecies = 'Cão';
   DateTime _matingDate = DateTime.now().subtract(const Duration(days: 30));
   String _selectedBreedSize = 'Médio (10-25kg)';
@@ -151,8 +147,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Espécie
             DropdownButtonFormField<String>(
               value: _selectedSpecies,
               decoration: const InputDecoration(
@@ -169,7 +163,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
                 if (value != null) {
                   setState(() {
                     _selectedSpecies = value;
-                    // Ajustar porte padrão baseado na espécie
                     if (value == 'Gato') {
                       _selectedBreedSize = 'Gato';
                     } else {
@@ -186,8 +179,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Porte da Raça
             DropdownButtonFormField<String>(
               value: _selectedBreedSize,
               decoration: const InputDecoration(
@@ -215,8 +206,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Peso da Mãe
             TextFormField(
               controller: _motherWeightController,
               decoration: const InputDecoration(
@@ -257,8 +246,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Data do Acasalamento
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.calendar_today),
@@ -268,8 +255,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               onTap: () => _selectMatingDate(context),
             ),
             const Divider(),
-            
-            // Primeira Gestação
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Primeira Gestação'),
@@ -301,8 +286,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Tamanho Esperado da Ninhada
             TextFormField(
               controller: _expectedLitterSizeController,
               decoration: const InputDecoration(
@@ -354,8 +337,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Results
             ...result.results.map((item) => _buildResultItem(item)),
             
             if (result.summary != null) ...[
@@ -440,8 +421,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
-    
-    // Separar alertas de recomendações normais
     final alerts = recommendations.where((r) => r.title.contains('Alerta')).toList();
     final normalRecs = recommendations.where((r) => !r.title.contains('Alerta')).toList();
 
@@ -455,8 +434,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
           ),
         ),
         const SizedBox(height: 8),
-        
-        // Mostrar alertas primeiro
         if (alerts.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(12),
@@ -494,8 +471,6 @@ class _PregnancyPageState extends ConsumerState<PregnancyPage> {
             ),
           ),
         ],
-        
-        // Recomendações normais
         ...normalRecs.map((rec) => Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(

@@ -90,8 +90,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
       if (vehicleId.isEmpty) {
         return const Left(ValidationFailure('ID do veículo é obrigatório'));
       }
-
-      // Generate both reports in parallel for better performance
       final results = await Future.wait([
         generateMonthlyReport(vehicleId, currentMonth),
         generateMonthlyReport(vehicleId, previousMonth),
@@ -130,8 +128,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
       if (vehicleId.isEmpty) {
         return const Left(ValidationFailure('ID do veículo é obrigatório'));
       }
-
-      // Generate both reports in parallel for better performance
       final results = await Future.wait([
         generateYearlyReport(vehicleId, currentYear),
         generateYearlyReport(vehicleId, previousYear),
@@ -235,7 +231,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
   @override
   Future<Either<Failure, String>> exportReportToCSV(ReportSummaryEntity report) async {
     try {
-      // Simple CSV export - can be enhanced with proper CSV library
       final csvContent = StringBuffer();
       csvContent.writeln('Relatório do Veículo,${report.vehicleId}');
       csvContent.writeln('Período,${report.periodDisplayName}');
@@ -260,7 +255,6 @@ class ReportsRepositoryImpl implements ReportsRepository {
   @override
   Future<Either<Failure, String>> exportReportToPDF(ReportSummaryEntity report) async {
     try {
-      // Basic PDF content structure - would need proper PDF library for actual PDF generation
       final pdfContent = StringBuffer();
       pdfContent.writeln('=== RELATÓRIO PDF DO VEÍCULO ${report.vehicleId} ===');
       pdfContent.writeln('');

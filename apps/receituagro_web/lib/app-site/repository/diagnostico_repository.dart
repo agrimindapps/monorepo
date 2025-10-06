@@ -6,8 +6,6 @@ import '../adapters/diagnostico_adapter.dart';
 class DiagnosticoRepository {
   final SupabaseClient _client = Supabase.instance.client;
 
-  // === LEGACY METHODS (Backward Compatibility) ===
-
   Future<List<Diagnostico>> getAllDiagnosticos() async {
     try {
       final response = await _client.from('diagnosticos').select();
@@ -50,8 +48,6 @@ class DiagnosticoRepository {
       throw Exception('Erro ao deletar diagnóstico: $e');
     }
   }
-
-  // === CORE ENTITY METHODS (New SOLID Approach) ===
 
   /// Fetches all diagnosticos as Core entities
   Future<List<DiagnosticoEntity>> getAllEntities() async {
@@ -142,8 +138,6 @@ class DiagnosticoRepository {
   Future<List<DiagnosticoEntity>> getApprovedEntities() async {
     try {
       final allDiagnosticos = await getAllEntities();
-      
-      // Filter approved ones
       return allDiagnosticos.where((diagnostico) => diagnostico.isAprovado).toList();
     } catch (e) {
       throw Exception('Erro ao buscar diagnósticos aprovados (entities): $e');
@@ -185,8 +179,6 @@ class DiagnosticoRepository {
           .toList();
 
       final entities = DiagnosticoAdapter.toEntityList(supabaseModels);
-
-      // Sort by title for consistent ordering
       entities.sort((a, b) => a.titulo.compareTo(b.titulo));
 
       return entities.take(10).toList(); // Return top 10 recommendations

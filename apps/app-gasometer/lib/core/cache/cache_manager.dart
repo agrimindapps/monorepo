@@ -102,7 +102,6 @@ class MemoryCacheManager<K, V> implements CacheManager<K, V> {
   /// Ensures cache doesn't exceed max size (LRU eviction)
   void _ensureCapacity() {
     if (_cache.length >= _maxSize) {
-      // Simple LRU: remove oldest entry
       DateTime oldestTime = DateTime.now();
       K? oldestKey;
       
@@ -155,7 +154,6 @@ mixin CachedRepository<T> {
     int maxSize = 100,
     Duration defaultTtl = const Duration(minutes: 5),
   }) {
-    // Prevent double initialization
     if (_isInitialized) {
       return;
     }

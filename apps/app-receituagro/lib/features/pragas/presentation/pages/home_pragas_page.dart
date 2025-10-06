@@ -75,20 +75,15 @@ class HomePragasPage extends ConsumerWidget {
   }
 
   Widget _buildBody(BuildContext context, WidgetRef ref, HomePragasState state) {
-    // Estado de inicialização
     if (state.isInitializing) {
       return _buildLoadingState(context);
     }
-
-    // Estado de erro de inicialização
     if (state.initializationFailed) {
       return HomePragasErrorWidget(
         errorMessage: state.initializationError ?? 'Erro desconhecido',
         onRetry: () => ref.read(homePragasNotifierProvider.notifier).forceRefresh(),
       );
     }
-
-    // Conteúdo principal
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
@@ -96,18 +91,12 @@ class HomePragasPage extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: ReceitaAgroSpacing.sm),
-
-              // Grid de estatísticas/categorias
               HomePragasStatsWidget(state: state),
 
               const SizedBox(height: ReceitaAgroSpacing.sm),
-
-              // Seção de sugestões com carrossel
               HomePragasSuggestionsWidget(state: state),
 
               const SizedBox(height: ReceitaAgroSpacing.sm),
-
-              // Seção de últimos acessados
               HomePragasRecentWidget(state: state),
 
               const SizedBox(height: ReceitaAgroSpacing.bottomSafeArea),

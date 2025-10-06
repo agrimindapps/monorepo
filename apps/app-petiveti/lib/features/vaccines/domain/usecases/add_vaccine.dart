@@ -12,7 +12,6 @@ class AddVaccine implements UseCase<Vaccine, Vaccine> {
 
   @override
   Future<Either<Failure, Vaccine>> call(Vaccine vaccine) async {
-    // Comprehensive validation
     if (!vaccine.isValid) {
       return const Left(ValidationFailure(message: 'Dados da vacina inválidos'));
     }
@@ -32,13 +31,9 @@ class AddVaccine implements UseCase<Vaccine, Vaccine> {
     if (vaccine.date.isAfter(DateTime.now())) {
       return const Left(ValidationFailure(message: 'Data de aplicação não pode ser no futuro'));
     }
-
-    // Validate next due date if present
     if (vaccine.nextDueDate != null && vaccine.nextDueDate!.isBefore(vaccine.date)) {
       return const Left(ValidationFailure(message: 'Data da próxima dose deve ser posterior à data de aplicação'));
     }
-
-    // Validate reminder date if present
     if (vaccine.reminderDate != null && vaccine.reminderDate!.isBefore(DateTime.now())) {
       return const Left(ValidationFailure(message: 'Data do lembrete deve ser no futuro'));
     }

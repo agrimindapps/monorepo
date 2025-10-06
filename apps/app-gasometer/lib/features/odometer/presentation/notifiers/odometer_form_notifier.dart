@@ -23,52 +23,31 @@ part 'odometer_form_notifier.g.dart';
 /// - Suporte para criação e edição de registros
 @riverpod
 class OdometerFormNotifier extends _$OdometerFormNotifier {
-  // TextEditingControllers gerenciados internamente
   late final TextEditingController odometerController;
   late final TextEditingController descriptionController;
-
-  // Services e use cases injetados via GetIt
   late final GetVehicleById _getVehicleById;
-
-  // Timers de debounce
   Timer? _odometerDebounceTimer;
   Timer? _descriptionDebounceTimer;
-
-  // Debounce duration (ms)
   static const int _odometerDebounceMs = 500;
   static const int _descriptionDebounceMs = 300;
 
   @override
   OdometerFormState build() {
-    // Inicializa controllers
     odometerController = TextEditingController();
     descriptionController = TextEditingController();
-
-    // Inicializa services via GetIt
     _getVehicleById = getIt<GetVehicleById>();
-
-    // Adiciona listeners aos controllers
     _initializeControllers();
-
-    // Cleanup ao descartar
     ref.onDispose(() {
-      // Cancela timers
       _odometerDebounceTimer?.cancel();
       _descriptionDebounceTimer?.cancel();
-
-      // Remove listeners
       odometerController.removeListener(_onOdometerChanged);
       descriptionController.removeListener(_onDescriptionChanged);
-
-      // Dispose controllers
       odometerController.dispose();
       descriptionController.dispose();
     });
 
     return const OdometerFormState();
   }
-
-  // ==================== Initialization ====================
 
   /// Adiciona listeners aos controllers
   void _initializeControllers() {
@@ -91,7 +70,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Carrega dados do veículo
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
 
       await vehicleResult.fold(
@@ -127,7 +105,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     state = state.copyWith(isLoading: true);
 
     try {
-      // Carrega dados do veículo
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: odometer.vehicleId));
 
       await vehicleResult.fold(
@@ -164,8 +141,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     descriptionController.text = state.description;
   }
 
-  // ==================== Field Change Handlers ====================
-
   void _onOdometerChanged() {
     _odometerDebounceTimer?.cancel();
     _odometerDebounceTimer = Timer(
@@ -177,8 +152,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
           odometerValue: value,
           hasChanges: true,
         ).clearFieldError('odometerValue');
-
-        // Valida contra o odômetro atual do veículo
         if (state.hasVehicle && value > 0) {
           final validationResult = OdometerValidator.validateOdometerWithVehicle(
             value,
@@ -207,8 +180,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
       },
     );
   }
-
-  // ==================== UI Actions ====================
 
   /// Atualiza tipo de registro
   void updateRegistrationType(OdometerType registrationType) {
@@ -261,8 +232,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     state = state.clearError();
   }
 
-  // ==================== Form Validation ====================
-
   /// Valida campo específico (para TextFormField)
   String? validateField(String field, String? value) {
     switch (field) {
@@ -299,8 +268,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
       state.vehicle!,
     );
   }
-
-  // ==================== Date/Time Pickers ====================
 
   /// Abre picker de data
   Future<void> pickDate(BuildContext context) async {
@@ -359,8 +326,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     }
   }
 
-  // ==================== Form Actions ====================
-
   /// Limpa formulário
   void clearForm() {
     odometerController.clear();
@@ -384,16 +349,12 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     );
   }
 
-  // ==================== Data Conversion ====================
-
   /// Cria OdometerEntity a partir do estado atual do formulário
   OdometerEntity toOdometerEntity({
     String? id,
     DateTime? createdAt,
   }) {
     final now = DateTime.now();
-
-    // Sanitização final antes da persistência
     final sanitizedDescription = InputSanitizer.sanitizeDescription(state.description);
 
     return OdometerEntity(
@@ -412,8 +373,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
       },
     );
   }
-
-  // ==================== Utility Methods ====================
 
   /// Limpa o valor do odômetro
   void clearOdometer() {

@@ -30,13 +30,9 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // Initialize SOLID state manager only once
     if (!_initialized) {
       _initialized = true;
       final formManager = ref.read(solidPlantFormStateManagerProvider);
-
-      // Initialize form data
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           if (widget.plantId != null) {
@@ -82,10 +78,8 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
                 text: 'Salvar',
                 enabled: formState.canSave && !formState.isSaving,
                 onSuccess: () {
-                  // Success handled in _savePlant method
                 },
                 onError: () {
-                  // Error handled in _savePlant method
                 },
               );
             },
@@ -148,13 +142,10 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Informações Básicas
                   _buildSectionTitle('Informações Básicas'),
                   const PlantFormBasicInfo(),
 
                   const SizedBox(height: 32),
-
-                  // Configurações de Cuidado
                   _buildSectionTitle('Configurações de Cuidado'),
                   const PlantFormCareConfig(),
 
@@ -187,16 +178,12 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     final formManager = ref.read(solidPlantFormStateManagerProvider);
     final formState = ref.read(solidPlantFormStateProvider);
     final plantName = formState.name.trim();
-
-    // Start contextual loading
     startSaveLoading(itemName: plantName.isNotEmpty ? plantName : 'planta');
 
     try {
       final success = await formManager.savePlant();
 
       if (!mounted) return;
-
-      // Stop loading
       stopSaveLoading();
 
       if (success) {
@@ -205,9 +192,6 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
             '🔄 PlantFormPage._savePlant() - Atualizando lista de plantas via Riverpod',
           );
         }
-
-        // Atualizar lista de plantas IMEDIATAMENTE via Riverpod
-        // Não esperar postFrameCallback para garantir que a lista seja atualizada
         if (mounted) {
           if (kDebugMode) {
             print('🔄 PlantFormPage._savePlant() - Chamando refreshPlants()');
@@ -244,8 +228,6 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
               behavior: SnackBarBehavior.floating,
             ),
           );
-
-          // Call the onSaved callback if provided
           widget.onSaved?.call();
 
           context.pop();
@@ -301,9 +283,6 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     if (kDebugMode) {
       print('🔙 PlantFormPage._handleBackPressed - isEditing: $isEditing, plantId: ${widget.plantId}');
     }
-
-    // Only check for changes if in edit mode
-    // In insert mode, allow user to cancel without confirmation
     final hasChanges = isEditing && _hasUnsavedChanges(formState);
 
     if (kDebugMode) {
@@ -361,15 +340,12 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
 
   /// Check if there are unsaved changes in the form
   bool _hasUnsavedChanges(PlantFormState formState) {
-    // Basic info changes
     if (formState.name.trim().isNotEmpty) return true;
     if (formState.species.trim().isNotEmpty) return true;
     if (formState.spaceId != null) return true;
     if (formState.notes.trim().isNotEmpty) return true;
     if (formState.plantingDate != null) return true;
     if (formState.imageUrls.isNotEmpty) return true;
-
-    // Care configuration changes
     if (formState.enableWateringCare == true || formState.wateringIntervalDays != null) return true;
     if (formState.enableFertilizerCare == true || formState.fertilizingIntervalDays != null) return true;
     if (formState.enableSunlightCare == true) return true;
@@ -384,8 +360,6 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
   List<Widget> _buildChangesList(PlantFormState formState) {
     final changes = <String>[];
     final theme = Theme.of(context);
-
-    // Check what data would be lost
     if (formState.name.trim().isNotEmpty) {
       changes.add('Nome da planta');
     }
@@ -404,8 +378,6 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     if (formState.imageUrls.isNotEmpty) {
       changes.add('Foto${formState.imageUrls.length > 1 ? 's' : ''} da planta');
     }
-
-    // Care configurations
     if (formState.enableWateringCare == true ||
         formState.wateringIntervalDays != null) {
       changes.add('Configuração de rega');
@@ -426,8 +398,6 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     if (formState.enableReplanting == true) {
       changes.add('Configuração de replantio');
     }
-
-    // Limit to show maximum 4 changes + "and X more" to avoid overwhelming dialog
     final displayChanges = changes.take(4).toList();
     final remainingCount = changes.length - displayChanges.length;
 

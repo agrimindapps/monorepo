@@ -77,8 +77,6 @@ class SubscriptionState {
   
   SubscriptionPlan? get yearlyPlan => 
       availablePlans.where((p) => p.type == PlanType.yearly).firstOrNull;
-
-  // Granular loading state getters
   bool get hasAnyLoading => 
       isLoading || 
       isLoadingPlans || 

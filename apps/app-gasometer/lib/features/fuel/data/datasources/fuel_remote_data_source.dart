@@ -121,7 +121,6 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
   @override
   Future<List<FuelRecordEntity>> searchFuelRecords(String userId, String query) async {
     try {
-      // Firebase doesn't have full-text search, so we'll implement basic search
       final querySnapshot = await _getUserFuelCollection(userId)
           .orderBy('date', descending: true)
           .get();
@@ -180,8 +179,6 @@ class FuelRemoteDataSourceImpl implements FuelRemoteDataSource {
       throw ServerException('Erro ao observar registros por veículo: ${e.toString()}');
     }
   }
-
-  // Helper methods
   FuelRecordEntity _mapToEntity(FuelSupplyModel model) {
     return FuelRecordEntity(
       id: model.id,

@@ -45,8 +45,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
     );
 
     _animationController.forward();
-
-    // Verifica se o usuário já está logado e redireciona
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
@@ -55,14 +53,10 @@ class _LandingPageState extends ConsumerState<LandingPage>
   }
 
   void _checkUserLoginStatus() {
-    // ignore: unused_local_variable
     final authState = ref.read(local.authProvider);
     final isInitialized = ref.read(local.isInitializedProvider);
     final isAuthenticated = ref.read(local.isAuthenticatedProvider);
-
-    // Se já está inicializado e autenticado, redireciona instantaneamente
     if (isInitialized && isAuthenticated) {
-      // Removed artificial delay - redirect immediately for better UX
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           context.go('/plants');
@@ -84,18 +78,12 @@ class _LandingPageState extends ConsumerState<LandingPage>
         builder: (context, ref, child) {
           final isInitialized = ref.watch(local.isInitializedProvider);
           final isAuthenticated = ref.watch(local.isAuthenticatedProvider);
-          
-          // Se ainda está carregando, mostra splash
           if (!isInitialized) {
             return _buildSplashScreen();
           }
-
-          // Se está autenticado, mostra loading e redireciona
           if (isAuthenticated) {
             return _buildRedirectingScreen();
           }
-
-          // Se não está autenticado, mostra landing page
           return _buildLandingContent();
         },
       ),
@@ -244,7 +232,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          // Logo
           const Row(
             children: [
               Icon(Icons.eco, size: 32, color: Colors.white),
@@ -260,8 +247,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
             ],
           ),
           const Spacer(),
-
-          // Login button
           AccessibleButton(
             onPressed: () {
               AccessibilityTokens.performHapticFeedback('light');
@@ -303,7 +288,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
               opacity: _fadeAnimation,
               child: Column(
                 children: [
-                  // Hero icon
                   Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
@@ -317,8 +301,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Main title
                   Semantics(
                     header: true,
                     child: Text(
@@ -336,8 +318,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Subtitle
                   Text(
                     'O aplicativo que transforma você em um jardineiro expert.\nLembretes inteligentes, dicas personalizadas e muito mais.',
                     textAlign: TextAlign.center,
@@ -348,8 +328,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
                     ),
                   ),
                   const SizedBox(height: 40),
-
-                  // CTA Button
                   SizedBox(
                     width: double.infinity,
                     child: AccessibleButton(
@@ -417,8 +395,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
             style: TextStyle(color: PlantisColors.textSecondary, fontSize: 16),
           ),
           const SizedBox(height: 40),
-
-          // Features grid
           _buildFeatureItem(
             Icons.schedule,
             'Lembretes Inteligentes',

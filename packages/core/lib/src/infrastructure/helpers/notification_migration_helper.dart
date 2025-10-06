@@ -22,15 +22,11 @@ class NotificationMigrationHelper {
       if (kDebugMode) {
         debugPrint('🚀 Starting notification migration...');
       }
-
-      // Get all pending notifications from legacy service
       final pendingNotifications = await _legacyService.getPendingNotifications();
 
       if (kDebugMode) {
         debugPrint('📋 Found ${pendingNotifications.length} notifications to migrate');
       }
-
-      // Migrate each notification
       for (final notification in pendingNotifications) {
         await _migrateNotification(notification, result);
       }
@@ -59,20 +55,16 @@ class NotificationMigrationHelper {
     MigrationResult result,
   ) async {
     try {
-      // Parse legacy notification payload to extract metadata
       Map<String, dynamic> legacyData = {};
       if (notification.payload != null) {
         try {
           legacyData = jsonDecode(notification.payload!) as Map<String, dynamic>;
         } catch (e) {
-          // Payload parsing failed, use empty data
           if (kDebugMode) {
             debugPrint('⚠️ Failed to parse payload for notification ${notification.id}: $e');
           }
         }
       }
-
-      // Create enhanced notification entity
       final enhancedNotification = NotificationEntity(
         id: notification.id,
         title: notification.title,
@@ -83,14 +75,10 @@ class NotificationMigrationHelper {
         importance: _mapLegacyImportance(legacyData),
         scheduledDate: _extractScheduledDate(legacyData),
       );
-
-      // Schedule in enhanced service
       final success = await _enhancedService.scheduleNotification(enhancedNotification);
 
       if (success) {
         result.addSuccess(notification.id, 'Successfully migrated notification');
-
-        // Cancel from legacy service
         await _legacyService.cancelNotification(notification.id);
       } else {
         result.addFailure(notification.id, 'Failed to schedule in enhanced service');
@@ -110,8 +98,6 @@ class NotificationMigrationHelper {
       'migrationDate': DateTime.now().toIso8601String(),
       'legacyData': legacyData,
     };
-
-    // Extract and standardize common fields
     if (legacyData.containsKey('plantId')) {
       enhancedData['entityId'] = legacyData['plantId'];
       enhancedData['entityType'] = 'plant';
@@ -183,7 +169,6 @@ class NotificationMigrationHelper {
       try {
         return DateTime.parse(scheduledStr);
       } catch (e) {
-        // Invalid date format, return null
         return null;
       }
     }
@@ -193,7 +178,6 @@ class NotificationMigrationHelper {
       try {
         return DateTime.fromMillisecondsSinceEpoch(timestampMs);
       } catch (e) {
-        // Invalid timestamp, return null
         return null;
       }
     }
@@ -209,14 +193,11 @@ class NotificationMigrationHelper {
     final validationResult = MigrationValidationResult();
 
     try {
-      // Check if enhanced service has the expected number of notifications
       final enhancedNotifications = await _enhancedService.getPendingNotifications();
       final legacyNotifications = await _legacyService.getPendingNotifications();
 
       validationResult.enhancedNotificationCount = enhancedNotifications.length;
       validationResult.legacyNotificationCount = legacyNotifications.length;
-
-      // Validate specific migrated notifications
       for (final successId in result.successIds) {
         final hasInEnhanced = enhancedNotifications.any((n) => n.id == successId);
         final hasInLegacy = legacyNotifications.any((n) => n.id == successId);
@@ -262,27 +243,22 @@ class NotificationMigrationHelper {
 
     for (final successId in result.successIds) {
       try {
-        // Find notification in enhanced service
         final enhancedNotifications = await _enhancedService.getPendingNotifications();
         final notification = enhancedNotifications.firstWhereOrNull((n) => n.id == successId);
 
         if (notification != null) {
-          // Extract legacy data from payload
           Map<String, dynamic> legacyData = {};
           if (notification.payload != null) {
             try {
               final enhancedPayload = jsonDecode(notification.payload!) as Map<String, dynamic>;
               legacyData = enhancedPayload['legacyData'] as Map<String, dynamic>? ?? {};
             } catch (e) {
-              // Payload parsing failed, use minimal data
               legacyData = {
                 'title': notification.title,
                 'body': notification.body,
               };
             }
           }
-
-          // Create legacy notification entity
           final legacyNotification = NotificationEntity(
             id: notification.id,
             title: notification.title,
@@ -290,12 +266,9 @@ class NotificationMigrationHelper {
             payload: jsonEncode(legacyData),
             channelId: legacyData['channelId'] as String? ?? 'default',
           );
-
-          // Schedule in legacy service
           final success = await _legacyService.scheduleNotification(legacyNotification);
 
           if (success) {
-            // Cancel from enhanced service
             await _enhancedService.cancelNotification(successId);
             rollbackResult.addSuccess(successId);
           } else {

@@ -37,7 +37,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late AnimationController _slideController;
-  // Animation removed as unused
   
   int _currentStep = 0;
   bool _isPurchasing = false;
@@ -57,7 +56,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    // Slide animation removed as unused
   }
 
   @override
@@ -82,12 +80,9 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Progress Indicator
                 _buildProgressIndicator(context),
 
                 const SizedBox(height: 24),
-
-                // Purchase Flow Content
                 SizedBox(
                   height: 500,
                   child: PageView(
@@ -128,8 +123,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
             ),
           ),
           const SizedBox(height: 16),
-          
-          // Progress Bar
           LinearProgressIndicator(
             value: (_currentStep + 1) / _stepTitles.length,
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -137,8 +130,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           ),
           
           const SizedBox(height: 8),
-          
-          // Step Indicators
           Row(
             children: List.generate(_stepTitles.length, (index) {
               return Expanded(
@@ -172,13 +163,10 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Trial Offer (if enabled)
           if (widget.showTrialFirst && subscriptionState.hasTrialAvailable)
             _buildTrialOfferCard(context, subscriptionNotifier),
 
           const SizedBox(height: 24),
-
-          // Plan Options
           Text(
             'Planos Disponíveis',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -186,15 +174,11 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
             ),
           ),
           const SizedBox(height: 16),
-
-          // Premium Plans
           ...subscriptionNotifier.availablePlans.map((plan) {
             return _buildPlanCard(context, plan, subscriptionNotifier);
           }),
           
           const SizedBox(height: 24),
-          
-          // Continue Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -211,8 +195,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
               ),
             ),
           ),
-          
-          // Terms and Conditions
           const SizedBox(height: 16),
           _buildTermsText(context),
         ],
@@ -230,7 +212,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Selected Plan Summary
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -257,8 +238,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                   ],
                 ),
                 const SizedBox(height: 12),
-                
-                // Pricing
                 Row(
                   children: [
                     Text(
@@ -277,8 +256,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                     ),
                   ],
                 ),
-                
-                // Trial Info (if applicable)
                 if (selectedPlan['hasTrialPeriod'] as bool) ...[
                   const SizedBox(height: 8),
                   Container(
@@ -301,8 +278,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           ),
           
           const SizedBox(height: 24),
-          
-          // What's Included
           Text(
             'O que está incluído:',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -330,8 +305,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           }),
           
           const SizedBox(height: 32),
-          
-          // Purchase Button
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -368,8 +341,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           ),
           
           const SizedBox(height: 16),
-          
-          // Back Button
           SizedBox(
             width: double.infinity,
             child: TextButton(
@@ -493,7 +464,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           children: [
             Row(
               children: [
-                // Selection Radio
                 Radio<String>(
                   value: (plan as Map<String, dynamic>)['id'] as String,
                   groupValue: _selectedPlanId,
@@ -501,8 +471,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                 ),
                 
                 const SizedBox(width: 8),
-                
-                // Plan Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -523,8 +491,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                     ],
                   ),
                 ),
-                
-                // Price
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -545,8 +511,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                 ),
               ],
             ),
-            
-            // Promotional Badge
             if (plan['isPromotional'] as bool) ...[
               const SizedBox(height: 8),
               Container(

@@ -5,8 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Notifiers comuns que podem ser reutilizados entre todos os apps
 /// Implementam padrões comuns de state management
 
-// ========== AUTENTICAÇÃO ==========
-
 /// Notifier base para estado de autenticação
 /// Apps podem estender este notifier para implementação específica
 abstract class BaseAuthNotifier extends StateNotifier<AuthState> {
@@ -100,8 +98,6 @@ class _Error extends AuthState {
   final String message;
 }
 
-// ========== PREFERÊNCIAS ==========
-
 /// Notifier para gerenciar preferências do usuário
 class PreferencesNotifier extends StateNotifier<Map<String, dynamic>> {
   PreferencesNotifier(this._prefs) : super({});
@@ -175,8 +171,6 @@ class PreferencesNotifier extends StateNotifier<Map<String, dynamic>> {
   List<String>? getStringList(String key) => state[key] as List<String>?;
 }
 
-// ========== TEMA ==========
-
 /// Notifier para gerenciar tema da aplicação
 class ThemeNotifier extends StateNotifier<ThemeData> {
   ThemeNotifier(this._prefs, this._lightTheme, this._darkTheme) : super(_lightTheme) {
@@ -212,8 +206,6 @@ class ThemeNotifier extends StateNotifier<ThemeData> {
   bool get isDarkTheme => state == _darkTheme;
 }
 
-// ========== CONECTIVIDADE ==========
-
 /// Notifier para gerenciar estado de conectividade
 class ConnectivityNotifier extends StateNotifier<ConnectivityState> {
   ConnectivityNotifier() : super(ConnectivityState.unknown);
@@ -232,8 +224,6 @@ enum ConnectivityState {
   disconnected,
   unknown,
 }
-
-// ========== SINCRONIZAÇÃO ==========
 
 /// Notifier para gerenciar estado de sincronização
 class SyncNotifier extends StateNotifier<SyncState> {
@@ -315,8 +305,6 @@ class _SyncError extends SyncState {
   const _SyncError(this.message) : super._();
   final String message;
 }
-
-// ========== FORMULÁRIOS ==========
 
 /// Notifier base para formulários
 abstract class BaseFormNotifier<T> extends StateNotifier<FormState<T>> {
@@ -413,8 +401,6 @@ class _FormError<T> extends FormState<T> {
   final String message;
 }
 
-// ========== CACHE ==========
-
 /// Notifier para gerenciar cache local
 class CacheNotifier extends StateNotifier<Map<String, CacheItem>> {
   CacheNotifier() : super({});
@@ -436,8 +422,6 @@ class CacheNotifier extends StateNotifier<Map<String, CacheItem>> {
   T? get<T>(String key) {
     final item = state[key];
     if (item == null) return null;
-    
-    // Verifica se expirou
     if (item.expiresAt != null && DateTime.now().isAfter(item.expiresAt!)) {
       remove(key);
       return null;

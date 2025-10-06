@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 class PlantisTypography {
   static const String fontFamily = 'Roboto';
-
-  // Display Styles
   static const TextStyle displayLarge = TextStyle(
     fontSize: 57,
     fontWeight: FontWeight.w400,
@@ -24,8 +22,6 @@ class PlantisTypography {
     letterSpacing: 0,
     height: 1.22,
   );
-
-  // Headline Styles
   static const TextStyle headlineLarge = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w600,
@@ -46,8 +42,6 @@ class PlantisTypography {
     letterSpacing: 0,
     height: 1.33,
   );
-
-  // Title Styles
   static const TextStyle titleLarge = TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w500,
@@ -68,8 +62,6 @@ class PlantisTypography {
     letterSpacing: 0.1,
     height: 1.43,
   );
-
-  // Body Styles
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
@@ -90,8 +82,6 @@ class PlantisTypography {
     letterSpacing: 0.4,
     height: 1.33,
   );
-
-  // Label Styles
   static const TextStyle labelLarge = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -112,24 +102,18 @@ class PlantisTypography {
     letterSpacing: 0.5,
     height: 1.45,
   );
-
-  // Button Style
   static const TextStyle button = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     letterSpacing: 1.25,
     height: 1.43,
   );
-
-  // Caption Style
   static const TextStyle caption = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
     height: 1.33,
   );
-
-  // Overline Style
   static const TextStyle overline = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.w400,

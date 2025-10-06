@@ -100,8 +100,6 @@ class TasksState extends Equatable {
   final String searchQuery;
   final List<task_entity.TaskType> selectedTaskTypes;
   final List<task_entity.TaskPriority> selectedPriorities;
-
-  // Granular loading states
   final Map<String, bool> individualTaskOperations; // taskId -> isLoading
   final Set<TaskLoadingOperation> activeOperations;
   final String? currentOperationMessage;
@@ -175,12 +173,8 @@ class TasksState extends Equatable {
     }
     return TasksState(errorMessage: message);
   }
-
-  // Computed properties (getters)
   bool get hasError => errorMessage != null;
   bool get isEmpty => filteredTasks.isEmpty && !isLoading;
-
-  // Granular loading state getters
   bool isTaskOperationLoading(String taskId) =>
       individualTaskOperations[taskId] ?? false;
   bool get hasActiveOperations => activeOperations.isNotEmpty;

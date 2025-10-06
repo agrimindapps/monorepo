@@ -79,7 +79,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     final startTime = DateTime.now();
     
     try {
-      // Performance monitoring: start calculation
       await _analyticsService.logEvent(
         'calculator_repository_execution_start',
         parameters: {
@@ -99,13 +98,9 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
         );
         return const Left(NotFoundFailure('Calculadora não encontrada'));
       }
-
-      // Executa o cálculo usando o método da entidade
       final result = calculator.executeCalculation(inputs);
       
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
-      // Performance monitoring: calculation success
       await _analyticsService.logEvent(
         'calculator_repository_execution_success',
         parameters: {
@@ -115,8 +110,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
           'is_valid': result.isValid,
         },
       );
-      
-      // Store performance metrics
       await _storePerformanceMetric(
         'calculation_execution',
         calculatorId,
@@ -126,8 +119,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
       return Right(result);
     } catch (e, stackTrace) {
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
-      // Error tracking
       await _analyticsService.logEvent(
         'calculator_repository_execution_error',
         parameters: {
@@ -152,8 +143,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     try {
       final history = await _localDataSource.getCalculationHistory();
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
-      // Performance monitoring
       await _analyticsService.logEvent(
         'calculation_history_loaded',
         parameters: {
@@ -164,7 +153,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
       
       return Right(history);
     } catch (e, stackTrace) {
-      // Error tracking
       await _analyticsService.logEvent(
         'calculation_history_load_error',
         parameters: {
@@ -188,8 +176,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
     try {
       await _localDataSource.saveCalculationToHistory(historyItem);
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
-      // Performance monitoring
       await _analyticsService.logEvent(
         'calculation_history_saved',
         parameters: {
@@ -203,7 +189,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
       
       return const Right(unit);
     } catch (e, stackTrace) {
-      // Error tracking
       await _analyticsService.logEvent(
         'calculation_history_save_error',
         parameters: {
@@ -291,7 +276,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
         data: metric,
       );
     } catch (e) {
-      // Silent fail for performance metrics to not affect main functionality
       debugPrint('Error storing performance metric: $e');
     }
   }

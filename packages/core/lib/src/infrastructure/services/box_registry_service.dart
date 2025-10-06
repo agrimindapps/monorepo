@@ -25,8 +25,6 @@ class BoxRegistryService implements IBoxRegistryService {
       if (_isInitialized) return const Right(null);
 
       await Hive.initFlutter();
-
-      // Register License Model adapters
       _registerLicenseAdapters();
 
       _isInitialized = true;
@@ -41,8 +39,6 @@ class BoxRegistryService implements IBoxRegistryService {
   Future<Either<Failure, void>> registerBox(BoxConfiguration config) async {
     try {
       await _ensureInitialized();
-
-      // Verifica se já existe box com este nome
       if (_boxConfigurations.containsKey(config.name)) {
         return Left(
           CacheFailure(
@@ -50,8 +46,6 @@ class BoxRegistryService implements IBoxRegistryService {
           ),
         );
       }
-
-      // Registra adapters customizados se houver
       if (config.customAdapters != null) {
         for (final adapter in config.customAdapters!) {
           if (!Hive.isAdapterRegistered(adapter.typeId)) {
@@ -59,15 +53,10 @@ class BoxRegistryService implements IBoxRegistryService {
           }
         }
       }
-
-      // Armazena configuração
       _boxConfigurations[config.name] = config;
-
-      // Abre a box imediatamente se for persistente
       if (config.persistent) {
         final boxResult = await _openBox(config);
         if (boxResult.isLeft()) {
-          // Remove do registry se falhou ao abrir
           _boxConfigurations.remove(config.name);
           return boxResult.fold(
             (failure) => Left(failure),
@@ -86,18 +75,12 @@ class BoxRegistryService implements IBoxRegistryService {
   Future<Either<Failure, Box>> getBox(String boxName) async {
     try {
       await _ensureInitialized();
-
-      // Verifica se a box está registrada
       if (!_boxConfigurations.containsKey(boxName)) {
         return Left(CacheFailure('Box "$boxName" não está registrada'));
       }
-
-      // Se já está aberta, retorna
       if (_openBoxes.containsKey(boxName)) {
         return Right(_openBoxes[boxName]!);
       }
-
-      // Abre a box
       final config = _boxConfigurations[boxName]!;
       final boxResult = await _openBox(config);
 
@@ -131,8 +114,6 @@ class BoxRegistryService implements IBoxRegistryService {
       if (!_boxConfigurations.containsKey(boxName)) {
         return Left(CacheFailure('Box "$boxName" não está registrada'));
       }
-
-      // Remove do registry (mas não fecha a box)
       _boxConfigurations.remove(boxName);
 
       return const Right(null);
@@ -147,14 +128,10 @@ class BoxRegistryService implements IBoxRegistryService {
       if (!_boxConfigurations.containsKey(boxName)) {
         return Left(CacheFailure('Box "$boxName" não está registrada'));
       }
-
-      // Fecha a box se estiver aberta
       if (_openBoxes.containsKey(boxName)) {
         await _openBoxes[boxName]!.close();
         _openBoxes.remove(boxName);
       }
-
-      // Remove do registry
       _boxConfigurations.remove(boxName);
 
       return const Right(null);
@@ -171,7 +148,6 @@ class BoxRegistryService implements IBoxRegistryService {
       for (final boxName in boxesToClose) {
         final result = await closeBox(boxName);
         if (result.isLeft()) {
-          // Log erro mas continua fechando outras boxes
           if (kDebugMode) {
             debugPrint('Error closing box "$boxName" for app "$appId"');
           }
@@ -188,22 +164,16 @@ class BoxRegistryService implements IBoxRegistryService {
   bool canAppAccessBox(String boxName, String requestingAppId) {
     final config = _boxConfigurations[boxName];
     if (config == null) return false;
-
-    // Por agora, apenas o app proprietário pode acessar a box
-    // No futuro, pode-se implementar sistema de permissões mais sofisticado
     return config.appId == requestingAppId;
   }
 
   @override
   Future<Either<Failure, void>> dispose() async {
     try {
-      // Fecha todas as boxes abertas
       final boxNames = _openBoxes.keys.toList();
       for (final boxName in boxNames) {
         await _openBoxes[boxName]!.close();
       }
-
-      // Limpa registries
       _openBoxes.clear();
       _boxConfigurations.clear();
       _isInitialized = false;
@@ -222,14 +192,12 @@ class BoxRegistryService implements IBoxRegistryService {
       Box box;
 
       if (config.encryption != null) {
-        // Box criptografada
         box = await Hive.openBox(
           config.name,
           encryptionCipher: HiveAesCipher(config.encryption!.key),
           path: config.customPath,
         );
       } else {
-        // Box normal
         box = await Hive.openBox(config.name, path: config.customPath);
       }
 
@@ -286,12 +254,9 @@ class BoxRegistryService implements IBoxRegistryService {
 
   /// Register License Model adapters for Hive
   void _registerLicenseAdapters() {
-    // Register LicenseModel adapter (typeId: 10)
     if (!Hive.isAdapterRegistered(10)) {
       Hive.registerAdapter(LicenseModelAdapter());
     }
-
-    // Register LicenseType adapter (typeId: 11)
     if (!Hive.isAdapterRegistered(11)) {
       Hive.registerAdapter(LicenseTypeAdapter());
     }

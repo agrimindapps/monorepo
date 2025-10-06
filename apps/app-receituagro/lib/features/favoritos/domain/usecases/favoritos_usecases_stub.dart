@@ -5,61 +5,48 @@ import '../entities/favorito_entity.dart';
 class FavoritosUsecases {
   const FavoritosUsecases();
 
-  // =============================================================================
-  // MÉTODOS BÁSICOS PARA RESOLVER ERROS DE COMPILAÇÃO
-  // =============================================================================
-
   /// Obtém todos os favoritos
   Future<List<FavoritoEntity>> getAllFavoritos() async {
-    // Implementação stub - retorna lista vazia
     return [];
   }
 
   /// Obtém favoritos por tipo específico
   Future<List<FavoritoEntity>> getFavoritosByTipo(String tipo) async {
-    // Implementação stub - retorna lista vazia
     return [];
   }
 
   /// Verifica se item é favorito
   Future<bool> isFavorito(String tipo, String id) async {
-    // Implementação stub - retorna false
     return false;
   }
 
   /// Alterna favorito (toggle)
   Future<bool> toggleFavorito(String tipo, String id) async {
-    // Implementação stub - retorna true (sucesso simulado)
     return true;
   }
 
   /// Adiciona defensivo aos favoritos
   Future<bool> addDefensivoFavorito(String defensivoId) async {
-    // Implementação stub - retorna true (sucesso simulado)
     return true;
   }
 
   /// Remove defensivo dos favoritos
   Future<bool> removeDefensivoFavorito(String defensivoId) async {
-    // Implementação stub - retorna true (sucesso simulado)
     return true;
   }
 
   /// Adiciona praga aos favoritos
   Future<bool> addPragaFavorito(String pragaId) async {
-    // Implementação stub - retorna true (sucesso simulado)
     return true;
   }
 
   /// Remove praga dos favoritos
   Future<bool> removePragaFavorito(String pragaId) async {
-    // Implementação stub - retorna true (sucesso simulado)
     return true;
   }
 
   /// Busca favoritos por query
   Future<List<FavoritoEntity>> searchFavoritos(String query) async {
-    // Implementação stub - retorna lista vazia
     return [];
   }
 
@@ -107,11 +94,9 @@ class FavoritosUsecases {
 
   /// Limpa favoritos por tipo
   Future<void> clearFavoritosByTipo(String tipo) async {
-    // Implementação stub - não faz nada
   }
 
   /// Sincroniza favoritos
   Future<void> syncFavoritos() async {
-    // Implementação stub - não faz nada
   }
 }

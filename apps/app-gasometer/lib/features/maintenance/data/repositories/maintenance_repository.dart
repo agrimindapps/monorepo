@@ -112,9 +112,6 @@ class MaintenanceRepository {
   ) async {
     try {
       final models = _box.values.where((model) => !model.isDeleted).toList();
-
-      // Como o modelo atual não tem status separado, vamos considerar todas como 'completed'
-      // se foram salvas, ou filtrar de outra forma
       final filteredModels =
           models.where((model) {
             if (status == MaintenanceStatus.completed) {
@@ -223,8 +220,6 @@ class MaintenanceRepository {
         for (int j = i + 1; j < models.length; j++) {
           final model1 = models[i];
           final model2 = models[j];
-
-          // Considera duplicata se mesmo veículo, tipo, data (mesmo dia) e valor muito próximo
           final date1 = DateTime.fromMillisecondsSinceEpoch(model1.data);
           final date2 = DateTime.fromMillisecondsSinceEpoch(model2.data);
 
@@ -273,7 +268,6 @@ class MaintenanceRepository {
 
   /// Converte MaintenanceModel para MaintenanceEntity
   MaintenanceEntity _modelToEntity(MaintenanceModel model) {
-    // Separar título e descrição se possível (formato: "Título - Descrição")
     final parts = model.descricao.split(' - ');
     final title = parts.isNotEmpty ? parts.first : model.descricao;
     final description =
@@ -347,7 +341,6 @@ class MaintenanceRepository {
     try {
       await _box.close();
     } catch (e) {
-      // Log error mas não trava
       if (kDebugMode) {
         print('Erro ao fechar box de manutenções: $e');
       }

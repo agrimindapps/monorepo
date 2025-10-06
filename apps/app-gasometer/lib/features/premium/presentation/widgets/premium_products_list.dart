@@ -161,7 +161,6 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
       ),
       child: Stack(
         children: [
-          // Recommended badge
           if (isRecommended)
             Positioned(
               top: -1,
@@ -333,7 +332,6 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
   }
 
   String _calculateSavings() {
-    // Assuming 16% savings on yearly plan (typical for subscription services)
     return '16';
   }
 
@@ -341,11 +339,8 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
     BuildContext context,
     core.ProductInfo product,
   ) async {
-    // Show confirmation dialog
     final confirmed = await _showPurchaseConfirmation(context, product);
     if (!confirmed) return;
-
-    // Attempt purchase
     final notifier = ref.read(premiumNotifierProvider.notifier);
     final success = await notifier.purchaseProduct(product.productId);
 

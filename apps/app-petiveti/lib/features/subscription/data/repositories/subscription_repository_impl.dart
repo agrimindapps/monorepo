@@ -19,12 +19,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, List<SubscriptionPlan>>> getAvailablePlans() async {
     try {
-      // First try to get from remote (RevenueCat)
       final remotePlans = await remoteDataSource.getAvailablePlans();
       await localDataSource.cachePlans(remotePlans);
       return Right(remotePlans);
     } on ServerException catch (e) {
-      // Fallback to cached plans if remote fails
       try {
         final cachedPlans = await localDataSource.getAvailablePlans();
         return Right(cachedPlans);
@@ -41,18 +39,14 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, UserSubscription?>> getCurrentSubscription(String userId) async {
     try {
-      // Try remote first for most up-to-date subscription status
       final remoteSubscription = await remoteDataSource.getCurrentSubscription(userId);
       if (remoteSubscription != null) {
         await localDataSource.cacheSubscription(remoteSubscription);
         return Right(remoteSubscription);
       }
-      
-      // Fallback to cache
       final cachedSubscription = await localDataSource.getCurrentSubscription(userId);
       return Right(cachedSubscription);
     } on ServerException catch (_) {
-      // If remote fails, try cache
       try {
         final cachedSubscription = await localDataSource.getCurrentSubscription(userId);
         return Right(cachedSubscription);
@@ -69,7 +63,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, UserSubscription>> subscribeToPlan(String userId, String planId) async {
     try {
-      // Use RevenueCat to make the purchase
       final subscription = await remoteDataSource.subscribeToPlan(userId, planId);
       await localDataSource.cacheSubscription(subscription);
       return Right(subscription);
@@ -172,7 +165,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, void>> restorePurchases(String userId) async {
     try {
-      // Mock restore - Replace with RevenueCat restore
       await Future<void>.delayed(const Duration(seconds: 1));
       return const Right(null);
     } catch (e) {
@@ -183,7 +175,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   @override
   Future<Either<Failure, bool>> validateReceipt(String receiptData) async {
     try {
-      // Mock validation - Replace with actual receipt validation
       await Future<void>.delayed(const Duration(milliseconds: 500));
       return const Right(true);
     } catch (e) {

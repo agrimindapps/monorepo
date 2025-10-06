@@ -15,8 +15,6 @@ class ReceituagroEnvironmentConfig extends AppEnvironmentConfig {
 
   @override
   String get apiDomain => 'plantisreceituagro.com';
-
-  // Receituagro-specific API Keys
   String get weatherApiKey => EnvironmentConfig.getApiKey(
         'WEATHER_API_KEY',
         fallback: 'weather_dummy_key',
@@ -26,14 +24,10 @@ class ReceituagroEnvironmentConfig extends AppEnvironmentConfig {
         'GOOGLE_MAPS_API_KEY',
         fallback: 'maps_dummy_key',
       );
-
-  // RevenueCat Configuration
   String get revenueCatApiKey => EnvironmentConfig.getApiKey(
         'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
         fallback: 'rcat_dev_dummy_key',
       );
-
-  // Receituagro Subscription Products
   String get monthlyProductId => EnvironmentConfig.getProductId('receituagro_pro_monthly');
   String get yearlyProductId => EnvironmentConfig.getProductId('receituagro_pro_yearly');
 

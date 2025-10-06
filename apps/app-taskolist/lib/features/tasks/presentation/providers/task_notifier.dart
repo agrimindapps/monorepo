@@ -14,10 +14,6 @@ import '../../domain/watch_tasks.dart';
 
 part 'task_notifier.g.dart';
 
-// =============================================================================
-// DEPENDENCY PROVIDERS (Use Cases from GetIt)
-// =============================================================================
-
 @riverpod
 CreateTask createTaskUseCase(CreateTaskUseCaseRef ref) {
   return di.getIt<CreateTask>();
@@ -53,10 +49,6 @@ GetSubtasks getSubtasksUseCase(GetSubtasksUseCaseRef ref) {
   return di.getIt<GetSubtasks>();
 }
 
-// =============================================================================
-// TASK ASYNC NOTIFIER (Main state management)
-// =============================================================================
-
 @riverpod
 class TaskNotifier extends _$TaskNotifier {
   late final CreateTask _createTask;
@@ -68,23 +60,16 @@ class TaskNotifier extends _$TaskNotifier {
 
   @override
   Future<List<TaskEntity>> build() async {
-    // Initialize use cases
     _createTask = ref.read(createTaskUseCaseProvider);
     _deleteTask = ref.read(deleteTaskUseCaseProvider);
     _getTasks = ref.read(getTasksUseCaseProvider);
     _reorderTasks = ref.read(reorderTasksUseCaseProvider);
     _updateTask = ref.read(updateTaskUseCaseProvider);
     _watchTasks = ref.read(watchTasksUseCaseProvider);
-
-    // Load initial tasks
     final result = await _getTasks(const GetTasksParams());
 
     return result.fold((failure) => throw failure, (tasks) => tasks);
   }
-
-  // =============================================================================
-  // ACTIONS
-  // =============================================================================
 
   Future<void> getTasks({
     String? listId,
@@ -174,10 +159,7 @@ class TaskNotifier extends _$TaskNotifier {
 
       return result.fold((failure) => throw failure, (_) {
         final currentTasks = state.value ?? [];
-        // Reordenar as tasks localmente conforme a nova ordem
         final reorderedTasks = <TaskEntity>[];
-
-        // Adicionar tasks na nova ordem
         for (int i = 0; i < taskIds.length; i++) {
           final taskId = taskIds[i];
           final task = currentTasks.firstWhere(
@@ -186,8 +168,6 @@ class TaskNotifier extends _$TaskNotifier {
           );
           reorderedTasks.add(task.copyWith(position: i));
         }
-
-        // Adicionar qualquer task que não estava na lista de reordenação
         final remainingTasks =
             currentTasks.where((task) => !taskIds.contains(task.id)).toList();
         reorderedTasks.addAll(remainingTasks);
@@ -197,10 +177,6 @@ class TaskNotifier extends _$TaskNotifier {
     });
   }
 }
-
-// =============================================================================
-// STREAM PROVIDER (Watch tasks)
-// =============================================================================
 
 /// Classes para parâmetros
 class TasksStreamParams {
@@ -258,10 +234,6 @@ Stream<List<TaskEntity>> tasksStream(
     ),
   );
 }
-
-// =============================================================================
-// FUTURE PROVIDER (Create task with auto ID)
-// =============================================================================
 
 class TaskCreationData {
   final String title;
@@ -331,10 +303,6 @@ Future<String> createTaskWithId(
   );
 }
 
-// =============================================================================
-// FUTURE PROVIDER (Get tasks)
-// =============================================================================
-
 class GetTasksRequest {
   final String? listId;
   final String? userId;
@@ -395,10 +363,6 @@ Future<List<TaskEntity>> getTasksFuture(
     (tasks) => tasks,
   );
 }
-
-// =============================================================================
-// SUBTASKS PROVIDERS
-// =============================================================================
 
 /// Provider para buscar subtasks de uma tarefa específica
 @riverpod

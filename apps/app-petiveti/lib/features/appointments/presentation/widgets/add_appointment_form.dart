@@ -22,15 +22,11 @@ class AddAppointmentForm extends ConsumerStatefulWidget {
 
 class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Controllers
   late final TextEditingController _veterinarianController;
   late final TextEditingController _reasonController;
   late final TextEditingController _diagnosisController;
   late final TextEditingController _notesController;
   late final TextEditingController _costController;
-  
-  // Form data
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
   AppointmentStatus _selectedStatus = AppointmentStatus.scheduled;
@@ -40,8 +36,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
   @override
   void initState() {
     super.initState();
-    
-    // Initialize controllers with existing data if editing
     final appointment = widget.initialAppointment;
     
     _veterinarianController = TextEditingController(
@@ -63,14 +57,11 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
     _costController = TextEditingController(
       text: appointment?.cost?.toString() ?? '',
     );
-    
-    // Initialize date and time
     if (appointment != null) {
       _selectedDate = appointment.date;
       _selectedTime = TimeOfDay.fromDateTime(appointment.date);
       _selectedStatus = appointment.status;
     } else {
-      // Default to current date and next hour
       final now = DateTime.now();
       _selectedDate = now;
       _selectedTime = TimeOfDay(hour: now.hour + 1, minute: 0);
@@ -135,7 +126,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
       ),
       body: Column(
         children: [
-          // Animal info header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -179,15 +169,12 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
               ],
             ),
           ),
-          
-          // Form
           Expanded(
             child: Form(
               key: _formKey,
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  // Date and Time
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -218,8 +205,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   ),
                   
                   const SizedBox(height: 16),
-                  
-                  // Veterinarian
                   TextFormField(
                     controller: _veterinarianController,
                     decoration: const InputDecoration(
@@ -236,8 +221,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   ),
                   
                   const SizedBox(height: 16),
-                  
-                  // Reason
                   TextFormField(
                     controller: _reasonController,
                     decoration: const InputDecoration(
@@ -255,8 +238,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   ),
                   
                   const SizedBox(height: 16),
-                  
-                  // Status (only show if editing)
                   if (widget.isEditing) ...[
                     DropdownButtonFormField<AppointmentStatus>(
                       value: _selectedStatus,
@@ -281,8 +262,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  
-                  // Diagnosis (optional)
                   TextFormField(
                     controller: _diagnosisController,
                     decoration: const InputDecoration(
@@ -294,8 +273,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   ),
                   
                   const SizedBox(height: 16),
-                  
-                  // Notes (optional)
                   TextFormField(
                     controller: _notesController,
                     decoration: const InputDecoration(
@@ -307,8 +284,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   ),
                   
                   const SizedBox(height: 16),
-                  
-                  // Cost (optional)
                   TextFormField(
                     controller: _costController,
                     decoration: const InputDecoration(
@@ -417,8 +392,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
     try {
       final selectedAnimal = ref.read(selectedAnimalProvider);
       if (selectedAnimal == null) return;
-
-      // Create appointment date from selected date and time
       final appointmentDate = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -426,8 +399,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
         _selectedTime.hour,
         _selectedTime.minute,
       );
-
-      // Parse cost
       double? cost;
       if (_costController.text.isNotEmpty) {
         cost = double.tryParse(_costController.text.replaceAll(',', '.'));

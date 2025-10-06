@@ -38,7 +38,6 @@ part 'auth_notifier.g.dart';
 /// Migrado de StateNotifier para Notifier<AuthState> (Riverpod v2)
 @Riverpod(keepAlive: true)
 class Auth extends _$Auth {
-  // Use cases
   late final GetCurrentUser _getCurrentUser;
   late final WatchAuthState _watchAuthState;
   late final SignInWithEmail _signInWithEmail;
@@ -47,25 +46,18 @@ class Auth extends _$Auth {
   late final SignOut _signOut;
   late final UpdateProfile _updateProfile;
   late final SendPasswordReset _sendPasswordReset;
-
-  // Services
   late final GasometerAnalyticsService _analytics;
   late final PlatformService _platformService;
   late final AuthRateLimiter _rateLimiter;
   late final AuthLocalDataSource _authLocalDataSource;
   late final EnhancedAccountDeletionService _enhancedDeletionService;
-
-  // MonorepoAuthCache instance for cross-module security
   final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
 
   StreamSubscription<void>? _authStateSubscription;
-
-  // SECURITY + UX FIX: Flag to prevent automatic anonymous login during active login attempts
   bool _isInLoginAttempt = false;
 
   @override
   AuthState build() {
-    // Inject dependencies via GetIt
     _getCurrentUser = sl<GetCurrentUser>();
     _watchAuthState = sl<WatchAuthState>();
     _signInWithEmail = sl<SignInWithEmail>();
@@ -79,14 +71,8 @@ class Auth extends _$Auth {
     _rateLimiter = sl<AuthRateLimiter>();
     _authLocalDataSource = sl<AuthLocalDataSource>();
     _enhancedDeletionService = sl<EnhancedAccountDeletionService>();
-
-    // Initialize auth state
-    // Note: These are async but we don't await in build()
-    // The state will be updated asynchronously
     _initializeAuthState();
     _initializeMonorepoAuthCache();
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _authStateSubscription?.cancel();
     });
@@ -114,7 +100,6 @@ class Auth extends _$Auth {
     }
 
     try {
-      // Get current user first
       if (kDebugMode) {
         debugPrint('🔐 Obtendo usuário atual...');
       }
@@ -153,7 +138,6 @@ class Auth extends _$Auth {
               status: AuthStatus.authenticated,
             );
           } else {
-            // If no user and should use anonymous mode, initialize anonymously
             final shouldUseAnonymous = await shouldUseAnonymousMode();
             if (kDebugMode) {
               debugPrint(
@@ -179,8 +163,6 @@ class Auth extends _$Auth {
           }
         },
       );
-
-      // Watch for auth state changes
       _authStateSubscription = _watchAuthState().listen((result) {
         result.fold(
           (failure) {
@@ -233,8 +215,6 @@ class Auth extends _$Auth {
         }
         return;
       }
-
-      // For registered users, set up analytics and check premium
       await _analytics.setUserId(user.id);
       final isPremium = user.isPremium;
       await _analytics.setUserProperties({
@@ -271,7 +251,6 @@ class Auth extends _$Auth {
     _isInLoginAttempt = true; // SECURITY + UX FIX
 
     try {
-      // Verifica rate limiting antes de tentar login
       final canAttempt = await _rateLimiter.canAttemptLogin();
       if (!canAttempt) {
         final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
@@ -281,8 +260,6 @@ class Auth extends _$Auth {
           status: AuthStatus.error,
         );
         _isInLoginAttempt = false;
-
-        // Log tentativa bloqueada
         await _analytics.logUserAction(
           'login_blocked_rate_limit',
           parameters: {
@@ -304,16 +281,10 @@ class Auth extends _$Auth {
               '🔐 AuthNotifier: Login falhou - Tipo: ${failure.runtimeType}, Mensagem: ${failure.message}',
             );
           }
-
-          // Registra tentativa falhada no rate limiter
           await _rateLimiter.recordFailedAttempt();
-
-          // Obter informações atualizadas do rate limiter
           final rateLimitInfo = await _rateLimiter.getRateLimitInfo();
 
           String errorMsg = _mapFailureToMessage(failure);
-
-          // Adiciona aviso de rate limiting se aplicável
           if (!rateLimitInfo.canAttemptLogin) {
             errorMsg = rateLimitInfo.lockoutMessage;
           } else if (rateLimitInfo.warningMessage.isNotEmpty) {
@@ -326,8 +297,6 @@ class Auth extends _$Auth {
             status: AuthStatus.error,
           );
           _isInLoginAttempt = false; // SECURITY + UX FIX
-
-          // Log analytics para tentativa falhada
           await _analytics.logUserAction(
             'login_failed',
             parameters: {
@@ -339,7 +308,6 @@ class Auth extends _$Auth {
           );
         },
         (user) async {
-          // Registra tentativa bem-sucedida (limpa rate limiting)
           await _rateLimiter.recordSuccessfulAttempt();
 
           final gasometerUser = _convertFromCoreUser(user);
@@ -353,8 +321,6 @@ class Auth extends _$Auth {
             status: AuthStatus.authenticated,
           );
           _isInLoginAttempt = false; // SECURITY + UX FIX
-
-          // Log analytics
           await _analytics.logLogin('email');
           await _analytics.logUserAction(
             'login_success',
@@ -369,8 +335,6 @@ class Auth extends _$Auth {
         status: AuthStatus.error,
       );
       _isInLoginAttempt = false; // SECURITY + UX FIX
-
-      // Log erro inesperado
       await _analytics.recordError(
         e,
         StackTrace.current,
@@ -419,8 +383,6 @@ class Auth extends _$Auth {
           isLoading: false,
           status: AuthStatus.authenticated,
         );
-
-        // Log analytics
         await _analytics.logUserAction(
           'register_success',
           parameters: {'method': 'email'},
@@ -466,11 +428,7 @@ class Auth extends _$Auth {
           isLoading: false,
           status: AuthStatus.authenticated,
         );
-
-        // Salvar preferência de modo anônimo
         await _saveAnonymousPreference();
-
-        // Log analytics para modo anônimo
         await _analytics.logAnonymousSignIn();
         await _analytics.setUserProperties({
           'user_type': 'anonymous',
@@ -493,7 +451,6 @@ class Auth extends _$Auth {
     );
 
     try {
-      // Log analytics antes do logout
       await _analytics.logLogout();
 
       final result = await _signOut();
@@ -507,7 +464,6 @@ class Auth extends _$Auth {
           );
         },
         (_) async {
-          // SECURITY FIX: Clear cross-module cache to prevent contamination
           try {
             await _monorepoAuthCache.clearModuleData('app-gasometer');
             if (kDebugMode) {
@@ -517,7 +473,6 @@ class Auth extends _$Auth {
             if (kDebugMode) {
               debugPrint('⚠️ Erro ao limpar MonorepoAuthCache: $e');
             }
-            // Não falha o logout se houver erro na limpeza do cache
           }
 
           state = state.copyWith(
@@ -547,21 +502,17 @@ class Auth extends _$Auth {
   /// LOGOUT WITH LOADING DIALOG - migrado do AuthProvider
   Future<void> logoutWithLoadingDialog(BuildContext context) async {
     try {
-      // Mostrar o dialog de loading
       showLogoutLoading(
         context,
         message: 'Saindo...',
         duration: const Duration(seconds: 2),
       );
-
-      // Executar logout em paralelo com o dialog
       await logout();
 
       if (kDebugMode) {
         debugPrint('🔐 Logout com loading dialog concluído');
       }
     } catch (e) {
-      // Fechar dialog se houver erro
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
@@ -639,18 +590,12 @@ class Auth extends _$Auth {
   Future<bool> updateAvatar(String avatarBase64) async {
     try {
       if (state.currentUser == null) return false;
-
-      // Update user with new avatar
       final updatedUser = state.currentUser!.copyWith(
         avatarBase64: avatarBase64,
       );
-
-      // Persist the avatar locally through the auth data source
       await _saveUserLocallyWithAvatar(updatedUser);
 
       state = state.copyWith(currentUser: updatedUser);
-
-      // Log avatar update
       await _analytics.logUserAction(
         'avatar_updated',
         parameters: {
@@ -680,16 +625,10 @@ class Auth extends _$Auth {
   Future<bool> removeAvatar() async {
     try {
       if (state.currentUser == null) return false;
-
-      // Update user removing avatar
       final updatedUser = state.currentUser!.copyWith(avatarBase64: null);
-
-      // Persist the changes locally
       await _saveUserLocallyWithAvatar(updatedUser);
 
       state = state.copyWith(currentUser: updatedUser);
-
-      // Log avatar removal
       await _analytics.logUserAction(
         'avatar_removed',
         parameters: {'user_type': state.currentUser!.type.toString()},
@@ -720,8 +659,6 @@ class Auth extends _$Auth {
       if (kDebugMode) {
         debugPrint('🔐 Salvando dados do usuário localmente com avatar');
       }
-
-      // Convert gasometer UserEntity to core UserEntity for storage
       final coreUser = _convertToCore(user);
       await _authLocalDataSource.cacheUser(coreUser);
     } catch (e) {
@@ -747,7 +684,6 @@ class Auth extends _$Auth {
     );
 
     try {
-      // Use Enhanced Account Deletion Service
       final result = await _enhancedDeletionService.deleteAccount(
         password: currentPassword ?? '',
         userId: state.currentUser!.id,
@@ -764,7 +700,6 @@ class Auth extends _$Auth {
         },
         (deletionResult) {
           if (deletionResult.isSuccess) {
-            // Success - perform cleanup
             _performPostDeletionCleanup();
           } else {
             state = state.copyWith(
@@ -781,8 +716,6 @@ class Auth extends _$Auth {
         isLoading: false,
         status: AuthStatus.error,
       );
-
-      // Log unexpected error
       await _analytics.recordError(
         e,
         StackTrace.current,
@@ -808,7 +741,6 @@ class Auth extends _$Auth {
   }
 
   Future<void> _saveAnonymousPreference() async {
-    // Anonymous preference is now handled by the auth data source
     if (kDebugMode) {
       debugPrint('🔐 Preferência de modo anônimo salva');
     }
@@ -816,15 +748,12 @@ class Auth extends _$Auth {
 
   Future<bool> shouldUseAnonymousMode() async {
     try {
-      // SECURITY + UX FIX: Don't use anonymous mode if we're in the middle of a login attempt
       if (_isInLoginAttempt) {
         if (kDebugMode) {
           debugPrint('🔐 Não usar anônimo - tentativa de login em andamento');
         }
         return false;
       }
-
-      // Use platform service to determine if anonymous mode should be used by default
       return _platformService.shouldUseAnonymousByDefault;
     } catch (e) {
       if (kDebugMode) {
@@ -849,15 +778,10 @@ class Auth extends _$Auth {
   /// LOGIN WITH SYNC - migrado do AuthProvider
   Future<void> loginAndSync(String email, String password) async {
     try {
-      // 1. Fazer login primeiro (reutilizar método existente)
       await login(email, password);
-
-      // 2. Se login falhou, não continua com sync
       if (!state.isAuthenticated || state.errorMessage != null) {
         return;
       }
-
-      // 3. Iniciar sincronização em background (não bloqueia navegação)
       if (!state.isAnonymous) {
         _performBackgroundSync();
       }
@@ -879,7 +803,6 @@ class Auth extends _$Auth {
 
   /// Executa sincronização em background sem bloquear navegação
   void _performBackgroundSync() {
-    // Executar em background sem bloquear a UI
     Future.delayed(const Duration(milliseconds: 500), () {
       if (state.isAuthenticated && !state.isAnonymous) {
         _startBackgroundDataSync();
@@ -897,8 +820,6 @@ class Auth extends _$Auth {
       if (kDebugMode) {
         debugPrint('🔄 Iniciando sincronização em background...');
       }
-
-      // Sincronizar dados do Gasometer de forma simples
       await _syncGasometerData();
 
       await _analytics.log('gasometer_background_sync_completed');
@@ -920,7 +841,6 @@ class Auth extends _$Auth {
   /// Sincronizar dados do Gasometer usando UnifiedSync
   Future<void> _syncGasometerData() async {
     try {
-      // Usar o UnifiedSyncManager para sincronizar todos os dados do app gasometer
       final syncResult = await UnifiedSyncManager.instance.forceSyncApp(
         'gasometer',
       );
@@ -962,8 +882,6 @@ class Auth extends _$Auth {
   /// Convert core UserEntity to gasometer UserEntity
   gasometer_auth.UserEntity? _convertFromCoreUser(core.UserEntity? coreUser) {
     if (coreUser == null) return null;
-
-    // Convert from core UserEntity to gasometer UserEntity
     return gasometer_auth.UserEntity(
       id: coreUser.id,
       email: coreUser.email.isEmpty ? null : coreUser.email,
@@ -999,7 +917,6 @@ class Auth extends _$Auth {
 
   /// Convert gasometer UserEntity to core UserEntity
   core.UserEntity _convertToCore(gasometer_auth.UserEntity gasometerUser) {
-    // Safely extract metadata
     final metadata = gasometerUser.metadata;
     final phone = metadata['phone'];
     final isActive = metadata['isActive'];

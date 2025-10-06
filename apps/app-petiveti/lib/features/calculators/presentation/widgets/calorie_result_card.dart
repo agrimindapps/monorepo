@@ -20,27 +20,16 @@ class CalorieResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Resultado principal
         _buildMainResultCard(context),
         const SizedBox(height: 16),
-
-        // Necessidades nutricionais
         _buildNutritionalNeedsCard(context),
         const SizedBox(height: 16),
-
-        // Recomendações de alimentação
         _buildFeedingRecommendationsCard(context),
         const SizedBox(height: 16),
-
-        // Manejo de peso
         _buildWeightManagementCard(context),
         const SizedBox(height: 16),
-
-        // Considerações especiais
         if (output.specialConsiderations.isNotEmpty)
           _buildSpecialConsiderationsCard(context),
-
-        // Alertas e recomendações
         if (output.recommendations.isNotEmpty) ...[
           const SizedBox(height: 16),
           _buildRecommendationsCard(context),
@@ -68,7 +57,6 @@ class CalorieResultCard extends StatelessWidget {
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              // Título
               Text(
                 'Necessidades Calóricas',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -78,8 +66,6 @@ class CalorieResultCard extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-
-              // Resultados principais
               Row(
                 children: [
                   Expanded(
@@ -108,8 +94,6 @@ class CalorieResultCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Classificação
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
@@ -281,8 +265,6 @@ class CalorieResultCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Informações principais
             Row(
               children: [
                 Expanded(
@@ -310,8 +292,6 @@ class CalorieResultCard extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Horários
             if (feeding.feedingSchedule.isNotEmpty) ...[
               const Text(
                 'Horários Sugeridos:',
@@ -321,16 +301,12 @@ class CalorieResultCard extends StatelessWidget {
               Text(feeding.feedingSchedule.join(' • ')),
               const SizedBox(height: 12),
             ],
-            
-            // Tipo de alimento
             const Text(
               'Tipo de Alimento:',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(feeding.foodType),
-            
-            // Suplementos
             if (feeding.supplementNeeds.isNotEmpty) ...[
               const SizedBox(height: 12),
               const Text(
@@ -559,7 +535,6 @@ class CalorieResultCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () {
-                                // TODO: Implementar ação específica
                               },
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

@@ -37,14 +37,10 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Para usuários premium, mostra campo de comentário + lista
             if (data.isPremium) ...[
-              // Add new comment section (campo de cadastro)
               _buildAddCommentSection(data),
               const SizedBox(height: 24),
             ],
-
-            // Content
             data.isPremium ? _buildPremiumContent(data) : _buildFreeContent(),
 
             const SizedBox(height: 80), // Espaço para bottom navigation
@@ -113,7 +109,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
                 ),
               ],
             ),
-            // Exibe erro se houver
             if (data.errorMessage?.isNotEmpty ?? false) ...[
               const SizedBox(height: 8),
               Container(
@@ -145,7 +140,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
   }
 
   Widget _buildPremiumContent(DetalheDefensivoState data) {
-    // Comments list (sem estado vazio)
     if (data.isLoadingComments) {
       return const Center(
         child: Padding(
@@ -156,7 +150,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
     }
 
     if (data.comentarios.isEmpty) {
-      // Não mostra mais estado vazio aqui, pois usuários podem adicionar comentários acima
       return const SizedBox.shrink();
     }
 
@@ -289,7 +282,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to subscription
                 },
                 child: const Text('Upgrade para Premium'),
               ),
@@ -317,7 +309,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
     final success = await ref.read(detalheDefensivoNotifierProvider.notifier).addComment(content);
     if (success) {
       _commentController.clear();
-      // Mostra sucesso
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -327,7 +318,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
         );
       }
     } else {
-      // Erro já é gerenciado pelo notifier
       if (mounted) {
         final state = ref.read(detalheDefensivoNotifierProvider);
         state.whenData((data) {

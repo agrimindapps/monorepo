@@ -68,10 +68,7 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
   }
 
   Future<void> _loadPlant(String plantId, {required bool forceReload}) async {
-    // If we already have this plant loaded and not forcing reload, don't show loading
     if (!forceReload && state.plant?.id == plantId && !state.hasError) return;
-
-    // Only show loading if we don't have any plant data yet or forcing reload
     final shouldShowLoading = state.plant?.id != plantId || forceReload;
 
     if (shouldShowLoading) {
@@ -200,8 +197,6 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
     }
   }
 }
-
-// Dependency providers
 @riverpod
 GetPlantByIdUseCase getPlantByIdUseCase(Ref ref) {
   return GetIt.instance<GetPlantByIdUseCase>();

@@ -4,8 +4,6 @@ import 'package:flutter/foundation.dart';
 /// Provides environment-specific configurations and link validation
 class AppConfig {
   AppConfig._();
-
-  // Environment detection
   static bool get isProduction => kReleaseMode;
   static bool get isDevelopment => kDebugMode;
 

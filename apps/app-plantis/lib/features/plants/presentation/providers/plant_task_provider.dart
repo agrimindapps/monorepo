@@ -22,13 +22,9 @@ class PlantTaskProvider extends ChangeNotifier {
     PlantTasksRepository? repository,
   }) : _taskGenerationService = taskGenerationService ?? PlantTaskGenerator(),
        _repository = repository;
-
-  // State
   final Map<String, List<PlantTask>> _plantTasks = {};
   bool _isLoading = false;
   String? _errorMessage;
-
-  // Getters
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
@@ -134,8 +130,6 @@ class PlantTaskProvider extends ChangeNotifier {
       }
 
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
-
-      // CRÍTICO: Persistir tasks geradas se repository disponível
       if (_repository != null && tasks.isNotEmpty) {
         if (kDebugMode) {
           print(
@@ -163,7 +157,6 @@ class PlantTaskProvider extends ChangeNotifier {
           },
         );
       } else {
-        // Fallback para comportamento anterior se repository não disponível
         _plantTasks[plant.id] = tasks;
         if (kDebugMode) {
           print(
@@ -171,8 +164,6 @@ class PlantTaskProvider extends ChangeNotifier {
           );
         }
       }
-
-      // Update task statuses
       await _updateTaskStatuses(plant.id);
     } catch (e) {
       _errorMessage = 'Erro ao gerar tarefas: $e';
@@ -200,35 +191,25 @@ class PlantTaskProvider extends ChangeNotifier {
       final task = tasks[taskIndex];
 
       if (task.isCompleted) {
-        // Mark as pending
         final pendingTask = task.copyWith(
           status: TaskStatus.pending,
           completedDate: null,
         );
         tasks[taskIndex] = pendingTask;
-
-        // CRÍTICO: Atualizar na persistência
         if (_repository != null) {
           await _repository.updatePlantTask(pendingTask);
         }
       } else {
-        // Mark as completed
         final completedTask = task.markAsCompleted();
         tasks[taskIndex] = completedTask;
-
-        // CRÍTICO: Atualizar na persistência
         if (_repository != null) {
           await _repository.updatePlantTask(completedTask);
         }
-
-        // Generate next task (passa DateTime.now() como completionDate)
         final nextTask = _taskGenerationService.generateNextTask(
           completedTask,
           completionDate: DateTime.now(),
         );
         tasks.add(nextTask);
-
-        // CRÍTICO: Salvar nova task na persistência
         if (_repository != null) {
           await _repository.addPlantTask(nextTask);
         }
@@ -259,11 +240,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
       final task = tasks[taskIndex];
       final completedTask = task.markAsCompleted();
-
-      // Update the current task
       tasks[taskIndex] = completedTask;
-
-      // Generate next task (passa DateTime.now() como completionDate)
       final nextTask = _taskGenerationService.generateNextTask(
         completedTask,
         completionDate: DateTime.now(),
@@ -271,8 +248,6 @@ class PlantTaskProvider extends ChangeNotifier {
       tasks.add(nextTask);
 
       _plantTasks[plantId] = tasks;
-
-      // Update all task statuses
       await _updateTaskStatuses(plantId);
     } catch (e) {
       _errorMessage = 'Erro ao completar tarefa: $e';
@@ -298,37 +273,24 @@ class PlantTaskProvider extends ChangeNotifier {
       }
 
       final task = tasks[taskIndex];
-
-      // Mark as completed with specific date
       final completedTask = task.copyWith(
         status: TaskStatus.completed,
         completedDate: completionDate,
-        // Note: PlantTask doesn't have notes field, but we could extend it if needed
       );
-
-      // Update the current task
       tasks[taskIndex] = completedTask;
-
-      // CRÍTICO: Atualizar na persistência se disponível
       if (_repository != null) {
         await _repository.updatePlantTask(completedTask);
       }
-
-      // ✅ Generate next task based on REAL completion date
       final nextTask = _taskGenerationService.generateNextTask(
         completedTask,
         completionDate: completionDate, // ✅ Usa data real fornecida
       );
       tasks.add(nextTask);
-
-      // CRÍTICO: Salvar nova task na persistência se disponível
       if (_repository != null) {
         await _repository.addPlantTask(nextTask);
       }
 
       _plantTasks[plantId] = tasks;
-
-      // Update all task statuses
       await _updateTaskStatuses(plantId);
 
       if (kDebugMode) {
@@ -411,7 +373,6 @@ class PlantTaskProvider extends ChangeNotifier {
   /// Removes all tasks for a plant (when plant is deleted)
   Future<void> removeTasksForPlant(String plantId) async {
     try {
-      // CRÍTICO: Remover da persistência
       if (_repository != null) {
         await _repository.deletePlantTasksByPlantId(plantId);
         if (kDebugMode) {
@@ -440,8 +401,6 @@ class PlantTaskProvider extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-
-      // ✅ CRÍTICO: Deletar tarefas antigas do repositório (soft delete)
       if (_repository != null) {
         if (kDebugMode) {
           print(
@@ -453,11 +412,7 @@ class PlantTaskProvider extends ChangeNotifier {
           print('✅ PlantTaskProvider: Tarefas antigas deletadas (soft delete)');
         }
       }
-
-      // Remove existing tasks da memória
       _plantTasks.remove(plant.id);
-
-      // Generate new tasks based on updated config
       await generateTasksForPlant(plant);
 
       if (kDebugMode) {

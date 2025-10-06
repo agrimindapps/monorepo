@@ -35,8 +35,6 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
     with TickerProviderStateMixin {
   late AnimationController _listAnimationController;
   late Animation<double> _fadeAnimation;
-  
-  // Filter state
   String _searchQuery = '';
   ExpenseCategory? _filterCategory;
   DateTimeRange? _dateRange;
@@ -102,7 +100,6 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
 
   List<Expense> _getFilteredExpenses() {
     return widget.expenses.where((expense) {
-      // Search filter
       if (_searchQuery.isNotEmpty) {
         final searchLower = _searchQuery.toLowerCase();
         if (!expense.title.toLowerCase().contains(searchLower) &&
@@ -110,13 +107,9 @@ class _ExpenseEnhancedListRefactoredState extends ConsumerState<ExpenseEnhancedL
           return false;
         }
       }
-
-      // Category filter
       if (_filterCategory != null && expense.category != _filterCategory) {
         return false;
       }
-
-      // Date range filter
       if (_dateRange != null) {
         final expenseDate = DateTime(
           expense.expenseDate.year,

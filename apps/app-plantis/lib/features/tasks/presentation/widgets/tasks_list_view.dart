@@ -17,8 +17,6 @@ class TasksListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async {
-        // Simular refresh - será implementado no provider
-        // Removed artificial delay for instant refresh
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -63,7 +61,6 @@ class TaskListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Checkbox para completar tarefa
               if (task.status == task_entity.TaskStatus.pending)
                 GestureDetector(
                   onTap: onComplete,
@@ -99,13 +96,10 @@ class TaskListItem extends StatelessWidget {
                 ),
 
               const SizedBox(width: 12),
-
-              // Conteúdo da tarefa
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título da tarefa
                     Text(
                       task.title,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -123,8 +117,6 @@ class TaskListItem extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 4),
-
-                    // Planta e tipo
                     Row(
                       children: [
                         Icon(
@@ -137,7 +129,6 @@ class TaskListItem extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            // TODO: Resolve plant name from plantId - this file appears unused
                             task.type.displayName,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurface.withValues(
@@ -151,12 +142,9 @@ class TaskListItem extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 8),
-
-                    // Data de vencimento e prioridade
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Data de vencimento
                         Row(
                           children: [
                             Icon(
@@ -194,8 +182,6 @@ class TaskListItem extends StatelessWidget {
                             ),
                           ],
                         ),
-
-                        // Prioridade
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -227,8 +213,6 @@ class TaskListItem extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Ícone indicador
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,

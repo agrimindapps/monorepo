@@ -17,8 +17,6 @@ import '../../domain/services/fuel_formatter_service.dart';
 import '../../domain/services/fuel_validator_service.dart';
 import '../models/fuel_form_model.dart';
 
-// ========== STATE ==========
-
 /// Form state for fuel record creation/editing
 class FuelFormState {
   const FuelFormState({
@@ -28,7 +26,6 @@ class FuelFormState {
     this.isLoading = false,
     this.lastError,
     this.lastOdometerReading,
-    // Image state
     this.receiptImagePath,
     this.receiptImageUrl,
     this.isUploadingImage = false,
@@ -41,14 +38,10 @@ class FuelFormState {
   final bool isLoading;
   final String? lastError;
   final double? lastOdometerReading;
-
-  // Image management
   final String? receiptImagePath;
   final String? receiptImageUrl;
   final bool isUploadingImage;
   final String? imageUploadError;
-
-  // Computed getters
   bool get hasReceiptImage =>
       receiptImagePath != null || receiptImageUrl != null;
   bool get canSubmit =>
@@ -93,8 +86,6 @@ class FuelFormState {
   }
 }
 
-// ========== NOTIFIER ==========
-
 /// FuelFormNotifier - Manages fuel record form state
 class FuelFormNotifier extends StateNotifier<FuelFormState> {
   FuelFormNotifier({
@@ -122,11 +113,7 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   late final FuelFormatterService _formatter;
   late final FuelValidatorService _validator;
   late final ImagePicker _imagePicker;
-
-  // Form key for validation
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  // Text controllers for form fields
   final TextEditingController litersController = TextEditingController();
   final TextEditingController pricePerLiterController = TextEditingController();
   final TextEditingController odometerController = TextEditingController();
@@ -134,13 +121,9 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
   final TextEditingController gasStationBrandController =
       TextEditingController();
   final TextEditingController notesController = TextEditingController();
-
-  // Debounce timers
   Timer? _litersDebounceTimer;
   Timer? _priceDebounceTimer;
   Timer? _odometerDebounceTimer;
-
-  // ========== INITIALIZATION ==========
 
   Future<void> initialize({String? vehicleId, String? userId}) async {
     try {
@@ -152,14 +135,8 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
       final formModel = FuelFormModel.initial(selectedVehicleId, userId ?? '');
       state = state.copyWith(formModel: formModel, isLoading: true);
-
-      // Load vehicle data
       await _loadVehicleData(selectedVehicleId);
-
-      // Setup controllers
       _setupControllers();
-
-      // Update text controllers with initial values
       _updateTextControllers();
 
       state = state.copyWith(isInitialized: true, isLoading: false);
@@ -185,12 +162,10 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
   Future<void> _loadVehicleData(String vehicleId) async {
     try {
-      // Get vehicle from VehiclesNotifier
       final vehiclesNotifier = _ref.read(vehiclesNotifierProvider.notifier);
       final vehicle = await vehiclesNotifier.getVehicleById(vehicleId);
 
       if (vehicle != null) {
-        // Get last odometer reading
         final lastOdometer = vehicle.currentOdometer;
 
         state = state.copyWith(
@@ -235,8 +210,6 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     gasStationBrandController.text = state.formModel.gasStationBrand;
     notesController.text = state.formModel.notes;
   }
-
-  // ========== FIELD UPDATES ==========
 
   void _onLitersChanged() {
     _litersDebounceTimer?.cancel();
@@ -398,8 +371,6 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     );
   }
 
-  // ========== VALIDATION ==========
-
   String? validateField(String field, String? value) {
     switch (field) {
       case 'liters':
@@ -458,8 +429,6 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     return errors.isEmpty;
   }
 
-  // ========== FORM ACTIONS ==========
-
   void clearForm() {
     litersController.clear();
     pricePerLiterController.clear();
@@ -492,13 +461,8 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
 
   Future<void> loadFromFuelRecord(FuelRecordEntity record) async {
     try {
-      // Update form model with record data
       state = state.copyWith(formModel: FuelFormModel.fromFuelRecord(record));
-
-      // Load vehicle data
       await _loadVehicleData(record.vehicleId);
-
-      // Update controllers
       _updateTextControllers();
     } catch (e) {
       if (kDebugMode) {
@@ -507,8 +471,6 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
       state = state.copyWith(lastError: 'Erro ao carregar registro: $e');
     }
   }
-
-  // ========== IMAGE MANAGEMENT ==========
 
   Future<void> captureReceiptImage() async {
     try {
@@ -555,14 +517,10 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
         imageUploadError: null,
         clearImageError: true,
       );
-
-      // Validate image
       final isValid = await _receiptImageService.isValidImage(imagePath);
       if (!isValid) {
         throw Exception('Arquivo de imagem inválido');
       }
-
-      // Process image (compress + upload if online)
       final result = await _receiptImageService.processFuelReceiptImage(
         userId: state.formModel.userId,
         fuelSupplyId: _generateTemporaryId(),
@@ -654,8 +612,6 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     return 'temp_${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  // ========== CLEANUP ==========
-
   @override
   void dispose() {
     _litersDebounceTimer?.cancel();
@@ -672,8 +628,6 @@ class FuelFormNotifier extends StateNotifier<FuelFormState> {
     super.dispose();
   }
 }
-
-// ========== PROVIDERS ==========
 
 /// Fuel form notifier provider factory
 final fuelFormNotifierProvider =

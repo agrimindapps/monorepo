@@ -4,8 +4,6 @@ enum AppThemeMode {
   light,
   dark,
   system;
-
-  // Converter para ThemeMode do Flutter
   ThemeMode get themeMode {
     switch (this) {
       case AppThemeMode.light:
@@ -16,8 +14,6 @@ enum AppThemeMode {
         return ThemeMode.system;
     }
   }
-
-  // Converter de ThemeMode do Flutter
   static AppThemeMode fromThemeMode(ThemeMode themeMode) {
     switch (themeMode) {
       case ThemeMode.light:
@@ -28,8 +24,6 @@ enum AppThemeMode {
         return AppThemeMode.system;
     }
   }
-
-  // Nome localizado para UI
   String get displayName {
     switch (this) {
       case AppThemeMode.light:
@@ -40,8 +34,6 @@ enum AppThemeMode {
         return 'Sistema';
     }
   }
-
-  // Ícone para UI
   IconData get icon {
     switch (this) {
       case AppThemeMode.light:
@@ -52,8 +44,6 @@ enum AppThemeMode {
         return Icons.settings_brightness;
     }
   }
-
-  // Descrição para UI
   String get description {
     switch (this) {
       case AppThemeMode.light:
@@ -64,13 +54,9 @@ enum AppThemeMode {
         return 'Seguir configuração do sistema';
     }
   }
-
-  // Valor para persistência
   String get persistenceValue {
     return name;
   }
-
-  // Criar a partir do valor de persistência
   static AppThemeMode fromPersistenceValue(String value) {
     return AppThemeMode.values.firstWhere(
       (mode) => mode.name == value,

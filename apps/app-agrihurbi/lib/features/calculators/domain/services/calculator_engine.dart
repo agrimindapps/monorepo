@@ -56,7 +56,6 @@ class CalculatorEngine {
     bool validateOnly = false,
   }) async {
     try {
-      // Buscar calculadora
       final calculator = _registeredCalculators[calculatorId];
       if (calculator == null) {
         return CalculationEngineResult.error(
@@ -66,8 +65,6 @@ class CalculatorEngine {
           ),
         );
       }
-
-      // Criar sessão de cálculo
       final session = CalculationSession(
         calculatorId: calculatorId,
         parameters: parameters,
@@ -76,7 +73,6 @@ class CalculatorEngine {
       _activeSessions.add(session);
 
       try {
-        // 1. Validação de parâmetros
         final validationResult = await _validateParameters(
           calculator,
           parameters,
@@ -86,27 +82,19 @@ class CalculatorEngine {
           session.complete(success: false, errors: validationResult.errors.values.toList());
           return CalculationEngineResult.validationError(validationResult);
         }
-
-        // Se é apenas validação, retornar sucesso
         if (validateOnly) {
           session.complete(success: true);
           return CalculationEngineResult.validationSuccess(validationResult);
         }
-
-        // 2. Conversão de unidades (se necessário)
         final convertedParameters = await _convertUnits(
           calculator,
           parameters,
           preferredUnits,
         );
-
-        // 3. Execução do cálculo
         final calculationResult = await _executeCalculation(
           calculator,
           convertedParameters,
         );
-
-        // 4. Formatação dos resultados
         final formattedResult = await _formatResults(
           calculator,
           calculationResult,
@@ -276,14 +264,9 @@ class CalculatorEngine {
     for (final resultValue in result.results) {
       String formattedValue;
       String displayUnit = resultValue.unit;
-
-      // Aplicar unidades preferidas se especificadas
       if (preferredUnits != null && preferredUnits.containsKey(resultValue.label)) {
-        // ignore: unused_local_variable
         final targetUnit = preferredUnits[resultValue.label]!; // TODO: Implement unit conversion
-        // Lógica de conversão e formatação com unidade preferida
         formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);
-        // displayUnit seria atualizado após conversão
       } else {
         formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);
       }

@@ -20,8 +20,6 @@ class AgriHurbiApp extends ConsumerWidget {
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       locale: const Locale('pt', 'BR'),
-
-      // Builder for global widgets
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(

@@ -32,11 +32,7 @@ class DeviceValidationInterceptor {
     if (kDebugMode) {
       debugPrint('🔐 DeviceInterceptor: Starting authentication monitoring');
     }
-
-    // Monitora mudanças de usuário
     _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
-
-    // Monitora mudanças de estado de autenticação
     _authSubscription = _authStateNotifier.authStream.listen(_onAuthChanged);
   }
 
@@ -47,7 +43,6 @@ class DeviceValidationInterceptor {
     }
 
     if (user == null) {
-      // Usuário deslogou - reset estado
       _hasValidatedThisSession = false;
       if (kDebugMode) {
         debugPrint('🔐 DeviceInterceptor: User logged out, resetting session');
@@ -62,7 +57,6 @@ class DeviceValidationInterceptor {
     }
 
     if (isAuthenticated && !_hasValidatedThisSession) {
-      // Usuário acabou de fazer login - valida dispositivo
       _validateDeviceOnLogin();
     }
   }
@@ -92,9 +86,6 @@ class DeviceValidationInterceptor {
               '❌ DeviceInterceptor: Auto-validation failed - ${failure.message}',
             );
           }
-
-          // Em caso de falha crítica (limite excedido), pode ser necessário
-          // notificar o usuário através de um stream/callback
           if (failure.code == 'DEVICE_LIMIT_EXCEEDED') {
             _notifyDeviceLimitExceeded();
           }
@@ -113,8 +104,6 @@ class DeviceValidationInterceptor {
                 '⚠️ DeviceInterceptor: Device validation failed - ${validationResult.message}',
               );
             }
-
-            // Dependendo do status, pode ser necessário ação específica
             switch (validationResult.status) {
               case DeviceValidationStatus.exceeded:
                 _notifyDeviceLimitExceeded();
@@ -146,10 +135,6 @@ class DeviceValidationInterceptor {
         '⚠️ DeviceInterceptor: Device limit exceeded - user action required',
       );
     }
-
-    // Aqui você pode implementar um callback ou stream para notificar a UI
-    // Por exemplo, através de um EventBus ou StreamController global
-    // Para este exemplo, vamos apenas logar
   }
 
   /// Notifica que o dispositivo é inválido
@@ -157,8 +142,6 @@ class DeviceValidationInterceptor {
     if (kDebugMode) {
       debugPrint('⚠️ DeviceInterceptor: Device invalid - security concern');
     }
-
-    // Similar ao anterior, pode implementar notificação para UI
   }
 
   /// Força validação manual

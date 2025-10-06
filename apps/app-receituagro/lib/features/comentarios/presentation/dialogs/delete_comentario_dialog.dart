@@ -153,10 +153,6 @@ class DeleteComentarioDialog extends StatelessWidget {
     ];
   }
 
-  // ========================================================================
-  // EVENT HANDLERS
-  // ========================================================================
-
   void _handleCancel(BuildContext context) {
     onCancel?.call();
     Navigator.of(context).pop();
@@ -166,10 +162,6 @@ class DeleteComentarioDialog extends StatelessWidget {
     Navigator.of(context).pop();
     onConfirm();
   }
-
-  // ========================================================================
-  // HELPER METHODS
-  // ========================================================================
 
   IconData _getOriginIcon() {
     switch (comentario.ferramenta.toLowerCase()) {
@@ -187,10 +179,6 @@ class DeleteComentarioDialog extends StatelessWidget {
         return Icons.note_outlined;
     }
   }
-
-  // ========================================================================
-  // FACTORY CONSTRUCTORS
-  // ========================================================================
 
   /// Factory constructor with confirmation callback
   static DeleteComentarioDialog withConfirmation({

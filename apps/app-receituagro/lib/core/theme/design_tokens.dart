@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 /// Tokens de espaçamento padronizados
 class ReceitaAgroSpacing {
-  // Base spacing scale
   static const double xs = 4.0;
   static const double sm = 8.0;
   static const double md = 12.0;
@@ -16,8 +15,6 @@ class ReceitaAgroSpacing {
   static const double xl = 20.0;
   static const double xxl = 24.0;
   static const double xxxl = 32.0;
-  
-  // Semantic spacing tokens
   static const double sectionSpacing = xxl;     // 24px entre seções principais
   static const double cardPadding = lg;         // 16px padding interno de cards
   static const double horizontalPadding = sm;   // 8px padding horizontal padrão

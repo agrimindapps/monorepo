@@ -45,7 +45,6 @@ class PregnancyNotifier extends StateNotifier<PregnancyState> {
     );
 
     try {
-      // Validar inputs
       final validationErrors = _calculator.getValidationErrors(inputs);
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
@@ -54,8 +53,6 @@ class PregnancyNotifier extends StateNotifier<PregnancyState> {
         );
         return;
       }
-
-      // Realizar cálculo
       final result = await _performCalculation(
         calculatorId: _calculator.id,
         inputs: inputs,
@@ -109,18 +106,11 @@ final pregnancyProvider = StateNotifierProvider<PregnancyNotifier, PregnancyStat
 
 /// Provider para obter histórico de cálculos de gestação
 final pregnancyHistoryProvider = FutureProvider<List<CalculationResult>>((ref) async {
-  // TODO: Implementar busca do histórico no repositório
-  // final repository = di.getIt<CalculatorRepository>();
-  // final history = await repository.getCalculationHistory(calculatorId: 'pregnancy_gestacao');
-  // return history.map((h) => h.result).toList();
   return <CalculationResult>[];
 });
 
 /// Provider para verificar se a calculadora é favorita
 final pregnancyIsFavoriteProvider = FutureProvider<bool>((ref) async {
-  // TODO: Implementar verificação de favorito
-  // final repository = di.getIt<CalculatorRepository>();
-  // return await repository.isFavoriteCalculator('pregnancy_gestacao');
   return false;
 });
 

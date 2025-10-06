@@ -22,28 +22,20 @@ part 'maintenances_notifier.g.dart';
 /// - Detecção de manutenções vencidas/pendentes
 @riverpod
 class MaintenancesNotifier extends _$MaintenancesNotifier {
-  // Services e repositories injetados via GetIt
   late final MaintenanceRepository _repository;
   late final MaintenanceFormatterService _formatter;
   late final GetVehicleById _getVehicleById;
 
   @override
   MaintenancesState build() {
-    // Inicializa services via GetIt
     _repository = getIt<MaintenanceRepository>();
     _formatter = MaintenanceFormatterService();
     _getVehicleById = getIt<GetVehicleById>();
-
-    // Inicializa repository se necessário
     _repository.initialize();
-
-    // Carrega dados iniciais
     loadMaintenances();
 
     return const MaintenancesState();
   }
-
-  // ==================== CRUD Operations ====================
 
   /// Carrega todas as manutenções
   Future<void> loadMaintenances() async {
@@ -59,8 +51,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         maintenances: maintenances,
         isLoading: false,
       );
-
-      // Aplica filtros e calcula estatísticas
       _applyFiltersAndStats();
     } catch (e) {
       state = state.copyWith(
@@ -85,8 +75,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         maintenances: maintenances,
         isLoading: false,
       );
-
-      // Aplica filtros e calcula estatísticas
       _applyFiltersAndStats();
     } catch (e) {
       state = state.copyWith(
@@ -100,8 +88,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   Future<bool> addMaintenance(MaintenanceFormModel formModel) async {
     try {
       state = state.clearError();
-
-      // Validar dados completos
       final validationErrors = formModel.validate();
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
@@ -109,23 +95,16 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         );
         return false;
       }
-
-      // Converter para entity
       final maintenance = formModel.toMaintenanceEntity();
-
-      // Salvar no repositório
       final saved = await _repository.saveMaintenance(maintenance);
 
       if (saved != null) {
-        // Atualizar lista local
         final updatedList = List<MaintenanceEntity>.from(state.maintenances);
         updatedList.add(saved);
 
         state = state.copyWith(
           maintenances: updatedList,
         );
-
-        // Aplica filtros e calcula estatísticas
         _applyFiltersAndStats();
 
         return true;
@@ -151,8 +130,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         );
         return false;
       }
-
-      // Validar dados
       final validationErrors = formModel.validate();
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
@@ -160,15 +137,10 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         );
         return false;
       }
-
-      // Converter para entity
       final maintenance = formModel.toMaintenanceEntity();
-
-      // Atualizar no repositório
       final updated = await _repository.updateMaintenance(maintenance);
 
       if (updated != null) {
-        // Atualizar lista local
         final updatedList = List<MaintenanceEntity>.from(state.maintenances);
         final index = updatedList.indexWhere((m) => m.id == maintenance.id);
 
@@ -178,8 +150,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
           state = state.copyWith(
             maintenances: updatedList,
           );
-
-          // Aplica filtros e calcula estatísticas
           _applyFiltersAndStats();
         }
 
@@ -203,15 +173,12 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       final success = await _repository.deleteMaintenance(maintenanceId);
 
       if (success) {
-        // Atualizar lista local
         final updatedList = List<MaintenanceEntity>.from(state.maintenances);
         updatedList.removeWhere((m) => m.id == maintenanceId);
 
         state = state.copyWith(
           maintenances: updatedList,
         );
-
-        // Aplica filtros e calcula estatísticas
         _applyFiltersAndStats();
 
         return true;
@@ -226,8 +193,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     }
   }
 
-  // ==================== Queries ====================
-
   /// Busca manutenção por ID
   MaintenanceEntity? getMaintenanceById(String maintenanceId) {
     try {
@@ -240,7 +205,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   /// Carrega manutenções pendentes
   Future<List<MaintenanceEntity>> getUpcomingMaintenances() async {
     try {
-      // Buscar odômetro atual do veículo selecionado ou usar 0
       double currentOdometer = 0;
 
       if (state.selectedVehicleId != null) {
@@ -250,7 +214,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
         await vehicleResult.fold(
           (failure) async {
-            // Ignora erro e usa 0
           },
           (vehicle) async {
             currentOdometer = vehicle.currentOdometer;
@@ -278,8 +241,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   List<MaintenanceEntity> getHighCostMaintenances({double threshold = 1000.0}) {
     return state.filteredMaintenances.where((m) => m.cost >= threshold).toList();
   }
-
-  // ==================== Filters ====================
 
   /// Aplica filtro por veículo
   void filterByVehicle(String? vehicleId) {
@@ -328,8 +289,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     _applyFiltersAndStats();
   }
 
-  // ==================== Sorting ====================
-
   /// Ordena por campo específico
   void setSortBy(String field, {bool? ascending}) {
     state = state.copyWith(
@@ -339,29 +298,20 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     _applySort();
   }
 
-  // ==================== Internal Methods ====================
-
   /// Aplica filtros à lista de manutenções
   void _applyFiltersAndStats() {
     final filtered = state.maintenances.where((maintenance) {
-      // Filtro por veículo
       if (state.selectedVehicleId != null &&
           maintenance.vehicleId != state.selectedVehicleId) {
         return false;
       }
-
-      // Filtro por tipo
       if (state.selectedType != null && maintenance.type != state.selectedType) {
         return false;
       }
-
-      // Filtro por status
       if (state.selectedStatus != null &&
           maintenance.status != state.selectedStatus) {
         return false;
       }
-
-      // Filtro por período
       if (state.startDate != null) {
         final startOfDay = DateTime(
           state.startDate!.year,
@@ -382,8 +332,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         );
         if (maintenance.serviceDate.isAfter(endOfDay)) return false;
       }
-
-      // Filtro por busca de texto
       if (state.searchQuery.isNotEmpty) {
         final query = state.searchQuery.toLowerCase();
         if (!maintenance.title.toLowerCase().contains(query) &&
@@ -456,8 +404,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       (sum, m) => sum + m.cost,
     );
     final averageCost = totalCost / state.filteredMaintenances.length;
-
-    // Agrupar por tipo
     final byType = <MaintenanceType, double>{};
     final countByType = <MaintenanceType, int>{};
 
@@ -465,8 +411,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       byType[maintenance.type] = (byType[maintenance.type] ?? 0) + maintenance.cost;
       countByType[maintenance.type] = (countByType[maintenance.type] ?? 0) + 1;
     }
-
-    // Encontrar tipo mais caro
     MaintenanceType? mostExpensiveType;
     double maxTypeCost = 0;
     byType.forEach((type, cost) {
@@ -475,8 +419,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         mostExpensiveType = type;
       }
     });
-
-    // Calcular médias mensais se tiver dados suficientes
     double monthlyCost = 0;
     if (state.filteredMaintenances.length >= 2) {
       final sortedByDate = List<MaintenanceEntity>.from(state.filteredMaintenances)
@@ -492,8 +434,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
         monthlyCost = totalCost / monthsDiff;
       }
     }
-
-    // Agrupar por status
     final byStatus = <MaintenanceStatus, int>{};
     for (final maintenance in state.filteredMaintenances) {
       byStatus[maintenance.status] = (byStatus[maintenance.status] ?? 0) + 1;
@@ -528,8 +468,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     state = state.copyWith(stats: stats);
   }
 
-  // ==================== Reports ====================
-
   /// Obtém relatório detalhado de uma manutenção
   Future<Map<String, dynamic>> getMaintenanceReport(String maintenanceId) async {
     final maintenance = getMaintenanceById(maintenanceId);
@@ -542,7 +480,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
 
     await vehicleResult.fold(
       (failure) async {
-        // Ignora erro
       },
       (v) async {
         vehicle = v;
@@ -550,8 +487,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
     );
 
     if (vehicle == null) return {};
-
-    // Análise de manutenções similares
     final similarMaintenances = state.maintenances
         .where((m) => m.type == maintenance.type && m.id != maintenance.id)
         .toList();
@@ -561,8 +496,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       averageSimilar = similarMaintenances.fold<double>(0, (sum, m) => sum + m.cost) /
           similarMaintenances.length;
     }
-
-    // Última manutenção do mesmo tipo
     final lastSimilar = similarMaintenances
         .where((m) => m.serviceDate.isBefore(maintenance.serviceDate))
         .fold<MaintenanceEntity?>(null, (latest, current) {
@@ -612,8 +545,6 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       'period': _formatter.formatServiceInterval(start, end),
     };
   }
-
-  // ==================== Refresh ====================
 
   /// Recarrega dados
   Future<void> refresh() async {

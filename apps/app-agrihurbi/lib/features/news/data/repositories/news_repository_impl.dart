@@ -24,8 +24,6 @@ class NewsRepositoryImpl implements NewsRepository {
     this._networkInfo,
   );
 
-  // === NEWS ARTICLES ===
-
   @override
   Future<Either<Failure, List<NewsArticleEntity>>> getNews({
     NewsFilter? filter,
@@ -34,12 +32,9 @@ class NewsRepositoryImpl implements NewsRepository {
   }) async {
     try {
       if (await _networkInfo.isConnected) {
-        // Try to fetch from remote first
         try {
           final remoteArticles = await _remoteDataSource.fetchNewsFromRSS(limit: limit);
           await _localDataSource.cacheArticles(remoteArticles);
-          
-          // Apply filters if needed
           if (filter != null) {
             final filterModel = NewsFilterModel.fromEntity(filter);
             final filteredArticles = await _localDataSource.searchCachedArticles(
@@ -52,7 +47,6 @@ class NewsRepositoryImpl implements NewsRepository {
           
           return Right(remoteArticles);
         } catch (e) {
-          // Fall back to cache if remote fails
           final cachedArticles = await _localDataSource.getCachedArticles(
             limit: limit,
             offset: offset,
@@ -60,7 +54,6 @@ class NewsRepositoryImpl implements NewsRepository {
           return Right(cachedArticles);
         }
       } else {
-        // Offline - get from cache
         final cachedArticles = await _localDataSource.getCachedArticles(
           limit: limit,
           offset: offset,
@@ -109,11 +102,8 @@ class NewsRepositoryImpl implements NewsRepository {
           await _localDataSource.cacheArticles(remoteResults);
           return Right(remoteResults);
         } catch (e) {
-          // Fall back to cached search
         }
       }
-
-      // Search in cache
       final filterModel = filter != null ? NewsFilterModel.fromEntity(filter) : null;
       final cachedResults = await _localDataSource.searchCachedArticles(
         query: query,
@@ -154,7 +144,6 @@ class NewsRepositoryImpl implements NewsRepository {
         await _localDataSource.cacheArticles(premiumArticles);
         return Right(premiumArticles);
       } else {
-        // Get premium from cache
         const filter = NewsFilterModel(showOnlyPremium: true);
         final cachedPremium = await _localDataSource.searchCachedArticles(
           query: '',
@@ -171,8 +160,6 @@ class NewsRepositoryImpl implements NewsRepository {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
-
-  // === COMMODITY PRICES ===
 
   @override
   Future<Either<Failure, List<CommodityPriceEntity>>> getCommodityPrices({
@@ -260,8 +247,6 @@ class NewsRepositoryImpl implements NewsRepository {
     }
   }
 
-  // === FAVORITES ===
-
   @override
   Future<Either<Failure, void>> addToFavorites(String articleId) async {
     try {
@@ -310,8 +295,6 @@ class NewsRepositoryImpl implements NewsRepository {
     }
   }
 
-  // === RSS FEEDS ===
-
   @override
   Future<Either<Failure, void>> refreshRSSFeeds() async {
     try {
@@ -343,8 +326,6 @@ class NewsRepositoryImpl implements NewsRepository {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
-
-  // === CACHE MANAGEMENT ===
 
   @override
   Future<Either<Failure, void>> cacheArticle(NewsArticleEntity article) async {
@@ -383,8 +364,6 @@ class NewsRepositoryImpl implements NewsRepository {
     }
   }
 
-  // === RSS SOURCE MANAGEMENT ===
-
   @override
   Future<Either<Failure, void>> addRSSSource(String feedUrl) async {
     try {
@@ -420,8 +399,6 @@ class NewsRepositoryImpl implements NewsRepository {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
-
-  // === PRICE ALERTS ===
 
   @override
   Future<Either<Failure, void>> setPriceAlert({

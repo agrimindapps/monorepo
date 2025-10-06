@@ -5,8 +5,6 @@ import 'package:core/core.dart';
 @lazySingleton
 class PlatformService {
   const PlatformService();
-
-  // Use core's PlatformCapabilitiesService
   static const _coreService = PlatformCapabilitiesService();
 
   /// Verifica se está executando em plataforma mobile (Android ou iOS)

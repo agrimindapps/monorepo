@@ -32,7 +32,6 @@ mixin PremiumStatusListener<T extends StatefulWidget> on State<T> {
   
   /// Override this method to handle premium status changes
   void onPremiumStatusChanged(bool isPremium) {
-    // Stub implementation - can be overridden
   }
   
   @override

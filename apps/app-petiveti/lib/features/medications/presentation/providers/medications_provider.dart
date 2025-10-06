@@ -13,8 +13,6 @@ import '../../domain/usecases/get_medication_by_id.dart';
 import '../../domain/usecases/get_medications.dart';
 import '../../domain/usecases/get_medications_by_animal_id.dart';
 import '../../domain/usecases/update_medication.dart';
-
-// State classes
 class MedicationsState {
   final List<Medication> medications;
   final List<Medication> activeMedications;
@@ -46,8 +44,6 @@ class MedicationsState {
     );
   }
 }
-
-// State notifier with performance monitoring
 class MedicationsNotifier extends StateNotifier<MedicationsState> with PerformanceMonitoring {
   final GetMedications _getMedications;
   final GetMedicationsByAnimalId _getMedicationsByAnimalId;
@@ -150,14 +146,11 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Add the medication to current state optimistically
         final updatedMedications = [medication, ...state.medications];
         state = state.copyWith(
           medications: updatedMedications,
           error: null,
         );
-
-        // Refresh active and expiring medications
         loadActiveMedications();
         loadExpiringMedications();
       },
@@ -170,7 +163,6 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Update the medication in current state
         final updatedMedications = state.medications.map((m) {
           return m.id == medication.id ? medication : m;
         }).toList();
@@ -179,8 +171,6 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
           medications: updatedMedications,
           error: null,
         );
-
-        // Refresh active and expiring medications
         loadActiveMedications();
         loadExpiringMedications();
       },
@@ -193,7 +183,6 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Remove the medication from current state
         final updatedMedications = state.medications.where((m) => m.id != id).toList();
         final updatedActiveMedications = state.activeMedications.where((m) => m.id != id).toList();
         final updatedExpiringMedications = state.expiringMedications.where((m) => m.id != id).toList();
@@ -215,7 +204,6 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Refresh medications to reflect the discontinued status
         loadMedications();
         loadActiveMedications();
         loadExpiringMedications();
@@ -238,8 +226,6 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
   void clearError() {
     state = state.copyWith(error: null);
   }
-
-  // Helper methods for UI
   List<Medication> getMedicationsForAnimal(String animalId) {
     return state.medications.where((m) => m.animalId == animalId).toList();
   }
@@ -264,8 +250,6 @@ class MedicationsNotifier extends StateNotifier<MedicationsState> with Performan
     return state.expiringMedications.length;
   }
 }
-
-// Providers
 final medicationsProvider = StateNotifierProvider<MedicationsNotifier, MedicationsState>((ref) {
   return MedicationsNotifier(
     getMedications: di.getIt<GetMedications>(),
@@ -279,42 +263,26 @@ final medicationsProvider = StateNotifierProvider<MedicationsNotifier, Medicatio
     getExpiringSoonMedications: di.getIt<GetExpiringSoonMedications>(),
   );
 });
-
-// Individual medication provider
 final medicationProvider = FutureProvider.family<Medication?, String>((ref, id) async {
   final notifier = ref.read(medicationsProvider.notifier);
   return await notifier.getMedicationById(id);
 });
-
-// Stream provider for real-time updates
 final medicationsStreamProvider = StreamProvider<List<Medication>>((ref) {
   final repository = di.getIt.get<MedicationRepository>();
   return repository.watchMedications();
 });
-
-// Medications by animal stream provider
 final medicationsByAnimalStreamProvider = StreamProvider.family<List<Medication>, String>((ref, animalId) {
   final repository = di.getIt.get<MedicationRepository>();
   return repository.watchMedicationsByAnimalId(animalId);
 });
-
-// Active medications stream provider
 final activeMedicationsStreamProvider = StreamProvider<List<Medication>>((ref) {
   final repository = di.getIt.get<MedicationRepository>();
   return repository.watchActiveMedications();
 });
-
-// Selected medication provider for maintaining selection across pages
 final selectedMedicationProvider = StateProvider<Medication?>((ref) => null);
-
-// Filters
 final medicationTypeFilterProvider = StateProvider<MedicationType?>((ref) => null);
 final medicationStatusFilterProvider = StateProvider<MedicationStatus?>((ref) => null);
-
-// Search query provider
 final medicationSearchQueryProvider = StateProvider<String>((ref) => '');
-
-// Filtered medications provider
 final filteredMedicationsProvider = Provider<List<Medication>>((ref) {
   final medications = ref.watch(medicationsProvider).medications;
   final typeFilter = ref.watch(medicationTypeFilterProvider);
@@ -322,18 +290,12 @@ final filteredMedicationsProvider = Provider<List<Medication>>((ref) {
   final searchQuery = ref.watch(medicationSearchQueryProvider);
 
   var filtered = medications;
-
-  // Apply type filter
   if (typeFilter != null) {
     filtered = filtered.where((m) => m.type == typeFilter).toList();
   }
-
-  // Apply status filter
   if (statusFilter != null) {
     filtered = filtered.where((m) => m.status == statusFilter).toList();
   }
-
-  // Apply search filter
   if (searchQuery.isNotEmpty) {
     final query = searchQuery.toLowerCase();
     filtered = filtered.where((m) =>

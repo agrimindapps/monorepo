@@ -32,7 +32,6 @@ class UserActionService {
 
   /// Limpar dados locais
   Future<void> clearLocalData(BuildContext context) async {
-    // Mostrar indicador de progresso
     _showProgressDialog(
       context, 
       title: 'Limpando Dados',
@@ -40,8 +39,6 @@ class UserActionService {
     );
 
     try {
-      // Aqui você implementaria a limpeza dos dados locais
-      // Por exemplo, limpar Hive boxes, cache, etc.
       await _clearHiveData();
       await _clearAppCache();
       await _resetUserPreferences();
@@ -68,7 +65,6 @@ class UserActionService {
 
   /// Excluir conta do usuário
   Future<void> deleteAccount(BuildContext context) async {
-    // Mostrar indicador de progresso
     _showProgressDialog(
       context,
       title: 'Excluindo Conta',
@@ -76,7 +72,6 @@ class UserActionService {
     );
 
     try {
-      // Get current user ID via Firebase Auth (synchronous access)
       final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid ?? '';
       if (userId.isEmpty) {
         if (context.mounted) {
@@ -87,8 +82,6 @@ class UserActionService {
         }
         return;
       }
-
-      // Execute account deletion
       final result = await _accountDeletionService.deleteAccount(
         password: '',
         userId: userId,
@@ -253,34 +246,16 @@ class UserActionService {
 
   /// Limpar dados do Hive
   Future<void> _clearHiveData() async {
-    // TODO: Implementar limpeza dos boxes do Hive
-    // Exemplo:
-    // await Hive.deleteBoxFromDisk('user_data');
-    // await Hive.deleteBoxFromDisk('recipes');
-    // await Hive.deleteBoxFromDisk('diagnostics');
-    
-    // Simular operação
     await Future<void>.delayed(const Duration(milliseconds: 500));
   }
 
   /// Limpar cache do app
   Future<void> _clearAppCache() async {
-    // TODO: Implementar limpeza do cache
-    // Exemplo:
-    // await DefaultCacheManager().emptyCache();
-    
-    // Simular operação
     await Future<void>.delayed(const Duration(milliseconds: 300));
   }
 
   /// Reset das preferências do usuário
   Future<void> _resetUserPreferences() async {
-    // TODO: Implementar reset das preferências
-    // Exemplo:
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.clear();
-    
-    // Simular operação
     await Future<void>.delayed(const Duration(milliseconds: 200));
   }
 }

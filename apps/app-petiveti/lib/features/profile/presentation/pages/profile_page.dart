@@ -24,12 +24,9 @@ class ProfilePage extends ConsumerWidget {
   }
 
   Widget _buildBody(BuildContext context, WidgetRef ref, AuthState authState) {
-    // Handle loading state
     if (authState.status == AuthStatus.loading) {
       return ProfileStateHandlers.buildLoadingState(context);
     }
-
-    // Handle error state
     if (authState.status == AuthStatus.error && authState.error != null) {
       return ProfileStateHandlers.buildErrorState(
         context: context,
@@ -37,16 +34,12 @@ class ProfilePage extends ConsumerWidget {
         onRetry: () => _retryLoadProfile(ref),
       );
     }
-
-    // Handle unauthenticated state
     if (authState.status == AuthStatus.unauthenticated || authState.user == null) {
       return ProfileStateHandlers.buildUnauthenticatedState(
         context: context,
         onSignIn: () => context.push('/login'),
       );
     }
-
-    // Handle authenticated state with user data
     return Semantics(
       label: 'Página de perfil do usuário',
       hint: 'Visualize e gerencie suas informações de perfil e configurações',
@@ -54,11 +47,8 @@ class ProfilePage extends ConsumerWidget {
         padding: ProfileConstants.pageContentPadding,
         child: Column(
         children: [
-          // Header do perfil
           ProfileStateHandlers.buildProfileHeader(context, authState.user!),
             const SizedBox(height: ProfileConstants.headerTopSpacing),
-            
-            // Seções do menu
             _buildMenuSection(
               context,
               ProfileConstants.financialSectionTitle,
@@ -139,8 +129,6 @@ class ProfilePage extends ConsumerWidget {
             ),
             
             const SizedBox(height: 32),
-            
-            // Botão de logout
             SizedBox(
               width: double.infinity,
               child: Semantics(
@@ -162,8 +150,6 @@ class ProfilePage extends ConsumerWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Versão do app com acessibilidade
             Semantics(
               label: 'Informações da versão do aplicativo',
               child: FutureBuilder<PackageInfo>(
@@ -191,7 +177,6 @@ class ProfilePage extends ConsumerWidget {
   /// 
   /// Attempts to reload the user profile data when an error occurs.
   void _retryLoadProfile(WidgetRef ref) {
-    // Trigger a refresh by invalidating the provider
     ref.invalidate(authProvider);
   }
 

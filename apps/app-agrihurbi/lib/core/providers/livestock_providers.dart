@@ -16,8 +16,6 @@ import '../../features/livestock/domain/usecases/update_bovine.dart';
 
 part 'livestock_providers.g.dart';
 
-// === LIVESTOCK STATE CLASSES ===
-
 /// State para gerenciamento de bovinos
 class BovinesState {
   const BovinesState({
@@ -168,8 +166,6 @@ class LivestockSearchState {
   }
 }
 
-// === STATE NOTIFIERS ===
-
 /// StateNotifier para gerenciamento de bovinos
 @riverpod
 class BovinesNotifier extends _$BovinesNotifier {
@@ -184,8 +180,6 @@ class BovinesNotifier extends _$BovinesNotifier {
     _createBovine = di.getIt<CreateBovineUseCase>();
     _updateBovine = di.getIt<UpdateBovineUseCase>();
     _deleteBovine = di.getIt<DeleteBovineUseCase>();
-
-    // Initialize data loading
     Future.microtask(() => loadBovines());
 
     return const BovinesState();
@@ -331,8 +325,6 @@ class EquinesNotifier extends _$EquinesNotifier {
   @override
   EquinesState build() {
     _getEquines = di.getIt<GetEquinesUseCase>();
-
-    // Initialize data loading
     Future.microtask(() => loadEquines());
 
     return const EquinesState();
@@ -499,8 +491,6 @@ class LivestockSearchNotifier extends _$LivestockSearchNotifier {
   }
 }
 
-// === DERIVED PROVIDERS ===
-
 /// Provider derivado para bovinos filtrados
 @riverpod
 List<BovineEntity> filteredBovines(Ref ref) {
@@ -545,8 +535,6 @@ String? consolidatedLivestockError(Ref ref) {
 
   return errors.isEmpty ? null : errors.join('\n');
 }
-
-// === STATISTICS STATE & NOTIFIER ===
 
 /// State para estatísticas de livestock
 class LivestockStatisticsState {
@@ -607,8 +595,6 @@ class LivestockStatisticsNotifier extends _$LivestockStatisticsNotifier {
     state = state.copyWith(errorMessage: null);
   }
 }
-
-// === SYNC STATE & NOTIFIER ===
 
 /// State para sincronização de livestock
 class LivestockSyncState {
@@ -676,8 +662,6 @@ class LivestockSyncNotifier extends _$LivestockSyncNotifier {
   }
 
   Future<bool> backgroundSync() async {
-    // Implementação de sincronização em background
-    // Por enquanto, usa o mesmo método que forceSyncNow
     return await forceSyncNow();
   }
 
@@ -689,8 +673,6 @@ class LivestockSyncNotifier extends _$LivestockSyncNotifier {
     state = const LivestockSyncState();
   }
 }
-
-// === ADDITIONAL PROVIDERS ===
 
 /// Provider atualizado para verificar se há operações em andamento (incluindo stats e sync)
 @riverpod
@@ -728,8 +710,6 @@ String? consolidatedLivestockErrorComplete(Ref ref) {
 
   return errors.isEmpty ? null : errors.join('\n');
 }
-
-// === COORDINATOR ACTIONS ===
 
 /// Ações coordenadas para o sistema de livestock
 class LivestockCoordinatorActions {

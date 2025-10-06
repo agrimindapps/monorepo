@@ -1,11 +1,7 @@
-// ignore_for_file: overridden_fields
 
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
-
-// Note: Hive adapter not generated yet - TypeId 10 reserved
 @HiveType(typeId: 10)
-// ignore: must_be_immutable
 class ConflictHistoryModel extends BaseSyncModel {
   @override
   @HiveField(0)

@@ -46,7 +46,6 @@ enum LaunchMode {
 class MockDeviceService implements IDeviceService {
   @override
   Future<bool> isDevelopmentVersion() async {
-    // In debug mode, return true. In release, this would check build flavor/config
     return kDebugMode;
   }
   
@@ -68,15 +67,12 @@ class MockDeviceService implements IDeviceService {
   
   @override
   Future<bool> canLaunchUrl(String url) async {
-    // Mock implementation - always return true
-    // In real implementation would use url_launcher
     await Future<void>.delayed(const Duration(milliseconds: 100));
     return true;
   }
   
   @override
   Future<bool> launchUrl(String url, {LaunchMode mode = LaunchMode.external}) async {
-    // Mock implementation - simulate successful launch
     debugPrint('Launching URL: $url (mode: $mode)');
     await Future<void>.delayed(const Duration(milliseconds: 200));
     return true;

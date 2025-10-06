@@ -226,7 +226,6 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
 
 
   Color _getItemColor() {
-    // Todos os ícones devem ser verdes como nos mockups
     return const Color(0xFF4CAF50);
   }
 

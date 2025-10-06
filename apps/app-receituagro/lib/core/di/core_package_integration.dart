@@ -1,9 +1,5 @@
-// Flutter imports
-// Package imports
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
-
-// Local imports
 import '../../features/analytics/analytics_service.dart';
 import '../providers/auth_notifier.dart';
 import '../services/device_identity_service.dart';
@@ -14,7 +10,6 @@ import 'injection_container.dart' as di;
 /// This file centralizes all Core Package service registrations
 /// Following the patterns established in app-gasometer and app-plantis
 class CorePackageIntegration {
-  // Use the same GetIt instance as injection_container.dart
   static core.GetIt get _sl => di.sl;
 
   /// Initialize all Core Package services for ReceitaAgro
@@ -39,7 +34,6 @@ class CorePackageIntegration {
 
   /// Register connectivity services needed for Sprint 1
   static Future<void> _registerConnectivityServices() async {
-    // Enhanced Connectivity Service (needed by main.dart initialization)
     try {
       _sl.registerLazySingleton<core.EnhancedConnectivityService>(
         () => core.EnhancedConnectivityService(),
@@ -52,12 +46,9 @@ class CorePackageIntegration {
 
   /// Register Core Package repositories (primary integration layer)
   static Future<void> _registerCoreRepositories() async {
-    // Hive Manager from Core Package (essential for Hive repositories)
     try {
       final hiveManager = core.HiveManager.instance;
       _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
-      
-      // Initialize the HiveManager
       final initResult = await hiveManager.initialize('receituagro');
       if (!initResult.isError) {
         if (kDebugMode) print('✅ Core Package: Hive Manager registered and initialized');
@@ -67,18 +58,13 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('IHiveManager registration failed: $e');
     }
-    
-    // Enhanced Storage Service from Core Package (advanced features)
     try {
       _sl.registerLazySingleton<core.EnhancedStorageService>(
         () => core.EnhancedStorageService(),
       );
     } catch (e) {
-      // Fallback if constructor not available
       if (kDebugMode) print('EnhancedStorageService registration failed: $e');
     }
-    
-    // File Repository from Core Package
     try {
       _sl.registerLazySingleton<core.IFileRepository>(
         () => core.FileManagerService(),
@@ -86,10 +72,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('IFileRepository registration failed: $e');
     }
-    
-    // Auth Repository from Core Package
-    // Note: ReceitaAgro uses anonymous auth only, no Google/Facebook Sign-In
-    // Pass null for GoogleSignIn on Web to avoid clientId configuration issues
     try {
       _sl.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(
@@ -99,8 +81,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('IAuthRepository registration failed: $e');
     }
-    
-    // Storage Repository from Core Package
     try {
       _sl.registerLazySingleton<core.IStorageRepository>(
         () => core.FirebaseStorageService(),
@@ -108,17 +88,10 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('IStorageRepository registration failed: $e');
     }
-    
-    // Encrypted Storage Repository - Currently not implemented in Core Package
-    // Using Enhanced Storage Service instead
-    // _sl.registerLazySingleton<core.IEncryptedStorageRepository>(
-    //   () => core.EncryptedStorageService(), // When available
-    // );
   }
 
   /// Register enhanced services from Core Package
   static Future<void> _registerEnhancedServices() async {
-    // Enhanced Logging Service (replaces local ErrorHandlerService)
     try {
       _sl.registerLazySingleton<core.EnhancedLoggingService>(
         () => core.EnhancedLoggingService(),
@@ -126,8 +99,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('EnhancedLoggingService registration failed: $e');
     }
-    
-    // Security Service from Core Package (singleton instance)
     try {
       _sl.registerLazySingleton<core.SecurityService>(
         () => core.SecurityService.instance,
@@ -135,8 +106,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('SecurityService registration failed: $e');
     }
-    
-    // Enhanced Security Service (separate service with additional features)
     try {
       _sl.registerLazySingleton<core.EnhancedSecurityService>(
         () => core.EnhancedSecurityService(),
@@ -144,8 +113,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('EnhancedSecurityService registration failed: $e');
     }
-    
-    // Performance Service
     try {
       _sl.registerLazySingleton<core.IPerformanceRepository>(
         () => core.PerformanceService(),
@@ -153,8 +120,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('IPerformanceRepository registration failed: $e');
     }
-    
-    // Validation Service from Core Package
     try {
       _sl.registerLazySingleton<core.ValidationService>(
         () => core.ValidationService(),
@@ -162,8 +127,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('ValidationService registration failed: $e');
     }
-    
-    // Enhanced Image Service (replaces OptimizedImageService)
     try {
       _sl.registerLazySingleton<core.EnhancedImageService>(
         () => core.EnhancedImageService(),
@@ -175,7 +138,6 @@ class CorePackageIntegration {
 
   /// Register network and connectivity services
   static Future<void> _registerNetworkAndConnectivity() async {
-    // Enhanced Connectivity Service
     try {
       _sl.registerLazySingleton<core.EnhancedConnectivityService>(
         () => core.EnhancedConnectivityService(),
@@ -183,8 +145,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('EnhancedConnectivityService registration failed: $e');
     }
-    
-    // Http Client Service (standardizes all network requests)
     try {
       _sl.registerLazySingleton<core.HttpClientService>(
         () => core.HttpClientService(),
@@ -196,7 +156,6 @@ class CorePackageIntegration {
 
   /// Register cross-app services for monorepo consistency
   static Future<void> _registerCrossAppServices() async {
-    // Monorepo Auth Cache (essential for cross-app authentication)
     try {
       _sl.registerLazySingleton<core.MonorepoAuthCache>(
         () => core.MonorepoAuthCache(),
@@ -204,8 +163,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('MonorepoAuthCache registration failed: $e');
     }
-    
-    // File Manager Service
     try {
       _sl.registerLazySingleton<core.FileManagerService>(
         () => core.FileManagerService(),
@@ -217,52 +174,31 @@ class CorePackageIntegration {
 
   /// Register sync and Firebase services
   static Future<void> _registerSyncAndFirebase() async {
-    // Selective Sync Service from Core Package - may require parameters
     try {
-      // SelectiveSyncService constructor may require parameters - commenting out for now
-      // _sl.registerLazySingleton<core.SelectiveSyncService>(
-      //   () => core.SelectiveSyncService(hiveStorage: storage), // Requires hiveStorage parameter
-      // );
       if (kDebugMode) print('SelectiveSyncService registration disabled - constructor requires hiveStorage parameter');
     } catch (e) {
       if (kDebugMode) print('SelectiveSyncService registration failed: $e');
     }
-    
-    // Sync Firebase Service factory - uses getInstance pattern
-    // Individual instances should be created as needed using:
-    // core.SyncFirebaseService.getInstance(collectionName, fromMap, toMap)
   }
 
   /// Register development and debugging tools
   static Future<void> _registerDevelopmentTools() async {
-    // Database Inspector Service - Only available in debug/development mode
-    // Commented out as constructor may require parameters not available
     if (kDebugMode) {
-      // try {
-      //   _sl.registerLazySingleton<core.DatabaseInspectorService>(
-      //     () => core.DatabaseInspectorService(), // Constructor may require parameters
-      //   );
-      // } catch (e) {
         if (kDebugMode) print('DatabaseInspectorService registration disabled - constructor may require parameters');
-      // }
     }
   }
 
   /// Register ReceitaAgro-specific services that extend Core Package functionality
   static Future<void> _registerReceitaAgroSpecificServices() async {
-    // ReceitaAgro Validation Service (extends Core Package ValidationService)
     _sl.registerLazySingleton<ReceitaAgroValidationService>(
       () => ReceitaAgroValidationService(),
     );
-    
-    // Initialize services that require Core Package dependencies
     await _initializeEnhancedServices();
   }
 
   /// Initialize services that require dependencies
   static Future<void> _initializeEnhancedServices() async {
     try {
-      // Initialize ReceitaAgro Validation Service with Core Package ValidationService
       final validationService = _sl<ReceitaAgroValidationService>();
       if (_sl.isRegistered<core.ValidationService>()) {
         validationService.initialize(_sl<core.ValidationService>());
@@ -355,16 +291,11 @@ class CorePackageIntegration {
     return buffer.toString();
   }
 
-  // ===== AUTH-SPECIFIC SERVICES (Sprint 1) =====
-
   /// Register only auth services from Core Package
   static Future<void> _registerAuthServices() async {
-    // Hive Manager from Core Package (essential for Hive repositories)
     try {
       final hiveManager = core.HiveManager.instance;
       _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
-      
-      // Initialize the HiveManager
       final initResult = await hiveManager.initialize('receituagro');
       if (!initResult.isError) {
         if (kDebugMode) print('✅ Core Package: Hive Manager registered and initialized');
@@ -374,8 +305,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('❌ Core Package: Hive Manager registration failed - $e');
     }
-    
-    // Firebase Auth Service
     try {
       _sl.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(),
@@ -388,7 +317,6 @@ class CorePackageIntegration {
 
   /// Register analytics services from Core Package
   static Future<void> _registerAnalyticsServices() async {
-    // Firebase Analytics Service
     try {
       _sl.registerLazySingleton<core.IAnalyticsRepository>(
         () => core.FirebaseAnalyticsService(),
@@ -397,8 +325,6 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('❌ Core Package: Firebase Analytics Service registration failed - $e');
     }
-
-    // Firebase Crashlytics Service
     try {
       _sl.registerLazySingleton<core.ICrashlyticsRepository>(
         () => core.FirebaseCrashlyticsService(),
@@ -407,14 +333,10 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('❌ Core Package: Firebase Crashlytics Service registration failed - $e');
     }
-
-    // ReceitaAgro Enhanced Analytics Provider will be registered in _registerReceitaAgroAuthServices
-    // to avoid duplicate registration
   }
 
   /// Register Performance and Crashlytics services for Firebase migration
   static Future<void> _registerPerformanceAndCrashlyticsServices() async {
-    // Performance Service (required by main.dart _initializeFirebaseServices)
     try {
       if (!_sl.isRegistered<core.IPerformanceRepository>()) {
         _sl.registerLazySingleton<core.IPerformanceRepository>(
@@ -429,12 +351,6 @@ class CorePackageIntegration {
 
   /// Register ReceitaAgro-specific auth services
   static Future<void> _registerReceitaAgroAuthServices() async {
-    // ReceitaAgroEnhancedAnalyticsProvider removed - Migrated to Riverpod
-    // Now using EnhancedAnalyticsNotifier (Riverpod - lifecycle managed automatically)
-
-    // Register ReceitaAgroAnalyticsService as a wrapper
-    // This is a REAL CLASS (not typedef) that delegates to ReceitaAgroEnhancedAnalyticsProvider
-    // This approach allows GetIt to register both types independently
     try {
       if (!_sl.isRegistered<ReceitaAgroAnalyticsService>()) {
         _sl.registerLazySingleton<ReceitaAgroAnalyticsService>(
@@ -449,11 +365,6 @@ class CorePackageIntegration {
       if (kDebugMode) print('❌ ReceitaAgro: Analytics Service wrapper registration failed - $e');
       rethrow;
     }
-
-    // ReceitaAgroAuthProvider removed - Riverpod manages lifecycle automatically
-    // Migration complete: Using ReceitaAgroAuthNotifier instead
-
-    // Register AuthNotifier (Riverpod pattern - MIGRATION)
     if (!_sl.isRegistered<AuthNotifier>()) {
       _sl.registerLazySingleton<AuthNotifier>(
         () => AuthNotifier(

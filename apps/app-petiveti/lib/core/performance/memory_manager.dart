@@ -66,16 +66,11 @@ class MemoryManager {
   MemoryLeakReport detectLeaks() {
     final leaks = <MemoryLeak>[];
     final orphanedObjects = <String>[];
-    
-    // Força garbage collection para limpeza
     _forceGC();
-    
-    // Aguarda um pouco para GC completar
     Future.delayed(const Duration(milliseconds: 100), () {
       _objectRegistry.forEach((key, weakRef) {
         final obj = weakRef.target;
         if (obj != null) {
-          // Objeto ainda está vivo - possível vazamento
           leaks.add(MemoryLeak(
             objectKey: key,
             objectType: obj.runtimeType.toString(),
@@ -83,12 +78,9 @@ class MemoryManager {
             description: 'Object not garbage collected after forced GC',
           ));
         } else {
-          // Objeto foi coletado - remover da registry
           orphanedObjects.add(key);
         }
       });
-
-      // Limpar objetos órfãos
       for (final key in orphanedObjects) {
         _objectRegistry.remove(key);
       }
@@ -115,8 +107,6 @@ class MemoryManager {
     );
 
     _snapshots.add(snapshot);
-    
-    // Manter apenas os últimos snapshots
     if (_snapshots.length > maxSnapshots) {
       _snapshots.removeAt(0);
     }
@@ -146,8 +136,6 @@ class MemoryManager {
 
     final memoryGrowth = lastSnapshot.rssUsage - firstSnapshot.rssUsage;
     final objectGrowth = lastSnapshot.objectCount - firstSnapshot.objectCount;
-    
-    // Detectar picos de memória
     final peaks = <MemoryPeak>[];
     int maxUsage = 0;
     DateTime? peakTime;
@@ -183,7 +171,6 @@ class MemoryManager {
     _forceGC();
     
     if (aggressive) {
-      // Cleanup agressivo - remove todos os trackings orfãos
       final keysToRemove = <String>[];
       
       _objectRegistry.forEach((key, weakRef) {
@@ -195,8 +182,6 @@ class MemoryManager {
       for (final key in keysToRemove) {
         untrackObject(key);
       }
-
-      // Limpar snapshots antigos
       if (_snapshots.length > maxSnapshots ~/ 2) {
         _snapshots.removeRange(0, _snapshots.length - (maxSnapshots ~/ 2));
       }
@@ -223,9 +208,7 @@ class MemoryManager {
 
   void _forceGC() {
     if (!kReleaseMode) {
-      // Em desenvolvimento, força múltiplas coletas
       for (int i = 0; i < 3; i++) {
-        // Simula pressão de memória para forçar GC
         final temp = List.generate(1000, (index) => Object());
         temp.clear();
       }

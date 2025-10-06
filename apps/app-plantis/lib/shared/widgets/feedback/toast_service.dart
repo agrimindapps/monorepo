@@ -168,7 +168,6 @@ class ToastService {
 
   static void _showToast(BuildContext context, ToastController controller) {
     if (_isShowingToast) {
-      // Adicionar à fila se já está mostrando toast
       _toastQueue.add(controller);
       return;
     }
@@ -192,8 +191,6 @@ class ToastService {
 
     _currentToast = overlayEntry;
     overlay.insert(overlayEntry);
-
-    // Auto-dismiss
     Future.delayed(controller.duration, () {
       if (_currentToast == overlayEntry) {
         dismiss();
@@ -204,8 +201,6 @@ class ToastService {
   static void _processQueue() {
     if (_toastQueue.isNotEmpty && !_isShowingToast) {
       _toastQueue.removeAt(0);
-      // Recuperar contexto pode ser complexo, por isso toasts em fila são limitados
-      // Em uma implementação real, você poderia usar um GlobalKey para o contexto
     }
   }
 }
@@ -484,7 +479,6 @@ enum ToastType { success, error, warning, info, custom }
 
 /// Contextos pré-definidos para toasts
 class ToastContexts {
-  // Tarefas
   static void taskCompleted(BuildContext context, String taskName) {
     ToastService.showSuccess(
       context: context,
@@ -510,12 +504,9 @@ class ToastContexts {
       description: error,
       actionLabel: 'Tentar novamente',
       onAction: () {
-        // Implementar retry logic
       },
     );
   }
-
-  // Plantas
   static void plantSaved(BuildContext context, String plantName) {
     ToastService.showSuccess(
       context: context,
@@ -551,8 +542,6 @@ class ToastContexts {
       icon: Icons.water_drop,
     );
   }
-
-  // Premium
   static void purchaseSuccess(BuildContext context) {
     ToastService.showSuccess(
       context: context,
@@ -569,7 +558,6 @@ class ToastContexts {
       description: error,
       actionLabel: 'Tentar novamente',
       onAction: () {
-        // Implementar retry purchase
       },
     );
   }
@@ -582,8 +570,6 @@ class ToastContexts {
       icon: Icons.restore,
     );
   }
-
-  // Auth
   static void loginSuccess(BuildContext context, String userName) {
     ToastService.showSuccess(
       context: context,
@@ -610,8 +596,6 @@ class ToastContexts {
       icon: Icons.logout,
     );
   }
-
-  // Sync
   static void syncSuccess(BuildContext context) {
     ToastService.showSuccess(
       context: context,
@@ -628,7 +612,6 @@ class ToastContexts {
       description: error,
       actionLabel: 'Tentar novamente',
       onAction: () {
-        // Implementar retry sync
       },
     );
   }
@@ -650,8 +633,6 @@ class ToastContexts {
       actionLabel: 'Tentar novamente',
     );
   }
-
-  // Upload
   static void uploadComplete(BuildContext context, String fileName) {
     ToastService.showSuccess(
       context: context,
@@ -669,8 +650,6 @@ class ToastContexts {
       actionLabel: 'Tentar novamente',
     );
   }
-
-  // Network
   static void connectionLost(BuildContext context) {
     ToastService.showWarning(
       context: context,
@@ -689,8 +668,6 @@ class ToastContexts {
       icon: Icons.wifi,
     );
   }
-
-  // Validation
   static void validationError(BuildContext context, String field) {
     ToastService.showWarning(
       context: context,
@@ -708,8 +685,6 @@ class ToastContexts {
       icon: Icons.save,
     );
   }
-
-  // Settings
   static void settingsSaved(BuildContext context) {
     ToastService.showSuccess(
       context: context,

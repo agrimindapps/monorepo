@@ -40,8 +40,6 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // Captura erros de widgets em debug mode se habilitado
     if (widget.enableInDebugMode) {
       ErrorWidget.builder = (FlutterErrorDetails details) {
         _handleError(details);
@@ -60,11 +58,7 @@ class _ErrorBoundaryState extends State<ErrorBoundary> {
       _error = error;
       _hasError = true;
     });
-
-    // Chama o callback de erro se fornecido
     widget.onError?.call(error);
-
-    // Log do erro
     ErrorHandler.instance.handleError(error);
   }
 

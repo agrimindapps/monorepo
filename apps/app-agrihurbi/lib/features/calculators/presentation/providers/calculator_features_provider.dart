@@ -8,7 +8,6 @@ import '../../domain/services/calculator_template_service.dart';
 /// Provider Riverpod para CalculatorFeaturesProvider
 final calculatorFeaturesProvider =
     ChangeNotifierProvider<CalculatorFeaturesProvider>((ref) {
-      // TODO: Injetar dependências reais aqui
       return CalculatorFeaturesProvider();
     });
 
@@ -20,18 +19,12 @@ final calculatorFeaturesProvider =
 class CalculatorFeaturesProvider extends ChangeNotifier {
   late final CalculatorFavoritesService _favoritesService;
   late final CalculatorTemplateService _templateService;
-
-  // Estado dos favoritos
   List<String> _favoriteIds = [];
   bool _isLoadingFavorites = false;
-
-  // Estado dos templates
   List<CalculationTemplate> _templates = [];
   List<CalculationTemplate> _filteredTemplates = [];
   bool _isLoadingTemplates = false;
   String _templateSearchQuery = '';
-
-  // Estado geral
   String? _errorMessage;
 
   CalculatorFeaturesProvider();
@@ -45,8 +38,6 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
     await Future.wait([loadFavorites(), loadTemplates()]);
   }
 
-  // === GETTERS ===
-
   List<String> get favoriteIds => _favoriteIds;
   bool get isLoadingFavorites => _isLoadingFavorites;
 
@@ -56,8 +47,6 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
   String get templateSearchQuery => _templateSearchQuery;
 
   String? get errorMessage => _errorMessage;
-
-  // === OPERAÇÕES DE FAVORITOS ===
 
   /// Carrega lista de favoritos
   Future<void> loadFavorites() async {
@@ -149,8 +138,6 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
     return await _favoritesService.getStats();
   }
 
-  // === OPERAÇÕES DE TEMPLATES ===
-
   /// Carrega todos os templates
   Future<void> loadTemplates() async {
     _isLoadingTemplates = true;
@@ -231,7 +218,6 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
     try {
       final success = await _templateService.markTemplateAsUsed(templateId);
       if (success) {
-        // Não precisa recarregar toda lista, apenas atualizar o item
         final templateIndex = _templates.indexWhere((t) => t.id == templateId);
         if (templateIndex != -1) {
           _templates[templateIndex] = _templates[templateIndex].markAsUsed();
@@ -263,8 +249,6 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
   /// Aplica filtros aos templates
   void _applyTemplateFilters() {
     var filtered = List<CalculationTemplate>.from(_templates);
-
-    // Filtrar por busca
     if (_templateSearchQuery.isNotEmpty) {
       final query = _templateSearchQuery.toLowerCase();
       filtered =
@@ -281,16 +265,12 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
               )
               .toList();
     }
-
-    // Ordenar por uso recente
     filtered.sort((a, b) {
-      // Templates usados recentemente primeiro
       if (a.lastUsed != null && b.lastUsed == null) return -1;
       if (a.lastUsed == null && b.lastUsed != null) return 1;
       if (a.lastUsed != null && b.lastUsed != null) {
         return b.lastUsed!.compareTo(a.lastUsed!);
       }
-      // Senão, ordenar por data de criação
       return b.createdAt.compareTo(a.createdAt);
     });
 
@@ -326,14 +306,11 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
     return await _templateService.getStats();
   }
 
-  // === OPERAÇÕES DE COMPARTILHAMENTO ===
-
   /// Gera link de compartilhamento para calculadora
   String generateCalculatorShareLink(
     String calculatorId,
     String calculatorName,
   ) {
-    // TODO: Implementar sistema de deep linking
     return 'agrihurbi://calculator/$calculatorId';
   }
 
@@ -367,15 +344,11 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
         'Calculado em ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
   }
 
-  // === OPERAÇÕES DE EXPORTAÇÃO ===
-
   /// Exporta template como JSON
   Future<String?> exportTemplate(String templateId) async {
     try {
       final template = await _templateService.getTemplateById(templateId);
       if (template == null) return null;
-
-      // TODO: Implementar serialização para exportação
       return template.toString();
     } catch (e) {
       debugPrint('CalculatorFeaturesProvider: Erro ao exportar template - $e');
@@ -436,12 +409,8 @@ class CalculatorFeaturesProvider extends ChangeNotifier {
       'inputs': inputs,
       'outputs': outputs,
     };
-
-    // Seria melhor usar dart:convert, mas para simplificar:
     return data.toString();
   }
-
-  // === OPERAÇÕES AUXILIARES ===
 
   /// Limpa mensagens de erro
   void clearError() {

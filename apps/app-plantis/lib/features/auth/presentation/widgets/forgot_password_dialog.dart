@@ -327,7 +327,6 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
             _successMessage = 'Email de redefinição enviado com sucesso!';
           });
         } else {
-          // Get error from auth state
           final authState = ref.read(authProvider);
           final errorMsg = authState.maybeWhen(
             error: (error, _) => error.toString(),

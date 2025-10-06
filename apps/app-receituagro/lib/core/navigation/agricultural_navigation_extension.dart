@@ -25,8 +25,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (agriculturalPageType == null) {
       return null; // Not an agricultural page type
     }
-
-    // Create configuration based on agricultural page type
     return NavigationConfiguration(
       showBottomNavigation: agriculturalPageType.shouldShowBottomNavigation,
       showBackButton: agriculturalPageType.canGoBack,
@@ -52,8 +50,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (agriculturalPageType == null) {
       return false;
     }
-
-    // Handle specific agricultural navigation cases
     switch (agriculturalPageType) {
       case AgriculturalPageType.detalheDefensivo:
         return await _handleDefensivoDetailNavigation(arguments);
@@ -97,8 +93,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (agriculturalPageType == null) {
       return true; // Not our responsibility
     }
-
-    // Validate arguments for agricultural page types
     switch (agriculturalPageType) {
       case AgriculturalPageType.detalheDefensivo:
         return _validateDefensivoArguments(arguments);
@@ -138,8 +132,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
       'is_list_page': agriculturalPageType.isListPage,
       'is_search_page': agriculturalPageType.isSearchPage,
     };
-
-    // Add specific metadata based on page type
     if (agriculturalPageType.isDefensivoPage && arguments != null) {
       metadata['defensivo_name'] = arguments['defensivoName'];
       metadata['defensivo_id'] = arguments['defensivoId'];
@@ -169,15 +161,11 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (agriculturalPageType == null) {
       return false;
     }
-
-    // Handle special back navigation cases
     switch (agriculturalPageType) {
       case AgriculturalPageType.diagnosticoWizard:
-        // Custom back handling for diagnostic wizard
         return await _handleDiagnosticoWizardBack(currentState);
 
       case AgriculturalPageType.premium:
-        // Track premium page exit
         return await _handlePremiumBack(currentState);
 
       default:
@@ -248,8 +236,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (defensivoName == null) return false;
 
     try {
-      // This will be handled by the main navigation service
-      // Return false to let core service handle it
       return false;
     } catch (error) {
       debugPrint('Failed to handle defensivo detail navigation: $error');
@@ -267,8 +253,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (pragaName == null) return false;
 
     try {
-      // This will be handled by the main navigation service
-      // Return false to let core service handle it
       return false;
     } catch (error) {
       debugPrint('Failed to handle praga detail navigation: $error');
@@ -286,8 +270,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     if (culturaName == null) return false;
 
     try {
-      // This will be handled by the main navigation service
-      // Return false to let core service handle it
       return false;
     } catch (error) {
       debugPrint('Failed to handle cultura detail navigation: $error');
@@ -300,8 +282,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
     Map<String, dynamic>? arguments,
   ) async {
     try {
-      // This will be handled by the main navigation service
-      // Return false to let core service handle it
       return false;
     } catch (error) {
       debugPrint('Failed to handle diagnostico wizard navigation: $error');
@@ -313,21 +293,16 @@ class AgriculturalNavigationExtension implements INavigationExtension {
   Future<bool> _handlePremiumNavigation(
     Map<String, dynamic>? arguments,
   ) async {
-    // Premium navigation is handled by core NavigationService
-    // Just return false to let core handle it
     return false;
   }
 
   /// Handle diagnostico wizard back navigation
   Future<bool> _handleDiagnosticoWizardBack(NavigationState currentState) async {
-    // Custom logic for diagnostic wizard back navigation
-    // For now, use default behavior
     return false;
   }
 
   /// Handle premium page back navigation
   Future<bool> _handlePremiumBack(NavigationState currentState) async {
-    // Track premium page exit analytics
     debugPrint('User exited premium page');
     return false; // Use default back navigation
   }
@@ -355,7 +330,6 @@ class AgriculturalNavigationExtension implements INavigationExtension {
 
   /// Validate diagnostico arguments
   bool _validateDiagnosticoArguments(Map<String, dynamic>? arguments) {
-    // Diagnostico wizard can work without arguments (new diagnostic)
     return true;
   }
 }

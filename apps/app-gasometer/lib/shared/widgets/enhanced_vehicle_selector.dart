@@ -40,8 +40,6 @@ class _EnhancedVehicleSelectorState
   void initState() {
     super.initState();
     _currentSelectedVehicleId = widget.selectedVehicleId;
-
-    // Initialize animations
     _animationController = AnimationController(
       duration: AppDurations.normal,
       vsync: this,
@@ -67,20 +65,15 @@ class _EnhancedVehicleSelectorState
 
       if (mounted) {
         final vehiclesAsync = ref.read(vehiclesNotifierProvider);
-
-        // Aguarda os dados se ainda estiver carregando
         final vehicles = await vehiclesAsync.when<Future<List<VehicleEntity>>>(
           data: (data) async => data,
           loading: () async {
             debugPrint('⏳ Aguardando carregamento de veículos...');
-            // Aguarda até que os dados estejam disponíveis
             await Future.delayed(const Duration(milliseconds: 100));
             return ref.read(vehiclesNotifierProvider).value ?? [];
           },
           error: (_, __) async => <VehicleEntity>[],
         );
-
-        // Se há um veículo salvo, verifica se ele ainda existe
         if (savedVehicleId != null) {
           final vehicleExists = vehicles.any((v) => v.id == savedVehicleId);
 
@@ -91,15 +84,12 @@ class _EnhancedVehicleSelectorState
             widget.onVehicleChanged(savedVehicleId);
             return;
           } else {
-            // Remove a preferência se o veículo não existe mais
             await prefs.remove(_selectedVehicleKey);
             debugPrint(
               '🗑️ Veículo removido das preferências: $savedVehicleId',
             );
           }
         }
-
-        // Auto-seleção: se não há veículo selecionado mas há veículos disponíveis
         if (_currentSelectedVehicleId == null && vehicles.isNotEmpty) {
           final vehicleToSelect = _selectBestVehicle(vehicles);
           if (vehicleToSelect != null) {
@@ -123,12 +113,8 @@ class _EnhancedVehicleSelectorState
   /// Prioriza veículos ativos e ordena por data de criação (mais recente primeiro)
   VehicleEntity? _selectBestVehicle(List<VehicleEntity> vehicles) {
     if (vehicles.isEmpty) return null;
-
-    // Separa veículos ativos e inativos
     final activeVehicles = vehicles.where((v) => v.isActive).toList();
     final inactiveVehicles = vehicles.where((v) => !v.isActive).toList();
-
-    // Ordena por data de criação (mais recente primeiro)
     activeVehicles.sort(
       (a, b) => (b.createdAt ?? DateTime(1900)).compareTo(
         a.createdAt ?? DateTime(1900),
@@ -139,13 +125,9 @@ class _EnhancedVehicleSelectorState
         a.createdAt ?? DateTime(1900),
       ),
     );
-
-    // Prioriza veículos ativos, senão pega o primeiro inativo
     if (activeVehicles.isNotEmpty) {
-      // Removed verbose active vehicle selection log
       return activeVehicles.first;
     } else if (inactiveVehicles.isNotEmpty) {
-      // Removed verbose inactive vehicle selection log
       return inactiveVehicles.first;
     }
 
@@ -158,10 +140,8 @@ class _EnhancedVehicleSelectorState
       final prefs = await SharedPreferences.getInstance();
       if (vehicleId != null) {
         await prefs.setString(_selectedVehicleKey, vehicleId);
-        // Removed verbose vehicle save log
       } else {
         await prefs.remove(_selectedVehicleKey);
-        // Removed verbose preference removal log
       }
     } catch (e) {
       debugPrint('❌ Erro ao salvar veículo selecionado: $e');
@@ -169,10 +149,7 @@ class _EnhancedVehicleSelectorState
   }
 
   void _onVehicleSelected(String? vehicleId) {
-    // Haptic feedback for better UX
     HapticFeedback.selectionClick();
-
-    // Animate the selection change
     _animationController.reverse().then((_) {
       setState(() {
         _currentSelectedVehicleId = vehicleId;
@@ -205,8 +182,6 @@ class _EnhancedVehicleSelectorState
         if (vehicles.isEmpty) {
           return _buildEmptyState(context);
         }
-
-        // Auto-seleção quando há veículos disponíveis mas nenhum selecionado
         if (vehicles.isNotEmpty && _currentSelectedVehicleId == null) {
           final vehicleToSelect = _selectBestVehicle(vehicles);
           if (vehicleToSelect != null) {

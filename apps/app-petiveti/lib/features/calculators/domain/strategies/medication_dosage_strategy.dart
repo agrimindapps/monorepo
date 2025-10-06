@@ -13,39 +13,22 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   @override
   MedicationDosageOutput calculate(MedicationDosageInput input) {
-    // Buscar dados do medicamento
     final medicationData = _getMedicationData(input.medicationId);
     
     if (medicationData == null) {
       throw ArgumentError('Medicamento não encontrado: ${input.medicationId}');
     }
-
-    // Obter faixa de dosagem apropriada
     final dosageRange = medicationData.getDosageRange(input.species, input.ageGroup);
     
     if (dosageRange == null) {
       throw ArgumentError('Dosagem não definida para ${input.species.displayName} - ${input.ageGroup.displayName}');
     }
-
-    // Calcular dosagem base
     final baseDosagePerKg = _calculateBaseDosage(dosageRange, input);
-    
-    // Aplicar ajustes por condições especiais
     final adjustedDosagePerKg = _applyDosageAdjustments(baseDosagePerKg, input, medicationData);
-    
-    // Calcular doses
     final calculations = _performDosageCalculations(adjustedDosagePerKg, input, medicationData);
-    
-    // Gerar alertas de segurança
     final alerts = _generateSafetyAlerts(input, medicationData, dosageRange, adjustedDosagePerKg);
-    
-    // Criar informações de monitoramento
     final monitoringInfo = _createMonitoringInfo(medicationData, input);
-    
-    // Criar instruções de administração
     final instructions = _createAdministrationInstructions(medicationData, input);
-    
-    // Determinar se é seguro administrar
     final isSafe = _isSafeToAdminister(alerts);
 
     return MedicationDosageOutput(
@@ -82,17 +65,12 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   /// Calcula dosagem base dentro da faixa terapêutica
   double _calculateBaseDosage(DosageRange dosageRange, MedicationDosageInput input) {
-    // Para condições normais, usar dosagem média
     if (input.specialConditions.isEmpty && !input.isEmergency) {
       return (dosageRange.minDose + dosageRange.maxDose) / 2;
     }
-    
-    // Para emergências, pode usar dosagem mais alta
     if (input.isEmergency) {
       return dosageRange.maxDose * 0.9; // 90% da dose máxima
     }
-    
-    // Para condições especiais, geralmente começar com dosagem menor
     return dosageRange.minDose + (dosageRange.maxDose - dosageRange.minDose) * 0.3;
   }
 
@@ -101,18 +79,13 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
     double cumulativeReduction = 1.0;
     const double minimumDosageFactor = 0.4; // Nunca reduzir mais que 60%
     const double severityWeightFactor = 0.7; // Fator de peso para condições severas múltiplas
-    
-    // Aplicar ajustes com peso baseado em severidade e número de condições
     final Map<SpecialCondition, double> conditionFactors = {};
     
     for (final condition in input.specialConditions) {
       double conditionFactor = _getConditionAdjustmentFactor(condition, medicationData);
       conditionFactors[condition] = conditionFactor;
     }
-    
-    // Se múltiplas condições, aplicar fator de redução ponderado ao invés de multiplicativo
     if (conditionFactors.length > 1) {
-      // Para múltiplas condições, usar média ponderada ao invés de produto
       double weightedSum = 0.0;
       double totalWeight = 0.0;
       
@@ -121,30 +94,19 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         weightedSum += entry.value * weight;
         totalWeight += weight;
       }
-      
-      // Aplicar fator de suavização para múltiplas condições
       final avgFactor = weightedSum / totalWeight;
       cumulativeReduction = severityWeightFactor + (avgFactor * (1.0 - severityWeightFactor));
     } else if (conditionFactors.isNotEmpty) {
-      // Uma única condição: aplicar fator direto
       cumulativeReduction = conditionFactors.values.first;
     }
-    
-    // Ajuste adicional por idade (aplicado separadamente para não ser cumulativo)
     double ageAdjustment = 1.0;
     if (input.ageGroup == AgeGroup.puppy) {
       ageAdjustment = 0.8; // Filhotes geralmente precisam de doses menores por kg
     } else if (input.ageGroup == AgeGroup.senior) {
       ageAdjustment = 0.85; // Idosos: metabolismo mais lento
     }
-    
-    // Garantir que não reduzimos além do mínimo terapêutico
     cumulativeReduction = math.max(cumulativeReduction, minimumDosageFactor);
-    
-    // Aplicar ajustes finais
     double adjustedDosage = baseDosage * cumulativeReduction * ageAdjustment;
-    
-    // Verificação final: garantir que ainda está dentro da faixa terapêutica mínima
     final dosageRange = medicationData.getDosageRange(input.species, input.ageGroup);
     if (dosageRange != null) {
       final absoluteMinimum = dosageRange.minDose * 0.6; // 60% da dose mínima como limite absoluto
@@ -158,29 +120,23 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
   double _getConditionAdjustmentFactor(SpecialCondition condition, MedicationData medicationData) {
     switch (condition) {
       case SpecialCondition.renalDisease:
-        // Ajuste baseado na metabolização renal do medicamento
         return _isRenallyMetabolized(medicationData) ? 0.6 : 0.8;
       case SpecialCondition.hepaticDisease:
-        // Ajuste baseado na metabolização hepática
         return _isHepaticallyMetabolized(medicationData) ? 0.5 : 0.75;
       case SpecialCondition.geriatric:
-        // Redução conservadora para geriátricos
         return 0.8;
       case SpecialCondition.heartDisease:
-        // Ajuste específico dependendo do medicamento
         if (medicationData.category.toLowerCase().contains('diurético')) {
           return 1.0; // Manter dose para diuréticos em cardiopatas
         } else {
           return 0.9; // Redução leve para outros medicamentos
         }
       case SpecialCondition.pregnant:
-        // Ajuste baseado na categoria de gravidez
         if (!medicationData.isSafeForPregnancy()) {
           return 0.7; // Dose mais conservadora
         }
         return 0.9; // Redução leve se seguro na gravidez
       case SpecialCondition.diabetes:
-        // Ajuste para diabéticos (depende do medicamento)
         if (medicationData.category.toLowerCase().contains('corticoide')) {
           return 0.7; // Redução maior para corticoides em diabéticos
         }
@@ -188,7 +144,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
       case SpecialCondition.lactating:
         return 0.85; // Redução moderada durante lactação
       default:
-        // Outras condições: redução conservadora
         return 0.9;
     }
   }
@@ -212,13 +167,8 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   /// Realiza cálculos de dosagem
   Map<String, double?> _performDosageCalculations(double dosagePerKg, MedicationDosageInput input, MedicationData medicationData) {
-    // Dose total diária = peso × dosagem por kg
     final totalDailyDose = input.weight * dosagePerKg;
-    
-    // Dose por administração = dose total ÷ frequência
     final dosePerAdministration = totalDailyDose / input.frequency.timesPerDay;
-    
-    // Volume a administrar (se concentração fornecida)
     double? volumeToAdminister;
     if (input.concentration != null && input.concentration! > 0) {
       volumeToAdminister = dosePerAdministration / input.concentration!;
@@ -239,8 +189,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
     double calculatedDosage,
   ) {
     final alerts = <SafetyAlert>[];
-
-    // Verificar faixa de dosagem
     if (!dosageRange.isDoseInSafeRange(calculatedDosage)) {
       if (calculatedDosage < dosageRange.minDose) {
         alerts.add(SafetyAlert(
@@ -259,8 +207,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         ));
       }
     }
-
-    // Verificar toxicidade
     if (dosageRange.isDosePotentiallyToxic(calculatedDosage)) {
       alerts.add(SafetyAlert(
         type: AlertType.toxicity,
@@ -270,8 +216,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         isBlocking: true,
       ));
     }
-
-    // Verificar letalidade
     if (dosageRange.isDosePotentiallyLethal(calculatedDosage)) {
       alerts.add(SafetyAlert(
         type: AlertType.toxicity,
@@ -281,8 +225,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         isBlocking: true,
       ));
     }
-
-    // Verificar contraindicações
     final contraindications = medicationData.getContraindications(input.specialConditions);
     for (final contraindication in contraindications) {
       alerts.add(SafetyAlert(
@@ -295,8 +237,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         isBlocking: contraindication.isAbsolute,
       ));
     }
-
-    // Verificar gravidez
     if (input.specialConditions.contains(SpecialCondition.pregnant) && 
         !medicationData.isSafeForPregnancy()) {
       alerts.add(SafetyAlert(
@@ -306,8 +246,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         recommendation: 'Avaliar risco-benefício com veterinário',
       ));
     }
-
-    // Verificar lactação
     if (input.specialConditions.contains(SpecialCondition.lactating) && 
         !medicationData.isSafeForLactation()) {
       alerts.add(const SafetyAlert(
@@ -317,8 +255,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         recommendation: 'Monitorar filhotes durante tratamento',
       ));
     }
-
-    // Alertas específicos da espécie
     final speciesWarnings = medicationData.getSpeciesWarnings(input.species);
     for (final warning in speciesWarnings) {
       alerts.add(SafetyAlert(
@@ -328,8 +264,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         recommendation: 'Monitoramento especial necessário',
       ));
     }
-
-    // Verificar idade
     if (!medicationData.isAppropriateForAge(input.ageGroup, input.species)) {
       alerts.add(SafetyAlert(
         type: AlertType.ageContraindication,
@@ -348,8 +282,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
     final warningSignsToWatch = <String>[];
     String frequency = 'Conforme orientação veterinária';
     String duration = 'Durante todo o tratamento';
-
-    // Parâmetros baseados na categoria do medicamento
     switch (medicationData.category.toLowerCase()) {
       case 'antibiótico':
         parametersToMonitor.addAll(['Melhora dos sintomas', 'Efeitos gastrointestinais']);
@@ -372,8 +304,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
         frequency = 'A cada 3-5 dias';
         break;
     }
-
-    // Parâmetros adicionais baseados em condições especiais
     if (input.specialConditions.contains(SpecialCondition.renalDisease)) {
       parametersToMonitor.add('Função renal');
       warningSignsToWatch.add('Mudanças na urinação');
@@ -401,8 +331,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
   AdministrationInstructions _createAdministrationInstructions(MedicationData medicationData, MedicationDosageInput input) {
     String route = medicationData.administrationRoutes.first;
     String timing = 'Conforme prescrição';
-    
-    // Timing específico por medicamento
     if (medicationData.name.toLowerCase().contains('omeprazol')) {
       timing = 'Em jejum, 30 minutos antes da refeição';
     } else if (medicationData.category.toLowerCase().contains('anti-inflamatório')) {
@@ -429,7 +357,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   /// Retorna unidade de dosagem
   String _getDosageUnit(MedicationData medicationData) {
-    // Por padrão, assumir mg
     return 'mg';
   }
 
@@ -482,7 +409,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   /// Verifica se medicamento é predominantemente metabolizado pelos rins
   bool _isRenallyMetabolized(MedicationData medication) {
-    // Lista de medicamentos que são predominantemente eliminados pelos rins
     const renalMetabolizedMedications = [
       'furosemide',
       'enrofloxacin', 
@@ -497,7 +423,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   /// Verifica se medicamento é predominantemente metabolizado pelo fígado
   bool _isHepaticallyMetabolized(MedicationData medication) {
-    // Lista de medicamentos que são predominantemente metabolizados pelo fígado
     const hepaticallyMetabolizedMedications = [
       'meloxicam',
       'tramadol',
@@ -549,8 +474,6 @@ class MedicationDosageStrategy implements CalculatorStrategy<MedicationDosageInp
 
   @override
   bool? get stringify => null;
-
-  // Implementação explícita do isInputValid para garantir compatibilidade
   @override
   bool isInputValid(MedicationDosageInput input) => validateInput(input).isEmpty;
 }

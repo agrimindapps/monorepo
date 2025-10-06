@@ -50,7 +50,6 @@ class CalorieNavigationBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Don't show navigation bar when results are displayed
     if (state.hasResult) return const SizedBox.shrink();
     
     return Container(

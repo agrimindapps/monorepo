@@ -52,7 +52,6 @@ class _PromoAppBarState extends State<PromoAppBar> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  // Logo
                   Row(
                     children: [
                       Container(
@@ -80,8 +79,6 @@ class _PromoAppBarState extends State<PromoAppBar> {
                   ),
                   
                   const Spacer(),
-                  
-                  // Navigation buttons (apenas para desktop/tablet)
                   if (!isMobile) ...[
                     _buildNavButton('Recursos', widget.onFeaturesPressed),
                     _buildNavButton('Screenshots', widget.onScreenshotsPressed),
@@ -89,8 +86,6 @@ class _PromoAppBarState extends State<PromoAppBar> {
                     _buildNavButton('FAQ', widget.onFaqPressed),
                     const SizedBox(width: 16),
                   ],
-                  
-                  // Login button
                   OutlinedButton(
                     onPressed: widget.onLoginPressed,
                     style: OutlinedButton.styleFrom(
@@ -103,8 +98,6 @@ class _PromoAppBarState extends State<PromoAppBar> {
                     ),
                     child: const Text('Já tenho conta'),
                   ),
-                  
-                  // Menu button para mobile
                   if (isMobile) ...[
                     const SizedBox(width: 8),
                     IconButton(

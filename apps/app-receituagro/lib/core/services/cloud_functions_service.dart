@@ -99,8 +99,6 @@ class ReceitaAgroCloudFunctionsService {
   }
 
   ReceitaAgroCloudFunctionsService._internal();
-
-  // Cloud Functions endpoints
   static const String _baseUrl =
       'https://us-central1-receituagro-prod.cloudfunctions.net';
   static const String _devUrl =
@@ -336,23 +334,16 @@ class ReceitaAgroCloudFunctionsService {
   /// Check if device can access premium features
   Future<Either<String, bool>> checkDeviceAccess(String deviceId) async {
     try {
-      // First validate subscription
       final subscriptionResult = await validateSubscription();
 
       return subscriptionResult.fold((error) => Left(error), (subscription) {
-        // Check if subscription is valid and device is registered
         if (!subscription.isValid) {
           return const Right(false);
         }
-
-        // For premium features, check if user has premium subscription
         if (!subscription.isPremium) {
           return const Right(false);
         }
-
-        // Check if device limit is respected
         if (!subscription.canAddDevice && subscription.activeDevicesCount > 0) {
-          // Need to check if this specific device is already registered
           return const Right(true); // Assuming device check happens elsewhere
         }
 

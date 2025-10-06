@@ -30,7 +30,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    // Initialization will be done in build with WidgetsBinding
   }
 
   @override
@@ -38,8 +37,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final settingsState = ref.watch(settingsNotifierProvider);
-
-    // Initialize settings on first build
     if (!_initialized) {
       _initialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -113,29 +110,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
       children: const [
         SizedBox(height: 12),
-
-        // 👤 SEÇÃO DE CONTA/LOGIN (primeiro item - sempre visível)
         AuthSection(),
         SizedBox(height: 12),
-
-        // 💎 PREMIUM/ASSINATURA (sempre visível)
         PremiumSection(),
         SizedBox(height: 12),
-
-        // 🔔 NOTIFICAÇÕES (sempre visível)
         NotificationsSection(),
         SizedBox(height: 12),
-
-        // 🔧 SEÇÕES DE DESENVOLVIMENTO (condicional)
         FeatureFlagsSection(),
         SizedBox(height: 12),
         DevelopmentSection(),
         SizedBox(height: 12),
-
-        // 🆘 SUPORTE (sempre visível)
         SupportSection(),
-
-        // Espaço extra para melhor rolagem
         SizedBox(height: 24),
       ],
     );
@@ -186,7 +171,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await ref.read(settingsNotifierProvider.notifier).initialize(deviceId);
     } catch (e) {
       debugPrint('Error initializing settings: $e');
-      // Fallback to anonymous user
       await ref
           .read(settingsNotifierProvider.notifier)
           .initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');

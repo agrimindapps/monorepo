@@ -46,8 +46,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (credential.user == null) {
         throw const ServerException(message: 'Falha na autenticação');
       }
-
-      // Update last login
       await _updateLastLogin(credential.user!.uid);
 
       return await _createUserModelFromFirebaseUser(credential.user!);
@@ -69,16 +67,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (credential.user == null) {
         throw const ServerException(message: 'Falha na criação da conta');
       }
-
-      // Update display name if provided
       if (name != null && name.isNotEmpty) {
         await credential.user!.updateDisplayName(name);
       }
-
-      // Send email verification
       await credential.user!.sendEmailVerification();
-
-      // Create user document in Firestore
       await _createUserDocument(credential.user!, name);
 
       return await _createUserModelFromFirebaseUser(credential.user!);
@@ -92,30 +84,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> signInWithGoogle() async {
     try {
-      // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       
       if (googleUser == null) {
         throw const ServerException(message: 'Login com Google cancelado pelo usuário');
       }
-
-      // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      // Create a new credential
       final credential = firebase_auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-
-      // Sign in to Firebase with the Google credentials
       final userCredential = await firebaseAuth.signInWithCredential(credential);
       
       if (userCredential.user == null) {
         throw const ServerException(message: 'Falha no login com Google');
       }
-
-      // Create or update user document in Firestore
       await _createOrUpdateUserDocument(userCredential.user!);
 
       return await _createUserModelFromFirebaseUser(userCredential.user!);
@@ -129,28 +112,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> signInWithApple() async {
     try {
-      // Request Apple ID credentials
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
       );
-
-      // Create Firebase credential
       final oauthCredential = firebase_auth.OAuthProvider('apple.com').credential(
         idToken: appleCredential.identityToken,
         accessToken: appleCredential.authorizationCode,
       );
-
-      // Sign in to Firebase with Apple credentials
       final userCredential = await firebaseAuth.signInWithCredential(oauthCredential);
       
       if (userCredential.user == null) {
         throw const ServerException(message: 'Falha no login com Apple');
       }
-
-      // Create or update user document with Apple-specific data
       await _createOrUpdateUserDocument(
         userCredential.user!,
         appleName: _getAppleName(appleCredential),
@@ -167,26 +143,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> signInWithFacebook() async {
     try {
-      // Trigger the sign-in flow
       final LoginResult result = await FacebookAuth.instance.login();
 
       if (result.status != LoginStatus.success) {
         throw const ServerException(message: 'Login com Facebook cancelado ou falhou');
       }
-
-      // Create a credential from the access token
       final facebookAuthCredential = firebase_auth.FacebookAuthProvider.credential(
         result.accessToken!.token,
       );
-
-      // Sign in to Firebase with Facebook credentials
       final userCredential = await firebaseAuth.signInWithCredential(facebookAuthCredential);
       
       if (userCredential.user == null) {
         throw const ServerException(message: 'Falha no login com Facebook');
       }
-
-      // Create or update user document in Firestore
       await _createOrUpdateUserDocument(userCredential.user!);
 
       return await _createUserModelFromFirebaseUser(userCredential.user!);
@@ -205,8 +174,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (userCredential.user == null) {
         throw const ServerException(message: 'Falha no login anônimo');
       }
-
-      // Create anonymous user document in Firestore
       await _createAnonymousUserDocument(userCredential.user!);
 
       return await _createUserModelFromFirebaseUser(userCredential.user!);
@@ -220,7 +187,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      // Sign out from all providers
       await Future.wait([
         firebaseAuth.signOut(),
         googleSignIn.signOut(),
@@ -277,16 +243,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (user == null) {
         throw const ServerException(message: 'Usuário não está logado');
       }
-
-      // Update Firebase Auth profile
       if (name != null) {
         await user.updateDisplayName(name);
       }
       if (photoUrl != null) {
         await user.updatePhotoURL(photoUrl);
       }
-
-      // Update Firestore document
       await _updateUserDocument(user.uid, name, photoUrl);
 
       await user.reload();
@@ -307,11 +269,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (user == null) {
         throw const ServerException(message: 'Usuário não está logado');
       }
-
-      // Delete user document from Firestore
       await firestore.collection('users').doc(user.uid).delete();
-
-      // Delete user from Firebase Auth
       await user.delete();
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw ServerException(message: _getAuthErrorMessage(e));
@@ -327,11 +285,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return await _createUserModelFromFirebaseUser(firebaseUser);
     });
   }
-
-  // Helper methods
   Future<UserModel> _createUserModelFromFirebaseUser(firebase_auth.User firebaseUser) async {
     try {
-      // Try to get additional user data from Firestore
       final userDoc = await firestore.collection('users').doc(firebaseUser.uid).get();
       
       final now = DateTime.now();
@@ -392,18 +347,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final now = DateTime.now();
       final userDoc = firestore.collection('users').doc(firebaseUser.uid);
-      
-      // Check if user document exists
       final docSnapshot = await userDoc.get();
       
       if (docSnapshot.exists) {
-        // Update existing document
         await userDoc.update({
           'lastLoginAt': now.millisecondsSinceEpoch,
           'updatedAt': now.millisecondsSinceEpoch,
         });
       } else {
-        // Create new document
         final displayName = appleName ?? firebaseUser.displayName;
         await userDoc.set({
           'email': firebaseUser.email,
@@ -474,7 +425,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'lastLoginAt': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {
-      // Don't throw error for last login update failure
     }
   }
 

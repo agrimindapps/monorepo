@@ -13,12 +13,9 @@ class DeleteBovineUseCase implements UseCase<void, DeleteBovineParams> {
   
   @override
   Future<Either<Failure, void>> call(DeleteBovineParams params) async {
-    // Validação básica do ID
     if (params.bovineId.trim().isEmpty) {
       return const Left(ValidationFailure('ID do bovino é obrigatório para exclusão'));
     }
-    
-    // Verificar se o bovino existe
     final existingBovineResult = await repository.getBovineById(params.bovineId);
     if (existingBovineResult.isLeft()) {
       return Left(
@@ -32,61 +29,41 @@ class DeleteBovineUseCase implements UseCase<void, DeleteBovineParams> {
     }
     
     final existingBovine = existingBovineResult.fold((l) => throw UnimplementedError(), (r) => r);
-    
-    // Validar confirmação se necessária
     if (params.requireConfirmation && !params.confirmed) {
       return const Left(ValidationFailure('Confirmação é obrigatória para exclusão'));
     }
-    
-    // Validar regras de negócio específicas
     final businessRuleValidation = await _validateBusinessRules(existingBovine, params);
     if (businessRuleValidation != null) {
       return Left(businessRuleValidation);
     }
-    
-    // Executar operações em cascata se necessário
     if (params.deleteRelatedData) {
       final cascadeResult = await _performCascadeOperations(params.bovineId);
       if (cascadeResult.isLeft()) {
         return cascadeResult;
       }
     }
-    
-    // Deletar imagens se especificado
     if (params.deleteImages && existingBovine.imageUrls.isNotEmpty) {
       final imageDeleteResult = await repository.deleteAnimalImages(
         params.bovineId, 
         existingBovine.imageUrls,
       );
       if (imageDeleteResult.isLeft()) {
-        // Log erro mas não falha a operação principal
-        // TODO: Implementar logging quando disponível
       }
     }
-    
-    // Executar a exclusão (soft delete por padrão)
     return await repository.deleteBovine(params.bovineId);
   }
   
   /// Valida regras de negócio específicas para exclusão
   Future<Failure?> _validateBusinessRules(dynamic existingBovine, DeleteBovineParams params) async {
-    // Verificar se bovino está inativo (já foi "deletado" anteriormente)
     if (existingBovine.isActive == false && !params.forceDelete) {
       return const ValidationFailure('Bovino já foi removido anteriormente');
     }
-    
-    // Outras validações de business rules podem ser adicionadas aqui
-    // Ex: verificar se bovino tem dependências, se está em processo reprodutivo, etc.
     
     return null;
   }
   
   /// Executa operações em cascata relacionadas
   Future<Either<Failure, void>> _performCascadeOperations(String bovineId) async {
-    // Implementar operações em cascata quando o sistema estiver completo
-    // Ex: remover registros de vacinas, histórico médico, registros de reprodução, etc.
-    
-    // Por ora, retorna sucesso
     return const Right(null);
   }
 }

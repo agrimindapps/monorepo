@@ -7,7 +7,6 @@ import '../../../features/plants/domain/repositories/spaces_repository.dart';
 
 class SpacesModule {
   static void init(GetIt sl) {
-    // Data sources
     sl.registerLazySingleton<SpacesLocalDatasource>(
       () => SpacesLocalDatasourceImpl(),
     );
@@ -15,8 +14,6 @@ class SpacesModule {
     sl.registerLazySingleton<SpacesRemoteDatasource>(
       () => SpacesRemoteDatasourceImpl(firestore: sl()),
     );
-
-    // Repository
     sl.registerLazySingleton<SpacesRepository>(
       () => SpacesRepositoryImpl(
         localDatasource: sl(),
@@ -25,10 +22,5 @@ class SpacesModule {
         authService: sl(),
       ),
     );
-
-    // Use cases - Todos já registrados via Injectable (@injectable)
-
-    // SpacesProvider migrado para Riverpod - agora usa SpacesNotifier
-    // Acesso via ref.read(spacesNotifierProvider.notifier)
   }
 }

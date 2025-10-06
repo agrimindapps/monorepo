@@ -224,7 +224,6 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Seção de Informações e Imagem
           DiagnosticoInfoWidget(
             nomePraga: widget.nomePraga,
             nomeDefensivo: widget.nomeDefensivo,
@@ -232,20 +231,14 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
             diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),
-
-          // Seção de Detalhes do Diagnóstico (sempre visível)
           DiagnosticoDetalhesWidget(
             diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),
-
-          // Seção de Instruções de Aplicação (sempre visível)
           AplicacaoInstrucoesWidget(
             diagnosticoData: state.diagnosticoData,
           ),
           const SizedBox(height: 24),
-
-          // Recursos Premium - Visíveis mas controlados por isPremium
           _buildPremiumFeatures(state),
           
           const SizedBox(height: 80), // Espaço para bottom navigation
@@ -255,7 +248,6 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
   }
   
   Widget _buildPremiumFeatures(DetalheDiagnosticoState state) {
-    // Removido - sem seções premium visíveis
     return const SizedBox.shrink();
   }
 

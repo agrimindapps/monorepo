@@ -250,9 +250,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
         TipoFavorito.praga,
         praga.id,
       );
-      // Remover favorito sem feedback de SnackBar
     } catch (e) {
-      // Erro silencioso
     }
   }
 

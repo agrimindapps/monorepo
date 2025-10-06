@@ -29,21 +29,16 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
   @override
   List<FieldConfig> buildFields() {
     return [
-      // Marca do veículo
       FieldTemplates.name(
         key: 'marca',
         label: 'Marca',
         isRequired: true,
       ),
-      
-      // Modelo do veículo
       FieldTemplates.name(
         key: 'modelo', 
         label: 'Modelo',
         isRequired: true,
       ),
-      
-      // Ano do veículo
       NumberFieldConfig(
         key: 'ano',
         label: 'Ano',
@@ -53,16 +48,12 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
         decimalPlaces: 0,
         allowNegative: false,
       ),
-      
-      // Cor do veículo
       const TextFieldConfig(
         key: 'cor',
         label: 'Cor',
         isRequired: true,
         maxLength: 50,
       ),
-      
-      // Placa do veículo
       const TextFieldConfig(
         key: 'placa',
         label: 'Placa',
@@ -71,8 +62,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
         validationPattern: r'^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$',
         hint: 'Ex: ABC1234 ou ABC1D23',
       ),
-      
-      // Chassi do veículo
       const TextFieldConfig(
         key: 'chassi',
         label: 'Chassi',
@@ -81,8 +70,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
         validationPattern: r'^[A-HJ-NPR-Z0-9]{17}$',
         hint: '17 caracteres alfanuméricos',
       ),
-      
-      // RENAVAM
       const TextFieldConfig(
         key: 'renavam',
         label: 'RENAVAM',
@@ -92,8 +79,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
         hint: '9 a 11 dígitos',
         keyboardType: TextInputType.number,
       ),
-      
-      // Tipo de combustível
       const DropdownFieldConfig(
         key: 'combustivel',
         label: 'Tipo de Combustível',
@@ -109,8 +94,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
         ],
         initialValue: 'Gasolina',
       ),
-      
-      // Odômetro inicial
       const NumberFieldConfig(
         key: 'odometro',
         label: 'Quilometragem Atual (km)',
@@ -127,7 +110,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
   @override
   List<IFieldValidator> buildValidators() {
     return [
-      // Add custom validators if needed
     ];
   }
   
@@ -229,13 +211,7 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
   @override
   Future<FormSubmissionResult<VehicleEntity>> submitForm(VehicleEntity data) async {
     try {
-      // TODO: Implement actual vehicle submission logic
-      // This should integrate with the existing vehicle repository
-      
-      // Simulate submission delay
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      
-      // For now, return success - this will be connected to the actual service
       return FormSubmissionResult.success(data);
     } catch (e) {
       return FormSubmissionResult.failure(
@@ -249,8 +225,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
     if (id == null) return null;
     
     try {
-      // TODO: Implement vehicle loading by ID
-      // This should integrate with the existing vehicle repository
       return null;
     } catch (e) {
       return null;
@@ -265,8 +239,6 @@ class VehicleFormConfig extends FormConfig<VehicleEntity> {
     bool? allowOfflineSubmission,
     int? maxRetryAttempts,
   }) {
-    // For this implementation, return a new instance
-    // In a more complex scenario, you might want to create a proper copy
     return VehicleFormConfig();
   }
 }

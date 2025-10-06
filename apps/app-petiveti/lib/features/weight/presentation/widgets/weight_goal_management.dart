@@ -22,8 +22,6 @@ class WeightGoalManagement extends ConsumerStatefulWidget {
 class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
-  // Goal setting form
   final _formKey = GlobalKey<FormState>();
   final _targetWeightController = TextEditingController();
   final _timelineController = TextEditingController();
@@ -80,7 +78,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
   }
 
   Widget _buildActiveGoalsTab(ThemeData theme, WeightsState weightsState, AnimalsState animalsState) {
-    // Mock active goals for demonstration
     final activeGoals = _getMockActiveGoals();
 
     if (activeGoals.isEmpty) {
@@ -158,8 +155,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Progress section
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -209,8 +204,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
             ),
             
             const SizedBox(height: 12),
-            
-            // Timeline and actions
             Row(
               children: [
                 Icon(Icons.schedule, size: 16, color: Colors.grey[600]),
@@ -255,7 +248,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Goal type selection
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -283,8 +275,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
             ),
             
             const SizedBox(height: 16),
-            
-            // Target weight and timeline
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -349,8 +339,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
             ),
             
             const SizedBox(height: 16),
-            
-            // Priority and notifications
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -396,8 +384,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
             ),
             
             const SizedBox(height: 24),
-            
-            // Action buttons
             Row(
               children: [
                 Expanded(
@@ -683,8 +669,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
       ),
     );
   }
-
-  // Helper Methods
   List<Map<String, dynamic>> _getMockActiveGoals() {
     return [
       {
@@ -779,7 +763,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
 
   void _saveGoal() {
     if (_formKey.currentState!.validate()) {
-      // Save goal logic here
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Meta criada com sucesso!'),
@@ -793,7 +776,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
   }
 
   void _editGoal(Map<String, dynamic> goal) {
-    // Edit goal logic
   }
 
   void _completeGoal(Map<String, dynamic> goal) {
@@ -825,7 +807,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
   }
 
   void _showGoalAnalytics(Map<String, dynamic> goal) {
-    // Show detailed analytics
   }
 
   void _showVeterinaryConsultation() {
@@ -842,7 +823,6 @@ class _WeightGoalManagementState extends ConsumerState<WeightGoalManagement>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              // Navigate to veterinary consultation booking
             },
             child: const Text('Agendar Consulta'),
           ),

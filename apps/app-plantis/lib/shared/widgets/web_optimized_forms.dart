@@ -202,8 +202,6 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
     super.initState();
     _isWebEnvironment = kIsWeb;
     _focusNode = widget.focusNode ?? FocusNode();
-
-    // Add listener with enhanced safety for web
     if (mounted) {
       _focusNode.addListener(_onFocusChange);
     }
@@ -211,7 +209,6 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
 
   @override
   void dispose() {
-    // Enhanced disposal with web safety
     try {
       _focusNode.removeListener(_onFocusChange);
       if (widget.focusNode == null && !_isWebEnvironment) {
@@ -221,17 +218,14 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
         _focusNode.dispose();
       }
     } catch (e) {
-      // Silently handle disposal errors in web environment
     }
     super.dispose();
   }
 
   void _onFocusChange() {
-    // Critical: Enhanced mounted check with web considerations
     if (!mounted) return;
 
     if (_isWebEnvironment) {
-      // Web: Add micro-delay to prevent race conditions
       Future.delayed(const Duration(milliseconds: 1), () {
         if (mounted) {
           setState(() {
@@ -240,7 +234,6 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
         }
       });
     } else {
-      // Mobile: Direct state update
       setState(() {
         _isFocused = _focusNode.hasFocus;
       });

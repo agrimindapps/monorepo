@@ -187,8 +187,6 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
 
   Widget _buildAnimatedContent(ThemeData theme) {
     Widget baseWidget = _buildBaseFeedbackCard(theme);
-
-    // Aplicar animação específica baseada no tipo e animação
     switch (widget.controller.type) {
       case FeedbackType.success:
         return _buildSuccessAnimation(baseWidget);
@@ -424,8 +422,6 @@ class CheckmarkPainter extends CustomPainter {
     final path = Path();
     final centerX = size.width * 0.5;
     final centerY = size.height * 0.5;
-
-    // Desenhar círculo de fundo
     if (progress > 0.1) {
       final circleProgress = ((progress - 0.1) / 0.3).clamp(0.0, 1.0);
       canvas.drawCircle(
@@ -434,8 +430,6 @@ class CheckmarkPainter extends CustomPainter {
         paint..style = PaintingStyle.stroke,
       );
     }
-
-    // Desenhar checkmark
     if (progress > 0.4) {
       final checkProgress = ((progress - 0.4) / 0.6).clamp(0.0, 1.0);
 
@@ -507,8 +501,6 @@ class ConfettiPainter extends CustomPainter {
       paint.color = colors[i % colors.length].withValues(
         alpha: (1.0 - progress * 0.7),
       );
-
-      // Rotação da partícula
       final rotation = progress * math.pi * 2 * (1 + i % 3);
 
       canvas.save();

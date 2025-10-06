@@ -53,11 +53,7 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
           return Left(initResult.fold((failure) => failure, (_) => throw Exception()));
         }
       }
-
-      // Generate app-specific box name to avoid conflicts
       final fullBoxName = '${_appIdentifier}_$boxName';
-
-      // Get or create cipher for this box
       HiveCipher cipher;
       if (_ciphers.containsKey(fullBoxName)) {
         cipher = _ciphers[fullBoxName]!;
@@ -74,8 +70,6 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
         cipher = HiveAesCipher(key);
         _ciphers[fullBoxName] = cipher;
       }
-
-      // Open encrypted box
       if (!Hive.isBoxOpen(fullBoxName)) {
         final box = await Hive.openBox<String>(fullBoxName, encryptionCipher: cipher);
 
@@ -359,10 +353,6 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
     );
   }
 
-  // ==========================================================================
-  // INTERFACE IMPLEMENTATION - IEncryptedStorageRepository
-  // ==========================================================================
-
   /// Store encrypted data with interface signature
   @override
   Future<Either<Failure, void>> storeEncrypted<T extends Object>(
@@ -484,5 +474,4 @@ class EnhancedEncryptedStorageService implements IEncryptedStorageRepository {
   }
 
   /// Clear encrypted box with interface signature
-  // This method is already implemented above in the class
 }

@@ -33,8 +33,6 @@ class SignupFormWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 30),
-
-          // Campo de nome
           AuthTextFieldWidget(
             controller: loginNotifier.nameController,
             label: 'Nome completo',
@@ -44,8 +42,6 @@ class SignupFormWidget extends ConsumerWidget {
             validator: loginNotifier.validateName,
           ),
           const SizedBox(height: 20),
-
-          // Campo de email
           AuthTextFieldWidget(
             controller: loginNotifier.emailController,
             label: 'Email',
@@ -55,8 +51,6 @@ class SignupFormWidget extends ConsumerWidget {
             validator: loginNotifier.validateEmail,
           ),
           const SizedBox(height: 20),
-
-          // Campo de senha
           AuthTextFieldWidget(
             controller: loginNotifier.passwordController,
             label: 'Senha',
@@ -77,8 +71,6 @@ class SignupFormWidget extends ConsumerWidget {
             validator: loginNotifier.validatePassword,
           ),
           const SizedBox(height: 20),
-
-          // Campo de confirmar senha
           AuthTextFieldWidget(
             controller: loginNotifier.confirmPasswordController,
             label: 'Confirmar senha',
@@ -100,13 +92,9 @@ class SignupFormWidget extends ConsumerWidget {
             onFieldSubmitted: (_) => _handleSignup(context, ref),
           ),
           const SizedBox(height: 20),
-
-          // Termos e condições
           _buildTermsAndConditions(context),
 
           const SizedBox(height: 30),
-
-          // Botão de cadastro
           AuthButtonWidget(
             text: 'Criar Conta',
             isLoading: loginState.isLoading,
@@ -114,8 +102,6 @@ class SignupFormWidget extends ConsumerWidget {
           ),
 
           const SizedBox(height: 30),
-
-          // Botão de voltar ao perfil
           Center(
             child: TextButton.icon(
               onPressed: () => _navigateBackToProfile(context),
@@ -214,7 +200,6 @@ class SignupFormWidget extends ConsumerWidget {
     if (loginState.isAuthenticated && onSignupSuccess != null) {
       onSignupSuccess!();
     } else if (loginState.errorMessage != null) {
-      // Mostrar erro via SnackBar superior
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -259,8 +244,6 @@ class SignupFormWidget extends ConsumerWidget {
           ),
         ),
       );
-
-      // Limpar erro após mostrar
       loginNotifier.clearError();
     }
   }

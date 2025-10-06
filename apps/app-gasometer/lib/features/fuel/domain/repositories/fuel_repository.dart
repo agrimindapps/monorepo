@@ -12,8 +12,6 @@ abstract class FuelRepository {
   Future<Either<Failure, List<FuelRecordEntity>>> searchFuelRecords(String query);
   Stream<Either<Failure, List<FuelRecordEntity>>> watchFuelRecords();
   Stream<Either<Failure, List<FuelRecordEntity>>> watchFuelRecordsByVehicle(String vehicleId);
-
-  // Analytics methods
   Future<Either<Failure, double>> getAverageConsumption(String vehicleId);
   Future<Either<Failure, double>> getTotalSpent(String vehicleId, {DateTime? startDate, DateTime? endDate});
   Future<Either<Failure, List<FuelRecordEntity>>> getRecentFuelRecords(String vehicleId, {int limit = 10});

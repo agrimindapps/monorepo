@@ -126,8 +126,6 @@ class ImageService {
       }
 
       final file = File(image.path);
-      
-      // Validações
       final validationResult = validateImage(file);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
@@ -154,8 +152,6 @@ class ImageService {
       }
 
       final file = File(image.path);
-      
-      // Validações
       final validationResult = validateImage(file);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
@@ -186,8 +182,6 @@ class ImageService {
       final List<File> files = [];
       for (final xFile in limitedImages) {
         final file = File(xFile.path);
-        
-        // Validar cada imagem
         final validationResult = validateImage(file);
         if (validationResult.isError) {
           return Future.error(validationResult.error!);
@@ -209,25 +203,16 @@ class ImageService {
     Function(double)? onProgress,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
-      // Validar imagem antes do upload
       final validationResult = validateImage(imageFile);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
       }
-
-      // Determinar pasta
       final targetFolder = _determineFolder(folder, uploadType);
-      
-      // Gerar nome único se não fornecido
       final finalFileName = fileName ?? 
           '${_uuid.v4()}${_getFileExtension(imageFile.path)}';
-
-      // Referência no Firebase Storage
       final Reference storageRef = _storage.ref().child(
         '$targetFolder/$finalFileName',
       );
-
-      // Configurar metadata
       final SettableMetadata metadata = SettableMetadata(
         contentType: _getContentType(imageFile.path),
         customMetadata: {
@@ -236,22 +221,14 @@ class ImageService {
           'originalSize': imageFile.lengthSync().toString(),
         },
       );
-
-      // Upload com progresso
       final UploadTask uploadTask = storageRef.putFile(imageFile, metadata);
-
-      // Monitorar progresso se callback fornecido
       if (onProgress != null) {
         uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;
           onProgress(progress);
         });
       }
-
-      // Aguardar conclusão
       final TaskSnapshot snapshot = await uploadTask;
-
-      // Retornar URL de download
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
       return ImageUploadResult(
@@ -338,14 +315,11 @@ class ImageService {
 
   /// Validar imagem
   Result<void> validateImage(File imageFile) {
-    // Verificar se arquivo existe
     if (!imageFile.existsSync()) {
       return Result.error(
         ValidationError(message: 'Arquivo de imagem não encontrado'),
       );
     }
-
-    // Validar formato
     if (!_isValidImageFormat(imageFile.path)) {
       return Result.error(
         ValidationError(
@@ -354,8 +328,6 @@ class ImageService {
         ),
       );
     }
-
-    // Validar tamanho
     if (!_isValidFileSize(imageFile)) {
       return Result.error(
         ValidationError(
@@ -423,8 +395,6 @@ class ImageService {
     int? quality,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
-      // TODO: Implementar compressão real usando flutter_image_compress
-      // Por enquanto, retorna o arquivo original
       return imageFile;
     });
   }

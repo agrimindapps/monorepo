@@ -11,15 +11,11 @@ import '../services/plantis_realtime_service.dart';
 class RealtimeSyncProvider with ChangeNotifier {
   final PlantisRealtimeService _realtimeService;
   final ConnectivityService _connectivityService;
-
-  // Stream subscriptions
   StreamSubscription<bool>? _realtimeStatusSubscription;
   StreamSubscription<String>? _syncEventSubscription;
   StreamSubscription<Map<String, SyncStatus>>? _globalSyncSubscription;
   StreamSubscription<AppSyncEvent>? _syncEventsSubscription;
   StreamSubscription<ConnectivityType>? _connectivitySubscription;
-
-  // Estado do provider
   bool _isRealtimeActive = false;
   bool _isOnline = true;
   String _lastSyncEvent = '';
@@ -27,8 +23,6 @@ class RealtimeSyncProvider with ChangeNotifier {
   final List<String> _recentEvents = [];
   DateTime? _lastSyncTime;
   int _pendingChanges = 0;
-
-  // Configurações
   bool _showSyncNotifications = true;
   bool _enableBackgroundSync = true;
 
@@ -40,8 +34,6 @@ class RealtimeSyncProvider with ChangeNotifier {
            connectivityService ?? ConnectivityService.instance {
     _initializeProvider();
   }
-
-  // Getters
   bool get isRealtimeActive => _isRealtimeActive;
   bool get isOnline => _isOnline;
   String get lastSyncEvent => _lastSyncEvent;
@@ -101,18 +93,13 @@ class RealtimeSyncProvider with ChangeNotifier {
   /// Inicializa o provider e listeners
   Future<void> _initializeProvider() async {
     try {
-      // Inicializar serviços
       await _realtimeService.initialize();
       await _connectivityService.initialize();
-
-      // Configurar listeners
       _setupRealtimeStatusListener();
       _setupSyncEventListener();
       _setupGlobalSyncListener();
       _setupSyncEventsListener();
       _setupConnectivityListener();
-
-      // Estado inicial
       await _updateInitialState();
 
       developer.log(
@@ -221,8 +208,6 @@ class RealtimeSyncProvider with ChangeNotifier {
 
         if (_isOnline != wasOnline) {
           _addRecentEvent(_isOnline ? 'Conectado' : 'Desconectado');
-
-          // Notificar o real-time service sobre mudança de conectividade
           _realtimeService.handleConnectivityChange(_isOnline);
           notifyListeners();
         }
@@ -284,8 +269,6 @@ class RealtimeSyncProvider with ChangeNotifier {
   void _addRecentEvent(String event) {
     final timestampedEvent = '${_formatTimestamp(DateTime.now())}: $event';
     _recentEvents.insert(0, timestampedEvent);
-
-    // Manter apenas os últimos 10 eventos
     if (_recentEvents.length > 10) {
       _recentEvents.removeRange(10, _recentEvents.length);
     }
@@ -373,8 +356,6 @@ class RealtimeSyncProvider with ChangeNotifier {
       'realtime_service_debug': _realtimeService.getDebugInfo(),
     };
   }
-
-  // Métodos auxiliares
   String _getStatusDescription(SyncStatus status) {
     switch (status) {
       case SyncStatus.synced:

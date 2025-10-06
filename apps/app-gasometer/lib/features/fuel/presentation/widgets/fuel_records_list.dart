@@ -36,7 +36,6 @@ class FuelRecordsList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        // ✅ Virtualized list for performance
         SizedBox(
           height: 400, // Fixed height for virtualization
           child: ListView.builder(

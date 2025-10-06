@@ -8,22 +8,11 @@ import '../entities/advanced_diet_input.dart';
 class CalorieCalculationService {
   /// Calculate daily caloric needs based on pet characteristics
   double calculateDailyCalories(AdvancedDietInput input) {
-    // Base metabolic rate calculation
     double rer = _calculateRestingEnergyRequirement(input.weight);
-    
-    // Apply life stage multiplier
     double lifeStageMultiplier = _getLifeStageMultiplier(input.lifeStage, input.species);
-    
-    // Apply activity level multiplier
     double activityMultiplier = _getActivityMultiplier(input.activityLevel);
-    
-    // Apply body condition adjustment
     double bodyConditionMultiplier = _getBodyConditionMultiplier(input.bodyCondition);
-    
-    // Apply health condition adjustment
     double healthMultiplier = _getHealthConditionMultiplier(input.healthCondition);
-    
-    // Apply special conditions (pregnancy, lactation, neutered)
     double specialMultiplier = _getSpecialConditionMultiplier(input);
     
     double totalCalories = rer * 
@@ -32,8 +21,6 @@ class CalorieCalculationService {
                           bodyConditionMultiplier * 
                           healthMultiplier * 
                           specialMultiplier;
-    
-    // Apply weight management adjustment if needed
     if (input.bodyCondition == BodyCondition.overweight || 
         input.bodyCondition == BodyCondition.obese) {
       totalCalories = _applyWeightManagementAdjustment(totalCalories, input);
@@ -141,7 +128,6 @@ class CalorieCalculationService {
     double idealWeight = input.idealWeight!;
     
     if (currentWeight > idealWeight) {
-      // Calculate calories based on ideal weight for weight loss
       double idealRER = _calculateRestingEnergyRequirement(idealWeight);
       return idealRER * 1.4; // Conservative weight loss calories
     }

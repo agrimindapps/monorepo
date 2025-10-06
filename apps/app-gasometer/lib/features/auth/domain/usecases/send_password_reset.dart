@@ -9,7 +9,6 @@ class SendPasswordReset implements UseCase<Unit, SendPasswordResetParams> {
 
   @override
   Future<Either<Failure, Unit>> call(SendPasswordResetParams params) async {
-    // Validate email
     final emailValidation = repository.validateEmail(params.email);
     if (emailValidation.isLeft()) {
       return emailValidation.fold((failure) => Left(failure), (_) => throw Exception());

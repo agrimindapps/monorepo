@@ -45,11 +45,8 @@ class VehicleRepositoryImpl implements VehicleRepository {
   @override
   Future<Either<Failure, List<VehicleEntity>>> getAllVehicles() async {
     try {
-      // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localVehicles = await localDataSource.getAllVehicles();
       final localEntities = localVehicles.map((model) => model.toEntity()).toList();
-      
-      // Sync em background se conectado (não bloqueia o retorno)
       unawaited(_syncInBackground());
       
       return Right(localEntities);
@@ -69,22 +66,17 @@ class VehicleRepositoryImpl implements VehicleRepository {
 
       final userId = await _getCurrentUserId();
       if (userId == null) return;
-
-      // Sync remoto sem aguardar
       unawaited(remoteDataSource.getAllVehicles(userId).then((remoteVehicles) async {
-        // Atualizar cache local
         await localDataSource.clearAllVehicles();
         for (final vehicle in remoteVehicles) {
           await localDataSource.saveVehicle(vehicle);
         }
       }).catchError((Object error) {
-        // Sync falhou, mas não afeta a funcionalidade local
         if (kDebugMode) {
           print('Background sync failed: $error');
         }
       }));
     } catch (e) {
-      // Ignorar erros de sync em background
       if (kDebugMode) {
         print('Background sync error: $e');
       }
@@ -94,10 +86,8 @@ class VehicleRepositoryImpl implements VehicleRepository {
   @override
   Future<Either<Failure, VehicleEntity>> getVehicleById(String id) async {
     try {
-      // OFFLINE FIRST: Buscar local primeiro
       final localVehicle = await localDataSource.getVehicleById(id);
       if (localVehicle != null) {
-        // Sync em background se necessário
         unawaited(_syncVehicleInBackground(id));
         return Right(localVehicle.toEntity());
       }
@@ -159,8 +149,6 @@ class VehicleRepositoryImpl implements VehicleRepository {
         );
         return;
       }
-
-      // Fire-and-forget remote sync
       unawaited(remoteDataSource.saveVehicle(userId, vehicleModel).then((_) async {
         await loggingService.logInfo(
           category: LogCategory.vehicles,
@@ -210,7 +198,6 @@ class VehicleRepositoryImpl implements VehicleRepository {
     );
 
     try {
-      // Validation log
       await loggingService.logInfo(
         category: LogCategory.vehicles,
         message: 'Validating vehicle data',
@@ -218,15 +205,11 @@ class VehicleRepositoryImpl implements VehicleRepository {
       );
 
       final vehicleModel = VehicleModel.fromEntity(vehicle);
-      
-      // Local storage log
       await loggingService.logInfo(
         category: LogCategory.vehicles,
         message: 'Saving vehicle to local storage',
         metadata: {'vehicle_id': vehicle.id},
       );
-
-      // Always save to local first
       await localDataSource.saveVehicle(vehicleModel);
 
       await loggingService.logInfo(
@@ -234,8 +217,6 @@ class VehicleRepositoryImpl implements VehicleRepository {
         message: 'Vehicle saved to local storage successfully',
         metadata: {'vehicle_id': vehicle.id},
       );
-      
-      // Remote sync in background (fire-and-forget)
       unawaited(_syncVehicleToRemoteInBackground(vehicleModel));
       
       await loggingService.logInfo(
@@ -317,8 +298,6 @@ class VehicleRepositoryImpl implements VehicleRepository {
         message: 'Updating vehicle in local storage',
         metadata: {'vehicle_id': vehicle.id},
       );
-
-      // Always update local first
       await localDataSource.updateVehicle(vehicleModel);
 
       await loggingService.logInfo(
@@ -429,8 +408,6 @@ class VehicleRepositoryImpl implements VehicleRepository {
         message: 'Deleting vehicle from local storage',
         metadata: {'vehicle_id': id},
       );
-
-      // Always delete from local first
       await localDataSource.deleteVehicle(id);
 
       await loggingService.logInfo(
@@ -529,11 +506,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
       if (userId == null) {
         return const Left(AuthenticationFailure('User not authenticated'));
       }
-      
-      // Get all local vehicles
       final localVehicles = await localDataSource.getAllVehicles();
-      
-      // Sync to remote
       await remoteDataSource.syncVehicles(userId, localVehicles);
       
       return const Right(unit);
@@ -585,21 +558,17 @@ class VehicleRepositoryImpl implements VehicleRepository {
 
       final isConnected = await _isConnected;
       if (!isConnected) {
-        // Se offline, emitir dados locais uma vez
         final localVehicles = await localDataSource.getAllVehicles();
         final localEntities = localVehicles.map((model) => model.toEntity()).toList();
         yield Right<Failure, List<VehicleEntity>>(localEntities);
         return;
       }
-
-      // Se online, observar stream do Firestore
       await for (final vehicles in remoteDataSource.watchVehicles(userId)) {
         final entities = vehicles.map((model) => model.toEntity()).toList();
         yield Right<Failure, List<VehicleEntity>>(entities);
       }
 
     } catch (e) {
-      // Em caso de erro, tentar fallback para dados locais
       try {
         final localVehicles = await localDataSource.getAllVehicles();
         final localEntities = localVehicles.map((model) => model.toEntity()).toList();

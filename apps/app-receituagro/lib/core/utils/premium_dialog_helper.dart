@@ -7,13 +7,9 @@ class PremiumDialogHelper {
   /// Returns false for anonymous users, true for authenticated users
   static bool shouldShowPremiumDialog() {
     final user = FirebaseAuth.instance.currentUser;
-    
-    // Don't show premium dialogs for anonymous users
     if (user != null && user.isAnonymous) {
       return false;
     }
-    
-    // Show premium dialogs for authenticated users or when no user is logged in
     return true;
   }
 
@@ -24,7 +20,6 @@ class PremiumDialogHelper {
     VoidCallback? onSubscribe,
   }) {
     if (!shouldShowPremiumDialog()) {
-      // For anonymous users, just return without showing dialog
       return;
     }
 
@@ -58,7 +53,6 @@ class PremiumDialogHelper {
     String? message,
   }) {
     if (!shouldShowPremiumDialog()) {
-      // For anonymous users, just return without showing snackbar
       return;
     }
 
@@ -72,7 +66,6 @@ class PremiumDialogHelper {
           label: 'Assinar',
           textColor: Colors.white,
           onPressed: () {
-            // TODO: Navigate to subscription page
           },
         ),
       ),

@@ -3,10 +3,6 @@
 class TasksConstants {
   TasksConstants._();
 
-  // ============================================================================
-  // TIMING CONSTANTS
-  // ============================================================================
-
   /// Minimum interval between sync operations to prevent throttling
   static const Duration syncMinimumInterval = Duration(seconds: 2);
 
@@ -28,10 +24,6 @@ class TasksConstants {
   /// Maximum notification ID value to prevent overflow
   static const int maxNotificationId = 2147483647;
 
-  // ============================================================================
-  // UI CONSTANTS
-  // ============================================================================
-
   /// Task creation dialog width percentage
   static const double taskDialogWidthPercentage = 0.9;
 
@@ -48,10 +40,6 @@ class TasksConstants {
   static const int progressExcellentThreshold = 80;
   static const int progressGoodThreshold = 50;
   static const int progressFairThreshold = 25;
-
-  // ============================================================================
-  // UI SPACING CONSTANTS
-  // ============================================================================
 
   /// Empty state illustration size
   static const double emptyStateIllustrationSize = 120.0;
@@ -98,10 +86,6 @@ class TasksConstants {
   static const double dashboardVerticalSpacing = 16.0;
   static const double progressSectionSpacing = 8.0;
 
-  // ============================================================================
-  // NOTIFICATION CONSTANTS
-  // ============================================================================
-
   /// Fixed notification ID for daily summary
   static const int dailySummaryNotificationId = 9999;
 
@@ -123,16 +107,8 @@ class TasksConstants {
   /// Notification color
   static const int notificationColor = 0xFF4CAF50;
 
-  // ============================================================================
-  // TASK FILTER CONSTANTS
-  // ============================================================================
-
   /// Maximum priority index for sorting
   static const int maxPriorityIndex = 4;
-
-  // ============================================================================
-  // ALPHA/OPACITY CONSTANTS
-  // ============================================================================
 
   /// Primary container alpha for illustrations
   static const double illustrationAlpha = 0.3;

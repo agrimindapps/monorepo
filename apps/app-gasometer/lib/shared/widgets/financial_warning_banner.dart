@@ -129,7 +129,6 @@ return Consumer(
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: onDismiss ?? () {
-                    // Default dismiss behavior
                   },
                   icon: Icon(
                     Icons.close,
@@ -155,8 +154,6 @@ return Consumer(
     final pendingFinancial = stats['financial_queued'] as int? ?? 0;
     final retrying = stats['retrying'] as int? ?? 0;
     final highPriority = stats['high_priority_queued'] as int? ?? 0;
-
-    // Priority order of warnings
     if (retrying > 0) return FinancialWarningType.syncRetrying;
     if (highPriority > 0) return FinancialWarningType.highValueTransaction;
     if (pendingFinancial > 0) return FinancialWarningType.unsyncedData;
@@ -181,7 +178,6 @@ return Consumer(
           showAction: true,
           actionLabel: 'Sincronizar',
           defaultAction: () {
-            // Trigger sync
           },
         );
 
@@ -198,7 +194,6 @@ return Consumer(
           showAction: true,
           actionLabel: 'Verificar',
           defaultAction: () {
-            // Show high value transactions
           },
         );
 
@@ -214,7 +209,6 @@ return Consumer(
           showAction: true,
           actionLabel: 'Resolver',
           defaultAction: () {
-            // Show conflict resolution
           },
         );
 
@@ -230,7 +224,6 @@ return Consumer(
           showAction: true,
           actionLabel: 'Corrigir',
           defaultAction: () {
-            // Show validation errors
           },
         );
 
@@ -260,7 +253,6 @@ return Consumer(
           showAction: true,
           actionLabel: 'Detalhes',
           defaultAction: () {
-            // Show retry details
           },
         );
     }
@@ -332,8 +324,6 @@ extension FinancialWarningBannerExtension on BuildContext {
     );
 
     overlay.insert(entry);
-
-    // Auto-dismiss after duration
     Timer(duration, () {
       if (entry.mounted) {
         entry.remove();

@@ -37,8 +37,6 @@ class NetworkInfoAdapter implements NetworkInfo {
     try {
       await _connectivityService.initialize();
       _isInitialized = true;
-
-      // Sincroniza estado inicial
       final initialState = await _connectivityService.isOnline();
       initialState.fold(
         (failure) {
@@ -63,7 +61,6 @@ class NetworkInfoAdapter implements NetworkInfo {
         'NetworkInfoAdapter: Initialization error: $e',
         name: 'NetworkAdapter',
       );
-      // Graceful degradation - continua funcionando com fallback
       _isInitialized = false;
     }
   }
@@ -90,7 +87,6 @@ class NetworkInfoAdapter implements NetworkInfo {
           },
         );
       } else {
-        // Fallback silencioso durante inicialização
         return _fallbackConnectionCheck();
       }
     } catch (e) {
@@ -198,7 +194,6 @@ class NetworkInfoAdapter implements NetworkInfo {
       if (_isInitialized) {
         return _connectivityService.isConnectivityStable;
       }
-      // Durante inicialização, considera estável se temos conexão conhecida
       return _lastKnownConnectionState;
     } catch (e) {
       developer.log(
@@ -275,7 +270,6 @@ class NetworkInfoAdapter implements NetworkInfo {
         'NetworkInfoAdapter: Fallback connection check failed: $e',
         name: 'NetworkAdapter',
       );
-      // Último recurso: retorna o último estado conhecido
       return _lastKnownConnectionState;
     }
   }

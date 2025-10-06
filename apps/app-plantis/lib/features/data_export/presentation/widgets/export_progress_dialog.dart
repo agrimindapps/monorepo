@@ -60,7 +60,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
                   return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header with plant icon
                   Row(
                     children: [
                       Container(
@@ -123,8 +122,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
                   ),
 
                   const SizedBox(height: 24),
-
-                  // Progress content
                   if (progress.errorMessage != null)
                     _buildErrorContent(
                       context,
@@ -136,8 +133,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
                     _buildProgressContent(context, progress),
 
                   const SizedBox(height: 24),
-
-                  // Action buttons
                   _buildActionButtons(context, progress),
                 ],
               );
@@ -157,7 +152,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
   Widget _buildProgressContent(BuildContext context, ExportProgress progress) {
     return Column(
       children: [
-        // Progress indicator
         Stack(
           alignment: Alignment.center,
           children: [
@@ -184,8 +178,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
         ),
 
         const SizedBox(height: 20),
-
-        // Current task
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -235,7 +227,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
   ) {
     return Column(
       children: [
-        // Success icon
         Container(
           width: 80,
           height: 80,
@@ -251,8 +242,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
         ),
 
         const SizedBox(height: 20),
-
-        // Success message
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -285,8 +274,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
         ),
 
         const SizedBox(height: 16),
-
-        // Export info
         Row(
           children: [
             Expanded(
@@ -358,7 +345,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
   ) {
     return Column(
       children: [
-        // Error icon
         Container(
           width: 80,
           height: 80,
@@ -370,8 +356,6 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
         ),
 
         const SizedBox(height: 20),
-
-        // Error message
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),

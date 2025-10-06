@@ -16,8 +16,6 @@ enum SyncState {
 class SyncStatusProvider with ChangeNotifier {
   final ConnectivityService _connectivityService;
   final local.SyncQueue _syncQueue;
-
-  // Stream subscriptions for proper disposal
   StreamSubscription<ConnectivityType>? _networkSubscription;
   StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
 
@@ -34,7 +32,6 @@ class SyncStatusProvider with ChangeNotifier {
   }
 
   void _initializeListeners() {
-    // Listen to network status changes
     _networkSubscription = _connectivityService.networkStatusStream.listen((
       status,
     ) {
@@ -54,8 +51,6 @@ class SyncStatusProvider with ChangeNotifier {
           break;
       }
     });
-
-    // Listen to sync queue changes
     _queueSubscription = _syncQueue.queueStream.listen((items) {
       _pendingItems = items;
 
@@ -73,8 +68,6 @@ class SyncStatusProvider with ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // Method to manually trigger sync or check sync status
   Future<void> checkSyncStatus() async {
     final networkStatusResult =
         await _connectivityService.getCurrentNetworkStatus();
@@ -96,8 +89,6 @@ class SyncStatusProvider with ChangeNotifier {
       }
     });
   }
-
-  // Helper method to get a user-friendly status message
   String get statusMessage {
     switch (_currentState) {
       case SyncState.idle:
@@ -113,7 +104,6 @@ class SyncStatusProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    // Cancel stream subscriptions to prevent memory leaks
     _networkSubscription?.cancel();
     _queueSubscription?.cancel();
     super.dispose();

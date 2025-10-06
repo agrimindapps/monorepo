@@ -54,7 +54,6 @@ class ResponsiveSidebar extends ConsumerWidget {
                 ),
               ),
               if (isCollapsed)
-                // Expand button when collapsed
                 Container(
                   padding: const EdgeInsets.all(16),
                   child: IconButton(
@@ -97,7 +96,6 @@ class _SidebarHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Clean, minimal logo
           Container(
             width: isCollapsed ? 32 : 40,
             height: isCollapsed ? 32 : 40,
@@ -133,7 +131,6 @@ class _SidebarHeader extends StatelessWidget {
               tooltip: 'Contrair sidebar',
             ),
           ] else
-            // Expandir button when collapsed
             const Spacer(),
         ],
       ),
@@ -157,7 +154,6 @@ class _SidebarNavigationItems extends StatelessWidget {
         vertical: 8,
       ),
       children: [
-        // Navigation section header (like Alphabank)
         if (!isCollapsed) ...[
           Padding(
             padding: const EdgeInsets.only(left: 8, bottom: 16, top: 8),
@@ -171,9 +167,6 @@ class _SidebarNavigationItems extends StatelessWidget {
             ),
           ),
         ],
-        
-        
-        // Main navigation items
         _SidebarNavigationItem(
           icon: Icons.directions_car_outlined,
           activeIcon: Icons.directions_car,
@@ -359,7 +352,6 @@ class _SidebarFooter extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Settings section
           _SidebarNavigationItem(
             icon: Icons.settings_outlined,
             activeIcon: Icons.settings,
@@ -370,8 +362,6 @@ class _SidebarFooter extends StatelessWidget {
           ),
           
           const SizedBox(height: 12),
-          
-          // User section
           Row(
             children: [
               Container(
@@ -430,10 +420,8 @@ class _SidebarFooter extends StatelessWidget {
             dense: true,
           ),
           onTap: () {
-            // Handle profile navigation
           },
         ),
-        // Only show logout for non-anonymous users
         if (!isAnonymous)
           PopupMenuItem<void>(
             child: const ListTile(
@@ -478,7 +466,6 @@ class _SidebarFooter extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Warning icon
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -493,8 +480,6 @@ class _SidebarFooter extends StatelessWidget {
           ),
           
           const SizedBox(height: 24),
-          
-          // Title
           Text(
             'Sair da Conta',
             style: TextStyle(
@@ -506,8 +491,6 @@ class _SidebarFooter extends StatelessWidget {
           ),
           
           const SizedBox(height: 16),
-          
-          // Detailed explanation
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -552,8 +535,6 @@ class _SidebarFooter extends StatelessWidget {
           ),
           
           const SizedBox(height: 24),
-          
-          // Action buttons
           Row(
             children: [
               Expanded(

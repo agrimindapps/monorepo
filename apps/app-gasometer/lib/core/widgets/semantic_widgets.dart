@@ -58,8 +58,6 @@ class SemanticCard extends StatelessWidget {
         child: child,
       ),
     );
-
-    // Se não há interação, retorna apenas com Semantics informativo
     if (onTap == null && onLongPress == null) {
       return Semantics(
         label: semanticLabel,
@@ -69,8 +67,6 @@ class SemanticCard extends StatelessWidget {
         child: cardContent,
       );
     }
-
-    // Card interativo com suporte completo a acessibilidade
     return Semantics(
       label: semanticLabel,
       hint: semanticHint ?? _getDefaultHint(),

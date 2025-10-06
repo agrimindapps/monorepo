@@ -99,43 +99,32 @@ class OdometerField extends StatelessWidget {
         ),
       ),
       onValidationChanged: (result) {
-        // Callback interno para validação
         if (onChanged != null) {
           onChanged!(controller.text);
         }
       },
       customValidator: (String? value) {
-        // Validação básica primeiro
         if (required && (value == null || value.isEmpty)) {
           return 'Quilometragem é obrigatória';
         }
 
         if (value != null && value.isNotEmpty) {
-          // Remove formatação e converte para número
           final cleanValue = value.replaceAll(RegExp(r'[^\d,.]'), '');
           final doubleValue = double.tryParse(cleanValue.replaceAll(',', '.'));
 
           if (doubleValue == null) {
             return 'Valor inválido';
           }
-
-          // Validação de range
           if (doubleValue < minValue || doubleValue > maxValue) {
             return 'Valor deve estar entre ${_formatNumber(minValue)} e ${_formatNumber(maxValue)}';
           }
-
-          // Validação contextual com leitura anterior
           if (lastReading != null && doubleValue < lastReading!) {
             return 'Quilometragem não pode ser menor que a última leitura (${_formatNumber(lastReading!)} km)';
           }
-
-          // Validação de aumento excessivo (mais de 50.000 km desde a última leitura)
           if (lastReading != null && (doubleValue - lastReading!) > 50000) {
             return 'Aumento muito grande desde a última leitura. Verifique o valor.';
           }
         }
-
-        // Validação adicional customizada
         if (additionalValidator != null) {
           return additionalValidator!(value);
         }

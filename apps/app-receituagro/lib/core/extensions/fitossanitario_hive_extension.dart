@@ -2,7 +2,6 @@ import '../data/models/fitossanitario_hive.dart';
 
 /// Extensão para FitossanitarioHive com métodos display compatíveis com DefensivoModel
 extension FitossanitarioHiveExtension on FitossanitarioHive {
-  // Computed display properties para compatibilidade com o widget existente
   String get displayName => nomeComum.isNotEmpty ? nomeComum : nomeTecnico;
   
   String get displayIngredient => ingredienteAtivo?.isNotEmpty == true 
@@ -20,8 +19,6 @@ extension FitossanitarioHiveExtension on FitossanitarioHive {
   String get displayModoAcao => modoAcao?.isNotEmpty == true
       ? modoAcao!
       : 'Não especificado';
-
-  // Propriedades line1 e line2 para compatibilidade com DefensivoModel
   String get line1 => displayName;
   
   String get line2 => displayIngredient.length > 40 

@@ -15,8 +15,6 @@ class MarkVaccineCompleted implements UseCase<Vaccine, String> {
     if (vaccineId.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'ID da vacina é obrigatório'));
     }
-
-    // First get the vaccine
     final vaccineResult = await repository.getVaccineById(vaccineId);
     
     return vaccineResult.fold(

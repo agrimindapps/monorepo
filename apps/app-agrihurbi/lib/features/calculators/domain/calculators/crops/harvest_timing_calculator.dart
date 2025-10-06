@@ -125,38 +125,20 @@ class HarvestTimingCalculator extends CalculatorEntity {
       final String harvestPurpose = inputs['harvest_purpose'].toString();
       final String machineryAvailability = inputs['machinery_availability'].toString();
       final double fieldSize = double.parse(inputs['field_size'].toString());
-
-      // Parse da data de plantio
       final DateTime plantingDate = _parseDate(plantingDateStr);
-      
-      // Obter dados da cultura
       final Map<String, dynamic> cropData = _getCropHarvestData(cropType);
-      
-      // Calcular datas baseadas no ciclo
       final Map<String, dynamic> maturityDates = _calculateMaturityDates(
         plantingDate, cultivarCycle, cropData);
-
-      // Análise de maturidade atual
       final Map<String, dynamic> maturityAnalysis = _analyzeCurrentMaturity(
         currentMoisture, targetMoisture, cropType, harvestPurpose);
-
-      // Análise climática
       final Map<String, dynamic> weatherImpact = _analyzeWeatherImpact(
         weatherForecast, fieldAccessibility, harvestPurpose);
-
-      // Recomendação de timing
       final Map<String, dynamic> timingRecommendation = _calculateOptimalTiming(
         maturityDates, maturityAnalysis, weatherImpact, machineryAvailability);
-
-      // Cronograma de colheita
       final List<Map<String, dynamic>> harvestSchedule = _generateHarvestSchedule(
         timingRecommendation, fieldSize, machineryAvailability);
-
-      // Análise de qualidade
       final Map<String, dynamic> qualityAnalysis = _analyzeHarvestQuality(
         currentMoisture, targetMoisture, weatherForecast, cropType);
-
-      // Recomendações
       final List<String> recommendations = _generateHarvestRecommendations(
         timingRecommendation, qualityAnalysis, weatherImpact, cropType);
 
@@ -267,7 +249,6 @@ class HarvestTimingCalculator extends CalculatorEntity {
         'quality_window_days': 8,
         'maturity_indicators': ['Amarelecimento das vagens', 'Secagem das plantas'],
       },
-      // Outros crops com dados simplificados
       'default': {
         'optimal_moisture': 16.0,
         'storage_moisture': 13.0,
@@ -285,7 +266,6 @@ class HarvestTimingCalculator extends CalculatorEntity {
     String cultivarCycle,
     Map<String, dynamic> cropData,
   ) {
-    // Extrair número de dias do ciclo
     final RegExp regex = RegExp(r'(\d+)-(\d+)');
     final match = regex.firstMatch(cultivarCycle);
     
@@ -319,14 +299,10 @@ class HarvestTimingCalculator extends CalculatorEntity {
   ) {
     final Map<String, dynamic> cropData = _getCropHarvestData(cropType);
     final double optimalMoisture = cropData['optimal_moisture'] as double;
-
-    // Calcular porcentagem de maturidade baseada na umidade
     double maturityPercentage = 100.0;
     if (currentMoisture > optimalMoisture) {
       maturityPercentage = math.max(70, 100 - (currentMoisture - optimalMoisture) * 3);
     }
-
-    // Adequação da umidade atual
     final double moistureDeviation = (currentMoisture - targetMoisture).abs();
     String maturityStatus;
     
@@ -398,8 +374,6 @@ class HarvestTimingCalculator extends CalculatorEntity {
   ) {
     final DateTime today = DateTime.now();
     final DateTime physiologicalMaturity = maturityDates['physiological_maturity'] as DateTime;
-    
-    // Ajustar data baseada na disponibilidade de máquinas
     final Map<String, int> machineryDelay = {
       'Imediata': 0,
       'Em 2-3 dias': 2,
@@ -412,12 +386,8 @@ class HarvestTimingCalculator extends CalculatorEntity {
     final DateTime optimalDate = physiologicalMaturity.add(Duration(days: delay));
 
     final int daysToHarvest = optimalDate.difference(today).inDays;
-    
-    // Janela de colheita
     final double riskLevel = (weatherImpact['risk_level'] as double) / 10;
     final int harvestWindowDays = math.max(5, 15 - riskLevel.round());
-
-    // Taxa de perda por atraso
     final double delayLossPercentage = daysToHarvest > 0 ? 0.0 : daysToHarvest.toDouble().abs() * 0.3;
 
     return {
@@ -435,12 +405,9 @@ class HarvestTimingCalculator extends CalculatorEntity {
     String weatherForecast,
     String cropType,
   ) {
-    // Índice de qualidade baseado na umidade
     double qualityIndex = 100.0;
     final double moistureDeviation = (currentMoisture - targetMoisture).abs();
     qualityIndex -= moistureDeviation * 5;
-
-    // Impacto do clima na qualidade
     final Map<String, double> weatherQualityImpact = {
       'Seco e Ensolarado': 0.0,
       'Parcialmente Nublado': -5.0,
@@ -477,8 +444,6 @@ class HarvestTimingCalculator extends CalculatorEntity {
     String machineryAvailability,
   ) {
     final List<Map<String, dynamic>> schedule = [];
-
-    // Capacidade operacional (ha/dia)
     final Map<String, double> dailyCapacity = {
       'Manual': 0.5,
       'Imediata': 8.0,
@@ -516,25 +481,17 @@ class HarvestTimingCalculator extends CalculatorEntity {
     final String urgencyLevel = timingRecommendation['urgency_level'] as String;
     final double qualityIndex = qualityAnalysis['quality_index'] as double;
     final double riskLevel = weatherImpact['risk_level'] as double;
-
-    // Recomendações por urgência
     if (urgencyLevel == 'Urgente') {
       recommendations.add('URGENTE: Colheita deve ser iniciada imediatamente para evitar perdas.');
     } else if (urgencyLevel == 'Alta') {
       recommendations.add('Priorizar início da colheita nos próximos dias.');
     }
-
-    // Recomendações por qualidade
     if (qualityIndex < 70) {
       recommendations.add('Qualidade comprometida - considerar estratégias de melhoria pós-colheita.');
     }
-
-    // Recomendações por risco climático
     if (riskLevel > 70) {
       recommendations.add('Alto risco climático - aguardar janela de tempo favorável.');
     }
-
-    // Recomendações específicas por cultura
     switch (cropType) {
       case 'Milho':
         recommendations.add('Milho: verificar linha negra nos grãos como indicador de maturidade.');
@@ -546,8 +503,6 @@ class HarvestTimingCalculator extends CalculatorEntity {
         recommendations.add('Feijão: evitar colheita com orvalho para reduzir umidade.');
         break;
     }
-
-    // Recomendações gerais
     recommendations.add('Verificar calibração da colheitadeira antes do início.');
     recommendations.add('Monitorar umidade dos grãos durante a colheita.');
     recommendations.add('Preparar sistema de secagem se necessário.');

@@ -23,8 +23,6 @@ class FeatureFlagsSection extends ConsumerWidget {
     return featureFlagsAsync.when(
       data: (featureFlagsState) {
         final notifier = ref.read(featureFlagsNotifierProvider.notifier);
-
-        // Only show if feature flags indicate production display
         if (!_shouldShowInProduction(notifier)) {
           return const SizedBox.shrink();
         }
@@ -38,16 +36,9 @@ class FeatureFlagsSection extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Header
               _buildSectionHeader(context, featureFlagsState),
-
-              // Feature Flags Overview
               _buildFeatureFlagsOverview(context, notifier),
-
-              // A/B Testing Status
               _buildABTestingStatus(context, notifier),
-
-              // Admin Actions (show for development builds)
               if (EnvironmentConfig.isDebugMode)
                 _buildAdminActions(context, ref, featureFlagsState),
             ],
@@ -61,7 +52,6 @@ class FeatureFlagsSection extends ConsumerWidget {
 
   /// Determine if section should show in production
   bool _shouldShowInProduction(FeatureFlagsNotifier notifier) {
-    // Show if any user-visible A/B tests are active
     return notifier.isNewUiDesignEnabled ||
            notifier.isImprovedOnboardingEnabled ||
            notifier.isGamificationEnabled;
@@ -103,8 +93,6 @@ class FeatureFlagsSection extends ConsumerWidget {
               ],
             ),
           ),
-          
-          // Status Indicator
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
@@ -148,8 +136,6 @@ class FeatureFlagsSection extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          
-          // Core Features Grid
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -171,8 +157,6 @@ class FeatureFlagsSection extends ConsumerWidget {
       _ABTestItem('Improved Onboarding', notifier.isImprovedOnboardingEnabled, 'Test Group'),
       _ABTestItem('Gamification', notifier.isGamificationEnabled, 'Experimental'),
     ];
-
-    // Only show if any A/B tests are active
     final activeTests = abTests.where((test) => test.isActive).toList();
     if (activeTests.isEmpty) {
       return const SizedBox.shrink();
@@ -191,8 +175,6 @@ class FeatureFlagsSection extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          
-          // A/B Tests
           ...activeTests.map((test) {
             return Container(
               margin: const EdgeInsets.only(bottom: 4),
@@ -253,8 +235,6 @@ class FeatureFlagsSection extends ConsumerWidget {
         children: [
           const Divider(),
           const SizedBox(height: 8),
-
-          // Admin Panel Button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
@@ -271,8 +251,6 @@ class FeatureFlagsSection extends ConsumerWidget {
           ),
 
           const SizedBox(height: 8),
-
-          // Refresh Remote Config Button
           SizedBox(
             width: double.infinity,
             child: TextButton.icon(

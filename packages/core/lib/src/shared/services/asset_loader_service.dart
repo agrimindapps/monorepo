@@ -17,8 +17,6 @@ class AssetLoaderService implements IAssetLoader {
       
       final String jsonString = await rootBundle.loadString(assetPath);
       final dynamic jsonData = json.decode(jsonString);
-      
-      // Se for uma lista diretamente
       if (jsonData is List) {
         final List<Map<String, dynamic>> dataList = jsonData
             .whereType<Map<String, dynamic>>()
@@ -28,10 +26,7 @@ class AssetLoaderService implements IAssetLoader {
         developer.log('Asset carregado: ${dataList.length} registros', name: 'AssetLoaderService');
         return Right(dataList);
       }
-      
-      // Se for um objeto com uma lista dentro
       if (jsonData is Map<String, dynamic>) {
-        // Procura pela primeira lista encontrada no objeto
         for (final value in jsonData.values) {
           if (value is List) {
             final List<Map<String, dynamic>> dataList = value

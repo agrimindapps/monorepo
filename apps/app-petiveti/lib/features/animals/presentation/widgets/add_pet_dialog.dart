@@ -287,8 +287,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
     );
   }
 
-  // Método _selectBirthDate removido - funcionalidade movida para DateTimePickerField
-
   Widget _buildSubmitSection() {
     return _isEditing
         ? PetiVetiFormComponents.submitUpdate(
@@ -333,8 +331,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
         createdAt: widget.animal?.createdAt ?? now,
         updatedAt: now,
       );
-
-      // Save using provider
       if (_isEditing) {
         await ref.read(animalsProvider.notifier).updateAnimal(animal);
       } else {

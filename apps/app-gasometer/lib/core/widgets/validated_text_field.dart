@@ -65,21 +65,15 @@ class ValidatedTextField extends StatefulWidget {
   final int? maxLines;
   final int? maxLength;
   final bool obscureText;
-  
-  // Validação
   final String? Function(String?)? validator;
   final AsyncValidator? asyncValidator;
   final Duration debounceDuration;
   final bool validateOnChange;
   final bool showValidationIcon;
   final bool showCharacterCount;
-  
-  // Callbacks
   final ValueChanged<String>? onChanged;
   final VoidCallback? onEditingComplete;
   final ValueChanged<String>? onSubmitted;
-  
-  // Estilo customizado
   final InputDecoration? decoration;
   final TextStyle? textStyle;
 
@@ -105,8 +99,6 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
   void initState() {
     super.initState();
     _controller = widget.controller ?? TextEditingController();
-    
-    // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -117,8 +109,6 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
         curve: Curves.easeInOut,
       ),
     );
-    
-    // Listener para mudanças no texto
     _controller.addListener(_onTextChanged);
   }
 
@@ -138,14 +128,8 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
     if (!widget.validateOnChange) return;
     
     final text = _controller.text;
-    
-    // Cancelar timer anterior se existir
     _debounceTimer?.cancel();
-    
-    // Chamar callback imediatamente
     widget.onChanged?.call(text);
-    
-    // Validação com debounce
     if (text.isEmpty) {
       setState(() {
         _validationState = ValidationState.initial;
@@ -153,14 +137,10 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
       });
       return;
     }
-    
-    // Mostrar estado de validação
     setState(() {
       _validationState = ValidationState.validating;
       _errorMessage = null;
     });
-    
-    // Configurar debounce
     _debounceTimer = Timer(widget.debounceDuration, () {
       _performValidation(text);
     });
@@ -171,18 +151,12 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
     
     try {
       String? error;
-      
-      // Validação obrigatória para campos required
       if (widget.required && text.trim().isEmpty) {
         error = 'Este campo é obrigatório';
       }
-      
-      // Validação síncrona
       if (error == null && widget.validator != null) {
         error = widget.validator!(text);
       }
-      
-      // Validação assíncrona
       if (error == null && widget.asyncValidator != null) {
         error = await widget.asyncValidator!(text);
       }
@@ -198,8 +172,6 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
           _errorMessage = null;
         }
       });
-      
-      // Animar ícone
       _iconAnimationController.forward();
       
     } catch (e) {
@@ -277,17 +249,12 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
   }
 
   String? get _displayHelperText {
-    // Priorizar mensagem de erro
     if (_errorMessage != null) {
       return _errorMessage;
     }
-    
-    // Mensagem de helper padrão
     if (widget.helperText != null) {
       return widget.helperText;
     }
-    
-    // Contador de caracteres se habilitado
     if (widget.showCharacterCount && widget.maxLength != null) {
       final current = _controller.text.length;
       final max = widget.maxLength!;
@@ -415,8 +382,6 @@ class _ValidatedTextFieldState extends State<ValidatedTextField>
                 : '',
           ),
         ),
-        
-        // Indicadores de progresso/validação adicionais
         if (_validationState == ValidationState.validating)
           Padding(
             padding: const EdgeInsets.only(top: 4.0),
@@ -446,8 +411,6 @@ extension CommonValidators on ValidatedTextField {
   /// Validador para valores monetários
   static String? moneyValidator(String? value) {
     if (value == null || value.isEmpty) return null;
-    
-    // Remove formatação e tenta converter
     final cleanValue = value.replaceAll(RegExp(r'[^\d,.]'), '');
     final doubleValue = double.tryParse(cleanValue.replaceAll(',', '.'));
     

@@ -4,54 +4,36 @@ import 'package:core/core.dart' hide getIt;
 import '../../core/di/injection.dart' as di;
 import '../../features/notifications/presentation/notification_stats.dart' as local_stats;
 import '../../infrastructure/services/notification_service.dart';
-
-// Provider para o serviço de notifications
 final notificationServiceProvider = Provider<TaskManagerNotificationService>((ref) {
   return di.getIt<TaskManagerNotificationService>();
 });
-
-// Provider para status de permissões
 final notificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getPermissionStatus();
 });
-
-// Provider para solicitar permissões
 final requestNotificationPermissionProvider = FutureProvider<core.NotificationPermissionEntity>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.requestPermissions();
 });
-
-// Provider para notificações pendentes
 final pendingNotificationsProvider = FutureProvider<List<core.PendingNotificationEntity>>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getPendingNotifications();
 });
-
-// Provider para notificações ativas
 final activeNotificationsProvider = FutureProvider<List<core.PendingNotificationEntity>>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getActiveNotifications();
 });
-
-// Provider para estatísticas de notificações
 final notificationStatsProvider = FutureProvider<local_stats.NotificationStats>((ref) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.getNotificationStats();
 });
-
-// Provider para verificar se uma notificação específica está agendada
 final isNotificationScheduledProvider = FutureProvider.family<bool, int>((ref, notificationId) async {
   final notificationService = ref.watch(notificationServiceProvider);
   return await notificationService.isNotificationScheduled(notificationId);
 });
-
-// Provider para configurações de notificação (armazenadas localmente)
 final notificationSettingsProvider = StateNotifierProvider<NotificationSettingsNotifier, NotificationSettings>((ref) {
   return NotificationSettingsNotifier();
 });
-
-// Provider para ações de notificação
 final notificationActionsProvider = Provider<NotificationActions>((ref) {
   final notificationService = ref.watch(notificationServiceProvider);
   return NotificationActions(notificationService, ref);
@@ -180,7 +162,6 @@ class NotificationActions {
     );
 
     if (success) {
-      // Invalidar providers relacionados
       _ref.invalidate(pendingNotificationsProvider);
       _ref.invalidate(notificationStatsProvider);
     }
@@ -260,7 +241,6 @@ class NotificationActions {
         minute: settings.weeklyReviewMinute,
       );
     } else {
-      // Cancelar se existir
       const weeklyReviewId = TaskManagerNotificationService.generalBaseId + 1;
       return await _notificationService.cancelNotification(weeklyReviewId);
     }
@@ -298,8 +278,6 @@ class NotificationActions {
   /// Solicita permissões de notificação
   Future<core.NotificationPermissionEntity> requestPermissions() async {
     final permission = await _notificationService.requestPermissions();
-    
-    // Invalidar provider de permissões
     _ref.invalidate(notificationPermissionProvider);
     
     return permission;

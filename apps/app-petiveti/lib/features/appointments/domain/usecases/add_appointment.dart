@@ -12,7 +12,6 @@ class AddAppointment implements UseCase<Appointment, AddAppointmentParams> {
 
   @override
   Future<Either<Failure, Appointment>> call(AddAppointmentParams params) async {
-    // Validate appointment data
     if (params.appointment.veterinarianName.isEmpty) {
       return const Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
     }

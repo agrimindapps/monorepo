@@ -96,10 +96,7 @@ class AppRatingService implements IAppRatingRepository {
   Future<void> incrementUsageCount() async {
     try {
       await init();
-      // rate_my_app handles this automatically based on app launches
-      // but we can call this method to manually increment if needed
     } catch (e) {
-      // Fail silently
     }
   }
 
@@ -109,7 +106,6 @@ class AppRatingService implements IAppRatingRepository {
       await init();
       _rateMyApp.callEvent(RateMyAppEventType.rateButtonPressed);
     } catch (e) {
-      // Fail silently
     }
   }
 
@@ -125,8 +121,6 @@ class AppRatingService implements IAppRatingRepository {
 
   @override
   Future<void> setMinimumUsageCount(int count) async {
-    // This is configured in the constructor as minLaunches
-    // rate_my_app doesn't allow runtime changes to this value
   }
 
   @override
@@ -134,7 +128,6 @@ class AppRatingService implements IAppRatingRepository {
     try {
       await _rateMyApp.reset();
     } catch (e) {
-      // Fail silently
     }
   }
 }

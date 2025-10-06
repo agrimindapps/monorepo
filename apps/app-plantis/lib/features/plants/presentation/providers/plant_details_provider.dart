@@ -51,10 +51,7 @@ class PlantDetailsProvider extends ChangeNotifier {
   }
 
   Future<void> _loadPlant(String plantId, {required bool forceReload}) async {
-    // If we already have this plant loaded and not forcing reload, don't show loading
     if (!forceReload && _plant?.id == plantId && !hasError) return;
-
-    // Only show loading if we don't have any plant data yet or forcing reload
     final shouldShowLoading = _plant?.id != plantId || forceReload;
 
     if (shouldShowLoading) {

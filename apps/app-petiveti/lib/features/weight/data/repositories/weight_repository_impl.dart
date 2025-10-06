@@ -118,10 +118,7 @@ class WeightRepositoryImpl implements WeightRepository {
     int? bodyConditionScore,
   }) async {
     try {
-      // Get all weights for the animal first
       final weightModels = await localDataSource.getWeightsByAnimalId(animalId);
-      
-      // Apply filters
       var filteredModels = weightModels.where((model) {
         final weight = model.toEntity();
         
@@ -193,8 +190,6 @@ class WeightRepositoryImpl implements WeightRepository {
       final minWeight = weights.map((w) => w.weight).reduce((a, b) => a < b ? a : b);
       final maxWeight = weights.map((w) => w.weight).reduce((a, b) => a > b ? a : b);
       final totalWeightChange = weights.length > 1 ? weights.last.weight - weights.first.weight : 0.0;
-      
-      // Calculate overall trend
       WeightTrend? overallTrend;
       if (weights.length >= 2) {
         final firstHalf = weights.take(weights.length ~/ 2).map((w) => w.weight).reduce((a, b) => a + b) / (weights.length ~/ 2);
@@ -208,8 +203,6 @@ class WeightRepositoryImpl implements WeightRepository {
           overallTrend = WeightTrend.stable;
         }
       }
-      
-      // Calculate body condition distribution
       final bodyConditionDistribution = <BodyCondition, int>{};
       for (final weight in weights) {
         final condition = weight.bodyCondition;
@@ -263,8 +256,6 @@ class WeightRepositoryImpl implements WeightRepository {
       }
       
       weights.sort((a, b) => a.date.compareTo(b.date));
-      
-      // Calculate trend using simple linear regression
       final n = weights.length.toDouble();
       final sumX = weights.asMap().entries.map((e) => e.key.toDouble()).reduce((a, b) => a + b);
       final sumY = weights.map((w) => w.weight).reduce((a, b) => a + b);
@@ -283,16 +274,12 @@ class WeightRepositoryImpl implements WeightRepository {
         weight: w.weight,
         bodyConditionScore: w.bodyConditionScore,
       )).toList();
-      
-      // Simple projections
       const daysTo30 = 30.0;
       const daysTo90 = 90.0;
       final lastWeight = weights.last.weight;
       
       final projectedWeightIn30Days = lastWeight + (slope * daysTo30);
       final projectedWeightIn90Days = lastWeight + (slope * daysTo90);
-      
-      // Generate recommendations and alerts
       final recommendations = <String>[];
       final alerts = <String>[];
       
@@ -403,8 +390,6 @@ class WeightRepositoryImpl implements WeightRepository {
   @override
   Future<Either<Failure, double?>> calculateAnimalBMI(String animalId) async {
     try {
-      // BMI calculation for animals is not standard, return null for now
-      // This could be implemented with specific formulas for dogs/cats if needed
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));

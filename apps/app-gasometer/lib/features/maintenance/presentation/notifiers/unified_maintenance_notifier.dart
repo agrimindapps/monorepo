@@ -26,8 +26,6 @@ class UnifiedMaintenanceState {
   final MaintenanceSorting sorting;
   final Map<String, dynamic> statistics;
   final String? error;
-
-  // Computed properties
   bool get hasActiveFilters => filters.hasActiveFilters;
   int get totalRecords => allMaintenances.length;
   int get filteredRecords => filteredMaintenances.length;
@@ -99,19 +97,14 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
 
   @override
   Future<UnifiedMaintenanceState> build() async {
-    // Get dependencies from GetIt
     _getAllMaintenanceRecords = getIt<GetAllMaintenanceRecords>();
     _getMaintenanceRecordsByVehicle = getIt<GetMaintenanceRecordsByVehicle>();
     _addMaintenanceRecord = getIt<AddMaintenanceRecord>();
     _updateMaintenanceRecord = getIt<UpdateMaintenanceRecord>();
     _deleteMaintenanceRecord = getIt<DeleteMaintenanceRecord>();
     _filterService = getIt<MaintenanceFilterService>();
-
-    // Load initial data
     return _loadMaintenances();
   }
-
-  // Core CRUD Operations
 
   /// Load all maintenance records
   Future<UnifiedMaintenanceState> _loadMaintenances() async {
@@ -155,8 +148,6 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
         (failure) => throw Exception(failure.message),
         (records) {
           final currentState = state.value ?? const UnifiedMaintenanceState();
-
-          // Auto-apply vehicle filter if not already set
           final filters = currentState.filters.vehicleId != vehicleId
               ? currentState.filters.copyWith(vehicleId: vehicleId)
               : currentState.filters;
@@ -311,8 +302,6 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
     }
   }
 
-  // Filtering and Sorting Operations
-
   /// Apply vehicle filter
   void filterByVehicle(String? vehicleId) {
     final currentState = state.value;
@@ -438,8 +427,6 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
     state = AsyncValue.data(currentState.copyWith(clearError: true));
   }
 
-  // Private Methods
-
   void _applyFiltersAndSorting(
     MaintenanceFilters filters,
     MaintenanceSorting sorting,
@@ -464,8 +451,6 @@ class UnifiedMaintenanceNotifier extends _$UnifiedMaintenanceNotifier {
     );
   }
 }
-
-// Derived State Providers
 
 /// Provider for completed maintenances
 @riverpod

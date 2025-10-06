@@ -213,7 +213,6 @@ class DateTimePickerField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         if (label != null) ...[
           Text(
             label!,
@@ -225,14 +224,10 @@ class DateTimePickerField extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-
-        // Campo principal
         if (mode == DateTimePickerMode.dateRange)
           _buildDateRangeField(context)
         else
           _buildSingleField(context),
-
-        // Texto de ajuda
         if (helperText != null) ...[
           const SizedBox(height: 4),
           Text(
@@ -383,7 +378,6 @@ class DateTimePickerField extends StatelessWidget {
         await _pickDateTime(context);
         break;
       case DateTimePickerMode.dateRange:
-        // Handled separately
         break;
     }
   }
@@ -429,7 +423,6 @@ class DateTimePickerField extends StatelessWidget {
   }
 
   Future<void> _pickDateTime(BuildContext context) async {
-    // Primeiro pega a data
     final date = await showDatePicker(
       context: context,
       initialDate: value ?? DateTime.now(),
@@ -441,7 +434,6 @@ class DateTimePickerField extends StatelessWidget {
     );
 
     if (date != null) {
-      // Depois pega a hora
       final time = await showTimePicker(
         context: context,
         initialTime: value != null

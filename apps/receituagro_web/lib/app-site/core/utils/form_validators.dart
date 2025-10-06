@@ -86,8 +86,6 @@ class FormValidators {
     if (!_scientificName.hasMatch(sanitized)) {
       return 'Nome científico deve conter apenas letras, espaços, hífen e ponto';
     }
-
-    // Validação adicional para formato de nome científico
     if (!_isValidScientificNameFormat(sanitized)) {
       return 'Nome científico deve seguir o formato: Genus species';
     }
@@ -139,7 +137,6 @@ class FormValidators {
 
   /// Valida formato de nome científico básico
   static bool _isValidScientificNameFormat(String name) {
-    // Verifica se tem pelo menos duas palavras (gênero e espécie)
     List<String> parts = name.trim().split(RegExp(r'\s+'));
     return parts.length >= 2 && parts.every((part) => part.isNotEmpty);
   }

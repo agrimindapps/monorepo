@@ -24,8 +24,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final MaintenanceLocalDataSource localDataSource;
   final Connectivity connectivity;
   final LoggingService loggingService;
-
-  // Controle de sync em background
   Completer<void>? _syncInProgress;
   Timer? _debounceTimer;
   static const Duration _debounceDelay = Duration(seconds: 5);
@@ -40,10 +38,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> getAllMaintenanceRecords() async {
     try {
-      // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getAllMaintenanceRecords();
-
-      // Sync em background (reativado com índices Firestore configurados)
       _scheduleSyncInBackground();
 
       return Right(localRecords);
@@ -57,10 +52,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   /// Agenda sync em background com debounce para evitar múltiplas operações
   void _scheduleSyncInBackground() {
-    // Cancelar timer anterior se existir
     _debounceTimer?.cancel();
-    
-    // Agendar novo sync com debounce
     _debounceTimer = Timer(_debounceDelay, () {
       unawaited(_syncAllMaintenanceRecordsInBackground());
     });
@@ -68,7 +60,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   /// Sync em background sem bloquear a UI
   Future<void> _syncAllMaintenanceRecordsInBackground() async {
-    // Verificar se já existe sync em progresso
     if (_syncInProgress != null && !_syncInProgress!.isCompleted) {
       return; // Sync já em andamento, evitar duplicação
     }
@@ -81,21 +72,13 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         _syncInProgress!.complete();
         return;
       }
-
-      // Sync remoto com controle adequado
       final remoteRecords = await remoteDataSource.getAllMaintenanceRecords();
-      
-      // Atualizar cache local
       for (final record in remoteRecords) {
         await localDataSource.addMaintenanceRecord(record);
       }
-      
-      // Sync bem-sucedido
       _syncInProgress!.complete();
       
     } catch (e) {
-      // Log estruturado ao invés de print
-      // TODO: Implementar logger adequado
       debugPrint('Background maintenance sync error: $e');
       _syncInProgress!.complete();
     }
@@ -110,10 +93,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<Either<Failure, List<MaintenanceEntity>>> getMaintenanceRecordsByVehicle(String vehicleId) async {
     try {
-      // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getMaintenanceRecordsByVehicle(vehicleId);
-      
-      // Sync em background se conectado
       unawaited(_syncMaintenanceRecordsByVehicleInBackground(vehicleId));
       
       return Right(localRecords);
@@ -136,14 +116,11 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           await localDataSource.addMaintenanceRecord(record);
         }
       }).catchError((Object error) {
-        // Log error adequadamente sem print em produção
         debugPrint('Background maintenance vehicle sync failed: $error');
       }));
     } catch (e) {
-      // Log error adequadamente sem print em produção
       debugPrint('Background maintenance vehicle sync error: $e');
     } finally {
-      // Garantir que o Completer sempre seja finalizado
       _syncInProgress?.complete();
     }
   }
@@ -160,8 +137,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
         );
         return;
       }
-
-      // Fire-and-forget remote sync
       unawaited(remoteDataSource.addMaintenanceRecord(maintenance).then((_) async {
         await loggingService.logInfo(
           category: LogCategory.maintenance,
@@ -250,8 +225,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           'vehicle_id': maintenance.vehicleId,
         },
       );
-
-      // Always save locally first
       final localRecord = await localDataSource.addMaintenanceRecord(maintenance);
 
       await loggingService.logInfo(
@@ -262,8 +235,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           'vehicle_id': maintenance.vehicleId,
         },
       );
-      
-      // Remote sync in background (fire-and-forget)
       unawaited(_syncMaintenanceRecordToRemoteInBackground(maintenance));
       
       await loggingService.logInfo(
@@ -318,14 +289,12 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<Either<Failure, MaintenanceEntity>> updateMaintenanceRecord(MaintenanceEntity maintenance) async {
     try {
-      // Always update locally first
       final localRecord = await localDataSource.updateMaintenanceRecord(maintenance);
       
       if (await _isConnected) {
         try {
           await remoteDataSource.updateMaintenanceRecord(maintenance);
         } catch (e) {
-          // Continue with local update if remote fails
         }
       }
       
@@ -340,14 +309,12 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<Either<Failure, Unit>> deleteMaintenanceRecord(String id) async {
     try {
-      // Delete locally first
       await localDataSource.deleteMaintenanceRecord(id);
       
       if (await _isConnected) {
         try {
           await remoteDataSource.deleteMaintenanceRecord(id);
         } catch (e) {
-          // Continue with local deletion if remote fails
         }
       }
       
@@ -471,8 +438,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
             if (record.nextServiceDate == null) return false;
             return record.nextServiceDate!.isBefore(cutoffDate) && record.nextServiceDate!.isAfter(DateTime.now());
           }).toList();
-          
-          // Sort by next service date
           upcomingRecords.sort((a, b) => a.nextServiceDate!.compareTo(b.nextServiceDate!));
           
           return Right(upcomingRecords);
@@ -577,7 +542,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       return records.fold(
         (failure) => Left(failure),
         (recordsList) {
-          // Sort by service date (most recent first) and take limit
           recordsList.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
           final recentRecords = recordsList.take(limit).toList();
           

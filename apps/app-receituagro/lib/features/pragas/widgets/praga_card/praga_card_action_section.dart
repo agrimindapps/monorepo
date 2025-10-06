@@ -32,13 +32,11 @@ class PragaCardActionSection extends StatelessWidget {
 
   /// Ações para modo lista (sem botão de favorito)
   Widget _buildListActions() {
-    // No modo lista, não mostra o botão de favorito
     return const SizedBox.shrink();
   }
 
   /// Ações para modo grid (sem botão de favorito)
   Widget _buildGridActions() {
-    // No modo grid, não mostra o botão de favorito
     return const SizedBox.shrink();
   }
 

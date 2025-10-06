@@ -181,8 +181,6 @@ class MigrationCLI {
         'Executing migrate command for $appName (dryRun: $dryRun, force: $force)',
         name: 'MigrationCLI',
       );
-
-      // Se não for force, verificar compatibilidade primeiro
       if (!force) {
         final checkResult = await commandCheck(appName);
         final isCompatible = checkResult['is_compatible'] as bool? ?? false;
@@ -440,8 +438,6 @@ class MigrationCLI {
       'timestamp': DateTime.now().toIso8601String(),
     };
   }
-
-  // Métodos auxiliares privados
 
   String _generateMigrationRecommendation(MigrationCompatibilityReport report) {
     if (!report.isCompatible) {

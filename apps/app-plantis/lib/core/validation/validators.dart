@@ -3,8 +3,6 @@
 class Validators {
   Validators._(); // Private constructor to prevent instantiation
 
-  // ========== TEXT VALIDATORS ==========
-
   /// Validates that a field is not empty
   static String? required(String? value, {String? fieldName}) {
     if (value == null || value.trim().isEmpty) {
@@ -43,19 +41,12 @@ class Validators {
     return null;
   }
 
-  // ========== PLANT-SPECIFIC VALIDATORS ==========
-
   /// Validates plant name
   static String? plantName(String? value) {
-    // Required
     final requiredError = required(value, fieldName: 'Nome da planta');
     if (requiredError != null) return requiredError;
-
-    // Length: 1-100 characters
     final lengthError = lengthRange(value, 1, 100, fieldName: 'Nome da planta');
     if (lengthError != null) return lengthError;
-
-    // No special characters that could break database
     if (value!.contains(RegExp(r'[<>{}[\]\\]'))) {
       return 'Nome não pode conter caracteres especiais: < > { } [ ] \\';
     }
@@ -66,8 +57,6 @@ class Validators {
   /// Validates plant species (optional field)
   static String? plantSpecies(String? value) {
     if (value == null || value.isEmpty) return null; // Optional field
-
-    // Max length: 150 characters
     return maxLength(value, 150, fieldName: 'Espécie');
   }
 
@@ -84,8 +73,6 @@ class Validators {
 
     return maxLength(value, 1000, fieldName: 'Notas');
   }
-
-  // ========== NUMERIC VALIDATORS ==========
 
   /// Validates that value is a positive integer
   static String? positiveInteger(String? value, {String? fieldName}) {
@@ -155,13 +142,9 @@ class Validators {
     return null;
   }
 
-  // ========== EMAIL VALIDATORS ==========
-
   /// Validates email format
   static String? email(String? value) {
     if (value == null || value.isEmpty) return null; // Use with required() for mandatory fields
-
-    // Basic email regex
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );
@@ -173,15 +156,10 @@ class Validators {
     return null;
   }
 
-  // ========== PASSWORD VALIDATORS ==========
-
   /// Validates password strength
   static String? password(String? value) {
-    // Required
     final requiredError = required(value, fieldName: 'Senha');
     if (requiredError != null) return requiredError;
-
-    // Minimum 6 characters (Firebase minimum)
     if (value!.length < 6) {
       return 'Senha deve ter no mínimo 6 caracteres';
     }
@@ -191,7 +169,6 @@ class Validators {
 
   /// Validates password confirmation matches
   static String? passwordConfirmation(String? value, String? originalPassword) {
-    // Required
     final requiredError = required(value, fieldName: 'Confirmação de senha');
     if (requiredError != null) return requiredError;
 
@@ -202,15 +179,10 @@ class Validators {
     return null;
   }
 
-  // ========== TASK VALIDATORS ==========
-
   /// Validates task title
   static String? taskTitle(String? value) {
-    // Required
     final requiredError = required(value, fieldName: 'Título da tarefa');
     if (requiredError != null) return requiredError;
-
-    // Length: 1-200 characters
     return lengthRange(value, 1, 200, fieldName: 'Título da tarefa');
   }
 
@@ -220,8 +192,6 @@ class Validators {
 
     return maxLength(value, 1000, fieldName: 'Descrição da tarefa');
   }
-
-  // ========== COMPOSITE VALIDATORS ==========
 
   /// Combines multiple validators
   static String? Function(String?) combine(List<String? Function(String?)> validators) {
@@ -233,8 +203,6 @@ class Validators {
       return null;
     };
   }
-
-  // ========== CONDITIONAL VALIDATORS ==========
 
   /// Validates only if condition is true
   static String? Function(String?) when(

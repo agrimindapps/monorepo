@@ -13,7 +13,6 @@ class HapticService {
     if (_isInitialized) return;
 
     try {
-      // Testar se haptic feedback está disponível
       await HapticFeedback.lightImpact();
       _isInitialized = true;
 
@@ -217,8 +216,6 @@ class HapticService {
 
     for (int i = 0; i < pattern.length; i++) {
       await _executeHapticType(pattern[i]);
-
-      // Adicionar delay entre haptics (exceto no último)
       if (i < pattern.length - 1) {
         await Future<void>.delayed(Duration(milliseconds: delayBetween));
       }
@@ -251,56 +248,37 @@ enum HapticType { light, medium, heavy, selection, vibrate }
 
 /// Contextos pré-definidos para haptic feedback
 class HapticContexts {
-  // Interações básicas
   static Future<void> buttonTap() => HapticService.light();
   static Future<void> cardTap() => HapticService.selection();
   static Future<void> swipe() => HapticService.light();
-
-  // Navegação
   static Future<void> pageChange() => HapticService.navigation();
   static Future<void> openModal() => HapticService.medium();
   static Future<void> closeModal() => HapticService.light();
-
-  // Tarefas
   static Future<void> completeTask() => HapticService.taskComplete();
   static Future<void> addTask() => HapticService.selection();
   static Future<void> deleteTask() => HapticService.heavy();
-
-  // Plantas
   static Future<void> addPlant() => HapticService.plantSave();
   static Future<void> editPlant() => HapticService.plantSave();
   static Future<void> deletePlant() => HapticService.error();
   static Future<void> waterPlant() => HapticService.medium();
-
-  // Premium
   static Future<void> purchaseSuccess() => HapticService.purchase();
   static Future<void> purchaseError() => HapticService.error();
   static Future<void> restorePurchase() => HapticService.success();
-
-  // Sistema
   static Future<void> saveSettings() => HapticService.selection();
   static Future<void> syncData() => HapticService.sync();
   static Future<void> backupComplete() => HapticService.success();
   static Future<void> backupError() => HapticService.error();
-
-  // Auth
   static Future<void> loginSuccess() => HapticService.auth();
   static Future<void> loginError() => HapticService.error();
   static Future<void> biometricSuccess() => HapticService.auth();
   static Future<void> biometricError() => HapticService.warning();
-
-  // Upload
   static Future<void> uploadStart() => HapticService.light();
   static Future<void> uploadProgress() => HapticService.progress();
   static Future<void> uploadComplete() => HapticService.success();
   static Future<void> uploadError() => HapticService.error();
-
-  // Validação
   static Future<void> validationError() => HapticService.warning();
   static Future<void> requiredField() => HapticService.warning();
   static Future<void> formSubmit() => HapticService.medium();
-
-  // Notifications
   static Future<void> notificationReceived() => HapticService.vibrate();
   static Future<void> reminderAlert() => HapticService.medium();
 }
@@ -368,14 +346,11 @@ class HapticWrapper extends StatelessWidget {
       onTap:
           enabled
               ? () async {
-                // Executar haptic feedback primeiro
                 if (hapticContext != null) {
                   await _executeContextualHaptic();
                 } else {
                   await HapticService._executeHapticType(hapticType);
                 }
-
-                // Executar callback
                 onTap?.call();
               }
               : onTap,

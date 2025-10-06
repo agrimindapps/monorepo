@@ -207,15 +207,11 @@ class IdealWeightCalculator extends Calculator {
   @override
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-
-    // Validar campos obrigatórios
     for (final field in inputFields) {
       if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
-
-    // Validação específica para campos numéricos
     if (inputs.containsKey('current_weight')) {
       final weight = inputs['current_weight'];
       if (weight is! double && weight is! int) {
@@ -252,17 +248,12 @@ class IdealWeightCalculator extends Calculator {
     required double currentWeight,
     required double bcsScore,
   }) {
-    // Fatores de conversão por ECC
     final bcsConversionFactors = {
       1.0: 1.43, 2.0: 1.25, 3.0: 1.15, 4.0: 1.05, 5.0: 1.00,
       6.0: 0.90, 7.0: 0.80, 8.0: 0.70, 9.0: 0.60,
     };
-
-    // Calcular peso ideal baseado no ECC
     final conversionFactor = bcsConversionFactors[bcsScore] ?? 1.0;
     double idealWeight = currentWeight * conversionFactor;
-
-    // Ajustar baseado na raça/porte (peso de referência)
     final referenceWeight = _getReferenceWeight(species, breed, sex);
     if (referenceWeight > 0) {
       final ratio = idealWeight / referenceWeight;
@@ -273,13 +264,9 @@ class IdealWeightCalculator extends Calculator {
 
     idealWeight = double.parse(idealWeight.toStringAsFixed(1));
     final weightDifference = double.parse((idealWeight - currentWeight).toStringAsFixed(1));
-
-    // Calcular necessidades calóricas
     final metabolicWeight = math.pow(idealWeight, 0.75).toDouble();
     final baseCalories = species == 'Cão' ? 132.0 : 100.0;
     double dailyCalories = metabolicWeight * baseCalories;
-
-    // Ajustar por idade
     if (ageYears < 1) {
       dailyCalories *= 1.8; // Filhotes
     } else if (ageYears >= 7) {
@@ -288,21 +275,15 @@ class IdealWeightCalculator extends Calculator {
           : math.max(0.8, 1.0 - ((ageYears - 7) * 0.01));
       dailyCalories *= ageFactor;
     }
-
-    // Ajustar por castração
     if (neutered) {
       dailyCalories *= 0.8;
     }
-
-    // Ajustar por necessidade de ganho/perda de peso
     int? estimatedWeeks;
     if (weightDifference.abs() > 0.1) {
       if (weightDifference < 0) {
-        // Precisa perder peso
         dailyCalories *= 0.8;
         estimatedWeeks = (weightDifference.abs() / 0.5 * 4).ceil();
       } else {
-        // Precisa ganhar peso
         dailyCalories *= 1.2;
         estimatedWeeks = (weightDifference.abs() / 0.25 * 4).ceil();
       }
@@ -322,7 +303,6 @@ class IdealWeightCalculator extends Calculator {
   }
 
   double _getReferenceWeight(String species, String breed, String sex) {
-    // Pesos de referência aproximados por categoria
     final referenceWeights = {
       'Cão': {
         'Macho': {

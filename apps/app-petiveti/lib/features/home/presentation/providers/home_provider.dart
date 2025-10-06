@@ -2,8 +2,6 @@ import 'package:core/core.dart';
 
 import '../../../animals/domain/entities/animal_enums.dart';
 import '../../../animals/presentation/providers/animals_provider.dart';
-
-// Estado para notificações da home
 class HomeNotificationsState {
   final int unreadCount;
   final List<String> recentNotifications;
@@ -27,8 +25,6 @@ class HomeNotificationsState {
     );
   }
 }
-
-// Estado para estatísticas da home
 class HomeStatsState {
   final int totalAnimals;
   final int upcomingAppointments;
@@ -91,8 +87,6 @@ class HomeStatsState {
   bool get hasUrgentTasks => overdueItems > 0 || todayTasks > 0;
   String get healthStatus => overdueItems > 5 ? 'Atenção' : overdueItems > 0 ? 'Cuidado' : 'Em dia';
 }
-
-// Estado para status geral da home
 class HomeStatusState {
   final bool isLoading;
   final bool isOnline;
@@ -121,13 +115,10 @@ class HomeStatusState {
     );
   }
 }
-
-// Notifier para notificações
 class HomeNotificationsNotifier extends StateNotifier<HomeNotificationsState> {
   HomeNotificationsNotifier() : super(const HomeNotificationsState());
 
   Future<void> loadNotifications() async {
-    // Simulate loading notifications
     await Future<void>.delayed(const Duration(milliseconds: 500));
     
     state = state.copyWith(
@@ -148,8 +139,6 @@ class HomeNotificationsNotifier extends StateNotifier<HomeNotificationsState> {
     );
   }
 }
-
-// Notifier para estatísticas
 class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
   final Ref ref;
   
@@ -159,14 +148,9 @@ class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
     state = state.copyWith(isLoading: true);
     
     try {
-      // Simulate loading stats from repositories with real data integration
       await Future<void>.delayed(const Duration(milliseconds: 800));
-      
-      // Get data from other providers
       final animalsState = ref.read(animalsProvider);
       final animals = animalsState.animals;
-      
-      // Calculate species breakdown
       final Map<String, int> speciesBreakdown = {};
       double totalAge = 0;
       int animalsWithAge = 0;
@@ -182,8 +166,6 @@ class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
       }
       
       final averageAge = animalsWithAge > 0 ? totalAge / animalsWithAge : 0.0;
-      
-      // Simulate overdue and today tasks calculation
       final overdueItems = (animals.length * 0.1).round(); // 10% have overdue items
       final todayTasks = (animals.length * 0.2).round(); // 20% have tasks today
       
@@ -202,7 +184,6 @@ class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
         isLoading: false,
       );
     } catch (e) {
-      // Fallback to demo data if error
       state = state.copyWith(
         totalAnimals: 0,
         upcomingAppointments: 0,
@@ -222,8 +203,6 @@ class HomeStatsNotifier extends StateNotifier<HomeStatsState> {
     loadStats();
   }
 }
-
-// Notifier para status
 class HomeStatusNotifier extends StateNotifier<HomeStatusState> {
   HomeStatusNotifier() : super(HomeStatusState(lastUpdated: DateTime.now()));
 
@@ -231,7 +210,6 @@ class HomeStatusNotifier extends StateNotifier<HomeStatusState> {
     state = state.copyWith(isLoading: true, clearError: true);
     
     try {
-      // Simulate network check
       await Future<void>.delayed(const Duration(milliseconds: 300));
       
       state = state.copyWith(
@@ -259,8 +237,6 @@ class HomeStatusNotifier extends StateNotifier<HomeStatusState> {
     state = state.copyWith(clearError: true);
   }
 }
-
-// Providers
 final homeNotificationsProvider = StateNotifierProvider<HomeNotificationsNotifier, HomeNotificationsState>((ref) {
   return HomeNotificationsNotifier();
 });
@@ -272,8 +248,6 @@ final homeStatsProvider = StateNotifierProvider<HomeStatsNotifier, HomeStatsStat
 final homeStatusProvider = StateNotifierProvider<HomeStatusNotifier, HomeStatusState>((ref) {
   return HomeStatusNotifier();
 });
-
-// Computed providers
 final hasUnreadNotificationsProvider = Provider<bool>((ref) {
   return ref.watch(homeNotificationsProvider).unreadCount > 0;
 });

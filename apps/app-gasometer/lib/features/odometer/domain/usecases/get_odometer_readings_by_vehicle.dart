@@ -25,8 +25,6 @@ class GetOdometerReadingsByVehicleUseCase implements UseCase<List<OdometerEntity
       }
 
       final readings = await _repository.getOdometerReadingsByVehicle(vehicleId);
-
-      // As leituras já vêm ordenadas do repositório
       return Right(readings);
     } on CacheFailure catch (e) {
       return Left(e);

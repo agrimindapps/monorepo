@@ -23,7 +23,6 @@ class ReceitaAgroTheme {
     ),
     scaffoldBackgroundColor: const Color(0xFFF5F5F5), // Cor de fundo das páginas
   ).copyWith(
-    // Customizações específicas do ReceitaAgro
     appBarTheme: const AppBarTheme(
       backgroundColor: ReceitaAgroColors.primary,
       foregroundColor: Colors.white,
@@ -32,16 +31,12 @@ class ReceitaAgroTheme {
       elevation: 0,
       centerTitle: true,
     ),
-
-    // FAB personalizado
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: ReceitaAgroColors.primary,
       foregroundColor: Colors.white,
       elevation: 6,
       shape: CircleBorder(),
     ),
-
-    // Bottom navigation personalizado
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: ReceitaAgroColors.primary,
@@ -50,8 +45,6 @@ class ReceitaAgroTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-
-    // Chip theme personalizado
     chipTheme: ChipThemeData(
       backgroundColor: ReceitaAgroColors.secondaryLight,
       selectedColor: ReceitaAgroColors.primary,
@@ -63,8 +56,6 @@ class ReceitaAgroTheme {
         side: BorderSide.none,
       ),
     ),
-
-    // Switch personalizado
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -79,22 +70,16 @@ class ReceitaAgroTheme {
         return Colors.grey.shade300;
       }),
     ),
-
-    // Progress indicator personalizado
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: ReceitaAgroColors.primary,
       linearTrackColor: ReceitaAgroColors.primaryLight,
       circularTrackColor: ReceitaAgroColors.primaryLight,
     ),
-    
-    // Divider personalizado
     dividerTheme: const DividerThemeData(
       color: Color(0xFFE8E8E8), // Mais próximo do fundo mas ainda visível
       thickness: 1,
       space: 1,
     ),
-    
-    // Card theme personalizado - força branco puro
     cardTheme: const CardThemeData(
       color: Colors.white,
       shadowColor: Colors.black12,
@@ -123,7 +108,6 @@ class ReceitaAgroTheme {
       surfaceContainerLow: const Color(0xFF1C1C1E),
     ),
   ).copyWith(
-    // Customizações específicas do ReceitaAgro para modo escuro
     appBarTheme: const AppBarTheme(
       backgroundColor: ReceitaAgroColors.primaryDark,
       foregroundColor: Colors.white,
@@ -132,16 +116,12 @@ class ReceitaAgroTheme {
       elevation: 0,
       centerTitle: true,
     ),
-
-    // FAB para modo escuro
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: ReceitaAgroColors.primary,
       foregroundColor: Colors.white,
       elevation: 6,
       shape: CircleBorder(),
     ),
-
-    // Bottom navigation para modo escuro
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: const Color(0xFF1E1E1E),
       selectedItemColor: ReceitaAgroColors.primaryLight,
@@ -150,8 +130,6 @@ class ReceitaAgroTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-
-    // Switch para modo escuro
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -166,22 +144,16 @@ class ReceitaAgroTheme {
         return Colors.grey.shade800;
       }),
     ),
-
-    // Progress indicator para modo escuro
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: ReceitaAgroColors.primaryLight,
       linearTrackColor: ReceitaAgroColors.primary,
       circularTrackColor: ReceitaAgroColors.primary,
     ),
-    
-    // Divider para modo escuro
     dividerTheme: DividerThemeData(
       color: Colors.grey.shade700,
       thickness: 1,
       space: 1,
     ),
-    
-    // Card theme para modo escuro
     cardTheme: const CardThemeData(
       color: Color(0xFF2C2C2E),
       shadowColor: Colors.black26,

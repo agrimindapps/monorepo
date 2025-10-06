@@ -223,8 +223,6 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     MedicationModel medication,
   ) async {
     final box = await medicationBox;
-
-    // Check for medications with overlapping periods for the same animal
     return box.values
         .where(
           (existing) =>

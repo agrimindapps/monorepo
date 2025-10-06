@@ -145,8 +145,6 @@ class OptimizedWidget extends StatelessWidget {
     }
 
     Widget optimizedChild = child;
-
-    // Aplicar RepaintBoundary se necessário
     if (forceRepaintBoundary || _shouldApplyRepaintBoundary()) {
       optimizedChild = RepaintBoundary(child: optimizedChild);
     }
@@ -155,8 +153,6 @@ class OptimizedWidget extends StatelessWidget {
   }
 
   bool _shouldApplyRepaintBoundary() {
-    // Lógica para determinar se deve aplicar RepaintBoundary
-    // baseada no tipo do widget e contexto
     return child is ListView ||
            child is GridView ||
            child is CustomScrollView ||
@@ -189,8 +185,6 @@ class _OptimizedBuilderState extends State<OptimizedBuilder> {
   void initState() {
     super.initState();
     _widgetKey = widget.debugLabel ?? '${widget.runtimeType}_${widget.hashCode}';
-    
-    // Registrar listeners se fornecidos
     if (widget.listenables != null) {
       for (final listenable in widget.listenables!) {
         listenable.addListener(_onListenableChanged);
@@ -200,7 +194,6 @@ class _OptimizedBuilderState extends State<OptimizedBuilder> {
 
   @override
   void dispose() {
-    // Limpar listeners
     if (widget.listenables != null) {
       for (final listenable in widget.listenables!) {
         listenable.removeListener(_onListenableChanged);
@@ -212,7 +205,6 @@ class _OptimizedBuilderState extends State<OptimizedBuilder> {
   void _onListenableChanged() {
     if (mounted) {
       setState(() {
-        // Força rebuild apenas quando necessário
       });
     }
   }
@@ -265,7 +257,6 @@ class _OptimizedListViewState<T> extends State<OptimizedListView<T>> {
         physics: widget.physics,
         itemCount: widget.items.length,
         itemBuilder: (context, index) {
-          // Cache de widgets para evitar rebuilds desnecessários
           final item = widget.items[index];
           final itemKey = '${item.hashCode}_$index';
           
@@ -281,8 +272,6 @@ class _OptimizedListViewState<T> extends State<OptimizedListView<T>> {
   @override
   void didUpdateWidget(OptimizedListView<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // Limpar cache se a lista mudou significativamente
     if (widget.items.length != oldWidget.items.length) {
       _cachedWidgets.clear();
     }
@@ -472,13 +461,9 @@ class _PerformanceDetectorState extends State<PerformanceDetector>
     if (_lastFrameTime != null) {
       final frameDuration = now.difference(_lastFrameTime!);
       _frameTimes.add(frameDuration);
-      
-      // Manter apenas os últimos 60 frames
       if (_frameTimes.length > 60) {
         _frameTimes.removeAt(0);
       }
-      
-      // Detectar frame drops
       if (frameDuration.inMilliseconds > 16) { // >16ms = <60fps
         widget.onIssueDetected?.call(PerformanceIssue(
           type: PerformanceIssueType.frameDrop,
@@ -490,8 +475,6 @@ class _PerformanceDetectorState extends State<PerformanceDetector>
     }
     
     _lastFrameTime = now;
-    
-    // Agendar próxima medição
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback(_recordFrameTime);
     }

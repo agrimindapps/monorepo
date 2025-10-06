@@ -4,8 +4,6 @@ import '../providers/base_provider.dart';
 import '../widgets/form_dialog.dart';
 import 'base_form_page.dart';
 import 'form_mixins.dart';
-
-// Provider used to expose the form instance to Riverpod tree
 final _formProviderOverride = Provider<dynamic>((ref) => null);
 
 /// Abstract base class for form dialogs with common functionality
@@ -55,7 +53,6 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
   
   /// Initialize the form provider after creation
   Future<void> initializeFormProvider(T provider) async {
-    // Default empty implementation, override if needed
   }
   
   /// Build the form content - must be implemented by child classes
@@ -67,10 +64,7 @@ abstract class BaseFormDialogState<T extends ChangeNotifier> extends State<BaseF
   /// Called after successful form submission
   void onFormSubmitSuccess() {
     if (mounted) {
-      // Fechar o dialog imediatamente após sucesso local
       Navigator.of(context).pop(true);
-      
-      // Mostrar confirmação após fechar o dialog
       showSuccessSnackbar(isEditMode 
           ? 'Item atualizado com sucesso!' 
           : 'Item cadastrado com sucesso!');
@@ -151,7 +145,6 @@ return ProviderScope(
   }
   
   Widget _buildFormDialog(BuildContext context, T formProvider) {
-    // Check for errors and show them - cast to IFormProvider if possible
     String? error;
     bool loading = false;
     bool canSubmitForm = false;

@@ -36,16 +36,10 @@ class CacheService {
       timestamp: DateTime.now(),
       duration: cacheDuration,
     );
-
-    // Armazenar em memória
     _memoryCache[key] = entry;
-
-    // Limpar cache se exceder o limite
     if (_memoryCache.length > maxMemoryEntries) {
       _cleanOldestEntries();
     }
-
-    // Armazenar em disco se solicitado
     if (persistToDisk) {
       await _saveToDisk(key, entry);
     }
@@ -53,26 +47,18 @@ class CacheService {
 
   /// Recupera dados do cache
   Future<T?> get<T>(String key) async {
-    // Primeiro verifica no cache de memória
     final memoryEntry = _memoryCache[key] as CacheEntry<T>?;
     if (memoryEntry != null && !memoryEntry.isExpired) {
       return memoryEntry.data;
     }
-
-    // Se não encontrou ou expirou, remove da memória
     if (memoryEntry != null && memoryEntry.isExpired) {
       _memoryCache.remove(key);
     }
-
-    // Verifica no cache em disco
     final diskEntry = await _loadFromDisk<T>(key);
     if (diskEntry != null && !diskEntry.isExpired) {
-      // Recarrega no cache de memória
       _memoryCache[key] = diskEntry;
       return diskEntry.data;
     }
-
-    // Se encontrou mas expirou, remove do disco
     if (diskEntry != null && diskEntry.isExpired) {
       await _removeFromDisk(key);
     }
@@ -105,7 +91,6 @@ class CacheService {
 
   /// Limpa entradas expiradas
   Future<void> clearExpired() async {
-    // Limpar da memória
     final expiredKeys =
         _memoryCache.entries
             .where((entry) => entry.value.isExpired)
@@ -115,8 +100,6 @@ class CacheService {
     for (final key in expiredKeys) {
       _memoryCache.remove(key);
     }
-
-    // Limpar do disco
     if (_prefs != null) {
       final allKeys = _prefs!.getKeys().where(
         (k) => k.startsWith(_cachePrefix),
@@ -187,22 +170,17 @@ class CacheService {
     final cachedData = await get<T>(key);
 
     if (cachedData != null) {
-      // Se deve fazer refresh em background
       if (refreshInBackground) {
         _refreshInBackground(key, fetchFunction, duration);
       }
       return cachedData;
     }
-
-    // Se não há dados em cache, busca normalmente
     final freshData = await fetchFunction();
     await put(key, freshData, duration: duration, persistToDisk: true);
 
     _recordHit(false); // Cache miss
     return freshData;
   }
-
-  // Métodos privados
 
   static const String _cachePrefix = 'cache_';
   int _hits = 0;
@@ -242,7 +220,6 @@ class CacheService {
 
       await _prefs!.setString(diskKey, jsonEncode(serializedEntry));
     } catch (e) {
-      // Falha silenciosa para serialização
     }
   }
 
@@ -266,7 +243,6 @@ class CacheService {
         duration: Duration(milliseconds: entryData['duration'] as int),
       );
     } catch (e) {
-      // Remove entrada corrompida
       await _removeFromDisk(key);
       return null;
     }
@@ -278,7 +254,6 @@ class CacheService {
   }
 
   dynamic _serializeData(dynamic data) {
-    // Serialização básica - pode ser expandida conforme necessário
     if (data is String || data is num || data is bool) {
       return data;
     }
@@ -289,12 +264,10 @@ class CacheService {
   }
 
   T _deserializeData<T>(dynamic data) {
-    // Desserialização básica - pode ser expandida conforme necessário
     return data as T;
   }
 
   int _estimateMemoryUsage() {
-    // Estimativa simples baseada no número de entradas
     return _memoryCache.length * 1024; // 1KB por entrada (estimativa grosseira)
   }
 
@@ -303,13 +276,11 @@ class CacheService {
     Future<T> Function() fetchFunction,
     Duration? duration,
   ) {
-    // Executa refresh em background sem bloquear a thread
     Timer.run(() async {
       try {
         final freshData = await fetchFunction();
         await put(key, freshData, duration: duration, persistToDisk: true);
       } catch (e) {
-        // Falha silenciosa no refresh em background
       }
     });
   }
@@ -380,8 +351,6 @@ class CacheKeys {
   static const String reminders = 'reminders';
   static const String calculators = 'calculators';
   static const String userProfile = 'user_profile';
-
-  // Keys com parâmetros
   static String animalById(String id) => 'animal_$id';
   static String animalsByUser(String userId) => 'animals_user_$userId';
   static String appointmentsByAnimal(String animalId) =>

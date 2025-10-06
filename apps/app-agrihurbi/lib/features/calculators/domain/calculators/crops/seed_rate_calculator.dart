@@ -119,30 +119,16 @@ class SeedRateCalculator extends CalculatorEntity {
       final double thousandSeedWeight = double.parse(inputs['thousand_seed_weight'].toString());
       final double fieldArea = double.parse(inputs['field_area'].toString());
       final double safetyMargin = double.parse(inputs['safety_margin'].toString());
-
-      // Calcular eficiência de estabelecimento
       final double establishmentEfficiency = (germinationRate / 100) * 
                                            (seedPurity / 100) * 
                                            ((100 - fieldLosses) / 100);
-
-      // Número de sementes necessárias por hectare
       final double seedsPerHa = targetPopulation / establishmentEfficiency;
-
-      // Aplicar margem de segurança
       final double finalSeedsPerHa = seedsPerHa * (1 + safetyMargin / 100);
-
-      // Peso das sementes por hectare (kg)
       final double seedWeightPerHa = (finalSeedsPerHa * thousandSeedWeight) / 1000000;
-
-      // Total para a área
       final double totalSeeds = finalSeedsPerHa * fieldArea;
       final double totalWeight = seedWeightPerHa * fieldArea;
-
-      // Análise de qualidade
       final Map<String, dynamic> qualityAnalysis = _analyzeQuality(
         germinationRate, seedPurity, fieldLosses, cropType);
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         cropType, establishmentEfficiency, qualityAnalysis);
 
@@ -210,14 +196,8 @@ class SeedRateCalculator extends CalculatorEntity {
     String cropType,
   ) {
     double qualityIndex = 0.0;
-    
-    // Pontuação por germinação (0-40 pontos)
     qualityIndex += (germination / 100) * 40;
-    
-    // Pontuação por pureza (0-30 pontos)
     qualityIndex += (purity / 100) * 30;
-    
-    // Pontuação por baixas perdas (0-30 pontos)
     qualityIndex += ((100 - losses) / 100) * 30;
 
     String classification;

@@ -78,18 +78,12 @@ export 'fields/type_dropdown_field.dart';
 /// Seções de submit/cancel consistentes
 export 'sections/form_submit_section.dart';
 
-// ==========================================================================
-// CLASSES DE CONVENIÊNCIA
-// ==========================================================================
-
 /// **PetiVeti Form Components**
 ///
 /// Classe principal que agrupa todos os componentes para fácil acesso.
 /// Oferece métodos estáticos para criação rápida de componentes comuns.
 class PetiVetiFormComponents {
   PetiVetiFormComponents._();
-
-  // ========== ANIMAL SELECTORS ==========
 
   /// Seletor de animal obrigatório
   static Widget animalRequired({
@@ -116,8 +110,6 @@ class PetiVetiFormComponents {
       label: label ?? 'Animal (Opcional)',
     );
   }
-
-  // ========== DATE TIME PICKERS ==========
 
   /// Data de nascimento
   static Widget birthDate({
@@ -153,8 +145,6 @@ class PetiVetiFormComponents {
       onRangeChanged: onRangeChanged,
     );
   }
-
-  // ========== NOTES FIELDS ==========
 
   /// Observações gerais
   static Widget notesGeneral({
@@ -201,8 +191,6 @@ class PetiVetiFormComponents {
     );
   }
 
-  // ========== SUBMIT SECTIONS ==========
-
   /// Seção para criar
   static Widget submitCreate({
     required VoidCallback? onSubmit,
@@ -245,8 +233,6 @@ class PetiVetiFormComponents {
       icon: icon,
     );
   }
-
-  // ========== TYPE DROPDOWNS ==========
 
   /// Dropdown de prioridade
   static Widget priorityDropdown({
@@ -293,10 +279,6 @@ class PetiVetiFormComponents {
     );
   }
 }
-
-// ==========================================================================
-// TYPEDEF PARA FACILITAR USO
-// ==========================================================================
 
 /// Alias para facilitar importação
 typedef PVC = PetiVetiFormComponents;

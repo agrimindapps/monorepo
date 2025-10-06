@@ -6,8 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Providers comuns reutilizáveis entre todos os apps do monorepo
 /// Centraliza o state management para consistência arquitetural
 
-// ========== PROVIDERS DE INFRAESTRUTURA ==========
-
 /// Provider para SharedPreferences - singleton global
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('SharedPreferences must be overridden at app startup');
@@ -28,8 +26,6 @@ final isConnectedProvider = Provider<bool>((ref) {
   );
 });
 
-// ========== PROVIDERS DE CONFIGURAÇÃO ==========
-
 /// Provider para configurações globais do app
 final appConfigProvider = StateProvider<Map<String, dynamic>>((ref) {
   return <String, dynamic>{};
@@ -44,8 +40,6 @@ final themeProvider = StateProvider<ThemeMode>((ref) {
 final localeProvider = StateProvider<String>((ref) {
   return 'pt_BR';
 });
-
-// ========== PROVIDERS DE ESTADO GLOBAL ==========
 
 /// Provider para loading states globais
 final globalLoadingProvider = StateProvider<bool>((ref) {
@@ -62,10 +56,6 @@ final globalNotificationProvider = StateProvider<String?>((ref) {
   return null;
 });
 
-// ========== PROVIDERS DE AUTENTICAÇÃO ==========
-// Nota: Autenticação específica será implementada por cada app
-// usando os serviços do core como base
-
 /// Provider base para estado de autenticação
 /// Apps devem override este provider com sua implementação específica
 final authStateProvider = StateProvider<bool>((ref) {
@@ -77,8 +67,6 @@ final authStateProvider = StateProvider<bool>((ref) {
 final currentUserProvider = StateProvider<Map<String, dynamic>?>((ref) {
   return null;
 });
-
-// ========== PROVIDERS UTILITÁRIOS ==========
 
 /// Provider para timestamp atual (auto-refresh)
 final timestampProvider = StreamProvider<DateTime>((ref) {
@@ -92,8 +80,6 @@ final timestampProvider = StreamProvider<DateTime>((ref) {
 final uuidProvider = Provider<String>((ref) {
   return DateTime.now().millisecondsSinceEpoch.toString();
 });
-
-// ========== PROVIDERS DE DEBUG ==========
 
 /// Provider para mode debug (apenas em desenvolvimento)
 final debugModeProvider = Provider<bool>((ref) {
@@ -117,8 +103,6 @@ class DebugLogsNotifier extends StateNotifier<List<String>> {
   void addLog(String message) {
     final timestamp = DateTime.now().toIso8601String();
     state = [...state, '[$timestamp] $message'];
-    
-    // Limitar a 100 logs para evitar memory leak
     if (state.length > 100) {
       state = state.sublist(state.length - 100);
     }
@@ -128,8 +112,6 @@ class DebugLogsNotifier extends StateNotifier<List<String>> {
     state = [];
   }
 }
-
-// ========== PROVIDERS DE PERFORMANCE ==========
 
 /// Provider para métricas de performance
 final performanceMetricsProvider = StateProvider<Map<String, dynamic>>((ref) {
@@ -144,8 +126,6 @@ final performanceMetricsProvider = StateProvider<Map<String, dynamic>>((ref) {
 final globalCacheProvider = StateProvider<Map<String, dynamic>>((ref) {
   return <String, dynamic>{};
 });
-
-// ========== PROVIDERS ESPECÍFICOS POR FEATURE ==========
 
 /// Provider para estado de sincronização global
 final syncStateProvider = StateProvider<SyncState>((ref) {
@@ -170,8 +150,6 @@ final lastSyncProvider = StateProvider<DateTime?>((ref) {
   return null;
 });
 
-// ========== FAMILY PROVIDERS ==========
-
 /// Family provider para cache por chave
 final cacheByKeyProvider = StateProvider.family<dynamic, String>((ref, key) {
   return null;
@@ -186,8 +164,6 @@ final loadingByFeatureProvider = StateProvider.family<bool, String>((ref, featur
 final errorByFeatureProvider = StateProvider.family<String?, String>((ref, feature) {
   return null;
 });
-
-// ========== DERIVED PROVIDERS ==========
 
 /// Provider derivado que combina estado de conectividade e sincronização
 final canSyncProvider = Provider<bool>((ref) {

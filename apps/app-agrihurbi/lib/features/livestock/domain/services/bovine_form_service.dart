@@ -16,10 +16,6 @@ class BovineFormService {
 
   BovineFormService(this._validationService);
 
-  // =====================================================================
-  // VALIDATION METHODS
-  // =====================================================================
-
   /// Valida nome comum
   String? validateCommonName(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -36,7 +32,6 @@ class BovineFormService {
 
   /// Valida ID de registro
   String? validateRegistrationId(String? value) {
-    // ID é opcional, se vazio será gerado automaticamente
     if (value == null || value.trim().isEmpty) {
       return null; // Válido para criação
     }
@@ -119,16 +114,11 @@ class BovineFormService {
 
   /// Valida finalidade
   String? validatePurpose(String? value) {
-    // Purpose é opcional
     if (value != null && value.trim().isNotEmpty && value.trim().length < 3) {
       return 'Finalidade deve ter pelo menos 3 caracteres';
     }
     return null;
   }
-
-  // =====================================================================
-  // DATA TRANSFORMATION
-  // =====================================================================
 
   /// Processa tags de string para lista
   List<String> processTags(String tagsString) {
@@ -159,15 +149,9 @@ class BovineFormService {
     return '$namePrefix-$breedPrefix-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
   }
 
-  // =====================================================================
-  // BUSINESS LOGIC
-  // =====================================================================
-
   /// Valida formulário completo
   FormValidationResult validateCompleteForm(BovineFormData formData) {
     final errors = <String, String>{};
-    
-    // Validação individual de campos
     final commonNameError = validateCommonName(formData.commonName);
     if (commonNameError != null) errors['commonName'] = commonNameError;
     
@@ -207,8 +191,6 @@ class BovineFormService {
     DateTime? existingCreatedAt,
   }) {
     final now = DateTime.now();
-    
-    // Gera ID automaticamente se necessário
     String finalRegistrationId = formData.registrationId?.trim() ?? '';
     if (finalRegistrationId.isEmpty) {
       finalRegistrationId = generateRegistrationId(
@@ -255,10 +237,6 @@ class BovineFormService {
     );
   }
 
-  // =====================================================================
-  // HELPER METHODS
-  // =====================================================================
-
   /// Verifica se há mudanças no formulário
   bool hasFormChanged(BovineFormData current, BovineFormData original) {
     return current.commonName != original.commonName ||
@@ -287,10 +265,6 @@ class BovineFormService {
     return currentLength >= (maxLength * threshold);
   }
 }
-
-// =====================================================================
-// DATA CLASSES
-// =====================================================================
 
 /// Classe para armazenar dados do formulário
 class BovineFormData {

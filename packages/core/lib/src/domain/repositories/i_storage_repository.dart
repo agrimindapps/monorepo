@@ -221,8 +221,6 @@ class StorageImageUploadResult {
   /// Obtém a melhor URL baseada no tamanho desejado
   String getBestUrl({int? preferredWidth}) {
     if (preferredWidth == null) return originalUrl;
-
-    // Lógica simples para escolher a melhor variante
     if (preferredWidth <= 150 && variants.containsKey('_thumb')) {
       return variants['_thumb']!;
     }

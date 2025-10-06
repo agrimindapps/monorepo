@@ -241,26 +241,15 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
       DateTime? newestTimestamp;
 
       for (final log in logs) {
-        // Count by category
         byCategory[log.category] = (byCategory[log.category] ?? 0) + 1;
-
-        // Count by level
         byLevel[log.level] = (byLevel[log.level] ?? 0) + 1;
-
-        // Count by operation
         byOperation[log.operation] = (byOperation[log.operation] ?? 0) + 1;
-
-        // Count errors
         if (log.error != null) {
           errorCount++;
         }
-
-        // Count unsynced
         if (!log.synced) {
           unsyncedCount++;
         }
-
-        // Track oldest/newest
         if (oldestTimestamp == null ||
             log.timestamp.isBefore(oldestTimestamp)) {
           oldestTimestamp = log.timestamp;

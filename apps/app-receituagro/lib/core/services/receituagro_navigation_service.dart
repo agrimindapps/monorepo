@@ -15,7 +15,6 @@ class ReceitaAgroNavigationService {
     required AgriculturalNavigationExtension agricExtension,
   }) : _coreService = coreService,
        _agricExtension = agricExtension {
-    // Register agricultural extension with core service
     _coreService.registerExtension(_agricExtension);
   }
 
@@ -40,10 +39,6 @@ class ReceitaAgroNavigationService {
     _coreService.unregisterExtension(_agricExtension.extensionId);
     _coreService.dispose();
   }
-
-  // ==========================================================================
-  // DEFENSIVOS NAVIGATION (Migrated from AppNavigationProvider)
-  // ==========================================================================
 
   /// Navigate to defensivos list
   Future<void> navigateToListaDefensivos({
@@ -142,10 +137,6 @@ class ReceitaAgroNavigationService {
     );
   }
 
-  // ==========================================================================
-  // PRAGAS NAVIGATION (Migrated from AppNavigationProvider)
-  // ==========================================================================
-
   /// Navigate to pragas list
   Future<void> navigateToListaPragas({
     String? categoria,
@@ -236,10 +227,6 @@ class ReceitaAgroNavigationService {
     );
   }
 
-  // ==========================================================================
-  // CULTURAS NAVIGATION (Migrated from AppNavigationProvider)
-  // ==========================================================================
-
   /// Navigate to culturas list
   Future<void> navigateToListaCulturas({
     Map<String, dynamic>? extraData,
@@ -294,10 +281,6 @@ class ReceitaAgroNavigationService {
     );
   }
 
-  // ==========================================================================
-  // DIAGNOSTICOS NAVIGATION
-  // ==========================================================================
-
   /// Navigate to diagnosticos list
   Future<void> navigateToListaDiagnosticos({
     Map<String, dynamic>? extraData,
@@ -334,10 +317,6 @@ class ReceitaAgroNavigationService {
       arguments: extraData,
     );
   }
-
-  // ==========================================================================
-  // FAVORITES NAVIGATION
-  // ==========================================================================
 
   /// Navigate to favorites main page
   Future<void> navigateToFavoritos({
@@ -383,10 +362,6 @@ class ReceitaAgroNavigationService {
     );
   }
 
-  // ==========================================================================
-  // SETTINGS AND USER NAVIGATION
-  // ==========================================================================
-
   /// Navigate to settings
   Future<void> navigateToSettings({
     Map<String, dynamic>? extraData,
@@ -415,10 +390,6 @@ class ReceitaAgroNavigationService {
   }) async {
     await _coreService.navigateToPremium<void>();
   }
-
-  // ==========================================================================
-  // SEARCH NAVIGATION
-  // ==========================================================================
 
   /// Navigate to global search
   Future<void> navigateToGlobalSearch({
@@ -449,10 +420,6 @@ class ReceitaAgroNavigationService {
       },
     );
   }
-
-  // ==========================================================================
-  // CORE NAVIGATION METHODS (Proxy to core service)
-  // ==========================================================================
 
   /// Navigate to route with optional page type
   Future<T?> navigateTo<T>(
@@ -554,14 +521,8 @@ class ReceitaAgroNavigationService {
     _coreService.clearHistory();
   }
 
-  // ==========================================================================
-  // COMPATIBILITY METHODS (Migrated from AppNavigationProvider)
-  // ==========================================================================
-
   /// Update bottom navigation visibility (stored in configuration)
   void updateBottomNavigationVisibility(bool visible) {
-    // This functionality is now handled by NavigationConfiguration
-    // in each page's configuration
   }
 
   /// Get bottom navigation visibility

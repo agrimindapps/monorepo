@@ -14,11 +14,8 @@ abstract class PlantsExportDataSource {
 
 class PlantsExportLocalDataSource implements PlantsExportDataSource {
   final PlantsRepository _plantsRepository;
-  // ignore: unused_field
   final PlantCommentsRepository _commentsRepository;
-  // ignore: unused_field
   final TasksRepository _tasksRepository;
-  // ignore: unused_field
   final SpacesRepository _spacesRepository;
 
   PlantsExportLocalDataSource({
@@ -86,7 +83,6 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   @override
   Future<List<TaskExportData>> getUserTasksData(String userId) async {
     try {
-      // Mock data for demonstration
       return [
         TaskExportData(
           id: '1',
@@ -114,7 +110,6 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   @override
   Future<List<SpaceExportData>> getUserSpacesData(String userId) async {
     try {
-      // Mock data for demonstration
       return [
         SpaceExportData(
           id: '1',
@@ -134,7 +129,6 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
     String userId,
   ) async {
     try {
-      // Mock data for demonstration
       return [
         PlantPhotoExportData(
           plantId: '1',
@@ -154,7 +148,6 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
     String userId,
   ) async {
     try {
-      // Mock data for demonstration
       return [
         PlantCommentExportData(
           id: '1',

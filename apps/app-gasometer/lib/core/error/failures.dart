@@ -7,8 +7,6 @@ abstract class Failure extends Equatable {
   @override
   List<Object> get props => [message];
 }
-
-// General failures
 class ServerFailure extends Failure {
   const ServerFailure(super.message);
 }
@@ -28,8 +26,6 @@ class ValidationFailure extends Failure {
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure(super.message);
 }
-
-// Authentication failures
 class AuthenticationFailure extends Failure {
   const AuthenticationFailure(super.message);
 }
@@ -37,8 +33,6 @@ class AuthenticationFailure extends Failure {
 class AuthorizationFailure extends Failure {
   const AuthorizationFailure(super.message);
 }
-
-// Vehicle specific failures
 class VehicleNotFoundFailure extends Failure {
   const VehicleNotFoundFailure(super.message);
 }
@@ -46,18 +40,12 @@ class VehicleNotFoundFailure extends Failure {
 class DuplicateVehicleFailure extends Failure {
   const DuplicateVehicleFailure(super.message);
 }
-
-// Fuel specific failures
 class InvalidFuelDataFailure extends Failure {
   const InvalidFuelDataFailure(super.message);
 }
-
-// Maintenance specific failures
 class MaintenanceNotFoundFailure extends Failure {
   const MaintenanceNotFoundFailure(super.message);
 }
-
-// Sync failures
 class SyncFailure extends Failure {
   const SyncFailure(super.message);
 }

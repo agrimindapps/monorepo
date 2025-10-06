@@ -36,11 +36,8 @@ class ContentSectionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header da seção
         _buildSectionHeader(theme),
         const SizedBox(height: ReceitaAgroSpacing.sm),
-
-        // Conteúdo da seção
         if (showCard) _buildCardContent(theme) else _buildDirectContent(),
       ],
     );
@@ -53,7 +50,6 @@ class ContentSectionWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Linha verde vertical como no mockup
           Container(
             width: 4,
             height: 24,
@@ -63,8 +59,6 @@ class ContentSectionWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-
-          // Título da seção
           Expanded(
             child: Text(
               title,
@@ -75,8 +69,6 @@ class ContentSectionWidget extends StatelessWidget {
               ),
             ),
           ),
-
-          // Ícone de ação
           if (actionIcon != null)
             IconButton(
               onPressed: onActionPressed,
@@ -126,8 +118,6 @@ class ContentSectionWidget extends StatelessWidget {
     if (emptyState != null) {
       return emptyState!;
     }
-
-    // Se está vazio e tem mensagem, mostra a mensagem
     if (isEmpty && emptyMessage != null) {
       return Center(
         child: Padding(
@@ -186,11 +176,8 @@ class ContentListItemWidget extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-            // Leading widget ou ícone padrão
             leading ?? _buildDefaultIcon(theme),
             const SizedBox(width: 12),
-
-            // Conteúdo principal
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -345,7 +345,6 @@ class _ManagementBottomSheet extends ConsumerWidget {
   }
 
   void _showSubscriptionHistory(BuildContext context, WidgetRef ref) {
-    // Implementar visualização do histórico
     Navigator.pop(context);
     ScaffoldMessenger.of(
       context,
@@ -353,8 +352,6 @@ class _ManagementBottomSheet extends ConsumerWidget {
   }
 
   void _openManagementUrl(String url) {
-    // Implementar abertura da URL
-    // launch(url);
   }
 
   void _restorePurchases(BuildContext context, WidgetRef ref) async {

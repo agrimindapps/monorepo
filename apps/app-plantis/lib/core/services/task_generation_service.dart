@@ -63,8 +63,6 @@ class TaskGenerationService {
     try {
       final baseDate = plantingDate ?? DateTime.now();
       final tasks = <task_entity.Task>[];
-
-      // Para cada tipo de cuidado ativo, gera a primeira tarefa
       for (final careType in config.activeCareTypes) {
         final interval = config.getIntervalForCareType(careType);
         final careInfo = careTypeInfo[careType];
@@ -115,8 +113,6 @@ class TaskGenerationService {
   }) {
     try {
       final careType = _mapTaskTypeToCareType(completedTask.type) ?? 'agua';
-
-      // Verifica se o tipo de cuidado ainda está ativo
       if (!config.isCareTypeActive(careType)) {
         return const Right(null); // Não gera nova tarefa se desabilitado
       }
@@ -170,8 +166,6 @@ class TaskGenerationService {
     if (intervalDays <= 0) {
       throw ArgumentError('Intervalo deve ser maior que zero');
     }
-
-    // Usar TaskScheduleCalculator para cálculos mais avançados
     return TaskScheduleCalculator.calculateNextDate(
       baseDate: baseDate,
       intervalDays: intervalDays,

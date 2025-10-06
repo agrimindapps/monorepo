@@ -2,17 +2,14 @@ import 'dart:async';
 
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
-// ignore: unused_import
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart';
-// Plants providers now imported from Riverpod - using plants_providers.dart
 import '../../../../core/providers/plants_providers.dart' show ViewMode, SortBy;
 import '../../../../core/providers/plants_providers.dart' as riverpod_plants;
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-// import '../../../spaces/presentation/providers/spaces_provider.dart' as spaces;
 import '../../domain/entities/plant.dart';
 import '../widgets/empty_plants_widget.dart';
 import '../widgets/plants_app_bar.dart';
@@ -67,7 +64,6 @@ class PlantsDisplayData {
 /// View → Provider → Use Cases → Repository → Data Sources
 
 class PlantsListPage extends ConsumerStatefulWidget {
-  // Remove dependency injection - now using Riverpod providers
 
   const PlantsListPage({super.key});
 
@@ -77,9 +73,6 @@ class PlantsListPage extends ConsumerStatefulWidget {
 
 class _PlantsListPageState extends ConsumerState<PlantsListPage>
     with RouteAware {
-  // Riverpod providers - accessed via ref
-
-  // UI-only controller for scroll management
   final ScrollController _scrollController = ScrollController();
 
   StreamSubscription<void>? _syncStatusSubscription;
@@ -87,13 +80,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
   @override
   void initState() {
     super.initState();
-
-    // Load data after a small delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Trigger initial data load via Riverpod provider
-      // This will be handled by the provider automatically
-
-      // Iniciar sincronização automática se usuário não anônimo
       _tryStartAutoSync();
     });
   }
@@ -101,38 +88,22 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // TODO: Route observer functionality disabled during NavigationService migration
-    // Consider using GoRouter navigation events instead
-    // final routeObserver = NavigationService.instance.routeObserver;
-    // final modalRoute = ModalRoute.of(context);
-    // if (modalRoute is PageRoute) {
-    //   routeObserver.subscribe(this, modalRoute);
-    // }
   }
 
   /// Inicia sincronização em background sem bloquear UI
   void _tryStartAutoSync() {
-    // Sincronização será gerenciada pelos providers Riverpod
-    // Por enquanto, apenas verificamos se está autenticado
     final authState = ref.read(authProvider);
     if (authState.hasValue &&
         authState.value!.isAuthenticated &&
         !authState.value!.isAnonymous) {
-      // Background sync will be handled by providers
     }
-
-    // Monitorar progresso de sync para atualizar dados quando necessário
     _monitorBackgroundSync();
   }
 
   /// Monitora sincronização em background de forma mais eficiente
   void _monitorBackgroundSync() {
-    // TODO: Implement background sync monitoring with Riverpod
-    // Using less frequent refresh to avoid battery drain
     Timer.periodic(const Duration(minutes: 15), (timer) {
       if (mounted) {
-        // Only refresh if app is visible and user is authenticated
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             final authState = ref.read(authProvider);
@@ -154,18 +125,10 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
     _scrollController.dispose();
     _syncStatusSubscription?.cancel();
 
-    // TODO: Route observer functionality disabled during NavigationService migration
-    // final routeObserver = NavigationService.instance.routeObserver;
-    // routeObserver.unsubscribe(this);
-
     super.dispose();
   }
-
-  // RouteAware callbacks - called when user navigates back to this page
   @override
   void didPopNext() {
-    // Called when a route has been popped off, and the current route shows up.
-    // This means user returned from plant details or other screen
     if (mounted) {
       ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
     }
@@ -173,21 +136,15 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
   @override
   void didPush() {
-    // Called when the current route has been pushed.
   }
 
   @override
   void didPop() {
-    // Called when the current route has been popped off.
   }
 
   @override
   void didPushNext() {
-    // Called when a new route has been pushed, and the current route is no longer visible.
   }
-
-  // ===== VIEW EVENT HANDLERS =====
-  // These methods only delegate to provider and handle UI interactions
 
   Future<void> _onRefresh() async {
     await ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
@@ -269,9 +226,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
     }
   }
 
-  // ===== UI-ONLY INTERACTIONS =====
-  // These methods handle pure UI interactions (scroll, navigation)
-
   void _scrollToTop() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
@@ -284,22 +238,13 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
   @override
   Widget build(BuildContext context) {
-    // Build UI without blocking for sync - sync happens in background
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? _) {
-        // Simple auth state monitoring without complex sync logic for now
-        // Auth state monitoring and plant data display
-
-        // ARCHITECTURE: Now using Riverpod providers directly
-        // All state management flows through Riverpod
         return BasePageScaffold(
           body: ResponsiveLayout(
             child: Column(
               children: [
-                // Header with optional sync indicator
                 _buildHeaderWithSyncIndicator(context),
-
-                // Search and filters section
                 Consumer(
                   builder: (
                     BuildContext context,
@@ -338,14 +283,10 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                     );
                   },
                 ),
-
-                // ARCHITECTURE: Content uses multiple granular selectors for optimal performance
-                // Each selector only listens to specific parts of provider state
                 Expanded(child: _buildOptimizedPlantsContent()),
               ],
             ),
           ),
-          // FAB para adicionar planta
           floatingActionButton: PlantsFab(
             onScrollToTop: _scrollToTop,
             scrollController: _scrollController,
@@ -382,7 +323,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                       ),
                     ),
                     actions: [
-                      // Sort button
                       GestureDetector(
                         onTap: () => _showSortOptions(context),
                         child: Container(
@@ -403,20 +343,15 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                           ),
                         ),
                       ),
-                      // Grouped by spaces toggle button
                       GestureDetector(
                         onTap: () {
                           final currentMode = plantsState.viewMode;
                           ViewMode newMode;
-
-                          // Se já está agrupado, volta para o modo anterior (grid ou list)
                           if (currentMode == ViewMode.groupedBySpaces ||
                               currentMode == ViewMode.groupedBySpacesGrid ||
                               currentMode == ViewMode.groupedBySpacesList) {
-                            // Volta para list como padrão
                             newMode = ViewMode.list;
                           } else {
-                            // Aplica agrupamento mantendo o modo atual (grid ou list)
                             if (currentMode == ViewMode.grid) {
                               newMode = ViewMode.groupedBySpacesGrid;
                             } else {
@@ -448,7 +383,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                       ),
                     ],
                   ),
-                  // TODO: Add sync indicator when background sync is migrated to Riverpod
                 ],
               ),
           loading:
@@ -522,12 +456,9 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                             .loadInitialData(),
               ),
           data: (state) {
-            // Handle loading state within data with better UX
             if (state.isLoading && state.allPlants.isEmpty) {
-              // First load - show full loading widget
               return const PlantsLoadingWidget();
             } else if (state.isLoading && state.allPlants.isNotEmpty) {
-              // Refreshing with existing data - show shimmer overlay
               return Stack(
                 children: [
                   _buildPlantsContent(), // Show existing data
@@ -538,8 +469,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                 ],
               );
             }
-
-            // Handle error state
             if (state.error != null) {
               return PlantsErrorWidget(
                 error: state.error!,
@@ -550,8 +479,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                             .loadInitialData(),
               );
             }
-
-            // Content with plants or empty state (successful load)
             return _buildPlantsContent();
           },
         );
@@ -578,18 +505,13 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
               isSearching: plantsState.searchQuery.isNotEmpty,
               searchQuery: plantsState.searchQuery,
             );
-
-            // Estado vazio
             if (displayData.plants.isEmpty) {
               return EmptyPlantsWidget(
                 isSearching: displayData.isSearching,
                 searchQuery: displayData.searchQuery,
                 onClearSearch: () => _onSearchChanged(''),
-                // onAddPlant removido - botão não será exibido
               );
             }
-
-            // Content with view mode
             return RefreshIndicator(
               onRefresh: _onRefresh,
               child: _buildViewForMode(plantsState.viewMode, displayData),

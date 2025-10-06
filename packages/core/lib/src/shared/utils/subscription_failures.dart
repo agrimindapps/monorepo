@@ -103,15 +103,10 @@ class SubscriptionUnknownFailure extends Failure {
 extension SubscriptionFailureMapper on String {
   Failure toSubscriptionFailure([String? customMessage]) {
     switch (this) {
-      // User actions
       case 'user_cancelled':
         return const SubscriptionPaymentFailure.userCancelled();
-
-      // Network errors
       case 'network_error':
         return const SubscriptionNetworkFailure();
-
-      // Payment errors
       case 'purchase_not_allowed':
         return const SubscriptionPaymentFailure.notAllowed();
       case 'purchase_invalid':
@@ -120,16 +115,12 @@ extension SubscriptionFailureMapper on String {
         return const SubscriptionPaymentFailure.productUnavailable();
       case 'product_already_purchased':
         return const SubscriptionPaymentFailure.alreadyPurchased();
-
-      // Validation errors
       case 'invalid_receipt':
         return const SubscriptionValidationFailure.invalidReceipt();
       case 'receipt_already_in_use':
         return const SubscriptionValidationFailure.receiptInUse();
       case 'missing_receipt_file':
         return const SubscriptionValidationFailure.invalidReceipt();
-
-      // Configuration errors
       case 'invalid_credentials':
         return const SubscriptionConfigFailure.invalidCredentials();
       case 'invalid_app_user_id':
@@ -139,18 +130,12 @@ extension SubscriptionFailureMapper on String {
       case 'MISSING_API_KEY':
       case 'INITIALIZATION_ERROR':
         return const SubscriptionConfigFailure.missingApiKey();
-
-      // Server errors
       case 'store_problem':
       case 'unexpected_backend_response':
       case 'unknown_backend_error':
         return const SubscriptionServerFailure();
-
-      // Operation errors
       case 'operation_already_in_progress':
         return const SubscriptionOperationInProgressFailure();
-
-      // Unknown
       default:
         return SubscriptionUnknownFailure(customMessage ?? 'Erro: $this');
     }

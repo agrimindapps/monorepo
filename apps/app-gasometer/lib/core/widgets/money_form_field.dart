@@ -147,17 +147,13 @@ class MoneyFormField extends StatelessWidget {
         FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
       ];
     }
-
-    // Formatador mais específico baseado no tipo
     switch (type) {
       case MoneyFieldType.price:
-        // Preço por litro - permite 3 casas decimais
         return [
           FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
           _MoneyInputFormatter(decimalPlaces: 3),
         ];
       default:
-        // Outros tipos - 2 casas decimais padrão
         return [
           FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
           _MoneyInputFormatter(decimalPlaces: 2),
@@ -189,20 +185,15 @@ class MoneyFormField extends StatelessWidget {
     }
 
     if (value != null && value.isNotEmpty) {
-      // Remove formatação e converte para número
       final cleanValue = value.replaceAll(RegExp(r'[^\d,.]'), '');
       final doubleValue = double.tryParse(cleanValue.replaceAll(',', '.'));
 
       if (doubleValue == null) {
         return 'Valor inválido';
       }
-
-      // Validação de range
       if (doubleValue < minValue || doubleValue > maxValue) {
         return 'Valor deve estar entre R\$ ${_formatCurrency(minValue)} e R\$ ${_formatCurrency(maxValue)}';
       }
-
-      // Validações específicas por tipo
       switch (type) {
         case MoneyFieldType.price:
           if (doubleValue > 50.0) {
@@ -218,8 +209,6 @@ class MoneyFormField extends StatelessWidget {
           break;
       }
     }
-
-    // Validação adicional customizada
     if (additionalValidator != null) {
       return additionalValidator!(value);
     }
@@ -257,10 +246,7 @@ class _MoneyInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Implementação básica - pode ser expandida para formatação mais sofisticada
     final newText = newValue.text;
-
-    // Limita casas decimais
     if (newText.contains(',')) {
       final parts = newText.split(',');
       if (parts.length == 2 && parts[1].length > decimalPlaces) {

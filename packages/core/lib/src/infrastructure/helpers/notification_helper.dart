@@ -15,10 +15,7 @@ class NotificationHelper {
     if (_isInitialized) return;
 
     try {
-      // Inicializa a base de dados de timezone
       tz_data.initializeTimeZones();
-      
-      // Define a timezone local
       tz.setLocalLocation(tz.getLocation('America/Sao_Paulo'));
       
       _isInitialized = true;
@@ -44,7 +41,6 @@ class NotificationHelper {
     final lowercaseAppName = appName.toLowerCase();
     
     return [
-      // Canal principal (geral)
       NotificationChannelEntity(
         id: '${lowercaseAppName}_general',
         name: '$appName - Geral',
@@ -55,8 +51,6 @@ class NotificationHelper {
         enableVibration: true,
         enableLights: true,
       ),
-      
-      // Canal para lembretes/tarefas
       NotificationChannelEntity(
         id: '${lowercaseAppName}_reminders',
         name: '$appName - Lembretes',
@@ -67,8 +61,6 @@ class NotificationHelper {
         enableVibration: true,
         enableLights: true,
       ),
-      
-      // Canal para alertas importantes
       NotificationChannelEntity(
         id: '${lowercaseAppName}_alerts',
         name: '$appName - Alertas',
@@ -79,8 +71,6 @@ class NotificationHelper {
         enableVibration: true,
         enableLights: true,
       ),
-      
-      // Canal para promoções (baixa prioridade)
       NotificationChannelEntity(
         id: '${lowercaseAppName}_promotions',
         name: '$appName - Promoções',
@@ -212,8 +202,6 @@ class NotificationHelper {
   /// Calcula próxima data baseada em intervalo
   static DateTime calculateNextSchedule(DateTime baseDate, Duration interval) {
     DateTime nextDate = baseDate.add(interval);
-    
-    // Se a data já passou, calcula a próxima ocorrência
     while (nextDate.isBefore(DateTime.now())) {
       nextDate = nextDate.add(interval);
     }

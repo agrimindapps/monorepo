@@ -39,8 +39,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     super.initState();
     _selectedFilter = widget.currentFilter;
     _selectedTag = widget.currentSelectedTag;
-
-    // Inicializar controladores de animação
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -62,8 +60,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     );
 
     _loadAvailableTags();
-
-    // Iniciar animações
     _fadeController.forward();
     _slideController.forward();
   }
@@ -76,7 +72,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   }
 
   void _loadAvailableTags() {
-    // Obter todas as tasks para extrair tags
     const tasksRequest = GetTasksRequest();
     ref
         .read(getTasksProvider(tasksRequest).future)
@@ -93,7 +88,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
           }
         })
         .catchError((error) {
-          // Em caso de erro, manter lista vazia
           if (mounted) {
             setState(() {
               _availableTags = [];
@@ -136,13 +130,8 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
               opacity: _fadeAnimation,
               child: Column(
                 children: [
-                  // User Section with modern design
                   _buildModernUserSection(),
-
-                  // Quick Stats Section
                   _buildQuickStatsSection(),
-
-                  // Content with improved spacing
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -199,7 +188,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
         children: [
           Row(
             children: [
-              // Modern Avatar with gradient
               GestureDetector(
                 onTap: () => _openSettings(),
                 child: AnimatedContainer(
@@ -243,8 +231,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
               ),
 
               const SizedBox(width: 16),
-
-              // User Info with better typography
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,8 +261,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                   ],
                 ),
               ),
-
-              // Modern Settings Button
               Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -493,7 +477,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                // Icon with modern container
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: 36,
@@ -515,8 +498,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                 ),
 
                 const SizedBox(width: 14),
-
-                // Text with improved typography
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,8 +532,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
                     ],
                   ),
                 ),
-
-                // Selection indicator
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child:
@@ -689,9 +668,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             spacing: 10,
             runSpacing: 10,
             children: [
-              // Chip "Todas" no início com design moderno
               _buildModernTagChip(null, isAllChip: true),
-              // Tags específicas
               ..._availableTags.map((tag) => _buildModernTagChip(tag)),
             ],
           ),
@@ -753,7 +730,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Modern indicator
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: 8,
@@ -803,8 +779,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
 
   Color _getTagColor(String? tag) {
     if (tag == null) return AppColors.primaryColor;
-
-    // Generate color based on tag hash
     final colors = [
       AppColors.primaryColor,
       AppColors.secondary,
@@ -825,7 +799,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Modern divider
         Container(
           height: 1,
           margin: const EdgeInsets.symmetric(vertical: 8),
@@ -841,8 +814,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
         ),
 
         const SizedBox(height: 16),
-
-        // Action buttons grid
         Row(
           children: [
             Expanded(
@@ -866,8 +837,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
         ),
 
         const SizedBox(height: 12),
-
-        // Additional action
         SizedBox(
           width: double.infinity,
           child: _buildActionButton(
@@ -932,7 +901,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
     try {
       await ref.read(authNotifierProvider.notifier).signOut();
       if (mounted) {
-        // A AuthGuard automaticamente redirecionará para login
       }
     } catch (e) {
       if (mounted) {
@@ -970,7 +938,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   void _selectFilter(TaskFilter filter) {
     setState(() {
       _selectedFilter = filter;
-      // Limpar tag selecionada ao mudar filtro
       if (filter != TaskFilter.all) {
         _selectedTag = null;
       }
@@ -982,7 +949,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   void _selectTag(String? tag) {
     setState(() {
       _selectedTag = tag;
-      // Se selecionar uma tag específica, voltar para "todas as tarefas"
       if (tag != null) {
         _selectedFilter = TaskFilter.all;
       }
@@ -992,7 +958,6 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   }
 
   void _openSettings() {
-    // Navegar para a página de configurações
     Navigator.push(
       context,
       MaterialPageRoute<dynamic>(builder: (context) => const SettingsPage()),

@@ -53,8 +53,6 @@ class PlantsListNotifier extends _$PlantsListNotifier {
   @override
   Future<PlantsListState> build() async {
     _plantsRepository = ref.read(plantsRepositoryProvider);
-
-    // Load initial plants
     return await _loadPlantsInternal();
   }
 
@@ -93,8 +91,6 @@ class PlantsListNotifier extends _$PlantsListNotifier {
             isLoading: false,
           ),
         );
-
-        // Reapply current search if any
         if (currentState.searchQuery.isNotEmpty) {
           _applySearch();
         }
@@ -120,8 +116,6 @@ class PlantsListNotifier extends _$PlantsListNotifier {
         state = AsyncValue.data(
           currentState.copyWith(plants: updatedPlants),
         );
-
-        // Reapply search to include new plant if it matches
         _applySearch();
       },
     );
@@ -147,8 +141,6 @@ class PlantsListNotifier extends _$PlantsListNotifier {
         state = AsyncValue.data(
           currentState.copyWith(plants: updatedPlants),
         );
-
-        // Reapply search after update
         _applySearch();
       },
     );
@@ -309,8 +301,6 @@ class PlantsListNotifier extends _$PlantsListNotifier {
     state = AsyncValue.data(currentState.copyWith(errorMessage: null));
   }
 }
-
-// Dependency Provider
 @riverpod
 PlantsRepository plantsRepository(Ref ref) {
   return GetIt.instance<PlantsRepository>();

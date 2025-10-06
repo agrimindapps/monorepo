@@ -17,7 +17,6 @@ class PlantisTheme {
       secondary: PlantisColors.secondary,
     ),
   ).copyWith(
-    // Customizações específicas do Plantis
     appBarTheme: const AppBarTheme(
       backgroundColor: PlantisColors.primary,
       foregroundColor: Colors.white,
@@ -26,16 +25,12 @@ class PlantisTheme {
       elevation: 0,
       centerTitle: true,
     ),
-
-    // FAB personalizado
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: PlantisColors.primary,
       foregroundColor: Colors.white,
       elevation: 6,
       shape: CircleBorder(),
     ),
-
-    // Bottom navigation personalizado
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: PlantisColors.primary,
@@ -44,8 +39,6 @@ class PlantisTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-
-    // Navigation bar personalizado (Material 3)
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Colors.white,
       indicatorColor: PlantisColors.primary.withValues(alpha: 0.2),
@@ -73,8 +66,6 @@ class PlantisTheme {
       }),
       elevation: 8,
     ),
-
-    // Chip theme personalizado para plantas
     chipTheme: ChipThemeData(
       backgroundColor: PlantisColors.secondaryLight,
       selectedColor: PlantisColors.primary,
@@ -86,8 +77,6 @@ class PlantisTheme {
         side: BorderSide.none,
       ),
     ),
-
-    // Switch personalizado
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -102,15 +91,11 @@ class PlantisTheme {
         return Colors.grey.shade300;
       }),
     ),
-
-    // Progress indicator personalizado
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: PlantisColors.primary,
       linearTrackColor: PlantisColors.primaryLight,
       circularTrackColor: PlantisColors.primaryLight,
     ),
-
-    // Card theme baseado no mockup - elevação e sombras aprimoradas
     cardTheme: CardThemeData(
       elevation: 0, // Controlamos a sombra manualmente
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -118,8 +103,6 @@ class PlantisTheme {
       shadowColor: Colors.transparent, // Sem sombra padrão
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
-
-    // Scaffold theme baseado no mockup
     scaffoldBackgroundColor: const Color(0xFFF8F9FA),
   );
 
@@ -136,7 +119,6 @@ class PlantisTheme {
       secondary: PlantisColors.secondary,
     ),
   ).copyWith(
-    // Customizações específicas do Plantis para modo escuro
     appBarTheme: const AppBarTheme(
       backgroundColor: PlantisColors.primaryDark,
       foregroundColor: Colors.white,
@@ -145,16 +127,12 @@ class PlantisTheme {
       elevation: 0,
       centerTitle: true,
     ),
-
-    // FAB para modo escuro
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: PlantisColors.primary,
       foregroundColor: Colors.white,
       elevation: 6,
       shape: CircleBorder(),
     ),
-
-    // Bottom navigation para modo escuro
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: const Color(0xFF1E1E1E),
       selectedItemColor: PlantisColors.primaryLight,
@@ -163,8 +141,6 @@ class PlantisTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-
-    // Navigation bar para modo escuro (Material 3)
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: const Color(0xFF1E1E1E),
       indicatorColor: PlantisColors.primaryLight.withValues(alpha: 0.3),
@@ -190,8 +166,6 @@ class PlantisTheme {
       }),
       elevation: 8,
     ),
-
-    // Switch para modo escuro
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -206,15 +180,11 @@ class PlantisTheme {
         return Colors.grey.shade800;
       }),
     ),
-
-    // Progress indicator para modo escuro
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: PlantisColors.primaryLight,
       linearTrackColor: PlantisColors.primary,
       circularTrackColor: PlantisColors.primary,
     ),
-
-    // Card theme para modo escuro baseado no mockup
     cardTheme: CardThemeData(
       elevation: 0, // Controlamos a sombra manualmente
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -222,8 +192,6 @@ class PlantisTheme {
       shadowColor: Colors.transparent, // Sem sombra padrão
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
-
-    // Scaffold theme para modo escuro
     scaffoldBackgroundColor: const Color(0xFF1C1C1E),
   );
 

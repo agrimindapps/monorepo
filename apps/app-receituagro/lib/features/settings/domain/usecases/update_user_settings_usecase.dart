@@ -11,16 +11,9 @@ class UpdateUserSettingsUseCase {
 
   /// Updates complete user settings
   Future<UserSettingsEntity> call(UserSettingsEntity settings) async {
-    // Business validation
     _validateSettings(settings);
-    
-    // Apply business rules for updates
     final validatedSettings = await _applyUpdateRules(settings);
-    
-    // Save to repository
     await _repository.saveUserSettings(validatedSettings);
-    
-    // Handle side effects
     await _handleSideEffects(validatedSettings);
     
     return validatedSettings;
@@ -35,20 +28,12 @@ class UpdateUserSettingsUseCase {
     if (userId.isEmpty) {
       throw InvalidUserIdException('User ID cannot be empty');
     }
-
-    // Get current settings
     final currentSettings = await _repository.getUserSettings(userId);
     if (currentSettings == null) {
       throw SettingsNotFoundException('Settings not found for user $userId');
     }
-
-    // Validate the specific update
     _validateSingleUpdate(key, value);
-
-    // Create updated settings
     final updatedSettings = _applySingleUpdate(currentSettings, key, value);
-
-    // Use the main update flow
     return await call(updatedSettings);
   }
 
@@ -60,21 +45,15 @@ class UpdateUserSettingsUseCase {
     if (updates.isEmpty) {
       throw InvalidUpdateException('No updates provided');
     }
-
-    // Get current settings
     final currentSettings = await _repository.getUserSettings(userId);
     if (currentSettings == null) {
       throw SettingsNotFoundException('Settings not found for user $userId');
     }
-
-    // Apply all updates
     var updatedSettings = currentSettings;
     for (final entry in updates.entries) {
       _validateSingleUpdate(entry.key, entry.value);
       updatedSettings = _applySingleUpdate(updatedSettings, entry.key, entry.value);
     }
-
-    // Use the main update flow
     return await call(updatedSettings);
   }
 
@@ -83,14 +62,10 @@ class UpdateUserSettingsUseCase {
     if (!settings.isValid) {
       throw InvalidSettingsException('Settings validation failed');
     }
-
-    // Business rule: Language must be supported
     const supportedLanguages = ['pt-BR', 'en-US', 'es-ES'];
     if (!supportedLanguages.contains(settings.language)) {
       throw UnsupportedLanguageException('Language ${settings.language} is not supported');
     }
-
-    // Business rule: User ID must be consistent
     if (settings.userId.isEmpty) {
       throw InvalidUserIdException('User ID cannot be empty in settings');
     }
@@ -99,25 +74,16 @@ class UpdateUserSettingsUseCase {
   /// Apply business rules for settings updates
   Future<UserSettingsEntity> _applyUpdateRules(UserSettingsEntity settings) async {
     var updatedSettings = settings.copyWith(lastUpdated: DateTime.now());
-
-    // Business rule: Development mode restrictions
     if (settings.isDevelopmentMode) {
       updatedSettings = updatedSettings.copyWith(analyticsEnabled: false);
     }
-
-    // Business rule: Premium features validation
     if (settings.speechToTextEnabled) {
-      // In a real app, check subscription status
       final hasValidSubscription = await _checkSubscriptionStatus(settings.userId);
       if (!hasValidSubscription) {
         updatedSettings = updatedSettings.copyWith(speechToTextEnabled: false);
       }
     }
-
-    // Business rule: Accessibility consistency
     if (!settings.soundEnabled && !settings.notificationsEnabled) {
-      // Warn or adjust for accessibility
-      // For now, we'll allow this configuration
     }
 
     return updatedSettings;
@@ -125,23 +91,15 @@ class UpdateUserSettingsUseCase {
 
   /// Handle side effects of settings changes
   Future<void> _handleSideEffects(UserSettingsEntity settings) async {
-    // Side effect: Update theme in app
     if (settings.isDarkTheme) {
-      // Trigger theme change event
       await _notifyThemeChange(settings.isDarkTheme);
     }
-
-    // Side effect: Update analytics preferences
     if (!settings.analyticsEnabled) {
       await _disableAnalytics(settings.userId);
     }
-
-    // Side effect: Update notification preferences
     if (!settings.notificationsEnabled) {
       await _disableNotifications(settings.userId);
     }
-
-    // Side effect: Update speech recognition
     if (settings.speechToTextEnabled) {
       await _initializeSpeechRecognition(settings.language);
     }
@@ -204,28 +162,23 @@ class UpdateUserSettingsUseCase {
 
   /// Check subscription status (mock implementation)
   Future<bool> _checkSubscriptionStatus(String userId) async {
-    // In real implementation, check with subscription service
     return true; // For now, assume all users have premium
   }
 
   /// Notify theme change (mock implementation)
   Future<void> _notifyThemeChange(bool isDark) async {
-    // In real implementation, notify theme service
   }
 
   /// Disable analytics (mock implementation)
   Future<void> _disableAnalytics(String userId) async {
-    // In real implementation, disable analytics tracking
   }
 
   /// Disable notifications (mock implementation)
   Future<void> _disableNotifications(String userId) async {
-    // In real implementation, unregister notification tokens
   }
 
   /// Initialize speech recognition (mock implementation)
   Future<void> _initializeSpeechRecognition(String language) async {
-    // In real implementation, configure speech service
   }
 }
 

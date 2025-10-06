@@ -46,10 +46,7 @@ class PreferencesNotifier extends _$PreferencesNotifier {
 
   @override
   Future<PreferencesState> build() async {
-    // Inicializa automaticamente ao criar o provider
     await _preferencesService.initialize();
-
-    // Carrega preferências do storage
     final pragasDetectadas = _preferencesService.getPragasDetectadasEnabled();
     final lembretesAplicacao = _preferencesService.getLembretesAplicacaoEnabled();
 
@@ -96,7 +93,6 @@ class PreferencesNotifier extends _$PreferencesNotifier {
         await toggleLembretesAplicacao(enabled);
         break;
       default:
-        // Para tipos não implementados, ainda mostra feedback visual
         break;
     }
   }

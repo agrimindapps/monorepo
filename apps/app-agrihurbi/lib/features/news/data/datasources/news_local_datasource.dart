@@ -44,8 +44,6 @@ class NewsLocalDataSource {
     await Hive.openBox<Map<String, dynamic>>(_priceAlertsBoxName);
   }
 
-  // === NEWS ARTICLES ===
-
   /// Cache news articles
   Future<void> cacheArticles(List<NewsArticleModel> articles) async {
     try {
@@ -94,25 +92,18 @@ class NewsLocalDataSource {
   }) async {
     try {
       var articles = _articlesBox.values.where((article) {
-        // Text search
         final matchesQuery = query.isEmpty ||
             article.title.toLowerCase().contains(query.toLowerCase()) ||
             article.description.toLowerCase().contains(query.toLowerCase());
 
         if (!matchesQuery) return false;
-
-        // Filter by category
         if (filter?.categories.isNotEmpty == true &&
             !filter!.categories.contains(NewsCategoryModel.fromEntity(article.category))) {
           return false;
         }
-
-        // Filter by premium status
         if (filter?.showOnlyPremium == true && !article.isPremium) {
           return false;
         }
-
-        // Filter by date range
         if (filter?.fromDate != null && article.publishedAt.isBefore(filter!.fromDate!)) {
           return false;
         }
@@ -138,8 +129,6 @@ class NewsLocalDataSource {
       throw CacheException('Failed to clear articles cache: $e');
     }
   }
-
-  // === FAVORITES ===
 
   /// Add article to favorites
   Future<void> addToFavorites(String articleId) async {
@@ -187,8 +176,6 @@ class NewsLocalDataSource {
       throw CacheException('Failed to get favorite articles: $e');
     }
   }
-
-  // === COMMODITY PRICES ===
 
   /// Cache commodity prices
   Future<void> cacheCommodityPrices(List<CommodityPriceModel> prices) async {
@@ -248,8 +235,6 @@ class NewsLocalDataSource {
     }
   }
 
-  // === RSS FEEDS ===
-
   /// Save RSS feeds
   Future<void> saveRSSFeeds(List<String> feeds) async {
     try {
@@ -295,8 +280,6 @@ class NewsLocalDataSource {
     }
   }
 
-  // === PRICE ALERTS ===
-
   /// Save price alert
   Future<void> savePriceAlert(Map<String, dynamic> alert) async {
     try {
@@ -324,8 +307,6 @@ class NewsLocalDataSource {
       throw CacheException('Failed to remove price alert: $e');
     }
   }
-
-  // === METADATA ===
 
   /// Save last RSS update timestamp
   Future<void> saveLastRSSUpdate(DateTime timestamp) async {

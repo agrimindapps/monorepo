@@ -8,18 +8,10 @@ import '../../../../core/theme/theme_mode_enum.dart';
 
 part 'theme_notifier.g.dart';
 
-// =============================================================================
-// DEPENDENCY PROVIDERS (Services via GetIt - if needed, or direct instances)
-// =============================================================================
-
 @riverpod
 PreferencesLocalDataSource preferencesDataSource(PreferencesDataSourceRef ref) {
   return PreferencesLocalDataSourceImpl();
 }
-
-// =============================================================================
-// STATE CLASS
-// =============================================================================
 
 class ThemeState {
   final AppThemeMode themeMode;
@@ -35,10 +27,6 @@ class ThemeState {
   }
 }
 
-// =============================================================================
-// ASYNC NOTIFIER (Theme Management)
-// =============================================================================
-
 @riverpod
 class ThemeNotifier extends _$ThemeNotifier {
   PreferencesLocalDataSource get _dataSource =>
@@ -53,24 +41,16 @@ class ThemeNotifier extends _$ThemeNotifier {
       if (kDebugMode) {
         print('Error loading theme: $error');
       }
-      // Fallback para tema do sistema em caso de erro
       return const ThemeState(themeMode: AppThemeMode.system);
     }
   }
-
-  // =============================================================================
-  // ACTIONS
-  // =============================================================================
 
   /// Define novo tema
   Future<void> setThemeMode(AppThemeMode themeMode) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      // Persistir a mudança
       await _dataSource.setThemeMode(themeMode);
-
-      // Retornar novo estado
       return ThemeState(themeMode: themeMode);
     });
   }
@@ -112,10 +92,6 @@ class ThemeNotifier extends _$ThemeNotifier {
     return state.value?.themeMode ?? AppThemeMode.system;
   }
 }
-
-// =============================================================================
-// DERIVED PROVIDERS (Convenience)
-// =============================================================================
 
 /// Provider derivado para obter apenas o valor do tema (sem AsyncValue)
 @riverpod

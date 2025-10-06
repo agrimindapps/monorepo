@@ -25,8 +25,6 @@ class AppointmentCard extends StatelessWidget {
     final formattedDate = DateFormat('dd/MM/yyyy').format(appointment.date);
     final formattedTime = DateFormat('HH:mm').format(appointment.date);
     final statusText = appointment.displayStatus;
-    
-    // Build comprehensive accessibility description
     final accessibilityLabel = 'Consulta de $formattedDate às $formattedTime com ${appointment.veterinarianName}. Motivo: ${appointment.reason}. Status: $statusText';
     const accessibilityHint = 'Toque para ver detalhes da consulta';
 
@@ -45,11 +43,9 @@ class AppointmentCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with date and status
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date and time
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,8 +65,6 @@ class AppointmentCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
-                  // Status chip with accessibility
                   Semantics(
                     label: 'Status da consulta: ${appointment.displayStatus}',
                     child: Container(
@@ -88,8 +82,6 @@ class AppointmentCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
-                  // More options button with accessibility
                   Semantics(
                     label: 'Menu de ações da consulta',
                     hint: 'Toque para editar ou excluir esta consulta',
@@ -144,8 +136,6 @@ class AppointmentCard extends StatelessWidget {
               ),
               
               const SizedBox(height: 12),
-              
-              // Veterinarian with accessibility
               Semantics(
                 label: 'Veterinário: ${appointment.veterinarianName}',
                 child: Row(
@@ -172,8 +162,6 @@ class AppointmentCard extends StatelessWidget {
               ),
               
               const SizedBox(height: 8),
-              
-              // Reason with accessibility
               Semantics(
                 label: 'Motivo da consulta: ${appointment.reason}',
                 child: Row(
@@ -197,8 +185,6 @@ class AppointmentCard extends StatelessWidget {
                   ],
                 ),
               ),
-              
-              // Diagnosis (if available)
               if (appointment.diagnosis != null && appointment.diagnosis!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
@@ -221,8 +207,6 @@ class AppointmentCard extends StatelessWidget {
                   ],
                 ),
               ],
-              
-              // Cost (if available)
               if (appointment.cost != null && appointment.cost! > 0) ...[
                 const SizedBox(height: 8),
                 Row(
@@ -243,8 +227,6 @@ class AppointmentCard extends StatelessWidget {
                   ],
                 ),
               ],
-              
-              // Time indicators
               if (appointment.isToday) ...[
                 const SizedBox(height: 8),
                 Container(

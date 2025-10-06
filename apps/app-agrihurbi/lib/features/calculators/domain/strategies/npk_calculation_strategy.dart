@@ -150,8 +150,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     final errors = <String>[];
     final warnings = <String>[];
     final sanitizedInputs = Map<String, dynamic>.from(inputs);
-
-    // Validação de parâmetros obrigatórios
     for (final param in parameters) {
       if (!inputs.containsKey(param.id)) {
         errors.add('Parâmetro obrigatório ${param.name} não fornecido');
@@ -159,8 +157,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
       }
 
       final value = inputs[param.id];
-
-      // Validação de tipo e range
       if (param.type == ParameterType.decimal) {
         final numValue = double.tryParse(value.toString());
         if (numValue == null) {
@@ -182,8 +178,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
         }
       }
     }
-
-    // Validações específicas de negócio
     final organicMatter =
         double.tryParse(inputs['organic_matter']?.toString() ?? '0') ?? 0;
     if (organicMatter < 1.0) {
@@ -211,39 +205,24 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     Map<String, dynamic> inputs,
   ) async {
     try {
-      // 1. Calcular exigências nutricionais
       final nutritionalNeeds = await calculateNutritionalNeeds(inputs);
-
-      // 2. Calcular fornecimento do solo
       final soilSupply = await calculateSoilSupply(inputs);
-
-      // 3. Calcular fatores de eficiência
       final efficiencyFactors = await calculateEfficiencyFactors(inputs);
-
-      // 4. Gerar recomendações de fertilizantes
       final fertilizerRecommendations = await generateFertilizerRecommendations(
         nutritionalNeeds,
         soilSupply,
         efficiencyFactors,
       );
-
-      // 5. Calcular necessidades líquidas
       final netNeeds = _calculateNetNeeds(
         nutritionalNeeds,
         soilSupply,
         efficiencyFactors,
       );
-
-      // 6. Gerar cronograma de aplicação
       final applicationSchedule = await _generateApplicationSchedule(
         inputs,
         netNeeds,
       );
-
-      // 7. Gerar recomendações agronômicas
       final recommendations = await _generateRecommendations(inputs, netNeeds);
-
-      // 8. Calcular custos
       final estimatedCost = _calculateCosts(netNeeds, inputs['area'] as double);
 
       return CalculationResult(
@@ -317,8 +296,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     lastUpdated: DateTime.now(),
   );
 
-  // ============= IMPLEMENTAÇÃO DOS MÉTODOS DA INTERFACE =============
-
   @override
   Future<NutritionalRequirements> calculateNutritionalNeeds(
     Map<String, dynamic> inputs,
@@ -348,26 +325,16 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     final soilTexture = inputs['soil_texture'] as String;
     final organicMatter = inputs['organic_matter'] as double;
     final previousCrop = inputs['previous_crop'] as String;
-
-    // Fatores de conversão mg/dm³ para kg/ha (20 cm profundidade)
     const double conversionFactor = 2.0;
-
-    // Fornecimento base do solo
     double nSupply = soilN * conversionFactor;
     double pSupply = soilP * conversionFactor * 2.29; // P para P₂O₅
     double kSupply = soilK * conversionFactor * 1.20; // K para K₂O
-
-    // Ajustes por matéria orgânica
     final double omBonus = (organicMatter - 2.0) * 10.0;
     nSupply += math.max(0, omBonus);
-
-    // Ajustes por cultura anterior
     final previousCropEffect = await _dataRepository.getPreviousCropEffect(
       previousCrop,
     );
     nSupply += previousCropEffect.nitrogenContribution;
-
-    // Ajustes por textura
     final textureData = await _dataRepository.getSoilTextureFactors(
       soilTexture,
     );
@@ -393,8 +360,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     final textureData = await _dataRepository.getSoilTextureFactors(
       soilTexture,
     );
-
-    // Ajuste por matéria orgânica
     final double omFactor = 1.0 + (organicMatter - 3.0) * 0.05;
 
     return EfficiencyFactors(
@@ -415,8 +380,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     final products = await _dataRepository.getFertilizerProducts();
 
     final recommendations = <FertilizerRecommendation>[];
-
-    // Fertilizante nitrogenado
     if (netNeeds.nitrogen > 0) {
       final urea = products.firstWhere((p) => p.name == 'Ureia');
       final quantity = netNeeds.nitrogen / urea.nutrientContent['N']!;
@@ -430,8 +393,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
         ),
       );
     }
-
-    // Fertilizante fosfatado
     if (netNeeds.phosphorus > 0) {
       final map = products.firstWhere((p) => p.name.contains('MAP'));
       final quantity = netNeeds.phosphorus / map.nutrientContent['P2O5']!;
@@ -445,8 +406,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
         ),
       );
     }
-
-    // Fertilizante potássico
     if (netNeeds.potassium > 0) {
       final kcl = products.firstWhere((p) => p.name.contains('Cloreto'));
       final quantity = netNeeds.potassium / kcl.nutrientContent['K2O']!;
@@ -472,8 +431,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
       ],
     );
   }
-
-  // ============= MÉTODOS AUXILIARES =============
 
   NPKNeeds _calculateNetNeeds(
     NutritionalRequirements needs,
@@ -504,7 +461,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
   }
 
   bool _isYieldRealistic(String cropType, double expectedYield) {
-    // Produtividades médias consideradas altas
     final Map<String, double> highYields = {
       'Milho': 12.0,
       'Soja': 4.0,
@@ -621,7 +577,6 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
   }
 
   double _calculateCosts(NPKNeeds netNeeds, double area) {
-    // Preços médios por kg de nutriente (R$/kg)
     const double nPrice = 4.50;
     const double pPrice = 8.00;
     const double kPrice = 5.50;

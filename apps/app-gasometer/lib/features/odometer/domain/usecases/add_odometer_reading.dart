@@ -18,13 +18,10 @@ class AddOdometerReadingUseCase implements UseCase<OdometerEntity?, OdometerEnti
   @override
   Future<Either<Failure, OdometerEntity?>> call(OdometerEntity params) async {
     try {
-      // Validações básicas
       final validation = _validateOdometerReading(params);
       if (validation != null) {
         return Left(ValidationFailure(validation));
       }
-
-      // Salvar leitura
       final result = await _repository.saveOdometerReading(params);
 
       if (result == null) {

@@ -43,8 +43,6 @@ class NotificationActionsService {
     } catch (e, stackTrace) {
       debugPrint('❌ Error executing notification action: $e');
       debugPrint('Stack trace: $stackTrace');
-      
-      // Mostrar erro para usuário se context disponível
       if (context != null && context.mounted) {
         _showErrorSnackBar(context, 'Erro ao executar ação: $e');
       }
@@ -63,8 +61,6 @@ class NotificationActionsService {
           (t) => t.id == taskId,
           orElse: () => throw local_nav.TaskNotFoundException(taskId),
         );
-        
-        // Atualizar status para concluída
         final updatedTask = task.copyWith(
           status: TaskStatus.completed,
           updatedAt: DateTime.now(),
@@ -84,8 +80,6 @@ class NotificationActionsService {
             if (context != null && context.mounted) {
               _showSuccessSnackBar(context, '✅ Tarefa "${task.title}" concluída!');
             }
-            
-            // Cancelar notificações futuras desta tarefa
             _cancelTaskNotifications(taskId);
           },
         );
@@ -107,11 +101,7 @@ class NotificationActionsService {
   static Future<void> _snoozeTaskFor1Hour(String taskId, BuildContext? context) async {
     try {
       final notificationService = _container.read(notificationServiceProvider);
-      
-      // Cancelar notificação atual
       await notificationService.cancelNotification(taskId.hashCode);
-      
-      // Reagendar para 1 hora a partir de agora
       final newReminderTime = DateTime.now().add(const Duration(hours: 1));
       
       await notificationService.scheduleTaskReminder(
@@ -141,8 +131,6 @@ class NotificationActionsService {
   static Future<void> _openExtendDeadlineDialog(String taskId, BuildContext? context) async {
     try {
       debugPrint('📅 Opening extend deadline dialog for task: $taskId');
-      
-      // Navegar para tarefa com foco no deadline
       await local_nav.NavigationService.navigateFromNotification('task_deadline:$taskId');
       
       if (context != null && context.mounted) {
@@ -160,11 +148,7 @@ class NotificationActionsService {
   static Future<void> _cancelTaskNotifications(String taskId) async {
     try {
       final notificationService = _container.read(notificationServiceProvider);
-      
-      // Cancelar notificação principal
       await notificationService.cancelNotification(taskId.hashCode);
-      
-      // Cancelar notificação de deadline se existir
       await notificationService.cancelNotification('${taskId}_deadline'.hashCode);
       
       debugPrint('🔕 Cancelled notifications for task: $taskId');

@@ -95,10 +95,8 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com checkbox e star
             Row(
               children: [
-                // Checkbox para marcar como concluída
                 GestureDetector(
                   onTap: _toggleCompleted,
                   child: Container(
@@ -125,8 +123,6 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                   ),
                 ),
                 const SizedBox(width: 12),
-
-                // Indicador de prioridade
                 Container(
                   width: 4,
                   height: 24,
@@ -138,8 +134,6 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                   ),
                 ),
                 const SizedBox(width: 12),
-
-                // Título
                 Expanded(
                   child:
                       widget.isEditing
@@ -182,8 +176,6 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                             overflow: TextOverflow.ellipsis,
                           ),
                 ),
-
-                // Botão de favoritar
                 GestureDetector(
                   onTap: _toggleStarred,
                   child: Container(
@@ -200,8 +192,6 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                 ),
               ],
             ),
-
-            // Descrição (se houver)
             if (widget.task.description != null || widget.isEditing) ...[
               const SizedBox(height: 12),
               if (widget.isEditing)
@@ -237,8 +227,6 @@ class _TaskHeaderCardState extends ConsumerState<TaskHeaderCard> {
                   overflow: TextOverflow.ellipsis,
                 ),
             ],
-
-            // Tags (se houver)
             if (widget.task.tags.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(

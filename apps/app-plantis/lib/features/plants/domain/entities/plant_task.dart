@@ -49,8 +49,6 @@ class PlantTask extends Equatable {
 
   bool get isOverdue {
     if (status == TaskStatus.completed) return false;
-
-    // Comparar apenas a data (sem hora) para evitar falsos positivos
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final taskDate = DateTime(

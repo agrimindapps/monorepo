@@ -20,16 +20,9 @@ class PremiumSyncTest {
     debugPrint('🧪 Iniciando teste de sincronização premium...');
 
     try {
-      // 1. Testa listeners de streams
       await _testStreamListeners();
-
-      // 2. Testa sincronização forçada
       await _testForceSync();
-
-      // 3. Testa cenário de múltiplas atualizações
       await _testMultipleUpdates();
-
-      // 4. Testa recuperação de erro
       await _testErrorRecovery();
 
       debugPrint('✅ Teste de sincronização premium concluído com sucesso!');
@@ -43,8 +36,6 @@ class PremiumSyncTest {
   /// Testa listeners de streams
   Future<void> _testStreamListeners() async {
     debugPrint('📡 Testando listeners de streams...');
-
-    // Escuta mudanças de status
     _statusSubscription = _syncService.premiumStatusStream.listen(
       (status) {
         debugPrint(
@@ -55,8 +46,6 @@ class PremiumSyncTest {
         debugPrint('❌ Erro no stream de status: $error');
       },
     );
-
-    // Escuta eventos de sync
     _eventsSubscription = _syncService.syncEvents.listen(
       (event) {
         debugPrint('🔄 Evento de sync: ${event.runtimeType}');
@@ -65,8 +54,6 @@ class PremiumSyncTest {
         debugPrint('❌ Erro no stream de eventos: $error');
       },
     );
-
-    // Aguarda um pouco para permitir setup dos streams
     await Future<void>.delayed(const Duration(seconds: 1));
     debugPrint('✅ Listeners configurados');
   }
@@ -92,8 +79,6 @@ class PremiumSyncTest {
   /// Testa múltiplas atualizações em sequência
   Future<void> _testMultipleUpdates() async {
     debugPrint('📦 Testando múltiplas atualizações...');
-
-    // Simula múltiplas chamadas de sync em sequência
     final futures = <Future<void>>[];
 
     for (int i = 0; i < 3; i++) {
@@ -112,11 +97,7 @@ class PremiumSyncTest {
   /// Testa recuperação de erro
   Future<void> _testErrorRecovery() async {
     debugPrint('🔧 Testando recuperação de erro...');
-
-    // Força um erro simulado e verifica se o sistema se recupera
     try {
-      // Note: Em um teste real, injetaríamos um mock que falha
-      // Por agora, apenas testamos que o sistema não trava
       await _syncService.forceSync();
       debugPrint('✅ Sistema não travou com erro simulado');
     } catch (e) {
@@ -178,8 +159,6 @@ class PremiumSyncTest {
     testCurrentStatus();
     testFeatureAccess();
     testUsageLimits();
-
-    // Testa uma sincronização
     final result = await _syncService.forceSync();
     result.fold(
       (failure) => debugPrint('⚠️  Quick sync failed: ${failure.message}'),

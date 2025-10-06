@@ -46,7 +46,6 @@ class _NotesExpansionDialogState extends State<NotesExpansionDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 const Expanded(
@@ -65,8 +64,6 @@ class _NotesExpansionDialogState extends State<NotesExpansionDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Text Area
             Expanded(
               child: TextField(
                 controller: _notesController,
@@ -82,8 +79,6 @@ class _NotesExpansionDialogState extends State<NotesExpansionDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Footer
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

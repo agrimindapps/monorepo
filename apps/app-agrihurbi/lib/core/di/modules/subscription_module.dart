@@ -7,7 +7,6 @@ import '../../../features/subscription/domain/repositories/subscription_reposito
 import '../../../features/subscription/domain/usecases/subscription_usecases.dart';
 
 void initSubscriptionModule(GetIt sl) {
-    // Datasources
     sl.registerLazySingleton<SubscriptionLocalDataSource>(
       () => SubscriptionLocalDataSourceImpl(),
     );
@@ -18,16 +17,12 @@ void initSubscriptionModule(GetIt sl) {
         subscriptionRepository: sl<ISubscriptionRepository>(),
       ),
     );
-
-    // Repository
     sl.registerLazySingleton<SubscriptionRepository>(
       () => SubscriptionRepositoryImpl(
         localDataSource: sl<SubscriptionLocalDataSource>(),
         remoteDataSource: sl<SubscriptionRemoteDataSource>(),
       ),
     );
-
-    // Use Cases
     sl.registerLazySingleton(() => GetAvailablePlans(sl<SubscriptionRepository>()));
     sl.registerLazySingleton(() => GetCurrentSubscription(sl<SubscriptionRepository>()));
     sl.registerLazySingleton(() => SubscribeToPlan(sl<SubscriptionRepository>()));

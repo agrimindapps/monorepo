@@ -68,7 +68,6 @@ class ProfileImagePickerWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
               Container(
                 width: 40,
                 height: 4,
@@ -81,8 +80,6 @@ class ProfileImagePickerWidget extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-
-              // Title
               Text(
                 'Alterar Foto do Perfil',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -103,8 +100,6 @@ class ProfileImagePickerWidget extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
-
-              // Options
               Column(
                 children: [
                   _buildOption(
@@ -143,8 +138,6 @@ class ProfileImagePickerWidget extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
-
-              // Cancel button
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
@@ -354,16 +347,10 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
         if (kDebugMode) {
           debugPrint('📷 ProfileImagePicker: Image selected: ${file.path}');
         }
-
-        // Haptic feedback
         HapticFeedback.lightImpact();
-
-        // Close modal
         if (mounted) {
           Navigator.of(context).pop();
         }
-
-        // Call callback
         widget.onImageSelected(file);
       } else {
         if (kDebugMode) {
@@ -398,16 +385,10 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
       if (kDebugMode) {
         debugPrint('🗑️ ProfileImagePicker: Removing current image');
       }
-
-      // Haptic feedback
       HapticFeedback.lightImpact();
-
-      // Close modal
       if (mounted) {
         Navigator.of(context).pop();
       }
-
-      // Call callback
       widget.onRemoveImage?.call();
     } catch (e) {
       if (kDebugMode) {

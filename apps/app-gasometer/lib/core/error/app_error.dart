@@ -52,10 +52,6 @@ abstract class AppError extends Equatable {
 /// Error severity levels
 enum ErrorSeverity { info, warning, error, critical, fatal }
 
-// ============================================================================
-// NETWORK ERRORS
-// ============================================================================
-
 class NetworkError extends AppError {
   const NetworkError({
     required super.message,
@@ -90,10 +86,6 @@ class NoInternetError extends NetworkError {
              'Sem conexão com a internet. Verifique sua conectividade.',
        );
 }
-
-// ============================================================================
-// SERVER ERRORS
-// ============================================================================
 
 class ServerError extends AppError {
   const ServerError({
@@ -160,10 +152,6 @@ class InternalServerError extends ServerError {
        );
 }
 
-// ============================================================================
-// VALIDATION ERRORS
-// ============================================================================
-
 class ValidationError extends AppError {
   const ValidationError({
     required super.message,
@@ -185,10 +173,6 @@ class ValidationError extends AppError {
     return map;
   }
 }
-
-// ============================================================================
-// BUSINESS LOGIC ERRORS
-// ============================================================================
 
 class BusinessLogicError extends AppError {
   const BusinessLogicError({
@@ -239,10 +223,6 @@ class InvalidOdometerError extends BusinessLogicError {
        );
 }
 
-// ============================================================================
-// STORAGE ERRORS
-// ============================================================================
-
 class StorageError extends AppError {
   const StorageError({
     required super.message,
@@ -276,10 +256,6 @@ class DatabaseError extends StorageError {
        );
 }
 
-// ============================================================================
-// SYNC ERRORS
-// ============================================================================
-
 class SyncError extends AppError {
   const SyncError({
     required super.message,
@@ -303,10 +279,6 @@ class ConflictError extends SyncError {
              'Conflito de dados detectado. Resolução automática aplicada.',
        );
 }
-
-// ============================================================================
-// AUTHENTICATION ERRORS
-// ============================================================================
 
 class AuthenticationError extends AppError {
   const AuthenticationError({
@@ -340,10 +312,6 @@ class AccountDisabledError extends AuthenticationError {
        );
 }
 
-// ============================================================================
-// PERMISSION ERRORS
-// ============================================================================
-
 class PermissionError extends AppError {
   const PermissionError({
     required this.permission,
@@ -364,10 +332,6 @@ class PermissionError extends AppError {
     return map;
   }
 }
-
-// ============================================================================
-// UNEXPECTED ERRORS
-// ============================================================================
 
 class UnexpectedError extends AppError {
   const UnexpectedError({

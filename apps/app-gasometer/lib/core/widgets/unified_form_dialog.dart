@@ -60,8 +60,6 @@ class UnifiedFormDialog extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isTablet = UnifiedDesignTokens.isTablet(context);
     final isDesktop = UnifiedDesignTokens.isDesktop(context);
-    
-    // Definir largura responsiva
     double dialogWidth;
     if (isDesktop) {
       dialogWidth = 600;
@@ -96,10 +94,7 @@ class UnifiedFormDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             _buildHeader(context, theme),
-            
-            // Content
             if (scrollable)
               Flexible(
                 child: SingleChildScrollView(
@@ -114,8 +109,6 @@ class UnifiedFormDialog extends StatelessWidget {
                   child: content,
                 ),
               ),
-            
-            // Actions
             if (onConfirm != null || onCancel != null)
               _buildActions(context, theme),
           ],
@@ -137,7 +130,6 @@ class UnifiedFormDialog extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Ícone do header
           if (headerIcon != null) ...[
             Container(
               padding: const EdgeInsets.all(UnifiedDesignTokens.spacingSM),
@@ -153,8 +145,6 @@ class UnifiedFormDialog extends StatelessWidget {
             ),
             const SizedBox(width: UnifiedDesignTokens.spacingMD),
           ],
-          
-          // Título e subtítulo
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,8 +168,6 @@ class UnifiedFormDialog extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Botão de fechar se barrierDismissible
           if (barrierDismissible && onCancel != null)
             IconButton(
               onPressed: isLoading ? null : onCancel,
@@ -206,7 +194,6 @@ class UnifiedFormDialog extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Botão cancelar
           if (onCancel != null) ...[
             TextButton(
               onPressed: isLoading ? null : onCancel,
@@ -221,8 +208,6 @@ class UnifiedFormDialog extends StatelessWidget {
             ),
             const SizedBox(width: UnifiedDesignTokens.spacingMD),
           ],
-          
-          // Botão confirmar
           if (onConfirm != null)
             FilledButton(
               onPressed: (isLoading || !canConfirm) ? null : onConfirm,

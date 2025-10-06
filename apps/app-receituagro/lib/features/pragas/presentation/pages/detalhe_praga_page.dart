@@ -36,11 +36,7 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
   @override
   void initState() {
     super.initState();
-
-    // Inicializar tab controller
     _tabController = TabController(length: 3, vsync: this);
-
-    // Inicializar dados após primeiro frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadInitialData();
     });
@@ -57,9 +53,6 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
     try {
       final pragaNotifier = ref.read(detalhePragaNotifierProvider.notifier);
       final diagnosticosNotifier = ref.read(diagnosticosPragaNotifierProvider.notifier);
-
-      // Inicializar provider da praga (operação local - sem timeout)
-      // Preferir ID quando disponível para melhor precisão
       if (widget.pragaId != null && widget.pragaId!.isNotEmpty) {
         await pragaNotifier.initializeById(widget.pragaId!);
       } else {
@@ -68,11 +61,7 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
           widget.pragaScientificName,
         );
       }
-
-      // Aguardar estado estar disponível
       final pragaState = await ref.read(detalhePragaNotifierProvider.future);
-
-      // Se praga carregada com sucesso, carregar diagnósticos por ID
       if (pragaState.pragaData != null && pragaState.pragaData!.idReg.isNotEmpty) {
         await diagnosticosNotifier.loadDiagnosticos(
           pragaState.pragaData!.idReg,
@@ -81,8 +70,6 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       }
     } catch (e) {
       debugPrint('❌ Erro ao carregar dados iniciais: $e');
-      // Não relançar a exceção para não quebrar a UI
-      // O notifier já terá o estado de erro interno
     }
   }
 
@@ -167,7 +154,6 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       final state = ref.read(detalhePragaNotifierProvider).value;
 
       if (success) {
-        // Notifica a página de favoritos sobre a mudança
         FavoritosPage.reloadIfActive();
 
         ScaffoldMessenger.of(context).showSnackBar(

@@ -15,11 +15,7 @@ class AnesthesiaPage extends ConsumerStatefulWidget {
 
 class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Form controllers
   final _weightController = TextEditingController();
-  
-  // Form state
   String _selectedSpecies = 'Cão';
   String _selectedProcedureType = 'Anestesia curta (< 30min)';
   String _selectedAgeGroup = 'Adulto (2-8 anos)';
@@ -149,8 +145,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Peso
             TextFormField(
               controller: _weightController,
               decoration: const InputDecoration(
@@ -172,8 +166,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Espécie
             DropdownButtonFormField<String>(
               value: _selectedSpecies,
               decoration: const InputDecoration(
@@ -220,8 +212,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Tipo de Procedimento
             DropdownButtonFormField<String>(
               value: _selectedProcedureType,
               decoration: const InputDecoration(
@@ -274,8 +264,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Faixa Etária
             DropdownButtonFormField<String>(
               value: _selectedAgeGroup,
               decoration: const InputDecoration(
@@ -308,8 +296,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Estado de Saúde
             DropdownButtonFormField<String>(
               value: _selectedHealthStatus,
               decoration: const InputDecoration(
@@ -373,8 +359,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Results
             ...result.results.map((item) => _buildResultItem(item)),
             
             if (result.summary != null) ...[
@@ -456,8 +440,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
-    
-    // Separar avisos de monitoramento
     final warnings = recommendations.where((r) => r.severity == ResultSeverity.warning).toList();
     final monitoring = recommendations.where((r) => r.severity != ResultSeverity.warning).toList();
 
@@ -471,8 +453,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
           ),
         ),
         const SizedBox(height: 8),
-        
-        // Mostrar avisos primeiro
         if (warnings.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(12),
@@ -510,8 +490,6 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
             ),
           ),
         ],
-        
-        // Monitoramento
         ...monitoring.map((rec) => Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(

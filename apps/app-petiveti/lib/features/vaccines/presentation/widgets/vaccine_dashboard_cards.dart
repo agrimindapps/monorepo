@@ -224,8 +224,6 @@ class VaccineDashboardCards extends ConsumerWidget {
   }
 
   void _onCardTap(BuildContext context, VaccinesFilter filter) {
-    // This would typically navigate to filtered view
-    // Implementation depends on navigation structure
   }
 }
 
@@ -259,8 +257,6 @@ class VaccineTimeline extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final vaccinesState = ref.watch(vaccinesProvider);
-    
-    // Get upcoming vaccines sorted by due date
     final upcomingVaccines = vaccinesState.vaccines
         .where((vaccine) => 
             (animalId == null || vaccine.animalId == animalId) &&

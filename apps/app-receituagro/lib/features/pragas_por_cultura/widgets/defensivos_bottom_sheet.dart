@@ -180,7 +180,6 @@ class DefensivosBottomSheet extends StatelessWidget {
           onTap: () {
             Navigator.of(context).pop();
             onDefensivoTap?.call();
-            // Implementar navegação para detalhes do defensivo
           },
         ),
       ),

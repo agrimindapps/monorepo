@@ -46,14 +46,8 @@ class FirestoreDeletionService {
       }
 
       final result = FirestoreDeletionResult();
-
-      // Step 1: Delete main user document
       await _deleteUserDocument(userId, result);
-
-      // Step 2: Delete all subcollections
       await _deleteSubcollections(userId, subcollections, result);
-
-      // Step 3: Delete user's files from Storage
       if (deleteStorage) {
         await _deleteStorageFiles(userId, result);
       }
@@ -135,8 +129,6 @@ class FirestoreDeletionService {
           }
           continue;
         }
-
-        // Delete in batches (Firestore limit is 500 operations per batch)
         await _deleteBatchedDocuments(snapshot.docs, subcollection, result);
 
         result.subcollectionsDeleted[subcollection] = snapshot.docs.length;
@@ -180,8 +172,6 @@ class FirestoreDeletionService {
     if (operationCount > 0) {
       batches.add(currentBatch);
     }
-
-    // Commit all batches
     for (var i = 0; i < batches.length; i++) {
       try {
         await batches[i].commit();
@@ -208,11 +198,7 @@ class FirestoreDeletionService {
       }
 
       final userStorageRef = _storage.ref().child('users/$userId');
-
-      // List all files recursively
       final listResult = await userStorageRef.listAll();
-
-      // Delete all files
       for (final item in listResult.items) {
         try {
           await item.delete();
@@ -224,8 +210,6 @@ class FirestoreDeletionService {
           }
         }
       }
-
-      // Recursively delete files in subdirectories
       for (final prefix in listResult.prefixes) {
         await _deleteStoragePrefix(prefix, result);
       }
@@ -298,11 +282,8 @@ class FirestoreDeletionService {
     };
 
     try {
-      // Check user document
       final userDoc = await _firestore.collection('users').doc(userId).get();
       stats['hasUserDocument'] = userDoc.exists;
-
-      // Count documents in each subcollection
       for (final subcollection in subcollections) {
         try {
           final snapshot =

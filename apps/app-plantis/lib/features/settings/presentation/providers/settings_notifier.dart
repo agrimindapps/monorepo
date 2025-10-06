@@ -51,28 +51,18 @@ class SettingsState {
       successMessage: clearSuccess ? null : (successMessage ?? this.successMessage),
     );
   }
-
-  // Getters específicos (derived state)
   NotificationSettingsEntity get notificationSettings => settings.notifications;
   BackupSettingsEntity get backupSettings => settings.backup;
   ThemeSettingsEntity get themeSettings => settings.theme;
   AccountSettingsEntity get accountSettings => settings.account;
   AppSettingsEntity get appSettings => settings.app;
-
-  // Estados derivados
   bool get hasPermissionsGranted => settings.notifications.permissionsGranted;
   bool get isDarkMode => settings.theme.isDarkMode;
   bool get isLightMode => settings.theme.isLightMode;
   bool get followSystemTheme => settings.theme.followSystemTheme;
   bool get notificationsEnabled => settings.notifications.taskRemindersEnabled;
-
-  // Verificação de plataforma web
   bool get isWebPlatform => kIsWeb;
 }
-
-// ============================================================================
-// DEPENDENCY PROVIDERS
-// ============================================================================
 
 @riverpod
 ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
@@ -89,14 +79,9 @@ BackupService? backupService(BackupServiceRef ref) {
   try {
     return getIt<BackupService>();
   } catch (e) {
-    // BackupService é opcional
     return null;
   }
 }
-
-// ============================================================================
-// SETTINGS NOTIFIER (Main State Management)
-// ============================================================================
 
 @riverpod
 class SettingsNotifier extends _$SettingsNotifier {
@@ -106,22 +91,16 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   @override
   Future<SettingsState> build() async {
-    // Initialize dependencies
     _settingsRepository = ref.read(settingsRepositoryProvider);
     _notificationService = ref.read(plantisNotificationServiceProvider);
     _backupService = ref.read(backupServiceProvider);
-
-    // Initialize provider
     return await _initialize();
   }
 
   /// Inicializa o provider carregando configurações
   Future<SettingsState> _initialize() async {
     try {
-      // Load settings
       await _loadSettings();
-
-      // Sync with services
       await _syncWithServices();
 
       final currentState = state.valueOrNull ?? SettingsState.initial();
@@ -161,8 +140,6 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> _syncWithServices() async {
     try {
       final currentState = state.valueOrNull ?? SettingsState.initial();
-
-      // Sincronizar permissões de notificação
       final hasPermissions = await _notificationService.areNotificationsEnabled();
 
       if (currentState.settings.notifications.permissionsGranted != hasPermissions) {
@@ -172,8 +149,6 @@ class SettingsNotifier extends _$SettingsNotifier {
           ),
         );
       }
-
-      // Sincronizar dados da conta
       await _syncAccountSettings();
     } catch (e) {
       debugPrint('Erro ao sincronizar com services: $e');
@@ -183,8 +158,6 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Sincroniza configurações da conta com AuthRepository
   Future<void> _syncAccountSettings() async {
     try {
-      // Por enquanto, usar configurações padrão
-      // TODO: Integrar com stream de usuário do AuthRepository quando necessário
       final accountSettings = AccountSettingsEntity.defaults();
       final currentState = state.valueOrNull ?? SettingsState.initial();
 
@@ -226,8 +199,6 @@ class SettingsNotifier extends _$SettingsNotifier {
               isLoading: false,
             ),
           );
-
-          // Sincronizar com services externos
           _applyCascadeEffects(newSettings);
         },
       );
@@ -264,8 +235,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     final currentState = state.valueOrNull ?? SettingsState.initial();
     final updatedSettings = currentState.settings.copyWith(theme: newSettings);
     await updateSettings(updatedSettings);
-
-    // Aplicar tema imediatamente
     _applyThemeChanges(newSettings);
   }
 
@@ -282,10 +251,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     final updatedSettings = currentState.settings.copyWith(app: newSettings);
     await updateSettings(updatedSettings);
   }
-
-  // ========================================================================
-  // MÉTODOS ESPECÍFICOS PARA FACILITAR USO NAS PÁGINAS
-  // ========================================================================
 
   /// Toggle para lembretes de tarefas
   Future<void> toggleTaskReminders(bool enabled) async {
@@ -374,8 +339,6 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Aplica efeitos cascata quando configurações mudam
   void _applyCascadeEffects(SettingsEntity newSettings) {
     final currentState = state.valueOrNull ?? SettingsState.initial();
-
-    // Aplicar mudanças de tema
     if (currentState.settings.theme != newSettings.theme) {
       _applyThemeChanges(newSettings.theme);
     }
@@ -383,13 +346,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Aplica mudanças de tema no ThemeProvider
   void _applyThemeChanges(ThemeSettingsEntity themeSettings) {
-    // A aplicação de temas agora é feita através dos providers Riverpod
-    // Este método é mantido para compatibilidade mas não implementa nada
   }
-
-  // ========================================================================
-  // MÉTODOS DE NOTIFICAÇÃO INTEGRADOS
-  // ========================================================================
 
   /// Abre configurações do sistema para notificações
   Future<void> openNotificationSettings() async {
@@ -461,10 +418,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     return currentState.settings.notifications.isTaskTypeEnabled(taskType);
   }
 
-  // ========================================================================
-  // MÉTODOS DE BACKUP INTEGRADOS
-  // ========================================================================
-
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
     final backupService = _backupService;
@@ -535,8 +488,6 @@ class SettingsNotifier extends _$SettingsNotifier {
               isLoading: false,
             ),
           );
-
-          // Reaplica configurações nos services
           await _syncWithServices();
         },
       );
@@ -566,10 +517,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     );
   }
 }
-
-// ============================================================================
-// DERIVED STATE PROVIDERS (para facilitar acesso na UI)
-// ============================================================================
 
 @riverpod
 SettingsEntity settings(SettingsRef ref) {

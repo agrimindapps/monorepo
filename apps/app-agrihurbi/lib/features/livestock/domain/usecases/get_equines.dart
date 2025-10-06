@@ -15,12 +15,9 @@ class GetEquinesUseCase implements UseCase<List<EquineEntity>, GetEquinesParams>
   
   @override
   Future<Either<Failure, List<EquineEntity>>> call(GetEquinesParams params) async {
-    // Se não há parâmetros de busca, retorna todos
     if (params.searchParams == null) {
       return await repository.getEquines();
     }
-    
-    // Aplicar filtros de busca
     return await repository.searchEquines(params.searchParams!);
   }
 }

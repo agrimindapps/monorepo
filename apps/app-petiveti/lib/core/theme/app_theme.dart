@@ -8,8 +8,6 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
-      
-      // ========== COLOR SCHEME ==========
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.light,
@@ -22,8 +20,6 @@ class AppTheme {
         error: AppColors.error,
         onError: AppColors.onPrimary,
       ),
-      
-      // ========== APP BAR ==========
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -40,8 +36,6 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
       ),
-      
-      // ========== CARD THEME ==========
       cardTheme: const CardThemeData(
         elevation: 2,
         shadowColor: AppColors.shadow,
@@ -51,8 +45,6 @@ class AppTheme {
         ),
         color: AppColors.surface,
       ),
-      
-      // ========== INPUT DECORATION ==========
       inputDecorationTheme: const InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -81,8 +73,6 @@ class AppTheme {
         prefixIconColor: AppColors.secondary,
         suffixIconColor: AppColors.textSecondary,
       ),
-      
-      // ========== ELEVATED BUTTON ==========
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -104,8 +94,6 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // ========== OUTLINED BUTTON ==========
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -123,8 +111,6 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // ========== TEXT BUTTON ==========
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -137,15 +123,11 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // ========== FLOATING ACTION BUTTON ==========
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         elevation: 4,
       ),
-      
-      // ========== BOTTOM NAVIGATION BAR ==========
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.navigationBackground,
         selectedItemColor: AppColors.navigationSelected,
@@ -169,14 +151,10 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      
-      // ========== DIVIDER ==========
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
       ),
-      
-      // ========== SNACK BAR ==========
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: AppColors.textPrimary,
         contentTextStyle: TextStyle(color: AppColors.surface),
@@ -185,8 +163,6 @@ class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
       ),
-      
-      // ========== DIALOG ==========
       dialogTheme: const DialogThemeData(
         backgroundColor: AppColors.dialogBackground,
         surfaceTintColor: Colors.transparent,
@@ -214,8 +190,6 @@ class AppTheme {
     
     return ThemeData(
       useMaterial3: true,
-      
-      // ========== COLOR SCHEME ==========
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         brightness: Brightness.dark,
@@ -228,8 +202,6 @@ class AppTheme {
         error: AppColors.errorLight,
         onError: Colors.black,
       ),
-      
-      // ========== APP BAR ==========
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
@@ -246,8 +218,6 @@ class AppTheme {
           color: darkOnSurface,
         ),
       ),
-      
-      // ========== CARD THEME ==========
       cardTheme: const CardThemeData(
         elevation: 2,
         shadowColor: Colors.black45,
@@ -257,8 +227,6 @@ class AppTheme {
         ),
         color: darkSurface,
       ),
-      
-      // ========== INPUT DECORATION ==========
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -287,8 +255,6 @@ class AppTheme {
         prefixIconColor: AppColors.secondaryLight,
         suffixIconColor: Colors.grey[400],
       ),
-      
-      // Continue with other theme properties...
     );
   }
 }

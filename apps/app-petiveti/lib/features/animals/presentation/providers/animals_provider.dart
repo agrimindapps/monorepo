@@ -12,8 +12,6 @@ import '../../domain/usecases/delete_animal.dart';
 import '../../domain/usecases/get_animal_by_id.dart';
 import '../../domain/usecases/get_animals.dart';
 import '../../domain/usecases/update_animal.dart';
-
-// Filter classes
 class AnimalsFilter {
   final String searchQuery;
   final AnimalSpecies? speciesFilter;
@@ -51,8 +49,6 @@ class AnimalsFilter {
       genderFilter != null ||
       sizeFilter != null;
 }
-
-// State classes
 class AnimalsState {
   final List<Animal> animals;
   final List<Animal> filteredAnimals;
@@ -86,8 +82,6 @@ class AnimalsState {
 
   List<Animal> get displayedAnimals => filter.hasActiveFilters ? filteredAnimals : animals;
 }
-
-// State notifier
 class AnimalsNotifier extends StateNotifier<AnimalsState> {
   final GetAnimals _getAnimals;
   final GetAnimalById _getAnimalById;
@@ -150,7 +144,6 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
           isLoading: false,
           error: null,
         );
-        // Apply current filter to new data
         _applyFilter();
       },
     );
@@ -196,13 +189,9 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
     }
 
     List<Animal> filtered = state.animals;
-
-    // Apply active status filter
     if (filter.onlyActive) {
       filtered = filtered.where((animal) => animal.isActive).toList();
     }
-
-    // Apply search query filter
     if (filter.searchQuery.isNotEmpty) {
       final query = filter.searchQuery.toLowerCase();
       filtered = filtered.where((animal) {
@@ -213,22 +202,16 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
             animal.microchipNumber?.toLowerCase().contains(query) == true;
       }).toList();
     }
-
-    // Apply species filter
     if (filter.speciesFilter != null) {
       filtered = filtered
           .where((animal) => animal.species == filter.speciesFilter)
           .toList();
     }
-
-    // Apply gender filter
     if (filter.genderFilter != null) {
       filtered = filtered
           .where((animal) => animal.gender == filter.genderFilter)
           .toList();
     }
-
-    // Apply size filter
     if (filter.sizeFilter != null) {
       filtered = filtered
           .where((animal) => animal.size == filter.sizeFilter)
@@ -244,13 +227,11 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Add the animal to current state optimistically
         final updatedAnimals = [animal, ...state.animals];
         state = state.copyWith(
           animals: updatedAnimals,
           error: null,
         );
-        // Reapply filter to include new animal if it matches
         _applyFilter();
       },
     );
@@ -262,7 +243,6 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Update the animal in current state
         final updatedAnimals = state.animals.map((a) {
           return a.id == animal.id ? animal : a;
         }).toList();
@@ -271,7 +251,6 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
           animals: updatedAnimals,
           error: null,
         );
-        // Reapply filter to update filtered list
         _applyFilter();
       },
     );
@@ -283,13 +262,11 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Remove the animal from current state
         final updatedAnimals = state.animals.where((a) => a.id != id).toList();
         state = state.copyWith(
           animals: updatedAnimals,
           error: null,
         );
-        // Reapply filter to update filtered list
         _applyFilter();
       },
     );
@@ -311,8 +288,6 @@ class AnimalsNotifier extends StateNotifier<AnimalsState> {
     state = state.copyWith(error: null);
   }
 }
-
-// Providers
 final animalsProvider = StateNotifierProvider<AnimalsNotifier, AnimalsState>((ref) {
   return AnimalsNotifier(
     getAnimals: di.getIt<GetAnimals>(),
@@ -322,18 +297,12 @@ final animalsProvider = StateNotifierProvider<AnimalsNotifier, AnimalsState>((re
     deleteAnimal: di.getIt<DeleteAnimal>(),
   );
 });
-
-// Individual animal provider
 final animalProvider = FutureProvider.family<Animal?, String>((ref, id) async {
   final notifier = ref.read(animalsProvider.notifier);
   return await notifier.getAnimalById(id);
 });
-
-// Stream provider for real-time updates
 final animalsStreamProvider = StreamProvider<List<Animal>>((ref) {
   final repository = di.getIt.get<AnimalRepository>();
   return repository.watchAnimals();
 });
-
-// Selected animal provider for maintaining selection across pages
 final selectedAnimalProvider = StateProvider<Animal?>((ref) => null);

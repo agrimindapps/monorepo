@@ -126,8 +126,6 @@ class SolidDIFactory {
   /// Registra todas as dependências SOLID no GetIt
   void registerSolidDependencies() {
     final getIt = GetIt.instance;
-    
-    // Registrar serviços como singletons
     if (!getIt.isRegistered<IAuthStateProvider>()) {
       getIt.registerSingleton<IAuthStateProvider>(createAuthStateProvider());
     }
@@ -153,8 +151,6 @@ class SolidDIFactory {
     if (!getIt.isRegistered<PlantsCareCalculator>()) {
       getIt.registerSingleton<PlantsCareCalculator>(createPlantsCareCalculator());
     }
-    
-    // Registrar factories para state managers (não singletons)
     if (!getIt.isRegistered<PlantsStateManager>()) {
       getIt.registerFactory<PlantsStateManager>(() => createPlantsStateManager(
         dataService: getIt<PlantsDataService>(),
@@ -245,22 +241,17 @@ class SolidDIConfigurator {
   }
   
   static void _configureProduction(SolidDIFactory factory) {
-    // Configuração otimizada para produção
     factory.registerSolidDependencies();
   }
   
   static void _configureDevelopment(SolidDIFactory factory) {
-    // Configuração com debugging para desenvolvimento
     factory.registerSolidDependencies();
-    
-    // Adicionar logs de debug se necessário
     if (kDebugMode) {
       print('🔧 SOLID DI configurado para desenvolvimento');
     }
   }
   
   static void _configureTesting(SolidDIFactory factory) {
-    // Configuração para testes - limpar dependências existentes
     factory.clearSolidDependencies();
     factory.registerSolidDependencies();
     

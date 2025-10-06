@@ -9,8 +9,6 @@
 class TaskScheduleCalculator {
   static const int _defaultTaskHour = 9; // 9h da manhã
   static const int _defaultTaskMinute = 0;
-
-  // Limites de intervalo por tipo de cuidado (em dias)
   static const Map<String, TaskIntervalLimits> _careTypeLimits = {
     'agua': TaskIntervalLimits(minDays: 1, maxDays: 14),
     'adubo': TaskIntervalLimits(minDays: 7, maxDays: 90),
@@ -36,16 +34,11 @@ class TaskScheduleCalculator {
     int? customHour,
     int? customMinute,
   }) {
-    // Validar intervalo
     final validatedInterval = _validateAndAdjustInterval(
       intervalDays,
       careType,
     );
-
-    // Calcular data base
     var nextDate = baseDate.add(Duration(days: validatedInterval));
-
-    // Definir horário padrão
     final hour = customHour ?? _getDefaultHourForCareType(careType);
     final minute = customMinute ?? _defaultTaskMinute;
 
@@ -56,13 +49,9 @@ class TaskScheduleCalculator {
       hour,
       minute,
     );
-
-    // Ajustar para pular fins de semana se solicitado
     if (skipWeekends) {
       nextDate = _skipWeekends(nextDate);
     }
-
-    // Aplicar ajustes específicos por tipo de cuidado
     nextDate = _applyCareTypeAdjustments(nextDate, careType);
 
     return nextDate;
@@ -105,7 +94,6 @@ class TaskScheduleCalculator {
     var nextDay = date;
 
     while (nextDay.weekday > 5) {
-      // 6 = sábado, 7 = domingo
       nextDay = nextDay.add(const Duration(days: 1));
     }
 
@@ -149,14 +137,10 @@ class TaskScheduleCalculator {
     if (limits == null) {
       return 7; // Padrão semanal
     }
-
-    // Ajustar baseado na estação (simplificado para Brasil)
     final isWinter = _isWinter(now);
     final isSummer = _isSummer(now);
 
     int baseInterval = _getBaseIntervalForCareType(careType);
-
-    // Ajustes sazonais
     switch (careType) {
       case 'agua':
         if (isSummer) {
@@ -181,8 +165,6 @@ class TaskScheduleCalculator {
         }
         break;
     }
-
-    // Garantir que está dentro dos limites
     return limits.clampToLimits(baseInterval);
   }
 
@@ -196,8 +178,6 @@ class TaskScheduleCalculator {
   static TaskIntervalLimits? getLimitsForCareType(String careType) {
     return _careTypeLimits[careType];
   }
-
-  // Métodos privados
 
   static int _validateAndAdjustInterval(int intervalDays, String careType) {
     if (intervalDays <= 0) {
@@ -241,13 +221,11 @@ class TaskScheduleCalculator {
   static DateTime _applyCareTypeAdjustments(DateTime date, String careType) {
     switch (careType) {
       case 'banho_sol':
-        // Evitar sol muito forte (meio-dia às 14h)
         if (date.hour >= 12 && date.hour <= 14) {
           return DateTime(date.year, date.month, date.day, 8, date.minute);
         }
         break;
       case 'rega':
-        // Evitar rega no fim do dia
         if (date.hour >= 18) {
           return DateTime(date.year, date.month, date.day, 7, date.minute);
         }
@@ -277,12 +255,10 @@ class TaskScheduleCalculator {
   }
 
   static bool _isWinter(DateTime date) {
-    // Simplificado para Brasil (Jun-Set)
     return date.month >= 6 && date.month <= 9;
   }
 
   static bool _isSummer(DateTime date) {
-    // Simplificado para Brasil (Dez-Mar)
     return date.month >= 12 || date.month <= 3;
   }
 }

@@ -167,8 +167,6 @@ class WeightGainCalculator extends CalculatorEntity {
       final String geneticPotential = inputs['genetic_potential'].toString();
       final String healthStatus = inputs['health_status'].toString();
       final int targetDays = int.parse(inputs['target_days'].toString());
-
-      // Validações
       if (targetWeight <= currentWeight) {
         return CalculationError(
           calculatorId: id,
@@ -176,47 +174,25 @@ class WeightGainCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-
-      // Obter parâmetros da espécie
       final Map<String, dynamic> speciesData = _getSpeciesGrowthParameters(animalSpecies);
-
-      // Calcular necessidades energéticas
       final Map<String, dynamic> energyRequirements = _calculateEnergyRequirements(
         animalSpecies, currentWeight, animalCategory, environmentalTemperature, animalSex, speciesData);
-
-      // Calcular energia disponível para ganho
       final Map<String, dynamic> availableEnergy = _calculateAvailableEnergyForGain(
         feedIntake, dietEnergy, energyRequirements);
-
-      // Calcular ganho de peso potencial
       final Map<String, dynamic> weightGainPotential = _calculateWeightGainPotential(
         availableEnergy, currentWeight, animalCategory, geneticPotential, healthStatus, speciesData, animalSpecies);
-
-      // Calcular conversão alimentar
       final Map<String, dynamic> feedConversion = _calculateFeedConversion(
         feedIntake, weightGainPotential, feedingSystem, animalSpecies);
-
-      // Projeções de crescimento
       final Map<String, dynamic> growthProjections = _calculateGrowthProjections(
         currentWeight, targetWeight, weightGainPotential, targetDays);
-
-      // Análise nutricional
       final Map<String, dynamic> nutritionalAnalysis = _analyzeNutritionalAdequacy(
         dietEnergy, dietProtein, feedIntake, animalSpecies, animalCategory, weightGainPotential);
-
-      // Indicadores de performance
       final Map<String, dynamic> performanceIndicators = _calculatePerformanceIndicators(
         weightGainPotential, feedConversion, growthProjections, nutritionalAnalysis);
-
-      // Cronograma de pesagens
       final List<Map<String, dynamic>> weighingSchedule = _generateWeighingSchedule(
         currentWeight, weightGainPotential, targetDays);
-
-      // Análise econômica
       final Map<String, dynamic> economicAnalysis = _calculateEconomicAnalysis(
         feedIntake, weightGainPotential, feedingSystem, animalSpecies, targetDays);
-
-      // Recomendações zootécnicas
       final List<String> recommendations = _generateZootechnicalRecommendations(
         animalSpecies, animalCategory, weightGainPotential, nutritionalAnalysis,
         feedingSystem, performanceIndicators);
@@ -393,19 +369,14 @@ class WeightGainCalculator extends CalculatorEntity {
     String sex,
     Map<String, dynamic> speciesData,
   ) {
-    // Energia de mantença
     final double metabolicWeight = math.pow(currentWeight, 0.75).toDouble();
     final double maintenanceFactor = speciesData['maintenance_energy_factor'] as double;
     double maintenanceEnergy = (maintenanceFactor * metabolicWeight) / 1000; // Mcal/dia
-
-    // Ajuste por temperatura
     if (temperature < 5 || temperature > 30) {
       final double tempDiff = temperature - 20;
       final double tempStress = (tempDiff < 0 ? -tempDiff : tempDiff) * 0.01;
       maintenanceEnergy *= (1 + math.min(tempStress, 0.25));
     }
-
-    // Ajuste por sexo e categoria
     final Map<String, double> sexFactors = {
       'Macho Inteiro': 1.05,
       'Macho Castrado': 1.0,
@@ -435,16 +406,9 @@ class WeightGainCalculator extends CalculatorEntity {
     double dietEnergy,
     Map<String, dynamic> energyRequirements,
   ) {
-    // Energia total consumida
     final double totalEnergyIntake = feedIntake * dietEnergy;
-
-    // Energia de mantença
     final double maintenanceEnergy = energyRequirements['maintenance_energy'] as double;
-
-    // Energia disponível para ganho
     final double availableEnergyForGain = math.max(0, totalEnergyIntake - maintenanceEnergy);
-
-    // Eficiência energética
     final double energyEfficiency = availableEnergyForGain > 0 
         ? (availableEnergyForGain / totalEnergyIntake) * 100
         : 0.0;
@@ -470,11 +434,7 @@ class WeightGainCalculator extends CalculatorEntity {
     final double gainEfficiency = speciesData['gain_energy_efficiency'] as double;
     final double maxDailyGain = speciesData['max_daily_gain'] as double;
     final double matureWeight = speciesData['mature_weight'] as double;
-
-    // Energia líquida para ganho
     final double netEnergyForGain = energyForGain * gainEfficiency;
-
-    // Ganho potencial baseado na energia (4.92 Mcal EL/kg ganho para bovinos)
     double energyBasedGain = 0.0;
     if (netEnergyForGain > 0) {
       final double energyPerKgGain = animalSpecies.contains('Bovino') ? 4.92 
@@ -483,12 +443,8 @@ class WeightGainCalculator extends CalculatorEntity {
           : 5.0;
       energyBasedGain = netEnergyForGain / energyPerKgGain;
     }
-
-    // Ajuste por maturidade (animais próximos ao peso adulto ganham menos)
     final double maturityFactor = 1.0 - math.pow(currentWeight / matureWeight, 2);
     energyBasedGain *= math.max(0.3, maturityFactor);
-
-    // Ajuste por potencial genético
     final Map<String, double> geneticFactors = {
       'Baixo': 0.8,
       'Médio': 1.0,
@@ -496,8 +452,6 @@ class WeightGainCalculator extends CalculatorEntity {
       'Superior': 1.4,
     };
     energyBasedGain *= (geneticFactors[geneticPotential] ?? 1.0);
-
-    // Ajuste por status sanitário
     final Map<String, double> healthFactors = {
       'Excelente': 1.0,
       'Bom': 0.95,
@@ -505,8 +459,6 @@ class WeightGainCalculator extends CalculatorEntity {
       'Comprometido': 0.70,
     };
     energyBasedGain *= (healthFactors[healthStatus] ?? 0.95);
-
-    // Limitação pelo máximo fisiológico
     final double dailyGain = math.min(energyBasedGain, maxDailyGain);
 
     return {
@@ -526,11 +478,7 @@ class WeightGainCalculator extends CalculatorEntity {
     String species,
   ) {
     final double dailyGain = weightGain['daily_gain'] as double;
-    
-    // Conversão alimentar básica
     double feedConversionRatio = dailyGain > 0 ? feedIntake / dailyGain : 0.0;
-
-    // Ajuste por sistema de alimentação
     final Map<String, double> systemFactors = {
       'Confinamento Total': 1.0,
       'Semi-Confinamento': 1.1,
@@ -539,8 +487,6 @@ class WeightGainCalculator extends CalculatorEntity {
       'Creep Feeding': 0.9,
     };
     feedConversionRatio *= (systemFactors[feedingSystem] ?? 1.0);
-
-    // Classificação da conversão
     String conversionClassification;
     final double speciesBaseFCR = species.contains('Frango') ? 1.8
         : species.contains('Suíno') ? 2.8
@@ -572,22 +518,12 @@ class WeightGainCalculator extends CalculatorEntity {
     int targetDays,
   ) {
     final double dailyGain = weightGain['daily_gain'] as double;
-    
-    // Ganho total no período
     final double totalWeightGain = dailyGain * targetDays;
-    
-    // Peso final projetado
     final double finalWeight = currentWeight + totalWeightGain;
-    
-    // Dias necessários para atingir peso meta
     final int daysToTarget = dailyGain > 0 
         ? ((targetWeight - currentWeight) / dailyGain).ceil()
         : 999999;
-    
-    // Taxa de crescimento relativo
     final double growthRate = (dailyGain / currentWeight) * 100;
-    
-    // Projeção de peso por semana
     final List<Map<String, dynamic>> weeklyProjection = [];
     for (int week = 1; week <= math.min(52, (targetDays / 7).ceil()); week++) {
       final int days = week * 7;
@@ -619,29 +555,17 @@ class WeightGainCalculator extends CalculatorEntity {
     Map<String, dynamic> weightGain,
   ) {
     final double dailyGain = weightGain['daily_gain'] as double;
-    
-    // Necessidades energéticas ideais (estimativa)
     final double idealEnergy = species.contains('Bovino') ? 2.6
         : species.contains('Suíno') ? 3.2
         : species.contains('Frango') ? 3.0
         : 2.4;
-    
-    // Necessidades proteicas ideais (estimativa)
     final double idealProtein = category == 'Bezerro/Leitão' ? 18.0
         : category == 'Recria' ? 14.0
         : category == 'Engorda' ? 12.0
         : 14.0;
-    
-    // Adequação energética
     final double energyAdequacy = (dietEnergy / idealEnergy) * 100;
-    
-    // Adequação proteica
     final double proteinAdequacy = (dietProtein / idealProtein) * 100;
-    
-    // Proteína consumida diariamente
     final double dailyProteinIntake = feedIntake * (dietProtein / 100) * 1000; // gramas
-    
-    // Eficiência proteica (ganho por grama de proteína)
     final double proteinEfficiency = dailyProteinIntake > 0 
         ? (dailyGain * 1000) / dailyProteinIntake
         : 0.0;
@@ -680,19 +604,12 @@ class WeightGainCalculator extends CalculatorEntity {
     final double fcr = feedConversion['feed_conversion_ratio'] as double;
     final double growthRate = growthProjections['growth_rate'] as double;
     final double energyEfficiency = nutritionalAnalysis['energy_adequacy'] as double;
-    
-    // Índice de performance global (0-100)
     double performanceIndex = 0.0;
-    
-    // Componentes do índice
     final double gainScore = math.min(100, dailyGain * 50); // Normalizado
     final double fcrScore = math.max(0, 100 - (fcr - 2) * 10); // Melhor FCR = maior score
     final double efficiencyScore = math.min(100, energyEfficiency);
     
     performanceIndex = (gainScore + fcrScore + efficiencyScore) / 3;
-    
-    // Consumo relativo (% do peso vivo)
-    // Necessário peso atual para calcular - assumindo peso médio
     const double relativeFeedIntake = 2.5; // Estimativa genérica
 
     return {
@@ -713,8 +630,6 @@ class WeightGainCalculator extends CalculatorEntity {
   ) {
     final List<Map<String, dynamic>> schedule = [];
     final double dailyGain = weightGain['daily_gain'] as double;
-    
-    // Pesagens quinzenais
     for (int day = 0; day <= targetDays; day += 15) {
       if (day > targetDays) day = targetDays;
       
@@ -741,8 +656,6 @@ class WeightGainCalculator extends CalculatorEntity {
     int targetDays,
   ) {
     final double dailyGain = weightGain['daily_gain'] as double;
-    
-    // Preços estimados
     final Map<String, double> feedPrices = {
       'Confinamento Total': 1.25, // R\$/kg
       'Semi-Confinamento': 1.10,
@@ -763,17 +676,11 @@ class WeightGainCalculator extends CalculatorEntity {
     
     final double feedPrice = feedPrices[feedingSystem] ?? 1.25;
     final double animalPrice = animalPrices[species] ?? 15.0;
-    
-    // Custos
     final double dailyFeedCost = feedIntake * feedPrice;
     final double totalFeedCost = dailyFeedCost * targetDays;
     final double feedCostPerKgGain = dailyGain > 0 ? dailyFeedCost / dailyGain : 0.0;
-    
-    // Receita
     final double totalWeightGain = dailyGain * targetDays;
     final double potentialRevenue = totalWeightGain * animalPrice;
-    
-    // Margem
     final double marginPerAnimal = potentialRevenue - totalFeedCost;
     final double roi = totalFeedCost > 0 ? (marginPerAnimal / totalFeedCost) * 100 : 0.0;
 
@@ -801,36 +708,26 @@ class WeightGainCalculator extends CalculatorEntity {
     final double energyAdequacy = nutritionalAnalysis['energy_adequacy'] as double;
     final double proteinAdequacy = nutritionalAnalysis['protein_adequacy'] as double;
     final double performanceIndex = performanceIndicators['performance_index'] as double;
-
-    // Recomendações por ganho de peso
     if (dailyGain < 0.3 && species.contains('Bovino')) {
       recommendations.add('Ganho baixo para bovinos - revisar nutrição e sanidade.');
     } else if (dailyGain > 1.5 && species.contains('Bovino')) {
       recommendations.add('Excelente ganho - manter protocolo atual.');
     }
-
-    // Recomendações por adequação energética
     if (energyAdequacy < 90) {
       recommendations.add('Energia insuficiente - aumentar densidade energética da dieta.');
     } else if (energyAdequacy > 120) {
       recommendations.add('Excesso de energia - otimizar custos reduzindo densidade.');
     }
-
-    // Recomendações por adequação proteica
     if (proteinAdequacy < 85) {
       recommendations.add('Proteína insuficiente - incluir fonte proteica adicional.');
     } else if (proteinAdequacy > 130) {
       recommendations.add('Excesso de proteína - otimizar custos reduzindo inclusão.');
     }
-
-    // Recomendações por performance
     if (performanceIndex < 60) {
       recommendations.add('Performance abaixo do esperado - revisar manejo geral.');
     } else if (performanceIndex > 85) {
       recommendations.add('Excelente performance - manter protocolos atuais.');
     }
-
-    // Recomendações por sistema
     switch (feedingSystem) {
       case 'Confinamento Total':
         recommendations.add('Confinamento: monitorar acidose e fornecer fibra adequada.');
@@ -842,8 +739,6 @@ class WeightGainCalculator extends CalculatorEntity {
         recommendations.add('Pastejo rotacionado: respeitar altura de entrada e saída.');
         break;
     }
-
-    // Recomendações por categoria
     switch (category) {
       case 'Bezerro/Leitão':
         recommendations.add('Animais jovens: atenção especial à digestibilidade.');
@@ -852,8 +747,6 @@ class WeightGainCalculator extends CalculatorEntity {
         recommendations.add('Fase de engorda: maximizar conversão alimentar.');
         break;
     }
-
-    // Recomendações gerais
     recommendations.add('Realizar pesagens regulares para acompanhar performance.');
     recommendations.add('Monitorar sanidade e vacinação em dia.');
     recommendations.add('Ajustar dieta conforme mudanças de peso e categoria.');

@@ -106,8 +106,6 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
       final String fertilizerType = inputs['fertilizer_type'].toString();
       final double fertilizerOMContent = double.parse(inputs['fertilizer_mo_content'].toString());
       final double soilDensity = double.parse(inputs['soil_density'].toString());
-
-      // Validação
       if (targetOM <= currentOM) {
         return CalculationError(
           calculatorId: id,
@@ -115,57 +113,29 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-
-      // Obter características do adubo
       final Map<String, dynamic> fertilizerData = _getFertilizerCharacteristics(fertilizerType);
       final double efficiency = fertilizerData['efficiency'] as double;
       final double moistureContent = fertilizerData['moisture'] as double;
       final double npkN = fertilizerData['n'] as double;
       final double npkP = fertilizerData['p'] as double;
       final double npkK = fertilizerData['k'] as double;
-
-      // Cálculo da necessidade de MO
       final double omDeficit = targetOM - currentOM; // % de MO a aumentar
-      
-      // Volume de solo por hectare (em m³)
       final double soilVolumePerHa = 10000 * (soilDepth / 100); // m³/ha
-      
-      // Massa de solo seco por hectare (em toneladas)
       final double soilMassPerHa = soilVolumePerHa * soilDensity * 1000 / 1000; // t/ha
-      
-      // Necessidade de MO em toneladas por hectare
       final double omNeedPerHa = (omDeficit / 100) * soilMassPerHa; // t MO/ha
-      
-      // Quantidade de adubo necessária por hectare (base seca)
       final double fertilizerDryPerHa = omNeedPerHa / ((fertilizerOMContent / 100) * efficiency);
-      
-      // Quantidade de adubo úmido por hectare
       final double fertilizerWetPerHa = fertilizerDryPerHa / (1 - moistureContent / 100);
-      
-      // Quantidade total para a área
       final double totalFertilizerWet = fertilizerWetPerHa * area;
       final double totalFertilizerDry = fertilizerDryPerHa * area;
-
-      // Nutrientes fornecidos
       final double totalNitrogen = totalFertilizerDry * (npkN / 100);
       final double totalPhosphorus = totalFertilizerDry * (npkP / 100);
       final double totalPotassium = totalFertilizerDry * (npkK / 100);
-
-      // Equivalente em fertilizantes minerais
       final double ureaEquivalent = totalNitrogen / 0.45; // Uréia 45% N
-      // ignore: unused_local_variable
       final double superphosphateEquivalent = totalPhosphorus / 0.18; // Super simples 18% P2O5
-      // ignore: unused_local_variable
       final double kclEquivalent = totalPotassium / 0.60; // KCl 60% K2O
-
-      // Cronograma de aplicação
       final List<Map<String, dynamic>> applicationSchedule = _generateApplicationSchedule(
         fertilizerWetPerHa, fertilizerType);
-
-      // Custos estimados
       final double estimatedCost = _estimateCost(totalFertilizerWet, fertilizerType);
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         fertilizerType, omDeficit, fertilizerWetPerHa, currentOM);
 
@@ -309,12 +279,9 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
     String fertilizerType,
   ) {
     final List<Map<String, dynamic>> schedule = [];
-    
-    // Divide aplicação baseada no tipo de adubo
     switch (fertilizerType) {
       case 'Esterco Bovino':
       case 'Esterco Suíno':
-        // Aplicação única no preparo do solo
         schedule.add({
           'periodo': 'Preparo do Solo',
           'quantidade': quantityPerHa,
@@ -324,7 +291,6 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
         break;
       case 'Compostagem':
       case 'Húmus de Minhoca':
-        // Aplicação parcelada
         schedule.add({
           'periodo': 'Preparo (60 dias antes)',
           'quantidade': quantityPerHa * 0.7,
@@ -351,7 +317,6 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
   }
 
   double _estimateCost(double totalQuantity, String fertilizerType) {
-    // Preços estimados por tonelada (R\$/t)
     final Map<String, double> prices = {
       'Esterco Bovino': 80.0,
       'Esterco Suíno': 90.0,
@@ -372,25 +337,17 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
     double currentOM,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações baseadas no déficit de MO
     if (omDeficit > 3.0) {
       recommendations.add('Alto déficit de MO. Considere aplicação parcelada em 2-3 anos.');
     } else if (omDeficit < 1.0) {
       recommendations.add('Baixo déficit de MO. Aplicação única será suficiente.');
     }
-
-    // Recomendações baseadas na quantidade
     if (quantityPerHa > 20.0) {
       recommendations.add('Quantidade elevada. Divida a aplicação para evitar perdas.');
     }
-
-    // Recomendações baseadas no MO atual
     if (currentOM < 2.0) {
       recommendations.add('Solo com baixo teor de MO. Priorize melhoria da estrutura.');
     }
-
-    // Recomendações específicas por tipo
     switch (fertilizerType) {
       case 'Esterco Bovino':
         recommendations.add('Esterco bovino: realize compostagem por 90 dias antes da aplicação.');
@@ -405,8 +362,6 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
         recommendations.add('Húmus: excelente para culturas sensíveis e mudas.');
         break;
     }
-
-    // Recomendações gerais
     recommendations.add('Incorpore o adubo orgânico em até 24 horas após aplicação.');
     recommendations.add('Monitore a umidade do solo para melhor decomposição.');
     recommendations.add('Faça análise de solo anualmente para acompanhar evolução da MO.');

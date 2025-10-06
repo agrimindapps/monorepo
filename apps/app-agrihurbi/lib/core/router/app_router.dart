@@ -22,45 +22,35 @@ import 'package:flutter/material.dart';
 import '../providers/providers.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Web inicia em promo (landing page), Mobile/Desktop inicia em login
   const initialRoute = kIsWeb ? '/promo' : '/login';
 
   return GoRouter(
     initialLocation: initialRoute,
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      // Simple auth redirect logic
       try {
         final authState = ref.read(authNotifierProvider);
         final isAuthenticated = authState.isAuthenticated;
         final isOnAuthPage = state.matchedLocation.startsWith('/login') || state.matchedLocation.startsWith('/register');
         final isOnPromo = state.matchedLocation == '/promo';
-
-        // If not authenticated and not on auth page or promo, redirect to login (or promo for web)
         if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
           return kIsWeb ? '/promo' : '/login';
         }
-
-        // If authenticated and on auth page or promo, redirect to home
         if (isAuthenticated && (isOnAuthPage || isOnPromo)) {
           return '/home';
         }
 
         return null; // No redirect needed
       } catch (e) {
-        // If authNotifierProvider not ready, allow current navigation
         return null;
       }
     },
     routes: [
-      // Promotional Page (outside auth flow)
       GoRoute(
         path: '/promo',
         name: 'promo',
         builder: (context, state) => const PromoPage(),
       ),
-
-      // Authentication Routes
       GoRoute(
         path: '/login',
         name: 'login',
@@ -72,20 +62,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'register',
         builder: (context, state) => const RegisterPage(),
       ),
-      
-      // Main App Routes
       GoRoute(
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomePage(),
         routes: [
-          // Livestock routes - Migrated to Provider + Clean Architecture
           GoRoute(
             path: 'livestock',
             name: 'livestock',
             builder: (context, state) => const BovinesListPage(),
             routes: [
-              // Bovines routes
               GoRoute(
                 path: 'bovines',
                 name: 'bovines-list',
@@ -114,8 +100,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              
-              // Equines routes
               GoRoute(
                 path: 'equines',
                 name: 'equines-list',
@@ -144,15 +128,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              
-              // Search page
               GoRoute(
                 path: 'search',
                 name: 'livestock-search',
                 builder: (context, state) => const LivestockSearchPage(),
               ),
-              
-              // Livestock management routes
               GoRoute(
                 path: 'add',
                 name: 'add-livestock',
@@ -176,14 +156,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
-          // Calculator Routes - Migrated to Provider + Clean Architecture
           GoRoute(
             path: 'calculators',
             name: 'calculators',
             builder: (context, state) => const CalculatorsListPage(),
             routes: [
-              // General calculator detail route
               GoRoute(
                 path: 'detail/:id',
                 name: 'calculator-detail',
@@ -192,8 +169,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   return CalculatorDetailPage(calculatorId: id);
                 },
               ),
-              
-              // Irrigation Calculator Routes
               GoRoute(
                 path: 'irrigation/:id',
                 name: 'irrigation-calculator',
@@ -202,8 +177,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   return CalculatorDetailPage(calculatorId: id);
                 },
               ),
-              
-              // Nutrition Calculator Routes
               GoRoute(
                 path: 'nutrition',
                 name: 'nutrition-calculators',
@@ -236,8 +209,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              
-              // Livestock Calculator Routes
               GoRoute(
                 path: 'livestock',
                 name: 'livestock-calculators',
@@ -265,8 +236,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              
-              // Crop Calculator Routes  
               GoRoute(
                 path: 'crops',
                 name: 'crop-calculators',
@@ -294,8 +263,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              
-              // Soil Calculator Routes
               GoRoute(
                 path: 'soil',
                 name: 'soil-calculators',
@@ -313,8 +280,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                 ],
               ),
-              
-              // Search and favorites
               GoRoute(
                 path: 'search',
                 name: 'calculators-search',
@@ -327,8 +292,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
-          // Weather Routes - Migrated to Provider + Clean Architecture
           GoRoute(
             path: 'weather',
             name: 'weather',
@@ -356,8 +319,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
-          // News Routes - Migrated to Provider + Clean Architecture
           GoRoute(
             path: 'news',
             name: 'news',
@@ -388,8 +349,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
-          // Market Routes
           GoRoute(
             path: 'markets',
             name: 'markets',
@@ -405,8 +364,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
-          // Settings Routes - Migrated to Provider + Clean Architecture  
           GoRoute(
             path: 'settings',
             name: 'settings',
@@ -424,8 +381,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          
-          // Subscription Routes  
           GoRoute(
             path: 'subscription',
             name: 'subscription',
@@ -457,7 +412,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
 /// Navigation helper methods using GoRouter
 class AppNavigation {
-  // Private constructor to prevent instantiation
   AppNavigation._();
   /// Navigate to login page
   static void toLogin(BuildContext context) => context.go('/login');
@@ -596,8 +550,6 @@ class AppNavigation {
     );
   }
 }
-
-// Placeholder for EquinesListPage - TODO: Implementar
 class EquinesListPage extends StatelessWidget {
   const EquinesListPage({super.key});
   
@@ -625,9 +577,6 @@ class EquinesListPage extends StatelessWidget {
     ),
   );
 }
-
-
-// Weather Pages Placeholders
 class WeatherMeasurementsPage extends StatelessWidget {
   const WeatherMeasurementsPage({super.key});
   @override
@@ -664,11 +613,6 @@ class NewsDetailPage extends StatelessWidget {
     body: Center(child: Text('News Detail Page - ID: $id')),
   );
 }
-
-
-// Settings and News pages are now imported from their respective feature modules
-
-// News Pages Placeholders
 class NewsSearchPage extends StatelessWidget {
   const NewsSearchPage({super.key});
   @override
@@ -695,8 +639,6 @@ class RSSFeedsPage extends StatelessWidget {
     body: const Center(child: Text('RSS Feeds Page - Em desenvolvimento')),
   );
 }
-
-// Settings Pages Placeholders
 class BackupPage extends StatelessWidget {
   const BackupPage({super.key});
   @override
@@ -714,8 +656,6 @@ class AboutPage extends StatelessWidget {
     body: const Center(child: Text('About Page - Em desenvolvimento')),
   );
 }
-
-// Subscription Pages Placeholders
 class SubscriptionPage extends StatelessWidget {
   const SubscriptionPage({super.key});
   @override

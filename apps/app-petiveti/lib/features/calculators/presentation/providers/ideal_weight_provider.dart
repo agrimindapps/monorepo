@@ -45,7 +45,6 @@ class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
     );
 
     try {
-      // Validar inputs
       final validationErrors = _calculator.getValidationErrors(inputs);
       if (validationErrors.isNotEmpty) {
         state = state.copyWith(
@@ -54,8 +53,6 @@ class IdealWeightNotifier extends StateNotifier<IdealWeightState> {
         );
         return;
       }
-
-      // Realizar cálculo
       final result = await _performCalculation(
         calculatorId: _calculator.id,
         inputs: inputs,
@@ -95,17 +92,10 @@ final idealWeightProvider = StateNotifierProvider<IdealWeightNotifier, IdealWeig
 
 /// Provider para obter histórico de cálculos de peso ideal
 final idealWeightHistoryProvider = FutureProvider<List<CalculationResult>>((ref) async {
-  // TODO: Implementar busca do histórico no repositório
-  // final repository = di.getIt<CalculatorRepository>();
-  // final history = await repository.getCalculationHistory(calculatorId: 'ideal_weight');
-  // return history.map((h) => h.result).toList();
   return <CalculationResult>[];
 });
 
 /// Provider para verificar se a calculadora é favorita
 final idealWeightIsFavoriteProvider = FutureProvider<bool>((ref) async {
-  // TODO: Implementar verificação de favorito
-  // final repository = di.getIt<CalculatorRepository>();
-  // return await repository.isFavoriteCalculator('ideal_weight');
   return false;
 });

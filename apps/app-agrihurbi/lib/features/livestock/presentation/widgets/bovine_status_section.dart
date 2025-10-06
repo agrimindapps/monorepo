@@ -47,19 +47,13 @@ class BovineStatusSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
-          // Switch principal
           _buildStatusSwitch(context),
           
           if (showDetails) ...[
             const SizedBox(height: 16),
-            
-            // Informações detalhadas
             _buildStatusDetails(context),
             
             const SizedBox(height: 12),
-            
-            // Impacto da mudança de status
             _buildStatusImpact(context),
           ],
         ],

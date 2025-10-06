@@ -30,8 +30,6 @@ class DeviceManagementProvider extends ChangeNotifier {
   final RevokeAllOtherDevicesUseCase _revokeAllOtherDevicesUseCase;
   final GetDeviceStatisticsUseCase _getDeviceStatisticsUseCase;
   final AuthStateNotifier _authStateNotifier;
-
-  // Estado principal
   List<DeviceModel> _devices = [];
   DeviceModel? _currentDevice;
   DeviceStatisticsModel? _statistics;
@@ -39,13 +37,9 @@ class DeviceManagementProvider extends ChangeNotifier {
   bool _isInitialized = false;
   String? _errorMessage;
   String? _successMessage;
-
-  // Estados específicos de operações
   bool _isValidating = false;
   bool _isRevoking = false;
   String? _revokingDeviceUuid;
-
-  // Stream subscriptions
   StreamSubscription<UserEntity?>? _userSubscription;
 
   DeviceManagementProvider({
@@ -63,8 +57,6 @@ class DeviceManagementProvider extends ChangeNotifier {
        _authStateNotifier = authStateNotifier {
     _initializeProvider();
   }
-
-  // Getters principais
   List<DeviceModel> get devices => List.unmodifiable(_devices);
   DeviceModel? get currentDevice => _currentDevice;
   DeviceStatisticsModel? get statistics => _statistics;
@@ -72,13 +64,9 @@ class DeviceManagementProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
-
-  // Getters de estados específicos
   bool get isValidating => _isValidating;
   bool get isRevoking => _isRevoking;
   String? get revokingDeviceUuid => _revokingDeviceUuid;
-
-  // Getters derivados
   List<DeviceModel> get activeDevices =>
       _devices.where((d) => d.isActive).toList();
   List<DeviceModel> get inactiveDevices =>
@@ -87,8 +75,6 @@ class DeviceManagementProvider extends ChangeNotifier {
   int get totalDeviceCount => _devices.length;
   bool get hasDevices => _devices.isNotEmpty;
   bool get canAddMoreDevices => activeDeviceCount < 3; // Limite padrão
-
-  // Getters específicos do plantis
   bool get isCurrentDeviceIdentified => _currentDevice != null;
   String get deviceSummary {
     if (!hasDevices) return 'Nenhum dispositivo registrado';
@@ -101,11 +87,7 @@ class DeviceManagementProvider extends ChangeNotifier {
     if (kDebugMode) {
       debugPrint('🔐 DeviceProvider: Initializing');
     }
-
-    // Escuta mudanças de usuário
     _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
-
-    // Inicializa se já tem usuário
     if (_authStateNotifier.isAuthenticated) {
       _initializeDeviceManagement();
     }
@@ -114,10 +96,8 @@ class DeviceManagementProvider extends ChangeNotifier {
   /// Callback para mudanças de usuário
   void _onUserChanged(UserEntity? user) {
     if (user == null) {
-      // Usuário deslogou
       _resetState();
     } else {
-      // Usuário logou
       _initializeDeviceManagement();
     }
   }
@@ -130,10 +110,7 @@ class DeviceManagementProvider extends ChangeNotifier {
     _clearMessages();
 
     try {
-      // Identifica dispositivo atual
       await _identifyCurrentDevice();
-
-      // Carrega dispositivos
       await _loadDevices(showLoading: false);
 
       _isInitialized = true;
@@ -156,8 +133,6 @@ class DeviceManagementProvider extends ChangeNotifier {
       }
 
       _currentDevice = await DeviceModel.fromCurrentDevice();
-
-      // CRITICAL: Verificar se é null (plataforma não suportada)
       if (_currentDevice == null) {
         if (kDebugMode) {
           debugPrint(
@@ -176,7 +151,6 @@ class DeviceManagementProvider extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('❌ DeviceProvider: Error identifying current device: $e');
       }
-      // Não é crítico, continua sem identificar
     }
   }
 
@@ -212,7 +186,6 @@ class DeviceManagementProvider extends ChangeNotifier {
           _setError('Erro ao carregar dispositivos: ${failure.message}');
         },
         (devices) {
-          // Converte DeviceEntity para DeviceModel
           _devices =
               devices.map((entity) => DeviceModel.fromEntity(entity)).toList();
           _clearError();
@@ -265,8 +238,6 @@ class DeviceManagementProvider extends ChangeNotifier {
         (validationResult) {
           if (validationResult.isValid) {
             _setSuccess('Dispositivo validado com sucesso');
-
-            // Recarrega lista de dispositivos
             _loadDevices(showLoading: false);
           } else {
             _setError(
@@ -289,8 +260,6 @@ class DeviceManagementProvider extends ChangeNotifier {
   /// Revoga um dispositivo específico
   Future<bool> revokeDevice(String deviceUuid, {String? reason}) async {
     if (_isRevoking) return false;
-
-    // Impede revogar o dispositivo atual por padrão
     if (_currentDevice?.uuid == deviceUuid) {
       _setError('Não é possível revogar o dispositivo atual');
       return false;
@@ -323,11 +292,7 @@ class DeviceManagementProvider extends ChangeNotifier {
         },
         (_) {
           _setSuccess('Dispositivo revogado com sucesso');
-
-          // Remove da lista local
           _devices.removeWhere((d) => d.uuid == deviceUuid);
-
-          // Recarrega dados para sincronizar
           _loadDevices(showLoading: false);
 
           if (kDebugMode) {
@@ -384,8 +349,6 @@ class DeviceManagementProvider extends ChangeNotifier {
         },
         (_) {
           _setSuccess('Outros dispositivos revogados com sucesso');
-
-          // Recarrega dados para sincronizar
           _loadDevices(showLoading: false);
 
           if (kDebugMode) {
@@ -493,8 +456,6 @@ class DeviceManagementProvider extends ChangeNotifier {
     _clearMessages();
     notifyListeners();
   }
-
-  // Métodos privados de gerenciamento de estado
 
   void _setLoading(bool loading) {
     if (_isLoading != loading) {

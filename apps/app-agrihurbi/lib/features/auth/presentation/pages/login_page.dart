@@ -48,8 +48,6 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 60),
-
-                // Logo and Title
                 Column(
                   children: [
                     Container(
@@ -84,8 +82,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 48),
-
-                // Email Field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -98,8 +94,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -124,8 +118,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Login Button
                 Consumer(
                   builder: (context, ref, child) {
                     final authProvider = ref.watch(authProviderProvider);
@@ -152,8 +144,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 16),
-
-                // Register Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -169,8 +159,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Error Message
                 Consumer(
                   builder: (context, ref, child) {
                     final authProvider = ref.watch(authProviderProvider);
@@ -236,13 +224,11 @@ class _LoginPageState extends State<LoginPage> {
       result.fold(
         (failure) {
           if (mounted) {
-            // ✅ Double check before using context
             ErrorHandler.showErrorSnackbar(context, failure);
           }
         },
         (user) {
           if (mounted) {
-            // ✅ Double check before using context
             ErrorHandler.showSuccessSnackbar(
               context,
               SuccessMessages.loginSuccess,

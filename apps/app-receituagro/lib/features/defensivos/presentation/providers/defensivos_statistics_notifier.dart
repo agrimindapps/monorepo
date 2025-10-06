@@ -35,7 +35,6 @@ class DefensivosStatistics {
 /// Static function for compute() - calculates statistics in background isolate
 /// Performance optimization: Prevents UI thread blocking during heavy statistical calculations
 DefensivosStatistics _calculateDefensivosStatistics(List<FitossanitarioHive> defensivos) {
-  // Calculate real statistics - moved to background thread to prevent UI blocking
   final totalDefensivos = defensivos.length;
   final totalFabricantes = defensivos.map((d) => d.displayFabricante).toSet().length;
   final totalModoAcao = defensivos.map((d) => d.displayModoAcao).where((m) => m.isNotEmpty).toSet().length;
@@ -86,8 +85,6 @@ class DefensivosStatisticsState {
   DefensivosStatisticsState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // Convenience getters
   int get totalDefensivos => statistics.totalDefensivos;
   int get totalFabricantes => statistics.totalFabricantes;
   int get totalModoAcao => statistics.totalModoAcao;
@@ -114,30 +111,20 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
 
   @override
   Future<DefensivosStatisticsState> build() async {
-    // Get dependencies from DI
     _repository = di.sl<FitossanitarioHiveRepository>();
-
-    // Load statistics on initialization
     return await _loadStatistics();
   }
 
   /// Load and calculate statistics
   Future<DefensivosStatisticsState> _loadStatistics() async {
     try {
-      // Load data from repository on main thread (required for Hive)
       var defensivos = await _repository.getActiveDefensivos();
-
-      // Se não há dados, verifica se precisa aguardar o carregamento
       if (defensivos.isEmpty) {
-        // Verifica se dados estão sendo carregados
         final isDataLoaded = await FitossanitariosDataLoader.isDataLoaded();
 
         if (!isDataLoaded) {
-          // Aguarda um pouco e tenta novamente (dados podem estar sendo carregados)
           await Future<void>.delayed(const Duration(milliseconds: 500));
           defensivos = await _repository.getActiveDefensivos();
-
-          // Se ainda estiver vazio após aguardar
           if (defensivos.isEmpty) {
             return DefensivosStatisticsState.initial().copyWith(
               errorMessage: 'Dados não disponíveis no momento.\n\nPor favor, reinicie o aplicativo se o problema persistir.',
@@ -145,8 +132,6 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
           }
         }
       }
-
-      // Calculate statistics directly (Hive objects are not serializable for compute)
       final statistics = _calculateDefensivosStatistics(defensivos);
 
       return DefensivosStatisticsState(
@@ -179,9 +164,6 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
 
     try {
       var defensivos = await _repository.getActiveDefensivos();
-
-      // Se não há dados, não mostra erro - apenas calcula com dados vazios
-      // (durante refresh, não queremos mostrar mensagens de erro)
       final statistics = _calculateDefensivosStatistics(defensivos);
 
       state = AsyncValue.data(

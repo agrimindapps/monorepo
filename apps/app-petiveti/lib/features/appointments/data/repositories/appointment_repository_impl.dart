@@ -3,7 +3,6 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-// import '../../../../core/logging/entities/log_entry.dart'; // TODO: Use for detailed logging
 import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
 import '../../domain/entities/appointment.dart';
 import '../../domain/repositories/appointment_repository.dart';
@@ -25,7 +24,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
   @override
   Future<Either<Failure, List<Appointment>>> getAppointments(String animalId) async {
     try {
-      // Try to get data from remote first if connected
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
@@ -35,12 +33,10 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
           await localDataSource.cacheAppointments(remoteAppointments);
           return Right(remoteAppointments.map((model) => model.toEntity()).toList());
         } catch (e) {
-          // If remote fails, fallback to local data
           final localAppointments = await localDataSource.getAppointments(animalId);
           return Right(localAppointments.map((model) => model.toEntity()).toList());
         }
       } else {
-        // If not connected, get from local cache
         final localAppointments = await localDataSource.getAppointments(animalId);
         return Right(localAppointments.map((model) => model.toEntity()).toList());
       }
@@ -56,7 +52,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
   @override
   Future<Either<Failure, List<Appointment>>> getUpcomingAppointments(String animalId) async {
     try {
-      // Try to get data from remote first if connected
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
@@ -64,20 +59,16 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
         try {
           final remoteAppointments = await remoteDataSource.getAppointments(animalId);
           await localDataSource.cacheAppointments(remoteAppointments);
-          
-          // Filter upcoming appointments locally
           final upcomingAppointments = remoteAppointments
               .where((appointment) => appointment.toEntity().isUpcoming)
               .toList();
           
           return Right(upcomingAppointments.map((model) => model.toEntity()).toList());
         } catch (e) {
-          // If remote fails, fallback to local data
           final localAppointments = await localDataSource.getUpcomingAppointments(animalId);
           return Right(localAppointments.map((model) => model.toEntity()).toList());
         }
       } else {
-        // If not connected, get from local cache
         final localAppointments = await localDataSource.getUpcomingAppointments(animalId);
         return Right(localAppointments.map((model) => model.toEntity()).toList());
       }
@@ -93,19 +84,14 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
   @override
   Future<Either<Failure, Appointment?>> getAppointmentById(String id) async {
     try {
-      // First try local cache
       final localAppointment = await localDataSource.getAppointmentById(id);
       if (localAppointment != null) {
         return Right(localAppointment.toEntity());
       }
-
-      // If not found locally and connected, try remote
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
       if (isConnected) {
-        // Note: We'd need to implement getAppointmentById in remote datasource
-        // For now, we'll return null if not found locally
         return const Right(null);
       }
 
@@ -123,11 +109,7 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
   Future<Either<Failure, Appointment>> addAppointment(Appointment appointment) async {
     try {
       final appointmentModel = AppointmentModel.fromEntity(appointment);
-      
-      // Always cache locally first
       await localDataSource.cacheAppointment(appointmentModel);
-
-      // Try to sync with remote if connected
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
@@ -137,7 +119,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
           await localDataSource.cacheAppointment(createdAppointment);
           return Right(createdAppointment.toEntity());
         } catch (e) {
-          // If remote fails, return local version
           return Right(appointmentModel.toEntity());
         }
       } else {
@@ -156,11 +137,7 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
   Future<Either<Failure, Appointment>> updateAppointment(Appointment appointment) async {
     try {
       final appointmentModel = AppointmentModel.fromEntity(appointment);
-      
-      // Always update locally first
       await localDataSource.updateAppointment(appointmentModel);
-
-      // Try to sync with remote if connected
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
@@ -170,7 +147,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
           await localDataSource.updateAppointment(updatedAppointment);
           return Right(updatedAppointment.toEntity());
         } catch (e) {
-          // If remote fails, return local version
           return Right(appointmentModel.toEntity());
         }
       } else {
@@ -188,10 +164,7 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
   @override
   Future<Either<Failure, void>> deleteAppointment(String id) async {
     try {
-      // Always delete locally first
       await localDataSource.deleteAppointment(id);
-
-      // Try to sync with remote if connected
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
@@ -199,8 +172,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
         try {
           await remoteDataSource.deleteAppointment(id);
         } catch (e) {
-          // If remote fails, we've already deleted locally
-          // This will be synced later when connection is restored
         }
       }
 
@@ -221,7 +192,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
     DateTime endDate,
   ) async {
     try {
-      // Try to get data from remote first if connected
       final connectivityResult = await connectivity.checkConnectivity();
       final isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
@@ -235,7 +205,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
           await localDataSource.cacheAppointments(remoteAppointments);
           return Right(remoteAppointments.map((model) => model.toEntity()).toList());
         } catch (e) {
-          // If remote fails, fallback to local data
           final localAppointments = await localDataSource.getAppointments(animalId);
           final filteredAppointments = localAppointments.where((appointment) {
             final appointmentDate = DateTime.fromMillisecondsSinceEpoch(appointment.dateTimestamp);
@@ -246,7 +215,6 @@ class AppointmentRepositoryImpl with LoggableRepositoryMixin implements Appointm
           return Right(filteredAppointments.map((model) => model.toEntity()).toList());
         }
       } else {
-        // If not connected, filter local data
         final localAppointments = await localDataSource.getAppointments(animalId);
         final filteredAppointments = localAppointments.where((appointment) {
           final appointmentDate = DateTime.fromMillisecondsSinceEpoch(appointment.dateTimestamp);

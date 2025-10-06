@@ -10,15 +10,9 @@ class PlantisBoxesSetup {
 
     final plantisBoxes = [
       BoxConfiguration.basic(name: PlantisBoxes.main, appId: 'plantis'),
-      // PlantisBoxes.plants removida - agora usa apenas UnifiedSyncManager 'plants'
-      // PlantisBoxes.spaces removida - agora usa apenas UnifiedSyncManager 'spaces'
-      // PlantisBoxes.tasks removida - agora usa apenas UnifiedSyncManager 'tasks'
       BoxConfiguration.basic(name: PlantisBoxes.reminders, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.care_logs, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.backups, appId: 'plantis'),
-      // PlantisBoxes.comentarios removida - duplicada, usa apenas UnifiedSyncManager
-
-      // UnifiedSyncManager boxes (usadas pelo sistema de sincronização)
       BoxConfiguration.basic(name: 'plants', appId: 'plantis'),
       BoxConfiguration.basic(name: 'spaces', appId: 'plantis'),
       BoxConfiguration.basic(name: 'tasks', appId: 'plantis'),

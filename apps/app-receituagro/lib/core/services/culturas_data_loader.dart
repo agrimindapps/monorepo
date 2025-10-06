@@ -26,8 +26,6 @@ class CulturasDataLoader {
         name: 'CulturasDataLoader',
       );
       print('🌱 [CULTURAS] Iniciando carregamento de culturas...');
-
-      // 1. Carrega JSON do asset - use path without 'assets/' prefix for web compatibility
       const String assetPath =
           kIsWeb
               ? 'database/json/tbculturas/TBCULTURAS0.json'
@@ -39,8 +37,6 @@ class CulturasDataLoader {
       final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
       final List<Map<String, dynamic>> allCulturas =
           jsonData.cast<Map<String, dynamic>>().toList();
-
-      // Filtra apenas registros válidos
       final List<Map<String, dynamic>> culturas =
           allCulturas
               .where(
@@ -59,11 +55,7 @@ class CulturasDataLoader {
       print(
         '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
       );
-
-      // 2. Obtém repositório do DI
       final repository = di.sl<CulturaHiveRepository>();
-
-      // 3. Carrega dados no repositório
       final result = await repository.loadFromJson(culturas, '1.0.0');
 
       result.fold(
@@ -82,8 +74,6 @@ class CulturasDataLoader {
           _isLoaded = true;
         },
       );
-
-      // 4. Verifica se dados foram realmente salvos
       final loadedResult = await repository.getAll();
       if (loadedResult.isSuccess) {
         final loadedCulturas = loadedResult.data!;
@@ -106,7 +96,6 @@ class CulturasDataLoader {
       );
       print('❌ [CULTURAS] Erro durante carregamento de culturas: $e');
       print('❌ [CULTURAS] Stack trace: ${StackTrace.current}');
-      // Não bloqueia o app, apenas registra o erro
     }
   }
 

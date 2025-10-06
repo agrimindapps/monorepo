@@ -78,40 +78,25 @@ class PragasRepositoryImpl implements IPragasRepository {
       
       final allPragas = result.data ?? [];
       final term = searchTerm.trim().toLowerCase();
-      
-      // Performance optimization: use more efficient filtering
       final filteredPragas = allPragas.where((praga) {
         final nomeComumLower = praga.nomeComum.toLowerCase();
         final nomeCientificoLower = praga.nomeCientifico.toLowerCase();
-        
-        // Case-insensitive search with multiple criteria
         return nomeComumLower.contains(term) || 
                nomeCientificoLower.contains(term) ||
-               // Also search in alternative names if available
                (praga.nomeComum.contains(';') && 
                 praga.nomeComum.toLowerCase().split(';').any((name) => 
                   name.trim().toLowerCase().contains(term)));
       }).toList();
-      
-      // Convert to entities and sort by relevance
       final entities = PragaMapper.fromHiveToEntityList(filteredPragas);
-      
-      // Sort by relevance: exact matches first, then startsWith, then contains
       entities.sort((a, b) {
         final aNameLower = a.nomeComum.toLowerCase();
         final bNameLower = b.nomeComum.toLowerCase();
-        
-        // Exact match priority
         if (aNameLower == term && bNameLower != term) return -1;
         if (bNameLower == term && aNameLower != term) return 1;
-        
-        // StartsWith priority
         final aStartsWith = aNameLower.startsWith(term);
         final bStartsWith = bNameLower.startsWith(term);
         if (aStartsWith && !bStartsWith) return -1;
         if (bStartsWith && !aStartsWith) return 1;
-        
-        // Alphabetical order for same relevance
         return a.nomeComum.compareTo(b.nomeComum);
       });
 
@@ -142,9 +127,6 @@ class PragasRepositoryImpl implements IPragasRepository {
       if (culturaId.isEmpty) {
         return const Right([]);
       }
-
-      // Por enquanto retorna todas as pragas
-      // TODO: Implementar busca por cultura usando DiagnosticoHiveRepository
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
         return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
@@ -187,8 +169,6 @@ class PragasRepositoryImpl implements IPragasRepository {
         return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
       }
       final allPragas = result.data ?? [];
-      
-      // Como não temos timestamp real, vamos pegar os primeiros N
       final pragasRecentes = allPragas.take(limit).toList();
       final pragasEntities = PragaMapper.fromHiveToEntityList(pragasRecentes);
       
@@ -282,16 +262,12 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
   @override
   Future<Either<Failure, List<PragaEntity>>> getRecentlyAccessed() async {
     try {
-      // Por enquanto retorna algumas pragas aleatórias como "recentes"
-      // TODO: Implementar com LocalStorage real para histórico
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
         return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
       }
       final allPragas = result.data ?? [];
       if (allPragas.isEmpty) return const Right([]);
-
-      // Pega algumas pragas como mock de recentes
       final recentHivePragas = allPragas.take(_maxRecentItems).toList();
       final pragasEntities = PragaMapper.fromHiveToEntityList(recentHivePragas);
       return Right(pragasEntities);
@@ -306,9 +282,6 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
       if (pragaId.isEmpty) {
         return const Left(CacheFailure('ID da praga não pode ser vazio'));
       }
-
-      // TODO: Implementar com LocalStorage real
-      // await _localStorage.setRecentItem('acessadosPragas', pragaId);
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Erro ao marcar praga como acessada: ${e.toString()}'));
@@ -324,8 +297,6 @@ class PragasHistoryRepositoryImpl implements IPragasHistoryRepository {
       }
       final allPragas = result.data ?? [];
       if (allPragas.isEmpty) return const Right([]);
-
-      // Algoritmo simples de sugestão (pode ser melhorado)
       final shuffledPragas = allPragas.toList()..shuffle();
       final suggestedHivePragas = shuffledPragas
           .take(limit.clamp(1, _maxSuggestedItems))

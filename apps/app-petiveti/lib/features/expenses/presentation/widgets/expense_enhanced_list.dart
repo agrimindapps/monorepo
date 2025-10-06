@@ -82,7 +82,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Search bar
           TextField(
             decoration: InputDecoration(
               hintText: 'Pesquisar despesas...',
@@ -109,8 +108,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
               });
             },
           ),
-          
-          // Filters
           if (_showFilters) ...[
             const SizedBox(height: 16),
             _buildFiltersRow(theme),
@@ -125,7 +122,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       spacing: 8,
       runSpacing: 8,
       children: [
-        // Category filter
         DropdownButton<ExpenseCategory?>(
           value: _filterCategory,
           hint: const Text('Categoria'),
@@ -158,15 +154,11 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
             });
           },
         ),
-        
-        // Date range filter
         FilterChip(
           label: Text(_dateRange == null ? 'Período' : _formatDateRange(_dateRange!)),
           selected: _dateRange != null,
           onSelected: (_) => _selectDateRange(),
         ),
-        
-        // Clear filters
         if (_filterCategory != null || _dateRange != null)
           ActionChip(
             label: const Text('Limpar'),
@@ -236,7 +228,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
   Widget _buildExpensesList(ThemeData theme, List<Expense> expenses) {
     return RefreshIndicator(
       onRefresh: () async {
-        // Refresh expenses data
         await ref.read(expensesProvider.notifier).loadExpenses('default_user');
       },
       child: ListView.builder(
@@ -276,7 +267,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
               children: [
                 Row(
                   children: [
-                    // Category avatar
                     Container(
                       width: 48,
                       height: 48,
@@ -292,8 +282,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                     ),
                     
                     const SizedBox(width: 16),
-                    
-                    // Main content
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,8 +321,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                         ],
                       ),
                     ),
-                    
-                    // Amount and actions
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -408,8 +394,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                     ),
                   ],
                 ),
-                
-                // Additional info if present
                 if (expense.invoiceNumber != null || expense.veterinaryClinic != null) ...[
                   const SizedBox(height: 12),
                   const Divider(height: 1),
@@ -481,8 +465,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
 
   List<Expense> _filterExpenses(List<Expense> expenses) {
     var filtered = expenses.toList();
-    
-    // Search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((expense) {
         final query = _searchQuery.toLowerCase();
@@ -492,13 +474,9 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
                (expense.veterinaryClinic?.toLowerCase().contains(query) ?? false);
       }).toList();
     }
-    
-    // Category filter
     if (_filterCategory != null) {
       filtered = filtered.where((expense) => expense.category == _filterCategory).toList();
     }
-    
-    // Date range filter
     if (_dateRange != null) {
       filtered = filtered.where((expense) {
         return expense.expenseDate.isAfter(_dateRange!.start.subtract(const Duration(days: 1))) &&
@@ -546,13 +524,11 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
         _showExpenseDetails(expense);
         break;
       case 'edit':
-        // Navigate to edit form
         break;
       case 'delete':
         _showDeleteConfirmation(expense);
         break;
       case 'attachments':
-        // Show attachments
         break;
     }
   }
@@ -586,8 +562,6 @@ class _ExpenseEnhancedListState extends ConsumerState<ExpenseEnhancedList>
       ),
     );
   }
-
-  // Helper methods
   Color _getCategoryColor(ExpenseCategory category) {
     const categoryColors = {
       ExpenseCategory.consultation: Colors.blue,
@@ -670,7 +644,6 @@ class ExpenseDetailsSheet extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Handle
           Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             width: 40,
@@ -680,14 +653,11 @@ class ExpenseDetailsSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
-          // Content
           Expanded(
             child: ListView(
               controller: scrollController,
               padding: const EdgeInsets.all(16),
               children: [
-                // Header with category
                 Row(
                   children: [
                     Container(
@@ -728,8 +698,6 @@ class ExpenseDetailsSheet extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 24),
-                
-                // Amount
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -751,8 +719,6 @@ class ExpenseDetailsSheet extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 24),
-                
-                // Details
                 _buildDetailItem('Descrição', expense.description, Icons.description),
                 _buildDetailItem('Data', _formatDate(expense.expenseDate), Icons.calendar_today),
                 _buildDetailItem('Forma de Pagamento', _getPaymentMethodName(expense.paymentMethod), Icons.payment),
@@ -779,7 +745,6 @@ class ExpenseDetailsSheet extends StatelessWidget {
                         leading: const Icon(Icons.attach_file),
                         title: Text(attachment),
                         onTap: () {
-                          // Open attachment
                         },
                       )),
                 ],
@@ -826,8 +791,6 @@ class ExpenseDetailsSheet extends StatelessWidget {
       ),
     );
   }
-
-  // Helper methods (copied from parent for consistency)
   Color _getCategoryColor(ExpenseCategory category) {
     const categoryColors = {
       ExpenseCategory.consultation: Colors.blue,

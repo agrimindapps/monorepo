@@ -5,7 +5,6 @@ import '../../domain/repositories/i_enhanced_notification_repository.dart';
 
 /// Template engine for processing notification templates with data binding
 class NotificationTemplateEngine {
-  // Regular expression for finding template variables {{variableName}}
   static final RegExp _variableRegex = RegExp(r'\{\{(\w+)\}\}');
 
   /// Processes a template with provided data
@@ -18,19 +17,13 @@ class NotificationTemplateEngine {
     Map<String, dynamic> data,
   ) {
     final mergedData = {...template.defaultData, ...data};
-
-    // Validate required fields
     for (final field in template.requiredFields) {
       if (!mergedData.containsKey(field)) {
         throw ArgumentError('Required template field missing: $field');
       }
     }
-
-    // Process title and body
     final processedTitle = _processTemplateString(template.title, mergedData);
     final processedBody = _processTemplateString(template.body, mergedData);
-
-    // Calculate scheduled date if recurrence is defined
     DateTime? scheduledDate;
     if (template.recurrence != null) {
       scheduledDate = _calculateRecurringDate(
@@ -97,7 +90,6 @@ class NotificationTemplateEngine {
     } else if (value is Duration) {
       return _formatDuration(value);
     } else if (value is double) {
-      // Format doubles with appropriate precision
       return value.toStringAsFixed(value.truncateToDouble() == value ? 0 : 1);
     } else if (value is List) {
       return value.map((item) => _formatValue(item)).join(', ');
@@ -117,21 +109,16 @@ class NotificationTemplateEngine {
     final difference = dateTime.difference(now);
 
     if (difference.inDays == 0) {
-      // Today - show time
       return 'hoje às ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays == 1) {
-      // Tomorrow
       return 'amanhã às ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays == -1) {
-      // Yesterday
       return 'ontem às ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays.abs() < 7) {
-      // This week
       final weekdays = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
       final weekday = weekdays[dateTime.weekday % 7];
       return '$weekday às ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else {
-      // Full date
       return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
     }
   }
@@ -162,8 +149,6 @@ class NotificationTemplateEngine {
     Map<String, dynamic> data,
   ) {
     DateTime baseDate = DateTime.now();
-
-    // Check if base date is provided in data
     if (data.containsKey('baseDate')) {
       final baseDateValue = data['baseDate'];
       if (baseDateValue is DateTime) {
@@ -199,8 +184,6 @@ class NotificationTemplateEngine {
         );
 
       case RecurrenceFrequency.custom:
-        // Custom recurrence would need additional logic
-        // For now, default to daily
         return baseDate.add(Duration(days: recurrence.interval));
     }
   }
@@ -211,8 +194,6 @@ class NotificationTemplateEngine {
   /// Returns list of validation errors (empty if valid)
   static List<String> validateTemplate(NotificationTemplate template) {
     final errors = <String>[];
-
-    // Check for basic requirements
     if (template.id.isEmpty) {
       errors.add('Template ID cannot be empty');
     }
@@ -224,8 +205,6 @@ class NotificationTemplateEngine {
     if (template.body.isEmpty) {
       errors.add('Template body cannot be empty');
     }
-
-    // Check for undefined variables in title
     final titleVariables = _extractVariables(template.title);
     for (final variable in titleVariables) {
       if (!template.defaultData.containsKey(variable) &&
@@ -233,8 +212,6 @@ class NotificationTemplateEngine {
         errors.add('Undefined variable in title: $variable');
       }
     }
-
-    // Check for undefined variables in body
     final bodyVariables = _extractVariables(template.body);
     for (final variable in bodyVariables) {
       if (!template.defaultData.containsKey(variable) &&
@@ -242,8 +219,6 @@ class NotificationTemplateEngine {
         errors.add('Undefined variable in body: $variable');
       }
     }
-
-    // Validate actions
     for (int i = 0; i < template.actions.length; i++) {
       final action = template.actions[i];
       if (action.id.isEmpty) {
@@ -253,8 +228,6 @@ class NotificationTemplateEngine {
         errors.add('Action ${i + 1} has empty title');
       }
     }
-
-    // Validate recurrence rule
     if (template.recurrence != null) {
       final recurrence = template.recurrence!;
       if (recurrence.interval <= 0) {

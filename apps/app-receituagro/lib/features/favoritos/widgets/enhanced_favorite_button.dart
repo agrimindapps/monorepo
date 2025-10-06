@@ -89,16 +89,12 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
       parent: _pulseController,
       curve: Curves.easeInOut,
     ));
-
-    // Auto-repeat pulse animation if loading
     _pulseController.repeat(reverse: true);
   }
 
   @override
   void didUpdateWidget(EnhancedFavoriteButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // Animate when favorite state changes
     if (oldWidget.isFavorite != widget.isFavorite && widget.enableAnimation) {
       _animateFavoriteChange();
     }
@@ -114,12 +110,9 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
 
   void _animateFavoriteChange() {
     if (widget.isFavorite) {
-      // Animate scale up when favorited
       _scaleController.forward().then((_) {
         _scaleController.reverse();
       });
-      
-      // Small rotation for delight
       _rotationController.forward().then((_) {
         _rotationController.reverse();
       });
@@ -128,21 +121,13 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
 
   void _handleTap() {
     if (widget.isLoading || widget.onPressed == null) return;
-
-    // Haptic feedback
     if (widget.enableHapticFeedback) {
       _triggerHapticFeedback();
     }
-
-    // Visual feedback
     setState(() {
       _isPressed = true;
     });
-
-    // Call callback
     widget.onPressed!();
-
-    // Reset press state
     Future<void>.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
@@ -154,10 +139,8 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
 
   void _triggerHapticFeedback() {
     if (widget.isFavorite) {
-      // Light impact when removing from favorites
       HapticFeedback.lightImpact();
     } else {
-      // Medium impact when adding to favorites
       HapticFeedback.mediumImpact();
     }
   }
@@ -182,8 +165,6 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
       size: widget.size,
       color: _iconColor,
     );
-
-    // Apply animations if enabled
     if (widget.enableAnimation) {
       icon = AnimatedBuilder(
         animation: Listenable.merge([
@@ -193,13 +174,9 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
         ]),
         builder: (context, child) {
           double scale = _scaleAnimation.value;
-          
-          // Apply pulse if loading
           if (widget.isLoading && widget.showLoadingIndicator) {
             scale *= _pulseAnimation.value;
           }
-          
-          // Apply press scale
           if (_isPressed) {
             scale *= 0.9;
           }
@@ -279,8 +256,6 @@ class _EnhancedFavoriteButtonState extends State<EnhancedFavoriteButton>
         ),
       ),
     );
-
-    // Add tooltip if provided
     if (widget.tooltip != null) {
       button = Tooltip(
         message: widget.tooltip,

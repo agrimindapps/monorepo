@@ -145,7 +145,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -187,8 +186,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                   ),
                   
                   const SizedBox(height: 32),
-                  
-                  // Features
                   const Text(
                     'O que você ganha com Premium:',
                     style: TextStyle(
@@ -201,8 +198,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                   ..._buildFeaturesList(),
                   
                   const SizedBox(height: 32),
-                  
-                  // Pricing
                   const Text(
                     'Escolha seu plano:',
                     style: TextStyle(
@@ -215,8 +210,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                   ..._buildProductCards(),
                   
                   const SizedBox(height: 32),
-                  
-                  // Footer
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -249,8 +242,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                   ),
                   
                   const SizedBox(height: 24),
-                  
-                  // Continue without Premium button
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(

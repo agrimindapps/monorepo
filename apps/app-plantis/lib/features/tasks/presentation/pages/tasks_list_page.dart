@@ -11,11 +11,7 @@ import '../../domain/entities/task.dart' as task_entity;
 import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
-// import '../widgets/task_creation_dialog.dart'; // Removido - tarefas geradas automaticamente
 import '../widgets/tasks_error_boundary.dart';
-// import '../widgets/tasks_fab.dart'; // Removido - tarefas geradas automaticamente
-
-// Helper classes for optimized state management
 class TasksListState {
   final bool isLoading;
   final bool hasError;
@@ -124,7 +120,6 @@ class TasksListPage extends ConsumerStatefulWidget {
 }
 
 class _TasksListPageState extends ConsumerState<TasksListPage> {
-  // Cache for date formatting to avoid recreation
   static const List<String> _weekdays = [
     'Segunda-feira',
     'Terça-feira',
@@ -149,26 +144,20 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     'Novembro',
     'Dezembro',
   ];
-
-  // Date formatting cache
   final Map<String, String> _dateFormattingCache = <String, String>{};
   @override
   void initState() {
     super.initState();
-
-    // Load tasks on initialization with delay to ensure auth is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       ref.read(tasksProvider.notifier).loadTasks();
-      // Set default filter to "Today"
       ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.today);
     });
   }
 
   @override
   void dispose() {
-    // CRITICAL MEMORY LEAK FIX: Clear date formatting cache to prevent memory leaks
     _dateFormattingCache.clear();
     super.dispose();
   }
@@ -177,16 +166,12 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   Widget build(BuildContext context) {
     return TasksErrorBoundary(
       onRetry: () {
-        // Retry will be handled through the error boundary widget internally
       },
       child: BasePageScaffold(
         body: ResponsiveLayout(
           child: Column(
             children: [
-              // Header estilo ReceitaAgro
               _buildHeader(context),
-
-              // Simple filter section
               _buildSimpleFilters(context),
 
               Expanded(
@@ -283,7 +268,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            // Filtro de tarefas atrasadas - aparece PRIMEIRO e apenas se houver tarefas atrasadas
             if (tasksState.overdueTasks > 0) ...[
               FilterChip(
                 label: Row(
@@ -333,7 +317,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               ),
               const SizedBox(width: 12),
             ],
-            // Filtro "Hoje"
             FilterChip(
               label: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -524,11 +507,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         onAddTask: () {}, // Removido - tarefas geradas automaticamente
       );
     }
-
-    // Agrupar tarefas por data
     final groupedTasks = _groupTasksByDate(data.filteredTasks);
-
-    // Verificar se deve mostrar botão "Ver todas futuras"
     final shouldShowViewAllButton =
         data.currentFilter == TasksFilterType.upcoming &&
         data.totalTasks > data.filteredTasks.length;
@@ -538,7 +517,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         SliverList.builder(
           itemCount: groupedTasks.length + (shouldShowViewAllButton ? 1 : 0),
           itemBuilder: (context, index) {
-            // Se é o último item e deve mostrar o botão
             if (shouldShowViewAllButton && index == groupedTasks.length) {
               return _buildViewAllButton();
             }
@@ -578,7 +556,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       key: ValueKey(dateGroup.dateKey),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header da data
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
@@ -604,7 +581,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ],
           ),
         ),
-        // Lista de tarefas desta data
         ...dateGroup.tasks.map((task) => _buildTaskCard(task)),
         const SizedBox(height: 16),
       ],
@@ -620,8 +596,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               state.individualTaskOperations.containsKey(task.id),
       orElse: () => false,
     );
-
-    // Buscar a planta completa pelo plantId (nome e imagem)
     final plantsAsync = ref.watch(plantsProvider);
     String plantName = 'Carregando...';
     String? plantImageUrl;
@@ -677,7 +651,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 },
         child: Row(
           children: [
-            // Imagem da planta (esquerda)
             Container(
               width: 48,
               height: 48,
@@ -712,7 +685,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               ),
             ),
             const SizedBox(width: 12),
-            // Task information
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -735,7 +707,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                       fontSize: 14,
                     ),
                   ),
-                  // Plant description - will be implemented later
                   const SizedBox.shrink(),
                   if (isLoading) ...[
                     const SizedBox(height: 2),
@@ -751,7 +722,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 ],
               ),
             ),
-            // Check button pequeno (direita) - círculo vazio para pendente
             GestureDetector(
               onTap:
                   isLoading
@@ -800,11 +770,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
     if (result != null && context.mounted) {
       try {
-        // Complete the task using the provider
         await ref.read(tasksProvider.notifier).completeTask(task.id);
 
         if (context.mounted) {
-          // Show success feedback
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Tarefa "${task.title}" concluída com sucesso!'),
@@ -815,7 +783,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         }
       } catch (e) {
         if (context.mounted) {
-          // Show error feedback
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Erro ao concluir tarefa. Tente novamente.'),
@@ -857,7 +824,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     } else if (taskDate == today.subtract(const Duration(days: 1))) {
       return 'Ontem';
     } else {
-      // Use cache to avoid recreating the same date string
       final cacheKey = '${date.year}-${date.month}-${date.day}-${date.weekday}';
 
       if (_dateFormattingCache.containsKey(cacheKey)) {
@@ -874,9 +840,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       return formatted;
     }
   }
-
-  // Método removido - tarefas são geradas automaticamente quando concluídas
-  // Future<void> _showAddTaskDialog(BuildContext context) async {}
 
   Widget _buildViewAllButton() {
     final theme = Theme.of(context);
@@ -984,8 +947,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       },
     );
   }
-
-  // ignore: unused_element
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -1031,7 +992,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Retry logic
               },
               child: const Text('Tentar novamente'),
             ),
@@ -1049,7 +1009,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       child: Stack(
         children: [
           _buildTasksListAsync(),
-          // Operation feedback overlay
           if (state.hasActiveOperations ||
               state.currentOperationMessage != null)
             _buildOperationOverlay(),

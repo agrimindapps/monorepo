@@ -252,15 +252,12 @@ class ResultFormatterService {
   }
 
   static int _getDecimalPlaces(double value, String unit) {
-    // Determinar precisão baseada no valor e contexto
     if (unit.contains('%')) return 1;
     if (unit.contains('ha') || unit.contains('acre')) return 2;
     if (unit.contains('kg') || unit.contains('t')) return 1;
     if (unit.contains('L') || unit.contains('m³')) return 1;
     if (unit.contains('°C')) return 1;
     if (unit.contains('ppm') || unit.contains('mg')) return 2;
-
-    // Baseado no valor
     if (value.abs() >= 1000) return 0;
     if (value.abs() >= 100) return 1;
     if (value.abs() >= 10) return 1;
@@ -274,7 +271,6 @@ class ResultFormatterService {
   }
 
   static String _addThousandsSeparator(String number) {
-    // Implementação básica para separador de milhares (ponto no BR)
     final parts = number.split('.');
     final integerPart = parts[0];
     final decimalPart = parts.length > 1 ? parts[1] : '';
@@ -338,7 +334,6 @@ class ResultFormatterService {
   }
 
   static String _formatDate(DateTime date, String format) {
-    // Implementação básica de formatação de data
     switch (format) {
       case 'dd/MM/yyyy':
         return '${date.day.toString().padLeft(2, '0')}/'

@@ -46,7 +46,6 @@ class WeightCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with weight and date
               Row(
                 children: [
                   Expanded(
@@ -72,8 +71,6 @@ class WeightCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  
-                  // Recent indicator
                   if (weight.isRecent)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -103,20 +100,14 @@ class WeightCard extends ConsumerWidget {
                     ),
                 ],
               ),
-              
-              // Trend information (if available and enabled)
               if (showTrend && difference != null) ...[
                 const SizedBox(height: 12),
                 _buildTrendInfo(context, difference),
               ],
-              
-              // Body condition score
               if (weight.bodyConditionScore != null) ...[
                 const SizedBox(height: 12),
                 _buildBodyConditionInfo(context, weight),
               ],
-              
-              // Notes (if available)
               if (weight.notes != null && weight.notes!.trim().isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Container(
@@ -151,21 +142,16 @@ class WeightCard extends ConsumerWidget {
                   ),
                 ),
               ],
-              
-              // Action buttons
               if (onEdit != null || onDelete != null) ...[
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    // Quick stats
                     if (difference != null)
                       Expanded(
                         child: _buildQuickStats(context, difference),
                       ),
                     
                     const SizedBox(width: 12),
-                    
-                    // Actions menu
                     PopupMenuButton<String>(
                       onSelected: (value) {
                         switch (value) {

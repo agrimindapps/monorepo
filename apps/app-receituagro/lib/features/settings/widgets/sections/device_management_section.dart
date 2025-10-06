@@ -26,13 +26,9 @@ class DeviceManagementSection extends ConsumerWidget {
         final devices = settingsState.connectedDevicesInfo;
         final currentDevice = settingsState.currentDeviceInfo;
         final hasDeviceManagement = ref.read(settingsNotifierProvider.notifier).isDeviceManagementEnabled;
-
-        // Only show for authenticated users (not anonymous)
         if (settingsState.currentUserId.isEmpty) {
           return const SizedBox.shrink();
         }
-
-        // Don't show section if device management is disabled
         if (!hasDeviceManagement) {
           return const SizedBox.shrink();
         }
@@ -56,7 +52,6 @@ class DeviceManagementSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Title
         Text(
           'Dispositivos Conectados',
           style: theme.textTheme.titleLarge?.copyWith(
@@ -65,8 +60,6 @@ class DeviceManagementSection extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Modern Card with elevated design
         Card(
           margin: EdgeInsets.zero,
           elevation: 4,
@@ -75,7 +68,6 @@ class DeviceManagementSection extends ConsumerWidget {
           ),
           child: Column(
             children: [
-              // Main Device Status with Icon Container
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
@@ -106,12 +98,8 @@ class DeviceManagementSection extends ConsumerWidget {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _openDeviceManagementDialog(context, ref),
               ),
-
-              // Device Limit Status (if needed)
               if (devices.length >= 3)
                 _buildDeviceLimitStatus(context, theme, devices.length),
-
-              // Action Buttons Row
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: SizedBox(
@@ -138,9 +126,7 @@ class DeviceManagementSection extends ConsumerWidget {
 
   /// Open device management dialog
   Future<void> _openDeviceManagementDialog(BuildContext context, WidgetRef ref) async {
-    // Import dialog dynamically to avoid circular dependencies
     final Widget? dialog = await Future.microtask(() {
-      // This will be implemented when DeviceManagementDialog is updated
       return null;
     });
 

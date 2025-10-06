@@ -226,21 +226,13 @@ class AnimalModel extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  // Getter para compatibilidade com datasource
   bool get isDeleted => !isActive;
-
-  // Factory method para Map conversion
   static AnimalModel fromMap(Map<String, dynamic> map) {
     return AnimalModel.fromJson(map);
   }
-
-  // Instance method para Map conversion
   Map<String, dynamic> toMap() {
     return toJson();
   }
-
-  // Método copyWith atualizado para suportar isDeleted
   AnimalModel copyWithDeleted({bool? isDeleted}) {
     return copyWith(isActive: isDeleted != null ? !isDeleted : null);
   }

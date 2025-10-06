@@ -23,29 +23,20 @@ class CalculationResultDisplay extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Resultado principal
         if (result.primaryValue != null) 
           _buildPrimaryResult(context),
         
         const SizedBox(height: 16),
-        
-        // Valores adicionais
         if (result.values.isNotEmpty)
           _buildAdditionalValues(context),
-        
-        // Interpretação/recomendações
         if (result.interpretation != null) ...[
           const SizedBox(height: 16),
           _buildInterpretation(context),
         ],
-        
-        // Warnings ou observações
         if (result.warnings?.isNotEmpty == true) ...[
           const SizedBox(height: 16),
           _buildWarnings(context),
         ],
-        
-        // Timestamp do cálculo
         const SizedBox(height: 16),
         _buildTimestamp(context),
       ],

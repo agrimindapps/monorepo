@@ -16,21 +16,14 @@ class PlantTasksHelper {
   /// Calcula o número de tarefas pendentes para uma planta específica
   static int getPendingTasksCount(WidgetRef ref, String plantId) {
     try {
-      // BUGFIX: Usar watch() em vez de read() para observar mudanças
       final tasksAsync = ref.watch(tasksProvider);
-
-      // Se ainda está carregando ou tem erro, retorna 0
       if (!tasksAsync.hasValue) return 0;
 
       final tasksState = tasksAsync.value!;
-
-      // Busca todas as tarefas da planta
       final plantTasks =
           tasksState.allTasks
               .where((task) => task.plantId == plantId)
               .toList();
-
-      // Conta apenas as tarefas pendentes
       final pendingTasks =
           plantTasks
               .where((task) => task.status == task_entity.TaskStatus.pending)
@@ -38,7 +31,6 @@ class PlantTasksHelper {
 
       return pendingTasks;
     } catch (e) {
-      // Se ocorrer erro, retorna 0
       debugPrint('Erro ao buscar tarefas pendentes para planta $plantId: $e');
       return 0;
     }
@@ -47,15 +39,10 @@ class PlantTasksHelper {
   /// Calcula o número de tarefas atrasadas para uma planta específica
   static int getOverdueTasksCount(WidgetRef ref, String plantId) {
     try {
-      // BUGFIX: Usar watch() em vez de read() para observar mudanças
       final tasksAsync = ref.watch(tasksProvider);
-
-      // Se ainda está carregando ou tem erro, retorna 0
       if (!tasksAsync.hasValue) return 0;
 
       final tasksState = tasksAsync.value!;
-
-      // Busca tarefas da planta que estão atrasadas
       final overdueTasks =
           tasksState.allTasks
               .where(

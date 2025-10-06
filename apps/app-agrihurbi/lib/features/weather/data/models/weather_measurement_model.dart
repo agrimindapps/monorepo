@@ -408,10 +408,6 @@ class WeatherMeasurementModel extends Equatable {
         ')';
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
   /// Map OpenWeatherMap condition to internal format
   static String _mapOpenWeatherCondition(String condition) {
     switch (condition.toLowerCase()) {
@@ -457,16 +453,12 @@ class WeatherMeasurementModel extends Equatable {
   /// Calculate quality score for sensor data
   static double _calculateSensorQualityScore(Map<String, dynamic> sensorData) {
     double score = 1.0;
-
-    // Reduce score for missing critical data
     final requiredFields = ['temperature', 'humidity', 'pressure'];
     for (final field in requiredFields) {
       if (sensorData[field] == null) {
         score -= 0.15;
       }
     }
-
-    // Reduce score for unrealistic values
     final temp = (sensorData['temperature'] as num?)?.toDouble();
     if (temp != null && ((temp < -50) || (temp > 60))) score -= 0.2;
 
@@ -475,8 +467,6 @@ class WeatherMeasurementModel extends Equatable {
 
     final pressure = (sensorData['pressure'] as num?)?.toDouble();
     if (pressure != null && ((pressure < 800) || (pressure > 1200))) score -= 0.15;
-
-    // Reduce score for very old timestamps
     final timestamp = DateTime.tryParse(sensorData['timestamp']?.toString() ?? '');
     if (timestamp != null) {
       final age = DateTime.now().difference(timestamp).inHours;

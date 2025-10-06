@@ -60,13 +60,8 @@ class SimpleSubscriptionSyncService {
   /// Inicializa o serviço
   Future<void> initialize() async {
     try {
-      // Carrega subscription do cache local
       await _loadFromCache();
-
-      // Inicia sync periódico
       _startPeriodicSync();
-
-      // Tenta sincronizar imediatamente (background)
       unawaited(_performSync());
 
       if (kDebugMode) {
@@ -96,7 +91,6 @@ class SimpleSubscriptionSyncService {
   Future<Either<Failure, bool>> hasActiveSubscriptionForApp(
     String appName,
   ) async {
-    // Se não tem cache, tenta sincronizar
     if (_cachedSubscription == null) {
       final syncResult = await _performSync();
       if (syncResult.isLeft()) {
@@ -108,8 +102,6 @@ class SimpleSubscriptionSyncService {
     if (subscription == null || !subscription.isActive) {
       return const Right(false);
     }
-
-    // Verifica se a assinatura é para o app específico através do productId
     final isForApp = _isSubscriptionForApp(subscription, appName);
     return Right(isForApp);
   }
@@ -154,8 +146,6 @@ class SimpleSubscriptionSyncService {
       if (kDebugMode) {
         print('📱 SimpleSubscriptionSyncService: Starting sync');
       }
-
-      // Busca dados do RevenueCat (source of truth)
       final revenueCatResult =
           await _subscriptionRepository.getCurrentSubscription();
       if (revenueCatResult.isLeft()) {
@@ -171,8 +161,6 @@ class SimpleSubscriptionSyncService {
         (failure) => null,
         (subscription) => subscription,
       );
-
-      // Compara com cache local para detectar mudanças
       final hasChanges = _hasSubscriptionChanged(latestSubscription);
 
       if (hasChanges) {
@@ -181,11 +169,7 @@ class SimpleSubscriptionSyncService {
             '📱 SimpleSubscriptionSyncService: Changes detected, updating cache',
           );
         }
-
-        // Salva no cache local
         await _saveToCache(latestSubscription);
-
-        // Atualiza stream
         _subscriptionStreamController.add(latestSubscription);
       }
 
@@ -221,8 +205,6 @@ class SimpleSubscriptionSyncService {
             try {
               final Map<String, dynamic> json = _decodeJson(jsonString);
               _cachedSubscription = _deserializeSubscription(json);
-
-              // Emitir subscription no stream
               _subscriptionStreamController.add(_cachedSubscription);
 
               if (kDebugMode) {
@@ -344,7 +326,6 @@ class SimpleSubscriptionSyncService {
 
   /// Encode Map to JSON string (simple implementation)
   String _encodeJson(Map<String, dynamic> map) {
-    // Simple JSON encoding - can be replaced with dart:convert if available
     final buffer = StringBuffer('{');
     final entries = map.entries.toList();
 
@@ -375,17 +356,12 @@ class SimpleSubscriptionSyncService {
 
   /// Decode JSON string to Map (simple implementation)
   Map<String, dynamic> _decodeJson(String jsonString) {
-    // Simple JSON decoding - can be replaced with dart:convert if available
     final map = <String, dynamic>{};
-
-    // Remove outer braces
     var content = jsonString.trim();
     if (content.startsWith('{')) content = content.substring(1);
     if (content.endsWith('}')) {
       content = content.substring(0, content.length - 1);
     }
-
-    // Split by comma (simplified - doesn't handle nested objects)
     final pairs = content.split(',');
 
     for (final pair in pairs) {
@@ -393,8 +369,6 @@ class SimpleSubscriptionSyncService {
       if (parts.length == 2) {
         var key = parts[0].trim().replaceAll('"', '');
         var value = parts[1].trim();
-
-        // Parse value
         if (value == 'null') {
           map[key] = null;
         } else if (value == 'true') {
@@ -404,7 +378,6 @@ class SimpleSubscriptionSyncService {
         } else if (value.startsWith('"') && value.endsWith('"')) {
           map[key] = value.substring(1, value.length - 1);
         } else {
-          // Try to parse as number
           final numValue = int.tryParse(value);
           map[key] = numValue ?? value;
         }
@@ -423,8 +396,6 @@ class SimpleSubscriptionSyncService {
     if (_cachedSubscription == null || newSubscription == null) {
       return true;
     }
-
-    // Compara campos críticos
     return _cachedSubscription!.id != newSubscription.id ||
         _cachedSubscription!.status != newSubscription.status ||
         _cachedSubscription!.tier != newSubscription.tier;

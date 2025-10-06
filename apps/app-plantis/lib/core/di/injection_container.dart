@@ -75,20 +75,10 @@ import 'modules/tasks_module.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // External dependencies (must be first for SharedPreferences)
   await _initExternal();
-
-  // Core services from package (must be before Injectable for IAuthRepository, etc)
   _initCoreServices();
-
-  // Backup services must be before Injectable (BackupServiceRefactored needs them)
   _registerBackupServices();
-
-  // ===== INJECTABLE AUTO-WIRING =====
-  // Configure Injectable dependencies (requires core services to be registered)
   await injectable.configureDependencies();
-
-  // Features
   _initAuth();
   _initAccount();
   _initAccountDeletion(); // NEW: Account Deletion Services
@@ -101,91 +91,58 @@ Future<void> init() async {
   _initSettings();
   _initBackup(); // Remaining backup config (schedulers, providers)
   _initDataExport();
-
-  // Sync service (requires repositories from modules)
   SyncDIModule.init(sl);
-
-  // App services
   _initAppServices();
 }
 
 Future<void> _initExternal() async {
-  // Shared Preferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
-
-  // Connectivity, ConnectivityService e FirebaseStorage agora são registrados via ExternalModule
 }
 
 void _initCoreServices() {
-  // Firebase (FirebaseStorage agora via ExternalModule)
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
   sl.registerLazySingleton(() => FirebaseFunctions.instance);
-
-  // Network Info - Migrated to Adapter Pattern for enhanced features
-  // BACKWARD COMPATIBILITY: Interface NetworkInfo preservada, zero breaking changes
   sl.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoAdapter(sl<ConnectivityService>()),
   );
-
-  // Auth Repository - Enhanced with security features
   sl.registerLazySingleton<IAuthRepository>(
     () => PlantisSecurityConfig.createEnhancedAuthService(),
   );
-
-  // Analytics Repository
   sl.registerLazySingleton<IAnalyticsRepository>(
     () => FirebaseAnalyticsService(),
   );
-
-  // Crashlytics Repository
   sl.registerLazySingleton<ICrashlyticsRepository>(
     () => FirebaseCrashlyticsService(),
   );
-
-  // Performance Repository - Stub implementation (to be implemented)
   sl.registerLazySingleton<IPerformanceRepository>(
     () => _StubPerformanceRepository(),
   );
-
-  // Box Registry Service (required by HiveStorageService)
   sl.registerLazySingleton<IBoxRegistryService>(() => BoxRegistryService());
-
-  // Storage repositories
   sl.registerLazySingleton<ILocalStorageRepository>(
     () => HiveStorageService(sl<IBoxRegistryService>()),
   );
-
-  // Enhanced Secure Storage Service with Plantis configuration
   sl.registerLazySingleton<EnhancedSecureStorageService>(
     () => EnhancedSecureStorageService(
       appIdentifier: AppConstants.appId,
       config: const SecureStorageConfig.plantis(),
     ),
   );
-
-  // Enhanced Encrypted Storage Service
   sl.registerLazySingleton<EnhancedEncryptedStorageService>(
     () => EnhancedEncryptedStorageService(
       secureStorage: sl<EnhancedSecureStorageService>(),
       appIdentifier: AppConstants.appId,
     ),
   );
-
-  // Plantis Storage Adapter (backward compatibility)
   sl.registerLazySingleton<PlantisStorageAdapter>(
     () => PlantisStorageAdapter(
       secureStorage: sl<EnhancedSecureStorageService>(),
       encryptedStorage: sl<EnhancedEncryptedStorageService>(),
     ),
   );
-
-  // Legacy SecureStorageService interface (backward compatibility)
   sl.registerLazySingleton<SecureStorageService>(
     () => SecureStorageService.instance,
   );
-
-  // App Rating Repository
   sl.registerLazySingleton<IAppRatingRepository>(
     () => AppRatingService(
       appStoreId: AppConstants.appStoreId,
@@ -196,15 +153,9 @@ void _initCoreServices() {
       remindLaunches: AppConstants.appRatingRemindLaunches,
     ),
   );
-
-  // Notification Services (using core LocalNotificationService)
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
-
-  // Notification Manager - registrado com interfaces segregadas
   sl.registerLazySingleton(() => NotificationManager());
-
-  // Interfaces segregadas para diferentes responsabilidades (ISP)
   sl.registerLazySingleton<ITaskNotificationManager>(
     () => sl<NotificationManager>(),
   );
@@ -217,14 +168,9 @@ void _initCoreServices() {
   sl.registerLazySingleton<INotificationScheduleManager>(
     () => sl<NotificationManager>(),
   );
-
-  // Enhanced Image Service (using adapter pattern)
-  // Consolidates Core ImageService + ImagePreloaderService functionality
   sl.registerLazySingleton(
     () => PlantisImageServiceAdapterFactory.createForPlantis(),
   );
-
-  // Backward compatibility: Register core ImageService separately if needed
   sl.registerLazySingleton(
     () => ImageService(
       config: const ImageServiceConfig(
@@ -242,20 +188,12 @@ void _initCoreServices() {
       ),
     ),
   );
-
-  // File Manager Service (Core Package) - Replaces custom platform handlers
   sl.registerLazySingleton<IFileRepository>(() => FileManagerService());
-
-  // URL Launcher Service
   sl.registerLazySingleton(() => UrlLauncherService());
-
-  // License System (from core package)
   sl.registerLazySingleton<LicenseRepository>(() => LicenseLocalStorage());
   sl.registerLazySingleton<LicenseService>(
     () => LicenseService(sl<LicenseRepository>()),
   );
-
-  // Use Cases
   sl.registerLazySingleton(() => LoginUseCase(sl(), sl()));
   sl.registerLazySingleton(
     () => LogoutUseCase(sl(), sl(), sl<DataCleanerService>()),
@@ -264,13 +202,7 @@ void _initCoreServices() {
 }
 
 void _initAuth() {
-  // Auth State Notifier (Singleton)
   sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
-
-  // BackgroundSyncService já registrado via Injectable (injection.config.dart)
-  // BackgroundSyncProvider já registrado via Injectable (injection.config.dart)
-
-  // Auth Provider - with BackgroundSyncProvider and DeviceValidation dependencies
   sl.registerLazySingleton(
     () => providers.AuthProvider(
       loginUseCase: sl(),
@@ -284,52 +216,39 @@ void _initAuth() {
       revokeDeviceUseCase: sl<local.RevokeDeviceUseCase>(),
     ),
   );
-
-  // Register Provider
   sl.registerFactory(() => RegisterProvider());
 }
 
 void _initAccount() {
-  // Account simplificado - sem DI necessário
 }
 
 void _initAccountDeletion() {
-  // Initialize Account Deletion Module with enhanced security services
   AccountDeletionModule.init(sl);
 }
 
 void _initDeviceManagement() {
-  // Firebase Device Service do core package
   sl.registerLazySingleton<FirebaseDeviceService>(
     () => FirebaseDeviceService(
       functions: sl<FirebaseFunctions>(),
       firestore: sl<FirebaseFirestore>(),
     ),
   );
-
-  // Remote DataSource - agora usando o Firebase real
   sl.registerLazySingleton<DeviceRemoteDataSource>(
     () => DeviceRemoteDataSourceImpl(
       firebaseDeviceService: sl<FirebaseDeviceService>(),
     ),
   );
-
-  // Local DataSource - usar a implementação do core já registrada
   sl.registerLazySingleton<DeviceLocalDataSource>(
     () => DeviceLocalDataSourceImpl(
       storageService: sl<ILocalStorageRepository>(),
     ),
   );
-
-  // Repository
   sl.registerLazySingleton<DeviceRepository>(
     () => DeviceRepositoryImpl(
       remoteDataSource: sl<DeviceRemoteDataSource>(),
       localDataSource: sl<DeviceLocalDataSource>(),
     ),
   );
-
-  // Use Cases locais do app-plantis
   sl.registerLazySingleton<local.GetUserDevicesUseCase>(
     () => local.GetUserDevicesUseCase(
       sl<DeviceRepository>(),
@@ -368,8 +287,6 @@ void _initDeviceManagement() {
   sl.registerLazySingleton<UpdateDeviceActivityUseCase>(
     () => UpdateDeviceActivityUseCase(sl<DeviceRepository>()),
   );
-
-  // Provider real ativo
   sl.registerLazySingleton<DeviceManagementProvider>(
     () => DeviceManagementProvider(
       getUserDevicesUseCase: sl<local.GetUserDevicesUseCase>(),
@@ -395,22 +312,16 @@ void _initSpaces() {
 }
 
 void _initComments() {
-  // Comments functionality is handled in plants module
 }
 
 void _initPremium() {
-  // Repository (mantém RevenueCat como implementação base)
   sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
-
-  // Unified Subscription Services (NEW - Simplified)
   sl.registerLazySingleton<SimpleSubscriptionSyncService>(
     () => SimpleSubscriptionSyncService(
       subscriptionRepository: sl<ISubscriptionRepository>(),
       localStorage: sl<ILocalStorageRepository>(),
     ),
   );
-
-  // Provider (atualizado para usar SimpleSubscriptionSyncService)
   sl.registerFactory(
     () => PremiumProvider(
       subscriptionRepository: sl(),
@@ -421,17 +332,12 @@ void _initPremium() {
 }
 
 void _initSettings() {
-  // Settings DataSource
   sl.registerLazySingleton<SettingsLocalDataSource>(
     () => SettingsLocalDataSource(prefs: sl<SharedPreferences>()),
   );
-
-  // Settings Repository
   sl.registerLazySingleton<ISettingsRepository>(
     () => SettingsRepository(localDataSource: sl<SettingsLocalDataSource>()),
   );
-
-  // Centralized Settings Provider (Enhanced Architecture)
   sl.registerLazySingleton<SettingsProvider>(
     () => SettingsProvider(
       settingsRepository: sl<ISettingsRepository>(),
@@ -439,8 +345,6 @@ void _initSettings() {
       backupService: sl<BackupService>(),
     )..initialize(), // Auto-initialize for better UX
   );
-
-  // Notifications Settings Provider
   sl.registerFactory(
     () => NotificationsSettingsProvider(
       notificationService: sl<PlantisNotificationService>(),
@@ -451,9 +355,6 @@ void _initSettings() {
 
 /// Register backup services BEFORE Injectable (required by BackupServiceRefactored)
 void _registerBackupServices() {
-  // NOTE: IBackupRepository será registrado DEPOIS em _initBackup() (precisa de FirebaseStorage do ExternalModule)
-
-  // Backup Services (Refatorados seguindo SOLID) - required by BackupServiceRefactored
   sl.registerLazySingleton<BackupValidationService>(
     () => const BackupValidationService(),
   );
@@ -465,20 +366,15 @@ void _registerBackupServices() {
   sl.registerLazySingleton<BackupAuditService>(
     () => BackupAuditService(storageService: sl<SecureStorageService>()),
   );
-
-  // NOTE: BackupRestoreService será registrado em _initBackup (precisa dos repositories)
 }
 
 void _initBackup() {
-  // IBackupRepository (needs FirebaseStorage from ExternalModule, so registered here)
   sl.registerLazySingleton<IBackupRepository>(
     () => BackupRepository(
       storage: sl<FirebaseStorage>(),
       authRepository: sl<IAuthRepository>(),
     ),
   );
-
-  // BackupRestoreService (requires repositories registered via modules/Injectable)
   sl.registerLazySingleton<BackupRestoreService>(
     () => BackupRestoreService(
       plantsRepository: sl(),
@@ -490,8 +386,6 @@ void _initBackup() {
       auditService: sl<BackupAuditService>(),
     ),
   );
-
-  // BackupServiceRefactored (removed from Injectable, registered manually)
   sl.registerSingleton<BackupServiceRefactored>(
     BackupServiceRefactored(
       backupRepository: sl<IBackupRepository>(),
@@ -502,8 +396,6 @@ void _initBackup() {
       storageService: sl<SecureStorageService>(),
     ),
   );
-
-  // Backup Service (requires repositories registered via modules)
   sl.registerSingleton<BackupService>(
     BackupService(
       backupRepository: sl<IBackupRepository>(),
@@ -517,8 +409,6 @@ void _initBackup() {
       tasksRepository: sl(),
     ),
   );
-
-  // Backup Scheduler
   sl.registerSingleton<BackupScheduler>(
     BackupScheduler(
       backupService: sl<BackupService>(),
@@ -526,13 +416,9 @@ void _initBackup() {
       connectivity: sl<Connectivity>(),
     ),
   );
-
-  // Backup Scheduler Manager
   sl.registerSingleton<BackupSchedulerManager>(
     BackupSchedulerManager(sl<BackupScheduler>()),
   );
-
-  // Backup Settings Provider
   sl.registerFactory(
     () => BackupSettingsProvider(
       backupService: sl<BackupService>(),
@@ -542,25 +428,16 @@ void _initBackup() {
 }
 
 void _initAppServices() {
-  // Navigation Service - Core Package Implementation
   sl.registerLazySingleton<INavigationService>(() => NavigationService());
-
-  // Analytics Provider
   sl.registerLazySingleton<AnalyticsProvider>(
     () => AnalyticsProvider(
       analyticsRepository: sl<IAnalyticsRepository>(),
       crashlyticsRepository: sl<ICrashlyticsRepository>(),
     ),
   );
-
-  // Theme management is now handled via Riverpod providers in core package
-
-  // Sync Status Provider (legacy)
   sl.registerLazySingleton<SyncStatusProvider>(
     () => SyncStatusProvider(sl(), sl()),
   );
-
-  // Data Cleaner Service
   sl.registerLazySingleton<DataCleanerService>(
     () => DataCleanerService(
       plantsRepository: sl(),
@@ -572,7 +449,6 @@ void _initAppServices() {
 }
 
 void _initDataExport() {
-  // Data Sources - using concrete implementations
   sl.registerLazySingleton<PlantsExportDataSource>(
     () => PlantsExportLocalDataSource(
       plantsRepository: sl<PlantsRepository>(),
@@ -589,8 +465,6 @@ void _initDataExport() {
   sl.registerLazySingleton<ExportFileGenerator>(
     () => ExportFileGenerator(fileRepository: sl<IFileRepository>()),
   );
-
-  // Repository
   sl.registerLazySingleton<DataExportRepository>(
     () => DataExportRepositoryImpl(
       plantsDataSource: sl<PlantsExportDataSource>(),
@@ -598,8 +472,6 @@ void _initDataExport() {
       fileGenerator: sl<ExportFileGenerator>(),
     ),
   );
-
-  // Use Cases
   sl.registerLazySingleton<CheckExportAvailabilityUseCase>(
     () => CheckExportAvailabilityUseCase(sl<DataExportRepository>()),
   );
@@ -611,8 +483,6 @@ void _initDataExport() {
   sl.registerLazySingleton<GetExportHistoryUseCase>(
     () => GetExportHistoryUseCase(sl<DataExportRepository>()),
   );
-
-  // Provider
   sl.registerFactory<DataExportProvider>(
     () => DataExportProvider(
       checkAvailabilityUseCase: sl<CheckExportAvailabilityUseCase>(),

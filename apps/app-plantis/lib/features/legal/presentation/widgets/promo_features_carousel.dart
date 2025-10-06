@@ -80,7 +80,6 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
       ),
       child: Column(
         children: [
-          // Título da seção
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -120,8 +119,6 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
             ),
           ),
           const SizedBox(height: 48),
-
-          // Carousel de funcionalidades
           SizedBox(
             height: isMobile ? 320 : 350,
             child: PageView.builder(
@@ -160,8 +157,6 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel>
           ),
 
           const SizedBox(height: 24),
-
-          // Indicadores de página
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(

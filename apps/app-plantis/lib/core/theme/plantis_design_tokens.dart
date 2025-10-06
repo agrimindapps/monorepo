@@ -5,8 +5,6 @@ import 'plantis_colors.dart';
 class PlantisDesignTokens {
   const PlantisDesignTokens._(); // Private constructor
 
-  // MARK: - Spacing Tokens
-
   /// Spacing scale based on 4px baseline
   static const double spacing1 = 4.0; // 4px
   static const double spacing2 = 8.0; // 8px
@@ -22,8 +20,6 @@ class PlantisDesignTokens {
   static const double spacing16 = 64.0; // 64px
   static const double spacing20 = 80.0; // 80px
 
-  // MARK: - Border Radius Tokens
-
   static const double radiusNone = 0.0;
   static const double radiusXS = 2.0;
   static const double radiusSM = 4.0;
@@ -34,8 +30,6 @@ class PlantisDesignTokens {
   static const double radius3XL = 24.0;
   static const double radiusFull = 9999.0;
 
-  // MARK: - Elevation Tokens
-
   static const double elevationNone = 0.0;
   static const double elevationXS = 1.0;
   static const double elevationSM = 2.0;
@@ -45,8 +39,6 @@ class PlantisDesignTokens {
   static const double elevation2XL = 16.0;
   static const double elevation3XL = 24.0;
 
-  // MARK: - Animation Duration Tokens
-
   static const Duration durationInstant = Duration(milliseconds: 50);
   static const Duration durationQuick = Duration(milliseconds: 100);
   static const Duration durationFast = Duration(milliseconds: 150);
@@ -55,8 +47,6 @@ class PlantisDesignTokens {
   static const Duration durationSlow = Duration(milliseconds: 500);
   static const Duration durationSlower = Duration(milliseconds: 750);
   static const Duration durationSlowest = Duration(milliseconds: 1000);
-
-  // MARK: - Typography Scale
 
   static const double fontSizeXS = 10.0;
   static const double fontSizeSM = 12.0;
@@ -69,8 +59,6 @@ class PlantisDesignTokens {
   static const double fontSize5XL = 32.0;
   static const double fontSize6XL = 36.0;
 
-  // MARK: - Font Weights
-
   static const FontWeight fontWeightThin = FontWeight.w100;
   static const FontWeight fontWeightExtraLight = FontWeight.w200;
   static const FontWeight fontWeightLight = FontWeight.w300;
@@ -81,8 +69,6 @@ class PlantisDesignTokens {
   static const FontWeight fontWeightExtraBold = FontWeight.w800;
   static const FontWeight fontWeightBlack = FontWeight.w900;
 
-  // MARK: - Icon Sizes
-
   static const double iconSizeXS = 12.0;
   static const double iconSizeSM = 16.0;
   static const double iconSizeBase = 20.0;
@@ -91,8 +77,6 @@ class PlantisDesignTokens {
   static const double iconSize2XL = 32.0;
   static const double iconSize3XL = 36.0;
   static const double iconSize4XL = 40.0;
-
-  // MARK: - Component Specific Tokens
 
   /// Settings components sizing
   static const double settingsItemHeight = 56.0;
@@ -111,8 +95,6 @@ class PlantisDesignTokens {
   static const double buttonPaddingHorizontal = 24.0;
   static const double buttonPaddingVertical = 12.0;
 
-  // MARK: - Plant-themed Component Tokens
-
   /// Premium components
   static const double premiumBadgeRadius = 8.0;
   static const double premiumIndicatorSize = 24.0;
@@ -126,8 +108,6 @@ class PlantisDesignTokens {
   static const double hoverScaleUp = 1.02;
   static const double pressScaleDown = 0.98;
   static const Duration interactionDuration = Duration(milliseconds: 150);
-
-  // MARK: - Helper Methods
 
   /// Get appropriate spacing based on context
   static double getContextualSpacing(SpacingContext context) {
@@ -175,8 +155,6 @@ class PlantisDesignTokens {
     }
   }
 
-  // MARK: - Semantic Color Helpers
-
   /// Get semantic color based on state
   static Color getSemanticColor(SemanticState state) {
     switch (state) {
@@ -208,8 +186,6 @@ class PlantisDesignTokens {
         return PlantisColors.sunLight;
     }
   }
-
-  // MARK: - Box Shadow Presets
 
   static List<BoxShadow> get softShadow => [
     BoxShadow(
@@ -243,8 +219,6 @@ class PlantisDesignTokens {
     ),
   ];
 
-  // MARK: - Plant-themed Gradients
-
   static const LinearGradient leafGradient = LinearGradient(
     colors: [PlantisColors.leaf, PlantisColors.leafLight],
     begin: Alignment.topLeft,
@@ -275,15 +249,11 @@ class PlantisDesignTokens {
     end: Alignment.bottomRight,
   );
 
-  // MARK: - Animation Curves
-
   static const Curve plantGrowCurve = Curves.easeOutBack;
   static const Curve leafFallCurve = Curves.easeInQuart;
   static const Curve waterFlowCurve = Curves.easeInOut;
   static const Curve sunRiseCurve = Curves.easeOutQuint;
 }
-
-// MARK: - Enums
 
 enum SpacingContext { tight, normal, comfortable, spacious }
 

@@ -15,7 +15,6 @@ class ExpensesEmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ilustração
             Container(
               width: 120,
               height: 120,
@@ -35,8 +34,6 @@ class ExpensesEmptyState extends StatelessWidget {
             ),
 
             const SizedBox(height: GasometerDesignTokens.spacingXl),
-
-            // Título principal
             SemanticText.heading(
               'Nenhuma despesa registrada',
               style: TextStyle(
@@ -48,8 +45,6 @@ class ExpensesEmptyState extends StatelessWidget {
             ),
 
             const SizedBox(height: GasometerDesignTokens.spacingMd),
-
-            // Descrição
             SemanticText.subtitle(
               'Use o botão + para registrar suas despesas do veículo como seguro, IPVA, manutenções, multas e outros gastos.',
               style: TextStyle(

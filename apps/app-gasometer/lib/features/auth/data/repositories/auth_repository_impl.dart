@@ -21,16 +21,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
     try {
-      // Try to get current user from Firebase first
       final remoteUser = await remoteDataSource.getCurrentUser();
 
       if (remoteUser != null) {
-        // Cache the user locally
         await localDataSource.cacheUser(remoteUser);
         return Right(remoteUser);
       }
-
-      // Fallback to local cache
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
         return Right(cachedUser);
@@ -38,7 +34,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return const Right(null);
     } on local_exceptions.ServerException catch (e) {
-      // Try local cache on server error
       try {
         final cachedUser = await localDataSource.getCachedUser();
         if (cachedUser != null) {
@@ -61,12 +56,9 @@ class AuthRepositoryImpl implements AuthRepository {
           .watchAuthState()
           .map<Either<Failure, UserEntity?>>((userModel) {
             if (userModel == null) {
-              // Clear local cache when user signs out
               localDataSource.clearCachedUser().catchError((_) {});
               return const Right(null);
             }
-
-            // Cache the user locally
             localDataSource.cacheUser(userModel).catchError((_) {});
 
             return Right(userModel);
@@ -91,8 +83,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     try {
       final userModel = await remoteDataSource.signInWithEmail(email, password);
-
-      // Cache user locally
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -109,8 +99,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> signInAnonymously() async {
     try {
       final userModel = await remoteDataSource.signInAnonymously();
-
-      // Don't cache anonymous users
 
       return Right(userModel);
     } on local_exceptions.AuthenticationException catch (e) {
@@ -134,8 +122,6 @@ class AuthRepositoryImpl implements AuthRepository {
         password,
         displayName,
       );
-
-      // Cache user locally
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -158,8 +144,6 @@ class AuthRepositoryImpl implements AuthRepository {
         displayName,
         photoUrl,
       );
-
-      // Update cached user
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -234,8 +218,6 @@ class AuthRepositoryImpl implements AuthRepository {
     required String newPassword,
   }) async {
     try {
-      // This would need to be implemented in the remote data source
-      // For now, return not implemented
       return const Left(
         UnexpectedFailure('Password reset confirmation not implemented'),
       );
@@ -254,8 +236,6 @@ class AuthRepositoryImpl implements AuthRepository {
         email,
         password,
       );
-
-      // Cache the converted user
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -272,8 +252,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> signInWithGoogle() async {
     try {
       final userModel = await remoteDataSource.signInWithGoogle();
-
-      // Cache user locally
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -290,8 +268,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> signInWithApple() async {
     try {
       final userModel = await remoteDataSource.signInWithApple();
-
-      // Cache user locally
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -308,8 +284,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> signInWithFacebook() async {
     try {
       final userModel = await remoteDataSource.signInWithFacebook();
-
-      // Cache user locally
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -326,8 +300,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> linkAnonymousWithGoogle() async {
     try {
       final userModel = await remoteDataSource.linkAnonymousWithGoogle();
-
-      // Cache the converted user
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -344,8 +316,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> linkAnonymousWithApple() async {
     try {
       final userModel = await remoteDataSource.linkAnonymousWithApple();
-
-      // Cache the converted user
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -362,8 +332,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserEntity>> linkAnonymousWithFacebook() async {
     try {
       final userModel = await remoteDataSource.linkAnonymousWithFacebook();
-
-      // Cache the converted user
       await localDataSource.cacheUser(userModel);
 
       return Right(userModel);
@@ -381,7 +349,6 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.signOut();
       await localDataSource.clearCachedUser();
-      // SECURITY + UX FIX: Clear password but preserve email for better UX
       await localDataSource.clearCachedCredentialsPreservingEmail();
       return const Right(unit);
     } on local_exceptions.ServerException catch (e) {
@@ -396,13 +363,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, Unit>> deleteAccount() async {
     try {
-      // 1. Delete account from remote (Firebase)
       await remoteDataSource.deleteAccount();
-
-      // 2. Clear cached user data
       await localDataSource.clearCachedUser();
-
-      // 3. Clear all local gasometer data (vehicles, fuel records, etc.)
       await _clearGasometerLocalData();
 
       return const Right(unit);
@@ -420,10 +382,7 @@ class AuthRepositoryImpl implements AuthRepository {
   /// Clears all local gasometer-specific data after account deletion
   Future<void> _clearGasometerLocalData() async {
     try {
-      // Get DataCleanerService instance
       final dataCleanerService = DataCleanerService.instance;
-
-      // Clear all local data including Hive boxes and SharedPreferences
       final clearResult = await dataCleanerService.clearAllData();
 
       if (clearResult['success'] == true) {
@@ -445,7 +404,6 @@ class AuthRepositoryImpl implements AuthRepository {
         }
       }
     } catch (e) {
-      // Don't throw error here - account deletion should succeed even if local cleanup fails
       if (kDebugMode) {
         debugPrint('⚠️ Error during local data cleanup: $e');
       }

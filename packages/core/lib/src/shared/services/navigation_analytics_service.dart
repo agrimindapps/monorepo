@@ -23,13 +23,8 @@ class NavigationAnalyticsService implements INavigationAnalytics {
     Map<String, dynamic>? parameters,
   ) async {
     try {
-      // Track page view count
       _pageViewCounts[pageType] = (_pageViewCounts[pageType] ?? 0) + 1;
-
-      // Start timing for this page
       _pageStartTimes[pageType] = DateTime.now();
-
-      // Create navigation event
       final event = NavigationEvent(
         type: NavigationEventType.pageView,
         pageType: pageType,
@@ -38,8 +33,6 @@ class NavigationAnalyticsService implements INavigationAnalytics {
       );
 
       _addSessionEvent(event);
-
-      // Track with Firebase
       final result = await _firebaseAnalytics.logEvent(
         'navigation_page_view',
         parameters: {
@@ -201,14 +194,11 @@ class NavigationAnalyticsService implements INavigationAnalytics {
     DateTime endDate,
   ) async {
     try {
-      // Filter events by date range
       final filteredEvents =
           _sessionEvents.where((event) {
             return event.timestamp.isAfter(startDate) &&
                 event.timestamp.isBefore(endDate);
           }).toList();
-
-      // Calculate summary statistics
       final summary = <String, dynamic>{
         'date_range': {
           'start': startDate.toIso8601String(),
@@ -347,8 +337,6 @@ class NavigationAnalyticsService implements INavigationAnalytics {
   /// Add event to session with size management
   void _addSessionEvent(NavigationEvent event) {
     _sessionEvents.add(event);
-
-    // Maintain max session events
     if (_sessionEvents.length > _maxSessionEvents) {
       _sessionEvents.removeAt(0);
     }

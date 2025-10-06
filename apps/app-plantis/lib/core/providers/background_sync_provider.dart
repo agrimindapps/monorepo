@@ -19,15 +19,11 @@ class BackgroundSyncProvider extends ChangeNotifier {
   BackgroundSyncProvider(this._backgroundSyncService) {
     _listenToSyncUpdates();
   }
-
-  // Expose service getters
   bool get isSyncInProgress => _backgroundSyncService.isSyncInProgress;
   bool get hasPerformedInitialSync =>
       _backgroundSyncService.hasPerformedInitialSync;
   String get currentSyncMessage => _backgroundSyncService.currentSyncMessage;
   BackgroundSyncStatus get syncStatus => _backgroundSyncService.syncStatus;
-
-  // Expose service streams
   Stream<BackgroundSyncStatus> get syncStatusStream =>
       _backgroundSyncService.syncStatusStream;
   Stream<String> get syncMessageStream =>

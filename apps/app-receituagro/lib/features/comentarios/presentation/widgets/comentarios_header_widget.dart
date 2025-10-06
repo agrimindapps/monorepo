@@ -53,13 +53,9 @@ class ComentariosHeaderWidget extends StatelessWidget {
     if (isLoading) {
       return 'Carregando comentários...';
     }
-
-    // Build contextual subtitle based on filters
     if (_hasFilters) {
       return _buildFilteredSubtitle();
     }
-
-    // General subtitle
     return _buildGeneralSubtitle();
   }
 
@@ -69,15 +65,11 @@ class ComentariosHeaderWidget extends StatelessWidget {
 
   String _buildFilteredSubtitle() {
     final parts = <String>[];
-    
-    // Add count information
     if (filteredCount > 0) {
       parts.add('$filteredCount comentários');
     } else {
       parts.add('Nenhum comentário');
     }
-
-    // Add context information
     if (_hasFilters) {
       final filterParts = <String>[];
       

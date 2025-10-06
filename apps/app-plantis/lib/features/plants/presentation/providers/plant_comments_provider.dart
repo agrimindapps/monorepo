@@ -18,8 +18,6 @@ class PlantCommentsState {
     this.error,
     this.currentPlantId,
   });
-
-  // Convenience getters
   bool get hasComments => comments.isNotEmpty;
   int get commentsCount => comments.length;
   bool get hasError => error != null;
@@ -79,18 +77,13 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
   @override
   Future<PlantCommentsState> build() async {
-    // Initialize repository from DI
     _repository = ref.read(plantCommentsRepositoryProvider);
-
-    // Start with empty state
     return const PlantCommentsState();
   }
 
   /// Load comments for a specific plant
   Future<void> loadComments(String plantId) async {
     final currentState = state.valueOrNull ?? const PlantCommentsState();
-
-    // Comments already loaded for this plant
     if (currentState.currentPlantId == plantId &&
         currentState.comments.isNotEmpty) {
       return;
@@ -151,7 +144,6 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
       },
       (comment) {
         final newState = state.valueOrNull ?? const PlantCommentsState();
-        // Add to the beginning of the list (newest first)
         final updatedComments = [comment, ...newState.comments];
         state = AsyncValue.data(
           newState.copyWith(
@@ -281,16 +273,12 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
   }
 }
 
-// === DEPENDENCY PROVIDERS (GetIt DI) ===
-
 @riverpod
 PlantCommentsRepository plantCommentsRepository(
   PlantCommentsRepositoryRef ref,
 ) {
   return GetIt.instance<PlantCommentsRepository>();
 }
-
-// === COMPATIBILITY PROVIDERS (for gradual migration) ===
 
 @riverpod
 List<ComentarioModel> plantComments(PlantCommentsRef ref) {

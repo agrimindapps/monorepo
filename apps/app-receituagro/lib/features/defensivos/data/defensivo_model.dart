@@ -31,8 +31,6 @@ class DefensivoModel {
       modoAcao: map['modoAcao']?.toString(),
     );
   }
-
-  // Computed display properties
   String get displayName => nomeComum ?? line1;
   String get displayIngredient => ingredienteAtivo ?? line2;
   String get displayClass => classeAgronomica ?? 'Não especificado';

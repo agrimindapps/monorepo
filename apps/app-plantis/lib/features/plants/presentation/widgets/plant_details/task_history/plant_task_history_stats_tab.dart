@@ -41,8 +41,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
-
-    // Criar animações escalonadas
     _itemAnimations = List.generate(6, (index) {
       return Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
@@ -70,21 +68,15 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
   /// Calcula estatísticas de frequência semanal
   List<Map<String, dynamic>> _calculateWeeklyFrequency() {
     final weeklyData = <int, int>{}; // weekday -> count
-
-    // Inicializar com 0 para todos os dias da semana
     for (int i = 1; i <= 7; i++) {
       weeklyData[i] = 0;
     }
-
-    // Contar tarefas por dia da semana
     for (final task in widget.completedTasks) {
       if (task.completedDate != null) {
         final weekday = task.completedDate!.weekday;
         weeklyData[weekday] = (weeklyData[weekday] ?? 0) + 1;
       }
     }
-
-    // Converter para lista de mapas
     final weekDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     return List.generate(7, (index) {
       final weekday = index + 1;
@@ -102,13 +94,9 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
     final total = widget.completedTasks.length;
 
     if (total == 0) return {};
-
-    // Contar por tipo
     for (final task in widget.completedTasks) {
       typeCounts[task.type] = (typeCounts[task.type] ?? 0) + 1;
     }
-
-    // Converter para percentual
     final distribution = <TaskType, double>{};
     for (final entry in typeCounts.entries) {
       distribution[entry.key] = (entry.value / total) * 100;
@@ -121,8 +109,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
   List<Map<String, dynamic>> _calculateAchievements() {
     final achievements = <Map<String, dynamic>>[];
     final total = widget.completedTasks.length;
-
-    // Conquistas por total de tarefas
     achievements.addAll([
       {
         'title': 'Primeiro Cuidado',
@@ -165,8 +151,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
         'current': total,
       },
     ]);
-
-    // Conquista por sequência
     final currentStreak = _calculateCurrentStreak();
     achievements.add({
       'title': 'Constância',
@@ -178,8 +162,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
       'target': 7,
       'current': currentStreak,
     });
-
-    // Conquista por especialização
     final typeDistribution = _calculateTypeDistribution();
     final maxTypePercentage =
         typeDistribution.values.isEmpty
@@ -268,8 +250,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
       });
       return insights;
     }
-
-    // Insight sobre tipo mais comum
     if (typeDistribution.isNotEmpty) {
       final mostCommonType = typeDistribution.entries.reduce(
         (a, b) => a.value > b.value ? a : b,
@@ -283,8 +263,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             '${mostCommonType.value.toStringAsFixed(1)}% das suas tarefas são ${mostCommonType.key.displayName.toLowerCase()}.',
       });
     }
-
-    // Insight sobre dia mais ativo
     final mostActiveDay = weeklyData.reduce(
       (a, b) => (a['count'] as int) > (b['count'] as int) ? a : b,
     );
@@ -298,8 +276,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             'Você cuida mais da sua planta nas ${mostActiveDay['day']}s (${mostActiveDay['count']} cuidados).',
       });
     }
-
-    // Insight sobre consistência
     final currentStreak = _calculateCurrentStreak();
     if (currentStreak > 1) {
       insights.add({
@@ -310,8 +286,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             'Você está numa sequência de $currentStreak dias. Continue assim!',
       });
     }
-
-    // Insight sobre total
     if (total >= 10) {
       insights.add({
         'icon': Icons.celebration,
@@ -340,7 +314,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gráfico de frequência semanal
             AnimatedBuilder(
               animation: _itemAnimations[0],
               builder: (context, child) {
@@ -358,8 +331,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             ),
 
             const SizedBox(height: 32),
-
-            // Distribuição por tipo
             AnimatedBuilder(
               animation: _itemAnimations[1],
               builder: (context, child) {
@@ -377,8 +348,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             ),
 
             const SizedBox(height: 32),
-
-            // Conquistas
             AnimatedBuilder(
               animation: _itemAnimations[2],
               builder: (context, child) {
@@ -396,8 +365,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             ),
 
             const SizedBox(height: 32),
-
-            // Insights personalizados
             AnimatedBuilder(
               animation: _itemAnimations[3],
               builder: (context, child) {
@@ -448,7 +415,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           ),
           child: Column(
             children: [
-              // Gráfico de barras
               SizedBox(
                 height: 200,
                 child: Row(
@@ -467,7 +433,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                // Valor
                                 Text(
                                   '$count',
                                   style: theme.textTheme.bodySmall?.copyWith(
@@ -480,7 +445,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                // Barra
                                 Container(
                                   width: 24,
                                   height: height * _chartController.value,
@@ -505,7 +469,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                // Label do dia
                                 Text(
                                   day,
                                   style: theme.textTheme.bodySmall?.copyWith(
@@ -728,7 +691,6 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             overflow: TextOverflow.ellipsis,
           ),
           const Spacer(),
-          // Progress bar
           LinearProgressIndicator(
             value: progress,
             backgroundColor:

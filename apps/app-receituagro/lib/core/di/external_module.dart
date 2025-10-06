@@ -7,7 +7,4 @@ import 'package:core/core.dart';
 /// dependências circulares no GetIt.
 @module
 abstract class ExternalModule {
-  // As dependências ISubscriptionRepository e ILocalStorageRepository
-  // são registradas diretamente em injection_container.dart (linhas 174-242)
-  // para evitar loops infinitos de resolução de dependências.
 }

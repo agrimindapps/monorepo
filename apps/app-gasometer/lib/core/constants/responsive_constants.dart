@@ -7,37 +7,26 @@ import 'package:flutter/material.dart';
 
 /// Screen size breakpoints for responsive design
 class ResponsiveBreakpoints {
-  // Screen width breakpoints
   static const double mobile = 0;
   static const double tablet = 768;
   static const double desktop = 1024;
   static const double largeDesktop = 1440;
-  
-  // Content layout constraints
   static const double maxContentWidth = 1120;
-  
-  // Navigation widths
   static const double sidebarWidth = 280;
   static const double collapsedSidebarWidth = 72;
   static const double navigationRailWidth = 80;
-  
-  // Adaptive spacing based on screen width
   static double getHorizontalPadding(double screenWidth) {
     if (screenWidth >= largeDesktop) return 32.0;
     if (screenWidth >= desktop) return 24.0;
     if (screenWidth >= tablet) return 20.0;
     return 16.0;
   }
-  
-  // Grid column counts for different screen sizes
   static int getGridColumns(double screenWidth) {
     if (screenWidth >= largeDesktop) return 4;
     if (screenWidth >= desktop) return 3;
     if (screenWidth >= tablet) return 2;
     return 1;
   }
-  
-  // Content padding based on navigation type
   static EdgeInsets getContentPadding(NavigationType navigationType) {
     switch (navigationType) {
       case NavigationType.sidebar:

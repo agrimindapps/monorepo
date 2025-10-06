@@ -3,46 +3,30 @@ import 'package:core/core.dart';
 import '../../core/enums/analytics_user_type.dart';
 
 export '../../core/enums/analytics_user_type.dart' show AnalyticsUserType;
-// Export types
 export 'enhanced_analytics_notifier.dart' show EnhancedAnalyticsNotifier;
 
 /// Analytics events specific to ReceitaAgro
 enum ReceitaAgroAnalyticsEvent {
-  // App lifecycle
   appOpened('app_opened'),
   appClosed('app_closed'),
-
-  // User journey
   onboardingStarted('onboarding_started'),
   onboardingCompleted('onboarding_completed'),
   onboardingSkipped('onboarding_skipped'),
-
-  // Content interaction
   plagueViewed('plague_viewed'),
   plagueSearched('plague_searched'),
   cultureViewed('culture_viewed'),
   diagnosticStarted('diagnostic_started'),
   diagnosticCompleted('diagnostic_completed'),
-
-  // Premium features
   premiumFeatureAttempted('premium_feature_attempted'),
   subscriptionViewed('subscription_viewed'),
   subscriptionPurchased('subscription_purchased'),
   subscriptionCancelled('subscription_cancelled'),
-
-  // Sharing and export
   contentShared('content_shared'),
   reportExported('report_exported'),
-
-  // Performance and errors
   performanceIssue('performance_issue'),
   errorOccurred('error_occurred'),
-
-  // Feature usage
   featureUsed('feature_used'),
   settingChanged('setting_changed'),
-
-  // Device management
   deviceRegistered('device_registered'),
   deviceRemoved('device_removed');
 
@@ -67,10 +51,7 @@ class ReceitaAgroAnalyticsService {
     required ICrashlyticsRepository crashlyticsRepository,
   }) : _analyticsRepository = analyticsRepository,
        _crashlyticsRepository = crashlyticsRepository;
-
-  // Core analytics operations
   Future<void> initialize() async {
-    // Analytics repository doesn't have initialize method - it's auto-initialized
   }
 
   Future<void> logEvent(
@@ -132,8 +113,6 @@ class ReceitaAgroAnalyticsService {
   Future<void> logPremiumAttempt(String featureName) async {
     await logEvent('premium_attempt', {'feature': featureName});
   }
-
-  // Legacy compatibility methods
   void trackLogin(String method, {Map<String, dynamic>? metadata}) {
     logLogin(method);
     if (metadata != null) logEvent('login_metadata', metadata);

@@ -15,36 +15,24 @@ class EnhancedImageCacheManager {
   }
 
   EnhancedImageCacheManager._internal();
-
-  // Memory cache for decoded base64 images (LRU)
   final Map<String, Uint8List> _memoryCache = {};
   final Map<String, DateTime> _cacheAccess = {};
-
-  // Cache configuration
   static const int maxMemoryCacheSize = 20; // Max items in memory
   static const int maxMemoryBytes = 50 * 1024 * 1024; // 50MB max memory usage
   static const Duration cacheExpiration = Duration(hours: 24);
 
   int _currentMemoryBytes = 0;
 
-  // Simplified cache manager using default CachedNetworkImage behavior
-  // In production, consider adding flutter_cache_manager dependency for more control
-
   /// Get base64 image from cache or decode it
   Future<Uint8List?> getBase64Image(String base64String) async {
     final key = _generateCacheKey(base64String);
-
-    // Check memory cache first
     if (_memoryCache.containsKey(key)) {
       _updateAccessTime(key);
       return _memoryCache[key];
     }
 
     try {
-      // Decode the image
       final imageBytes = await _decodeBase64Optimized(base64String);
-
-      // Cache it if there's space
       await _cacheImageBytes(key, imageBytes);
 
       return imageBytes;
@@ -57,7 +45,6 @@ class EnhancedImageCacheManager {
   /// Optimized base64 decoding using compute for large images
   static Future<Uint8List> _decodeBase64Optimized(String base64String) async {
     if (base64String.length > 1000000) {
-      // > 1MB base64, use compute
       return compute(_decodeBase64Worker, base64String);
     } else {
       return base64Decode(base64String);
@@ -72,17 +59,10 @@ class EnhancedImageCacheManager {
   /// Cache image bytes with memory management
   Future<void> _cacheImageBytes(String key, Uint8List imageBytes) async {
     final imageSize = imageBytes.lengthInBytes;
-
-    // Check if image is too large for memory cache
     if (imageSize > 10 * 1024 * 1024) {
-      // 10MB limit per image
       return;
     }
-
-    // Clean up cache if needed
     await _cleanupMemoryCache(imageSize);
-
-    // Add to cache
     _memoryCache[key] = imageBytes;
     _cacheAccess[key] = DateTime.now();
     _currentMemoryBytes += imageSize;
@@ -90,7 +70,6 @@ class EnhancedImageCacheManager {
 
   /// Cleanup memory cache using LRU eviction
   Future<void> _cleanupMemoryCache(int newImageSize) async {
-    // Remove expired entries first
     final now = DateTime.now();
     final expiredKeys =
         _cacheAccess.entries
@@ -101,13 +80,9 @@ class EnhancedImageCacheManager {
     for (final key in expiredKeys) {
       _removeFromCache(key);
     }
-
-    // If still over limit, remove oldest entries
     while ((_currentMemoryBytes + newImageSize > maxMemoryBytes) ||
         (_memoryCache.length >= maxMemoryCacheSize)) {
       if (_cacheAccess.isEmpty) break;
-
-      // Find oldest entry
       final oldestKey =
           _cacheAccess.entries
               .reduce((a, b) => a.value.isBefore(b.value) ? a : b)
@@ -141,14 +116,11 @@ class EnhancedImageCacheManager {
 
   /// Preload critical images
   Future<void> preloadCriticalImages(List<String> base64Images) async {
-    // Limit concurrent preloading to avoid memory spikes
     for (int i = 0; i < base64Images.length; i += 3) {
       final batch = base64Images.skip(i).take(3);
       final batchFutures = batch.map((image) => getBase64Image(image));
 
       await Future.wait(batchFutures);
-
-      // Small delay between batches to prevent memory pressure
       if (i + 3 < base64Images.length) {
         await Future<void>.delayed(const Duration(milliseconds: 100));
       }
@@ -160,8 +132,6 @@ class EnhancedImageCacheManager {
     _memoryCache.clear();
     _cacheAccess.clear();
     _currentMemoryBytes = 0;
-
-    // Request garbage collection
     if (!kIsWeb) {
       SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.restoreSystemUIOverlays',
@@ -188,9 +158,6 @@ class EnhancedImageCacheManager {
     int quality = 80,
   }) async {
     try {
-      // For now, just return original bytes
-      // In a production app, you might use image processing libraries
-      // like image package or native platform channels for optimization
       return originalBytes;
     } catch (e) {
       debugPrint('Error optimizing image: $e');
@@ -201,7 +168,6 @@ class EnhancedImageCacheManager {
   /// Cleanup disk cache
   Future<void> cleanupDiskCache() async {
     try {
-      // Clear cached network image cache
       await CachedNetworkImage.evictFromCache('');
     } catch (e) {
       debugPrint('Error cleaning disk cache: $e');
@@ -251,8 +217,6 @@ extension OptimizedCachedNetworkImage on CachedNetworkImage {
       errorWidget:
           (context, url, error) => errorWidget ?? const Icon(Icons.error),
       fadeInDuration: fadeInDuration,
-      // Using default cache manager
-      // Memory optimization
       memCacheWidth: width?.round(),
       memCacheHeight: height?.round(),
       maxWidthDiskCache: width != null ? (width * 2).round() : null,

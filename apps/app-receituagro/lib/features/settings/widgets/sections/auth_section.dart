@@ -13,7 +13,6 @@ class AuthSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch auth state from Riverpod
     final authAsync = ref.watch(receitaAgroAuthNotifierProvider);
 
     return authAsync.when(
@@ -225,7 +224,6 @@ class AuthSection extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    // Avatar Hero com gradiente
                     Container(
                       width: 60,
                       height: 60,
@@ -281,13 +279,10 @@ class AuthSection extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-
-                    // User Info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Nome/Email principal
                           Text(
                             user.displayName.isNotEmpty
                                 ? user.displayName
@@ -299,8 +294,6 @@ class AuthSection extends ConsumerWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-
-                          // Email secundário (se houver nome)
                           if (user.displayName.isNotEmpty &&
                               user.email.isNotEmpty) ...[
                             const SizedBox(height: 2),
@@ -315,8 +308,6 @@ class AuthSection extends ConsumerWidget {
                           ],
 
                           const SizedBox(height: 8),
-
-                          // Data de criação
                           Text(
                             'Membro desde $createdDate',
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -327,8 +318,6 @@ class AuthSection extends ConsumerWidget {
                         ],
                       ),
                     ),
-
-                    // Action button
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(

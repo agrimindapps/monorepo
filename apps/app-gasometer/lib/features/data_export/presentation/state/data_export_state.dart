@@ -25,8 +25,6 @@ class DataExportState {
   final String? errorMessage;
   final List<ExportResult> exportHistory;
   final Map<String, dynamic>? exportEstimate;
-
-  // Getters auxiliares
   bool get hasError => errorMessage != null;
   bool get canStartExport => canExport && !isExporting;
 

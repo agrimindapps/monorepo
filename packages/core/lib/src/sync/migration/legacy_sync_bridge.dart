@@ -15,8 +15,6 @@ class LegacySyncBridge {
   static LegacySyncBridge get instance => _instance;
 
   LegacySyncBridge._internal();
-
-  // Registro de sync services específicos por app
   final Map<String, ISyncService> _appSyncServices = {};
   bool _isInitialized = false;
 
@@ -29,16 +27,6 @@ class LegacySyncBridge {
         'Initializing Legacy Sync Bridge',
         name: 'LegacySyncBridge',
       );
-
-      // Registrar sync services específicos por app
-      // NOTE: Estes services precisam ser instanciados com repositories reais via DI
-      // Por ora, deixamos comentado até que a migração seja feita em cada app
-      // _appSyncServices['gasometer'] = GasometerSyncService();
-      // _appSyncServices['plantis'] = PlantisSyncService();
-      // _appSyncServices['receituagro'] = ReceitaAgroSyncService();
-      // _appSyncServices['petiveti'] = PetiVetiSyncService();
-
-      // Inicializar todos os services
       for (final service in _appSyncServices.values) {
         await service.initialize();
       }
@@ -66,8 +54,6 @@ class LegacySyncBridge {
     }
 
     final flags = SyncFeatureFlags.instance;
-
-    // Verificar se deve usar nova arquitetura para este app
     if (flags.isEnabledForApp(appName) && flags.useNewSyncOrchestrator) {
       return await _syncWithNewArchitecture(appName);
     } else {
@@ -113,11 +99,7 @@ class LegacySyncBridge {
         'Using LEGACY architecture for $appName sync',
         name: 'LegacySyncBridge',
       );
-
-      // Delegar para UnifiedSyncManager existente
       await UnifiedSyncManager.instance.forceSyncApp(appName);
-
-      // Se chegou até aqui sem exception, consideramos sucesso
       developer.log(
         'Legacy sync completed for $appName',
         name: 'LegacySyncBridge',
@@ -141,19 +123,12 @@ class LegacySyncBridge {
         'Skipping legacy configuration for $appName - using new architecture',
         name: 'LegacySyncBridge',
       );
-      // Nova arquitetura não precisa da configuração legacy
       return;
     } else {
       developer.log(
         'Using legacy configuration for $appName',
         name: 'LegacySyncBridge',
       );
-      // Delegar para configuração legacy - removido para evitar erros de tipo
-      // await UnifiedSyncManager.instance.initializeApp(
-      //   appName: appName,
-      //   config: config,
-      //   entities: entities,
-      // );
     }
   }
 
@@ -174,8 +149,6 @@ class LegacySyncBridge {
         };
       }
     }
-
-    // Fallback para status legacy
     return {
       'architecture': 'legacy',
       'service_id': 'unified_sync_manager',
@@ -212,16 +185,12 @@ class LegacySyncBridge {
         'Starting migration of $appName to new architecture',
         name: 'LegacySyncBridge',
       );
-
-      // Verificar se serviço está disponível
       final service = _appSyncServices[appName];
       if (service == null) {
         return Left(
           NotFoundFailure('No new sync service available for $appName'),
         );
       }
-
-      // Fazer sync inicial com nova arquitetura para validar
       final result = await service.sync();
 
       return result.fold(
@@ -251,9 +220,6 @@ class LegacySyncBridge {
       'Rolling back $appName to legacy architecture',
       name: 'LegacySyncBridge',
     );
-
-    // Simular rollback - na implementação real, isso envolveria
-    // resetar feature flags e garantir que o legacy funciona
   }
 
   /// Cleanup e dispose de recursos

@@ -15,7 +15,6 @@ class SettingsRepository implements ISettingsRepository {
   @override
   Future<Either<Failure, SettingsEntity>> loadSettings() async {
     try {
-      // Migra configurações legacy se necessário
       await _localDataSource.migrateFromLegacySettings();
 
       final settingsData = await _localDataSource.loadSettings();
@@ -225,8 +224,6 @@ class SettingsRepository implements ISettingsRepository {
   Future<DateTime?> getLastUpdated() async {
     return await _localDataSource.getLastUpdated();
   }
-
-  // Mappers para converter entre Data Models e Entities
 
   SettingsEntity _mapToEntity(data_models.SettingsData data) {
     return SettingsEntity(

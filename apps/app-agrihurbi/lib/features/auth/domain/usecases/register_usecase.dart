@@ -22,7 +22,6 @@ class RegisterUseCase {
     final startTime = DateTime.now();
 
     try {
-      // Analytics: track registration attempt
       await _analyticsService.logEvent(
         'registration_attempt',
         parameters: {
@@ -32,8 +31,6 @@ class RegisterUseCase {
           'password_length': params.password.length,
         },
       );
-
-      // Validação dos parâmetros de entrada
       final validation = _validateRegistrationData(params);
       if (validation != null) {
         await _analyticsService.logEvent(
@@ -45,13 +42,9 @@ class RegisterUseCase {
         );
         return Left(ValidationFailure(message: validation));
       }
-
-      // Normalizar dados
       final normalizedEmail = params.email.trim().toLowerCase();
       final normalizedName = params.name.trim();
       final normalizedPhone = params.phone?.trim();
-
-      // Validar se email já existe
       final emailExists = await _checkEmailExists(normalizedEmail);
       if (emailExists) {
         await _analyticsService.logEvent(
@@ -60,16 +53,12 @@ class RegisterUseCase {
         );
         return const Left(ValidationFailure(message: 'Email já está em uso'));
       }
-
-      // Executar registro no repository
       final result = await repository.register(
         name: normalizedName,
         email: normalizedEmail,
         password: params.password,
         phone: normalizedPhone,
       );
-
-      // Analytics: track registration result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
 
       await result.fold(
@@ -93,8 +82,6 @@ class RegisterUseCase {
               'has_phone': params.phone != null,
             },
           );
-
-          // Set user properties for analytics
           await _analyticsService.setUserId(user.id);
           await _analyticsService.setUserProperty('user_type', 'farmer');
           await _analyticsService.setUserProperty(
@@ -123,7 +110,6 @@ class RegisterUseCase {
 
   /// Valida os dados de registro antes do processamento
   String? _validateRegistrationData(RegisterParams params) {
-    // Validar nome
     if (params.name.trim().isEmpty) {
       return 'Nome é obrigatório';
     }
@@ -135,8 +121,6 @@ class RegisterUseCase {
     if (params.name.trim().length > 100) {
       return 'Nome deve ter no máximo 100 caracteres';
     }
-
-    // Validar email
     if (params.email.trim().isEmpty) {
       return 'Email é obrigatório';
     }
@@ -147,8 +131,6 @@ class RegisterUseCase {
     if (!emailPattern.hasMatch(params.email.trim())) {
       return 'Formato de email inválido';
     }
-
-    // Validar senha
     if (params.password.isEmpty) {
       return 'Senha é obrigatória';
     }
@@ -160,16 +142,12 @@ class RegisterUseCase {
     if (params.password.length > 128) {
       return 'Senha deve ter no máximo 128 caracteres';
     }
-
-    // Validar senha complexidade
     final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(params.password);
     final hasNumber = RegExp(r'[0-9]').hasMatch(params.password);
 
     if (!hasLetter || !hasNumber) {
       return 'Senha deve conter pelo menos uma letra e um número';
     }
-
-    // Validar telefone se fornecido
     if (params.phone != null && params.phone!.trim().isNotEmpty) {
       final phonePattern = RegExp(r'^[\+]?[(]?[\d\s\-\(\)]{10,20}$');
       if (!phonePattern.hasMatch(params.phone!.trim())) {
@@ -182,8 +160,6 @@ class RegisterUseCase {
 
   /// Verifica se o email já está em uso
   Future<bool> _checkEmailExists(String email) async {
-    // Esta verificação será implementada quando o repository estiver completo
-    // Por ora, retornamos false (email não existe)
     return false;
   }
 }

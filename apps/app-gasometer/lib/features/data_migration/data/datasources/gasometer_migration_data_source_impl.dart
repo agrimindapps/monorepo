@@ -39,8 +39,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
       if (kDebugMode) {
         debugPrint('🔍 Getting anonymous data for user: $anonymousUserId');
       }
-
-      // Get user info from Firebase Auth
       final userResult = await _getUserEntity(anonymousUserId);
       if (userResult.isLeft()) {
         return userResult.fold(
@@ -52,17 +50,12 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
       final userEntity = userResult.getOrElse(
         () => throw Exception('No user entity'),
       );
-
-      // Get vehicles count and data
       final vehiclesResult = await _vehicleRepository.getAllVehicles();
       final vehicleCount = vehiclesResult.fold(
         (failure) => 0,
         (vehicles) => vehicles.where((v) => v.userId == anonymousUserId).length,
       );
-
-      // Get fuel records count and totals
       final fuelResult = await _fuelRepository.getAllFuelRecords();
-      // Explicitly type the map to avoid type inference warnings
       final Map<String, dynamic> fuelData = fuelResult.fold(
         (failure) => {'count': 0, 'totalCost': 0.0, 'totalDistance': 0.0},
         (supplies) {
@@ -82,8 +75,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
           };
         },
       );
-
-      // Create anonymous data object
       final anonymousData = GasometerAnonymousData(
         userId: anonymousUserId,
         userInfo: userEntity,
@@ -118,8 +109,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
       if (kDebugMode) {
         debugPrint('🔍 Getting account data for user: $accountUserId');
       }
-
-      // Get user info
       final userResult = await _getUserEntity(accountUserId);
       if (userResult.isLeft()) {
         return userResult.fold(
@@ -131,8 +120,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
       final userEntity = userResult.getOrElse(
         () => throw Exception('No user entity'),
       );
-
-      // Get account creation date for age calculation
       final user = await _getUserFromFirestore(accountUserId);
       final accountAge =
           user != null && user.data() != null
@@ -141,8 +128,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
                     DateTime.now(),
               )
               : null;
-
-      // Query Firebase for account data counts
       final vehicleCount = await _getFirestoreRecordCount(
         'vehicles',
         accountUserId,
@@ -151,8 +136,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
         'fuel_supplies',
         accountUserId,
       );
-
-      // Get totals from Firebase
       final fuelTotals = await _getFirestoreFuelTotals(accountUserId);
 
       final accountData = GasometerAccountData(
@@ -229,8 +212,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
 
       int deletedVehicles = 0;
       int deletedFuelRecords = 0;
-
-      // Delete vehicles from Firebase
       final vehiclesQuery =
           await _firestore
               .collection('vehicles')
@@ -241,8 +222,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
         await doc.reference.delete();
         deletedVehicles++;
       }
-
-      // Delete fuel supplies from Firebase
       final fuelQuery =
           await _firestore
               .collection('fuel_supplies')
@@ -287,8 +266,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
       if (kDebugMode) {
         debugPrint('🗑️ Deleting anonymous account: $anonymousUserId');
       }
-
-      // Get the anonymous user
       final currentUser = _firebaseAuth.currentUser;
       if (currentUser == null || currentUser.uid != anonymousUserId) {
         return const Left(AuthFailure('Usuário anônimo não está autenticado'));
@@ -297,8 +274,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
       if (!currentUser.isAnonymous) {
         return const Left(AuthFailure('Usuário não é anônimo'));
       }
-
-      // Delete the Firebase Auth account
       await currentUser.delete();
 
       if (kDebugMode) {
@@ -317,7 +292,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
   @override
   Future<bool> checkNetworkConnectivity() async {
     try {
-      // Try to make a simple Firebase call
       await _firestore.collection('_connection_test').limit(1).get();
       return true;
     } catch (e) {
@@ -340,7 +314,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
   @override
   Future<bool> validateAccountUser(String accountUserId) async {
     try {
-      // Check if user exists in Firebase
       final userDoc = await _getUserFromFirestore(accountUserId);
       return userDoc != null && userDoc.exists;
     } catch (e) {
@@ -350,18 +323,13 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
 
   @override
   Future<void> cancelOngoingOperations() async {
-    // This would cancel any ongoing operations if we had them
-    // For now, this is a placeholder
     if (kDebugMode) {
       debugPrint('🛑 Canceling ongoing migration operations');
     }
   }
 
-  // Private helper methods
-
   Future<Either<Failure, UserEntity>> _getUserEntity(String userId) async {
     try {
-      // Try to get user from current Firebase Auth user
       final currentUser = _firebaseAuth.currentUser;
       if (currentUser != null && currentUser.uid == userId) {
         return Right(
@@ -381,8 +349,6 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
           ),
         );
       }
-
-      // Try to get user from Firestore if not current user
       final userDoc = await _getUserFromFirestore(userId);
       if (userDoc != null && userDoc.exists) {
         final data = userDoc.data()!;

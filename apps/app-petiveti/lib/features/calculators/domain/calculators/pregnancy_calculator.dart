@@ -234,34 +234,18 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
 
     final now = DateTime.now();
     final gestationDays = now.difference(input.matingDate).inDays;
-    
-    // Período gestacional por espécie
     final totalGestationDays = _getTotalGestationDays(input.species);
     final variationDays = _getGestationVariation(input.species);
-    
-    // Calcular datas
     final estimatedDueDate = input.matingDate.add(Duration(days: totalGestationDays));
     final earliestDueDate = estimatedDueDate.subtract(Duration(days: variationDays));
     final latestDueDate = estimatedDueDate.add(Duration(days: variationDays));
-    
-    // Estágio atual
     final currentStage = _getCurrentStage(gestationDays, input.species);
-    
-    // Dias restantes
     final daysRemaining = totalGestationDays - gestationDays;
-    
-    // Verificar se está atrasado
     final isOverdue = now.isAfter(latestDueDate);
-    
-    // Cálculos nutricionais
     final recommendedCalories = _calculateDailyCalories(input, currentStage);
     final recommendedWeight = _calculateRecommendedWeight(input, currentStage);
-    
-    // Recomendações
     final nutritionalRecs = _getNutritionalRecommendations(input, currentStage);
     final careInstructions = _getCareInstructions(input, currentStage, daysRemaining);
-    
-    // Marcos importantes
     final upcomingMilestones = _getUpcomingMilestones(input.species, gestationDays);
 
     return PregnancyResult(
@@ -338,7 +322,6 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
   }
 
   double _calculateDailyCalories(PregnancyInput input, PregnancyStage stage) {
-    // Calorias base: ~70 * peso^0.75 para manutenção
     double baseCalories = 70 * math.pow(input.motherWeight, 0.75).toDouble();
     
     switch (stage) {
@@ -352,7 +335,6 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
   }
 
   double _calculateRecommendedWeight(PregnancyInput input, PregnancyStage stage) {
-    // Ganho de peso recomendado durante a gestação
     double weightGainPercent;
     
     switch (stage) {
@@ -463,8 +445,6 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
     final milestones = <PregnancyMilestone>[];
     
     final allMilestones = _getAllMilestones(species);
-    
-    // Filtrar apenas marcos futuros ou próximos
     for (final milestone in allMilestones) {
       if (milestone.day >= currentDay - 2) {
         milestones.add(milestone);
@@ -521,7 +501,6 @@ class PregnancyCalculator extends BaseCalculator<PregnancyInput, PregnancyResult
         ),
       ]);
     } else {
-      // Gatos
       milestones.addAll([
         const PregnancyMilestone(
           day: 15,

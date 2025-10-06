@@ -5,36 +5,26 @@ class SyncFeatureFlags {
   static SyncFeatureFlags get instance => _instance;
   
   SyncFeatureFlags._internal();
-  
-  // Feature flags para componentes individuais (mutáveis para migração)
   bool _useNewCacheManager = false;
   bool _useNewNetworkMonitor = false; 
   bool _useNewSyncOrchestrator = false;
   bool _useNewSyncServiceFactory = false;
-  
-  // Feature flags por app para rollout gradual (mutáveis para migração)
   bool _enableForGasometer = false;
   bool _enableForPlantis = false;
   bool _enableForTaskolist = false;
   bool _enableForReceituagro = false;
   bool _enableForPetiveti = false;
   bool _enableForAgrihurbi = false;
-  
-  // Getters para feature flags de componentes
   bool get useNewCacheManager => _useNewCacheManager;
   bool get useNewNetworkMonitor => _useNewNetworkMonitor;
   bool get useNewSyncOrchestrator => _useNewSyncOrchestrator;
   bool get useNewSyncServiceFactory => _useNewSyncServiceFactory;
-  
-  // Getters para feature flags por app
   bool get enableForGasometer => _enableForGasometer;
   bool get enableForPlantis => _enableForPlantis;
   bool get enableForTaskolist => _enableForTaskolist;
   bool get enableForReceituagro => _enableForReceituagro;
   bool get enableForPetiveti => _enableForPetiveti;
   bool get enableForAgrihurbi => _enableForAgrihurbi;
-  
-  // Métodos para controlar feature flags durante migração
   
   /// Ativa nova arquitetura globalmente
   void enableNewSyncOrchestrator() {

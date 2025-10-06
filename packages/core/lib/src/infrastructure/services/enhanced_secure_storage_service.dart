@@ -84,8 +84,6 @@ class EnhancedSecureStorageService {
         final keyList = (jsonDecode(existingKeyString) as List<dynamic>);
         return Right(keyList.cast<int>());
       }
-
-      // Generate new 256-bit key
       final newKey = List<int>.generate(32, (i) =>
         DateTime.now().millisecondsSinceEpoch.hashCode % 256);
 

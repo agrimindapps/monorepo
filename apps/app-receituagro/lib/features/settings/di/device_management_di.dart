@@ -12,17 +12,11 @@ class DeviceManagementDI {
   /// Registra todas as dependências de device management
   static Future<void> registerDependencies(GetIt sl) async {
     if (_isRegistered) return;
-
-    // === DATA SOURCES ===
-    
-    // Local Data Source
     sl.registerLazySingleton<DeviceLocalDataSource>(
       () => DeviceLocalDataSourceImpl(
         localStorage: sl<ILocalStorageRepository>(),
       ),
     );
-
-    // Remote Data Source (Web-safe registration)
     sl.registerLazySingleton<DeviceRemoteDataSource>(
       () {
         try {
@@ -30,7 +24,6 @@ class DeviceManagementDI {
             firebaseDeviceService: sl<FirebaseDeviceService>(),
           );
         } catch (e) {
-          // Fallback for Web or if service is not available
           print('⚠️  FirebaseDeviceService not available, using fallback: $e');
           return DeviceRemoteDataSourceImpl(
             firebaseDeviceService: null, // Use null-safe implementation
@@ -38,10 +31,6 @@ class DeviceManagementDI {
         }
       },
     );
-
-    // === REPOSITORY ===
-    
-    // Device Repository Implementation
     sl.registerLazySingleton<IDeviceRepository>(
       () => DeviceRepositoryImpl(
         localDataSource: sl<DeviceLocalDataSource>(),
@@ -49,34 +38,21 @@ class DeviceManagementDI {
         connectivityService: sl<ConnectivityService>(),
       ),
     );
-
-    // === USE CASES ===
-    
-    // Get User Devices Use Case
     sl.registerLazySingleton<GetUserDevicesUseCase>(
       () => GetUserDevicesUseCase(
         sl<IDeviceRepository>(),
       ),
     );
-
-    // Validate Device Use Case
     sl.registerLazySingleton<ValidateDeviceUseCase>(
       () => ValidateDeviceUseCase(
         sl<IDeviceRepository>(),
       ),
     );
-
-    // Revoke Device Use Case
     sl.registerLazySingleton<RevokeDeviceUseCase>(
       () => RevokeDeviceUseCase(
         sl<IDeviceRepository>(),
       ),
     );
-
-    // === HIGH-LEVEL SERVICES ===
-
-    // Device Management Service (Web-safe registration)
-    // Only register if all required services are available
     try {
       if (sl.isRegistered<FirebaseDeviceService>() &&
           sl.isRegistered<FirebaseAuthService>() &&
@@ -114,8 +90,6 @@ class DeviceManagementDI {
   /// Remove todas as dependências registradas (para testes)
   static Future<void> unregisterDependencies(GetIt sl) async {
     if (!_isRegistered) return;
-
-    // Remove na ordem inversa do registro
     if (sl.isRegistered<DeviceManagementService>()) {
       await sl.unregister<DeviceManagementService>();
     }

@@ -64,8 +64,6 @@ class FuelRepositoryImpl implements FuelRepository {
         );
         return;
       }
-
-      // Fire-and-forget remote sync
       unawaited(remoteDataSource.addFuelRecord(userId, fuelRecord).then((_) async {
         await loggingService.logInfo(
           category: LogCategory.fuel,
@@ -106,10 +104,7 @@ class FuelRepositoryImpl implements FuelRepository {
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> getAllFuelRecords() async {
     try {
-      // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getAllFuelRecords();
-
-      // Sync em background (reativado com índices Firestore configurados)
       unawaited(_syncAllFuelRecordsInBackground());
 
       return Right(localRecords);
@@ -129,19 +124,14 @@ class FuelRepositoryImpl implements FuelRepository {
 
       final userId = await _getCurrentUserId();
       if (userId == null) return;
-
-      // Sync remoto sem aguardar
       unawaited(remoteDataSource.getAllFuelRecords(userId).then((remoteRecords) async {
-        // Atualizar cache local
         for (final record in remoteRecords) {
           await localDataSource.addFuelRecord(record);
         }
       }).catchError((Object error) {
-        // Sync falhou, mas não afeta a funcionalidade local
         debugPrint('Background fuel sync failed: $error');
       }));
     } catch (e) {
-      // Ignorar erros de sync em background
       debugPrint('Background fuel sync error: $e');
     }
   }
@@ -149,10 +139,7 @@ class FuelRepositoryImpl implements FuelRepository {
   @override
   Future<Either<Failure, List<FuelRecordEntity>>> getFuelRecordsByVehicle(String vehicleId) async {
     try {
-      // OFFLINE FIRST: Sempre retorna dados locais primeiro
       final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
-
-      // Sync em background (reativado com índices Firestore configurados)
       unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
 
       return Right(localRecords);
@@ -195,7 +182,6 @@ class FuelRepositoryImpl implements FuelRepository {
           final remoteRecord = await remoteDataSource.getFuelRecordById(userId, id);
           
           if (remoteRecord != null) {
-            // Cache record locally
             await localDataSource.addFuelRecord(remoteRecord);
           }
           
@@ -244,8 +230,6 @@ class FuelRepositoryImpl implements FuelRepository {
           'vehicle_id': fuelRecord.vehicleId,
         },
       );
-
-      // Always save locally first
       final localRecord = await localDataSource.addFuelRecord(fuelRecord);
 
       await loggingService.logInfo(
@@ -256,8 +240,6 @@ class FuelRepositoryImpl implements FuelRepository {
           'vehicle_id': fuelRecord.vehicleId,
         },
       );
-      
-      // Remote sync in background (fire-and-forget)
       unawaited(_syncFuelRecordToRemoteInBackground(fuelRecord));
       
       await loggingService.logInfo(
@@ -325,17 +307,13 @@ class FuelRepositoryImpl implements FuelRepository {
   Future<Either<Failure, FuelRecordEntity>> updateFuelRecord(FuelRecordEntity fuelRecord) async {
     try {
       final userId = await _getCurrentUserId();
-      
-      // Always update locally first
       final localRecord = await localDataSource.updateFuelRecord(fuelRecord);
       
       if (await _isConnected() && userId != null) {
         try {
-          // Then sync to remote
           final remoteRecord = await remoteDataSource.updateFuelRecord(userId, fuelRecord);
           return Right(remoteRecord);
         } catch (e) {
-          // If remote fails, still return local success
           return Right(localRecord);
         }
       } else {
@@ -354,16 +332,12 @@ class FuelRepositoryImpl implements FuelRepository {
   Future<Either<Failure, Unit>> deleteFuelRecord(String id) async {
     try {
       final userId = await _getCurrentUserId();
-      
-      // Always delete locally first
       await localDataSource.deleteFuelRecord(id);
       
       if (await _isConnected() && userId != null) {
         try {
-          // Then delete from remote
           await remoteDataSource.deleteFuelRecord(userId, id);
         } catch (e) {
-          // If remote fails, still return success since local deletion worked
         }
       }
       
@@ -412,7 +386,6 @@ class FuelRepositoryImpl implements FuelRepository {
         yield* remoteDataSource.watchFuelRecords(userId)
             .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records))
             .handleError((error) {
-          // If remote stream fails, fallback to local
           return localDataSource.watchFuelRecords()
               .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records));
         });

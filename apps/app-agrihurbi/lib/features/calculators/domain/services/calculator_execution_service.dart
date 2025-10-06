@@ -24,7 +24,6 @@ class CalculatorExecutionService {
     bool skipValidation = false,
   }) async {
     try {
-      // Buscar estratégia
       final strategy = _strategyRegistry.getStrategy(strategyId);
       if (strategy == null) {
         return CalculationExecutionResult.error(
@@ -36,8 +35,6 @@ class CalculatorExecutionService {
           ),
         );
       }
-
-      // Validação (se não foi pulada)
       if (!skipValidation) {
         final validationResult = await _validationService.validateWithStrategy(
           strategy,
@@ -55,15 +52,9 @@ class CalculatorExecutionService {
             ),
           );
         }
-
-        // Usar inputs sanitizados da validação
         inputs = validationResult.sanitizedInputs;
       }
-
-      // Executar cálculo
       final calculationResult = await strategy.executeCalculation(inputs);
-
-      // Pós-processamento (se necessário)
       final finalResult = await strategy.postProcessResults(
         calculationResult,
         inputs,
@@ -96,7 +87,6 @@ class CalculatorExecutionService {
     String? preferredStrategyType,
   }) async {
     try {
-      // Buscar estratégia compatível
       final strategy = _findBestStrategy(inputs, preferredStrategyType);
       if (strategy == null) {
         return CalculationExecutionResult.error(
@@ -108,8 +98,6 @@ class CalculatorExecutionService {
           ),
         );
       }
-
-      // Executar usando a estratégia encontrada
       return await executeWithStrategy(strategy.strategyId, inputs);
     } catch (e) {
       return CalculationExecutionResult.error(
@@ -193,8 +181,6 @@ class CalculatorExecutionService {
         reason: 'Estratégia não pode processar os inputs fornecidos',
       );
     }
-
-    // Validação adicional
     final validationResult = await _validationService.validateWithStrategy(
       strategy,
       inputs,
@@ -239,15 +225,11 @@ class CalculatorExecutionService {
     );
   }
 
-  // ============= MÉTODOS PRIVADOS =============
-
   ICalculatorStrategy? _findBestStrategy(
     Map<String, dynamic> inputs,
     String? preferredType,
   ) {
     final allStrategies = _strategyRegistry.getAllStrategies();
-
-    // Primeiro, tentar estratégias do tipo preferido
     if (preferredType != null) {
       final preferredStrategies =
           allStrategies
@@ -264,8 +246,6 @@ class CalculatorExecutionService {
         }
       }
     }
-
-    // Se não encontrou no tipo preferido, buscar em todas
     for (final strategy in allStrategies) {
       if (strategy.canProcess(inputs)) {
         return strategy;
@@ -275,8 +255,6 @@ class CalculatorExecutionService {
     return null;
   }
 }
-
-// ============= RESULT CLASSES =============
 
 class CalculationExecutionResult {
   final bool isSuccess;

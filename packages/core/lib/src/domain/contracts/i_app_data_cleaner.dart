@@ -30,7 +30,6 @@ abstract class IAppDataCleaner {
   /// Limpar categoria específica de dados (opcional)
   /// Parâmetro category pode ser: 'vehicles', 'fuel', 'maintenance', etc.
   Future<Map<String, dynamic>> clearCategoryData(String category) {
-    // Implementação padrão - apenas delega para limpeza total
     return clearAllAppData();
   }
 

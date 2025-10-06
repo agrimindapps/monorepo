@@ -73,7 +73,6 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
 
   @override
   Future<List<ComentarioEntity>> searchComentarios(String query) async {
-    // Get all comentarios and filter by search query
     final allComentarios = await getAllComentarios();
 
     if (query.trim().isEmpty) {

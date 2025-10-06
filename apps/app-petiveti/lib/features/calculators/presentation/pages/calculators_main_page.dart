@@ -42,7 +42,6 @@ class _CalculatorsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Organizar calculadoras por categoria
     final categorizedCalculators = <CalculatorCategory, List<Calculator>>{};
     for (final calc in calculators) {
       categorizedCalculators.putIfAbsent(calc.category, () => []).add(calc);
@@ -296,7 +295,6 @@ class _CalculatorCard extends StatelessWidget {
   }
 
   void _navigateToCalculator(BuildContext context) {
-    // Mapear IDs para rotas específicas
     String route;
     switch (calculator.id) {
       case 'body_condition':
@@ -333,7 +331,6 @@ class _CalculatorCard extends StatelessWidget {
         route = '/calculators/exercise';
         break;
       default:
-        // Para calculadoras sem página específica, mostrar em breve
         _showComingSoonDialog(context);
         return;
     }
@@ -412,7 +409,6 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                // Recarregar a página
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute<void>(
                     builder: (context) => const CalculatorsMainPage(),

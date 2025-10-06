@@ -1,6 +1,5 @@
 /// Constants for Animals feature strings and UI values
 class AnimalsConstants {
-  // Strings
   static const String addPetTooltip = 'Adicionar Pet';
   static const String myPets = 'Meus Pets';
   static const String searchPetsHint = 'Buscar pets...';
@@ -17,8 +16,6 @@ class AnimalsConstants {
   static const String allGenders = 'Todos os gêneros';
   static const String size = 'Porte';
   static const String allSizes = 'Todos os portes';
-  
-  // Accessibility strings
   static const String addNewPetSemantic = 'Adicionar novo pet';
   static const String addNewPetHint = 'Toque para abrir o formulário de cadastro de pets';
   static const String backToList = 'Voltar para a lista de pets';
@@ -52,8 +49,6 @@ class AnimalsConstants {
   static const String genderFilterHint = 'Selecione um gênero para filtrar seus pets';
   static const String sizeFilterLabel = 'Filtro de tamanho';
   static const String sizeFilterHint = 'Selecione um tamanho para filtrar seus pets';
-  
-  // UI Constants
   static const double filterContainerPadding = 16.0;
   static const double filterSectionSpacing = 16.0;
   static const double badgeHorizontalPadding = 8.0;

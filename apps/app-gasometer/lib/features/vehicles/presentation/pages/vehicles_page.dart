@@ -122,12 +122,9 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
   }
 
   int _calculateCrossAxisCount() {
-    // Responsividade básica baseada na largura da tela
     return 2; // Para mobile sempre 2 colunas
   }
 
   void _navigateToVehicleDetails(VehicleEntity vehicle) {
-    // TODO: Implementar navegação para detalhes do veículo
-    // context.push('/vehicles/${vehicle.id}');
   }
 }

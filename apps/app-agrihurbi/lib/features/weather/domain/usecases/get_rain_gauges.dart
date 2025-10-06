@@ -338,10 +338,6 @@ class GetRainGauges {
     }
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
   /// Calculate summary statistics for rain gauges
   Map<String, dynamic> _calculateSummaryStatistics(List<RainGaugeEntity> gauges) {
     if (gauges.isEmpty) {

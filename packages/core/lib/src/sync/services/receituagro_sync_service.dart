@@ -37,28 +37,20 @@ class ReceitaAgroSyncService implements ISyncService {
 
   @override
   final List<String> dependencies = [];
-
-  // Estado interno
   bool _isInitialized = false;
   final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
-
-  // Estatísticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
   int _totalItemsSynced = 0;
-
-  // Stream controllers
   final StreamController<SyncServiceStatus> _statusController =
       StreamController<SyncServiceStatus>.broadcast();
   final StreamController<ServiceProgress> _progressController =
       StreamController<ServiceProgress>.broadcast();
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
-
-  // Entidades do ReceitaAgro (da config atual)
   final List<String> _entityTypes = [
     'favoritos', // Ferramentas favoritas do usuário
     'comentarios', // Feedback sobre diagnósticos
@@ -137,12 +129,6 @@ class ReceitaAgroSyncService implements ISyncService {
       int totalSynced = 0;
       final errors = <String>[];
 
-      // Delegação para UnifiedSyncManager que gerencia:
-      // - Batch sync (configurado via EntitySyncRegistration)
-      // - Conflict resolution (estratégias por entidade)
-      // - Sync intervals (personalizados por entidade)
-      // - Real-time listeners (opcional por entidade)
-
       for (int i = 0; i < _entityTypes.length; i++) {
         final entityType = _entityTypes[i];
 
@@ -155,8 +141,6 @@ class ReceitaAgroSyncService implements ISyncService {
             currentItem: entityType,
           ),
         );
-
-        // Delegar sync para UnifiedSyncManager
         final syncResult = await _syncEntity(entityType);
 
         syncResult.fold(
@@ -182,8 +166,6 @@ class ReceitaAgroSyncService implements ISyncService {
 
       _lastSync = endTime;
       _totalItemsSynced += totalSynced;
-
-      // Considerar sucesso se sincronizou pelo menos uma entidade
       if (errors.isEmpty || totalSynced > 0) {
         _successfulSyncs++;
         _updateStatus(SyncServiceStatus.completed);
@@ -242,15 +224,6 @@ class ReceitaAgroSyncService implements ISyncService {
   /// Sincroniza uma entidade específica delegando para UnifiedSyncManager
   Future<Either<Failure, int>> _syncEntity(String entityType) async {
     try {
-      // UnifiedSyncManager gerencia sync por entidade via EntitySyncRegistration
-      // Cada entidade tem configurações específicas:
-      // - Batch size (favoritos: 50, settings: 10, history: 100, etc.)
-      // - Conflict strategy (local wins, remote wins, timestamp)
-      // - Sync interval (personalizado)
-      // - Realtime enabled/disabled
-
-      // Por enquanto, retorna contagem estimada baseada no tipo
-      // Quando migrarmos completamente, isso chamará unifiedSyncManager.syncEntity()
       switch (entityType) {
         case 'favoritos':
           return const Right(12); // Alguns favoritos
@@ -290,9 +263,6 @@ class ReceitaAgroSyncService implements ISyncService {
         message: 'Starting specific sync for ReceitaAgro entities',
         metadata: {'entity_types': ids, 'count': ids.length},
       );
-
-      // Sync específico pode ser implementado posteriormente
-      // Por ora, sincroniza as entidades especificadas
       int totalSynced = 0;
       for (final entityType in ids) {
         final result = await _syncEntity(entityType);
@@ -347,7 +317,6 @@ class ReceitaAgroSyncService implements ISyncService {
 
   @override
   Future<bool> checkConnectivity() async {
-    // Verificação específica para ReceitaAgro pode incluir endpoints de dados agrícolas
     return true; // Implementação simplificada
   }
 
@@ -401,8 +370,6 @@ class ReceitaAgroSyncService implements ISyncService {
   @override
   Future<void> dispose() async {
     logger.logInfo(message: 'Disposing ReceitaAgro Sync Service');
-
-    // Cancel connectivity monitoring
     await _connectivitySubscription?.cancel();
     _connectivitySubscription = null;
 
@@ -412,8 +379,6 @@ class ReceitaAgroSyncService implements ISyncService {
     _isInitialized = false;
     _updateStatus(SyncServiceStatus.disposing);
   }
-
-  // Métodos específicos do ReceitaAgro
 
   /// Sync apenas dados do usuário (favoritos, comentários, settings, history)
   Future<Either<Failure, ServiceSyncResult>> syncUserData() async {
@@ -451,10 +416,7 @@ class ReceitaAgroSyncService implements ISyncService {
   /// Chame este método após inicializar o serviço para habilitar auto-sync on reconnect
   void startConnectivityMonitoring(Stream<bool> connectivityStream) {
     try {
-      // Cancel existing subscription if any
       _connectivitySubscription?.cancel();
-
-      // Listen to connectivity changes
       _connectivitySubscription = connectivityStream.listen(
         (isConnected) {
           logger.logConnectivityChange(
@@ -467,8 +429,6 @@ class ReceitaAgroSyncService implements ISyncService {
               message: 'Connection restored - triggering auto-sync',
               metadata: {'pending_sync': true},
             );
-
-            // Trigger sync when connection is restored and there's pending data
             sync();
           }
         },
@@ -502,8 +462,6 @@ class ReceitaAgroSyncService implements ISyncService {
       metadata: {'service': serviceId},
     );
   }
-
-  // Métodos privados
 
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {

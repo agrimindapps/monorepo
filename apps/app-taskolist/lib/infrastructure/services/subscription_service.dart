@@ -18,13 +18,9 @@ class TaskManagerSubscriptionService {
     this._analyticsService,
     this._crashlyticsService,
   );
-
-  // IDs dos produtos do Task Manager
   static const String taskManagerMonthly = 'task_manager_premium_monthly';
   static const String taskManagerYearly = 'task_manager_premium_yearly';
   static const String taskManagerLifetime = 'task_manager_premium_lifetime';
-
-  // Features premium do Task Manager
   static const Map<String, List<String>> premiumFeatures = {
     'premium_monthly': [
       'unlimited_tasks',
@@ -63,8 +59,6 @@ class TaskManagerSubscriptionService {
       'api_access',
     ],
   };
-
-  // Limites para usuários gratuitos
   static const int maxFreeTasks = 50;
   static const int maxFreeSubtasks = 10;
   static const int maxFreeTags = 5;
@@ -103,7 +97,6 @@ class TaskManagerSubscriptionService {
     final hasPremium = await hasPremiumSubscription();
     
     if (!hasPremium) {
-      // Features básicas sempre disponíveis
       const basicFeatures = [
         'create_tasks',
         'edit_tasks',
@@ -114,8 +107,6 @@ class TaskManagerSubscriptionService {
       
       return basicFeatures.contains(featureName);
     }
-    
-    // Premium tem acesso a todas as features
     return true;
   }
 
@@ -427,8 +418,6 @@ class TaskManagerSubscriptionService {
         return 0.0;
     }
   }
-
-  // Delegate methods do core
   Future<SubscriptionEntity?> getCurrentSubscription() async {
     final result = await _subscriptionRepository.getCurrentSubscription();
     return result.fold(

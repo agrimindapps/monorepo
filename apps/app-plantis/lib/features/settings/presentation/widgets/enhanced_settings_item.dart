@@ -67,7 +67,6 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
   void _handleTapDown(TapDownDetails details) {
     if (widget.enabled && !widget.loading) {
       _animationController.forward();
-      // Haptic feedback for interactive items
       HapticFeedback.lightImpact();
     }
   }

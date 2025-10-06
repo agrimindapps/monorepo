@@ -16,7 +16,6 @@ class SyncStatusWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Versão temporária simples durante migração para Riverpod
     return GestureDetector(
       onTap: () => _showSyncDetailsDialog(context),
       child: Container(

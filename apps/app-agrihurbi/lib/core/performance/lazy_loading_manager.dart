@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:core/core.dart'
     show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
-// === LAZY LOADING STATE ===
-
 /// State para gerenciamento de lazy loading
 class LazyLoadingState {
   const LazyLoadingState({
@@ -41,12 +39,9 @@ class LazyLoadingState {
 
   /// Estima o uso de memória do cache
   double _estimateMemoryUsage() {
-    // Estimativa simples baseada no número de instâncias
     return loadedKeys.length * 0.5; // 0.5KB por instância (estimativa)
   }
 }
-
-// === LAZY LOADING NOTIFIER ===
 
 /// StateNotifier para gerenciamento de lazy loading
 ///
@@ -69,17 +64,12 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
 
   /// Obtém um provider com lazy loading
   Future<T> getProvider<T>(String key) async {
-    // Se já foi carregado, retorna imediatamente
     if (state.loadedKeys.contains(key)) {
       return state.lazyCache[key] as T;
     }
-
-    // Se está sendo carregado, aguarda o carregamento
     if (state.loadingFutures.containsKey(key)) {
       return await state.loadingFutures[key] as T;
     }
-
-    // Inicia o carregamento
     final completer = Completer<T>();
     final newLoadingFutures = Map<String, Future<dynamic>>.from(
       state.loadingFutures,
@@ -100,8 +90,6 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
       final finalLoadingFutures = Map<String, Future<dynamic>>.from(
         state.loadingFutures,
       );
-      // Ignore unawaited_futures para remove() que retorna Future?
-      // ignore: unawaited_futures
       finalLoadingFutures.remove(key);
 
       state = state.copyWith(
@@ -109,22 +97,14 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
         loadedKeys: newLoadedKeys,
         loadingFutures: finalLoadingFutures,
       );
-
-      // Evitar warning unawaited_futures - completer é síncrono
-      // ignore: unawaited_futures
       completer.complete(instance);
       return instance;
     } catch (error) {
       final errorLoadingFutures = Map<String, Future<dynamic>>.from(
         state.loadingFutures,
       );
-      // Ignore unawaited_futures para remove() que retorna Future?
-      // ignore: unawaited_futures
       errorLoadingFutures.remove(key);
       state = state.copyWith(loadingFutures: errorLoadingFutures);
-
-      // Evitar warning unawaited_futures - completer é síncrono
-      // ignore: unawaited_futures
       completer.completeError(error);
       rethrow;
     }
@@ -176,8 +156,6 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
   Map<String, dynamic> getCacheStats() => state.cacheStats;
 }
 
-// === LAZY LOADING PROVIDERS ===
-
 /// Provider para lazy loading
 final lazyLoadingProvider =
     StateNotifierProvider<LazyLoadingNotifier, LazyLoadingState>((ref) {
@@ -188,8 +166,6 @@ final lazyLoadingProvider =
 final lazyLoadingStatsProvider = Provider<Map<String, dynamic>>((ref) {
   return ref.watch(lazyLoadingProvider).cacheStats;
 });
-
-// === LAZY LOADING MIXIN ===
 
 /// Mixin para facilitar o uso de lazy loading
 mixin LazyLoadingMixin {
@@ -217,8 +193,6 @@ mixin LazyLoadingMixin {
 
   /// Limpa recursos do lazy loading
   void disposeLazyLoading() {
-    // Providers não são descarregados automaticamente no dispose
-    // para permitir reutilização entre widgets
   }
 }
 

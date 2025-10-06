@@ -83,8 +83,6 @@ class _ErrorHeaderState extends State<ErrorHeader>
       parent: _animationController,
       curve: Curves.easeIn,
     ));
-
-    // Animar entrada se há mensagem inicial
     if (widget.errorMessage != null) {
       _animationController.forward();
     }
@@ -93,17 +91,12 @@ class _ErrorHeaderState extends State<ErrorHeader>
   @override
   void didUpdateWidget(ErrorHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Animar entrada/saída baseado na mudança da mensagem
     if (oldWidget.errorMessage == null && widget.errorMessage != null) {
-      // Mostrar erro
       _animationController.forward();
     } else if (oldWidget.errorMessage != null && widget.errorMessage == null) {
-      // Esconder erro
       _animationController.reverse();
     } else if (oldWidget.errorMessage != widget.errorMessage &&
                widget.errorMessage != null) {
-      // Mudança de mensagem - reset e mostrar
       _animationController.reset();
       _animationController.forward();
     }
@@ -127,7 +120,6 @@ class _ErrorHeaderState extends State<ErrorHeader>
 
   @override
   Widget build(BuildContext context) {
-    // Não renderizar se não há mensagem
     if (widget.errorMessage == null) {
       return const SizedBox.shrink();
     }

@@ -55,24 +55,17 @@ class _ABTestingWidgetState extends ConsumerState<ABTestingWidget> {
     return featureFlagsAsync.when(
       data: (featureFlagsState) {
         if (!featureFlagsState.isInitialized) {
-          // Return fallback or control while loading
           return widget.fallbackWidget ?? widget.controlWidget;
         }
 
         final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
         final isVariantActive = featureFlagsNotifier.isFeatureEnabled(widget.featureFlag);
-
-        // Track analytics exposure (only once per widget lifecycle)
         if (!_hasTrackedExposure && widget.analyticsEventName != null) {
           _trackVariantExposure(isVariantActive);
         }
-
-        // Select appropriate widget
         final selectedWidget = isVariantActive
             ? widget.variantWidget
             : widget.controlWidget;
-
-        // Wrap with debug indicator if enabled
         if (widget.showDebugIndicator && _isDebugMode()) {
           return _buildWithDebugIndicator(selectedWidget, isVariantActive);
         }
@@ -124,19 +117,7 @@ class _ABTestingWidgetState extends ConsumerState<ABTestingWidget> {
   /// Track variant exposure for analytics
   void _trackVariantExposure(bool isVariantActive) {
     if (!mounted || widget.analyticsEventName == null) return;
-
-    // This would integrate with your analytics service
-    // For now, we'll just mark it as tracked
     _hasTrackedExposure = true;
-
-    // In a real implementation, you'd call something like:
-    // context.read<AnalyticsService>().track(
-    //   widget.analyticsEventName!,
-    //   properties: {
-    //     'variant': isVariantActive ? 'B' : 'A',
-    //     'feature_flag': widget.featureFlag.toString(),
-    //   },
-    // );
   }
 }
 
@@ -236,13 +217,9 @@ class ABTestingButton extends StatelessWidget {
   final ReceitaAgroFeatureFlag featureFlag;
   final VoidCallback? onPressed;
   final String text;
-  
-  // Control variant (A) properties
   final Color? controlColor;
   final Color? controlTextColor;
   final EdgeInsets? controlPadding;
-  
-  // Test variant (B) properties  
   final Color? variantColor;
   final Color? variantTextColor;
   final EdgeInsets? variantPadding;
@@ -323,13 +300,9 @@ class ABTestingButton extends StatelessWidget {
 class ABTestingCard extends StatelessWidget {
   final ReceitaAgroFeatureFlag featureFlag;
   final Widget child;
-  
-  // Control variant properties
   final EdgeInsets? controlPadding;
   final double? controlElevation;
   final BorderRadius? controlBorderRadius;
-  
-  // Test variant properties
   final EdgeInsets? variantPadding;
   final double? variantElevation;
   final BorderRadius? variantBorderRadius;
@@ -394,6 +367,4 @@ class ABTestingCard extends StatelessWidget {
     );
   }
 }
-
-// ReceitaAgroFeatureFlag should be imported from core services
 // This file uses the enum from remote_config_service.dart

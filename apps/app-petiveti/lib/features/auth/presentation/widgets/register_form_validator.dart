@@ -34,8 +34,6 @@ abstract class RegisterFormValidator {
     if (trimmedValue.length < 2) {
       return 'Nome deve ter pelo menos 2 caracteres';
     }
-    
-    // Allow only letters, spaces, and common name characters
     if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(trimmedValue)) {
       return 'Nome deve conter apenas letras';
     }
@@ -59,8 +57,6 @@ abstract class RegisterFormValidator {
     }
     
     final trimmedValue = value.trim().toLowerCase();
-    
-    // Enhanced email validation pattern
     final emailRegExp = RegExp(
       r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
     );
@@ -89,12 +85,6 @@ abstract class RegisterFormValidator {
     if (value.length < 6) {
       return 'Senha deve ter pelo menos 6 caracteres';
     }
-    
-    // Future enhancement: Add complexity requirements
-    // - At least one uppercase letter
-    // - At least one lowercase letter  
-    // - At least one number
-    // - At least one special character
     
     return null;
   }
@@ -139,36 +129,26 @@ abstract class RegisterFormValidator {
     
     int score = 0;
     final recommendations = <String>[];
-    
-    // Length check
     if (password.length >= 8) {
       score++;
     } else {
       recommendations.add('Use pelo menos 8 caracteres');
     }
-    
-    // Uppercase check
     if (password.contains(RegExp(r'[A-Z]'))) {
       score++;
     } else {
       recommendations.add('Inclua pelo menos uma letra maiúscula');
     }
-    
-    // Lowercase check
     if (password.contains(RegExp(r'[a-z]'))) {
       score++;
     } else {
       recommendations.add('Inclua pelo menos uma letra minúscula');
     }
-    
-    // Number check
     if (password.contains(RegExp(r'[0-9]'))) {
       score++;
     } else {
       recommendations.add('Inclua pelo menos um número');
     }
-    
-    // Special character check
     if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
       score++;
     } else {

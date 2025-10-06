@@ -226,42 +226,17 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
 
   @override
   HydrationResult performCalculation(HydrationInput input) {
-    // Validação já feita pela BaseCalculator
-
-    // Calcular necessidade base de água
     final dailyWaterNeeds = _calculateDailyWaterNeeds(input);
-    
-    // Calcular volume de manutenção
     final maintenanceVolume = _calculateMaintenanceVolume(input);
-    
-    // Calcular volume de reposição (para déficit)
     final replacementVolume = _calculateReplacementVolume(input);
-    
-    // Calcular volume para perdas contínuas
     final ongoingLossVolume = _calculateOngoingLossVolume(input);
-    
-    // Volume total diário
     final totalDailyVolume = maintenanceVolume + replacementVolume + ongoingLossVolume;
-    
-    // Recomendação por hora
     final hourlyIntakeRecommendation = totalDailyVolume / 24;
-    
-    // Métodos de hidratação recomendados
     final hydrationMethods = _getHydrationMethods(input);
-    
-    // Instruções de monitoramento
     final monitoringInstructions = _getMonitoringInstructions(input);
-    
-    // Avisos de segurança
     final warnings = _generateWarnings(input);
-    
-    // Verificar se precisa de terapia IV
     final requiresIVTherapy = _requiresIVTherapy(input);
-    
-    // Nível de urgência
     final urgencyLevel = _getUrgencyLevel(input);
-
-    // Criar ResultItems
     final resultItems = [
       ResultItem(
         label: 'Volume Total Diário',
@@ -284,8 +259,6 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
         unit: 'mL/h',
       ),
     ];
-    
-    // Criar Recomendações
     final recommendations = [
       ...hydrationMethods.map((method) => Recommendation(
         title: 'Método de Hidratação',
@@ -371,16 +344,12 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
   }
 
   double _calculateDailyWaterNeeds(HydrationInput input) {
-    // Necessidade base: 50-60 mL/kg/dia para cães e gatos
     double baseNeeds = input.weight * 55; // mL/dia
-    
-    // Ajustar por condição corporal
     switch (input.bodyCondition) {
       case BodyCondition.underweight:
         baseNeeds *= 1.1; // +10%
         break;
       case BodyCondition.ideal:
-        // Sem ajuste
         break;
       case BodyCondition.overweight:
         baseNeeds *= 0.9; // -10%
@@ -389,14 +358,11 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
         baseNeeds *= 0.8; // -20%
         break;
     }
-    
-    // Ajustar por nível de atividade
     switch (input.activityLevel) {
       case ActivityLevel.sedentary:
         baseNeeds *= 0.9; // -10%
         break;
       case ActivityLevel.moderate:
-        // Sem ajuste
         break;
       case ActivityLevel.active:
         baseNeeds *= 1.2; // +20%
@@ -405,14 +371,11 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
         baseNeeds *= 1.4; // +40%
         break;
     }
-    
-    // Ajustar por temperatura ambiente
     switch (input.environmentTemp) {
       case EnvironmentTemp.cool:
         baseNeeds *= 0.9; // -10%
         break;
       case EnvironmentTemp.normal:
-        // Sem ajuste
         break;
       case EnvironmentTemp.warm:
         baseNeeds *= 1.2; // +20%
@@ -421,8 +384,6 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
         baseNeeds *= 1.5; // +50%
         break;
     }
-    
-    // Ajustes por condições especiais
     if (input.isLactating) {
       baseNeeds *= 1.5; // +50% para lactação
     }
@@ -435,8 +396,6 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
   }
 
   double _calculateMaintenanceVolume(HydrationInput input) {
-    // Volume de manutenção baseado no peso
-    // Fórmula: 70 * peso^0.75 (para energia) convertido para água
     return 70 * math.pow(input.weight, 0.75) * 2; // Aproximadamente 2mL por kcal
   }
 
@@ -460,11 +419,7 @@ class HydrationCalculator extends BaseCalculator<HydrationInput, HydrationResult
         deficitPercent = 0.12; // 12%
         break;
     }
-    
-    // Peso em kg * % desidratação * 1000 (para converter kg para mL)
     double deficitVolume = input.weight * deficitPercent * 1000;
-    
-    // Dividir em 24h para reposição gradual (exceto emergências)
     if (input.dehydrationLevel == DehydrationLevel.critical) {
       return deficitVolume; // Repor em 6-12h
     } else {

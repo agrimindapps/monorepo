@@ -77,8 +77,6 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
       spaceData.remove('id'); // Remove ID from data, it will be the document ID
 
       final docRef = await _getSpacesCollection(userId).add(spaceData);
-
-      // Return space with the generated ID
       return space.copyWith(id: docRef.id, isDirty: false);
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao adicionar espaço: ${e.message}');
@@ -110,7 +108,6 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<void> deleteSpace(String id, String userId) async {
     try {
-      // Soft delete - update isDeleted flag
       await _getSpacesCollection(userId).doc(id).update({
         'isDeleted': true,
         'updatedAt': Timestamp.now(),

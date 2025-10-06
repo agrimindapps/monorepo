@@ -130,15 +130,12 @@ class MedicationData extends Equatable {
 
   /// Retorna a faixa de dosagem para uma espécie e grupo de idade específicos
   DosageRange? getDosageRange(Species species, AgeGroup ageGroup) {
-    // Primeiro, procura por uma faixa específica para a espécie e idade
     final specificRange = dosageRanges.firstWhere(
       (range) => range.species == species && range.ageGroup == ageGroup,
       orElse: () => DosageRange(minDose: 0, maxDose: 0, species: species),
     );
 
     if (specificRange.maxDose > 0) return specificRange;
-
-    // Se não encontrar, procura por uma faixa geral para a espécie
     final generalRange = dosageRanges.firstWhere(
       (range) => range.species == species && range.ageGroup == null,
       orElse: () => DosageRange(minDose: 0, maxDose: 0, species: species),

@@ -85,8 +85,6 @@ class ListaDefensivosState {
   ListaDefensivosState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // Convenience getters
   bool get hasData => allDefensivos.isNotEmpty;
   bool get hasFilteredData => displayedDefensivos.isNotEmpty;
   bool get canLoadMore => displayedDefensivos.length < filteredDefensivos.length;
@@ -124,28 +122,18 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
 
   @override
   Future<ListaDefensivosState> build() async {
-    // Get dependencies from DI
     _repository = di.sl<FitossanitarioHiveRepository>();
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _debounceTimer?.cancel();
     });
-
-    // Load initial data
     return await _loadData();
   }
 
   /// Load initial data
   Future<ListaDefensivosState> _loadData() async {
     try {
-      // Load defensivos from repository
       final defensivos = await _repository.getActiveDefensivos();
-
-      // Sort alphabetically by name
       defensivos.sort((a, b) => a.displayName.compareTo(b.displayName));
-
-      // Load first page
       final endIndex = _itemsPerPage.clamp(0, defensivos.length);
       final displayedDefensivos = defensivos.sublist(0, endIndex);
 
@@ -232,16 +220,12 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     if (currentState == null) return;
 
     final isAscending = !currentState.isAscending;
-
-    // Expensive operation outside of state update
     final sortedFiltered = List<FitossanitarioHive>.from(currentState.filteredDefensivos);
     sortedFiltered.sort((a, b) {
       return isAscending
           ? a.displayName.compareTo(b.displayName)
           : b.displayName.compareTo(a.displayName);
     });
-
-    // Load first page
     final endIndex = _itemsPerPage.clamp(0, sortedFiltered.length);
     final displayedDefensivos = sortedFiltered.sublist(0, endIndex);
 
@@ -273,8 +257,6 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     if (currentState.isLoadingMore || !currentState.canLoadMore) return;
 
     state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
-
-    // Simulate delay for smooth UX
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
     final nextPage = currentState.currentPage + 1;
@@ -307,8 +289,6 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     }
   }
 
-  // Private methods
-
   /// Perform the actual search
   void _performSearch(String searchText) {
     final currentState = state.value;
@@ -322,8 +302,6 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
           defensivo.displayClass.toLowerCase().contains(searchLower) ||
           defensivo.displayFabricante.toLowerCase().contains(searchLower);
     }).toList();
-
-    // Sort results outside of state update
     filtered.sort((a, b) => a.displayName.compareTo(b.displayName));
 
     state = AsyncValue.data(
@@ -343,7 +321,6 @@ class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
     required bool isSearching,
     required List<FitossanitarioHive> filteredData,
   }) {
-    // Load first page
     final endIndex = _itemsPerPage.clamp(0, filteredData.length);
     final displayedDefensivos = filteredData.sublist(0, endIndex);
 

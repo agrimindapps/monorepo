@@ -6,8 +6,6 @@ import '../adapters/praga_adapter.dart';
 class PragasRepository {
   final _client = Supabase.instance.client;
 
-  // === LEGACY METHODS (Backward Compatibility) ===
-
   Future<List<Pragas>> getAllPragas() async {
     try {
       final response = await _client.from('pragas').select();
@@ -46,8 +44,6 @@ class PragasRepository {
       throw Exception('Erro ao deletar praga: $e');
     }
   }
-
-  // === CORE ENTITY METHODS (New SOLID Approach) ===
 
   /// Fetches all pragas as Core entities
   Future<List<PragaEntity>> getAllEntities() async {

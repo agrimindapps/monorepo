@@ -26,7 +26,6 @@ class AuthSessionManager {
     UserType userType,
   ) async {
     try {
-      // Generate session data
       final deviceId = await _deviceService.getDeviceUuid();
       final sessionData = UserSessionData(
         userId: user.id,
@@ -34,8 +33,6 @@ class AuthSessionManager {
         loginTime: DateTime.now(),
         isAnonymous: user.isAnonymous,
       );
-
-      // Set analytics user properties
       await _analytics.setUserId(user.id);
       await _analytics.setUserProperties(
         userType: _mapToAnalyticsUserType(userType),
@@ -61,7 +58,6 @@ class AuthSessionManager {
   /// Clear session data on logout
   Future<void> clearSession() async {
     try {
-      // Clear analytics
       await _analytics.clearUser();
 
       if (kDebugMode) {

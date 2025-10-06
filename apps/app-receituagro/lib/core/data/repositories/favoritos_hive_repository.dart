@@ -134,7 +134,6 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
     final results = <FavoritoItemHive>[];
     
     for (final id in ids) {
-      // Tenta encontrar por itemId em todos os favoritos
       final result = await findBy((favorito) => favorito.itemId == id);
       if (result.isSuccess && result.data!.isNotEmpty) {
         results.add(result.data!.first);

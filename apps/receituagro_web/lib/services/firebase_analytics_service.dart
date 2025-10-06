@@ -19,8 +19,6 @@ class GAnalyticsService {
       screenClass: 'AnalyticsDemo',
     );
   }
-
-  // Novo método para registrar ações customizadas
   static Future<void> logCustomEvent(String eventName,
       {Map<String, Object>? parameters}) async {
     await FirebaseAnalytics.instance.logEvent(

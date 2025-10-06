@@ -43,17 +43,13 @@ class DeviceListItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Platform Icon
           _buildPlatformIcon(theme),
           
           const SizedBox(width: 12),
-          
-          // Device Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Device Name + Primary Badge
                 Row(
                   children: [
                     Expanded(
@@ -75,8 +71,6 @@ class DeviceListItem extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 2),
-                
-                // Platform and System Version
                 Text(
                   '${device.platform} ${device.systemVersion}',
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -85,8 +79,6 @@ class DeviceListItem extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 2),
-                
-                // Last Active
                 Text(
                   _formatLastActive(device.lastActiveAt),
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -97,8 +89,6 @@ class DeviceListItem extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Revoke Button (only for non-primary devices)
           if (!isPrimary && onRevoke != null) ...[
             const SizedBox(width: 8),
             _buildRevokeButton(theme),

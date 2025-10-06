@@ -34,18 +34,10 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   final ReorderTasks _reorderTasks;
   final UpdateTask _updateTask;
   final WatchTasks _watchTasks;
-
-  // FIX: Memory leak - Store subscription para cancelar no dispose
   StreamSubscription<List<TaskEntity>>? _watchSubscription;
-
-  // FIX: Race condition - Flags para prevenir operações concorrentes
   bool _isCreating = false;
   bool _isReordering = false;
-
-  // FIX: Race condition - Set para tracking de operações em progresso
   final Set<String> _operationsInProgress = {};
-
-  // FIX: Race condition - Completer para gerenciar operações assíncronas
   final Map<String, Completer<void>> _pendingOperations = {};
 
   Future<void> getTasks({
@@ -74,12 +66,9 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }
 
   Future<void> createTask(TaskEntity task) async {
-    // FIX: Race condition - Prevenir criações concorrentes
     if (_isCreating) {
       throw StateError('Task creation already in progress');
     }
-
-    // FIX: Race condition - Check se já existe operação para este ID
     if (_operationsInProgress.contains(task.id)) {
       throw StateError('Operation already in progress for task ${task.id}');
     }
@@ -92,9 +81,7 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
 
       result.fold(
         (failure) {
-          // FIX: Better error handling sem sobrescrever estado válido
           if (state.hasValue) {
-            // Preservar tasks existentes e adicionar erro como notificação
             _notifyError(failure);
           } else {
             state = AsyncValue.error(failure, StackTrace.current);
@@ -103,11 +90,8 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
         (taskId) {
           final updatedTask = task.copyWith(id: taskId);
           if (state.hasValue) {
-            // FIX: Race condition - Usar lista imutável
             final currentTasks = List<TaskEntity>.from(state.value!);
             currentTasks.add(updatedTask);
-
-            // FIX: Manter ordem consistente
             currentTasks.sort((a, b) => (b.position).compareTo(a.position));
 
             state = AsyncValue.data(currentTasks);
@@ -121,7 +105,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }
 
   Future<void> createSubtask(TaskEntity subtask) async {
-    // FIX: Validar que é realmente uma subtask
     if (subtask.parentTaskId == null) {
       throw ArgumentError('Subtask must have a parentTaskId');
     }
@@ -129,11 +112,9 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }
 
   Future<void> updateTask(TaskEntity task) async {
-    // FIX: Race condition - Prevenir updates concorrentes
     final operationKey = 'update_${task.id}';
 
     if (_operationsInProgress.contains(operationKey)) {
-      // FIX: Aguardar operação anterior completar
       await _pendingOperations[operationKey]?.future;
       return;
     }
@@ -147,7 +128,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
 
       result.fold((failure) => _notifyError(failure), (_) {
         if (state.hasValue) {
-          // FIX: Race condition - Operação atômica com lista imutável
           final currentTasks = List<TaskEntity>.from(state.value!);
           final index = currentTasks.indexWhere((t) => t.id == task.id);
 
@@ -169,7 +149,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }
 
   Future<void> deleteTask(String taskId) async {
-    // FIX: Race condition - Prevenir deletes concorrentes
     final operationKey = 'delete_$taskId';
 
     if (_operationsInProgress.contains(operationKey)) {
@@ -179,13 +158,10 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     _operationsInProgress.add(operationKey);
 
     try {
-      // FIX: Optimistic update com rollback em caso de erro
       List<TaskEntity>? previousTasks;
 
       if (state.hasValue) {
         previousTasks = List<TaskEntity>.from(state.value!);
-
-        // Optimistic delete
         final updatedTasks =
             previousTasks.where((t) => t.id != taskId).toList();
         state = AsyncValue.data(updatedTasks);
@@ -195,14 +171,12 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
 
       result.fold(
         (failure) {
-          // FIX: Rollback em caso de erro
           if (previousTasks != null) {
             state = AsyncValue.data(previousTasks);
           }
           _notifyError(failure);
         },
         (_) {
-          // Delete confirmado, nada a fazer
         },
       );
     } finally {
@@ -218,7 +192,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }
 
   Future<void> deleteSubtask(String subtaskId) async {
-    // FIX: Verificar se é realmente uma subtask antes de deletar
     if (state.hasValue) {
       final subtask = state.value!.firstWhere(
         (t) => t.id == subtaskId,
@@ -234,7 +207,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
   }
 
   Future<void> reorderTasks(List<String> taskIds) async {
-    // FIX: Race condition - Prevenir reordenações concorrentes
     if (_isReordering) {
       return;
     }
@@ -242,7 +214,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     _isReordering = true;
 
     try {
-      // FIX: Validar IDs antes de reordenar
       if (state.hasValue) {
         final currentTasks = state.value!;
         final validIds =
@@ -261,8 +232,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
         if (state.hasValue) {
           final currentTasks = List<TaskEntity>.from(state.value!);
           final taskMap = {for (var task in currentTasks) task.id: task};
-
-          // FIX: Reordenação mais eficiente
           final reorderedTasks = <TaskEntity>[];
 
           for (int i = 0; i < taskIds.length; i++) {
@@ -272,8 +241,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
               taskMap.remove(taskIds[i]);
             }
           }
-
-          // Adicionar tasks restantes mantendo ordem relativa
           reorderedTasks.addAll(taskMap.values);
 
           state = AsyncValue.data(reorderedTasks);
@@ -291,7 +258,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
     TaskPriority? priority,
     bool? isStarred,
   }) {
-    // FIX: Memory leak - Cancelar subscription anterior
     _watchSubscription?.cancel();
 
     final stream = _watchTasks(
@@ -303,8 +269,6 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
         isStarred: isStarred,
       ),
     );
-
-    // FIX: Memory leak - Armazenar subscription para cancelar depois
     _watchSubscription = stream.listen(
       (tasks) => state = AsyncValue.data(tasks),
       onError:
@@ -313,23 +277,15 @@ class TaskNotifierFixed extends StateNotifier<AsyncValue<List<TaskEntity>>> {
       cancelOnError: false, // FIX: Não cancelar em caso de erro
     );
   }
-
-  // FIX: Helper para notificar erros sem sobrescrever estado
   void _notifyError(dynamic error) {
-    // TODO: Implementar sistema de notificação de erros
-    // Por enquanto, apenas log
     if (kDebugMode) {
       print('Error in TaskNotifier: $error');
     }
   }
-
-  // FIX: Memory leak - Implementar dispose adequado
   @override
   void dispose() {
     _watchSubscription?.cancel();
     _watchSubscription = null;
-
-    // Completar todas as operações pendentes
     for (final completer in _pendingOperations.values) {
       if (!completer.isCompleted) {
         completer.completeError(StateError('Provider disposed'));

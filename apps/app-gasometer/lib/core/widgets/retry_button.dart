@@ -159,8 +159,6 @@ class _RetryButtonState extends State<RetryButton>
     try {
       await Future<void>.delayed(const Duration(milliseconds: 100));
       widget.onRetry();
-
-      // Start cooldown if specified
       if (widget.cooldownDuration != null) {
         setState(() {
           _inCooldown = true;

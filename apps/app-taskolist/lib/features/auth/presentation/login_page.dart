@@ -30,14 +30,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
   bool _isLoading = false;
   bool _isAnonymousLoading = false;
   bool _rememberMe = false;
-
-  // Animation controllers
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late AnimationController _scaleController;
   late AnimationController _rotationController;
-
-  // Animations
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _scaleAnimation;
@@ -47,14 +43,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
   void initState() {
     super.initState();
     _initializeAnimations();
-
-    // Add focus listeners for better UX
     _emailFocusNode.addListener(() => setState(() {}));
     _passwordFocusNode.addListener(() => setState(() {}));
   }
 
   void _initializeAnimations() {
-    // Fade animation
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -62,8 +55,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
-
-    // Slide animation
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -74,8 +65,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     ).animate(
       CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
     );
-
-    // Scale animation
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -83,8 +72,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
     );
-
-    // Rotation animation for logo
     _rotationController = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
@@ -93,8 +80,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
       begin: 0,
       end: 2 * math.pi,
     ).animate(_rotationController);
-
-    // Start animations
     _fadeController.forward();
     _slideController.forward();
     _scaleController.forward();
@@ -115,18 +100,14 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) {
-      // Shake animation on validation error
       _shakeForm();
       return;
     }
 
     setState(() => _isLoading = true);
-
-    // Haptic feedback
     HapticFeedback.lightImpact();
 
     try {
-      // Usar novo método loginAndSync em vez do login tradicional
       await ref
           .read(authNotifierProvider.notifier)
           .loginAndSync(_emailController.text.trim(), _passwordController.text);
@@ -213,7 +194,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header with icon and title
                   Row(
                     children: [
                       Container(
@@ -256,8 +236,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     ],
                   ),
                   const SizedBox(height: 24),
-
-                  // Content
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -290,8 +268,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // Warning container with modern design
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -343,8 +319,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   ),
 
                   const SizedBox(height: 32),
-
-                  // Action buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -509,7 +483,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   void _shakeForm() {
     HapticFeedback.mediumImpact();
-    // Implement shake animation for form
   }
 
   String _getErrorMessage(dynamic error) {
@@ -554,8 +527,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
             primaryColor: Theme.of(context).primaryColor,
           ),
     );
-
-    // Navegar quando sync terminar
     _navigateAfterSync();
   }
 
@@ -569,11 +540,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
       final authNotifier = ref.read(authNotifierProvider.notifier);
       if (!authNotifier.isSyncInProgress) {
         subscription.cancel();
-
-        // Pequeno delay para garantir que o loading foi fechado
         Future<void>.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
-            // Fechar dialog de loading se estiver visível
             if (Navigator.canPop(context)) {
               Navigator.of(context).pop();
             }
@@ -604,20 +572,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    // Setup auth listener inside build method
     ref.listen<AsyncValue<dynamic>>(authNotifierProvider, (previous, next) {
       print('🔄 Auth listener: Estado mudou');
       next.when(
         data: (user) {
           print('✅ Auth listener: Usuário autenticado: ${user?.id}');
           if (user != null && mounted) {
-            // Reset loading states
             setState(() {
               _isLoading = false;
               _isAnonymousLoading = false;
             });
-
-            // Verificar se há sincronização em progresso
             final authNotifier = ref.read(authNotifierProvider.notifier);
             if (authNotifier.isSyncInProgress) {
               _showSimpleSyncLoading();
@@ -667,10 +631,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         child: SafeArea(
           child: Stack(
             children: [
-              // Animated background patterns
               _buildBackgroundPattern(),
-
-              // Main content
               Center(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -682,22 +643,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Logo and title section
                           _buildLogoSection(isDarkMode),
                           const SizedBox(height: 48),
-
-                          // Glass morphism card
                           _buildGlassCard(
                             child: Form(
                               key: _formKey,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  // Welcome text
                                   _buildWelcomeText(isDarkMode),
                                   const SizedBox(height: 32),
-
-                                  // Email field
                                   _buildModernTextField(
                                     controller: _emailController,
                                     focusNode: _emailFocusNode,
@@ -707,8 +662,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                     validator: _validateEmail,
                                   ),
                                   const SizedBox(height: 20),
-
-                                  // Password field
                                   _buildModernTextField(
                                     controller: _passwordController,
                                     focusNode: _passwordFocusNode,
@@ -718,12 +671,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                     validator: _validatePassword,
                                   ),
                                   const SizedBox(height: 16),
-
-                                  // Remember me and forgot password
                                   _buildOptionsRow(),
                                   const SizedBox(height: 32),
-
-                                  // Login button
                                   _buildGradientButton(
                                     onPressed:
                                         (_isLoading || _isAnonymousLoading)
@@ -734,16 +683,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
                                         _isLoading && !_isAnonymousLoading,
                                   ),
                                   const SizedBox(height: 24),
-
-                                  // Social login section
                                   _buildSocialLoginSection(),
                                   const SizedBox(height: 24),
-
-                                  // Demo mode button
                                   _buildDemoButton(),
                                   const SizedBox(height: 20),
-
-                                  // Register link
                                   _buildRegisterLink(),
                                 ],
                               ),
@@ -782,7 +725,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
       scale: _scaleAnimation,
       child: Column(
         children: [
-          // Animated logo
           AnimatedBuilder(
             animation: _rotationAnimation,
             builder: (context, child) {
@@ -1023,7 +965,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Remember me
         Row(
           children: [
             SizedBox(
@@ -1054,14 +995,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
             ),
           ],
         ),
-
-        // Forgot password
         TextButton(
           onPressed:
               _isLoading
                   ? null
                   : () {
-                    // Handle forgot password
                   },
           style: TextButton.styleFrom(
             foregroundColor: Colors.white,
@@ -1263,8 +1201,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 }
-
-// Custom painter for animated background pattern
 class BackgroundPatternPainter extends CustomPainter {
   final double rotation;
 
@@ -1276,8 +1212,6 @@ class BackgroundPatternPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.fill
           ..strokeWidth = 1;
-
-    // Draw floating circles
     for (int i = 0; i < 5; i++) {
       final offset = Offset(
         size.width * (0.2 + i * 0.2) + math.sin(rotation + i) * 20,
@@ -1287,8 +1221,6 @@ class BackgroundPatternPainter extends CustomPainter {
       paint.color = Colors.white.withAlpha((10 + i * 5));
       canvas.drawCircle(offset, 30 + i * 10.0, paint);
     }
-
-    // Draw diagonal lines pattern
     paint.style = PaintingStyle.stroke;
     paint.color = Colors.white.withAlpha(5);
     paint.strokeWidth = 0.5;

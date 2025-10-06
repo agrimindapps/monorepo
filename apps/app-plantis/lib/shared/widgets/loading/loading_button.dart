@@ -85,8 +85,6 @@ class _LoadingButtonState extends State<LoadingButton>
 
   void _handlePress() async {
     if (_isDisabled) return;
-
-    // Animate button press
     await _controller.forward();
     await _controller.reverse();
 
@@ -118,8 +116,6 @@ class _LoadingButtonState extends State<LoadingButton>
           _showError = true;
         });
         widget.onError?.call();
-
-        // Auto-hide error after 2 seconds
         await Future<void>.delayed(const Duration(seconds: 2));
         if (mounted) {
           setState(() => _showError = false);

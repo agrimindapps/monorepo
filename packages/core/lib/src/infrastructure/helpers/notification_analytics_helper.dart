@@ -17,16 +17,10 @@ class NotificationAnalyticsHelper {
     try {
       final prefs = await SharedPreferences.getInstance();
       final existingEvents = await _getStoredEvents(prefs);
-
-      // Add new event
       existingEvents.add(event);
-
-      // Keep only recent events to avoid storage bloat
       if (existingEvents.length > _maxStoredEvents) {
         existingEvents.removeRange(0, existingEvents.length - _maxStoredEvents);
       }
-
-      // Save back to storage
       await _saveEvents(prefs, existingEvents);
 
       if (kDebugMode) {
@@ -51,8 +45,6 @@ class NotificationAnalyticsHelper {
     try {
       final prefs = await SharedPreferences.getInstance();
       final events = await _getStoredEvents(prefs);
-
-      // Filter events by date range and plugin
       final filteredEvents = events.where((event) {
         final isInRange = event.timestamp.isAfter(dateRange.startDate) &&
                          event.timestamp.isBefore(dateRange.endDate);
@@ -67,8 +59,6 @@ class NotificationAnalyticsHelper {
       if (kDebugMode) {
         debugPrint('❌ Error getting notification analytics: $e');
       }
-
-      // Return empty analytics on error
       return NotificationAnalytics(
         totalScheduled: 0,
         totalDelivered: 0,
@@ -98,8 +88,6 @@ class NotificationAnalyticsHelper {
     try {
       final prefs = await SharedPreferences.getInstance();
       final events = await _getStoredEvents(prefs);
-
-      // Filter events for this user and date range
       final userEvents = events.where((event) {
         final isInRange = event.timestamp.isAfter(dateRange.startDate) &&
                          event.timestamp.isBefore(dateRange.endDate);
@@ -115,8 +103,6 @@ class NotificationAnalyticsHelper {
       if (kDebugMode) {
         debugPrint('❌ Error getting user engagement metrics: $e');
       }
-
-      // Return empty metrics on error
       return UserEngagementMetrics(
         userId: userId,
         dateRange: dateRange,
@@ -138,8 +124,6 @@ class NotificationAnalyticsHelper {
     try {
       final prefs = await SharedPreferences.getInstance();
       final events = await _getStoredEvents(prefs);
-
-      // Filter and group events by notification ID
       final notificationEvents = <int, List<NotificationEvent>>{};
 
       for (final event in events) {
@@ -148,17 +132,11 @@ class NotificationAnalyticsHelper {
           notificationEvents.putIfAbsent(event.notificationId, () => []).add(event);
         }
       }
-
-      // Convert to history entries
       final entries = <NotificationHistoryEntry>[];
 
       for (final notificationId in notificationEvents.keys) {
         final notificationEventList = notificationEvents[notificationId]!;
-
-        // Sort events by timestamp
         notificationEventList.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-        // Find key events
         final scheduledEvent = notificationEventList
             .firstWhereOrNull((e) => e.type == NotificationEventType.scheduled);
         final deliveredEvent = notificationEventList
@@ -180,8 +158,6 @@ class NotificationAnalyticsHelper {
           ));
         }
       }
-
-      // Sort entries by scheduled date (newest first)
       entries.sort((a, b) => b.scheduledDate.compareTo(a.scheduledDate));
 
       return NotificationHistory(
@@ -259,8 +235,6 @@ class NotificationAnalyticsHelper {
     }
   }
 
-  // Private helper methods
-
   Future<List<NotificationEvent>> _getStoredEvents(SharedPreferences prefs) async {
     final eventsJson = prefs.getStringList(_eventsKey) ?? [];
 
@@ -269,7 +243,6 @@ class NotificationAnalyticsHelper {
         final eventMap = jsonDecode(eventStr) as Map<String, dynamic>;
         return _eventFromJson(eventMap);
       } catch (e) {
-        // Skip invalid events
         return null;
       }
     }).whereType<NotificationEvent>().toList();
@@ -324,22 +297,16 @@ class NotificationAnalyticsHelper {
     final engagementRate = (totalClicked + totalDismissed) > 0 && totalDelivered > 0
         ? (totalClicked + totalDismissed) / totalDelivered
         : 0.0;
-
-    // Calculate clicks by action
     final clicksByAction = <String, int>{};
     for (final event in clickedEvents) {
       final actionId = event.metadata['actionId'] as String? ?? 'notification_tap';
       clicksByAction[actionId] = (clicksByAction[actionId] ?? 0) + 1;
     }
-
-    // Calculate delivery by channel
     final deliveryByChannel = <String, int>{};
     for (final event in deliveredEvents) {
       final channelId = event.metadata['channelId'] as String? ?? 'default';
       deliveryByChannel[channelId] = (deliveryByChannel[channelId] ?? 0) + 1;
     }
-
-    // Calculate performance by plugin
     final performanceByPlugin = <String, double>{};
     final pluginEvents = <String, List<NotificationEvent>>{};
 
@@ -356,8 +323,6 @@ class NotificationAnalyticsHelper {
 
       performanceByPlugin[pluginId] = pluginDelivered > 0 ? pluginClicked / pluginDelivered : 0.0;
     }
-
-    // Calculate trends (daily aggregation)
     final trends = _calculateTrends(events, dateRange);
 
     return NotificationAnalytics(
@@ -424,8 +389,6 @@ class NotificationAnalyticsHelper {
     final totalReceived = deliveredEvents.length;
     final totalClicked = clickedEvents.length;
     final engagementRate = totalReceived > 0 ? totalClicked / totalReceived : 0.0;
-
-    // Calculate average response time
     Duration totalResponseTime = Duration.zero;
     int responseCount = 0;
 
@@ -445,16 +408,12 @@ class NotificationAnalyticsHelper {
     final averageResponseTime = responseCount > 0
         ? Duration(milliseconds: totalResponseTime.inMilliseconds ~/ responseCount)
         : Duration.zero;
-
-    // Calculate engagement by plugin
     final engagementByPlugin = <String, int>{};
     for (final event in clickedEvents) {
       if (event.pluginId != null) {
         engagementByPlugin[event.pluginId!] = (engagementByPlugin[event.pluginId!] ?? 0) + 1;
       }
     }
-
-    // Calculate preferred notification times
     final clickHours = clickedEvents.map((e) => e.timestamp.hour).toList();
     final hourCounts = <int, int>{};
     for (final hour in clickHours) {
@@ -479,7 +438,6 @@ class NotificationAnalyticsHelper {
   }
 
   NotificationEventType _getNotificationStatus(List<NotificationEvent> events) {
-    // Determine the final status based on events
     if (events.any((e) => e.type == NotificationEventType.clicked)) {
       return NotificationEventType.clicked;
     }
@@ -500,7 +458,6 @@ class NotificationAnalyticsHelper {
   }
 
   int _estimateDataSize(List<NotificationEvent> events) {
-    // Rough estimation of JSON size in KB
     if (events.isEmpty) return 0;
 
     final sampleEvent = _eventToJson(events.first);

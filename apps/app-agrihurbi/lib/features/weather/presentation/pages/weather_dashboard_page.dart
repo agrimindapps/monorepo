@@ -24,8 +24,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    
-    // Initialize weather provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(weatherProviderProvider).initialize();
     });
@@ -44,7 +42,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
         title: const Text('Estação Meteorológica'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          // Sync button
           Builder(
             builder: (context) {
               final provider = ref.watch(weatherProviderProvider);
@@ -61,8 +58,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
               );
             },
           ),
-          
-          // Settings button
           IconButton(
             onPressed: () => _showSettingsDialog(),
             icon: const Icon(Icons.settings),
@@ -153,23 +148,18 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Current weather card
             WeatherCurrentCard(
               measurement: provider.latestMeasurement,
               isLoading: provider.isLoading,
             ),
             
             const SizedBox(height: 16),
-            
-            // Weather statistics
             if (provider.hasStatistics) ...[
               WeatherStatisticsCard(
                 statistics: provider.statistics.first,
               ),
               const SizedBox(height: 16),
             ],
-            
-            // Quick actions
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -218,7 +208,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
   Widget _buildHistoryTab(WeatherProvider provider) {
     return Column(
       children: [
-        // Filter bar
         Container(
           padding: const EdgeInsets.all(16),
           color: Theme.of(context).colorScheme.surface,
@@ -240,8 +229,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
             ],
           ),
         ),
-        
-        // Measurements list
         Expanded(
           child: WeatherMeasurementsList(
             measurements: provider.measurements,
@@ -265,15 +252,12 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Rain gauges summary
             RainGaugesSummary(
               rainGauges: provider.rainGauges,
               isLoading: provider.isRainGaugesLoading,
             ),
             
             const SizedBox(height: 16),
-            
-            // Rain gauges status
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -387,7 +371,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Show settings dialog
   Future<void> _showSettingsDialog() async {
-    // Implementation for settings dialog
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -424,7 +407,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Show add measurement dialog
   Future<void> _showAddMeasurementDialog() async {
-    // Implementation for manual measurement input
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -441,7 +423,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // TODO: Open measurement form
             },
             child: const Text('Abrir Formulário'),
           ),
@@ -470,7 +451,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Show filter dialog
   Future<void> _showFilterDialog() async {
-    // Implementation for advanced filters
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -516,7 +496,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Get current weather from API
   Future<void> _getCurrentWeatherFromAPI() async {
-    // For demo purposes, using São Paulo coordinates
     const latitude = -23.5505;
     const longitude = -46.6333;
     
@@ -539,7 +518,6 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Get weather forecast
   Future<void> _getWeatherForecast() async {
-    // For demo purposes, using São Paulo coordinates
     const latitude = -23.5505;
     const longitude = -46.6333;
     

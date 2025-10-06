@@ -25,11 +25,8 @@ class ExpensesStatisticsRow extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
-        // Grid de estatísticas
         LayoutBuilder(
           builder: (context, constraints) {
-            // Responsivo: 2 colunas em mobile, 4 em tablet+
             final isWide = constraints.maxWidth > 600;
             final crossAxisCount = isWide ? 4 : 2;
             final childAspectRatio = isWide ? 1.2 : 1.0;
@@ -74,8 +71,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
             );
           },
         ),
-        
-        // Estatísticas adicionais se houver dados suficientes
         if (statistics['totalRecords'] != null && (statistics['totalRecords'] as int) > 0) ...[
           const SizedBox(height: 24),
           _buildAdditionalStats(context),
@@ -107,7 +102,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Cabeçalho com ícone
             Row(
               children: [
                 Container(
@@ -127,8 +121,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
             ),
             
             const SizedBox(height: 8),
-            
-            // Valor
             SemanticText(
               value,
               style: TextStyle(
@@ -139,8 +131,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
             ),
             
             const SizedBox(height: 4),
-            
-            // Título
             SemanticText.label(
               title,
               style: TextStyle(
@@ -182,8 +172,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
           ),
           
           const SizedBox(height: 12),
-          
-          // Tipo mais comum
           if (mostCommonType != null)
             _buildInfoRow(
               context,
@@ -191,8 +179,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
               mostCommonType,
               Icons.category,
             ),
-          
-          // Média por registro
           if (averagePerRecord != null)
             _buildInfoRow(
               context,
@@ -200,8 +186,6 @@ class ExpensesStatisticsRow extends StatelessWidget {
               _formatCurrency(averagePerRecord),
               Icons.calculate,
             ),
-          
-          // Comparação mensal
           if (thisMonth != null && lastMonth != null) ...[
             const SizedBox(height: 8),
             _buildMonthlyComparison(context, thisMonth, lastMonth),

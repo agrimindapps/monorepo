@@ -9,7 +9,6 @@ import '../../../features/vehicles/domain/repositories/vehicle_repository.dart';
 /// Registra o GasometerSyncService do core package
 abstract class SyncDIModule {
   static void init(GetIt sl) {
-    // Registrar GasometerSyncService do core package
     sl.registerLazySingleton<GasometerSyncService>(
       () => GasometerSyncServiceFactory.create(
         vehicleRepository: sl<VehicleRepository>(),
@@ -18,8 +17,6 @@ abstract class SyncDIModule {
         expensesRepository: null, // TODO: Implementar ExpensesRepository quando disponível
       ),
     );
-
-    // Inicialização é lazy, service só é criado quando solicitado
   }
 
   /// Inicializa o sync service após o app estar pronto
@@ -31,7 +28,6 @@ abstract class SyncDIModule {
 
       result.fold(
         (failure) {
-          // Log do erro mas não bloqueia o app
           if (kDebugMode) {
             print('⚠️ Failed to initialize Gasometer sync service: ${failure.message}');
           }
@@ -40,8 +36,6 @@ abstract class SyncDIModule {
           if (kDebugMode) {
             print('✅ Gasometer sync service initialized successfully');
           }
-
-          // Integrar com connectivity monitoring existente
           _setupConnectivityMonitoring(sl);
         },
       );
@@ -57,8 +51,6 @@ abstract class SyncDIModule {
     try {
       final syncService = sl<GasometerSyncService>();
       final connectivityService = sl<ConnectivityService>();
-
-      // Conectar o sync service ao stream de conectividade
       syncService.startConnectivityMonitoring(
         connectivityService.connectivityStream,
       );

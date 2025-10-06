@@ -14,7 +14,6 @@ class DiagnosticosRepositoryStub implements IDiagnosticosRepository {
     int? limit,
     int? offset,
   }) async {
-    // Retorna lista vazia para evitar erros
     return const Right(<DiagnosticoEntity>[]);
   }
 

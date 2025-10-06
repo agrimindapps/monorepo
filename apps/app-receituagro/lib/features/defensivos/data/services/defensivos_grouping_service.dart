@@ -11,43 +11,33 @@ class DefensivosGroupingService {
     required String tipoAgrupamento,
     String? filtroTexto,
   }) {
-    // Aplicar filtro de texto primeiro se fornecido
     List<DefensivoEntity> defensivosFiltrados = defensivos;
     if (filtroTexto != null && filtroTexto.isNotEmpty) {
       defensivosFiltrados = _aplicarFiltroTexto(defensivos, filtroTexto);
     }
-
-    // Agrupar por tipo
     final Map<String, List<DefensivoEntity>> grupos = {};
-    
-    // Verificar se é agrupamento que necessita tratamento especial
     final isIngredienteAtivo = _isIngredienteAtivoGrouping(tipoAgrupamento);
     final isModoAcao = _isModoAcaoGrouping(tipoAgrupamento);
     
     for (final defensivo in defensivosFiltrados) {
       if (isIngredienteAtivo) {
-        // Para ingrediente ativo, separar por "+" e criar grupos individuais
         final ingredientes = _extrairIngredientesAtivos(defensivo);
         for (final ingrediente in ingredientes) {
           grupos.putIfAbsent(ingrediente, () => <DefensivoEntity>[]);
           grupos[ingrediente]!.add(defensivo);
         }
       } else if (isModoAcao) {
-        // Para modo de ação, separar por "," e criar grupos individuais
         final modosAcao = _extrairModosAcao(defensivo);
         for (final modo in modosAcao) {
           grupos.putIfAbsent(modo, () => <DefensivoEntity>[]);
           grupos[modo]!.add(defensivo);
         }
       } else {
-        // Agrupamento normal para outros tipos
         final chaveGrupo = _obterChaveGrupo(defensivo, tipoAgrupamento);
         grupos.putIfAbsent(chaveGrupo, () => <DefensivoEntity>[]);
         grupos[chaveGrupo]!.add(defensivo);
       }
     }
-
-    // Converter para DefensivoGroupEntity e ordenar
     final gruposEntity = grupos.entries
         .map((entry) => DefensivoGroupEntity.fromDefensivos(
               tipoAgrupamento: tipoAgrupamento,
@@ -56,8 +46,6 @@ class DefensivosGroupingService {
               descricao: _obterDescricaoGrupo(tipoAgrupamento, entry.key),
             ))
         .toList();
-
-    // Ordenar grupos por nome
     gruposEntity.sort((a, b) => a.nome.toLowerCase().compareTo(b.nome.toLowerCase()));
 
     return gruposEntity;
@@ -162,7 +150,6 @@ class DefensivosGroupingService {
         return defensivo.displayToxico;
       
       default:
-        // Fallback para fabricante se tipo não reconhecido
         return defensivo.displayFabricante;
     }
   }
@@ -284,8 +271,6 @@ class DefensivosGroupingService {
     if (ingredientesText.isEmpty || ingredientesText == 'Sem ingrediente ativo') {
       return ['Não informado'];
     }
-    
-    // Separar por "+" e aplicar trim em cada ingrediente
     final ingredientes = ingredientesText
         .split('+')
         .map((ingrediente) => ingrediente.trim())
@@ -302,8 +287,6 @@ class DefensivosGroupingService {
     if (modoAcaoText.isEmpty || modoAcaoText == 'Não especificado') {
       return ['Não especificado'];
     }
-    
-    // Separar APENAS por vírgula e aplicar trim em cada modo de ação
     final modosAcao = modoAcaoText
         .split(',')
         .map((modo) => modo.trim())

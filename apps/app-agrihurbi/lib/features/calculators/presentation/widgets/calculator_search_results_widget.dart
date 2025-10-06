@@ -47,13 +47,8 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Cabeçalho dos resultados
         _buildResultsHeader(context),
-
-        // Stats de performance (apenas em debug)
         if (kDebugMode) _buildPerformanceStats(context),
-
-        // Lista de resultados
         Expanded(child: _buildResultsList(context)),
       ],
     );
@@ -129,7 +124,6 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       itemCount: searchResults.length,
-      // Otimizações de performance
       addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       cacheExtent: 500.0,

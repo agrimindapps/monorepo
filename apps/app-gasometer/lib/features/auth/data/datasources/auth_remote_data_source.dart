@@ -7,41 +7,27 @@ import '../../../../core/extensions/user_entity_gasometer_extension.dart';
 abstract class AuthRemoteDataSource {
   Stream<UserEntity?> watchAuthState();
   Future<UserEntity?> getCurrentUser();
-
-  // Sign In
   Future<UserEntity> signInWithEmail(String email, String password);
   Future<UserEntity> signInAnonymously();
   Future<UserEntity> signInWithGoogle();
   Future<UserEntity> signInWithApple();
   Future<UserEntity> signInWithFacebook();
-
-  // Sign Up
   Future<UserEntity> signUpWithEmail(
     String email,
     String password,
     String? displayName,
   );
-
-  // Profile Management
   Future<UserEntity> updateProfile(String? displayName, String? photoUrl);
   Future<void> updateEmail(String newEmail);
   Future<void> updatePassword(String newPassword);
   Future<void> sendEmailVerification();
-
-  // Password Reset
   Future<void> sendPasswordResetEmail(String email);
-
-  // Account Conversion
   Future<UserEntity> linkAnonymousWithEmail(String email, String password);
   Future<UserEntity> linkAnonymousWithGoogle();
   Future<UserEntity> linkAnonymousWithApple();
   Future<UserEntity> linkAnonymousWithFacebook();
-
-  // Sign Out
   Future<void> signOut();
   Future<void> deleteAccount();
-
-  // Firestore user data
   Future<void> saveUserToFirestore(UserEntity user);
   Future<UserEntity?> getUserFromFirestore(String userId);
 }
@@ -96,8 +82,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userModel = UserEntityGasometerExtension.fromFirebaseUser(
         credential.user!,
       );
-
-      // Save/update user data in Firestore
       await saveUserToFirestore(userModel);
 
       return userModel;
@@ -107,8 +91,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           '🔥 Firebase Auth Error - Code: ${e.code}, Message: ${e.message}',
         );
       }
-
-      // Handle specific Firebase Auth error codes
       switch (e.code) {
         case 'too-many-requests':
           if (kDebugMode) {
@@ -173,8 +155,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (credential.user == null) {
         throw const AuthenticationException('No user returned from sign up');
       }
-
-      // Update display name if provided
       if (displayName != null) {
         await credential.user!.updateDisplayName(displayName);
         await credential.user!.reload();
@@ -183,8 +163,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userModel = UserEntityGasometerExtension.fromFirebaseUser(
         credential.user!,
       );
-
-      // Save user data in Firestore
       await saveUserToFirestore(userModel);
 
       return userModel;
@@ -214,8 +192,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userModel = UserEntityGasometerExtension.fromFirebaseUser(
         updatedUser,
       );
-
-      // Update user data in Firestore
       await saveUserToFirestore(userModel);
 
       return userModel;
@@ -305,8 +281,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (kDebugMode) {
             debugPrint('✅ Gasometer: Google Sign In successful, converting to app entity...');
           }
-
-          // Convert core UserEntity to app UserEntity and save to Firestore
           final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
           await saveUserToFirestore(appUser);
 
@@ -341,8 +315,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (kDebugMode) {
             debugPrint('✅ Gasometer: Apple Sign In successful, converting to app entity...');
           }
-
-          // Convert core UserEntity to app UserEntity and save to Firestore
           final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
           await saveUserToFirestore(appUser);
 
@@ -377,8 +349,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (kDebugMode) {
             debugPrint('✅ Gasometer: Facebook Sign In successful, converting to app entity...');
           }
-
-          // Convert core UserEntity to app UserEntity and save to Firestore
           final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
           await saveUserToFirestore(appUser);
 
@@ -417,8 +387,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final userModel = UserEntityGasometerExtension.fromFirebaseUser(
         userCredential.user!,
       );
-
-      // Save user data in Firestore
       await saveUserToFirestore(userModel);
 
       return userModel;
@@ -449,8 +417,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (kDebugMode) {
             debugPrint('✅ Gasometer: Google account linking successful, converting to app entity...');
           }
-
-          // Convert core UserEntity to app UserEntity and save to Firestore
           final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
           await saveUserToFirestore(appUser);
 
@@ -485,8 +451,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (kDebugMode) {
             debugPrint('✅ Gasometer: Apple account linking successful, converting to app entity...');
           }
-
-          // Convert core UserEntity to app UserEntity and save to Firestore
           final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
           await saveUserToFirestore(appUser);
 
@@ -521,8 +485,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (kDebugMode) {
             debugPrint('✅ Gasometer: Facebook account linking successful, converting to app entity...');
           }
-
-          // Convert core UserEntity to app UserEntity and save to Firestore
           final appUser = UserEntityGasometerExtension.fromCoreUserEntity(coreUser);
           await saveUserToFirestore(appUser);
 
@@ -553,11 +515,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (user == null) {
         throw const AuthenticationException('No user signed in');
       }
-
-      // Delete user data from Firestore first
       await _firestore.collection('users').doc(user.uid).delete();
-
-      // Delete the user account
       await user.delete();
     } on FirebaseAuthException catch (e) {
       throw AuthenticationException('Account deletion failed: ${e.message}');

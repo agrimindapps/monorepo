@@ -108,8 +108,6 @@ class FieldCapacityCalculator extends CalculatorEntity {
       final double bulkDensity = double.parse(inputs['bulk_density'].toString());
       final double rootDepth = double.parse(inputs['root_depth'].toString());
       final double area = double.parse(inputs['area'].toString());
-
-      // Validação da soma das frações texturais
       final double siltContent = 100 - clayContent - sandContent;
       if (siltContent < 0 || siltContent > 85) {
         return CalculationError(
@@ -118,45 +116,24 @@ class FieldCapacityCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-
-      // Cálculo da Capacidade de Campo (CC) usando equação de Saxton & Rawls
       final double thetaS = _calculateSaturatedMoisture(clayContent, sandContent, organicMatter);
       final double theta_33 = _calculateFieldCapacity(clayContent, sandContent, organicMatter);
       final double theta_1500 = _calculateWiltingPoint(clayContent, sandContent, organicMatter);
-
-      // Água disponível
       final double availableWater = theta_33 - theta_1500;
       final double availableWaterMm = availableWater * rootDepth * 10; // mm
-
-      // Volume de água disponível
       final double totalVolumeM3 = availableWaterMm * CalculatorMath.hectareToSquareMeters(area) / 1000;
       final double totalVolumeLiters = CalculatorMath.cubicToLiters(totalVolumeM3);
-
-      // Porosidade total
       final double totalPorosity = 1 - (bulkDensity / 2.65);
       final double macroporosity = totalPorosity - thetaS;
-      // ignore: unused_local_variable
       final double microporosity = thetaS; // TODO: Use in detailed soil analysis
-
-      // Lâmina para diferentes frações da água disponível
-      // ignore: unused_local_variable
       final double lamina25 = availableWaterMm * 0.25; // TODO: Use in irrigation scenarios
       final double lamina50 = availableWaterMm * 0.50;
-      // ignore: unused_local_variable
       final double lamina75 = availableWaterMm * 0.75; // TODO: Use in stress management
-
-      // Tempo de esgotamento (assumindo ET média de 5 mm/dia)
       const double etMedia = 5.0;
       final double diasEsgotamento = availableWaterMm / etMedia;
-
-      // Frequência de irrigação recomendada
       final int frequenciaIrrigacao = _calculateIrrigationFrequency(availableWaterMm, soilType);
-
-      // Classificação da qualidade física do solo
       final String qualidadeFisica = _classifySoilPhysicalQuality(
         totalPorosity, macroporosity, availableWater);
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         soilType, availableWater, bulkDensity, organicMatter, frequenciaIrrigacao);
 
@@ -246,25 +223,21 @@ class FieldCapacityCalculator extends CalculatorEntity {
   }
 
   double _calculateSaturatedMoisture(double clay, double sand, double om) {
-    // Equação de Saxton & Rawls (2006)
     final double thetaS = 0.332 - 7.251e-4 * sand + 0.1276 * (math.log(clay) / math.ln10);
     return math.min(0.7, math.max(0.3, thetaS + 0.02 * om));
   }
 
   double _calculateFieldCapacity(double clay, double sand, double om) {
-    // Capacidade de campo (-33 kPa)
     final double theta33T = 0.299 - 2.92e-4 * sand + 0.1004 * (math.log(clay) / math.ln10);
     return math.min(0.6, math.max(0.1, theta33T + 0.015 * om));
   }
 
   double _calculateWiltingPoint(double clay, double sand, double om) {
-    // Ponto de murcha (-1500 kPa)
     final double theta1500T = 0.157 - 1.83e-4 * sand + 0.0663 * (math.log(clay) / math.ln10);
     return math.min(0.4, math.max(0.02, theta1500T + 0.01 * om));
   }
 
   int _calculateIrrigationFrequency(double availableWater, String soilType) {
-    // Frequência baseada no tipo de solo e água disponível
     switch (soilType) {
       case 'Arenoso':
         return availableWater > 20 ? 3 : 2;
@@ -305,8 +278,6 @@ class FieldCapacityCalculator extends CalculatorEntity {
     int frequency,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações baseadas no tipo de solo
     switch (soilType) {
       case 'Arenoso':
         recommendations.add('Solo arenoso: irrigações mais frequentes e menores volumes.');
@@ -315,29 +286,21 @@ class FieldCapacityCalculator extends CalculatorEntity {
         recommendations.add('Solo argiloso: irrigações menos frequentes e maiores volumes.');
         break;
     }
-
-    // Recomendações baseadas na água disponível
     if (availableWater < 0.08) {
       recommendations.add('Baixa capacidade de retenção. Considere melhorar estrutura do solo.');
     } else if (availableWater > 0.20) {
       recommendations.add('Boa capacidade de retenção. Solo adequado para irrigação.');
     }
-
-    // Recomendações baseadas na densidade
     if (bulkDensity > 1.6) {
       recommendations.add('Solo compactado. Considere descompactação.');
     } else if (bulkDensity < 1.1) {
       recommendations.add('Solo com boa estrutura física.');
     }
-
-    // Recomendações baseadas na matéria orgânica
     if (organicMatter < 2.0) {
       recommendations.add('Baixo teor de MO. Adicione matéria orgânica para melhorar retenção.');
     } else if (organicMatter > 5.0) {
       recommendations.add('Excelente teor de matéria orgânica.');
     }
-
-    // Recomendação de manejo
     recommendations.add('Irrigue quando atingir 50-70% da água disponível.');
     recommendations.add('Frequência recomendada: a cada $frequency dias.');
 

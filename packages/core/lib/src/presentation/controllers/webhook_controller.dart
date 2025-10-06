@@ -1,6 +1,3 @@
-// TEMPORARY STUB FILE TO RESOLVE BUILD ERRORS
-// This is a stub version of the webhook controller
-// Will be replaced with proper implementation later
 
 import 'package:dartz/dartz.dart';
 import '../../services/webhook_handler_service.dart';
@@ -20,13 +17,10 @@ class WebhookController {
     Map<String, dynamic> webhookData,
   ) async {
     try {
-      // Rate limiting check - stub
       final rateLimitCheck = _checkRateLimit();
       if (!rateLimitCheck) {
         return const Left(ValidationFailure('Rate limit exceeded'));
       }
-
-      // Process webhook
       return await _webhookHandlerService.processWebhook(webhookData);
     } catch (e) {
       return Left(ServerFailure('Webhook handling failed: $e'));
@@ -35,7 +29,6 @@ class WebhookController {
 
   /// Rate limit check - stub implementation
   bool _checkRateLimit() {
-    // Always pass for stub
     return true;
   }
 

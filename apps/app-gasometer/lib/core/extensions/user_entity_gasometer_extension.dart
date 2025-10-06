@@ -18,7 +18,6 @@ extension UserEntityGasometerExtension on UserEntity {
       case core.AuthProvider.google:
       case core.AuthProvider.apple:
       case core.AuthProvider.facebook:
-        // Verifica se é premium baseado nos metadados ou outro critério
         if (hasGasometerMetadata('isPremium') && getGasometerMetadata('isPremium') == true) {
           return UserType.premium;
         }
@@ -55,11 +54,8 @@ extension UserEntityGasometerExtension on UserEntity {
     if (parts.length < 2) return {};
     
     try {
-      // Parse JSON metadata
       final metadataStr = parts[1];
       if (metadataStr.isEmpty) return {};
-      
-      // Simple metadata parsing - format: "key1:value1,key2:value2"
       final metadata = <String, dynamic>{};
       final pairs = metadataStr.split(',');
       for (final pair in pairs) {
@@ -67,8 +63,6 @@ extension UserEntityGasometerExtension on UserEntity {
         if (keyValue.length == 2) {
           final key = keyValue[0].trim();
           final value = keyValue[1].trim();
-          
-          // Try to parse as bool or keep as string
           if (value.toLowerCase() == 'true') {
             metadata[key] = true;
           } else if (value.toLowerCase() == 'false') {
@@ -108,7 +102,6 @@ extension UserEntityGasometerExtension on UserEntity {
     Map<String, dynamic>? metadata,
     UserType? userType,
   }) {
-    // Constrói o campo phone com avatarBase64 e metadata
     String? newPhone;
     final currentAvatarBase64 = avatarBase64 ?? this.avatarBase64;
     final currentMetadata = metadata ?? this.metadata;
@@ -126,8 +119,6 @@ extension UserEntityGasometerExtension on UserEntity {
       
       newPhone = '$avatarPart|METADATA|$metadataPart';
     }
-    
-    // Atualiza provider se userType foi especificado
     core.AuthProvider? newProvider;
     if (userType != null) {
       switch (userType) {
@@ -136,12 +127,9 @@ extension UserEntityGasometerExtension on UserEntity {
           break;
         case UserType.registered:
         case UserType.premium:
-          // Mantém provider atual se não for anonymous
           newProvider = provider == core.AuthProvider.anonymous ? core.AuthProvider.email : provider;
           break;
       }
-      
-      // Adiciona isPremium aos metadados se necessário
       if (userType == UserType.premium) {
         final updatedMetadata = Map<String, dynamic>.from(currentMetadata);
         updatedMetadata['isPremium'] = true;
@@ -161,7 +149,6 @@ extension UserEntityGasometerExtension on UserEntity {
   
   /// Factory: Cria UserEntity a partir de core UserEntity (para social login)
   static UserEntity fromCoreUserEntity(UserEntity coreUser) {
-    // Adiciona módulo específico do gasometer mantendo todas as outras propriedades
     return coreUser.copyWith(
       moduleName: 'gasometer',
     );
@@ -175,8 +162,6 @@ extension UserEntityGasometerExtension on UserEntity {
       provider = core.AuthProvider.anonymous;
     } else if (firebaseUser.email != null) {
       provider = core.AuthProvider.email;
-      
-      // Detecta provider baseado nos dados do Firebase
       for (final userInfo in firebaseUser.providerData) {
         switch (userInfo.providerId) {
           case 'google.com':
@@ -191,14 +176,10 @@ extension UserEntityGasometerExtension on UserEntity {
         }
       }
     }
-    
-    // Constrói metadata do Firebase
     final metadata = {
       'providerId': firebaseUser.providerData.map((p) => p.providerId).toList().join(','),
       'isAnonymous': firebaseUser.isAnonymous.toString(),
     };
-    
-    // Constrói phone com metadata
     final metadataPairs = metadata.entries
         .map((e) => '${e.key}:${e.value}')
         .join(',');
@@ -222,13 +203,9 @@ extension UserEntityGasometerExtension on UserEntity {
   /// Factory: Cria UserEntity a partir de documento Firestore (migrado do UserModel)
   static UserEntity fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
-    // Converte type antigo para AuthProvider
     core.AuthProvider provider = core.AuthProvider.email;
     final typeIndex = data['type'] as int? ?? 0;
     if (typeIndex == 0) provider = core.AuthProvider.anonymous;
-    
-    // Migra metadata antigo
     final oldMetadata = Map<String, dynamic>.from(data['metadata'] as Map? ?? {});
     final metadataPairs = oldMetadata.entries
         .map((e) => '${e.key}:${e.value}')
@@ -254,12 +231,9 @@ extension UserEntityGasometerExtension on UserEntity {
   
   /// Factory: Cria UserEntity a partir de JSON local (migrado do UserModel)
   static UserEntity fromGasometerJson(Map<String, dynamic> json) {
-    // Converte type antigo para AuthProvider
     core.AuthProvider provider = core.AuthProvider.email;
     final typeIndex = json['type'] as int? ?? 0;
     if (typeIndex == 0) provider = core.AuthProvider.anonymous;
-    
-    // Migra avatarBase64 e metadata
     final avatarBase64 = json['avatarBase64'] as String?;
     final oldMetadata = Map<String, dynamic>.from(json['metadata'] as Map? ?? {});
     
@@ -332,11 +306,8 @@ extension UserEntityGasometerExtension on UserEntity {
     DateTime? lastSignInAt,
     Map<String, dynamic>? metadata,
   }) {
-    // Calcula novos valores
     final newAvatarBase64 = avatarBase64 ?? this.avatarBase64;
     final newMetadata = metadata ?? this.metadata;
-    
-    // Constrói phone com novos dados
     String? newPhone;
     if (newAvatarBase64 != null || newMetadata.isNotEmpty) {
       final metadataPairs = newMetadata.entries
@@ -344,8 +315,6 @@ extension UserEntityGasometerExtension on UserEntity {
           .join(',');
       newPhone = '${newAvatarBase64 ?? ''}|METADATA|$metadataPairs';
     }
-    
-    // Converte UserType para AuthProvider
     core.AuthProvider? newProvider;
     if (type != null) {
       switch (type) {

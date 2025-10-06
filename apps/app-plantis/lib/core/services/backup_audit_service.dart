@@ -44,7 +44,6 @@ class BackupAuditService {
       );
     } catch (e) {
       debugPrint('❌ Erro ao criar log de auditoria: $e');
-      // Não propaga erro para não afetar operação principal
     }
   }
 
@@ -161,8 +160,6 @@ class BackupAuditService {
   }) async {
     try {
       final logs = await _getAllLogs();
-
-      // Aplicar filtros
       var filteredLogs =
           logs.where((log) {
             if (userId != null && log.userId != userId) return false;
@@ -173,11 +170,7 @@ class BackupAuditService {
             if (endDate != null && log.timestamp.isAfter(endDate)) return false;
             return true;
           }).toList();
-
-      // Ordenar por timestamp (mais recente primeiro)
       filteredLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-      // Aplicar limite
       if (limit != null && filteredLogs.length > limit) {
         filteredLogs = filteredLogs.take(limit).toList();
       }
@@ -196,8 +189,6 @@ class BackupAuditService {
       final maxAllowed = maxEntries ?? _maxLogEntries;
 
       if (logs.length <= maxAllowed) return;
-
-      // Manter apenas os logs mais recentes
       logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       final logsToKeep = logs.take(maxAllowed).toList();
 
@@ -244,13 +235,9 @@ class BackupAuditService {
     }
   }
 
-  // ===== MÉTODOS PRIVADOS =====
-
   Future<void> _addLogEntry(AuditLogEntry entry) async {
     final logs = await _getAllLogs();
     logs.insert(0, entry); // Adicionar no início (mais recente primeiro)
-
-    // Limitar tamanho da lista
     if (logs.length > _maxLogEntries) {
       logs.removeRange(_maxLogEntries, logs.length);
     }

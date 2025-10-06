@@ -23,8 +23,6 @@ class PetivetiSyncService {
   bool _isInitialized = false;
   StreamSubscription<Map<String, SyncStatus>>? _statusSubscription;
   StreamSubscription<AppSyncEvent>? _eventSubscription;
-
-  // Controllers para streams específicos do pet care
   final StreamController<PetCareSyncEvent> _petCareEventController =
       StreamController<PetCareSyncEvent>.broadcast();
   final StreamController<EmergencySyncStatus> _emergencyStatusController =
@@ -51,16 +49,12 @@ class PetivetiSyncService {
         );
         return const Right(null);
       }
-
-      // Usar configuração padrão baseada no ambiente
       _config = config ?? _getDefaultConfig(enableDevelopmentMode);
 
       developer.log(
         'Initializing PetivetiSyncService with config: ${_config!}',
         name: 'PetivetiSync',
       );
-
-      // Inicializar UnifiedSyncManager
       final result = await UnifiedSyncManager.instance.initializeApp(
         appName: _config!.appSyncConfig.appName,
         config: _config!.appSyncConfig,
@@ -70,11 +64,7 @@ class PetivetiSyncService {
       if (result.isLeft()) {
         return result;
       }
-
-      // Configurar listeners
       _setupListeners();
-
-      // Configurar funcionalidades específicas do pet care
       await _setupPetCareFeatures();
 
       _isInitialized = true;
@@ -107,7 +97,6 @@ class PetivetiSyncService {
 
   /// Configura listeners de sync
   void _setupListeners() {
-    // Listener para status global
     _statusSubscription = UnifiedSyncManager.instance.globalSyncStatusStream
         .listen(
           (statusMap) {
@@ -123,8 +112,6 @@ class PetivetiSyncService {
             );
           },
         );
-
-    // Listener para eventos de sync
     _eventSubscription = UnifiedSyncManager.instance.syncEventStream.listen(
       (event) {
         if (event.appName == _config!.appSyncConfig.appName) {
@@ -140,18 +127,12 @@ class PetivetiSyncService {
   /// Configura funcionalidades específicas do pet care
   Future<void> _setupPetCareFeatures() async {
     final features = _config!.petCareFeatures;
-
-    // Configurar alertas médicos
     if (features.enableMedicalAlerts) {
       await _setupMedicalAlerts();
     }
-
-    // Configurar lembretes de cronograma
     if (features.enableScheduleReminders) {
       await _setupScheduleReminders();
     }
-
-    // Configurar monitoramento de emergência
     if (_config!.emergencyDataConfig.enableEmergencyMode) {
       await _setupEmergencyMonitoring();
     }
@@ -164,25 +145,16 @@ class PetivetiSyncService {
 
   /// Configura alertas médicos
   Future<void> _setupMedicalAlerts() async {
-    // REVIEW (converted TODO 2025-10-06): Implementar alertas para medicações vencendo
-    // REVIEW (converted TODO 2025-10-06): Implementar alertas para consultas próximas
-    // REVIEW (converted TODO 2025-10-06): Implementar alertas para vacinas em atraso
     developer.log('Medical alerts configured', name: 'PetivetiSync');
   }
 
   /// Configura lembretes de cronograma
   Future<void> _setupScheduleReminders() async {
-    // REVIEW (converted TODO 2025-10-06): Implementar lembretes de alimentação
-    // REVIEW (converted TODO 2025-10-06): Implementar lembretes de exercícios
-    // REVIEW (converted TODO 2025-10-06): Implementar lembretes de medicação
     developer.log('Schedule reminders configured', name: 'PetivetiSync');
   }
 
   /// Configura monitoramento de emergência
   Future<void> _setupEmergencyMonitoring() async {
-    // Monitorar dados críticos de medicação
-    // Monitorar mudanças significativas de peso
-    // Monitorar consultas de emergência
     developer.log('Emergency monitoring configured', name: 'PetivetiSync');
   }
 
@@ -192,8 +164,6 @@ class PetivetiSyncService {
       'Sync status changed to: ${status.name}',
       name: 'PetivetiSync',
     );
-
-    // Emitir status de emergência se necessário
     if (_config!.emergencyDataConfig.enableEmergencyMode) {
       _emitEmergencyStatus(status);
     }
@@ -205,14 +175,10 @@ class PetivetiSyncService {
       'Sync event: ${event.action.name} for ${event.entityType}',
       name: 'PetivetiSync',
     );
-
-    // Converter para evento específico do pet care
     final petCareEvent = _convertToPetCareEvent(event);
     if (petCareEvent != null) {
       _petCareEventController.add(petCareEvent);
     }
-
-    // Verificar se é evento de emergência
     if (_isEmergencyEvent(event)) {
       _handleEmergencyEvent(event);
     }
@@ -271,20 +237,13 @@ class PetivetiSyncService {
 
   /// Verifica se é evento de emergência
   bool _isEmergencyEvent(AppSyncEvent event) {
-    // Medicações sempre são críticas
     if (event.entityType.toString() == 'MedicationSyncEntity') {
       return true;
     }
-
-    // Consultas de emergência
     if (event.entityType.toString() == 'AppointmentSyncEntity') {
-      // REVIEW (converted TODO 2025-10-06): Verificar se é consulta de emergência
       return false;
     }
-
-    // Mudanças significativas de peso
     if (event.entityType.toString() == 'WeightSyncEntity') {
-      // REVIEW (converted TODO 2025-10-06): Verificar se é mudança significativa
       return false;
     }
 
@@ -297,9 +256,6 @@ class PetivetiSyncService {
       'Emergency event detected: ${event.entityType} ${event.action.name}',
       name: 'PetivetiSync',
     );
-
-    // REVIEW (converted TODO 2025-10-06): Implementar notificações de emergência
-    // REVIEW (converted TODO 2025-10-06): Implementar sync prioritário
   }
 
   /// Emite status de emergência
@@ -321,24 +277,18 @@ class PetivetiSyncService {
     }
 
     developer.log('Forcing emergency sync', name: 'PetivetiSync');
-
-    // Forçar sync de medicações primeiro (prioridade crítica)
     final medicationResult = await UnifiedSyncManager.instance
         .forceSyncEntity<MedicationSyncEntity>(_config!.appSyncConfig.appName);
 
     if (medicationResult.isLeft()) {
       return medicationResult;
     }
-
-    // Forçar sync de animais
     final animalResult = await UnifiedSyncManager.instance
         .forceSyncEntity<AnimalSyncEntity>(_config!.appSyncConfig.appName);
 
     if (animalResult.isLeft()) {
       return animalResult;
     }
-
-    // Forçar sync de consultas
     final appointmentResult = await UnifiedSyncManager.instance
         .forceSyncEntity<AppointmentSyncEntity>(_config!.appSyncConfig.appName);
 
@@ -374,8 +324,6 @@ class PetivetiSyncService {
   }
 
   /// Wrapper methods para operações comuns
-
-  // Animal operations
   Future<Either<Failure, String>> createAnimal(AnimalSyncEntity animal) async {
     return UnifiedSyncManager.instance.create(
       _config!.appSyncConfig.appName,
@@ -405,8 +353,6 @@ class PetivetiSyncService {
       _config!.appSyncConfig.appName,
     );
   }
-
-  // Medication operations
   Future<Either<Failure, String>> createMedication(
     MedicationSyncEntity medication,
   ) async {
@@ -438,8 +384,6 @@ class PetivetiSyncService {
       _config!.appSyncConfig.appName,
     );
   }
-
-  // Appointment operations
   Future<Either<Failure, String>> createAppointment(
     AppointmentSyncEntity appointment,
   ) async {
@@ -471,8 +415,6 @@ class PetivetiSyncService {
       _config!.appSyncConfig.appName,
     );
   }
-
-  // Weight operations
   Future<Either<Failure, String>> createWeight(WeightSyncEntity weight) async {
     return UnifiedSyncManager.instance.create(
       _config!.appSyncConfig.appName,
@@ -491,8 +433,6 @@ class PetivetiSyncService {
       _config!.appSyncConfig.appName,
     );
   }
-
-  // User Settings operations
   Future<Either<Failure, void>> updateUserSettings(
     String id,
     UserSettingsSyncEntity settings,

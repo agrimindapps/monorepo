@@ -55,19 +55,12 @@ class _NotificationSettingsPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status das notificações
           _buildStatusCard(permission, statsAsync),
           const SizedBox(height: 24),
-
-          // Configurações de tarefas
           _buildTaskNotificationsSection(settings),
           const SizedBox(height: 24),
-
-          // Configurações de produtividade
           _buildProductivitySection(settings),
           const SizedBox(height: 24),
-
-          // Ações
           _buildActionsSection(),
         ],
       ),
@@ -440,7 +433,6 @@ class _NotificationSettingsPageState
   }
 
   void _showWeeklyReviewTimeDialog(NotificationSettings settings) {
-    // Implementar dialog para escolher dia e horário
     showDialog<dynamic>(
       context: context,
       builder:
@@ -462,7 +454,6 @@ class _NotificationSettingsPageState
   }
 
   void _showDailyProductivityTimeDialog(NotificationSettings settings) {
-    // Implementar dialog para escolher horário
     showDialog<dynamic>(
       context: context,
       builder:
@@ -601,8 +592,6 @@ class _NotificationSettingsPageState
     return days[dayOfWeek];
   }
 }
-
-// Extensão para valores de duração mais comuns
 class DurationValues {
   static const values = [
     Duration(minutes: 30),

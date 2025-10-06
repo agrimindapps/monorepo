@@ -138,10 +138,6 @@ class UnitConversionResult extends CalculationResult {
     super.calculatedAt,
   });
 
-  // primaryResult é herdado da classe base e retorna ResultItem?
-
-  // summary será definido no constructor quando criar o resultado
-
   @override
   List<Object?> get props => [
         convertedValue,
@@ -219,8 +215,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
 
     final relatedConversions = _getRelatedConversions(input);
     final veterinaryContext = _getVeterinaryContext(input);
-
-    // Criar lista de ResultItem para o resultado estruturado
     final results = <ResultItem>[
       ResultItem(
         label: 'Valor Convertido',
@@ -265,7 +259,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
   }
 
   Map<String, dynamic> _convertWeight(double value, String from, String to) {
-    // Converter tudo para gramas primeiro
     final Map<String, double> toGrams = {
       'kg': 1000.0,
       'g': 1.0,
@@ -296,7 +289,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
   }
 
   Map<String, dynamic> _convertVolume(double value, String from, String to) {
-    // Converter tudo para mL primeiro
     final Map<String, double> toML = {
       'l': 1000.0,
       'ml': 1.0,
@@ -368,8 +360,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
     double result;
     String formula;
     double factor = 1.0;
-
-    // Conversões comuns de dosagem
     if (from == 'mgPerKg' && to == 'mgPerLb') {
       result = value / 2.20462; // 1 kg = 2.20462 lb
       formula = 'mg/kg ÷ 2.205';
@@ -379,7 +369,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
       formula = 'mg/lb × 2.205';
       factor = 2.20462;
     } else if (from == 'mgPerKg') {
-      // Calcular dose total para o animal
       result = value * weight;
       formula = 'mg/kg × peso(${weight}kg)';
       factor = weight;
@@ -396,7 +385,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
   }
 
   Map<String, dynamic> _convertPressure(double value, String from, String to) {
-    // Converter tudo para mmHg primeiro
     final Map<String, double> toMmHg = {
       'mmHg': 1.0,
       'kPa': 7.50062,
@@ -420,7 +408,6 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
   }
 
   Map<String, dynamic> _convertLength(double value, String from, String to) {
-    // Converter tudo para cm primeiro
     final Map<String, double> toCm = {
       'cm': 1.0,
       'mm': 0.1,
@@ -567,15 +554,12 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
 
   String _getUnitDisplay(String unit) {
     final Map<String, String> displays = {
-      // Weight
       'kg': 'kg',
       'g': 'g',
       'mg': 'mg',
       'mcg': 'μg',
       'lb': 'lb',
       'oz': 'oz',
-      
-      // Volume
       'l': 'L',
       'ml': 'mL',
       'gallon': 'gal',
@@ -585,26 +569,18 @@ class UnitConversionCalculator extends BaseCalculator<UnitConversionInput, UnitC
       'fluidOz': 'fl oz',
       'tablespoon': 'tbsp',
       'teaspoon': 'tsp',
-      
-      // Temperature
       'celsius': '°C',
       'fahrenheit': '°F',
       'kelvin': 'K',
-      
-      // Dosage
       'mgPerKg': 'mg/kg',
       'mgPerLb': 'mg/lb',
       'unitsPerKg': 'UI/kg',
       'mlPerKg': 'mL/kg',
       'iuPerKg': 'IU/kg',
-      
-      // Pressure
       'mmHg': 'mmHg',
       'kPa': 'kPa',
       'psi': 'psi',
       'atm': 'atm',
-      
-      // Length
       'cm': 'cm',
       'mm': 'mm',
       'm': 'm',

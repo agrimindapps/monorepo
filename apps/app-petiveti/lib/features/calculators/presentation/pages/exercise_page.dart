@@ -15,13 +15,9 @@ class ExercisePage extends ConsumerStatefulWidget {
 
 class _ExercisePageState extends ConsumerState<ExercisePage> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Form controllers
   final _ageController = TextEditingController();
   final _weightController = TextEditingController();
   final _availableTimeController = TextEditingController();
-  
-  // Form state
   String _selectedSpecies = 'Cão';
   String _selectedBreedGroup = 'Sem Raça Definida - Moderado';
   String _selectedActivityLevel = 'Moderadamente Ativo (exercício regular)';
@@ -156,8 +152,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Espécie
             DropdownButtonFormField<String>(
               value: _selectedSpecies,
               decoration: const InputDecoration(
@@ -174,7 +168,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
                 if (value != null) {
                   setState(() {
                     _selectedSpecies = value;
-                    // Ajustar grupo da raça baseado na espécie
                     if (value == 'Gato') {
                       _selectedBreedGroup = 'Gato de Apartamento';
                     } else {
@@ -191,8 +184,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Grupo da Raça
             DropdownButtonFormField<String>(
               value: _selectedBreedGroup,
               decoration: const InputDecoration(
@@ -239,8 +230,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Idade
             TextFormField(
               controller: _ageController,
               decoration: const InputDecoration(
@@ -262,8 +251,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Peso
             TextFormField(
               controller: _weightController,
               decoration: const InputDecoration(
@@ -285,8 +272,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Condições de Saúde
             DropdownButtonFormField<String>(
               value: _selectedHealthConditions,
               decoration: const InputDecoration(
@@ -341,8 +326,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Nível de Atividade Atual
             DropdownButtonFormField<String>(
               value: _selectedActivityLevel,
               decoration: const InputDecoration(
@@ -376,8 +359,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Tempo Disponível
             TextFormField(
               controller: _availableTimeController,
               decoration: const InputDecoration(
@@ -418,8 +399,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Objetivo do Exercício
             DropdownButtonFormField<String>(
               value: _selectedExerciseGoal,
               decoration: const InputDecoration(
@@ -485,8 +464,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Results
             ...result.results.map((item) => _buildResultItem(item)),
             
             if (result.summary != null) ...[
@@ -569,8 +546,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
 
   Widget _buildRecommendationsSection(List<Recommendation> recommendations) {
     final theme = Theme.of(context);
-    
-    // Separar alertas de segurança das recomendações normais
     final safetyAlerts = recommendations.where((r) => r.title.contains('Segurança')).toList();
     final normalRecs = recommendations.where((r) => !r.title.contains('Segurança')).toList();
 
@@ -584,8 +559,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
           ),
         ),
         const SizedBox(height: 8),
-        
-        // Mostrar alertas primeiro
         if (safetyAlerts.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(12),
@@ -623,8 +596,6 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             ),
           ),
         ],
-        
-        // Recomendações normais
         ...normalRecs.map((rec) => Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(

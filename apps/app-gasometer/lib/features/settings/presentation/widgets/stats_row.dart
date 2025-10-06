@@ -29,7 +29,6 @@ class StatsRow extends StatelessWidget {
     Widget content = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Label with optional icon
         Expanded(
           child: Row(
             children: [
@@ -52,8 +51,6 @@ class StatsRow extends StatelessWidget {
             ],
           ),
         ),
-        
-        // Value
         Text(
           value,
           style: valueStyle ?? theme.textTheme.bodyMedium?.copyWith(
@@ -63,8 +60,6 @@ class StatsRow extends StatelessWidget {
         ),
       ],
     );
-
-    // Wrap with InkWell if onTap is provided
     if (onTap != null) {
       content = Material(
         color: Colors.transparent,

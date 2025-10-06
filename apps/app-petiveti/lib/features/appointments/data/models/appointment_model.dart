@@ -58,8 +58,6 @@ class AppointmentModel extends HiveObject {
     required this.updatedAtTimestamp,
     this.isDeleted = false,
   });
-
-  // Convert to domain entity
   Appointment toEntity() {
     return Appointment(
       id: id,
@@ -76,8 +74,6 @@ class AppointmentModel extends HiveObject {
       isDeleted: isDeleted,
     );
   }
-
-  // Create from domain entity
   factory AppointmentModel.fromEntity(Appointment appointment) {
     return AppointmentModel(
       id: appointment.id,
@@ -94,14 +90,10 @@ class AppointmentModel extends HiveObject {
       isDeleted: appointment.isDeleted,
     );
   }
-
-  // JSON serialization
   factory AppointmentModel.fromJson(Map<String, dynamic> json) =>
       _$AppointmentModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$AppointmentModelToJson(this);
-
-  // Firebase/Map conversion (for compatibility with existing structure)
   Map<String, dynamic> toMap() {
     return {
       'id': id,

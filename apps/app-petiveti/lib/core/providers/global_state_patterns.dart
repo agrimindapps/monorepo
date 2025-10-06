@@ -101,8 +101,6 @@ abstract class BaseAsyncNotifier<T> extends StateNotifier<AsyncState<T>> {
         isLoading: false,
         errorMessage: errorMessage,
       );
-      
-      // Log error for debugging
       _logError(error, stackTrace);
     }
   }
@@ -116,11 +114,9 @@ abstract class BaseAsyncNotifier<T> extends StateNotifier<AsyncState<T>> {
 
   /// Retry last operation (override in implementations)
   Future<void> retry() async {
-    // Override in subclasses
   }
 
   void _logError(dynamic error, StackTrace stackTrace) {
-    // In production, send to crash reporting service
     print('Error in $runtimeType: $error');
     print('StackTrace: $stackTrace');
   }

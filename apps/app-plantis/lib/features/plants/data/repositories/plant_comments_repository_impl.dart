@@ -16,7 +16,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     try {
       await PlantisSyncConfig.configure();
     } catch (e) {
-      // Log error but don't fail - will fallback to empty data
       print('Warning: Failed to initialize sync for comments: $e');
     }
   }
@@ -28,24 +27,17 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     try {
       print('🔍 getCommentsForPlant - Type: $ComentarioModel');
       print('   App: $_appName');
-
-      // Use UnifiedSyncManager to find all comments and filter locally
       final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(
         _appName,
       );
-
-      // Handle error case
       if (result.isLeft()) {
         final failure = result.fold(
           (l) => l,
           (r) => throw Exception('Unreachable'),
         );
-
-        // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
           await _ensureSyncInitialized();
-          // Try again after initialization
           final retryResult = await UnifiedSyncManager.instance
               .findAll<ComentarioModel>(_appName);
 
@@ -69,14 +61,10 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         }
         return Left(failure);
       }
-
-      // Handle success case
       final comments = result.fold(
         (l) => throw Exception('Unreachable'),
         (r) => r,
       );
-
-      // Filter out deleted comments and comments for this specific plant, then sort by creation date (newest first)
       final filteredComments =
           comments
               .where(
@@ -91,7 +79,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
       return Right(filteredComments);
     } catch (e) {
-      // Fallback: return empty list if sync not available
       return const Right([]);
     }
   }
@@ -102,7 +89,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     String content,
   ) async {
     try {
-      // Create new comment with plant association
       final comment = ComentarioModel.create(
         conteudo: content,
         plantId: plantId,
@@ -112,23 +98,16 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         _appName,
         comment,
       );
-
-      // Handle error case
       if (result.isLeft()) {
         final failure = result.fold(
           (l) => l,
           (r) => throw Exception('Unreachable'),
         );
-
-        // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
           await _ensureSyncInitialized();
-          // Try again after initialization
           final retryResult = await UnifiedSyncManager.instance
               .create<ComentarioModel>(_appName, comment);
-
-          // Force immediate sync after retry
           if (retryResult.isRight()) {
             _forceImmediateSync();
           }
@@ -140,11 +119,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         }
         return Left(failure);
       }
-
-      // Force immediate sync to Firebase after successful creation
       _forceImmediateSync();
-
-      // Handle success case
       return Right(comment);
     } catch (e, stack) {
       print('Failed to add comment: $e\n$stack');
@@ -154,7 +129,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
   /// Forces immediate sync of comments to Firebase
   void _forceImmediateSync() {
-    // Fire and forget - não bloqueia a resposta ao usuário
     UnifiedSyncManager.instance.forceSyncEntity<ComentarioModel>(_appName).then(
       (Either<Failure, void> result) {
         result.fold(
@@ -171,7 +145,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     ComentarioModel comment,
   ) async {
     try {
-      // Update comment with new timestamp
       final updatedComment = comment.copyWith(dataAtualizacao: DateTime.now());
 
       final result = await UnifiedSyncManager.instance.update<ComentarioModel>(
@@ -179,19 +152,14 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         comment.id,
         updatedComment,
       );
-
-      // Handle error case
       if (result.isLeft()) {
         final failure = result.fold(
           (l) => l,
           (r) => throw Exception('Unreachable'),
         );
-
-        // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
           await _ensureSyncInitialized();
-          // Try again after initialization
           final retryResult = await UnifiedSyncManager.instance
               .update<ComentarioModel>(_appName, comment.id, updatedComment);
           return retryResult.fold(
@@ -201,8 +169,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         }
         return Left(failure);
       }
-
-      // Handle success case
       return Right(updatedComment);
     } catch (e) {
       return Left(CacheFailure('Failed to update comment: $e'));
@@ -216,19 +182,14 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         _appName,
         commentId,
       );
-
-      // Handle error case
       if (result.isLeft()) {
         final failure = result.fold(
           (l) => l,
           (r) => throw Exception('Unreachable'),
         );
-
-        // If failure is because sync not initialized, try to initialize
         if (failure.message.contains('No sync repository found') ||
             failure.message.contains('not initialized')) {
           await _ensureSyncInitialized();
-          // Try again after initialization
           return await UnifiedSyncManager.instance.delete<ComentarioModel>(
             _appName,
             commentId,
@@ -236,8 +197,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         }
         return Left(failure);
       }
-
-      // Handle success case
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Failed to delete comment: $e'));
@@ -246,11 +205,9 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
   @override
   Future<Either<Failure, void>> deleteCommentsForPlant(String plantId) async {
-    // Get all comments for the plant and delete them
     final commentsResult = await getCommentsForPlant(plantId);
 
     return commentsResult.fold((failure) => Left(failure), (comments) async {
-      // Delete each comment individually using UnifiedSyncManager
       for (final comment in comments) {
         final deleteResult = await UnifiedSyncManager.instance
             .delete<ComentarioModel>(_appName, comment.id);
@@ -264,7 +221,6 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
   /// Clear all comments (for testing or data reset)
   Future<void> clearAllComments() async {
-    // Get all comments and delete them
     final result = await UnifiedSyncManager.instance.findAll<ComentarioModel>(
       _appName,
     );

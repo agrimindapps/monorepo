@@ -43,7 +43,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Rate Limiting Info
           FutureBuilder(
             future: authNotifier.getRateLimitInfo(),
             builder: (context, snapshot) {
@@ -64,8 +63,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
           ),
 
           const SizedBox(height: 16),
-
-          // Email Field
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -87,8 +84,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
           ),
 
           const SizedBox(height: 16),
-
-          // Password Field
           TextFormField(
             controller: _passwordController,
             obscureText: !_showPassword,
@@ -117,8 +112,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
           ),
 
           const SizedBox(height: 8),
-
-          // Forgot Password
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -128,8 +121,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
           ),
 
           const SizedBox(height: 16),
-
-          // Login Button
           FutureBuilder(
             future: authNotifier.canAttemptLogin(),
             builder: (context, snapshot) {
@@ -151,8 +142,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
               );
             },
           ),
-
-          // Error Message
           if (authState.errorMessage != null) ...[
             const SizedBox(height: 16),
             Container(
@@ -182,8 +171,6 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
           ],
 
           const SizedBox(height: 24),
-
-          // Register Link
           if (widget.onRegisterTap != null)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -204,11 +191,8 @@ class _EnhancedLoginFormState extends ConsumerState<EnhancedLoginForm> {
     if (!_formKey.currentState!.validate()) return;
 
     final authNotifier = ref.read(authProvider.notifier);
-
-    // Verifica rate limiting antes de tentar login
     final canAttempt = await authNotifier.canAttemptLogin();
     if (!canAttempt) {
-      // O notifier já mostrará a mensagem de erro apropriada
       return;
     }
 

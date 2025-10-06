@@ -32,16 +32,12 @@ class _VaccineSchedulingInterfaceRefactoredState extends ConsumerState<VaccineSc
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
-  
-  // Controllers for basic info form
   final _nameController = TextEditingController();
   final _veterinarianController = TextEditingController();
   final _batchController = TextEditingController();
   final _manufacturerController = TextEditingController();
   final _dosageController = TextEditingController();
   final _notesController = TextEditingController();
-  
-  // State variables
   DateTime _scheduledDate = DateTime.now();
   DateTime? _nextDueDate;
   DateTime? _reminderDate;
@@ -225,8 +221,6 @@ class _VaccineSchedulingInterfaceRefactoredState extends ConsumerState<VaccineSc
     try {
       if (widget.existingVaccine == null) {
         await ref.read(vaccinesProvider.notifier).addVaccine(vaccine);
-        
-        // Create series vaccines if configured
         if (_isSeriesVaccine && _seriesCount > 1) {
           await _createSeriesVaccines(vaccine);
         }

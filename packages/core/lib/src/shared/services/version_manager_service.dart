@@ -14,8 +14,6 @@ class VersionManagerService implements IVersionManager {
   @override
   String getCurrentVersion() {
     try {
-      // Retorna versão padrão para compatibilidade com interface
-      // Use getCurrentVersionAsync() para obter a versão real
       return '1.0.0+1'; // Versão fallback baseada no pubspec.yaml
     } catch (e) {
       developer.log(
@@ -139,14 +137,10 @@ class VersionManagerService implements IVersionManager {
     try {
       final versionBox = await _getVersionBox();
       final stats = <String, String>{};
-
-      // Adiciona todas as chaves da box de versões
       for (final key in versionBox.keys) {
         final value = versionBox.get(key);
         stats[key.toString()] = value?.toString() ?? '';
       }
-
-      // Adiciona versão atual
       stats['current_app_version'] = await getCurrentVersionAsync();
 
       return stats;
@@ -280,8 +274,6 @@ class VersionManagerService implements IVersionManager {
         'Erro durante verificação de versão: $e',
         name: 'VersionManagerService',
       );
-
-      // Retorna resultado de erro que força atualização
       return VersionCheckResult(
         currentVersion: await getCurrentVersionAsync(),
         lastSavedVersion: '',
@@ -318,8 +310,6 @@ class VersionManagerService implements IVersionManager {
     try {
       final versionBox = await _getVersionBox();
       final currentVersion = await getCurrentVersionAsync();
-
-      // Verifica se versões são consistentes
       final lastSaved =
           versionBox.get(_currentVersionKey, defaultValue: '') ?? '';
       final lastData =

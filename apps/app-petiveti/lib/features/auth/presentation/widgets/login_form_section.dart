@@ -219,8 +219,6 @@ class LoginFormSection extends StatelessWidget {
     }
 
     final email = value.trim();
-    
-    // Simple but effective email validation regex
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     );
@@ -228,8 +226,6 @@ class LoginFormSection extends StatelessWidget {
     if (!emailRegex.hasMatch(email)) {
       return 'Email inválido';
     }
-
-    // Check for common mistakes
     if (email.contains('..')) {
       return 'Email não pode conter pontos consecutivos';
     }
@@ -252,8 +248,6 @@ class LoginFormSection extends StatelessWidget {
     if (value.length < 6) {
       return 'Senha deve ter pelo menos 6 caracteres';
     }
-
-    // Additional validation for sign-up mode
     if (isSignUp) {
       if (value.length < 8) {
         return 'Senha deve ter pelo menos 8 caracteres';

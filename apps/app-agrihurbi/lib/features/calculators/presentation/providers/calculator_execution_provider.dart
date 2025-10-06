@@ -17,15 +17,11 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     required ExecuteCalculation executeCalculation,
   }) : _executeCalculation = executeCalculation;
 
-  // === STATE MANAGEMENT ===
-
   bool _isCalculating = false;
   CalculationResult? _currentResult;
   Map<String, dynamic> _currentInputs = {};
   String? _errorMessage;
   CalculatorEntity? _activeCalculator;
-
-  // === GETTERS ===
 
   bool get isCalculating => _isCalculating;
   CalculationResult? get currentResult => _currentResult;
@@ -43,13 +39,9 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   /// Obtém valor de um input específico
   T? getInput<T>(String parameterId) => _currentInputs[parameterId] as T?;
 
-  // === INPUT MANAGEMENT ===
-
   /// Define calculadora ativa
   void setActiveCalculator(CalculatorEntity? calculator) {
     _activeCalculator = calculator;
-    
-    // Limpa inputs e resultado ao trocar de calculadora
     if (calculator == null || _activeCalculator?.id != calculator.id) {
       _currentInputs.clear();
       _currentResult = null;
@@ -62,8 +54,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   /// Atualiza input de cálculo
   void updateInput(String parameterId, dynamic value) {
     _currentInputs[parameterId] = value;
-    
-    // Limpa resultado ao alterar inputs
     _currentResult = null;
     
     notifyListeners();
@@ -73,8 +63,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   /// Atualiza múltiplos inputs
   void updateInputs(Map<String, dynamic> inputs) {
     _currentInputs.addAll(inputs);
-    
-    // Limpa resultado ao alterar inputs
     _currentResult = null;
     
     notifyListeners();
@@ -84,7 +72,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   /// Remove um input específico
   void removeInput(String parameterId) {
     if (_currentInputs.remove(parameterId) != null) {
-      // Limpa resultado ao remover input
       _currentResult = null;
       notifyListeners();
       debugPrint('CalculatorExecutionProvider: Input removido - $parameterId');
@@ -105,8 +92,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     notifyListeners();
     debugPrint('CalculatorExecutionProvider: Resultado limpo');
   }
-
-  // === CALCULATION EXECUTION ===
 
   /// Executa cálculo com a calculadora ativa
   Future<bool> executeCalculation() async {
@@ -175,8 +160,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     );
   }
 
-  // === INPUT VALIDATION ===
-
   /// Valida inputs obrigatórios
   ValidationResult validateRequiredInputs() {
     if (_activeCalculator == null) {
@@ -189,9 +172,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
 
     final errors = <String>[];
     final missingInputs = <String>[];
-
-    // Aqui seria feita a validação baseada nos parâmetros da calculadora
-    // Por enquanto, validação básica
     if (_currentInputs.isEmpty) {
       errors.add('Nenhum parâmetro informado');
     }
@@ -205,17 +185,12 @@ class CalculatorExecutionProvider extends ChangeNotifier {
 
   /// Valida formato dos inputs
   bool validateInputFormat(String parameterId, dynamic value) {
-    // Implementar validação de formato específica por tipo
     if (value == null) return false;
-    
-    // Validação básica por tipo
     if (value is String && value.trim().isEmpty) return false;
     if (value is num && value.isNaN) return false;
     
     return true;
   }
-
-  // === RESULT MANAGEMENT ===
 
   /// Aplica resultado de cálculo anterior
   void applyPreviousResult(CalculationResult result) {
@@ -228,8 +203,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
   /// Obtém resumo do resultado atual
   String? getResultSummary() {
     if (_currentResult == null) return null;
-    
-    // Implementar lógica de resumo baseada no tipo de resultado
     return 'Cálculo realizado com ${_currentInputs.length} parâmetros';
   }
 
@@ -254,8 +227,6 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-// === VALIDATION RESULT CLASS ===
 
 class ValidationResult {
   final bool isValid;

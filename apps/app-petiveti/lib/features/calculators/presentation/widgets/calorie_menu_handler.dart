@@ -43,7 +43,6 @@ class CalorieMenuHandler {
         _handleHelpAction();
         break;
       default:
-        // Unknown action - could log or handle gracefully
         break;
     }
   }
@@ -119,6 +118,5 @@ class CalorieMenuHandler {
 
   /// Dispose of resources
   void dispose() {
-    // No resources to dispose in this handler
   }
 }

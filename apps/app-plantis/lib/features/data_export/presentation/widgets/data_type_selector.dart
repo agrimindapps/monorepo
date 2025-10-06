@@ -156,7 +156,6 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header with selection controls
         Row(
           children: [
             Text(
@@ -188,8 +187,6 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
         ),
 
         const SizedBox(height: 12),
-
-        // Selection summary
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
@@ -236,8 +233,6 @@ class _DataTypeSelectorState extends State<DataTypeSelector> {
         ),
 
         const SizedBox(height: 16),
-
-        // Data type list
         Column(
           children:
               availableTypes.map((dataType) {

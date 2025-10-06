@@ -337,7 +337,6 @@ class FeedBackService {
             ElevatedButton(
               onPressed: () {
                 sendComment('IDEA', description);
-                // Navigator.of(context).pop();
                 stepActive = 4;
                 setState(() {});
               },

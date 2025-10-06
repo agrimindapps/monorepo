@@ -414,8 +414,6 @@ Responderemos suas questões em até 48 horas úteis.''',
     final privacySections = _privacyPolicyContent['sections'] as List;
     final termsSections = _termsOfServiceContent['sections'] as List;
     final totalSections = privacySections.length + termsSections.length;
-
-    // Simple version based on date and content count
     return '${_lastUpdatedDate}_v$totalSections';
   }
 

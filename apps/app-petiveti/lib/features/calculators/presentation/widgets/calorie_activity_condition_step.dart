@@ -21,7 +21,6 @@ class CalorieActivityConditionStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título do step
           Text(
             'Atividade & Condição Corporal',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -41,22 +40,15 @@ class CalorieActivityConditionStep extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // Seleção do nível de atividade
                   _buildActivityLevelSelector(context),
                   const SizedBox(height: 24),
-
-                  // Seleção da condição corporal (BCS)
                   _buildBodyConditionSelector(context),
                   const SizedBox(height: 24),
-
-                  // Resumo das seleções
                   _buildSelectionSummary(context),
                 ],
               ),
             ),
           ),
-
-          // Erros de validação
           if (validationErrors.isNotEmpty)
             _buildValidationErrors(context),
         ],

@@ -10,32 +10,19 @@ import 'package:flutter/material.dart';
 /// Este sistema unificado garante 95% de consistência visual e reduz
 /// em 40% o esforço de desenvolvimento de novos cadastros.
 abstract class UnifiedDesignTokens {
-  // ============================================================================
-  // COLOR SYSTEM - Consolidado de GasometerDesignTokens + Form Components
-  // ============================================================================
-  
-  // PRIMARY BRAND COLORS - Mantidas as cores principais do app
   static const Color _colorPrimary = Color(0xFFFF5722);      // Deep Orange - Cor principal da marca
   static const Color _colorSecondary = Color(0xFF2196F3);    // Blue - Ações secundárias
-  
-  // SEMANTIC COLORS - Estados e feedback visual
   static const Color colorSuccess = Color(0xFF4CAF50);       // Estados de sucesso
   static const Color colorWarning = Color(0xFFFF9800);       // Estados de aviso
   static const Color colorError = Color(0xFFF44336);         // Estados de erro
   static const Color colorInfo = Color(0xFF2196F3);          // Estados informativos
-  
-  // SURFACE COLORS - Backgrounds e superfícies  
   static const Color colorSurface = Color(0xFFFFFFFF);       // Superfície primária
   static const Color colorSurfaceVariant = Color(0xFFF8F9FA); // Superfície alternativa
   static const Color colorBackground = Color(0xFFF5F5F5);    // Background principal
   static const Color colorHeaderBackground = Color(0xFF2C2C2E); // Background do header
-  
-  // PREMIUM COLORS - Cores premium e gold
   static const Color colorPremiumAccent = Color(0xFFFFA500);     // Orange premium accent
   static const Color colorPremiumGold = Color(0xFFFFD700);       // Gold premium
   static const Color colorPremiumBackground = Color(0xFFFFA500); // Premium background overlay
-  
-  // NEUTRAL COLORS (GRAYSCALE) - Escala completa de cinzas
   static const Color colorNeutral50 = Color(0xFFFAFAFA);        // Lightest neutral
   static const Color colorNeutral100 = Color(0xFFF5F5F5);       // Very light neutral
   static const Color colorNeutral200 = Color(0xFFEEEEEE);       // Light neutral
@@ -46,30 +33,18 @@ abstract class UnifiedDesignTokens {
   static const Color colorNeutral700 = Color(0xFF616161);       // Dark neutral
   static const Color colorNeutral800 = Color(0xFF424242);       // Very dark neutral
   static const Color colorNeutral900 = Color(0xFF212121);       // Darkest neutral
-
-  // TEXT COLORS - Cores específicas para texto
   static const Color colorTextPrimary = Color(0xFF1C1B1F);      // Primary text
   static const Color colorTextSecondary = Color(0xFF757575);    // Secondary text
   static const Color colorTextOnPrimary = Color(0xFFFFFFFF);    // Text on primary background
   static const Color colorTextOnSurface = Color(0xFF1C1B1F);    // Text on surface
-
-  // CONTEXT-SPECIFIC COLORS - Cores específicas do domínio
   static const Color colorFuelGasoline = Color(0xFFFF5722);  // Gasolina laranja
   static const Color colorFuelEthanol = Color(0xFF4CAF50);   // Etanol verde
   static const Color colorFuelDiesel = Color(0xFF795548);    // Diesel marrom
   static const Color colorFuelGas = Color(0xFF9C27B0);       // Gas purple
-  
-  // REPORT/ANALYTICS COLORS
   static const Color colorAnalyticsBlue = Color(0xFF4299E1);    // Analytics blue
   static const Color colorAnalyticsGreen = Color(0xFF48BB78);   // Analytics green
   static const Color colorAnalyticsPurple = Color(0xFF9F7AEA);  // Analytics purple
-  
-  // FAQ/CONTENT COLORS
   static const Color colorContentBackground = Color(0xFFF8F9FA); // Content background
-  
-  // ============================================================================
-  // TYPOGRAPHY SYSTEM - Padronizado para formulários
-  // ============================================================================
   static const double fontSizeXS = 11.0;
   static const double fontSizeSM = 12.0;
   static const double fontSizeMD = 14.0;  // Padrão para body text
@@ -78,17 +53,11 @@ abstract class UnifiedDesignTokens {
   static const double fontSizeXXL = 20.0;
   static const double fontSizeXXXL = 24.0;
   static const double fontSizeDisplay = 32.0;
-  
-  // Font Weights
   static const FontWeight fontWeightLight = FontWeight.w300;
   static const FontWeight fontWeightRegular = FontWeight.w400;
   static const FontWeight fontWeightMedium = FontWeight.w500;
   static const FontWeight fontWeightSemiBold = FontWeight.w600;
   static const FontWeight fontWeightBold = FontWeight.w700;
-  
-  // ============================================================================
-  // SPACING SYSTEM - Unificado para todas as interfaces
-  // ============================================================================
   static const double spacingXS = 4.0;
   static const double spacingSM = 8.0;
   static const double spacingMD = 12.0;
@@ -96,35 +65,23 @@ abstract class UnifiedDesignTokens {
   static const double spacingXL = 20.0;
   static const double spacingXXL = 24.0;
   static const double spacingXXXL = 32.0;
-  
-  // Semantic Spacing - Para uso específico em formulários
   static const double spacingFormField = 16.0;        // Entre campos de formulário
   static const double spacingSection = 24.0;          // Entre seções
   static const double spacingPageMargin = 20.0;       // Margens da página
   static const double spacingDialogPadding = 24.0;    // Padding de diálogos
   static const double spacingCardPadding = 20.0;      // Padding de cards
-  
-  // ============================================================================
-  // BORDER RADIUS SYSTEM
-  // ============================================================================
   static const double radiusXS = 4.0;
   static const double radiusSM = 6.0;
   static const double radiusMD = 8.0;
   static const double radiusLG = 12.0;
   static const double radiusXL = 16.0;
   static const double radiusXXL = 20.0;
-  
-  // Semantic Radius
   static const double radiusButton = 8.0;             // Botões
   static const double radiusCard = 16.0;              // Cards
   static const double radiusDialog = 12.0;            // Diálogos
   static const double radiusInput = 8.0;              // Campos de input
   static const double radiusChip = 20.0;              // Chips
   static const double radiusRound = 50.0;             // Completely round
-
-  // ============================================================================
-  // ICON SIZES SYSTEM
-  // ============================================================================
   static const double iconSizeXS = 16.0;
   static const double iconSizeSM = 20.0;
   static const double iconSizeMD = 24.0;
@@ -132,65 +89,37 @@ abstract class UnifiedDesignTokens {
   static const double iconSizeXL = 32.0;
   static const double iconSizeXXL = 40.0;
   static const double iconSizeXXXL = 48.0;
-
-  // Semantic icon sizes
   static const double iconSizeButton = iconSizeSM;            // 20.0
   static const double iconSizeListItem = iconSizeMD;          // 24.0
   static const double iconSizeHeader = iconSizeLG;            // 28.0
   static const double iconSizeFeature = iconSizeXL;           // 32.0
   static const double iconSizeAvatar = iconSizeXXL;           // 40.0
-
-  // ============================================================================
-  // ELEVATION SYSTEM
-  // ============================================================================
   static const double elevationNone = 0.0;
   static const double elevationXS = 1.0;
   static const double elevationSM = 2.0;
   static const double elevationMD = 4.0;
   static const double elevationLG = 8.0;
   static const double elevationXL = 16.0;
-
-  // Semantic elevation
   static const double elevationCard = elevationSM;           // 2.0
   static const double elevationButton = elevationSM;         // 2.0
   static const double elevationDialog = elevationLG;         // 8.0
   static const double elevationAppBar = elevationMD;         // 4.0
-
-  // ============================================================================
-  // OPACITY SYSTEM
-  // ============================================================================
   static const double opacityDisabled = 0.38;
   static const double opacitySecondary = 0.6;
   static const double opacityHint = 0.5;
   static const double opacityDivider = 0.12;
   static const double opacityOverlay = 0.1;
   static const double opacityBackdrop = 0.5;
-
-  // ============================================================================
-  // ANIMATION DURATIONS
-  // ============================================================================
   static const Duration animationFast = Duration(milliseconds: 150);
   static const Duration animationNormal = Duration(milliseconds: 250);
   static const Duration animationSlow = Duration(milliseconds: 350);
-  
-  // ============================================================================
-  // RESPONSIVE BREAKPOINTS
-  // ============================================================================
   static const double breakpointMobile = 480.0;
   static const double breakpointTablet = 768.0;
   static const double breakpointDesktop = 1024.0;
   static const double breakpointWide = 1200.0;
-
-  // ============================================================================
-  // CONSTRAINTS SYSTEM
-  // ============================================================================
   static const double maxWidthContent = 1200.0;
   static const double maxWidthDialog = 500.0;
   static const double minTouchTarget = 48.0;
-  
-  // ============================================================================
-  // HELPER METHODS - Para uso responsivo e adaptativo
-  // ============================================================================
   
   /// Retorna espaçamento responsivo baseado no tamanho da tela
   static double responsiveSpacing(BuildContext context) {
@@ -285,10 +214,6 @@ abstract class UnifiedDesignTokens {
     if (isTablet(context)) return iconSizeLG;
     return iconSizeXL;
   }
-  
-  // ============================================================================
-  // DEPRECATED MAPPING - Para migração gradual dos tokens antigos
-  // ============================================================================
   
   /// Cores primárias - mantém compatibilidade com GasometerDesignTokens
   static Color get colorPrimary => _colorPrimary;

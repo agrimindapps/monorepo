@@ -68,10 +68,8 @@ class PremiumSection extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Header with premium avatar
               Row(
                 children: [
-                  // Hero Avatar Premium
                   DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -104,8 +102,6 @@ class PremiumSection extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  
-                  // Title and Status
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,8 +160,6 @@ class PremiumSection extends ConsumerWidget {
               ),
               
               const SizedBox(height: 20),
-              
-              // Premium Benefits
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -212,8 +206,6 @@ class PremiumSection extends ConsumerWidget {
               ),
               
               const SizedBox(height: 20),
-              
-              // Management Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -292,7 +284,6 @@ class PremiumSection extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                // Premium Icon
                 Container(
                   width: 50,
                   height: 50,
@@ -312,8 +303,6 @@ class PremiumSection extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                
-                // Title and Subtitle
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,8 +341,6 @@ class PremiumSection extends ConsumerWidget {
                     ],
                   ),
                 ),
-                
-                // Arrow
                 const Icon(
                   Icons.arrow_forward_ios,
                   color: Color(0xFF66BB6A),  // Medium green

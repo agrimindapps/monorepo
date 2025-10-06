@@ -70,8 +70,6 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
       },
     );
   }
-
-  // Método específico para criar subtasks
   Future<void> createSubtask(TaskEntity subtask) async {
     await createTask(subtask);
   }
@@ -109,8 +107,6 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
       },
     );
   }
-
-  // Métodos específicos para subtasks
   Future<void> updateSubtask(TaskEntity subtask) async {
     await updateTask(subtask);
   }
@@ -127,10 +123,7 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
       (_) {
         if (state.hasValue) {
           final currentTasks = state.value!;
-          // Reordenar as tasks localmente conforme a nova ordem
           final reorderedTasks = <TaskEntity>[];
-
-          // Adicionar tasks na nova ordem
           for (int i = 0; i < taskIds.length; i++) {
             final taskId = taskIds[i];
             final task = currentTasks.firstWhere(
@@ -140,8 +133,6 @@ class TaskNotifier extends StateNotifier<AsyncValue<List<TaskEntity>>> {
             );
             reorderedTasks.add(task.copyWith(position: i));
           }
-
-          // Adicionar qualquer task que não estava na lista de reordenação
           final remainingTasks =
               currentTasks.where((task) => !taskIds.contains(task.id)).toList();
           reorderedTasks.addAll(remainingTasks);

@@ -14,8 +14,6 @@ class AppTheme {
         surface: AppColors.background,
         error: AppColors.error,
       ),
-      
-      // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.textOnPrimary,
@@ -28,8 +26,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-      
-      // Card Theme
       cardTheme: const CardThemeData(
         color: AppColors.surface,
         elevation: 2,
@@ -39,16 +35,12 @@ class AppTheme {
         ),
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
-      
-      // Floating Action Button Theme
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 6,
         shape: CircleBorder(),
       ),
-      
-      // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
@@ -93,8 +85,6 @@ class AppTheme {
           vertical: 12,
         ),
       ),
-      
-      // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryColor,
@@ -110,8 +100,6 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primaryColor,
@@ -124,8 +112,6 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.background,
         selectedColor: AppColors.primaryColor,
@@ -144,8 +130,6 @@ class AppTheme {
         elevation: 0,
         pressElevation: 1,
       ),
-      
-      // Checkbox Theme
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -158,23 +142,17 @@ class AppTheme {
           borderRadius: BorderRadius.circular(4),
         ),
       ),
-      
-      // List Tile Theme
       listTileTheme: const ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
       ),
-      
-      // Divider Theme
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 1,
       ),
-      
-      // Text Theme
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           color: AppColors.textPrimary,
@@ -234,25 +212,17 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
-      
-      // Scaffold Background
       scaffoldBackgroundColor: AppColors.surface,
-      
-      // Icon Theme
       iconTheme: const IconThemeData(
         color: AppColors.textSecondary,
         size: 24,
       ),
-      
-      // Primary Icon Theme
       primaryIconTheme: const IconThemeData(
         color: AppColors.textOnPrimary,
         size: 24,
       ),
     );
   }
-  
-  // Tema escuro
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -265,8 +235,6 @@ class AppTheme {
         surface: AppColors.darkSurface,
         error: AppColors.error,
       ),
-      
-      // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.darkSurface,
         foregroundColor: Colors.white,
@@ -279,8 +247,6 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
       ),
-      
-      // Card Theme
       cardTheme: const CardThemeData(
         color: AppColors.darkSurface,
         elevation: 2,
@@ -290,16 +256,12 @@ class AppTheme {
         ),
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
-      
-      // Floating Action Button Theme
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.darkPrimary,
         foregroundColor: Colors.white,
         elevation: 6,
         shape: CircleBorder(),
       ),
-      
-      // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.darkSurface,
@@ -344,8 +306,6 @@ class AppTheme {
           vertical: 12,
         ),
       ),
-      
-      // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.darkPrimary,
@@ -361,8 +321,6 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // Text Button Theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.darkPrimary,
@@ -375,8 +333,6 @@ class AppTheme {
           ),
         ),
       ),
-      
-      // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.darkSurface,
         selectedColor: AppColors.darkPrimary,
@@ -395,8 +351,6 @@ class AppTheme {
         elevation: 0,
         pressElevation: 1,
       ),
-      
-      // Checkbox Theme
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -409,8 +363,6 @@ class AppTheme {
           borderRadius: BorderRadius.circular(4),
         ),
       ),
-      
-      // List Tile Theme
       listTileTheme: const ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         shape: RoundedRectangleBorder(
@@ -419,15 +371,11 @@ class AppTheme {
         textColor: Colors.white,
         iconColor: Colors.white70,
       ),
-      
-      // Divider Theme
       dividerTheme: const DividerThemeData(
         color: Colors.white24,
         thickness: 1,
         space: 1,
       ),
-      
-      // Text Theme
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           color: Colors.white,
@@ -487,17 +435,11 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
-      
-      // Scaffold Background
       scaffoldBackgroundColor: AppColors.darkBackground,
-      
-      // Icon Theme
       iconTheme: const IconThemeData(
         color: Colors.white70,
         size: 24,
       ),
-      
-      // Primary Icon Theme
       primaryIconTheme: const IconThemeData(
         color: Colors.white,
         size: 24,

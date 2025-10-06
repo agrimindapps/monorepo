@@ -181,25 +181,18 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // Erro
     if (_error != null && _items.isEmpty) {
       return widget.errorBuilder?.call(_error!, retry) ?? 
              _buildDefaultErrorWidget(_error!, retry);
     }
-
-    // Loading inicial
     if (_isLoading && _items.isEmpty) {
       return widget.loadingWidget ?? 
              const Center(child: CircularProgressIndicator());
     }
-
-    // Lista vazia
     if (_items.isEmpty && !_isLoading) {
       return widget.emptyWidget ?? 
              const Center(child: Text('Nenhum item encontrado'));
     }
-
-    // Lista com dados
     return RefreshIndicator(
       onRefresh: refresh,
       child: widget.enableVirtualization 
@@ -259,7 +252,6 @@ class _PaginatedListViewState<T> extends State<PaginatedListView<T>> {
   }
 
   Widget _buildListItem(BuildContext context, int index) {
-    // Loading more indicator
     if (index >= _items.length) {
       return _buildLoadMoreIndicator();
     }
@@ -336,25 +328,16 @@ mixin PaginatedProvider<T> on ChangeNotifier {
   
   /// Carrega uma página específica
   Future<List<T>> loadPage(int page, int pageSize) async {
-    // Verificar cache primeiro
     if (_pageCache.containsKey(page)) {
       return _pageCache[page]!;
     }
-    
-    // Carregar dados da fonte
     final items = await fetchPage(page, pageSize);
-    
-    // Cachear a página
     _pageCache[page] = items;
-    
-    // Atualizar lista completa se necessário
     if (page == 0) {
       _allItems = List<T>.from(items);
     } else {
       _allItems.addAll(items);
     }
-    
-    // Verificar se há mais dados
     _hasMoreData = items.length >= pageSize;
     
     notifyListeners();

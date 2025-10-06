@@ -15,15 +15,11 @@ class LivestockSearchProvider extends ChangeNotifier {
   LivestockSearchProvider({
     required search_use_case.SearchAnimalsUseCase searchAnimals,
   }) : _searchAnimals = searchAnimals;
-
-  // === STATE MANAGEMENT ===
   
   bool _isSearching = false;
   List<AnimalBaseEntity> _searchResults = [];
   String _searchQuery = '';
   String? _errorMessage;
-
-  // === GETTERS ===
   
   bool get isSearching => _isSearching;
   List<AnimalBaseEntity> get searchResults => _searchResults;
@@ -32,8 +28,6 @@ class LivestockSearchProvider extends ChangeNotifier {
   
   bool get hasResults => _searchResults.isNotEmpty;
   int get totalResults => _searchResults.length;
-
-  // === SEARCH OPERATIONS ===
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {

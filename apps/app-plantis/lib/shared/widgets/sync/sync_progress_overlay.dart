@@ -56,8 +56,6 @@ class SyncProgressController {
   double _overallProgress = 0.0;
   String? _currentMessage;
   Timer? _autoHideTimer;
-
-  // Getters
   Stream<SyncProgressState> get stateStream => _stateController.stream;
   Stream<List<SyncStep>> get stepsStream => _stepsController.stream;
   Stream<double> get progressStream => _progressController.stream;
@@ -83,8 +81,6 @@ class SyncProgressController {
     if (message != null) {
       updateMessage(message);
     }
-
-    // Auto-hide logic
     if (newState == SyncProgressState.completed) {
       _scheduleAutoHide();
     }
@@ -128,8 +124,6 @@ class SyncProgressController {
     if (message != null) {
       updateMessage(message);
     }
-
-    // Verificar se todas as etapas foram completadas
     if (_steps.every((step) => step.isCompleted)) {
       updateState(
         SyncProgressState.completed,
@@ -180,7 +174,6 @@ class SyncProgressController {
   void _scheduleAutoHide() {
     _autoHideTimer?.cancel();
     _autoHideTimer = Timer(const Duration(seconds: 3), () {
-      // O overlay deve se esconder automaticamente
     });
   }
 
@@ -308,13 +301,10 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       color: Colors.transparent,
       child: Stack(
         children: [
-          // Background semi-transparente
           FadeTransition(
             opacity: _fadeAnimation,
             child: Container(color: Colors.black.withValues(alpha: 0.3)),
           ),
-
-          // Overlay content
           Positioned(
             bottom: 0,
             left: 0,

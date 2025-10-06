@@ -21,7 +21,6 @@ class AuthTabsWidget extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Tab Login
           _buildTab(
             context: context,
             title: 'Entrar',
@@ -35,7 +34,6 @@ class AuthTabsWidget extends ConsumerWidget {
             primaryColor: primaryColor,
           ),
           const SizedBox(width: 40),
-          // Tab Cadastro
           _buildTab(
             context: context,
             title: 'Cadastrar',

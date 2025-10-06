@@ -234,25 +234,18 @@ class SyncLogger {
     required String message,
     Map<String, dynamic>? metadata,
   }) {
-    // Debug logs apenas em modo debug
     if (!enableDebugLogs && level == LogLevel.debug) {
       return;
     }
-
-    // Format metadata para visualização
     final metadataStr = metadata != null && metadata.isNotEmpty
         ? ' | ${metadata.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
         : '';
-
-    // Log estruturado usando developer.log para production
     developer.log(
       '$message$metadataStr',
       name: '${appName.toUpperCase()}:${category.name.toUpperCase()}',
       level: _levelToInt(level),
       time: DateTime.now(),
     );
-
-    // Debug print apenas em debug mode
     if (kDebugMode) {
       final emoji = _levelToEmoji(level);
       final categoryEmoji = _categoryToEmoji(category);

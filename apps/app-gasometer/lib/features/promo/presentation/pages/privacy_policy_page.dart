@@ -10,8 +10,6 @@ class PrivacyPolicyPage extends StatefulWidget {
 
 class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
   final scrollController = ScrollController();
-
-  // Referências para as seções para navegação
   final GlobalKey _introSection = GlobalKey();
   final GlobalKey _coletaSection = GlobalKey();
   final GlobalKey _logDataSection = GlobalKey();
@@ -50,45 +48,21 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Cabeçalho
                 _buildHeader(),
-
-                // Introdução
                 _buildIntroduction(),
-
-                // Coleta e uso de informações
                 _buildInfoCollection(),
-
-                // Log Data
                 _buildLogData(),
-
-                // Cookies
                 _buildCookies(),
-
-                // Provedores de serviço
                 _buildServiceProviders(),
-
-                // Segurança
                 _buildSecurity(),
-
-                // Links para outros sites
                 _buildLinks(),
-
-                // Privacidade das crianças
                 _buildChildrenPrivacy(),
-
-                // Alterações na política
                 _buildPolicyChanges(),
-
-                // Contato
                 _buildContact(),
-
-                // Rodapé
                 _buildFooter(),
               ],
             ),
           ),
-          // Menu de navegação fixo
           _buildNavBar(),
         ],
       ),
@@ -113,7 +87,6 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 70), // Espaço para a barra de navegação
-          // Header padronizado aplicado ao conteúdo principal
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -203,7 +176,6 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Logo
               GestureDetector(
                 onTap: () => context.go('/promo'),
                 child: Row(
@@ -225,8 +197,6 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
                   ],
                 ),
               ),
-
-              // Menu items
               if (isMobile)
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.menu),

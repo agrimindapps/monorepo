@@ -31,10 +31,7 @@ class PromoNavigationBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo com efeito hover
           _buildLogo(),
-
-          // Menu para desktop ou ícone de menu para mobile
           isMobile ? _buildMobileMenu(context) : _buildDesktopMenu(context),
         ],
       ),
@@ -46,7 +43,6 @@ class PromoNavigationBar extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: () {
-          // Ação para voltar ao topo da página
         },
         child: Row(
           children: [
@@ -173,7 +169,6 @@ class PromoNavigationBar extends StatelessWidget {
 
     return Row(
       children: [
-        // Links de navegação
         Row(
           children: [
             _buildNavItem('Funcionalidades',
@@ -191,8 +186,6 @@ class PromoNavigationBar extends StatelessWidget {
           ],
         ),
         SizedBox(width: isSmallDesktop ? 12 : 24),
-
-        // Botão de Login
         OutlinedButton(
           onPressed: () => _navigateToLogin(context),
           style: OutlinedButton.styleFrom(
@@ -220,7 +213,6 @@ class PromoNavigationBar extends StatelessWidget {
   Widget _buildMobileMenu(BuildContext context) {
     return Row(
       children: [
-        // Botão de Login para Mobile
         TextButton(
           onPressed: () => _navigateToLogin(context),
           style: TextButton.styleFrom(
@@ -235,7 +227,6 @@ class PromoNavigationBar extends StatelessWidget {
             ),
           ),
         ),
-        // Botão de Menu Mobile
         IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {

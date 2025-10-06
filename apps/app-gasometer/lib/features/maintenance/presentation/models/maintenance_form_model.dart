@@ -105,25 +105,15 @@ class MaintenanceFormModel extends Equatable {
   final double cost;
   final DateTime serviceDate;
   final double odometer;
-
-  // Informações da oficina
   final String workshopName;
   final String workshopPhone;
   final String workshopAddress;
-
-  // Próximo serviço
   final DateTime? nextServiceDate;
   final double? nextServiceOdometer;
-
-  // Anexos
   final List<String> photosPaths;
   final List<String> invoicesPaths;
-
-  // Peças e informações técnicas
   final Map<String, String> parts;
   final String notes;
-
-  // Estado do formulário
   final bool isLoading;
   final bool hasChanges;
   final Map<String, String> errors;
@@ -324,13 +314,9 @@ class MaintenanceFormModel extends Equatable {
   /// Valida todos os campos e retorna mapa de erros
   Map<String, String> validate() {
     final validationErrors = <String, String>{};
-
-    // Validar veículo
     if (vehicleId.isEmpty) {
       validationErrors['vehicleId'] = 'Veículo é obrigatório';
     }
-
-    // Validar título
     if (title.trim().isEmpty) {
       validationErrors['title'] = 'Título é obrigatório';
     } else if (title.trim().length < 3) {
@@ -338,8 +324,6 @@ class MaintenanceFormModel extends Equatable {
     } else if (title.trim().length > 100) {
       validationErrors['title'] = 'Título muito longo (máximo 100 caracteres)';
     }
-
-    // Validar descrição
     if (description.trim().isEmpty) {
       validationErrors['description'] = 'Descrição é obrigatória';
     } else if (description.trim().length < 5) {
@@ -349,28 +333,20 @@ class MaintenanceFormModel extends Equatable {
       validationErrors['description'] =
           'Descrição muito longa (máximo 500 caracteres)';
     }
-
-    // Validar valor
     if (cost <= 0) {
       validationErrors['cost'] = 'Valor deve ser maior que zero';
     } else if (cost > 999999.99) {
       validationErrors['cost'] = 'Valor muito alto';
     }
-
-    // Validar odômetro
     if (odometer < 0) {
       validationErrors['odometer'] = 'Odômetro não pode ser negativo';
     } else if (odometer > 9999999) {
       validationErrors['odometer'] = 'Valor muito alto';
     }
-
-    // Validar data
     final now = DateTime.now();
     if (serviceDate.isAfter(now)) {
       validationErrors['serviceDate'] = 'Data não pode ser futura';
     }
-
-    // Validar campos opcionais da oficina
     if (workshopName.trim().isNotEmpty && workshopName.trim().length < 2) {
       validationErrors['workshopName'] = 'Nome da oficina muito curto';
     }
@@ -382,8 +358,6 @@ class MaintenanceFormModel extends Equatable {
             'Telefone deve ter 10 ou 11 dígitos';
       }
     }
-
-    // Validar próximo serviço
     if (nextServiceDate != null && nextServiceDate!.isBefore(serviceDate)) {
       validationErrors['nextServiceDate'] =
           'Data da próxima manutenção deve ser posterior';
@@ -393,8 +367,6 @@ class MaintenanceFormModel extends Equatable {
       validationErrors['nextServiceOdometer'] =
           'Odômetro da próxima deve ser maior';
     }
-
-    // Validar observações (opcional)
     if (notes.trim().isNotEmpty && notes.trim().length > 1000) {
       validationErrors['notes'] =
           'Observação muito longa (máximo 1000 caracteres)';
@@ -407,8 +379,6 @@ class MaintenanceFormModel extends Equatable {
   /// Aplica sanitização em todos os campos de texto para segurança
   MaintenanceEntity toMaintenanceEntity() {
     final now = DateTime.now();
-
-    // Sanitizar todos os campos de texto antes da persistência
     final sanitizedTitle = InputSanitizer.sanitize(title);
     final sanitizedDescription = InputSanitizer.sanitizeDescription(
       description,

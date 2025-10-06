@@ -10,13 +10,10 @@ class SignUpWithEmail implements UseCase<UserEntity, SignUpWithEmailParams> {
 
   @override
   Future<Either<Failure, UserEntity>> call(SignUpWithEmailParams params) async {
-    // Validate email
     final emailValidation = repository.validateEmail(params.email);
     if (emailValidation.isLeft()) {
       return emailValidation.fold((failure) => Left(failure), (_) => throw Exception());
     }
-
-    // Validate password
     final passwordValidation = repository.validatePassword(params.password);
     if (passwordValidation.isLeft()) {
       return passwordValidation.fold((failure) => Left(failure), (_) => throw Exception());

@@ -19,10 +19,6 @@ import '../../domain/entities/fuel_type_mapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_form_notifier.dart';
 import '../providers/vehicles_notifier.dart';
-
-// ✅ ARCHITECTURE FIX: Document refactoring needed for this 800+ line monolithic widget
-// TODO: Extract image picker, form sections, and validation into separate components
-// TODO: Create VehicleFormView, VehicleImagePicker, and VehicleFormActions widgets
 class AddVehiclePage extends ConsumerStatefulWidget {
 
   const AddVehiclePage({super.key, this.vehicle});
@@ -35,8 +31,6 @@ class AddVehiclePage extends ConsumerStatefulWidget {
 class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorHandlerMixin {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _observacoesController = TextEditingController();
-
-  // Novo sistema de validação centralizada
   late final FormValidator _formValidator;
   final Map<String, GlobalKey> _fieldKeys = {};
   bool _isInitialized = false;
@@ -48,11 +42,8 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
 
     if (widget.vehicle != null) {
       notifier.initializeForEdit(widget.vehicle!);
-      // Inicializar observações se editando
       _observacoesController.text = widget.vehicle!.metadata['observacoes'] as String? ?? '';
     }
-
-    // Inicializar FormValidator centralizado
     _initializeFormValidator();
     _isInitialized = true;
   }
@@ -60,8 +51,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
   void _initializeFormValidator() {
     _formValidator = FormValidator();
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
-
-    // Gerar keys para scroll automático
     _fieldKeys['marca'] = GlobalKey();
     _fieldKeys['modelo'] = GlobalKey();
     _fieldKeys['ano'] = GlobalKey();
@@ -71,8 +60,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     _fieldKeys['chassi'] = GlobalKey();
     _fieldKeys['renavam'] = GlobalKey();
     _fieldKeys['observacoes'] = GlobalKey();
-
-    // Configurar validações centralizadas
     _formValidator.addFields([
       FormFieldConfig(
         fieldId: 'marca',
@@ -157,14 +144,11 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         scrollKey: _fieldKeys['observacoes'],
       ),
     ]);
-
-    // Validação customizada para combustível será feita no submit
   }
 
   @override
   void dispose() {
     _observacoesController.dispose();
-    // Limpar FormValidator
     _formValidator.clear();
     super.dispose();
   }
@@ -175,8 +159,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     final authState = ref.watch(authProvider);
     final formState = ref.watch(vehicleFormNotifierProvider);
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
-
-    // Aguarda a inicialização do AuthState
     if (authState.status == AuthStatus.authenticating || !authState.isInitialized) {
       return const Scaffold(
         body: Center(
@@ -184,8 +166,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         ),
       );
     }
-
-    // Inicializa o form notifier quando o auth estiver pronto
     _initializeFormNotifier();
 
     return FormDialog(
@@ -201,7 +181,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ErrorHeader para exibir erros de validação
             buildFormErrorHeader(),
             if (formErrorMessage != null)
               const SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -239,7 +218,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
             maxLengthValidation: 50,
             validateOnChange: false, // Desabilitar validação em tempo real
             inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]'))],
-            // Remover onValidationChanged - validação será centralizada
           ),
         ),
         const SizedBox(height: GasometerDesignTokens.spacingMd),
@@ -583,22 +561,17 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     required double width,
     required BoxFit fit,
   }) {
-    // Para imagens locais (File), usar Image.file otimizado com memory cache
     return Image.file(
       imageFile,
       height: height,
       width: width,
       fit: fit,
-      // Otimizações de memória
       cacheHeight: height.toInt(),
       cacheWidth: width.toInt(),
-      // Frame builder para adicionar shimmer loading effect
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
           return child;
         }
-        
-        // Shimmer loading enquanto a imagem carrega
         return _buildShimmerPlaceholder(height, width);
       },
       errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
@@ -709,8 +682,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
   Widget _buildYearDropdown(dynamic notifier) {
     final currentYear = DateTime.now().year;
     final years = List.generate(currentYear - 1900 + 1, (index) => currentYear - index);
-
-    // Parse text to int, handling empty string
     final yearText = notifier.yearController.text as String;
     final currentValue = yearText.trim().isNotEmpty
         ? int.tryParse(yearText)
@@ -752,7 +723,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
 
   Widget _buildCombustivelSelector(dynamic notifier) {
     final formState = ref.watch(vehicleFormNotifierProvider);
-    // Usar FuelTypeMapper para gerar lista de combustíveis dinamicamente
     final combustiveis = FuelTypeMapper.availableFuelStrings.map((fuelName) {
       IconData icon;
       switch (fuelName) {
@@ -848,23 +818,14 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
   Future<void> _submitForm() async {
     final notifier = ref.read(vehicleFormNotifierProvider.notifier);
     final formState = ref.read(vehicleFormNotifierProvider);
-
-    // Limpar erro anterior
     clearFormError();
-
-    // Validação centralizada usando FormValidator
     final validationResult = await _formValidator.validateAll();
-
-    // Validação customizada para combustível (não incluída no FormValidator)
     if (formState.selectedFuel.isEmpty) {
       setFormError('Selecione o tipo de combustível');
       return;
     }
-
-    // Se há erro de validação, exibir no header e fazer scroll para o campo
     if (!validationResult.isValid) {
       setFormError(validationResult.message);
-      // Scroll para o primeiro campo com erro
       await _formValidator.scrollToFirstError();
       return;
     }
@@ -874,11 +835,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     try {
       if (!mounted) return;
       final vehiclesNotifier = ref.read(vehiclesNotifierProvider.notifier);
-
-      // Criar entidade do veículo usando o FormNotifier
       final vehicleEntity = notifier.createVehicleEntity();
-      
-      // Adicionar observações aos metadados
       final updatedMetadata = Map<String, dynamic>.from(vehicleEntity.metadata);
       updatedMetadata['observacoes'] = _observacoesController.text.trim();
       
@@ -898,17 +855,12 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
         updatedAt: vehicleEntity.updatedAt,
         metadata: updatedMetadata,
       );
-      
-      // Salvar via notifier
       if (widget.vehicle != null) {
         await vehiclesNotifier.updateVehicle(updatedVehicleEntity);
       } else {
         await vehiclesNotifier.addVehicle(updatedVehicleEntity);
       }
-
-      // Se chegou aqui, a operação foi bem-sucedida
       if (mounted) {
-        // Fechar o dialog imediatamente após sucesso local
         Navigator.of(context).pop(true);
       }
     } catch (e) {

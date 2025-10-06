@@ -41,10 +41,8 @@ class DeviceTileWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header do dispositivo
               Row(
                 children: [
-                  // Ícone da plataforma
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -58,8 +56,6 @@ class DeviceTileWidget extends StatelessWidget {
                   ),
 
                   const SizedBox(width: 12),
-
-                  // Informações principais
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,19 +109,14 @@ class DeviceTileWidget extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Menu de ações
                   if (!isCurrentDevice && device.isActive && !isBeingRevoked)
                     _buildActionButton(context),
                 ],
               ),
 
               const SizedBox(height: 12),
-
-              // Status e informações adicionais
               Row(
                 children: [
-                  // Status do dispositivo
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -154,8 +145,6 @@ class DeviceTileWidget extends StatelessWidget {
                   ),
 
                   const Spacer(),
-
-                  // Última atividade
                   Text(
                     _formatLastActivity(),
                     style: TextStyle(
@@ -165,8 +154,6 @@ class DeviceTileWidget extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Informações técnicas (colapsadas por padrão)
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -189,8 +176,6 @@ class DeviceTileWidget extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // Indicador de carregamento se está sendo revogado
               if (isBeingRevoked) ...[
                 const SizedBox(height: 12),
                 Row(
@@ -284,7 +269,6 @@ class DeviceTileWidget extends StatelessWidget {
       final months = (difference.inDays / 30).floor();
       return months == 1 ? 'há 1 mês' : 'há $months meses';
     } else {
-      // Para atividades muito antigas, mostra data
       return DateFormat('dd/MM/yyyy').format(device.lastActiveAt);
     }
   }

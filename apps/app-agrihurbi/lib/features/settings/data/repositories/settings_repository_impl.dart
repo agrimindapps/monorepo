@@ -207,7 +207,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, void>> testNotifications() async {
-    // Implementation would trigger a test notification
     return const Right(null);
   }
 
@@ -239,7 +238,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, void>> forceSyncToCloud() async {
-    // Implementation would sync settings to cloud
     return const Right(null);
   }
 
@@ -256,8 +254,6 @@ class SettingsRepositoryImpl implements SettingsRepository {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
     }
   }
-
-  // Simplified implementations for remaining methods
   @override
   Future<Either<Failure, void>> updatePrivacySettings(
     PrivacySettings privacy,

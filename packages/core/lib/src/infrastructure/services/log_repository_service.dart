@@ -79,23 +79,14 @@ class LogRepositoryService {
 
   /// Adiciona entrada de log ao sistema
   void _addLogEntry(LogEntry entry) {
-    // Adicionar à lista em memória
     _logs.add(entry);
-    
-    // Emitir no stream para observadores
     _logStreamController.add(entry);
-
-    // Output para console em debug mode
     if (kDebugMode) {
       _printToConsole(entry);
     }
-
-    // Rotação automática se necessário
     if (_logs.length > _maxLogs) {
       _rotateLogs();
     }
-
-    // Persistir assincronamente
     _persistLogs();
   }
 
@@ -125,15 +116,11 @@ class LogRepositoryService {
     DateTime? endDate,
   }) async {
     var filteredLogs = List<LogEntry>.from(_logs);
-
-    // Filtro por nível
     if (filterLevel != null) {
       filteredLogs = filteredLogs
           .where((log) => log.level == filterLevel)
           .toList();
     }
-
-    // Filtro por texto
     if (searchText != null && searchText.isNotEmpty) {
       final searchLower = searchText.toLowerCase();
       filteredLogs = filteredLogs.where((log) {
@@ -141,22 +128,16 @@ class LogRepositoryService {
             (log.context?.toLowerCase().contains(searchLower) ?? false);
       }).toList();
     }
-
-    // Filtro por data inicial
     if (startDate != null) {
       filteredLogs = filteredLogs
           .where((log) => log.hora.isAfter(startDate) || log.hora.isAtSameMomentAs(startDate))
           .toList();
     }
-
-    // Filtro por data final
     if (endDate != null) {
       filteredLogs = filteredLogs
           .where((log) => log.hora.isBefore(endDate) || log.hora.isAtSameMomentAs(endDate))
           .toList();
     }
-
-    // Ordenar por data (mais recentes primeiro)
     filteredLogs.sort((a, b) => b.hora.compareTo(a.hora));
 
     return filteredLogs;
@@ -222,14 +203,11 @@ class LogRepositoryService {
             final entry = LogEntry.fromJson(logMap);
             _logs.add(entry);
           } catch (e) {
-            // Ignora logs corrompidos
             if (kDebugMode) {
               print('Failed to parse persisted log: $e');
             }
           }
         }
-        
-        // Ordenar por data
         _logs.sort((a, b) => a.hora.compareTo(b.hora));
         
         info('Loaded ${_logs.length} persisted logs', context: 'LogService');
@@ -245,8 +223,6 @@ class LogRepositoryService {
   Future<void> _persistLogs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      // Converter logs para JSON (apenas os últimos 1000 para não sobrecarregar)
       final logsToSave = _logs.length > 1000 
           ? _logs.sublist(_logs.length - 1000)
           : _logs;
@@ -288,16 +264,12 @@ class LogRepositoryService {
       'byLevel': <String, int>{},
       'byContext': <String, int>{},
     };
-
-    // Contar por nível
     final byLevelMap = stats['byLevel'] as Map<String, int>;
     for (final level in LogLevel.values) {
       byLevelMap[level.name] = _logs
           .where((log) => log.level == level)
           .length;
     }
-
-    // Contar por contexto
     final contextCounts = <String, int>{};
     for (final log in _logs) {
       final context = log.context ?? 'No Context';

@@ -11,45 +11,33 @@ part 'login_form_notifier.g.dart';
 /// Notifier Riverpod para gerenciar o estado do formulário de login
 @riverpod
 class LoginFormNotifier extends _$LoginFormNotifier {
-  // TextEditingControllers gerenciados internamente
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   late final TextEditingController nameController;
   late final TextEditingController confirmPasswordController;
-
-  // Use cases injetados via GetIt
   late final SignInWithEmail _signInWithEmail;
   late final SignUpWithEmail _signUpWithEmail;
   late final SignInAnonymously _signInAnonymously;
 
   @override
   LoginFormState build() {
-    // Inicializa controllers
     emailController = TextEditingController();
     passwordController = TextEditingController();
     nameController = TextEditingController();
     confirmPasswordController = TextEditingController();
-
-    // Inicializa use cases via GetIt
     _signInWithEmail = getIt<SignInWithEmail>();
     _signUpWithEmail = getIt<SignUpWithEmail>();
     _signInAnonymously = getIt<SignInAnonymously>();
-
-    // Cleanup ao descartar
     ref.onDispose(() {
       emailController.dispose();
       passwordController.dispose();
       nameController.dispose();
       confirmPasswordController.dispose();
     });
-
-    // Carrega dados salvos
     _loadSavedData();
 
     return const LoginFormState();
   }
-
-  // ==================== UI Actions ====================
 
   /// Alterna visibilidade da senha
   void togglePasswordVisibility() {
@@ -87,8 +75,6 @@ class LoginFormNotifier extends _$LoginFormNotifier {
   void setSignUpMode(bool isSignUp) {
     state = state.copyWith(isSignUpMode: isSignUp);
   }
-
-  // ==================== Authentication Methods ====================
 
   /// Faz login com email e senha
   Future<bool> signInWithEmail() async {
@@ -198,8 +184,6 @@ class LoginFormNotifier extends _$LoginFormNotifier {
     }
   }
 
-  // ==================== Form Validation ====================
-
   /// Valida formulário de login
   bool _validateLoginForm() {
     if (emailController.text.trim().isEmpty) {
@@ -264,8 +248,6 @@ class LoginFormNotifier extends _$LoginFormNotifier {
     return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
   }
 
-  // ==================== Field Validators (para TextFormField) ====================
-
   /// Valida campo de nome
   String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -310,8 +292,6 @@ class LoginFormNotifier extends _$LoginFormNotifier {
     return null;
   }
 
-  // ==================== Data Persistence ====================
-
   /// Carrega dados salvos do SharedPreferences
   Future<void> _loadSavedData() async {
     try {
@@ -331,7 +311,6 @@ class LoginFormNotifier extends _$LoginFormNotifier {
 
       state = state.copyWith(rememberMe: savedRememberMe);
     } catch (e) {
-      // Ignora erros ao carregar dados salvos
     }
   }
 
@@ -358,7 +337,6 @@ class LoginFormNotifier extends _$LoginFormNotifier {
 
       await prefs.setBool('gasometer_remember_me', state.rememberMe);
     } catch (e) {
-      // Ignora erros ao salvar dados
     }
   }
 }

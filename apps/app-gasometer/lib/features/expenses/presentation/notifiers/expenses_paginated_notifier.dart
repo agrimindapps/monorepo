@@ -19,11 +19,8 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
   @override
   Future<ExpensesPaginatedState> build() async {
-    // Inicializa dependências via GetIt
     _repository = getIt<IExpensesRepository>();
     _statisticsService = ExpenseStatisticsService();
-
-    // Carrega primeira página automaticamente
     return await _loadFirstPageInternal();
   }
 
@@ -47,8 +44,6 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
       sortBy: currentState.sortBy,
       sortOrder: currentState.sortOrder,
     );
-
-    // Carrega estatísticas para primeira página
     Map<String, dynamic>? stats;
     try {
       final allFilteredExpenses = await _repository.getExpensesWithFilters(
@@ -62,7 +57,6 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
       );
       stats = _statisticsService.calculateStats(allFilteredExpenses);
     } catch (e) {
-      // Falha nas stats não deve impedir o carregamento
       stats = null;
     }
 
@@ -83,8 +77,6 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
         currentState.isLoadingMore) {
       return;
     }
-
-    // Marca como carregando mais (sem resetar estado)
     state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
 
     try {
@@ -112,9 +104,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
         ),
       );
     } catch (error, stackTrace) {
-      // Mantém items carregados em caso de erro
       state = AsyncValue.data(currentState.copyWith(isLoadingMore: false));
-      // Re-throw para captura no UI se necessário
       Error.throwWithStackTrace(error, stackTrace);
     }
   }
@@ -129,8 +119,6 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
     final currentState = state.valueOrNull ?? const ExpensesPaginatedState();
 
     if (currentState.filtersConfig == newFilters) return;
-
-    // Atualiza filtros e recarrega
     state = AsyncValue.data(
       currentState.copyWith(
         filtersConfig: newFilters,
@@ -148,8 +136,6 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
     if (currentState.sortBy == sortBy && currentState.sortOrder == sortOrder) {
       return;
     }
-
-    // Atualiza ordenação e recarrega
     state = AsyncValue.data(
       currentState.copyWith(
         sortBy: sortBy,
@@ -166,12 +152,10 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
 
     SortOrder newOrder;
     if (currentState.sortBy == sortBy) {
-      // Mesmo campo, inverte ordem
       newOrder = currentState.sortOrder == SortOrder.ascending
           ? SortOrder.descending
           : SortOrder.ascending;
     } else {
-      // Campo diferente, padrão descendente
       newOrder = SortOrder.descending;
     }
 
@@ -243,11 +227,7 @@ class ExpensesPaginatedNotifier extends _$ExpensesPaginatedNotifier {
     if (currentState == null) return;
 
     final currentPageBackup = currentState.currentPage;
-
-    // Recarrega primeira página
     await refresh();
-
-    // Tenta restaurar até a mesma página
     if (currentPageBackup > 0) {
       final newState = state.valueOrNull;
       if (newState != null && newState.hasNextPage) {

@@ -17,8 +17,6 @@ import '../../features/calculators/domain/usecases/save_calculation_to_history.d
 
 part 'calculator_providers.g.dart';
 
-// === CALCULATOR STATE CLASSES ===
-
 /// State principal para gerenciamento de calculadoras
 class CalculatorState {
   const CalculatorState({
@@ -52,8 +50,6 @@ class CalculatorState {
   final List<String> favoriteCalculatorIds;
   final Map<String, dynamic> currentInputs;
   final String? errorMessage;
-
-  // Getters
   List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
     return filteredCalculators
         .where((calc) => calc.category == category)
@@ -203,8 +199,6 @@ class CalculatorFeaturesState {
   }
 }
 
-// === RIVERPOD NOTIFIERS (MODERN) ===
-
 /// Notifier principal para gerenciamento de calculadoras
 @riverpod
 class CalculatorNotifier extends _$CalculatorNotifier {
@@ -332,8 +326,6 @@ class CalculatorNotifier extends _$CalculatorNotifier {
           currentResult: calculationResult,
         );
         success = true;
-
-        // Salva no histórico automaticamente se bem-sucedido
         if (calculationResult.isValid) {
           _saveToHistory(calculationResult);
         }
@@ -358,7 +350,6 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     saveResult.fold(
       (failure) {
-        // Log error silently
       },
       (_) {
         final newHistory = [historyItem, ...state.calculationHistory];
@@ -388,16 +379,12 @@ class CalculatorNotifier extends _$CalculatorNotifier {
   /// Aplica filtros à lista de calculadoras
   void _applyFilters() {
     var filtered = List<CalculatorEntity>.from(state.calculators);
-
-    // Filtrar por categoria
     if (state.selectedCategory != null) {
       filtered =
           filtered
               .where((calc) => calc.category == state.selectedCategory)
               .toList();
     }
-
-    // Filtrar por busca
     if (state.searchQuery.isNotEmpty) {
       final query = state.searchQuery.toLowerCase();
       filtered =
@@ -546,7 +533,6 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
 
   /// Define calculadora ativa
   void setActiveCalculator(CalculatorEntity? calculator) {
-    // Limpa inputs e resultado ao trocar de calculadora
     if (calculator == null || state.activeCalculator?.id != calculator.id) {
       state = const CalculatorExecutionState();
     }
@@ -856,8 +842,6 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Aplica filtros aos templates
   void _applyTemplateFilters() {
     var filtered = List<CalculationTemplate>.from(state.templates);
-
-    // Filtrar por busca
     if (state.templateSearchQuery.isNotEmpty) {
       final query = state.templateSearchQuery.toLowerCase();
       filtered =
@@ -874,8 +858,6 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
               )
               .toList();
     }
-
-    // Ordenar por uso recente
     filtered.sort((a, b) {
       if (a.lastUsed != null && b.lastUsed == null) return -1;
       if (a.lastUsed == null && b.lastUsed != null) return 1;
@@ -922,8 +904,6 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
     await Future.wait([loadFavorites(), loadTemplates()]);
   }
 }
-
-// === DERIVED PROVIDERS ===
 
 /// Provider para lista filtrada de calculadoras
 @riverpod

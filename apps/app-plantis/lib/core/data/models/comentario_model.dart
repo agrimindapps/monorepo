@@ -1,12 +1,9 @@
 import 'package:core/core.dart';
 
-// Note: Hive adapter not generated - keeping @HiveType for future
-
 /// Comentario model with Firebase sync support
 /// TypeId: 0 - Sequential numbering
 @HiveType(typeId: 0)
 class ComentarioModel extends BaseSyncEntity {
-  // Base sync fields (required for Hive generation)
   @HiveField(0)
   @override
   final String id;
@@ -31,8 +28,6 @@ class ComentarioModel extends BaseSyncEntity {
   @HiveField(8)
   @override
   final String? moduleName;
-
-  // Comentario specific fields
   @HiveField(10)
   final String conteudo;
   @HiveField(11)
@@ -41,8 +36,6 @@ class ComentarioModel extends BaseSyncEntity {
   final DateTime? dataCriacao;
   @HiveField(13)
   final String? plantId;
-
-  // Getters para compatibilidade com BaseSyncEntity
   @override
   DateTime? get createdAt =>
       createdAtMs != null
@@ -226,8 +219,6 @@ class ComentarioModel extends BaseSyncEntity {
       plantId: plantId ?? this.plantId,
     );
   }
-
-  // Implementação dos métodos abstratos do BaseSyncEntity
   @override
   ComentarioModel markAsDirty() {
     return copyWith(isDirty: true, updatedAt: DateTime.now());
@@ -265,8 +256,6 @@ class ComentarioModel extends BaseSyncEntity {
       updatedAt: DateTime.now(),
     );
   }
-
-  // Convenience methods for different serialization formats
   Map<String, dynamic> toJson() => toFirebaseMap();
   factory ComentarioModel.fromJson(Map<String, dynamic> json) =>
       ComentarioModel.fromFirebaseMap(json);

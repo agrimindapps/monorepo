@@ -20,15 +20,11 @@ class UserLimits {
     this.currentSubtasks = 0,
     this.currentTags = 0,
   });
-
-  // Getters para compatibilidade com o código existente
   bool get isPremium => isUserPremium;
   
   int get remainingTasks => maxTasks - currentTasks;
   int get remainingSubtasks => maxSubtasks - currentSubtasks;
   int get remainingTags => maxTags - currentTags;
-  
-  // Verifica se ainda pode criar tarefas
   bool get canCreateTask => remainingTasks > 0;
   bool get canCreateSubtask => remainingSubtasks > 0;
   bool get canCreateTag => remainingTags > 0;
@@ -56,8 +52,6 @@ class UserLimits {
       currentTags: currentTags ?? this.currentTags,
     );
   }
-
-  // Factory para usuário premium
   factory UserLimits.premium({
     int currentTasks = 0,
     int currentSubtasks = 0,
@@ -75,8 +69,6 @@ class UserLimits {
       currentTags: currentTags,
     );
   }
-
-  // Factory para usuário gratuito
   factory UserLimits.free({
     int currentTasks = 0,
     int currentSubtasks = 0,

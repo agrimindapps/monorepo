@@ -68,8 +68,6 @@ class SyncError {
   }) {
     final id = DateTime.now().millisecondsSinceEpoch.toString();
     final timestamp = DateTime.now();
-
-    // Categorizar erro baseado no tipo
     SyncErrorType type;
     SyncErrorSeverity severity;
     String userMessage;
@@ -142,24 +140,15 @@ class SyncError {
 class SyncErrorHandler {
   static const int _maxRetries = 3;
   static const Duration _retryBaseDelay = Duration(seconds: 2);
-  // static const Duration _errorDisplayDuration = Duration(seconds: 5); // Unused for now
-
-  // Singleton
   static final SyncErrorHandler _instance = SyncErrorHandler._();
   static SyncErrorHandler get instance => _instance;
   SyncErrorHandler._();
-
-  // Stream controllers
   final _errorController = StreamController<SyncError>.broadcast();
   final _recoveryController = StreamController<String>.broadcast();
-
-  // Estado interno
   final Map<String, int> _retryCount = {};
   final List<SyncError> _errorHistory = [];
   final Set<String> _suppressedErrors = {};
   Timer? _cleanupTimer;
-
-  // Getters
   Stream<SyncError> get errorStream => _errorController.stream;
   Stream<String> get recoveryStream => _recoveryController.stream;
   List<SyncError> get errorHistory => List.unmodifiable(_errorHistory);
@@ -188,20 +177,12 @@ class SyncErrorHandler {
         stackTrace: stackTrace,
         metadata: metadata,
       );
-
-      // Log do erro
       _logError(syncError);
-
-      // Adicionar ao histórico
       _errorHistory.add(syncError);
       if (_errorHistory.length > 100) {
         _errorHistory.removeAt(0); // Manter apenas os 100 mais recentes
       }
-
-      // Emitir erro para listeners
       _errorController.add(syncError);
-
-      // Executar estratégia de recuperação
       final recovered = await _executeRecoveryStrategy(syncError, context);
 
       if (recovered) {
@@ -256,8 +237,6 @@ class SyncErrorHandler {
     }
 
     _retryCount[syncError.id] = retries + 1;
-
-    // Backoff exponencial
     final delay = _retryBaseDelay * (2 << retries);
     await Future<void>.delayed(delay);
 
@@ -265,12 +244,8 @@ class SyncErrorHandler {
       'Tentativa ${retries + 1}/$_maxRetries para erro ${syncError.id}',
       name: 'SyncErrorHandler',
     );
-
-    // Aqui seria chamada a operação original novamente
-    // Por simplicidade, consideramos que o retry foi bem-sucedido em alguns casos
     if (syncError.type == SyncErrorType.network ||
         syncError.type == SyncErrorType.timeout) {
-      // Simular sucesso para erros de rede/timeout após algumas tentativas
       return retries > 0;
     }
 
@@ -283,8 +258,6 @@ class SyncErrorHandler {
       'Fallback para modo offline devido ao erro ${syncError.id}',
       name: 'SyncErrorHandler',
     );
-
-    // Notificar que operação continuará offline
     _recoveryController.add('Operação continuando offline');
 
     return true; // Considera recuperado pois continuará offline
@@ -360,7 +333,6 @@ class SyncErrorHandler {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // Navegar para tela de login
               Navigator.of(context).pushReplacementNamed('/auth');
             },
             child: const Text('Fazer Login'),
@@ -442,8 +414,6 @@ class SyncErrorHandler {
       error: syncError.originalError,
       stackTrace: syncError.stackTrace,
     );
-
-    // Log adicional para debug
     if (kDebugMode) {
       developer.log(
         'Detalhes: type=${syncError.type}, severity=${syncError.severity}, '
@@ -480,13 +450,9 @@ class SyncErrorHandler {
   void _cleanupOldErrors() {
     final cutoff = DateTime.now().subtract(const Duration(hours: 24));
     _errorHistory.removeWhere((error) => error.timestamp.isBefore(cutoff));
-
-    // Limpar contadores de retry para erros antigos
     _retryCount.removeWhere(
       (id, _) => !_errorHistory.any((error) => error.id == id),
     );
-
-    // Limpar supressões antigas
     _suppressedErrors.removeWhere(
       (id) => !_errorHistory.any((error) => error.id == id),
     );

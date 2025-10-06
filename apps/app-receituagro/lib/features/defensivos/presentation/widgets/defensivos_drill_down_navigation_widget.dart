@@ -33,7 +33,6 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Botão de voltar (se aplicável)
           if (navigationState.canGoBack) ...[
             InkWell(
               onTap: onBackPressed,
@@ -49,13 +48,9 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
             ),
             const SizedBox(width: 8),
           ],
-
-          // Breadcrumbs
           Expanded(
             child: _buildBreadcrumbs(context),
           ),
-
-          // Indicador de nível atual
           _buildLevelIndicator(context),
         ],
       ),
@@ -127,7 +122,6 @@ class DefensivosDrillDownNavigationWidget extends StatelessWidget {
   }
 
   Widget _buildLevelIndicator(BuildContext context) {
-    // ignore: unused_local_variable
     final theme = Theme.of(context);
 
     return Container(

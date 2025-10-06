@@ -21,15 +21,10 @@ class InputSanitizer {
     
     return input
         .trim()
-        // Remove HTML tags to prevent XSS
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        // Remove potentially dangerous characters
         .replaceAll(RegExp(r'[&<>"\x27\x60]'), '')
-        // Remove script-related keywords (case insensitive)
         .replaceAll(RegExp(r'javascript:|vbscript:|data:|file:', caseSensitive: false), '')
-        // Remove event handlers (onclick, onload, etc.)
         .replaceAll(RegExp(r'on\w+\s*=', caseSensitive: false), '')
-        // Normalize multiple whitespaces to single space
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
   }
@@ -44,9 +39,7 @@ class InputSanitizer {
     
     return input
         .trim()
-        // Keep only digits, comma, and decimal point
         .replaceAll(RegExp(r'[^0-9,.]'), '')
-        // Ensure only one decimal separator
         .replaceAllMapped(RegExp(r'[,.]'), (match) {
           return match.group(0) == ',' ? ',' : '.';
         });
@@ -64,11 +57,8 @@ class InputSanitizer {
     return input
         .trim()
         .toLowerCase()
-        // Remove HTML tags
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        // Remove dangerous characters but keep valid email chars
         .replaceAll(RegExp(r'[^a-zA-Z0-9@._-]'), '')
-        // Remove script-related content
         .replaceAll(RegExp(r'javascript:|data:|file:', caseSensitive: false), '');
   }
   
@@ -82,13 +72,9 @@ class InputSanitizer {
     
     return input
         .trim()
-        // Remove HTML tags
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        // Keep only letters, spaces, apostrophes, and hyphens
         .replaceAll(RegExp(r'[^a-zA-ZÀ-ÿ\s\x27-]'), '')
-        // Remove dangerous patterns
         .replaceAll(RegExp(r'javascript:|data:|file:', caseSensitive: false), '')
-        // Normalize whitespace
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
   }
@@ -103,15 +89,10 @@ class InputSanitizer {
     
     return input
         .trim()
-        // Remove HTML tags to prevent XSS
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        // Remove script injections
         .replaceAll(RegExp(r'javascript:|vbscript:|data:|file:', caseSensitive: false), '')
-        // Remove event handlers
         .replaceAll(RegExp(r'on\w+\s*=', caseSensitive: false), '')
-        // Remove dangerous characters but allow more punctuation
         .replaceAll(RegExp(r'[<>"\x27\x60]'), '')
-        // Normalize line breaks and whitespace
         .replaceAll(RegExp(r'\r\n|\r|\n'), '\n')
         .replaceAll(RegExp(r'\n{3,}'), '\n\n')
         .replaceAll(RegExp(r'[ \t]+'), ' ')
@@ -173,7 +154,6 @@ class InputSanitizer {
   }
   
   /// Log function for debugging sanitization issues (in debug mode only)
-  // ignore: unused_element
   static void _logSanitization(String original, String sanitized) {
     assert(() {
       if (original != sanitized) {

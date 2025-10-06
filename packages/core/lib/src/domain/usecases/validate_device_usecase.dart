@@ -15,13 +15,11 @@ class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParam
   @override
   Future<Either<Failure, DeviceEntity>> call(ValidateDeviceParams params) async {
     try {
-      // Primeiro, verifica se o usuário pode adicionar mais dispositivos
       final canAddResult = await _deviceRepository.canAddMoreDevices(params.userId);
       
       return await canAddResult.fold(
         (failure) async => Left(failure),
         (canAdd) async {
-          // Se o dispositivo já existe, apenas valida
           final existingDeviceResult = await _deviceRepository.getDeviceByUuid(
             params.device.uuid,
           );
@@ -30,14 +28,11 @@ class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParam
             (failure) async => Left(failure),
             (existingDevice) async {
               if (existingDevice != null) {
-                // Dispositivo existe, atualiza última atividade
                 return await _deviceRepository.updateLastActivity(
                   userId: params.userId,
                   deviceUuid: params.device.uuid,
                 );
               }
-              
-              // Dispositivo novo, verifica se pode adicionar
               if (!canAdd) {
                 return const Left(
                   ValidationFailure(
@@ -47,8 +42,6 @@ class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParam
                   ),
                 );
               }
-              
-              // Valida e registra novo dispositivo
               return await _deviceRepository.validateDevice(
                 userId: params.userId,
                 device: params.device,

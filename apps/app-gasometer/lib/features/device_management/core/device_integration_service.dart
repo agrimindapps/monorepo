@@ -22,8 +22,6 @@ class DeviceIntegrationService {
       if (kDebugMode) {
         debugPrint('🔄 DeviceIntegrationService: Validating device for login');
       }
-
-      // 1. Obter informações do dispositivo atual
       final deviceInfoResult = await _getCurrentDeviceInfo();
       if (deviceInfoResult.isFailure) {
         return DeviceValidationResult.failure(
@@ -32,8 +30,6 @@ class DeviceIntegrationService {
       }
 
       final deviceEntity = deviceInfoResult.deviceEntity!;
-
-      // 2. Usar o core service para validar o dispositivo
       final validationResult = await _coreDeviceService.validateDevice(deviceEntity);
 
       return validationResult.fold(
@@ -63,8 +59,6 @@ class DeviceIntegrationService {
   /// Atualiza atividade do dispositivo durante o uso do app
   Future<void> updateDeviceActivity(String userId, String deviceUuid) async {
     try {
-      // Using core service - this would be handled automatically by the core service
-      // when user uses the app, but we can trigger a manual update if needed
       if (kDebugMode) {
         debugPrint('✅ DeviceIntegrationService: Device activity updated (handled by core)');
       }
@@ -81,7 +75,6 @@ class DeviceIntegrationService {
     String userId,
     DeviceEntity currentDevice,
   ) {
-    // Load user devices in the provider
     provider.loadUserDevices();
   }
 

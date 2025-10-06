@@ -81,7 +81,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
   }
 
   Future<void> _selectTemplate(CalculationTemplate template) async {
-    // Marcar como usado
     await widget.templateService.markTemplateAsUsed(template.id);
     
     if (mounted) {
@@ -143,7 +142,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 Icon(
@@ -166,8 +164,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
             ),
             
             const SizedBox(height: 16),
-            
-            // Search bar
             TextField(
               controller: _searchController,
               decoration: const InputDecoration(
@@ -179,8 +175,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
             ),
             
             const SizedBox(height: 16),
-            
-            // Content
             Expanded(
               child: _buildContent(),
             ),
@@ -288,7 +282,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with name and actions
               Row(
                 children: [
                   Expanded(
@@ -339,8 +332,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
                   ),
                 ],
               ),
-              
-              // Description
               if (hasDescription) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -352,8 +343,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
               ],
               
               const SizedBox(height: 12),
-              
-              // Metadata
               Row(
                 children: [
                   Icon(
@@ -387,8 +376,6 @@ class _TemplateSelectionDialogState extends State<TemplateSelectionDialog> {
               ),
               
               const SizedBox(height: 8),
-              
-              // Input values preview
               Text(
                 '${template.inputValues.length} parâmetros salvos',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(

@@ -27,8 +27,6 @@ import '../../providers/plant_details_provider.dart';
 /// ```
 class PlantDetailsController {
   final PlantDetailsProvider provider;
-
-  // Callbacks para ações que precisam de context
   final VoidCallback? onBack;
   final void Function(String)? onNavigateToEdit;
   final void Function(String)? onNavigateToImages;
@@ -112,7 +110,6 @@ class PlantDetailsController {
   /// controller.editPlant(selectedPlant);
   /// ```
   void editPlant(Plant plant) {
-    // Use PlantFormDialog for consistent editing experience
     onNavigateToEdit?.call(plant.id);
   }
 
@@ -227,7 +224,6 @@ class PlantDetailsController {
           await provider.deletePlant(); // Deleta a planta atual no provider
 
       if (success) {
-        // Notificar que a planta foi deletada
         onPlantDeleted?.call(plantId);
 
         onShowSnackBarWithColor?.call(
@@ -262,7 +258,6 @@ class PlantDetailsController {
   /// controller.sharePlant(selectedPlant);
   /// ```
   void sharePlant(Plant plant) {
-    // TODO: Implementar compartilhamento
     onShowSnackBar?.call(AppStrings.sharingFeatureInDevelopment, 'info');
   }
 
@@ -282,7 +277,6 @@ class PlantDetailsController {
   /// controller.duplicatePlant(selectedPlant);
   /// ```
   void duplicatePlant(Plant plant) {
-    // TODO: Implementar duplicação
     onShowSnackBar?.call(AppStrings.duplicateFeatureInDevelopment, 'info');
   }
 

@@ -35,8 +35,6 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
       if (await isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpenses(userId);
-          
-          // Sync remote data to local
           for (final remoteExpense in remoteExpenses) {
             final localExpense = localExpenses.firstWhere(
               (local) => local.id == remoteExpense.id,
@@ -71,10 +69,7 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
       
       if (await isConnected) {
         try {
-          // Para remote, usaremos um userId padrão ou precisaremos obtê-lo de outro lugar
           final remoteExpenses = await remoteDataSource.getExpensesByAnimal('default_user', animalId);
-          
-          // Sync and return updated data
           for (final remoteExpense in remoteExpenses) {
             final localExpense = localExpenses.firstWhere(
               (local) => local.id == remoteExpense.id,
@@ -108,8 +103,6 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
       if (await isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpensesByDateRange(userId, startDate, endDate);
-          
-          // Sync and return updated data
           for (final remoteExpense in remoteExpenses) {
             final localExpense = localExpenses.firstWhere(
               (local) => local.id == remoteExpense.id,
@@ -143,8 +136,6 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
       if (await isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpensesByCategory(userId, category);
-          
-          // Sync and return updated data
           for (final remoteExpense in remoteExpenses) {
             final localExpense = localExpenses.firstWhere(
               (local) => local.id == remoteExpense.id,
@@ -173,7 +164,6 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   @override
   Future<Either<Failure, ExpenseSummary>> getExpenseSummary(String userId) async {
     try {
-      // Usar período padrão (mês atual) quando não especificado
       final now = DateTime.now();
       final startDate = DateTime(now.year, now.month, 1);
       final endDate = DateTime(now.year, now.month + 1, 0);
@@ -190,22 +180,16 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   Future<Either<Failure, void>> addExpense(Expense expense) async {
     try {
       final expenseModel = ExpenseModel.fromEntity(expense);
-      
-      // Always save locally first (offline-first)
       await localDataSource.addExpense(expenseModel);
       
       if (await isConnected) {
         try {
-          // Try to sync to remote
           final remoteId = await remoteDataSource.addExpense(expenseModel, expense.userId);
-          
-          // Update local with remote ID if different
           if (remoteId != expenseModel.id) {
             final updatedModel = expenseModel.copyWith(id: remoteId);
             await localDataSource.updateExpense(updatedModel);
           }
         } catch (e) {
-          // Mark for later sync if remote fails
         }
       }
       
@@ -219,16 +203,12 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   Future<Either<Failure, void>> updateExpense(Expense expense) async {
     try {
       final expenseModel = ExpenseModel.fromEntity(expense);
-      
-      // Always save locally first (offline-first)
       await localDataSource.updateExpense(expenseModel);
       
       if (await isConnected) {
         try {
-          // Try to sync to remote
           await remoteDataSource.updateExpense(expenseModel);
         } catch (e) {
-          // Mark for later sync if remote fails
         }
       }
       
@@ -241,15 +221,12 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   @override
   Future<Either<Failure, void>> deleteExpense(String expenseId) async {
     try {
-      // Always delete locally first (offline-first)
       await localDataSource.deleteExpense(expenseId);
       
       if (await isConnected) {
         try {
-          // Try to sync to remote
           await remoteDataSource.deleteExpense(expenseId);
         } catch (e) {
-          // Mark for later sync if remote fails
         }
       }
       

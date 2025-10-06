@@ -28,7 +28,6 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('Perfil'),
         centerTitle: true,
         actions: [
-          // Botão de refresh wrapped in Consumer to get ref
           Consumer(
             builder: (context, ref, child) {
               return IconButton(
@@ -67,17 +66,12 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar e informações básicas
             _buildUserHeader(user),
 
             const SizedBox(height: 32),
-
-            // Informações detalhadas
             _buildUserDetails(user),
 
             const SizedBox(height: 32),
-
-            // Ações do usuário
             _buildUserActions(),
 
             const SizedBox(height: 16),
@@ -94,7 +88,6 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Avatar
             CircleAvatar(
               radius: 40,
               backgroundImage:
@@ -111,8 +104,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
 
             const SizedBox(width: 16),
-
-            // Informações básicas
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,8 +227,6 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Text('Ações', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 16),
-
-                // Botão de refresh
                 ElevatedButton.icon(
                   onPressed:
                       authProvider.isRefreshing
@@ -259,8 +248,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
 
                 const SizedBox(height: 12),
-
-                // Botão de logout
                 ElevatedButton.icon(
                   onPressed:
                       authProvider.isLoggingOut

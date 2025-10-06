@@ -55,8 +55,6 @@ class _SyncStatusIndicatorWidgetState
   late AnimationController _rotationController;
   late Animation<double> _pulseAnimation;
   late Animation<double> _rotationAnimation;
-
-  // Mock sync state - in real implementation, this would come from a sync service
   SyncStatus _currentSyncStatus = SyncStatus.idle;
   double _syncProgress = 0.0;
   String _lastSyncTime = '';
@@ -65,8 +63,6 @@ class _SyncStatusIndicatorWidgetState
   @override
   void initState() {
     super.initState();
-
-    // Pulse animation for syncing state
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -74,8 +70,6 @@ class _SyncStatusIndicatorWidgetState
     _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-
-    // Rotation animation for syncing spinner
     _rotationController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -97,7 +91,6 @@ class _SyncStatusIndicatorWidgetState
 
   /// Initialize mock sync state for demonstration
   void _initializeMockState() {
-    // Simulate different sync states over time
     Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
@@ -140,8 +133,6 @@ class _SyncStatusIndicatorWidgetState
       _syncProgress = 1.0;
       _lastSyncTime = 'Agora';
     });
-
-    // Return to idle after showing success
     Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
@@ -164,7 +155,6 @@ class _SyncStatusIndicatorWidgetState
         final featureFlagsNotifier = ref.read(
           featureFlagsNotifierProvider.notifier,
         );
-        // Don't show if sync is disabled
         if (!featureFlagsNotifier.isContentSynchronizationEnabled) {
           return const SizedBox.shrink();
         }
@@ -235,7 +225,6 @@ class _SyncStatusIndicatorWidgetState
       ),
       child: Row(
         children: [
-          // Sync Icon with Animation
           AnimatedBuilder(
             animation: _rotationAnimation,
             builder: (context, child) {
@@ -254,8 +243,6 @@ class _SyncStatusIndicatorWidgetState
           ),
 
           const SizedBox(width: 12),
-
-          // Status Text and Progress
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,8 +257,6 @@ class _SyncStatusIndicatorWidgetState
                   ),
                   const SizedBox(height: 2),
                 ],
-
-                // Progress Bar (when syncing)
                 if (_currentSyncStatus == SyncStatus.syncing) ...[
                   LinearProgressIndicator(
                     value: _syncProgress,
@@ -301,8 +286,6 @@ class _SyncStatusIndicatorWidgetState
               ],
             ),
           ),
-
-          // Action Button
           if (_getSyncAction() != null) ...[
             const SizedBox(width: 8),
             IconButton(
@@ -416,7 +399,6 @@ class _SyncStatusIndicatorWidgetState
 
   /// Start manual sync with connectivity check
   void _startManualSync() async {
-    // Check connectivity first
     final connectivityResult = await ConnectivityService.instance.isOnline();
     connectivityResult.fold((failure) => _showConnectivityError(failure), (
       isOnline,

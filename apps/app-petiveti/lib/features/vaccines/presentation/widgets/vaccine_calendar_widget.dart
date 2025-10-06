@@ -161,7 +161,6 @@ class _VaccineCalendarWidgetState extends ConsumerState<VaccineCalendarWidget> {
   }
 
   Widget _buildCalendarContent(ThemeData theme, Map<DateTime, List<Vaccine>> calendar) {
-    // Get vaccines for the current month and group by day
     final monthVaccines = <DateTime, List<Vaccine>>{};
     final startOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
     final endOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);

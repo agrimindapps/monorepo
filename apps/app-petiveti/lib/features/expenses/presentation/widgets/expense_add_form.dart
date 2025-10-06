@@ -625,8 +625,6 @@ class _ExpenseAddFormState extends ConsumerState<ExpenseAddForm>
       }
     }
   }
-
-  // Helper methods
   Color _getCategoryColor(ExpenseCategory category) {
     const categoryColors = {
       ExpenseCategory.consultation: Colors.blue,

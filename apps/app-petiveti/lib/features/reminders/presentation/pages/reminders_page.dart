@@ -26,10 +26,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: RemindersConstants.tabCount, vsync: this);
-    // Use Future.microtask for better performance
     Future.microtask(() => _loadReminders());
-    
-    // Listen for errors and show them consistently
     ref.listenManual<RemindersState>(
       remindersProvider,
       (RemindersState? previous, RemindersState next) {

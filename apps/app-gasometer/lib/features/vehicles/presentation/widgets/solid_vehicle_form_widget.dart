@@ -43,8 +43,6 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
     _formConfig = VehicleFormConfig();
     _fieldFactory = MaterialFieldFactory();
     _stateManager = FormStateManager<VehicleEntity>();
-    
-    // Initialize form with existing vehicle data if provided
     if (widget.initialVehicle != null) {
       _initializeFormData();
     }
@@ -159,7 +157,6 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
   }
 
   Widget _createFieldWidget(FieldConfig config) {
-    // Create field widget based on type using factory
     Widget fieldWidget;
     
     switch (config.fieldType) {
@@ -187,14 +184,10 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
       default:
         fieldWidget = const Text('Unsupported field type');
     }
-    
-    // Wrap with change listener to update field values
     return _wrapWithChangeListener(fieldWidget, config);
   }
 
   Widget _wrapWithChangeListener(Widget fieldWidget, FieldConfig config) {
-    // For now, return the widget as-is
-    // In a full implementation, this would wrap the widget to capture value changes
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -238,20 +231,14 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
     });
 
     try {
-      // Transform field values to entity
       final vehicle = _formConfig.transformDataForValidation(_fieldValues);
       if (vehicle == null) {
         throw Exception('Dados do formulário inválidos');
       }
-
-      // Submit through form config
       final result = await _formConfig.submitForm(vehicle);
       
       if (result.isSuccess && result.data != null) {
-        // Success - call callback if provided
         widget.onSubmit?.call(result.data!);
-        
-        // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -261,7 +248,6 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
           );
         }
       } else {
-        // Handle submission error
         setState(() {
           _errorMessage = result.errorMessage ?? 'Erro desconhecido ao salvar veículo';
         });
@@ -289,6 +275,5 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
 /// State manager for form following Command pattern
 class FormStateManager<T> {
   void dispose() {
-    // Cleanup resources if needed
   }
 }

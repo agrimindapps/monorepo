@@ -1,9 +1,4 @@
-// Adapter to bridge Supabase Fitossanitario model with Core FitossanitarioEntity
-// Note: Currently using minimal core integration due to missing enum definitions
-// This demonstrates the adapter pattern for future full implementation
 import '../classes/fitossanitario_class.dart';
-
-// Temporary stub types until core package is fully implemented
 class FitossanitarioEntity {
   final String id;
   final String nome;

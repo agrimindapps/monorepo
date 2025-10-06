@@ -48,7 +48,6 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
   @override
   void initState() {
     super.initState();
-    // Initialize data loading in initState instead of build method
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       
@@ -88,8 +87,6 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
                 child: Consumer(
                   builder: (context, ref, child) {
                     final comentariosAsync = ref.watch(comentariosNotifierProvider);
-
-                    // Verificar se o usuário é premium usando o service real
                     final premiumService = di.sl<IPremiumService>();
                     final isPremium = premiumService.isPremium;
 
@@ -137,8 +134,6 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
       floatingActionButton: Consumer(
         builder: (context, ref, child) {
           final comentariosAsync = ref.watch(comentariosNotifierProvider);
-
-          // Verificar se o usuário é premium usando o service real
           final premiumService = di.sl<IPremiumService>();
           final isPremium = premiumService.isPremium;
 
@@ -177,12 +172,10 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
                   : comentariosState.comentarios.length;
 
               if (widget.pkIdentificador != null || widget.ferramenta != null) {
-                // Comentários filtrados por contexto
                 subtitle = filtered > 0
                     ? '$filtered comentários para este contexto'
                     : 'Nenhum comentário neste contexto';
               } else {
-                // Todos os comentários
                 subtitle = total > 0 ? '$total comentários' : 'Suas anotações pessoais';
               }
             }
@@ -293,7 +286,6 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header do comentário
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
             decoration: BoxDecoration(
@@ -387,8 +379,6 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
               ],
             ),
           ),
-          
-          // Conteúdo do comentário
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Text(
@@ -445,12 +435,10 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
         pkIdentificador: widget.pkIdentificador,
         ferramenta: widget.ferramenta,
         onSave: (content) async {
-          // Criar entidade a partir do conteúdo
           final comentario = _createComentarioFromContent(content);
           await ref.read(comentariosNotifierProvider.notifier).addComentario(comentario);
         },
         onCancel: () {
-          // Callback opcional para cancelamento
         },
       ),
     );
@@ -470,7 +458,6 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              // Delete comentario usando notifier
               ref.read(comentariosNotifierProvider.notifier).deleteComentario(comentario.id);
             },
             style: TextButton.styleFrom(
@@ -562,7 +549,6 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
 
   @override
   void dispose() {
-    // Remove listener before disposing to prevent memory leaks
     _commentController.removeListener(_onContentChanged);
     _commentController.dispose();
     _contentNotifier.dispose();
@@ -590,22 +576,15 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             _buildHeader(context, theme, isDark),
-            
-            // Origin Info (if available)
             if (widget.origem != null || widget.itemName != null)
               _buildOriginInfo(context, theme, isDark),
-            
-            // Content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                 child: _buildCommentForm(theme, isDark),
               ),
             ),
-            
-            // Actions
             _buildActions(context, theme, isDark),
           ],
         ),
@@ -919,7 +898,6 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
 
   void _saveComment(BuildContext context, String content) async {
     if (widget.onSave != null) {
-      // Aplica padding se o conteúdo for muito curto
       String contentToSave = content;
       if (content.length < _minLength) {
         contentToSave = content.padRight(_minLength, ' ');
@@ -941,7 +919,6 @@ class _AddCommentDialogState extends State<AddCommentDialog> {
         }
       }
     } else {
-      // Fallback para demonstração
       if (context.mounted) {
         Navigator.of(context).pop();
       }

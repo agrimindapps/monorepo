@@ -10,13 +10,10 @@ import 'financial_sync_service.dart';
 import 'financial_validator.dart';
 
 export '../../features/expenses/data/models/expense_model.dart';
-// Core entities (re-export from features)
 export '../../features/fuel/data/models/fuel_supply_model.dart';
-// Widgets
 export '../../shared/widgets/financial_conflict_dialog.dart';
 export '../../shared/widgets/financial_sync_indicator.dart';
 export '../../shared/widgets/financial_warning_banner.dart';
-// Services
 export 'audit_trail_service.dart';
 export 'financial_conflict_resolver.dart';
 export 'financial_sync_service.dart';
@@ -33,14 +30,9 @@ class FinancialModule {
     required String userId,
     required UnifiedSyncManager coreSync,
   }) async {
-    // Initialize audit service
     _auditService = FinancialAuditTrailService();
     await _auditService!.initialize(userId: userId);
-
-    // Initialize conflict resolver
     _conflictResolver = FinancialConflictResolver(_auditService!);
-
-    // Initialize sync service
     _syncService = FinancialSyncService(
       validator: FinancialValidator(),
       auditService: _auditService!,

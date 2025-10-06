@@ -89,7 +89,6 @@ class VersionConflictResolver<T extends BaseSyncEntity> implements IConflictReso
   Future<Either<Failure, T>> resolveConflict(T localVersion, T remoteVersion) async {
     try {
       if (localVersion.version == remoteVersion.version) {
-        // Versões iguais, usar timestamp como fallback
         return await TimestampConflictResolver<T>().resolveConflict(localVersion, remoteVersion);
       }
       
@@ -112,7 +111,6 @@ class LocalWinsConflictResolver<T extends BaseSyncEntity> implements IConflictRe
   @override
   Future<Either<Failure, T>> resolveConflict(T localVersion, T remoteVersion) async {
     try {
-      // Incrementa versão local para garantir que ela "vença"
       return Right(localVersion.incrementVersion() as T);
     } catch (e) {
       return Left(SyncFailure('Local wins conflict resolution failed: $e'));
@@ -175,7 +173,6 @@ class SmartConflictResolver<T extends BaseSyncEntity> implements IConflictResolv
 
   @override
   Future<Either<Failure, T>> resolveConflict(T localVersion, T remoteVersion) async {
-    // Tentar cada estratégia em ordem
     for (final strategy in strategies) {
       try {
         final resolver = ConflictResolverFactory.getResolver<T>(strategy);
@@ -183,12 +180,9 @@ class SmartConflictResolver<T extends BaseSyncEntity> implements IConflictResolv
           return await resolver.resolveConflict(localVersion, remoteVersion);
         }
       } catch (e) {
-        // Continuar para próxima estratégia
         continue;
       }
     }
-    
-    // Se chegou aqui, não conseguiu resolver automaticamente
     return Left(ConflictResolutionFailure(
       'Smart resolver could not resolve conflict automatically',
       localVersion,
@@ -228,8 +222,6 @@ class FieldPriorityConflictResolver<T extends BaseSyncEntity> implements IConfli
   @override
   Future<Either<Failure, T>> resolveConflict(T localVersion, T remoteVersion) async {
     try {
-      // Esta implementação precisaria ser específica para cada tipo T
-      // Por enquanto, usar estratégia de fallback
       final fallbackResolver = ConflictResolverFactory.getResolver<T>(fallbackStrategy);
       return await fallbackResolver.resolveConflict(localVersion, remoteVersion);
     } catch (e) {

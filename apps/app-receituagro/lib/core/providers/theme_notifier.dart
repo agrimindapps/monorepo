@@ -26,7 +26,6 @@ class ThemeNotifier extends _$ThemeNotifier {
         state = themeMode;
       }
     } catch (e) {
-      // Fallback to system theme if there's an error
       state = ThemeMode.system;
     }
   }
@@ -55,7 +54,6 @@ class ThemeNotifier extends _$ThemeNotifier {
       final themeString = _themeToString(themeMode);
       await prefs.setString(_themeKey, themeString);
     } catch (e) {
-      // Handle error silently - theme change will still work for current session
     }
   }
 

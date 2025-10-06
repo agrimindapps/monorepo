@@ -16,16 +16,11 @@ class PlantsFilterService {
     final lowerQuery = query.toLowerCase().trim();
 
     return plants.where((plant) {
-      // Search in name
       if (plant.name.toLowerCase().contains(lowerQuery)) return true;
-
-      // Search in species
       if (plant.species != null &&
           plant.species!.toLowerCase().contains(lowerQuery)) {
         return true;
       }
-
-      // Search in notes
       if (plant.notes != null &&
           plant.notes!.toLowerCase().contains(lowerQuery)) {
         return true;
@@ -61,19 +56,14 @@ class PlantsFilterService {
     if (oldPlants.length != newPlants.length) {
       return true;
     }
-
-    // Compare IDs and update timestamps
     for (int i = 0; i < oldPlants.length; i++) {
       final currentPlant = oldPlants[i];
       Plant? newPlant;
       try {
         newPlant = newPlants.firstWhere((p) => p.id == currentPlant.id);
       } catch (e) {
-        // Plant not found in new list - was removed
         return true;
       }
-
-      // Compare update timestamp
       if (currentPlant.updatedAt != newPlant.updatedAt) {
         return true;
       }

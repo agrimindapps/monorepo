@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings, prefer_adjacent_string_concatenation
 
 final List<Map<String, dynamic>> inappProductIds = [
   {

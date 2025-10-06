@@ -44,8 +44,6 @@ class PremiumState {
           clearOperation ? null : (currentOperation ?? this.currentOperation),
     );
   }
-
-  // Computed properties
   bool get isPremium => currentSubscription?.isActive ?? false;
   bool get isInTrial => currentSubscription?.isInTrial ?? false;
   bool get canPurchasePremium => true; // Simplified
@@ -60,8 +58,6 @@ class PremiumState {
   }
 
   DateTime? get expirationDate => currentSubscription?.expirationDate;
-
-  // Premium features
   bool canCreateUnlimitedPlants() => isPremium;
   bool canAccessAdvancedFeatures() => isPremium;
   bool canExportData() => isPremium;
@@ -104,8 +100,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     _authRepository = ref.read(authRepositoryProvider);
     _simpleSubscriptionSyncService =
         ref.read(simpleSubscriptionSyncServiceProvider);
-
-    // Setup subscriptions with auto-dispose
     ref.onDispose(() {
       _subscriptionStream?.cancel();
       _syncSubscriptionStream?.cancel();
@@ -115,12 +109,8 @@ class PremiumNotifier extends _$PremiumNotifier {
         debugPrint('[PremiumNotifier] Disposed successfully');
       }
     });
-
-    // Load initial data
     await _loadAvailableProducts();
     await _checkCurrentSubscription();
-
-    // Setup stream listeners
     _setupSubscriptionStreams();
     _setupAuthStream();
 
@@ -128,7 +118,6 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   void _setupSubscriptionStreams() {
-    // Listen to subscription changes via SimpleSubscriptionSyncService
     if (_simpleSubscriptionSyncService != null) {
       _syncSubscriptionStream = _simpleSubscriptionSyncService
           .subscriptionStatus
@@ -149,7 +138,6 @@ class PremiumNotifier extends _$PremiumNotifier {
             },
           );
     } else {
-      // Fallback to direct repository stream
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
         (subscription) async {
           state = AsyncValue.data(
@@ -170,7 +158,6 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   void _setupAuthStream() {
-    // Listen to auth changes to sync user subscription
     _authStream = _authRepository.currentUser.listen((user) {
       if (user != null) {
         _syncUserSubscription(user.id);
@@ -200,8 +187,6 @@ class PremiumNotifier extends _$PremiumNotifier {
         clearError: true,
       ),
     );
-
-    // Use SimpleSubscriptionSyncService if available
     if (_simpleSubscriptionSyncService != null) {
       final result = await _simpleSubscriptionSyncService
           .hasActiveSubscriptionForApp('plantis');
@@ -217,7 +202,6 @@ class PremiumNotifier extends _$PremiumNotifier {
           );
         },
         (hasSubscription) {
-          // Subscription will be updated via stream
           state = AsyncValue.data(
             (state.valueOrNull ?? const PremiumState()).copyWith(
               isLoading: false,
@@ -227,7 +211,6 @@ class PremiumNotifier extends _$PremiumNotifier {
         },
       );
     } else {
-      // Fallback to direct repository
       final result = await _subscriptionRepository.getCurrentSubscription();
 
       result.fold(
@@ -380,8 +363,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     );
   }
 }
-
-// Dependency providers
 @riverpod
 ISubscriptionRepository subscriptionRepository(Ref ref) {
   return GetIt.instance<ISubscriptionRepository>();

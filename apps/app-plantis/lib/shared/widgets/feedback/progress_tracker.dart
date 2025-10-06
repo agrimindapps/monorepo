@@ -85,8 +85,6 @@ class ProgressTracker {
           icon: Icons.check_circle,
         );
       }
-
-      // Remove operação após delay
       Future.delayed(const Duration(seconds: 2), () {
         _activeOperations.remove(key);
         _notifyListeners();
@@ -226,8 +224,6 @@ class ProgressOperation extends ChangeNotifier {
        _progress = 0.0,
        _state = OperationState.running,
        _startTime = DateTime.now();
-
-  // Getters
   String? get description => _description;
   String? get currentMessage => _currentMessage;
   double get progress => _progress;
@@ -255,8 +251,6 @@ class ProgressOperation extends ChangeNotifier {
     if (description != null) {
       _description = description;
     }
-
-    // Calcular tempo estimado
     if (_progress > 0.1) {
       final elapsed = elapsedTime;
       final estimatedTotal = elapsed.inMilliseconds / _progress;
@@ -662,7 +656,6 @@ class _ProgressTrackerPanelState extends State<ProgressTrackerPanel> {
 
 /// Contextos pré-definidos para operações de progresso
 class ProgressContexts {
-  // Upload de imagens
   static String uploadImage(String imageName) {
     return ProgressTracker.startOperation(
       key: 'upload_image_${DateTime.now().millisecondsSinceEpoch}',
@@ -671,8 +664,6 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
-
-  // Backup de dados
   static String backupData() {
     return ProgressTracker.startOperation(
       key: 'backup_data_${DateTime.now().millisecondsSinceEpoch}',
@@ -681,8 +672,6 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
-
-  // Restore de dados
   static String restoreData() {
     return ProgressTracker.startOperation(
       key: 'restore_data_${DateTime.now().millisecondsSinceEpoch}',
@@ -691,8 +680,6 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
-
-  // Sincronização
   static String syncData() {
     return ProgressTracker.startOperation(
       key: 'sync_data_${DateTime.now().millisecondsSinceEpoch}',
@@ -701,8 +688,6 @@ class ProgressContexts {
       type: ProgressType.indeterminate,
     ).key;
   }
-
-  // Processamento de dados
   static String processData(String operation) {
     return ProgressTracker.startOperation(
       key: 'process_${operation}_${DateTime.now().millisecondsSinceEpoch}',

@@ -162,8 +162,6 @@ class FeedbackSystem {
   ) {
     final key = DateTime.now().millisecondsSinceEpoch.toString();
     _activeControllers[key] = controller;
-
-    // Auto-dismiss após duration
     if (controller.duration != null) {
       Future.delayed(controller.duration!, () {
         dismiss(key);
@@ -171,8 +169,6 @@ class FeedbackSystem {
     }
 
     _notifyListeners();
-
-    // Anunciar para acessibilidade
     if (controller.semanticLabel != null || controller.message.isNotEmpty) {
       SemanticsService.announce(
         controller.semanticLabel ?? controller.message,
@@ -262,8 +258,6 @@ class FeedbackController extends ChangeNotifier {
       _message = successMessage;
     }
     notifyListeners();
-
-    // Auto-dismiss após mostrar sucesso
     Future.delayed(const Duration(seconds: 2), () {
       dismiss();
     });

@@ -23,13 +23,9 @@ class DataGeneratorService {
       debugPrint('   Veículos: $numberOfVehicles');
       debugPrint('   Meses de histórico: $monthsOfHistory');
     }
-
-    // Simular tempo de processamento
     await Future<void>.delayed(Duration(milliseconds: 500 + _random.nextInt(1500)));
 
     final startTime = DateTime.now();
-    
-    // Calcular estimativas realísticas
     final fuelRecords = numberOfVehicles * monthsOfHistory * 3;
     final odometerReadings = numberOfVehicles * monthsOfHistory * 4;
     final expenses = numberOfVehicles * monthsOfHistory * 4;
@@ -56,8 +52,6 @@ class DataGeneratorService {
       debugPrint('   ${results['maintenanceRecords']} manutenções');
       debugPrint('   Tempo: ${results['duration']}ms');
     }
-
-    // TODO: Implementar geração real de dados quando as entidades estiverem corrigidas
     throw UnimplementedError(
       'A geração de dados reais ainda não está implementada. '
       'As entidades precisam ser ajustadas para compatibilidade completa.'
@@ -79,8 +73,6 @@ class DataGeneratorService {
     if (kDebugMode) {
       debugPrint('🧹 Limpando todos os dados gerados...');
     }
-    
-    // TODO: Implementar limpeza real através dos repositories
     await Future<void>.delayed(const Duration(milliseconds: 500));
     
     if (kDebugMode) {

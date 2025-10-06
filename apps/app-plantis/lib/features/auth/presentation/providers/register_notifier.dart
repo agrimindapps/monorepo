@@ -29,8 +29,6 @@ class RegisterState {
       isLoading: isLoading ?? this.isLoading,
     );
   }
-
-  // Computed properties
   int get currentStep => registerData.currentStep;
   double get progress {
     switch (registerData.currentStep) {
@@ -186,11 +184,7 @@ class RegisterNotifier extends _$RegisterNotifier {
   Future<bool> checkEmailExists(String email) async {
     try {
       state = state.copyWith(isLoading: true);
-
-      // Simulate API call delay
       await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      // Simulate email check (replace with real implementation)
       final exists = email.toLowerCase() == 'test@test.com';
 
       state = state.copyWith(isLoading: false);
@@ -211,8 +205,6 @@ class RegisterNotifier extends _$RegisterNotifier {
     if (!validatePersonalInfo()) {
       return false;
     }
-
-    // Check if email already exists
     final emailExists = await checkEmailExists(state.registerData.email);
     if (emailExists) {
       _setError('Este email já possui uma conta.');

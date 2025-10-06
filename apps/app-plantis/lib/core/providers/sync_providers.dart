@@ -68,7 +68,6 @@ class SyncNotifier extends StateNotifier<SyncState> {
     );
 
     try {
-      // Use UnifiedSyncManager to force sync for plantis app
       final result = await UnifiedSyncManager.instance.forceSyncApp('plantis');
 
       result.fold(

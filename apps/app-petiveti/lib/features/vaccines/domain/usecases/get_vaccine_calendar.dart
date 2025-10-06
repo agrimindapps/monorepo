@@ -38,8 +38,6 @@ class GetVaccineCalendarParams {
     required this.endDate,
     this.animalId,
   });
-  
-  // Factory constructors for convenience
   factory GetVaccineCalendarParams.currentMonth({String? animalId}) {
     final now = DateTime.now();
     final startDate = DateTime(now.year, now.month, 1);

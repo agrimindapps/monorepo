@@ -37,8 +37,6 @@ class GenerateInitialTasksUseCase
         print('🔧 plantingDate: ${params.plantingDate}');
         print('🔧 userId: ${params.userId}');
       }
-
-      // Validação dos parâmetros
       final validationResult = _validateParams(params);
       if (validationResult != null) {
         if (kDebugMode) {
@@ -48,8 +46,6 @@ class GenerateInitialTasksUseCase
         }
         return Left(validationResult);
       }
-
-      // Gerar tarefas usando o service
       if (kDebugMode) {
         print(
           '🔧 GenerateInitialTasksUseCase.call() - Chamando taskGenerationService.generateInitialTasks',
@@ -96,13 +92,9 @@ class GenerateInitialTasksUseCase
           '🔧 GenerateInitialTasksUseCase.call() - Salvando ${taskEntities.length} tarefas',
         );
       }
-
-      // Salvar todas as tarefas de forma atômica
       final saveResults = await Future.wait(
         taskEntities.map((task) => tasksRepository.addTask(task)),
       );
-
-      // Verificar se alguma falhou
       final failures = saveResults.where((result) => result.isLeft()).toList();
       if (failures.isNotEmpty) {
         final firstFailure = failures.first.fold(
@@ -117,8 +109,6 @@ class GenerateInitialTasksUseCase
         }
         return Left(firstFailure);
       }
-
-      // Todas as tarefas foram salvas com sucesso
       final savedTasks =
           saveResults
               .map((result) => result.fold((_) => null, (task) => task))
@@ -152,8 +142,6 @@ class GenerateInitialTasksUseCase
         'Planta deve ter pelo menos um tipo de cuidado ativo',
       );
     }
-
-    // Validar se todos os tipos de cuidado são suportados
     for (final careType in params.config.activeCareTypes) {
       if (!taskGenerationService.isCareTypeSupported(careType)) {
         return ValidationFailure('Tipo de cuidado não suportado: $careType');

@@ -75,8 +75,6 @@ class _OptimizedPragaImageWidgetState extends State<OptimizedPragaImageWidget> {
     if (nomeCientifico == null || nomeCientifico.isEmpty) {
       return 'assets/imagens/bigsize/a.jpg';
     }
-    
-    // Remove caracteres especiais e formata o nome científico
     final cleanName = nomeCientifico.trim();
     return 'assets/imagens/bigsize/$cleanName.jpg';
   }
@@ -247,7 +245,6 @@ class _OptimizedPragaImageWidgetState extends State<OptimizedPragaImageWidget> {
 
   @override
   void dispose() {
-    // O cache é gerenciado globalmente, não precisa limpar aqui
     super.dispose();
   }
 }

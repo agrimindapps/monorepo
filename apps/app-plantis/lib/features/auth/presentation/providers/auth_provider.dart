@@ -36,14 +36,9 @@ class AuthProvider extends ChangeNotifier {
   AuthOperation? _currentOperation;
   StreamSubscription<UserEntity?>? _userSubscription;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
-
-  // Device validation state
   bool _isValidatingDevice = false;
   String? _deviceValidationError;
   bool _deviceLimitExceeded = false;
-
-  // Legacy sync properties - will be removed
-  // Sync is now handled by BackgroundSyncProvider
 
   AnalyticsProvider? get _analytics {
     try {
@@ -92,13 +87,9 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isPremium => _isPremium;
   AuthOperation? get currentOperation => _currentOperation;
-
-  // Device validation getters
   bool get isValidatingDevice => _isValidatingDevice;
   String? get deviceValidationError => _deviceValidationError;
   bool get deviceLimitExceeded => _deviceLimitExceeded;
-
-  // Sync related getters - delegated to BackgroundSyncProvider
   bool get isSyncInProgress => _syncProvider?.isSyncInProgress ?? false;
   bool get hasPerformedInitialSync =>
       _syncProvider?.hasPerformedInitialSync ?? false;
@@ -109,10 +100,7 @@ class AuthProvider extends ChangeNotifier {
     _userSubscription = _authRepository.currentUser.listen(
       (user) async {
         _currentUser = user;
-
-        // Se não há usuário e deve usar modo anônimo, inicializa anonimamente
         if (user == null && await shouldUseAnonymousMode()) {
-          // NÃO marcar como inicializado ainda - esperar o signInAnonymously completar
           if (kDebugMode) {
             debugPrint(
               '🔄 AuthProvider: Iniciando modo anônimo, aguardando login...',
@@ -121,8 +109,6 @@ class AuthProvider extends ChangeNotifier {
           await signInAnonymously();
           return; // O signInAnonymously vai disparar este listener novamente
         }
-
-        // CRITICAL FIX: Only set initialized AFTER auth is fully stable
         await _completeAuthInitialization(user);
       },
       onError: (Object error) {
@@ -137,8 +123,6 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       },
     );
-
-    // Escuta mudanças na assinatura
     if (_subscriptionRepository != null) {
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
         subscription,
@@ -153,22 +137,15 @@ class AuthProvider extends ChangeNotifier {
   /// CRITICAL FIX: Complete auth initialization only after all operations are stable
   Future<void> _completeAuthInitialization(UserEntity? user) async {
     try {
-      // Update AuthStateNotifier with user changes
       _authStateNotifier.updateUser(user);
-
-      // Sincroniza com RevenueCat quando o usuário faz login (não anônimo)
       if (user != null && !isAnonymous && _subscriptionRepository != null) {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
-
-        // Triggar sincronização inicial em background sem bloquear
         _triggerBackgroundSyncIfNeeded(user.id);
       } else {
         _isPremium = false;
         _authStateNotifier.updatePremiumStatus(false);
       }
-
-      // CRITICAL: Only mark as initialized AFTER everything is stable
       if (kDebugMode) {
         debugPrint(
           '✅ AuthProvider: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: $_isPremium',
@@ -223,7 +200,6 @@ class AuthProvider extends ChangeNotifier {
   void dispose() {
     _userSubscription?.cancel();
     _subscriptionStream?.cancel();
-    // Limpeza de recursos de sync
     super.dispose();
   }
 
@@ -248,11 +224,7 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
         _isLoading = false;
         _currentOperation = null;
-
-        // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
-
-        // Log login event
         _analytics?.logLogin('email');
 
         notifyListeners();
@@ -263,15 +235,9 @@ class AuthProvider extends ChangeNotifier {
   /// Non-blocking login that triggers background sync and device validation
   Future<void> loginAndNavigate(String email, String password) async {
     try {
-      // Primeiro fazer login normal
       await login(email, password);
-
-      // Login bem-sucedido - validar dispositivo e triggar sync
       if (isAuthenticated && !isAnonymous && _errorMessage == null) {
-        // Validar dispositivo PRIMEIRO (crítico para segurança)
         await _validateDeviceAfterLogin();
-
-        // Se device validation passou, triggar sync em background
         if (!_deviceLimitExceeded) {
           _triggerBackgroundSyncIfNeeded(_currentUser!.id);
         }
@@ -280,7 +246,6 @@ class AuthProvider extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('Erro durante login: $e');
       }
-      // Error is already handled in login() method
     }
   }
 
@@ -311,8 +276,6 @@ class AuthProvider extends ChangeNotifier {
             debugPrint('❌ Device validation falhou: ${failure.message}');
           }
           _deviceValidationError = failure.message;
-
-          // Se é limite excedido, fazer logout automático
           if (failure.code == 'DEVICE_LIMIT_EXCEEDED') {
             _deviceLimitExceeded = true;
             _handleDeviceLimitExceeded();
@@ -330,8 +293,6 @@ class AuthProvider extends ChangeNotifier {
               );
             }
             _deviceValidationError = validationResult.message;
-
-            // Se é limite excedido, fazer logout automático
             if (validationResult.status == DeviceValidationStatus.exceeded) {
               _deviceLimitExceeded = true;
               _handleDeviceLimitExceeded();
@@ -357,14 +318,10 @@ class AuthProvider extends ChangeNotifier {
         '🚫 Limite de dispositivos excedido - fazendo logout automático',
       );
     }
-
-    // Log analytics event
     await _analytics?.logEvent('device_limit_exceeded', {
       'user_id': _currentUser?.id ?? 'unknown',
       'device_count': 3, // Limite fixo
     });
-
-    // Force logout after a brief delay to show error message
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (_deviceLimitExceeded) {
         logout();
@@ -380,8 +337,6 @@ class AuthProvider extends ChangeNotifier {
       }
       return;
     }
-
-    // Execute in background without blocking
     Future.delayed(const Duration(milliseconds: 100), () {
       if (isAuthenticated && !isAnonymous) {
         _syncProvider!.startBackgroundSync(userId: userId, isInitialSync: true);
@@ -408,11 +363,7 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     _currentOperation = AuthOperation.logout;
     notifyListeners();
-
-    // 1. CRÍTICO: Cleanup do dispositivo atual ANTES do logout
     await _performDeviceCleanupOnLogout();
-
-    // 2. Continuar com logout normal
     final result = await _logoutUseCase();
 
     result.fold(
@@ -426,15 +377,9 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = null;
         _isLoading = false;
         _currentOperation = null;
-
-        // Resetar estado de sincronização para próxima sessão
         _syncProvider?.resetSyncState();
-
-        // Update AuthStateNotifier with logout
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
-
-        // Log logout event
         _analytics?.logLogout();
 
         notifyListeners();
@@ -465,8 +410,6 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
         _isLoading = false;
         _currentOperation = null;
-
-        // Update AuthStateNotifier with new user
         _authStateNotifier.updateUser(user);
 
         notifyListeners();
@@ -493,11 +436,7 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
         _isLoading = false;
         _currentOperation = null;
-
-        // Update AuthStateNotifier with anonymous user
         _authStateNotifier.updateUser(user);
-
-        // Salvar preferência de modo anônimo
         _saveAnonymousPreference();
 
         notifyListeners();
@@ -599,7 +538,6 @@ class AuthProvider extends ChangeNotifier {
         return false;
       },
       (_) {
-        // Log evento de reset de senha
         _analytics?.logEvent('password_reset_requested', {'method': 'email'});
 
         return true;
@@ -629,11 +567,7 @@ class AuthProvider extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('🧹 Device cleanup: Starting device revocation on logout');
       }
-
-      // Obter UUID do dispositivo atual
       final currentDevice = await DeviceModel.fromCurrentDevice();
-
-      // CRITICAL: Verificar se dispositivo é válido (não-Web)
       if (currentDevice == null) {
         if (kDebugMode) {
           debugPrint(
@@ -642,8 +576,6 @@ class AuthProvider extends ChangeNotifier {
         }
         return; // Sair sem erro se plataforma não suportada
       }
-
-      // Revogar este dispositivo (permitir self-revoke no logout)
       final revokeResult = await _revokeDeviceUseCase(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
@@ -659,8 +591,6 @@ class AuthProvider extends ChangeNotifier {
               '❌ Device cleanup: Failed to revoke current device - ${failure.message}',
             );
           }
-
-          // Log erro para analytics/monitoring
           _analytics?.logEvent('device_cleanup_failed', {
             'context': 'logout',
             'error': failure.message,
@@ -672,8 +602,6 @@ class AuthProvider extends ChangeNotifier {
           if (kDebugMode) {
             debugPrint('✅ Device cleanup: Current device revoked successfully');
           }
-
-          // Log sucesso para analytics
           _analytics?.logEvent('device_cleanup_success', {
             'context': 'logout',
             'device_uuid': currentDevice.uuid,
@@ -687,8 +615,6 @@ class AuthProvider extends ChangeNotifier {
           '❌ Device cleanup: Unexpected error during logout cleanup - $e',
         );
       }
-
-      // Log erro crítico
       _analytics?.logEvent('device_cleanup_error', {
         'context': 'logout',
         'error': e.toString(),
@@ -728,7 +654,6 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Use Enhanced Account Deletion Service
       final result = await _enhancedDeletionService.deleteAccount(
         password: password,
         userId: _currentUser!.id,
@@ -745,7 +670,6 @@ class AuthProvider extends ChangeNotifier {
         },
         (deletionResult) {
           if (deletionResult.isSuccess) {
-            // Success - perform logout cleanup
             _performPostDeletionCleanup();
             return true;
           } else {
@@ -773,11 +697,7 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = false;
     _errorMessage = null;
     _currentOperation = null;
-
-    // Resetar estado de sincronização para próxima sessão
     _syncProvider?.resetSyncState();
-
-    // Update AuthStateNotifier
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
 

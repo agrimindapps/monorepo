@@ -25,8 +25,6 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
       }
       
       final hiveitems = result.data!;
-      
-      // Filtra por usuário atual e ordena por data (mais recente primeiro)
       final userComments = hiveitems
           .where((item) => item.status && item.userId == userId)
           .toList()
@@ -47,8 +45,6 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
     try {
       final userId = await _getCurrentUserId();
       final hiveComentario = ComentarioHive.fromComentarioModel(comentario, userId);
-      
-      // Gera ID único se não existir
       if (hiveComentario.idReg.isEmpty) {
         hiveComentario.idReg = _generateId();
       }
@@ -75,13 +71,9 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
-      
-      // Verifica se o usuário é o dono do comentário
       if (existing.userId != userId) {
         throw Exception('Não autorizado a editar este comentário');
       }
-      
-      // Atualiza os campos
       existing.conteudo = comentario.conteudo;
       existing.titulo = comentario.titulo;
       existing.updatedAt = DateTime.now().millisecondsSinceEpoch;
@@ -105,13 +97,9 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
-      
-      // Verifica se o usuário é o dono do comentário
       if (existing.userId != userId) {
         throw Exception('Não autorizado a deletar este comentário');
       }
-      
-      // Soft delete - marca como inativo
       existing.status = false;
       existing.updatedAt = DateTime.now().millisecondsSinceEpoch;
       
@@ -218,8 +206,6 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
 
       final activeComments = userComments.where((item) => item.status).length;
       final deletedComments = userComments.where((item) => !item.status).length;
-      
-      // Conta por ferramenta
       final toolCounts = <String, int>{};
       for (final comment in userComments.where((item) => item.status)) {
         toolCounts[comment.ferramenta] = (toolCounts[comment.ferramenta] ?? 0) + 1;
@@ -243,7 +229,6 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<String> _getCurrentUserId() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // Gera UUID único por dispositivo para usuários não autenticados
       return await DeviceIdentityService.instance.getDeviceUuid();
     }
     return user.uid;

@@ -16,8 +16,6 @@ class MemoryMonitoringService {
 
   bool _isMonitoring = false;
   bool get isMonitoring => _isMonitoring;
-
-  // Memory thresholds for warnings
   static const int _warningThresholdMB = 100;
   static const int _criticalThresholdMB = 200;
 
@@ -48,19 +46,11 @@ class MemoryMonitoringService {
   /// Take a memory snapshot
   Future<MemorySnapshot> _takeSnapshot() async {
     final snapshot = await _getCurrentMemorySnapshot();
-
-    // Add to snapshots list
     _snapshots.add(snapshot);
-
-    // Keep only the last X snapshots
     if (_snapshots.length > _maxSnapshots) {
       _snapshots.removeAt(0);
     }
-
-    // Check for memory warnings
     _checkMemoryThresholds(snapshot);
-
-    // Log detailed info in debug mode
     if (kDebugMode) {
       _logSnapshot(snapshot);
     }
@@ -71,25 +61,16 @@ class MemoryMonitoringService {
   /// Get current memory usage snapshot
   Future<MemorySnapshot> _getCurrentMemorySnapshot() async {
     final timestamp = DateTime.now();
-
-    // Get VM memory info (only available in debug mode)
     int? usedMemoryMB;
     int? heapMemoryMB;
 
     if (kDebugMode) {
       try {
-        // VM service memory info disabled for now
-        // TODO: Implement proper VM service integration
-        // final vmInfo = await developer.Service.getVM();
-        // Get basic memory estimation instead
         usedMemoryMB = 50; // Placeholder estimate
         heapMemoryMB = 100; // Placeholder estimate
       } catch (e) {
-        // VM service not available, continue without detailed memory info
       }
     }
-
-    // Get cache statistics - disabled for now
     final imageCacheStats =
         <String, dynamic>{}; // OptimizedPlantImageWidget.getCacheStats();
     final searchCacheStats =
@@ -114,8 +95,6 @@ class MemoryMonitoringService {
         '🚨 CRITICAL: Memory usage is ${usedMemory}MB (>${_criticalThresholdMB}MB)',
       );
       debugPrint('🚨 Consider clearing caches or investigating memory leaks');
-
-      // Auto-clear caches if memory is critical
       clearAllCaches();
     } else if (usedMemory > _warningThresholdMB) {
       debugPrint(
@@ -150,16 +129,6 @@ class MemoryMonitoringService {
   /// Clear all caches to free memory
   void clearAllCaches() {
     try {
-      // Clear image cache - disabled for now
-      // OptimizedPlantImageWidget.clearCache();
-
-      // Clear search cache - disabled for now
-      // PlantsSearchService.instance.clearCache();
-
-      // Force garbage collection (debug only) - disabled for now
-      // if (kDebugMode) {
-      //   developer.Service.requestHeapSnapshot(developer.Service.isolateId!);
-      // }
 
       debugPrint('🧹 All caches cleared');
     } catch (e) {
@@ -195,8 +164,6 @@ class MemoryMonitoringService {
       averageMemory =
           usedMemories.reduce((a, b) => a + b) / usedMemories.length;
       peakMemory = usedMemories.reduce((a, b) => a > b ? a : b);
-
-      // Determine trend (comparing first half vs second half)
       if (usedMemories.length >= 4) {
         final firstHalf = usedMemories.take(usedMemories.length ~/ 2).toList();
         final secondHalf = usedMemories.skip(usedMemories.length ~/ 2).toList();

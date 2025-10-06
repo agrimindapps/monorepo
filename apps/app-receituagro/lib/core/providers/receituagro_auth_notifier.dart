@@ -68,29 +68,19 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
 
   @override
   Stream<ReceitaAgroAuthState> build() async* {
-    // Get services from DI
     _authRepository = di.sl<IAuthRepository>();
     _deviceService = di.sl<DeviceIdentityService>();
     _analytics = di.sl<ReceitaAgroAnalyticsService>();
     _enhancedDeletionService = di.sl<EnhancedAccountDeletionService>();
-
-    // Yield initial state
     yield ReceitaAgroAuthState.initial();
-
-    // Listen to auth repository user stream
     await for (final user in _authRepository.currentUser) {
       final previousState = state.value ?? ReceitaAgroAuthState.initial();
       final previousUser = previousState.currentUser;
 
       if (user != null) {
-        // User logged in or state changed
         final sessionData = await _initializeUserSession(user);
-
-        // Track login analytics
         if (previousUser?.id != user.id) {
           _analytics.trackLogin(user.provider.toString());
-
-          // Check if this is a new device for the user
           if (!user.isAnonymous) {
             await _handleDeviceLogin(user);
             await _triggerPostAuthSync(user, previousUser);
@@ -104,7 +94,6 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
           errorMessage: null,
         );
       } else {
-        // User logged out
         await _clearUserSession();
         if (previousUser != null) {
           _analytics.trackLogout('user_action');
@@ -150,10 +139,6 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
       if (kDebugMode) print('🔄 Auth Notifier: Handling device login for user ${user.id}');
 
       final deviceInfo = await _deviceService.getDeviceInfo();
-
-      // Device registration is now handled by DeviceManagementService
-      // which is integrated with SettingsNotifier (Riverpod)
-      // Track device login for analytics
       _analytics.trackDeviceAdded(deviceInfo.platform);
 
       if (kDebugMode) {
@@ -207,8 +192,6 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
       if (kDebugMode) print('❌ Auth Notifier: Error triggering post-auth sync: $e');
     }
   }
-
-  // ===== PUBLIC METHODS =====
 
   Future<bool> forceSyncUserData() async {
     final currentState = state.value;
@@ -628,8 +611,6 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
     }
   }
 }
-
-// ===== SUPPORTING CLASSES =====
 
 class AuthResult {
   final bool isSuccess;

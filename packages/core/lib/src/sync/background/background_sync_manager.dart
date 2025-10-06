@@ -116,19 +116,13 @@ class BackgroundSyncManager {
           'max_queue_size': maxQueueSize,
         },
       );
-
-      // Inicializar throttler
       _throttler = SyncThrottler(
         minInterval: minSyncInterval,
         maxBackoffInterval: const Duration(hours: 1),
         backoffMultiplier: 2.0,
         debounceDuration: const Duration(seconds: 2),
       );
-
-      // Inicializar queue
       _queue = SyncQueue(maxQueueSize: maxQueueSize);
-
-      // Escutar eventos da queue
       _queue.events.listen(_handleQueueEvent);
 
       _isInitialized = true;
@@ -166,8 +160,6 @@ class BackgroundSyncManager {
         'enabled': config?.enabled ?? true,
       },
     );
-
-    // Iniciar timer periódico se enabled
     if (_configs[service.serviceId]!.enabled) {
       _startPeriodicSync(service.serviceId);
     }
@@ -195,11 +187,7 @@ class BackgroundSyncManager {
   void _startPeriodicSync(String serviceId) {
     final config = _configs[serviceId];
     if (config == null || !config.enabled) return;
-
-    // Cancelar timer existente
     _stopPeriodicSync(serviceId);
-
-    // Criar novo timer periódico
     _timers[serviceId] = Timer.periodic(config.syncInterval, (_) {
       triggerSync(serviceId, priority: config.priority);
     });
@@ -243,8 +231,6 @@ class BackgroundSyncManager {
       );
       return;
     }
-
-    // Verificar throttling
     if (!force && !_throttler.canSync(serviceId)) {
       final timeUntilNext = _throttler.timeUntilNextSync(serviceId);
       _logger.logInfo(
@@ -260,11 +246,6 @@ class BackgroundSyncManager {
       );
       return;
     }
-
-    // TODO: Verificar condições de bateria e rede
-    // Por enquanto, sempre permitir sync
-
-    // Adicionar à queue
     final queueItem = SyncQueueItem(
       serviceId: serviceId,
       displayName: service.displayName,
@@ -346,8 +327,6 @@ class BackgroundSyncManager {
   /// Atualiza configuração de um service
   void updateConfig(String serviceId, BackgroundSyncConfig config) {
     _configs[serviceId] = config;
-
-    // Reiniciar timer periódico com novo intervalo
     if (config.enabled) {
       _startPeriodicSync(serviceId);
     } else {
@@ -433,18 +412,12 @@ class BackgroundSyncManager {
   /// Dispose resources
   Future<void> dispose() async {
     _logger.logInfo(message: 'Disposing Background Sync Manager');
-
-    // Cancelar todos os timers
     for (final timer in _timers.values) {
       timer.cancel();
     }
     _timers.clear();
-
-    // Limpar throttler e queue
     _throttler.dispose();
     await _queue.dispose();
-
-    // Limpar services e configs
     _services.clear();
     _configs.clear();
 

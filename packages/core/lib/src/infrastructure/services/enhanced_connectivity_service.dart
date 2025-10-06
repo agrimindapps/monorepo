@@ -25,32 +25,22 @@ class EnhancedConnectivityService {
   static const Duration _statusCacheDuration = Duration(seconds: 10);
   
   final Connectivity _connectivity = Connectivity();
-  
-  // Stream controllers
   final StreamController<ConnectivityStatus> _statusController = 
       StreamController<ConnectivityStatus>.broadcast();
   final StreamController<NetworkQuality> _qualityController = 
       StreamController<NetworkQuality>.broadcast();
-  
-  // Cache de status
   ConnectivityStatus? _cachedStatus;
   DateTime? _lastStatusCheck;
   NetworkQuality? _cachedQuality;
   DateTime? _lastQualityCheck;
-  
-  // Subscriptions
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _qualityCheckTimer;
   Timer? _retryTimer;
-  
-  // Configurações
   String _pingHost = _defaultPingHost;
   int _pingPort = _defaultPingPort;
   Duration _pingTimeout = _defaultTimeout;
   bool _qualityMonitoringEnabled = true;
   Duration _qualityCheckInterval = const Duration(minutes: 1);
-  
-  // Métricas
   int _connectionChanges = 0;
   DateTime? _lastConnectionChange;
   final List<NetworkMetric> _metrics = [];
@@ -71,28 +61,21 @@ class EnhancedConnectivityService {
     Duration qualityCheckInterval = const Duration(minutes: 1),
   }) async {
     try {
-      // Configura parâmetros customizados
       if (customPingHost != null) _pingHost = customPingHost;
       if (customPingPort != null) _pingPort = customPingPort;
       if (pingTimeout != null) _pingTimeout = pingTimeout;
       _qualityMonitoringEnabled = enableQualityMonitoring;
       _qualityCheckInterval = qualityCheckInterval;
-
-      // Inicia monitoramento de conectividade
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
         _handleConnectivityChange,
         onError: _handleConnectivityError,
       );
-
-      // Verifica status inicial
       final initialStatus = await getCurrentStatus();
       if (initialStatus.isSuccess) {
         _cachedStatus = initialStatus.data;
         _lastStatusCheck = DateTime.now();
         _statusController.add(_cachedStatus!);
       }
-
-      // Inicia monitoramento de qualidade se habilitado
       if (_qualityMonitoringEnabled) {
         _startQualityMonitoring();
       }
@@ -112,7 +95,6 @@ class EnhancedConnectivityService {
 
   /// Obtém o status atual de conectividade
   Future<Result<ConnectivityStatus>> getCurrentStatus({bool forceRefresh = false}) async {
-    // Retorna cache se válido e não é refresh forçado
     if (!forceRefresh && 
         _cachedStatus != null && 
         _lastStatusCheck != null &&
@@ -161,7 +143,6 @@ class EnhancedConnectivityService {
       await socket.close();
       return Result.success(true);
     } catch (e) {
-      // Tenta hosts alternativos
       final alternativeHosts = ['1.1.1.1', '208.67.222.222'];
       
       for (final host in alternativeHosts) {
@@ -184,7 +165,6 @@ class EnhancedConnectivityService {
 
   /// Testa a qualidade da rede medindo latência
   Future<Result<NetworkQuality>> checkNetworkQuality() async {
-    // Retorna cache se ainda válido
     if (_cachedQuality != null && 
         _lastQualityCheck != null &&
         DateTime.now().difference(_lastQualityCheck!) < const Duration(minutes: 2)) {
@@ -204,7 +184,6 @@ class EnhancedConnectivityService {
         if (connectivityResult.data == true) {
           measurements.add(stopwatch.elapsedMilliseconds);
         } else {
-          // Se falha na conectividade, retorna qualidade ruim
           final quality = NetworkQuality(
             latency: -1,
             quality: ConnectionQuality.poor,
@@ -216,8 +195,6 @@ class EnhancedConnectivityService {
           _lastQualityCheck = DateTime.now();
           return Result.success(quality);
         }
-        
-        // Delay entre medições
         if (i < testCount - 1) {
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
@@ -233,8 +210,6 @@ class EnhancedConnectivityService {
         timestamp: DateTime.now(),
         isStable: _isLatencyStable(measurements),
       );
-
-      // Adiciona métrica ao histórico
       _addMetric(NetworkMetric(
         timestamp: DateTime.now(),
         latency: averageLatency,
@@ -260,8 +235,6 @@ class EnhancedConnectivityService {
   /// Força reconexão (útil para WiFi problemático)
   Future<Result<void>> forceReconnection() async {
     try {
-      // No Android/iOS, não temos controle direto sobre reconexão
-      // Mas podemos forçar uma nova verificação de status
       _cachedStatus = null;
       _lastStatusCheck = null;
       _cachedQuality = null;
@@ -297,11 +270,9 @@ class EnhancedConnectivityService {
     Duration delay = initialDelay;
 
     while (attempt < maxRetries) {
-      // Verifica conectividade antes da tentativa
       if (waitForConnection) {
         final statusResult = await getCurrentStatus();
         if (statusResult.isSuccess && !statusResult.data!.isConnected) {
-          // Espera por conectividade
           await _waitForConnection(timeout: const Duration(minutes: 2));
         }
       }
@@ -322,8 +293,6 @@ class EnhancedConnectivityService {
             ),
           );
         }
-
-        // Exponential backoff
         await Future<void>.delayed(delay);
         delay = Duration(milliseconds: (delay.inMilliseconds * backoffMultiplier).round());
       }
@@ -386,14 +355,10 @@ class EnhancedConnectivityService {
     }
   }
 
-  // Métodos privados
-
   void _handleConnectivityChange(List<ConnectivityResult> results) async {
     try {
       _connectionChanges++;
       _lastConnectionChange = DateTime.now();
-
-      // Verifica conectividade real
       final hasRealConnection = await _checkRealConnectivity();
       
       final status = ConnectivityStatus(
@@ -409,12 +374,8 @@ class EnhancedConnectivityService {
       _lastStatusCheck = DateTime.now();
 
       _statusController.add(status);
-
-      // Log da mudança
       debugPrint('Conectividade mudou: ${status.isConnected ? 'Conectado' : 'Desconectado'} '
                 '(${results.map((r) => r.name).join(', ')})');
-
-      // Se perdeu conectividade, para monitoramento de qualidade temporariamente
       if (!status.isConnected && _qualityCheckTimer != null) {
         _qualityCheckTimer?.cancel();
         _qualityCheckTimer = null;
@@ -428,8 +389,6 @@ class EnhancedConnectivityService {
 
   void _handleConnectivityError(Object error) {
     debugPrint('Erro no monitoramento de conectividade: $error');
-    
-    // Tenta recuperar após um delay
     _retryTimer?.cancel();
     _retryTimer = Timer(const Duration(seconds: 10), () {
       _connectivitySubscription?.cancel();
@@ -454,8 +413,6 @@ class EnhancedConnectivityService {
     final completer = Completer<Result<void>>();
     Timer? timeoutTimer;
     StreamSubscription<ConnectivityStatus>? subscription;
-
-    // Setup timeout
     timeoutTimer = Timer(timeout, () {
       subscription?.cancel();
       if (!completer.isCompleted) {
@@ -467,8 +424,6 @@ class EnhancedConnectivityService {
         ));
       }
     });
-
-    // Listen para mudanças de conectividade
     subscription = onConnectivityChanged.listen((status) {
       if (status.isConnected) {
         timeoutTimer?.cancel();
@@ -478,8 +433,6 @@ class EnhancedConnectivityService {
         }
       }
     });
-
-    // Verifica se já está conectado
     final currentStatus = await getCurrentStatus();
     if (currentStatus.isSuccess && currentStatus.data!.isConnected) {
       timeoutTimer.cancel();
@@ -508,15 +461,11 @@ class EnhancedConnectivityService {
         .reduce((a, b) => a + b) / measurements.length;
     
     final standardDeviation = sqrt(variance);
-    
-    // Considera estável se desvio padrão for menos que 30% da média
     return standardDeviation < (average * 0.3);
   }
 
   void _addMetric(NetworkMetric metric) {
     _metrics.add(metric);
-    
-    // Mantém apenas os últimos N registros
     if (_metrics.length > _maxMetricsHistory) {
       _metrics.removeAt(0);
     }

@@ -1,4 +1,3 @@
-// ignore_for_file: only_throw_errors
 
 import 'package:dio/dio.dart';
 
@@ -10,9 +9,6 @@ import '../models/weather_statistics_model.dart';
 
 /// Abstract interface for weather remote data source operations
 abstract class WeatherRemoteDataSource {
-  // ============================================================================
-  // WEATHER MEASUREMENTS
-  // ============================================================================
   
   Future<List<WeatherMeasurementModel>> getAllMeasurements({
     String? locationId,
@@ -40,10 +36,6 @@ abstract class WeatherRemoteDataSource {
   Future<void> deleteMeasurement(String id);
   
   Future<List<WeatherMeasurementModel>> uploadMeasurements(List<WeatherMeasurementModel> measurements);
-
-  // ============================================================================
-  // RAIN GAUGES
-  // ============================================================================
   
   Future<List<RainGaugeModel>> getAllRainGauges();
   
@@ -60,10 +52,6 @@ abstract class WeatherRemoteDataSource {
   Future<void> deleteRainGauge(String id);
   
   Future<RainGaugeModel> updateRainGaugeMeasurement(String gaugeId, double rainfall, DateTime timestamp);
-
-  // ============================================================================
-  // WEATHER STATISTICS
-  // ============================================================================
   
   Future<List<WeatherStatisticsModel>> getStatistics({
     String? locationId,
@@ -78,10 +66,6 @@ abstract class WeatherRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   });
-
-  // ============================================================================
-  // EXTERNAL APIs
-  // ============================================================================
   
   Future<WeatherMeasurementModel> getCurrentWeatherFromAPI(
     double latitude,
@@ -95,10 +79,6 @@ abstract class WeatherRemoteDataSource {
     int days = 7,
     String provider = 'openweathermap',
   });
-
-  // ============================================================================
-  // SYNC OPERATIONS
-  // ============================================================================
   
   Future<List<WeatherMeasurementModel>> downloadMeasurements({DateTime? since});
   
@@ -110,17 +90,11 @@ abstract class WeatherRemoteDataSource {
 /// Implementation of weather remote data source using HTTP APIs
 class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
   final DioClient _dioClient;
-  
-  // API Configuration
   static const String _baseUrl = 'https://api.weather-service.com/v1';
   static const String _openWeatherApiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
   static const String _accuWeatherApiKey = 'YOUR_ACCUWEATHER_API_KEY';
   
   WeatherRemoteDataSourceImpl(this._dioClient);
-
-  // ============================================================================
-  // WEATHER MEASUREMENTS IMPLEMENTATION
-  // ============================================================================
 
   @override
   Future<List<WeatherMeasurementModel>> getAllMeasurements({
@@ -268,10 +242,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     }
   }
 
-  // ============================================================================
-  // RAIN GAUGES IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<List<RainGaugeModel>> getAllRainGauges() async {
     try {
@@ -404,10 +374,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     }
   }
 
-  // ============================================================================
-  // WEATHER STATISTICS IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<List<WeatherStatisticsModel>> getStatistics({
     String? locationId,
@@ -462,10 +428,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     }
   }
 
-  // ============================================================================
-  // EXTERNAL APIs IMPLEMENTATION
-  // ============================================================================
-
   @override
   Future<WeatherMeasurementModel> getCurrentWeatherFromAPI(
     double latitude,
@@ -508,10 +470,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       throw Exception('Weather forecast API error for provider $provider (status: 500): ${e.toString()}');
     }
   }
-
-  // ============================================================================
-  // SYNC OPERATIONS IMPLEMENTATION
-  // ============================================================================
 
   @override
   Future<List<WeatherMeasurementModel>> downloadMeasurements({DateTime? since}) async {
@@ -565,10 +523,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     }
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
   /// Get current weather from OpenWeatherMap API
   Future<WeatherMeasurementModel> _getCurrentWeatherFromOpenWeatherMap(
     double latitude,
@@ -608,7 +562,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     double longitude,
   ) async {
     try {
-      // First, get location key
       final locationDio = Dio();
       final locationResponse = await locationDio.get<Map<String, dynamic>>(
         'https://dataservice.accuweather.com/locations/v1/cities/geoposition/search',
@@ -620,8 +573,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
 
       final locationData = locationResponse.data ?? <String, dynamic>{};
       final locationKey = locationData['Key'];
-
-      // Then get current conditions
       final weatherDio = Dio();
       final weatherResponse = await weatherDio.get<List<dynamic>>(
         'https://dataservice.accuweather.com/currentconditions/v1/$locationKey',
@@ -695,8 +646,6 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     double longitude,
     int days,
   ) async {
-    // For brevity, returning current weather as a single-item forecast
-    // In a real implementation, you would call the appropriate forecast endpoints
     final current = await _getCurrentWeatherFromAccuWeather(latitude, longitude);
     return [current];
   }

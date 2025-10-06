@@ -28,8 +28,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
   @override
   void initState() {
     super.initState();
-
-    // Animação de escala para tap
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -37,8 +35,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
     );
-
-    // Animação de glow pulsante
     _glowController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
@@ -46,8 +42,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
     _glowAnimation = Tween<double>(begin: 0.3, end: 0.8).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
-
-    // Iniciar animação de glow
     _glowController.repeat(reverse: true);
   }
 
@@ -165,7 +159,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
-                      // Glow effect
                       BoxShadow(
                         color: PlantisColors.primary.withValues(
                           alpha: _glowAnimation.value * 0.3,
@@ -173,7 +166,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),
-                      // Sombra normal
                       BoxShadow(
                         color: theme.colorScheme.shadow.withValues(alpha: 0.1),
                         blurRadius: 8,
@@ -200,7 +192,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                     ),
                     child: Column(
                       children: [
-                        // Header do card
                         Row(
                           children: [
                             Container(
@@ -249,11 +240,8 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                         ),
 
                         const SizedBox(height: 20),
-
-                        // Estatísticas principais
                         Row(
                           children: [
-                            // Total de tarefas
                             Expanded(
                               child: _buildStatCard(
                                 context,
@@ -264,8 +252,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                               ),
                             ),
                             const SizedBox(width: 12),
-
-                            // Streak atual
                             Expanded(
                               child: _buildStatCard(
                                 context,
@@ -276,8 +262,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
                               ),
                             ),
                             const SizedBox(width: 12),
-
-                            // Mês atual
                             Expanded(
                               child: _buildStatCard(
                                 context,
@@ -292,8 +276,6 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
 
                         if (monthStats['total']! > 0) ...[
                           const SizedBox(height: 16),
-
-                          // Preview de tipos de cuidado do mês
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(

@@ -94,12 +94,9 @@ class FormSubmitSection extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Divisor opcional
           if (padding == null) const Divider(),
 
           const SizedBox(height: 16),
-
-          // Botões
           if (fullWidth && showCancel)
             _buildFullWidthButtons(context)
           else if (fullWidth)
@@ -114,7 +111,6 @@ class FormSubmitSection extends StatelessWidget {
   Widget _buildFullWidthButtons(BuildContext context) {
     return Column(
       children: [
-        // Botão principal
         SizedBox(
           width: double.infinity,
           height: buttonHeight ?? 48,
@@ -122,8 +118,6 @@ class FormSubmitSection extends StatelessWidget {
         ),
 
         SizedBox(height: spacing),
-
-        // Botão de cancelar
         SizedBox(
           width: double.infinity,
           height: buttonHeight ?? 48,

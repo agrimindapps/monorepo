@@ -22,7 +22,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
   @override
   void initState() {
     super.initState();
-    // Load comments when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(commentsProvider.notifier).loadComments(widget.plant.id);
@@ -44,7 +43,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       data: (state) {
         return GestureDetector(
           onTap: () {
-            // Remove o foco do campo de comentário quando tocar em outros lugares
             FocusScope.of(context).unfocus();
           },
           child: Column(
@@ -121,7 +119,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             controller: _commentController,
             maxLines: 3,
             onTapOutside: (event) {
-              // Remove o foco quando tocar fora do campo
               FocusScope.of(context).unfocus();
             },
             decoration: InputDecoration(
@@ -267,7 +264,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header com data e menu
           Row(
             children: [
               Container(
@@ -324,8 +320,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
           ),
 
           const SizedBox(height: 12),
-
-          // Conteúdo do comentário
           Text(
             comment.conteudo,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -333,8 +327,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
               height: 1.5,
             ),
           ),
-
-          // Mostrar data de atualização se foi editado
           if (comment.dataAtualizacao != null &&
               comment.dataAtualizacao != comment.dataCriacao) ...[
             const SizedBox(height: 8),
@@ -354,8 +346,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
   Future<void> _addComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
-
-    // BUGFIX: Adicionar logs detalhados para debug
     if (kDebugMode) {
       print('🔍 Tentando adicionar comentário:');
       print('   Plant ID: ${widget.plant.id}');
@@ -374,8 +364,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
 
       if (success) {
         _commentController.clear();
-
-        // Mostrar confirmação
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -386,7 +374,6 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
           );
         }
       } else {
-        // BUGFIX: Mostrar mensagem de erro específica se falhou
         if (mounted) {
           final commentsState = ref.read(commentsProvider).valueOrNull;
           final errorMsg = commentsState?.errorMessage ?? 'Erro desconhecido ao adicionar observação';

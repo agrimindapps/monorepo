@@ -1,5 +1,3 @@
-// Loading Components System - Centralized UX Loading Solutions
-// This file exports all loading components created to solve UX inconsistencies
 
 import 'package:flutter/material.dart';
 
@@ -17,17 +15,12 @@ export 'skeleton_loader.dart';
 
 /// Quick access constants for common loading contexts
 class LoadingConstants {
-  // Common timeout durations
   static const Duration shortTimeout = Duration(seconds: 10);
   static const Duration mediumTimeout = Duration(seconds: 30);
   static const Duration longTimeout = Duration(minutes: 2);
-
-  // Common delay durations
   static const Duration quickDelay = Duration(milliseconds: 300);
   static const Duration standardDelay = Duration(milliseconds: 500);
   static const Duration slowDelay = Duration(seconds: 1);
-
-  // Skeleton item counts
   static const int defaultSkeletonCount = 3;
   static const int listSkeletonCount = 5;
   static const int gridSkeletonCount = 6;
@@ -296,7 +289,6 @@ mixin LoadingPageMixin<T extends StatefulWidget> on State<T> {
   void stopAllLoadings() => LoadingUtils.stopAllLoadings();
 
   void disposeLoadings() {
-    // Clean up any loading states for this widget
     stopAllLoadings();
   }
 }

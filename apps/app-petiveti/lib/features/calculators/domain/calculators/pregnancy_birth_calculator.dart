@@ -177,8 +177,6 @@ class PregnancyBirthCalculator extends Calculator {
     ];
 
     final recommendations = _generateRecommendations(daysToDelivery, gestationDay, species);
-    
-    // Adicionar informações sobre todas as fases
     for (final phase in allPhases) {
       recommendations.add(
         Recommendation(
@@ -208,8 +206,6 @@ class PregnancyBirthCalculator extends Calculator {
   @override
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-
-    // Validar campos obrigatórios básicos
     if (!inputs.containsKey('species') || inputs['species'] == null) {
       errors.add('Espécie é obrigatória');
     }
@@ -219,8 +215,6 @@ class PregnancyBirthCalculator extends Calculator {
     }
 
     final calculationMethod = inputs['calculation_method'] as String?;
-
-    // Validar campos específicos do método
     if (calculationMethod?.contains('acasalamento') == true) {
       if (!inputs.containsKey('mating_date') || inputs['mating_date'] == null || (inputs['mating_date'] as String).isEmpty) {
         errors.add('Data de acasalamento é obrigatória para este método');
@@ -270,15 +264,12 @@ class PregnancyBirthCalculator extends Calculator {
   }
 
   DateTime _calculateBirthDateFromMating(DateTime matingDate, String species, String breed) {
-    // Duração média da gestação por espécie
     final gestationDays = {
       'Cão': 63,
       'Gato': 65,
       'Coelho': 31,
       'Hamster': 18,
     };
-
-    // Ajustes por raça
     final breedAdjustments = {
       'Cão': {
         'Chihuahua': -2,
@@ -306,7 +297,6 @@ class PregnancyBirthCalculator extends Calculator {
   }
 
   DateTime _calculateBirthDateFromUltrasound(DateTime ultrasoundDate, double fetusSize, String species) {
-    // Estimativa de idade gestacional baseada no tamanho do feto (para cães)
     final sizeToAge = [
       {'size': 10, 'days': 30},
       {'size': 15, 'days': 35},
@@ -335,8 +325,6 @@ class PregnancyBirthCalculator extends Calculator {
     if (method == 'acasalamento') {
       return currentDate.difference(referenceDate).inDays;
     } else {
-      // Para ultrassom, precisaríamos calcular baseado no tamanho do feto
-      // Por simplicidade, assumimos que é o dia do ultrassom
       return currentDate.difference(referenceDate).inDays + 30; // estimativa
     }
   }
@@ -458,8 +446,6 @@ class PregnancyBirthCalculator extends Calculator {
         ),
       ]);
     }
-
-    // Recomendações gerais baseadas na fase da gestação
     if (gestationDay >= 45) {
       recommendations.add(
         const Recommendation(

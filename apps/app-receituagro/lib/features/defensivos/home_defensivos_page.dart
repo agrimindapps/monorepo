@@ -45,13 +45,10 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
           child: Column(
             children: [
-              // Header section with state-based subtitle
               HomeDefensivosHeader(isDark: isDark),
-              // Main content area
               Expanded(
                 child: state.when(
                   data: (data) {
-                    // Handle error state within data
                     if (data.errorMessage != null) {
                       return DefensivosErrorState(
                         onRetry: () {
@@ -70,17 +67,14 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: ReceitaAgroSpacing.sm),
-                                // Statistics grid with category navigation
                                 DefensivosStatsGrid(
                                   onCategoryTap: (category) => _navigateToCategory(context, category),
                                 ),
                                 const SizedBox(height: ReceitaAgroSpacing.sm),
-                                // Recent access section
                                 DefensivosRecentSection(
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
                                 const SizedBox(height: ReceitaAgroSpacing.sm),
-                                // New items section
                                 DefensivosNewItemsSection(
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
@@ -110,14 +104,11 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
     );
   }
 
-  // Navigation methods - maintained for orchestration
-
   void _navigateToDefensivoDetails(
     String defensivoName,
     String fabricante,
     FitossanitarioHive defensivo,
   ) {
-    // Register access for analytics (in background)
     ref.read(homeDefensivosNotifierProvider.notifier).recordDefensivoAccess(defensivo);
 
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
@@ -128,34 +119,28 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
   }
 
   void _navigateToCategory(BuildContext context, String category) {
-    // Navigate based on category type
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
 
     switch (category.toLowerCase()) {
       case 'defensivos':
-        // Para defensivos, mantém navegação original (lista simples)
         navigationService.navigateToListaDefensivos();
         break;
       case 'fabricantes':
-        // Para fabricantes, vai para lista agrupada por fabricante
         navigationService.navigateToDefensivosAgrupados(
           extraData: {'tipoAgrupamento': 'fabricantes'},
         );
         break;
       case 'modoacao':
-        // Para modo de ação, vai para lista agrupada por modo de ação
         navigationService.navigateToDefensivosAgrupados(
           extraData: {'tipoAgrupamento': 'modoAcao'},
         );
         break;
       case 'ingredienteativo':
-        // Para ingrediente ativo, vai para lista agrupada por ingrediente ativo
         navigationService.navigateToDefensivosAgrupados(
           extraData: {'tipoAgrupamento': 'ingredienteAtivo'},
         );
         break;
       case 'classeagronomica':
-        // Para classe agronômica, vai para lista agrupada por classe
         navigationService.navigateToDefensivosAgrupados(
           extraData: {'tipoAgrupamento': 'classeAgronomica'},
         );

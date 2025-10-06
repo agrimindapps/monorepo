@@ -36,7 +36,6 @@ class MarketCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Header row with name and favorite button
               Row(
                 children: [
                   Expanded(
@@ -94,8 +93,6 @@ class MarketCard extends StatelessWidget {
               ),
 
               const SizedBox(height: 12),
-
-              // Price information row
               Row(
                 children: [
                   Expanded(
@@ -119,8 +116,6 @@ class MarketCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
-                  // Change indicator
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
@@ -164,8 +159,6 @@ class MarketCard extends StatelessWidget {
               ),
 
               const SizedBox(height: 12),
-
-              // Footer with status and volume
               Row(
                 children: [
                   Container(

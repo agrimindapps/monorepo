@@ -127,7 +127,6 @@ class UnifiedErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de erro
             Container(
               padding: const EdgeInsets.all(UnifiedDesignTokens.spacingLG),
               decoration: BoxDecoration(
@@ -142,8 +141,6 @@ class UnifiedErrorView extends StatelessWidget {
             ),
             
             const SizedBox(height: UnifiedDesignTokens.spacingXL),
-            
-            // Mensagem de erro
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -152,8 +149,6 @@ class UnifiedErrorView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
-            // Botão de ação
             if (showRetryButton && onAction != null) ...[
               const SizedBox(height: UnifiedDesignTokens.spacingXL),
               FilledButton.icon(
@@ -204,7 +199,6 @@ class UnifiedEmptyView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de estado vazio
             Container(
               padding: const EdgeInsets.all(UnifiedDesignTokens.spacingLG),
               decoration: BoxDecoration(
@@ -219,8 +213,6 @@ class UnifiedEmptyView extends StatelessWidget {
             ),
             
             const SizedBox(height: UnifiedDesignTokens.spacingXL),
-            
-            // Mensagem principal
             Text(
               message,
               style: theme.textTheme.titleMedium?.copyWith(
@@ -229,8 +221,6 @@ class UnifiedEmptyView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
-            // Subtítulo
             if (subtitle != null) ...[
               const SizedBox(height: UnifiedDesignTokens.spacingSM),
               Text(
@@ -241,8 +231,6 @@ class UnifiedEmptyView extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ],
-            
-            // Botão de ação
             if (onAction != null && actionText != null) ...[
               const SizedBox(height: UnifiedDesignTokens.spacingXL),
               OutlinedButton.icon(

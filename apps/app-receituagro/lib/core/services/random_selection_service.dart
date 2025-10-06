@@ -21,39 +21,28 @@ class RandomSelectionService {
   }
   
   static List<T> selectRandomWeighted<T>(List<T> items, List<double> weights, int count) {
-    // Simplified implementation for stub
     return selectRandom(items, count);
   }
   
   static void setSeed(int seed) {
-    // Stub implementation - would set random seed in real implementation
   }
-  
-  // Specific methods for defensivos
   static List<T> selectRandomDefensivos<T>(List<T> defensivos, {int count = 5}) {
     return selectRandom(defensivos, count);
   }
   
   static List<FitossanitarioHive> selectNewDefensivos(List<FitossanitarioHive> defensivos, {int count = 5}) {
     if (defensivos.isEmpty || count <= 0) return [];
-    
-    // Filter defensivos that have createdAt timestamps (and are not null/0)
     final defensivosWithCreatedAt = defensivos.where((d) => d.createdAt != null && d.createdAt! > 0).toList();
     
     if (defensivosWithCreatedAt.isEmpty) {
-      // If no createdAt data, return random selection as fallback
       print('⚠️ Nenhum defensivo com createdAt válido. Usando seleção aleatória para "Novos Defensivos"');
       return selectRandom(defensivos, count).cast<FitossanitarioHive>();
     }
-    
-    // Sort by createdAt descending (newest first) - timestamps are usually in milliseconds
     defensivosWithCreatedAt.sort((a, b) {
       final aCreatedAt = a.createdAt ?? 0;
       final bCreatedAt = b.createdAt ?? 0;
       return bCreatedAt.compareTo(aCreatedAt); // Descending order
     });
-    
-    // Debug: Print a few samples to verify ordering
     if (defensivosWithCreatedAt.length > 3) {
       print('📅 DEBUG: Primeiros "Novos Defensivos":');
       for (int i = 0; i < 3 && i < defensivosWithCreatedAt.length; i++) {
@@ -62,18 +51,13 @@ class RandomSelectionService {
         print('  ${i+1}. ${d.nomeComum} - criado em: $createdAtDate (timestamp: ${d.createdAt})');
       }
     }
-    
-    // Take the newest items up to the requested count
     return defensivosWithCreatedAt.take(count).toList();
   }
-  
-  // Specific methods for pragas
   static List<T> selectRandomPragas<T>(List<T> pragas, {int count = 5}) {
     return selectRandom(pragas, count);
   }
   
   static List<T> selectSuggestedPragas<T>(List<T> pragas, {int count = 5}) {
-    // Stub implementation - in real version would use suggestion algorithm
     return selectRandom(pragas, count);
   }
   
@@ -83,7 +67,6 @@ class RandomSelectionService {
     List<T> Function(List<T>, {int count}) randomSelector, {
     int count = 5,
   }) {
-    // Stub implementation - combine history with random items
     final combined = <T>[];
     combined.addAll(historyItems.take(count ~/ 2));
     

@@ -38,7 +38,6 @@ class CalculatorTemplateService {
           .where((template) => template.isValid)
           .toList();
     } catch (e) {
-      // Tentar backup em caso de erro
       return await _restoreFromBackup();
     }
   }
@@ -70,8 +69,6 @@ class CalculatorTemplateService {
   Future<bool> saveTemplate(CalculationTemplate template) async {
     try {
       final templates = await getAllTemplates();
-
-      // Verificar se já existe template com mesmo nome para esta calculadora
       final existingIndex = templates.indexWhere(
         (t) =>
             t.name == template.name &&
@@ -80,12 +77,10 @@ class CalculatorTemplateService {
       );
 
       if (existingIndex != -1) {
-        // Atualizar template existente
         templates[existingIndex] = template.copyWith(
           id: templates[existingIndex].id, // Manter ID original
         );
       } else {
-        // Adicionar novo template
         final newTemplate = template.copyWith(
           id: template.id.isEmpty ? _generateUniqueId() : template.id,
         );
@@ -161,8 +156,6 @@ class CalculatorTemplateService {
   /// Obtém templates usados recentemente
   Future<List<CalculationTemplate>> getRecentTemplates({int limit = 10}) async {
     final templates = await getAllTemplates();
-
-    // Filtrar templates que foram usados
     final usedTemplates =
         templates.where((template) => template.lastUsed != null).toList()
           ..sort((a, b) => b.lastUsed!.compareTo(a.lastUsed!));
@@ -175,9 +168,6 @@ class CalculatorTemplateService {
     int limit = 10,
   }) async {
     final templates = await getAllTemplates();
-
-    // Por simplicidade, considerar templates com lastUsed como mais populares
-    // Em implementação mais avançada, poderia ter contador de usos
     final popularTemplates =
         templates.where((template) => template.wasUsedRecently).toList()..sort(
           (a, b) => (b.lastUsed ?? DateTime(1970)).compareTo(
@@ -205,8 +195,6 @@ class CalculatorTemplateService {
               .toList();
 
       final existingTemplates = await getAllTemplates();
-
-      // Combinar templates, evitando duplicatas
       final combinedTemplates = <CalculationTemplate>[...existingTemplates];
 
       for (final template in templates) {
@@ -273,7 +261,6 @@ class CalculatorTemplateService {
       final backupJson = jsonEncode(backupData);
       await _prefs.setString(_templatesBackupKey, backupJson);
     } catch (e) {
-      // Falha no backup não deve impedir operação principal
     }
   }
 
@@ -288,8 +275,6 @@ class CalculatorTemplateService {
               .map((json) => _templateFromJson(json as Map<String, dynamic>))
               .where((template) => template.isValid)
               .toList();
-
-      // Restaurar dados principais
       await _saveTemplates(templates);
 
       return templates;

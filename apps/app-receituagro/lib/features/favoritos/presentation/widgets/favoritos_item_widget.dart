@@ -167,8 +167,6 @@ class FavoritosItemWidget extends StatelessWidget {
         break;
     }
     
-    // subtitle is never null in this implementation
-    
     return Text(
       subtitle,
       style: TextStyle(
@@ -215,18 +213,13 @@ class FavoritosItemWidget extends StatelessWidget {
 
   /// Manipula tap no item
   void _handleTap(BuildContext context) {
-    // TODO: Implementar navegação para página de detalhes
-    // Usar o Navigator ou sistema de roteamento do app
     
     switch (tipo) {
       case TipoFavorito.defensivo:
-        // Navigator.pushNamed(context, '/defensivo/${favorito.id}');
         break;
       case TipoFavorito.praga:
-        // Navigator.pushNamed(context, '/praga/${favorito.id}');
         break;
       case TipoFavorito.diagnostico:
-        // Navigator.pushNamed(context, '/diagnostico/${favorito.id}');
         break;
     }
   }

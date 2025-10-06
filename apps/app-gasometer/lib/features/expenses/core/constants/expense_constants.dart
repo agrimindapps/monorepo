@@ -5,12 +5,9 @@ import '../../domain/entities/expense_entity.dart';
 class ExpenseConstants {
   
   ExpenseConstants._();
-  // Limites de validação
   static const double minAmount = 0.01;
   static const double maxAmount = 999999.99;
   static const double maxOdometer = 9999999.0;
-  
-  // Limites específicos por tipo (valores esperados)
   static const double parkingMaxExpected = 50.0;
   static const double carWashMaxExpected = 100.0;
   static const double tollMaxExpected = 200.0;
@@ -22,45 +19,29 @@ class ExpenseConstants {
   static const double licensingMaxExpected = 500.0;
   static const double accessoriesMaxExpected = 5000.0;
   static const double documentationMaxExpected = 1000.0;
-  
-  // Formatação
   static const String decimalSeparator = ',';
   static const String dotSeparator = '.';
   static const String thousandSeparator = '.';
   static const String currencySymbol = 'R\$';
   static const int amountDecimals = 2;
   static const int odometerDecimals = 1;
-  
-  // Validação de datas
   static const int maxYearsBack = 10;
-  
-  // Validação de texto
   static const int maxDescriptionLength = 100;
   static const int minDescriptionLength = 3;
   static const int maxLocationLength = 100;
   static const int minLocationLength = 2;
   static const int maxNotesLength = 300;
-  
-  // Cache
   static const int maxCacheSize = 100;
   static const int defaultPageSize = 20;
-  
-  // Debounce timers (milliseconds)
   static const int amountDebounceMs = 300;
   static const int odometerDebounceMs = 200;
   static const int descriptionDebounceMs = 500;
-  
-  // Diferenças máximas permitidas
   static const double maxOdometerDifference = 5000.0; // Diferença máxima entre registros
   static const double maxAmountVariationPercent = 0.5; // 50% de variação para despesas recorrentes
-  
-  // Regex patterns
   static const String amountPattern = r'^\d{0,8}[,.]?\d{0,2}$';
   static const String odometerPattern = r'^\d{0,6}[,.]?\d{0,1}$';
   static const String descriptionPattern = r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)]+$';
   static const String locationPattern = r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)\/]+$';
-  
-  // Mensagens de erro padrão
   static const String requiredFieldError = 'Campo obrigatório';
   static const String invalidValueError = 'Valor inválido';
   static const String tooHighValueError = 'Valor muito alto';
@@ -70,12 +51,8 @@ class ExpenseConstants {
   static const String invalidCharactersError = 'Caracteres inválidos';
   static const String tooShortError = 'Muito curto';
   static const String tooLongError = 'Muito longo';
-  
-  // Unidades de medida
   static const String kilometerUnit = 'km';
   static const String consumptionUnit = 'km/l';
-  
-  // Mapeamento de tipos de despesa com propriedades
   static const Map<ExpenseType, ExpenseTypeProperties> expenseTypeProperties = {
     ExpenseType.fuel: ExpenseTypeProperties(
       displayName: 'Combustível',
@@ -173,51 +150,33 @@ class ExpenseConstants {
       description: 'Outras despesas não categorizadas',
     ),
   };
-  
-  // Status do formulário
   static const String formStatusIdle = 'idle';
   static const String formStatusLoading = 'loading';
   static const String formStatusError = 'error';
   static const String formStatusSuccess = 'success';
-  
-  // Configurações de UI
   static const double formMaxHeight = 650.0;
   static const double sectionSpacing = 16.0;
   static const double fieldSpacing = 12.0;
   static const double buttonHeight = 48.0;
   static const double cardBorderRadius = 12.0;
-  
-  // Configurações de animação
   static const int animationDurationMs = 250;
   static const int loadingMinDurationMs = 500;
-  
-  // Títulos das seções
   static const String basicInfoSectionTitle = 'Informações Básicas';
   static const String expenseSectionTitle = 'Despesa';
   static const String locationSectionTitle = 'Localização';
   static const String additionalSectionTitle = 'Informações Adicionais';
-  
-  // Placeholders de campos
   static const String descriptionPlaceholder = 'Ex: Seguro anual, Multa de velocidade...';
   static const String amountPlaceholder = '0,00';
   static const String odometerPlaceholder = '0,0';
   static const String locationPlaceholder = 'Ex: Shopping Center, Posto de Gasolina...';
   static const String notesPlaceholder = 'Observações sobre esta despesa...';
-  
-  // Padrões de data brasileiros
   static const String datePattern = 'dd/MM/yyyy';
   static const String timePattern = 'HH:mm';
   static const String dateTimePattern = 'dd/MM/yyyy HH:mm';
-  
-  // Configurações de relatórios
   static const double reportAmountThousands = 1000.0;
   static const double reportAmountMillions = 1000000.0;
-  
-  // Configurações de paginação
   static const int maxPageSize = 100;
   static const int minPageSize = 5;
-  
-  // Configurações de imagem
   static const int imageMaxWidth = 1200;
   static const int imageMaxHeight = 1200;
   static const int imageQuality = 85; // Previne instanciação

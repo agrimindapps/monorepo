@@ -16,18 +16,12 @@ class OptimizedImageService {
   static final OptimizedImageService _instance = OptimizedImageService._internal();
   factory OptimizedImageService() => _instance;
   OptimizedImageService._internal();
-
-  // Cache em memória com limite de tamanho
   final Map<String, Uint8List> _cache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
   final Map<String, Future<Uint8List?>> _loadingFutures = {};
-  
-  // Configurações de cache
   static const int _maxCacheSize = 50; // Máximo 50 imagens em cache
   static const Duration _cacheExpiration = Duration(minutes: 30);
   static const int _maxMemoryUsageMB = 50; // Máximo 50MB em cache
-  
-  // Estatísticas
   int _cacheHits = 0;
   int _cacheMisses = 0;
   int _totalLoaded = 0;
@@ -35,7 +29,6 @@ class OptimizedImageService {
 
   /// Carrega uma imagem com cache inteligente
   Future<Uint8List?> loadImage(String imagePath) async {
-    // 1. Verifica cache primeiro
     if (_cache.containsKey(imagePath)) {
       final timestamp = _cacheTimestamps[imagePath];
       if (timestamp != null && 
@@ -44,18 +37,13 @@ class OptimizedImageService {
         developer.log('Cache HIT: $imagePath', name: 'OptimizedImageService');
         return _cache[imagePath];
       } else {
-        // Cache expirado
         _removeFromCache(imagePath);
       }
     }
-
-    // 2. Se já está carregando, retorna a Future existente
     if (_loadingFutures.containsKey(imagePath)) {
       developer.log('Loading in progress: $imagePath', name: 'OptimizedImageService');
       return await _loadingFutures[imagePath];
     }
-
-    // 3. Inicia carregamento
     _cacheMisses++;
     final loadingFuture = _loadImageFromAssets(imagePath);
     _loadingFutures[imagePath] = loadingFuture;
@@ -83,8 +71,6 @@ class OptimizedImageService {
     try {
       final ByteData data = await rootBundle.load(imagePath);
       final Uint8List bytes = data.buffer.asUint8List();
-      
-      // Comprime imagem se necessário (opcional)
       if (bytes.length > 500000) { // Se > 500KB, comprime
         return await _compressImage(bytes);
       }
@@ -95,8 +81,6 @@ class OptimizedImageService {
       
     } catch (e) {
       developer.log('Error loading asset $imagePath: $e', name: 'OptimizedImageService');
-      
-      // Fallback para imagem padrão
       if (imagePath != 'assets/imagens/bigsize/a.jpg') {
         return await _loadImageFromAssets('assets/imagens/bigsize/a.jpg');
       }
@@ -135,15 +119,10 @@ class OptimizedImageService {
 
   /// Adiciona imagem ao cache com LRU eviction
   void _addToCache(String imagePath, Uint8List imageData) {
-    // Remove itens expirados
     _cleanExpiredCache();
-    
-    // Se cache está cheio, remove o mais antigo
     if (_cache.length >= _maxCacheSize) {
       _evictOldestCacheItem();
     }
-
-    // Verifica limite de memória
     final currentMemoryMB = _calculateTotalCacheSize() / (1024 * 1024);
     if (currentMemoryMB > _maxMemoryUsageMB) {
       _evictCacheBySize();
@@ -207,7 +186,6 @@ class OptimizedImageService {
   Future<void> preloadCriticalImages() async {
     final criticalImages = [
       'assets/imagens/bigsize/a.jpg', // Fallback image
-      // Adicione outras imagens críticas aqui
     ];
 
     final futures = criticalImages.map((path) => loadImage(path));

@@ -20,7 +20,6 @@ class VehicleSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Redireciona para o novo seletor melhorado
     return EnhancedVehicleSelector(
       selectedVehicleId: selectedVehicleId,
       onVehicleChanged: onVehicleChanged,

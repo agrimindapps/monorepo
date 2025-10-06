@@ -64,8 +64,6 @@ class DefensivosDrillDownState {
   DefensivosDrillDownState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // Getters de conveniência
   bool get hasError => errorMessage != null;
   bool get isAtGroupLevel => navigationState.isAtGroupLevel;
   bool get isAtItemLevel => navigationState.isAtItemLevel;
@@ -84,7 +82,6 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
 
   @override
   Future<DefensivosDrillDownState> build() async {
-    // Get dependencies from DI
     _groupingService = di.sl<DefensivosGroupingService>();
 
     return DefensivosDrillDownState.initial();
@@ -200,8 +197,6 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
 
     final groups = _generateGroups(defensivos, currentState.navigationState.tipoAgrupamento);
     final filteredGroups = _applyFilters(groups, currentState.navigationState);
-
-    // Se estava em um grupo, atualizar itens
     final currentGroupItems = currentState.navigationState.isAtItemLevel && currentState.navigationState.currentGroup != null
         ? _updateCurrentGroupItems(currentState.navigationState.currentGroup!, currentState.navigationState)
         : <DefensivoEntity>[];
@@ -306,8 +301,6 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     return _groupingService.isValidTipoAgrupamento(type);
   }
 
-  // Private methods
-
   /// Gera grupos a partir dos defensivos
   List<DefensivoGroupEntity> _generateGroups(List<DefensivoEntity> defensivos, String tipoAgrupamento) {
     try {
@@ -327,7 +320,6 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     DrillDownNavigationState navigationState,
   ) {
     try {
-      // Primeiro, filtrar grupos com nomes muito curtos
       var filteredGroups = groups.where((group) {
         return group.nome.length >= 3;
       }).toList();
@@ -368,10 +360,7 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     DrillDownNavigationState navigationState,
   ) {
     try {
-      // Aplicar filtros aos itens do grupo
       var items = List<DefensivoEntity>.from(currentGroup.itens);
-
-      // Filtrar itens com descrição menor que 3 caracteres
       items = items.where((item) {
         return item.displayName.length >= 3;
       }).toList();
@@ -385,8 +374,6 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
               item.displayClass.toLowerCase().contains(filtroLower);
         }).toList();
       }
-
-      // Ordenar itens
       items.sort((a, b) {
         final comparison = a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
         return navigationState.isAscending ? comparison : -comparison;

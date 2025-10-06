@@ -58,8 +58,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final FlutterSecureStorage _secureStorage;
   final HiveStorageService _hiveStorageService;
   final FirebaseAnalyticsService _analyticsService;
-  
-  // Chaves para storage
   static const String _userBoxKey = 'auth_users';
   static const String _currentUserKey = 'current_user';
   static const String _accessTokenKey = 'access_token';
@@ -78,18 +76,9 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     
     try {
       debugPrint('AuthLocalDataSourceImpl: Salvando usuário ${user.id}');
-      
-      // TODO: Fix HiveStorageService API usage
-      // await _hiveStorageService.put(
-      //   boxName: _userBoxKey,
-      //   key: _currentUserKey,
-      //   value: user.toJson(),
-      // );
       debugPrint('User cached locally: ${user.id}');
       
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
-      // Analytics: track user caching
       await _analyticsService.logEvent(
         'user_cached',
         parameters: {
@@ -119,8 +108,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<UserModel?> getLastUser() async {
     try {
       debugPrint('AuthLocalDataSourceImpl: Obtendo último usuário');
-      
-      // Usar HiveStorageService do core
       final result = await _hiveStorageService.get<Map<String, dynamic>>(
         box: _userBoxKey,
         key: _currentUserKey,
@@ -135,8 +122,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       if (userData != null) {
         user = UserModel.fromJson(userData);
         debugPrint('AuthLocalDataSourceImpl: Usuário encontrado - ${user.id}');
-        
-        // Analytics: track user retrieval
         await _analyticsService.logEvent(
           'user_retrieved_from_cache',
           parameters: {
@@ -172,8 +157,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<void> clearUser() async {
     try {
       debugPrint('AuthLocalDataSourceImpl: Limpando dados do usuário');
-      
-      // Limpar usuário usando HiveStorageService
       final result = await _hiveStorageService.remove(
         box: _userBoxKey,
         key: _currentUserKey,
@@ -183,14 +166,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         (failure) => throw Exception('Erro ao remover usuário: ${failure.message}'),
         (_) => null,
       );
-      
-      // Limpar tokens
       await clearTokens();
-      
-      // Limpar dados de sessão
       await clearSessionData();
-      
-      // Analytics: track user clearing
       await _analyticsService.logEvent(
         'user_cleared_from_cache',
         parameters: {},

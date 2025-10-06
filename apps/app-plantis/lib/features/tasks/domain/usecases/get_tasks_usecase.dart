@@ -77,8 +77,6 @@ class GetUpcomingTasksUseCase
     return await repository.getUpcomingTasks();
   }
 }
-
-// Parâmetros
 class GetTasksByPlantIdParams {
   final String plantId;
 

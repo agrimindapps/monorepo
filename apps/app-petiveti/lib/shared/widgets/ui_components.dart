@@ -27,8 +27,6 @@ import '../../core/theme/app_colors.dart';
 class UIComponents {
   UIComponents._();
 
-  // ========== LOADING STATES ==========
-
   /// **Standard Loading Indicator**
   /// 
   /// Primary loading indicator used throughout the app with consistent styling.
@@ -151,8 +149,6 @@ class UIComponents {
     );
   }
 
-  // ========== LOADING OVERLAYS ==========
-
   /// **Modal Loading Overlay**
   /// 
   /// Full-screen loading overlay that blocks user interaction.
@@ -227,8 +223,6 @@ class UIComponents {
     );
   }
 
-  // ========== EMPTY STATES ==========
-
   /// **Enhanced Empty State**
   /// 
   /// Engaging empty state widget with helpful actions and clear guidance.
@@ -270,7 +264,6 @@ class UIComponents {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Icon or illustration
               illustration ?? 
               Container(
                 padding: const EdgeInsets.all(16),
@@ -286,8 +279,6 @@ class UIComponents {
               ),
               
               const SizedBox(height: 24),
-              
-              // Title
               Text(
                 title,
                 style: const TextStyle(
@@ -299,8 +290,6 @@ class UIComponents {
               ),
               
               const SizedBox(height: 8),
-              
-              // Subtitle
               Text(
                 subtitle,
                 style: const TextStyle(
@@ -312,8 +301,6 @@ class UIComponents {
               ),
               
               const SizedBox(height: 24),
-              
-              // Actions
               if (actionLabel != null && onAction != null) ...[
                 SizedBox(
                   width: double.infinity,
@@ -386,8 +373,6 @@ class UIComponents {
     );
   }
 
-  // ========== ERROR STATES ==========
-
   /// **Enhanced Error State**
   /// 
   /// User-friendly error state with recovery options and clear messaging.
@@ -430,7 +415,6 @@ class UIComponents {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Error icon
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -445,8 +429,6 @@ class UIComponents {
               ),
               
               const SizedBox(height: 24),
-              
-              // Title
               Text(
                 title,
                 style: TextStyle(
@@ -458,8 +440,6 @@ class UIComponents {
               ),
               
               const SizedBox(height: 8),
-              
-              // Message
               Text(
                 message,
                 style: const TextStyle(
@@ -471,8 +451,6 @@ class UIComponents {
               ),
               
               const SizedBox(height: 24),
-              
-              // Primary action (Retry)
               if (onRetry != null)
                 SizedBox(
                   width: double.infinity,
@@ -488,8 +466,6 @@ class UIComponents {
                     ),
                   ),
                 ),
-              
-              // Secondary action
               if (onSecondaryAction != null && secondaryActionLabel != null) ...[
                 const SizedBox(height: 12),
                 SizedBox(
@@ -506,16 +482,12 @@ class UIComponents {
                   ),
                 ),
               ],
-              
-              // Contact support
               if (showContactSupport) ...[
                 const SizedBox(height: 20),
                 const Divider(),
                 const SizedBox(height: 12),
                 TextButton.icon(
                   onPressed: () {
-                    // Integration with AppDialogs.showContactSupport
-                    // AppDialogs.showContactSupport(context);
                   },
                   icon: const Icon(Icons.support_agent),
                   label: const Text('Entrar em Contato'),
@@ -565,8 +537,6 @@ class UIComponents {
       showContactSupport: false,
     );
   }
-
-  // ========== HELPER METHODS ==========
 
   static IconData _getErrorIcon(ErrorType errorType) {
     switch (errorType) {
@@ -619,8 +589,6 @@ enum ErrorType {
   /// Server-side errors
   server,
 }
-
-// ========== EXTENSION WIDGETS ==========
 
 /// **Shimmer Loading Effect**
 /// 

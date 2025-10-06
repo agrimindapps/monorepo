@@ -65,8 +65,6 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
   @override
   ResultFuture<ComentarioEntity> getComentarioById(String id) async {
     try {
-      // Como o service não tem método específico por ID,
-      // vamos buscar todos e filtrar
       final comentarios = await _comentariosService.getAllComentarios(
         pkIdentificador: '', // Busca todos
       );
@@ -101,8 +99,6 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
   @override
   ResultFuture<void> updateComentario(ComentarioEntity comentario) async {
     try {
-      // Como o service não tem método de update específico,
-      // vamos simular removendo e adicionando novamente
       await _comentariosService.deleteComentario(comentario.id);
 
       final updatedComentario = comentario.copyWith(updatedAt: DateTime.now());
@@ -154,7 +150,6 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
     String pkIdentificador,
   ) async* {
     try {
-      // Como não temos stream nativo, simulamos com refresh periódico
       while (true) {
         try {
           final comentarios = await _comentariosService.getAllComentarios(
@@ -168,8 +163,6 @@ class ComentarioRepositoryImpl implements ComentarioRepository {
         } catch (e) {
           yield [];
         }
-
-        // Aguarda 5 segundos antes do próximo refresh
         await Future<void>.delayed(const Duration(seconds: 5));
       }
     } catch (e) {

@@ -21,7 +21,6 @@ class BottomNavWrapper extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex ?? 0,
         onTap: (index) {
-          // Navegar de volta para a MainNavigationPage com o índice selecionado
           _navigateToMainPage(context, index);
         },
         elevation: 8,
@@ -57,7 +56,6 @@ class BottomNavWrapper extends StatelessWidget {
   }
 
   void _navigateToMainPage(BuildContext context, int index) {
-    // Voltar para a MainNavigationPage com o índice correto
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (context) => MainNavigationPage(initialIndex: index),

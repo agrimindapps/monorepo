@@ -87,8 +87,6 @@ class DeviceManagementState {
       revokingDeviceUuid: clearRevoking ? null : (revokingDeviceUuid ?? this.revokingDeviceUuid),
     );
   }
-
-  // Derived state
   List<DeviceModel> get activeDevices => devices.where((d) => d.isActive).toList();
   List<DeviceModel> get inactiveDevices => devices.where((d) => !d.isActive).toList();
   int get activeDeviceCount => activeDevices.length;
@@ -103,10 +101,6 @@ class DeviceManagementState {
     return '$activeDeviceCount dispositivos ativos';
   }
 }
-
-// ============================================================================
-// DEPENDENCY PROVIDERS
-// ============================================================================
 
 @riverpod
 GetUserDevicesUseCase getUserDevicesUseCase(GetUserDevicesUseCaseRef ref) {
@@ -138,10 +132,6 @@ AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
   return getIt<AuthStateNotifier>();
 }
 
-// ============================================================================
-// DEVICE MANAGEMENT NOTIFIER
-// ============================================================================
-
 @riverpod
 class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   late final GetUserDevicesUseCase _getUserDevicesUseCase;
@@ -155,15 +145,12 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
   @override
   Future<DeviceManagementState> build() async {
-    // Initialize dependencies
     _getUserDevicesUseCase = ref.read(getUserDevicesUseCaseProvider);
     _validateDeviceUseCase = ref.read(validateDeviceUseCaseProvider);
     _revokeDeviceUseCase = ref.read(revokeDeviceUseCaseProvider);
     _revokeAllOtherDevicesUseCase = ref.read(revokeAllOtherDevicesUseCaseProvider);
     _getDeviceStatisticsUseCase = ref.read(getDeviceStatisticsUseCaseProvider);
     _authStateNotifier = ref.read(authStateNotifierProvider);
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _userSubscription?.cancel();
       if (kDebugMode) {
@@ -174,11 +161,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     if (kDebugMode) {
       debugPrint('🔐 DeviceProvider: Initializing');
     }
-
-    // Escuta mudanças de usuário
     _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
-
-    // Inicializa se já tem usuário
     if (_authStateNotifier.isAuthenticated) {
       return await _initializeDeviceManagement();
     }
@@ -189,10 +172,8 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   /// Callback para mudanças de usuário
   void _onUserChanged(UserEntity? user) {
     if (user == null) {
-      // Usuário deslogou
       _resetState();
     } else {
-      // Usuário logou - reinitialize
       state = const AsyncValue.loading();
       _reinitialize();
     }
@@ -206,10 +187,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   /// Inicializa gerenciamento de dispositivos
   Future<DeviceManagementState> _initializeDeviceManagement() async {
     try {
-      // Identifica dispositivo atual
       final currentDevice = await DeviceModel.fromCurrentDevice();
-
-      // CRITICAL: Verificar se é null (plataforma não suportada)
       if (currentDevice == null) {
         if (kDebugMode) {
           debugPrint('🚫 DeviceProvider: Current platform not supported for device management');
@@ -220,8 +198,6 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       if (kDebugMode) {
         debugPrint('📱 DeviceProvider: Current device identified: ${currentDevice.name}');
       }
-
-      // Carrega dispositivos
       final devices = await _loadDevicesData();
 
       if (kDebugMode) {
@@ -351,8 +327,6 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
               successMessage: 'Dispositivo validado com sucesso',
               isValidating: false,
             ));
-
-            // Recarrega lista de dispositivos
             loadDevices();
           } else {
             state = AsyncValue.data(currentState.copyWith(
@@ -378,8 +352,6 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     final currentState = state.valueOrNull ?? DeviceManagementState.initial();
 
     if (currentState.isRevoking) return false;
-
-    // Impede revogar o dispositivo atual por padrão
     if (currentState.currentDevice?.uuid == deviceUuid) {
       state = AsyncValue.data(currentState.copyWith(
         errorMessage: 'Não é possível revogar o dispositivo atual',
@@ -422,7 +394,6 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           return false;
         },
         (_) {
-          // Remove da lista local
           final updatedDevices = currentState.devices.where((d) => d.uuid != deviceUuid).toList();
 
           state = AsyncValue.data(currentState.copyWith(
@@ -431,8 +402,6 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
             isRevoking: false,
             clearRevoking: true,
           ));
-
-          // Recarrega dados para sincronizar
           loadDevices();
 
           if (kDebugMode) {
@@ -505,8 +474,6 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
             successMessage: 'Outros dispositivos revogados com sucesso',
             isRevoking: false,
           ));
-
-          // Recarrega dados para sincronizar
           loadDevices();
 
           if (kDebugMode) {

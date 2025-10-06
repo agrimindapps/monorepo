@@ -25,22 +25,16 @@ abstract class PlantTasksLocalDatasource {
 class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   static const String _boxName = 'plant_tasks';
   Box? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
-
-  // Cache for performance optimization
   List<PlantTask>? _cachedTasks;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
 
   Future<Box> get box async {
     if (_box != null) return _box!;
-
-    // If box is already open (by UnifiedSync), reuse it
     if (Hive.isBoxOpen(_boxName)) {
       _box = Hive.box(_boxName);
       return _box!;
     }
-
-    // Otherwise open it
     _box = await Hive.openBox(_boxName);
     return _box!;
   }
@@ -48,7 +42,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   @override
   Future<List<PlantTask>> getPlantTasks() async {
     try {
-      // Check if cache is still valid
       if (_cachedTasks != null && _cacheTimestamp != null) {
         final now = DateTime.now();
         if (now.difference(_cacheTimestamp!).compareTo(_cacheValidity) < 0) {
@@ -81,7 +74,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
             }
           }
         } catch (e) {
-          // Log corrupted data and remove from Hive
           if (kDebugMode) {
             print(
               '❌ PlantTasksLocalDatasource: Dados corrompidos para key $key: $e',
@@ -104,11 +96,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           continue;
         }
       }
-
-      // Sort by scheduled date
       tasks.sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
-
-      // Update cache
       _cachedTasks = tasks;
       _cacheTimestamp = DateTime.now();
 
@@ -171,7 +159,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
 
         return taskModel.isDeleted ? null : taskModel.toEntity();
       } catch (corruptionError) {
-        // Handle corrupted individual task data
         if (kDebugMode) {
           print(
             '❌ PlantTasksLocalDatasource: Dados corrompidos para ID $id: $corruptionError',
@@ -217,8 +204,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final taskJson = jsonEncode(taskModel.toJson());
 
       await hiveBox.put(task.id, taskJson);
-
-      // Invalidate cache
       _invalidateCache();
 
       if (kDebugMode) {
@@ -250,8 +235,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         final taskJson = jsonEncode(taskModel.toJson());
         await hiveBox.put(task.id, taskJson);
       }
-
-      // Invalidate cache
       _invalidateCache();
 
       if (kDebugMode) {
@@ -276,8 +259,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final taskModel = PlantTaskModel.fromEntity(task).markAsDirty();
       final taskJson = jsonEncode(taskModel.toJson());
       await hiveBox.put(task.id, taskJson);
-
-      // Invalidate cache
       _invalidateCache();
 
       if (kDebugMode) {
@@ -299,20 +280,14 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> deletePlantTask(String id) async {
     try {
       final hiveBox = await box;
-
-      // Get existing task first for soft delete
       final taskJson = hiveBox.get(id) as String?;
       if (taskJson != null) {
         final taskData = jsonDecode(taskJson) as Map<String, dynamic>;
         final taskModel = PlantTaskModel.fromJson(taskData);
-
-        // Soft delete - mark as deleted
         final deletedTask = taskModel.markAsDeleted();
 
         final updatedJson = jsonEncode(deletedTask.toJson());
         await hiveBox.put(id, updatedJson);
-
-        // Invalidate cache
         _invalidateCache();
 
         if (kDebugMode) {
@@ -418,8 +393,6 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
     try {
       final hiveBox = await box;
       await hiveBox.clear();
-
-      // Clear memory cache
       _invalidateCache();
 
       if (kDebugMode) {

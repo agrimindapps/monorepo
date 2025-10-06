@@ -33,7 +33,6 @@ class SmartEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Illustration
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -47,8 +46,6 @@ class SmartEmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          
-          // Title
           SemanticText.heading(
             customTitle ?? config.title,
             style: TextStyle(
@@ -59,8 +56,6 @@ class SmartEmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
-          
-          // Message
           SemanticText(
             customMessage ?? config.message,
             style: TextStyle(
@@ -72,8 +67,6 @@ class SmartEmptyState extends StatelessWidget {
           ),
           
           const SizedBox(height: 32),
-          
-          // Actions
           if (actions?.isNotEmpty == true) ...[
             Wrap(
               spacing: 12,
@@ -89,8 +82,6 @@ class SmartEmptyState extends StatelessWidget {
               children: config.defaultActions.map((action) => _buildActionButton(context, action)).toList(),
             ),
           ],
-          
-          // Refresh option
           if (showRefresh && onRefresh != null) ...[
             const SizedBox(height: 16),
             TextButton.icon(
@@ -280,7 +271,6 @@ class SmartEmptyState extends StatelessWidget {
   }
 
   void _handleAction(String action) {
-    // This would typically be handled by a parent widget or callback
     debugPrint('SmartEmptyState action: $action');
   }
 }
@@ -364,7 +354,6 @@ class ReportsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine the most appropriate empty state
     EmptyStateType type;
     List<ActionButton> actions = [];
 

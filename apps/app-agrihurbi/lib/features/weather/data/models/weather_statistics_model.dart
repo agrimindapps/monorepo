@@ -694,10 +694,6 @@ class WeatherStatisticsModel extends Equatable {
         ')';
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
   /// Parse weather condition counts from various formats
   static Map<String, int> _parseConditionCounts(dynamic conditionCounts) {
     if (conditionCounts is Map<String, int>) {

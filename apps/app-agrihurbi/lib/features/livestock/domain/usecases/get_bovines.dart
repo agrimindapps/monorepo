@@ -16,12 +16,9 @@ class GetBovinesUseCase implements UseCase<List<BovineEntity>, GetBovinesParams>
   
   @override
   Future<Either<Failure, List<BovineEntity>>> call(GetBovinesParams params) async {
-    // Se não há parâmetros de busca, retorna todos
     if (params.searchParams == null) {
       return await repository.getBovines();
     }
-    
-    // Aplicar filtros de busca
     return await repository.searchBovines(params.searchParams!);
   }
 }

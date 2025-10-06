@@ -36,8 +36,6 @@ class CacheEntry {
   }
 }
 
-// === MEMORY STATE ===
-
 /// State para gerenciamento de memória
 class MemoryState {
   const MemoryState({
@@ -100,13 +98,9 @@ class MemoryState {
       'memory_level': memoryPressureLevel.name,
     };
   }
-
-  // Configurações estáticas
   static const double _memoryWarningThresholdMB = 150.0; // 150MB
   static const double _memoryCriticalThresholdMB = 200.0; // 200MB
 }
-
-// === MEMORY NOTIFIER ===
 
 /// StateNotifier para gerenciamento de memória
 ///
@@ -119,11 +113,7 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
   MemoryNotifier() : super(MemoryState(startTime: DateTime.now())) {
     _startMemoryMonitoring();
   }
-
-  // Configurações
   static const int _memoryCheckIntervalMs = 30000; // 30 segundos
-
-  // Estado do monitor
   Timer? _memoryTimer;
   final List<MemoryPressureCallback> _pressureCallbacks = [];
 
@@ -138,11 +128,6 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
   /// Verifica o uso atual de memória
   Future<void> _checkMemoryUsage() async {
     try {
-      // No Flutter, não há uma API direta para memória
-      // Usaremos uma estimativa baseada no developer tools
-      // final info = await developer.Service.getInfo();
-
-      // Estimativa baseada em heurísticas
       final currentUsage = _estimateMemoryUsage();
 
       final newMaxUsage =
@@ -182,14 +167,9 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
 
   /// Estima o uso de memória (heurística)
   double _estimateMemoryUsage() {
-    // Estimativa baseada em:
-    // - Número de caches registrados
-    // - Tempo de execução da app
-    // - Número de widgets ativos
 
     const baseMB = 20.0; // Uso base da aplicação
     final cacheMB = state.managedCaches.length * 2.0; // 2MB por cache
-    // Uso de tempo relativo limitado para evitar overflow de memória
     final runTimeMinutes =
         state.startTime != null
             ? DateTime.now().difference(state.startTime!).inMinutes
@@ -218,8 +198,6 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
       'Pressão de memória detectada: $level',
       name: 'MemoryManager',
     );
-
-    // Executa callbacks registrados
     for (final callback in _pressureCallbacks) {
       try {
         await callback(level);
@@ -230,11 +208,7 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
         );
       }
     }
-
-    // Limpa caches automaticamente
     await _performAutomaticCleanup(level);
-
-    // Força garbage collection
     await _forceGarbageCollection();
   }
 
@@ -242,8 +216,6 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
   Future<void> _performAutomaticCleanup(MemoryPressureLevel level) async {
     final now = DateTime.now();
     final entries = state.managedCaches.values.toList();
-
-    // Ordena por prioridade (menor = mais prioritário) e último acesso
     entries.sort((a, b) {
       final priorityComparison = b.priority.compareTo(a.priority);
       if (priorityComparison != 0) return priorityComparison;
@@ -260,8 +232,6 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
 
     for (final entry in entries) {
       if (cleanupCount >= maxCleanup) break;
-
-      // Remove caches de baixa prioridade ou não acessados recentemente
       final hoursSinceAccess = now.difference(entry.lastAccessed).inHours;
 
       if (entry.priority >= 4 || hoursSinceAccess >= 2) {
@@ -295,11 +265,8 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
   /// Força garbage collection
   Future<void> _forceGarbageCollection() async {
     try {
-      // Força GC através de alocação e liberação rápida
       final list = List.generate(1000, (i) => Object());
       list.clear();
-
-      // Pequena pausa para permitir GC
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
       developer.log('Garbage collection forçado', name: 'MemoryManager');
@@ -380,8 +347,6 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
     super.dispose();
   }
 }
-
-// === MEMORY PROVIDERS ===
 
 /// Provider para gerenciamento de memória
 final memoryProvider = StateNotifierProvider<MemoryNotifier, MemoryState>((

@@ -41,19 +41,14 @@ class AddSpaceUseCase implements UseCase<Space, AddSpaceParams> {
 
   @override
   Future<Either<Failure, Space>> call(AddSpaceParams params) async {
-    // Validate space data
     final validationResult = _validateSpace(params);
     if (validationResult != null) {
       return Left(validationResult);
     }
-
-    // Get current user ID from auth state notifier
     final currentUser = AuthStateNotifier.instance.currentUser;
     if (currentUser == null) {
       return const Left(AuthFailure('Usuário não está autenticado'));
     }
-
-    // Create space with timestamps
     final now = DateTime.now();
     final space = Space(
       id: params.id ?? _generateId(),
@@ -119,17 +114,13 @@ class UpdateSpaceUseCase implements UseCase<Space, UpdateSpaceParams> {
 
   @override
   Future<Either<Failure, Space>> call(UpdateSpaceParams params) async {
-    // Validate space data
     final validationResult = _validateSpace(params);
     if (validationResult != null) {
       return Left(validationResult);
     }
-
-    // Get existing space first
     final existingResult = await repository.getSpaceById(params.id);
 
     return existingResult.fold((failure) => Left(failure), (existingSpace) {
-      // Update space with new data and timestamp
       final updatedSpace = existingSpace.copyWith(
         name: params.name.trim(),
         description: params.description?.trim(),
@@ -194,8 +185,6 @@ class DeleteSpaceUseCase implements UseCase<void, String> {
     if (id.trim().isEmpty) {
       return const Left(ValidationFailure('ID do espaço é obrigatório'));
     }
-
-    // Check if space exists first
     final existingResult = await repository.getSpaceById(id);
 
     return existingResult.fold(

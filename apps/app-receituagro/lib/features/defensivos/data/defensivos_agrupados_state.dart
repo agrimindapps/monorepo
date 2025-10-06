@@ -37,16 +37,12 @@ class DefensivosAgrupadosState {
     this.selectedGroupId = '',
     this.categoriesList = const [],
   });
-
-  // Computed properties
   int get totalItems => defensivosList.length;
   int get filteredItems => defensivosListFiltered.length;
   bool get hasData => defensivosList.isNotEmpty;
   bool get hasFilteredData => defensivosListFiltered.isNotEmpty;
   bool get isEmpty => defensivosListFiltered.isEmpty && !isLoading && !isSearching;
   bool get canNavigateBack => navigationLevel > 0;
-
-  // Navigation helpers
   bool get isInGroup => navigationLevel > 0;
   bool get isInCategoryLevel => navigationLevel == 0;
 

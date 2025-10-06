@@ -25,8 +25,6 @@ class ConnectivityIndicator extends StatelessWidget {
       stream: connectivityService.connectivityStream,
       builder: (context, snapshot) {
         final status = snapshot.data ?? ConnectivityStatus.unknown;
-        
-        // Only show when offline or when explicitly requested to show online
         if (status == ConnectivityStatus.connected && !showWhenOnline) {
           return child ?? const SizedBox.shrink();
         }

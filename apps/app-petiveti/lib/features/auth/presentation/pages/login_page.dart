@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:core/core.dart' hide AuthState, FormState;
-// import 'package:flutter/foundation.dart'; // TODO: Use for debug features
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -31,21 +30,16 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage>
     with TickerProviderStateMixin {
-  // Form controllers
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
-  
-  // Page and animation controllers
   late PageController _pageController;
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
-  // State management
   bool _isLoginMode = true;
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -91,7 +85,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   void _setupListeners() {
-    // Email and password listeners removed - validation logic not implemented
   }
 
   @override
@@ -170,7 +163,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.isAuthenticated == true) {
-        // Mostrar SimpleSyncLoading e depois navegar
         _handleAuthSuccess();
       }
       if (next.hasError == true && next.error != null) {
@@ -188,20 +180,15 @@ class _LoginPageState extends ConsumerState<LoginPage>
   /// Manipula o sucesso da autenticação mostrando loading de sincronização
   void _handleAuthSuccess() {
     if (!mounted) return;
-    
-    // Mostrar SimpleSyncLoading que navega automaticamente quando termina
     SimpleSyncLoading.show(
       context,
       message: 'Carregando seus pets...',
     );
-    
-    // Navegar para home após o SimpleSyncLoading fechar automaticamente
     _navigateAfterSync();
   }
   
   /// Navega para home quando sync terminar
   void _navigateAfterSync() {
-    // Use Timer instead of unawaited for better readability
     Timer(const Duration(seconds: 3), () {
       if (mounted) {
         context.go('/');
@@ -277,22 +264,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
         ],
       );
     }
-
-    // Signup wizard placeholder - can be extracted to separate widget in Phase 2
     return const Center(
       child: Text('Signup wizard - To be implemented in Phase 2'),
     );
   }
-
-
-  // Auth handlers
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
     
     setState(() => _isLoading = true);
     
     try {
-      // Usar loginAndSync ao invés de signInWithEmail simples
       final success = await ref.read(authProvider.notifier).loginAndSync(
         _emailController.text.trim(),
         _passwordController.text,

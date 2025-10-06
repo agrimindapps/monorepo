@@ -19,8 +19,6 @@ import 'dart:math';
 
 class QualityGates {
   static const String version = '1.0.0';
-  
-  // Quality Gate Limits
   static const int maxFileLines = 500;
   static const int warnFileLines = 300;
   static const int infoFileLines = 250;
@@ -113,21 +111,14 @@ Examples:
     final startTime = DateTime.now();
     
     try {
-      // Get target directories
       final dirs = _getTargetDirectories();
-      
-      // Run checks based on type
       for (String dir in dirs) {
         await _runChecksForApp(dir);
       }
-      
-      // Generate report
       await _generateReport();
       
       final duration = DateTime.now().difference(startTime);
       print('\n✅ Quality Gates completed in ${duration.inMilliseconds}ms');
-      
-      // Exit with appropriate code in CI mode
       if (ciMode) {
         final criticalCount = issues.where((i) => i.severity == Severity.critical).length;
         exit(criticalCount > 0 ? 1 : 0);
@@ -280,7 +271,6 @@ Examples:
   }
   
   Future<void> _checkWidgetComplexity(String content, String file, String app) async {
-    // Check for large widgets
     final widgetMatches = RegExp(r'class\s+(\w+Widget?)\s+extends\s+\w+').allMatches(content);
     
     for (Match match in widgetMatches) {
@@ -302,8 +292,6 @@ Examples:
         ));
       }
     }
-    
-    // Check build method complexity
     final buildMatches = RegExp(r'Widget\s+build\s*\([^)]*\)\s*\{').allMatches(content);
     for (Match match in buildMatches) {
       final buildStart = match.start;
@@ -326,7 +314,6 @@ Examples:
   }
   
   Future<void> _checkProviderPatterns(String content, String file, String app) async {
-    // Check for proper Provider usage
     if (content.contains('ChangeNotifier') && !content.contains('dispose()')) {
       issues.add(QualityIssue(
         type: 'provider_pattern',
@@ -338,8 +325,6 @@ Examples:
         data: {},
       ));
     }
-    
-    // Check for Consumer usage
     final consumerCount = RegExp(r'Consumer<').allMatches(content).length;
     if (consumerCount > 5) {
       issues.add(QualityIssue(
@@ -356,8 +341,6 @@ Examples:
   
   Future<void> _checkCleanArchitecture(String content, String file, String app) async {
     final path = file.toLowerCase();
-    
-    // Check layer separation
     if (path.contains('/presentation/') && 
         (content.contains('import') && content.contains('/data/') && !content.contains('/domain/'))) {
       issues.add(QualityIssue(
@@ -370,8 +353,6 @@ Examples:
         data: {},
       ));
     }
-    
-    // Check for proper use cases in presentation
     if (path.contains('/presentation/') && path.contains('_page.dart') && 
         !content.contains('usecase') && !content.contains('UseCase')) {
       issues.add(QualityIssue(
@@ -403,7 +384,6 @@ Examples:
   }
   
   Future<void> _checkMemoryLeaks(String content, String file, String app) async {
-    // Check for controllers without disposal
     if (content.contains('Controller') && 
         content.contains('initState') && 
         !content.contains('dispose')) {
@@ -417,8 +397,6 @@ Examples:
         data: {},
       ));
     }
-    
-    // Check for stream subscriptions
     if (content.contains('StreamSubscription') && !content.contains('cancel()')) {
       issues.add(QualityIssue(
         type: 'memory_leak',
@@ -433,7 +411,6 @@ Examples:
   }
   
   Future<void> _checkUnnecessaryRebuilds(String content, String file, String app) async {
-    // Check for const constructors
     final widgetMatches = RegExp(r'return\s+(\w+)\s*\(').allMatches(content);
     for (Match match in widgetMatches) {
       final widgetCall = match.group(0)!;
@@ -452,7 +429,6 @@ Examples:
   }
   
   Future<void> _checkHardcodedSecrets(String content, String file, String app) async {
-    // Check for API keys and secrets
     final patterns = <String, RegExp>{
       'stripe_key': RegExp(r'[sp]k_(live|test)_[A-Za-z0-9]{20,}'),
       'google_api': RegExp(r'AIza[A-Za-z0-9_-]{35}'),
@@ -481,7 +457,6 @@ Examples:
   }
   
   Future<void> _checkInputValidation(String content, String file, String app) async {
-    // Check for user input without validation
     if (content.contains('TextField') && !content.contains('validator')) {
       issues.add(QualityIssue(
         type: 'input_validation',
@@ -496,7 +471,6 @@ Examples:
   }
   
   Future<void> _checkDataExposure(String content, String file, String app) async {
-    // Check for print statements in production code
     if (content.contains('print(') && !file.contains('test/')) {
       final printCount = RegExp(r'print\s*\(').allMatches(content).length;
       issues.add(QualityIssue(
@@ -768,8 +742,6 @@ class QualityIssue {
     'data': data,
   };
 }
-
-// Main entry point
 Future<void> main(List<String> args) async {
   await QualityGates.main(args);
 }

@@ -42,8 +42,6 @@ class ProfileManagementTestHelper {
     if (kDebugMode) {
       debugPrint('⚠️ Testing delete account flow (DESTRUCTIVE TEST)...');
       debugPrint('   This test will delete the current user account!');
-      
-      // Aguardar 3 segundos para dar tempo de cancelar se necessário
       await Future<void>.delayed(const Duration(seconds: 3));
       
       try {
@@ -71,8 +69,6 @@ class ProfileManagementTestHelper {
   ) async {
     if (kDebugMode) {
       debugPrint('🧪 Testing complete profile management workflow...');
-      
-      // 1. Verificar se usuário está logado
       final isLoggedIn = await authService.isLoggedIn;
       if (!isLoggedIn) {
         debugPrint('❌ No user logged in for profile tests');
@@ -80,14 +76,8 @@ class ProfileManagementTestHelper {
       }
       
       debugPrint('✅ User is logged in, proceeding with tests');
-      
-      // 2. Testar atualização de perfil
       await testUpdateProfile(authService);
-      
-      // Aguardar um pouco entre os testes
       await Future<void>.delayed(const Duration(seconds: 2));
-      
-      // 3. Testar apenas o flow de delete (sem executar realmente)
       debugPrint('🔍 Delete account flow available but not executed in tests');
       debugPrint('   • Call testDeleteAccountFlow() manually if needed');
       debugPrint('   • WARNING: This will permanently delete the account');

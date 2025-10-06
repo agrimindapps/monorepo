@@ -20,8 +20,6 @@ class DefensivoAgrupadoItemModel {
     this.classeAgronomica,
     this.modoAcao,
   });
-
-  // Business Logic Properties
   bool get isDefensivo => line2.isNotEmpty && ingredienteAtivo != null;
   bool get isGroup => !isDefensivo;
   int get itemCount => int.tryParse(count ?? '0') ?? 0;

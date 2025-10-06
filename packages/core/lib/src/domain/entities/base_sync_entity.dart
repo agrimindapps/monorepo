@@ -50,7 +50,6 @@ abstract class BaseSyncEntity extends BaseEntity {
 
   /// Cria instância do Map do Firebase
   /// Deve ser implementado por cada subclasse
-  // static T fromFirebaseMap<T extends BaseSyncEntity>(Map<String, dynamic> map);
 
   /// Marca como "sujo" (precisa sincronizar)
   BaseSyncEntity markAsDirty();
@@ -92,17 +91,12 @@ abstract class BaseSyncEntity extends BaseEntity {
   /// Resolve conflito entre duas versões
   /// Por padrão, usa timestamp mais recente
   BaseSyncEntity resolveConflictWith(BaseSyncEntity other) {
-    // Se uma das versões foi deletada, deletada vence
     if (isDeleted || other.isDeleted) {
       return isDeleted ? this : other;
     }
-
-    // Versão maior vence
     if (version != other.version) {
       return version > other.version ? this : other;
     }
-
-    // Timestamp mais recente vence
     final thisUpdate = updatedAt ?? createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
     final otherUpdate = other.updatedAt ?? other.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 

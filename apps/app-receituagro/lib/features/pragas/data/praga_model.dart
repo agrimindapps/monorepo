@@ -34,8 +34,6 @@ class PragaModel {
       imagem: map['imagem']?.toString(),
     );
   }
-
-  // Computed display properties
   String get displayName => nomeComum;
   String get displaySecondaryName => nomeSecundario ?? nomeCientifico ?? '';
   String get displayType {

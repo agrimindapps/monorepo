@@ -53,29 +53,21 @@ class BovineFormActionButtons extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Indicador de mudanças não salvas
             if (hasUnsavedChanges && !isLoading)
               _buildUnsavedChangesIndicator(context),
-
-            // Botões principais
             Row(
               children: [
-                // Botão Cancelar
                 Expanded(
                   child: _buildCancelButton(context, isLoading),
                 ),
 
                 const SizedBox(width: 12),
-
-                // Botão Salvar
                 Expanded(
                   flex: 2,
                   child: _buildSaveButton(context, provider, isLoading),
                 ),
               ],
             ),
-
-            // Botão de deletar (se editando)
             if (isEditing && onDelete != null) ...[
               const SizedBox(height: 12),
               _buildDeleteButton(context, provider, isLoading),

@@ -115,10 +115,6 @@ class NotificationsSettingsState {
   }
 }
 
-// ============================================================================
-// DEPENDENCY PROVIDERS
-// ============================================================================
-
 @riverpod
 PlantisNotificationService notificationService(NotificationServiceRef ref) {
   return getIt<PlantisNotificationService>();
@@ -129,16 +125,10 @@ Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
   return getIt<SharedPreferences>();
 }
 
-// ============================================================================
-// NOTIFICATIONS SETTINGS NOTIFIER
-// ============================================================================
-
 @riverpod
 class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   late final PlantisNotificationService _notificationService;
   late final SharedPreferences _prefs;
-
-  // Chaves para SharedPreferences
   static const String _keyTaskReminders = 'notifications_task_reminders';
   static const String _keyOverdueNotifications = 'notifications_overdue';
   static const String _keyDailySummary = 'notifications_daily_summary';
@@ -151,18 +141,13 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   Future<NotificationsSettingsState> build() async {
     _notificationService = ref.read(notificationServiceProvider);
     _prefs = await ref.read(sharedPreferencesProvider.future);
-
-    // Load settings
     return await _loadSettings();
   }
 
   /// Carregar configurações
   Future<NotificationsSettingsState> _loadSettings() async {
     try {
-      // Verificar permissões
       final areNotificationsEnabled = await _notificationService.areNotificationsEnabled();
-
-      // Carregar configurações salvas
       final taskRemindersEnabled = _prefs.getBool(_keyTaskReminders) ?? true;
       final overdueNotificationsEnabled = _prefs.getBool(_keyOverdueNotifications) ?? true;
       final dailySummaryEnabled = _prefs.getBool(_keyDailySummary) ?? true;
@@ -171,8 +156,6 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
       final hour = _prefs.getInt(_keyDailySummaryHour) ?? 8;
       final minute = _prefs.getInt(_keyDailySummaryMinute) ?? 0;
       final dailySummaryTime = TimeOfDay(hour: hour, minute: minute);
-
-      // Carregar configurações por tipo de tarefa
       final taskTypeSettings = <String, bool>{
         'Regar': true,
         'Adubar': true,

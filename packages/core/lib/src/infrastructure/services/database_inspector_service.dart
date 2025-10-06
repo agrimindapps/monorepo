@@ -72,7 +72,6 @@ class DatabaseInspectorService {
   /// Carrega dados de uma Hive Box específica
   Future<List<DatabaseRecord>> loadHiveBoxData(String boxKey) async {
     try {
-      // Verificar se a box está aberta, se não tenta abrir
       late Box box;
       if (Hive.isBoxOpen(boxKey)) {
         box = Hive.box(boxKey);
@@ -83,7 +82,6 @@ class DatabaseInspectorService {
           if (kDebugMode) {
             print('Error loading Hive box $boxKey: $e');
           }
-          // Se a box já estiver aberta, tenta acessar diretamente
           if (e.toString().contains('already open')) {
             try {
               box = Hive.box(boxKey);
@@ -109,7 +107,6 @@ class DatabaseInspectorService {
             boxKey: boxKey,
           ));
         } catch (e) {
-          // Registrar erro mas continuar processamento
           if (kDebugMode) {
             print('Error loading record $key from box $boxKey: $e');
           }
@@ -157,8 +154,6 @@ class DatabaseInspectorService {
           }
         }
       }
-
-      // Ordenar por chave
       records.sort((a, b) => a.key.compareTo(b.key));
       return records;
     } catch (e) {
@@ -205,12 +200,8 @@ class DatabaseInspectorService {
     
     final fields = extractUniqueFields(records).toList();
     fields.sort(); // Ordenar campos alfabeticamente
-    
-    // Cabeçalho
     final table = <List<String>>[];
     table.add(['ID', ...fields]);
-    
-    // Dados
     for (final record in records) {
       final row = <String>[record.id];
       
@@ -296,17 +287,13 @@ class DatabaseInspectorService {
 
   /// Obtém todas as boxes Hive disponíveis
   List<String> getAvailableHiveBoxes() {
-    // Note: Hive não expõe boxNames diretamente, usar boxes registradas
     final boxNames = <String>[];
-    
-    // Adicionar boxes customizadas conhecidas
     for (final customBox in _customBoxes) {
       try {
         if (Hive.isBoxOpen(customBox.key)) {
           boxNames.add(customBox.key);
         }
       } catch (e) {
-        // Ignorar se box não existir
       }
     }
     
@@ -316,7 +303,6 @@ class DatabaseInspectorService {
   /// Obtém estatísticas de uma box
   Map<String, dynamic> getBoxStats(String boxKey) {
     try {
-      // Verificar se a box está aberta
       if (!Hive.isBoxOpen(boxKey)) {
         return {
           'boxKey': boxKey,
@@ -360,7 +346,6 @@ class DatabaseInspectorService {
           totalRecords += box.keys.length;
         }
       } catch (e) {
-        // Ignorar boxes que não podem ser abertas
       }
     }
     
@@ -380,7 +365,6 @@ class DatabaseInspectorService {
     }
     
     if (value is Map) {
-      // Converter Map para Map<String, dynamic>
       final result = <String, dynamic>{};
       for (final entry in value.entries) {
         result[entry.key.toString()] = entry.value;
@@ -396,8 +380,6 @@ class DatabaseInspectorService {
         '_key': key,
       };
     }
-    
-    // Para tipos primitivos, criar um wrapper
     return {
       '_type': value.runtimeType.toString(),
       '_value': value,

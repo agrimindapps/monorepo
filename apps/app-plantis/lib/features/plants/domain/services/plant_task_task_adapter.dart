@@ -9,7 +9,6 @@ import '../entities/plant_task.dart';
 class PlantTaskTaskAdapter {
   /// Converte PlantTask para Task (sistema principal)
   static task_entity.Task plantTaskToTask(PlantTask plantTask) {
-    // Mapear tipos de PlantTask para tipos de Task
     final taskType = _mapPlantTaskTypeToTaskType(plantTask.type);
     final taskStatus = _mapPlantTaskStatusToTaskStatus(plantTask.status);
     final priority = _mapPlantTaskTypeToPriority(plantTask.type);
@@ -34,7 +33,6 @@ class PlantTaskTaskAdapter {
 
   /// Converte Task para PlantTask (quando aplicável)
   static PlantTask? taskToPlantTask(task_entity.Task task) {
-    // Por enquanto, assume que tasks recorrentes são PlantTasks
     if (!task.isRecurring) {
       return null;
     }
@@ -63,7 +61,6 @@ class PlantTaskTaskAdapter {
 
   /// Verifica se uma Task foi originalmente uma PlantTask
   static bool isTaskFromPlantTask(task_entity.Task task) {
-    // Por enquanto, assume que tasks recorrentes são PlantTasks
     return task.isRecurring;
   }
 
@@ -165,15 +162,11 @@ class PlantTaskTaskAdapter {
     required Map<String, Plant> plantsById,
   }) {
     final mergedTasks = <String, task_entity.Task>{};
-
-    // Adicionar tasks existentes que não são de PlantTask
     for (final task in existingTasks) {
       if (!isTaskFromPlantTask(task)) {
         mergedTasks[task.id] = task;
       }
     }
-
-    // Converter PlantTasks para Tasks e adicionar/atualizar
     for (final plantTask in plantTasks) {
       final task = plantTaskToTask(plantTask);
       mergedTasks[task.id] = task;
@@ -204,7 +197,6 @@ class PlantTaskTaskAdapter {
 
     for (final task in existingTasks) {
       if (isTaskFromPlantTask(task) && plantTaskIds.contains(task.id)) {
-        // Verifica se há diferenças significativas
         final plantTask = plantTasks.firstWhere((pt) => pt.id == task.id);
         final convertedTask = plantTaskToTask(plantTask);
 

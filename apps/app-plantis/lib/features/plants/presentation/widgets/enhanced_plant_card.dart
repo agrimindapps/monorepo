@@ -132,7 +132,6 @@ class _PlantGridCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Plant illustration
               Expanded(
                 child: Center(
                   child: _PlantIllustration(plant: plant, size: 60),
@@ -140,8 +139,6 @@ class _PlantGridCard extends StatelessWidget {
               ),
 
               const SizedBox(height: 8),
-
-              // Plant name
               Text(
                 plant.name,
                 style: theme.textTheme.titleMedium?.copyWith(
@@ -166,8 +163,6 @@ class _PlantGridCard extends StatelessWidget {
               ],
 
               const SizedBox(height: 8),
-
-              // Compact task status
               Center(
                 child: _CompactTaskStatus(
                   plant: plant,
@@ -468,8 +463,6 @@ class PlantIllustrationPainter extends CustomPainter {
           ..strokeWidth = 2;
 
     final center = Offset(size.width / 2, size.height / 2);
-
-    // Draw stem
     paint.color = stemColor;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -482,11 +475,7 @@ class PlantIllustrationPainter extends CustomPainter {
       ),
       paint,
     );
-
-    // Draw leaves
     paint.color = leafColor;
-
-    // Left leaf
     final leftLeafPath = Path();
     leftLeafPath.moveTo(center.dx - 2, center.dy - 2);
     leftLeafPath.quadraticBezierTo(
@@ -502,8 +491,6 @@ class PlantIllustrationPainter extends CustomPainter {
       center.dy - 2,
     );
     canvas.drawPath(leftLeafPath, paint);
-
-    // Right leaf
     final rightLeafPath = Path();
     rightLeafPath.moveTo(center.dx + 2, center.dy - 2);
     rightLeafPath.quadraticBezierTo(
@@ -519,8 +506,6 @@ class PlantIllustrationPainter extends CustomPainter {
       center.dy - 2,
     );
     canvas.drawPath(rightLeafPath, paint);
-
-    // Center leaf
     final centerLeafPath = Path();
     centerLeafPath.moveTo(center.dx, center.dy - 4);
     centerLeafPath.quadraticBezierTo(

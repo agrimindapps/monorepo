@@ -23,8 +23,6 @@ class RevenueCatCancellationService {
           '💳 RevenueCatCancellationService: Checking for active subscriptions',
         );
       }
-
-      // Get current customer info
       CustomerInfo customerInfo;
       try {
         customerInfo = await Purchases.getCustomerInfo();
@@ -34,7 +32,6 @@ class RevenueCatCancellationService {
             '⚠️ RevenueCatCancellationService: Error getting customer info: $e',
           );
         }
-        // If RevenueCat fails, we don't want to block account deletion
         return Result.success(
           SubscriptionCancellationResult(
             hadActiveSubscription: false,
@@ -64,8 +61,6 @@ class RevenueCatCancellationService {
           '⚠️ Found ${activeSubscriptions.length} active subscription(s)',
         );
       }
-
-      // Get entitlements info
       final entitlements = customerInfo.entitlements.active;
       final entitlementDetails = <String, Map<String, dynamic>>{};
 
@@ -80,8 +75,6 @@ class RevenueCatCancellationService {
           'store': entitlement.store.name,
         };
       }
-
-      // Get manual cancellation instructions
       final instructions = _getManualCancellationInstructions();
 
       if (kDebugMode) {
@@ -171,8 +164,6 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
         'entitlements': {},
         'latestExpirationDate': null,
       };
-
-      // Get entitlement details
       for (final entry in customerInfo.entitlements.active.entries) {
         final entitlement = entry.value;
         details['entitlements'][entry.key] = {
@@ -184,8 +175,6 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
           'willRenew': entitlement.willRenew,
           'store': entitlement.store.name,
         };
-
-        // Track latest expiration
         if (entitlement.expirationDate != null) {
           final currentString = details['latestExpirationDate'] as String?;
           final expirationDate = DateTime.parse(entitlement.expirationDate!);

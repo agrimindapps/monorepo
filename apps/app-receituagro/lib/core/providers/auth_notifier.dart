@@ -34,11 +34,8 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     _initializeAuthNotifier();
   }
 
-  // ===== INITIALIZATION =====
-
   Future<void> _initializeAuthNotifier() async {
     try {
-      // Listen to auth state changes
       _userSubscription = _authRepository.currentUser.listen(
         _handleUserStateChange,
         onError: (Object error) {
@@ -46,8 +43,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
           state = state.copyWith(errorMessage: 'Erro na autenticação: $error');
         },
       );
-
-      // Check if user is already logged in
       final isLoggedIn = await _authRepository.isLoggedIn;
       if (isLoggedIn && state.currentUser != null) {
         await _initializeUserSession(state.currentUser!);
@@ -64,23 +59,15 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     final previousUser = state.currentUser;
 
     if (user != null) {
-      // User logged in or state changed
       await _initializeUserSession(user);
-
-      // Track login analytics
       if (previousUser?.id != user.id) {
         _analytics.trackLogin(user.provider.toString());
-
-        // Check if this is a new device for the user
         if (!user.isAnonymous) {
           await _handleDeviceLogin(user);
-
-          // Trigger automatic sync after successful authentication
           await _triggerPostAuthSync(user, previousUser);
         }
       }
     } else {
-      // User logged out
       await _clearUserSession();
       if (previousUser != null) {
         _analytics.trackLogout('user_action');
@@ -91,8 +78,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   Future<void> _initializeUserSession(UserEntity user) async {
     try {
       state = state.copyWith(isLoading: true);
-
-      // Generate session data
       final deviceId = await _deviceService.getDeviceUuid();
       final sessionData = UserSessionData(
         userId: user.id,
@@ -100,8 +85,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         loginTime: DateTime.now(),
         isAnonymous: user.isAnonymous,
       );
-
-      // Set analytics user properties
       await _analytics.setUserId(user.id);
       await _analytics.setUserProperties(
         userType: _mapToAnalyticsUserType(state.userType),
@@ -127,7 +110,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   }
 
   Future<void> _clearUserSession() async {
-    // Clear analytics
     await _analytics.clearUser();
 
     state = state.clearUser();
@@ -138,21 +120,13 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   Future<void> _handleDeviceLogin(UserEntity user) async {
     try {
       if (kDebugMode) print('🔄 Auth Notifier: Handling device login for user ${user.id}');
-
-      // Get current device info
       final deviceInfo = await _deviceService.getDeviceInfo();
-
-      // Device registration is now handled by DeviceManagementService
-      // which is integrated with SettingsNotifier (Riverpod)
-      // Track device login for analytics
       _analytics.trackDeviceAdded(deviceInfo.platform);
 
       if (kDebugMode) {
         print('✅ Auth Notifier: Device login detected for ${deviceInfo.name}');
         print('   Device management handled by SettingsNotifier');
       }
-
-      // Sync user profile with Firestore
       await _syncUserProfile(user, deviceInfo);
     } catch (e) {
       if (kDebugMode) print('❌ Auth Notifier: Device login handling error - $e');
@@ -206,8 +180,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     }
   }
 
-  // ===== PUBLIC METHODS =====
-
   Future<bool> forceSyncUserData() async {
     if (state.currentUser == null || state.currentUser!.isAnonymous) {
       if (kDebugMode) print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
@@ -247,8 +219,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       return false;
     }
   }
-
-  // ===== AUTHENTICATION METHODS =====
 
   Future<AuthResult> signInWithEmailAndPassword({
     required String email,
@@ -392,7 +362,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         (_) {
           _analytics.trackLogout('user_action');
           state = state.copyWith(isLoading: false);
-          // Sign in anonymously after logout to maintain app functionality
           signInAnonymously();
         },
       );
@@ -543,16 +512,12 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     }
   }
 
-  // ===== UTILITY METHODS =====
-
   void clearError() {
     state = state.copyWith(clearError: true);
   }
 
   bool canAccessFeature(String feature) {
     if (!state.isAuthenticated) return false;
-
-    // TODO: Integrate with Premium service
     return true;
   }
 
@@ -616,8 +581,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   }
 }
 
-// ===== SUPPORTING CLASSES =====
-
 class AuthResult {
   final bool isSuccess;
   final UserEntity? user;
@@ -637,8 +600,6 @@ class AuthResult {
     return AuthResult._(isSuccess: false, errorMessage: message);
   }
 }
-
-// Extension to check if UserEntity is anonymous
 extension UserEntityExtensions on UserEntity {
   bool get isAnonymous => provider.toString() == 'anonymous';
 }

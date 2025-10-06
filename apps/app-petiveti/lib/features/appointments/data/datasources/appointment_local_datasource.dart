@@ -41,8 +41,6 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
                     appointment.animalId == animalId && !appointment.isDeleted,
               )
               .toList();
-
-      // Sort by date descending (most recent first)
       appointments.sort((a, b) => b.dateTimestamp.compareTo(a.dateTimestamp));
 
       return appointments;
@@ -69,8 +67,6 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
                     appointment.status == 0,
               ) // scheduled status
               .toList();
-
-      // Sort by date ascending (soonest first)
       upcomingAppointments.sort(
         (a, b) => a.dateTimestamp.compareTo(b.dateTimestamp),
       );

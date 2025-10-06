@@ -53,8 +53,6 @@ class EnhancedAccountDeletionService {
 
       final result = EnhancedDeletionResult();
       final startTime = DateTime.now();
-
-      // STEP 1: Verificar autenticação
       result.steps.add('Verificando autenticação...');
       final isLoggedIn = await _authRepository.isLoggedIn;
       if (!isLoggedIn) {
@@ -64,8 +62,6 @@ class EnhancedAccountDeletionService {
           ),
         );
       }
-
-      // Get user ID
       String? currentUserId = userId;
       if (currentUserId == null) {
         await for (final user in _authRepository.currentUser) {
@@ -86,8 +82,6 @@ class EnhancedAccountDeletionService {
       }
 
       result.userId = currentUserId;
-
-      // STEP 2: Bloquear usuários anônimos
       if (isAnonymous == true) {
         if (kDebugMode) {
           debugPrint('❌ Anonymous users cannot delete account');
@@ -101,8 +95,6 @@ class EnhancedAccountDeletionService {
           ),
         );
       }
-
-      // STEP 3: Verificar rate limiting
       result.steps.add('Verificando rate limiting...');
       if (!_rateLimiter.canAttemptDeletion(currentUserId)) {
         final cooldown = _rateLimiter.getRemainingCooldown(currentUserId);
@@ -121,11 +113,7 @@ class EnhancedAccountDeletionService {
           ),
         );
       }
-
-      // Registrar tentativa
       _rateLimiter.recordDeletionAttempt(currentUserId);
-
-      // STEP 4: Re-autenticação obrigatória
       if (password != null && password.isNotEmpty) {
         result.steps.add('Re-autenticando usuário...');
         if (kDebugMode) {
@@ -159,7 +147,6 @@ class EnhancedAccountDeletionService {
           debugPrint('✅ Re-authentication successful');
         }
       } else {
-        // Senha é obrigatória para contas não-anônimas
         return Result.error(
           AppErrorFactory.fromFailure(
             const ValidationFailure(
@@ -168,8 +155,6 @@ class EnhancedAccountDeletionService {
           ),
         );
       }
-
-      // STEP 5: Verificar e cancelar assinaturas RevenueCat
       result.steps.add('Verificando assinaturas...');
       try {
         if (kDebugMode) {
@@ -200,10 +185,7 @@ class EnhancedAccountDeletionService {
         if (kDebugMode) {
           debugPrint('⚠️ Error checking subscriptions: $e');
         }
-        // Don't block deletion if subscription check fails
       }
-
-      // STEP 6: Limpar dados do Firestore/Storage
       result.steps.add('Limpando dados na nuvem...');
       try {
         if (kDebugMode) {
@@ -235,10 +217,7 @@ class EnhancedAccountDeletionService {
         if (kDebugMode) {
           debugPrint('⚠️ Error deleting Firestore data: $e');
         }
-        // Don't block deletion if Firestore cleanup fails
       }
-
-      // STEP 7: Limpar dados locais específicos do app
       if (_appDataCleaner != null) {
         result.steps.add('Limpando dados locais...');
         try {
@@ -264,11 +243,8 @@ class EnhancedAccountDeletionService {
           if (kDebugMode) {
             debugPrint('⚠️ Error cleaning local data: $e');
           }
-          // Don't block deletion if local cleanup fails
         }
       }
-
-      // STEP 8: Deletar conta do Firebase Auth
       result.steps.add('Excluindo conta do Firebase...');
       if (kDebugMode) {
         debugPrint('🔥 Deleting Firebase Auth account');
@@ -303,8 +279,6 @@ class EnhancedAccountDeletionService {
           ),
         );
       }
-
-      // Limpar rate limiting em caso de sucesso
       _rateLimiter.clearAttempts(currentUserId);
 
       result.completedAt = DateTime.now();
@@ -351,8 +325,6 @@ class EnhancedAccountDeletionService {
         'appName': _appDataCleaner?.appName ?? 'Unknown',
         'timestamp': DateTime.now().toIso8601String(),
       };
-
-      // Local data stats
       if (_appDataCleaner != null) {
         try {
           final hasData = await _appDataCleaner.hasDataToClear();
@@ -368,16 +340,12 @@ class EnhancedAccountDeletionService {
           preview['localDataError'] = e.toString();
         }
       }
-
-      // Firestore data stats
       try {
         final firestoreStats = await _firestoreDeletion.getDataStats(userId);
         preview['cloudData'] = firestoreStats;
       } catch (e) {
         preview['cloudDataError'] = e.toString();
       }
-
-      // Subscription info
       try {
         final subscriptionDetails =
             await _revenueCatCancellation.getSubscriptionDetails();
@@ -388,8 +356,6 @@ class EnhancedAccountDeletionService {
       } catch (e) {
         preview['subscriptionError'] = e.toString();
       }
-
-      // Rate limit status
       preview['rateLimitStatus'] = _rateLimiter.getStats(userId);
 
       return Result.success(preview);
@@ -419,24 +385,14 @@ class EnhancedDeletionResult {
   DateTime? completedAt;
   int? totalDurationSeconds;
   List<String> steps = [];
-
-  // Re-authentication
   bool reauthenticationSuccess = false;
   String? reauthenticationError;
-
-  // Firebase Auth deletion
   bool firebaseDeleteSuccess = false;
   String? firebaseDeleteError;
-
-  // Firestore/Storage deletion
   FirestoreDeletionResult? firestoreDeletionResult;
   String? firestoreDeletionError;
-
-  // RevenueCat subscription
   SubscriptionCancellationResult? subscriptionCancellationResult;
   String? subscriptionCancellationError;
-
-  // Local data cleanup
   Map<String, dynamic>? localDataCleanupResult;
   String? localDataCleanupError;
   bool dataCleanupVerified = false;

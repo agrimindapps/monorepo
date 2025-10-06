@@ -46,14 +46,10 @@ class GetComentariosUseCase {
   /// Gets all comentarios sorted by newest first
   Future<List<ComentarioEntity>> call() async {
     final comentarios = await _repository.getAllComentarios();
-    
-    // Business rule: Sort by newest first, then by status
     comentarios.sort((a, b) {
-      // Active comments first
       if (a.status != b.status) {
         return a.status ? -1 : 1;
       }
-      // Then by creation date (newest first)
       return b.createdAt.compareTo(a.createdAt);
     });
     
@@ -63,8 +59,6 @@ class GetComentariosUseCase {
   /// Gets comentarios filtered by context
   Future<List<ComentarioEntity>> getByContext(String pkIdentificador) async {
     final comentarios = await _repository.getComentariosByContext(pkIdentificador);
-    
-    // Apply same sorting logic
     comentarios.sort((a, b) {
       if (a.status != b.status) {
         return a.status ? -1 : 1;
@@ -78,8 +72,6 @@ class GetComentariosUseCase {
   /// Gets comentarios filtered by tool/feature
   Future<List<ComentarioEntity>> getByTool(String ferramenta) async {
     final comentarios = await _repository.getComentariosByTool(ferramenta);
-    
-    // Apply same sorting logic
     comentarios.sort((a, b) {
       if (a.status != b.status) {
         return a.status ? -1 : 1;
@@ -97,19 +89,14 @@ class GetComentariosUseCase {
     }
 
     final comentarios = await _repository.searchComentarios(query);
-    
-    // Business rule: Score by relevance
     final queryLower = query.toLowerCase();
     comentarios.sort((a, b) {
-      // Calculate relevance score
       final scoreA = _calculateRelevanceScore(a, queryLower);
       final scoreB = _calculateRelevanceScore(b, queryLower);
       
       if (scoreA != scoreB) {
         return scoreB.compareTo(scoreA); // Higher score first
       }
-      
-      // Fallback to date if same relevance
       return b.createdAt.compareTo(a.createdAt);
     });
     
@@ -123,25 +110,15 @@ class GetComentariosUseCase {
     final content = comentario.conteudo.toLowerCase();
     final title = comentario.titulo.toLowerCase();
     final tool = comentario.ferramenta.toLowerCase();
-    
-    // Title match is most relevant
     if (title.contains(query)) score += 10;
     if (title.startsWith(query)) score += 5;
-    
-    // Content match
     if (content.contains(query)) score += 5;
     if (content.startsWith(query)) score += 3;
-    
-    // Tool match
     if (tool.contains(query)) score += 3;
-    
-    // Recent comments get slight boost
     final daysSince = DateTime.now().difference(comentario.createdAt).inDays;
     if (daysSince <= 7) {
       score += 2;
     } else if (daysSince <= 30) score += 1;
-    
-    // Active status boost
     if (comentario.status) score += 1;
     
     return score;

@@ -6,7 +6,6 @@ import 'package:core/core.dart' show Failure, Either;
 /// Defines contract for app settings management,
 /// user preferences, and configuration persistence
 abstract class SettingsRepository {
-  // === GENERAL SETTINGS ===
 
   /// Get user settings
   Future<Either<Failure, SettingsEntity>> getSettings();
@@ -22,8 +21,6 @@ abstract class SettingsRepository {
   /// Get default settings
   Future<Either<Failure, SettingsEntity>> getDefaultSettings();
 
-  // === THEME & APPEARANCE ===
-
   /// Update app theme
   Future<Either<Failure, void>> updateTheme(AppTheme theme);
 
@@ -36,8 +33,6 @@ abstract class SettingsRepository {
   /// Get display settings
   Future<Either<Failure, DisplaySettings>> getDisplaySettings();
 
-  // === LANGUAGE & LOCALIZATION ===
-
   /// Update app language
   Future<Either<Failure, void>> updateLanguage(String languageCode);
 
@@ -46,8 +41,6 @@ abstract class SettingsRepository {
 
   /// Get available languages
   Future<Either<Failure, List<SupportedLanguage>>> getAvailableLanguages();
-
-  // === NOTIFICATION SETTINGS ===
 
   /// Update notification settings
   Future<Either<Failure, void>> updateNotificationSettings(
@@ -59,8 +52,6 @@ abstract class SettingsRepository {
 
   /// Test notification settings
   Future<Either<Failure, void>> testNotifications();
-
-  // === DATA & SYNC SETTINGS ===
 
   /// Update data settings
   Future<Either<Failure, void>> updateDataSettings(DataSettings dataSettings);
@@ -74,8 +65,6 @@ abstract class SettingsRepository {
   /// Get last sync timestamp
   Future<Either<Failure, DateTime?>> getLastSyncTime();
 
-  // === PRIVACY SETTINGS ===
-
   /// Update privacy settings
   Future<Either<Failure, void>> updatePrivacySettings(PrivacySettings privacy);
 
@@ -84,8 +73,6 @@ abstract class SettingsRepository {
 
   /// Clear all analytics data
   Future<Either<Failure, void>> clearAnalyticsData();
-
-  // === SECURITY SETTINGS ===
 
   /// Update security settings
   Future<Either<Failure, void>> updateSecuritySettings(
@@ -103,8 +90,6 @@ abstract class SettingsRepository {
 
   /// Verify biometric authentication
   Future<Either<Failure, bool>> verifyBiometricAuth();
-
-  // === BACKUP & RESTORE ===
 
   /// Update backup settings
   Future<Either<Failure, void>> updateBackupSettings(BackupSettings backup);
@@ -126,8 +111,6 @@ abstract class SettingsRepository {
   /// Delete backup
   Future<Either<Failure, void>> deleteBackup(String backupId);
 
-  // === DATA EXPORT ===
-
   /// Export all data
   Future<Either<Failure, ExportResult>> exportAllData({
     required DataExportFormat format,
@@ -144,8 +127,6 @@ abstract class SettingsRepository {
   /// Get export history
   Future<Either<Failure, List<ExportInfo>>> getExportHistory();
 
-  // === CACHE MANAGEMENT ===
-
   /// Get cache size information
   Future<Either<Failure, CacheInfo>> getCacheInfo();
 
@@ -154,8 +135,6 @@ abstract class SettingsRepository {
 
   /// Clear specific cache type
   Future<Either<Failure, void>> clearCache(CacheType type);
-
-  // === APP INFO & DIAGNOSTICS ===
 
   /// Get app version info
   Future<Either<Failure, AppVersionInfo>> getAppVersion();
@@ -171,8 +150,6 @@ abstract class SettingsRepository {
     String? userComment,
     bool includeLogs = true,
   });
-
-  // === SETTINGS VALIDATION ===
 
   /// Validate settings integrity
   Future<Either<Failure, SettingsValidationResult>> validateSettings();

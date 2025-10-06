@@ -40,7 +40,6 @@ class HeaderSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Textos e botões à esquerda
         Expanded(
           flex: 5,
           child: Column(
@@ -54,8 +53,6 @@ class HeaderSection extends StatelessWidget {
             ],
           ),
         ),
-
-        // Imagem à direita
         Expanded(
           flex: 5,
           child: _buildAppShowcase(),
@@ -83,7 +80,6 @@ class HeaderSection extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título principal
         Text(
           'Controle Total\npara seu Veículo',
           style: TextStyle(
@@ -95,8 +91,6 @@ class HeaderSection extends StatelessWidget {
           ),
         ),
         SizedBox(height: 24),
-
-        // Descrição
         Text(
           'Gerencie abastecimentos, manutenções e despesas do seu veículo com o aplicativo mais completo do mercado.',
           style: TextStyle(
@@ -154,7 +148,6 @@ class HeaderSection extends StatelessWidget {
   Widget _buildDownloadBadges(BuildContext context) {
     return Row(
       children: [
-        // Google Play badge
         GestureDetector(
           onTap: () {
             showDialog(
@@ -200,7 +193,6 @@ class HeaderSection extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        // App Store badge
         GestureDetector(
           onTap: () {
             showDialog(
@@ -253,7 +245,6 @@ class HeaderSection extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Círculo decorativo
         Container(
           width: 350,
           height: 350,
@@ -262,8 +253,6 @@ class HeaderSection extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.05),
           ),
         ),
-
-        // Imagem do mockup do app
         Container(
           width: 280,
           height: 520,
@@ -286,14 +275,11 @@ class HeaderSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             child: Stack(
               children: [
-                // Placeholder para a screenshot do app
                 Container(
                   color: Colors.blue[900],
                   width: double.infinity,
                   height: double.infinity,
                 ),
-
-                // Notch da tela
                 Align(
                   alignment: Alignment.topCenter,
                   child: Container(
@@ -306,8 +292,6 @@ class HeaderSection extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Interface do app (mockup)
                 Padding(
                   padding: const EdgeInsets.all(2),
                   child: Column(
@@ -328,7 +312,6 @@ class HeaderSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      // Gráfico simplificado
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         height: 120,
@@ -355,7 +338,6 @@ class HeaderSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      // Menu simulado
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
                         padding: const EdgeInsets.all(16),
@@ -397,8 +379,6 @@ class HeaderSection extends StatelessWidget {
             ),
           ),
         ),
-
-        // Elementos flutuantes decorativos
         Positioned(
           top: 50,
           right: 40,

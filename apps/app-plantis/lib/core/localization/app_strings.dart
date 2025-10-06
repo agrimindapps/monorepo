@@ -2,8 +2,6 @@
 /// This file contains all hardcoded strings that should be localized
 class AppStrings {
   AppStrings._();
-
-  // Plant Details Page Strings
   static const String plantDetailsTitle = 'Detalhes da Planta';
   static const String error = 'Erro';
   static const String loadingPlant = 'Carregando planta...';
@@ -28,8 +26,6 @@ class AppStrings {
       '• Verificar sua conexão com a internet\n'
       '• Entrar em contato com o suporte';
   static const String understood = 'Entendi';
-
-  // Plant Details Actions
   static const String quickActions = 'Ações rápidas';
   static const String quickActionsFor = 'Ações rápidas para';
   static const String editPlantFor = 'Editar informações de';
@@ -56,29 +52,21 @@ class AppStrings {
       'Adição de nota em desenvolvimento';
   static const String sharingInDevelopment =
       'Compartilhamento em desenvolvimento';
-
-  // Tab Names
   static const String overview = 'Visão Geral';
   static const String tasks = 'Tarefas';
   static const String care = 'Cuidados';
   static const String notes = 'Comentários';
-
-  // More Options Sheet
   static const String options = 'Opções';
   static const String shareInfo = 'Compartilhar informações da planta';
   static const String duplicate = 'Duplicar';
   static const String createCopy = 'Criar uma cópia desta planta';
   static const String deleteAction = 'Excluir';
   static const String permanentlyRemove = 'Remover permanentemente esta planta';
-
-  // Delete Confirmation
   static const String confirmDelete = 'Excluir planta';
   static const String deleteConfirmMessage = 'Tem certeza que deseja excluir';
   static const String cannotBeUndone = 'Esta ação não pode ser desfeita.';
   static const String cancel = 'Cancelar';
   static const String delete = 'Excluir';
-
-  // Invalid Data State
   static const String incompleteData = 'Dados Incompletos';
   static const String incompleteDataAriaLabel = 'Dados da planta incompletos';
   static const String incompleteDataMessage =
@@ -86,8 +74,6 @@ class AppStrings {
   static const String editPlantData =
       'Editar dados da planta para corrigir problemas';
   static const String editPlant = 'Editar Planta';
-
-  // Task Creation
   static const String newTask = 'Nova Tarefa';
   static const String taskType = 'Tipo de tarefa';
   static const String taskTitle = 'Título da tarefa';
@@ -96,33 +82,24 @@ class AppStrings {
   static const String create = 'Criar';
   static const String taskCreatedSuccessfully = 'Tarefa criada com sucesso!';
   static const String addNewTask = 'Adicionar Nova Tarefa';
-
-  // Task Types
   static const String watering = 'Rega';
   static const String fertilizing = 'Adubação';
   static const String pruning = 'Poda';
   static const String sunlightCheck = 'Luz solar';
   static const String pestInspection = 'Pragas';
   static const String replanting = 'Replantio';
-
-  // Default Task Titles
   static const String waterPlant = 'Regar planta';
   static const String applyFertilizer = 'Aplicar fertilizante';
   static const String pruneBranches = 'Podar galhos';
   static const String checkSunExposure = 'Verificar exposição solar';
   static const String inspectPests = 'Inspecionar pragas';
   static const String replantInLargerPot = 'Replantar em vaso maior';
-
-  // Status Messages
   static const String plantDeletedSuccessfully = 'Planta excluída com sucesso';
   static const String errorDeletingPlant = 'Erro ao excluir planta';
   static const String sharingFeatureInDevelopment =
       'Funcionalidade de compartilhamento em desenvolvimento';
   static const String duplicateFeatureInDevelopment =
       'Funcionalidade de duplicação em desenvolvimento';
-
-  // Tasks System Strings
-  // TasksProvider Messages
   static const String loadingTasks = 'Carregando tarefas...';
   static const String synchronizing = 'Sincronizando...';
   static const String addingTask = 'Adicionando tarefa...';
@@ -140,8 +117,6 @@ class AppStrings {
       'Erro inesperado ao completar tarefa';
   static const String mustBeAuthenticatedToCreateTasks =
       'Você deve estar autenticado para criar tarefas';
-
-  // Task Creation Dialog
   static const String newTaskTitle = 'Nova Tarefa';
   static const String taskTypeLabel = 'Tipo de Tarefa';
   static const String plantLabel = 'Planta';
@@ -163,16 +138,12 @@ class AppStrings {
   static const String dueDatePickerHelp = 'Data de Vencimento';
   static const String confirmButton = 'CONFIRMAR';
   static const String cancelButton = 'CANCELAR';
-
-  // Tasks Dashboard
   static const String totalLabel = 'Total';
   static const String pendingLabel = 'Pendentes';
   static const String todayLabel = 'Hoje';
   static const String overdueLabel = 'Atrasadas';
   static const String overallProgress = 'Progresso Geral';
   static const String tasksProgressFormat = 'de %d tarefas (%d%%)';
-
-  // Empty Tasks Widget
   static const String noTasksFound = 'Nenhuma tarefa encontrada';
   static const String noTasksFoundDescription =
       'Você ainda não possui tarefas cadastradas.\nComece adicionando uma nova tarefa para suas plantas!';
@@ -192,8 +163,6 @@ class AppStrings {
   static const String noTasksForThisPlantDescription =
       'Esta planta não possui tarefas cadastradas.\nQue tal adicionar alguns cuidados?';
   static const String addNewTaskButton = 'Adicionar Nova Tarefa';
-
-  // Task Notification Service
   static const String timeToWater = 'Hora de regar! 💧';
   static const String timeToFertilize = 'Hora de adubar! 🌿';
   static const String timeToPrune = 'Hora da poda! ✂️';
@@ -214,21 +183,15 @@ class AppStrings {
   static const String reminderRescheduled = 'Lembrete Reagendado 🔔';
   static const String notificationSystem = 'Sistema de Notificações';
   static const String checkingOverdueTasks = 'Verificando tarefas em atraso...';
-
-  // Task Notification Priority Emojis
   static const String urgentPriorityEmoji = ' ⚡';
   static const String highPriorityEmoji = ' 🔴';
   static const String mediumPriorityEmoji = ' 🟡';
   static const String lowPriorityEmoji = ' 🟢';
-
-  // Daily Summary Messages
   static const String oneTaskToday = 'Você tem 1 tarefa para hoje: ';
   static const String multipleTasksWithUrgent =
       'Você tem %TOTAL% tarefas hoje, %URGENT% urgentes!';
   static const String multipleTasksScheduled =
       'Você tem %TOTAL% tarefas agendadas para hoje';
-
-  // Tasks AppBar Strings
   static const String tasksTitle = 'Tarefas';
   static const String searchTasksHint = 'Buscar tarefas...';
   static const String filtersTitle = 'Filtros';
@@ -244,8 +207,6 @@ class AppStrings {
   static const String todayQuickFilter = 'Para hoje';
   static const String upcomingQuickFilterFormat = 'Próximas %d';
   static const String plantFilterFormat = 'Planta: %s';
-
-  // Task Type Display Names (centralized)
   static const String taskTypeWatering = 'Rega';
   static const String taskTypeFertilizing = 'Adubo';
   static const String taskTypePruning = 'Poda';
@@ -256,8 +217,6 @@ class AppStrings {
   static const String taskTypeSunlight = 'Luz solar';
   static const String taskTypeShade = 'Sombra';
   static const String taskTypeCustom = 'Personalizada';
-
-  // Priority Display Names (centralized)
   static const String priorityUrgent = 'Urgente';
   static const String priorityHigh = 'Alta';
   static const String priorityMedium = 'Média';

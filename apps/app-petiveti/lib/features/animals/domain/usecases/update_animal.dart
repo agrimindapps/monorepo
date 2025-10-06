@@ -12,7 +12,6 @@ class UpdateAnimal extends UseCase<void, Animal> {
 
   @override
   Future<Either<Failure, void>> call(Animal params) async {
-    // Validation
     if (params.name.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'Nome do animal é obrigatório'));
     }
@@ -24,8 +23,6 @@ class UpdateAnimal extends UseCase<void, Animal> {
     if (params.weight != null && params.weight! <= 0) {
       return const Left(ValidationFailure(message: 'Peso deve ser maior que zero'));
     }
-
-    // Update the updatedAt field
     final updatedAnimal = params.copyWith(updatedAt: DateTime.now());
     
     return await repository.updateAnimal(updatedAnimal);

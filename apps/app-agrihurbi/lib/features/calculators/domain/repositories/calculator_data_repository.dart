@@ -4,15 +4,11 @@
 /// das calculadoras individuais. Implementa Dependency Inversion Principle.
 abstract class ICalculatorDataRepository {
   
-  // ============= CROP REQUIREMENTS =============
-  
   /// Obtém exigências nutricionais de uma cultura
   Future<CropRequirementsData> getCropRequirements(String cropType, double expectedYield);
   
   /// Lista todas as culturas disponíveis
   Future<List<String>> getAvailableCrops();
-  
-  // ============= SOIL TEXTURE =============
   
   /// Obtém fatores relacionados à textura do solo
   Future<SoilTextureData> getSoilTextureFactors(String soilTexture);
@@ -20,25 +16,17 @@ abstract class ICalculatorDataRepository {
   /// Lista todas as texturas de solo disponíveis
   Future<List<String>> getAvailableSoilTextures();
   
-  // ============= FERTILIZER DATA =============
-  
   /// Obtém lista de produtos fertilizantes disponíveis
   Future<List<FertilizerProduct>> getFertilizerProducts();
   
   /// Busca fertilizante por nutriente específico
   Future<FertilizerProduct?> getFertilizerByNutrient(String nutrient);
   
-  // ============= APPLICATION SCHEDULE =============
-  
   /// Obtém cronograma de aplicação para uma cultura
   Future<List<ApplicationSchedule>> getApplicationSchedule(String cropType);
   
-  // ============= PREVIOUS CROP EFFECTS =============
-  
   /// Obtém efeitos da cultura anterior
   Future<PreviousCropEffect> getPreviousCropEffect(String previousCrop);
-  
-  // ============= AGRONOMIC RECOMMENDATIONS =============
   
   /// Gera recomendações agronômicas baseadas nos inputs
   Future<List<String>> getAgronomicRecommendations({
@@ -50,18 +38,12 @@ abstract class ICalculatorDataRepository {
     required double kNeed,
   });
   
-  // ============= UNIT CONVERSION =============
-  
   /// Obtém fator de conversão entre unidades
   Future<double> getConversionFactor(String fromUnit, String toUnit);
-  
-  // ============= VALIDATION RANGES =============
   
   /// Obtém ranges de validação para parâmetros
   Future<ValidationRanges> getValidationRanges(String parameterType);
 }
-
-// ============= DATA MODELS =============
 
 /// Dados de exigências nutricionais de culturas
 class CropRequirementsData {

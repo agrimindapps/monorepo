@@ -14,7 +14,6 @@ class EmptyAppointmentsState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Illustration
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -29,8 +28,6 @@ class EmptyAppointmentsState extends StatelessWidget {
             ),
             
             const SizedBox(height: 24),
-            
-            // Title
             Text(
               'Nenhuma consulta encontrada',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -41,8 +38,6 @@ class EmptyAppointmentsState extends StatelessWidget {
             ),
             
             const SizedBox(height: 8),
-            
-            // Subtitle
             Text(
               'As consultas veterinárias aparecerão aqui.\nToque no botão + para agendar a primeira consulta.',
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -52,8 +47,6 @@ class EmptyAppointmentsState extends StatelessWidget {
             ),
             
             const SizedBox(height: 32),
-            
-            // Tips section
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(

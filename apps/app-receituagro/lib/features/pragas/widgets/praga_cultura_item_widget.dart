@@ -73,11 +73,8 @@ class PragaCulturaItemWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.card),
           child: Stack(
             children: [
-              // Imagem da praga ocupando todo o card
               _buildFullImage(),
-              // Gradiente overlay para legibilidade do texto
               _buildGradientOverlay(),
-              // Conteúdo textual sobreposto
               _buildOverlayContent(),
             ],
           ),

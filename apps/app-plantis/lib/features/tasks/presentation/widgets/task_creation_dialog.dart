@@ -134,8 +134,6 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
     setState(() {
       _plants = plants;
       _isLoadingPlants = false;
-
-      // Auto-select first plant if available
       if (_plants.isNotEmpty && _selectedPlantId == null) {
         _selectedPlantId = _plants.first.id;
       }
@@ -226,27 +224,16 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Task Type Selection
                 _buildTaskTypeField(),
                 const SizedBox(height: 20),
-
-                // Plant Selection
                 _buildPlantSelectionField(),
                 const SizedBox(height: 20),
-
-                // Title Field
                 _buildTitleField(),
                 const SizedBox(height: 16),
-
-                // Description Field
                 _buildDescriptionField(),
                 const SizedBox(height: 20),
-
-                // Due Date Field
                 _buildDueDateField(),
                 const SizedBox(height: 20),
-
-                // Priority Field
                 _buildPriorityField(),
               ],
             ),

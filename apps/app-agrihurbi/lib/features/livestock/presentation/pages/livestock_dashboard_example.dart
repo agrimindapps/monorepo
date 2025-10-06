@@ -21,7 +21,6 @@ class _LivestockDashboardExampleState
   @override
   void initState() {
     super.initState();
-    // Inicializa o sistema livestock
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(livestockCoordinatorProvider).initializeSystem();
     });
@@ -48,13 +47,8 @@ class _LivestockDashboardExampleState
       ),
       body: Column(
         children: [
-          // === STATISTICS SECTION ===
           _buildStatisticsSection(coordinator),
-
-          // === FILTERS SECTION ===
           _buildFiltersSection(coordinator),
-
-          // === BOVINES LIST SECTION ===
           Expanded(child: _buildBovinesList(coordinator)),
         ],
       ),
@@ -135,7 +129,6 @@ class _LivestockDashboardExampleState
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Busca de texto
             TextField(
               decoration: const InputDecoration(
                 labelText: 'Buscar bovinos',
@@ -145,8 +138,6 @@ class _LivestockDashboardExampleState
               onChanged: coordinator.filtersProvider.updateSearchQuery,
             ),
             const SizedBox(height: 8),
-
-            // Filtros por categoria
             Row(
               children: [
                 Expanded(
@@ -184,8 +175,6 @@ class _LivestockDashboardExampleState
                 ),
               ],
             ),
-
-            // Contador de filtros ativos
             if (coordinator.filtersProvider.hasActiveFilters)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -314,8 +303,6 @@ class _LivestockDashboardExampleState
   }
 
   void _showAddBovineDialog(BuildContext context) {
-    // Implementar dialog de adicionar bovino
-    // Usando o coordinator.bovinesProvider.createBovine()
   }
 
   void _showEditBovineDialog(
@@ -323,8 +310,6 @@ class _LivestockDashboardExampleState
     LivestockCoordinatorProvider coordinator,
     BovineEntity bovine,
   ) {
-    // Implementar dialog de editar bovino
-    // Usando o coordinator.bovinesProvider.updateBovine()
   }
 
   void _showDeleteConfirmation(

@@ -11,8 +11,6 @@ import '../../domain/usecases/get_expenses.dart';
 import '../../domain/usecases/get_expenses_by_category.dart';
 import '../../domain/usecases/get_expenses_by_date_range.dart';
 import '../../domain/usecases/update_expense.dart';
-
-// State classes
 class ExpensesState {
   final List<Expense> expenses;
   final List<Expense> monthlyExpenses;
@@ -47,8 +45,6 @@ class ExpensesState {
       error: error,
     );
   }
-
-  // Helper getters
   double get totalAmount => summary?.totalAmount ?? 0;
   double get monthlyAmount => summary?.monthlyAmount ?? 0;
   double get yearlyAmount => summary?.yearlyAmount ?? 0;
@@ -58,8 +54,6 @@ class ExpensesState {
     return summary?.categoryBreakdown ?? {};
   }
 }
-
-// State notifier
 class ExpensesNotifier extends StateNotifier<ExpensesState> {
   final GetExpenses _getExpenses;
   final GetExpensesByDateRange _getExpensesByDateRange;
@@ -114,19 +108,14 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
   }
 
   void _processExpensesData(List<Expense> expenses) {
-    // Filter monthly expenses
     final now = DateTime.now();
     final monthlyExpenses = expenses.where((expense) => 
         expense.expenseDate.year == now.year && 
         expense.expenseDate.month == now.month).toList();
-
-    // Group expenses by category
     final expensesByCategory = <ExpenseCategory, List<Expense>>{};
     for (final category in ExpenseCategory.values) {
       expensesByCategory[category] = expenses.where((e) => e.category == category).toList();
     }
-
-    // Create summary from expenses
     final summary = ExpenseSummary.fromExpenses(expenses);
 
     state = state.copyWith(
@@ -184,7 +173,6 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Add the expense to current state optimistically
         final updatedExpenses = [expense, ...state.expenses];
         _processExpensesData(updatedExpenses);
       },
@@ -197,7 +185,6 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Update the expense in current state
         final updatedExpenses = state.expenses.map((e) {
           return e.id == expense.id ? expense : e;
         }).toList();
@@ -213,7 +200,6 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        // Remove the expense from current state
         final updatedExpenses = state.expenses.where((e) => e.id != expenseId).toList();
         _processExpensesData(updatedExpenses);
       },
@@ -223,8 +209,6 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
-
-  // Helper methods for the UI
   List<Expense> getExpensesByCategory(ExpenseCategory category) {
     return state.expensesByCategory[category] ?? [];
   }
@@ -233,8 +217,6 @@ class ExpensesNotifier extends StateNotifier<ExpensesState> {
     return state.categoryAmounts[category] ?? 0;
   }
 }
-
-// Providers
 final expensesProvider = StateNotifierProvider<ExpensesNotifier, ExpensesState>((ref) {
   return ExpensesNotifier(
     getExpenses: di.getIt<GetExpenses>(),
@@ -246,8 +228,6 @@ final expensesProvider = StateNotifierProvider<ExpensesNotifier, ExpensesState>(
     deleteExpense: di.getIt<DeleteExpense>(),
   );
 });
-
-// Parameter class for category provider
 class CategoryExpenseParams {
   final String userId;
   final ExpenseCategory category;
@@ -265,15 +245,11 @@ class CategoryExpenseParams {
   @override
   int get hashCode => userId.hashCode ^ category.hashCode;
 }
-
-// Individual category provider
 final categoryExpensesProvider = FutureProvider.family<List<Expense>, CategoryExpenseParams>((ref, params) async {
   final notifier = ref.read(expensesProvider.notifier);
   await notifier.loadExpensesByCategory(params.userId, params.category);
   return notifier.getExpensesByCategory(params.category);
 });
-
-// Stream provider for real-time updates
 final expensesStreamProvider = StreamProvider.family<List<Expense>, String>((ref, userId) {
   final repository = di.getIt.get<ExpenseRepository>();
   return repository.watchExpenses(userId).map((either) => either.fold(
@@ -281,15 +257,11 @@ final expensesStreamProvider = StreamProvider.family<List<Expense>, String>((ref
     (expenses) => expenses,   // Return expenses on success
   ));
 });
-
-// Monthly expenses provider
 final monthlyExpensesProvider = FutureProvider.family<List<Expense>, String>((ref, userId) async {
   final notifier = ref.read(expensesProvider.notifier);
   await notifier.loadMonthlyExpenses(userId);
   return ref.read(expensesProvider).monthlyExpenses;
 });
-
-// Summary provider
 final expenseSummaryProvider = FutureProvider.family<ExpenseSummary?, String>((ref, userId) async {
   final notifier = ref.read(expensesProvider.notifier);
   await notifier.loadExpenseSummary(userId);

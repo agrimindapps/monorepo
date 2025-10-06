@@ -32,7 +32,6 @@ class FavoritosNavigationService {
     FavoritoDefensivoModel defensivo,
   ) async {
     try {
-      // Busca dados atualizados do defensivo
       final result = await _fitossanitarioRepository.getByKey(defensivo.idReg);
       final defensivoReal = result.isSuccess ? result.data : null;
       
@@ -58,7 +57,6 @@ class FavoritosNavigationService {
     FavoritoPragaModel praga,
   ) async {
     try {
-      // Busca dados atualizados da praga
       final result = await _pragasRepository.getByKey(praga.idReg);
       final pragaReal = result.isSuccess ? result.data : null;
       
@@ -86,7 +84,6 @@ class FavoritosNavigationService {
     FavoritoDiagnosticoModel diagnostico,
   ) async {
     try {
-      // Busca diagnóstico completo com dados relacionais
       final diagnosticoCompleto = await _integrationService.getDiagnosticoCompleto(diagnostico.idReg);
 
       if (diagnosticoCompleto != null) {
@@ -116,8 +113,6 @@ class FavoritosNavigationService {
     String culturaNome,
   ) async {
     try {
-      // Aqui seria a navegação para a página específica da cultura
-      // Por enquanto mostra um diálogo informativo
       showDialog<dynamic>(
         context: context,
         builder: (context) => AlertDialog(
@@ -144,7 +139,6 @@ class FavoritosNavigationService {
     String? defensivoId,
   }) async {
     try {
-      // Aqui seria a navegação para busca avançada com filtros
       final filtros = <String, String>{};
       if (culturaId != null) filtros['cultura'] = culturaId;
       if (pragaId != null) filtros['praga'] = pragaId;
@@ -252,7 +246,6 @@ class FavoritosNavigationService {
         action: SnackBarAction(
           label: 'Atualizar Favoritos',
           onPressed: () {
-            // Aqui poderia triggerar uma atualização dos favoritos
           },
         ),
       ),
@@ -271,6 +264,5 @@ class FavoritosNavigationService {
 
   /// Limpa cache de navegação se necessário
   void clearNavigationCache() {
-    // Implementar se houver cache específico de navegação
   }
 }

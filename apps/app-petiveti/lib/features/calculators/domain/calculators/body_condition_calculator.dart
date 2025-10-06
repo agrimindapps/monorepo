@@ -174,10 +174,7 @@ class BodyConditionCalculator extends BaseCalculator<BodyConditionInput, BodyCon
 
   @override
   BodyConditionOutput performCalculation(BodyConditionInput input) {
-    // Calcular score BCS baseado nos parâmetros de entrada
     final bcsScore = _calculateBcsScore(input);
-    
-    // Usar factory para criar output completo
     return BodyConditionOutputFactory.fromBcsScore(
       bcsScore: bcsScore,
       currentWeight: input.currentWeight,
@@ -310,21 +307,13 @@ class BodyConditionCalculator extends BaseCalculator<BodyConditionInput, BodyCon
   /// @returns BCS score (1-9) where 4-5 represents ideal body condition
   /// @throws Never - method includes bounds checking and safe defaults
   int _calculateBcsScore(BodyConditionInput input) {
-    // Pesos para cada parâmetro na avaliação final
     const ribWeight = 0.4; // 40% - mais importante
     const waistWeight = 0.35; // 35% 
     const abdominalWeight = 0.25; // 25%
-    
-    // Calcular score ponderado
     final weightedScore = (input.ribPalpation.score * ribWeight) +
                          (input.waistVisibility.score * waistWeight) +
                          (input.abdominalProfile.score * abdominalWeight);
-    
-    // Converter para escala 1-9
-    // Score 1-5 dos parâmetros -> Score 1-9 BCS
     final bcsScore = ((weightedScore - 1) * 2) + 1;
-    
-    // Arredondar e limitar entre 1-9
     return bcsScore.round().clamp(1, 9);
   }
 }

@@ -7,8 +7,6 @@ class ReceitaAgroValidationService {
   static final ReceitaAgroValidationService _instance = ReceitaAgroValidationService._internal();
   factory ReceitaAgroValidationService() => _instance;
   ReceitaAgroValidationService._internal();
-
-  // ignore: unused_field
   late final ValidationService _coreValidationService;
   bool _isInitialized = false;
 
@@ -20,27 +18,17 @@ class ReceitaAgroValidationService {
 
   /// Validate agricultural data input
   ReceitaAgroValidationResult validateAgriculturalData(Map<String, dynamic> data) {
-    // Use fallback mode if not initialized
     if (!_isInitialized) {
       if (kDebugMode) print('ReceitaAgroValidationService not initialized, using fallback mode');
     }
 
     final errors = <String>[];
-
-    // Use Core Package validation for common fields if available
     try {
       if (data.containsKey('email')) {
         final email = data['email'] as String;
         if (email.isEmpty || !email.contains('@')) {
           errors.add('Email inválido');
         }
-        // Future: Use core validation when methods are confirmed
-        // if (_isInitialized) {
-        //   final emailResult = _coreValidationService.validateEmail(email);
-        //   if (!emailResult.isValid) {
-        //     errors.addAll(emailResult.errors);
-        //   }
-        // }
       }
 
       if (data.containsKey('phone')) {
@@ -48,19 +36,10 @@ class ReceitaAgroValidationService {
         if (phone.isEmpty || phone.length < 10) {
           errors.add('Telefone inválido');
         }
-        // Future: Use core validation when methods are confirmed
-        // if (_isInitialized) {
-        //   final phoneResult = _coreValidationService.validatePhone(phone);
-        //   if (!phoneResult.isValid) {
-        //     errors.addAll(phoneResult.errors);
-        //   }
-        // }
       }
     } catch (e) {
       if (kDebugMode) print('Core validation failed, using fallback: $e');
     }
-
-    // Agricultural-specific validations
     if (data.containsKey('cultura_name')) {
       final culturaResult = validateCulturaName(data['cultura_name'] as String);
       if (!culturaResult.isValid) {
@@ -117,13 +96,9 @@ class ReceitaAgroValidationService {
     if (culturaName.length > 100) {
       errors.add('Nome da cultura não pode exceder 100 caracteres');
     }
-
-    // Check for valid agricultural characters (letters, spaces, hyphens)
     if (!RegExp(r'^[a-zA-ZÀ-ÿ\s\-]+$').hasMatch(culturaName)) {
       errors.add('Nome da cultura contém caracteres inválidos');
     }
-
-    // Check for common cultura names that should be standardized
     final standardizedNames = {
       'soja': 'Soja',
       'milho': 'Milho',
@@ -136,8 +111,6 @@ class ReceitaAgroValidationService {
     };
 
     if (standardizedNames.containsKey(culturaName.toLowerCase())) {
-      // This is a suggestion, not an error
-      // Could be handled by caller if needed
     }
 
     return ReceitaAgroValidationResult(
@@ -161,8 +134,6 @@ class ReceitaAgroValidationService {
     if (pragaName.length > 150) {
       errors.add('Nome da praga não pode exceder 150 caracteres');
     }
-
-    // Allow scientific names (letters, spaces, parentheses, periods)
     if (!RegExp(r'^[a-zA-ZÀ-ÿ\s\-\.\(\)]+$').hasMatch(pragaName)) {
       errors.add('Nome da praga contém caracteres inválidos');
     }
@@ -188,8 +159,6 @@ class ReceitaAgroValidationService {
     if (defensivoName.length > 200) {
       errors.add('Nome do defensivo não pode exceder 200 caracteres');
     }
-
-    // Allow alphanumeric, spaces, hyphens, and common chemical symbols
     if (!RegExp(r'^[a-zA-Z0-9À-ÿ\s\-\.\+]+$').hasMatch(defensivoName)) {
       errors.add('Nome do defensivo contém caracteres inválidos');
     }
@@ -284,17 +253,11 @@ class ReceitaAgroValidationService {
     if (comentario.length > 1000) {
       errors.add('Comentário não pode exceder 1000 caracteres');
     }
-
-    // Check for spam-like content
     if (comentario.toLowerCase().contains('spam') ||
         comentario.toLowerCase().contains('teste teste teste')) {
       errors.add('Conteúdo parece ser spam');
     }
-
-    // Use Core Package for profanity filter if available
     try {
-      // This would use core package's content validation if available
-      // For now, basic check
       final inappropriateWords = ['palavra1', 'palavra2']; // Placeholder
       for (final word in inappropriateWords) {
         if (comentario.toLowerCase().contains(word)) {
@@ -303,7 +266,6 @@ class ReceitaAgroValidationService {
         }
       }
     } catch (e) {
-      // Fallback if core validation not available
     }
 
     return ReceitaAgroValidationResult(
@@ -315,24 +277,18 @@ class ReceitaAgroValidationService {
   /// Validate diagnostic search filters
   ReceitaAgroValidationResult validateDiagnosticFilters(Map<String, dynamic> filters) {
     final errors = <String>[];
-
-    // Validate cultura filter
     if (filters.containsKey('cultura') && filters['cultura'] != null) {
       final culturaResult = validateCulturaName(filters['cultura'] as String);
       if (!culturaResult.isValid) {
         errors.add('Filtro de cultura inválido: ${culturaResult.errors.first}');
       }
     }
-
-    // Validate praga filter
     if (filters.containsKey('praga') && filters['praga'] != null) {
       final pragaResult = validatePragaName(filters['praga'] as String);
       if (!pragaResult.isValid) {
         errors.add('Filtro de praga inválido: ${pragaResult.errors.first}');
       }
     }
-
-    // Validate search query length
     if (filters.containsKey('query') && filters['query'] != null) {
       final query = filters['query'] as String;
       if (query.length > 200) {
@@ -349,19 +305,13 @@ class ReceitaAgroValidationService {
   /// Validate favorite item data
   ReceitaAgroValidationResult validateFavoriteItem(String type, String id, Map<String, dynamic> data) {
     final errors = <String>[];
-
-    // Validate type
     final validTypes = ['defensivo', 'praga', 'cultura', 'diagnostico'];
     if (!validTypes.contains(type)) {
       errors.add('Tipo de favorito inválido');
     }
-
-    // Validate ID
     if (id.isEmpty || id.length > 50) {
       errors.add('ID do item favorito inválido');
     }
-
-    // Validate data based on type
     switch (type) {
       case 'defensivo':
         if (!data.containsKey('nome') || data['nome'] == null) {

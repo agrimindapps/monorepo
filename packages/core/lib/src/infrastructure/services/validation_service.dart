@@ -12,7 +12,6 @@
 /// - Validação condicional
 /// - Sanitização de dados
 class ValidationService {
-  // Patterns comuns
   static final _emailPattern = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
   );
@@ -24,8 +23,6 @@ class ValidationService {
   static final _strongPasswordPattern = RegExp(
     r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]'
   );
-
-  // Mensagens de erro (podem ser internacionalizadas)
   static const Map<String, String> _defaultMessages = {
     'required': 'Este campo é obrigatório',
     'email': 'Email inválido',
@@ -67,8 +64,6 @@ class ValidationService {
     
     return message;
   }
-
-  // ========== VALIDADORES BÁSICOS ==========
 
   /// Validador obrigatório
   static Validator<String> required([String? message]) {
@@ -251,29 +246,21 @@ class ValidationService {
           message ?? _getMessage('strongPassword'),
         );
       }
-      
-      // Verifica se tem pelo menos uma minúscula
       if (!RegExp(r'[a-z]').hasMatch(value)) {
         return ValidationResult.error(
           message ?? _getMessage('strongPassword'),
         );
       }
-      
-      // Verifica se tem pelo menos uma maiúscula
       if (!RegExp(r'[A-Z]').hasMatch(value)) {
         return ValidationResult.error(
           message ?? _getMessage('strongPassword'),
         );
       }
-      
-      // Verifica se tem pelo menos um dígito
       if (!RegExp(r'\d').hasMatch(value)) {
         return ValidationResult.error(
           message ?? _getMessage('strongPassword'),
         );
       }
-      
-      // Verifica se tem pelo menos um símbolo
       if (!RegExp(r'[@$!%*?&]').hasMatch(value)) {
         return ValidationResult.error(
           message ?? _getMessage('strongPassword'),
@@ -411,8 +398,6 @@ class ValidationService {
     };
   }
 
-  // ========== VALIDADORES COMPOSTOS ==========
-
   /// Combina múltiplos validadores com AND
   static Validator<T> combine<T>(List<Validator<T>> validators) {
     return (value) {
@@ -446,8 +431,6 @@ class ValidationService {
     };
   }
 
-  // ========== VALIDAÇÃO DE FORMULÁRIOS ==========
-
   /// Valida um mapa de campos
   static ValidationResult validateForm(Map<String, dynamic> data, Map<String, List<Validator>> rules) {
     final errors = <String, List<String>>{};
@@ -477,8 +460,6 @@ class ValidationService {
     
     return ValidationResult.errorWithFields(errors);
   }
-
-  // ========== SANITIZAÇÃO ==========
 
   /// Sanitiza string removendo caracteres especiais
   static String sanitizeString(String input, {bool allowSpaces = true}) {
@@ -512,8 +493,6 @@ class ValidationService {
     }
     return url;
   }
-
-  // ========== VALIDAÇÃO ASSÍNCRONA ==========
 
   /// Validador assíncrono customizado
   static AsyncValidator<T> asyncCustom<T>(
@@ -549,18 +528,13 @@ class ValidationService {
     Map<String, List<Validator>> syncRules,
     [Map<String, List<AsyncValidator>>? asyncRules]
   ) async {
-    // Primeiro executa validações síncronas
     final syncResult = validateForm(data, syncRules);
     if (!syncResult.isValid) {
       return syncResult;
     }
-    
-    // Se não há validações assíncronas, retorna resultado síncrono
     if (asyncRules == null || asyncRules.isEmpty) {
       return syncResult;
     }
-    
-    // Executa validações assíncronas
     final errors = <String, List<String>>{};
     
     for (final entry in asyncRules.entries) {
@@ -589,15 +563,9 @@ class ValidationService {
     return ValidationResult.errorWithFields(errors);
   }
 
-  // ========== MÉTODOS AUXILIARES PRIVADOS ==========
-
   static bool _isValidCpf(String cpf) {
     if (cpf.length != 11) return false;
-    
-    // Verifica se todos os dígitos são iguais
     if (RegExp(r'^(\d)\1{10}$').hasMatch(cpf)) return false;
-    
-    // Validação do primeiro dígito verificador
     int sum = 0;
     for (int i = 0; i < 9; i++) {
       sum += int.parse(cpf[i]) * (10 - i);
@@ -606,8 +574,6 @@ class ValidationService {
     int firstDigit = remainder < 2 ? 0 : 11 - remainder;
     
     if (int.parse(cpf[9]) != firstDigit) return false;
-    
-    // Validação do segundo dígito verificador
     sum = 0;
     for (int i = 0; i < 10; i++) {
       sum += int.parse(cpf[i]) * (11 - i);
@@ -620,11 +586,7 @@ class ValidationService {
 
   static bool _isValidCnpj(String cnpj) {
     if (cnpj.length != 14) return false;
-    
-    // Verifica se todos os dígitos são iguais
     if (RegExp(r'^(\d)\1{13}$').hasMatch(cnpj)) return false;
-    
-    // Validação do primeiro dígito verificador
     const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
     int sum = 0;
     for (int i = 0; i < 12; i++) {
@@ -634,8 +596,6 @@ class ValidationService {
     int firstDigit = remainder < 2 ? 0 : 11 - remainder;
     
     if (int.parse(cnpj[12]) != firstDigit) return false;
-    
-    // Validação do segundo dígito verificador
     const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
     sum = 0;
     for (int i = 0; i < 13; i++) {

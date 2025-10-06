@@ -33,8 +33,6 @@ class LogRepositoryImpl implements LogRepository {
   Future<Either<Failure, Unit>> saveLog(LogEntry logEntry) async {
     try {
       await localDataSource.saveLog(logEntry);
-      
-      // Tenta sync em background se conectado (sem bloquear)
       _syncInBackground();
       
       return const Right(unit);
@@ -49,8 +47,6 @@ class LogRepositoryImpl implements LogRepository {
   Future<Either<Failure, Unit>> saveLogs(List<LogEntry> logEntries) async {
     try {
       await localDataSource.saveLogs(logEntries);
-      
-      // Tenta sync em background se conectado (sem bloquear)
       _syncInBackground();
       
       return const Right(unit);
@@ -161,8 +157,6 @@ class LogRepositoryImpl implements LogRepository {
       }
 
       await remoteDataSource.syncLogs(logs);
-      
-      // Marca como sincronizados localmente
       final logIds = logs.map((log) => log.id).toList();
       await localDataSource.markLogsAsSynced(logIds);
       
@@ -262,7 +256,6 @@ class LogRepositoryImpl implements LogRepository {
         (failure) => null,
         (unsyncedLogs) async {
           if (unsyncedLogs.isNotEmpty) {
-            // Sync sem aguardar para não bloquear
             syncLogsToRemote(unsyncedLogs).then((_) {
               if (kDebugMode) {
                 print('✅ Logs synced in background: ${unsyncedLogs.length}');

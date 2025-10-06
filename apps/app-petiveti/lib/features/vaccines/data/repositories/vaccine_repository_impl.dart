@@ -16,8 +16,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
     required this.localDataSource,
     required this.remoteDataSource,
   });
-
-  // Helper methods
   Either<Failure, List<Vaccine>> _handleLocalSuccess(List<VaccineModel> models) {
     try {
       final vaccines = models.map((model) => model.toEntity()).toList();
@@ -39,14 +37,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
     try {
       await remoteOperation();
     } on ServerException {
-      // Ignore server errors for local-first approach
-      // Data will be synced later when connection is available
     } catch (e) {
-      // Ignore other sync errors
     }
   }
-
-  // Basic CRUD operations
   @override
   Future<Either<Failure, List<Vaccine>>> getVaccines() async {
     try {
@@ -90,11 +83,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<Either<Failure, Vaccine>> addVaccine(Vaccine vaccine) async {
     try {
       final vaccineModel = VaccineModel.fromEntity(vaccine);
-      
-      // Local-first: save to local storage immediately
       await localDataSource.addVaccine(vaccineModel);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.addVaccine(vaccineModel));
       
       return Right(vaccine);
@@ -109,11 +98,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<Either<Failure, Vaccine>> updateVaccine(Vaccine vaccine) async {
     try {
       final vaccineModel = VaccineModel.fromEntity(vaccine);
-      
-      // Local-first: update local storage immediately
       await localDataSource.updateVaccine(vaccineModel);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.updateVaccine(vaccineModel));
       
       return Right(vaccine);
@@ -127,10 +112,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, void>> deleteVaccine(String id) async {
     try {
-      // Local-first: delete from local storage immediately
       await localDataSource.deleteVaccine(id);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.deleteVaccine(id));
       
       return const Right(null);
@@ -153,8 +135,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado ao excluir vacinas: ${e.toString()}'));
     }
   }
-
-  // Status-based queries
   @override
   Future<Either<Failure, List<Vaccine>>> getPendingVaccines([String? animalId]) async {
     try {
@@ -238,8 +218,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-
-  // Calendar and date-based queries
   @override
   Future<Either<Failure, List<Vaccine>>> getVaccinesByDateRange(
     DateTime startDate,
@@ -281,8 +259,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
     try {
       final vaccineModels = await localDataSource.getVaccinesByDateRange(startDate, endDate, animalId);
       final vaccines = vaccineModels.map((model) => model.toEntity()).toList();
-      
-      // Group vaccines by date
       final Map<DateTime, List<Vaccine>> calendar = {};
       for (final vaccine in vaccines) {
         final date = DateTime(vaccine.date.year, vaccine.date.month, vaccine.date.day);
@@ -297,8 +273,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-
-  // Reminder functionality
   @override
   Future<Either<Failure, List<Vaccine>>> getVaccinesNeedingReminders() async {
     try {
@@ -329,20 +303,13 @@ class VaccineRepositoryImpl implements VaccineRepository {
     DateTime reminderDate,
   ) async {
     try {
-      // Get the vaccine first
       final vaccineModel = await localDataSource.getVaccineById(vaccineId);
       if (vaccineModel == null) {
         return const Left(ValidationFailure(message: 'Vacina não encontrada'));
       }
-
-      // Update with reminder
       final updatedVaccine = vaccineModel.toEntity().scheduleReminder(reminderDate);
       final updatedModel = VaccineModel.fromEntity(updatedVaccine);
-      
-      // Local-first update
       await localDataSource.updateVaccine(updatedModel);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.scheduleVaccineReminder(vaccineId, reminderDate));
       
       return Right(updatedVaccine);
@@ -356,20 +323,13 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, void>> removeVaccineReminder(String vaccineId) async {
     try {
-      // Get the vaccine first
       final vaccineModel = await localDataSource.getVaccineById(vaccineId);
       if (vaccineModel == null) {
         return const Left(ValidationFailure(message: 'Vacina não encontrada'));
       }
-
-      // Update without reminder
       final updatedVaccine = vaccineModel.toEntity().copyWith(reminderDate: null);
       final updatedModel = VaccineModel.fromEntity(updatedVaccine);
-      
-      // Local-first update
       await localDataSource.updateVaccine(updatedModel);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.removeVaccineReminder(vaccineId));
       
       return const Right(null);
@@ -379,8 +339,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-
-  // Search and filtering
   @override
   Future<Either<Failure, List<Vaccine>>> searchVaccines(
     String query, [
@@ -440,8 +398,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-
-  // Statistics and reporting
   @override
   Future<Either<Failure, Map<String, int>>> getVaccineStatistics([String? animalId]) async {
     try {
@@ -559,17 +515,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-
-  // Bulk operations
   @override
   Future<Either<Failure, List<Vaccine>>> addMultipleVaccines(List<Vaccine> vaccines) async {
     try {
       final vaccineModels = vaccines.map((v) => VaccineModel.fromEntity(v)).toList();
-      
-      // Local-first: save to local storage immediately
       await localDataSource.addMultipleVaccines(vaccineModels);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.addMultipleVaccines(vaccineModels));
       
       return Right(vaccines);
@@ -583,10 +533,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
   @override
   Future<Either<Failure, void>> markVaccinesAsCompleted(List<String> vaccineIds) async {
     try {
-      // Local-first: update local storage immediately
       await localDataSource.markVaccinesAsCompleted(vaccineIds);
-      
-      // Background sync to remote
       await _syncToRemote(() => remoteDataSource.markVaccinesAsCompleted(vaccineIds));
       
       return const Right(null);
@@ -603,7 +550,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
     VaccineStatus status,
   ) async {
     try {
-      // Update locally
       for (final id in vaccineIds) {
         final vaccine = await localDataSource.getVaccineById(id);
         if (vaccine != null) {
@@ -619,28 +565,18 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
-
-  // Data synchronization
   @override
   Future<Either<Failure, void>> syncVaccines() async {
     try {
-      // Get last sync time
       final lastSync = await remoteDataSource.getLastSyncTime();
       
       if (lastSync != null) {
-        // Get vaccines modified after last sync
         final modifiedVaccines = await remoteDataSource.getVaccinesModifiedAfter(lastSync);
-        
-        // Update local cache with modified vaccines
         await localDataSource.cacheVaccines(modifiedVaccines.where((v) => !v.isDeleted).toList());
-        
-        // Handle deletions
         for (final vaccine in modifiedVaccines.where((v) => v.isDeleted)) {
           await localDataSource.deleteVaccine(vaccine.id);
         }
       }
-      
-      // Update last sync time
       await remoteDataSource.updateLastSyncTime();
       
       return const Right(null);
@@ -664,8 +600,6 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(NetworkFailure(message: 'Erro ao obter tempo de sincronização: ${e.toString()}'));
     }
   }
-
-  // Data export/import
   @override
   Future<Either<Failure, Map<String, dynamic>>> exportVaccineData([String? animalId]) async {
     try {

@@ -14,7 +14,6 @@ class PlantsFab extends ConsumerWidget {
   });
 
   Future<void> _onAddPlant(BuildContext context, WidgetRef ref) async {
-    // Mostrar dialog modal para cadastro de planta
     await PlantFormDialog.show(context);
   }
 

@@ -42,14 +42,10 @@ class CacheService {
       final cacheKey = _cachePrefix + key;
       final timestampKey = cacheKey + _timestampSuffix;
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-
-      // Salvar no cache em memória
       if (useMemoryCache) {
         _memoryCache[cacheKey] = data;
         _memoryCacheTimestamp[cacheKey] = DateTime.now();
       }
-
-      // Salvar no SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final jsonData = jsonEncode(data);
 
@@ -75,8 +71,6 @@ class CacheService {
       final cacheKey = _cachePrefix + key;
       final timestampKey = cacheKey + _timestampSuffix;
       final cacheTtl = ttl ?? _defaultTtl;
-
-      // Verificar cache em memória primeiro
       if (useMemoryCache && _memoryCache.containsKey(cacheKey)) {
         final cacheTime = _memoryCacheTimestamp[cacheKey];
         if (cacheTime != null &&
@@ -85,13 +79,10 @@ class CacheService {
           SecureLogger.debug('Cache hit (memory) para key: $key');
           return _memoryCache[cacheKey] as T;
         } else {
-          // Cache expirado, remover da memória
           _memoryCache.remove(cacheKey);
           _memoryCacheTimestamp.remove(cacheKey);
         }
       }
-
-      // Verificar SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final cachedData = prefs.getString(cacheKey);
       final timestamp = prefs.getInt(timestampKey);
@@ -105,8 +96,6 @@ class CacheService {
           final data = deserializer != null
               ? deserializer(jsonDecode(cachedData))
               : jsonDecode(cachedData) as T;
-
-          // Atualizar cache em memória
           if (useMemoryCache) {
             _memoryCache[cacheKey] = data;
             _memoryCacheTimestamp[cacheKey] = cacheTime;
@@ -115,7 +104,6 @@ class CacheService {
           SecureLogger.debug('Cache hit (disk) para key: $key');
           return data;
         } else {
-          // Cache expirado, remover
           await remove(key);
         }
       }
@@ -135,12 +123,8 @@ class CacheService {
     try {
       final cacheKey = _cachePrefix + key;
       final timestampKey = cacheKey + _timestampSuffix;
-
-      // Remover da memória
       _memoryCache.remove(cacheKey);
       _memoryCacheTimestamp.remove(cacheKey);
-
-      // Remover do SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await Future.wait([
         prefs.remove(cacheKey),
@@ -201,7 +185,6 @@ class CacheService {
     bool useMemoryCache = true,
     T Function(dynamic)? deserializer,
   }) async {
-    // Tentar cache primeiro
     final cachedData = await get<T>(
       key,
       ttl: ttl,
@@ -212,11 +195,7 @@ class CacheService {
     if (cachedData != null) {
       return cachedData;
     }
-
-    // Se não há cache, buscar dados
     final data = await fetcher();
-
-    // Salvar no cache
     await set(key, data, ttl: ttl, useMemoryCache: useMemoryCache);
 
     return data;
@@ -265,8 +244,6 @@ class CacheService {
       for (final key in keys) {
         await prefs.remove(key);
       }
-
-      // Limpar da memória também
       _memoryCache.removeWhere((key, value) => key.contains(pattern));
       _memoryCacheTimestamp.removeWhere((key, value) => key.contains(pattern));
 
@@ -301,5 +278,4 @@ extension CacheExtension on String {
 
 /// Função para evitar warning do unawaited
 void unawaited(Future<void> future) {
-  // Intencionalmente não esperamos o resultado
 }

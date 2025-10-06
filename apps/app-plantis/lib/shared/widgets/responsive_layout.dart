@@ -41,11 +41,7 @@ class ResponsiveLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Se a tela é menor que maxWidth + padding, use a tela inteira com padding lateral
-    // Se a tela é maior, centralize o conteúdo com largura máxima
     if (screenWidth <= maxWidth + (horizontalPadding * 2)) {
-      // Mobile/Tablet - usar largura total com padding lateral
       return Padding(
         padding: EdgeInsets.symmetric(
           horizontal: horizontalPadding,
@@ -54,7 +50,6 @@ class ResponsiveLayout extends StatelessWidget {
         child: child,
       );
     } else {
-      // Desktop - centralizar com largura máxima
       return Center(
         child: Container(
           constraints: BoxConstraints(maxWidth: maxWidth),
@@ -92,7 +87,6 @@ extension ResponsiveLayoutExtension on Widget {
 
 /// Breakpoints responsivos para uso consistente em toda a aplicação
 class ResponsiveBreakpoints {
-  // Private constructor to prevent instantiation
   const ResponsiveBreakpoints._();
 
   /// Largura mínima para considerar desktop (1200px)

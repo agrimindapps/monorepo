@@ -6,8 +6,6 @@ class MaintenanceFormatterService {
   factory MaintenanceFormatterService() => _instance;
   MaintenanceFormatterService._internal();
   static final MaintenanceFormatterService _instance = MaintenanceFormatterService._internal();
-
-  // Formatadores brasileiros
   final NumberFormat _currencyFormatter = NumberFormat.currency(
     locale: 'pt_BR',
     symbol: 'R\$',
@@ -18,8 +16,6 @@ class MaintenanceFormatterService {
   final DateFormat _dateFormatter = DateFormat('dd/MM/yyyy', 'pt_BR');
   final DateFormat _timeFormatter = DateFormat('HH:mm', 'pt_BR');
   final DateFormat _dateTimeFormatter = DateFormat('dd/MM/yyyy HH:mm', 'pt_BR');
-
-  // Cache para otimização de performance
   final Map<String, String> _formatCache = {};
   static const int maxCacheSize = 100;
 
@@ -74,8 +70,6 @@ class MaintenanceFormatterService {
     }
     
     final formatted = formatter();
-    
-    // Controlar tamanho do cache
     if (_formatCache.length >= maxCacheSize) {
       _formatCache.clear();
     }
@@ -87,8 +81,6 @@ class MaintenanceFormatterService {
   /// Parse de valores formatados para double
   double parseFormattedAmount(String value) {
     if (value.isEmpty) return 0.0;
-    
-    // Remove símbolos e converte vírgula para ponto
     final cleaned = value
         .replaceAll('R\$', '')
         .replaceAll('.', '') // Remove separador de milhares
@@ -101,8 +93,6 @@ class MaintenanceFormatterService {
   /// Parse de odômetro formatado para double
   double parseFormattedOdometer(String value) {
     if (value.isEmpty) return 0.0;
-    
-    // Remove "km" e converte vírgula para ponto
     final cleaned = value
         .replaceAll('km', '')
         .replaceAll('.', '') // Remove separador de milhares
@@ -122,10 +112,8 @@ class MaintenanceFormatterService {
     final cleaned = phone.replaceAll(RegExp(r'[^\d]'), '');
     
     if (cleaned.length == 10) {
-      // Formato: (XX) XXXX-XXXX
       return '(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 6)}-${cleaned.substring(6)}';
     } else if (cleaned.length == 11) {
-      // Formato: (XX) 9XXXX-XXXX
       return '(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 7)}-${cleaned.substring(7)}';
     }
     

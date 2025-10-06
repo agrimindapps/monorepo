@@ -373,14 +373,10 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
               .toLowerCase()
               .contains(query.toLowerCase());
         }
-        
-        // Default search by converting child to string
         final childText = _extractTextFromWidget(item.child);
         return childText.toLowerCase().contains(query.toLowerCase());
       }).toList();
     }
-    
-    // Update overlay
     _overlayEntry?.markNeedsBuild();
   }
 

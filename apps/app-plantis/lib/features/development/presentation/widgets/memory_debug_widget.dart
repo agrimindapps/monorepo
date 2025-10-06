@@ -29,8 +29,6 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
 
     if (kDebugMode) {
       _memoryService.startMonitoring();
-
-      // Update report every 30 seconds
       Future.delayed(const Duration(seconds: 2), _updateReport);
       _startPeriodicUpdate();
     }

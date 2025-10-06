@@ -2,22 +2,15 @@ import 'package:flutter/material.dart';
 
 /// Cores específicas do ReceitaAgro (foco em agronegócio)
 class ReceitaAgroColors {
-  // Primary greens (agriculture focus)
   static const Color primary = Color(0xFF4CAF50);        // Agriculture green
   static const Color primaryLight = Color(0xFF81C784);   // Light green
   static const Color primaryDark = Color(0xFF388E3C);    // Dark green
-  
-  // Secondary greens
   static const Color secondary = Color(0xFF8BC34A);      // Light green accent
   static const Color secondaryLight = Color(0xFFDCEDC8); // Very light green
   static const Color secondaryDark = Color(0xFF689F38);  // Dark green accent
-  
-  // Tertiary/Accent colors
   static const Color accent = Color(0xFF66BB6A);         // Medium green
   static const Color accentLight = Color(0xFFC8E6C9);    // Light accent
   static const Color accentDark = Color(0xFF2E7D32);     // Dark accent
-  
-  // Agricultural themed colors
   static const Color earth = Color(0xFF795548);          // Earth brown
   static const Color earthLight = Color(0xFFD7CCC8);     // Light earth
   static const Color earthDark = Color(0xFF5D4037);      // Dark earth
@@ -29,8 +22,6 @@ class ReceitaAgroColors {
   static const Color seed = Color(0xFF3E2723);           // Seed brown
   static const Color leaf = Color(0xFF4CAF50);           // Leaf green
   static const Color sun = Color(0xFFFFC107);            // Sun yellow
-  
-  // Brand gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -60,8 +51,6 @@ class ReceitaAgroColors {
     end: Alignment.bottomRight,
     colors: [harvest, harvestLight],
   );
-  
-  // Helper methods
   static Color getPrimaryShade(int shade) {
     switch (shade) {
       case 50: return const Color(0xFFE8F5E8);

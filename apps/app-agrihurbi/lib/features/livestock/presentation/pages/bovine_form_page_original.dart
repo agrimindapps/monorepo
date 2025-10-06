@@ -29,8 +29,6 @@ class BovineFormPage extends ConsumerStatefulWidget {
 class _BovineFormPageState extends ConsumerState<BovineFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  
-  // Controladores dos campos
   final _commonNameController = TextEditingController();
   final _registrationIdController = TextEditingController();
   final _breedController = TextEditingController();
@@ -40,8 +38,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
   final _characteristicsController = TextEditingController();
   final _purposeController = TextEditingController();
   final _tagsController = TextEditingController();
-
-  // Estado do formulário
   BovineAptitude? _selectedAptitude;
   BreedingSystem? _selectedBreedingSystem;
   List<String> _selectedTags = [];
@@ -74,11 +70,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
 
     if (widget.isEditing) {
       final provider = ref.read(bovinesProviderProvider);
-
-      // Tenta buscar o bovino local primeiro
       var bovine = provider.getBovineById(widget.bovineId!);
-
-      // Se não encontrou local, carrega usando use case dedicado
       if (bovine == null) {
         final success = await provider.loadBovineById(widget.bovineId!);
         if (success) {
@@ -91,7 +83,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       if (bovine != null) {
         _populateForm(bovine);
       } else {
-        // Mostra erro específico baseado no estado do provider
         final provider = ref.read(bovinesProviderProvider);
         final errorMsg = provider.errorMessage ?? 'Bovino não encontrado';
         _showErrorAndGoBack(errorMsg);
@@ -152,7 +143,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
           : Builder(
               builder: (context) {
                 final provider = ref.watch(bovinesProviderProvider);
-                // Mostra loading específico para carregamento de bovino individual
                 if (provider.isLoadingBovine) {
                   return Center(
                     child: Column(
@@ -172,8 +162,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
                     ),
                   );
                 }
-                
-                // Mostra erro se houve falha no carregamento
                 if (provider.errorMessage != null && widget.isEditing) {
                   return Center(
                     child: Column(
@@ -718,7 +706,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
           action: SnackBarAction(
             label: 'Tentar Novamente',
             onPressed: () {
-              // Tenta carregar novamente
               _loadBovineData();
             },
           ),

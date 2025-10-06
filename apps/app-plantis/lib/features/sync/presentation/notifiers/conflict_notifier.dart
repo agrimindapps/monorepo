@@ -42,8 +42,6 @@ class ConflictNotifier extends _$ConflictNotifier {
   Future<ConflictState> build() async {
     _conflictHistoryService = ref.read(conflictHistoryServiceProvider);
     _conflictResolver = ref.read(conflictResolverProvider);
-
-    // Load initial conflicts
     try {
       final conflicts = _conflictHistoryService.getAllConflicts();
       return ConflictState(conflicts: conflicts);
@@ -141,8 +139,6 @@ class ConflictNotifier extends _$ConflictNotifier {
     }
   }
 }
-
-// Dependency Providers
 @riverpod
 ConflictHistoryService conflictHistoryService(Ref ref) {
   return GetIt.instance<ConflictHistoryService>();

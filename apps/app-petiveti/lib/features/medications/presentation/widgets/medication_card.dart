@@ -34,7 +34,6 @@ class MedicationCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with name and status
               Row(
                 children: [
                   Expanded(
@@ -127,8 +126,6 @@ class MedicationCard extends StatelessWidget {
               ),
               
               const SizedBox(height: 12),
-              
-              // Dosage and frequency
               Row(
                 children: [
                   Expanded(
@@ -152,8 +149,6 @@ class MedicationCard extends StatelessWidget {
               ),
               
               const SizedBox(height: 12),
-              
-              // Treatment period
               Row(
                 children: [
                   Icon(
@@ -178,8 +173,6 @@ class MedicationCard extends StatelessWidget {
                   ],
                 ],
               ),
-              
-              // Progress bar for active medications
               if (medication.isActive) ...[
                 const SizedBox(height: 8),
                 LinearProgressIndicator(
@@ -193,8 +186,6 @@ class MedicationCard extends StatelessWidget {
                   style: theme.textTheme.bodySmall,
                 ),
               ],
-              
-              // Prescribed by (if available)
               if (medication.prescribedBy != null) ...[
                 const SizedBox(height: 8),
                 Row(
@@ -214,8 +205,6 @@ class MedicationCard extends StatelessWidget {
                   ],
                 ),
               ],
-              
-              // Warning for expiring medications
               if (medication.isExpiringSoon) ...[
                 const SizedBox(height: 8),
                 Container(

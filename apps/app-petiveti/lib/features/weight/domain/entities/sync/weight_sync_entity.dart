@@ -123,23 +123,15 @@ class WeightSyncEntity extends BaseSyncEntity {
       'date': date.toIso8601String(),
       'notes': notes,
       'body_condition_score': bodyConditionScore,
-
-      // Informações de registro
       'measurement_method': measurementMethod.toString().split('.').last,
       'accuracy': accuracy.toString().split('.').last,
       'environmental_factors': environmentalFactors,
-
-      // Informações veterinárias
       'vet_recommended_weight': vetRecommendedWeight,
       'is_target_weight': isTargetWeight,
       'previous_weight': previousWeight,
       'weight_goal_id': weightGoalId,
-
-      // Mídia e medições
       'photos_urls': photosUrls,
       'measurements': measurements,
-
-      // Metadados computados
       'body_condition': bodyCondition.toString().split('.').last,
       'formatted_weight': formattedWeight,
       'is_recent': isRecent,
@@ -152,8 +144,6 @@ class WeightSyncEntity extends BaseSyncEntity {
       'percentage_change': percentageChange,
       'requires_vet_attention': requiresVetAttention,
     };
-
-    // Remover valores nulos
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -171,28 +161,20 @@ class WeightSyncEntity extends BaseSyncEntity {
       version: (baseFields['version'] as int?) ?? 1,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-
-      // Campos específicos do peso
       animalId: map['animal_id'] as String,
       weight: (map['weight'] as num).toDouble(),
       date: DateTime.parse(map['date'] as String),
       notes: map['notes'] as String?,
       bodyConditionScore: map['body_condition_score'] as int?,
-
-      // Informações de registro
       measurementMethod: _parseWeightMeasurementMethod(map['measurement_method'] as String?),
       accuracy: _parseWeightAccuracy(map['accuracy'] as String?),
       environmentalFactors: (map['environmental_factors'] as List<dynamic>?)
         ?.map((e) => e as String)
         .toList() ?? [],
-
-      // Informações veterinárias
       vetRecommendedWeight: (map['vet_recommended_weight'] as num?)?.toDouble(),
       isTargetWeight: map['is_target_weight'] as bool? ?? false,
       previousWeight: (map['previous_weight'] as num?)?.toDouble(),
       weightGoalId: map['weight_goal_id'] as String?,
-
-      // Mídia e medições
       photosUrls: (map['photos_urls'] as List<dynamic>?)
         ?.map((e) => e as String)
         .toList() ?? [],

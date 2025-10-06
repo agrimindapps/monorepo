@@ -25,22 +25,15 @@ class PerformCalculation {
     String? animalId,
     bool saveToHistory = true,
   }) async {
-    // 1. Buscar a calculadora
     final calculator = await _repository.getCalculatorById(calculatorId);
     if (calculator == null) {
       throw Exception('Calculadora não encontrada: $calculatorId');
     }
-
-    // 2. Validar inputs
     if (!calculator.validateInputs(inputs)) {
       final errors = calculator.getValidationErrors(inputs);
       throw ArgumentError('Inputs inválidos: ${errors.join(', ')}');
     }
-
-    // 3. Executar cálculo
     final result = calculator.calculate(inputs);
-
-    // 4. Salvar no histórico se solicitado
     if (saveToHistory) {
       await _saveCalculationToHistory(
         calculator: calculator,

@@ -27,7 +27,6 @@ class CalculatorFavoritesService {
       final favoritesList = jsonDecode(favoritesJson) as List;
       return favoritesList.cast<String>();
     } catch (e) {
-      // Tentar backup em caso de erro
       return await _restoreFromBackup();
     }
   }
@@ -135,8 +134,6 @@ class CalculatorFavoritesService {
   /// Sincroniza favoritos (placeholder para sincronização remota)
   Future<bool> syncFavorites() async {
     try {
-      // Aqui seria implementada a sincronização com servidor
-      // Por enquanto, apenas atualiza timestamp local
       await _prefs.setString(_lastSyncKey, DateTime.now().toIso8601String());
       return true;
     } catch (e) {
@@ -161,7 +158,6 @@ class CalculatorFavoritesService {
       final backupJson = jsonEncode(backupData);
       await _prefs.setString(_favoritesBackupKey, backupJson);
     } catch (e) {
-      // Falha no backup não deve impedir operação principal
     }
   }
 
@@ -172,8 +168,6 @@ class CalculatorFavoritesService {
 
       final backupData = jsonDecode(backupJson) as Map<String, dynamic>;
       final favorites = backupData['favorites'] as List;
-
-      // Restaurar dados principais
       await _saveFavorites(favorites.cast<String>());
 
       return favorites.cast<String>();
@@ -197,24 +191,17 @@ class CalculatorSearchService {
     final normalizedQuery = _normalizeText(query);
 
     return calculators.where((calculator) {
-      // Busca no nome
       if (_normalizeText(calculator.name).contains(normalizedQuery)) {
         return true;
       }
-
-      // Busca na descrição
       if (_normalizeText(calculator.description).contains(normalizedQuery)) {
         return true;
       }
-
-      // Busca nas tags
       for (final tag in calculator.tags) {
         if (_normalizeText(tag).contains(normalizedQuery)) {
           return true;
         }
       }
-
-      // Busca nos parâmetros
       for (final parameter in calculator.parameters) {
         if (_normalizeText(parameter.name).contains(normalizedQuery) ||
             _normalizeText(parameter.description).contains(normalizedQuery)) {
@@ -301,8 +288,6 @@ class CalculatorSearchService {
     int maxSuggestions = 5,
   }) {
     final suggestions = <CalculatorEntity>[];
-
-    // Prioridade 1: Mesma categoria
     final sameCategory =
         allCalculators
             .where(
@@ -312,8 +297,6 @@ class CalculatorSearchService {
             )
             .toList();
     suggestions.addAll(sameCategory);
-
-    // Prioridade 2: Tags em comum
     final commonTags =
         allCalculators
             .where(
@@ -328,8 +311,6 @@ class CalculatorSearchService {
         suggestions.add(calc);
       }
     }
-
-    // Prioridade 3: Complexidade similar
     final similarComplexity =
         allCalculators
             .where(

@@ -6,7 +6,6 @@ import '../../shared/utils/failure.dart';
 class MockAnalyticsService implements IAnalyticsRepository {
   @override
   Future<Either<Failure, void>> logLogin({required String method}) async {
-    // Mock - apenas retorna sucesso
     return const Right(null);
   }
 
@@ -19,8 +18,6 @@ class MockAnalyticsService implements IAnalyticsRepository {
   Future<Either<Failure, void>> logEvent(String name, {Map<String, dynamic>? parameters}) async {
     return const Right(null);
   }
-  
-  // Implementações vazias para satisfazer a interface
   @override
   Future<Either<Failure, void>> logSignUp({required String method}) => 
       Future.value(const Right(null));

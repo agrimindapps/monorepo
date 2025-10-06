@@ -25,8 +25,6 @@ class FirebaseStorageService implements IStorageRepository {
   }) async {
     try {
       final ref = _storage.ref().child(path);
-      
-      // Configurar metadados se fornecidos
       SettableMetadata? settableMetadata;
       if (contentType != null || metadata != null) {
         settableMetadata = SettableMetadata(
@@ -38,8 +36,6 @@ class FirebaseStorageService implements IStorageRepository {
       final uploadTask = settableMetadata != null
           ? ref.putFile(file, settableMetadata)
           : ref.putFile(file);
-
-      // Monitorar progresso se callback fornecido
       if (onProgress != null) {
         uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;
@@ -69,9 +65,6 @@ class FirebaseStorageService implements IStorageRepository {
   }) async {
     try {
       File processedImage = imageFile;
-
-      // TODO: Implementar redimensionamento de imagem se necessário
-      // Requer package como image ou flutter_image_compress
       
       return uploadFile(
         file: processedImage,
@@ -100,11 +93,7 @@ class FirebaseStorageService implements IStorageRepository {
     try {
       final ref = _storage.refFromURL(url);
       final file = File(localPath);
-
-      // Criar diretório se não existir
       await file.parent.create(recursive: true);
-
-      // Download com monitoramento de progresso
       final downloadTask = ref.writeToFile(file);
 
       if (onProgress != null) {
@@ -179,7 +168,6 @@ class FirebaseStorageService implements IStorageRepository {
             metadata: metadata.customMetadata,
           ));
         } catch (e) {
-          // Ignorar itens com erro de metadados
           items.add(StorageItem(
             name: item.name,
             path: path,
@@ -188,8 +176,6 @@ class FirebaseStorageService implements IStorageRepository {
           ));
         }
       }
-
-      // Aplicar limite se especificado
       if (maxResults != null && items.length > maxResults) {
         return Right(items.take(maxResults).toList());
       }
@@ -291,8 +277,6 @@ class FirebaseStorageService implements IStorageRepository {
     required String destinationPath,
   }) async {
     try {
-      // Firebase Storage não tem API de cópia direta
-      // Precisamos fazer download e re-upload
       final sourceRef = _storage.ref().child(sourcePath);
       final data = await sourceRef.getData();
 
@@ -301,8 +285,6 @@ class FirebaseStorageService implements IStorageRepository {
       }
 
       final destRef = _storage.ref().child(destinationPath);
-      
-      // Obter metadados originais
       final originalMetadata = await sourceRef.getMetadata();
       final settableMetadata = SettableMetadata(
         contentType: originalMetadata.contentType,
@@ -330,7 +312,6 @@ class FirebaseStorageService implements IStorageRepository {
     required String destinationPath,
   }) async {
     try {
-      // Copiar arquivo
       final copyResult = await copyFile(
         sourcePath: sourcePath,
         destinationPath: destinationPath,
@@ -339,7 +320,6 @@ class FirebaseStorageService implements IStorageRepository {
       return copyResult.fold(
         (failure) => Left(failure),
         (url) async {
-          // Deletar arquivo original após cópia bem-sucedida
           final deleteResult = await deleteFile(path: sourcePath);
           return deleteResult.fold(
             (failure) => Left(failure),
@@ -360,7 +340,6 @@ class FirebaseStorageService implements IStorageRepository {
     Function(double)? onProgress,
   }) async {
     try {
-      // Upload da imagem original
       final originalResult = await uploadImage(
         imageFile: imageFile,
         path: basePath,
@@ -371,14 +350,9 @@ class FirebaseStorageService implements IStorageRepository {
         (failure) => Left(failure),
         (originalUrl) async {
           final variantUrls = <String, String>{};
-
-          // Upload das variantes se especificadas
           if (variants != null) {
             for (int i = 0; i < variants.length; i++) {
               final variant = variants[i];
-              
-              // TODO: Implementar redimensionamento para cada variante
-              // Por enquanto, apenas fazemos upload da imagem original
               final variantPath = basePath.replaceAll(
                 basePath.split('/').last,
                 '${basePath.split('/').last.split('.').first}${variant.suffix}.${basePath.split('/').last.split('.').last}',
@@ -394,7 +368,6 @@ class FirebaseStorageService implements IStorageRepository {
 
               variantResult.fold(
                 (failure) {
-                  // Ignorar falhas de variantes por enquanto
                   developer.log('Erro ao fazer upload de variante ${variant.suffix}: $failure', name: 'FirebaseStorage');
                 },
                 (variantUrl) {

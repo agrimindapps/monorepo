@@ -29,8 +29,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   final DatabaseInspectorService _inspector = DatabaseInspectorService.instance;
   List<String> _availableModules = ['Todos'];
   List<SharedPreferencesRecord> _sharedPrefsData = [];
-
-  // Estado expandido dos cards
   final Set<String> _expandedBoxes = {};
   final Set<String> _expandedPrefs = {};
   final Set<String> _expandedRecords = {}; // boxKey_recordIndex
@@ -153,7 +151,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Dropdown de módulo
           DropdownButtonFormField<String>(
             value: _selectedModule,
             decoration: InputDecoration(
@@ -176,7 +173,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
             },
           ),
           const SizedBox(height: 12),
-          // Campo de busca
           TextField(
             decoration: InputDecoration(
               labelText: 'Buscar HiveBox',
@@ -230,8 +226,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
     final stats = _inspector.getBoxStats(box.key);
     final totalRecords = stats['totalRecords'] as int? ?? 0;
     final isOpen = stats['isOpen'] as bool? ?? false;
-
-    // Ignora erro de "box já aberta" - considera como sucesso
     final errorMessage = stats['error']?.toString() ?? '';
     final isAlreadyOpenError = errorMessage.contains('already open');
     final hasError = stats.containsKey('error') && !isAlreadyOpenError;
@@ -243,7 +237,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
-          // Header do card
           InkWell(
             onTap: () {
               setState(() {
@@ -259,7 +252,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  // Ícone de status
                   Container(
                     width: 48,
                     height: 48,
@@ -283,7 +275,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +297,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                       ],
                     ),
                   ),
-                  // Ícone de expansão
                   Icon(
                     isExpanded ? Icons.expand_less : Icons.expand_more,
                     color: Colors.grey[600],
@@ -315,7 +305,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               ),
             ),
           ),
-          // Conteúdo expandido
           if (isExpanded) ...[
             const Divider(height: 1),
             _buildHiveBoxContent(box, hasError, stats),
@@ -330,7 +319,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
     bool hasError,
     Map<String, dynamic> stats,
   ) {
-    // Ignora erro de "box já aberta" - isso significa que ela está disponível
     final errorMessage = stats['error']?.toString() ?? '';
     final isAlreadyOpenError = errorMessage.contains('already open');
 
@@ -393,7 +381,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               final record = entry.value;
               return _buildRecordCard(box.key, index, record, records.length);
             }),
-            // Botão de exportar
             Padding(
               padding: const EdgeInsets.all(16),
               child: SizedBox(
@@ -745,22 +732,15 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       ),
     );
   }
-
-  // Métodos de carregamento
   /// Carrega dados de uma HiveBox com estratégia segura: abrir → ler → fechar
   /// Isso evita erros de "box já aberta"
   Future<List<DatabaseRecord>> _loadBoxDataSafely(String boxKey) async {
     try {
-      // Estratégia: Se a box já está aberta, usa ela. Senão, abre temporariamente.
       var box = Hive.box<dynamic>(boxKey);
       final wasAlreadyOpen = box.isOpen;
-
-      // Se não estava aberta, abre agora
       if (!wasAlreadyOpen) {
         box = await Hive.openBox<dynamic>(boxKey);
       }
-
-      // Lê todos os dados
       final records = <DatabaseRecord>[];
       for (var i = 0; i < box.length; i++) {
         try {
@@ -768,7 +748,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
           final value = box.getAt(i);
 
           if (value != null) {
-            // Converte para Map se necessário
             final dataMap =
                 value is Map<String, dynamic>
                     ? value
@@ -787,15 +766,12 @@ class _DataInspectorPageState extends State<DataInspectorPage>
           }
         }
       }
-
-      // Se abrimos a box temporariamente, fecha ela
       if (!wasAlreadyOpen && box.isOpen) {
         await box.close();
       }
 
       return records;
     } catch (e) {
-      // Se der erro de "já aberta", tenta usar a box aberta
       if (e.toString().contains('already open')) {
         try {
           final box = Hive.box<dynamic>(boxKey);
@@ -807,7 +783,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               final value = box.getAt(i);
 
               if (value != null) {
-                // Converte para Map se necessário
                 final dataMap =
                     value is Map<String, dynamic>
                         ? value
@@ -836,8 +811,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       throw Exception('Failed to load Hive box $boxKey: $e');
     }
   }
-
-  // Métodos auxiliares
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'string':
@@ -883,7 +856,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   String _formatValue(dynamic value) {
     if (value is String) {
       try {
-        // Tenta formatar como JSON se for string JSON
         final decoded = json.decode(value);
         const encoder = JsonEncoder.withIndent('  ');
         return encoder.convert(decoded);
@@ -909,8 +881,6 @@ class _DataInspectorPageState extends State<DataInspectorPage>
     List<DatabaseRecord> records,
   ) async {
     try {
-      // Estratégia: abrir → ler → exportar → fechar
-      // Garante que sempre temos os dados mais recentes
       final freshRecords = await _loadBoxDataSafely(box.key);
 
       final jsonData = {

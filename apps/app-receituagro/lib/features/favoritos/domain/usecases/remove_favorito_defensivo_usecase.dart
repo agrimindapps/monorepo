@@ -17,22 +17,17 @@ class RemoveFavoritoDefensivoUseCase {
   /// Retorna `Either<Failure, bool>`
   Future<Either<Failure, bool>> call(String defensivoId) async {
     try {
-      // Validação de entrada
       if (!_validator.isValidId(defensivoId)) {
         return Left(
           ValidationFailure('ID do defensivo é inválido: $defensivoId'),
         );
       }
-
-      // Verifica se está nos favoritos
       final isFavorite = await _repository.isDefensivoFavorito(defensivoId);
       if (!isFavorite) {
         return Left(
           NotFoundFailure('Defensivo não está nos favoritos: $defensivoId'),
         );
       }
-
-      // Remove dos favoritos
       final result = await _repository.removeDefensivo(defensivoId);
       
       if (!result) {

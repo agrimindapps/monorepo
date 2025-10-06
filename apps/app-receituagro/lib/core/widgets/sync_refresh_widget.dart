@@ -113,10 +113,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
       onNotification: _handleScrollNotification,
       child: Stack(
         children: [
-          // Main Content
           widget.child,
-          
-          // Custom Refresh Indicator
           Positioned(
             top: 0,
             left: 0,
@@ -156,7 +153,6 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
 
   /// Handle scroll start
   void _handleScrollStart(ScrollStartNotification notification) {
-    // Reset state when starting new scroll
     if (_currentPhase == RefreshPhase.idle) {
       _dragDistance = 0.0;
     }
@@ -165,8 +161,6 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
   /// Handle scroll update (dragging)
   void _handleScrollUpdate(ScrollUpdateNotification notification) {
     final metrics = notification.metrics;
-    
-    // Only handle over-scroll at the top
     if (metrics.pixels <= 0 && notification.dragDetails != null) {
       setState(() {
         _dragDistance = -metrics.pixels;
@@ -174,8 +168,6 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
 
       final progress = math.min(_dragDistance / widget.refreshTriggerDistance, 1.0);
       _positionController.value = progress;
-
-      // Update phase based on drag distance
       if (_dragDistance >= widget.refreshTriggerDistance) {
         if (_currentPhase != RefreshPhase.readyToRefresh) {
           _updateRefreshPhase(RefreshPhase.readyToRefresh);
@@ -240,14 +232,10 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
     try {
       await widget.onRefresh();
       _updateRefreshPhase(RefreshPhase.completed);
-      
-      // Show success briefly
       await Future<void>.delayed(const Duration(milliseconds: 800));
       
     } catch (error) {
       _updateRefreshPhase(RefreshPhase.error);
-      
-      // Show error briefly
       await Future<void>.delayed(const Duration(milliseconds: 1200));
     } finally {
       _resetRefreshState();
@@ -291,12 +279,9 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Sync Icon/Spinner
             _buildSyncIcon(primaryColor),
             
             const SizedBox(height: 8),
-            
-            // Status Message
             Text(
               _statusMessage,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -318,7 +303,6 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
     switch (_currentPhase) {
       case RefreshPhase.idle:
       case RefreshPhase.dragging:
-        // Downward arrow that rotates based on drag progress
         final progress = math.min(_dragDistance / widget.refreshTriggerDistance, 1.0);
         iconWidget = Transform.rotate(
           angle: progress * math.pi,
@@ -331,7 +315,6 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         break;
         
       case RefreshPhase.readyToRefresh:
-        // Scale animation on ready state
         iconWidget = AnimatedBuilder(
           animation: _scaleAnimation,
           builder: (context, child) {
@@ -348,7 +331,6 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         break;
         
       case RefreshPhase.refreshing:
-        // Rotating sync icon
         iconWidget = AnimatedBuilder(
           animation: _rotationAnimation,
           builder: (context, child) {
@@ -440,7 +422,6 @@ class MultiStageSyncRefresh extends StatefulWidget {
 }
 
 class _MultiStageSyncRefreshState extends State<MultiStageSyncRefresh> {
-  // ignore: unused_field
   int _currentStageIndex = 0;
   String _currentStageMessage = '';
 
@@ -463,8 +444,6 @@ class _MultiStageSyncRefreshState extends State<MultiStageSyncRefresh> {
       });
       
       await widget.syncStages[i].operation();
-      
-      // Small delay between stages for better UX
       if (i < widget.syncStages.length - 1) {
         await Future<void>.delayed(const Duration(milliseconds: 300));
       }

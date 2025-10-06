@@ -53,8 +53,6 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
     super.initState();
 
     _tabController = TabController(length: 3, vsync: this);
-
-    // Animação de entrada do modal
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
@@ -65,8 +63,6 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
     ).animate(
       CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
     );
-
-    // Iniciar animação
     _slideController.forward();
   }
 
@@ -113,16 +109,9 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
             ),
             child: Column(
               children: [
-                // Handle para arrastar
                 _buildDragHandle(context),
-
-                // Header do modal
                 _buildHeader(context),
-
-                // Tab bar
                 _buildTabBar(context),
-
-                // Conteúdo das abas
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -186,7 +175,6 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
       ),
       child: Row(
         children: [
-          // Ícone da planta
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -204,8 +192,6 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
           ),
 
           const SizedBox(width: 16),
-
-          // Informações da planta
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,8 +223,6 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
               ],
             ),
           ),
-
-          // Badge de total
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -269,8 +253,6 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
           ),
 
           const SizedBox(width: 8),
-
-          // Botão fechar
           IconButton(
             onPressed: _closeModal,
             icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),

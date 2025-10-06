@@ -59,46 +59,33 @@ class ExpensesRepository
   @override
   Future<void> initialize() async {
     _box = await Hive.openBox<ExpenseModel>(_boxName);
-
-    // Inicializar cache com configurações otimizadas para expenses
     initializeCache(
       maxSize: 200, // Mais entradas para expenses frequentes
       defaultTtl: const Duration(
         minutes: 45,
       ), // TTL otimizado para dados financeiros (45 min)
     );
-
-    // Aquecimento de cache para dados frequentemente acessados (em background)
     unawaited(_warmupCache());
   }
 
   /// Aquece o cache com dados frequentemente acessados
   Future<void> _warmupCache() async {
     try {
-      // Carregar todas as despesas para o cache (em background)
       unawaited(getAllExpenses());
-
-      // Carregar estatísticas básicas
       unawaited(getStats());
-
-      // Se há despesas, carregar as mais recentes
       final recentModels =
           _box.values.where((model) => !model.isDeleted).toList()
             ..sort((a, b) => b.data.compareTo(a.data));
 
       if (recentModels.isNotEmpty) {
-        // Cache das últimas 10 despesas individualmente
         for (int i = 0; i < recentModels.length && i < 10; i++) {
           final entity = _modelToEntity(recentModels[i]);
           cacheEntity(entityCacheKey(entity.id), entity);
         }
-
-        // Carregar despesas do último mês (período comum de consulta)
         final lastMonth = DateTime.now().subtract(const Duration(days: 30));
         unawaited(getExpensesByPeriod(lastMonth, DateTime.now()));
       }
     } catch (e) {
-      // Warmup não deve travar a inicialização
       if (kDebugMode) {
         print('Cache warmup failed (non-critical): $e');
       }
@@ -118,29 +105,20 @@ class ExpensesRepository
         'amount': expense.amount,
       },
       operationFunc: () async {
-        // Always save locally first
         final model = _entityToModel(expense);
         await _box.put(expense.id, model);
 
         final entity = _modelToEntity(model);
-
-        // Log local storage
         await logLocalStorage(
           action: 'saved',
           entityType: 'Expense',
           entityId: expense.id,
           metadata: {'storage_type': 'hive'},
         );
-
-        // Cache a entidade
         cacheEntity(entityCacheKey(expense.id), entity);
-
-        // Invalidar caches de listas relacionadas
         invalidateListCache('all_expenses');
         invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
         invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
-
-        // Remote sync in background (fire-and-forget)
         unawaited(_syncExpenseToRemoteInBackground(expense));
 
         return entity;
@@ -169,24 +147,16 @@ class ExpensesRepository
         await _box.put(expense.id, model);
 
         final entity = _modelToEntity(model);
-
-        // Log local storage
         await logLocalStorage(
           action: 'updated',
           entityType: 'Expense',
           entityId: expense.id,
           metadata: {'storage_type': 'hive'},
         );
-
-        // Atualizar cache da entidade
         cacheEntity(entityCacheKey(expense.id), entity);
-
-        // Invalidar caches de listas relacionadas
         invalidateListCache('all_expenses');
         invalidateListCache(vehicleCacheKey(expense.vehicleId, 'expenses'));
         invalidateListCache(typeCacheKey(expense.type.name, 'expenses'));
-
-        // Remote sync in background (fire-and-forget)
         unawaited(_syncExpenseToRemoteInBackground(expense));
 
         return entity;
@@ -202,23 +172,16 @@ class ExpensesRepository
       entityType: 'Expense',
       entityId: expenseId,
       operationFunc: () async {
-        // Buscar dados antes de deletar para invalidação seletiva
         final expenseToDelete = _box.get(expenseId);
 
         await _box.delete(expenseId);
-
-        // Log local storage
         await logLocalStorage(
           action: 'deleted',
           entityType: 'Expense',
           entityId: expenseId,
           metadata: {'storage_type': 'hive'},
         );
-
-        // Remover do cache
         invalidateCache(entityCacheKey(expenseId));
-
-        // Invalidação seletiva baseada na despesa removida
         if (expenseToDelete != null) {
           invalidateListCache('all_expenses');
           invalidateListCache(
@@ -226,7 +189,6 @@ class ExpensesRepository
           );
           invalidateListCache(typeCacheKey(expenseToDelete.tipo, 'expenses'));
         } else {
-          // Fallback para invalidação completa apenas se não conseguir dados específicos
           invalidateListCache('all_expenses');
         }
 
@@ -240,8 +202,6 @@ class ExpensesRepository
   Future<ExpenseEntity?> getExpenseById(String expenseId) async {
     try {
       await _ensureInitialized();
-
-      // Verificar cache primeiro
       final cacheKey = entityCacheKey(expenseId);
       final cached = getCachedEntity(cacheKey);
       if (cached != null) {
@@ -252,8 +212,6 @@ class ExpensesRepository
       if (model == null) return null;
 
       final entity = _modelToEntity(model);
-
-      // Cache o resultado
       cacheEntity(cacheKey, entity);
 
       return entity;
@@ -267,8 +225,6 @@ class ExpensesRepository
   Future<List<ExpenseEntity>> getAllExpenses() async {
     try {
       await _ensureInitialized();
-
-      // Verificar cache primeiro
       const cacheKey = 'all_expenses';
       final cached = getCachedList(cacheKey);
       if (cached != null) {
@@ -277,8 +233,6 @@ class ExpensesRepository
 
       final models = _box.values.where((model) => !model.isDeleted).toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache o resultado
       cacheList(cacheKey, entities);
 
       return entities;
@@ -292,8 +246,6 @@ class ExpensesRepository
   Future<List<ExpenseEntity>> getExpensesByVehicle(String vehicleId) async {
     try {
       await _ensureInitialized();
-
-      // Verificar cache primeiro
       final cacheKey = vehicleCacheKey(vehicleId, 'expenses');
       final cached = getCachedList(cacheKey);
       if (cached != null) {
@@ -307,8 +259,6 @@ class ExpensesRepository
               )
               .toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache o resultado
       cacheList(cacheKey, entities);
 
       return entities;
@@ -321,7 +271,6 @@ class ExpensesRepository
   @override
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type) async {
     try {
-      // Verificar cache primeiro
       final cacheKey = typeCacheKey(type.name, 'expenses');
       final cached = getCachedList(cacheKey);
       if (cached != null) {
@@ -333,8 +282,6 @@ class ExpensesRepository
               .where((model) => model.tipo == type.name && !model.isDeleted)
               .toList();
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache o resultado
       cacheList(cacheKey, entities);
 
       return entities;
@@ -350,7 +297,6 @@ class ExpensesRepository
     DateTime end,
   ) async {
     try {
-      // Cache key baseado no período
       final periodKey =
           'period_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
       final cached = getCachedList(periodKey);
@@ -369,8 +315,6 @@ class ExpensesRepository
           }).toList();
 
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache com TTL menor para buscas por período (20 min)
       cacheList(periodKey, entities, ttl: const Duration(minutes: 20));
 
       return entities;
@@ -383,7 +327,6 @@ class ExpensesRepository
   @override
   Future<List<ExpenseEntity>> searchExpenses(String query) async {
     try {
-      // Cache para buscas (queries muito específicas, TTL menor)
       final searchKey = 'search_${query.toLowerCase().replaceAll(' ', '_')}';
       final cached = getCachedList(searchKey);
       if (cached != null) {
@@ -398,8 +341,6 @@ class ExpensesRepository
           }).toList();
 
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache com TTL bem menor para buscas (10 min)
       cacheList(searchKey, entities, ttl: const Duration(minutes: 10));
 
       return entities;
@@ -449,8 +390,6 @@ class ExpensesRepository
         for (int j = i + 1; j < models.length; j++) {
           final model1 = models[i];
           final model2 = models[j];
-
-          // Considera duplicata se mesmo veículo, tipo, data (mesmo dia) e valor muito próximo
           final date1 = DateTime.fromMillisecondsSinceEpoch(model1.data);
           final date2 = DateTime.fromMillisecondsSinceEpoch(model2.data);
 
@@ -564,7 +503,6 @@ class ExpensesRepository
     String? searchText,
   }) async {
     try {
-      // Cache key complexa baseada nos filtros
       final filterKey = _buildFilterCacheKey(
         vehicleId: vehicleId,
         type: type,
@@ -609,8 +547,6 @@ class ExpensesRepository
           }).toList();
 
       final entities = models.map((model) => _modelToEntity(model)).toList();
-
-      // Cache com TTL médio para filtros (25 min)
       cacheList(filterKey, entities, ttl: const Duration(minutes: 25));
 
       return entities;
@@ -657,15 +593,12 @@ class ExpensesRepository
     SortOrder sortOrder = SortOrder.descending,
   }) async {
     try {
-      // Get filtered results
       final allExpenses = await getExpensesWithFilters(
         vehicleId: vehicleId,
         type: type,
         startDate: startDate,
         endDate: endDate,
       );
-
-      // Sort results
       allExpenses.sort((a, b) {
         int comparison = 0;
         switch (sortBy) {
@@ -688,8 +621,6 @@ class ExpensesRepository
 
         return sortOrder == SortOrder.ascending ? comparison : -comparison;
       });
-
-      // Paginate
       final totalItems = allExpenses.length;
       final totalPages = (totalItems / pageSize).ceil();
       final startIndex = page * pageSize;
@@ -717,21 +648,14 @@ class ExpensesRepository
   /// Sincroniza despesa com Firebase em background
   Future<void> _syncExpenseToRemoteInBackground(ExpenseEntity expense) async {
     try {
-      // Verificar se está conectado
       if (!await _isConnected()) {
         return;
       }
-
-      // Verificar se tem usuário autenticado
       final userId = await _getCurrentUserId();
       if (userId == null) {
         return;
       }
-
-      // Sincronizar com Firebase
       await _remoteDataSource.addExpense(userId, expense);
-
-      // Log successful sync
       await logRemoteSync(
         action: 'synced',
         entityType: 'Expense',
@@ -744,7 +668,6 @@ class ExpensesRepository
         },
       );
     } catch (e) {
-      // Log failed sync
       await logRemoteSync(
         action: 'sync_failed',
         entityType: 'Expense',
@@ -756,8 +679,6 @@ class ExpensesRepository
           'type': expense.type.name,
         },
       );
-
-      // Log but don't throw - background sync should be silent
       if (kDebugMode) {
         print('Background sync failed for expense ${expense.id}: $e');
       }
@@ -770,7 +691,6 @@ class ExpensesRepository
     try {
       await _box.close();
     } catch (e) {
-      // Log error mas não trava
       if (kDebugMode) {
         print('Erro ao fechar box de despesas: $e');
       }

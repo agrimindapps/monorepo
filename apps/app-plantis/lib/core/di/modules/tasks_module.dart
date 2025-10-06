@@ -2,9 +2,7 @@ import 'package:core/core.dart';
 
 import '../../../features/tasks/data/datasources/local/tasks_local_datasource.dart';
 import '../../../features/tasks/data/datasources/remote/tasks_remote_datasource.dart';
-// Data
 import '../../../features/tasks/data/repositories/tasks_repository_impl.dart';
-// Domain
 import '../../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../../../features/tasks/domain/usecases/add_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/complete_task_usecase.dart';
@@ -12,27 +10,19 @@ import '../../../features/tasks/domain/usecases/complete_task_with_regeneration_
 import '../../../features/tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/update_task_usecase.dart';
-// Presentation
 import '../../../features/tasks/presentation/providers/tasks_provider.dart';
-// Core services
 import '../../services/task_generation_service.dart';
 
 class TasksModule {
   static void init(GetIt sl) {
-    // Presentation Layer
     sl.registerFactory(
       () => TasksProvider(
         getTasksUseCase: sl(),
         addTaskUseCase: sl(),
         completeTaskUseCase: sl(),
-        // AuthStateNotifier will be accessed as singleton, no DI needed
       ),
     );
-
-    // Services
     sl.registerLazySingleton(() => TaskGenerationService());
-
-    // Use Cases
     sl.registerLazySingleton(() => GetTasksUseCase(sl()));
     sl.registerLazySingleton(() => AddTaskUseCase(sl()));
     sl.registerLazySingleton(() => UpdateTaskUseCase(sl()));
@@ -50,8 +40,6 @@ class TasksModule {
         taskGenerationService: sl(),
       ),
     );
-
-    // Repository
     sl.registerLazySingleton<TasksRepository>(
       () => TasksRepositoryImpl(
         remoteDataSource: sl(),
@@ -60,8 +48,6 @@ class TasksModule {
         authService: sl(),
       ),
     );
-
-    // Data Sources
     sl.registerLazySingleton<TasksRemoteDataSource>(
       () => TasksRemoteDataSourceImpl(),
     );

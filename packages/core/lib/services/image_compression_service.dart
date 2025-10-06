@@ -19,23 +19,13 @@ class ImageCompressionService {
       if (!await file.exists()) {
         throw Exception('Image file not found: $imagePath');
       }
-
-      // Read the image file
       final bytes = await file.readAsBytes();
-      
-      // Decode the image
       final image = img.decodeImage(bytes);
       if (image == null) {
         throw Exception('Failed to decode image');
       }
-
-      // Resize if necessary
       final resizedImage = _resizeImage(image);
-      
-      // Convert to JPEG with compression
       final compressedBytes = img.encodeJpg(resizedImage, quality: _quality);
-      
-      // Save compressed image
       final compressedPath = await _saveCompressedImage(compressedBytes, imagePath);
       
       return compressedPath;
@@ -48,16 +38,11 @@ class ImageCompressionService {
   /// Returns the compressed image bytes
   Future<Uint8List> compressImageBytes(Uint8List imageBytes) async {
     try {
-      // Decode the image
       final image = img.decodeImage(imageBytes);
       if (image == null) {
         throw Exception('Failed to decode image bytes');
       }
-
-      // Resize if necessary
       final resizedImage = _resizeImage(image);
-      
-      // Convert to JPEG with compression
       final compressedBytes = img.encodeJpg(resizedImage, quality: _quality);
       
       return Uint8List.fromList(compressedBytes);
@@ -68,7 +53,6 @@ class ImageCompressionService {
 
   /// Resize image maintaining aspect ratio
   img.Image _resizeImage(img.Image image) {
-    // Calculate new dimensions maintaining aspect ratio
     int newWidth = image.width;
     int newHeight = image.height;
     
@@ -76,11 +60,9 @@ class ImageCompressionService {
       final aspectRatio = newWidth / newHeight;
       
       if (aspectRatio > 1) {
-        // Landscape orientation
         newWidth = _maxWidth;
         newHeight = (_maxWidth / aspectRatio).round();
       } else {
-        // Portrait orientation
         newHeight = _maxHeight;
         newWidth = (_maxHeight * aspectRatio).round();
       }
@@ -105,8 +87,6 @@ class ImageCompressionService {
       if (!await receiptsDir.exists()) {
         await receiptsDir.create(recursive: true);
       }
-      
-      // Generate unique filename with timestamp
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final originalName = originalPath.split('/').last.split('.').first;
       final compressedFileName = '${originalName}_compressed_$timestamp.jpg';
@@ -148,7 +128,6 @@ class ImageCompressionService {
         await file.delete();
       }
     } catch (e) {
-      // Silently ignore deletion errors
     }
   }
 
@@ -213,13 +192,11 @@ class ImageCompressionService {
             try {
               await entity.delete();
             } catch (e) {
-              // Silently ignore deletion errors
             }
           }
         }
       }
     } catch (e) {
-      // Silently ignore cleanup errors
     }
   }
 

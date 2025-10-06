@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 /// Integra todas as funcionalidades necessárias do app ReceitaAgro
 /// Implementada por PremiumServiceReal com integração RevenueCat + Hive
 abstract class IPremiumService extends ChangeNotifier {
-  // ============ CORE PROPERTIES ============
   
   /// Verificação rápida de acesso premium (cached)
   bool get isPremium;
@@ -14,8 +13,6 @@ abstract class IPremiumService extends ChangeNotifier {
   
   /// Se deve mostrar dialogs premium (não para usuários anônimos)
   bool get shouldShowPremiumDialogs;
-  
-  // ============ STATUS MANAGEMENT ============
   
   /// Verifica status premium online (força sincronização)
   Future<void> checkPremiumStatus();
@@ -38,8 +35,6 @@ abstract class IPremiumService extends ChangeNotifier {
   /// Force refresh do cache (limpa e recarrega)
   Future<void> refreshPremiumStatus();
   
-  // ============ FEATURE ACCESS ============
-  
   /// Verifica se pode usar uma feature específica
   bool canUseFeature(String featureName);
   
@@ -55,15 +50,11 @@ abstract class IPremiumService extends ChangeNotifier {
   /// Lista de features premium disponíveis
   Future<List<String>> getPremiumFeatures();
   
-  // ============ TRIAL MANAGEMENT ============
-  
   /// Verifica se trial está disponível
   Future<bool> isTrialAvailable();
   
   /// Inicia período de trial
   Future<bool> startTrial();
-  
-  // ============ TEST SUBSCRIPTION ============
   
   /// Gera assinatura de teste (desenvolvimento)
   Future<void> generateTestSubscription();
@@ -71,15 +62,11 @@ abstract class IPremiumService extends ChangeNotifier {
   /// Remove assinatura de teste
   Future<void> removeTestSubscription();
   
-  // ============ NAVIGATION ============
-  
   /// Navegar para página de assinatura/premium
   Future<void> navigateToPremium();
   
   /// URL para upgrade (usuários não-premium)
   String? get upgradeUrl;
-  
-  // ============ REACTIVE PROGRAMMING ============
   
   /// Stream de mudanças no status premium
   Stream<bool> get premiumStatusStream;

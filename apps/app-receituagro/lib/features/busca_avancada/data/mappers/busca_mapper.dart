@@ -15,34 +15,27 @@ class BuscaMapper {
   static Future<BuscaResultEntity> diagnosticoToEntity(
     DiagnosticoHive diagnostico,
   ) async {
-    // Resolve nomes dinamicamente usando repositories
     String defensivoNome = 'Defensivo não encontrado';
     String culturaNome = 'Cultura não encontrada';
     String pragaNome = 'Praga não encontrada';
 
     try {
-      // Resolve defensivo
       final defensivoRepo = sl<FitossanitarioHiveRepository>();
       final defensivo = await defensivoRepo.getById(diagnostico.fkIdDefensivo);
       if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
         defensivoNome = defensivo.nomeComum;
       }
-
-      // Resolve cultura
       final culturaRepo = sl<CulturaHiveRepository>();
       final cultura = await culturaRepo.getById(diagnostico.fkIdCultura);
       if (cultura != null && cultura.cultura.isNotEmpty) {
         culturaNome = cultura.cultura;
       }
-
-      // Resolve praga
       final pragaRepo = sl<PragasHiveRepository>();
       final praga = await pragaRepo.getById(diagnostico.fkIdPraga);
       if (praga != null && praga.nomeComum.isNotEmpty) {
         pragaNome = praga.nomeComum;
       }
     } catch (e) {
-      // Falha silenciosamente para não quebrar a UI
     }
 
     return BuscaResultEntity(
@@ -118,7 +111,6 @@ class BuscaMapper {
 
   /// Converte CulturaHive para BuscaResultEntity - SIMPLIFICADO
   static BuscaResultEntity culturaToEntity(CulturaHive cultura) {
-    // TODO: Implementar após verificar propriedades corretas do CulturaHive
     return BuscaResultEntity(
       id: cultura.objectId,
       tipo: 'cultura',

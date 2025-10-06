@@ -48,7 +48,6 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label com indicador de obrigatório
         RichText(
           text: TextSpan(
             children: [
@@ -71,8 +70,6 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
         ),
 
         const SizedBox(height: 4),
-
-        // Descrição do parâmetro
         if (widget.parameter.description.isNotEmpty)
           Text(
             widget.parameter.description,
@@ -82,11 +79,7 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
           ),
 
         const SizedBox(height: 8),
-
-        // Input específico por tipo
         _buildInputWidget(),
-
-        // Texto de erro
         if (_errorText != null) ...[
           const SizedBox(height: 4),
           Text(
@@ -96,8 +89,6 @@ class _ParameterInputWidgetState extends State<ParameterInputWidget> {
             ),
           ),
         ],
-
-        // Informações adicionais (min/max, unidade)
         _buildHelpText(),
       ],
     );

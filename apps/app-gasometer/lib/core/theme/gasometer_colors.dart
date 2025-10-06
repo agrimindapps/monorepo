@@ -2,22 +2,15 @@ import 'package:flutter/material.dart';
 
 /// Cores específicas do GasOMeter (foco em combustível e automotivo)
 class GasometerColors {
-  // Primary colors (orange/red theme for fuel/automotive)
   static const Color primary = Color(0xFFFF5722);        // Deep Orange
   static const Color primaryLight = Color(0xFFFF8A65);   // Light orange
   static const Color primaryDark = Color(0xFFE64A19);    // Dark orange
-  
-  // Secondary colors (blue for maintenance/reports)
   static const Color secondary = Color(0xFF2196F3);      // Blue
   static const Color secondaryLight = Color(0xFF64B5F6); // Light blue
   static const Color secondaryDark = Color(0xFF1976D2);  // Dark blue
-  
-  // Tertiary/Accent colors (green for savings/efficiency)
   static const Color accent = Color(0xFF4CAF50);         // Green
   static const Color accentLight = Color(0xFF81C784);    // Light green
   static const Color accentDark = Color(0xFF388E3C);     // Dark green
-  
-  // Fuel-themed colors
   static const Color gasoline = Color(0xFFFF5722);       // Orange (gasoline)
   static const Color gasolineLight = Color(0xFFFFAB91);  // Light orange
   static const Color gasolineDark = Color(0xFFBF360C);   // Dark orange
@@ -33,14 +26,10 @@ class GasometerColors {
   static const Color gas = Color(0xFF9C27B0);            // Purple (gas)
   static const Color gasLight = Color(0xFFCE93D8);       // Light purple
   static const Color gasDark = Color(0xFF7B1FA2);        // Dark purple
-  
-  // Status colors
   static const Color efficiency = Color(0xFF4CAF50);     // Green for good efficiency
   static const Color warning = Color(0xFFFF9800);        // Amber for warnings
   static const Color danger = Color(0xFFF44336);         // Red for alerts
   static const Color info = Color(0xFF2196F3);           // Blue for information
-  
-  // Brand gradients
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -76,8 +65,6 @@ class GasometerColors {
     end: Alignment.bottomRight,
     colors: [diesel, dieselLight],
   );
-  
-  // Chart colors for fuel analytics
   static const List<Color> chartColors = [
     Color(0xFFFF5722), // Orange
     Color(0xFF2196F3), // Blue
@@ -88,8 +75,6 @@ class GasometerColors {
     Color(0xFFE91E63), // Pink
     Color(0xFF795548), // Brown
   ];
-  
-  // Helper methods
   static Color getPrimaryShade(int shade) {
     switch (shade) {
       case 50: return const Color(0xFFFBE9E7);
@@ -121,8 +106,6 @@ class GasometerColors {
       default: return secondary;
     }
   }
-  
-  // Fuel type color helper
   static Color getFuelColor(String fuelType) {
     switch (fuelType.toLowerCase()) {
       case 'gasoline':

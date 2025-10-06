@@ -17,14 +17,6 @@ class CoreModule implements DIModule {
   }
 
   Future<void> _registerExternalServices(GetIt getIt) async {
-    // MIGRATION COMPLETED: Using only core package repositories
-    // Removed direct Firebase services to avoid duplication
-
-    // NOTE: FirebaseFirestore and FirebaseAuth are now registered by injectable
-    // via RegisterModule to avoid duplicate registration errors
-    // They are available via RegisterModule.firestore and RegisterModule.firebaseAuth
-
-    // Core package repositories (standard migration path)
     try {
       getIt.registerLazySingleton<core.IAuthRepository>(
         () => core.FirebaseAuthService(),
@@ -44,8 +36,6 @@ class CoreModule implements DIModule {
       getIt.registerLazySingleton<core.IPerformanceRepository>(
         () => core.PerformanceService(),
       );
-
-      // Register EnhancedAnalyticsService with app-specific configuration
       getIt.registerLazySingleton<core.EnhancedAnalyticsService>(
         () => core.EnhancedAnalyticsService(
           analytics: getIt<core.IAnalyticsRepository>(),
@@ -61,47 +51,23 @@ class CoreModule implements DIModule {
     } catch (e) {
       debugPrint('⚠️ Warning: Could not register core repositories: $e');
     }
-
-    // NOTE: Connectivity is now registered by injectable
-    // via dependency injection to avoid duplicate registration errors
-
-    // NOTE: SharedPreferences is now registered by injectable via RegisterModule
-    // with @preResolve to ensure it's available during DI initialization
   }
 
   Future<void> _registerCoreServices(GetIt getIt) async {
-    // For gasometer, we keep it minimal and leverage the packages/core services
-    // Additional gasometer-specific services can be registered here as needed
-
-    // Register core package services needed by Injectable dependencies
     try {
-      // Services from core package needed by DeviceManagementModule
       getIt.registerLazySingleton<core.FirebaseDeviceService>(
         () => core.FirebaseDeviceService(),
       );
-
-      // TODO: IDeviceRepository implementation not found in core package
-      // DeviceManagementModule expects this but no implementation exists
-      // For now, we skip registration and let it fail gracefully if needed
-
-      // FirebaseAuthService - reuse the IAuthRepository instance
-      // (IAuthRepository is implemented by FirebaseAuthService)
       getIt.registerLazySingleton<core.FirebaseAuthService>(
         () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
       );
-
-      // FirebaseAnalyticsService - reuse the IAnalyticsRepository instance
       getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
         () =>
             getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
       );
-
-      // Subscription Repository from core package
       getIt.registerLazySingleton<core.ISubscriptionRepository>(
         () => core.RevenueCatService(),
       );
-
-      // DataCleanerService (app-specific singleton)
       getIt.registerLazySingleton<DataCleanerService>(
         () => DataCleanerService.instance,
       );

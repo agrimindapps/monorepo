@@ -65,7 +65,6 @@ class DefensivosCategoryButton extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // Background decorative icon
                   Positioned(
                     right: -15,
                     bottom: -15,
@@ -75,7 +74,6 @@ class DefensivosCategoryButton extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.1),
                     ),
                   ),
-                  // Main content
                   Padding(
                     padding: const EdgeInsets.all(ReceitaAgroSpacing.sm),
                     child: Column(
@@ -128,7 +126,6 @@ class DefensivosCategoryButton extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Touch indicator
                   Positioned(
                     bottom: 8,
                     right: 8,

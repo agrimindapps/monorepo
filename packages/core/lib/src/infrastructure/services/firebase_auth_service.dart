@@ -87,8 +87,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (credential.user == null) {
         return const Left(AuthFailure('Falha na criação da conta'));
       }
-
-      // Atualizar o nome de exibição
       await credential.user!.updateDisplayName(displayName);
       await credential.user!.reload();
 
@@ -111,12 +109,9 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Attempting Google Sign In...');
       }
-
-      // 1. Trigger Google Sign In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        // User canceled the sign-in
         if (kDebugMode) {
           debugPrint('⚠️ Firebase: Google Sign In canceled by user');
         }
@@ -126,8 +121,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Google user obtained, getting authentication...');
       }
-
-      // 2. Obtain auth details from Google Sign In
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
@@ -136,8 +129,6 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Falha ao obter credenciais do Google'));
       }
-
-      // 3. Create Firebase credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -146,8 +137,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing in with Google credential...');
       }
-
-      // 4. Sign in to Firebase with Google credential
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
 
       if (userCredential.user == null) {
@@ -182,16 +171,12 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Attempting Apple Sign In...');
       }
-
-      // Check if Apple Sign In is available (iOS 13+, macOS 10.15+)
       if (!await SignInWithApple.isAvailable()) {
         if (kDebugMode) {
           debugPrint('❌ Firebase: Apple Sign In not available on this device');
         }
         return const Left(AuthFailure('Login com Apple não disponível neste dispositivo'));
       }
-
-      // 1. Request Apple ID credential
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -208,8 +193,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Apple credential obtained, creating Firebase credential...');
       }
-
-      // 2. Create OAuth credential for Firebase
       final oAuthProvider = OAuthProvider('apple.com');
       final credential = oAuthProvider.credential(
         idToken: appleCredential.identityToken,
@@ -219,8 +202,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing in with Apple credential...');
       }
-
-      // 3. Sign in to Firebase with Apple credential
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
 
       if (userCredential.user == null) {
@@ -229,8 +210,6 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Falha no login com Apple'));
       }
-
-      // 4. Update display name if provided by Apple (first time only)
       if (appleCredential.givenName != null || appleCredential.familyName != null) {
         final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
         if (displayName.isNotEmpty && userCredential.user!.displayName == null) {
@@ -250,8 +229,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('❌ Firebase: SignInWithAppleAuthorizationException - ${e.code}: ${e.message}');
       }
-
-      // Map Apple-specific errors
       switch (e.code) {
         case AuthorizationErrorCode.canceled:
           return const Left(AuthFailure('Login com Apple cancelado'));
@@ -321,8 +298,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Attempting Facebook Sign In...');
       }
-
-      // 1. Trigger Facebook Sign In flow
       final LoginResult result = await _facebookAuth.login();
 
       if (result.status != LoginStatus.success) {
@@ -352,8 +327,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Facebook token obtained, creating Firebase credential...');
       }
-
-      // 2. Create Firebase credential
       final OAuthCredential facebookCredential = FacebookAuthProvider.credential(
         result.accessToken!.token,
       );
@@ -361,8 +334,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing in with Facebook credential...');
       }
-
-      // 3. Sign in to Firebase with Facebook credential
       final userCredential = await _firebaseAuth.signInWithCredential(facebookCredential);
 
       if (userCredential.user == null) {
@@ -397,11 +368,7 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Signing out from all providers...');
       }
-
-      // Sign out from Firebase
       await _firebaseAuth.signOut();
-
-      // Sign out from social providers
       try {
         await _googleSignIn.signOut();
       } catch (e) {
@@ -515,8 +482,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Reautenticar antes de alterar senha
       final credential = EmailAuthProvider.credential(
         email: user.email!,
         password: currentPassword,
@@ -641,8 +606,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Check if already linked
       final isLinked = user.providerData.any((info) => info.providerId == 'google.com');
       if (isLinked) {
         if (kDebugMode) {
@@ -650,8 +613,6 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Conta já vinculada com Google'));
       }
-
-      // 1. Trigger Google Sign In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -660,15 +621,11 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Vinculação cancelada pelo usuário'));
       }
-
-      // 2. Obtain auth details
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
         return const Left(AuthFailure('Falha ao obter credenciais do Google'));
       }
-
-      // 3. Create Firebase credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -677,8 +634,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Linking account with Google credential...');
       }
-
-      // 4. Link credential to current user
       final userCredential = await user.linkWithCredential(credential);
 
       if (userCredential.user == null) {
@@ -694,8 +649,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
       }
-
-      // Handle specific linking errors
       if (e.code == 'credential-already-in-use') {
         return const Left(AuthFailure('Esta conta Google já está em uso por outro usuário'));
       } else if (e.code == 'email-already-in-use') {
@@ -725,8 +678,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Check if already linked
       final isLinked = user.providerData.any((info) => info.providerId == 'apple.com');
       if (isLinked) {
         if (kDebugMode) {
@@ -734,13 +685,9 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Conta já vinculada com Apple'));
       }
-
-      // Check if Apple Sign In is available
       if (!await SignInWithApple.isAvailable()) {
         return const Left(AuthFailure('Login com Apple não disponível neste dispositivo'));
       }
-
-      // 1. Request Apple ID credential
       final appleCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -753,8 +700,6 @@ class FirebaseAuthService implements IAuthRepository {
               )
             : null,
       );
-
-      // 2. Create OAuth credential for Firebase
       final oAuthProvider = OAuthProvider('apple.com');
       final credential = oAuthProvider.credential(
         idToken: appleCredential.identityToken,
@@ -764,15 +709,11 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Linking account with Apple credential...');
       }
-
-      // 3. Link credential to current user
       final userCredential = await user.linkWithCredential(credential);
 
       if (userCredential.user == null) {
         return const Left(AuthFailure('Erro ao vincular conta com Apple'));
       }
-
-      // 4. Update display name if provided (first time only)
       if (appleCredential.givenName != null || appleCredential.familyName != null) {
         final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
         if (displayName.isNotEmpty && userCredential.user!.displayName == null) {
@@ -798,8 +739,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
       }
-
-      // Handle specific linking errors
       if (e.code == 'credential-already-in-use') {
         return const Left(AuthFailure('Esta conta Apple já está em uso por outro usuário'));
       } else if (e.code == 'email-already-in-use') {
@@ -829,8 +768,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (user == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Check if already linked
       final isLinked = user.providerData.any((info) => info.providerId == 'facebook.com');
       if (isLinked) {
         if (kDebugMode) {
@@ -838,8 +775,6 @@ class FirebaseAuthService implements IAuthRepository {
         }
         return const Left(AuthFailure('Conta já vinculada com Facebook'));
       }
-
-      // 1. Trigger Facebook Sign In flow
       final LoginResult result = await _facebookAuth.login();
 
       if (result.status != LoginStatus.success) {
@@ -852,8 +787,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (result.accessToken == null) {
         return const Left(AuthFailure('Falha ao obter token de acesso do Facebook'));
       }
-
-      // 2. Create Firebase credential
       final OAuthCredential facebookCredential = FacebookAuthProvider.credential(
         result.accessToken!.token,
       );
@@ -861,8 +794,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('🔄 Firebase: Linking account with Facebook credential...');
       }
-
-      // 3. Link credential to current user
       final userCredential = await user.linkWithCredential(facebookCredential);
 
       if (userCredential.user == null) {
@@ -878,8 +809,6 @@ class FirebaseAuthService implements IAuthRepository {
       if (kDebugMode) {
         debugPrint('❌ Firebase: FirebaseAuthException - ${e.code}: ${e.message}');
       }
-
-      // Handle specific linking errors
       if (e.code == 'credential-already-in-use') {
         return const Left(AuthFailure('Esta conta Facebook já está em uso por outro usuário'));
       } else if (e.code == 'email-already-in-use') {

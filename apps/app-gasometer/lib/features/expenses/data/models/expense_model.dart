@@ -7,7 +7,6 @@ part 'expense_model.g.dart';
 /// Expense (Despesa) model with Firebase sync support
 /// TypeId: 3 - New sequential numbering
 @HiveType(typeId: 3)
-// ignore: must_be_immutable
 class ExpenseModel extends BaseSyncModel {
 
   ExpenseModel({
@@ -142,18 +141,14 @@ class ExpenseModel extends BaseSyncModel {
 
   /// FIXED: fromJson now correctly handles Firebase Timestamp objects
   factory ExpenseModel.fromJson(Map<String, dynamic> json) {
-    // Check if this is Firebase data (contains Timestamp objects)
     final hasTimestamp = json.values.any((value) => value is Timestamp);
     
     if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
-      // Use Firebase parsing for data from remote source
       return ExpenseModel.fromFirebaseMap(json);
     } else {
-      // Use Hive parsing for local data
       return ExpenseModel.fromHiveMap(json);
     }
   }
-  // Base sync fields (required for Hive generation)
   @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -163,8 +158,6 @@ class ExpenseModel extends BaseSyncModel {
   @HiveField(6) @override final int version;
   @HiveField(7) @override final String? userId;
   @HiveField(8) @override final String? moduleName;
-
-  // Expense specific fields
   @HiveField(10)
   final String veiculoId;
   @HiveField(11)

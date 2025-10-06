@@ -41,8 +41,6 @@ class _CriticalDoseConfirmationDialogState extends State<CriticalDoseConfirmatio
   @override
   void initState() {
     super.initState();
-    
-    // Animação de pulso para alertas críticos
     _pulseController = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -57,8 +55,6 @@ class _CriticalDoseConfirmationDialogState extends State<CriticalDoseConfirmatio
     ));
     
     _pulseController.repeat(reverse: true);
-    
-    // Countdown de segurança - só pode prosseguir após 10 segundos
     _startCountdown();
   }
 
@@ -147,30 +143,20 @@ class _CriticalDoseConfirmationDialogState extends State<CriticalDoseConfirmatio
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Informações da dose
               _buildDoseInfoCard(),
               const SizedBox(height: 16),
-              
-              // Avisos críticos
               _buildWarningsSection(),
               const SizedBox(height: 16),
-              
-              // Recomendação de ação
               if (widget.recommendedAction != null)
                 _buildRecommendationCard(),
               const SizedBox(height: 16),
-              
-              // Sistema de confirmações múltiplas
               _buildConfirmationSection(),
               const SizedBox(height: 16),
-              
-              // Countdown de segurança
               if (!_canProceed) _buildCountdownSection(),
             ],
           ),
         ),
         actions: [
-          // Botão de cancelar (sempre disponível)
           TextButton.icon(
             onPressed: () => Navigator.of(context).pop(false),
             icon: const Icon(Icons.cancel_outlined),
@@ -179,8 +165,6 @@ class _CriticalDoseConfirmationDialogState extends State<CriticalDoseConfirmatio
               foregroundColor: Colors.grey.shade700,
             ),
           ),
-          
-          // Botão de proceder (só após confirmações)
           ElevatedButton.icon(
             onPressed: _canConfirm ? () => _handleProceedConfirmation() : null,
             icon: _canConfirm 
@@ -441,10 +425,7 @@ class _CriticalDoseConfirmationDialogState extends State<CriticalDoseConfirmatio
   }
 
   void _handleProceedConfirmation() {
-    // Vibração háptica para confirmar ação crítica
     HapticFeedback.heavyImpact();
-    
-    // Log da decisão crítica (em produção, seria enviado para auditoria médica)
     debugPrint('CRÍTICO: Usuário prosseguiu com dose crítica após confirmações múltiplas');
     debugPrint('Medicamento: ${widget.medicationName}');
     debugPrint('Dose: ${widget.calculatedDose} ${widget.unit}');

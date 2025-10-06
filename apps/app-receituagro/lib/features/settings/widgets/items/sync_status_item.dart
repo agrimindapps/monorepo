@@ -36,7 +36,6 @@ class SyncStatusItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: Row(
           children: [
-            // Setting Icon
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
@@ -51,8 +50,6 @@ class SyncStatusItem extends StatelessWidget {
             ),
             
             const SizedBox(width: 8),
-            
-            // Setting Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,8 +70,6 @@ class SyncStatusItem extends StatelessWidget {
                 ],
               ),
             ),
-            
-            // Sync Status Indicator
             _buildSyncIndicator(context),
           ],
         ),

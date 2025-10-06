@@ -7,8 +7,6 @@ class TaskManagerPerformanceService {
 
   TaskManagerPerformanceService(this._performanceRepository);
 
-  // Traces específicos do Task Manager
-
   Future<void> startTaskOperationTrace(String operation) async {
     await _performanceRepository.startTrace(
       'task_$operation',
@@ -37,7 +35,6 @@ class TaskManagerPerformanceService {
     await _performanceRepository.measureOperationTime(
       'task_list_load',
       () async {
-        // Esta função será chamada pelo código que carrega a lista
         await Future<void>.delayed(Duration.zero);
       },
       attributes: {
@@ -73,8 +70,6 @@ class TaskManagerPerformanceService {
       },
     );
   }
-
-  // Métricas customizadas do Task Manager
 
   Future<void> recordTaskOperationMetric({
     required String operation,
@@ -184,8 +179,6 @@ class TaskManagerPerformanceService {
     );
   }
 
-  // Monitoramento de saúde específico do app
-
   Future<Map<String, dynamic>> getTaskManagerHealthReport() async {
     final baseReport = await _performanceRepository.getPerformanceReport();
     final currentMetrics = await _performanceRepository.getCurrentMetrics();
@@ -203,28 +196,19 @@ class TaskManagerPerformanceService {
   }
 
   double _calculatePerformanceScore(PerformanceMetrics metrics) {
-    // Score baseado em FPS, memória e CPU
     double score = 100.0;
-    
-    // FPS penalty (target: 60 fps)
     if (metrics.fps < 60) {
       score -= (60 - metrics.fps) * 0.5;
     }
-    
-    // Memory penalty (target: < 80% usage)
     if (metrics.memoryUsage.usagePercentage > 80) {
       score -= (metrics.memoryUsage.usagePercentage - 80) * 0.8;
     }
-    
-    // CPU penalty (target: < 70% usage)
     if (metrics.cpuUsage > 70) {
       score -= (metrics.cpuUsage - 70) * 0.6;
     }
     
     return score.clamp(0, 100);
   }
-
-  // Delegate methods do core
   Future<bool> startPerformanceTracking({PerformanceConfig? config}) =>
       _performanceRepository.startPerformanceTracking(config: config);
 

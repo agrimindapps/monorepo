@@ -64,7 +64,6 @@ class AccountSectionWidget extends ConsumerWidget {
   }
 
   Widget _buildAuthenticatedAccountCard(BuildContext context, WidgetRef ref, gasometer_entities.UserEntity? user, bool isAnonymous, bool isPremium) {
-    // Extract display values safely
     final displayName = isAnonymous ? 'Usuário Anônimo' : (user?.displayName ?? 'Usuário');
     final displayEmail = isAnonymous ? 'Dados salvos localmente' : (user?.email ?? 'Email não disponível');
 
@@ -190,8 +189,6 @@ class AccountSectionWidget extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-
-          // Show error message if any
           if (authState.errorMessage != null) ...[
             Container(
               width: double.infinity,
@@ -313,10 +310,8 @@ class AccountSectionWidget extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Hero Header with premium avatar
                 Row(
                   children: [
-                    // Hero Avatar Premium
                     Container(
                       width: 64,
                       height: 64,
@@ -346,8 +341,6 @@ class AccountSectionWidget extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-
-                    // Title and Status
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,8 +401,6 @@ class AccountSectionWidget extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 20),
-
-                // Premium Benefits
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -457,8 +448,6 @@ class AccountSectionWidget extends ConsumerWidget {
                 ),
 
                 const SizedBox(height: 20),
-
-                // Management Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -519,7 +508,6 @@ class AccountSectionWidget extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    // Premium Icon
                     Container(
                       width: 50,
                       height: 50,
@@ -539,8 +527,6 @@ class AccountSectionWidget extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-
-                    // Title and Subtitle
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,8 +567,6 @@ class AccountSectionWidget extends ConsumerWidget {
                         ],
                       ),
                     ),
-
-                    // Arrow
                     const Icon(
                       Icons.arrow_forward_ios,
                       color: Colors.white,
@@ -597,9 +581,6 @@ class AccountSectionWidget extends ConsumerWidget {
       ),
     );
   }
-
-
-  // Auth handling methods
   Future<void> _handleAnonymousLogin(BuildContext context, WidgetRef ref) async {
     await ref.read(authProvider.notifier).signInAnonymously();
     final authState = ref.read(authProvider);

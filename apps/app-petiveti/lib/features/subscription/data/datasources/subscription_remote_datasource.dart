@@ -32,8 +32,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
     required this.firestore,
     required this.subscriptionRepository,
   });
-
-  // Helper method to map ProductInfo to SubscriptionPlanModel
   SubscriptionPlanModel _mapProductInfoToPlan(core.ProductInfo productInfo) {
     return SubscriptionPlanModel(
       id: productInfo.productId,
@@ -56,8 +54,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       },
     );
   }
-
-  // Helper method to map SubscriptionEntity to UserSubscriptionModel
   UserSubscriptionModel _mapSubscriptionEntityToUserSubscription(
     core.SubscriptionEntity entity,
     String userId,
@@ -91,8 +87,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       updatedAt: entity.updatedAt ?? DateTime.now(),
     );
   }
-
-  // Helper: Map subscription period to PlanType
   PlanType _mapSubscriptionPeriodToPlanType(String? period) {
     if (period == null) return PlanType.free;
 
@@ -105,8 +99,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
     return PlanType.monthly;
   }
-
-  // Helper: Get duration in days from subscription period
   int? _getDurationInDays(String? period) {
     if (period == null) return null;
 
@@ -117,8 +109,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
     return 30;
   }
-
-  // Helper: Map SubscriptionTier to PlanType
   PlanType _mapTierToPlanType(core.SubscriptionTier tier) {
     switch (tier) {
       case core.SubscriptionTier.free:
@@ -129,8 +119,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         return PlanType.yearly;
     }
   }
-
-  // Helper: Map SubscriptionStatus to PlanStatus
   PlanStatus _mapSubscriptionStatusToPlanStatus(core.SubscriptionStatus status) {
     switch (status) {
       case core.SubscriptionStatus.active:
@@ -147,8 +135,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         return PlanStatus.pending;
     }
   }
-
-  // Helper: Parse trial days from period string
   int? _parseTrialDays(String period) {
     final match = RegExp(r'(\d+)').firstMatch(period);
     if (match != null) {
@@ -160,8 +146,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
     }
     return null;
   }
-
-  // Helper: Get features for product
   List<String> _getFeaturesForProduct(String productId) {
     return [
       'Acesso ilimitado a todas as calculadoras',
@@ -175,7 +159,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<List<SubscriptionPlanModel>> getAvailablePlans() async {
     try {
-      // Get products from core repository
       final result = await subscriptionRepository.getAvailableProducts(
         productIds: ['petiveti_monthly', 'petiveti_yearly'], // Configure as needed
       );
@@ -192,7 +175,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<UserSubscriptionModel?> getCurrentSubscription(String userId) async {
     try {
-      // Get current subscription from core repository
       final result = await subscriptionRepository.getCurrentSubscription();
 
       return result.fold(
@@ -210,7 +192,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<UserSubscriptionModel> subscribeToPlan(String userId, String planId) async {
     try {
-      // Purchase product via core repository
       final result = await subscriptionRepository.purchaseProduct(
         productId: planId,
       );
@@ -218,7 +199,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
       return result.fold(
         (failure) => throw ServerException(message: failure.message),
         (subscriptionEntity) async {
-          // Save to Firestore for cross-device sync
           final subscriptionData = {
             'userId': userId,
             'planId': planId,
@@ -241,8 +221,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
               .doc(userId)
               .collection('subscriptions')
               .add(subscriptionData);
-
-          // Update user premium status
           await firestore.collection('users').doc(userId).update({
             'isPremium': subscriptionEntity.isActive,
             'premiumExpiresAt': subscriptionEntity.expirationDate?.millisecondsSinceEpoch,
@@ -260,16 +238,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<void> cancelSubscription(String userId) async {
     try {
-      // IMPORTANT: Subscription cancellation cannot be done programmatically.
-      // Users MUST cancel through:
-      // - iOS: Settings → Apple ID → Subscriptions
-      // - Android: Play Store → Subscriptions
-      //
-      // This method only updates Firestore to track cancellation intent
-      // and prevent features from being enabled after store cancellation.
-      //
-      // The actual cancellation status comes from RevenueCat webhooks
-      // which update when the store processes the cancellation.
 
       await firestore
           .collection('users')
@@ -295,13 +263,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<void> pauseSubscription(String userId) async {
     try {
-      // IMPORTANT: Subscription pausing cannot be done programmatically.
-      // This is a store-level operation:
-      // - Android: Play Store supports pausing (up to 3 months)
-      // - iOS: Not supported by App Store
-      //
-      // This method only updates Firestore to track pause intent locally.
-      // The actual pause must be done by user through Play Store settings.
 
       await firestore
           .collection('users')
@@ -348,7 +309,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
   @override
   Future<UserSubscriptionModel> upgradePlan(String userId, String newPlanId) async {
-    // For RevenueCat, upgrading is similar to subscribing to a new plan
     return await subscribeToPlan(userId, newPlanId);
   }
 
@@ -383,7 +343,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<bool> validateReceipt(String receiptData) async {
     try {
-      // Use getCurrentSubscription to validate
       final result = await subscriptionRepository.getCurrentSubscription();
 
       return result.fold(
@@ -411,8 +370,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
 
       final doc = snapshot.docs.first;
       final data = doc.data();
-
-      // Get latest subscription info from core repository
       try {
         final result = await subscriptionRepository.getCurrentSubscription();
 
@@ -428,7 +385,6 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
           },
         );
       } catch (e) {
-        // Fallback to Firestore data if core repository fails
         return UserSubscriptionModel(
           id: doc.id,
           userId: userId,
@@ -471,18 +427,15 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<String?> getSubscriptionManagementUrl() async {
     try {
-      // Get management URL from core repository
       final result = await subscriptionRepository.getManagementUrl();
 
       return result.fold(
         (failure) {
-          // Return null on failure, caller should handle fallback
           return null;
         },
         (url) => url,
       );
     } catch (e) {
-      // Return null on error, caller should handle fallback
       return null;
     }
   }

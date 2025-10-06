@@ -32,8 +32,6 @@ class AccountDeletionService {
       }
 
       final deletionResult = AccountDeletionResult();
-
-      // Step 1: Verificar se usuário está autenticado
       final isLoggedIn = await _authRepository.isLoggedIn;
       if (!isLoggedIn) {
         return Result.error(
@@ -42,8 +40,6 @@ class AccountDeletionService {
           ),
         );
       }
-
-      // Step 2: Obter estatísticas antes da limpeza (para logs)
       if (_appDataCleaner != null) {
         try {
           final statsBeforeCleaning =
@@ -65,8 +61,6 @@ class AccountDeletionService {
           }
         }
       }
-
-      // Step 3: Limpar dados locais específicos do app
       if (_appDataCleaner != null) {
         try {
           if (kDebugMode) {
@@ -101,8 +95,6 @@ class AccountDeletionService {
               debugPrint('   Errors: ${cleanupResult['errors']}');
             }
           }
-
-          // Verificar integridade da limpeza
           final verificationResult = await _appDataCleaner.verifyDataCleanup();
           deletionResult.dataCleanupVerified = verificationResult;
 
@@ -118,7 +110,6 @@ class AccountDeletionService {
               '❌ AccountDeletionService: Error during app data cleanup: $e',
             );
           }
-          // Continue with Firebase deletion even if local cleanup fails
         }
       } else {
         if (kDebugMode) {
@@ -127,8 +118,6 @@ class AccountDeletionService {
           );
         }
       }
-
-      // Step 4: Deletar conta do Firebase
       if (kDebugMode) {
         debugPrint('🔥 AccountDeletionService: Deleting Firebase account...');
       }
@@ -224,19 +213,11 @@ class AccountDeletionService {
 /// Resultado detalhado da exclusão de conta
 class AccountDeletionResult {
   DateTime? completedAt;
-
-  // Firebase deletion
   bool firebaseDeleteSuccess = false;
   String? firebaseDeleteError;
-
-  // Local data cleanup
   Map<String, dynamic>? localDataCleanupResult;
   String? localDataCleanupError;
-
-  // Data verification
   bool dataCleanupVerified = false;
-
-  // Statistics
   Map<String, dynamic>? dataStatsBeforeCleaning;
 
   AccountDeletionResult();

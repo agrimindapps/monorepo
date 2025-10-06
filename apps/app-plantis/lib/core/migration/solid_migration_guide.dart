@@ -44,7 +44,6 @@ class PlantFormPageSOLID extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Usar o novo provider SOLID
     final formState = ref.watch(solidPlantFormStateProvider);
     final formManager = ref.read(solidPlantFormStateManagerProvider);
     
@@ -121,21 +120,15 @@ class PlantFormPageSOLID extends ConsumerWidget {
 class MigrationHelper {
   /// Configuração para ambiente de desenvolvimento
   static void setupDevelopmentMigration(WidgetRef ref) {
-    // Inicializar SOLID DI
     ref.read(solidDIInitializationProvider);
-    
-    // Log para debugging
     debugPrint('🔄 SOLID Migration: Development setup complete');
   }
   
   /// Validação de que a migração está funcionando
   static Future<bool> validateMigration(WidgetRef ref) async {
     try {
-      // Testar que os providers SOLID estão funcionando
       final solidState = ref.read(solidPlantFormStateProvider);
       final migrationState = ref.read(migrationPlantFormProvider);
-      
-      // Validar que estados são compatíveis
       final isValid = solidState.name == migrationState.name &&
                      solidState.species == migrationState.species &&
                      solidState.isLoading == migrationState.isLoading;

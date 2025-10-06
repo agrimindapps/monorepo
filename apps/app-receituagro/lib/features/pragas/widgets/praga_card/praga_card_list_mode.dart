@@ -54,7 +54,6 @@ class PragaCardListMode extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // Seção de imagem compacta
                 Container(
                   width: 64,
                   height: 64,
@@ -79,8 +78,6 @@ class PragaCardListMode extends StatelessWidget {
                 ),
                 
                 const SizedBox(width: ReceitaAgroSpacing.sm),
-                
-                // Conteúdo principal expandido
                 Expanded(
                   child: PragaCardContentSection(
                     properties: properties,
@@ -89,8 +86,6 @@ class PragaCardListMode extends StatelessWidget {
                 ),
                 
                 const SizedBox(width: ReceitaAgroSpacing.sm),
-                
-                // Seção de ações
                 PragaCardActionSection(
                   properties: properties,
                   mode: PragaCardActionMode.list,

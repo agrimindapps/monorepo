@@ -8,7 +8,6 @@ import 'package:dartz/dartz.dart';
 /// Defines contract for news and market data operations
 /// Supports RSS feeds, article caching, and commodity pricing
 abstract class NewsRepository {
-  // === NEWS ARTICLES ===
   
   /// Fetch latest news articles with optional filtering
   Future<Either<Failure, List<NewsArticleEntity>>> getNews({
@@ -48,8 +47,6 @@ abstract class NewsRepository {
 
   /// Clear articles cache
   Future<Either<Failure, void>> clearCache();
-
-  // === RSS FEEDS ===
   
   /// Refresh RSS feeds from all sources
   Future<Either<Failure, void>> refreshRSSFeeds();
@@ -65,8 +62,6 @@ abstract class NewsRepository {
 
   /// Get all configured RSS sources
   Future<Either<Failure, List<String>>> getRSSSources();
-
-  // === COMMODITY PRICES ===
   
   /// Get current commodity prices
   Future<Either<Failure, List<CommodityPriceEntity>>> getCommodityPrices({
@@ -98,8 +93,6 @@ abstract class NewsRepository {
 
   /// Remove price alert
   Future<Either<Failure, void>> removePriceAlert(String alertId);
-
-  // === FAVORITES & BOOKMARKS ===
   
   /// Add article to favorites
   Future<Either<Failure, void>> addToFavorites(String articleId);

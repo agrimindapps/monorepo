@@ -66,8 +66,6 @@ class ValidatedSwitchField extends StatefulWidget {
   
   /// Se o campo é obrigatório (deve estar ativo)
   final bool required;
-  
-  // Validação
   /// Validador síncrono
   final String? Function(bool)? validator;
   
@@ -82,12 +80,8 @@ class ValidatedSwitchField extends StatefulWidget {
   
   /// Se deve mostrar ícone de validação
   final bool showValidationIcon;
-  
-  // Callbacks
   /// Callback quando a edição é completada
   final VoidCallback? onEditingComplete;
-  
-  // Visual
   /// Cor personalizada para o switch ativo
   final Color? activeColor;
   
@@ -133,8 +127,6 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
   @override
   void initState() {
     super.initState();
-    
-    // Configurar animação para ícones de validação
     _iconAnimationController = AnimationController(
       duration: GasometerDesignTokens.animationFast,
       vsync: this,
@@ -145,8 +137,6 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
         curve: Curves.easeInOut,
       ),
     );
-    
-    // Validar valor inicial se necessário
     if (widget.validateOnChange) {
       _validateValue(widget.value);
     }
@@ -172,16 +162,11 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
     widget.onEditingComplete?.call();
     
     if (widget.validateOnChange) {
-      // Cancelar timer anterior se existir
       _debounceTimer?.cancel();
-      
-      // Mostrar estado de validação
       setState(() {
         _validationState = SwitchValidationState.validating;
         _errorMessage = null;
       });
-      
-      // Configurar debounce
       _debounceTimer = Timer(widget.debounceDuration, () {
         _validateValue(value);
       });
@@ -193,18 +178,12 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
     
     try {
       String? error;
-      
-      // Validação obrigatória para campos required
       if (widget.required && !value) {
         error = 'Esta opção deve estar ativa';
       }
-      
-      // Validação síncrona
       if (error == null && widget.validator != null) {
         error = widget.validator!(value);
       }
-      
-      // Validação assíncrona
       if (error == null && widget.asyncValidator != null) {
         error = await widget.asyncValidator!(value);
       }
@@ -220,8 +199,6 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
           _errorMessage = null;
         }
       });
-      
-      // Animar ícone
       await _iconAnimationController.forward();
       
     } catch (e) {
@@ -283,12 +260,9 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
   }
 
   String? get _displayHelperText {
-    // Priorizar mensagem de erro
     if (_errorMessage != null) {
       return _errorMessage;
     }
-    
-    // Mensagem de helper padrão
     return widget.helperText;
   }
 
@@ -414,7 +388,6 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Switch com label
         InkWell(
           onTap: widget.enabled ? () => _onValueChanged(!widget.value) : null,
           borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusMd),
@@ -423,8 +396,6 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
             child: _buildSwitchRow(),
           ),
         ),
-        
-        // Helper text
         if (_displayHelperText != null)
           Padding(
             padding: const EdgeInsets.only(
@@ -439,8 +410,6 @@ class _ValidatedSwitchFieldState extends State<ValidatedSwitchField>
               ),
             ),
           ),
-        
-        // Indicador de progresso para validação
         if (_validationState == SwitchValidationState.validating)
           Padding(
             padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingXs),
@@ -545,7 +514,6 @@ class _ValidatedSwitchGroupState extends State<ValidatedSwitchGroup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título do grupo
         if (widget.title != null)
           Padding(
             padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingXs),
@@ -558,8 +526,6 @@ class _ValidatedSwitchGroupState extends State<ValidatedSwitchGroup> {
               ),
             ),
           ),
-        
-        // Subtítulo do grupo
         if (widget.subtitle != null)
           Padding(
             padding: const EdgeInsets.only(bottom: GasometerDesignTokens.spacingSm),
@@ -571,8 +537,6 @@ class _ValidatedSwitchGroupState extends State<ValidatedSwitchGroup> {
               ),
             ),
           ),
-        
-        // Lista de switches
         Column(
           children: widget.items.map((item) {
             final isSelected = widget.allowMultiple 

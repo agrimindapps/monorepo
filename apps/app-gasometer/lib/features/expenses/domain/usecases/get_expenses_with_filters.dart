@@ -49,7 +49,6 @@ class GetExpensesWithFiltersUseCase
     ExpensesFilterParams params,
   ) async {
     try {
-      // Validações
       final validation = _validateFilters(params);
       if (validation != null) {
         return Left(ValidationFailure(validation));
@@ -64,8 +63,6 @@ class GetExpensesWithFiltersUseCase
         maxAmount: params.maxAmount,
         searchText: params.searchText,
       );
-
-      // Ordenar por data (mais recente primeiro)
       expenses.sort((a, b) => b.date.compareTo(a.date));
 
       return Right(expenses);
@@ -79,14 +76,11 @@ class GetExpensesWithFiltersUseCase
   }
 
   String? _validateFilters(ExpensesFilterParams params) {
-    // Validar intervalo de datas
     if (params.startDate != null && params.endDate != null) {
       if (params.endDate!.isBefore(params.startDate!)) {
         return 'Data final deve ser posterior à data inicial';
       }
     }
-
-    // Validar intervalo de valores
     if (params.minAmount != null && params.minAmount! < 0) {
       return 'Valor mínimo não pode ser negativo';
     }

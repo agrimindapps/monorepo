@@ -165,12 +165,9 @@ class NotesFormField extends StatelessWidget {
     }
 
     if (value != null && value.isNotEmpty) {
-      // Validação de comprimento
       if (value.length > config.maxLength) {
         return 'Máximo ${config.maxLength} caracteres';
       }
-
-      // Validações específicas por tipo
       switch (type) {
         case NotesFieldType.location:
           if (value.length < 3) {
@@ -186,8 +183,6 @@ class NotesFormField extends StatelessWidget {
           break;
       }
     }
-
-    // Validação adicional customizada
     if (additionalValidator != null) {
       return additionalValidator!(value);
     }

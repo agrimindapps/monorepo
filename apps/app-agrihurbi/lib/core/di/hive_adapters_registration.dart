@@ -1,6 +1,4 @@
 import 'package:core/core.dart' show Hive;
-
-// Generated Hive Adapters
 import '../../features/auth/data/models/user_model.dart';
 import '../../features/livestock/data/models/bovine_model.dart';
 import '../../features/livestock/data/models/equine_model.dart';
@@ -18,14 +16,9 @@ import '../../features/weather/data/models/weather_statistics_model.dart';
 ///
 /// IMPORTANTE: Chamar APÓS Hive.initFlutter() e ANTES de abrir qualquer box
 void registerAgrihurbiHiveAdapters() {
-  // === MODEL ADAPTERS (Generated) ===
-
-  // Auth Models
   if (!Hive.isAdapterRegistered(20)) {
     Hive.registerAdapter(UserModelAdapter());
   }
-
-  // Livestock Models
   if (!Hive.isAdapterRegistered(0)) {
     Hive.registerAdapter(BovineModelAdapter());
   }
@@ -33,8 +26,6 @@ void registerAgrihurbiHiveAdapters() {
   if (!Hive.isAdapterRegistered(1)) {
     Hive.registerAdapter(EquineModelAdapter());
   }
-
-  // Settings Models
   if (!Hive.isAdapterRegistered(23)) {
     Hive.registerAdapter(SettingsModelAdapter());
   }
@@ -62,8 +53,6 @@ void registerAgrihurbiHiveAdapters() {
   if (!Hive.isAdapterRegistered(31)) {
     Hive.registerAdapter(BackupSettingsModelAdapter());
   }
-
-  // News Models
   if (!Hive.isAdapterRegistered(10)) {
     Hive.registerAdapter(NewsArticleModelAdapter());
   }
@@ -71,13 +60,9 @@ void registerAgrihurbiHiveAdapters() {
   if (!Hive.isAdapterRegistered(11)) {
     Hive.registerAdapter(CommodityPriceModelAdapter());
   }
-
-  // Market Models
   if (!Hive.isAdapterRegistered(12)) {
     Hive.registerAdapter(MarketModelAdapter());
   }
-
-  // Weather Models
   if (!Hive.isAdapterRegistered(40)) {
     Hive.registerAdapter(RainGaugeModelAdapter());
   }
@@ -89,13 +74,7 @@ void registerAgrihurbiHiveAdapters() {
   if (!Hive.isAdapterRegistered(42)) {
     Hive.registerAdapter(WeatherStatisticsModelAdapter());
   }
-
-  // === ENUM ADAPTERS (Manual) ===
-
-  // Livestock Enums
   registerLivestockEnumAdapters();
-
-  // Market Enums
   registerMarketAdapters();
 
   print('✅ AgriHurbi Hive Adapters registered successfully');

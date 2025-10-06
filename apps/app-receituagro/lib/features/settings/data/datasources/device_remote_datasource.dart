@@ -30,7 +30,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
     }
     
     try {
-      // Usar Firestore diretamente para obter dispositivos
       return await _firebaseDeviceService.getDevicesFromFirestore(userId);
     } catch (e) {
       return Left(
@@ -45,7 +44,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, DeviceEntity>> validateDevice(String userId, DeviceEntity device) async {
     if (!_isServiceAvailable) {
-      // Return device as valid for Web compatibility
       return Right(device);
     }
     
@@ -67,7 +65,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, void>> revokeDevice(String userId, String deviceUuid) async {
     if (!_isServiceAvailable) {
-      // Return success for Web compatibility (no-op)
       return const Right(null);
     }
     
@@ -89,7 +86,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, DeviceEntity>> updateLastActivity(String userId, String deviceUuid) async {
     if (!_isServiceAvailable) {
-      // Return a mock device entity for Web compatibility
       return Right(DeviceEntity(
         id: deviceUuid,
         uuid: deviceUuid,
@@ -126,18 +122,15 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
     if (!_isServiceAvailable) {
-      // Always allow for Web compatibility
       return const Right(true);
     }
     
     try {
-      // Obter contagem atual de dispositivos ativos
       final countResult = await _firebaseDeviceService!.getActiveDeviceCount(userId);
       
       return countResult.fold(
         (failure) => Left(failure),
         (activeCount) {
-          // Limite padrão de 3 dispositivos (pode ser configurável no futuro)
           const int deviceLimit = 3;
           return Right(activeCount < deviceLimit);
         },
@@ -155,7 +148,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, DeviceStatistics>> getDeviceStatistics(String userId) async {
     try {
-      // Obter lista de dispositivos
       final devicesResult = await getUserDevices(userId);
       
       return devicesResult.fold(
@@ -201,25 +193,19 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, void>> revokeAllOtherDevices(String userId, String currentDeviceUuid) async {
     try {
-      // Obter todos os dispositivos
       final devicesResult = await getUserDevices(userId);
       
       return await devicesResult.fold(
         (failure) async => Left(failure),
         (devices) async {
-          // Filtrar dispositivos a serem revogados (todos exceto o atual)
           final devicesToRevoke = devices
               .where((device) => device.uuid != currentDeviceUuid && device.isActive)
               .toList();
-          
-          // Revogar cada dispositivo
           final revokeResults = await Future.wait(
             devicesToRevoke.map((device) => 
               revokeDevice(userId, device.uuid)
             ),
           );
-          
-          // Verificar se alguma revogação falhou
           for (final result in revokeResults) {
             if (result.isLeft()) {
               return result;
@@ -242,7 +228,6 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, List<DeviceEntity>>> cleanupInactiveDevices(String userId, int inactiveDays) async {
     try {
-      // Obter todos os dispositivos
       final devicesResult = await getUserDevices(userId);
       
       return await devicesResult.fold(
@@ -250,23 +235,17 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
         (devices) async {
           final now = DateTime.now();
           final cutoffDate = now.subtract(Duration(days: inactiveDays));
-          
-          // Identificar dispositivos inativos
           final inactiveDevices = devices
               .where((device) => 
                 device.isActive && 
                 device.lastActiveAt.isBefore(cutoffDate)
               )
               .toList();
-          
-          // Revogar dispositivos inativos
           final cleanupResults = await Future.wait(
             inactiveDevices.map((device) => 
               revokeDevice(userId, device.uuid)
             ),
           );
-          
-          // Verificar se alguma limpeza falhou
           for (final result in cleanupResults) {
             if (result.isLeft()) {
               return const Left(

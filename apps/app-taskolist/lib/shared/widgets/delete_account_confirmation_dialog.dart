@@ -67,7 +67,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header com ícone de aviso animado
           AnimatedBuilder(
             animation: _warningColorAnimation,
             builder: (context, child) {
@@ -87,8 +86,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 16),
-          
-          // Título
           const Text(
             '⚠️ EXCLUSÃO PERMANENTE DE CONTA',
             style: TextStyle(
@@ -100,8 +97,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 24),
-          
-          // Lista de avisos
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -155,8 +150,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 24),
-          
-          // Checkbox de confirmação de leitura
           CheckboxListTile(
             value: _hasReadWarnings,
             onChanged: (value) {
@@ -177,12 +170,9 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 24),
-          
-          // Botões
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Cancelar
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -198,8 +188,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
               ),
               
               const SizedBox(width: 16),
-              
-              // Continuar
               Expanded(
                 child: ElevatedButton(
                   onPressed: _hasReadWarnings ? _proceedToConfirmation : null,
@@ -231,7 +219,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
           Row(
             children: [
               IconButton(
@@ -253,8 +240,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 24),
-          
-          // Instrução de confirmação
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -293,8 +278,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 24),
-          
-          // Campo 1: Digite seu email
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -331,8 +314,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 20),
-          
-          // Campo 2: Digite o texto de confirmação
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -371,12 +352,9 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
           ),
           
           const SizedBox(height: 32),
-          
-          // Botões
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Cancelar
               Expanded(
                 child: OutlinedButton(
                   onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
@@ -392,8 +370,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
               ),
               
               const SizedBox(width: 16),
-              
-              // Deletar Conta
               Expanded(
                 child: ElevatedButton(
                   onPressed: canProceed ? _confirmDeletion : null,
@@ -469,8 +445,6 @@ class _DeleteAccountConfirmationDialogState extends State<DeleteAccountConfirmat
     });
 
     HapticFeedback.heavyImpact();
-    
-    // Pequeno delay para mostrar loading
     await Future<void>.delayed(const Duration(milliseconds: 500));
     
     if (!mounted) return;

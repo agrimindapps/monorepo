@@ -130,7 +130,6 @@ class OdometerRemoteDataSourceImpl implements OdometerRemoteDataSource {
   @override
   Future<List<OdometerEntity>> searchOdometerReadings(String userId, String query) async {
     try {
-      // Firebase text search is limited, so we'll fetch all and filter locally
       final allReadings = await getAllOdometerReadings(userId);
       final lowercaseQuery = query.toLowerCase();
       
@@ -207,7 +206,6 @@ class OdometerRemoteDataSourceImpl implements OdometerRemoteDataSource {
         },
       );
     } catch (e) {
-      // Log the error but don't throw to avoid breaking the entire list
       print('Error converting document to odometer entity: $e');
       return null;
     }

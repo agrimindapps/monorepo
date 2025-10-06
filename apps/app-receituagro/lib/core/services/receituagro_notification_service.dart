@@ -57,27 +57,18 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
     if (_isInitialized) return true;
 
     try {
-      // Inicializa timezone
       await NotificationHelper.initializeTimeZone();
-
-      // Configura settings
       final settings = NotificationHelper.createDefaultSettings(
         defaultColor: _primaryColor,
       );
       (_notificationRepository as LocalNotificationService).configure(settings);
-
-      // Cria canais padrão
       final defaultChannels = NotificationHelper.getDefaultChannels(
         appName: _appName,
         primaryColor: _primaryColor,
       );
-
-      // Inicializa o serviço
       final result = await _notificationRepository.initialize(
         defaultChannels: defaultChannels,
       );
-
-      // Define callbacks
       _notificationRepository.setNotificationTapCallback(_handleNotificationTap);
       _notificationRepository.setNotificationActionCallback(_handleNotificationAction);
 
@@ -259,8 +250,6 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
       final type = data['type'] as String?;
 
       debugPrint('🔔 ReceitaAgro notification tapped: $type');
-
-      // Aqui você pode navegar para telas específicas baseado no tipo
       switch (type) {
         case 'pest_detected':
           _navigateToPestDetails(data);
@@ -292,7 +281,6 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
         _handleNotificationTap(payload);
         break;
       case 'dismiss':
-        // Apenas dismissar
         break;
       case 'remind_later':
         _handleRemindLater(payload);
@@ -302,31 +290,26 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
 
   /// Navegar para detalhes da praga
   void _navigateToPestDetails(Map<String, dynamic> data) {
-    // TODO: Implementar navegação para detalhes da praga
     debugPrint('Navigate to pest: ${data['pest_name']}');
   }
 
   /// Navegar para agenda de aplicação
   void _navigateToApplicationSchedule(Map<String, dynamic> data) {
-    // TODO: Implementar navegação para agenda de aplicação
     debugPrint('Navigate to application: ${data['defensive_name']}');
   }
 
   /// Navegar para detalhes da receita
   void _navigateToRecipeDetails(Map<String, dynamic> data) {
-    // TODO: Implementar navegação para receita
     debugPrint('Navigate to recipe: ${data['recipe_name']}');
   }
 
   /// Navegar para informações climáticas
   void _navigateToWeatherInfo(Map<String, dynamic> data) {
-    // TODO: Implementar navegação para clima
     debugPrint('Navigate to weather info');
   }
 
   /// Navegar para monitoramento
   void _navigateToMonitoring(Map<String, dynamic> data) {
-    // TODO: Implementar navegação para monitoramento
     debugPrint('Navigate to monitoring: ${data['field_name']}');
   }
 
@@ -337,8 +320,6 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
     try {
       final data = jsonDecode(payload) as Map<String, dynamic>;
       final type = data['type'] as String?;
-
-      // Reagenda para 1 hora depois
       final newDate = DateTime.now().add(const Duration(hours: 1));
 
       switch (type) {
@@ -349,7 +330,6 @@ class ReceitaAgroNotificationService implements IReceitaAgroNotificationService 
             applicationDate: newDate,
           );
           break;
-        // Adicionar outros tipos conforme necessário
       }
     } catch (e) {
       debugPrint('❌ Error rescheduling notification: $e');

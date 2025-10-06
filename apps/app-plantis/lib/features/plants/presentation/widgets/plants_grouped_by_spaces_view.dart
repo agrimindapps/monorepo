@@ -30,8 +30,6 @@ class _PlantsGroupedBySpacesViewState
   @override
   void initState() {
     super.initState();
-
-    // Carregar espaços se ainda não estiverem carregados
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final spacesAsync = ref.read(spacesProvider);
       final isEmpty = spacesAsync.maybeWhen(
@@ -87,20 +85,16 @@ class _PlantsGroupedBySpacesViewState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Space header
         SpaceHeaderWidget(
           spaceId: spaceId,
           spaceName: spaceName,
           plantCount: plants.length,
           onEdit: () {
-            // Refresh plants list after space name change
             ref.read(plantsProvider.notifier).refreshPlants();
           },
         ),
 
         const SizedBox(height: 8),
-
-        // Plants grid/list for this space
         widget.useGridLayout
             ? _buildPlantsGrid(context, plants)
             : _buildPlantsList(context, plants),
@@ -196,21 +190,16 @@ class _PlantsGroupedBySpacesViewState
     if (spacesState == null) {
       return 'Espaço desconhecido';
     }
-
-    // Try to find space in loaded spaces
     try {
       final space = spacesState.allSpaces.firstWhere((s) => s.id == spaceId);
       return space.displayName;
     } catch (e) {
-      // Space not found in loaded spaces, return a fallback
       return 'Espaço desconhecido';
     }
   }
 
   int _getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    // Usar a mesma lógica responsiva do PlantsGridView original
     if (width < 600) {
       return 2; // Telefones
     } else if (width < 900) {

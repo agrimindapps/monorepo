@@ -21,14 +21,10 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   })  : _getCalculationHistory = getCalculationHistory,
         _saveCalculationToHistory = saveCalculationToHistory;
 
-  // === STATE MANAGEMENT ===
-
   List<CalculationHistory> _calculationHistory = [];
   bool _isLoadingHistory = false;
   bool _isSavingToHistory = false;
   String? _errorMessage;
-
-  // === GETTERS ===
 
   List<CalculationHistory> get calculationHistory => _calculationHistory;
   bool get isLoadingHistory => _isLoadingHistory;
@@ -58,8 +54,6 @@ class CalculatorHistoryProvider extends ChangeNotifier {
           item.createdAt.isBefore(end))
         .toList();
   }
-
-  // === HISTORY OPERATIONS ===
 
   /// Carrega histórico de cálculos
   Future<void> loadCalculationHistory() async {
@@ -115,7 +109,6 @@ class CalculatorHistoryProvider extends ChangeNotifier {
         debugPrint('CalculatorHistoryProvider: Erro ao salvar no histórico - ${failure.message}');
       },
       (_) {
-        // Adiciona ao início da lista (mais recente primeiro)
         _calculationHistory.insert(0, historyItem);
         success = true;
         debugPrint('CalculatorHistoryProvider: Resultado salvo no histórico - ${historyItem.id}');
@@ -180,8 +173,6 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     return false;
   }
 
-  // === HISTORY SEARCH AND FILTER ===
-
   /// Busca no histórico por termo
   List<CalculationHistory> searchHistory(String searchTerm) {
     if (searchTerm.trim().isEmpty) return _calculationHistory;
@@ -208,8 +199,6 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     ).toList();
   }
 
-  // === HISTORY STATISTICS ===
-
   /// Obtém estatísticas do histórico
   HistoryStatistics getHistoryStatistics() {
     if (_calculationHistory.isEmpty) {
@@ -228,11 +217,8 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     DateTime? newest;
 
     for (final item in _calculationHistory) {
-      // Conta uso por calculadora
       calculatorCounts[item.calculatorId] = 
           (calculatorCounts[item.calculatorId] ?? 0) + 1;
-      
-      // Encontra datas extremas
       if (oldest == null || item.createdAt.isBefore(oldest)) {
         oldest = item.createdAt;
       }
@@ -240,8 +226,6 @@ class CalculatorHistoryProvider extends ChangeNotifier {
         newest = item.createdAt;
       }
     }
-
-    // Encontra calculadora mais usada
     String? mostUsedCalculator;
     int mostUsedCount = 0;
     calculatorCounts.forEach((calculatorId, count) {
@@ -298,8 +282,6 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-// === HISTORY STATISTICS CLASS ===
 
 class HistoryStatistics {
   final int totalCalculations;

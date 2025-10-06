@@ -16,59 +16,43 @@ enum ParameterType {
 
 enum ParameterUnit {
   none,
-  // Área
   hectare,
   metro2,
   acre,
   plantasha,
-  // Volume
   litro,
   metro3,
-  // Peso
   kg,
   quilograma,
   tonelada,
   gramas,
   grama,
-  // Distância
   metro,
   centimetro,
   kilometro,
-  // Percentual
   percentual,
-  // Tempo
   dia,
   mes,
   ano,
-  // Temperatura
   celsius,
-  // Pressão
   bar,
   atm,
-  // Nutrientes
   ppm,
   mgL,
   mgdm3,
-  // Contadores e Scores
   count,
   escore,
-  // Livestock units
   cabecas,
-  // Combined units
   kgdia,
   litrodia,
   mcalkg,
   litroha,
-  // Distance units
   milimetro,
   mmh, // mm/h
-  // Soil/Chemistry units
   cmolcdm3, // cmolc/dm³
   gcm3, // g/cm³
   dsm, // dS/m
-  // Ratios
   ratio,
-  // Type extension for integers
   integer,
 }
 

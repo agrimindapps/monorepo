@@ -10,8 +10,6 @@ import '../domain/usecases/get_pragas_usecase.dart';
 class PragasDI {
   static void configure() {
     final sl = GetIt.instance;
-
-    // Repositories
     sl.registerLazySingleton<IPragasRepository>(
       () => PragasRepositoryImpl(sl<PragasHiveRepository>()),
     );
@@ -23,8 +21,6 @@ class PragasDI {
     sl.registerLazySingleton<IPragasFormatter>(
       () => PragasFormatterImpl(),
     );
-
-    // Use Cases
     sl.registerLazySingleton<GetPragasUseCase>(
       () => GetPragasUseCase(repository: sl()),
     );
@@ -59,10 +55,6 @@ class PragasDI {
     sl.registerLazySingleton<GetPragasStatsUseCase>(
       () => GetPragasStatsUseCase(repository: sl()),
     );
-
-    // Provider removed - Riverpod manages lifecycle automatically
-    // Riverpod notifiers: PragasNotifier, HomePragasNotifier, DetalhePragaNotifier, etc.
-    // State is managed via @riverpod providers in presentation/providers/
   }
 }
 

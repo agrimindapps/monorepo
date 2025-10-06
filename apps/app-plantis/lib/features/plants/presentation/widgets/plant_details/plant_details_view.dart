@@ -56,30 +56,23 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-
-    // Adiciona listener para remover foco quando mudar de aba
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         FocusScope.of(context).unfocus();
       }
     });
-
-    // MEMORY LEAK FIX: Enhanced controller initialization with proper mounted checks
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       try {
         final provider = ref.read(plantDetailsProviderProvider);
         final taskProvider = ref.read(plantTaskProviderProvider);
-
-        // Only create controller if widget is still mounted
         if (mounted) {
           _controller = PlantDetailsController(
             provider: provider,
             onBack: () {
               if (mounted) {
                 Navigator.of(context).pop();
-                // Forçar atualização da lista na tela anterior
                 _notifyListScreenUpdate();
               }
             },
@@ -90,7 +83,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                   plantId: plantId,
                 );
                 if (result == true && mounted) {
-                  // Planta foi editada com sucesso, recarregar dados
                   final provider = ref.read(plantDetailsProviderProvider);
                   await provider.reloadPlant(plantId);
 
@@ -103,12 +95,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               }
             },
             onNavigateToImages: (plantId) {
-              // TODO: Implementar rota para galeria de imagens
-              // if (mounted) context.push('/plants/$plantId/images');
             },
             onNavigateToSchedule: (plantId) {
-              // TODO: Implementar rota para cronograma de cuidados
-              // if (mounted) context.push('/plants/$plantId/schedule');
             },
             onShowSnackBar: (message, type) {
               if (mounted) _showSnackBar(message, type);
@@ -144,19 +132,14 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               if (mounted) _syncPlantDeletion(plantId);
             },
           );
-
-          // Load plant data only if controller was created successfully
           if (_controller != null && mounted) {
             _controller!.loadPlant(widget.plantId);
           }
-
-          // Initialize tasks only if everything is properly set up
           if (mounted) {
             _initializeTasksIfNeeded(taskProvider);
           }
         }
       } catch (e) {
-        // Handle initialization errors gracefully
         if (mounted) {
           debugPrint('Error initializing PlantDetailsView: $e');
         }
@@ -166,17 +149,10 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
 
   @override
   void dispose() {
-    // CRITICAL MEMORY LEAK FIX: Proper disposal sequence
     _tabController.dispose();
-
-    // Clear controller reference and ensure no pending operations
     if (_controller != null) {
       _controller = null;
     }
-
-    // Clear any provider listeners and ensure proper cleanup
-    // The providers are dependency-injected, so they'll be disposed by the DI container
-    // but we need to ensure no pending operations or callbacks are active
 
     super.dispose();
   }
@@ -186,11 +162,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     final plantDetailsProvider = ref.watch(plantDetailsProviderProvider);
 
     return BasePageScaffold(
-      // Optimized with ref.watch - only rebuilds when provider state changes
       body: ResponsiveLayout(
         child: Builder(
           builder: (context) {
-            // Estados de loading e erro
             if (plantDetailsProvider.isLoading &&
                 plantDetailsProvider.plant == null) {
               return _buildLoadingState(context);
@@ -208,13 +182,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             if (plant == null) {
               return _buildLoadingState(context);
             }
-
-            // Validate plant data
             if (!_isPlantDataValid(plant)) {
               return _buildInvalidDataState(context, plant);
             }
-
-            // Tela principal com a planta carregada
             return _buildMainContent(context, plant);
           },
         ),
@@ -245,7 +215,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               : theme.colorScheme.surface,
       body: CustomScrollView(
         slivers: [
-          // Loading AppBar
           SliverAppBar(
             expandedHeight: AppSpacing.appBarHeight,
             pinned: true,
@@ -270,15 +239,12 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               background: _buildLoadingImageSection(context),
             ),
           ),
-
-          // Loading Content
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.screenPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Loading text shimmer
                   const _LoadingShimmer(
                     height: AppSpacing.sectionSpacing,
                     width: 200,
@@ -286,12 +252,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                   const SizedBox(height: AppSpacing.iconPadding),
                   const _LoadingShimmer(height: AppSpacing.lg, width: 150),
                   const SizedBox(height: AppSpacing.sectionSpacing),
-
-                  // Loading tabs
                   _buildLoadingTabs(context),
                   const SizedBox(height: AppSpacing.lg),
-
-                  // Loading content cards
                   ...[
                     for (int i = 0; i < 3; i++) ...[
                       _buildLoadingCard(context),
@@ -472,7 +434,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Error illustration
               Container(
                 width: 120,
                 height: 120,
@@ -512,17 +473,12 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.iconPadding),
-
-              // Error details (expandable)
               if (errorMessage != null && errorMessage.isNotEmpty)
                 _buildErrorDetails(context, errorMessage),
 
               const SizedBox(height: 32),
-
-              // Action buttons
               Column(
                 children: [
-                  // Primary retry button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -540,8 +496,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                     ),
                   ),
                   const SizedBox(height: AppSpacing.buttonSpacing),
-
-                  // Secondary actions
                   Row(
                     children: [
                       Expanded(
@@ -578,8 +532,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               ),
 
               const SizedBox(height: AppSpacing.sectionSpacing),
-
-              // Troubleshooting tips
               _buildTroubleshootingTips(context),
             ],
           ),
@@ -740,24 +692,19 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   /// Parameters:
   /// - [taskProvider]: The task provider instance for task management
   void _initializeTasksIfNeeded(PlantTaskProvider taskProvider) {
-    // MEMORY LEAK FIX: Enhanced mounted checks to prevent memory leaks
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Double-check mounted state to prevent operations on disposed widgets
       if (!mounted) return;
 
       try {
         final provider = ref.read(plantDetailsProviderProvider);
         if (provider.plant != null && mounted) {
           final tasks = taskProvider.getTasksForPlant(widget.plantId);
-          // Se não há tarefas, gera tarefas iniciais
           if (tasks.isEmpty && mounted) {
             taskProvider.generateTasksForPlant(provider.plant!);
           }
         }
       } catch (e) {
-        // Fail silently if widget is disposed during initialization
         if (mounted) {
-          // Log error if needed, but don't crash the app
           debugPrint('Error initializing tasks: $e');
         }
       }
@@ -819,9 +766,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
 
   void _syncPlantDeletion(String plantId) {
     try {
-      // Tentar sincronizar com PlantsProvider se disponível
       final plantsProvider = ref.read(plantsProviderProvider);
-      // Forçar recarregamento completo da lista para refletir as mudanças
       plantsProvider.refreshPlants();
 
       if (kDebugMode) {
@@ -835,10 +780,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
           '⚠️ _syncPlantDeletion: Provider não encontrado, tentando ref.read: $e',
         );
       }
-
-      // Tentar método alternativo usando delayed context.read()
       try {
-        // Não usa ref.read() pois esta é uma StatefulWidget
         Future.delayed(Duration.zero, () {
           if (mounted) {
             final plantsProvider = ref.read(plantsProviderProvider);
@@ -851,7 +793,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             '❌ _syncPlantDeletion: Falha total na sincronização: $fallbackError',
           );
         }
-        // Como último recurso, usar um delay e tentar novamente
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
             try {
@@ -877,7 +818,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   /// Notifica a tela de lista para atualizar após mudanças
   void _notifyListScreenUpdate() {
     try {
-      // Usar um delay para garantir que a navegação termine antes de atualizar
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) {
           try {
@@ -1027,10 +967,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   Widget _buildMainContent(BuildContext context, Plant plant) {
     return Column(
       children: [
-        // Header estilo ReceitaAgro
         _buildHeader(context, plant),
-
-        // Content with tabs
         Expanded(
           child: DecoratedBox(
             decoration: const BoxDecoration(
@@ -1117,8 +1054,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       ],
     );
   }
-
-  // ignore: unused_element
   Widget _buildAppBar(BuildContext context, Plant plant) {
     final theme = Theme.of(context);
 
@@ -1202,7 +1137,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         background: PlantImageSection(
           plant: plant,
           onEditImages: () {
-            // TODO: Implementar navegação para edição de imagens
           },
         ),
       ),
@@ -1312,7 +1246,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
       child: Column(
         children: [
-          // Plant image section moved to first tab
           _buildPlantImageSection(context, plant),
           const SizedBox(height: AppSpacing.lg),
           PlantInfoSection(plant: plant),
@@ -1361,11 +1294,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   /// Returns:
   /// - `true` if plant data is valid for display, `false` otherwise
   bool _isPlantDataValid(Plant plant) {
-    // Basic validation checks
     if (plant.id.isEmpty) return false;
     if (plant.displayName.trim().isEmpty) return false;
-
-    // Plant must have at least basic information
     return true; // Allow plants with minimal data to be displayed
   }
 
@@ -1419,7 +1349,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Warning illustration
               Container(
                 width: 120,
                 height: 120,
@@ -1459,11 +1388,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               ),
 
               const SizedBox(height: 32),
-
-              // Action buttons
               Column(
                 children: [
-                  // Primary edit button (if plant has valid ID)
                   if (plant.id.isNotEmpty)
                     SizedBox(
                       width: double.infinity,
@@ -1489,8 +1415,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                     ),
 
                   if (plant.id.isNotEmpty) const SizedBox(height: 12),
-
-                  // Secondary actions
                   OutlinedButton.icon(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.arrow_back),
@@ -1511,8 +1435,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     );
   }
 }
-
-// Optimized widgets to prevent unnecessary rebuilds
 
 /// Optimized loading shimmer widget that doesn't rebuild unnecessarily
 class _LoadingShimmer extends StatelessWidget {

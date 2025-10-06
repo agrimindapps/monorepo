@@ -55,8 +55,6 @@ class ThemeToggleSwitch extends ConsumerWidget {
               ],
             ),
           ),
-
-        // Toggle buttons para os três modos
         SegmentedButton<AppThemeMode>(
           segments:
               AppThemeMode.values
@@ -138,8 +136,6 @@ class ThemeToggleSwitch extends ConsumerWidget {
     );
   }
 }
-
-// Widget alternativo mais simples - apenas ícone com tooltip
 class ThemeToggleIcon extends ConsumerWidget {
   final double size;
 
@@ -168,8 +164,6 @@ class ThemeToggleIcon extends ConsumerWidget {
     }
   }
 }
-
-// Widget para lista de opções (para uso em Settings)
 class ThemeSelectionList extends ConsumerWidget {
   const ThemeSelectionList({super.key});
 

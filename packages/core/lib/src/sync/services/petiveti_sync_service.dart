@@ -46,28 +46,20 @@ class PetivetiSyncService implements ISyncService {
 
   @override
   final String version = '2.0.0';
-
-  // Estado interno
   bool _isInitialized = false;
   final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
-
-  // Estatísticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
   int _totalItemsSynced = 0;
-
-  // Stream controllers
   final StreamController<SyncServiceStatus> _statusController =
       StreamController<SyncServiceStatus>.broadcast();
   final StreamController<ServiceProgress> _progressController =
       StreamController<ServiceProgress>.broadcast();
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
-
-  // Entidades do Petiveti
   final List<String> _entityTypes = [
     'animals',      // Pets/Animais
     'appointments', // Consultas veterinárias
@@ -237,8 +229,6 @@ class PetivetiSyncService implements ISyncService {
   /// Sincroniza uma entidade específica
   Future<Either<Failure, int>> _syncEntity(String entityType) async {
     try {
-      // Delegation para repositories específicos
-      // Quando integrarmos completamente, isso chamará métodos de sync dos repositories
 
       switch (entityType) {
         case 'animals':
@@ -388,8 +378,6 @@ class PetivetiSyncService implements ISyncService {
   @override
   Future<void> dispose() async {
     logger.logInfo(message: 'Disposing Petiveti Sync Service');
-
-    // Cancel connectivity monitoring
     await _connectivitySubscription?.cancel();
     _connectivitySubscription = null;
 
@@ -399,8 +387,6 @@ class PetivetiSyncService implements ISyncService {
     _isInitialized = false;
     _updateStatus(SyncServiceStatus.disposing);
   }
-
-  // Métodos específicos do Petiveti
 
   /// Sync apenas dados de animais
   Future<Either<Failure, ServiceSyncResult>> syncAnimals() async {
@@ -474,8 +460,6 @@ class PetivetiSyncService implements ISyncService {
       metadata: {'service': serviceId},
     );
   }
-
-  // Métodos privados
 
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {

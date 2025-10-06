@@ -42,11 +42,7 @@ class _BovineDetailPageState extends ConsumerState<BovineDetailPage> {
 
   Future<void> _loadBovineDetails() async {
     final provider = ref.read(bovinesProviderProvider);
-    
-    // Busca bovino local primeiro
     var bovine = provider.getBovineById(widget.bovineId);
-    
-    // Se não encontrou local, busca remoto
     if (bovine == null) {
       await provider.loadBovineById(widget.bovineId);
       bovine = provider.selectedBovine;
@@ -499,24 +495,12 @@ class _BovineDetailPageState extends ConsumerState<BovineDetailPage> {
   }
 
   void _shareBovine() {
-    // final text = '''
-    // Bovino: ${_bovine!.commonName}
-    // Raça: ${_bovine!.breed}
-    // Aptidão: ${_bovine!.aptitude.displayName}
-    // Sistema de Criação: ${_bovine!.breedingSystem.displayName}
-    // País de Origem: ${_bovine!.originCountry}
-    //
-    // Compartilhado via AgriHurbi
-    // ''';
-
-    // Note: Implement actual sharing functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Funcionalidade de compartilhamento em desenvolvimento'),
         action: SnackBarAction(
           label: 'Copiar Texto',
           onPressed: () {
-            // Copy to clipboard functionality
           },
         ),
       ),

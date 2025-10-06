@@ -8,9 +8,6 @@ import '../failures/weather_failures.dart';
 /// Weather repository interface following Clean Architecture
 /// Defines contracts for weather data operations
 abstract class WeatherRepository {
-  // ============================================================================
-  // WEATHER MEASUREMENTS
-  // ============================================================================
   
   /// Get all weather measurements for a location
   Future<Either<WeatherFailure, List<WeatherMeasurementEntity>>> getAllMeasurements({
@@ -64,10 +61,6 @@ abstract class WeatherRepository {
     double? maxRainfall,
     int? limit,
   });
-
-  // ============================================================================
-  // RAIN GAUGES
-  // ============================================================================
   
   /// Get all rain gauges
   Future<Either<WeatherFailure, List<RainGaugeEntity>>> getAllRainGauges();
@@ -114,10 +107,6 @@ abstract class WeatherRepository {
     String gaugeId,
     double calibrationFactor,
   );
-
-  // ============================================================================
-  // WEATHER STATISTICS
-  // ============================================================================
   
   /// Get weather statistics for a period
   Future<Either<WeatherFailure, WeatherStatisticsEntity>> getWeatherStatistics({
@@ -157,10 +146,6 @@ abstract class WeatherRepository {
     required DateTime startDate,
     required DateTime endDate,
   });
-
-  // ============================================================================
-  // REAL-TIME DATA AND SYNC
-  // ============================================================================
   
   /// Get real-time weather data from external APIs
   Future<Either<WeatherFailure, WeatherMeasurementEntity>> getCurrentWeatherFromAPI(
@@ -185,10 +170,6 @@ abstract class WeatherRepository {
   Future<Either<WeatherFailure, int>> downloadWeatherUpdates({
     DateTime? since,
   });
-
-  // ============================================================================
-  // DATA QUALITY AND VALIDATION
-  // ============================================================================
   
   /// Validate weather measurement data
   Future<Either<WeatherFailure, bool>> validateMeasurement(WeatherMeasurementEntity measurement);
@@ -213,10 +194,6 @@ abstract class WeatherRepository {
     required DateTime startDate,
     required DateTime endDate,
   });
-
-  // ============================================================================
-  // LOCATION AND DEVICE MANAGEMENT
-  // ============================================================================
   
   /// Get weather locations
   Future<Either<WeatherFailure, List<Map<String, dynamic>>>> getWeatherLocations();
@@ -247,10 +224,6 @@ abstract class WeatherRepository {
     String status, {
     Map<String, dynamic>? additionalData,
   });
-
-  // ============================================================================
-  // EXPORT AND IMPORT
-  // ============================================================================
   
   /// Export weather data to various formats
   Future<Either<WeatherFailure, String>> exportWeatherData({
@@ -278,10 +251,6 @@ abstract class WeatherRepository {
     String backupPath, {
     bool replaceExisting = false,
   });
-
-  // ============================================================================
-  // SUBSCRIPTIONS AND NOTIFICATIONS
-  // ============================================================================
   
   /// Subscribe to real-time weather updates
   Stream<WeatherMeasurementEntity> subscribeToWeatherUpdates(String? locationId);

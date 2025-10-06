@@ -41,10 +41,7 @@ class _PlantisSubscriptionPlansWidgetState
   void initState() {
     super.initState();
     _selectedPlanId = widget.selectedPlanId;
-
-    // Se não há plano selecionado e existem produtos, seleciona o primeiro (geralmente anual)
     if (_selectedPlanId == null && widget.availableProducts.isNotEmpty) {
-      // Prioriza plano anual se disponível
       final yearlyPlan = widget.availableProducts.firstWhere(
         (product) =>
             product.productId.toLowerCase().contains('year') ||
@@ -68,7 +65,6 @@ class _PlantisSubscriptionPlansWidgetState
 
   @override
   Widget build(BuildContext context) {
-    // Se não há produtos disponíveis, usar dados mock
     final products =
         widget.availableProducts.isEmpty
             ? _getMockProducts()
@@ -194,7 +190,6 @@ class _PlantisSubscriptionPlansWidgetState
       ),
       child: Stack(
         children: [
-          // Badge "MELHOR VALOR" se aplicável
           if (badge != null)
             Positioned(
               top: 0,
@@ -221,8 +216,6 @@ class _PlantisSubscriptionPlansWidgetState
                 ),
               ),
             ),
-
-          // Conteúdo principal do card
           Material(
             color: Colors.transparent,
             child: InkWell(
@@ -237,10 +230,8 @@ class _PlantisSubscriptionPlansWidgetState
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Radio button no topo
                     _buildRadioButton(isSelected),
                     const SizedBox(height: 12),
-                    // Conteúdo centralizado
                     Column(
                       children: [
                         _buildPlanTitle(title, subtitle),

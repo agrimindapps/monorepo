@@ -16,8 +16,6 @@ class StreamManager {
       subscription.cancel();
       throw StateError('StreamManager already disposed');
     }
-    
-    // Cancela subscription anterior se existir
     _subscriptions[key]?.cancel();
     _subscriptions[key] = subscription;
   }
@@ -28,8 +26,6 @@ class StreamManager {
       controller.close();
       throw StateError('StreamManager already disposed');
     }
-    
-    // Fecha controller anterior se existir
     _controllers[key]?.close();
     _controllers[key] = controller;
   }
@@ -40,8 +36,6 @@ class StreamManager {
       timer.cancel();
       throw StateError('StreamManager already disposed');
     }
-    
-    // Cancela timer anterior se existir
     _timers[key]?.cancel();
     _timers[key] = timer;
   }
@@ -64,7 +58,6 @@ class StreamManager {
       onError: onError,
       onDone: () {
         onDone?.call();
-        // Remove subscription quando completa
         _subscriptions.remove(key);
       },
       cancelOnError: cancelOnError ?? false,
@@ -82,7 +75,6 @@ class StreamManager {
     
     final controller = StreamController<T>.broadcast(
       onCancel: () {
-        // Auto-remove quando não há mais listeners
         if (_controllers[key]?.hasListener == false) {
           _controllers.remove(key);
         }
@@ -102,7 +94,6 @@ class StreamManager {
     final controller = StreamController<T>(
       sync: sync,
       onCancel: () {
-        // Auto-remove quando cancelado
         _controllers.remove(key);
       },
     );
@@ -138,7 +129,6 @@ class StreamManager {
     
     final timer = Timer(duration, () {
       callback();
-      // Auto-remove quando executado
       _timers.remove(key);
     });
     
@@ -208,14 +198,8 @@ class StreamManager {
     if (_isDisposed) return;
     
     _isDisposed = true;
-    
-    // Cancela todas as subscriptions
     await clearSubscriptions();
-    
-    // Fecha todos os controllers
     await clearControllers();
-    
-    // Cancela todos os timers
     clearTimers();
     
     if (kDebugMode) {
@@ -296,10 +280,7 @@ class ExampleProvider extends ManagedProvider {
   
   @override
   void init() {
-    // Cria controller gerenciado
     _dataController = streamManager.createBroadcastController('data');
-    
-    // Listen to external stream com auto-cancelamento
     listenTo(
       'external_data',
       externalDataStream,
@@ -310,8 +291,6 @@ class ExampleProvider extends ManagedProvider {
         _dataController.addError(error as Object? ?? 'Unknown error', stack as StackTrace? ?? StackTrace.empty);
       },
     );
-    
-    // Timer periódico gerenciado
     streamManager.createPeriodicTimer(
       'refresh_timer',
       const Duration(minutes: 5),
@@ -334,7 +313,6 @@ class ExampleProvider extends ManagedProvider {
   
   @override
   Future<void> dispose() async {
-    // StreamManagerMixin cuida de tudo automaticamente
     await super.dispose();
   }
 }

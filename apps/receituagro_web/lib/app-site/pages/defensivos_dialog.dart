@@ -1,4 +1,3 @@
-// fitossanitario_dialog.dart
 import 'package:flutter/material.dart';
 
 import '../classes/fitossanitario_class.dart';

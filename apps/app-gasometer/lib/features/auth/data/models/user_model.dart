@@ -16,8 +16,6 @@ class UserModel extends UserEntity {
     super.lastSignInAt,
     super.metadata,
   });
-
-  // Create from entity
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       id: entity.id,
@@ -32,8 +30,6 @@ class UserModel extends UserEntity {
       metadata: entity.metadata,
     );
   }
-
-  // From Firebase User
   factory UserModel.fromFirebaseUser(User firebaseUser) {
     UserType userType = UserType.anonymous;
     
@@ -59,8 +55,6 @@ class UserModel extends UserEntity {
       },
     );
   }
-
-  // From Firestore document
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     
@@ -77,8 +71,6 @@ class UserModel extends UserEntity {
       metadata: Map<String, dynamic>.from(data['metadata'] as Map? ?? {}),
     );
   }
-
-  // From JSON (for local storage)
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
@@ -95,8 +87,6 @@ class UserModel extends UserEntity {
       metadata: Map<String, dynamic>.from(json['metadata'] as Map? ?? {}),
     );
   }
-
-  // To Firestore document
   Map<String, dynamic> toFirestore() {
     return {
       'email': email,
@@ -110,8 +100,6 @@ class UserModel extends UserEntity {
       'metadata': metadata,
     };
   }
-
-  // To JSON (for local storage)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -126,8 +114,6 @@ class UserModel extends UserEntity {
       'metadata': metadata,
     };
   }
-
-  // Convert to entity
   UserEntity toEntity() {
     return UserEntity(
       id: id,

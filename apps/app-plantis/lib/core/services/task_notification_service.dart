@@ -95,20 +95,15 @@ class TaskNotificationService {
     if (_isInitialized) return true;
 
     try {
-      // Initialize the core notification service
       final initResult = await _notificationService.initialize();
       if (!initResult) {
         debugPrint('❌ Failed to initialize core notification service');
         return false;
       }
-
-      // Request notification permissions
       final hasPermission = await _requestNotificationPermissions();
       if (!hasPermission) {
         debugPrint('⚠️ Notification permissions not granted');
       }
-
-      // Initialize WorkManager for background processing
       await _initializeWorkManager();
 
       _isInitialized = true;
@@ -123,14 +118,11 @@ class TaskNotificationService {
   /// Request notification permissions with user-friendly flow
   Future<bool> _requestNotificationPermissions() async {
     try {
-      // Check current permission status
       final currentPermission =
           await _notificationService.areNotificationsEnabled();
       if (currentPermission) {
         return true;
       }
-
-      // Request permission
       final permissionGranted = await _notificationService.requestPermission();
 
       if (!permissionGranted) {
@@ -147,8 +139,6 @@ class TaskNotificationService {
   /// Initialize WorkManager for background task processing
   Future<void> _initializeWorkManager() async {
     try {
-      // Platform-specific WorkManager initialization would go here
-      // For now, we'll use a placeholder implementation
       debugPrint('✅ WorkManager initialized for background processing');
     } catch (e) {
       debugPrint('❌ Error initializing WorkManager: $e');
@@ -166,9 +156,6 @@ class TaskNotificationService {
   }) async {
     try {
       await _ensureInitialized();
-
-      // Create notification with actions
-      // ignore: unused_local_variable
       final notification = NotificationHelper.createReminderNotification(
         appName: 'Plantis',
         id: id,
@@ -178,8 +165,6 @@ class TaskNotificationService {
         color: TasksConstants.notificationColor,
         scheduledDate: scheduledDate,
       );
-
-      // Schedule the notification
       await _notificationService.scheduleDirectNotification(
         notificationId: id,
         title: title,
@@ -232,20 +217,14 @@ class TaskNotificationService {
   Future<void> scheduleTaskNotification(task_entity.Task task) async {
     try {
       await _ensureInitialized();
-
-      // Check if notifications are enabled
       final bool enabled = await _notificationService.areNotificationsEnabled();
       if (!enabled) {
         debugPrint('⚠️ Notifications not enabled, skipping task notification');
         return;
       }
-
-      // Calculate notification time (1 hour before due date)
       final DateTime notificationTime = task.dueDate.subtract(
         TasksConstants.notificationAdvanceTime,
       );
-
-      // Don't schedule if time has already passed
       if (notificationTime.isBefore(DateTime.now())) {
         debugPrint('⚠️ Notification time has passed, skipping: ${task.title}');
         return;
@@ -259,8 +238,6 @@ class TaskNotificationService {
       );
 
       final int notificationId = _createNotificationId('${task.id}_reminder');
-
-      // Create notification actions
       final actions = _createTaskNotificationActions(task);
 
       await _scheduleNotificationWithActions(
@@ -344,7 +321,6 @@ class TaskNotificationService {
       }
 
       const String title = AppStrings.taskOverdue;
-      // TODO: Fetch plant name from plantId for better notification message
       final String body = '${task.title} está atrasada';
       final String payload = _createNotificationPayload(
         task,
@@ -352,8 +328,6 @@ class TaskNotificationService {
       );
 
       final int notificationId = _createNotificationId('${task.id}_overdue');
-
-      // Create actions for overdue notifications
       final actions = [
         {
           'id': TasksConstants.completeTaskActionId,
@@ -546,8 +520,6 @@ class TaskNotificationService {
         priorityEmoji = AppStrings.lowPriorityEmoji;
         break;
     }
-
-    // TODO: Fetch plant name from plantId for better notification title
     return '${task.title}$priorityEmoji';
   }
 
@@ -634,7 +606,6 @@ class TaskNotificationService {
     try {
       final Map<String, dynamic> data =
           jsonDecode(payload) as Map<String, dynamic>;
-      // final String type = (data['type'] as String?) ?? '';
       final String taskId = (data['taskId'] as String?) ?? '';
 
       debugPrint(
@@ -665,23 +636,18 @@ class TaskNotificationService {
   /// Navigate to specific task
   static void _navigateToTask(String taskId) {
     debugPrint('🧭 Navigate to task: $taskId');
-    // TODO: Implement navigation to task details
     _navigateToTasksList();
   }
 
   /// Navigate to tasks list
   static void _navigateToTasksList() {
     debugPrint('🧭 Navigate to tasks list');
-    // TODO: Implement navigation to tasks list with proper routing
   }
 
   /// Handle complete task action from notification
   static Future<void> _handleCompleteTaskAction(String taskId) async {
     try {
       debugPrint('✅ Completing task from notification: $taskId');
-      // TODO: Integrate with TasksProvider to complete the task
-      // This would require getting the current TasksProvider instance
-      // For now, we'll just navigate to the app
       _navigateToTasksList();
     } catch (e) {
       debugPrint('❌ Error completing task from notification: $e');
@@ -695,18 +661,12 @@ class TaskNotificationService {
   ) async {
     try {
       debugPrint('⏰ Snoozing task: $taskId');
-
-      // Parse original payload
       final Map<String, dynamic> data =
           jsonDecode(payload) as Map<String, dynamic>;
-
-      // Create new notification for 1 hour later
       final instance = TaskNotificationService._instance;
       final snoozeTime = DateTime.now().add(TasksConstants.snoozeDuration);
 
       final snoozedPayload = _updatePayloadForSnooze(data, snoozeTime);
-
-      // Schedule snoozed notification
       await instance._scheduleNotificationWithActions(
         id: instance._createNotificationId('${taskId}_snoozed'),
         title: AppStrings.reminderRescheduled,
@@ -714,7 +674,6 @@ class TaskNotificationService {
         scheduledDate: snoozeTime,
         payload: jsonEncode(snoozedPayload),
         actions: instance._createTaskNotificationActions(
-          // We'd need the actual task object here, using placeholder
           task_entity.Task(
             id: taskId,
             createdAt: DateTime.now(),
@@ -738,7 +697,6 @@ class TaskNotificationService {
   static Future<void> _handleRescheduleTaskAction(String taskId) async {
     try {
       debugPrint('📅 Rescheduling task: $taskId');
-      // Navigate to app for rescheduling
       _navigateToTask(taskId);
     } catch (e) {
       debugPrint('❌ Error rescheduling task: $e');
@@ -845,31 +803,21 @@ class TaskNotificationService {
       await _ensureInitialized();
 
       debugPrint('🔄 Rescheduling notifications for ${allTasks.length} tasks');
-
-      // Cancel all existing task notifications
       await cancelAllTaskNotifications();
-
-      // Filter pending tasks
       final List<task_entity.Task> pendingTasks =
           allTasks
               .where((task) => task.status == task_entity.TaskStatus.pending)
               .toList();
-
-      // Batch schedule notifications
       final List<Future<void>> schedulingFutures = [];
 
       for (final task in pendingTasks) {
         schedulingFutures.add(scheduleTaskNotification(task));
       }
-
-      // Wait for all scheduling operations to complete
       await Future.wait(schedulingFutures);
 
       debugPrint(
         '✅ Rescheduled notifications for ${pendingTasks.length} pending tasks',
       );
-
-      // Schedule background check for overdue tasks
       await _scheduleBackgroundTaskCheck();
     } catch (e) {
       debugPrint('❌ Error rescheduling notifications: $e');
@@ -879,7 +827,6 @@ class TaskNotificationService {
   /// Schedule background task to check for overdue tasks periodically
   Future<void> _scheduleBackgroundTaskCheck() async {
     try {
-      // Schedule a daily check for overdue tasks
       final dailyCheckTime = DateTime.now().add(
         TasksConstants.backgroundCheckInterval,
       );
@@ -908,9 +855,6 @@ class TaskNotificationService {
   Future<void> initializeNotificationHandlers() async {
     try {
       await _ensureInitialized();
-
-      // Note: Notification handlers are now set up automatically in PlantisNotificationService
-      // during initialization. This method is kept for compatibility.
 
       debugPrint('✅ Notification handlers initialized');
     } catch (e) {

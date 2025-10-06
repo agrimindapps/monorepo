@@ -16,13 +16,10 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Consumindo o novo ThemeProvider Riverpod
     final riverpodThemeState = ref.watch(themeNotifierProvider);
     final riverpodThemeSettings = riverpodThemeState.settings;
     final isRiverpodLoading = riverpodThemeState.isLoading;
     final riverpodError = riverpodThemeState.errorMessage;
-
-    // Access to theme methods via Riverpod
     final themeNotifier = ref.read(themeNotifierProvider.notifier);
 
     return Card(
@@ -32,7 +29,6 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 Icon(
@@ -49,8 +45,6 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Riverpod Theme State
             _buildSectionCard(
               context: context,
               title: '🚀 Novo: Riverpod ThemeProvider',
@@ -118,8 +112,6 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
                       riverpodThemeSettings.isDarkMode ? 'Sim' : 'Não',
                     ),
                     const SizedBox(height: 8),
-
-                    // Theme Controls usando Riverpod
                     Wrap(
                       spacing: 8,
                       children: [
@@ -176,8 +168,6 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // Comparison with convenience providers
             _buildSectionCard(
               context: context,
               title: '⚡ Providers de Conveniência',
@@ -241,7 +231,6 @@ class RiverpodThemeDemoWidget extends ConsumerWidget {
   }
 
   Widget _buildProviderDemo(BuildContext context, WidgetRef ref) {
-    // Demonstrando o uso dos providers de conveniência
     final isDarkMode = ref.watch(plantisIsDarkModeProvider);
     final isLightMode = ref.watch(plantisIsLightModeProvider);
     final followSystemTheme = ref.watch(plantisFollowSystemThemeProvider);

@@ -4,8 +4,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
-
-// Configurações padrão
 const int _defaultMaxSize = 100;
 const Duration _defaultTtl = Duration(minutes: 30);
 const int _maxMemoryUsageKB = 5 * 1024; // 5MB
@@ -65,7 +63,6 @@ class CacheEntry<T> {
   }
 
   double get score {
-    // Score baseado em frequência e recência
     final frequency = accessCount.toDouble();
     final recency = DateTime.now().difference(lastAccessed).inMinutes.toDouble();
     return frequency / (recency + 1);
@@ -97,8 +94,6 @@ class _CacheLayer<T> {
         _misses++;
         return null;
       }
-
-      // Move para o final (LRU)
       _data.remove(key);
       final updatedEntry = entry.copyWithAccess();
       _data[key] = updatedEntry;
@@ -119,14 +114,8 @@ class _CacheLayer<T> {
         lastAccessed: DateTime.now(),
         sizeBytes: sizeBytes,
       );
-
-      // Remove entrada existente se houver
       _data.remove(key);
-
-      // Verifica se precisa fazer eviction
       _evictIfNecessary();
-
-      // Adiciona nova entrada
       _data[key] = entry;
     }
 
@@ -139,15 +128,10 @@ class _CacheLayer<T> {
     }
 
     void _evictIfNecessary() {
-      // Remove entradas expiradas primeiro
       _removeExpiredEntries();
-
-      // Se ainda está acima do limite, remove por LRU/score
       while (_data.length >= config.maxSize) {
         _evictLeastValuable();
       }
-
-      // Verifica limite de memória
       while (_getTotalSizeKB() > _maxMemoryUsageKB && _data.isNotEmpty) {
         _evictLeastValuable();
       }
@@ -170,8 +154,6 @@ class _CacheLayer<T> {
 
     void _evictLeastValuable() {
       if (_data.isEmpty) return;
-
-      // Encontra entrada com menor score (menos valiosa)
       CacheEntry<T>? leastValuable;
       String? keyToRemove;
 
@@ -229,11 +211,7 @@ class OptimizedCacheManager extends ChangeNotifier {
   static final OptimizedCacheManager _instance = OptimizedCacheManager._internal();
   factory OptimizedCacheManager() => _instance;
   OptimizedCacheManager._internal();
-
-  // Caches especializados
   final Map<String, _CacheLayer<dynamic>> _cacheLayers = {};
-  
-  // Estatísticas
   int _totalHits = 0;
   int _totalMisses = 0;
   int _totalEvictions = 0;
@@ -358,7 +336,6 @@ class OptimizedCacheManager extends ChangeNotifier {
 
 /// Camadas de cache pré-definidas para o app
 class CacheLayers {
-  // Private constructor to prevent instantiation
   CacheLayers._();
   static const String calculators = 'calculators';
   static const String livestock = 'livestock';

@@ -18,26 +18,18 @@ class UnifiedSyncManager {
   static UnifiedSyncManager get instance => _instance;
 
   UnifiedSyncManager._internal();
-
-  // Registros por app - USANDO STRING KEYS PARA RESOLVER PROBLEMA DE TYPE LOOKUP
   final Map<String, AppSyncConfig> _appConfigs = {};
   final Map<String, Map<String, EntitySyncRegistration>> _entityRegistrations =
       {};
   final Map<String, Map<String, dynamic>> _syncRepositories =
       {}; // dynamic para permitir qualquer ISyncRepository<T>
-
-  // Estado global
   bool _isInitialized = false;
   String? _currentUserId;
   final Map<String, SyncStatus> _appSyncStatus = {};
-
-  // Streams de status
   final StreamController<Map<String, SyncStatus>> _globalStatusController =
       StreamController<Map<String, SyncStatus>>.broadcast();
   final StreamController<AppSyncEvent> _eventController =
       StreamController<AppSyncEvent>.broadcast();
-
-  // Listeners
   StreamSubscription<User?>? _authSubscription;
   final Map<String, Timer> _syncTimers = {};
 
@@ -52,27 +44,17 @@ class UnifiedSyncManager {
         'Initializing unified sync for app: $appName',
         name: 'UnifiedSync',
       );
-
-      // Registrar configuração do app
       _appConfigs[appName] = config;
       _entityRegistrations[appName] = {};
       _syncRepositories[appName] = {};
-
-      // Registrar entidades
       for (final registration in entities) {
         await _registerEntity(appName, registration);
       }
-
-      // Configurar listeners de auth (apenas uma vez)
       if (!_isInitialized) {
         _setupAuthListener();
         _isInitialized = true;
       }
-
-      // Configurar sync automático
       _setupAutoSyncForApp(appName);
-
-      // Inicializar status
       _appSyncStatus[appName] = SyncStatus.offline;
       await _updateAppSyncStatus(appName);
 
@@ -95,7 +77,6 @@ class UnifiedSyncManager {
     String appName,
     EntitySyncRegistration registration,
   ) async {
-    // CORREÇÃO P0: Usar string key ao invés de Type para evitar problemas de lookup
     final entityTypeKey = registration.entityType.toString();
 
     developer.log(
@@ -107,9 +88,6 @@ class UnifiedSyncManager {
     );
 
     _entityRegistrations[appName]![entityTypeKey] = registration;
-
-    // Criar e inicializar repositório de sync com tipo correto
-    // CORREÇÃO P0: Usar dynamic para manter compatibilidade de tipos
     final syncRepo = _createTypedRepository(registration);
 
     await syncRepo.initialize();
@@ -123,8 +101,6 @@ class UnifiedSyncManager {
 
   /// Cria repositório tipado corretamente
   dynamic _createTypedRepository(EntitySyncRegistration registration) {
-    // CORREÇÃO P0: Uso reflection ou dynamic para resolver problema de tipo
-    // Criar uma instância sem especificar o tipo genérico explicitamente
     return _createSyncServiceDynamic(
       registration.collectionName,
       registration.fromMap,
@@ -140,7 +116,6 @@ class UnifiedSyncManager {
     dynamic toMapFunction,
     SyncConfig config,
   ) {
-    // CORREÇÃO P0: Usar reflection para criar instância sem conflitos de tipo
 
     developer.log(
       'Creating sync service for collection: $collectionName',
@@ -148,7 +123,6 @@ class UnifiedSyncManager {
     );
 
     try {
-      // Tentar criar diretamente sem tipagem genérica específica
       final service = _createSyncServiceReflection(
         collectionName,
         fromMapFunction,
@@ -177,7 +151,6 @@ class UnifiedSyncManager {
     dynamic toMapFunction,
     SyncConfig config,
   ) {
-    // Criar service dynamic que será tipado em runtime
     final service = _DynamicSyncService(
       collectionName: collectionName,
       fromMapFunction: fromMapFunction,
@@ -196,8 +169,6 @@ class UnifiedSyncManager {
     final entityTypeKey = T.toString();
     final repo = _syncRepositories[appName]?[entityTypeKey];
     if (repo == null) return null;
-
-    // Wrapper que força o tipo correto usando dynamic cast
     return _RepositoryWrapper<T>(repo as dynamic);
   }
 
@@ -207,7 +178,6 @@ class UnifiedSyncManager {
     T entity,
   ) async {
     try {
-      // DEBUG: Log detalhado do lookup
       final entityTypeKey = T.toString();
       developer.log(
         '🔍 CREATE - Looking for repository:\n'
@@ -231,8 +201,6 @@ class UnifiedSyncManager {
           ),
         );
       }
-
-      // Adicionar metadados do app
       final entityWithMetadata =
           entity.copyWith(userId: _currentUserId, moduleName: appName) as T;
 
@@ -422,8 +390,6 @@ class UnifiedSyncManager {
             (repo as dynamic).forceSync() as Future<Either<Failure, void>>,
       );
       final results = await Future.wait(futures);
-
-      // Verificar se houve algum erro
       for (final result in results) {
         if (result.isLeft()) {
           return result;
@@ -496,8 +462,6 @@ class UnifiedSyncManager {
       'config': config.toDebugMap(),
       'entities': <String, dynamic>{},
     };
-
-    // Debug info de cada entidade - agora as keys já são strings
     for (final entry in repositories.entries) {
       final entityTypeKey = entry.key; // já é string
       final repository = entry.value as dynamic;
@@ -520,8 +484,6 @@ class UnifiedSyncManager {
             (repo as dynamic).clearLocalData() as Future<Either<Failure, void>>,
       );
       final results = await Future.wait(futures);
-
-      // Verificar se houve algum erro
       for (final result in results) {
         if (result.isLeft()) {
           return result;
@@ -535,8 +497,6 @@ class UnifiedSyncManager {
     }
   }
 
-  // Métodos privados
-
   void _setupAuthListener() {
     _authSubscription = FirebaseAuth.instance.authStateChanges().listen(
       (user) async {
@@ -548,13 +508,9 @@ class UnifiedSyncManager {
             'Auth state changed: ${_currentUserId ?? 'null'}',
             name: 'UnifiedSync',
           );
-
-          // Atualizar status de todos os apps
           for (final appName in _appConfigs.keys) {
             await _updateAppSyncStatus(appName);
           }
-
-          // Disparar sync automático se necessário
           if (_currentUserId != null) {
             for (final appName in _appConfigs.keys) {
               _triggerAutoSyncForApp(appName);
@@ -605,7 +561,6 @@ class UnifiedSyncManager {
       if (_currentUserId == null) {
         newStatus = SyncStatus.localOnly;
       } else {
-        // Verificar status das entidades
         final entityStatuses = <SyncStatus>[];
         for (final repo in repositories.values) {
           final repository = repo as dynamic;
@@ -621,8 +576,6 @@ class UnifiedSyncManager {
             entityStatuses.add(SyncStatus.synced);
           }
         }
-
-        // Determinar status geral
         if (entityStatuses.contains(SyncStatus.offline)) {
           newStatus = SyncStatus.offline;
         } else if (entityStatuses.contains(SyncStatus.syncing)) {
@@ -656,20 +609,13 @@ class UnifiedSyncManager {
   /// Cleanup de recursos
   Future<void> dispose() async {
     try {
-      // Cancel timers
       for (final timer in _syncTimers.values) {
         timer.cancel();
       }
       _syncTimers.clear();
-
-      // Cancel auth subscription
       await _authSubscription?.cancel();
-
-      // Close stream controllers
       await _globalStatusController.close();
       await _eventController.close();
-
-      // Dispose repositories
       for (final repositories in _syncRepositories.values) {
         for (final repository in repositories.values) {
           final repo = repository as dynamic;
@@ -678,8 +624,6 @@ class UnifiedSyncManager {
           }
         }
       }
-
-      // Clear state
       _appConfigs.clear();
       _entityRegistrations.clear();
       _syncRepositories.clear();
@@ -810,8 +754,6 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
   Future<Either<Failure, void>> initialize() async {
     return await _repository.initialize() as Either<Failure, void>;
   }
-
-  // Implementações para métodos faltantes
   @override
   Stream<bool> get connectivityStream =>
       _repository.connectivityStream as Stream<bool>;
@@ -904,7 +846,6 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
     required this.toMapFunction,
     required this.config,
   }) {
-    // Criar service interno usando approach dinâmica completa para evitar conflitos de tipo
     _internalService = _createGenericService(config);
   }
 
@@ -915,11 +856,9 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
       (map) {
         try {
           final entity = fromMapFunction(map);
-          // Garantir que a entidade seja um BaseSyncEntity
           if (entity is BaseSyncEntity) {
             return entity;
           } else {
-            // Casting direto se não for BaseSyncEntity
             return entity as BaseSyncEntity;
           }
         } catch (e) {
@@ -929,10 +868,8 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
       },
       (entity) {
         try {
-          // BYPASS: Chamar diretamente o método toFirebaseMap() da entidade para evitar conflitos de tipo
           return entity.toFirebaseMap();
         } catch (e) {
-          // Fallback: tentar usar a função original mesmo com problemas de tipo
           try {
             final callable = toMapFunction as dynamic;
             final result = callable(entity);
@@ -998,8 +935,6 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
 
   @override
   Map<String, dynamic> getDebugInfo() => _internalService.getDebugInfo();
-
-  // Implementar métodos obrigatórios da interface
   @override
   Stream<bool> get connectivityStream => _internalService.connectivityStream;
 

@@ -48,7 +48,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
 
   @override
   Future<EnhancedAnalyticsState> build() async {
-    // Get dependencies from DI
     final analyticsRepository = di.sl<IAnalyticsRepository>();
     final crashlyticsRepository = di.sl<ICrashlyticsRepository>();
 
@@ -69,26 +68,16 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
   /// Direct access to enhanced service for advanced features
   EnhancedAnalyticsService get enhancedService => _enhancedService;
 
-  // ==========================================================================
-  // INITIALIZATION AND SETUP
-  // ==========================================================================
-
   /// Initialize method for backward compatibility
   Future<void> initialize() async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Enhanced service is ready to use immediately
     if (kDebugMode) {
       debugPrint('✅ ReceitaAgro Enhanced Analytics Provider initialized');
     }
 
     state = AsyncValue.data(currentState.copyWith(isInitialized: true));
   }
-
-  // ==========================================================================
-  // SCREEN AND EVENT TRACKING
-  // ==========================================================================
 
   /// Logs screen view with enhanced error handling
   Future<void> logScreenView(String screenName) async {
@@ -103,10 +92,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
   ) async {
     await _enhancedService.logEvent(eventName, parameters);
   }
-
-  // ==========================================================================
-  // USER MANAGEMENT
-  // ==========================================================================
 
   /// Sets user ID in both analytics and crashlytics
   Future<void> setUserId(String userId) async {
@@ -171,10 +156,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     );
   }
 
-  // ==========================================================================
-  // ERROR TRACKING
-  // ==========================================================================
-
   /// Records error with enhanced reporting
   Future<void> recordError(
     dynamic error,
@@ -189,10 +170,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     );
   }
 
-  // ==========================================================================
-  // AUTH EVENTS
-  // ==========================================================================
-
   Future<void> logLogin(String method) async {
     await _enhancedService.logAuthEvent('login', parameters: {'method': method});
   }
@@ -205,10 +182,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     await _enhancedService.logAuthEvent('logout');
   }
 
-  // ==========================================================================
-  // APP LIFECYCLE EVENTS
-  // ==========================================================================
-
   Future<void> logAppOpen() async {
     await _enhancedService.logEvent('app_open', {'app': 'receituagro'});
   }
@@ -220,10 +193,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
   Future<void> logFeatureUsed(String featureName) async {
     await _enhancedService.logEvent('feature_used', {'feature': featureName});
   }
-
-  // ==========================================================================
-  // RECEITUAGRO-SPECIFIC EVENTS
-  // ==========================================================================
 
   Future<void> logCropAnalyzed({Map<String, dynamic>? additionalData}) async {
     await _enhancedService.logAppSpecificEvent(
@@ -322,10 +291,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     );
   }
 
-  // ==========================================================================
-  // PREMIUM EVENTS
-  // ==========================================================================
-
   Future<void> logSubscriptionPurchased(String productId, double price) async {
     await _enhancedService.logPurchaseEvent(
       productId: productId,
@@ -387,10 +352,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     await logPremiumFeatureAttempted(featureName);
   }
 
-  // ==========================================================================
-  // SEARCH AND DISCOVERY EVENTS
-  // ==========================================================================
-
   Future<void> logSearch(String query, int resultCount) async {
     await _enhancedService.logEvent('search', {
       'query': query,
@@ -405,10 +366,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
       'content_id': contentId,
     });
   }
-
-  // ==========================================================================
-  // ENGAGEMENT EVENTS
-  // ==========================================================================
 
   Future<void> logUserEngagement(String action, int durationSeconds) async {
     await _enhancedService.logEvent('user_engagement', {
@@ -431,10 +388,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
       'duration_seconds': durationSeconds,
     });
   }
-
-  // ==========================================================================
-  // LEGACY COMPATIBILITY METHODS
-  // ==========================================================================
 
   void trackLogin(String method, {Map<String, dynamic>? metadata}) {
     logLogin(method);
@@ -497,10 +450,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     });
   }
 
-  // ==========================================================================
-  // DEVELOPMENT AND TESTING
-  // ==========================================================================
-
   Future<void> testCrash() async {
     await _enhancedService.testCrash();
   }
@@ -517,10 +466,6 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
       });
     }
   }
-
-  // ==========================================================================
-  // CONVENIENCE GETTERS
-  // ==========================================================================
 
   /// Whether analytics is enabled in the current environment
   bool get isAnalyticsEnabled => EnvironmentConfig.enableAnalytics;

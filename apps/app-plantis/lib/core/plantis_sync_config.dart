@@ -4,8 +4,6 @@ import '../features/plants/domain/entities/plant.dart';
 import '../features/plants/domain/entities/space.dart';
 import '../features/tasks/domain/entities/task.dart';
 import 'data/models/comentario_model.dart';
-
-// Funções auxiliares para contornar problemas de tipo do sistema de sync
 Plant _plantFromFirebaseMap(Map<String, dynamic> map) {
   final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
@@ -110,47 +108,36 @@ abstract final class PlantisSyncConfig {
         conflictStrategy: ConflictStrategy.timestamp, // Simples timestamp
       ),
       entities: [
-        // Entidade principal - Plantas (usando a entidade real do app)
         EntitySyncRegistration<Plant>.simple(
           entityType: Plant,
           collectionName: 'plants',
           fromMap: _plantFromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as Plant).toFirebaseMap(),
         ),
-
-        // Espaços das plantas
         EntitySyncRegistration<Space>.simple(
           entityType: Space,
           collectionName: 'spaces',
           fromMap: _spaceFromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as Space).toFirebaseMap(),
         ),
-
-        // Tasks relacionadas às plantas (usando a entidade real do app)
         EntitySyncRegistration<Task>.simple(
           entityType: Task,
           collectionName: 'tasks',
           fromMap: Task.fromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as Task).toFirebaseMap(),
         ),
-
-        // Comentários das plantas
         EntitySyncRegistration<ComentarioModel>.simple(
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
         ),
-
-        // Usuários (profile compartilhado entre apps)
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
         ),
-
-        // Assinaturas (subscription compartilhada entre apps)
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
@@ -176,40 +163,30 @@ abstract final class PlantisSyncConfig {
           fromMap: _plantFromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as Plant).toFirebaseMap(),
         ),
-
-        // Espaços das plantas (desenvolvimento)
         EntitySyncRegistration<Space>.simple(
           entityType: Space,
           collectionName: 'dev_spaces',
           fromMap: _spaceFromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as Space).toFirebaseMap(),
         ),
-
-        // Tasks relacionadas às plantas (desenvolvimento)
         EntitySyncRegistration<Task>.simple(
           entityType: Task,
           collectionName: 'dev_tasks',
           fromMap: Task.fromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as Task).toFirebaseMap(),
         ),
-
-        // Comentários das plantas (desenvolvimento)
         EntitySyncRegistration<ComentarioModel>.simple(
           entityType: ComentarioModel,
           collectionName: 'dev_comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
         ),
-
-        // Usuários (desenvolvimento)
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
           collectionName: 'dev_users',
           fromMap: UserEntity.fromFirebaseMap,
           toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
         ),
-
-        // Assinaturas (desenvolvimento)
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
           collectionName: 'dev_subscriptions',
@@ -239,8 +216,6 @@ abstract final class PlantisSyncConfig {
           syncInterval: const Duration(hours: 12),
           batchSize: 100, // Lotes maiores quando sync
         ),
-
-        // Espaços das plantas (offline-first)
         EntitySyncRegistration<Space>(
           entityType: Space,
           collectionName: 'spaces',
@@ -251,8 +226,6 @@ abstract final class PlantisSyncConfig {
           syncInterval: const Duration(hours: 12),
           batchSize: 50, // Lotes medianos para espaços
         ),
-
-        // Tasks relacionadas às plantas (offline-first)
         EntitySyncRegistration<Task>(
           entityType: Task,
           collectionName: 'tasks',
@@ -263,8 +236,6 @@ abstract final class PlantisSyncConfig {
           syncInterval: const Duration(hours: 12),
           batchSize: 50, // Lotes menores para tasks
         ),
-
-        // Comentários das plantas (offline-first)
         EntitySyncRegistration<ComentarioModel>(
           entityType: ComentarioModel,
           collectionName: 'comentarios',
@@ -275,8 +246,6 @@ abstract final class PlantisSyncConfig {
           syncInterval: const Duration(hours: 12),
           batchSize: 50, // Lotes menores para comentários
         ),
-
-        // Usuários (offline-first)
         EntitySyncRegistration<UserEntity>(
           entityType: UserEntity,
           collectionName: 'users',
@@ -290,8 +259,6 @@ abstract final class PlantisSyncConfig {
           ), // Sync mais esporádico para usuários
           batchSize: 10, // Lotes pequenos para usuários
         ),
-
-        // Assinaturas (offline-first)
         EntitySyncRegistration<SubscriptionEntity>(
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',

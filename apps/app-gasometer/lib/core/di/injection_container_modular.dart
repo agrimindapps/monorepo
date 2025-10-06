@@ -21,29 +21,18 @@ class ModularInjectionContainer {
   static Future<void> init() async {
     try {
       print('🚀 Starting GasOMeter dependency initialization...');
-
-      // Initialize Hive with all adapters and boxes
       print('📦 Initializing Hive...');
       await HiveService.instance.init();
       print('✅ Hive initialized');
-
-      // Register core modules FIRST (provides base services for injectable)
       print('📦 Registering core modules...');
       final modules = _createModules();
       for (final module in modules) {
         await module.register(_getIt);
       }
-
-      // Initialize injectable dependencies AFTER core modules
-      // (now EnhancedAnalyticsService is available for GasometerAnalyticsService)
       print('📦 Configuring injectable dependencies...');
       await configureDependencies();
-
-      // Initialize account deletion module (after core services are registered)
       print('📦 Initializing account deletion module...');
       AccountDeletionModule.init(_getIt);
-
-      // Initialize sync module (after repositories are registered)
       print('📦 Initializing sync module...');
       SyncDIModule.init(_getIt);
 
@@ -61,12 +50,6 @@ class ModularInjectionContainer {
   static List<DIModule> _createModules() {
     return [
       CoreModule(), // External services and core infrastructure
-      // TODO: Add more modules in subsequent phases
-      // AuthModule(),
-      // VehiclesModule(),
-      // FuelModule(),
-      // MaintenanceModule(),
-      // etc.
     ];
   }
 

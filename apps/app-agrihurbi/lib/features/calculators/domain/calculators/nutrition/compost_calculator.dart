@@ -146,36 +146,20 @@ class CompostCalculator extends CalculatorEntity {
       final double ambientTemperature = double.parse(inputs['ambient_temperature'].toString());
       final String turningFrequency = inputs['turning_frequency'].toString();
       final double desiredFinalAmount = double.parse(inputs['desired_final_amount'].toString());
-
-      // Obter dados dos materiais
       final Map<String, dynamic> brownData = _getMaterialData(brownMaterialType, 'brown');
       final Map<String, dynamic> greenData = _getMaterialData(greenMaterialType, 'green');
-
-      // Calcular relação C/N atual
       final Map<String, dynamic> cnAnalysis = _calculateCNRatio(
         brownAmount, greenAmount, brownData, greenData);
-
-      // Calcular proporções ideais
       final Map<String, dynamic> optimalProportions = _calculateOptimalProportions(
         brownData, greenData, targetCNRatio, desiredFinalAmount);
-
-      // Estimar tempo de compostagem
       final Map<String, dynamic> timeEstimate = _estimateCompostingTime(
         compostType, targetCNRatio, moistureContent, ambientTemperature, turningFrequency);
-
-      // Dimensionamento da leira
       final Map<String, dynamic> pileDimensions = _calculatePileDimensions(
         optimalProportions['total_material'] as double, pileSize, compostType);
-
-      // Cronograma de manejo
       final List<Map<String, dynamic>> managementSchedule = _generateManagementSchedule(
         timeEstimate['total_time_days'] as int, turningFrequency, compostType);
-
-      // Análise de qualidade esperada
       final Map<String, dynamic> qualityAnalysis = _analyzeExpectedQuality(
         cnAnalysis, timeEstimate, moistureContent, compostType);
-
-      // Nutrientes finais estimados
       final Map<String, dynamic> finalNutrients = _calculateFinalNutrients(
         optimalProportions['brown_needed'] as double,
         optimalProportions['green_needed'] as double,
@@ -183,12 +167,8 @@ class CompostCalculator extends CalculatorEntity {
         greenData,
         timeEstimate['decomposition_rate'] as double,
       );
-
-      // Análise de custos
       final Map<String, dynamic> costAnalysis = _calculateCostAnalysis(
         optimalProportions, brownMaterialType, greenMaterialType, timeEstimate);
-
-      // Recomendações
       final List<String> recommendations = _generateRecommendations(
         compostType, cnAnalysis, moistureContent, ambientTemperature, 
         optimalProportions, qualityAnalysis);
@@ -300,7 +280,6 @@ class CompostCalculator extends CalculatorEntity {
 
   Map<String, dynamic> _getMaterialData(String material, String type) {
     final Map<String, Map<String, dynamic>> materialDatabase = {
-      // Materiais Marrons (ricos em C)
       'Palha de Arroz': {
         'carbon_content': 40.0,
         'nitrogen_content': 0.6,
@@ -357,8 +336,6 @@ class CompostCalculator extends CalculatorEntity {
         'density': 280.0,
         'decomposition_rate': 0.65,
       },
-
-      // Materiais Verdes (ricos em N)
       'Esterco Bovino': {
         'carbon_content': 18.0,
         'nitrogen_content': 2.5,
@@ -469,24 +446,14 @@ class CompostCalculator extends CalculatorEntity {
     double targetCN,
     double desiredFinalAmount,
   ) {
-    // ignore: unused_local_variable
     final double brownCN = brownData['cn_ratio'] as double; // TODO: Use in detailed nutrient analysis
-    // ignore: unused_local_variable
     final double greenCN = greenData['cn_ratio'] as double; // TODO: Use in composting optimization
-    
-    // Calcular proporção ideal usando álgebra para C/N
-    // x = quantidade de material marrom, y = quantidade de material verde
-    // (C_brown * x + C_green * y) / (N_brown * x + N_green * y) = targetCN
     
     final double brownC = brownData['carbon_content'] as double;
     final double brownN = brownData['nitrogen_content'] as double;
     final double greenC = greenData['carbon_content'] as double;
     final double greenN = greenData['nitrogen_content'] as double;
-    
-    // Assumindo y = 1, resolver para x
     final double ratio = (targetCN * greenN - greenC) / (brownC - targetCN * brownN);
-    
-    // Normalizar para quantidade desejada
     final double totalMaterialNeeded = desiredFinalAmount / 0.4; // Assumindo 40% de rendimento
     
     double brownNeeded, greenNeeded;
@@ -495,12 +462,9 @@ class CompostCalculator extends CalculatorEntity {
       brownNeeded = totalMaterialNeeded * ratio / (ratio + 1);
       greenNeeded = totalMaterialNeeded / (ratio + 1);
     } else {
-      // Se não conseguir resolver, usar proporções padrão 3:1
       brownNeeded = totalMaterialNeeded * 0.75;
       greenNeeded = totalMaterialNeeded * 0.25;
     }
-    
-    // Recalcular C/N resultante
     final double resultingC = (brownNeeded * brownC + greenNeeded * greenC) / 100;
     final double resultingN = (brownNeeded * brownN + greenNeeded * greenN) / 100;
     final double resultingCN = resultingN > 0 ? resultingC / resultingN : 0;
@@ -521,7 +485,6 @@ class CompostCalculator extends CalculatorEntity {
     double temperature,
     String turningFrequency,
   ) {
-    // Tempo base por tipo de compostagem (dias)
     final Map<String, int> baseTime = {
       'Leira Tradicional': 120,
       'Compostagem Termofílica': 90,
@@ -531,27 +494,19 @@ class CompostCalculator extends CalculatorEntity {
     };
 
     int totalTime = baseTime[compostType] ?? 120;
-    
-    // Ajustes por C/N
     if (cnRatio > 35) {
       totalTime = (totalTime * 1.2).round(); // C/N alto demora mais
     } else if (cnRatio < 25) {
       totalTime = (totalTime * 1.1).round(); // C/N baixo pode ter problemas
     }
-    
-    // Ajustes por umidade
     if (moisture < 45 || moisture > 65) {
       totalTime = (totalTime * 1.15).round();
     }
-    
-    // Ajustes por temperatura
     if (temperature < 15) {
       totalTime = (totalTime * 1.4).round();
     } else if (temperature > 30) {
       totalTime = (totalTime * 0.85).round();
     }
-    
-    // Ajustes por reviramento
     final Map<String, double> turningFactors = {
       'Semanal': 0.8,
       'Quinzenal': 1.0,
@@ -560,8 +515,6 @@ class CompostCalculator extends CalculatorEntity {
     };
     
     totalTime = (totalTime * (turningFactors[turningFrequency] ?? 1.0)).round();
-    
-    // Fases do processo
     int thermophilicDays = (totalTime * 0.3).round(); // 30% em fase termofílica
     int mesophilicDays = (totalTime * 0.4).round(); // 40% em fase mesofílica
     int maturationDays = totalTime - thermophilicDays - mesophilicDays; // Resto em maturação
@@ -580,13 +533,8 @@ class CompostCalculator extends CalculatorEntity {
     String pileSize,
     String compostType,
   ) {
-    // Densidade média da mistura (kg/m³)
     const double averageDensity = 400.0;
-    
-    // Volume inicial
     final double initialVolume = totalMaterial / averageDensity;
-    
-    // Dimensões baseadas no tamanho escolhido
     Map<String, double> dimensions;
     
     switch (pileSize) {
@@ -621,8 +569,6 @@ class CompostCalculator extends CalculatorEntity {
     String compostType,
   ) {
     final List<Map<String, dynamic>> schedule = [];
-    
-    // Frequência de reviramento
     final Map<String, int> turningDays = {
       'Semanal': 7,
       'Quinzenal': 15,
@@ -631,8 +577,6 @@ class CompostCalculator extends CalculatorEntity {
     };
     
     final int interval = turningDays[turningFrequency] ?? 15;
-    
-    // Fases do processo
     final int thermophilicEnd = (totalDays * 0.3).round();
     final int mesophilicEnd = (totalDays * 0.7).round();
     
@@ -674,28 +618,20 @@ class CompostCalculator extends CalculatorEntity {
   ) {
     double qualityScore = 100.0;
     final List<String> qualityIssues = [];
-    
-    // Análise C/N
     final double cnRatio = cnAnalysis['current_cn_ratio'] as double;
     if (cnRatio < 20 || cnRatio > 40) {
       qualityScore -= 20;
       qualityIssues.add('Relação C/N fora da faixa ideal');
     }
-    
-    // Análise de umidade
     if (moisture < 45 || moisture > 65) {
       qualityScore -= 15;
       qualityIssues.add('Umidade inadequada');
     }
-    
-    // Análise de tempo
     final int totalTime = timeEstimate['total_time_days'] as int;
     if (totalTime < 60) {
       qualityScore -= 10;
       qualityIssues.add('Tempo pode ser insuficiente para estabilização');
     }
-    
-    // Classificação final
     String classification;
     if (qualityScore >= 90) {
       classification = 'Excelente';
@@ -721,13 +657,10 @@ class CompostCalculator extends CalculatorEntity {
     Map<String, dynamic> greenData,
     double decompositionRate,
   ) {
-    // Nutrientes iniciais
     final double initialN = (brownAmount * (brownData['nitrogen_content'] as double) + 
                            greenAmount * (greenData['nitrogen_content'] as double)) / 100;
     final double initialP = (greenAmount * ((greenData['p_content'] as double?) ?? 0.5)) / 100;
     final double initialK = (greenAmount * ((greenData['k_content'] as double?) ?? 1.0)) / 100;
-    
-    // Concentração no produto final (considerando redução de massa)
     final double massReduction = decompositionRate;
     final double finalMass = (brownAmount + greenAmount) * (1 - massReduction);
     
@@ -745,7 +678,6 @@ class CompostCalculator extends CalculatorEntity {
     String greenMaterial,
     Map<String, dynamic> timeEstimate,
   ) {
-    // Custos de materiais (R\$/kg)
     final Map<String, double> materialCosts = {
       'Palha de Arroz': 0.15,
       'Serragem': 0.10,
@@ -767,8 +699,6 @@ class CompostCalculator extends CalculatorEntity {
                            (materialCosts[brownMaterial] ?? 0.10);
     final double greenCost = (proportions['green_needed'] as double) * 
                            (materialCosts[greenMaterial] ?? 0.20);
-    
-    // Custo de mão de obra (R\$/hora × horas)
     final int totalDays = timeEstimate['total_time_days'] as int;
     final double laborHours = totalDays * 0.5; // 30 min/dia em média
     final double laborCost = laborHours * 25.0; // R\$ 25/hora
@@ -793,30 +723,22 @@ class CompostCalculator extends CalculatorEntity {
     Map<String, dynamic> qualityAnalysis,
   ) {
     final List<String> recommendations = [];
-    
-    // Recomendações por C/N
     final double cnRatio = cnAnalysis['current_cn_ratio'] as double;
     if (cnRatio > 35) {
       recommendations.add('Relação C/N alta: adicionar mais material verde (rico em N).');
     } else if (cnRatio < 25) {
       recommendations.add('Relação C/N baixa: adicionar mais material marrom (rico em C).');
     }
-    
-    // Recomendações por umidade
     if (moisture < 45) {
       recommendations.add('Umidade baixa: adicionar água durante o reviramento.');
     } else if (moisture > 65) {
       recommendations.add('Umidade alta: adicionar material seco e aumentar aeração.');
     }
-    
-    // Recomendações por temperatura
     if (temperature < 15) {
       recommendations.add('Temperatura baixa: considerar cobertura da leira e local protegido.');
     } else if (temperature > 35) {
       recommendations.add('Temperatura alta: proteger leira do sol direto.');
     }
-    
-    // Recomendações por tipo de compostagem
     switch (compostType) {
       case 'Vermicompostagem':
         recommendations.add('Vermicompostagem: manter temperatura abaixo de 35°C.');
@@ -829,14 +751,10 @@ class CompostCalculator extends CalculatorEntity {
         recommendations.add('Bokashi: manter sistema anaeróbico durante fermentação.');
         break;
     }
-    
-    // Recomendações gerais
     recommendations.add('Triturar materiais grandes para acelerar decomposição.');
     recommendations.add('Manter leira protegida de chuva excessiva.');
     recommendations.add('Revolver sempre que temperatura exceder 70°C.');
     recommendations.add('Composto pronto: cor escura, cheiro de terra, não esquenta.');
-    
-    // Recomendações de qualidade
     final double qualityScore = qualityAnalysis['quality_score'] as double;
     if (qualityScore < 70) {
       recommendations.add('Atenção: condições podem afetar qualidade final.');

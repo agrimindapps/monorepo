@@ -24,8 +24,6 @@ class GetUpcomingVaccinesParams {
   final String? animalId;
   
   const GetUpcomingVaccinesParams({this.animalId});
-  
-  // Factory constructors for convenience
   factory GetUpcomingVaccinesParams.all() => const GetUpcomingVaccinesParams();
   factory GetUpcomingVaccinesParams.byAnimal(String animalId) => GetUpcomingVaccinesParams(animalId: animalId);
 }

@@ -16,8 +16,6 @@ class PlantsGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // BUGFIX: Implementar AlignedGridView usando flutter_staggered_grid_view
-    // Isso cria um grid mais responsivo e com melhor alinhamento dos cards
     return AlignedGridView.count(
       controller: scrollController,
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
@@ -35,8 +33,6 @@ class PlantsGridView extends StatelessWidget {
 
   int _getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    // Responsivo baseado no tamanho da tela
     if (width < 600) {
       return 2; // Telefones
     } else if (width < 900) {

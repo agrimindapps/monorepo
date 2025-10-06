@@ -135,7 +135,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
           ),
           child: Stack(
             children: [
-              // Background pattern
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.1,
@@ -150,7 +149,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                   ),
                 ),
               ),
-              // Center icon
               Center(
                 child: Container(
                   padding: const EdgeInsets.only(top: 40),
@@ -641,7 +639,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implementar compra
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Funcionalidade de compra em desenvolvimento'),

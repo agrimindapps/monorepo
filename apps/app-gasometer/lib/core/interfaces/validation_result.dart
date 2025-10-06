@@ -62,21 +62,16 @@ class ValidationResult {
   /// Combines multiple validation results
   /// Returns first error found, or first warning if no errors, or success
   static ValidationResult combine(List<ValidationResult> results) {
-    // Find first error
     for (final result in results) {
       if (!result.isValid) {
         return result;
       }
     }
-
-    // Find first warning
     for (final result in results) {
       if (result.isWarning) {
         return result;
       }
     }
-
-    // All successful
     return ValidationResult.success();
   }
 

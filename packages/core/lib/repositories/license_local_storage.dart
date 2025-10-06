@@ -28,13 +28,10 @@ class LicenseLocalStorage implements LicenseRepository {
   }) async {
     try {
       await _initializeBoxes();
-
-      // Check if there's already an active license
       final currentResult = await getCurrentLicense();
 
       return currentResult.fold(
         (failure) async {
-          // No current license, create new trial
           final trialLicense = LicenseModel.createTrial(metadata: metadata);
 
           final saveResult = await saveLicense(trialLicense);
@@ -45,11 +42,9 @@ class LicenseLocalStorage implements LicenseRepository {
         },
         (existingLicense) async {
           if (existingLicense != null) {
-            // License already exists
             if (existingLicense.isValid) {
               return Right(existingLicense);
             } else {
-              // Expired license, create new trial
               final trialLicense = LicenseModel.createTrial(metadata: metadata);
               final saveResult = await saveLicense(trialLicense);
               return saveResult.fold(
@@ -58,7 +53,6 @@ class LicenseLocalStorage implements LicenseRepository {
               );
             }
           } else {
-            // No license, create new trial
             final trialLicense = LicenseModel.createTrial(metadata: metadata);
             final saveResult = await saveLicense(trialLicense);
             return saveResult.fold(
@@ -187,8 +181,6 @@ class LicenseLocalStorage implements LicenseRepository {
     try {
       await _initializeBoxes();
       await _licenseBox!.put(_currentLicenseKey, license);
-
-      // Also save to history
       await _addToHistory(license);
 
       return const Right(null);
@@ -210,8 +202,6 @@ class LicenseLocalStorage implements LicenseRepository {
 
   @override
   Future<Either<Failure, LicenseModel?>> syncLicense() async {
-    // For local storage, sync is not applicable
-    // This would be implemented in a network repository
     final result = await getCurrentLicense();
     return result;
   }
@@ -235,16 +225,12 @@ class LicenseLocalStorage implements LicenseRepository {
         (failure) async => null, // Ignore history errors
         (history) async {
           final updatedHistory = List<LicenseModel>.from(history);
-
-          // Check if license already exists in history
           final existingIndex = updatedHistory.indexWhere((l) => l.id == license.id);
           if (existingIndex != -1) {
             updatedHistory[existingIndex] = license;
           } else {
             updatedHistory.add(license);
           }
-
-          // Keep only last 10 licenses in history
           if (updatedHistory.length > 10) {
             updatedHistory.removeRange(0, updatedHistory.length - 10);
           }
@@ -253,7 +239,6 @@ class LicenseLocalStorage implements LicenseRepository {
         },
       );
     } catch (e) {
-      // Ignore history errors - not critical
     }
   }
 

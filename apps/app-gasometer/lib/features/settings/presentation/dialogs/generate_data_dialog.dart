@@ -20,11 +20,8 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
   int _monthsOfHistory = 14;
   bool _isGenerating = false;
   Map<String, dynamic>? _lastResult;
-  
-  // ✅ MEMORY LEAK FIX: Add disposal for proper cleanup
   @override
   void dispose() {
-    // Cancel any pending operations if possible
     super.dispose();
   }
 
@@ -49,22 +46,16 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 20),
-            
-            // Vehicle count configuration
             _VehicleCountSelector(
               value: _numberOfVehicles,
               onChanged: (value) => setState(() => _numberOfVehicles = value),
             ),
-            
-            // History months configuration  
             _HistoryMonthsSelector(
               value: _monthsOfHistory,
               onChanged: (value) => setState(() => _monthsOfHistory = value),
             ),
             
             const SizedBox(height: 20),
-            
-            // Generation results display
             if (_lastResult != null) 
               _GenerationResults(results: _lastResult!),
           ],
@@ -102,8 +93,6 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
         _lastResult = result;
         _isGenerating = false;
       });
-      
-      // ✅ MEMORY LEAK FIX: Check mounted before using context
       if (mounted) {
         _showSnackBar(
           'Dados gerados com sucesso! '
@@ -114,7 +103,6 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
       }
       
     } on UnimplementedError {
-      // ✅ MEMORY LEAK FIX: Check mounted before using context
       if (mounted) {
         _showSnackBar(
           'Funcionalidade em desenvolvimento.\\n'
@@ -131,7 +119,6 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    // ✅ MEMORY LEAK FIX: Only show snackbar if widget is still mounted
     if (!mounted) return;
     
     ScaffoldMessenger.of(context).showSnackBar(

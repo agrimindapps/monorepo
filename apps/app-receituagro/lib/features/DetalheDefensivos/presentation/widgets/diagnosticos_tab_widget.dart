@@ -38,9 +38,7 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Área de filtros
           const DiagnosticoDefensivoFilterWidget(),
-          // Lista de diagnósticos com gerenciamento de estados
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(
@@ -61,7 +59,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   /// Callback para retry quando houver erro
   void _retryLoadDiagnostics(WidgetRef ref) {
-    // Reload diagnostics using Riverpod
     final defensivoState = ref.read(detalheDefensivoNotifierProvider);
     defensivoState.whenData((data) {
       final idReg = data.defensivoData?.idReg;
@@ -109,7 +106,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       String culturaNome = 'Não especificado';
 
       try {
-        // Primeiro tenta buscar pela idCultura (estrutura nova)
         final idCultura = _getPropertyFromDiagnostic(diagnostic, 'idCultura');
         if (idCultura != null) {
           final culturaData = await culturaRepository.getById(idCultura);
@@ -117,8 +113,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
             culturaNome = culturaData.cultura;
           }
         }
-
-        // Se não encontrou pela ID, tenta usar nomeCultura como fallback
         if (culturaNome == 'Não especificado') {
           final nomeCultura = _getPropertyFromDiagnostic(
             diagnostic,
@@ -128,7 +122,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
           culturaNome = nomeCultura ?? culturaProp ?? 'Não especificado';
         }
       } catch (e) {
-        // Em caso de erro, mantém o valor padrão
         culturaNome = 'Não especificado';
       }
 
@@ -144,7 +137,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       if (diagnostic is Map<String, dynamic>) {
         return diagnostic[property]?.toString();
       } else {
-        // Tenta acessar como propriedade do objeto
         switch (property) {
           case 'idCultura':
             return diagnostic.idCultura?.toString();
@@ -168,7 +160,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
     final List<Widget> widgets = [];
 
     groupedDiagnostics.forEach((cultura, diagnostics) {
-      // Seção de cultura
       widgets.add(
         DiagnosticoDefensivoCultureSectionWidget(
           cultura: cultura,
@@ -177,8 +168,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         ),
       );
       widgets.add(SpacingTokens.gapLG);
-
-      // Itens de diagnósticos
       for (int i = 0; i < diagnostics.length; i++) {
         final diagnostic = diagnostics[i];
         widgets.add(
@@ -196,8 +185,6 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       }
       widgets.add(SpacingTokens.gapXL);
     });
-
-    // Espaço já incluído no scrollPadding
     return widgets;
   }
 

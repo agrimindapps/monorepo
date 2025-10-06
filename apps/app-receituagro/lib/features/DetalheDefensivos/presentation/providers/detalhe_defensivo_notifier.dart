@@ -69,8 +69,6 @@ class DetalheDefensivoState {
   DetalheDefensivoState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // UI helpers
   bool get hasError => errorMessage != null;
   bool get hasDefensivo => defensivoData != null;
   bool get hasComentarios => comentarios.isNotEmpty;
@@ -89,13 +87,10 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   @override
   Future<DetalheDefensivoState> build() async {
-    // Get dependencies from DI
     _favoritosRepository = di.sl<FavoritosHiveRepository>();
     _fitossanitarioRepository = di.sl<FitossanitarioHiveRepository>();
     _comentariosService = di.sl<ComentariosService>();
     _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
-
-    // Setup premium status listener
     _setupPremiumStatusListener();
 
     return DetalheDefensivoState.initial();
@@ -109,10 +104,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
-      // Load essential data first
       await _loadDefensivoData(defensivoName);
-
-      // Load secondary data in parallel
       await Future.wait([
         _loadFavoritoState(defensivoName),
         loadComentarios(),
@@ -136,8 +128,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   Future<void> _loadDefensivoData(String defensivoName) async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Search by common name first (most common)
     final result = await _fitossanitarioRepository.getAll();
     if (result.isError) {
       throw Exception('Erro ao acessar dados: ${result.error}');
@@ -146,8 +136,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     var defensivos = result.data!.where(
       (d) => d.nomeComum == defensivoName,
     );
-
-    // If not found, search by technical name
     if (defensivos.isEmpty) {
       defensivos = result.data!.where(
         (d) => d.nomeTecnico == defensivoName,
@@ -174,7 +162,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       final isFavorited = await _favoritosProvider.isFavorito('defensivo', itemId);
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
-      // Fallback to repository
       try {
         final isFavorited = await _favoritosRepository.isFavoritoAsync('defensivo', itemId);
         state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
@@ -270,15 +257,12 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.defensivoData?.idReg ?? defensivoName;
-
-    // Optimistic update
     state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
 
     try {
       final success = await _favoritosProvider.toggleFavorito('defensivo', itemId);
 
       if (!success) {
-        // Revert on failure
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,
@@ -290,7 +274,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
       return true;
     } catch (e) {
-      // Fallback to old system
       try {
         final itemData = {
           'nome': currentState.defensivoData?.nomeComum ?? defensivoName,
@@ -314,7 +297,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
         return true;
       } catch (fallbackError) {
-        // Revert on error
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,

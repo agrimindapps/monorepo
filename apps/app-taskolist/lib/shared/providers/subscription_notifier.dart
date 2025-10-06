@@ -8,25 +8,16 @@ import '../../infrastructure/services/subscription_service.dart';
 
 part 'subscription_notifier.g.dart';
 
-// =============================================================================
-// DEPENDENCY PROVIDERS (Services from GetIt)
-// =============================================================================
-
 @riverpod
 TaskManagerSubscriptionService subscriptionService(SubscriptionServiceRef ref) {
   return di.getIt<TaskManagerSubscriptionService>();
 }
-
-// =============================================================================
-// STATE CLASS (Subscription Status)
-// =============================================================================
 
 /// Async Notifier para o estado de subscription
 @riverpod
 class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
   @override
   Future<local_sub.SubscriptionStatus> build() async {
-    // TODO: Implement actual subscription status fetching
     return const local_sub.SubscriptionStatus(
       isActive: false,
       expirationDate: null,
@@ -36,7 +27,6 @@ class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      // TODO: Implement actual subscription status fetching
       return const local_sub.SubscriptionStatus(
         isActive: false,
         expirationDate: null,
@@ -44,10 +34,6 @@ class SubscriptionStatusNotifier extends _$SubscriptionStatusNotifier {
     });
   }
 }
-
-// =============================================================================
-// FUTURE PROVIDERS (Async data fetching)
-// =============================================================================
 
 /// Provider para verificar se tem premium
 @riverpod
@@ -147,10 +133,6 @@ Future<List<SubscriptionEntity>> subscriptionHistory(
   return await subscriptionService.getUserSubscriptions();
 }
 
-// =============================================================================
-// STREAM PROVIDER (Subscription Status Stream)
-// =============================================================================
-
 /// Provider para o stream de subscription status
 @riverpod
 Stream<SubscriptionEntity?> subscriptionStatusStream(
@@ -159,10 +141,6 @@ Stream<SubscriptionEntity?> subscriptionStatusStream(
   final subscriptionService = ref.watch(subscriptionServiceProvider);
   return subscriptionService.subscriptionStatus;
 }
-
-// =============================================================================
-// ACTIONS PROVIDER (Subscription Actions)
-// =============================================================================
 
 @riverpod
 SubscriptionActions subscriptionActions(SubscriptionActionsRef ref) {
@@ -181,7 +159,6 @@ class SubscriptionActions {
     final success = await _subscriptionService.purchaseProduct(productId);
 
     if (success) {
-      // Invalidar providers relacionados para forçar atualização
       _ref.invalidate(hasPremiumProvider);
       _ref.invalidate(currentSubscriptionProvider);
       _ref.invalidate(availableFeaturesProvider);
@@ -197,7 +174,6 @@ class SubscriptionActions {
     final success = await _subscriptionService.restorePurchases();
 
     if (success) {
-      // Invalidar providers relacionados
       _ref.invalidate(hasPremiumProvider);
       _ref.invalidate(currentSubscriptionProvider);
       _ref.invalidate(availableFeaturesProvider);
@@ -211,8 +187,6 @@ class SubscriptionActions {
   /// Define o usuário no RevenueCat
   Future<void> setUser(String userId, {Map<String, String>? attributes}) async {
     await _subscriptionService.setUser(userId, attributes: attributes);
-
-    // Invalidar providers após definir usuário
     _ref.invalidate(hasPremiumProvider);
     _ref.invalidate(currentSubscriptionProvider);
     _ref.invalidate(availableFeaturesProvider);
@@ -221,15 +195,9 @@ class SubscriptionActions {
   }
 }
 
-// =============================================================================
-// USAGE STATS PROVIDER
-// =============================================================================
-
 /// Provider para estatísticas de uso
 @riverpod
 Future<local.UsageStats> usageStats(UsageStatsRef ref) async {
-  // Aqui você obteria as estatísticas reais dos repositórios
-  // Por enquanto, retornando dados mock para demonstração
   return const local.UsageStats(
     totalTasks: 25,
     totalSubtasks: 8,
@@ -238,10 +206,6 @@ Future<local.UsageStats> usageStats(UsageStatsRef ref) async {
     activeTasksThisWeek: 10,
   );
 }
-
-// =============================================================================
-// PARAMETER CLASSES
-// =============================================================================
 
 /// Classe para passar parâmetros para o userLimitsProvider
 class UserLimitsParams {

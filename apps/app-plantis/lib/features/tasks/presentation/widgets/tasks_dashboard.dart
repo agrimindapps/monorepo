@@ -11,8 +11,6 @@ class TasksDashboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-
-    // Optimized with select - only rebuilds when task statistics change
     final tasksAsync = ref.watch(tasksProvider);
 
     return tasksAsync.maybeWhen(
@@ -38,7 +36,6 @@ class TasksDashboard extends ConsumerWidget {
           ),
           child: Column(
             children: [
-              // Main statistics
               Row(
                 children: [
                   Expanded(
@@ -80,8 +77,6 @@ class TasksDashboard extends ConsumerWidget {
               ),
 
               const SizedBox(height: TasksConstants.dashboardVerticalSpacing),
-
-              // Barra de progresso
               _ProgressBar(
                 completed: taskStats['completedTasks']!,
                 total: taskStats['totalTasks']!,

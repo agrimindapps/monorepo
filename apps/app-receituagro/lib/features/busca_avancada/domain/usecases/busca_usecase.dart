@@ -10,15 +10,10 @@ class BuscarComFiltrosUseCase implements UseCase<List<BuscaResultEntity>, BuscaF
 
   @override
   Future<Either<Failure, List<BuscaResultEntity>>> call(BuscaFiltersEntity filters) async {
-    // Validação de entrada
     if (!filters.hasActiveFilters) {
       return const Left(ValidationFailure('Pelo menos um filtro deve ser selecionado'));
     }
-
-    // Salvar filtros no histórico antes de buscar
     final result = await repository.buscarComFiltros(filters);
-    
-    // Se busca foi bem-sucedida, salvar no histórico
     result.fold(
       (failure) => null,
       (resultados) => repository.salvarHistoricoBusca(filters, resultados),
@@ -111,8 +106,6 @@ class LimparCacheUseCase implements UseCase<void, NoParams> {
     return await repository.limparCache();
   }
 }
-
-// Parâmetros para use cases
 class BuscarPorTextoParams {
   final String query;
   final List<String>? tipos;

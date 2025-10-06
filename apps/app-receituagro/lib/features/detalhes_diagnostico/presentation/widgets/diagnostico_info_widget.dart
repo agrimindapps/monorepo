@@ -62,8 +62,6 @@ class DiagnosticoInfoWidget extends StatelessWidget {
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
-                  // Calcula altura baseada na largura disponível (proporção 16:9)
-                  // Subtrai o padding lateral do container (40px = 20px de cada lado)
                   final availableWidth = constraints.maxWidth - 40;
                   final imageHeight = availableWidth * 0.56;
                   

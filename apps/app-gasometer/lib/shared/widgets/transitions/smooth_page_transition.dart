@@ -161,11 +161,7 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
       begin: widget.reverse ? 1.0 : 0.8,
       end: widget.reverse ? 0.8 : 1.0,
     ).animate(curvedAnimation);
-
-    // Configure slide animation based on type
     _slideAnimation = _getSlideAnimation(curvedAnimation);
-
-    // Listen for completion
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed && !widget.reverse) {
         widget.onComplete?.call();
@@ -472,8 +468,6 @@ class SmoothPageRoute<T> extends PageRoute<T> {
     return child;
   }
 }
-
-// ========== ENUMS ==========
 
 /// Tipos de transição disponíveis
 enum SmoothTransitionType {

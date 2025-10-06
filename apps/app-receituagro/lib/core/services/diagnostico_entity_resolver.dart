@@ -23,13 +23,9 @@ class DiagnosticoEntityResolver {
   static DiagnosticoEntityResolver get instance => _instance ??= DiagnosticoEntityResolver._internal();
   
   DiagnosticoEntityResolver._internal();
-
-  // Repositórios injetados para acesso direto aos dados
   late final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
   late final FitossanitarioHiveRepository _defensivoRepository = sl<FitossanitarioHiveRepository>();
   late final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
-
-  // Cache de resolução com TTL
   final Map<String, String> _culturaCache = {};
   final Map<String, String> _defensivoCache = {};
   final Map<String, String> _pragaCache = {};
@@ -66,12 +62,9 @@ class DiagnosticoEntityResolver {
     String defaultValue = 'Cultura não especificada',
   }) async {
     try {
-      // 1. Verifica cache primeiro
       if (_isCacheValid && _culturaCache.containsKey(idCultura)) {
         return _culturaCache[idCultura]!;
       }
-
-      // 2. SEMPRE tenta resolver por ID
       if (idCultura.isNotEmpty) {
         final culturaData = await _culturaRepository.getById(idCultura);
         if (culturaData != null && culturaData.cultura.isNotEmpty) {
@@ -81,8 +74,6 @@ class DiagnosticoEntityResolver {
           return resolvedName;
         }
       }
-
-      // 3. Retorna valor padrão
       _culturaCache[idCultura] = defaultValue;
       _updateCacheTimestamp();
       return defaultValue;
@@ -106,12 +97,9 @@ class DiagnosticoEntityResolver {
     String defaultValue = 'Defensivo não especificado',
   }) async {
     try {
-      // 1. Verifica cache primeiro
       if (_isCacheValid && _defensivoCache.containsKey(idDefensivo)) {
         return _defensivoCache[idDefensivo]!;
       }
-
-      // 2. SEMPRE tenta resolver por ID
       if (idDefensivo.isNotEmpty) {
         final defensivoData = await _defensivoRepository.getById(idDefensivo);
         if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
@@ -121,8 +109,6 @@ class DiagnosticoEntityResolver {
           return resolvedName;
         }
       }
-
-      // 3. Retorna valor padrão
       _defensivoCache[idDefensivo] = defaultValue;
       _updateCacheTimestamp();
       return defaultValue;
@@ -146,12 +132,9 @@ class DiagnosticoEntityResolver {
     String defaultValue = 'Praga não especificada',
   }) async {
     try {
-      // 1. Verifica cache primeiro
       if (_isCacheValid && _pragaCache.containsKey(idPraga)) {
         return _pragaCache[idPraga]!;
       }
-
-      // 2. SEMPRE tenta resolver por ID
       if (idPraga.isNotEmpty) {
         final pragaData = await _pragasRepository.getById(idPraga);
         if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
@@ -161,8 +144,6 @@ class DiagnosticoEntityResolver {
           return resolvedName;
         }
       }
-
-      // 3. Retorna valor padrão
       _pragaCache[idPraga] = defaultValue;
       _updateCacheTimestamp();
       return defaultValue;

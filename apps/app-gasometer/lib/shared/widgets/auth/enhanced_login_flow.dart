@@ -87,7 +87,6 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
   }
 
   void _startFlow() {
-    // Primeira fase: Intelligent Loading
     setState(() {
       _currentPhase = LoginFlowPhase.intelligent;
     });
@@ -97,35 +96,25 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
     if (!mounted) return;
 
     if (widget.showSkeletonPreview) {
-      // Segunda fase: Skeleton Preview
       setState(() {
         _currentPhase = LoginFlowPhase.skeleton;
       });
-
-      // Timer para skeleton preview
       _phaseTimer = Timer(widget.skeletonDuration, () {
         if (mounted) {
           _completeFlow();
         }
       });
     } else {
-      // Pular diretamente para conclusão
       _completeFlow();
     }
   }
 
   void _completeFlow() {
     if (!mounted) return;
-
-    // Terceira fase: Navegação
     setState(() {
       _currentPhase = LoginFlowPhase.navigation;
     });
-
-    // Chamar callback de conclusão
     widget.onLoginComplete?.call();
-
-    // Navegar com delay para mostrar transição
     Timer(const Duration(milliseconds: 500), () {
       if (mounted) {
         context.go(widget.destinationRoute);
@@ -172,8 +161,6 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
 
   Widget _buildSkeletonPhase() {
     Widget skeletonContent;
-    
-    // Escolher skeleton baseado na rota de destino
     if (widget.destinationRoute.contains('/vehicles')) {
       skeletonContent = const VehiclesSkeleton(
         vehicleCount: 3,
@@ -186,10 +173,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
     return SmoothPageTransition.fadeSlide(
       child: Column(
         children: [
-          // Header com feedback
           _buildSkeletonHeader(),
-          
-          // Conteúdo skeleton
           Expanded(child: skeletonContent),
         ],
       ),
@@ -204,7 +188,6 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Ícone de sucesso
               Container(
                 width: 80,
                 height: 80,
@@ -224,8 +207,6 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
               ),
               
               const SizedBox(height: LoadingDesignTokens.spacingLg),
-              
-              // Texto de conclusão
               Text(
                 'Tudo pronto!',
                 style: LoadingDesignTokens.titleTextStyle.copyWith(
@@ -265,7 +246,6 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
       ),
       child: Row(
         children: [
-          // Indicador de progresso circular pequeno
           SizedBox(
             width: 16,
             height: 16,
@@ -278,8 +258,6 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
           ),
           
           const SizedBox(width: LoadingDesignTokens.spacingMd),
-          
-          // Texto de carregamento
           Expanded(
             child: Text(
               'Preparando sua página...',
@@ -428,7 +406,6 @@ class EnhancedLoginFlowController {
     String destinationRoute = '/vehicles',
     Color? primaryColor,
   }) {
-    // Substituir navegação direta por fluxo melhorado
     startAfterAuth(
       context,
       destinationRoute: destinationRoute,
@@ -456,7 +433,6 @@ class AuthFlowIntegration {
       destinationRoute: destinationRoute,
       primaryColor: primaryColor,
       onComplete: () {
-        // Navegação já tratada pelo fluxo melhorado
       },
     );
   }
@@ -468,10 +444,7 @@ class AuthFlowIntegration {
     String destinationRoute = '/vehicles',
     Color? primaryColor,
   }) {
-    // Chama sucesso original primeiro
     originalOnSuccess();
-    
-    // Depois inicia fluxo melhorado
     EnhancedLoginFlowController.startAfterAuth(
       context,
       destinationRoute: destinationRoute,
@@ -479,8 +452,6 @@ class AuthFlowIntegration {
     );
   }
 }
-
-// ========== ENUMS ==========
 
 /// Fases do fluxo de login melhorado
 enum LoginFlowPhase {

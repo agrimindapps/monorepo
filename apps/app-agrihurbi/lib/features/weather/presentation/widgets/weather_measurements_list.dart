@@ -29,7 +29,6 @@ class WeatherMeasurementsList extends StatelessWidget {
       itemCount: measurements.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= measurements.length) {
-          // Load more indicator
           return _buildLoadMoreIndicator();
         }
 
@@ -105,7 +104,6 @@ class WeatherMeasurementsList extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with location and time
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -135,11 +133,8 @@ class WeatherMeasurementsList extends StatelessWidget {
               ),
               
               const SizedBox(height: 12),
-              
-              // Main weather data
               Row(
                 children: [
-                  // Temperature
                   Expanded(
                     flex: 2,
                     child: _buildMainMetric(
@@ -148,8 +143,6 @@ class WeatherMeasurementsList extends StatelessWidget {
                       _getTemperatureColor(measurement.temperature),
                     ),
                   ),
-                  
-                  // Humidity
                   Expanded(
                     child: _buildMetric(
                       '${measurement.humidity.round()}%',
@@ -158,8 +151,6 @@ class WeatherMeasurementsList extends StatelessWidget {
                       Colors.blue,
                     ),
                   ),
-                  
-                  // Rainfall
                   Expanded(
                     child: _buildMetric(
                       '${measurement.rainfall}mm',
@@ -172,8 +163,6 @@ class WeatherMeasurementsList extends StatelessWidget {
               ),
               
               const SizedBox(height: 12),
-              
-              // Secondary metrics
               Row(
                 children: [
                   Expanded(
@@ -197,8 +186,6 @@ class WeatherMeasurementsList extends StatelessWidget {
                     ),
                 ],
               ),
-              
-              // Data quality and source indicator
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -207,8 +194,6 @@ class WeatherMeasurementsList extends StatelessWidget {
                   _buildSourceIndicator(measurement.source),
                 ],
               ),
-              
-              // Agricultural suitability
               if (measurement.isFavorableForAgriculture)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),

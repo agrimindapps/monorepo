@@ -17,7 +17,6 @@ class AvatarService {
   /// Select image from camera with proper permissions and validation
   Future<AvatarResult> selectFromCamera() async {
     try {
-      // Check and request camera permission
       final cameraStatus = await Permission.camera.request();
       if (!cameraStatus.isGranted) {
         return AvatarResult.error('Permissão de câmera necessária');
@@ -43,12 +42,10 @@ class AvatarService {
   /// Select image from gallery with proper validation
   Future<AvatarResult> selectFromGallery() async {
     try {
-      // Check and request photos permission (iOS) or storage (Android)
       PermissionStatus status;
       if (Platform.isIOS) {
         status = await Permission.photos.request();
       } else {
-        // Android 13+ uses different permissions
         if (Platform.isAndroid) {
           status = await Permission.photos.request();
           if (!status.isGranted) {
@@ -84,40 +81,27 @@ class AvatarService {
   Future<AvatarResult> _processImage(XFile imageFile) async {
     try {
       final File file = File(imageFile.path);
-      
-      // Validate file size
       final fileSize = await file.length();
       if (fileSize > _maxFileSizeBytes) {
         return AvatarResult.error('Arquivo muito grande (max 5MB)');
       }
-
-      // Validate file type
       final extension = imageFile.path.toLowerCase();
       if (!extension.endsWith('.jpg') && 
           !extension.endsWith('.jpeg') && 
           !extension.endsWith('.png')) {
         return AvatarResult.error('Tipo de arquivo não suportado (apenas JPG/PNG)');
       }
-
-      // Read and decode image
       final Uint8List originalBytes = await file.readAsBytes();
       final img.Image? originalImage = img.decodeImage(originalBytes);
       
       if (originalImage == null) {
         return AvatarResult.error('Imagem corrompida ou formato inválido');
       }
-
-      // Resize to square with crop if needed
       final img.Image processedImage = _resizeAndCropToSquare(originalImage);
-      
-      // Convert to JPEG with quality adjustment for size optimization
       final String base64String = await _compressToBase64(processedImage);
-      
-      // Cleanup original file
       try {
         await file.delete();
       } catch (e) {
-        // Non-critical error, log but continue
         print('Warning: Could not delete temporary file: $e');
       }
 
@@ -133,14 +117,9 @@ class AvatarService {
 
   /// Resize image to square format with smart cropping
   img.Image _resizeAndCropToSquare(img.Image image) {
-    // Determine the smaller dimension
     final int smallerSide = image.width < image.height ? image.width : image.height;
-    
-    // Calculate crop coordinates to center the image
     final int cropX = (image.width - smallerSide) ~/ 2;
     final int cropY = (image.height - smallerSide) ~/ 2;
-    
-    // Crop to square
     final img.Image croppedImage = img.copyCrop(
       image,
       x: cropX,
@@ -148,8 +127,6 @@ class AvatarService {
       width: smallerSide,
       height: smallerSide,
     );
-    
-    // Resize to target dimension
     return img.copyResize(
       croppedImage,
       width: _targetDimension,
@@ -160,20 +137,15 @@ class AvatarService {
 
   /// Compress image to base64 with size optimization
   Future<String> _compressToBase64(img.Image image) async {
-    // Start with high quality and reduce if needed
     int quality = 95;
     String base64String = '';
     
     do {
       final List<int> jpegBytes = img.encodeJpg(image, quality: quality);
       base64String = base64Encode(jpegBytes);
-      
-      // Check if size is acceptable
       if (_calculateSizeBytes(base64String) <= _maxSizeBytes || quality <= 10) {
         break;
       }
-      
-      // Reduce quality for next iteration
       quality -= 10;
     } while (quality > 0);
     

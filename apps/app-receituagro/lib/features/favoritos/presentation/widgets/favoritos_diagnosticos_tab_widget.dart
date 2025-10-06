@@ -250,9 +250,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   ) async {
     try {
       await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(TipoFavorito.diagnostico, diagnostico.id);
-      // Remover favorito sem feedback de SnackBar
     } catch (e) {
-      // Erro silencioso
     }
   }
 

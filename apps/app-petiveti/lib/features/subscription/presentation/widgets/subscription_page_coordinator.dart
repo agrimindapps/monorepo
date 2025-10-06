@@ -19,8 +19,6 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(subscriptionProvider);
-
-    // Error handling listener
     ref.listen<SubscriptionState>(subscriptionProvider, (previous, next) {
       if (next.error != null) {
         _showErrorMessage(context, next.error!);

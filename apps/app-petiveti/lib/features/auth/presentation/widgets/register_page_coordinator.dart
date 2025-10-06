@@ -40,7 +40,6 @@ abstract class RegisterPageCoordinator {
     required String password,
     required bool termsAccepted,
   }) async {
-    // Validate terms acceptance
     if (!termsAccepted) {
       _showError(
         context,

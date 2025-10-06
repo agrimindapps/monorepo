@@ -20,7 +20,6 @@ import '../../domain/entities/task.dart';
 /// final priorityName = TaskDisplayUtils.getPriorityName(TaskPriority.high);
 /// ```
 class TaskDisplayUtils {
-  // Private constructor to prevent instantiation
   TaskDisplayUtils._();
 
   /// Returns the localized display name for a task type

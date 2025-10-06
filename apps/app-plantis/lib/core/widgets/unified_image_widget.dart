@@ -12,46 +12,34 @@ import '../services/image_preloader_service.dart';
 /// Combines features from OptimizedImageWidget and OptimizedPlantImageWidget
 /// Provides a single, parameterizable widget for all image needs
 class UnifiedImageWidget extends StatefulWidget {
-  // Image sources (priority: base64 > network URLs > placeholder)
   final String? imageBase64;
   final String? imageUrl;
   final List<String> imageUrls;
-
-  // Dimensions and appearance
   final double width;
   final double height;
   final BoxFit fit;
   final BorderRadius? borderRadius;
   final bool useCircularBorder;
-
-  // Customization
   final Widget? placeholder;
   final Widget? errorWidget;
   final Color? placeholderColor;
   final Color? borderColor;
   final double? borderWidth;
-
-  // Performance optimization
   final bool enablePreloading;
   final bool enableMemoryCache;
   final int? cacheKey;
   final bool keepAlive;
-
-  // Plant-specific features
   final bool isPlantImage;
   final IconData? placeholderIcon;
 
   const UnifiedImageWidget({
     super.key,
-    // Image sources
     this.imageBase64,
     this.imageUrl,
     this.imageUrls = const [],
-    // Dimensions
     this.width = 100,
     this.height = 100,
     this.fit = BoxFit.cover,
-    // Appearance
     this.borderRadius,
     this.useCircularBorder = false,
     this.placeholder,
@@ -59,12 +47,10 @@ class UnifiedImageWidget extends StatefulWidget {
     this.placeholderColor,
     this.borderColor,
     this.borderWidth,
-    // Performance
     this.enablePreloading = true,
     this.enableMemoryCache = true,
     this.cacheKey,
     this.keepAlive = false,
-    // Plant-specific
     this.isPlantImage = false,
     this.placeholderIcon,
   });
@@ -131,7 +117,6 @@ class UnifiedImageWidget extends StatefulWidget {
 
 class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-  // LRU cache for base64 images
   static final _LRUImageCache _base64Cache = _LRUImageCache(maxSize: 30);
 
   Uint8List? _cachedImageBytes;
@@ -154,8 +139,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
   @override
   void didUpdateWidget(UnifiedImageWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Reload if image source changed
     if (oldWidget.imageBase64 != widget.imageBase64 ||
         oldWidget.imageUrl != widget.imageUrl ||
         oldWidget.imageUrls != widget.imageUrls) {
@@ -168,7 +151,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
   void didHaveMemoryPressure() {
     super.didHaveMemoryPressure();
     if (widget.enableMemoryCache) {
-      // Clear half the cache during memory pressure
       final targetSize = _base64Cache.maxSize ~/ 2;
       while (_base64Cache.length > targetSize) {
         _base64Cache.removeLRU();
@@ -178,27 +160,19 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
 
   void _preloadImageIfEnabled() {
     if (!widget.enablePreloading) return;
-
-    // Preload network image
     if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
-      // Use enhanced image service adapter for better integration
       try {
         final adapter = sl<PlantisImageServiceAdapter>();
         adapter.preloadImage(widget.imageUrl!);
       } catch (e) {
-        // Fallback to original preloader service
         ImagePreloaderService.instance.preloadImage(widget.imageUrl!);
       }
     }
-
-    // Preload from URLs list
     if (widget.imageUrls.isNotEmpty) {
-      // Use enhanced image service adapter for better integration
       try {
         final adapter = sl<PlantisImageServiceAdapter>();
         adapter.preloadImages(widget.imageUrls, priority: true);
       } catch (e) {
-        // Fallback to original preloader service
         ImagePreloaderService.instance.preloadImages(
           widget.imageUrls,
           priority: true,
@@ -211,7 +185,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
     if (widget.imageBase64 != null && widget.imageBase64!.isNotEmpty) {
       _loadBase64Image();
     } else {
-      // Reset cached bytes if not using base64
       setState(() {
         _cachedImageBytes = null;
         _currentImageKey = null;
@@ -221,14 +194,11 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
 
   void _loadBase64Image() {
     if (!widget.enableMemoryCache) {
-      // Direct decode without caching
       _decodeImageAsync(widget.imageBase64!);
       return;
     }
 
     final imageKey = widget.imageBase64!;
-
-    // Check cache first
     final cachedImage = _base64Cache.get(imageKey);
     if (cachedImage != null) {
       setState(() {
@@ -238,8 +208,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       });
       return;
     }
-
-    // Skip if already decoding the same image
     if (_isDecoding && _currentImageKey == imageKey) {
       return;
     }
@@ -259,8 +227,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       if (!mounted || _currentImageKey != base64String) {
         return;
       }
-
-      // Cache if enabled
       if (widget.enableMemoryCache) {
         _base64Cache.put(base64String, imageBytes);
       }
@@ -292,8 +258,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       height: widget.height,
       child: _buildImageContent(),
     );
-
-    // Apply border if specified
     if (widget.borderColor != null && widget.borderWidth != null) {
       child = DecoratedBox(
         decoration: BoxDecoration(
@@ -306,11 +270,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         child: child,
       );
     }
-
-    // Apply border radius clipping
     child = ClipRRect(borderRadius: _getBorderRadius(), child: child);
-
-    // Wrap with RepaintBoundary for performance
     return RepaintBoundary(
       key: widget.cacheKey != null ? ValueKey(widget.cacheKey) : null,
       child: child,
@@ -325,27 +285,18 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
   }
 
   Widget _buildImageContent() {
-    // Show loading placeholder while decoding
     if (_isDecoding) {
       return _buildPlaceholder();
     }
-
-    // Priority 1: Base64 image
     if (_cachedImageBytes != null) {
       return _buildBase64Image();
     }
-
-    // Priority 2: Primary network URL
     if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
       return _buildNetworkImage(widget.imageUrl!);
     }
-
-    // Priority 3: URLs list
     if (widget.imageUrls.isNotEmpty) {
       return _buildNetworkImage(widget.imageUrls.first);
     }
-
-    // Priority 4: Placeholder
     return _buildPlaceholder();
   }
 
@@ -401,7 +352,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         (widget.isPlantImage ? Icons.eco : Icons.image);
 
     if (widget.isPlantImage) {
-      // Plant-specific placeholder with border
       return Container(
         width: widget.width,
         height: widget.height,
@@ -423,8 +373,6 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         ),
       );
     }
-
-    // General placeholder
     return Container(
       width: widget.width,
       height: widget.height,
@@ -487,8 +435,6 @@ class _LRUImageCache {
   Uint8List? get(String key) {
     final node = _cache[key];
     if (node == null) return null;
-
-    // Move to front (mark as most recently used)
     _moveToFront(node);
     return node.value;
   }
@@ -498,20 +444,13 @@ class _LRUImageCache {
     final existingNode = _cache[key];
 
     if (existingNode != null) {
-      // Update existing node and move to front
       existingNode.value = value;
       _moveToFront(existingNode);
       return;
     }
-
-    // Create new node
     final newNode = _CacheNode(key, value);
     _cache[key] = newNode;
-
-    // Add to front of doubly linked list
     _addToFront(newNode);
-
-    // Remove least recently used if over capacity
     if (_cache.length > maxSize) {
       _removeLeastRecentlyUsed();
     }
@@ -598,7 +537,6 @@ extension UnifiedImageListExtension on ListView {
       },
       controller: controller,
       padding: padding,
-      // Performance optimizations
       cacheExtent: 500.0, // Preload 500px worth of content
       addRepaintBoundaries: true,
       addSemanticIndexes: true,

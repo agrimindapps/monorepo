@@ -30,8 +30,6 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
   void initState() {
     super.initState();
     _selectedSpaceId = widget.selectedSpaceId;
-
-    // Carregar espaços quando o widget for inicializado
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final spacesAsync = ref.read(spacesProvider);
       final isEmpty = spacesAsync.maybeWhen(
@@ -59,7 +57,6 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         Text(
           'Espaço${widget.isRequired ? ' *' : ''}',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -72,12 +69,9 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
 
         spacesAsync.when(
           data: (spacesState) {
-            // Normal state - show dropdown
             if (spacesState.hasSpaces || !spacesState.hasSpaces) {
               return _buildSpaceDropdown(context, spacesState, theme);
             }
-
-            // Error state
             if (spacesState.error != null) {
               return Container(
                 height: 56,
@@ -160,14 +154,10 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
             ),
           ),
         ),
-
-        // Custom space field
         if (_showCustomSpaceField) ...[
           const SizedBox(height: 12),
           _buildCustomSpaceField(context, theme),
         ],
-
-        // Error text
         if (widget.errorText != null) ...[
           const SizedBox(height: 8),
           Text(
@@ -187,8 +177,6 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     ThemeData theme,
   ) {
     final spaces = spacesState.allSpaces;
-
-    // Adiciona opções especiais
     final List<DropdownMenuItem<String?>> items = [
       DropdownMenuItem<String?>(
         value: null,
@@ -332,7 +320,6 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
                   contentPadding: const EdgeInsets.all(12),
                 ),
                 onChanged: (value) {
-                  // Atualizar em tempo real
                   if (value.trim().isNotEmpty) {
                     widget.onSpaceChanged('CREATE_NEW:${value.trim()}');
                   }

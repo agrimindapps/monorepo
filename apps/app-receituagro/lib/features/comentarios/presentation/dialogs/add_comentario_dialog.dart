@@ -45,10 +45,6 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
   static const int _maxLength = ComentariosDesignTokens.maxCommentLength;
   static const int _minLength = ComentariosDesignTokens.minCommentLength;
 
-  // ========================================================================
-  // LIFECYCLE METHODS
-  // ========================================================================
-
   @override
   void initState() {
     super.initState();
@@ -68,10 +64,6 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
       _contentNotifier.value = _commentController.text;
     }
   }
-
-  // ========================================================================
-  // BUILD METHODS
-  // ========================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -399,10 +391,6 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
     );
   }
 
-  // ========================================================================
-  // EVENT HANDLERS
-  // ========================================================================
-
   void _handleCancel() {
     widget.onCancel?.call();
     Navigator.of(context).pop();
@@ -431,10 +419,6 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
     }
   }
 
-  // ========================================================================
-  // HELPER METHODS
-  // ========================================================================
-
   bool _hasOriginInfo() {
     return widget.origem != null || widget.itemName != null;
   }
@@ -457,12 +441,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
     }
   }
 
-  // ========================================================================
-  // FACTORY CONSTRUCTORS
-  // ========================================================================
-
   /// Factory constructor for context-specific comments
-  // ignore: unused_element
   static AddComentarioDialog forContext({
     required String pkIdentificador,
     required String ferramenta,
@@ -480,7 +459,6 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
   }
 
   /// Factory constructor for general comments
-  // ignore: unused_element
   static AddComentarioDialog general({
     required Future<void> Function(String) onSave,
     VoidCallback? onCancel,

@@ -47,15 +47,9 @@ class MonorepoAuthCache {
       final userKey = '$_userPrefix${moduleName}_user';
       final loginTimeKey = '$_userPrefix${moduleName}_last_login';
       final sessionKey = '$_sessionPrefix$moduleName';
-      
-      // Salvar dados do usuário
       final userJson = jsonEncode(user.toJson());
       await _prefs.setString(userKey, userJson);
-      
-      // Salvar timestamp do login
       await _prefs.setString(loginTimeKey, DateTime.now().toIso8601String());
-      
-      // Criar sessão
       final sessionData = {
         'userId': user.id,
         'moduleName': moduleName,
@@ -63,11 +57,7 @@ class MonorepoAuthCache {
         'lastActivity': DateTime.now().toIso8601String(),
       };
       await _prefs.setString(sessionKey, jsonEncode(sessionData));
-      
-      // Atualizar último módulo ativo
       await _prefs.setString(_lastModuleKey, moduleName);
-      
-      // Registrar módulo na lista
       await _addModuleToList(moduleName);
       
       developer.log('Usuário ${user.email} salvo para módulo $moduleName', name: 'AuthCache');
@@ -146,8 +136,6 @@ class MonorepoAuthCache {
       if (sessionJson == null) return null;
       
       final sessionData = jsonDecode(sessionJson) as Map<String, dynamic>;
-      
-      // Verificar se sessão não expirou
       final config = ModuleAuthConfig.getConfig(moduleName);
       if (config != null) {
         final lastActivity = DateTime.parse(sessionData['lastActivity'] as String);
@@ -155,7 +143,6 @@ class MonorepoAuthCache {
         final timeoutMinutes = config.sessionTimeoutMinutes;
         
         if (now.difference(lastActivity).inMinutes > timeoutMinutes) {
-          // Sessão expirada
           await clearModuleSession(moduleName);
           return null;
         }
@@ -193,22 +180,14 @@ class MonorepoAuthCache {
   /// Verifica se pode compartilhar sessão entre módulos
   Future<bool> canShareSessionBetween(String fromModule, String toModule) async {
     _ensureInitialized();
-    
-    // Verificar se ambos módulos têm configuração
     if (!ModuleAuthConfig.canShareSession(fromModule, toModule)) {
       return false;
     }
-    
-    // Verificar se usuário é o mesmo em ambos módulos
     final fromUser = await getLastUserForModule(fromModule);
     final toUser = await getLastUserForModule(toModule);
     
     if (fromUser == null) return false;
-    
-    // Se não há usuário no módulo destino, pode compartilhar
     if (toUser == null) return true;
-    
-    // Se há usuário no destino, deve ser o mesmo
     return fromUser.id == toUser.id;
   }
 
@@ -223,8 +202,6 @@ class MonorepoAuthCache {
     try {
       final fromUser = await getLastUserForModule(fromModule);
       if (fromUser == null) return false;
-      
-      // Copiar usuário para o módulo destino
       await saveUserForModule(fromUser, toModule);
       
       developer.log('Sessão compartilhada de $fromModule para $toModule', name: 'AuthCache');

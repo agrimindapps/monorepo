@@ -16,30 +16,19 @@ class GetDefensivoDetailsUseCase implements app_usecase.UseCase<DefensivoEntity,
 
   @override
   ResultFuture<DefensivoEntity> call(GetDefensivoDetailsParams params) async {
-    // Primeiro tenta buscar por ID de registro
     if (params.idReg != null) {
       final result = await _repository.getDefensivoById(params.idReg!);
-      
-      // Se encontrou, retorna o resultado
       if (result.isRight()) {
         return result;
       }
-      
-      // Se falhou por ID, tenta por nome como fallback
       if (params.nome != null) {
         return await _repository.getDefensivoByName(params.nome!);
       }
-      
-      // Se não tem nome para fallback, retorna a falha original
       return result;
     }
-    
-    // Se não tem ID, busca por nome
     if (params.nome != null) {
       return await _repository.getDefensivoByName(params.nome!);
     }
-    
-    // Se não tem nem ID nem nome, retorna erro
     return const Left(
       app_failures.ServerFailure('ID de registro ou nome do defensivo é obrigatório'),
     );

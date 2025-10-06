@@ -25,11 +25,7 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Getting devices for user $userId');
       }
-
-      // Primeiro tentar cache local
       final cachedResult = await _localDataSource.getCachedDevices(userId);
-      
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -42,8 +38,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
         }
         return cachedResult;
       }
-
-      // Tentar buscar dados remotos
       final remoteResult = await _remoteDataSource.getUserDevices(userId);
       
       return await remoteResult.fold(
@@ -51,15 +45,12 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           if (kDebugMode) {
             debugPrint('❌ DeviceRepository: Remote failed - $failure, using cache');
           }
-          // Se falhar no remoto, usar cache
           return cachedResult;
         },
         (remoteDevices) async {
           if (kDebugMode) {
             debugPrint('✅ DeviceRepository: Got ${remoteDevices.length} devices from remote');
           }
-          
-          // Atualizar cache com dados remotos
           await _localDataSource.cacheDevices(userId, remoteDevices);
           
           return Right(remoteDevices);
@@ -89,8 +80,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Validating device ${device.uuid}');
       }
-
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -105,8 +94,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           ),
         );
       }
-
-      // Validar via remote datasource
       final validationResult = await _remoteDataSource.validateDevice(userId, device);
       
       return validationResult.fold(
@@ -115,8 +102,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           if (kDebugMode) {
             debugPrint('✅ DeviceRepository: Device validated successfully');
           }
-          
-          // Atualizar cache local com dispositivo validado
           _localDataSource.updateDevice(userId, validatedDevice);
           
           return Right(validatedDevice);
@@ -146,8 +131,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Revoking device $deviceUuid');
       }
-
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -162,8 +145,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           ),
         );
       }
-
-      // Revogar via remote datasource
       final revokeResult = await _remoteDataSource.revokeDevice(userId, deviceUuid);
       
       return revokeResult.fold(
@@ -172,8 +153,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           if (kDebugMode) {
             debugPrint('✅ DeviceRepository: Device revoked successfully');
           }
-          
-          // Remover do cache local
           _localDataSource.removeDevice(userId, deviceUuid);
           
           return const Right(null);
@@ -203,8 +182,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Updating activity for device $deviceUuid');
       }
-
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -212,7 +189,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       );
       
       if (!isConnected) {
-        // Se offline, tentar obter do cache e simular atualização
         final cachedResult = await _localDataSource.getDeviceByUuid(deviceUuid);
         return cachedResult.fold(
           (failure) => Left(failure),
@@ -225,8 +201,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
                 ),
               );
             }
-            
-            // Simular atualização offline (apenas local)
             final updatedDevice = cachedDevice.copyWith(
               lastActiveAt: DateTime.now(),
             ) as DeviceEntity;
@@ -236,8 +210,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           },
         );
       }
-
-      // Atualizar via remote datasource
       final updateResult = await _remoteDataSource.updateLastActivity(userId, deviceUuid);
       
       return updateResult.fold(
@@ -246,8 +218,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           if (kDebugMode) {
             debugPrint('✅ DeviceRepository: Device activity updated successfully');
           }
-          
-          // Atualizar cache local
           _localDataSource.updateDevice(userId, updatedDevice);
           
           return Right(updatedDevice);
@@ -271,7 +241,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   @override
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
     try {
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -279,7 +248,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       );
       
       if (!isConnected) {
-        // Se offline, verificar no cache local
         final cachedResult = await _localDataSource.getCachedDevices(userId);
         return cachedResult.fold(
           (failure) => const Right(false), // Falhar seguramente
@@ -289,8 +257,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           },
         );
       }
-
-      // Verificar via remote datasource
       return await _remoteDataSource.canAddMoreDevices(userId);
 
     } catch (e) {
@@ -307,7 +273,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   @override
   Future<Either<Failure, DeviceEntity?>> getDeviceByUuid(String uuid) async {
     try {
-      // Primeiro tentar cache local
       final localResult = await _localDataSource.getDeviceByUuid(uuid);
       
       return localResult.fold(
@@ -329,7 +294,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   @override
   Future<Either<Failure, DeviceStatistics>> getDeviceStatistics(String userId) async {
     try {
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -337,7 +301,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       );
       
       if (!isConnected) {
-        // Se offline, gerar estatísticas do cache
         final cachedResult = await _localDataSource.getCachedDevices(userId);
         return cachedResult.fold(
           (failure) => Left(failure),
@@ -369,8 +332,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           },
         );
       }
-
-      // Obter estatísticas via remote datasource
       return await _remoteDataSource.getDeviceStatistics(userId);
 
     } catch (e) {
@@ -390,7 +351,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
     required String currentDeviceUuid,
   }) async {
     try {
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -405,14 +365,11 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           ),
         );
       }
-
-      // Revogar via remote datasource
       final revokeResult = await _remoteDataSource.revokeAllOtherDevices(userId, currentDeviceUuid);
       
       return revokeResult.fold(
         (failure) => Left(failure),
         (_) {
-          // Limpar cache para forçar refresh
           _localDataSource.clearCache(userId);
           return const Right(null);
         },
@@ -435,7 +392,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
     required int inactiveDays,
   }) async {
     try {
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -450,14 +406,11 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           ),
         );
       }
-
-      // Limpar via remote datasource
       final cleanupResult = await _remoteDataSource.cleanupInactiveDevices(userId, inactiveDays);
       
       return cleanupResult.fold(
         (failure) => Left(failure),
         (removedDevices) {
-          // Atualizar cache removendo dispositivos limpos
           final removedUuids = removedDevices.map((device) => device.uuid).toList();
           for (final uuid in removedUuids) {
             _localDataSource.removeDevice(userId, uuid);
@@ -481,7 +434,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   @override
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     try {
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -489,7 +441,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       );
       
       if (!isConnected) {
-        // Se offline, contar do cache
         final cachedResult = await _localDataSource.getCachedDevices(userId);
         return cachedResult.fold(
           (failure) => Left(failure),
@@ -499,8 +450,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           },
         );
       }
-
-      // Obter contagem via remote datasource
       final devicesResult = await _remoteDataSource.getUserDevices(userId);
       return devicesResult.fold(
         (failure) => Left(failure),
@@ -524,8 +473,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   @override
   Future<Either<Failure, int>> getDeviceLimit(String userId) async {
     try {
-      // Por enquanto, limite fixo de 3 dispositivos
-      // No futuro pode ser configurável ou baseado no plano do usuário
       return const Right(3);
     } catch (e) {
       return Left(
@@ -544,8 +491,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Syncing devices for user $userId');
       }
-
-      // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();
       final isConnected = connectivityResult.fold(
         (failure) => false,
@@ -560,8 +505,6 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           ),
         );
       }
-
-      // Buscar dados remotos
       final remoteResult = await _remoteDataSource.getUserDevices(userId);
       
       return await remoteResult.fold(
@@ -570,11 +513,7 @@ class DeviceRepositoryImpl implements IDeviceRepository {
           if (kDebugMode) {
             debugPrint('✅ DeviceRepository: Synced ${remoteDevices.length} devices');
           }
-          
-          // Limpar cache atual
           await _localDataSource.clearCache(userId);
-          
-          // Armazenar dados atualizados
           await _localDataSource.cacheDevices(userId, remoteDevices);
           
           return Right(remoteDevices);

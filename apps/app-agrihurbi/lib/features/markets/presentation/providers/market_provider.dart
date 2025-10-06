@@ -40,8 +40,6 @@ class MarketProvider with ChangeNotifier {
     this._repository,
   );
 
-  // === STATE VARIABLES ===
-
   List<MarketEntity> _markets = [];
   List<MarketEntity> _favoriteMarkets = [];
   List<MarketEntity> _searchResults = [];
@@ -62,8 +60,6 @@ class MarketProvider with ChangeNotifier {
 
   DateTime? _lastUpdate;
   List<String> _searchHistory = [];
-
-  // === GETTERS ===
 
   List<MarketEntity> get markets => _markets;
   List<MarketEntity> get favoriteMarkets => _favoriteMarkets;
@@ -89,8 +85,6 @@ class MarketProvider with ChangeNotifier {
   bool get hasError => _errorMessage != null;
   bool get hasData => _markets.isNotEmpty;
   bool get hasSearchResults => _searchResults.isNotEmpty;
-
-  // === MARKET OPERATIONS ===
 
   /// Load markets with optional filter
   Future<void> loadMarkets({
@@ -275,8 +269,6 @@ class MarketProvider with ChangeNotifier {
     }
   }
 
-  // === FAVORITES MANAGEMENT ===
-
   /// Load favorite markets
   Future<void> loadFavorites() async {
     _setLoadingFavorites(true);
@@ -311,7 +303,6 @@ class MarketProvider with ChangeNotifier {
           return false;
         },
         (_) {
-          // Refresh favorites list
           loadFavorites();
           return true;
         },
@@ -333,7 +324,6 @@ class MarketProvider with ChangeNotifier {
           return false;
         },
         (_) {
-          // Refresh favorites list
           loadFavorites();
           return true;
         },
@@ -355,7 +345,6 @@ class MarketProvider with ChangeNotifier {
           return false;
         },
         (isFavorite) {
-          // Refresh favorites list
           loadFavorites();
           return isFavorite;
         },
@@ -376,8 +365,6 @@ class MarketProvider with ChangeNotifier {
       return false;
     }
   }
-
-  // === FILTER MANAGEMENT ===
 
   /// Apply filter
   void applyFilter(MarketFilter filter) {
@@ -409,8 +396,6 @@ class MarketProvider with ChangeNotifier {
     applyFilter(filter);
   }
 
-  // === UTILITY METHODS ===
-
   /// Initialize provider
   Future<void> initialize() async {
     await Future.wait([
@@ -439,14 +424,10 @@ class MarketProvider with ChangeNotifier {
   /// Load search history
   Future<void> _loadSearchHistory() async {
     try {
-      // TODO: Implement search history loading from local datasource
       _searchHistory = [];
     } catch (e) {
-      // Silent fail for search history
     }
   }
-
-  // === PRIVATE METHODS ===
 
   void _setLoadingMarkets(bool loading) {
     _isLoadingMarkets = loading;

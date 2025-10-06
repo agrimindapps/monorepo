@@ -6,8 +6,6 @@ import 'plantis_design_tokens.dart';
 class SettingsTheme {
   const SettingsTheme._(); // Private constructor
 
-  // MARK: - Theme Data
-
   /// Light theme configuration for settings
   static ThemeData get lightTheme => ThemeData(
     colorScheme: ColorScheme.fromSeed(
@@ -46,8 +44,6 @@ class SettingsTheme {
     fontFamily: 'SF Pro Display',
   );
 
-  // MARK: - Component Themes
-
   /// Settings item theme configuration
   static SettingsItemThemeData get settingsItemTheme =>
       const SettingsItemThemeData(
@@ -83,11 +79,8 @@ class SettingsTheme {
     rotateAnimationDuration: Duration(seconds: 3),
   );
 
-  // MARK: - Typography
-
   /// Settings page typography theme
   static TextTheme get textTheme => const TextTheme(
-    // Headers
     headlineLarge: TextStyle(
       fontSize: PlantisDesignTokens.fontSize5XL,
       fontWeight: PlantisDesignTokens.fontWeightBold,
@@ -102,8 +95,6 @@ class SettingsTheme {
       fontSize: PlantisDesignTokens.fontSize3XL,
       fontWeight: PlantisDesignTokens.fontWeightSemiBold,
     ),
-
-    // Titles
     titleLarge: TextStyle(
       fontSize: PlantisDesignTokens.fontSize2XL,
       fontWeight: PlantisDesignTokens.fontWeightSemiBold,
@@ -116,8 +107,6 @@ class SettingsTheme {
       fontSize: PlantisDesignTokens.fontSizeBase,
       fontWeight: PlantisDesignTokens.fontWeightMedium,
     ),
-
-    // Body text
     bodyLarge: TextStyle(
       fontSize: PlantisDesignTokens.fontSizeLG,
       fontWeight: PlantisDesignTokens.fontWeightNormal,
@@ -130,8 +119,6 @@ class SettingsTheme {
       fontSize: PlantisDesignTokens.fontSizeSM,
       fontWeight: PlantisDesignTokens.fontWeightNormal,
     ),
-
-    // Labels
     labelLarge: TextStyle(
       fontSize: PlantisDesignTokens.fontSizeBase,
       fontWeight: PlantisDesignTokens.fontWeightMedium,
@@ -145,8 +132,6 @@ class SettingsTheme {
       fontWeight: PlantisDesignTokens.fontWeightMedium,
     ),
   );
-
-  // MARK: - Button Themes
 
   /// Elevated button theme for settings
   static ElevatedButtonThemeData get elevatedButtonTheme =>
@@ -193,8 +178,6 @@ class SettingsTheme {
     ),
   );
 
-  // MARK: - Input Themes
-
   /// Input decoration theme for settings forms
   static InputDecorationTheme get inputDecorationTheme => InputDecorationTheme(
     filled: true,
@@ -225,8 +208,6 @@ class SettingsTheme {
     ),
   );
 
-  // MARK: - Dialog Theme
-
   /// Dialog theme for settings modals
   static DialogThemeData get dialogTheme => DialogThemeData(
     shape: RoundedRectangleBorder(
@@ -246,8 +227,6 @@ class SettingsTheme {
     ),
   );
 
-  // MARK: - Switch Theme
-
   /// Switch theme for settings toggles
   static SwitchThemeData get switchTheme => SwitchThemeData(
     thumbColor: WidgetStateProperty.resolveWith((states) {
@@ -264,8 +243,6 @@ class SettingsTheme {
     }),
     trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
   );
-
-  // MARK: - Helper Methods
 
   /// Get appropriate theme based on brightness
   static ThemeData getTheme(Brightness brightness) {
@@ -284,8 +261,6 @@ class SettingsTheme {
     );
   }
 }
-
-// MARK: - Custom Theme Data Classes
 
 /// Theme data for settings items
 class SettingsItemThemeData {

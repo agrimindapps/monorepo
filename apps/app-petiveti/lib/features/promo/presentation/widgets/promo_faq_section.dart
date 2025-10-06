@@ -21,7 +21,6 @@ class PromoFaqSection extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Section Title
           Text(
             'Perguntas Frequentes',
             style: theme.textTheme.displaySmall?.copyWith(

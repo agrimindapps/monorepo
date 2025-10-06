@@ -239,8 +239,6 @@ class NotificationService {
   void notify(NotificationEvent event) {
     _activeNotifications.add(event);
     _notificationSubject.notify(event);
-
-    // Auto-remove non-persistent notifications
     if (!event.persistent && event.autoHideDuration != null) {
       Timer(event.autoHideDuration!, () {
         dismissNotification(event.id);

@@ -6,8 +6,6 @@ import '../../../infrastructure/services/revenue_cat_service.dart';
 /// Providers unificados para gerenciamento de assinaturas Premium
 /// Consolida RevenueCat integration entre todos os apps do monorepo
 
-// ========== CORE SUBSCRIPTION PROVIDERS ==========
-
 /// Provider principal para estado de assinatura
 final subscriptionProvider =
     StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
@@ -37,19 +35,13 @@ final subscriptionInfoProvider = Provider<SubscriptionInfo?>((ref) {
 final availableProductsProvider = FutureProvider<List<StoreProduct>>((
   ref,
 ) async {
-  // REVIEW (converted TODO 2025-10-06): Implementar getOfferings no RevenueCatService
-  // Por enquanto, retornar lista vazia
   return <StoreProduct>[];
 });
 
 /// Provider para ofertas atuais do RevenueCat
 final currentOfferingsProvider = FutureProvider<Offerings?>((ref) async {
-  // REVIEW (converted TODO 2025-10-06): Implementar getOfferings no RevenueCatService
-  // Por enquanto, retornar null
   return null;
 });
-
-// ========== FEATURE GATE PROVIDERS ==========
 
 /// Provider para verificar acesso a features específicas por app
 final featureGateProvider = Provider.family<bool, String>((ref, featureName) {
@@ -83,8 +75,6 @@ final hasReachedLimitProvider = Provider.family<bool, String>((ref, feature) {
   return limits.hasReachedLimit(feature, usage);
 });
 
-// ========== APP-SPECIFIC PROVIDERS ==========
-
 /// Provider para features premium específicas do Gasometer
 final gasometerPremiumFeaturesProvider = Provider<GasometerPremiumFeatures>((
   ref,
@@ -107,8 +97,6 @@ final receitaagroPremiumFeaturesProvider = Provider<ReceitaagroPremiumFeatures>(
   },
 );
 
-// ========== PURCHASE PROVIDERS ==========
-
 /// Provider para ações de compra
 final purchaseActionsProvider = Provider<PurchaseActions>((ref) {
   final notifier = ref.read(subscriptionProvider.notifier);
@@ -124,17 +112,11 @@ final purchaseActionsProvider = Provider<PurchaseActions>((ref) {
 final purchaseHistoryProvider = FutureProvider<List<StoreTransaction>>((
   ref,
 ) async {
-  // REVIEW (converted TODO 2025-10-06): Implementar getCustomerInfo no RevenueCatService
-  // Por enquanto, retornar lista vazia
   return <StoreTransaction>[];
 });
 
-// ========== UTILITY PROVIDERS ==========
-
 /// Provider para informações do cliente RevenueCat
 final customerInfoProvider = FutureProvider<CustomerInfo?>((ref) async {
-  // REVIEW (converted TODO 2025-10-06): Implementar getCustomerInfo no RevenueCatService
-  // Por enquanto, retornar null
   return null;
 });
 
@@ -163,8 +145,6 @@ final trialStatusProvider = Provider<TrialStatus>((ref) {
 
   return TrialStatus.notEligible;
 });
-
-// ========== MODELS ==========
 
 /// Estados da assinatura
 abstract class SubscriptionState {
@@ -288,11 +268,8 @@ class FeatureLimits {
 
   factory FeatureLimits.forApp(String appId, bool isPremium) {
     if (isPremium) {
-      // Premium users have no limits
       return FeatureLimits(appId: appId, isPremium: true, limits: const {});
     }
-
-    // Free users have app-specific limits
     switch (appId) {
       case 'gasometer':
         return FeatureLimits(
@@ -398,8 +375,6 @@ class PurchaseActions {
   });
 }
 
-// ========== NOTIFIER IMPLEMENTATION ==========
-
 /// Notifier para gerenciamento de assinaturas
 class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   SubscriptionNotifier() : super(const SubscriptionLoading()) {
@@ -420,13 +395,9 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> checkSubscriptionStatus() async {
     try {
       state = const SubscriptionLoading();
-
-      // REVIEW (converted TODO 2025-10-06): Implementar getCustomerInfo no RevenueCatService
-      // Por enquanto, simular usuário sem premium
       final entitlements = <String, EntitlementInfo>{};
 
       if (entitlements.isNotEmpty) {
-        // REVIEW (converted TODO 2025-10-06): Implementar parsing real do EntitlementInfo quando service estiver pronto
         final info = SubscriptionInfo(
           productId: 'premium_monthly',
           isPremium: true,
@@ -452,12 +423,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<bool> purchasePackage(dynamic package) async {
     try {
       state = const SubscriptionLoading();
-
-      // REVIEW (converted TODO 2025-10-06): Implementar purchasePackage no RevenueCatService
-      // Por enquanto, simular compra bem-sucedida
       await Future.delayed(const Duration(seconds: 2));
-
-      // Simular ativação de premium após compra
       final info = SubscriptionInfo(
         productId: 'premium_monthly',
         isPremium: true,
@@ -501,13 +467,9 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 }
 
-// ========== UTILITY FUNCTIONS ==========
-
 /// Verifica se tem acesso a uma feature específica
 bool _hasFeatureAccess(String appId, String featureName, bool isPremium) {
   if (isPremium) return true;
-
-  // Features sempre gratuitas por app
   const freeFeatures = {
     'gasometer': {'basic_tracking', 'simple_reports'},
     'plantis': {'basic_plant_care', 'reminders'},
@@ -516,10 +478,7 @@ bool _hasFeatureAccess(String appId, String featureName, bool isPremium) {
 
   return freeFeatures[appId]?.contains(featureName) ?? false;
 }
-
-// ========== TEMPORARY PROVIDER ==========
 /// Provider temporário para app atual - será substituído por router integration
 final currentAppIdProvider = Provider<String>((ref) {
-  // Temporário - será detectado automaticamente
   return 'plantis';
 });

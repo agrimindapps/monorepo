@@ -162,8 +162,6 @@ class FuelFormView extends ConsumerWidget {
     );
   }
 
-  // Campo de data removido - agora usa DateTimeField
-
   Widget _buildFullTankSwitch(BuildContext context, WidgetRef ref) {
     final state = ref.watch(fuelFormNotifierProvider(vehicleId));
     final notifier = ref.read(fuelFormNotifierProvider(vehicleId).notifier);
@@ -175,7 +173,6 @@ class FuelFormView extends ConsumerWidget {
       showValidationIcon: false,
       onChanged: (value) => notifier.updateFullTank(value),
       validator: (value) {
-        // Optional validation if needed
         return null;
       },
     );
@@ -212,7 +209,6 @@ class FuelFormView extends ConsumerWidget {
       label: FuelConstants.pricePerLiterLabel,
       required: true,
       onChanged: (value) {
-        // O notifier já está conectado ao controller
       },
     );
   }
@@ -254,8 +250,6 @@ class FuelFormView extends ConsumerWidget {
       currentOdometer: vehicle?.currentOdometer,
       lastReading: state.lastOdometerReading,
       onChanged: (value) {
-        // O notifier já está conectado ao controller
-        // Não precisamos fazer nada aqui
       },
     );
   }
@@ -270,12 +264,9 @@ class FuelFormView extends ConsumerWidget {
       hint: FuelConstants.notesHint,
       required: false,
       onChanged: (value) {
-        // O notifier já está conectado ao controller
       },
     );
   }
-
-  // Método de seleção de data removido - agora é tratado pelo DateTimeField
 
   Widget _buildReceiptImageSection(BuildContext context, WidgetRef ref) {
     final state = ref.watch(fuelFormNotifierProvider(vehicleId));

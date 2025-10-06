@@ -62,7 +62,6 @@ class _FaqSectionState extends State<FaqSection> with TickerProviderStateMixin {
       ),
       child: Column(
         children: [
-          // Título da seção
           Column(
             children: [
               Text(
@@ -86,8 +85,6 @@ class _FaqSectionState extends State<FaqSection> with TickerProviderStateMixin {
             ],
           ),
           const SizedBox(height: 60),
-
-          // Lista de perguntas
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
             child: Column(

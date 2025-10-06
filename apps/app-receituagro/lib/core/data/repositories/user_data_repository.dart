@@ -24,10 +24,6 @@ class UserDataRepository {
   /// Verifica se há um usuário logado
   bool get hasCurrentUser => currentUserId != null;
 
-  // =============================================================================
-  // APP SETTINGS
-  // =============================================================================
-
   /// Obtém configurações do app para o usuário atual
   Future<Either<Exception, AppSettingsModel?>> getAppSettings() async {
     try {
@@ -56,8 +52,6 @@ class UserDataRepository {
       }
 
       final box = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
-      
-      // Verificar se já existe configuração para o usuário
       final existingKey = box.keys.firstWhere(
         (key) => box.get(key)?.userId == userId,
         orElse: () => null,
@@ -105,10 +99,6 @@ class UserDataRepository {
     }
   }
 
-  // =============================================================================
-  // SUBSCRIPTION DATA  
-  // =============================================================================
-
   /// Obtém dados de subscription para o usuário atual
   Future<Either<Exception, SubscriptionEntity?>> getSubscriptionData() async {
     try {
@@ -116,9 +106,6 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      // Temporariamente ainda usa Hive com SubscriptionDataModel para compatibilidade
-      // Será migrado para usar o sistema unificado gradualmente
       final box = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
       final subscriptionMap = box.values
           .where((sub) => sub['userId'] == userId)
@@ -127,8 +114,6 @@ class UserDataRepository {
       if (subscriptionMap == null) {
         return const Right(null);
       }
-
-      // Converter Map para SubscriptionEntity via adaptador
       try {
         final entity = SubscriptionEntity.fromFirebaseMap(
           Map<String, dynamic>.from(subscriptionMap),
@@ -151,8 +136,6 @@ class UserDataRepository {
       }
 
       final box = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
-      
-      // Verificar se já existe subscription para o usuário
       final existingKey = box.keys.firstWhere(
         (key) {
           final sub = box.get(key);
@@ -166,8 +149,6 @@ class UserDataRepository {
         updatedAt: DateTime.now(),
         isDirty: true, // Marca como não sincronizado
       );
-
-      // Converter para Map para salvar no Hive temporariamente
       final subscriptionMap = updatedSubscription.toFirebaseMap();
 
       if (existingKey != null) {
@@ -182,10 +163,6 @@ class UserDataRepository {
     }
   }
 
-  // =============================================================================
-  // FAVORITOS
-  // =============================================================================
-
   /// Obtém favoritos do usuário atual
   Future<Either<Exception, List<FavoritoDefensivoModel>>> getFavoritos() async {
     try {
@@ -193,9 +170,6 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      // Por enquanto, retorna lista vazia - implementação depende do storage usado
-      // Aqui seria a integração com o repository/service que gerencia favoritos
       
       return const Right([]);
     } catch (e) {
@@ -210,16 +184,11 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      // Marcar favorito com userId e como não sincronizado
       favorito.copyWith(
         userId: userId,
         synchronized: false,
         updatedAt: DateTime.now(),
       );
-
-      // Aqui seria a integração com o repository/service que gerencia favoritos
-      // Por exemplo: await _favoritosService.save(favorito);
 
       return const Right(null);
     } catch (e) {
@@ -235,18 +204,11 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // Aqui seria a integração com o repository/service que gerencia favoritos
-      // Por exemplo: await _favoritosService.remove(favoritoId, userId);
-
       return const Right(null);
     } catch (e) {
       return Left(Exception('Error removing favorito: $e'));
     }
   }
-
-  // =============================================================================
-  // COMENTARIOS
-  // =============================================================================
 
   /// Obtém comentários do usuário atual
   Future<Either<Exception, List<ComentarioModel>>> getComentarios() async {
@@ -255,9 +217,6 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      // Por enquanto, retorna lista vazia - implementação depende do storage usado
-      // Aqui seria a integração com o repository/service que gerencia comentários
       
       return const Right([]);
     } catch (e) {
@@ -272,17 +231,12 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      // Marcar comentário com userId e como não sincronizado
       comentario.copyWith(
         userId: userId,
         synchronized: false,
         syncedAt: null,
         updatedAt: DateTime.now(),
       );
-
-      // Aqui seria a integração com o repository/service que gerencia comentários
-      // Por exemplo: await _comentariosService.save(comentario);
 
       return const Right(null);
     } catch (e) {
@@ -298,18 +252,11 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      // Aqui seria a integração com o repository/service que gerencia comentários
-      // Por exemplo: await _comentariosService.remove(comentarioId, userId);
-
       return const Right(null);
     } catch (e) {
       return Left(Exception('Error removing comentario: $e'));
     }
   }
-
-  // =============================================================================
-  // SYNC OPERATIONS
-  // =============================================================================
 
   /// Obtém todos os itens não sincronizados do usuário
   Future<Either<Exception, Map<String, List<dynamic>>>> getUnsynchronizedData() async {
@@ -320,8 +267,6 @@ class UserDataRepository {
       }
 
       final unsynchronizedData = <String, List<dynamic>>{};
-
-      // App Settings não sincronizados
       final settingsResult = await getAppSettings();
       settingsResult.fold(
         (error) => null,
@@ -331,8 +276,6 @@ class UserDataRepository {
           }
         },
       );
-
-      // Subscription Data não sincronizada
       final subscriptionResult = await getSubscriptionData();
       subscriptionResult.fold(
         (error) => null,
@@ -342,8 +285,6 @@ class UserDataRepository {
           }
         },
       );
-
-      // Favoritos não sincronizados
       final favoritosResult = await getFavoritos();
       favoritosResult.fold(
         (error) => null,
@@ -354,8 +295,6 @@ class UserDataRepository {
           }
         },
       );
-
-      // Comentários não sincronizados
       final comentariosResult = await getComentarios();
       comentariosResult.fold(
         (error) => null,
@@ -412,11 +351,9 @@ class UserDataRepository {
           );
 
         case 'favoritos':
-          // Implementar conforme necessário
           return const Right(null);
 
         case 'comentarios':
-          // Implementar conforme necessário
           return const Right(null);
 
         default:
@@ -434,8 +371,6 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      // Limpar app settings
       final appSettingsBox = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
       final settingsKeysToRemove = appSettingsBox.keys
           .where((key) => appSettingsBox.get(key)?.userId == userId)
@@ -444,8 +379,6 @@ class UserDataRepository {
       for (final key in settingsKeysToRemove) {
         await appSettingsBox.delete(key);
       }
-
-      // Limpar subscription data
       final subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
       final subscriptionKeysToRemove = subscriptionBox.keys
           .where((key) {
@@ -457,8 +390,6 @@ class UserDataRepository {
       for (final key in subscriptionKeysToRemove) {
         await subscriptionBox.delete(key);
       }
-
-      // Aqui seria a limpeza de favoritos e comentários conforme implementação
 
       return const Right(null);
     } catch (e) {
@@ -475,20 +406,14 @@ class UserDataRepository {
       }
 
       final stats = <String, int>{};
-
-      // Contar configurações
       final appSettingsBox = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
       stats['app_settings'] = appSettingsBox.values
           .where((settings) => settings.userId == userId)
           .length;
-
-      // Contar subscriptions
       final subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
       stats['subscription_data'] = subscriptionBox.values
           .where((sub) => sub['userId'] == userId)
           .length;
-
-      // Aqui seria a contagem de favoritos e comentários conforme implementação
       stats['favoritos'] = 0; // Placeholder
       stats['comentarios'] = 0; // Placeholder
 

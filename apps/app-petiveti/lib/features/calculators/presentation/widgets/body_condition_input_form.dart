@@ -24,8 +24,6 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
   @override
   void initState() {
     super.initState();
-    
-    // Inicializar controladores com valores do provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final input = ref.read(bodyConditionInputProvider);
       _weightController.text = input.currentWeight > 0 ? input.currentWeight.toString() : '';
@@ -56,10 +54,7 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Sugestões
           if (suggestions.isNotEmpty) _buildSuggestionPanel(suggestions),
-          
-          // Dados básicos do animal
           _buildSectionHeader('Dados do Animal', Icons.pets),
           const SizedBox(height: 12),
           
@@ -110,8 +105,6 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
             ],
           ),
           const SizedBox(height: 24),
-          
-          // Avaliação física
           _buildSectionHeader('Avaliação Física', Icons.touch_app),
           const SizedBox(height: 12),
           
@@ -123,8 +116,6 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
           
           _buildAbdominalProfileDropdown(input.abdominalProfile),
           const SizedBox(height: 24),
-          
-          // Informações adicionais
           _buildSectionHeader('Informações Adicionais', Icons.info_outline),
           const SizedBox(height: 12),
           
@@ -133,8 +124,6 @@ class _BodyConditionInputFormState extends ConsumerState<BodyConditionInputForm>
           
           _buildObservationsField(),
           const SizedBox(height: 24),
-          
-          // Resumo visual
           _buildInputSummary(input),
         ],
       ),

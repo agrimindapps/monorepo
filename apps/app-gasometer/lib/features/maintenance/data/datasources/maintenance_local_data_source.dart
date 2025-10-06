@@ -31,8 +31,6 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
       final records = _localDataService.getAllMaintenanceRecords()
           .map((record) => MaintenanceMapper.modelToEntity(MaintenanceModel.fromHiveMap(record)))
           .toList();
-      
-      // Sort by date descending
       records.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
       return records;
     } catch (e) {
@@ -47,8 +45,6 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
           .where((record) => record['veiculoId'] == vehicleId)
           .map((record) => MaintenanceMapper.modelToEntity(MaintenanceModel.fromHiveMap(record)))
           .toList();
-      
-      // Sort by date descending
       records.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
       return records;
     } catch (e) {
@@ -138,7 +134,6 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
   @override
   Future<void> clearAllMaintenanceRecords() async {
     try {
-      // Clear all maintenance records - we'll need to implement this in LocalDataService
       final allRecords = _localDataService.getAllMaintenanceRecords();
       for (final record in allRecords) {
         final id = record['id'] as String?;
@@ -153,7 +148,6 @@ class MaintenanceLocalDataSourceImpl implements MaintenanceLocalDataSource {
 
   @override
   Stream<List<MaintenanceEntity>> watchMaintenanceRecords() {
-    // For now, return a simple stream - in production you'd implement proper listening
     return Stream.periodic(const Duration(seconds: 1), (_) => null)
         .asyncMap((_) => getAllMaintenanceRecords());
   }

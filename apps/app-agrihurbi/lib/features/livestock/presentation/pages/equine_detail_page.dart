@@ -42,11 +42,7 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
 
   Future<void> _loadEquineDetails() async {
     final provider = ref.read(equinesProviderProvider);
-
-    // Busca equino local primeiro
     var equine = provider.getEquineById(widget.equineId);
-
-    // Se não encontrou local, busca remoto
     if (equine == null) {
       await provider.loadEquineById(widget.equineId);
       equine = provider.selectedEquine;
@@ -533,24 +529,12 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
   }
 
   void _shareEquine() {
-    // final text = '''
-    // Equino: ${_equine!.commonName}
-    // Temperamento: ${_equine!.temperament.displayName}
-    // Pelagem: ${_equine!.coat.displayName}
-    // Uso Principal: ${_equine!.primaryUse.displayName}
-    // País de Origem: ${_equine!.originCountry}
-    //
-    // Compartilhado via AgriHurbi
-    // ''';
-
-    // Note: Implement actual sharing functionality
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Funcionalidade de compartilhamento em desenvolvimento'),
         action: SnackBarAction(
           label: 'Copiar Texto',
           onPressed: () {
-            // Copy to clipboard functionality
           },
         ),
       ),
@@ -587,7 +571,6 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
   }
 
   void _deleteEquine() async {
-    // TODO: Implementar exclusão quando EquinesProvider estiver completo
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Funcionalidade de exclusão de equinos em desenvolvimento'),

@@ -16,12 +16,8 @@ class GasometerStorageService {
   Future<Result<void>> initialize() async {
     try {
       if (_isInitialized) return Result.success(null);
-
-      // Get core services
       _boxRegistry = GetIt.I<IBoxRegistryService>();
       _storage = GetIt.I<ILocalStorageRepository>();
-
-      // Register gasometer-specific boxes
       await _registerGasometerBoxes();
 
       _isInitialized = true;

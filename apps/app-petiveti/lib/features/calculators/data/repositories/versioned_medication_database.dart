@@ -151,20 +151,17 @@ class VersionedMedicationDatabase {
   /// Carregamento dinâmico com verificação de integridade
   static Future<VersionedMedicationDatabase> load() async {
     try {
-      // Em produção, isso seria carregado de uma fonte segura (Firebase, API)
       final data = await _fetchFromSecureSource();
       await _validateMedicalReferences(data);
       return VersionedMedicationDatabase.fromValidatedData(data);
     } catch (e) {
       log('Erro ao carregar base de dados versioned: $e');
-      // Fallback para base local
       return _createDefaultDatabase();
     }
   }
 
   /// Cria instância a partir de dados validados
   factory VersionedMedicationDatabase.fromValidatedData(Map<String, dynamic> data) {
-    // Para simplificar, usar medicamentos padrão por enquanto
     final medications = _getDefaultMedications();
     
     final references = <String, MedicalReference>{};
@@ -240,11 +237,7 @@ class VersionedMedicationDatabase {
     );
 
     _auditLog.add(entry);
-    
-    // Em produção, enviar para sistema central de auditoria
     _sendToAuditService(entry);
-    
-    // Manter apenas os últimos 1000 logs em memória
     if (_auditLog.length > 1000) {
       _auditLog.removeAt(0);
     }
@@ -316,7 +309,6 @@ class VersionedMedicationDatabase {
   /// Busca medicamentos com validação de referências
   List<MedicationData> getMedicationsWithValidReferences() {
     return medications.where((med) {
-      // Verificar se há referências válidas para este medicamento
       final hasValidReferences = references.values.any((ref) =>
           ref.dosageData.containsKey(med.id) && !ref.needsUpdate);
       
@@ -333,8 +325,6 @@ class VersionedMedicationDatabase {
     return references.values.where((ref) =>
         ref.dosageData.containsKey(medicationId)).toList();
   }
-
-  // MÉTODOS PRIVADOS
 
   void _logAccess(String action, [Map<String, dynamic>? details]) {
     final entry = AuditLogEntry(
@@ -363,13 +353,11 @@ class VersionedMedicationDatabase {
   }
 
   void _sendToAuditService(AuditLogEntry entry) {
-    // Em produção, isso enviaria para um serviço de auditoria central
     log('Audit: ${entry.action} for ${entry.medicationId} at ${entry.timestamp}');
   }
 
   /// Simula carregamento de fonte segura
   static Future<Map<String, dynamic>> _fetchFromSecureSource() async {
-    // Em produção, isso faria uma requisição HTTP para uma API segura
     await Future<void>.delayed(const Duration(milliseconds: 100));
     
     return <String, dynamic>{
@@ -384,7 +372,6 @@ class VersionedMedicationDatabase {
 
   /// Valida referências médicas
   static Future<void> _validateMedicalReferences(Map<String, dynamic> data) async {
-    // Em produção, isso verificaria URLs, DOIs, etc.
     final references = data['references'] as Map<String, dynamic>? ?? <String, dynamic>{};
     
     for (final entry in references.entries) {
@@ -418,8 +405,6 @@ class VersionedMedicationDatabase {
   }
 
   static List<MedicationData> _getDefaultMedications() {
-    // Retorna lista básica de medicamentos do database original
-    // Para brevidade, incluindo apenas alguns essenciais
     return <MedicationData>[
       MedicationData(
         id: 'amoxicillin',
@@ -443,7 +428,6 @@ class VersionedMedicationDatabase {
         administrationRoutes: const <String>['Oral'],
         lastUpdated: DateTime(2024, 1, 1),
       ),
-      // Adicionar mais medicamentos conforme necessário
     ];
   }
 
@@ -488,6 +472,4 @@ class VersionedMedicationDatabase {
     };
   }
 }
-
-// A extensão foi removida para simplificar a implementação
 // Em produção, seria necessário implementar serialização completa

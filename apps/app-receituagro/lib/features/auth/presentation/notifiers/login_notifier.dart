@@ -13,8 +13,6 @@ part 'login_notifier.g.dart';
 @riverpod
 class LoginNotifier extends _$LoginNotifier {
   late final ReceitaAgroAuthNotifier _authNotifier;
-
-  // Text editing controllers - created once and managed by notifier
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late final TextEditingController _nameController;
@@ -22,27 +20,17 @@ class LoginNotifier extends _$LoginNotifier {
 
   @override
   LoginState build() {
-    // Get auth notifier from DI
     _authNotifier = di.sl<ReceitaAgroAuthNotifier>();
-
-    // Initialize controllers
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _nameController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-
-    // Dispose controllers when notifier is disposed
     ref.onDispose(() {
       _emailController.dispose();
       _passwordController.dispose();
       _nameController.dispose();
       _confirmPasswordController.dispose();
     });
-
-    // Listen to auth state changes (Riverpod will handle state updates automatically)
-    // No need to manually add/remove listeners with Riverpod
-
-    // Return initial state
     return LoginState.initial(
       emailController: _emailController,
       passwordController: _passwordController,
@@ -51,14 +39,10 @@ class LoginNotifier extends _$LoginNotifier {
     );
   }
 
-  // ===== GETTERS for controllers (to be used by widgets) =====
-
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
   TextEditingController get nameController => _nameController;
   TextEditingController get confirmPasswordController => _confirmPasswordController;
-
-  // ===== TOGGLE METHODS =====
 
   void toggleAuthMode() {
     state = state.copyWith(
@@ -97,8 +81,6 @@ class LoginNotifier extends _$LoginNotifier {
       isShowingRecoveryForm: false,
     );
   }
-
-  // ===== VALIDATION METHODS =====
 
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -140,8 +122,6 @@ class LoginNotifier extends _$LoginNotifier {
     return null;
   }
 
-  // ===== AUTHENTICATION METHODS =====
-
   /// Login with email and password
   Future<void> signInWithEmailAndSync() async {
     if (kDebugMode) {
@@ -150,8 +130,6 @@ class LoginNotifier extends _$LoginNotifier {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-
-    // Local validation
     final emailError = validateEmail(email);
     final passwordError = validatePassword(password);
 
@@ -188,8 +166,6 @@ class LoginNotifier extends _$LoginNotifier {
     final password = _passwordController.text;
     final name = _nameController.text.trim();
     final confirmPassword = _confirmPasswordController.text;
-
-    // Local validation
     final emailError = validateEmail(email);
     final passwordError = validatePassword(password);
     final nameError = validateName(name);
@@ -246,8 +222,6 @@ class LoginNotifier extends _$LoginNotifier {
       }
     }
   }
-
-  // ===== UTILITY METHODS =====
 
   void clearError() {
     _authNotifier.clearError();

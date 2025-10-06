@@ -158,8 +158,6 @@ class CachedImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget imageWidget;
-
-    // Determinar qual tipo de imagem carregar
     if (networkUrl != null) {
       imageWidget = _buildNetworkImage(context);
     } else if (imageFile != null) {
@@ -171,8 +169,6 @@ class CachedImageWidget extends StatelessWidget {
     } else {
       imageWidget = _buildErrorWidget(context);
     }
-
-    // Aplicar border radius se especificado
     if (borderRadius != null) {
       imageWidget = ClipRRect(
         borderRadius: borderRadius!,
@@ -201,8 +197,6 @@ class CachedImageWidget extends StatelessWidget {
   Widget _buildFileImage(BuildContext context, [File? file]) {
     final targetFile = file ?? imageFile!;
     final screenSize = MediaQuery.of(context).size;
-    
-    // Calcular cache dimensions baseado no contexto
     final cacheHeight = isFullScreen 
         ? (screenSize.height * 0.8).toInt() 
         : height?.toInt() ?? AppSizes.imagePreviewHeight.toInt();

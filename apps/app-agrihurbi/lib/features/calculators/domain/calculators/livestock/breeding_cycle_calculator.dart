@@ -156,39 +156,21 @@ class BreedingCycleCalculator extends CalculatorEntity {
       final double desiredConceptionRate = double.parse(inputs['desired_conception_rate'].toString());
       final int lactationPeriod = int.parse(inputs['lactation_period'].toString());
       final int voluntaryWaitingPeriod = int.parse(inputs['voluntary_waiting_period'].toString());
-
-      // Obter parâmetros da espécie
       final Map<String, dynamic> speciesData = _getSpeciesReproductiveData(animalSpecies);
-
-      // Verificar aptidão reprodutiva
       final Map<String, dynamic> reproductiveReadiness = _assessReproductiveReadiness(
         animalSpecies, femaleAgeMonths, femaleWeight, bodyConditionScore, speciesData);
-
-      // Calcular datas e intervalos
       final Map<String, dynamic> breedingDates = _calculateBreedingDates(
         lastBirthDateStr, targetBirthDateStr, voluntaryWaitingPeriod, speciesData);
-
-      // Calcular intervalo entre partos
       final Map<String, dynamic> calvingInterval = _calculateCalvingInterval(
         voluntaryWaitingPeriod, lactationPeriod, speciesData, breedingSystem);
-
-      // Planejamento reprodutivo do rebanho
       final Map<String, dynamic> herdPlanning = _calculateHerdReproductivePlanning(
         numberFemales, desiredConceptionRate, speciesData, breedingSeason);
-
-      // Cronograma reprodutivo
       final List<Map<String, dynamic>> reproductiveSchedule = _generateReproductiveSchedule(
         breedingDates, speciesData, breedingSystem);
-
-      // Indicadores reprodutivos
       final Map<String, dynamic> reproductiveIndicators = _calculateReproductiveIndicators(
         calvingInterval, desiredConceptionRate, lactationPeriod, speciesData);
-
-      // Análise econômica
       final Map<String, dynamic> economicAnalysis = _calculateEconomicAnalysis(
         herdPlanning, reproductiveIndicators, numberFemales, animalSpecies);
-
-      // Recomendações reprodutivas
       final List<String> recommendations = _generateReproductiveRecommendations(
         animalSpecies, reproductiveReadiness, breedingSystem, bodyConditionScore,
         reproductiveIndicators, breedingSeason);
@@ -386,8 +368,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
   ) {
     double readinessScore = 10.0;
     final List<String> limitations = [];
-
-    // Avaliação por idade
     final int optimalAge = speciesData['optimal_breeding_age_months'] as int;
     final int minAge = speciesData['sexual_maturity_months'] as int;
     
@@ -398,8 +378,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
       readinessScore -= 1.5;
       limitations.add('Idade abaixo da ideal para primeira cobertura');
     }
-
-    // Avaliação por peso
     final double minWeight = speciesData['minimum_breeding_weight_kg'] as double;
     if (weight < minWeight) {
       readinessScore -= 3.0;
@@ -408,8 +386,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
       readinessScore -= 1.0;
       limitations.add('Peso próximo ao mínimo - monitorar');
     }
-
-    // Avaliação por condição corporal
     if (bodyCondition < 2.5) {
       readinessScore -= 2.5;
       limitations.add('Condição corporal inadequada (muito magra)');
@@ -419,8 +395,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
     } else if (bodyCondition >= 3.0 && bodyCondition <= 3.5) {
       readinessScore += 0.5; // Bônus por condição ideal
     }
-
-    // Classificação final
     String classification;
     if (readinessScore >= 9.0) {
       classification = 'Excelente';
@@ -452,8 +426,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
     DateTime? expectedBirthDate;
 
     final int gestationDays = speciesData['gestation_days'] as int;
-
-    // Parse das datas
     if (lastBirthDateStr != null && lastBirthDateStr.isNotEmpty) {
       try {
         final parts = lastBirthDateStr.split('/');
@@ -465,7 +437,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
           );
         }
       } catch (e) {
-        // Ignorar erro de parsing
       }
     }
 
@@ -480,22 +451,15 @@ class BreedingCycleCalculator extends CalculatorEntity {
           );
         }
       } catch (e) {
-        // Ignorar erro de parsing
       }
     }
-
-    // Calcular datas
     if (targetBirthDate != null) {
-      // Calcular data de cobertura baseada na data desejada do parto
       breedingDate = targetBirthDate.subtract(Duration(days: gestationDays));
       expectedBirthDate = targetBirthDate;
     } else if (lastBirthDate != null) {
-      // Calcular próxima cobertura baseada no último parto
       breedingDate = lastBirthDate.add(Duration(days: voluntaryWaitingPeriod));
       expectedBirthDate = breedingDate.add(Duration(days: gestationDays));
     }
-
-    // Calcular dias até a próxima cobertura
     int? daysToBreeding;
     if (breedingDate != null) {
       daysToBreeding = breedingDate.difference(DateTime.now()).inDays;
@@ -518,24 +482,14 @@ class BreedingCycleCalculator extends CalculatorEntity {
     String breedingSystem,
   ) {
     final int gestationDays = speciesData['gestation_days'] as int;
-    
-    // Período de serviço estimado
     double averageConceptionRate = breedingSystem == 'Monta Natural' 
         ? speciesData['conception_rate_natural'] as double
         : speciesData['conception_rate_ai'] as double;
-
-    // Número médio de serviços necessários
     final double averageServices = 100.0 / averageConceptionRate;
     final int estrousCycleDays = speciesData['estrous_cycle_days'] as int;
-    
-    // Período de serviço = Período voluntário + (serviços - 1) × ciclo estral
     final int servicePeriodDays = voluntaryWaitingPeriod + 
         ((averageServices - 1) * estrousCycleDays).round();
-
-    // Intervalo entre partos
     final int totalIEPDays = gestationDays + servicePeriodDays;
-
-    // Partos por ano
     final double birthsPerYear = 365.0 / totalIEPDays;
 
     return {
@@ -554,17 +508,9 @@ class BreedingCycleCalculator extends CalculatorEntity {
     String breedingSeason,
   ) {
     final int gestationDays = speciesData['gestation_days'] as int;
-    
-    // Estimativa de fêmeas aptas à reprodução (85% do rebanho)
     final int breedingFemales = (numberFemales * 0.85).round();
-    
-    // Nascimentos esperados por ano
     final double expectedBirthsPerYear = breedingFemales * (365.0 / (gestationDays + 85));
-    
-    // Considerando taxa de concepção desejada
     final double adjustedBirths = expectedBirthsPerYear * (desiredConceptionRate / 100);
-    
-    // Distribuição por estação (se aplicável)
     Map<String, double> seasonalDistribution = {};
     switch (breedingSeason) {
       case 'Primavera/Verão':
@@ -612,8 +558,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
 
     if (breedingDateStr != null) {
       final DateTime breedingDate = DateTime.parse(breedingDateStr);
-      
-      // Eventos reprodutivos
       schedule.addAll([
         {
           'evento': 'Cobertura/IA',
@@ -665,19 +609,11 @@ class BreedingCycleCalculator extends CalculatorEntity {
   ) {
     final int totalIEP = calvingInterval['total_iep_days'] as int;
     final int gestationDays = speciesData['gestation_days'] as int;
-    
-    // Taxa de fertilidade baseada no IEP
     final double fertilityRate = (365.0 / totalIEP) * 100;
-    
-    // Eficiência reprodutiva
     final double reproductiveEfficiency = (gestationDays / totalIEP) * 100;
-    
-    // Dias não produtivos (período seco + período de serviço)
     final int servicePeriod = calvingInterval['service_period_days'] as int;
     final int dryPeriod = math.max(60, 365 - lactationPeriod); // Mínimo 60 dias
     final int nonproductiveDays = servicePeriod + dryPeriod;
-    
-    // Produtividade anual
     final double annualProductivity = (lactationPeriod / 365.0) * 100;
 
     return {
@@ -710,7 +646,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
     int numberFemales,
     String species,
   ) {
-    // Valores médios de venda por espécie (R\$)
     final Map<String, double> animalValues = {
       'Bovino': 1800.0,
       'Suíno': 400.0,
@@ -722,15 +657,9 @@ class BreedingCycleCalculator extends CalculatorEntity {
 
     final double valuePerAnimal = animalValues[species] ?? 1800.0;
     final double expectedBirths = herdPlanning['expected_births_per_year'] as double;
-    
-    // Receita anual com venda de animais
     final double annualRevenue = expectedBirths * valuePerAnimal * 0.8; // 80% vendidos
-    
-    // Custos reprodutivos estimados
     final double costPerFemale = species == 'Bovino' ? 300.0 : 150.0; // Anual
     final double totalReproductiveCosts = numberFemales * costPerFemale;
-    
-    // ROI reprodutivo
     final double reproductiveROI = totalReproductiveCosts > 0 
         ? ((annualRevenue - totalReproductiveCosts) / totalReproductiveCosts) * 100
         : 0.0;
@@ -753,8 +682,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
     String breedingSeason,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações por aptidão reprodutiva
     final double readinessScore = reproductiveReadiness['readiness_score'] as double;
     if (readinessScore < 6.0) {
       recommendations.add('Aptidão reprodutiva inadequada - melhorar nutrição e manejo.');
@@ -763,21 +690,15 @@ class BreedingCycleCalculator extends CalculatorEntity {
         recommendations.add('Atenção: $limitation');
       }
     }
-
-    // Recomendações por condição corporal
     if (bodyCondition < 2.5) {
       recommendations.add('Condição corporal baixa - aumentar nível nutricional.');
     } else if (bodyCondition > 4.0) {
       recommendations.add('Condição corporal excessiva - reduzir energia da dieta.');
     }
-
-    // Recomendações por eficiência reprodutiva
     final double efficiency = indicators['reproductive_efficiency'] as double;
     if (efficiency < 75.0) {
       recommendations.add('Eficiência reprodutiva baixa - revisar manejo reprodutivo.');
     }
-
-    // Recomendações por sistema de reprodução
     switch (breedingSystem) {
       case 'Inseminação Artificial':
         recommendations.add('IA: manter sêmen em nitrogênio líquido e detectar cio adequadamente.');
@@ -789,8 +710,6 @@ class BreedingCycleCalculator extends CalculatorEntity {
         recommendations.add('TE: selecionar doadoras e receptoras com rigor.');
         break;
     }
-
-    // Recomendações por espécie
     switch (species) {
       case 'Bovino':
         recommendations.add('Bovinos: monitorar parasitas e doenças reprodutivas (brucelose, IBR).');
@@ -803,13 +722,9 @@ class BreedingCycleCalculator extends CalculatorEntity {
         recommendations.add('Pequenos ruminantes: atenção ao efeito macho para indução do cio.');
         break;
     }
-
-    // Recomendações por estação de monta
     if (breedingSeason != 'Ano Todo') {
       recommendations.add('Estação de monta: concentrar partos na época mais favorável.');
     }
-
-    // Recomendações gerais
     recommendations.add('Manter registros reprodutivos atualizados para acompanhamento.');
     recommendations.add('Realizar diagnóstico de gestação 30-45 dias após cobertura.');
     recommendations.add('Monitorar saúde reprodutiva com exames periódicos.');

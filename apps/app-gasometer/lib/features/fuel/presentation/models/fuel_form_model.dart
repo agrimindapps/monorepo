@@ -212,8 +212,6 @@ class FuelFormModel extends Equatable {
   /// Aplica sanitização em todos os campos de texto para segurança
   FuelRecordEntity toFuelRecord() {
     final now = DateTime.now();
-
-    // Sanitizar campos de texto antes da persistência
     final sanitizedGasStationName =
         gasStationName.isEmpty
             ? null

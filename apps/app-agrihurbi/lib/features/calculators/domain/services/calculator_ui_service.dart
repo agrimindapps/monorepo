@@ -11,10 +11,6 @@ import '../entities/calculator_entity.dart';
 /// Reduz duplicação de código entre as páginas
 class CalculatorUIService {
   CalculatorUIService._();
-
-  // =====================================================================
-  // NAVIGATION HELPERS
-  // =====================================================================
   
   /// Navega para página de detalhes da calculadora
   static void navigateToCalculator(BuildContext context, String calculatorId) {
@@ -26,7 +22,6 @@ class CalculatorUIService {
     BuildContext context,
     CalculationHistory historyItem,
   ) {
-    // Implementar aplicação dos dados do histórico via provider
     context.push('/home/calculators/detail/${historyItem.calculatorId}');
   }
   
@@ -39,10 +34,6 @@ class CalculatorUIService {
   static void navigateToCategory(BuildContext context, String category) {
     context.push('/home/calculators/category/$category');
   }
-
-  // =====================================================================
-  // FORMATTING HELPERS
-  // =====================================================================
   
   /// Formata data relativa para exibição no histórico
   static String formatRelativeDate(DateTime date) {
@@ -68,8 +59,6 @@ class CalculatorUIService {
   static String formatCalculationSummary(CalculationHistory historyItem) {
     final result = historyItem.result;
     if (result.values.isEmpty) return 'Resultado calculado';
-    
-    // Buscar valor primário ou usar o primeiro
     final primaryValue = result.values.firstWhere(
       (v) => v.isPrimary,
       orElse: () => result.values.first,
@@ -81,7 +70,6 @@ class CalculatorUIService {
   /// Formata números para exibição
   static String _formatNumber(dynamic value) {
     if (value is double) {
-      // Remove casas decimais desnecessárias
       if (value == value.roundToDouble()) {
         return value.round().toString();
       } else {
@@ -116,10 +104,6 @@ class CalculatorUIService {
         return 'Calculadoras Agrícolas';
     }
   }
-  
-  // =====================================================================
-  // CATEGORY HELPERS
-  // =====================================================================
   
   /// Mapeia string para enum de categoria
   static CalculatorCategory? mapStringToCategory(String categoryString) {
@@ -182,10 +166,6 @@ class CalculatorUIService {
         return Icons.manage_accounts;
     }
   }
-
-  // =====================================================================
-  // VALIDATION HELPERS
-  // =====================================================================
   
   /// Valida se calculadora pode ser executada
   static bool canExecuteCalculator(CalculatorEntity calculator) {
@@ -202,10 +182,6 @@ class CalculatorUIService {
     }
     return 'Disponível';
   }
-  
-  // =====================================================================
-  // SEARCH HELPERS
-  // =====================================================================
   
   /// Extrai tags únicas de uma lista de calculadoras
   static List<String> extractAvailableTags(List<CalculatorEntity> calculators) {
@@ -226,10 +202,6 @@ class CalculatorUIService {
            calculator.category.displayName.toLowerCase().contains(lowerQuery) ||
            calculator.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
   }
-  
-  // =====================================================================
-  // FEEDBACK HELPERS
-  // =====================================================================
   
   /// Mostra snackbar de sucesso
   static void showSuccessMessage(BuildContext context, String message) {

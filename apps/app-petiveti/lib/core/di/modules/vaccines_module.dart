@@ -28,7 +28,6 @@ import '../di_module.dart';
 class VaccinesModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
-    // Data sources
     getIt.registerLazySingleton<VaccineLocalDataSource>(
       () => VaccineLocalDataSourceImpl(getIt()),
     );
@@ -39,16 +38,12 @@ class VaccinesModule implements DIModule {
         getIt<FirebaseService>().currentUserId ?? 'temp_user_id',
       ),
     );
-
-    // Repository
     getIt.registerLazySingleton<VaccineRepository>(
       () => VaccineRepositoryImpl(
         localDataSource: getIt<VaccineLocalDataSource>(),
         remoteDataSource: getIt<VaccineRemoteDataSource>(),
       ),
     );
-
-    // Use cases
     getIt.registerLazySingleton<GetVaccines>(
       () => GetVaccines(getIt<VaccineRepository>()),
     );

@@ -20,21 +20,17 @@ abstract class MaintenanceMapper {
       cost: model.valor,
       serviceDate: DateTime.fromMillisecondsSinceEpoch(model.data),
       odometer: model.odometro.toDouble(),
-      // Workshop info - not available in current model, but prepared for future
       workshopName: null,
       workshopPhone: null,
       workshopAddress: null,
-      // Next service info
       nextServiceDate: model.proximaRevisao != null 
           ? DateTime.fromMillisecondsSinceEpoch(model.proximaRevisao!) 
           : null,
       nextServiceOdometer: null, // Not available in current model
-      // Attachments - not available in current model
       photosPaths: const [],
       invoicesPaths: const [],
       parts: const {},
       notes: null, // Could store additional info from description if needed
-      // System metadata
       createdAt: model.createdAt ?? DateTime.now(),
       updatedAt: model.updatedAt ?? DateTime.now(),
       metadata: _buildMetadata(model),
@@ -86,8 +82,6 @@ abstract class MaintenanceMapper {
     );
   }
 
-  // Private helper methods
-
   /// Map string type to MaintenanceType enum
   static MaintenanceType _mapStringToMaintenanceType(String type) {
     switch (type.toLowerCase().trim()) {
@@ -101,7 +95,6 @@ abstract class MaintenanceMapper {
       case 'emergencial':
         return MaintenanceType.emergency;
       default:
-        // Default to preventive for unknown types
         return MaintenanceType.preventive;
     }
   }
@@ -127,17 +120,13 @@ abstract class MaintenanceMapper {
 
   /// Generate a meaningful title from type and description
   static String _generateTitleFromTypeAndDescription(String tipo, String descricao) {
-    // If description is meaningful, use it
     if (descricao.trim().isNotEmpty && descricao.trim().length > 3) {
-      // Limit title length and ensure it's meaningful
       String title = descricao.trim();
       if (title.length > 50) {
         title = '${title.substring(0, 47)}...';
       }
       return title;
     }
-    
-    // Otherwise use type as title
     return tipo.trim().isNotEmpty ? tipo : 'Manutenção';
   }
 
@@ -237,7 +226,6 @@ abstract class MaintenanceMapper {
       }
       return modelToEntity(model);
     } catch (e) {
-      // Log error in production
       if (kDebugMode) {
         print('Error converting model to entity: $e');
       }
@@ -253,7 +241,6 @@ abstract class MaintenanceMapper {
       }
       return entityToModel(entity);
     } catch (e) {
-      // Log error in production
       if (kDebugMode) {
         print('Error converting entity to model: $e');
       }

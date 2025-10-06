@@ -50,8 +50,6 @@ class AppointmentRemoteDataSourceImpl implements AppointmentRemoteDataSource {
           .add(appointment.toMap());
 
       final createdAppointment = appointment.copyWith(id: docRef.id);
-      
-      // Update the document with the correct ID
       await docRef.update({'id': docRef.id});
       
       return createdAppointment;

@@ -5,54 +5,35 @@ import 'package:flutter/services.dart';
 /// Design tokens específicos para acessibilidade seguindo WCAG 2.1
 class AccessibilityTokens {
   AccessibilityTokens._();
-
-  // WCAG Contrast Ratios
   static const double _normalTextContrast = 4.5;
   static const double _largeTextContrast = 3.0;
-
-  // Touch Target Sizes (Material Design + WCAG)
   static const double minTouchTargetSize = 44.0;
   static const double recommendedTouchTargetSize = 48.0;
   static const double largeTouchTargetSize = 56.0;
-
-  // Spacing for touch targets
   static const double minTouchSpacing = 8.0;
   static const double recommendedTouchSpacing = 16.0;
-
-  // Font Sizes (scaled for accessibility)
   static const double minReadableTextSize = 16.0;
   static const double largeTextThreshold = 18.0;
   static const double maxScaleFactor = 3.0;
-
-  // Animation Durations (respecting reduced motion)
   static const Duration quickAnimation = Duration(milliseconds: 150);
   static const Duration standardAnimation = Duration(milliseconds: 300);
   static const Duration slowAnimation = Duration(milliseconds: 500);
   static const Duration noAnimation = Duration.zero;
-
-  // Focus Management
   static const double focusStrokeWidth = 2.0;
   static const Color focusColor = Colors.blue;
   static const double focusBorderRadius = 4.0;
-
-  // Semantic Labels (Portuguese)
   static const Map<String, String> semanticLabels = {
-    // Navigation
     'back_button': 'Voltar para a tela anterior',
     'menu_button': 'Abrir menu de navegação',
     'close_button': 'Fechar',
     'next_button': 'Próximo',
     'previous_button': 'Anterior',
-
-    // Actions
     'save_button': 'Salvar alterações',
     'delete_button': 'Excluir item',
     'edit_button': 'Editar',
     'complete_button': 'Marcar como concluído',
     'add_button': 'Adicionar novo item',
     'refresh_button': 'Atualizar conteúdo',
-
-    // Forms
     'required_field': 'Campo obrigatório',
     'optional_field': 'Campo opcional',
     'password_field': 'Campo de senha',
@@ -60,19 +41,13 @@ class AccessibilityTokens {
     'search_field': 'Campo de pesquisa',
     'show_password': 'Mostrar senha',
     'hide_password': 'Ocultar senha',
-
-    // Loading states
     'loading': 'Carregando conteúdo',
     'refreshing': 'Atualizando conteúdo',
     'processing': 'Processando solicitação',
-
-    // Content
     'image': 'Imagem',
     'plant_image': 'Foto da planta',
     'profile_image': 'Foto do perfil',
     'empty_list': 'Lista vazia',
-
-    // Plants specific
     'plant_card': 'Cartão da planta',
     'task_card': 'Cartão de tarefa',
     'watering_task': 'Tarefa de rega',
@@ -80,8 +55,6 @@ class AccessibilityTokens {
     'pruning_task': 'Tarefa de poda',
     'care_reminder': 'Lembrete de cuidado',
   };
-
-  // Screen Reader Announcements
   static const Map<String, String> announcements = {
     'task_completed': 'Tarefa marcada como concluída',
     'plant_added': 'Nova planta adicionada',
@@ -91,8 +64,6 @@ class AccessibilityTokens {
     'network_error': 'Erro de conexão com a internet',
     'validation_error': 'Por favor, corrija os campos com erro',
   };
-
-  // Haptic Feedback Patterns
   static const Map<String, String> hapticPatterns = {
     'light': 'light',
     'medium': 'medium',
@@ -131,8 +102,6 @@ class AccessibilityTokens {
     if (isContrastCompliant(color, background, isLargeText: isLargeText)) {
       return color;
     }
-
-    // Se o contraste não é adequado, retorna preto ou branco baseado no background
     final backgroundLuminance = background.computeLuminance();
     return backgroundLuminance > 0.5 ? Colors.black : Colors.white;
   }
@@ -145,8 +114,6 @@ class AccessibilityTokens {
     final mediaQuery = MediaQuery.of(context);
     final textScaleFactor = mediaQuery.textScaler.scale(1.0);
     final scaledSize = baseFontSize * textScaleFactor;
-
-    // Garante um tamanho mínimo legível
     const minSize = minReadableTextSize;
     final maxSize = baseFontSize * maxScaleFactor;
 
@@ -253,8 +220,6 @@ extension AccessibilityExtension on Widget {
 /// Mixin para gerenciar focus nodes em StatefulWidgets com estabilidade de layout
 mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
   final Map<String, FocusNode> _focusNodes = {};
-
-  // Layout stability tracking
   bool _layoutStable = false;
   int _layoutStabilityChecks = 0;
   static const int _maxStabilityChecks = 3;
@@ -282,20 +247,16 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
       await Future<void>.delayed(_stabilityCheckDelay);
 
       if (!mounted) return false;
-
-      // Check if layout is complete by verifying RenderObject tree
       final renderObject = context.findRenderObject();
       if (renderObject != null &&
           renderObject.attached &&
           !renderObject.debugNeedsLayout) {
-        // Check if it's a RenderBox with size
         if (renderObject is RenderBox &&
             renderObject.hasSize &&
             renderObject.size != Size.zero) {
           _layoutStable = true;
           return true;
         }
-        // For non-RenderBox objects, assume stable if attached and laid out
         else if (renderObject is! RenderBox) {
           _layoutStable = true;
           return true;
@@ -304,8 +265,6 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
 
       _layoutStabilityChecks++;
     }
-
-    // Fallback: assume stable after max checks
     _layoutStable = true;
     return true;
   }
@@ -318,12 +277,10 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
 
   void requestFocus(String key) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Critical: Wait for layout stability before focus operations
       if (mounted && await _waitForLayoutStability()) {
         final node = _focusNodes[key];
         if (node != null && mounted && node.canRequestFocus) {
           try {
-            // Additional check: ensure widget is still laid out
             final renderObject = context.findRenderObject();
             if (renderObject != null &&
                 renderObject.attached &&
@@ -331,7 +288,6 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
               node.requestFocus();
             }
           } catch (e) {
-            // Silently handle focus errors in web environment
             debugPrint('Focus request failed for $key: $e');
           }
         }
@@ -344,14 +300,12 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
       final node = _focusNodes[key];
       if (node != null && mounted && node.hasFocus) {
         try {
-          // Check layout before unfocus to prevent race conditions
           final renderObject = context.findRenderObject();
           if (renderObject == null || !renderObject.attached) {
             return; // Skip unfocus if render object is not attached
           }
           node.unfocus();
         } catch (e) {
-          // Silently handle unfocus errors in web environment
           debugPrint('Unfocus failed for $key: $e');
         }
       }
@@ -360,12 +314,10 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
 
   void nextFocus(String currentKey, String nextKey) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Critical: Enhanced layout stability checks for focus traversal
       if (mounted && await _waitForLayoutStability()) {
         final nextNode = _focusNodes[nextKey];
         if (nextNode != null && mounted && nextNode.canRequestFocus) {
           try {
-            // Verify layout state before focus traversal
             final renderObject = context.findRenderObject();
             if (renderObject != null &&
                 renderObject.attached &&
@@ -373,7 +325,6 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
               nextNode.requestFocus();
             }
           } catch (e) {
-            // Silently handle focus traversal errors in web environment
             debugPrint(
               'Focus traversal failed from $currentKey to $nextKey: $e',
             );
@@ -405,8 +356,6 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
             }
           }
         }
-
-        // Retry if we haven't exceeded max attempts
         if (attempt < maxRetries && mounted) {
           _resetLayoutStability();
           Future.delayed(const Duration(milliseconds: 50), () {
@@ -421,7 +370,6 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
 
   @override
   void dispose() {
-    // Critical: Safe disposal of focus nodes to prevent race conditions
     for (final node in _focusNodes.values) {
       try {
         if (node.hasFocus) {
@@ -429,7 +377,6 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
         }
         node.dispose();
       } catch (e) {
-        // Silently handle disposal errors
         debugPrint('Focus node disposal error: $e');
       }
     }

@@ -35,8 +35,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual via stream (primeiro valor)
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -61,8 +59,6 @@ class DeviceManagementService {
           if (kDebugMode) {
             debugPrint('✅ DeviceManagement: Found ${devices.length} devices');
           }
-          
-          // Log analytics event
           unawaited(_analyticsService.logEvent(
             'device_list_viewed',
             parameters: {
@@ -95,8 +91,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -107,21 +101,17 @@ class DeviceManagementService {
       if (kDebugMode) {
         debugPrint('🔄 DeviceManagement: Validating device ${device.uuid} for user ${user.id}');
       }
-
-      // Primeiro verifica se pode adicionar mais dispositivos
       final canAddResult = await _deviceRepository.canAddMoreDevices(user.id);
       
       return await canAddResult.fold(
         (failure) async => Left(failure),
         (canAdd) async {
-          // Verifica se o dispositivo já existe
           final existingResult = await _deviceRepository.getDeviceByUuid(device.uuid);
           
           return await existingResult.fold(
             (failure) async => Left(failure),
             (existingDevice) async {
               if (existingDevice != null) {
-                // Dispositivo já existe, apenas atualiza atividade
                 if (kDebugMode) {
                   debugPrint('📱 DeviceManagement: Device exists, updating activity');
                 }
@@ -130,8 +120,6 @@ class DeviceManagementService {
                   userId: user.id,
                   deviceUuid: device.uuid,
                 );
-                
-                // Log analytics
                 unawaited(_analyticsService.logEvent(
                   'device_activity_updated',
                   parameters: {
@@ -142,14 +130,10 @@ class DeviceManagementService {
                 
                 return updateResult;
               }
-              
-              // Dispositivo novo
               if (!canAdd) {
                 if (kDebugMode) {
                   debugPrint('❌ DeviceManagement: Device limit exceeded');
                 }
-                
-                // Log analytics
                 unawaited(_analyticsService.logEvent(
                   'device_limit_exceeded',
                   parameters: {
@@ -165,8 +149,6 @@ class DeviceManagementService {
                   ),
                 );
               }
-              
-              // Valida via Firebase Cloud Function
               final validationResult = await _firebaseDeviceService.validateDevice(
                 userId: user.id,
                 device: device,
@@ -177,8 +159,6 @@ class DeviceManagementService {
                   if (kDebugMode) {
                     debugPrint('❌ DeviceManagement: Firebase validation failed - $failure');
                   }
-                  
-                  // Log analytics
                   unawaited(_analyticsService.logEvent(
                     'device_validation_failed',
                     parameters: {
@@ -193,8 +173,6 @@ class DeviceManagementService {
                   if (kDebugMode) {
                     debugPrint('✅ DeviceManagement: Device validated successfully');
                   }
-                  
-                  // Log analytics
                   unawaited(_analyticsService.logEvent(
                     'device_validated',
                     parameters: {
@@ -233,8 +211,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -245,8 +221,6 @@ class DeviceManagementService {
       if (kDebugMode) {
         debugPrint('🔄 DeviceManagement: Revoking device $deviceUuid for user ${user.id}');
       }
-
-      // Revoga via Firebase Cloud Function
       final revokeResult = await _firebaseDeviceService.revokeDevice(
         userId: user.id,
         deviceUuid: deviceUuid,
@@ -257,8 +231,6 @@ class DeviceManagementService {
           if (kDebugMode) {
             debugPrint('❌ DeviceManagement: Failed to revoke device - $failure');
           }
-          
-          // Log analytics
           unawaited(_analyticsService.logEvent(
             'device_revoke_failed',
             parameters: {
@@ -273,8 +245,6 @@ class DeviceManagementService {
           if (kDebugMode) {
             debugPrint('✅ DeviceManagement: Device revoked successfully');
           }
-          
-          // Log analytics
           unawaited(_analyticsService.logEvent(
             'device_revoked',
             parameters: {
@@ -306,8 +276,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -334,8 +302,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -348,7 +314,6 @@ class DeviceManagementService {
       result.fold(
         (failure) => null,
         (stats) {
-          // Log analytics
           unawaited(_analyticsService.logEvent(
             'device_statistics_viewed',
             parameters: {
@@ -378,8 +343,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -406,8 +369,6 @@ class DeviceManagementService {
           if (kDebugMode) {
             debugPrint('✅ DeviceManagement: All other devices revoked');
           }
-          
-          // Log analytics
           unawaited(_analyticsService.logEvent(
             'all_other_devices_revoked',
             parameters: {
@@ -439,8 +400,6 @@ class DeviceManagementService {
       if (!isLoggedIn) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // Obtém o usuário atual
       final userStream = _authService.currentUser;
       final user = await userStream.first;
       
@@ -459,8 +418,6 @@ class DeviceManagementService {
           if (kDebugMode) {
             debugPrint('✅ DeviceManagement: Cleaned up ${removedDevices.length} inactive devices');
           }
-          
-          // Log analytics
           unawaited(_analyticsService.logEvent(
             'inactive_devices_cleaned',
             parameters: {

@@ -18,7 +18,6 @@ class FavoritosHiveRepositoryService {
   Future<List<FavoritoDefensivoModel>> getFavoritosDefensivos() async {
     try {
       await _coreRepository.getFavoritosByTipoAsync('defensivos');
-      // Converter para modelo específico se necessário
       return [];
     } catch (e) {
       return [];
@@ -28,7 +27,6 @@ class FavoritosHiveRepositoryService {
   Future<List<FavoritoPragaModel>> getFavoritosPragas() async {
     try {
       await _coreRepository.getFavoritosByTipoAsync('pragas');
-      // Converter para modelo específico se necessário
       return [];
     } catch (e) {
       return [];
@@ -38,7 +36,6 @@ class FavoritosHiveRepositoryService {
   Future<List<FavoritoDiagnosticoModel>> getFavoritosDiagnosticos() async {
     try {
       await _coreRepository.getFavoritosByTipoAsync('diagnosticos');
-      // Converter para modelo específico se necessário
       return [];
     } catch (e) {
       return [];

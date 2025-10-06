@@ -77,13 +77,9 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading>
 
   /// Monitora automaticamente o estado da sincronização do PetiVeti
   void _startListeningToSync() {
-    // Verificar periodicamente se a sincronização terminou
     _syncSubscription = Stream<void>.periodic(const Duration(milliseconds: 500))
         .listen((_) {
       if (!mounted) return;
-      
-      // Para app-petiveti com Riverpod, assumimos que não há sincronização complexa inicialmente
-      // Vai fechar automaticamente após um delay simulado
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           _autoClose();
@@ -123,7 +119,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Ícone temático de pet com animação
               AnimatedBuilder(
                 animation: _pulseAnimation,
                 builder: (context, child) {
@@ -145,8 +140,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading>
                 },
               ),
               const SizedBox(height: 24),
-              
-              // Loading indicator circular com cor do tema pet
               const SizedBox(
                 width: 28,
                 height: 28,
@@ -156,8 +149,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading>
                 ),
               ),
               const SizedBox(height: 20),
-              
-              // Mensagem dinâmica
               Text(
                 _currentMessage,
                 style: const TextStyle(
@@ -168,8 +159,6 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              
-              // Submensagem contextual pet
               const Text(
                 'Seus dados dos pets estarão atualizados em instantes',
                 style: TextStyle(

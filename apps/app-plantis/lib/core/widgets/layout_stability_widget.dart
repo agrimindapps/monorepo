@@ -34,8 +34,6 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
   Size? _lastSize;
   bool _isLayoutStable = false;
   bool _isResizing = false;
-
-  // Throttling for resize events
   Timer? _resizeThrottleTimer;
   static const Duration _resizeThrottleDuration = Duration(milliseconds: 16);
 
@@ -43,8 +41,6 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
-    // Initial stability check after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLayoutStability();
     });
@@ -69,8 +65,6 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
       _onResizeEvent();
       return;
     }
-
-    // Throttle resize events to prevent excessive rebuilds
     _resizeThrottleTimer?.cancel();
     _resizeThrottleTimer = Timer(_resizeThrottleDuration, () {
       if (mounted) {
@@ -86,8 +80,6 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
     });
 
     widget.onLayoutChanged?.call();
-
-    // Reset stability after resize
     _stabilityTimer?.cancel();
     _stabilityTimer = Timer(widget.stabilityDelay, () {
       if (mounted) {
@@ -107,8 +99,6 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
       if (renderObject == null) return;
 
       final currentSize = renderObject.hasSize ? renderObject.size : Size.zero;
-
-      // Check if size has stabilized
       if (_lastSize != null &&
           _lastSize == currentSize &&
           renderObject.attached &&
@@ -131,8 +121,6 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
         }
 
         _lastSize = currentSize;
-
-        // Recheck after next frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             _checkLayoutStability();
@@ -145,11 +133,8 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
   @override
   Widget build(BuildContext context) {
     Widget child = widget.child;
-
-    // Add layout detection
     child = LayoutBuilder(
       builder: (context, constraints) {
-        // Trigger layout change detection when constraints change
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             _checkLayoutStability();
@@ -159,13 +144,9 @@ class _LayoutStabilityWidgetState extends State<LayoutStabilityWidget>
         return child;
       },
     );
-
-    // Add RepaintBoundary for isolation during resize
     if (widget.enableRepaintBoundary) {
       child = RepaintBoundary(child: child);
     }
-
-    // Add resize indicator for debugging
     if (widget.debugLabel != null && _isResizing) {
       child = Stack(
         children: [
@@ -275,7 +256,6 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
           checks++;
           Timer(const Duration(milliseconds: 16), checkStability);
         } else {
-          // Fallback: assume stable after max checks
           _layoutStable = true;
           if (!completer.isCompleted) completer.complete(true);
         }
@@ -283,8 +263,6 @@ mixin LayoutStabilityMixin<T extends StatefulWidget> on State<T> {
     }
 
     checkStability();
-
-    // Timeout fallback
     Timer(timeout, () {
       if (!completer.isCompleted) {
         _layoutStable = true; // Assume stable on timeout

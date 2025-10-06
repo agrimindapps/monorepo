@@ -22,20 +22,13 @@ class ModularInjectionContainer {
 
   /// Initialize all dependencies using modular approach
   static Future<void> init() async {
-    // Initialize Hive with all adapters and boxes
     await HiveService.instance.init();
-
-    // Initialize injectable dependencies (includes SharedPreferences, Firebase services, etc.)
     configureDependencies();
-
-    // Register additional modules in dependency order
     final modules = _createModules();
 
     for (final module in modules) {
       await module.register(_getIt);
     }
-
-    // Initialize logging service after all dependencies are registered
     await CoreModule.initializeLoggingService(_getIt);
   }
 
@@ -50,10 +43,6 @@ class ModularInjectionContainer {
       ExpensesModule(), // Expenses feature
       MedicationsModule(), // Medications feature
       VaccinesModule(), // Vaccines feature
-      // TODO: Add more modules as features are migrated
-      // CalculatorsModule(),
-      // AppointmentsModule(),
-      // etc.
     ];
   }
 

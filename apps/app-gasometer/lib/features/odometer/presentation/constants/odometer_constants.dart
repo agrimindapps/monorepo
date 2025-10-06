@@ -8,9 +8,6 @@ import 'package:flutter/material.dart';
 /// - Text labels and messages
 /// - Date and time constraints
 class OdometerConstants {
-  // ===========================================
-  // VALIDATION AND BUSINESS RULES
-  // ===========================================
 
   /// Validation constraints
   static const int maxDescriptionLength = 255;
@@ -42,10 +39,6 @@ class OdometerConstants {
     return description.length <= maxDescriptionLength;
   }
 
-  // ===========================================
-  // VALIDATION MESSAGES
-  // ===========================================
-
   static const Map<String, String> validationMessages = {
     'campoObrigatorio': 'Campo obrigatório',
     'valorInvalido': 'Valor inválido',
@@ -57,10 +50,6 @@ class OdometerConstants {
     'tipoObrigatorio': 'Tipo de registro é obrigatório',
     'descricaoLonga': 'Descrição muito longa',
   };
-
-  // ===========================================
-  // FIELD LABELS AND HINTS
-  // ===========================================
 
   static const Map<String, String> fieldLabels = {
     'odometro': 'Odômetro',
@@ -75,10 +64,6 @@ class OdometerConstants {
     'descricao': 'Descreva o motivo do registro (Opcional)',
     'tipoRegistro': 'Selecione o tipo de registro',
   };
-
-  // ===========================================
-  // SECTION TITLES AND ICONS
-  // ===========================================
 
   static const Map<String, String> sectionTitles = {
     'informacoesBasicas': 'Informações Básicas',
@@ -96,10 +81,6 @@ class OdometerConstants {
     'expandMore': Icons.expand_more,
   };
 
-  // ===========================================
-  // DATE AND TIME CONFIGURATION
-  // ===========================================
-
   static const Map<String, String> dateTimeLabels = {
     'cancelar': 'Cancelar',
     'confirmar': 'Confirmar',
@@ -108,10 +89,6 @@ class OdometerConstants {
     'hora': 'Hora',
     'minuto': 'Minuto',
   };
-
-  // ===========================================
-  // DIALOG MESSAGES
-  // ===========================================
 
   static const Map<String, String> dialogMessages = {
     'titulo': 'Odômetro',
@@ -125,18 +102,10 @@ class OdometerConstants {
     'salvar': 'Salvar',
   };
 
-  // ===========================================
-  // UNITS AND SUFFIXES
-  // ===========================================
-
   static const Map<String, String> units = {
     'odometro': 'km',
     'quilometros': 'km',
   };
-
-  // ===========================================
-  // UI DIMENSIONS AND STYLING
-  // ===========================================
 
   static const Map<String, double> dimensions = {
     'cardElevation': 0.0,
@@ -154,19 +123,11 @@ class OdometerConstants {
     'dropdownMaxHeight': 200.0,
   };
 
-  // ===========================================
-  // SUCCESS MESSAGES
-  // ===========================================
-
   static const Map<String, String> successMessages = {
     'cadastroSucesso': 'Registro de odômetro cadastrado com sucesso!',
     'edicaoSucesso': 'Registro de odômetro atualizado com sucesso!',
     'exclusaoSucesso': 'Registro de odômetro excluído com sucesso!',
   };
-
-  // ===========================================
-  // ERROR MESSAGES
-  // ===========================================
 
   static const Map<String, String> errorMessages = {
     'carregarVeiculo': 'Erro ao carregar dados do veículo',
@@ -178,10 +139,6 @@ class OdometerConstants {
     'timeoutCarregamento': 'Tempo limite excedido ao carregar dados',
     'networkError': 'Erro de conexão. Verifique sua internet.',
   };
-
-  // ===========================================
-  // FORM CONFIGURATION
-  // ===========================================
 
   static const Map<String, dynamic> formConfig = {
     'autovalidateMode': true,

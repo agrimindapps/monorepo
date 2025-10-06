@@ -52,8 +52,6 @@ class FinancialValidator {
   static FinancialValidationResult validateFuelSupply(FuelSupplyModel fuel) {
     final errors = <String>[];
     final warnings = <String>[];
-
-    // Required fields validation
     if (fuel.vehicleId.isEmpty) {
       errors.add('Veículo é obrigatório');
     }
@@ -63,19 +61,13 @@ class FinancialValidator {
     } else {
       final fuelDate = DateTime.fromMillisecondsSinceEpoch(fuel.date);
       final now = DateTime.now();
-
-      // Check if date is in future
       if (fuelDate.isAfter(now.add(const Duration(days: 1)))) {
         errors.add('Data não pode ser no futuro');
       }
-
-      // Check if date is too old (more than 10 years)
       if (fuelDate.isBefore(now.subtract(const Duration(days: 3650)))) {
         warnings.add('Data muito antiga (mais de 10 anos)');
       }
     }
-
-    // Monetary values validation
     if (fuel.totalPrice < 0) {
       errors.add('Valor total não pode ser negativo');
     } else if (fuel.totalPrice == 0) {
@@ -83,8 +75,6 @@ class FinancialValidator {
     } else if (fuel.totalPrice > _maxReasonableValue) {
       warnings.add('Valor total muito alto (R\$ ${fuel.totalPrice.toStringAsFixed(2)})');
     }
-
-    // Liters validation
     if (fuel.liters < 0) {
       errors.add('Litros não pode ser negativo');
     } else if (fuel.liters == 0) {
@@ -92,8 +82,6 @@ class FinancialValidator {
     } else if (fuel.liters > _maxReasonableLiters) {
       warnings.add('Quantidade de litros muito alta (${fuel.liters.toStringAsFixed(2)}L)');
     }
-
-    // Price per liter validation
     if (fuel.pricePerLiter < 0) {
       errors.add('Preço por litro não pode ser negativo');
     } else if (fuel.pricePerLiter == 0) {
@@ -106,19 +94,13 @@ class FinancialValidator {
         warnings.add('Preço por litro muito alto (R\$ ${fuel.pricePerLiter.toStringAsFixed(2)})');
       }
     }
-
-    // Cross-validation: total price vs liters * price per liter
     if (fuel.liters > 0 && fuel.pricePerLiter > 0) {
       final calculatedTotal = fuel.liters * fuel.pricePerLiter;
       final difference = (fuel.totalPrice - calculatedTotal).abs();
-
-      // Allow 1% tolerance for rounding
       if (difference > fuel.totalPrice * 0.01) {
         warnings.add('Inconsistência: Total calculado (R\$ ${calculatedTotal.toStringAsFixed(2)}) difere do total informado');
       }
     }
-
-    // Odometer validation
     if (fuel.odometer < 0) {
       errors.add('Odômetro não pode ser negativo');
     } else if (fuel.odometer > _maxReasonableOdometer) {
@@ -139,8 +121,6 @@ class FinancialValidator {
   static FinancialValidationResult validateExpense(ExpenseModel expense) {
     final errors = <String>[];
     final warnings = <String>[];
-
-    // Required fields validation
     if (expense.veiculoId.isEmpty) {
       errors.add('Veículo é obrigatório');
     }
@@ -158,19 +138,13 @@ class FinancialValidator {
     } else {
       final expenseDate = DateTime.fromMillisecondsSinceEpoch(expense.data);
       final now = DateTime.now();
-
-      // Check if date is in future
       if (expenseDate.isAfter(now.add(const Duration(days: 1)))) {
         errors.add('Data não pode ser no futuro');
       }
-
-      // Check if date is too old (more than 10 years)
       if (expenseDate.isBefore(now.subtract(const Duration(days: 3650)))) {
         warnings.add('Data muito antiga (mais de 10 anos)');
       }
     }
-
-    // Monetary values validation
     if (expense.valor < 0) {
       errors.add('Valor não pode ser negativo');
     } else if (expense.valor == 0) {
@@ -178,8 +152,6 @@ class FinancialValidator {
     } else if (expense.valor > _maxReasonableValue) {
       warnings.add('Valor muito alto (R\$ ${expense.valor.toStringAsFixed(2)})');
     }
-
-    // Odometer validation (if provided)
     if (expense.odometro < 0) {
       errors.add('Odômetro não pode ser negativo');
     } else if (expense.odometro > _maxReasonableOdometer) {
@@ -203,8 +175,6 @@ class FinancialValidator {
     } else if (entity is ExpenseModel) {
       return validateExpense(entity);
     }
-
-    // For non-financial entities, just basic validation
     final errors = <String>[];
 
     if (entity.id.isEmpty) {
@@ -260,14 +230,12 @@ class FinancialValidator {
   /// Get estimated importance level for financial data
   static int getFinancialImportanceLevel(BaseSyncEntity entity) {
     if (entity is FuelSupplyModel) {
-      // Higher importance for expensive fuel purchases
       if (entity.totalPrice > 500) return 3; // High
       if (entity.totalPrice > 200) return 2; // Medium
       return 1; // Low
     }
 
     if (entity is ExpenseModel) {
-      // Higher importance for expensive maintenance
       if (entity.valor > 1000) return 3; // High
       if (entity.valor > 500) return 2; // Medium
       return 1; // Low

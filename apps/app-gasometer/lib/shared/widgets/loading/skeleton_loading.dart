@@ -150,22 +150,17 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título da página
           _buildSkeletonBox(
             width: 120,
             height: LoadingDesignTokens.skeletonHeightLg,
             colors: colors,
           ),
           const SizedBox(height: LoadingDesignTokens.spacingLg),
-
-          // Lista de veículos
           ...List.generate(widget.itemCount, (index) => 
             _buildVehicleCard(colors, index)
           ),
 
           const SizedBox(height: LoadingDesignTokens.spacingLg),
-
-          // Botão adicionar
           _buildSkeletonBox(
             width: double.infinity,
             height: 48,
@@ -190,7 +185,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
           padding: const EdgeInsets.all(LoadingDesignTokens.spacingMd),
           child: Row(
             children: [
-              // Avatar do veículo
               _buildSkeletonBox(
                 width: LoadingDesignTokens.skeletonAvatarSize,
                 height: LoadingDesignTokens.skeletonAvatarSize,
@@ -199,13 +193,10 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
               ),
               
               const SizedBox(width: LoadingDesignTokens.spacingMd),
-              
-              // Informações do veículo
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nome do veículo
                     _buildSkeletonBox(
                       width: 140 + (index * 20.0),
                       height: LoadingDesignTokens.skeletonHeight,
@@ -213,8 +204,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                     ),
                     
                     const SizedBox(height: LoadingDesignTokens.spacingSm),
-                    
-                    // Modelo/Ano
                     _buildSkeletonBox(
                       width: 100,
                       height: LoadingDesignTokens.skeletonHeightSm,
@@ -223,8 +212,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
                   ],
                 ),
               ),
-              
-              // Ações
               Column(
                 children: [
                   _buildSkeletonBox(
@@ -343,7 +330,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
       padding: widget.padding ?? const EdgeInsets.all(LoadingDesignTokens.spacingMd),
       child: Column(
         children: [
-          // Avatar grande
           _buildSkeletonBox(
             width: 80,
             height: 80,
@@ -352,8 +338,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
           ),
           
           const SizedBox(height: LoadingDesignTokens.spacingMd),
-          
-          // Nome
           _buildSkeletonBox(
             width: 160,
             height: LoadingDesignTokens.skeletonHeightLg,
@@ -361,8 +345,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
           ),
           
           const SizedBox(height: LoadingDesignTokens.spacingSm),
-          
-          // Email
           _buildSkeletonBox(
             width: 200,
             height: LoadingDesignTokens.skeletonHeight,
@@ -370,8 +352,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
           ),
           
           const SizedBox(height: LoadingDesignTokens.spacingLg),
-          
-          // Informações adicionais
           ...List.generate(3, (index) => 
             Container(
               margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
@@ -406,7 +386,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cards de estatísticas
           Row(
             children: [
               Expanded(
@@ -420,8 +399,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
           ),
           
           const SizedBox(height: LoadingDesignTokens.spacingLg),
-          
-          // Título de seção
           _buildSkeletonBox(
             width: 140,
             height: LoadingDesignTokens.skeletonHeightLg,
@@ -429,8 +406,6 @@ class _SkeletonLoadingState extends State<SkeletonLoading>
           ),
           
           const SizedBox(height: LoadingDesignTokens.spacingMd),
-          
-          // Lista de itens
           ...List.generate(widget.itemCount, (index) => 
             Container(
               margin: const EdgeInsets.only(bottom: LoadingDesignTokens.spacingMd),
@@ -517,18 +492,13 @@ class VehiclesSkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header com título e ações
           _buildHeader(colors),
           
           const SizedBox(height: LoadingDesignTokens.spacingLg),
-          
-          // Cards de estatísticas se habilitado
           if (showStats) ...[
             _buildStatsSection(colors),
             const SizedBox(height: LoadingDesignTokens.spacingLg),
           ],
-          
-          // Lista de veículos
           _buildVehiclesList(colors),
         ],
       ),
@@ -561,8 +531,6 @@ class VehiclesSkeleton extends StatelessWidget {
             ),
           ],
         ),
-        
-        // Botão de ação
         Container(
           width: 40,
           height: 40,
@@ -633,7 +601,6 @@ class VehiclesSkeleton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Avatar do veículo
               Container(
                 width: 48,
                 height: 48,
@@ -644,8 +611,6 @@ class VehiclesSkeleton extends StatelessWidget {
               ),
               
               const SizedBox(width: LoadingDesignTokens.spacingMd),
-              
-              // Informações principais
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -670,8 +635,6 @@ class VehiclesSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              
-              // Estatísticas
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -701,8 +664,6 @@ class VehiclesSkeleton extends StatelessWidget {
     );
   }
 }
-
-// ========== ENUMS ==========
 
 /// Tipos de skeleton disponíveis
 enum SkeletonType {

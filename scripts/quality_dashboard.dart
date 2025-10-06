@@ -14,11 +14,7 @@ class QualityDashboard {
 
   Future<void> generate() async {
     print('📊 Generating Quality Dashboard v$version...');
-
-    // Collect metrics from all apps
     await _collectMetrics();
-
-    // Generate HTML dashboard
     await _generateHtmlDashboard();
 
     print('✅ Dashboard generated: quality_dashboard.html');
@@ -349,10 +345,7 @@ class QualityDashboard {
     </div>
     
     <script>
-        // Chart.js configurations and data
         const chartColors = ['#3498DB', '#E74C3C', '#F39C12', '#27AE60', '#9B59B6'];
-        
-        // Health Score Chart
         new Chart(document.getElementById('healthChart'), {
             type: 'bar',
             data: {
@@ -374,8 +367,6 @@ class QualityDashboard {
                 }
             }
         });
-        
-        // File Size Distribution
         new Chart(document.getElementById('sizeChart'), {
             type: 'doughnut',
             data: {
@@ -397,8 +388,6 @@ class QualityDashboard {
                 }
             }
         });
-        
-        // Lines of Code
         new Chart(document.getElementById('linesChart'), {
             type: 'bar',
             data: {
@@ -422,8 +411,6 @@ class QualityDashboard {
                 }
             }
         });
-        
-        // Quality Issues
         new Chart(document.getElementById('issuesChart'), {
             type: 'radar',
             data: {

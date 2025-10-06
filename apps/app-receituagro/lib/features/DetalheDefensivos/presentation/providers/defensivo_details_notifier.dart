@@ -47,8 +47,6 @@ class DefensivoDetailsState {
   DefensivoDetailsState clearError() {
     return copyWith(errorMessage: null);
   }
-
-  // UI helpers
   bool get hasError => errorMessage != null;
   bool get hasData => defensivo != null;
 }
@@ -62,7 +60,6 @@ class DefensivoDetailsNotifier extends _$DefensivoDetailsNotifier {
 
   @override
   Future<DefensivoDetailsState> build() async {
-    // Get use cases from DI
     _getDefensivoDetailsUseCase = di.sl<GetDefensivoDetailsUseCase>();
     _manageFavoritoUseCase = di.sl<ManageFavoritoUseCase>();
 
@@ -76,8 +73,6 @@ class DefensivoDetailsNotifier extends _$DefensivoDetailsNotifier {
   }) async {
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Evita múltiplas chamadas simultâneas
     if (currentState.isLoading) return;
 
     state = AsyncValue.data(
@@ -120,8 +115,6 @@ class DefensivoDetailsNotifier extends _$DefensivoDetailsNotifier {
               defensivo: defensivo,
             ).clearError(),
           );
-
-          // Verifica se está favoritado
           _checkFavoritoStatus();
         },
       );
@@ -155,14 +148,12 @@ class DefensivoDetailsNotifier extends _$DefensivoDetailsNotifier {
 
       result.fold(
         (failure) {
-          // Em caso de erro, não altera o estado
         },
         (isFavorited) {
           state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
         },
       );
     } catch (e) {
-      // Em caso de erro, não altera o estado
     }
   }
 
@@ -172,9 +163,6 @@ class DefensivoDetailsNotifier extends _$DefensivoDetailsNotifier {
     if (currentState == null) return;
 
     if (currentState.defensivo == null) return;
-
-    // Implementar verificação de favorito usando o repository
-    // Por simplicidade, vamos assumir que não está favoritado inicialmente
     state = AsyncValue.data(currentState.copyWith(isFavorited: false));
   }
 

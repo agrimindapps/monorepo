@@ -34,10 +34,7 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Obter estatísticas antes da limpeza
       final statsBefore = await getDataStatsBeforeCleaning();
-
-      // 1. Limpar Hive boxes
       final boxNames = [
         'farms',
         'fields',
@@ -59,8 +56,6 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
           result['success'] = false;
         }
       }
-
-      // 2. Limpar SharedPreferences (apenas chaves do app)
       final prefsKeys = _prefs.getKeys();
       final appSpecificKeys = prefsKeys.where(
         (key) =>
@@ -105,62 +100,46 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Contar farms
       if (await _hive.boxExists('farms')) {
         try {
           final farmsBox = await _hive.openBox<dynamic>('farms');
           stats['totalFarms'] = farmsBox.length;
           await farmsBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar fields
       if (await _hive.boxExists('fields')) {
         try {
           final fieldsBox = await _hive.openBox<dynamic>('fields');
           stats['totalFields'] = fieldsBox.length;
           await fieldsBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar crops
       if (await _hive.boxExists('crops')) {
         try {
           final cropsBox = await _hive.openBox<dynamic>('crops');
           stats['totalCrops'] = cropsBox.length;
           await cropsBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar activities
       if (await _hive.boxExists('activities')) {
         try {
           final activitiesBox = await _hive.openBox<dynamic>('activities');
           stats['totalActivities'] = activitiesBox.length;
           await activitiesBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar harvests
       if (await _hive.boxExists('harvests')) {
         try {
           final harvestsBox = await _hive.openBox<dynamic>('harvests');
           stats['totalHarvests'] = harvestsBox.length;
           await harvestsBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar preferences
       final prefsKeys = _prefs.getKeys();
       stats['totalPreferences'] =
           prefsKeys
@@ -187,15 +166,12 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      // Verificar se boxes foram deletadas
       final boxNames = ['farms', 'fields', 'crops', 'activities', 'harvests'];
       for (final boxName in boxNames) {
         if (await _hive.boxExists(boxName)) {
           return false;
         }
       }
-
-      // Verificar se preferences foram limpas
       final prefsKeys = _prefs.getKeys();
       final remainingAppKeys = prefsKeys.where(
         (key) => key.startsWith('agrihurbi_') || key.startsWith('farm_'),
@@ -210,15 +186,12 @@ class AgrihurbiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      // Verificar se existe alguma box
       final boxNames = ['farms', 'fields', 'crops', 'activities', 'harvests'];
       for (final boxName in boxNames) {
         if (await _hive.boxExists(boxName)) {
           return true;
         }
       }
-
-      // Verificar se existem preferences
       final prefsKeys = _prefs.getKeys();
       final hasPrefs = prefsKeys.any(
         (key) => key.startsWith('agrihurbi_') || key.startsWith('farm_'),

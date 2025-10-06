@@ -42,22 +42,16 @@ class DeviceManagementDialog extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             _buildHeader(theme),
-            
-            // Content
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Device Limit Info
                     _buildDeviceLimitInfo(theme, devices.length),
                     
                     const SizedBox(height: 20),
-                    
-                    // Current Device
                     if (currentDevice != null) ...[
                       Text(
                         'Dispositivo Atual',
@@ -74,8 +68,6 @@ class DeviceManagementDialog extends ConsumerWidget {
                       ),
                       const SizedBox(height: 20),
                     ],
-                    
-                    // Other Devices
                     if (devices.isNotEmpty && devices.length > 1) ...[
                       Text(
                         'Outros Dispositivos',
@@ -95,8 +87,6 @@ class DeviceManagementDialog extends ConsumerWidget {
                         );
                       }),
                     ],
-                    
-                    // No other devices message
                     if (devices.length <= 1) ...[
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -128,8 +118,6 @@ class DeviceManagementDialog extends ConsumerWidget {
                 ),
               ),
             ),
-            
-            // Actions
             _buildActions(context, theme),
           ],
         ),
@@ -279,10 +267,7 @@ class DeviceManagementDialog extends ConsumerWidget {
         await ref.read(settingsNotifierProvider.notifier).revokeDevice(device.uuid);
 
         if (context.mounted) {
-          // Close the dialog
           Navigator.of(context).pop();
-
-          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Dispositivo "${device.displayName}" revogado com sucesso'),

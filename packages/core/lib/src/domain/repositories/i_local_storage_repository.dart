@@ -201,22 +201,14 @@ class TTLData<T> {
 
 /// Chaves padrão para storage local
 class LocalStorageKeys {
-  // Configurações do usuário
   static const String userSettings = 'user_settings';
   static const String themeMode = 'theme_mode';
   static const String language = 'language';
   static const String notifications = 'notifications_enabled';
-
-  // Cache de dados
   static const String cachedData = 'cached_data';
   static const String offlineData = 'offline_data';
-
-  // Onboarding e tutorial
   static const String onboardingCompleted = 'onboarding_completed';
   static const String tutorialShown = 'tutorial_shown';
-
-  // App-specific keys should be defined in respective apps, not in core package
-  // This ensures proper separation of concerns and prevents cross-app contamination
 }
 
 /// Nomes das boxes core do Hive (genéricas para todos os apps)
@@ -226,9 +218,4 @@ class HiveBoxes {
   static const String settings = 'settings';
   static const String cache = 'cache';
   static const String offline = 'offline';
-  
-  // REMOVED: App-specific boxes moved to respective apps
-  // - plantis: moved to app-plantis/lib/core/storage/plantis_boxes.dart
-  // - receituagro: moved to app-receituagro/lib/core/storage/receituagro_boxes.dart
-  // This prevents cross-app contamination and maintains clean architecture
 }

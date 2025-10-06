@@ -10,10 +10,6 @@ import '../../infrastructure/services/sync_service.dart';
 
 part 'auth_notifier.g.dart';
 
-// =============================================================================
-// DEPENDENCY PROVIDERS (Services from GetIt)
-// =============================================================================
-
 @riverpod
 TaskManagerAuthService authService(AuthServiceRef ref) {
   return di.getIt<TaskManagerAuthService>();
@@ -28,10 +24,6 @@ TaskManagerSyncService syncService(SyncServiceRef ref) {
 TaskManagerCrashlyticsService crashlyticsService(CrashlyticsServiceRef ref) {
   return di.getIt<TaskManagerCrashlyticsService>();
 }
-
-// =============================================================================
-// AUTH STATE CLASS
-// =============================================================================
 
 class AuthState {
   final core.UserEntity? user;
@@ -62,10 +54,6 @@ class AuthState {
   }
 }
 
-// =============================================================================
-// AUTH ASYNC NOTIFIER (Watches auth stream)
-// =============================================================================
-
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
   late final TaskManagerAuthService _authService;
@@ -76,24 +64,17 @@ class AuthNotifier extends _$AuthNotifier {
   Future<AuthState> build() async {
     _authService = ref.read(authServiceProvider);
     _syncService = ref.read(syncServiceProvider);
-
-    // Setup stream listener
     _authSubscription = _authService.currentUser.listen(
       (user) {
-        // Update state when stream emits
         state = AsyncValue.data(state.value?.copyWith(user: user) ?? AuthState(user: user));
       },
       onError: (Object error, StackTrace stackTrace) {
         state = AsyncValue.error(error, stackTrace);
       },
     );
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _authSubscription?.cancel();
     });
-
-    // Return initial state
     try {
       final user = await _authService.currentUser.first;
       return AuthState(user: user);
@@ -101,10 +82,6 @@ class AuthNotifier extends _$AuthNotifier {
       rethrow;
     }
   }
-
-  // =============================================================================
-  // ACTIONS
-  // =============================================================================
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
@@ -191,10 +168,7 @@ class AuthNotifier extends _$AuthNotifier {
   /// Novo método que combina login + sincronização automática
   Future<void> loginAndSync(String email, String password) async {
     try {
-      // Primeiro fazer login normal
       await signInWithEmailAndPassword(email, password);
-
-      // Verificar se login foi bem-sucedido
       final currentState = state;
       if (currentState is AsyncError ||
           (currentState is AsyncData && currentState.value?.user == null)) {
@@ -202,8 +176,6 @@ class AuthNotifier extends _$AuthNotifier {
       }
 
       final user = (currentState as AsyncData<AuthState>).value.user!;
-
-      // Iniciar sincronização automática apenas se não foi feita ainda
       if (!state.value!.hasPerformedInitialSync && !_isAnonymous(user)) {
         await _startPostLoginSync(user);
       }
@@ -216,23 +188,16 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _startPostLoginSync(core.UserEntity user) async {
     final currentState = state.value;
     if (currentState == null || currentState.isSyncInProgress) return;
-
-    // ⚠️ IMPORTANTE: Sincronizar apenas usuários não anônimos
     if (_isAnonymous(user)) {
       return;
     }
-
-    // Update state to show sync in progress
     state = AsyncValue.data(currentState.copyWith(
       isSyncInProgress: true,
       syncMessage: 'Sincronizando dados...',
     ));
 
     try {
-      // TODO: Verificar status Premium quando RevenueCat estiver configurado
       const isUserPremium = false;
-
-      // Executar sincronização usando o SyncService
       final result = await _syncService.syncAll(
         userId: user.id,
         isUserPremium: isUserPremium,
@@ -240,17 +205,13 @@ class AuthNotifier extends _$AuthNotifier {
 
       result.fold(
         (failure) {
-          // Log do erro, mas não bloquear o usuário
           print('❌ Erro na sincronização pós-login: ${failure.message}');
-
-          // Update state - sync failed but don't block
           state = AsyncValue.data(currentState.copyWith(
             isSyncInProgress: false,
             hasPerformedInitialSync: false,
           ));
         },
         (_) {
-          // Marcar sincronização inicial como realizada
           state = AsyncValue.data(currentState.copyWith(
             isSyncInProgress: false,
             hasPerformedInitialSync: true,
@@ -259,8 +220,6 @@ class AuthNotifier extends _$AuthNotifier {
       );
     } catch (e) {
       print('❌ Erro durante sincronização: $e');
-
-      // Update state - sync failed
       state = AsyncValue.data(currentState.copyWith(
         isSyncInProgress: false,
         hasPerformedInitialSync: false,
@@ -282,10 +241,6 @@ class AuthNotifier extends _$AuthNotifier {
     );
   }
 }
-
-// =============================================================================
-// FUTURE PROVIDERS (For specific auth operations)
-// =============================================================================
 
 /// Request classes para login/registro
 class SignInRequest {
@@ -321,7 +276,6 @@ Future<core.UserEntity> signIn(SignInRef ref, SignInRequest request) async {
 
     return result.fold(
       (failure) {
-        // Log erro de autenticação
         unawaited(crashlyticsService.recordAuthError(
           authMethod: 'email_password',
           errorCode: 'login_failed',
@@ -379,20 +333,12 @@ Future<core.UserEntity> signUp(SignUpRef ref, SignUpRequest request) async {
   }
 }
 
-// =============================================================================
-// STREAM PROVIDERS
-// =============================================================================
-
 /// Provider para o estado de autenticação usando stream
 @riverpod
 Stream<core.UserEntity?> authStateStream(AuthStateStreamRef ref) {
   final authService = ref.watch(authServiceProvider);
   return authService.currentUser;
 }
-
-// =============================================================================
-// CONVENIENCE PROVIDERS (Derived state)
-// =============================================================================
 
 /// Provider para verificar se está logado
 @riverpod

@@ -131,11 +131,8 @@ class SettingsSectionConfig {
     required bool isDevelopmentMode,
   }) {
     return allSections.where((section) {
-      // Check platform visibility
       if (isWeb && !section.showOnWeb) return false;
       if (!isWeb && !section.showOnMobile) return false;
-      
-      // Check development mode requirement
       if (section.requiresDevelopmentMode && !isDevelopmentMode) return false;
       
       return true;

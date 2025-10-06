@@ -177,7 +177,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título
                     const Text(
                       'Título',
                       style: TextStyle(
@@ -204,8 +203,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Descrição
                     const Text(
                       'Descrição',
                       style: TextStyle(
@@ -229,8 +226,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Status
                     const Text(
                       'Status',
                       style: TextStyle(
@@ -284,8 +279,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                           }).toList(),
                     ),
                     const SizedBox(height: 24),
-
-                    // Prioridade
                     const Text(
                       'Prioridade',
                       style: TextStyle(
@@ -337,8 +330,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                           }).toList(),
                     ),
                     const SizedBox(height: 24),
-
-                    // Favorito
                     CheckboxListTile(
                       title: const Text('Tarefa Favorita'),
                       subtitle: const Text('Marcar como importante'),
@@ -355,8 +346,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Informações adicionais
                     Card(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -389,8 +378,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Subtarefas
                     SubtaskListWidget(parentTaskId: widget.task.id),
                   ],
                 ),

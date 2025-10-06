@@ -9,7 +9,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome do defensivo SEMPRE resolvendo dinamicamente usando fkIdDefensivo
   /// NUNCA usa o campo nomeDefensivo armazenado (pode estar desatualizado)
   Future<String> getDisplayNomeDefensivo() async {
-    // SEMPRE resolve dinamicamente usando o repository
     try {
       final repository = di.sl<FitossanitarioHiveRepository>();
       final defensivo = await repository.getById(fkIdDefensivo);
@@ -17,7 +16,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
         return defensivo.nomeComum;
       }
     } catch (e) {
-      // Falha silenciosamente para não quebrar a UI
     }
 
     return 'Defensivo não identificado';
@@ -26,7 +24,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome da cultura SEMPRE resolvendo dinamicamente usando fkIdCultura
   /// NUNCA usa o campo nomeCultura armazenado (pode estar desatualizado)
   Future<String> getDisplayNomeCultura() async {
-    // SEMPRE resolve dinamicamente usando o repository
     try {
       final repository = di.sl<CulturaHiveRepository>();
       final cultura = await repository.getById(fkIdCultura);
@@ -34,7 +31,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
         return cultura.cultura;
       }
     } catch (e) {
-      // Falha silenciosamente para não quebrar a UI
     }
 
     return 'Cultura não identificada';
@@ -43,7 +39,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
   /// Retorna o nome da praga SEMPRE resolvendo dinamicamente usando fkIdPraga
   /// NUNCA usa o campo nomePraga armazenado (pode estar desatualizado)
   Future<String> getDisplayNomePraga() async {
-    // SEMPRE resolve dinamicamente usando o repository
     try {
       final repository = di.sl<PragasHiveRepository>();
       final praga = await repository.getById(fkIdPraga);
@@ -51,7 +46,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
         return praga.nomeComum;
       }
     } catch (e) {
-      // Falha silenciosamente para não quebrar a UI
     }
 
     return 'Praga não identificada';
@@ -104,14 +98,11 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
 
   /// Converte para mapa de dados resolvendo informações técnicas dinamicamente
   Future<Map<String, String>> toDataMap() async {
-    // Resolve entidades relacionadas para obter dados técnicos
     String ingredienteAtivo = 'Consulte a bula do produto';
     String toxico = 'Consulte a bula do produto';
     String formulacao = 'Consulte a bula do produto';
     String modoAcao = 'Consulte a bula do produto';
     String nomeCientifico = 'N/A';
-    
-    // Busca dados técnicos do defensivo
     try {
       final fitossanitarioRepo = di.sl<FitossanitarioHiveRepository>();
       final defensivo = await fitossanitarioRepo.getById(fkIdDefensivo);
@@ -130,10 +121,7 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
         }
       }
     } catch (e) {
-      // Falha silenciosamente para não quebrar a UI
     }
-    
-    // Busca nome científico da praga
     try {
       final pragaRepo = di.sl<PragasHiveRepository>();
       final praga = await pragaRepo.getById(fkIdPraga);
@@ -141,7 +129,6 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
         nomeCientifico = praga.nomeCientifico;
       }
     } catch (e) {
-      // Falha silenciosamente para não quebrar a UI
     }
 
     return {

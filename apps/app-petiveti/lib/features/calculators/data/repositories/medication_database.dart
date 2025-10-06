@@ -4,7 +4,6 @@ import '../../domain/entities/medication_dosage_input.dart';
 /// Base de dados estática dos 10 medicamentos veterinários essenciais
 class MedicationDatabase {
   static final List<MedicationData> _medications = [
-    // 1. AMOXICILINA - Antibiótico de amplo espectro
     MedicationData(
       id: 'amoxicillin',
       name: 'Amoxicilina',
@@ -17,7 +16,6 @@ class MedicationDatabase {
         'Infecções odontológicas',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 10.0,
           maxDose: 20.0,
@@ -25,7 +23,6 @@ class MedicationDatabase {
           lethalDose: 100.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 10.0,
           maxDose: 15.0,
@@ -33,7 +30,6 @@ class MedicationDatabase {
           lethalDose: 80.0,
           species: Species.cat,
         ),
-        // Filhotes - dose reduzida
         DosageRange(
           minDose: 8.0,
           maxDose: 15.0,
@@ -72,8 +68,6 @@ class MedicationDatabase {
       clinicalNotes: 'Administrar preferencialmente com alimento para reduzir irritação gástrica.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 2. MELOXICAM - Anti-inflamatório não esteroidal
     MedicationData(
       id: 'meloxicam',
       name: 'Meloxicam',
@@ -86,7 +80,6 @@ class MedicationDatabase {
         'Dor crônica',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 0.1,
           maxDose: 0.2,
@@ -94,7 +87,6 @@ class MedicationDatabase {
           lethalDose: 1.0,
           species: Species.dog,
         ),
-        // Gatos - MUITO RESTRITO
         DosageRange(
           minDose: 0.05,
           maxDose: 0.1,
@@ -143,8 +135,6 @@ class MedicationDatabase {
       clinicalNotes: 'SEMPRE administrar com alimento. Monitorar função renal durante uso prolongado.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 3. TRAMADOL - Analgésico opioide
     MedicationData(
       id: 'tramadol',
       name: 'Tramadol',
@@ -157,7 +147,6 @@ class MedicationDatabase {
         'Dor oncológica',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 2.0,
           maxDose: 5.0,
@@ -165,7 +154,6 @@ class MedicationDatabase {
           lethalDose: 30.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 1.0,
           maxDose: 4.0,
@@ -205,8 +193,6 @@ class MedicationDatabase {
       clinicalNotes: 'Iniciar com dose menor e titular conforme resposta.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 4. PREDNISOLONA - Corticoide
     MedicationData(
       id: 'prednisolone',
       name: 'Prednisolona',
@@ -219,7 +205,6 @@ class MedicationDatabase {
         'Dermatites',
       ],
       dosageRanges: const [
-        // Cães e Gatos - dose anti-inflamatória
         DosageRange(
           minDose: 0.5,
           maxDose: 2.0,
@@ -232,7 +217,6 @@ class MedicationDatabase {
           toxicDose: 5.0,
           species: Species.cat,
         ),
-        // Dose imunossupressora
         DosageRange(
           minDose: 2.0,
           maxDose: 4.0,
@@ -280,8 +264,6 @@ class MedicationDatabase {
       clinicalNotes: 'SEMPRE reduzir dose gradualmente. Administrar com alimento.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 5. OMEPRAZOL - Protetor gástrico
     MedicationData(
       id: 'omeprazole',
       name: 'Omeprazol',
@@ -294,14 +276,12 @@ class MedicationDatabase {
         'Prevenção de úlceras por AINEs',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 0.7,
           maxDose: 1.5,
           toxicDose: 5.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 0.7,
           maxDose: 1.0,
@@ -328,8 +308,6 @@ class MedicationDatabase {
       clinicalNotes: 'Administrar EM JEJUM, 30-60 minutos antes da alimentação.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 6. FUROSEMIDA - Diurético de alça
     MedicationData(
       id: 'furosemide',
       name: 'Furosemida',
@@ -342,7 +320,6 @@ class MedicationDatabase {
         'Hipertensão',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 1.0,
           maxDose: 4.0,
@@ -350,7 +327,6 @@ class MedicationDatabase {
           lethalDose: 20.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 1.0,
           maxDose: 2.0,
@@ -401,8 +377,6 @@ class MedicationDatabase {
       clinicalNotes: 'Monitorar função renal, eletrólitos e hidratação. Aumentar ingestão de água.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 7. ENROFLOXACINA - Quinolona
     MedicationData(
       id: 'enrofloxacin',
       name: 'Enrofloxacina',
@@ -415,14 +389,12 @@ class MedicationDatabase {
         'Infecções de pele',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 5.0,
           maxDose: 10.0,
           toxicDose: 25.0,
           species: Species.dog,
         ),
-        // Gatos - DOSE MUITO RESTRITA
         DosageRange(
           minDose: 2.5,
           maxDose: 5.0,
@@ -465,8 +437,6 @@ class MedicationDatabase {
       clinicalNotes: 'Não administrar com laticínios. Manter hidratação adequada.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 8. METRONIDAZOL - Antiprotozoário/Antibacteriano
     MedicationData(
       id: 'metronidazole',
       name: 'Metronidazol',
@@ -479,14 +449,12 @@ class MedicationDatabase {
         'Doença inflamatória intestinal',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 10.0,
           maxDose: 25.0,
           toxicDose: 60.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 10.0,
           maxDose: 20.0,
@@ -528,8 +496,6 @@ class MedicationDatabase {
       clinicalNotes: 'Administrar com alimento para reduzir náusea.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 9. GABAPENTINA - Anticonvulsivante/Analgésico neuropático
     MedicationData(
       id: 'gabapentin',
       name: 'Gabapentina',
@@ -542,14 +508,12 @@ class MedicationDatabase {
         'Dor crônica',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 5.0,
           maxDose: 10.0,
           toxicDose: 50.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 3.0,
           maxDose: 8.0,
@@ -582,8 +546,6 @@ class MedicationDatabase {
       clinicalNotes: 'Titular dose gradualmente. Pode ser administrado com ou sem alimento.',
       lastUpdated: DateTime(2024, 1, 1),
     ),
-
-    // 10. INSULINA NPH - Antidiabético
     MedicationData(
       id: 'insulin_nph',
       name: 'Insulina NPH',
@@ -595,14 +557,12 @@ class MedicationDatabase {
         'Cetoacidose diabética (com insulina rápida)',
       ],
       dosageRanges: const [
-        // Cães
         DosageRange(
           minDose: 0.25,
           maxDose: 0.5,
           toxicDose: 2.0,
           species: Species.dog,
         ),
-        // Gatos
         DosageRange(
           minDose: 0.25,
           maxDose: 0.5,

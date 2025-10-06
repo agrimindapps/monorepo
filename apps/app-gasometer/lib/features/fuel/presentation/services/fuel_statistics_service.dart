@@ -56,8 +56,6 @@ class FuelStatisticsService {
       0,
       (sum, record) => sum + record.pricePerLiter,
     ) / records.length;
-
-    // Calculate consumption only for records with odometer data
     double averageConsumption = 0.0;
     final recordsWithConsumption = records
         .where((r) => r.consumption != null && r.consumption! > 0)

@@ -48,12 +48,9 @@ DeleteExpenseUseCase deleteExpenseUseCase(Ref ref) {
 /// Notifier principal para gerenciar estado de despesas
 @riverpod
 class ExpensesNotifier extends _$ExpensesNotifier {
-  // Services (stateless - podem ser const)
   final _validator = const ExpenseValidationService();
   final _statisticsService = ExpenseStatisticsService();
   final _filtersService = ExpenseFiltersService();
-
-  // Use cases (lazy loaded via ref)
   late final GetAllExpensesUseCase _getAllExpensesUseCase;
   late final GetExpensesByVehicleUseCase _getExpensesByVehicleUseCase;
   late final AddExpenseUseCase _addExpenseUseCase;
@@ -62,14 +59,11 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
   @override
   ExpensesState build() {
-    // Inicializa use cases via providers
     _getAllExpensesUseCase = ref.watch(getAllExpensesUseCaseProvider);
     _getExpensesByVehicleUseCase = ref.watch(getExpensesByVehicleUseCaseProvider);
     _addExpenseUseCase = ref.watch(addExpenseUseCaseProvider);
     _updateExpenseUseCase = ref.watch(updateExpenseUseCaseProvider);
     _deleteExpenseUseCase = ref.watch(deleteExpenseUseCaseProvider);
-
-    // Carrega despesas no init
     _loadInitialData();
 
     return ExpensesState.initial();
@@ -79,10 +73,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
   Future<void> _loadInitialData() async {
     await loadExpenses();
   }
-
-  // ===========================================
-  // CRUD OPERATIONS
-  // ===========================================
 
   /// Carrega todas as despesas
   Future<void> loadExpenses() async {
@@ -113,7 +103,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
         state = state.setError(failure.message);
       },
       (expenses) {
-        // Atualiza filtro de veículo
         final newFiltersConfig = state.filtersConfig.copyWith(vehicleId: vehicleId);
         _updateStateWithExpenses(expenses, filtersConfig: newFiltersConfig);
       },
@@ -122,7 +111,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
   /// Adiciona nova despesa
   Future<bool> addExpense(ExpenseFormModel formModel) async {
-    // Validate form data
     final validationErrors = formModel.validate();
     if (validationErrors.isNotEmpty) {
       final errorMessage = 'Dados inválidos: ${validationErrors.values.first}';
@@ -132,8 +120,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     }
 
     final expense = formModel.toExpenseEntity();
-
-    // Contextual validation
     final vehicle = await _getVehicleById(expense.vehicleId);
     if (vehicle != null) {
       final validationResult = _validator.validateExpenseRecord(
@@ -149,8 +135,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
         return false;
       }
     }
-
-    // Save expense
     state = state.setLoading();
 
     final result = await _addExpenseUseCase(expense);
@@ -162,7 +146,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
         return false;
       },
       (savedExpense) {
-        // Add to list and recalculate (savedExpense is guaranteed non-null here)
         final updatedExpenses = List<ExpenseEntity>.from(state.expenses)
           ..add(savedExpense!);
         _updateStateWithExpenses(updatedExpenses);
@@ -181,8 +164,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
       state = state.setError(errorMessage);
       return false;
     }
-
-    // Validate form data
     final validationErrors = formModel.validate();
     if (validationErrors.isNotEmpty) {
       final errorMessage = 'Dados inválidos: ${validationErrors.values.first}';
@@ -192,8 +173,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     }
 
     final expense = formModel.toExpenseEntity();
-
-    // Contextual validation
     final vehicle = await _getVehicleById(expense.vehicleId);
     if (vehicle != null) {
       final otherExpenses = state.expenses
@@ -213,8 +192,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
         return false;
       }
     }
-
-    // Update expense
     state = state.setLoading();
 
     final result = await _updateExpenseUseCase(expense);
@@ -226,7 +203,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
         return false;
       },
       (updatedExpense) {
-        // Update in list and recalculate (updatedExpense is guaranteed non-null here)
         final updatedExpenses = List<ExpenseEntity>.from(
           state.expenses.map((e) {
             if (e.id == expense.id) {
@@ -265,7 +241,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
       },
       (deleted) {
         if (deleted) {
-          // Remove from list and recalculate
           final updatedExpenses = state.expenses.where((e) => e.id != expenseId).toList();
           _updateStateWithExpenses(updatedExpenses);
 
@@ -278,10 +253,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
       },
     );
   }
-
-  // ===========================================
-  // FILTER OPERATIONS
-  // ===========================================
 
   /// Aplica filtro por veículo
   void filterByVehicle(String? vehicleId) {
@@ -335,10 +306,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     _applyFiltersAndRecalculate(newFiltersConfig);
   }
 
-  // ===========================================
-  // QUERY OPERATIONS
-  // ===========================================
-
   /// Busca despesa por ID
   ExpenseEntity? getExpenseById(String expenseId) {
     try {
@@ -355,8 +322,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
     final vehicle = await _getVehicleById(expense.vehicleId);
     if (vehicle == null) return {};
-
-    // Validação contextual
     final otherExpenses = state.expenses
         .where((e) => e.vehicleId == expense.vehicleId && e.id != expense.id)
         .toList();
@@ -366,8 +331,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
       vehicle,
       otherExpenses,
     );
-
-    // Análise de padrões similar
     final similarExpenses = state.expenses
         .where((e) => e.type == expense.type && e.id != expense.id)
         .toList();
@@ -459,10 +422,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     );
   }
 
-  // ===========================================
-  // REFRESH & UTILITY
-  // ===========================================
-
   /// Recarrega dados
   Future<void> refresh() async {
     if (state.selectedVehicleId != null) {
@@ -477,24 +436,14 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     state = state.copyWith(clearError: true);
   }
 
-  // ===========================================
-  // PRIVATE METHODS
-  // ===========================================
-
   /// Atualiza estado com nova lista de despesas
   void _updateStateWithExpenses(
     List<ExpenseEntity> expenses, {
     ExpenseFiltersConfig? filtersConfig,
   }) {
     final config = filtersConfig ?? state.filtersConfig;
-
-    // Aplicar filtros usando o service
     final filteredExpenses = _filtersService.applyFilters(expenses, config);
-
-    // Recalcular estatísticas usando o service
     final stats = _statisticsService.calculateStats(filteredExpenses);
-
-    // Calcular análise de padrões se há veículo selecionado
     ExpensePatternAnalysis? patternAnalysis;
     if (config.vehicleId != null) {
       patternAnalysis = _calculatePatternAnalysis(config.vehicleId!);
@@ -520,9 +469,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
           state.expenses.where((e) => e.vehicleId == vehicleId).toList();
 
       if (vehicleExpenses.isEmpty) return null;
-
-      // Aqui você pode usar _validator.analyzeExpensePatterns
-      // Por enquanto, retornando null (implementação completa virá depois)
       return null;
     } catch (e) {
       debugPrint('[ExpensesNotifier] Error calculating pattern analysis: $e');
@@ -533,7 +479,6 @@ class ExpensesNotifier extends _$ExpensesNotifier {
   /// Obtém veículo por ID (via VehiclesNotifier)
   Future<VehicleEntity?> _getVehicleById(String vehicleId) async {
     try {
-      // Acessa o VehiclesNotifier via Riverpod
       final vehiclesNotifier = ref.read(vehiclesNotifierProvider.notifier);
       return await vehiclesNotifier.getVehicleById(vehicleId);
     } catch (e) {

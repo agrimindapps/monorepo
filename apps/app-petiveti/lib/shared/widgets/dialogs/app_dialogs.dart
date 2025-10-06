@@ -177,15 +177,12 @@ class AppDialogs {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 20),
-              
-              // Email Contact
               _buildContactItem(
                 context,
                 icon: Icons.email,
                 title: 'Email',
                 subtitle: supportEmail,
                 onTap: () {
-                  // In a real app, would launch email client
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Email copiado: $supportEmail'),
@@ -199,15 +196,12 @@ class AppDialogs {
               ),
               
               const SizedBox(height: 12),
-              
-              // Phone Contact
               _buildContactItem(
                 context,
                 icon: Icons.phone,
                 title: 'Telefone',
                 subtitle: supportPhone,
                 onTap: () {
-                  // In a real app, would launch phone dialer
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Telefone copiado: $supportPhone'),
@@ -315,8 +309,6 @@ class AppDialogs {
                 const SizedBox(height: 20),
                 const Divider(),
                 const SizedBox(height: 12),
-                
-                // Version Information
                 FutureBuilder<PackageInfo>(
                   future: PackageInfo.fromPlatform(),
                   builder: (context, snapshot) {
@@ -769,8 +761,6 @@ class AppDialogs {
       ),
     );
   }
-
-  // Helper Methods
 
   static Widget _buildContactItem(
     BuildContext context, {

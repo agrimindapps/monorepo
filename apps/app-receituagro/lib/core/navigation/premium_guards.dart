@@ -55,8 +55,6 @@ class PremiumAccessResult {
 class PremiumGuards {
   final PremiumService _premiumService;
   final ReceitaAgroAnalyticsService _analyticsService;
-
-  // Limites para usuários gratuitos
   static const int maxFavoritesForFreeUser = 10;
   static const int maxCommentsForFreeUser = 5;
   static const int maxSearchResultsForFreeUser = 20;
@@ -67,8 +65,6 @@ class PremiumGuards {
   Future<PremiumAccessResult> checkFeatureAccess(PremiumFeature feature) async {
     try {
       final subscriptionData = _premiumService.getCurrentSubscription();
-
-      // Se não há subscription, negar acesso
       if (subscriptionData == null) {
         await _trackAccessDenied(feature, 'No subscription found');
         return PremiumAccessResult.denied(
@@ -76,13 +72,9 @@ class PremiumGuards {
           'Premium subscription required to access ${feature.key}',
         );
       }
-
-      // Converter Map para SubscriptionEntity via adaptador
       final subscription = SubscriptionEntity.fromFirebaseMap(
         Map<String, dynamic>.from(subscriptionData),
       );
-
-      // Verificar se a subscription está ativa
       if (!subscription.isActive) {
         await _trackAccessDenied(feature, 'Subscription not active: ${subscription.status.name}');
         return PremiumAccessResult.denied(
@@ -90,8 +82,6 @@ class PremiumGuards {
           'Premium subscription expired or inactive',
         );
       }
-
-      // Verificar se a feature está incluída na subscription usando adaptador
       if (!SubscriptionAdapter.hasFeature(subscription, feature.key)) {
         await _trackAccessDenied(feature, 'Feature not included in subscription');
         return PremiumAccessResult.denied(
@@ -99,8 +89,6 @@ class PremiumGuards {
           'Feature ${feature.key} not included in your subscription plan',
         );
       }
-
-      // Acesso permitido
       await _trackAccessGranted(feature, subscription);
       return PremiumAccessResult.granted(feature, subscription);
 
@@ -149,8 +137,6 @@ class PremiumGuards {
   /// Guard específico para comentários (com limite para usuários gratuitos)
   Future<PremiumAccessResult> checkUnlimitedComments(int currentCount) async {
     final subscriptionData = _premiumService.getCurrentSubscription();
-    
-    // Se tem subscription ativa, permitir comentários ilimitados
     if (subscriptionData != null) {
       final subscription = SubscriptionEntity.fromFirebaseMap(
         Map<String, dynamic>.from(subscriptionData),
@@ -159,8 +145,6 @@ class PremiumGuards {
         return PremiumAccessResult.granted(PremiumFeature.premiumContent, subscription);
       }
     }
-
-    // Para usuários gratuitos, verificar limite
     if (currentCount >= maxCommentsForFreeUser) {
       await _analyticsService.logEvent(
         ReceitaAgroAnalyticsEvent.premiumFeatureAttempted.eventName,
@@ -264,14 +248,10 @@ class PremiumGuards {
     }
 
     final warnings = <String>[];
-    
-    // Verificar favoritos
     final favoriteUsagePercent = (currentFavorites / maxFavoritesForFreeUser * 100).round();
     if (favoriteUsagePercent >= 80) {
       warnings.add('You have used $favoriteUsagePercent% of your free favorites ($currentFavorites/$maxFavoritesForFreeUser)');
     }
-    
-    // Verificar comentários
     final commentUsagePercent = (currentComments / maxCommentsForFreeUser * 100).round();
     if (commentUsagePercent >= 80) {
       warnings.add('You have used $commentUsagePercent% of your free comments ($currentComments/$maxCommentsForFreeUser)');

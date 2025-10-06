@@ -15,8 +15,6 @@ class UnifiedFeedbackSystem {
   /// Inicializa todos os sistemas de feedback
   static Future<void> initialize() async {
     if (_isInitialized) return;
-
-    // Inicializar serviços
     await HapticService.initialize();
 
     _isInitialized = true;
@@ -24,8 +22,6 @@ class UnifiedFeedbackSystem {
 
   /// Verifica se foi inicializado
   static bool get isInitialized => _isInitialized;
-
-  // === OPERAÇÕES ASYNC COMPLETAS ===
 
   /// Executa operação async com feedback visual completo
   static Future<T> executeWithFeedback<T>({
@@ -41,7 +37,6 @@ class UnifiedFeedbackSystem {
     bool showToast = true,
     Duration? timeout,
   }) async {
-    // 1. Iniciar loading contextual
     ContextualLoadingManager.startLoading(
       operationKey,
       message: loadingMessage,
@@ -54,13 +49,8 @@ class UnifiedFeedbackSystem {
     }
 
     try {
-      // 2. Executar operação
       final result = await operation();
-
-      // 3. Parar loading
       ContextualLoadingManager.stopLoading(operationKey);
-
-      // 4. Mostrar feedback de sucesso
       if (includeHaptic) {
         await HapticService.success();
       }
@@ -71,8 +61,6 @@ class UnifiedFeedbackSystem {
           message: successMessage ?? 'Operação concluída com sucesso!',
         );
       }
-
-      // 5. Feedback visual animado
       if (context.mounted) {
         FeedbackSystem.showSuccess(
           context: context,
@@ -84,10 +72,7 @@ class UnifiedFeedbackSystem {
 
       return result;
     } catch (error) {
-      // Parar loading
       ContextualLoadingManager.stopLoading(operationKey);
-
-      // Feedback de erro
       if (includeHaptic) {
         await HapticService.error();
       }
@@ -100,7 +85,6 @@ class UnifiedFeedbackSystem {
           message: errorMsg,
           actionLabel: 'Tentar novamente',
           onAction: () {
-            // Retry logic pode ser implementada aqui
           },
         );
       }
@@ -130,7 +114,6 @@ class UnifiedFeedbackSystem {
     bool includeHaptic = true,
     bool showToast = true,
   }) async {
-    // 1. Iniciar progress tracking
     final progressOp = ProgressTracker.startOperation(
       key: operationKey,
       title: title,
@@ -142,7 +125,6 @@ class UnifiedFeedbackSystem {
     progressOp.setContext(context);
 
     try {
-      // 2. Executar operação com callback de progresso
       final result = await operation((progress, message) {
         ProgressTracker.updateProgress(
           operationKey,
@@ -151,8 +133,6 @@ class UnifiedFeedbackSystem {
           includeHaptic: false, // Evitar spam de haptic
         );
       });
-
-      // 3. Completar com sucesso
       ProgressTracker.completeOperation(
         operationKey,
         successMessage: successMessage,
@@ -162,22 +142,18 @@ class UnifiedFeedbackSystem {
 
       return result;
     } catch (error) {
-      // 4. Falhar operação
       ProgressTracker.failOperation(
         operationKey,
         errorMessage: 'Erro: ${error.toString()}',
         showToast: showToast,
         includeHaptic: includeHaptic,
         onRetry: () {
-          // Retry logic
         },
       );
 
       rethrow;
     }
   }
-
-  // === OPERAÇÕES ESPECÍFICAS ===
 
   /// Salvar planta com feedback completo
   static Future<T> savePlant<T>({
@@ -302,8 +278,6 @@ class UnifiedFeedbackSystem {
     );
   }
 
-  // === CONFIRMAÇÕES COM FEEDBACK ===
-
   /// Confirmação com feedback háptico
   static Future<bool> confirm({
     required BuildContext context,
@@ -341,8 +315,6 @@ class UnifiedFeedbackSystem {
       requiresDoubleConfirmation: requireDouble,
     );
   }
-
-  // === TOASTS CONTEXTUAIS ===
 
   /// Toast de sucesso rápido
   static void successToast(BuildContext context, String message) {
@@ -382,8 +354,6 @@ class UnifiedFeedbackSystem {
     );
   }
 
-  // === HAPTIC FEEDBACK DIRETO ===
-
   /// Haptic para ações básicas
   static Future<void> lightHaptic() => HapticService.light();
 
@@ -415,8 +385,6 @@ class UnifiedFeedbackSystem {
         await HapticService.light();
     }
   }
-
-  // === CLEANUP ===
 
   /// Limpa todos os sistemas de feedback
   static void dispose() {
@@ -461,32 +429,24 @@ class _UnifiedFeedbackProviderState extends State<UnifiedFeedbackProvider> {
   @override
   void initState() {
     super.initState();
-    // Inicializar sistema na primeira vez
     UnifiedFeedbackSystem.initialize();
   }
 
   @override
   void dispose() {
-    // NÃO fazer dispose aqui pois outros widgets podem estar usando
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     Widget child = widget.child;
-
-    // 1. Adicionar ContextualLoadingListener (já existente)
     child = ContextualLoadingListener(child: child);
-
-    // 2. Adicionar FeedbackListener se habilitado
     if (widget.enableFeedbackOverlay) {
       child = FeedbackListener(
         alignment: widget.feedbackAlignment,
         child: child,
       );
     }
-
-    // 3. Adicionar ProgressTrackerPanel se habilitado
     if (widget.enableProgressOverlay) {
       child = Stack(
         children: [

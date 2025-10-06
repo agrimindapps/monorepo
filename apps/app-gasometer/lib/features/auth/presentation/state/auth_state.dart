@@ -65,8 +65,6 @@ class AuthState {
       syncMessage: syncMessage ?? this.syncMessage,
     );
   }
-
-  // Computed getters
   String? get userDisplayName => currentUser?.displayName;
   String? get userEmail => currentUser?.email;
   String get userId => currentUser?.id ?? '';

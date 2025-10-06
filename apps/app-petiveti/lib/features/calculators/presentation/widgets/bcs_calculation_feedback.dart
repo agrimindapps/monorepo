@@ -32,31 +32,22 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
   }
 
   void _initializeAnimations() {
-    // Pulse animation for loading states
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
-    // Progress animation for calculation phases
     _progressController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    
-    // Fade animation for result reveal
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    // Scale animation for BCS score reveal
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-
-    // Setup animations
     _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
@@ -77,8 +68,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
       begin: Colors.blue[100],
       end: Colors.blue[400],
     ).animate(_pulseController);
-
-    // Repeat pulse animation
     _pulseController.repeat(reverse: true);
   }
 
@@ -96,8 +85,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
     final theme = Theme.of(context);
     final state = ref.watch(bodyConditionProvider);
     final output = ref.watch(bodyConditionOutputProvider);
-
-    // Listen for state changes to trigger animations
     ref.listen<dynamic>(bodyConditionProvider, (previous, current) {
       _handleStateChange(previous, current);
     });
@@ -119,11 +106,9 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
 
   void _handleStateChange(dynamic previous, dynamic current) {
     if (previous?.isLoading == false && current.isLoading == true) {
-      // Started calculation - begin progress animation
       _progressController.reset();
       _progressController.forward();
     } else if (previous?.isLoading == true && current.isLoading == false) {
-      // Finished calculation - trigger result reveal
       _triggerResultReveal();
     }
   }
@@ -132,8 +117,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
     _pulseController.stop();
     _fadeController.reset();
     _scaleController.reset();
-    
-    // Sequence the reveal animations
     _fadeController.forward().then((_) {
       Future.delayed(const Duration(milliseconds: 200), () {
         _scaleController.forward();
@@ -150,7 +133,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // Animated header with pulse effect
               AnimatedBuilder(
                 animation: _pulseAnimation,
                 builder: (context, child) {
@@ -197,13 +179,9 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
               ),
               
               const SizedBox(height: 20),
-              
-              // Progress indicator with phases
               _buildCalculationPhases(theme),
               
               const SizedBox(height: 20),
-              
-              // Progress bar
               AnimatedBuilder(
                 animation: _progressAnimation,
                 builder: (context, child) {
@@ -321,7 +299,6 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                // Success header
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -349,26 +326,19 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
                 ),
                 
                 const SizedBox(height: 24),
-                
-                // Animated BCS score reveal
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: _buildBcsScoreDisplay(theme, output),
                 ),
                 
                 const SizedBox(height: 20),
-                
-                // Quick status summary
                 _buildQuickSummary(theme, output),
                 
                 const SizedBox(height: 16),
-                
-                // Action button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // Navigate to detailed results
                       _navigateToDetailedResults();
                     },
                     icon: const Icon(Icons.visibility),
@@ -597,7 +567,5 @@ class _BcsCalculationFeedbackState extends ConsumerState<BcsCalculationFeedback>
   }
 
   void _navigateToDetailedResults() {
-    // This would typically trigger a tab switch or navigation
-    // For now, we'll just show a placeholder
   }
 }

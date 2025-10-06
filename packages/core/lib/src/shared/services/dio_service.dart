@@ -67,10 +67,6 @@ class DioService {
   /// Use com cuidado - prefira os métodos específicos deste service
   Dio get dio => _dio;
 
-  // ============================================================
-  // MÉTODOS HTTP PRINCIPAIS
-  // ============================================================
-
   /// Executa uma requisição GET
   ///
   /// [path] - URL ou path da requisição
@@ -224,10 +220,6 @@ class DioService {
     );
   }
 
-  // ============================================================
-  // DOWNLOAD E UPLOAD
-  // ============================================================
-
   /// Faz download de um arquivo
   ///
   /// [urlPath] - URL do arquivo a baixar
@@ -324,13 +316,9 @@ class DioService {
     CancelToken? cancelToken,
   }) async {
     final Map<String, dynamic> formDataMap = {};
-
-    // Adiciona os arquivos
     for (final entry in files.entries) {
       formDataMap[entry.key] = await MultipartFile.fromFile(entry.value);
     }
-
-    // Adiciona dados adicionais
     if (additionalData != null) {
       formDataMap.addAll(additionalData);
     }
@@ -344,10 +332,6 @@ class DioService {
       cancelToken: cancelToken,
     );
   }
-
-  // ============================================================
-  // CONFIGURAÇÃO E UTILIDADES
-  // ============================================================
 
   /// Atualiza a baseUrl do Dio
   ///
@@ -432,7 +416,6 @@ class DioService {
   /// Remove todos os interceptors
   void clearInterceptors() {
     _dio.interceptors.clear();
-    // Re-adiciona o logger se estiver em debug
     if (kDebugMode) {
       _setupInterceptors();
     }

@@ -32,7 +32,6 @@ class OptimizedRemoteImageWidget extends StatefulWidget {
 class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget> {
   @override
   Widget build(BuildContext context) {
-    // Simplified implementation - use local assets only
     return Image.asset(
       widget.imagePath,
       width: widget.width,
@@ -42,7 +41,6 @@ class _OptimizedRemoteImageWidgetState extends State<OptimizedRemoteImageWidget>
       color: widget.color,
       colorBlendMode: widget.colorBlendMode,
       errorBuilder: (context, error, stackTrace) {
-        // Try fallback asset if provided
         if (widget.fallbackAsset != null) {
           return Image.asset(
             widget.fallbackAsset!,

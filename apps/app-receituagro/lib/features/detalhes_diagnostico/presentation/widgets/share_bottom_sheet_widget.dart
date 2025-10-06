@@ -27,7 +27,6 @@ class ShareBottomSheetWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle indicator
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
             height: 4,
@@ -37,8 +36,6 @@ class ShareBottomSheetWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
-          // Header
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -69,8 +66,6 @@ class ShareBottomSheetWidget extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Share options
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(

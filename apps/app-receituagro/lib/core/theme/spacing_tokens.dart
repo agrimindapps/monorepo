@@ -26,8 +26,6 @@ import 'package:flutter/material.dart';
 class SpacingTokens {
   SpacingTokens._();
 
-  // === Core Spacing Values ===
-
   /// 4dp - Espaçamento mínimo entre elementos muito relacionados
   /// Uso: Separação entre ícone e texto, padding interno pequeno
   static const double xs = 4.0;
@@ -56,8 +54,6 @@ class SpacingTokens {
   /// Uso: Bottom padding para evitar sobreposição com nav bar
   static const double bottomNavSpace = 80.0;
 
-  // === EdgeInsets Helpers ===
-
   /// Padding interno mínimo para componentes pequenos
   static const EdgeInsets paddingXS = EdgeInsets.all(xs);
 
@@ -73,8 +69,6 @@ class SpacingTokens {
   /// Padding interno extra grande para containers principais
   static const EdgeInsets paddingXL = EdgeInsets.all(xl);
 
-  // === Margins Helpers ===
-
   /// Margin mínimo entre elementos relacionados
   static const EdgeInsets marginXS = EdgeInsets.all(xs);
 
@@ -89,8 +83,6 @@ class SpacingTokens {
 
   /// Margin grande entre blocos principais
   static const EdgeInsets marginXL = EdgeInsets.all(xl);
-
-  // === External Element Spacing ===
 
   /// Padding para elementos externos (bordas da tela, containers principais)
   /// Valor otimizado de 8px para dar mais espaço ao conteúdo
@@ -109,8 +101,6 @@ class SpacingTokens {
     right: sm, // 8px right
     bottom: bottomNavSpace, // Espaço para bottom nav
   );
-
-  // === Internal Element Spacing ===
 
   /// Padding horizontal para conteúdo interno (mantém 16px)
   static const EdgeInsets contentPadding = EdgeInsets.symmetric(
@@ -150,8 +140,6 @@ class SpacingTokens {
   /// Spacing para separação de seções
   static const EdgeInsets sectionSpacing = EdgeInsets.only(bottom: xl);
 
-  // === SizedBox Helpers ===
-
   /// SizedBox com altura mínima
   static const SizedBox gapXS = SizedBox(height: xs);
 
@@ -182,20 +170,15 @@ class SpacingTokens {
   /// SizedBox horizontal padrão
   static const SizedBox gapHorizontalLG = SizedBox(width: lg);
 
-  // === Responsive Helpers ===
-
   /// Retorna padding responsivo baseado no tamanho da tela
   static EdgeInsets responsivePadding(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     if (screenWidth > 1200) {
-      // Desktop
       return const EdgeInsets.symmetric(horizontal: xxl, vertical: lg);
     } else if (screenWidth > 800) {
-      // Tablet
       return const EdgeInsets.symmetric(horizontal: xl, vertical: lg);
     } else {
-      // Mobile
       return contentPadding;
     }
   }
@@ -250,8 +233,6 @@ extension SpacingExtensions on Widget {
 class ComponentSpacing {
   ComponentSpacing._();
 
-  // === TabBar Spacing ===
-
   /// Altura padrão de TabBar
   static const double tabBarHeight = 44.0;
 
@@ -262,8 +243,6 @@ class ComponentSpacing {
   /// Spacing entre ícone e texto em tabs
   static const double tabIconTextGap = 6.0;
 
-  // === Card Spacing ===
-
   /// Border radius padrão para cards
   static const double cardBorderRadius = 12.0;
 
@@ -272,8 +251,6 @@ class ComponentSpacing {
 
   /// Elevação padrão de cards
   static const double cardElevation = 2.0;
-
-  // === Info Section Spacing ===
 
   /// Espaçamento entre seções de informação
   static const double infoSectionGap = SpacingTokens.xl;
@@ -284,15 +261,11 @@ class ComponentSpacing {
   /// Espaçamento entre header e conteúdo
   static const double headerContentGap = SpacingTokens.lg;
 
-  // === List Spacing ===
-
   /// Espaçamento entre itens de lista
   static const double listItemGap = SpacingTokens.md;
 
   /// Padding para itens de lista
   static const EdgeInsets listItemPadding = EdgeInsets.all(SpacingTokens.md);
-
-  // === Button Spacing ===
 
   /// Padding interno de botões
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(

@@ -15,26 +15,19 @@ class AuthState {
     this.isLoading = false,
     this.errorMessage,
   });
-
-  // Initial state factory
   const AuthState.initial()
       : currentUser = null,
         sessionData = null,
         isLoading = false,
         errorMessage = null;
-
-  // Computed properties (migrated from getters)
   bool get isAuthenticated => currentUser != null && !_isAnonymous;
   bool get isAnonymous => currentUser?.provider.toString() == 'anonymous';
   bool get _isAnonymous => currentUser?.provider.toString() == 'anonymous';
 
   UserType get userType {
     if (!isAuthenticated) return UserType.guest;
-    // TODO: Integrate with Premium service to determine premium status
     return UserType.registered;
   }
-
-  // copyWith method for state immutability
   AuthState copyWith({
     UserEntity? currentUser,
     UserSessionData? sessionData,
@@ -49,8 +42,6 @@ class AuthState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
-
-  // Convenience method to clear user (logout)
   AuthState clearUser() {
     return const AuthState(
       currentUser: null,
@@ -65,6 +56,4 @@ class AuthState {
     return 'AuthState(isAuthenticated: $isAuthenticated, isLoading: $isLoading, hasError: ${errorMessage != null})';
   }
 }
-
-// Supporting enums (migrated from auth_provider.dart)
 enum UserType { guest, registered, premium }

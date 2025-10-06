@@ -37,7 +37,6 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
 
       try {
         const uuid = Uuid();
-        // Criar a task usando o notifier
         await ref
             .read(taskNotifierProvider.notifier)
             .createTask(

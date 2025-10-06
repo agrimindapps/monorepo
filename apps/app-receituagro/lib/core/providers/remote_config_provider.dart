@@ -16,18 +16,12 @@ class RemoteConfigProvider extends ChangeNotifier {
   String? _lastError;
   DateTime? _lastUpdated;
   Timer? _refreshTimer;
-
-  // Feature flags state
   final Map<ReceitaAgroFeatureFlag, bool> _featureFlags = {};
-  
-  // Configuration state
   final Map<ReceitaAgroConfigKey, dynamic> _configurations = {};
 
   RemoteConfigProvider({
     ReceitaAgroRemoteConfigService? remoteConfigService,
   }) : _remoteConfigService = remoteConfigService ?? ReceitaAgroRemoteConfigService.instance;
-
-  // Getters
   bool get isInitialized => _isInitialized;
   bool get isLoading => _isLoading;
   String? get lastError => _lastError;
@@ -41,13 +35,8 @@ class RemoteConfigProvider extends ChangeNotifier {
     _clearError();
 
     try {
-      // Initialize remote config service
       await _remoteConfigService.initialize();
-      
-      // Load initial values
       await _loadAllValues();
-      
-      // Setup auto-refresh if enabled
       _setupAutoRefresh();
       
       _isInitialized = true;
@@ -63,8 +52,6 @@ class RemoteConfigProvider extends ChangeNotifier {
       _setError('Failed to initialize Remote Config: $e');
       
       if (EnvironmentConfig.enableAnalytics) {
-        // Log to Crashlytics in production
-        // FirebaseCrashlytics.instance.recordError(e, stackTrace);
       }
       
       developer.log(
@@ -118,7 +105,6 @@ class RemoteConfigProvider extends ChangeNotifier {
   /// Check if a feature is enabled
   bool isFeatureEnabled(ReceitaAgroFeatureFlag feature) {
     if (!_isInitialized) {
-      // Return cached value or fetch from service directly
       return _featureFlags[feature] ?? _remoteConfigService.isFeatureEnabled(feature);
     }
     
@@ -206,15 +192,11 @@ class RemoteConfigProvider extends ChangeNotifier {
 
   /// Load all values from Remote Config service
   Future<void> _loadAllValues() async {
-    // Load feature flags
     for (final feature in ReceitaAgroFeatureFlag.values) {
       _featureFlags[feature] = _remoteConfigService.isFeatureEnabled(feature);
     }
-
-    // Load configurations
     for (final config in ReceitaAgroConfigKey.values) {
       switch (config) {
-        // Int configs
         case ReceitaAgroConfigKey.maxDevicesPerSubscription:
         case ReceitaAgroConfigKey.subscriptionGracePeriodHours:
         case ReceitaAgroConfigKey.maxCacheSize:
@@ -225,18 +207,12 @@ class RemoteConfigProvider extends ChangeNotifier {
         case ReceitaAgroConfigKey.onboardingStepsCount:
           _configurations[config] = _remoteConfigService.getIntConfig(config);
           break;
-
-        // Double configs
         case ReceitaAgroConfigKey.imageQualityLevel:
           _configurations[config] = _remoteConfigService.getDoubleConfig(config);
           break;
-
-        // JSON configs
         case ReceitaAgroConfigKey.themeConfiguration:
           _configurations[config] = _remoteConfigService.getJsonConfig(config);
           break;
-
-        // String configs (default)
         default:
           _configurations[config] = _remoteConfigService.getStringConfig(config);
           break;
@@ -246,7 +222,6 @@ class RemoteConfigProvider extends ChangeNotifier {
 
   /// Setup auto-refresh timer
   void _setupAutoRefresh() {
-    // Only setup auto-refresh in debug mode or if explicitly enabled
     if (!EnvironmentConfig.isDebugMode && !isFeatureEnabled(ReceitaAgroFeatureFlag.enableDetailedAnalytics)) {
       return;
     }

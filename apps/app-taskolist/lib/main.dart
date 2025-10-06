@@ -18,26 +18,14 @@ import 'infrastructure/services/analytics_service.dart';
 import 'infrastructure/services/crashlytics_service.dart';
 import 'infrastructure/services/notification_service.dart';
 import 'infrastructure/services/performance_service.dart';
-
-// Global reference to crashlytics for error handlers
 late ICrashlyticsRepository _crashlyticsRepository;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializar Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Inicializar Hive
   await HiveConfig.initialize();
-
-  // Inicializar Dependency Injection
   await configureDependencies();
-
-  // Get crashlytics repository from DI
   _crashlyticsRepository = getIt<ICrashlyticsRepository>();
-
-  // Configurar Crashlytics para capturar erros Flutter
   if (!kIsWeb) {
     FlutterError.onError = (errorDetails) {
       _crashlyticsRepository.recordError(
@@ -47,8 +35,6 @@ void main() async {
         fatal: true,
       );
     };
-
-    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
     PlatformDispatcher.instance.onError = (error, stack) {
       _crashlyticsRepository.recordError(
         exception: error,
@@ -58,9 +44,6 @@ void main() async {
       return true;
     };
   }
-
-  // ===== ACCOUNT DELETION INITIALIZATION =====
-  // Initialize account deletion module after DI is ready
   try {
     print('🔐 MAIN: Initializing account deletion module...');
     AccountDeletionModule.init(getIt);
@@ -68,9 +51,6 @@ void main() async {
   } catch (e) {
     print('❌ MAIN: Account deletion initialization failed: $e');
   }
-
-  // ===== SYNC INITIALIZATION =====
-  // Force sync initialization after DI is ready
   try {
     print('🔄 MAIN: Forcing Taskolist sync initialization...');
     TaskolistSyncDIModule.init();
@@ -79,14 +59,8 @@ void main() async {
   } catch (e) {
     print('❌ MAIN: Sync initialization failed: $e');
   }
-
-  // Inicializar serviços Firebase
   await _initializeFirebaseServices();
-
-  // Criar ProviderScope e inicializar serviços de navegação
   final providerContainer = ProviderContainer();
-
-  // Inicializar serviços com container
   local_nav.NavigationService.initialize(providerContainer);
   NotificationActionsService.initialize(providerContainer);
 
@@ -100,39 +74,25 @@ void main() async {
 
 Future<void> _initializeFirebaseServices() async {
   try {
-    // Obter serviços do DI container
     final analyticsService = getIt<TaskManagerAnalyticsService>();
     final crashlyticsService = getIt<TaskManagerCrashlyticsService>();
     final performanceService = getIt<TaskManagerPerformanceService>();
     final notificationService = getIt<TaskManagerNotificationService>();
-
-    // Configurar contexto inicial do Crashlytics
     await crashlyticsService.setTaskManagerContext(
       userId: 'anonymous', // Será atualizado quando usuário fizer login
       version: '1.0.0',
       environment: kDebugMode ? 'debug' : 'production',
     );
-
-    // Marcar início da aplicação para Performance
     await performanceService.markAppStarted();
-
-    // Iniciar monitoramento de performance
     await performanceService.startPerformanceTracking();
-
-    // Inicializar serviço de notificações
     final notificationInitialized = await notificationService.initialize();
     if (notificationInitialized) {
-      // Solicitar permissões de notificação
       await notificationService.requestPermissions();
-
-      // Configurar handlers de notificação
       notificationService.setupNotificationHandlers(
         onNotificationTap: _handleNotificationTap,
         onNotificationAction: _handleNotificationAction,
       );
     }
-
-    // Log de inicialização bem-sucedida
     await crashlyticsService.log('App initialized successfully');
     await analyticsService.logEvent(
       'app_initialized',
@@ -144,8 +104,6 @@ Future<void> _initializeFirebaseServices() async {
     );
 
     debugPrint('🚀 Firebase services initialized successfully');
-
-    // Em modo debug, executar testes de notificação após 5 segundos
     if (kDebugMode && notificationInitialized) {
       Future<void>.delayed(const Duration(seconds: 5), () {
         debugPrint('🧪 Starting notification workflow tests...');
@@ -154,8 +112,6 @@ Future<void> _initializeFirebaseServices() async {
     }
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing Firebase services: $e');
-
-    // Registrar erro mesmo se os serviços não estiverem totalmente configurados
     try {
       await _crashlyticsRepository.recordError(
         exception: e,
@@ -163,7 +119,6 @@ Future<void> _initializeFirebaseServices() async {
         reason: 'Firebase services initialization failed',
       );
     } catch (_) {
-      // Ignorar se Crashlytics também falhou
     }
   }
 }
@@ -173,7 +128,6 @@ void _handleNotificationTap(String? payload) {
   debugPrint('🔔 Notification tapped: $payload');
 
   if (payload != null) {
-    // Usar NavigationService para gerenciar navegação
     local_nav.NavigationService.navigateFromNotification(payload);
   }
 }
@@ -181,8 +135,6 @@ void _handleNotificationTap(String? payload) {
 /// Manipula quando uma ação de notificação é executada
 void _handleNotificationAction(String actionId, String? payload) {
   debugPrint('🔔 Notification action: $actionId, payload: $payload');
-
-  // Usar NotificationActionsService para executar ações
   NotificationActionsService.executeNotificationAction(actionId, payload);
 }
 
@@ -199,7 +151,6 @@ class TaskManagerApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       navigatorKey: local_nav.NavigationService.navigatorKey,
-      // Web inicia em promo (landing page), Mobile/Desktop inicia em login
       home: kIsWeb ? const PromotionalPage() : const LoginPage(),
     );
   }

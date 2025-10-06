@@ -22,14 +22,4 @@ class DeleteCalculationHistory {
     return repository.removeFromHistory(historyId);
   }
 }
-
-// Use case removido - não implementado no repository atual
-// class GetCalculatorUsageStats {
-//   final CalculatorRepository repository;
-
-//   GetCalculatorUsageStats(repository);
-
-//   Future<Either<Failure, Map<String, int>>> call(String userId) async {
-//     return await repository.getCalculatorUsageStats(userId);
-//   }
 // }

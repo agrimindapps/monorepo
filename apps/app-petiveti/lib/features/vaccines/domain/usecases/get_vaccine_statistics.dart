@@ -23,8 +23,6 @@ class GetVaccineStatisticsParams {
   final String? animalId;
   
   const GetVaccineStatisticsParams({this.animalId});
-  
-  // Factory constructors for convenience
   factory GetVaccineStatisticsParams.all() => const GetVaccineStatisticsParams();
   factory GetVaccineStatisticsParams.byAnimal(String animalId) => GetVaccineStatisticsParams(animalId: animalId);
 }

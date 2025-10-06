@@ -38,7 +38,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título da seção
             const Text(
               'Detalhes',
               style: TextStyle(
@@ -48,8 +47,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Status
             _buildDetailRow(
               icon: Icons.radio_button_unchecked,
               iconColor: AppColors.getStatusColor(widget.selectedStatus.name),
@@ -60,8 +57,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
             ),
             
             const SizedBox(height: 12),
-            
-            // Prioridade
             _buildDetailRow(
               icon: Icons.flag,
               iconColor: AppColors.getPriorityColor(widget.selectedPriority.name),
@@ -72,8 +67,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
             ),
             
             const SizedBox(height: 12),
-            
-            // Data de vencimento
             _buildDetailRow(
               icon: Icons.calendar_today,
               iconColor: widget.task.dueDate != null && widget.task.isOverdue 
@@ -88,8 +81,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
             ),
             
             const SizedBox(height: 12),
-            
-            // Data de criação
             _buildDetailRow(
               icon: Icons.access_time,
               iconColor: AppColors.textSecondary,
@@ -97,8 +88,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
               value: _formatDateTime(widget.task.createdAt),
               isEditing: false,
             ),
-            
-            // Data de atualização
             if (widget.task.updatedAt != widget.task.createdAt) ...[
               const SizedBox(height: 12),
               _buildDetailRow(
@@ -109,8 +98,6 @@ class _TaskDetailsCardState extends State<TaskDetailsCard> {
                 isEditing: false,
               ),
             ],
-            
-            // Posição na lista
             const SizedBox(height: 12),
             _buildDetailRow(
               icon: Icons.format_list_numbered,

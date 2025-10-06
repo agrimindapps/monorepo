@@ -91,13 +91,8 @@ class AddComentarioUseCase {
 
   /// Adds a new comentario after comprehensive validation
   Future<void> call(ComentarioEntity comentario) async {
-    // Basic business validation
     await _validateComentario(comentario);
-    
-    // Check user limits (business rule)
     await _checkUserLimits();
-    
-    // Add timestamp if not set
     final now = DateTime.now();
     final comentarioToSave = comentario.copyWith(
       createdAt: comentario.createdAt == DateTime.fromMillisecondsSinceEpoch(0) 
@@ -114,12 +109,9 @@ class AddComentarioUseCase {
 
   /// Comprehensive business validation for comentario content
   Future<void> _validateComentario(ComentarioEntity comentario) async {
-    // Basic validity check
     if (!comentario.isValid) {
       throw InvalidComentarioException('Comentário deve ter título e conteúdo válidos');
     }
-
-    // Business rule: Content length limits (improved)
     final contentLength = comentario.conteudo.trim().length;
     if (contentLength < ComentariosDesignTokens.minCommentLength) {
       throw InvalidComentarioException('Conteúdo deve ter pelo menos ${ComentariosDesignTokens.minCommentLength} caracteres');
@@ -128,13 +120,9 @@ class AddComentarioUseCase {
     if (contentLength > 2000) {
       throw InvalidComentarioException('Conteúdo não pode exceder 2000 caracteres');
     }
-
-    // Business rule: Content quality validation
     if (_isLowQualityContent(comentario.conteudo)) {
       throw InvalidComentarioException('Conteúdo deve ser mais descritivo e útil');
     }
-
-    // Business rule: Title validation (enhanced)
     final titleLength = comentario.titulo.trim().length;
     if (titleLength == 0) {
       throw InvalidComentarioException('Título é obrigatório');
@@ -147,23 +135,12 @@ class AddComentarioUseCase {
     if (titleLength > 100) {
       throw InvalidComentarioException('Título não pode exceder 100 caracteres');
     }
-
-    // Business rule: Tool/feature validation
     if (comentario.ferramenta.trim().isEmpty) {
       throw InvalidComentarioException('Ferramenta/contexto é obrigatório');
     }
-
-    // Business rule: Context validation (optional for general comments)
-    // pkIdentificador can be empty for general comments not linked to specific content
-    // When empty, the comment becomes a general user note
-
-    // Business rule: No profanity or inappropriate content
     if (_containsInappropriateContent(comentario)) {
       throw InvalidComentarioException('Conteúdo contém linguagem inapropriada');
     }
-
-    // Business rule: No duplicate content in same context (async)
-    // Only check for duplicates if comment has specific context
     if (comentario.pkIdentificador.isNotEmpty && await _isDuplicateContent(comentario)) {
       throw DuplicateComentarioException('Já existe um comentário similar neste contexto');
     }
@@ -172,19 +149,13 @@ class AddComentarioUseCase {
   /// Check if content is low quality (too generic or spammy)
   bool _isLowQualityContent(String content) {
     final normalizedContent = content.toLowerCase().trim();
-    
-    // Check for extremely short content that's not meaningful
     if (normalizedContent.length < 10) {
       return true;
     }
-    
-    // Check for repetitive characters (spam-like)
     final repetitivePattern = RegExp(r'(.)\1{4,}'); // 5+ same characters in a row
     if (repetitivePattern.hasMatch(normalizedContent)) {
       return true;
     }
-    
-    // Check for common low-quality patterns
     final lowQualityPatterns = [
       'test', 'teste', '...', 'aaa', 'bbb', 'ccc',
       RegExp(r'^[a-z]\s*$'), // Single letters
@@ -205,10 +176,7 @@ class AddComentarioUseCase {
   /// Check for inappropriate content (basic implementation)
   bool _containsInappropriateContent(ComentarioEntity comentario) {
     final content = '${comentario.titulo} ${comentario.conteudo}'.toLowerCase();
-    
-    // Basic profanity filter - in a real app, this would be more comprehensive
     final inappropriateWords = [
-      // Add specific inappropriate words based on your app's guidelines
       'spam', 'scam', 'hack', 
     ];
     
@@ -220,8 +188,6 @@ class AddComentarioUseCase {
     final stats = await _repository.getUserCommentStats();
     final activeComments = stats['active'] ?? 0;
     final totalComments = stats['total'] ?? 0;
-
-    // Business rule: Absolute maximum comments per user
     const maxTotalComments = 500;
     if (totalComments >= maxTotalComments) {
       throw CommentLimitExceededException(
@@ -229,8 +195,6 @@ class AddComentarioUseCase {
         'Entre em contato com suporte para mais informações.'
       );
     }
-
-    // Business rule: Active comments limit for free tier
     const maxFreeActiveComments = 100;
     if (activeComments >= maxFreeActiveComments) {
       throw CommentLimitExceededException(
@@ -238,11 +202,7 @@ class AddComentarioUseCase {
         'Considere deletar comentários antigos ou fazer upgrade.'
       );
     }
-
-    // Business rule: Rate limiting - comments per day
     await _checkDailyLimits();
-
-    // Business rule: Context-specific limits
     await _checkContextLimits();
   }
 
@@ -264,8 +224,6 @@ class AddComentarioUseCase {
           'Tente novamente amanhã.'
         );
       }
-
-      // Business rule: Rapid creation prevention (anti-spam)
       final recentComments = todayComments.where((comment) => 
         comment.createdAt.isAfter(now.subtract(const Duration(minutes: 5)))
       ).length;
@@ -278,8 +236,6 @@ class AddComentarioUseCase {
         );
       }
     } catch (e) {
-      // If we can't check daily limits, allow creation
-      // (better to allow than block unnecessarily)
       if (e is CommentLimitExceededException) {
         rethrow;
       }
@@ -289,25 +245,14 @@ class AddComentarioUseCase {
   /// Check context-specific comment limits
   Future<void> _checkContextLimits() async {
     try {
-      // This would be implemented based on business needs
-      // For example: max 10 comments per specific praga/diagnostic
-      
-      // For now, we'll implement a basic check
-      // In a real scenario, this would check specific business rules
-      
-      // Placeholder for context-specific validation
     } catch (e) {
-      // Graceful handling of context limit checks
     }
   }
 
   /// Check for duplicate content in same context with proper implementation
   Future<bool> _isDuplicateContent(ComentarioEntity comentario) async {
     try {
-      // Get existing comments for the same context
       final existingComments = await _repository.getByContext(comentario.pkIdentificador);
-      
-      // Check for exact title duplicates
       final exactTitleMatch = existingComments.any((existing) => 
         existing.id != comentario.id && 
         existing.titulo.trim().toLowerCase() == comentario.titulo.trim().toLowerCase()
@@ -316,8 +261,6 @@ class AddComentarioUseCase {
       if (exactTitleMatch) {
         return true;
       }
-      
-      // Check for similar content (85% similarity threshold)
       const similarityThreshold = 0.85;
       final comentarioWords = _extractWords(comentario.conteudo);
       
@@ -334,8 +277,6 @@ class AddComentarioUseCase {
       
       return false;
     } catch (e) {
-      // If we can't check for duplicates, allow the comment
-      // (better to have a potential duplicate than block a valid comment)
       return false;
     }
   }

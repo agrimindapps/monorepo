@@ -64,36 +64,20 @@ class DosageValidationService {
     final validationChecks = <String, ValidationCheck>{};
     final warnings = <String>[];
     final criticalErrors = <String>[];
-    
-    // 1. Validação por múltiplos algoritmos independentes
     final algorithmValidation = _validateWithMultipleAlgorithms(input, output, medication);
     validationChecks['algorithm_cross_check'] = algorithmValidation;
-    
-    // 2. Verificação de limites absolutos por espécie
     final speciesValidation = _validateSpeciesLimits(input, output, medication);
     validationChecks['species_limits'] = speciesValidation;
-    
-    // 3. Cross-check com tabelas de referência veterinárias
     final referenceValidation = _validateAgainstVeterinaryReferences(input, output, medication);
     validationChecks['veterinary_references'] = referenceValidation;
-    
-    // 4. Validação de margem de segurança mínima
     final safetyMarginValidation = _validateSafetyMargin(input, output, medication);
     validationChecks['safety_margin'] = safetyMarginValidation;
-    
-    // 5. Alerta para doses próximas aos limites tóxicos
     final toxicityValidation = _validateToxicityProximity(input, output, medication);
     validationChecks['toxicity_proximity'] = toxicityValidation;
-    
-    // 6. Validação de interações medicamentosas críticas
     final interactionValidation = _validateDrugInteractions(input, output, medication);
     validationChecks['drug_interactions'] = interactionValidation;
-    
-    // 7. Validação de condições médicas especiais
     final conditionsValidation = _validateSpecialConditions(input, output, medication);
     validationChecks['special_conditions'] = conditionsValidation;
-
-    // Coletar warnings e erros de todas as validações
     for (final check in validationChecks.values) {
       if (!check.passed) {
         if (check.score < 0.5) {
@@ -103,19 +87,13 @@ class DosageValidationService {
         }
       }
     }
-
-    // Calcular score de confiança baseado em todos os checks
     final confidenceScore = _calculateConfidenceScore(validationChecks);
-    
-    // Determinar se requer confirmação dupla
     final requiresDoubleConfirmation = _requiresDoubleConfirmation(
       confidenceScore, 
       criticalErrors, 
       output, 
       medication
     );
-
-    // Determinar recomendação
     String? recommendedAction;
     if (criticalErrors.isNotEmpty) {
       recommendedAction = 'NÃO ADMINISTRAR - Consultar veterinário especialista imediatamente';
@@ -141,8 +119,6 @@ class DosageValidationService {
     final validationChecks = <String, ValidationCheck>{};
     final warnings = <String>[];
     final criticalErrors = <String>[];
-
-    // Verificar peso extremo
     if (input.weight < 0.5 || input.weight > 80.0) {
       criticalErrors.add('Peso fora da faixa segura: ${input.weight}kg');
       validationChecks['weight_range'] = ValidationCheck(
@@ -158,8 +134,6 @@ class DosageValidationService {
         score: 1.0,
       );
     }
-
-    // Verificar condições especiais críticas
     final criticalConditions = input.specialConditions.where((condition) =>
       condition == SpecialCondition.renalDisease ||
       condition == SpecialCondition.hepaticDisease ||
@@ -200,18 +174,11 @@ class DosageValidationService {
     MedicationDosageOutput output,
     MedicationData medication,
   ) {
-    // Algoritmo 1: Validação linear simples
     final expectedDose1 = _calculateDoseAlgorithm1(input, medication);
-    
-    // Algoritmo 2: Validação com superfície corporal
     final expectedDose2 = _calculateDoseAlgorithm2(input, medication);
-    
-    // Algoritmo 3: Validação farmacocinética básica
     final expectedDose3 = _calculateDoseAlgorithm3(input, medication);
 
     final calculatedDose = output.dosagePerKg;
-    
-    // Verificar concordância entre algoritmos
     const tolerance = 0.15; // 15% de tolerância
     final algorithm1Match = (calculatedDose - expectedDose1).abs() / expectedDose1 <= tolerance;
     final algorithm2Match = (calculatedDose - expectedDose2).abs() / expectedDose2 <= tolerance;
@@ -250,8 +217,6 @@ class DosageValidationService {
     }
 
     final calculatedDose = output.dosagePerKg;
-    
-    // Verificar limites absolutos
     if (calculatedDose > dosageRange.maxDose) {
       return ValidationCheck(
         name: 'Limites por espécie',
@@ -269,8 +234,6 @@ class DosageValidationService {
         message: 'Dose muito abaixo do mínimo terapêutico',
       );
     }
-
-    // Calcular score baseado na posição na faixa terapêutica
     final rangePosition = (calculatedDose - dosageRange.minDose) / 
                          (dosageRange.maxDose - dosageRange.minDose);
     final score = math.max(0.7, 1.0 - (rangePosition - 0.5).abs());
@@ -288,7 +251,6 @@ class DosageValidationService {
     MedicationDosageOutput output,
     MedicationData medication,
   ) {
-    // Referências baseadas em literatura veterinária conhecida
     final referenceRanges = _getVeterinaryReferenceRanges(medication.id, input.species);
     
     if (referenceRanges == null) {
@@ -353,8 +315,6 @@ class DosageValidationService {
         message: 'Margem de segurança insuficiente: ${safetyMargin.toStringAsFixed(1)}%',
       );
     }
-
-    // Score baseado na qualidade da margem de segurança
     final score = math.min(1.0, safetyMargin / (minimumSafetyMargin * 2));
 
     return ValidationCheck(
@@ -414,8 +374,6 @@ class DosageValidationService {
     MedicationDosageOutput output,
     MedicationData medication,
   ) {
-    // Este é um placeholder para futuras implementações de verificação de interações
-    // Em um sistema real, isso seria integrado com histórico médico do animal
     
     final criticalInteractions = medication.drugInteractions
         .where((drug) => _isCriticalInteraction(medication.id, drug))
@@ -453,8 +411,6 @@ class DosageValidationService {
         message: 'Combinação crítica de condições: ${criticalConditionCombinations.join(', ')}',
       );
     }
-
-    // Verificar contraindicações absolutas
     final contraindications = medication.getContraindications(input.specialConditions);
     final absoluteContraindications = contraindications.where((c) => c.isAbsolute).toList();
     
@@ -477,8 +433,6 @@ class DosageValidationService {
   /// Calcula score de confiança baseado em todos os checks
   static double _calculateConfidenceScore(Map<String, ValidationCheck> checks) {
     if (checks.isEmpty) return 0.0;
-    
-    // Pesos diferentes para diferentes tipos de validação
     final weights = <String, double>{
       'algorithm_cross_check': 0.25,
       'species_limits': 0.20,
@@ -508,23 +462,14 @@ class DosageValidationService {
     MedicationDosageOutput output,
     MedicationData medication,
   ) {
-    // Sempre requer confirmação se há erros críticos
     if (criticalErrors.isNotEmpty) return true;
-    
-    // Requer se score de confiança é baixo
     if (confidenceScore < 0.8) return true;
-    
-    // Requer para medicamentos de alto risco
     final highRiskMedications = ['meloxicam', 'enrofloxacin', 'furosemide', 'insulin_nph'];
     if (highRiskMedications.contains(medication.id)) return true;
-    
-    // Requer para doses próximas aos limites
     if (output.alerts.any((alert) => alert.level == AlertLevel.danger)) return true;
     
     return false;
   }
-
-  // MÉTODOS AUXILIARES PARA ALGORITMOS DE VALIDAÇÃO
 
   /// Algoritmo 1: Cálculo linear simples baseado em peso
   static double _calculateDoseAlgorithm1(MedicationDosageInput input, MedicationData medication) {
@@ -532,8 +477,6 @@ class DosageValidationService {
     if (dosageRange == null) return 0.0;
     
     double baseDose = (dosageRange.minDose + dosageRange.maxDose) / 2;
-    
-    // Ajuste simples por condições especiais
     if (input.specialConditions.isNotEmpty) {
       baseDose *= 0.85; // Redução conservadora
     }
@@ -545,14 +488,10 @@ class DosageValidationService {
   static double _calculateDoseAlgorithm2(MedicationDosageInput input, MedicationData medication) {
     final dosageRange = medication.getDosageRange(input.species, input.ageGroup);
     if (dosageRange == null) return 0.0;
-    
-    // Conversão aproximada peso -> superfície corporal para espécies veterinárias
     final bodyScaleFactor = input.species == Species.cat ? 0.8 : 1.0;
     final adjustedWeight = input.weight * bodyScaleFactor;
     
     double baseDose = (dosageRange.minDose + dosageRange.maxDose) / 2;
-    
-    // Ajuste por superfície corporal (fórmula veterinária simplificada)
     final surfaceAdjustment = math.pow(adjustedWeight / 10.0, 0.67);
     baseDose *= surfaceAdjustment;
     
@@ -565,8 +504,6 @@ class DosageValidationService {
     if (dosageRange == null) return 0.0;
     
     double baseDose = dosageRange.minDose + (dosageRange.maxDose - dosageRange.minDose) * 0.6;
-    
-    // Ajuste farmacocinético por idade
     switch (input.ageGroup) {
       case AgeGroup.puppy:
         baseDose *= 0.8; // Metabolismo mais lento
@@ -577,8 +514,6 @@ class DosageValidationService {
       default:
         break;
     }
-    
-    // Ajuste por frequência (clearance)
     final frequencyFactor = input.frequency.timesPerDay / 2.0;
     baseDose /= math.sqrt(frequencyFactor);
     
@@ -587,7 +522,6 @@ class DosageValidationService {
 
   /// Obtém faixas de referência veterinárias conhecidas
   static Map<String, double>? _getVeterinaryReferenceRanges(String medicationId, Species species) {
-    // Tabelas baseadas em literatura veterinária padrão
     final references = <String, Map<Species, Map<String, double>>>{
       'amoxicillin': {
         Species.dog: {'min': 10.0, 'max': 20.0},
@@ -601,7 +535,6 @@ class DosageValidationService {
         Species.dog: {'min': 2.0, 'max': 5.0},
         Species.cat: {'min': 1.0, 'max': 4.0},
       },
-      // Adicionar mais medicamentos conforme necessário
     };
     
     return references[medicationId]?[species];

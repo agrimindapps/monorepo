@@ -17,18 +17,12 @@ class GetUserSettingsUseCase {
     }
 
     _currentUserId = userId; // Store for use in fixing corrupted data
-
-    // Try to get existing settings
     var settings = await _repository.getUserSettings(userId);
-
-    // Create default settings if none exist
     if (settings == null) {
       settings = UserSettingsEntity.createDefault(userId);
       await _repository.saveUserSettings(settings);
       return settings;
     }
-
-    // Apply business rules
     settings = await _applyBusinessRules(settings);
 
     return settings;
@@ -37,21 +31,13 @@ class GetUserSettingsUseCase {
   /// Apply business rules and migrations
   Future<UserSettingsEntity> _applyBusinessRules(UserSettingsEntity settings) async {
     var updatedSettings = settings;
-
-    // Business rule: Migrate old settings
     if (settings.needsMigration) {
       updatedSettings = await _migrateSettings(settings);
     }
-
-    // Business rule: Validate settings consistency
     if (!settings.isValid) {
       updatedSettings = _fixInvalidSettings(settings);
     }
-
-    // Business rule: Apply security policies
     updatedSettings = _applySecurityPolicies(updatedSettings);
-
-    // Save if settings were modified
     if (updatedSettings != settings) {
       await _repository.saveUserSettings(updatedSettings);
     }
@@ -62,13 +48,9 @@ class GetUserSettingsUseCase {
   /// Migrate settings from old versions
   Future<UserSettingsEntity> _migrateSettings(UserSettingsEntity settings) async {
     var migrated = settings;
-
-    // Migration logic for different app versions
     if (settings.language.isEmpty) {
       migrated = migrated.copyWith(language: 'pt-BR');
     }
-
-    // Add other migration logic as needed
 
     return migrated;
   }
@@ -78,8 +60,6 @@ class GetUserSettingsUseCase {
     var fixed = settings;
 
     if (settings.userId.isEmpty) {
-      // Handle corrupted data by creating new default settings
-      // This commonly happens with old cached data
       return UserSettingsEntity.createDefault(_currentUserId ?? 'anonymous-fallback');
     }
 
@@ -93,17 +73,10 @@ class GetUserSettingsUseCase {
   /// Apply security and privacy policies
   UserSettingsEntity _applySecurityPolicies(UserSettingsEntity settings) {
     var secured = settings;
-
-    // Business rule: In development mode, disable analytics by default
     if (settings.isDevelopmentMode && settings.analyticsEnabled) {
       secured = secured.copyWith(analyticsEnabled: false);
     }
-
-    // Business rule: Premium features require valid subscription
-    // This would be checked against subscription service
     if (settings.speechToTextEnabled) {
-      // For now, we'll assume it's allowed, but in real implementation
-      // we would check subscription status here
     }
 
     return secured;
@@ -131,7 +104,6 @@ class GetUserSettingsUseCase {
   UserSettingsEntity _optimizeForAccessibility(UserSettingsEntity settings) {
     return settings.copyWith(
       soundEnabled: true,
-      // Other accessibility optimizations
     );
   }
 
@@ -139,7 +111,6 @@ class GetUserSettingsUseCase {
   UserSettingsEntity _optimizeForPerformance(UserSettingsEntity settings) {
     return settings.copyWith(
       analyticsEnabled: false,
-      // Other performance optimizations
     );
   }
 
@@ -148,7 +119,6 @@ class GetUserSettingsUseCase {
     return settings.copyWith(
       analyticsEnabled: false,
       notificationsEnabled: false,
-      // Other privacy optimizations
     );
   }
 }

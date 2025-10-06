@@ -35,7 +35,6 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Row(
                   children: [
                     Icon(Icons.medical_services, color: Colors.red.shade600),
@@ -48,7 +47,6 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
                       ),
                     ),
                     const Spacer(),
-                    // Toggle favoritos
                     IconButton(
                       icon: Icon(
                         _showFavoritesOnly ? Icons.favorite : Icons.favorite_outline,
@@ -64,8 +62,6 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
                   ],
                 ),
                 const SizedBox(height: 16),
-                
-                // Barra de busca
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -89,17 +85,11 @@ class _MedicationSelectorWidgetState extends ConsumerState<MedicationSelectorWid
                   onChanged: provider.searchMedications,
                 ),
                 const SizedBox(height: 16),
-                
-                // Filtros rápidos por categoria
                 if (!_showFavoritesOnly) _buildCategoryFilters(provider),
                 
                 const SizedBox(height: 16),
-                
-                // Medicamentos populares (se não há busca)
                 if (provider.searchQuery.isEmpty && !_showFavoritesOnly) 
                   _buildTopMedicationsSection(provider),
-                
-                // Lista de medicamentos
                 _buildMedicationsList(provider),
               ],
             ),

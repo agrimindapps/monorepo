@@ -8,10 +8,6 @@ abstract class WeatherFailure extends Equatable {
   List<Object> get props => [];
 }
 
-// ============================================================================
-// WEATHER MEASUREMENT FAILURES
-// ============================================================================
-
 /// Generic weather data failure
 class WeatherDataFailure extends WeatherFailure {
   final String message;
@@ -86,10 +82,6 @@ class InvalidWeatherMeasurementFailure extends WeatherFailure {
   String toString() =>
       'InvalidWeatherMeasurementFailure(message: $message, errors: $validationErrors)';
 }
-
-// ============================================================================
-// RAIN GAUGE FAILURES
-// ============================================================================
 
 /// Generic rain gauge failure
 class RainGaugeFailure extends WeatherFailure {
@@ -181,10 +173,6 @@ class RainGaugeCalibrationFailure extends WeatherFailure {
       'RainGaugeCalibrationFailure(gaugeId: $gaugeId, message: $message)';
 }
 
-// ============================================================================
-// WEATHER STATISTICS FAILURES
-// ============================================================================
-
 /// Generic weather statistics failure
 class WeatherStatisticsFailure extends WeatherFailure {
   final String message;
@@ -234,10 +222,6 @@ class InsufficientWeatherDataFailure extends WeatherFailure {
   String toString() =>
       'InsufficientWeatherDataFailure(period: $period, available: $availableRecords, required: $requiredRecords)';
 }
-
-// ============================================================================
-// NETWORK AND API FAILURES
-// ============================================================================
 
 /// Network connection failure
 class WeatherNetworkFailure extends WeatherFailure {
@@ -305,10 +289,6 @@ class WeatherApiAuthFailure extends WeatherFailure {
       'WeatherApiAuthFailure(service: $service, message: $message)';
 }
 
-// ============================================================================
-// LOCAL STORAGE FAILURES
-// ============================================================================
-
 /// Local weather data storage failure
 class WeatherLocalStorageFailure extends WeatherFailure {
   final String operation;
@@ -354,10 +334,6 @@ class WeatherSyncFailure extends WeatherFailure {
   String toString() =>
       'WeatherSyncFailure(message: $message, pending: $pendingRecords)';
 }
-
-// ============================================================================
-// VALIDATION AND PERMISSION FAILURES
-// ============================================================================
 
 /// Location permission failure
 class WeatherLocationPermissionFailure extends WeatherFailure {
@@ -408,10 +384,6 @@ class InvalidDateRangeFailure extends WeatherFailure {
   String toString() =>
       'InvalidDateRangeFailure(start: $startDate, end: $endDate, message: $message)';
 }
-
-// ============================================================================
-// DEVICE AND SENSOR FAILURES
-// ============================================================================
 
 /// Weather sensor failure
 class WeatherSensorFailure extends WeatherFailure {

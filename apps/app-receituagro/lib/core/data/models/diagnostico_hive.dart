@@ -152,8 +152,6 @@ class DiagnosticoHive extends HiveObject {
       'epocaAplicacao': epocaAplicacao,
     };
   }
-
-  // Getters convenientes para compatibilidade com código legado
   String get id => idReg;
   String get nome => nomeDefensivo ?? 'Defensivo desconhecido';
   String get cultura => nomeCultura ?? 'Cultura desconhecida';

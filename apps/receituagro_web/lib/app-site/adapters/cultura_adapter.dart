@@ -1,8 +1,4 @@
-// Adapter to bridge Supabase Cultura model with Core CulturaEntity
-// Note: Currently using minimal core integration for demonstration purposes
 import '../classes/cultura_class.dart';
-
-// Temporary stub types until core package is fully implemented
 class CulturaEntity {
   final String id;
   final String nomeComum;

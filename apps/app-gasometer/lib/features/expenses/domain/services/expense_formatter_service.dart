@@ -7,11 +7,8 @@ class ExpenseFormatterService {
   
   /// Cria uma nova instância do serviço de formatação
   ExpenseFormatterService();
-  // Cache para formatações recentes (memoização)
   final Map<String, String> _formatCache = <String, String>{};
   static const int _maxCacheSize = 100;
-
-  // Formatadores brasileiros
   final _currencyFormatter = NumberFormat.currency(
     locale: 'pt_BR',
     symbol: '',
@@ -21,8 +18,6 @@ class ExpenseFormatterService {
   final _dateFormatter = DateFormat('dd/MM/yyyy', 'pt_BR');
   final _timeFormatter = DateFormat('HH:mm', 'pt_BR');
   final _dateTimeFormatter = DateFormat('dd/MM/yyyy HH:mm', 'pt_BR');
-
-  // Constantes de formatação
   static const String decimalSeparator = ',';
   static const String dotSeparator = '.';
   static const String thousandSeparator = '.';
@@ -103,8 +98,6 @@ class ExpenseFormatterService {
   /// Converte string formatada para double
   double parseFormattedAmount(String value) {
     if (value.isEmpty) return 0.0;
-
-    // Remove formatação brasileira: 1.234,56 -> 1234.56
     final cleanValue = value
         .replaceAll(RegExp(r'\s'), '') // Remove espaços
         .replaceAll(thousandSeparator, '') // Remove separadores de milhar
@@ -190,16 +183,10 @@ class _AmountFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-
-    // Permitir apenas números e vírgula/ponto decimal
     if (!RegExp(r'^\d{0,8}[,.]?\d{0,2}$').hasMatch(text)) {
       return oldValue;
     }
-
-    // Substituir ponto por vírgula
     String formattedText = text.replaceAll('.', ',');
-
-    // Aplicar formatação de milhares se necessário
     if (!formattedText.contains(',') && formattedText.length > 3) {
       final number = int.tryParse(formattedText);
       if (number != null) {
@@ -223,13 +210,9 @@ class _OdometerFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-
-    // Permitir até 999999,9 km
     if (!RegExp(r'^\d{0,6}[,.]?\d{0,1}$').hasMatch(text)) {
       return oldValue;
     }
-
-    // Substituir ponto por vírgula
     final formattedText = text.replaceAll('.', ',');
 
     return TextEditingValue(
@@ -247,13 +230,9 @@ class _DescriptionFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-
-    // Remove caracteres perigosos
     final sanitized = text
         .replaceAll(RegExp(r'[<>"\\&%$#@!*()[\]{}]'), '')
         .replaceAll(RegExp(r'\s+'), ' ');
-
-    // Limita tamanho
     final limited = sanitized.length > 100 ? sanitized.substring(0, 100) : sanitized;
 
     return TextEditingValue(

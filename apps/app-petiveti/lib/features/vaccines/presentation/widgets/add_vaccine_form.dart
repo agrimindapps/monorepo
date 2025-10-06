@@ -37,8 +37,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
   bool _isRequired = true;
   VaccineStatus _status = VaccineStatus.scheduled;
   bool _isLoading = false;
-
-  // Common vaccine names for quick selection
   final List<String> _commonVaccines = [
     'V10 (Múltipla)',
     'V8 (Múltipla)',
@@ -60,7 +58,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
 
   void _loadInitialData() {
     if (widget.vaccine != null) {
-      // Editing mode
       final vaccine = widget.vaccine!;
       _nameController.text = vaccine.name;
       _veterinarianController.text = vaccine.veterinarian;
@@ -74,8 +71,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
       _isRequired = vaccine.isRequired;
       _status = vaccine.status;
     }
-
-    // Load animals for selection
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(animalsProvider.notifier).loadAnimals();
     });
@@ -118,7 +113,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Animal Selection
             if (animalsState.animals.isNotEmpty) ...[
               Text(
                 'Animal',
@@ -192,8 +186,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
               const SizedBox(height: 24),
             ],
-
-            // Vaccine Name
             Text(
               'Nome da Vacina',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -230,8 +222,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               },
             ),
             const SizedBox(height: 16),
-
-            // Veterinarian
             Text(
               'Veterinário',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -256,8 +246,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               },
             ),
             const SizedBox(height: 16),
-
-            // Date Selection
             Text(
               'Data de Aplicação',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -277,8 +265,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               onTap: () => _selectDate(context, isApplicationDate: true),
             ),
             const SizedBox(height: 16),
-
-            // Next Due Date (Optional)
             Text(
               'Próxima Dose (Opcional)',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -310,8 +296,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               onTap: () => _selectDate(context, isApplicationDate: false),
             ),
             const SizedBox(height: 16),
-
-            // Status and Required
             Row(
               children: [
                 Expanded(
@@ -368,8 +352,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Additional Information
             Text(
               'Informações Adicionais',
               style: theme.textTheme.titleLarge?.copyWith(
@@ -377,8 +359,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Batch
             TextFormField(
               controller: _batchController,
               decoration: InputDecoration(
@@ -391,8 +371,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Manufacturer
             TextFormField(
               controller: _manufacturerController,
               decoration: InputDecoration(
@@ -405,8 +383,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Dosage
             TextFormField(
               controller: _dosageController,
               decoration: InputDecoration(
@@ -419,8 +395,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Notes
             TextFormField(
               controller: _notesController,
               maxLines: 3,
@@ -434,8 +408,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Reminder Section
             if (_nextDueDate != null) ...[
               Text(
                 'Lembrete',
@@ -472,8 +444,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
               ),
               const SizedBox(height: 24),
             ],
-
-            // Save Button
             SizedBox(
               height: 48,
               child: FilledButton(
@@ -513,7 +483,6 @@ class _AddVaccineFormState extends ConsumerState<AddVaccineForm> {
       setState(() {
         if (isApplicationDate) {
           _selectedDate = picked;
-          // Reset next due date if it's before the new application date
           if (_nextDueDate != null && _nextDueDate!.isBefore(picked)) {
             _nextDueDate = null;
           }

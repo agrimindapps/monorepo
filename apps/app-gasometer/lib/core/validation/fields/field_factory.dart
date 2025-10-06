@@ -219,15 +219,11 @@ class _MaterialNumberField extends BaseFormField {
   
   List<TextInputFormatter> _buildNumberFormatters(NumberFieldConfig config) {
     final formatters = <TextInputFormatter>[];
-    
-    // Basic number filtering
     if (config.allowNegative) {
       formatters.add(FilteringTextInputFormatter.allow(RegExp(r'^-?\d*\.?\d*')));
     } else {
       formatters.add(FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')));
     }
-    
-    // Decimal places limit
     if (config.decimalPlaces != null) {
       formatters.add(_DecimalTextInputFormatter(config.decimalPlaces!));
     }
@@ -311,9 +307,7 @@ class _MaterialDateField extends BaseFormField {
   }
   
   String _formatDate(DateTime date, String? format) {
-    // Simple date formatting - in a real app, use intl package
     if (format != null) {
-      // Basic format support
       return format
           .replaceAll('dd', date.day.toString().padLeft(2, '0'))
           .replaceAll('MM', date.month.toString().padLeft(2, '0'))

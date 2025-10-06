@@ -9,8 +9,6 @@ class DefensivoItemWidget extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
   final bool isGridView;
-
-  // Cache estático para cores e ícones
   static final Map<String, Color> _colorCache = {};
   static final Map<String, IconData> _iconCache = {};
 
@@ -24,13 +22,9 @@ class DefensivoItemWidget extends StatelessWidget {
 
   Color get _getClassColor {
     final classe = defensivo.displayClass.toLowerCase();
-
-    // Verifica cache primeiro
     if (_colorCache.containsKey(classe)) {
       return _colorCache[classe]!;
     }
-
-    // Computa cor e adiciona ao cache
     Color color;
     if (classe.contains('herbicida') || classe.contains('herbic')) {
       color = Colors.green.shade700;
@@ -52,13 +46,9 @@ class DefensivoItemWidget extends StatelessWidget {
 
   IconData get _getClassIcon {
     final classe = defensivo.displayClass.toLowerCase();
-
-    // Verifica cache primeiro
     if (_iconCache.containsKey(classe)) {
       return _iconCache[classe]!;
     }
-
-    // Computa ícone e adiciona ao cache
     IconData icon;
     if (classe.contains('herbicida') || classe.contains('herbic')) {
       icon = FontAwesomeIcons.leaf;
@@ -111,7 +101,6 @@ class DefensivoItemWidget extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Ícone circular à esquerda (como no mockup)
               Container(
                 width: 40,
                 height: 40,
@@ -126,12 +115,10 @@ class DefensivoItemWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // Conteúdo principal
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Nome do produto
                     Text(
                       defensivo.displayName,
                       style: const TextStyle(
@@ -143,7 +130,6 @@ class DefensivoItemWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    // Ingrediente ativo
                     Text(
                       defensivo.displayIngredient,
                       style: TextStyle(fontSize: 13, color: Colors.grey[600]),
@@ -151,7 +137,6 @@ class DefensivoItemWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
-                    // Tag da categoria
                     Row(
                       children: [
                         Container(
@@ -176,7 +161,6 @@ class DefensivoItemWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              // Seta à direita
               const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
             ],
           ),

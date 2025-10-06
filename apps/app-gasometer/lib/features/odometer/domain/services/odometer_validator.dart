@@ -78,7 +78,6 @@ class OdometerValidator {
     double odometerValue,
     VehicleEntity vehicle,
   ) {
-    // Basic validation first
     if (odometerValue < minOdometer) {
       return const OdometerValidationResult(
         isValid: false,
@@ -92,8 +91,6 @@ class OdometerValidator {
         errorMessage: 'Valor máximo excedido (${OdometerFormatter.formatOdometerWithUnit(maxOdometer)})',
       );
     }
-
-    // Validate against vehicle's current odometer
     if (odometerValue < vehicle.currentOdometer) {
       return OdometerValidationResult(
         isValid: false,
@@ -140,34 +137,24 @@ class OdometerValidator {
   }) {
     final Map<String, String> errors = {};
     bool isValid = true;
-
-    // Validate vehicle ID
     if (!validateVehicleId(vehicleId)) {
       errors['vehicleId'] = 'Veículo é obrigatório';
       isValid = false;
     }
-
-    // Validate odometer
     final odometerError = validateOdometer(odometerText);
     if (odometerError != null) {
       errors['odometer'] = odometerError;
       isValid = false;
     }
-
-    // Validate date
     if (!validateDate(registrationDate)) {
       errors['registrationDate'] = 'A data de registro não pode ser futura';
       isValid = false;
     }
-
-    // Validate description
     final descriptionError = validateDescription(description);
     if (descriptionError != null) {
       errors['description'] = descriptionError;
       isValid = false;
     }
-    
-    // Validate registration type
     if (!validateRegistrationType(type)) {
       errors['type'] = 'Tipo de registro é obrigatório';
       isValid = false;

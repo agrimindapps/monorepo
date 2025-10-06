@@ -29,10 +29,6 @@
 /// ```
 class ComentariosStrings {
   ComentariosStrings._(); // Private constructor to prevent instantiation
-
-  // ==========================================================================
-  // UI LABELS AND TITLES
-  // ==========================================================================
   
   /// Dialog title for creating new comments
   /// Context: Title of the modal dialog
@@ -49,10 +45,6 @@ class ComentariosStrings {
   /// Subtitle explaining what comments are for
   /// Context: Helper text below main title
   static const String pageSubtitle = 'Suas anotações e observações sobre o conteúdo';
-  
-  // ==========================================================================
-  // FORM FIELDS AND INPUTS
-  // ==========================================================================
   
   /// Label for comment content input field
   /// Context: TextField label
@@ -73,10 +65,6 @@ class ComentariosStrings {
   /// Instructional text above content field
   /// Context: Helper text above input field
   static const String fieldInstructionContent = 'Digite seu comentário ou anotação:';
-  
-  // ==========================================================================
-  // BUTTONS AND ACTIONS
-  // ==========================================================================
   
   /// Save button text
   /// Context: Primary action button
@@ -106,10 +94,6 @@ class ComentariosStrings {
   /// Context: Clear search input button
   static const String buttonClearSearch = 'Limpar busca';
   
-  // ==========================================================================
-  // STATUS AND LOADING STATES  
-  // ==========================================================================
-  
   /// Loading text when saving comment
   /// Context: Button text during save operation
   static const String statusSaving = 'Salvando...';
@@ -129,10 +113,6 @@ class ComentariosStrings {
   /// Success message after deleting
   /// Context: Snackbar or toast message
   static const String statusDeleteSuccess = 'Comentário excluído com sucesso!';
-  
-  // ==========================================================================
-  // VALIDATION MESSAGES
-  // ==========================================================================
   
   /// Error when content is too short
   /// Context: Form validation error
@@ -173,10 +153,6 @@ class ComentariosStrings {
   static String requirementMinLength(int minLength) => 
       'Mínimo de $minLength caracteres';
   
-  // ==========================================================================
-  // BUSINESS LOGIC MESSAGES
-  // ==========================================================================
-  
   /// Error when user reaches comment limit
   /// Context: Business rule violation message
   static String errorCommentLimit(int limit) => 
@@ -212,10 +188,6 @@ class ComentariosStrings {
   /// Context: Fallback error message
   static const String errorLoadFailed = 'Erro ao carregar comentários';
   
-  // ==========================================================================
-  // EMPTY STATES AND MESSAGING
-  // ==========================================================================
-  
   /// Message when no comments exist
   /// Context: Empty state in comments list
   static const String emptyStateTitle = 'Nenhum comentário encontrado';
@@ -237,10 +209,6 @@ class ComentariosStrings {
   /// Action button text in empty state
   /// Context: Primary action in empty state
   static const String emptyStateAction = 'Adicionar Primeiro Comentário';
-  
-  // ==========================================================================
-  // SEARCH AND FILTERING
-  // ==========================================================================
   
   /// Search field placeholder
   /// Context: Search input hint text
@@ -266,10 +234,6 @@ class ComentariosStrings {
   /// Context: Search/filter results summary
   static String searchResults(int count) => 
       count == 1 ? '1 resultado encontrado' : '$count resultados encontrados';
-  
-  // ==========================================================================
-  // TIME AND DATE FORMATTING
-  // ==========================================================================
   
   /// Relative time: now
   /// Context: Time stamp showing immediate time
@@ -298,10 +262,6 @@ class ComentariosStrings {
   /// Relative time: days ago (plural)
   /// Context: Time stamp for older activity
   static String timeDaysAgo(int days) => '$days dias atrás';
-  
-  // ==========================================================================
-  // ACCESSIBILITY LABELS
-  // ==========================================================================
   
   /// Screen reader label for comment card
   /// Context: Semantic label for accessibility
@@ -405,10 +365,6 @@ class ComentariosStrings {
   /// Context: Semantic hint for accessibility
   static const String a11yCancelDialogButtonHint = 'Fecha o diálogo sem salvar';
   
-  // ==========================================================================
-  // PREMIUM AND UPGRADE MESSAGING
-  // ==========================================================================
-  
   /// Title for premium upgrade prompt
   /// Context: Premium feature promotion
   static const String premiumTitle = 'Recurso Premium';
@@ -427,10 +383,6 @@ class ComentariosStrings {
   static const String premiumBenefits = 
       'Comentários ilimitados, backup na nuvem e muito mais!';
   
-  // ==========================================================================
-  // CONFIRMATION AND DIALOGS
-  // ==========================================================================
-  
   /// Delete confirmation title
   /// Context: Confirmation dialog title
   static const String confirmDeleteTitle = 'Confirmar Exclusão';
@@ -448,10 +400,6 @@ class ComentariosStrings {
   /// Cancel button in dialogs
   /// Context: Cancel action button
   static const String confirmNo = 'Cancelar';
-  
-  // ==========================================================================
-  // AGRICULTURAL DOMAIN SPECIFIC
-  // ==========================================================================
   
   /// Tool name for pests feature
   /// Context: Agricultural tool identifier

@@ -135,32 +135,24 @@ class MaintenanceFilterService {
     MaintenanceFilters filters,
   ) {
     var filteredRecords = records;
-
-    // Filter by vehicle
     if (filters.vehicleId != null) {
       filteredRecords =
           filteredRecords
               .where((record) => record.vehicleId == filters.vehicleId)
               .toList();
     }
-
-    // Filter by type
     if (filters.type != null) {
       filteredRecords =
           filteredRecords
               .where((record) => record.type == filters.type)
               .toList();
     }
-
-    // Filter by status
     if (filters.status != null) {
       filteredRecords =
           filteredRecords
               .where((record) => record.status == filters.status)
               .toList();
     }
-
-    // Filter by date range
     if (filters.startDate != null) {
       final startOfDay = DateTime(
         filters.startDate!.year,
@@ -191,8 +183,6 @@ class MaintenanceFilterService {
               .where((record) => record.serviceDate.isBefore(endOfDay))
               .toList();
     }
-
-    // Filter by cost range
     if (filters.minCost != null) {
       filteredRecords =
           filteredRecords
@@ -206,16 +196,12 @@ class MaintenanceFilterService {
               .where((record) => record.cost <= filters.maxCost!)
               .toList();
     }
-
-    // Filter by urgency level
     if (filters.urgencyLevel != 'all') {
       filteredRecords =
           filteredRecords
               .where((record) => record.urgencyLevel == filters.urgencyLevel)
               .toList();
     }
-
-    // Filter by search query
     if (filters.searchQuery.isNotEmpty) {
       final query = filters.searchQuery.toLowerCase();
       filteredRecords =
@@ -343,13 +329,10 @@ class MaintenanceFilterService {
   }) {
     final now = DateTime.now();
     return records.where((record) {
-      // Check date-based overdue
       if (record.nextServiceDate != null &&
           record.nextServiceDate!.isBefore(now)) {
         return true;
       }
-
-      // Check odometer-based overdue (if current odometer is provided)
       if (currentOdometer != null &&
           record.nextServiceOdometer != null &&
           currentOdometer >= record.nextServiceOdometer!) {
@@ -403,8 +386,6 @@ class MaintenanceFilterService {
     }).toList();
   }
 
-  // Helper methods
-
   int _compareUrgency(String a, String b) {
     const urgencyOrder = {
       'overdue': 0,
@@ -438,8 +419,6 @@ class MaintenanceFilterService {
       (sum, record) => sum + record.cost,
     );
     final averageCost = totalCost / records.length;
-
-    // Group by type
     final byType = <String, int>{};
     final byStatus = <String, int>{};
     final byUrgency = <String, int>{};

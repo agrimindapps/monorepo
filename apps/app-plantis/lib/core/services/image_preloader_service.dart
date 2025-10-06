@@ -21,8 +21,6 @@ class ImagePreloaderService {
 
   bool _isProcessing = false;
   Timer? _preloadTimer;
-
-  // Configuration
   static const int maxConcurrentPreloads = 3;
   static const Duration preloadDelay = Duration(milliseconds: 500);
   static const int maxPreloadedImages = 100;
@@ -36,7 +34,6 @@ class ImagePreloaderService {
         .where((url) => !_preloadQueue.contains(url));
 
     if (priority) {
-      // Add priority images to the front of the queue
       final currentQueue = List<String>.from(_preloadQueue);
       _preloadQueue.clear();
       _preloadQueue.addAll(newImages);
@@ -58,7 +55,6 @@ class ImagePreloaderService {
     final imageUrls = <String>[];
 
     for (final plant in plants) {
-      // Extract image URLs from plant object
       if (plant is Map<String, dynamic>) {
         final images = plant['images'] as List<dynamic>?;
         if (images != null && images.isNotEmpty) {
@@ -91,8 +87,6 @@ class ImagePreloaderService {
 
     _isProcessing = true;
     final batch = <String>[];
-
-    // Take up to maxConcurrentPreloads from queue
     while (batch.length < maxConcurrentPreloads && _preloadQueue.isNotEmpty) {
       final imageUrl = _preloadQueue.removeFirst();
       if (!_preloadedImages.contains(imageUrl) &&
@@ -106,12 +100,8 @@ class ImagePreloaderService {
       _isProcessing = false;
       return;
     }
-
-    // Preload batch concurrently
     final futures = batch.map(_preloadSingleImage);
     await Future.wait(futures);
-
-    // Continue processing if there are more items
     if (_preloadQueue.isNotEmpty) {
       _preloadTimer = Timer(preloadDelay, _processPreloadQueue);
     } else {
@@ -123,16 +113,12 @@ class ImagePreloaderService {
   Future<void> _preloadSingleImage(String imageUrl) async {
     try {
       if (imageUrl.startsWith('http')) {
-        // Network image
         await _preloadNetworkImage(imageUrl);
       } else if (imageUrl.length > 100) {
-        // Likely base64 image
         await _preloadBase64Image(imageUrl);
       }
 
       _preloadedImages.add(imageUrl);
-
-      // Cleanup if we have too many preloaded images
       if (_preloadedImages.length > maxPreloadedImages) {
         final excess = _preloadedImages.length - maxPreloadedImages;
         final imagesToRemove = _preloadedImages.take(excess).toList();
@@ -150,9 +136,7 @@ class ImagePreloaderService {
   /// Preload network image using CachedNetworkImage
   Future<void> _preloadNetworkImage(String imageUrl) async {
     try {
-      // Use the image provider directly to cache the image
       final imageProvider = CachedNetworkImageProvider(imageUrl);
-      // Just resolve the image to trigger caching
       final completer = Completer<void>();
       final imageStream = imageProvider.resolve(const ImageConfiguration());
 
@@ -183,8 +167,6 @@ class ImagePreloaderService {
       debugPrint('Error preloading base64 image: $e');
     }
   }
-
-  // Removed dummy context implementation - using direct image provider approach instead
 
   /// Clear preload queue and cache
   void clearPreloadQueue() {
@@ -221,8 +203,6 @@ class ImagePreloaderService {
     clearPreloadedCache();
   }
 }
-
-// Simplified preloading without dummy context
 
 /// Mixin for widgets that need to preload images
 mixin ImagePreloadingMixin<T extends StatefulWidget> on State<T> {

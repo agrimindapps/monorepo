@@ -16,8 +16,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     super.version = 1,
     super.userId,
     super.moduleName,
-
-    // Configurações gerais
     this.language = 'pt-BR',
     this.theme = AppTheme.system,
     this.currency = 'BRL',
@@ -25,8 +23,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     this.temperatureUnit = TemperatureUnit.celsius,
     this.dateFormat = DateFormat.ddmmyyyy,
     this.timeFormat = TimeFormat.h24,
-
-    // Notificações
     this.enableNotifications = true,
     this.enableMedicationReminders = true,
     this.enableAppointmentReminders = true,
@@ -37,27 +33,19 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     this.quietHoursEnd,
     this.medicationReminderAdvance = const Duration(minutes: 15),
     this.appointmentReminderAdvance = const Duration(hours: 2),
-
-    // Privacidade (single user)
     this.allowEmergencyAccess = true,
-
-    // Dados e backup
     this.autoBackupEnabled = true,
     this.autoBackupFrequency = BackupFrequency.daily,
     this.includePhotosInBackup = false,
     this.onlyBackupOnWifi = true,
     this.maxLocalStorageDays = 365,
     this.enableDataExport = true,
-
-    // Acessibilidade
     this.fontSize = FontSize.normal,
     this.enableHighContrast = false,
     this.enableVoiceOver = false,
     this.enableHapticFeedback = true,
     this.enableReducedMotion = false,
     this.colorBlindnessType,
-
-    // Funcionalidades específicas do pet care
     this.defaultAnimalViewMode = AnimalViewMode.list,
     this.showAgeInDays = false,
     this.enableWeightTrends = true,
@@ -66,24 +54,18 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     this.autoCalculateNextVaccination = true,
     this.preferredVeterinarianId,
     this.defaultReminderLeadTime = const Duration(days: 1),
-
-    // Configurações avançadas
     this.developerMode = false,
     this.enableAnalytics = true,
     this.enableCrashReporting = true,
     this.enableBetaFeatures = false,
     this.maxSyncRetries = 3,
     this.syncTimeout = const Duration(minutes: 5),
-
-    // Personalização
     this.customCategories = const {},
     this.favoriteFeatures = const [],
     this.hiddenFeatures = const [],
     this.quickActionButtons = const [],
     this.dashboardWidgets = const [],
   });
-
-  // Configurações gerais
   final String language;
   final AppTheme theme;
   final String currency;
@@ -91,8 +73,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
   final TemperatureUnit temperatureUnit;
   final DateFormat dateFormat;
   final TimeFormat timeFormat;
-
-  // Notificações
   final bool enableNotifications;
   final bool enableMedicationReminders;
   final bool enableAppointmentReminders;
@@ -103,31 +83,23 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
   final TimeOfDay? quietHoursEnd;
   final Duration medicationReminderAdvance;
   final Duration appointmentReminderAdvance;
-
-  // Privacidade (single user)
   final bool allowEmergencyAccess;
   final bool sharePhotosByDefault = false; // Single user - always false
   final bool shareWeightDataByDefault = false; // Single user - always false
   final bool shareMedicalDataByDefault = false; // Single user - always false
   final bool hasEmergencyContacts = true; // Single user - simplified
-
-  // Dados e backup
   final bool autoBackupEnabled;
   final BackupFrequency autoBackupFrequency;
   final bool includePhotosInBackup;
   final bool onlyBackupOnWifi;
   final int maxLocalStorageDays;
   final bool enableDataExport;
-
-  // Acessibilidade
   final FontSize fontSize;
   final bool enableHighContrast;
   final bool enableVoiceOver;
   final bool enableHapticFeedback;
   final bool enableReducedMotion;
   final ColorBlindnessType? colorBlindnessType;
-
-  // Funcionalidades específicas do pet care
   final AnimalViewMode defaultAnimalViewMode;
   final bool showAgeInDays;
   final bool enableWeightTrends;
@@ -136,16 +108,12 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
   final bool autoCalculateNextVaccination;
   final String? preferredVeterinarianId;
   final Duration defaultReminderLeadTime;
-
-  // Configurações avançadas
   final bool developerMode;
   final bool enableAnalytics;
   final bool enableCrashReporting;
   final bool enableBetaFeatures;
   final int maxSyncRetries;
   final Duration syncTimeout;
-
-  // Personalização
   final Map<String, List<String>> customCategories;
   final List<String> favoriteFeatures;
   final List<String> hiddenFeatures;
@@ -175,8 +143,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
   Map<String, dynamic> toFirebaseMap() {
     final Map<String, dynamic> map = {
       ...baseFirebaseFields,
-
-      // Configurações gerais
       'language': language,
       'theme': theme.toString().split('.').last,
       'currency': currency,
@@ -184,8 +150,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       'temperature_unit': temperatureUnit.toString().split('.').last,
       'date_format': dateFormat.toString().split('.').last,
       'time_format': timeFormat.toString().split('.').last,
-
-      // Notificações
       'enable_notifications': enableNotifications,
       'enable_medication_reminders': enableMedicationReminders,
       'enable_appointment_reminders': enableAppointmentReminders,
@@ -196,27 +160,19 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       'quiet_hours_end': quietHoursEnd != null ? '${quietHoursEnd!.hour}:${quietHoursEnd!.minute}' : null,
       'medication_reminder_advance_minutes': medicationReminderAdvance.inMinutes,
       'appointment_reminder_advance_hours': appointmentReminderAdvance.inHours,
-
-      // Privacidade e compartilhamento
       'allow_emergency_access': allowEmergencyAccess,
-
-      // Dados e backup
       'auto_backup_enabled': autoBackupEnabled,
       'auto_backup_frequency': autoBackupFrequency.toString().split('.').last,
       'include_photos_in_backup': includePhotosInBackup,
       'only_backup_on_wifi': onlyBackupOnWifi,
       'max_local_storage_days': maxLocalStorageDays,
       'enable_data_export': enableDataExport,
-
-      // Acessibilidade
       'font_size': fontSize.toString().split('.').last,
       'enable_high_contrast': enableHighContrast,
       'enable_voice_over': enableVoiceOver,
       'enable_haptic_feedback': enableHapticFeedback,
       'enable_reduced_motion': enableReducedMotion,
       'color_blindness_type': colorBlindnessType?.toString().split('.').last,
-
-      // Pet care específico
       'default_animal_view_mode': defaultAnimalViewMode.toString().split('.').last,
       'show_age_in_days': showAgeInDays,
       'enable_weight_trends': enableWeightTrends,
@@ -225,23 +181,17 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       'auto_calculate_next_vaccination': autoCalculateNextVaccination,
       'preferred_veterinarian_id': preferredVeterinarianId,
       'default_reminder_lead_time_hours': defaultReminderLeadTime.inHours,
-
-      // Configurações avançadas
       'developer_mode': developerMode,
       'enable_analytics': enableAnalytics,
       'enable_crash_reporting': enableCrashReporting,
       'enable_beta_features': enableBetaFeatures,
       'max_sync_retries': maxSyncRetries,
       'sync_timeout_minutes': syncTimeout.inMinutes,
-
-      // Personalização
       'custom_categories': customCategories,
       'favorite_features': favoriteFeatures,
       'hidden_features': hiddenFeatures,
       'quick_action_buttons': quickActionButtons,
       'dashboard_widgets': dashboardWidgets,
-
-      // Metadados computados
       'has_quiet_hours': hasQuietHours,
       'has_emergency_contacts': hasEmergencyContacts,
       'is_accessibility_enabled': isAccessibilityEnabled,
@@ -249,8 +199,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       'has_emergency_settings': hasEmergencySettings,
       'emergency_settings': emergencySettings,
     };
-
-    // Remover valores nulos
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -268,8 +216,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       version: (baseFields['version'] as int?) ?? 1,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-
-      // Configurações gerais
       language: map['language'] as String? ?? 'pt-BR',
       theme: _parseAppTheme(map['theme'] as String?),
       currency: map['currency'] as String? ?? 'BRL',
@@ -277,8 +223,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       temperatureUnit: _parseTemperatureUnit(map['temperature_unit'] as String?),
       dateFormat: _parseDateFormat(map['date_format'] as String?),
       timeFormat: _parseTimeFormat(map['time_format'] as String?),
-
-      // Notificações
       enableNotifications: map['enable_notifications'] as bool? ?? true,
       enableMedicationReminders: map['enable_medication_reminders'] as bool? ?? true,
       enableAppointmentReminders: map['enable_appointment_reminders'] as bool? ?? true,
@@ -289,27 +233,19 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       quietHoursEnd: _parseTimeOfDay(map['quiet_hours_end'] as String?),
       medicationReminderAdvance: Duration(minutes: map['medication_reminder_advance_minutes'] as int? ?? 15),
       appointmentReminderAdvance: Duration(hours: map['appointment_reminder_advance_hours'] as int? ?? 2),
-
-      // Privacidade e compartilhamento
       allowEmergencyAccess: map['allow_emergency_access'] as bool? ?? true,
-
-      // Dados e backup
       autoBackupEnabled: map['auto_backup_enabled'] as bool? ?? true,
       autoBackupFrequency: _parseBackupFrequency(map['auto_backup_frequency'] as String?),
       includePhotosInBackup: map['include_photos_in_backup'] as bool? ?? false,
       onlyBackupOnWifi: map['only_backup_on_wifi'] as bool? ?? true,
       maxLocalStorageDays: map['max_local_storage_days'] as int? ?? 365,
       enableDataExport: map['enable_data_export'] as bool? ?? true,
-
-      // Acessibilidade
       fontSize: _parseFontSize(map['font_size'] as String?),
       enableHighContrast: map['enable_high_contrast'] as bool? ?? false,
       enableVoiceOver: map['enable_voice_over'] as bool? ?? false,
       enableHapticFeedback: map['enable_haptic_feedback'] as bool? ?? true,
       enableReducedMotion: map['enable_reduced_motion'] as bool? ?? false,
       colorBlindnessType: _parseColorBlindnessType(map['color_blindness_type'] as String?),
-
-      // Pet care específico
       defaultAnimalViewMode: _parseAnimalViewMode(map['default_animal_view_mode'] as String?),
       showAgeInDays: map['show_age_in_days'] as bool? ?? false,
       enableWeightTrends: map['enable_weight_trends'] as bool? ?? true,
@@ -318,16 +254,12 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       autoCalculateNextVaccination: map['auto_calculate_next_vaccination'] as bool? ?? true,
       preferredVeterinarianId: map['preferred_veterinarian_id'] as String?,
       defaultReminderLeadTime: Duration(hours: map['default_reminder_lead_time_hours'] as int? ?? 24),
-
-      // Configurações avançadas
       developerMode: map['developer_mode'] as bool? ?? false,
       enableAnalytics: map['enable_analytics'] as bool? ?? true,
       enableCrashReporting: map['enable_crash_reporting'] as bool? ?? true,
       enableBetaFeatures: map['enable_beta_features'] as bool? ?? false,
       maxSyncRetries: map['max_sync_retries'] as int? ?? 3,
       syncTimeout: Duration(minutes: map['sync_timeout_minutes'] as int? ?? 5),
-
-      // Personalização
       customCategories: Map<String, List<String>>.from(
         (map['custom_categories'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, (value as List<dynamic>).map((e) => e as String).toList()),
@@ -347,8 +279,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
         .toList() ?? [],
     );
   }
-
-  // Métodos helper para parsing de enums
   static AppTheme _parseAppTheme(String? value) {
     if (value == null) return AppTheme.system;
     try {
@@ -447,7 +377,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
         return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
       }
     } catch (e) {
-      // Ignore parse errors
     }
     return null;
   }
@@ -458,10 +387,8 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     final endMinutes = end.hour * 60 + end.minute;
 
     if (startMinutes <= endMinutes) {
-      // Same day range
       return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
     } else {
-      // Overnight range
       return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
     }
   }
@@ -709,8 +636,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     dashboardWidgets,
   ];
 }
-
-// Enums necessários para as configurações
 
 enum AppTheme { light, dark, system }
 enum WeightUnit { kg, lb }

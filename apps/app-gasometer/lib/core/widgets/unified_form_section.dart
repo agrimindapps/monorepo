@@ -37,8 +37,6 @@ class UnifiedFormSection extends StatelessWidget {
   final bool enabled;
   final Color? backgroundColor;
   
-  // Factory constructors para padrões comuns
-  
   /// Seção básica não colapsável
   static UnifiedFormSection basic({
     required String title,
@@ -121,10 +119,7 @@ class UnifiedFormSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section Header
           _buildSectionHeader(context, theme, isCollapsible),
-          
-          // Section Content
           if (expanded) _buildSectionContent(context, theme),
         ],
       ),
@@ -138,7 +133,6 @@ class UnifiedFormSection extends StatelessWidget {
           : const EdgeInsets.symmetric(vertical: UnifiedDesignTokens.spacingSM),
       child: Row(
         children: [
-          // Ícone da seção
           Container(
             padding: const EdgeInsets.all(UnifiedDesignTokens.spacingSM),
             decoration: BoxDecoration(
@@ -156,8 +150,6 @@ class UnifiedFormSection extends StatelessWidget {
             ),
           ),
           const SizedBox(width: UnifiedDesignTokens.spacingMD),
-          
-          // Título e subtítulo
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,8 +189,6 @@ class UnifiedFormSection extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Ícone de expansão/colapso
           if (isCollapsible)
             Icon(
               expanded ? Icons.expand_less : Icons.expand_more,
@@ -262,8 +252,6 @@ class UnifiedFormSection extends StatelessWidget {
     
     for (int i = 0; i < children.length; i++) {
       spacedChildren.add(children[i]);
-      
-      // Adicionar espaçamento entre os children (exceto o último)
       if (i < children.length - 1) {
         spacedChildren.add(
           const SizedBox(height: UnifiedDesignTokens.spacingFormField),
@@ -319,8 +307,6 @@ extension UnifiedFormSectionExtension on List<Widget> {
     
     for (int i = 0; i < length; i++) {
       sections.add(this[i]);
-      
-      // Adicionar espaçamento entre seções (exceto a última)
       if (i < length - 1 && this[i] is UnifiedFormSection) {
         sections.add(const SizedBox(height: UnifiedDesignTokens.spacingSection));
       }

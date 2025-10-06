@@ -37,42 +37,32 @@ import '../../features/weight/presentation/pages/weight_page.dart';
 import '../navigation/bottom_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // Web inicia em promo (landing page), Mobile/Desktop inicia em splash
   const initialRoute = kIsWeb ? '/promo' : '/splash';
   
   return GoRouter(
     initialLocation: initialRoute,
     debugLogDiagnostics: true,
     redirect: (context, state) {
-      // CORREÇÃO: Só fazer redirects após sair da splash
-      // Durante splash, permitir navegação normal
       final isOnSplash = state.matchedLocation == '/splash';
       
       if (isOnSplash) {
         return null; // Permitir acesso à splash sempre
       }
-      
-      // Para outras rotas, tentar acessar auth de forma segura
       try {
         final authState = ref.read(authProvider);
         final isAuthenticated = authState.isAuthenticated;
         final isOnAuthPage = state.matchedLocation.startsWith('/login') || 
                              state.matchedLocation.startsWith('/register');
         final isOnPromo = state.matchedLocation == '/promo';
-        
-        // If authenticated, redirect to home (except splash)
         if (isAuthenticated && (isOnPromo || isOnAuthPage)) {
           return '/';
         }
-
-        // If not authenticated and trying to access protected pages, redirect to promo
         if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
           return '/promo';
         }
 
         return null; // No redirect needed
       } catch (e) {
-        // Se authProvider ainda não está pronto, redirecionar para splash
         return '/splash';
       }
     },
@@ -369,8 +359,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
         ],
       ),
-      
-      // Rotas fora do shell (sem bottom navigation)
       GoRoute(
         path: '/promo',
         name: 'promo',

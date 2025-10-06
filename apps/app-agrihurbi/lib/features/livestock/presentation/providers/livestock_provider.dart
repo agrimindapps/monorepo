@@ -52,8 +52,6 @@ class LivestockProvider extends ChangeNotifier {
        _deleteBovine = deleteBovine,
        _searchAnimals = searchAnimals;
 
-  // === STATE MANAGEMENT ===
-
   /// Estados de loading
   bool _isLoading = false;
   bool _isLoadingBovines = false;
@@ -83,8 +81,6 @@ class LivestockProvider extends ChangeNotifier {
 
   /// Estatísticas
   Map<String, dynamic>? _statistics;
-
-  // === GETTERS ===
 
   bool get isLoading => _isLoading;
   bool get isLoadingBovines => _isLoadingBovines;
@@ -199,8 +195,6 @@ class LivestockProvider extends ChangeNotifier {
   int get totalActiveBovines => _bovines.where((b) => b.isActive).length;
   int get totalActiveEquines => _equines.where((e) => e.isActive).length;
 
-  // === OPERAÇÕES BOVINOS ===
-
   /// Carrega todos os bovinos
   Future<void> loadBovines() async {
     _isLoadingBovines = true;
@@ -274,8 +268,6 @@ class LivestockProvider extends ChangeNotifier {
         final index = _bovines.indexWhere((b) => b.id == updatedBovine.id);
         if (index != -1) {
           _bovines[index] = updatedBovine;
-
-          // Atualiza o selecionado se for o mesmo
           if (_selectedBovine?.id == updatedBovine.id) {
             _selectedBovine = updatedBovine;
           }
@@ -306,12 +298,9 @@ class LivestockProvider extends ChangeNotifier {
         debugPrint('Erro ao deletar bovino: ${failure.message}');
       },
       (_) {
-        // Remove da lista local ou marca como inativo
         final index = _bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
           _bovines[index] = _bovines[index].copyWith(isActive: false);
-
-          // Limpa seleção se foi o selecionado
           if (_selectedBovine?.id == bovineId) {
             _selectedBovine = null;
           }
@@ -326,8 +315,6 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
     return success;
   }
-
-  // === OPERAÇÕES EQUINOS ===
 
   /// Carrega todos os equinos
   Future<void> loadEquines() async {
@@ -357,8 +344,6 @@ class LivestockProvider extends ChangeNotifier {
     _selectedEquine = equine;
     notifyListeners();
   }
-
-  // === OPERAÇÕES DE BUSCA E FILTROS ===
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
@@ -424,8 +409,6 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // === OPERAÇÕES AUXILIARES ===
-
   /// Carrega estatísticas do rebanho
   Future<void> loadStatistics() async {
     _isLoading = true;
@@ -463,7 +446,6 @@ class LivestockProvider extends ChangeNotifier {
       },
       (_) {
         debugPrint('Sincronização realizada com sucesso');
-        // Recarrega dados após sync
         loadBovines();
         loadEquines();
       },
@@ -512,7 +494,6 @@ class LivestockProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Cleanup se necessário
     super.dispose();
   }
 }

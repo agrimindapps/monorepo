@@ -5,10 +5,6 @@ import '../theme/app_text_styles.dart';
 /// Design System Components
 /// Centralized reusable components with consistent styling
 
-// =====================================================================
-// ENHANCED CARD COMPONENT
-// =====================================================================
-
 /// Enhanced Card with consistent styling and accessibility
 class DSCard extends StatelessWidget {
   final Widget child;
@@ -62,10 +58,6 @@ class DSCard extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// MARKET CARD COMPONENT
-// =====================================================================
-
 /// Standardized Market Card for market data display
 class DSMarketCard extends StatelessWidget {
   final String title;
@@ -105,7 +97,6 @@ class DSMarketCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row with title and favorite
           Row(
             children: [
               Expanded(
@@ -134,8 +125,6 @@ class DSMarketCard extends StatelessWidget {
           ),
           
           const SizedBox(height: 8),
-          
-          // Price and change row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -179,10 +168,6 @@ class DSMarketCard extends StatelessWidget {
     );
   }
 }
-
-// =====================================================================
-// BUTTON COMPONENTS
-// =====================================================================
 
 /// Primary Button with consistent styling
 class DSPrimaryButton extends StatelessWidget {
@@ -287,10 +272,6 @@ class DSSecondaryButton extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// INPUT COMPONENTS
-// =====================================================================
-
 /// Enhanced Text Field with consistent styling
 class DSTextField extends StatelessWidget {
   final String? label;
@@ -378,10 +359,6 @@ class DSTextField extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// STATUS INDICATOR COMPONENTS
-// =====================================================================
-
 /// Status Indicator with color and text
 class DSStatusIndicator extends StatelessWidget {
   final String status;
@@ -454,10 +431,6 @@ class DSStatusIndicator extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// SECTION HEADER COMPONENT
-// =====================================================================
-
 /// Section Header with consistent styling
 class DSSectionHeader extends StatelessWidget {
   final String title;
@@ -499,10 +472,6 @@ class DSSectionHeader extends StatelessWidget {
   }
 }
 
-// =====================================================================
-// LOADING INDICATOR COMPONENTS
-// =====================================================================
-
 /// Loading Card Placeholder
 class DSLoadingCard extends StatelessWidget {
   final double? height;
@@ -535,10 +504,6 @@ class DSLoadingCard extends StatelessWidget {
     );
   }
 }
-
-// =====================================================================
-// ERROR STATE COMPONENTS
-// =====================================================================
 
 /// Error State Display
 class DSErrorState extends StatelessWidget {

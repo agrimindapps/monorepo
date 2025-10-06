@@ -1,4 +1,3 @@
-// ignore_for_file: overridden_fields
 
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:core/core.dart' hide NotificationSettings, PrivacySettings;
@@ -237,8 +236,6 @@ class NotificationSettingsModel extends NotificationSettings {
     };
   }
 }
-
-// Similar pattern for other settings models...
 @HiveType(typeId: 26)
 class DataSettingsModel extends DataSettings {
   @HiveField(0)
@@ -317,9 +314,6 @@ class DataSettingsModel extends DataSettings {
     };
   }
 }
-
-
-// Simplified versions of remaining models...
 @HiveType(typeId: 28)
 class PrivacySettingsModel extends PrivacySettings {
   @HiveField(0)

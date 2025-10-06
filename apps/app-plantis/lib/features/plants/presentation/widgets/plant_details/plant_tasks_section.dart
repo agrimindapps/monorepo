@@ -88,7 +88,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     List<PlantTask> tasks,
     PlantTaskProvider taskProvider,
   ) {
-    // Organizar tarefas por status
     final overdueTasks = tasks.where((task) => task.isOverdue).toList();
     final upcomingTasks =
         tasks.where((task) => task.isDueToday || task.isDueSoon).toList();
@@ -103,13 +102,9 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
             )
             .toList();
     final completedTasks = tasks.where((task) => task.isCompleted).toList();
-
-    // Ordenar tarefas por data de vencimento (mais próxima primeiro)
     overdueTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     upcomingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     pendingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
-
-    // Ordenar tarefas concluídas por data de conclusão (mais recente primeiro)
     completedTasks.sort(
       (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
         a.completedDate ?? DateTime(1970),
@@ -119,7 +114,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Tarefas em atraso
         if (overdueTasks.isNotEmpty) ...[
           _buildTaskSection(
             context,
@@ -130,8 +124,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
           ),
           const SizedBox(height: 24),
         ],
-
-        // Tarefas para hoje/próximas
         if (upcomingTasks.isNotEmpty) ...[
           _buildTaskSection(
             context,
@@ -142,8 +134,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
           ),
           const SizedBox(height: 24),
         ],
-
-        // Tarefas pendentes
         if (pendingTasks.isNotEmpty) ...[
           _buildTaskSection(
             context,
@@ -154,8 +144,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
           ),
           const SizedBox(height: 24),
         ],
-
-        // Tarefas concluídas - Seção expansível inline
         if (completedTasks.isNotEmpty) ...[
           _buildCompletedTasksExpandableSection(
             context,
@@ -254,7 +242,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Ícone da tarefa
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -265,8 +252,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
               ),
 
               const SizedBox(width: 16),
-
-              // Informações da tarefa
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,7 +333,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
   }
 
   String _formatDueDate(DateTime dueDate) {
-    // Formato sempre dd/MM/yyyy
     final day = dueDate.day.toString().padLeft(2, '0');
     final month = dueDate.month.toString().padLeft(2, '0');
     final year = dueDate.year.toString();
@@ -366,7 +350,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Botão de histórico expansível
         GestureDetector(
           onTap: () {
             setState(() {
@@ -435,8 +418,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
             ),
           ),
         ),
-
-        // Lista expansível de tarefas concluídas
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -468,17 +449,12 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     PlantTaskProvider taskProvider,
   ) async {
     try {
-      // Converter PlantTask para Task usando o adaptador
       final taskEntity = PlantTaskAdapter.plantTaskToTask(plantTask);
-
-      // Exibir dialog de conclusão
       final result = await TaskCompletionDialog.show(
         context: context,
         task: taskEntity,
         plantName: widget.plant.name,
       );
-
-      // Processar resultado se o usuário confirmou
       if (result != null && context.mounted) {
         await taskProvider.completeTaskWithDate(
           widget.plant.id,
@@ -486,8 +462,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
           completionDate: result.completionDate,
           notes: result.notes,
         );
-
-        // Feedback visual de sucesso
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -499,7 +473,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
         }
       }
     } catch (e) {
-      // Tratamento de erro
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

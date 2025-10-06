@@ -17,7 +17,6 @@ class TasksLoadingWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Indicador de carregamento com ícone personalizado
           Stack(
             alignment: Alignment.center,
             children: [
@@ -65,7 +64,6 @@ class TasksLoadingWidget extends StatelessWidget {
   Widget _buildSkeletonLoading(ThemeData theme) {
     return Column(
       children: [
-        // Date header skeleton
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -77,10 +75,8 @@ class TasksLoadingWidget extends StatelessWidget {
             ],
           ),
         ),
-        // Task card skeletons
         ...List.generate(5, (index) => _buildSkeletonTaskCard(theme)),
         const SizedBox(height: 20),
-        // Another date section
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -107,10 +103,8 @@ class TasksLoadingWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Icon skeleton
           _buildShimmer(40, 40, theme, isCircle: true),
           const SizedBox(width: 16),
-          // Content skeleton
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +116,6 @@ class TasksLoadingWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Action button skeleton
           _buildShimmer(40, 40, theme, isCircle: true),
         ],
       ),

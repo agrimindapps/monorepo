@@ -385,8 +385,6 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
   }
 
   Widget _buildCalendarView(ThemeData theme, List<Vaccine> vaccines) {
-    // Implementation for calendar view would go here
-    // This would show vaccines in a monthly calendar format
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -569,14 +567,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
       ),
     );
   }
-
-  // Helper Methods
   List<Vaccine> _filterVaccines(List<Vaccine> vaccines) {
     List<Vaccine> filtered = widget.animalId != null 
         ? vaccines.where((v) => v.animalId == widget.animalId).toList()
         : vaccines;
-
-    // Filter by time range
     final now = DateTime.now();
     switch (_selectedTimeRange) {
       case 'thisYear':
@@ -591,8 +585,6 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
         filtered = filtered.where((v) => v.date.isAfter(thirtyDaysAgo)).toList();
         break;
     }
-
-    // Filter by vaccine type
     switch (_selectedVaccineType) {
       case 'required':
         filtered = filtered.where((v) => v.isRequired).toList();
@@ -610,8 +602,6 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
     final thisYear = vaccines.where((v) => v.date.year == now.year).length;
     final overdue = vaccines.where((v) => v.isOverdue).length;
     final total = vaccines.length;
-    
-    // Calculate effectiveness (simplified)
     final completed = vaccines.where((v) => v.isCompleted).length;
     final effectiveness = total > 0 ? ((completed / total) * 100).round() : 0;
 
@@ -635,7 +625,6 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
   }
 
   Map<String, dynamic> _generateAdvancedAnalytics(List<Vaccine> vaccines) {
-    // Effectiveness by vaccine type
     final Map<String, List<Vaccine>> byType = {};
     for (final vaccine in vaccines) {
       byType.putIfAbsent(vaccine.name, () => []).add(vaccine);
@@ -646,14 +635,10 @@ class _VaccineHistoryVisualizationState extends ConsumerState<VaccineHistoryVisu
       final rate = value.isNotEmpty ? (completed / value.length * 100) : 0.0;
       return MapEntry(key, rate);
     });
-
-    // Trends (simplified)
     final trends = <String, int>{};
     for (int year = DateTime.now().year - 2; year <= DateTime.now().year; year++) {
       trends[year.toString()] = vaccines.where((v) => v.date.year == year).length;
     }
-
-    // Veterinarian distribution
     final veterinarians = <String, int>{};
     for (final vaccine in vaccines) {
       veterinarians[vaccine.veterinarian] = 

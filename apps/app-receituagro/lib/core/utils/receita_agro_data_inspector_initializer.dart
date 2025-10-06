@@ -7,10 +7,7 @@ class ReceitaAgroDataInspectorInitializer {
     if (!kDebugMode) return; // Apenas em modo debug
 
     final inspector = DatabaseInspectorService.instance;
-
-    // Registrar todas as boxes customizadas do app-receituagro
     inspector.registerCustomBoxes([
-      // Módulo de Dados Agrícolas - Core
       const CustomBoxType(
         key: 'receituagro_culturas',
         displayName: 'Culturas',
@@ -42,8 +39,6 @@ class ReceitaAgroDataInspectorInitializer {
         description:
             'Diagnósticos de pragas em culturas, incluindo recomendações de fitossanitários e dosagens',
       ),
-
-      // Módulo de Dados Agrícolas - Informações Detalhadas
       const CustomBoxType(
         key: 'receituagro_fitossanitarios_info',
         displayName: 'Informações de Fitossanitários',
@@ -67,8 +62,6 @@ class ReceitaAgroDataInspectorInitializer {
         description:
             'Informações detalhadas sobre pragas, incluindo ciclo de vida, sintomas e controle',
       ),
-
-      // Módulo Premium
       const CustomBoxType(
         key: 'receituagro_premium_status',
         displayName: 'Status Premium',
@@ -76,8 +69,6 @@ class ReceitaAgroDataInspectorInitializer {
         description:
             'Informações sobre assinatura premium, licenças e funcionalidades liberadas',
       ),
-
-      // Módulo de Usuário
       const CustomBoxType(
         key: 'comentarios',
         displayName: 'Comentários',
@@ -93,8 +84,6 @@ class ReceitaAgroDataInspectorInitializer {
         description:
             'Lista de favoritos do usuário, incluindo culturas, pragas e fitossanitários salvos',
       ),
-
-      // Módulo Sistema
       const CustomBoxType(
         key: 'receituagro_app_settings',
         displayName: 'Configurações do App',
@@ -152,8 +141,6 @@ class ReceitaAgroDataInspectorInitializer {
   static Map<String, dynamic> getModuleStats() {
     final inspector = DatabaseInspectorService.instance;
     final availableBoxes = inspector.getAvailableHiveBoxes();
-    
-    // Mapear estatísticas por módulo
     final moduleStats = <String, Map<String, dynamic>>{};
     
     for (final boxKey in availableBoxes) {

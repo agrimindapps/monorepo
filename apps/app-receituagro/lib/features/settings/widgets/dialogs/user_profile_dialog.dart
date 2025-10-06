@@ -30,8 +30,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     super.initState();
     _displayNameController = TextEditingController();
     _emailController = TextEditingController();
-
-    // Initialize values asynchronously after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authState = ref.read(receitaAgroAuthNotifierProvider).value;
       if (authState != null && mounted) {
@@ -55,8 +53,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     if (user != null && user.displayName.isNotEmpty) {
       return user.displayName;
     }
-
-    // Get device info from settings notifier
     final settingsState = ref.read(settingsNotifierProvider).value;
     final device = settingsState?.currentDeviceInfo;
     if (device?.name.isNotEmpty == true) {
@@ -119,7 +115,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Header
             Row(
               children: [
                 Icon(Icons.person, color: theme.colorScheme.primary, size: 24),
@@ -139,13 +134,9 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
             ),
 
             const SizedBox(height: 24),
-
-            // Avatar
             _buildAvatar(theme, authState),
 
             const SizedBox(height: 24),
-
-            // Profile Form
             Expanded(
               child: SingleChildScrollView(
                 child: _buildProfileForm(theme, authState),
@@ -153,8 +144,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
             ),
 
             const SizedBox(height: 24),
-
-            // Actions
             _buildActions(theme, authState),
           ],
         ),
@@ -214,7 +203,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Display Name Field
         Text(
           'Nome de Exibição',
           style: theme.textTheme.titleSmall?.copyWith(
@@ -244,8 +232,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
         ),
 
         const SizedBox(height: 16),
-
-        // Email Field
         Text(
           'Email',
           style: theme.textTheme.titleSmall?.copyWith(
@@ -267,8 +253,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
         ),
 
         const SizedBox(height: 24),
-
-        // Account Information
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -430,7 +414,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     });
 
     try {
-      // Simulate save operation
       await Future<void>.delayed(const Duration(seconds: 1));
 
       if (mounted) {

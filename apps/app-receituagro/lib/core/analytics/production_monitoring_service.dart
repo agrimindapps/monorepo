@@ -38,20 +38,13 @@ class ProductionMonitoringService {
     _crashlytics = crashlytics;
     
     try {
-      // Set global error handling
       FlutterError.onError = _handleFlutterError;
-      
-      // Set uncaught error handling
       PlatformDispatcher.instance.onError = _handlePlatformError;
-      
-      // Initialize crashlytics
       await _crashlytics.setUserId('receituagro_user_${DateTime.now().millisecondsSinceEpoch}');
       await _crashlytics.setCustomKey(key: 'app_name', value: 'receituagro');
       await _crashlytics.setCustomKey(key: 'sprint_version', value: 'sprint_4');
       
       _isInitialized = true;
-      
-      // Log successful initialization
       await _analytics.logEvent(
         'monitoring_service_initialized',
         parameters: {
@@ -68,15 +61,12 @@ class ProductionMonitoringService {
 
   /// Handle Flutter framework errors
   void _handleFlutterError(FlutterErrorDetails details) {
-    // Log to crashlytics
     _crashlytics.recordError(
       exception: details.exception,
       stackTrace: details.stack ?? StackTrace.empty,
       reason: 'Flutter Error: ${details.library}',
       fatal: false,
     );
-
-    // Log to analytics
     _analytics.logEvent(
       'flutter_error_occurred',
       parameters: {
@@ -86,12 +76,8 @@ class ProductionMonitoringService {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
-
-    // Count errors
     final errorKey = details.exception.runtimeType.toString();
     _errorCounts[errorKey] = (_errorCounts[errorKey] ?? 0) + 1;
-
-    // Call original error handler in debug mode
     if (kDebugMode) {
       FlutterError.presentError(details);
     }
@@ -298,8 +284,6 @@ class ProductionMonitoringService {
         ...additionalParameters ?? {},
       },
     );
-
-    // Log slow operations as warnings
     if (duration.inMilliseconds > 2000) {
       await _crashlytics.log('Slow operation detected: $operationName (${duration.inMilliseconds}ms)');
     }
@@ -310,16 +294,12 @@ class ProductionMonitoringService {
   /// Track custom errors
   Future<void> trackError(String errorType, String errorMessage, {StackTrace? stackTrace, Map<String, dynamic>? parameters}) async {
     if (!_isInitialized) return;
-
-    // Log to crashlytics
     await _crashlytics.recordError(
       exception: Exception('$errorType: $errorMessage'),
       stackTrace: stackTrace ?? StackTrace.current,
       reason: errorType,
       fatal: false,
     );
-
-    // Log to analytics
     await _analytics.logEvent(
       'custom_error',
       parameters: {
@@ -329,8 +309,6 @@ class ProductionMonitoringService {
         ...parameters ?? {},
       },
     );
-
-    // Count errors
     _errorCounts[errorType] = (_errorCounts[errorType] ?? 0) + 1;
   }
 
@@ -419,7 +397,6 @@ class ProductionMonitoringService {
 
   /// Get memory usage information
   Map<String, dynamic> _getMemoryUsage() {
-    // This would integrate with actual memory monitoring
     return {
       'rss': 'unknown', // Resident Set Size
       'heap_used': 'unknown',

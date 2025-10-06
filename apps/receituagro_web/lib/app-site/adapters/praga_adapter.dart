@@ -1,8 +1,4 @@
-// Adapter to bridge Supabase Pragas model with Core PragaEntity
-// Note: Currently using minimal core integration for demonstration purposes
 import '../classes/pragas_class.dart';
-
-// Temporary stub types until core package is fully implemented
 class PragaEntity {
   final String id;
   final String nomeComum;
@@ -45,7 +41,6 @@ class PragaAdapter {
   /// Converts Core PragaEntity back to Supabase Pragas
   /// Simplified implementation for demonstration purposes
   static Pragas fromEntity(PragaEntity entity) {
-    // Extract genus and species from scientific name
     final nomeParts = entity.nomeCientifico.split(' ');
     final genero = nomeParts.isNotEmpty ? nomeParts[0] : '';
     final especie = nomeParts.length > 1 ? nomeParts[1] : '';

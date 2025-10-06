@@ -16,13 +16,11 @@ class WebOptimizedNavigationShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Mostrar sidebar apenas em desktop (>1200px)
         final shouldShowSidebar = constraints.maxWidth >= 1200;
 
         if (shouldShowSidebar) {
           return _DesktopLayout(child: child);
         } else {
-          // Manter navegação mobile atual para telas menores
           return MainScaffold(child: child);
         }
       },
@@ -42,9 +40,7 @@ class _DesktopLayout extends StatelessWidget {
       backgroundColor: PlantisColors.getPageBackgroundColor(context),
       body: Row(
         children: [
-          // Sidebar fixa à esquerda
           const ModernSidebar(),
-          // Área de conteúdo principal
           Expanded(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -91,8 +87,6 @@ class _ModernSidebarState extends State<ModernSidebar>
   @override
   void initState() {
     super.initState();
-
-    // Animation controller para fade in inicial
     _fadeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -103,8 +97,6 @@ class _ModernSidebarState extends State<ModernSidebar>
         curve: Curves.easeInOut,
       ),
     );
-
-    // Animation controller para expansão/colapso
     _widthAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -161,7 +153,6 @@ class _ModernSidebarState extends State<ModernSidebar>
           return Container(
             width: _widthAnimation.value,
             decoration: BoxDecoration(
-              // Fundo cinza claro mais sutil
               color:
                   theme.brightness == Brightness.dark
                       ? Colors.grey.shade900.withValues(alpha: 0.95)
@@ -182,16 +173,9 @@ class _ModernSidebarState extends State<ModernSidebar>
             ),
             child: Column(
               children: [
-                // Header com logo e nome do app
                 _SidebarHeader(isExpanded: _isExpanded),
-
-                // Lista de navegação principal
                 Expanded(child: _NavigationList(isExpanded: _isExpanded)),
-
-                // Configurações movidas para bottom
                 _BottomNavigationSection(isExpanded: _isExpanded),
-
-                // Footer com informações do usuário, versão e toggle
                 _SidebarFooter(
                   isExpanded: _isExpanded,
                   onToggle: _toggleSidebar,
@@ -219,7 +203,6 @@ class _SidebarHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 24, 16, 24),
       child: Row(
         children: [
-          // Logo com gradiente
           Container(
             width: 44,
             height: 44,
@@ -243,8 +226,6 @@ class _SidebarHeader extends StatelessWidget {
 
           if (isExpanded) ...[
             const SizedBox(width: 16),
-
-            // Nome do app e subtítulo (apenas quando expandido)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +268,6 @@ class _NavigationList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Seção principal (apenas quando expandido)
           if (isExpanded) ...[
             Padding(
               padding: const EdgeInsets.only(left: 16, bottom: 12),
@@ -301,11 +281,8 @@ class _NavigationList extends StatelessWidget {
               ),
             ),
           ],
-
-          // Itens de navegação (sem Configurações)
           Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              // For now, show 0 pending tasks until we implement proper Riverpod providers
               const pendingTasksCount = 0;
 
               return Column(
@@ -366,8 +343,6 @@ class _BottomNavigationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 12),
-
-          // Configurações na parte inferior
           _NavigationItem(
             icon: Icons.settings_outlined,
             label: 'Configurações',
@@ -432,14 +407,9 @@ class _NavigationItemState extends State<_NavigationItem>
   bool get _isActive {
     final currentRoute =
         GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
-
-    // Exact match for root route
     if (widget.route == '/') {
       return currentRoute == '/';
     }
-
-    // For other routes, check if current route starts with the widget route
-    // and ensure it's either an exact match or followed by a '/' or query parameter
     if (currentRoute == widget.route) {
       return true;
     }
@@ -534,7 +504,6 @@ class _NavigationItemState extends State<_NavigationItem>
   Widget _buildExpandedContent(ThemeData theme, bool isActive) {
     return Row(
       children: [
-        // Ícone
         Icon(
           widget.icon,
           size: 20,
@@ -545,8 +514,6 @@ class _NavigationItemState extends State<_NavigationItem>
         ),
 
         const SizedBox(width: 16),
-
-        // Label
         Expanded(
           child: Text(
             widget.label,
@@ -559,8 +526,6 @@ class _NavigationItemState extends State<_NavigationItem>
             ),
           ),
         ),
-
-        // Badge para contadores
         if (widget.badge != null) ...[
           const SizedBox(width: 8),
           Container(
@@ -579,8 +544,6 @@ class _NavigationItemState extends State<_NavigationItem>
             ),
           ),
         ],
-
-        // Atalho de teclado
         if (widget.shortcut != null && _isHovering) ...[
           const SizedBox(width: 8),
           Container(
@@ -607,7 +570,6 @@ class _NavigationItemState extends State<_NavigationItem>
   Widget _buildCollapsedContent(ThemeData theme, bool isActive) {
     return Stack(
       children: [
-        // Ícone centralizado
         Center(
           child: Icon(
             widget.icon,
@@ -618,8 +580,6 @@ class _NavigationItemState extends State<_NavigationItem>
                     : theme.colorScheme.onSurfaceVariant,
           ),
         ),
-
-        // Badge no canto superior direito (se houver)
         if (widget.badge != null)
           Positioned(
             top: -2,
@@ -663,7 +623,6 @@ class _SidebarFooter extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Seção do usuário
         Container(
           padding: EdgeInsets.all(isExpanded ? 20 : 16),
           decoration: BoxDecoration(
@@ -676,10 +635,8 @@ class _SidebarFooter extends StatelessWidget {
           ),
           child: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              // For now, show guest user until we implement proper Riverpod providers
 
               if (!isExpanded) {
-                // Versão colapsada - apenas avatar com tooltip
                 return Tooltip(
                   message: 'Usuário Anônimo',
                   waitDuration: const Duration(milliseconds: 500),
@@ -717,8 +674,6 @@ class _SidebarFooter extends StatelessWidget {
                             ),
                           ),
                         ),
-
-                        // Indicador de status no canto
                         Positioned(
                           bottom: 2,
                           right: 2,
@@ -740,11 +695,8 @@ class _SidebarFooter extends StatelessWidget {
                   ),
                 );
               }
-
-              // Versão expandida - layout completo
               return Row(
                 children: [
-                  // Avatar
                   Container(
                     width: 40,
                     height: 40,
@@ -776,8 +728,6 @@ class _SidebarFooter extends StatelessWidget {
                   ),
 
                   const SizedBox(width: 12),
-
-                  // Nome e tipo de usuário
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,8 +752,6 @@ class _SidebarFooter extends StatelessWidget {
                   ),
 
                   const SizedBox(width: 8),
-
-                  // Indicador de status (online/offline)
                   Container(
                     width: 8,
                     height: 8,
@@ -817,20 +765,15 @@ class _SidebarFooter extends StatelessWidget {
             },
           ),
         ),
-
-        // Divider horizontal
         Divider(
           height: 1,
           thickness: 1,
           color: theme.dividerColor.withValues(alpha: 0.15),
         ),
-
-        // Seção com versão e botão toggle
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              // Versão do app (apenas quando expandido)
               if (isExpanded) ...[
                 Expanded(
                   child: Column(
@@ -859,8 +802,6 @@ class _SidebarFooter extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-
-              // Botão de toggle (sempre à direita)
               _ToggleButton(isExpanded: isExpanded, onToggle: onToggle),
             ],
           ),

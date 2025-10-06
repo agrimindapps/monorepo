@@ -18,15 +18,11 @@ class TaskManagerNotificationService {
     this._analyticsService,
     this._crashlyticsService,
   );
-
-  // Canais de notificação do Task Manager
   static const String taskReminderChannelId = 'task_reminders';
   static const String taskDeadlineChannelId = 'task_deadlines';
   static const String taskCompletedChannelId = 'task_completed';
   static const String projectUpdateChannelId = 'project_updates';
   static const String generalChannelId = 'general';
-
-  // IDs base para diferentes tipos de notificação
   static const int taskReminderBaseId = 10000;
   static const int taskDeadlineBaseId = 20000;
   static const int taskCompletedBaseId = 30000;
@@ -121,7 +117,6 @@ class TaskManagerNotificationService {
       });
 
       if (!permission.canScheduleExactAlarms) {
-        // Solicitar permissão para agendamentos exatos se necessário
         await _notificationRepository.requestExactNotificationPermission();
       }
 
@@ -525,8 +520,6 @@ class TaskManagerNotificationService {
       return '${duration.inMinutes} minuto${duration.inMinutes > 1 ? 's' : ''}';
     }
   }
-
-  // Delegate methods do core
   Future<NotificationPermissionEntity> getPermissionStatus() =>
       _notificationRepository.getPermissionStatus();
 

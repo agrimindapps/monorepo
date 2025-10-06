@@ -73,7 +73,6 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
 
   /// Atualiza entrada da calculadora
   void updateInput(BodyConditionInput input) {
-    // Validar entrada imediatamente
     final validationErrors = _strategy.validateInput(input);
     
     state = state.copyWith(
@@ -91,7 +90,6 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
   }
 
   void updateCurrentWeight(double weight) {
-    // Validação rigorosa de peso veterinário
     if (weight <= 0.0 || weight > 150.0) {
       throw VeterinaryInputException(
         message: 'Peso deve estar entre 0.1kg e 150kg',
@@ -101,8 +99,6 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
         maxValue: 150.0,
       );
     }
-    
-    // Validações específicas por espécie (se disponível)
     final species = state.input.species;
     if (species == AnimalSpecies.cat) {
       if (weight < 1.0 || weight > 12.0) {
@@ -197,8 +193,6 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
 
     try {
       final result = _strategy.calculate(state.input);
-      
-      // Adicionar ao histórico
       final newHistory = [...state.history, result];
       
       state = state.copyWith(
@@ -273,9 +267,6 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
   void loadFromHistory(int index) {
     if (index >= 0 && index < state.history.length) {
       final historicalResult = state.history[index];
-      
-      // Tentar reconstruir input do resultado (limitado aos dados disponíveis)
-      // Em implementação real, seria melhor salvar o input junto com output
       final reconstructedInput = state.input.copyWith(
         currentWeight: (historicalResult.results
             .firstWhere((r) => r.label == 'Peso Atual', orElse: () => const ResultItem(label: '', value: 0.0))
@@ -341,8 +332,6 @@ final bodyConditionHistoryProvider = Provider<List<BodyConditionOutput>>((ref) {
 final bodyConditionSuggestionsProvider = Provider<List<String>>((ref) {
   final input = ref.watch(bodyConditionInputProvider);
   final suggestions = <String>[];
-
-  // Sugestões baseadas no peso
   if (input.currentWeight > 0) {
     if (input.idealWeight == null) {
       suggestions.add('💡 Informe o peso ideal para cálculos mais precisos');
@@ -355,15 +344,11 @@ final bodyConditionSuggestionsProvider = Provider<List<String>>((ref) {
     if (input.animalAge == null) {
       suggestions.add('📅 Informe a idade para ajustes metabólicos');
     }
-    
-    // Sugestões específicas por espécie
     if (input.species == AnimalSpecies.cat && input.currentWeight > 6) {
       suggestions.add('⚠️ Peso elevado para gatos - considere avaliação veterinária');
     } else if (input.species == AnimalSpecies.dog && input.currentWeight < 2) {
       suggestions.add('⚠️ Peso muito baixo - verifique se é filhote ou raça toy');
     }
-    
-    // Sugestões de observações importantes
     if (input.observations == null || input.observations!.isEmpty) {
       suggestions.add('📝 Adicione observações sobre comportamento alimentar');
     }

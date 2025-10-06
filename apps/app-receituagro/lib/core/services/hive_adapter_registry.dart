@@ -24,9 +24,7 @@ class HiveAdapterRegistry {
     }
 
     try {
-      // Inicializa o Hive com Flutter
       await Hive.initFlutter();
-      // Registra adapters das classes Hive (gerados automaticamente via build_runner)
       Hive.registerAdapter(CulturaHiveAdapter());
       Hive.registerAdapter(PragasHiveAdapter());
       Hive.registerAdapter(FitossanitarioHiveAdapter());

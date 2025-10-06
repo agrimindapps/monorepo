@@ -25,7 +25,6 @@ class DeviceListWidget extends ConsumerWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Seção de dispositivos ativos
               if (deviceState.activeDevices.isNotEmpty) ...[
                 _buildSectionHeader(
                   context,
@@ -39,8 +38,6 @@ class DeviceListWidget extends ConsumerWidget {
                   (device) => _buildDeviceItem(context, ref, device, deviceState),
                 ),
               ],
-
-              // Seção de dispositivos inativos
               if (deviceState.inactiveDevices.isNotEmpty) ...[
                 const SizedBox(height: 24),
                 _buildSectionHeader(
@@ -55,8 +52,6 @@ class DeviceListWidget extends ConsumerWidget {
                   (device) => _buildDeviceItem(context, ref, device, deviceState),
                 ),
               ],
-
-              // Espaçamento final
               const SizedBox(height: 80),
             ],
           ),
@@ -144,7 +139,6 @@ class DeviceListWidget extends ConsumerWidget {
     DeviceModel device,
     DeviceManagementState deviceState,
   ) async {
-    // Previne revogar o dispositivo atual
     if (deviceState.currentDevice?.uuid == device.uuid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -279,7 +273,6 @@ class _DeviceDetailsSheet extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle da sheet
               Center(
                 child: Container(
                   width: 40,
@@ -291,8 +284,6 @@ class _DeviceDetailsSheet extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Header do dispositivo
               Row(
                 children: [
                   Container(
@@ -357,8 +348,6 @@ class _DeviceDetailsSheet extends ConsumerWidget {
               ),
 
               const SizedBox(height: 24),
-
-              // Lista de detalhes
               Expanded(
                 child: ListView(
                   controller: scrollController,
@@ -408,8 +397,6 @@ class _DeviceDetailsSheet extends ConsumerWidget {
                     ]),
 
                     const SizedBox(height: 24),
-
-                    // Indicador se é o dispositivo atual
                     ref.watch(deviceManagementProvider).when(
                       data: (deviceState) {
                         if (deviceState.currentDevice?.uuid == device.uuid) {

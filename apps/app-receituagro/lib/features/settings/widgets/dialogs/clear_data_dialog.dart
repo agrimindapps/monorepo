@@ -19,7 +19,6 @@ class ClearDataDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Ícone
             Container(
               width: 64,
               height: 64,
@@ -35,8 +34,6 @@ class ClearDataDialog extends StatelessWidget {
             ),
             
             const SizedBox(height: 20),
-            
-            // Título
             Text(
               'Limpar Dados Locais',
               style: SettingsDesignTokens.getSectionTitleStyle(context).copyWith(
@@ -46,8 +43,6 @@ class ClearDataDialog extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-            
-            // Informações sobre as consequências
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -64,8 +59,6 @@ class ClearDataDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 12),
-                  
-                  // Item 1
                   _buildInfoItem(
                     context,
                     icon: Icons.storage,
@@ -74,8 +67,6 @@ class ClearDataDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 8),
-                  
-                  // Item 2
                   _buildInfoItem(
                     context,
                     icon: Icons.settings_backup_restore,
@@ -84,8 +75,6 @@ class ClearDataDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 8),
-                  
-                  // Item 3 - Informação positiva
                   _buildInfoItem(
                     context,
                     icon: Icons.cloud,
@@ -95,8 +84,6 @@ class ClearDataDialog extends StatelessWidget {
                   ),
                   
                   const SizedBox(height: 8),
-                  
-                  // Item 4 - Informação positiva
                   _buildInfoItem(
                     context,
                     icon: Icons.refresh,
@@ -109,11 +96,8 @@ class ClearDataDialog extends StatelessWidget {
             ),
             
             const SizedBox(height: 24),
-            
-            // Botões
             Row(
               children: [
-                // Botão Cancelar
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -137,8 +121,6 @@ class ClearDataDialog extends StatelessWidget {
                 ),
                 
                 const SizedBox(width: 12),
-                
-                // Botão Limpar
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(true),

@@ -26,7 +26,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<List<PlantModel>> getPlants(String userId) async {
     try {
-      // Using simple query to avoid composite index requirement
       final snapshot =
           await _getPlantsCollection(
             userId,
@@ -41,8 +40,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
                 }),
               )
               .toList();
-
-      // Apply sorting on client-side to avoid composite index
       plants.sort((a, b) {
         final aDate = a.createdAt ?? DateTime(1970);
         final bDate = b.createdAt ?? DateTime(1970);
@@ -89,8 +86,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
       plantData.remove('id'); // Remove ID from data, it will be the document ID
 
       final docRef = await _getPlantsCollection(userId).add(plantData);
-
-      // Return plant with the generated ID
       return plant.copyWith(id: docRef.id, isDirty: false);
     } on FirebaseException catch (e) {
       throw ServerFailure('Erro ao adicionar planta: ${e.message}');
@@ -122,7 +117,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<void> deletePlant(String id, String userId) async {
     try {
-      // Soft delete - update isDeleted flag
       await _getPlantsCollection(userId).doc(id).update({
         'isDeleted': true,
         'updatedAt': Timestamp.now(),
@@ -138,9 +132,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<List<PlantModel>> searchPlants(String query, String userId) async {
     try {
-      // Firestore doesn't support full-text search, so we'll get all plants
-      // and filter on the client side. For better performance, consider using
-      // Algolia or implementing server-side search functions.
       final allPlants = await getPlants(userId);
       final searchQuery = query.toLowerCase().trim();
 
@@ -165,7 +156,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     String userId,
   ) async {
     try {
-      // Using simple query to avoid composite index requirement
       final snapshot =
           await _getPlantsCollection(userId)
               .where('isDeleted', isEqualTo: false)
@@ -181,8 +171,6 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
                 }),
               )
               .toList();
-
-      // Apply sorting on client-side to avoid composite index
       plants.sort((a, b) {
         final aDate = a.createdAt ?? DateTime(1970);
         final bDate = b.createdAt ?? DateTime(1970);

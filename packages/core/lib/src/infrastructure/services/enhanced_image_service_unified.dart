@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
-
-// Note: cached_network_image and crypto packages removed as they're not available in core package
 import 'package:dio/dio.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +16,6 @@ import '../../shared/utils/result.dart';
 /// Enhanced Image Service Configuration
 /// Consolidates all image service configurations into one
 class EnhancedImageServiceConfig {
-  // Basic ImageService config (existing)
   final int maxWidth;
   final int maxHeight;
   final int imageQuality;
@@ -27,26 +24,19 @@ class EnhancedImageServiceConfig {
   final List<String> allowedFormats;
   final String defaultFolder;
   final Map<String, String> folders;
-
-  // Enhanced caching config
   final bool enableCaching;
   final int maxCacheSize;
   final Duration cacheExpiration;
   final int maxMemoryUsageMB;
-
-  // Enhanced preloading config
   final bool enablePreloading;
   final int maxConcurrentPreloads;
   final int preloadQueueSize;
-
-  // Enhanced optimization config
   final bool autoOptimize;
   final int compressionThreshold;
   final double compressionRatio;
   final int thumbnailSize;
 
   const EnhancedImageServiceConfig({
-    // Basic config (backward compatibility)
     this.maxWidth = 1920,
     this.maxHeight = 1920,
     this.imageQuality = 85,
@@ -55,19 +45,13 @@ class EnhancedImageServiceConfig {
     this.allowedFormats = const ['.jpg', '.jpeg', '.png', '.webp'],
     this.defaultFolder = 'images',
     this.folders = const {},
-
-    // Enhanced caching
     this.enableCaching = true,
     this.maxCacheSize = 50,
     this.cacheExpiration = const Duration(minutes: 30),
     this.maxMemoryUsageMB = 50,
-
-    // Enhanced preloading
     this.enablePreloading = true,
     this.maxConcurrentPreloads = 3,
     this.preloadQueueSize = 100,
-
-    // Enhanced optimization
     this.autoOptimize = true,
     this.compressionThreshold = 1024 * 1024, // 1MB
     this.compressionRatio = 0.8,
@@ -89,19 +73,13 @@ class EnhancedImageServiceConfig {
       'tasks': 'tasks',
       'profiles': 'profiles',
     },
-
-    // Plant-optimized caching
     this.enableCaching = true,
     this.maxCacheSize = 100, // More cache for plants
     this.cacheExpiration = const Duration(hours: 2), // Longer cache
     this.maxMemoryUsageMB = 75,
-
-    // Plant-optimized preloading
     this.enablePreloading = true,
     this.maxConcurrentPreloads = 3,
     this.preloadQueueSize = 150, // Larger queue for plants
-
-    // Plant-optimized compression
     this.autoOptimize = true,
     this.compressionThreshold = 800 * 1024, // 800KB
     this.compressionRatio = 0.75, // Higher compression for plants
@@ -122,19 +100,13 @@ class EnhancedImageServiceConfig {
       'vehicles': 'vehicles',
       'maintenance': 'maintenance',
     },
-
-    // Receipt-optimized caching
     this.enableCaching = true,
     this.maxCacheSize = 30, // Less cache for receipts
     this.cacheExpiration = const Duration(hours: 6), // Longer cache
     this.maxMemoryUsageMB = 40,
-
-    // Receipt-optimized preloading
     this.enablePreloading = false, // Disable preloading for receipts
     this.maxConcurrentPreloads = 1,
     this.preloadQueueSize = 20,
-
-    // Receipt-optimized compression
     this.autoOptimize = true,
     this.compressionThreshold = 2 * 1024 * 1024, // 2MB
     this.compressionRatio = 0.9, // Lower compression for receipts
@@ -246,30 +218,22 @@ class EnhancedImageServiceUnified {
   final ImagePicker _picker;
   final FirebaseStorage _storage;
   final EnhancedImageServiceConfig _config;
-
-  // Caching infrastructure (from EnhancedImageService + OptimizedImageService)
   final Map<String, Uint8List> _memoryCache = {};
   final Map<String, DateTime> _cacheTimestamps = {};
   final Map<String, Future<Uint8List?>> _loadingFutures = {};
   late final Directory _cacheDir;
   bool _initialized = false;
-
-  // Preloading infrastructure (from ImagePreloaderService)
   final Queue<String> _preloadQueue = Queue<String>();
   final Set<String> _preloadedImages = <String>{};
   final Set<String> _preloadingImages = <String>{};
   bool _isProcessing = false;
   Timer? _preloadTimer;
-
-  // Statistics and monitoring
   int _cacheHits = 0;
   int _cacheMisses = 0;
   int _totalLoaded = 0;
   int _totalSize = 0;
   int _uploadsCount = 0;
   int _preloadCount = 0;
-
-  // Progress monitoring
   final StreamController<ImageLoadProgress> _progressController =
       StreamController<ImageLoadProgress>.broadcast();
 
@@ -308,10 +272,6 @@ class EnhancedImageServiceUnified {
     }
   }
 
-  // ==========================================================================
-  // SELECTION METHODS (Core ImageService compatibility)
-  // ==========================================================================
-
   /// Pick single image from gallery (backward compatible)
   Future<Result<File>> pickImageFromGallery() async {
     try {
@@ -330,8 +290,6 @@ class EnhancedImageServiceUnified {
       }
 
       final file = File(pickedFile.path);
-
-      // Auto-optimize if enabled
       if (_config.autoOptimize) {
         final optimizedResult = await _optimizeImageIfNeeded(file);
         return optimizedResult.fold(
@@ -369,8 +327,6 @@ class EnhancedImageServiceUnified {
       }
 
       final file = File(pickedFile.path);
-
-      // Auto-optimize if enabled
       if (_config.autoOptimize) {
         final optimizedResult = await _optimizeImageIfNeeded(file);
         return optimizedResult.fold(
@@ -394,11 +350,8 @@ class EnhancedImageServiceUnified {
   Future<Result<List<File>>> pickMultipleImages({int? maxImages}) async {
     try {
       final int limit = maxImages ?? _config.maxImagesCount;
-      // Note: pickMultipleImages might not be available in some ImagePicker versions
-      // Using a fallback approach
       final List<XFile> pickedFiles = [];
       try {
-        // Try to use pickMultipleMedia if available (newer versions)
         final medias = await _picker.pickMultipleMedia(
           limit: limit,
         );
@@ -408,7 +361,6 @@ class EnhancedImageServiceUnified {
           }
         }
       } catch (e) {
-        // Fallback: show error message to user that multiple selection is not supported
         return Result.failure(
           AppError.custom(
             message: 'Multiple image selection not supported on this device. Please select one image at a time.',
@@ -435,8 +387,6 @@ class EnhancedImageServiceUnified {
       final List<File> files = [];
       for (final xfile in pickedFiles) {
         final file = File(xfile.path);
-
-        // Auto-optimize if enabled
         if (_config.autoOptimize) {
           final optimizedResult = await _optimizeImageIfNeeded(file);
           final optimizedFile = optimizedResult.fold(
@@ -460,10 +410,6 @@ class EnhancedImageServiceUnified {
     }
   }
 
-  // ==========================================================================
-  // UPLOAD METHODS (Core ImageService compatibility)
-  // ==========================================================================
-
   /// Upload single image (backward compatible, returns enhanced result)
   Future<Result<EnhancedImageResult>> uploadImage(
     File imageFile, {
@@ -473,31 +419,20 @@ class EnhancedImageServiceUnified {
     void Function(double progress)? onProgress,
   }) async {
     try {
-      // Validation
       final validationResult = await _validateImageFile(imageFile);
       if (validationResult.isFailure) {
         return Result.failure(validationResult.error!);
       }
-
-      // Determine folder
       final uploadFolder = folder ??
           _config.folders[uploadType] ??
           _config.defaultFolder;
-
-      // Generate unique filename
       final String uniqueFileName = fileName ??
           '${const Uuid().v4()}.${path.extension(imageFile.path).substring(1)}';
-
-      // Create Firebase Storage reference
       final storageRef = _storage
           .ref()
           .child(uploadFolder)
           .child(uniqueFileName);
-
-      // Start upload with progress tracking
       final UploadTask uploadTask = storageRef.putFile(imageFile);
-
-      // Track progress
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         if (snapshot.totalBytes > 0) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;
@@ -507,8 +442,6 @@ class EnhancedImageServiceUnified {
 
       final TaskSnapshot snapshot = await uploadTask;
       final String downloadUrl = await snapshot.ref.getDownloadURL();
-
-      // Generate thumbnail if caching is enabled
       Uint8List? thumbnail;
       if (_config.enableCaching) {
         final thumbnailResult = await _createThumbnail(imageFile);
@@ -540,10 +473,6 @@ class EnhancedImageServiceUnified {
     }
   }
 
-  // ==========================================================================
-  // CACHING METHODS (EnhancedImageService + OptimizedImageService)
-  // ==========================================================================
-
   /// Load cached image with intelligent caching
   Future<Result<Uint8List>> loadCachedImage(String url) async {
     if (!_config.enableCaching) {
@@ -551,7 +480,6 @@ class EnhancedImageServiceUnified {
     }
 
     try {
-      // 1. Check memory cache first
       if (_memoryCache.containsKey(url)) {
         final timestamp = _cacheTimestamps[url];
         if (timestamp != null &&
@@ -560,20 +488,15 @@ class EnhancedImageServiceUnified {
           debugPrint('💾 Memory cache HIT: $url');
           return Result.success(_memoryCache[url]!);
         } else {
-          // Cache expired
           _removeFromCache(url);
         }
       }
-
-      // 2. Check if already loading
       if (_loadingFutures.containsKey(url)) {
         final data = await _loadingFutures[url];
         if (data != null) {
           return Result.success(data);
         }
       }
-
-      // 3. Load from network and cache
       _cacheMisses++;
       final loadingFuture = _loadAndCacheImage(url);
       _loadingFutures[url] = loadingFuture;
@@ -609,8 +532,6 @@ class EnhancedImageServiceUnified {
   }) async {
     try {
       final thumbnailSize = size ?? _config.thumbnailSize;
-
-      // Try to load from cache first
       final cacheKey = '${imageUrl}_thumb_$thumbnailSize';
       if (_config.enableCaching && _memoryCache.containsKey(cacheKey)) {
         final timestamp = _cacheTimestamps[cacheKey];
@@ -619,23 +540,17 @@ class EnhancedImageServiceUnified {
           return Result.success(_memoryCache[cacheKey]!);
         }
       }
-
-      // Load original image
       final imageResult = await loadCachedImage(imageUrl);
       if (imageResult.isFailure) {
         return Result.failure(imageResult.error!);
       }
 
       final originalData = imageResult.data!;
-
-      // Create thumbnail
       final thumbnailData = await _resizeImage(
         originalData,
         thumbnailSize,
         thumbnailSize,
       );
-
-      // Cache thumbnail
       if (_config.enableCaching) {
         _addToCache(cacheKey, thumbnailData);
       }
@@ -650,10 +565,6 @@ class EnhancedImageServiceUnified {
       );
     }
   }
-
-  // ==========================================================================
-  // PRELOADING METHODS (ImagePreloaderService)
-  // ==========================================================================
 
   /// Preload multiple images with priority support
   Future<void> preloadImages(
@@ -672,7 +583,6 @@ class EnhancedImageServiceUnified {
     if (newImages.isEmpty) return;
 
     if (priority) {
-      // Add priority images to the front of the queue
       final currentQueue = List<String>.from(_preloadQueue);
       _preloadQueue.clear();
       _preloadQueue.addAll(newImages);
@@ -680,8 +590,6 @@ class EnhancedImageServiceUnified {
     } else {
       _preloadQueue.addAll(newImages);
     }
-
-    // Limit queue size
     while (_preloadQueue.length > _config.preloadQueueSize) {
       _preloadQueue.removeLast();
     }
@@ -697,7 +605,6 @@ class EnhancedImageServiceUnified {
     final imageUrls = <String>[];
     for (final plant in plants) {
       if (plant is Map<String, dynamic>) {
-        // Extract image URLs from plant data
         final images = plant['images'] as List<dynamic>?;
         if (images != null) {
           for (final image in images) {
@@ -711,8 +618,6 @@ class EnhancedImageServiceUnified {
             }
           }
         }
-
-        // Also check for single image field
         final singleImage = plant['imageUrl'] as String?;
         if (singleImage != null && singleImage.isNotEmpty) {
           imageUrls.add(singleImage);
@@ -729,10 +634,6 @@ class EnhancedImageServiceUnified {
            _memoryCache.containsKey(imageUrl);
   }
 
-  // ==========================================================================
-  // CACHE MANAGEMENT
-  // ==========================================================================
-
   /// Clear image cache
   Future<Result<void>> clearImageCache({bool memoryOnly = false}) async {
     try {
@@ -748,8 +649,6 @@ class EnhancedImageServiceUnified {
           await _cacheDir.create(recursive: true);
         }
       }
-
-      // Reset statistics
       _cacheHits = 0;
       _cacheMisses = 0;
       _totalLoaded = 0;
@@ -766,10 +665,6 @@ class EnhancedImageServiceUnified {
       );
     }
   }
-
-  // ==========================================================================
-  // MONITORING AND STATISTICS
-  // ==========================================================================
 
   /// Get comprehensive cache and service statistics
   Map<String, dynamic> getCacheStats() {
@@ -817,10 +712,6 @@ class EnhancedImageServiceUnified {
     debugPrint('🔌 EnhancedImageServiceUnified disposed');
   }
 
-  // ==========================================================================
-  // PRIVATE HELPER METHODS
-  // ==========================================================================
-
   Future<Result<File>> _optimizeImageIfNeeded(File imageFile) async {
     try {
       final fileSizeBytes = await imageFile.length();
@@ -828,9 +719,6 @@ class EnhancedImageServiceUnified {
       if (fileSizeBytes <= _config.compressionThreshold) {
         return Result.success(imageFile);
       }
-
-      // TODO: Implement actual compression
-      // For now, return original file
       debugPrint('⚡ Image optimization skipped (TODO: implement compression)');
       return Result.success(imageFile);
     } catch (e, stackTrace) {
@@ -863,8 +751,6 @@ class EnhancedImageServiceUnified {
   }
 
   Future<Uint8List> _resizeImage(Uint8List data, int width, int height) async {
-    // TODO: Implement actual image resizing
-    // For now, return original data
     return data;
   }
 
@@ -912,7 +798,6 @@ class EnhancedImageServiceUnified {
 
   Future<Result<Uint8List>> _loadImageDirectly(String url) async {
     try {
-      // Simple HTTP GET request using available Dio client
       final dio = Dio();
       final response = await dio.get<List<int>>(
         url,
@@ -948,8 +833,6 @@ class EnhancedImageServiceUnified {
         progress: 0.0,
         status: ImageLoadStatus.loading,
       ));
-
-      // Load image directly using HTTP client (since cached_network_image is not available)
       final dio = Dio();
       final response = await dio.get<List<int>>(
         url,
@@ -969,8 +852,6 @@ class EnhancedImageServiceUnified {
         progress: 1.0,
         status: ImageLoadStatus.completed,
       ));
-
-      // Add to memory cache
       if (_config.enableCaching) {
         _addToCache(url, data);
       }
@@ -994,8 +875,6 @@ class EnhancedImageServiceUnified {
 
   void _addToCache(String key, Uint8List data) {
     if (!_config.enableCaching) return;
-
-    // Check memory limits
     if (_memoryCache.length >= _config.maxCacheSize) {
       _evictOldestCacheEntry();
     }
@@ -1016,8 +895,6 @@ class EnhancedImageServiceUnified {
 
   void _evictOldestCacheEntry() {
     if (_cacheTimestamps.isEmpty) return;
-
-    // Find oldest entry
     String? oldestKey;
     DateTime? oldestTime;
 
@@ -1069,8 +946,6 @@ class EnhancedImageServiceUnified {
       await Future.wait(futures);
     } finally {
       _isProcessing = false;
-
-      // Continue processing if there are more items
       if (_preloadQueue.isNotEmpty) {
         _preloadTimer = Timer(const Duration(milliseconds: 500), _startPreloading);
       }

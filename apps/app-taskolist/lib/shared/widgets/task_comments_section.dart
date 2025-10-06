@@ -47,8 +47,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
     });
 
     _commentController.clear();
-
-    // Auto scroll para o novo comentário
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         Scrollable.ensureVisible(
@@ -65,7 +63,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header dos comentários
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
@@ -87,8 +84,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
             ],
           ),
         ),
-
-        // Lista de comentários
         if (_comments.isEmpty)
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -126,8 +121,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
           )
         else
           ..._comments.map((comment) => _buildCommentItem(comment)),
-
-        // Input para novo comentário
         Container(
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -137,7 +130,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
           ),
           child: Row(
             children: [
-              // Avatar do usuário
               Container(
                 margin: const EdgeInsets.all(12),
                 width: 32,
@@ -152,8 +144,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                   size: 18,
                 ),
               ),
-
-              // Campo de texto
               Expanded(
                 child: TextField(
                   controller: _commentController,
@@ -167,8 +157,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                   onSubmitted: (_) => _addComment(),
                 ),
               ),
-
-              // Botão enviar
               IconButton(
                 onPressed: _addComment,
                 icon: const Icon(Icons.send, color: AppColors.primaryColor),
@@ -192,10 +180,8 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header do comentário
           Row(
             children: [
-              // Avatar
               Container(
                 width: 24,
                 height: 24,
@@ -210,8 +196,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
                 ),
               ),
               const SizedBox(width: 8),
-
-              // Nome do autor
               Text(
                 comment.authorName,
                 style: const TextStyle(
@@ -222,8 +206,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
               ),
 
               const Spacer(),
-
-              // Data
               Text(
                 _formatCommentDate(comment.createdAt),
                 style: const TextStyle(fontSize: 12, color: AppColors.textHint),
@@ -232,8 +214,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
           ),
 
           const SizedBox(height: 8),
-
-          // Texto do comentário
           Text(
             comment.text,
             style: const TextStyle(
@@ -266,8 +246,6 @@ class _TaskCommentsSectionState extends ConsumerState<TaskCommentsSection> {
     }
   }
 }
-
-// Modelo simples para comentário (futuramente mover para entities)
 class TaskComment {
   final String id;
   final String taskId;

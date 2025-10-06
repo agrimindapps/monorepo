@@ -50,8 +50,6 @@ class GetMaintenanceAnalytics
       final countByTypeResult = await repository.getMaintenanceCountByType(
         params.vehicleId,
       );
-
-      // Combine all results
       return totalCostResult.fold(
         (failure) => Left(failure),
         (totalCost) => averageCostResult.fold(

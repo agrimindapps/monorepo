@@ -84,8 +84,6 @@ class DiagnosticosState {
       contextoDefensivo: null,
     );
   }
-
-  // UI helpers
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
   bool get hasContext => contextoCultura != null || contextoPraga != null || contextoDefensivo != null;
@@ -96,8 +94,6 @@ class DiagnosticosState {
     if (diagnosticos.isEmpty) return DiagnosticosViewState.empty;
     return DiagnosticosViewState.loaded;
   }
-
-  // Resumo para UI
   String get searchSummary {
     if (hasContext) {
       final parts = <String>[];
@@ -142,7 +138,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
   @override
   Future<DiagnosticosState> build() async {
-    // Get use cases from DI
     _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
     _getDiagnosticoByIdUseCase = di.sl<GetDiagnosticoByIdUseCase>();
     _getRecomendacoesUseCase = di.sl<GetRecomendacoesUseCase>();
@@ -611,7 +606,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     if (currentState == null || currentState.diagnosticos.isEmpty) return;
 
     final sortedDiagnosticos = List<DiagnosticoEntity>.from(currentState.diagnosticos);
-    // Completos primeiro, depois parciais, depois incompletos
     sortedDiagnosticos.sort((a, b) {
       final scoreA = a.completude.index;
       final scoreB = b.completude.index;

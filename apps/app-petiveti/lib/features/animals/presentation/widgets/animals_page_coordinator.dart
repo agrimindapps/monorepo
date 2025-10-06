@@ -28,7 +28,6 @@ class AnimalsPageCoordinator {
     try {
       await ref.read(animalsProvider.notifier).loadAnimals();
     } catch (e) {
-      // Error will be handled by the error handler component
       rethrow;
     }
   }

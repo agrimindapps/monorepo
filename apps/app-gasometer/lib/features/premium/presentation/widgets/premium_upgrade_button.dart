@@ -106,7 +106,6 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
   }
 
   void _onUpgradePressed(BuildContext context, core.WidgetRef ref) {
-    // Scrollar para a seção de produtos ou abrir modal
     _showUpgradeOptions(context, ref);
   }
 
@@ -125,7 +124,6 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
         ),
         child: Column(
           children: [
-            // Handle bar
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
@@ -135,8 +133,6 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
-            // Header
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -170,8 +166,6 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
                 ],
               ),
             ),
-            
-            // Benefits
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -185,8 +179,6 @@ class PremiumUpgradeButton extends core.ConsumerWidget {
                 ],
               ),
             ),
-            
-            // Action buttons
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(

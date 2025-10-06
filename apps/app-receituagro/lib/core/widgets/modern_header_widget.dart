@@ -158,24 +158,19 @@ class ModernHeaderWidget extends StatelessWidget {
 
   /// Manipula o clique do botão voltar com detecção automática do sistema de navegação
   void _handleBackPress(BuildContext context) {
-    // Se há callback customizado fornecido, usa ele primeiro
     if (onBackPressed != null) {
       onBackPressed!();
       return;
     }
-
-    // Detecta automaticamente qual sistema de navegação usar
     _intelligentNavigationBack(context);
   }
 
   /// Sistema de navegação usando o novo ReceitaAgroNavigationService
   void _intelligentNavigationBack(BuildContext context) {
     try {
-      // Usa o novo serviço de navegação unificado
       final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
       navigationService.goBack<void>();
     } catch (e) {
-      // Fallback para navegação padrão do Navigator
       if (Navigator.canPop(context)) {
         Navigator.pop(context);
       } else {

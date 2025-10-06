@@ -58,7 +58,6 @@ class _UserProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Access Riverpod SettingsNotifier state
     final settingsAsync = ref.watch(settingsNotifierProvider);
     final featureFlagsAsync = ref.watch(featureFlagsNotifierProvider);
 
@@ -76,18 +75,11 @@ class _UserProfileCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Section Header
                 _buildSectionHeader(context, authData),
-
-                // Content based on auth status
                 if (!authData.isAuthenticated || authData.isAnonymous) ...[
-                  // Authentication options for guests
                   _buildAuthenticationOptions(context, ref),
                 ] else ...[
-                  // User profile for authenticated users
                   _buildUserProfile(context, settingsState, authData),
-
-                  // Settings Sync Status
                   if (featureFlags.isContentSynchronizationEnabled)
                     _buildSyncStatus(context, settingsState, featureFlags),
 
@@ -226,12 +218,9 @@ class _UserProfileCard extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              // User Avatar
               _buildUserAvatar(context, currentDevice),
               
               const SizedBox(width: 12),
-              
-              // User Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,8 +249,6 @@ class _UserProfileCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              
-              // Edit Icon
               Icon(
                 Icons.edit,
                 size: 16,
@@ -309,8 +296,6 @@ class _UserProfileCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-
-          // Sync Status Items
           SyncStatusItem(
             label: 'Tema',
             value: settingsState.isDarkTheme ? 'Escuro' : 'Claro',
@@ -348,7 +333,6 @@ class _UserProfileCard extends ConsumerWidget {
   String _getUserDisplayName(DeviceInfo? device) {
     if (device?.name.isNotEmpty == true) {
       final name = device!.name;
-      // Extract user-friendly name from device name if possible
       if (name.contains('iPhone')) return 'Usuário iPhone';
       if (name.contains('iPad')) return 'Usuário iPad';
       if (name.contains('Samsung')) return 'Usuário Samsung';
@@ -360,7 +344,6 @@ class _UserProfileCard extends ConsumerWidget {
 
   /// Get user email (mock)
   String _getUserEmail(SettingsState settingsState) {
-    // In real implementation, this would come from auth service
     return 'usuario@receituagro.com';
   }
 

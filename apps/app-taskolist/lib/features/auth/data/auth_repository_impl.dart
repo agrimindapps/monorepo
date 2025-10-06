@@ -54,19 +54,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   ResultFuture<UserEntity?> getCurrentUser() async {
     try {
-      // Primeiro verifica se está logado
       final isSignedIn = await _localDataSource.isUserSignedIn();
       if (!isSignedIn) {
         return const Right(null);
       }
-
-      // Tenta buscar usuário local primeiro
       final localUser = await _localDataSource.getCachedUser();
       if (localUser != null) {
         return Right(localUser);
       }
-
-      // Se não tem local, busca remoto
       final remoteUser = await _remoteDataSource.getCurrentUser();
       if (remoteUser != null) {
         await _localDataSource.cacheUser(remoteUser);
@@ -108,10 +103,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   ResultFuture<void> deleteAccount() async {
     try {
-      // Primeiro deletar conta remotamente
       await _remoteDataSource.deleteAccount();
-
-      // Depois limpar dados locais
       await _localDataSource.clearCache();
 
       return const Right(null);

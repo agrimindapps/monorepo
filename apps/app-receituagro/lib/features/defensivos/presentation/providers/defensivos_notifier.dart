@@ -75,14 +75,11 @@ class DefensivosNotifier extends _$DefensivosNotifier {
 
   @override
   Future<DefensivosState> build() async {
-    // Get use cases from DI
     _getDefensivosUseCase = di.sl<GetDefensivosUseCase>();
     _getDefensivosByClasseUseCase = di.sl<GetDefensivosByClasseUseCase>();
     _searchDefensivosUseCase = di.sl<SearchDefensivosUseCase>();
     _getClassesAgronomicasUseCase = di.sl<GetClassesAgronomicasUseCase>();
     _getFabricantesUseCase = di.sl<GetFabricantesUseCase>();
-
-    // Load initial data
     return await _loadDefensivos();
   }
 
@@ -95,7 +92,6 @@ class DefensivosNotifier extends _$DefensivosNotifier {
         error: _mapFailureToMessage(failure),
       ),
       (defensivos) async {
-        // Load metadata
         final classesResult = await _getClassesAgronomicasUseCase.call(const NoParams());
         final fabricantesResult = await _getFabricantesUseCase.call(const NoParams());
 

@@ -33,7 +33,6 @@ class ResponsiveContentArea extends StatelessWidget {
         if (padding != null) {
           effectivePadding = padding!;
         } else {
-          // Default responsive padding
           final horizontalPadding = applyHorizontalPadding 
               ? ResponsiveBreakpoints.getHorizontalPadding(screenWidth)
               : 0.0;
@@ -113,8 +112,6 @@ class ResponsivePageHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveLayout.isMobile(context);
-    
-    // Don't show header on mobile unless explicitly requested
     if (isMobile && !showOnMobile) {
       return const SizedBox.shrink();
     }

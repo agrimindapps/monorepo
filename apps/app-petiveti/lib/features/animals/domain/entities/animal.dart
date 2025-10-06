@@ -1,11 +1,7 @@
 import 'package:core/core.dart' show Equatable;
 import 'animal_enums.dart';
-
-// Backwards compatibility aliases for test files
 typedef PetEntity = Animal;
 typedef Pet = Animal;
-
-// Additional entities referenced in error messages
 class PetImageEntity extends Equatable {
   final String id;
   final String petId;
@@ -187,8 +183,6 @@ class Animal extends Equatable {
       return '$ageInDays ${ageInDays == 1 ? 'dia' : 'dias'}';
     }
   }
-
-  // Helper getter for backwards compatibility
   double get currentWeight => weight ?? 0.0;
   String? get photo => photoUrl;
   bool get isDeleted => !isActive;

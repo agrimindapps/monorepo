@@ -78,8 +78,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
             stackTrace: stackTrace,
             metadata: {'email': email},
           );
-          
-          // Still return success even if caching fails
           try {
             final user = await remoteDataSource.getCurrentUser();
             if (user != null) {
@@ -120,7 +118,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
     } on ServerException catch (e) {
       return Left(AuthFailure(message: e.message));
     } on CacheException catch (e) {
-      // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
         return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha na criação da conta'));
@@ -141,7 +138,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
     } on ServerException catch (e) {
       return Left(AuthFailure(message: e.message));
     } on CacheException catch (e) {
-      // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
         return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Google'));
@@ -162,7 +158,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
     } on ServerException catch (e) {
       return Left(AuthFailure(message: e.message));
     } on CacheException catch (e) {
-      // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
         return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Apple'));
@@ -183,7 +178,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
     } on ServerException catch (e) {
       return Left(AuthFailure(message: e.message));
     } on CacheException catch (e) {
-      // Still return success even if caching fails
       try {
         final user = await remoteDataSource.getCurrentUser();
         return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Facebook'));
@@ -246,8 +240,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
             error: e,
             stackTrace: stackTrace,
           );
-          
-          // Still return success even if caching fails
           try {
             final user = await remoteDataSource.getCurrentUser();
             if (user != null) {
@@ -286,7 +278,6 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
       await localDataSource.clearToken();
       return const Right(null);
     } on ServerException catch (e) {
-      // Even if remote signout fails, clear local data
       await localDataSource.clearCache();
       await localDataSource.clearToken();
       return Left(AuthFailure(message: e.message));
@@ -300,18 +291,14 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
   @override
   Future<Either<Failure, User?>> getCurrentUser() async {
     try {
-      // First try to get from remote (Firebase Auth state)
       final remoteUser = await remoteDataSource.getCurrentUser();
       if (remoteUser != null) {
         await localDataSource.cacheUser(remoteUser);
         return Right(remoteUser);
       }
-
-      // If no remote user, try local cache
       final cachedUser = await localDataSource.getCachedUser();
       return Right(cachedUser);
     } on ServerException catch (_) {
-      // If server fails, fallback to cache
       try {
         final cachedUser = await localDataSource.getCachedUser();
         return Right(cachedUser);
@@ -384,17 +371,12 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
   Stream<Either<Failure, User?>> watchAuthState() {
     return remoteDataSource.watchAuthState().map((user) {
       if (user != null) {
-        // Update local cache when auth state changes
         localDataSource.cacheUser(user).catchError((_) {
-          // Ignore cache errors in stream
         });
       } else {
-        // Clear local cache when signed out
         localDataSource.clearCache().catchError((_) {
-          // Ignore cache errors in stream
         });
         localDataSource.clearToken().catchError((_) {
-          // Ignore cache errors in stream
         });
       }
       return Right<Failure, User?>(user);

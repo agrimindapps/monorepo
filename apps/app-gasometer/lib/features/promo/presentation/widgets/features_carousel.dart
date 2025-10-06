@@ -16,8 +16,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
   final PageController _pageController =
       PageController(initialPage: 0, viewportFraction: 0.85);
   late final AnimationController _animationController;
-
-  // Cores para cada cartão de funcionalidade
   final List<Color> _cardColors = [
     Colors.blue.shade800,
     Colors.green.shade700,
@@ -28,8 +26,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
   @override
   void initState() {
     super.initState();
-
-    // Animação para elementos flutuantes
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 6),
@@ -63,7 +59,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
       ),
       child: Column(
         children: [
-          // Título da seção
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -103,8 +98,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
             ),
           ),
           const SizedBox(height: 60),
-
-          // Carrossel de funcionalidades
           isMobile ? _buildMobileCarousel() : _buildDesktopFeatureGrid(),
         ],
       ),
@@ -113,8 +106,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
 
   Widget _buildDesktopFeatureGrid() {
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Determinar número de colunas com base no tamanho da tela
     int crossAxisCount = 2;
     if (screenWidth > 1600) {
       crossAxisCount = 4;
@@ -163,8 +154,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
             },
           ),
         ),
-
-        // Indicadores de página
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -206,7 +195,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
         return Stack(
           clipBehavior: Clip.none,
           children: [
-            // Cartão principal
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -227,7 +215,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Círculo de ícone
                   Container(
                     width: 80,
                     height: 80,
@@ -242,8 +229,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                     ),
                   ),
                   const SizedBox(height: 24),
-
-                  // Título
                   Text(
                     feature['title'] as String,
                     style: TextStyle(
@@ -254,8 +239,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-
-                  // Descrição
                   Text(
                     feature['description'] as String,
                     style: const TextStyle(
@@ -270,8 +253,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                 ],
               ),
             ),
-
-            // Elementos decorativos flutuantes
             Positioned(
               top: -10 +
                   10 *
@@ -302,8 +283,6 @@ class _FeaturesCarouselState extends State<FeaturesCarousel>
                 ),
               ),
             ),
-
-            // Indicador "Destaque" para o primeiro item
             if (index == 0)
               Positioned(
                 top: 15,

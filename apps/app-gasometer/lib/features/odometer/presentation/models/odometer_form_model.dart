@@ -175,20 +175,14 @@ class OdometerFormModel extends Equatable {
   /// Validates all fields and returns error map
   Map<String, String> validate() {
     final validationErrors = <String, String>{};
-
-    // Validate vehicle
     if (vehicleId.isEmpty) {
       validationErrors['vehicleId'] = 'Veículo é obrigatório';
     }
-
-    // Validate odometer value
     if (value <= 0) {
       validationErrors['value'] = 'Valor do odômetro deve ser maior que zero';
     } else if (value > 9999999) {
       validationErrors['value'] = 'Valor do odômetro muito alto';
     }
-
-    // Validate description
     if (description.trim().isEmpty) {
       validationErrors['description'] = 'Descrição é obrigatória';
     } else if (description.trim().length < 3) {
@@ -198,14 +192,10 @@ class OdometerFormModel extends Equatable {
       validationErrors['description'] =
           'Descrição muito longa (máximo 100 caracteres)';
     }
-
-    // Validate registration date
     final now = DateTime.now();
     if (registrationDate.isAfter(now)) {
       validationErrors['registrationDate'] = 'Data não pode ser futura';
     }
-
-    // Check if date is too old (more than 10 years)
     final tenYearsAgo = now.subtract(const Duration(days: 365 * 10));
     if (registrationDate.isBefore(tenYearsAgo)) {
       validationErrors['registrationDate'] =
@@ -219,8 +209,6 @@ class OdometerFormModel extends Equatable {
   /// Applies sanitization to all text fields for security
   OdometerEntity toOdometerEntity() {
     final now = DateTime.now();
-
-    // Sanitize all text fields before persistence
     final sanitizedDescription = InputSanitizer.sanitizeDescription(
       description,
     );

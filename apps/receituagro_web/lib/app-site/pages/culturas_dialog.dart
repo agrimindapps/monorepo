@@ -38,8 +38,6 @@ class _CulturaDialogState extends State<CulturaDialog> {
 
       try {
         _formKey.currentState?.save();
-
-        // Sanitizar dados antes de salvar
         final sanitizedCultura = FormValidators.sanitizeInput(_cultura);
 
         final cultura = Cultura(

@@ -17,13 +17,11 @@ class DeviceListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Separar dispositivos ativos e inativos
     final activeDevices = devices.where((d) => d.isActive).toList();
     final inactiveDevices = devices.where((d) => !d.isActive).toList();
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
-        // Primeiro mostrar header dos ativos
         if (index == 0 && activeDevices.isNotEmpty) {
           return _buildSectionHeader(
             context,
@@ -33,8 +31,6 @@ class DeviceListWidget extends StatelessWidget {
             Colors.green,
           );
         }
-
-        // Mostrar dispositivos ativos
         if (index > 0 && index <= activeDevices.length) {
           final deviceIndex = index - 1;
           final device = activeDevices[deviceIndex];
@@ -44,8 +40,6 @@ class DeviceListWidget extends StatelessWidget {
             onAction: (action) => onDeviceAction(device.uuid, action),
           );
         }
-
-        // Header dos inativos (se houver)
         final activeSection =
             activeDevices.isNotEmpty ? activeDevices.length + 1 : 0;
         if (index == activeSection && inactiveDevices.isNotEmpty) {
@@ -57,8 +51,6 @@ class DeviceListWidget extends StatelessWidget {
             Colors.red,
           );
         }
-
-        // Mostrar dispositivos inativos
         if (index > activeSection && inactiveDevices.isNotEmpty) {
           final deviceIndex = index - activeSection - 1;
           if (deviceIndex < inactiveDevices.length) {
@@ -81,13 +73,9 @@ class DeviceListWidget extends StatelessWidget {
     List<DeviceEntity> inactive,
   ) {
     int count = 0;
-
-    // Dispositivos ativos + header (se houver)
     if (active.isNotEmpty) {
       count += active.length + 1;
     }
-
-    // Dispositivos inativos + header (se houver)
     if (inactive.isNotEmpty) {
       count += inactive.length + 1;
     }

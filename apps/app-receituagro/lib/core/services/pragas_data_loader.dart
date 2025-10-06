@@ -26,8 +26,6 @@ class PragasDataLoader {
         '🐛 [PRAGAS] Iniciando carregamento de pragas...',
         name: 'PragasDataLoader',
       );
-
-      // Carrega JSON do asset principal - use path without 'assets/' prefix for web compatibility
       const String assetPath =
           kIsWeb
               ? 'database/json/tbpragas/TBPRAGAS0.json'
@@ -39,8 +37,6 @@ class PragasDataLoader {
       final List<dynamic> jsonData = decodedJson is List ? decodedJson : [];
       final List<Map<String, dynamic>> allPragas =
           jsonData.cast<Map<String, dynamic>>().toList();
-
-      // Filtra apenas registros válidos
       final List<Map<String, dynamic>> pragas =
           allPragas
               .where(
@@ -56,11 +52,7 @@ class PragasDataLoader {
         '🐛 [PRAGAS] JSON carregado: ${allPragas.length} registros totais, ${pragas.length} pragas válidas',
         name: 'PragasDataLoader',
       );
-
-      // Obtém repositório do DI
       final repository = di.sl<PragasHiveRepository>();
-
-      // Carrega dados no repositório
       final result = await repository.loadFromJson(pragas, '1.0.0');
 
       result.fold(
@@ -79,8 +71,6 @@ class PragasDataLoader {
           _isLoaded = true;
         },
       );
-
-      // Verifica se dados foram realmente salvos
       final loadedPragasResult = await repository.getAll();
       loadedPragasResult.fold(
         (error) {
@@ -109,7 +99,6 @@ class PragasDataLoader {
         name: 'PragasDataLoader',
         stackTrace: StackTrace.current,
       );
-      // Não bloqueia o app, apenas registra o erro
     }
   }
 

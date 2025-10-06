@@ -11,7 +11,6 @@ class PremiumDevControls extends core.ConsumerWidget {
 
   @override
   Widget build(BuildContext context, core.WidgetRef ref) {
-    // Só mostrar em modo debug
     if (!kDebugMode) {
       return const SizedBox.shrink();
     }
@@ -180,8 +179,6 @@ class PremiumDevControls extends core.ConsumerWidget {
                     ),
                     
                     const SizedBox(height: 16),
-                    
-                    // Status atual
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),

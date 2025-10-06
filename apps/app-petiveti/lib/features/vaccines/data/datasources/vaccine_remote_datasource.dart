@@ -74,8 +74,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
     }
     return query;
   }
-
-  // Basic CRUD operations
   @override
   Future<List<VaccineModel>> getVaccines() async {
     try {
@@ -173,8 +171,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao deletar vacinas do animal: $e');
     }
   }
-
-  // Status-based queries
   @override
   Future<List<VaccineModel>> getPendingVaccines([String? animalId]) async {
     try {
@@ -257,8 +253,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao buscar próximas vacinas: $e');
     }
   }
-
-  // Date-based queries
   @override
   Future<List<VaccineModel>> getVaccinesByDateRange(
     DateTime startDate,
@@ -278,8 +272,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao buscar vacinas por período: $e');
     }
   }
-
-  // Reminder functionality
   @override
   Future<List<VaccineModel>> getVaccinesNeedingReminders() async {
     try {
@@ -324,13 +316,9 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao remover lembrete: $e');
     }
   }
-
-  // Search and filtering
   @override
   Future<List<VaccineModel>> searchVaccines(String query, [String? animalId]) async {
     try {
-      // Firestore doesn't support full-text search, so we'll get all and filter locally
-      // In a production app, you might want to use Algolia or similar service for search
       final vaccines = animalId != null 
           ? await getVaccinesByAnimalId(animalId)
           : await getVaccines();
@@ -391,8 +379,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao buscar vacinas por fabricante: $e');
     }
   }
-
-  // Bulk operations
   @override
   Future<List<VaccineModel>> addMultipleVaccines(List<VaccineModel> vaccines) async {
     try {
@@ -429,8 +415,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao marcar vacinas como concluídas: $e');
     }
   }
-
-  // Reactive streams
   @override
   Stream<List<VaccineModel>> watchVaccines() {
     try {
@@ -457,8 +441,6 @@ class VaccineRemoteDataSourceImpl implements VaccineRemoteDataSource {
       throw ServerException(message: 'Erro ao observar vacinas do animal: $e');
     }
   }
-
-  // Synchronization
   @override
   Future<DateTime?> getLastSyncTime() async {
     try {

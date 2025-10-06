@@ -40,7 +40,6 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       if (userJson == null) return null;
 
       final userMap = Map<String, dynamic>.from(
-        // Parse JSON string to Map
         _parseJsonString(userJson),
       );
       
@@ -129,14 +128,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> clearCachedCredentialsPreservingEmail() async {
     try {
-      // SECURITY + UX: Clear only password, preserve email for better UX
       await _secureStorage.delete(key: _cachedPasswordKey);
     } catch (e) {
       throw CacheException('Failed to clear cached password: $e');
     }
   }
-
-  // Helper methods for JSON parsing
   Map<String, dynamic> _parseJsonString(String jsonString) {
     return json.decode(jsonString) as Map<String, dynamic>;
   }

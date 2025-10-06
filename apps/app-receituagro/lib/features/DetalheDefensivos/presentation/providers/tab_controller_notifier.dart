@@ -55,8 +55,6 @@ class TabControllerNotifier extends _$TabControllerNotifier {
     _tabController?.dispose();
     _tabController = TabController(length: 4, vsync: vsync);
     _tabController!.addListener(_onTabChanged);
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _tabController?.removeListener(_onTabChanged);
       _tabController?.dispose();

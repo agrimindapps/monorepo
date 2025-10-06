@@ -278,10 +278,8 @@ class EmptyStateWidget extends StatelessWidget {
         child: Image.asset(
           illustrationAsset!,
           fit: BoxFit.contain,
-          // Otimizações de memória para assets
           cacheHeight: (style.illustrationSize ?? AppSizes.imageThumbSize).toInt(),
           cacheWidth: (style.illustrationSize ?? AppSizes.imageThumbSize).toInt(),
-          // Evitar carregamento desnecessário
           excludeFromSemantics: true,
         ),
       );

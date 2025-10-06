@@ -84,8 +84,6 @@ class _FavoritosPageState extends ConsumerState<FavoritosPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
     final state = ref.watch(favoritosNotifierProvider);
-
-    // Inicialização lazy
     if (!_hasInitialized) {
       _hasInitialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {

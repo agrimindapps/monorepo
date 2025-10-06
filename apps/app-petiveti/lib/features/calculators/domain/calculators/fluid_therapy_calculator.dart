@@ -102,25 +102,15 @@ class FluidTherapyCalculator extends Calculator {
     final vomitingFrequency = inputs['vomiting_frequency'] as String;
     final diarrheaSeverity = inputs['diarrhea_severity'] as String;
     final correctionHours = int.parse(inputs['correction_hours'] as String);
-
-    // 1. Calcular necessidades de manutenção
     final maintenanceNeeds = _calculateMaintenanceNeeds(weight);
-
-    // 2. Calcular déficit de desidratação
     final dehydrationDeficit = _calculateDehydrationDeficit(weight, dehydrationPercentage);
-
-    // 3. Calcular perdas contínuas adicionais
     final additionalLosses = _calculateAdditionalLosses(
       weight, vomitingFrequency, diarrheaSeverity, ongoingLosses
     );
-
-    // 4. Calcular taxa total de infusão
     final maintenanceRate = maintenanceNeeds / 24; // ml/h
     final deficitRate = dehydrationDeficit / correctionHours; // ml/h
     final lossRate = additionalLosses / 24; // ml/h
     final totalRate = maintenanceRate + deficitRate + lossRate;
-
-    // 5. Calcular volumes totais
     final totalDaily = maintenanceNeeds + additionalLosses;
     final totalWithDeficit = totalDaily + dehydrationDeficit;
 
@@ -201,20 +191,15 @@ class FluidTherapyCalculator extends Calculator {
   }
 
   double _calculateMaintenanceNeeds(double weight) {
-    // Fórmula: 60-80 ml/kg/dia para cães e gatos
-    // Uso médio de 70 ml/kg/dia
     return weight * 70;
   }
 
   double _calculateDehydrationDeficit(double weight, double dehydrationPercentage) {
-    // Déficit = peso (kg) × % desidratação × 1000 (ml)
     return weight * (dehydrationPercentage / 100) * 1000;
   }
 
   double _calculateAdditionalLosses(double weight, String vomiting, String diarrhea, double ongoingLosses) {
     double additionalLosses = ongoingLosses;
-
-    // Perdas por vômito
     switch (vomiting) {
       case '1-2':
         additionalLosses += weight * 5; // 5 ml/kg/dia
@@ -229,8 +214,6 @@ class FluidTherapyCalculator extends Calculator {
         additionalLosses += weight * 30; // 30 ml/kg/dia
         break;
     }
-
-    // Perdas por diarreia
     switch (diarrhea) {
       case 'Leve':
         additionalLosses += weight * 10; // 10 ml/kg/dia
@@ -257,7 +240,6 @@ class FluidTherapyCalculator extends Calculator {
         'composition': 'Eletrólitos balanceados',
       });
     } else {
-      // Reposição de déficit
       if (dehydrationPercentage <= 5.0) {
         recommendations.add({
           'fluid': 'Solução de Ringer Lactato',
@@ -276,8 +258,6 @@ class FluidTherapyCalculator extends Calculator {
           'composition': 'Eletrólitos balanceados',
         });
       }
-
-      // Perdas específicas
       if (vomiting != '0') {
         recommendations.add({
           'fluid': 'Solução Salina 0.45% + KCl',

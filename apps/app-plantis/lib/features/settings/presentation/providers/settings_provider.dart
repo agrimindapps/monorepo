@@ -12,7 +12,6 @@ class SettingsProvider extends ChangeNotifier {
   final ISettingsRepository _settingsRepository;
   final PlantisNotificationService _notificationService;
   final BackupService? _backupService;
-  // Estado unificado
   SettingsEntity _settings = SettingsEntity.defaults();
   bool _isLoading = false;
   bool _isInitialized = false;
@@ -26,33 +25,21 @@ class SettingsProvider extends ChangeNotifier {
   }) : _settingsRepository = settingsRepository,
        _notificationService = notificationService,
        _backupService = backupService;
-
-  // Getters
   SettingsEntity get settings => _settings;
   bool get isLoading => _isLoading;
   bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
-
-  // Getters específicos para facilitar uso nas páginas
   NotificationSettingsEntity get notificationSettings =>
       _settings.notifications;
   BackupSettingsEntity get backupSettings => _settings.backup;
   ThemeSettingsEntity get themeSettings => _settings.theme;
   AccountSettingsEntity get accountSettings => _settings.account;
   AppSettingsEntity get appSettings => _settings.app;
-
-  // Estados derivados
   bool get hasPermissionsGranted => _settings.notifications.permissionsGranted;
   bool get isDarkMode => _settings.theme.isDarkMode;
-
-  // Verificação de plataforma web
   bool get isWebPlatform => kIsWeb;
-
-  // Getter simplificado para o switch de notificações
   bool get notificationsEnabled => _settings.notifications.taskRemindersEnabled;
-
-  // Setter simplificado para o switch de notificações
   Future<void> setNotificationsEnabled(bool enabled) async {
     await toggleTaskReminders(enabled);
   }
@@ -95,7 +82,6 @@ class SettingsProvider extends ChangeNotifier {
   /// Sincroniza com services externos
   Future<void> _syncWithServices() async {
     try {
-      // Sincronizar permissões de notificação
       final hasPermissions =
           await _notificationService.areNotificationsEnabled();
 
@@ -104,8 +90,6 @@ class SettingsProvider extends ChangeNotifier {
           _settings.notifications.copyWith(permissionsGranted: hasPermissions),
         );
       }
-
-      // Sincronizar dados da conta
       await _syncAccountSettings();
     } catch (e) {
       debugPrint('Erro ao sincronizar com services: $e');
@@ -115,8 +99,6 @@ class SettingsProvider extends ChangeNotifier {
   /// Sincroniza configurações da conta com AuthRepository
   Future<void> _syncAccountSettings() async {
     try {
-      // Por enquanto, usar configurações padrão
-      // TODO: Integrar com stream de usuário do AuthRepository quando necessário
       final accountSettings = AccountSettingsEntity.defaults();
 
       if (_settings.account != accountSettings) {
@@ -141,8 +123,6 @@ class SettingsProvider extends ChangeNotifier {
         (void _) {
           _settings = newSettings;
           _setSuccess('Configurações salvas com sucesso');
-
-          // Sincronizar com services externos
           _applyCascadeEffects(newSettings);
         },
       );
@@ -171,8 +151,6 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> updateThemeSettings(ThemeSettingsEntity newSettings) async {
     final updatedSettings = _settings.copyWith(theme: newSettings);
     await updateSettings(updatedSettings);
-
-    // Aplicar tema imediatamente
     _applyThemeChanges(newSettings);
   }
 
@@ -187,8 +165,6 @@ class SettingsProvider extends ChangeNotifier {
     final updatedSettings = _settings.copyWith(app: newSettings);
     await updateSettings(updatedSettings);
   }
-
-  // Métodos específicos para facilitar uso nas páginas
 
   /// Toggle para lembretes de tarefas
   Future<void> toggleTaskReminders(bool enabled) async {
@@ -269,7 +245,6 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Aplica efeitos cascata quando configurações mudam
   void _applyCascadeEffects(SettingsEntity newSettings) {
-    // Aplicar mudanças de tema
     if (_settings.theme != newSettings.theme) {
       _applyThemeChanges(newSettings.theme);
     }
@@ -277,11 +252,7 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Aplica mudanças de tema no ThemeProvider
   void _applyThemeChanges(ThemeSettingsEntity themeSettings) {
-    // A aplicação de temas agora é feita através dos providers Riverpod
-    // Este método é mantido para compatibilidade mas não implementa nada
   }
-
-  // Métodos de notificação integrados
 
   /// Abre configurações do sistema para notificações
   Future<void> openNotificationSettings() async {
@@ -329,8 +300,6 @@ class SettingsProvider extends ChangeNotifier {
     return _settings.notifications.isTaskTypeEnabled(taskType);
   }
 
-  // Métodos de backup integrados (se disponível)
-
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
     final backupService = _backupService;
@@ -367,8 +336,6 @@ class SettingsProvider extends ChangeNotifier {
         (void _) async {
           _settings = SettingsEntity.defaults();
           _setSuccess('Configurações resetadas com sucesso');
-
-          // Reaplica configurações nos services
           await _syncWithServices();
         },
       );
@@ -390,8 +357,6 @@ class SettingsProvider extends ChangeNotifier {
   void clearMessages() {
     _clearMessages();
   }
-
-  // Métodos privados de gerenciamento de estado
 
   void _setLoading(bool loading) {
     if (_isLoading != loading) {

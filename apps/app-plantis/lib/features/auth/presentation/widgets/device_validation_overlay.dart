@@ -13,7 +13,6 @@ class DeviceValidationOverlay extends ConsumerWidget {
 
     return authState.when(
       data: (state) {
-        // Sempre retorna vazio por enquanto já que device validation não está implementado
         return const SizedBox.shrink();
       },
       loading: () => const SizedBox.shrink(),

@@ -23,7 +23,6 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Em produção, só mostra se explicitamente permitido
     if (!widget.showInProduction && const bool.fromEnvironment('dart.vm.product')) {
       return const SizedBox.shrink();
     }
@@ -63,7 +62,6 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // Status atual
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -79,8 +77,6 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
                       ),
                     ),
                   ),
-                  
-                  // Botão ativar
                   if (!isPremium)
                     ElevatedButton.icon(
                       onPressed: _isProcessing ? null : _activateTestSubscription,
@@ -98,8 +94,6 @@ class _PremiumTestControlsWidgetState extends State<PremiumTestControlsWidget> {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                     ),
-                  
-                  // Botão desativar
                   if (isPremium)
                     ElevatedButton.icon(
                       onPressed: _isProcessing ? null : _removeTestSubscription,

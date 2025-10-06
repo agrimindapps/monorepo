@@ -17,10 +17,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     String email,
     String password,
   ) async {
-    // Simular delay de rede
     await Future<void>.delayed(const Duration(milliseconds: 500));
-
-    // Validação simples para demo
     if (email.isEmpty || password.isEmpty) {
       throw Exception('Email e senha são obrigatórios');
     }
@@ -28,8 +25,6 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     if (password.length < 6) {
       throw Exception('Senha deve ter pelo menos 6 caracteres');
     }
-
-    // Criar usuário mock
     final user = UserModel(
       id: uuid.v4(),
       name: email.split('@').first, // Nome do email
@@ -50,10 +45,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     String password,
     String name,
   ) async {
-    // Simular delay de rede
     await Future<void>.delayed(const Duration(milliseconds: 800));
-
-    // Validação simples para demo
     if (email.isEmpty || password.isEmpty || name.isEmpty) {
       throw Exception('Todos os campos são obrigatórios');
     }
@@ -65,8 +57,6 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     if (!email.contains('@')) {
       throw Exception('Email inválido');
     }
-
-    // Criar usuário mock
     final user = UserModel(
       id: uuid.v4(),
       name: name,
@@ -102,9 +92,6 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     if (email.isEmpty || !email.contains('@')) {
       throw Exception('Email inválido');
     }
-
-    // Em uma implementação real, enviaria email de reset
-    // Por enquanto apenas simula sucesso
   }
 
   @override
@@ -122,15 +109,10 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
     if (_currentUser == null) {
       throw Exception('Nenhum usuário logado para deletar');
     }
-
-    // Em uma implementação real, deletaria a conta no servidor
-    // e todos os dados associados
     final deletedUserId = _currentUser!.id;
 
     _currentUser = null;
     _authStateController.add(null);
-
-    // Log da exclusão para debug
     debugPrint('🗑️ Account deleted for user: $deletedUserId');
   }
 

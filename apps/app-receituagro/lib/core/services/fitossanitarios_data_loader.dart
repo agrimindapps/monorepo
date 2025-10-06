@@ -31,11 +31,8 @@ class FitossanitariosDataLoader {
       );
 
       final List<Map<String, dynamic>> allFitossanitarios = [];
-
-      // Carrega todos os arquivos JSON de fitossanitários
       for (int i = 0; i <= 2; i++) {
         try {
-          // Use path without 'assets/' prefix for web compatibility
           final String assetPath =
               kIsWeb
                   ? 'database/json/tbfitossanitarios/TBFITOSSANITARIOS$i.json'
@@ -61,8 +58,6 @@ class FitossanitariosDataLoader {
           );
         }
       }
-
-      // Filtra apenas registros válidos
       final List<Map<String, dynamic>> fitossanitarios =
           allFitossanitarios
               .where(
@@ -81,11 +76,7 @@ class FitossanitariosDataLoader {
       print(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
       );
-
-      // Obtém repositório do DI
       final repository = di.sl<FitossanitarioHiveRepository>();
-
-      // Carrega dados no repositório
       final result = await repository.loadFromJson(fitossanitarios, '1.0.0');
 
       result.fold(
@@ -104,8 +95,6 @@ class FitossanitariosDataLoader {
           _isLoaded = true;
         },
       );
-
-      // Verifica se dados foram realmente salvos
       final loadedResult = await repository.getAll();
       if (loadedResult.isSuccess) {
         final loadedFitossanitarios = loadedResult.data!;
@@ -130,7 +119,6 @@ class FitossanitariosDataLoader {
         '❌ [FITOSSANITARIOS] Erro durante carregamento de fitossanitários: $e',
       );
       print('❌ [FITOSSANITARIOS] Stack trace: ${StackTrace.current}');
-      // Não bloqueia o app, apenas registra o erro
     }
   }
 

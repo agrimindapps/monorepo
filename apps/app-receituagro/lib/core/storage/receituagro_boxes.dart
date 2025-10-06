@@ -3,19 +3,10 @@ import 'package:core/core.dart';
 /// Definições de boxes específicas do app ReceitaAgro
 /// Cada app gerencia suas próprias boxes para evitar contaminação cross-app
 class ReceitaAgroBoxes {
-  // Box principal para dados do ReceitaAgro
   static const String receituagro = 'receituagro';
-  
-  // Box para cache específico do ReceitaAgro
   static const String cache = 'receituagro_cache';
-  
-  // Box para dados favoritos do ReceitaAgro
   static const String favoritos = 'receituagro_favoritos';
-  
-  // Box para configurações específicas do ReceitaAgro
   static const String settings = 'receituagro_settings';
-  
-  // Box para dados offline do ReceitaAgro
   static const String offline = 'receituagro_offline';
 
   /// Obtém todas as configurações de boxes do ReceitaAgro
@@ -82,23 +73,16 @@ class ReceitaAgroBoxes {
 /// Storage keys específicos para o ReceitaAgro
 /// Estes substituem os keys que estavam no core package
 class ReceitaAgroStorageKeys {
-    // Configurações do usuário
     static const String userPreferences = 'receituagro_user_preferences';
     static const String appVersion = 'receituagro_app_version';
     static const String lastSyncDate = 'receituagro_last_sync_date';
-    
-    // Cache de dados
     static const String cachedPlantas = 'receituagro_cached_plantas';
     static const String cachedPragas = 'receituagro_cached_pragas';
     static const String cachedDoencas = 'receituagro_cached_doencas';
     static const String cachedReceitas = 'receituagro_cached_receitas';
-    
-    // Favoritos
     static const String favoritePlants = 'receituagro_favorite_plants';
     static const String favoriteRecipes = 'receituagro_favorite_recipes';
     static const String favoriteCategories = 'receituagro_favorite_categories';
-    
-    // Dados offline
     static const String offlinePlants = 'receituagro_offline_plants';
     static const String offlineRecipes = 'receituagro_offline_recipes';
     static const String syncStatus = 'receituagro_sync_status';

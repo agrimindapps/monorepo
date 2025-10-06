@@ -23,7 +23,6 @@ class CallToAction extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Formas decorativas
           Positioned(
             top: -80,
             left: -80,
@@ -48,8 +47,6 @@ class CallToAction extends StatelessWidget {
               ),
             ),
           ),
-
-          // Conteúdo principal
           Padding(
             padding: EdgeInsets.symmetric(
               vertical: 80,
@@ -60,7 +57,6 @@ class CallToAction extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Column(
                   children: [
-                    // Título principal
                     Text(
                       'Pronto para Começar?',
                       style: TextStyle(
@@ -72,8 +68,6 @@ class CallToAction extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-
-                    // Subtítulo
                     Text(
                       'Seja um dos primeiros a experimentar o GasOMeter e transforme a forma como você gerencia seu veículo.',
                       style: TextStyle(
@@ -84,12 +78,9 @@ class CallToAction extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 40),
-
-                    // Botões de ação
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Botão principal - Acessar App
                         ElevatedButton(
                           onPressed: () {
                             context.go('/login');
@@ -124,8 +115,6 @@ class CallToAction extends StatelessWidget {
                         ),
 
                         const SizedBox(width: 16),
-
-                        // Botão secundário - Ser Notificado
                         OutlinedButton(
                           onPressed: () {
                             showDialog<void>(
@@ -166,8 +155,6 @@ class CallToAction extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 30),
-
-                    // Informação adicional
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(

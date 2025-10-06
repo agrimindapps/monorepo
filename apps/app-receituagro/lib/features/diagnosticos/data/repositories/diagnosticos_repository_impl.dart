@@ -42,7 +42,6 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   @override
   Future<Either<Failure, DiagnosticoEntity?>> getById(String id) async {
     try {
-      // Tenta buscar por idReg ou objectId
       final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(id);
 
       if (diagnosticoHive == null) {
@@ -223,8 +222,6 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         if (allResult.isLeft()) return allResult;
         diagnosticos = allResult.fold((l) => [], (r) => r);
       }
-
-      // Filtros por nome removidos - agora usamos apenas IDs
 
       if (filters.tipoAplicacao != null) {
         diagnosticos =

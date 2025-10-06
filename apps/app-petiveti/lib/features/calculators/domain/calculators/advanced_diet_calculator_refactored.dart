@@ -23,7 +23,6 @@ class AdvancedDietCalculatorRefactored extends BaseCalculator<AdvancedDietInput,
 
   @override
   AdvancedDietResult performCalculation(AdvancedDietInput input) {
-    // Delegate all calculations to the coordinator service
     return _coordinator.calculateDietPlan(input);
   }
 

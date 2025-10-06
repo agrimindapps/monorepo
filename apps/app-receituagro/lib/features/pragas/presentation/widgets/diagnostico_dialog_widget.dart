@@ -98,7 +98,6 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ingrediente Ativo
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Text(
@@ -110,7 +109,6 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
               ),
             ),
           ),
-          // Information Cards
           Container(
             padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
@@ -274,7 +272,6 @@ class _DefensivoButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return OutlinedButton(
       onPressed: () {
-        // Usa valores padrão (mock data - método do notifier retorna sempre os mesmos valores)
         const fabricante = 'Fabricante Desconhecido';
 
         if (context.mounted) Navigator.of(context).pop();

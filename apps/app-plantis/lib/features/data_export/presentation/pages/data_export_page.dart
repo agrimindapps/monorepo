@@ -35,8 +35,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     _tabController = TabController(length: 2, vsync: this);
     _loadDataStatistics();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // REVIEW (converted TODO 2025-10-06): Initialize provider using Riverpod
-      // ref.read(dataExportProvider.notifier).initialize();
     });
   }
 
@@ -48,16 +46,12 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
   Future<void> _loadDataStatistics() async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Load statistics using Riverpod provider
-      // final provider = ref.read(dataExportProvider.notifier);
-      // final stats = await provider.getDataTypeStatistics();
       if (mounted) {
         setState(() {
           _dataStatistics = {}; // Placeholder for now
         });
       }
     } catch (e) {
-      // Handle error silently
     }
   }
 
@@ -71,28 +65,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
       );
       return;
     }
-
-    // REVIEW (converted TODO 2025-10-06): Replace with Riverpod provider
-    // final provider = ref.read(dataExportProvider.notifier);
-
-    // Simulate provider behavior for now
-    // const canRequestExport = true;
-
-    // if (!canRequestExport) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text('Aguarde alguns minutos para solicitar outro export'),
-    //       backgroundColor: Colors.orange,
-    //     ),
-    //   );
-    //   return;
-    // }
-
-    // REVIEW (converted TODO 2025-10-06): Replace with actual export request
-    // final request = await provider.requestExport(
-    //   dataTypes: _selectedDataTypes,
-    //   format: _selectedFormat,
-    // );
     const ExportRequest? request = null;
 
     if (request != null && mounted) {
@@ -166,12 +138,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Widget _buildExportTab() {
     return Consumer(
       builder: (context, ref, child) {
-        // REVIEW (converted TODO 2025-10-06): Watch data export provider
-        // final provider = ref.watch(dataExportProvider);
-
-        // Simulate provider state for now
         const isLoading = false;
-        // ignore: unused_local_variable
         const canRequestExport = true;
         const availabilityResult = null;
         return SingleChildScrollView(
@@ -179,7 +146,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // LGPD Info Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -241,8 +207,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               ),
 
               const SizedBox(height: 24),
-
-              // Data Type Selection
               DataTypeSelector(
                 selectedDataTypes: _selectedDataTypes,
                 onSelectionChanged: (types) {
@@ -254,8 +218,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               ),
 
               const SizedBox(height: 24),
-
-              // Export Format Selection
               ExportFormatSelector(
                 selectedFormat: _selectedFormat,
                 onFormatChanged: (format) {
@@ -266,18 +228,13 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               ),
 
               const SizedBox(height: 24),
-
-              // Availability Check
               ExportAvailabilityWidget(
                 requestedDataTypes: _selectedDataTypes,
                 onAvailabilityChecked: () {
-                  // Optional callback when availability is checked
                 },
               ),
 
               const SizedBox(height: 24),
-
-              // Export Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -313,39 +270,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               ),
 
               const SizedBox(height: 16),
-
-              // Rate limiting info
-              // if (!canRequestExport) ...[
-              //   Container(
-              //     width: double.infinity,
-              //     padding: const EdgeInsets.all(12),
-              //     decoration: BoxDecoration(
-              //       color: Colors.orange.withAlpha(20),
-              //       borderRadius: BorderRadius.circular(8),
-              //       border: Border.all(color: Colors.orange.withAlpha(60)),
-              //     ),
-              //     child: Row(
-              //       children: [
-              //         const Icon(
-              //           Icons.schedule,
-              //           color: Colors.orange,
-              //           size: 20,
-              //         ),
-              //         const SizedBox(width: 8),
-              //         Expanded(
-              //           child: Text(
-              //             'Para sua segurança, é permitida apenas uma exportação por hora.',
-              //             style: TextStyle(
-              //               fontSize: 13,
-              //               color: Colors.orange.withAlpha(200),
-              //             ),
-              //           ),
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              //   const SizedBox(height: 16),
-              // ],
             ],
           ),
         );
@@ -356,18 +280,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Widget _buildHistoryTab() {
     return Consumer(
       builder: (context, ref, child) {
-        // REVIEW (converted TODO 2025-10-06): Watch data export provider
-        // final provider = ref.watch(dataExportProvider);
-
-        // Simulate provider state for now
-        // const isLoading = false;
         const exportHistory = <ExportRequest>[];
-
-        // if (isLoading) {
-        //   return const Center(
-        //     child: CircularProgressIndicator(color: PlantisColors.primary),
-        //   );
-        // }
 
         if (exportHistory.isEmpty) {
           return Center(
@@ -408,8 +321,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
         return RefreshIndicator(
           onRefresh: () async {
-            // REVIEW (converted TODO 2025-10-06): Refresh export history using Riverpod
-            // await ref.read(dataExportProvider.notifier).loadExportHistory();
           },
           color: PlantisColors.primary,
           child: ListView.builder(
@@ -470,8 +381,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 if (request.status == ExportRequestStatus.completed) ...[
                   IconButton(
                     onPressed: () {
-                      // REVIEW (converted TODO 2025-10-06): Download export using Riverpod
-                      // ref.read(dataExportProvider.notifier).downloadExport(request.id);
                     },
                     icon: const Icon(Icons.download, color: PlantisColors.leaf),
                   ),
@@ -481,8 +390,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                     if (value == 'delete') {
                       final confirmed = await _showDeleteConfirmation();
                       if (confirmed) {
-                        // REVIEW (converted TODO 2025-10-06): Delete export using Riverpod
-                        // ref.read(dataExportProvider.notifier).deleteExport(request.id);
                       }
                     }
                   },

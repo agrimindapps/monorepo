@@ -1,4 +1,3 @@
-// part 'log_entry.g.dart'; // Will be generated when running build_runner
 
 import 'package:core/core.dart';
 

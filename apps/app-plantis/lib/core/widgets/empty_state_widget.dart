@@ -184,19 +184,14 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icon/Illustration
             _buildIcon(context, theme),
 
             SizedBox(
               height: config.style == EmptyStateStyle.illustration ? 24 : 32,
             ),
-
-            // Title
             _buildTitle(theme),
 
             const SizedBox(height: 12),
-
-            // Description
             _buildDescription(theme),
 
             if (config.showButton && config.onButtonPressed != null) ...[
@@ -260,7 +255,6 @@ class EmptyStateWidget extends StatelessWidget {
 
   Widget _buildDescription(ThemeData theme) {
     if (config.description.contains('"')) {
-      // Rich text for search results with bold search term
       final parts = config.description.split('"');
       if (parts.length >= 3) {
         return RichText(
@@ -281,8 +275,6 @@ class EmptyStateWidget extends StatelessWidget {
         );
       }
     }
-
-    // Regular description text
     return Text(
       config.description,
       style: theme.textTheme.bodyMedium?.copyWith(
@@ -297,7 +289,6 @@ class EmptyStateWidget extends StatelessWidget {
     switch (config.style) {
       case EmptyStateStyle.illustration:
         if (config.buttonText == 'Limpar busca') {
-          // Outlined button for clear search
           return OutlinedButton.icon(
             onPressed: config.onButtonPressed,
             icon: const Icon(Icons.clear),
@@ -312,8 +303,6 @@ class EmptyStateWidget extends StatelessWidget {
             ),
           );
         }
-
-        // Regular elevated button for tasks
         return ElevatedButton.icon(
           onPressed: config.onButtonPressed,
           icon: const Icon(Icons.add),
@@ -326,7 +315,6 @@ class EmptyStateWidget extends StatelessWidget {
         );
 
       case EmptyStateStyle.icon:
-        // Large elevated button for plants
         return ElevatedButton.icon(
           onPressed: config.onButtonPressed,
           icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),

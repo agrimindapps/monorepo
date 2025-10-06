@@ -3,9 +3,6 @@ import '../entities/file_entity.dart';
 
 /// Interface para operações de gerenciamento de arquivos
 abstract class IFileRepository {
-  // ==========================================================================
-  // OPERAÇÕES BÁSICAS DE ARQUIVO
-  // ==========================================================================
 
   /// Verificar se um arquivo ou diretório existe
   Future<bool> exists(String path);
@@ -73,10 +70,6 @@ abstract class IFileRepository {
     bool recursive = false,
   });
 
-  // ==========================================================================
-  // NAVEGAÇÃO E BUSCA
-  // ==========================================================================
-
   /// Listar conteúdo de um diretório
   Future<List<FileInfoEntity>> listDirectory({
     required String path,
@@ -107,10 +100,6 @@ abstract class IFileRepository {
   /// Obter nome do arquivo sem extensão
   String getFileNameWithoutExtension(String path);
 
-  // ==========================================================================
-  // DIRETÓRIOS DO SISTEMA
-  // ==========================================================================
-
   /// Obter caminho do diretório de documentos
   Future<String> getDocumentsDirectory();
 
@@ -129,10 +118,6 @@ abstract class IFileRepository {
   /// Obter caminho de diretório específico
   Future<String?> getSystemDirectory(SystemDirectory type);
 
-  // ==========================================================================
-  // COMPRESSÃO E DESCOMPRESSÃO
-  // ==========================================================================
-
   /// Comprimir arquivos/diretórios
   Future<FileOperationResult> compress({
     required List<String> sourcePaths,
@@ -150,10 +135,6 @@ abstract class IFileRepository {
   /// Obter lista de arquivos em um arquivo comprimido
   Future<List<String>> listCompressedFiles(String archivePath);
 
-  // ==========================================================================
-  // CACHE E LIMPEZA
-  // ==========================================================================
-
   /// Configurar cache de arquivos
   Future<bool> configurateCache(CacheConfig config);
 
@@ -168,10 +149,6 @@ abstract class IFileRepository {
 
   /// Obter tamanho total de um diretório
   Future<int> getDirectorySize(String path);
-
-  // ==========================================================================
-  // UTILITÁRIOS
-  // ==========================================================================
 
   /// Obter tipo MIME de um arquivo
   Future<String> getMimeType(String path);
@@ -203,10 +180,6 @@ abstract class IFileRepository {
     required String path2,
   });
 
-  // ==========================================================================
-  // COMPARTILHAMENTO
-  // ==========================================================================
-
   /// Compartilhar arquivo(s)
   Future<bool> shareFiles({
     required List<String> filePaths,
@@ -222,10 +195,6 @@ abstract class IFileRepository {
 
   /// Abrir arquivo com aplicativo padrão
   Future<bool> openFile(String path);
-
-  // ==========================================================================
-  // BACKUP E RESTAURAÇÃO
-  // ==========================================================================
 
   /// Criar backup de arquivos
   Future<FileOperationResult> createBackup({
@@ -243,10 +212,6 @@ abstract class IFileRepository {
 
   /// Validar integridade do backup
   Future<bool> validateBackup(String backupPath);
-
-  // ==========================================================================
-  // MONITORAMENTO
-  // ==========================================================================
 
   /// Monitorar mudanças em um diretório
   Stream<FileInfoEntity> watchDirectory(String path);

@@ -86,8 +86,6 @@ class SettingsSection extends StatelessWidget {
     
     for (int i = 0; i < children.length; i++) {
       widgets.add(children[i]);
-      
-      // Add divider between items (except after the last item)
       if (i < children.length - 1) {
         widgets.add(const Divider(height: 1));
       }

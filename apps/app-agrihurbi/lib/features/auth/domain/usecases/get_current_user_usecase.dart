@@ -14,19 +14,16 @@ class GetCurrentUserUseCase implements UseCase<UserEntity?, GetCurrentUserParams
   
   @override
   Future<Either<Failure, UserEntity?>> call(GetCurrentUserParams params) async {
-    // Obter usuário atual do repository
     final result = await repository.getCurrentUser();
     
     return result.fold(
       (failure) {
-        // Se falhou por token expirado e refresh está habilitado
         if (params.refreshIfExpired && _isTokenExpiredFailure(failure)) {
           return _attemptTokenRefresh();
         }
         return Left(failure);
       },
       (user) {
-        // Validar dados do usuário se solicitado
         if (params.validateUserData && user != null) {
           final validation = _validateUserData(user);
           if (validation != null) {
@@ -48,8 +45,6 @@ class GetCurrentUserUseCase implements UseCase<UserEntity?, GetCurrentUserParams
   
   /// Tenta fazer refresh do token
   Future<Either<Failure, UserEntity?>> _attemptTokenRefresh() async {
-    // Esta implementação será feita quando o repository estiver completo
-    // Por ora, retorna null (sem usuário)
     return const Right(null);
   }
   

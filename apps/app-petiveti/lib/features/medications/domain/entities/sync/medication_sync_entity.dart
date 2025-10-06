@@ -147,20 +147,14 @@ class MedicationSyncEntity extends BaseSyncEntity {
       'notes': notes,
       'prescribed_by': prescribedBy,
       'type': type.toString().split('.').last,
-
-      // Dados críticos de emergência
       'is_critical': isCritical,
       'requires_supervision': requiresSupervision,
       'side_effects_notes': sideEffectsNotes,
       'emergency_instructions': emergencyInstructions,
-
-      // Dosagem (single user)
       'missed_doses': missedDoses.map((d) => d.toIso8601String()).toList(),
       'administration_times': administrationTimes.map((d) => d.toIso8601String()).toList(),
       'last_administered_at': lastAdministeredAt?.toIso8601String(),
       'next_dose_at': nextDoseAt?.toIso8601String(),
-
-      // Metadados computados para otimização
       'is_active': isActive,
       'status': status.toString().split('.').last,
       'remaining_days': remainingDays,
@@ -171,8 +165,6 @@ class MedicationSyncEntity extends BaseSyncEntity {
       'adherence_percentage': adherencePercentage,
       'has_missed_doses': hasMissedDoses,
     };
-
-    // Remover valores nulos
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -190,8 +182,6 @@ class MedicationSyncEntity extends BaseSyncEntity {
       version: (baseFields['version'] as int?) ?? 1,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-
-      // Campos específicos da medicação
       animalId: map['animal_id'] as String,
       name: map['name'] as String,
       dosage: map['dosage'] as String,
@@ -202,8 +192,6 @@ class MedicationSyncEntity extends BaseSyncEntity {
       notes: map['notes'] as String?,
       prescribedBy: map['prescribed_by'] as String?,
       type: _parseMedicationType(map['type'] as String?),
-
-      // Dados críticos
       isCritical: map['is_critical'] as bool? ?? false,
       requiresSupervision: map['requires_supervision'] as bool? ?? false,
       sideEffectsNotes: map['side_effects_notes'] as String?,
@@ -387,7 +375,6 @@ class MedicationSyncEntity extends BaseSyncEntity {
 
   /// Calcula próxima dose baseada na frequência
   DateTime? _calculateNextDose(DateTime lastDose) {
-    // Implementação simplificada - em produção seria mais sofisticada
     if (frequency.toLowerCase().contains('diário') || frequency.toLowerCase().contains('daily')) {
       return lastDose.add(const Duration(days: 1));
     } else if (frequency.toLowerCase().contains('2x') || frequency.toLowerCase().contains('twice')) {
@@ -397,8 +384,6 @@ class MedicationSyncEntity extends BaseSyncEntity {
     } else if (frequency.toLowerCase().contains('semanal') || frequency.toLowerCase().contains('weekly')) {
       return lastDose.add(const Duration(days: 7));
     }
-
-    // Default: diário
     return lastDose.add(const Duration(days: 1));
   }
 

@@ -55,7 +55,6 @@ class ProfileImageService {
     void Function(double)? onProgress,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
-      // Verificar se há usuário autenticado
       final currentUser = _auth.currentUser;
       if (currentUser == null) {
         return Future.error(
@@ -64,18 +63,12 @@ class ProfileImageService {
       }
 
       final targetUserId = userId ?? currentUser.uid;
-
-      // Validar imagem
       final validationResult = _imageService.validateImage(imageFile);
       if (validationResult.isError) {
         return Future.error(validationResult.error!);
       }
-
-      // Obter path de storage personalizado
       final storagePath = _config.getStoragePathForUser(targetUserId);
       const fileName = 'avatar.jpg'; // Nome fixo para facilitar cache e substituição
-
-      // Fazer upload usando ImageService
       final uploadResult = await _imageService.uploadImage(
         imageFile,
         folder: storagePath,
@@ -89,21 +82,14 @@ class ProfileImageService {
       }
 
       final imageUploadResult = uploadResult.data!;
-
-      // Atualizar photoURL no Firebase Auth (somente para o usuário atual)
       if (targetUserId == currentUser.uid) {
         try {
           await currentUser.updatePhotoURL(imageUploadResult.downloadUrl);
           await currentUser.reload();
         } catch (e) {
-          // Log do erro mas não falha o upload
-          // TODO: Replace with proper logging framework
-          // ignore: avoid_print
           print('⚠️ ProfileImageService: Erro ao atualizar photoURL no Auth: $e');
         }
       }
-
-      // Criar resultado de perfil específico
       final profileResult = ProfileImageResult.fromUploadResult(
         downloadUrl: imageUploadResult.downloadUrl,
         fileName: imageUploadResult.fileName,
@@ -128,25 +114,16 @@ class ProfileImageService {
       }
 
       final targetUserId = userId ?? currentUser.uid;
-
-      // Obter URL atual se for o usuário logado
       String? currentPhotoUrl;
       if (targetUserId == currentUser.uid) {
         currentPhotoUrl = currentUser.photoURL;
       }
-
-      // Se existe photoURL, tentar deletar do Storage
       if (currentPhotoUrl != null && currentPhotoUrl.isNotEmpty) {
         final deleteResult = await _imageService.deleteImage(currentPhotoUrl);
         if (deleteResult.isError) {
-          // Log do erro mas continua com limpeza do Auth
-          // TODO: Replace with proper logging framework
-          // ignore: avoid_print
           print('⚠️ ProfileImageService: Erro ao deletar do Storage: ${deleteResult.error}');
         }
       }
-
-      // Limpar photoURL no Firebase Auth (somente para o usuário atual)
       if (targetUserId == currentUser.uid) {
         try {
           await currentUser.updatePhotoURL(null);
@@ -271,17 +248,11 @@ class ProfileImageService {
       try {
         final storageRef = FirebaseStorage.instance.ref().child(storagePath);
         final listResult = await storageRef.listAll();
-        
-        // Deletar todos os arquivos na pasta do usuário
         for (final item in listResult.items) {
           try {
             await item.delete();
-            // TODO: Replace with proper logging framework
-            // ignore: avoid_print
             print('🗑️ ProfileImageService: Deleted old profile image: ${item.name}');
           } catch (e) {
-            // TODO: Replace with proper logging framework
-            // ignore: avoid_print
             print('⚠️ ProfileImageService: Failed to delete ${item.name}: $e');
           }
         }

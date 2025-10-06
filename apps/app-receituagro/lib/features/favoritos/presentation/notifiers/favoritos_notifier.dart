@@ -28,8 +28,6 @@ class FavoritosState {
     this.errorMessage,
     this.currentFilter = TipoFavorito.defensivo,
   });
-
-  // Getters de conveniência
   bool get hasDefensivos => defensivos.isNotEmpty;
   bool get hasPragas => pragas.isNotEmpty;
   bool get hasDiagnosticos => diagnosticos.isNotEmpty;
@@ -374,8 +372,6 @@ class FavoritosNotifier extends _$FavoritosNotifier {
     state = state.copyWith(errorMessage: null);
   }
 
-  // ========== MÉTODOS HELPER PRIVADOS ==========
-
   void _separateByType(List<FavoritoEntity> favoritos) {
     state = state.copyWith(
       defensivos: favoritos.whereType<FavoritoDefensivoEntity>().toList(),
@@ -400,8 +396,6 @@ class FavoritosNotifier extends _$FavoritosNotifier {
         await loadCulturas();
         break;
     }
-
-    // Atualiza estatísticas
     await loadStats();
   }
 

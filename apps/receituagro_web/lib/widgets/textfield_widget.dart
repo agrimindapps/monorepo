@@ -70,8 +70,6 @@ class VTextField extends StatelessWidget {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp('[0-9.,]')),
-            // FilteringTextInputFormatter.digitsOnly,
-            // CurrencyPtBrInputFormatter()
           ]),
     );
   }

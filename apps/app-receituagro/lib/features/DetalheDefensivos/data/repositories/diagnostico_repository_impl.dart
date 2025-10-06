@@ -36,8 +36,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
         (diagnosticosEntities) {
           debugPrint('✅ SUCESSO no _diagnosticosRepository');
           debugPrint('Entidades brutas encontradas: ${diagnosticosEntities.length}');
-          
-          // Log das primeiras entidades para debug
           if (diagnosticosEntities.isNotEmpty) {
             debugPrint('=== ENTIDADES ENCONTRADAS (primeiras 3) ===');
             for (int i = 0; i < diagnosticosEntities.length && i < 3; i++) {
@@ -74,7 +72,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   @override
   ResultFuture<List<DiagnosticoEntity>> getDiagnosticosByCultura(String cultura) async {
     try {
-      // ✅ CORRETO: Usar idCultura para filtrar, não nomeCultura cached
       final allResult = await _diagnosticosRepository.getByCultura(cultura);
 
       return allResult.fold(
@@ -95,7 +92,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   @override
   ResultFuture<List<DiagnosticoEntity>> getDiagnosticosByPraga(String praga) async {
     try {
-      // ✅ CORRETO: Usar idPraga para filtrar, não nomePraga cached
       final allResult = await _diagnosticosRepository.getByPraga(praga);
 
       return allResult.fold(
@@ -147,10 +143,7 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
     int? offset,
   }) async {
     try {
-      // ✅ CORRETO: Usar repository methods que filtram por IDs, não por nomes cached
       var result = await _diagnosticosRepository.getAll();
-
-      // Aplicar filtros usando os métodos corretos do repository
       if (cultura != null && cultura.isNotEmpty) {
         result = await _diagnosticosRepository.getByCultura(cultura);
       } else if (praga != null && praga.isNotEmpty) {
@@ -163,8 +156,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
         (failure) => Left(failure),
         (diagnosticosEntities) {
           var filteredEntities = diagnosticosEntities;
-
-          // Aplicar paginação
           if (offset != null && offset > 0) {
             if (offset >= filteredEntities.length) {
               return const Right([]);
@@ -194,10 +185,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
       if (query.trim().isEmpty) {
         return const Right([]);
       }
-
-      // ⚠️ NOTA: Search por texto livre requer resolver IDs para nomes
-      // Por ora, delegamos para o repository que usa IDs
-      // TODO: Implementar busca full-text após resolução de nomes
       debugPrint('⚠️ searchDiagnosticos: Busca por texto livre pode retornar resultados incompletos');
       debugPrint('   Recomenda-se usar filtros específicos por ID (cultura/praga/defensivo)');
 
@@ -206,8 +193,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
       return allResult.fold(
         (failure) => Left(failure),
         (diagnosticosEntities) {
-          // Por enquanto, retorna todos e deixa a UI filtrar após resolução
-          // Isso garante que nenhum resultado válido seja perdido
           final models = diagnosticosEntities
               .map((entity) => DiagnosticoModel.fromDiagnosticsEntity(entity))
               .toList();
@@ -223,7 +208,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
   @override
   Stream<List<DiagnosticoEntity>> watchDiagnosticos() async* {
     try {
-      // Como não temos stream nativo, simulamos com refresh periódico
       while (true) {
         final allResult = await _diagnosticosRepository.getAll();
         
@@ -235,8 +219,6 @@ class DiagnosticoRepositoryImpl implements DiagnosticoRepository {
                 .toList(),
           );
         }
-        
-        // Aguarda 10 segundos antes do próximo refresh
         await Future<void>.delayed(const Duration(seconds: 10));
       }
     } catch (e) {

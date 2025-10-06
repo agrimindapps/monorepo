@@ -16,16 +16,11 @@ class _CrashlyticsHelper {
 
   /// Check if Crashlytics is available and initialized
   static Future<bool> isAvailable() async {
-    // In debug mode, don't even try to use Crashlytics
     if (kDebugMode) {
       _isInitialized = false;
       return false;
     }
-
-    // If we already confirmed it's initialized, return true
     if (_isInitialized) return true;
-
-    // Don't check too frequently
     final now = DateTime.now();
     if (_lastInitCheck != null &&
         now.difference(_lastInitCheck!) < _initCheckCooldown) {
@@ -35,10 +30,7 @@ class _CrashlyticsHelper {
     _lastInitCheck = now;
 
     try {
-      // Try to access Crashlytics instance with timeout
       final instance = FirebaseCrashlytics.instance;
-
-      // Try a simple operation to verify it's working with timeout
       await instance
           .log('Crashlytics availability check')
           .timeout(const Duration(seconds: 2));
@@ -55,13 +47,11 @@ class _CrashlyticsHelper {
   }
 
   /// Mark as initialized (called after successful initialization)
-  // ignore: unused_element
   static void markAsInitialized() {
     _isInitialized = true;
   }
 
   /// Reset initialization status (for testing)
-  // ignore: unused_element
   static void reset() {
     _isInitialized = false;
     _lastInitCheck = null;
@@ -187,14 +177,11 @@ class ErrorReporter {
     String? appVersion,
   }) async {
     try {
-      // Always try to set Analytics properties
       await _analyticsService.setUserProperties({
         'is_anonymous': (isAnonymous ?? true).toString(),
         'is_premium': (isPremium ?? false).toString(),
         if (appVersion != null) 'app_version': appVersion,
       });
-
-      // Only set Crashlytics context if available (not in debug mode)
       if (!kDebugMode && await _CrashlyticsHelper.isAvailable()) {
         final crashlyticsInstance = FirebaseCrashlytics.instance;
 
@@ -210,7 +197,6 @@ class ErrorReporter {
         print('🔧 Debug mode: Skipping Crashlytics user context');
       }
     } catch (e) {
-      // Don't throw error in error reporter
       if (kDebugMode) {
         print('Failed to set user context: $e');
       }
@@ -235,7 +221,6 @@ class ErrorReporter {
     bool fatal,
   ) async {
     try {
-      // Check if Crashlytics is available before using it
       if (!await _CrashlyticsHelper.isAvailable()) {
         if (kDebugMode) {
           print('Skipping Crashlytics report - not available');
@@ -244,13 +229,9 @@ class ErrorReporter {
       }
 
       final crashlyticsInstance = FirebaseCrashlytics.instance;
-
-      // Set context information
       if (context != null) {
         await crashlyticsInstance.setCustomKey('error_context', context);
       }
-
-      // Set additional data as custom keys
       if (additionalData != null) {
         for (final entry in additionalData.entries) {
           await crashlyticsInstance.setCustomKey(
@@ -259,8 +240,6 @@ class ErrorReporter {
           );
         }
       }
-
-      // Set error type and severity
       await crashlyticsInstance.setCustomKey(
         'error_type',
         error.runtimeType.toString(),
@@ -305,7 +284,6 @@ class ErrorReporter {
     Map<String, dynamic>? additionalData,
   ) async {
     try {
-      // Create parameters map with proper types
       final Map<String, Object> parameters = {
         'error_type': error.runtimeType.toString(),
         'error_message': error.displayMessage,
@@ -313,8 +291,6 @@ class ErrorReporter {
         'is_recoverable': error.isRecoverable.toString(),
         'context': context ?? 'unknown',
       };
-
-      // Add additional data if present, ensuring no null values
       if (additionalData != null) {
         for (final entry in additionalData.entries) {
           if (entry.value != null) {
@@ -336,7 +312,6 @@ class ErrorReporter {
     Map<String, dynamic>? data,
   }) async {
     try {
-      // Only use Crashlytics in production and if available
       if (!kDebugMode && await _CrashlyticsHelper.isAvailable()) {
         final crashlyticsInstance = FirebaseCrashlytics.instance;
 
@@ -351,7 +326,6 @@ class ErrorReporter {
           }
         }
       } else {
-        // Fallback: just log to console (always in debug mode)
         if (kDebugMode) {
           print('Breadcrumb [$category]: $message');
           if (data != null) {
@@ -393,10 +367,7 @@ extension AppErrorReporting on AppError {
     Map<String, dynamic>? additionalData,
     bool fatal = false,
   }) async {
-    // Get error reporter from service locator if available
     try {
-      // This would normally use dependency injection
-      // For now, we'll create a simple reporter
       final reporter = ErrorReporter(
         GasometerAnalyticsService(
           core.EnhancedAnalyticsService(

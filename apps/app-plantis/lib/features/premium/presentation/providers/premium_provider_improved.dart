@@ -21,8 +21,6 @@ class PremiumProviderImproved extends ChangeNotifier {
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
   StreamSubscription<UserEntity?>? _authStream;
   StreamSubscription<PlantisSubscriptionSyncEvent>? _syncEventsStream;
-
-  // Novos estados para funcionalidades avançadas
   bool _isSyncing = false;
   DateTime? _lastSyncAt;
   List<String> _premiumFeaturesEnabled = [];
@@ -44,8 +42,6 @@ class PremiumProviderImproved extends ChangeNotifier {
     );
     _initialize();
   }
-
-  // Getters básicos
   SubscriptionEntity? get currentSubscription => _currentSubscription;
   List<ProductInfo> get availableProducts => _availableProducts;
   bool get isLoading => _isLoading;
@@ -54,22 +50,17 @@ class PremiumProviderImproved extends ChangeNotifier {
   bool get isInTrial => _currentSubscription?.isInTrial ?? false;
   bool get canPurchasePremium => !_isAnonymousUser;
   PurchaseOperation? get currentOperation => _currentOperation;
-
-  // Getters avançados
   bool get isSyncing => _isSyncing;
   DateTime? get lastSyncAt => _lastSyncAt;
   List<String> get premiumFeaturesEnabled => _premiumFeaturesEnabled;
   Map<String, dynamic>? get plantLimits => _plantLimits;
   int get syncRetryCount => _syncRetryCount;
   PlantisSubscriptionSyncEvent? get lastSyncEvent => _lastSyncEvent;
-
-  // Status de conectividade de sincronização
   bool get hasSyncErrors =>
       _lastSyncEvent?.type == PlantisSubscriptionSyncEventType.failed;
   String? get syncErrorMessage => hasSyncErrors ? _lastSyncEvent?.error : null;
 
   bool get _isAnonymousUser {
-    // Verifica se o usuário atual é anônimo através do AuthRepository
     return false; // Simplificado por agora - pode ser expandido depois
   }
 
@@ -85,7 +76,6 @@ class PremiumProviderImproved extends ChangeNotifier {
   DateTime? get expirationDate => _currentSubscription?.expirationDate;
 
   void _initialize() {
-    // Escuta eventos de sincronização em tempo real
     _syncEventsStream = _syncService.syncEventsStream.listen(
       (event) async {
         _lastSyncEvent = event;
@@ -129,13 +119,9 @@ class PremiumProviderImproved extends ChangeNotifier {
         notifyListeners();
       },
     );
-
-    // Escuta mudanças na assinatura do RevenueCat
     _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
       (subscription) async {
         _currentSubscription = subscription;
-
-        // Trigger sincronização cross-device quando há mudanças
         await _triggerSync();
 
         notifyListeners();
@@ -145,8 +131,6 @@ class PremiumProviderImproved extends ChangeNotifier {
         notifyListeners();
       },
     );
-
-    // Escuta stream de assinatura em tempo real do Firebase
     _syncService.getRealtimeSubscriptionStream().listen(
       (subscription) {
         if (subscription != _currentSubscription) {
@@ -158,8 +142,6 @@ class PremiumProviderImproved extends ChangeNotifier {
         debugPrint('[PremiumProvider] Erro no stream Firebase: $error');
       },
     );
-
-    // Escuta mudanças de autenticação
     _authStream = _authRepository.currentUser.listen((user) {
       if (user != null) {
         _syncUserSubscription(user.id);
@@ -167,14 +149,8 @@ class PremiumProviderImproved extends ChangeNotifier {
         _resetSubscriptionState();
       }
     });
-
-    // Carrega produtos disponíveis
     _loadAvailableProducts();
-
-    // Verifica assinatura atual
     _checkCurrentSubscription();
-
-    // Inicia sincronização automática
     _syncService.startAutoSync();
   }
 
@@ -281,11 +257,7 @@ class PremiumProviderImproved extends ChangeNotifier {
       },
       (subscription) async {
         _currentSubscription = subscription;
-
-        // Trigger sincronização após compra bem-sucedida
         await _triggerSync();
-
-        // Loga evento de compra para analytics
         final product = _availableProducts.firstWhere(
           (p) => p.productId == productId,
           orElse:
@@ -340,7 +312,6 @@ class PremiumProviderImproved extends ChangeNotifier {
       },
       (subscriptions) {
         if (subscriptions.isNotEmpty) {
-          // Pega a assinatura mais recente ativa
           final activeSubscriptions =
               subscriptions.where((s) => s.isActive).toList();
 
@@ -379,8 +350,6 @@ class PremiumProviderImproved extends ChangeNotifier {
     _currentOperation = null;
     notifyListeners();
   }
-
-  // Métodos para verificar funcionalidades específicas baseadas em dados sincronizados
   bool canCreateUnlimitedPlants() {
     final maxPlants = _plantLimits?['maxPlants'] as int?;
     return maxPlants == -1 || isPremium;
@@ -405,26 +374,18 @@ class PremiumProviderImproved extends ChangeNotifier {
       _premiumFeaturesEnabled.contains('weather_based_notifications');
   bool canUseCareCalendar() =>
       isPremium && _premiumFeaturesEnabled.contains('care_calendar');
-
-  // Verifica se uma funcionalidade específica está disponível
   bool hasFeature(String featureId) {
     if (!isPremium) return false;
     return _premiumFeaturesEnabled.contains(featureId);
   }
-
-  // Obtém limite atual de plantas
   int getCurrentPlantLimit() {
     final maxPlants = _plantLimits?['maxPlants'] as int?;
     return maxPlants == -1 ? 999999 : (maxPlants ?? 5); // 5 é o limite gratuito
   }
-
-  // Verifica se pode criar mais plantas
   bool canCreateMorePlants(int currentPlantCount) {
     if (canCreateUnlimitedPlants()) return true;
     return currentPlantCount < getCurrentPlantLimit();
   }
-
-  // Event handlers para eventos de sincronização
 
   Future<void> _handlePurchaseEvent(PlantisSubscriptionSyncEvent event) async {
     await _analytics.logEvent(
@@ -434,8 +395,6 @@ class PremiumProviderImproved extends ChangeNotifier {
         'purchased_at': event.purchasedAt?.toIso8601String() ?? 'unknown',
       },
     );
-
-    // Recarregar dados após compra
     await _checkCurrentSubscription();
     await _loadPlantLimits();
   }
@@ -461,21 +420,15 @@ class PremiumProviderImproved extends ChangeNotifier {
         'expired_at': event.expiredAt?.toIso8601String() ?? 'unknown',
       },
     );
-
-    // Resetar estado premium quando expira
     _premiumFeaturesEnabled = [];
     _plantLimits = {'maxPlants': 5, 'canCreateCustomCategories': false};
     notifyListeners();
   }
 
-  // Métodos auxiliares
-
   Future<void> _loadPlantLimits() async {
     try {
       final user = await _authRepository.currentUser.first;
       if (user == null) return;
-
-      // Simulação de carregamento dos limites - em produção viria do Firebase
       _plantLimits = {
         'maxPlants': isPremium ? -1 : 5,
         'canCreateCustomCategories': isPremium,
@@ -488,11 +441,8 @@ class PremiumProviderImproved extends ChangeNotifier {
   }
 
   Future<String> _getAppVersion() async {
-    // Em produção, usar package_info_plus
     return '1.0.0';
   }
-
-  // Métodos públicos adicionais
 
   /// Força uma nova sincronização manual
   Future<void> forceSyncSubscription() async {
@@ -543,10 +493,7 @@ class PremiumProviderImproved extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Stop auto sync first
     _syncService.stopAutoSync();
-
-    // Cancel all stream subscriptions to prevent memory leaks
     _subscriptionStream?.cancel();
     _subscriptionStream = null;
 
@@ -555,8 +502,6 @@ class PremiumProviderImproved extends ChangeNotifier {
 
     _syncEventsStream?.cancel();
     _syncEventsStream = null;
-
-    // Dispose sync service last
     _syncService.dispose();
 
     if (kDebugMode) {

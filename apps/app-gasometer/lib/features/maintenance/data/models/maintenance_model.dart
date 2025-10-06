@@ -7,7 +7,6 @@ part 'maintenance_model.g.dart';
 /// Maintenance (Manutenção) model with Firebase sync support
 /// TypeId: 4 - New sequential numbering
 @HiveType(typeId: 4)
-// ignore: must_be_immutable
 class MaintenanceModel extends BaseSyncModel {
 
   MaintenanceModel({
@@ -133,7 +132,6 @@ class MaintenanceModel extends BaseSyncModel {
       receiptImagePath: map['receipt_image_path']?.toString(),
     );
   }
-  // Base sync fields (required for Hive generation)
   @HiveField(0) @override final String id;
   @HiveField(1) final int? createdAtMs;
   @HiveField(2) final int? updatedAtMs;
@@ -143,8 +141,6 @@ class MaintenanceModel extends BaseSyncModel {
   @HiveField(6) @override final int version;
   @HiveField(7) @override final String? userId;
   @HiveField(8) @override final String? moduleName;
-
-  // Maintenance specific fields
   @HiveField(10) final String veiculoId;
   @HiveField(11) final String tipo; // Preventiva, Corretiva, Revisão
   @HiveField(12) final String descricao;

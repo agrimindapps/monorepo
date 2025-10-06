@@ -49,18 +49,11 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Botão principal de compra
         if (showPurchaseButton && !isPremium) _buildPurchaseButton(),
-
-        // Botão de restaurar compras
         if (!isPremium && !showPurchaseButton && onRestore != null)
           _buildRestoreButton(),
-
-        // Botão de gerenciar assinatura
         if (showSubscriptionManagement && isPremium)
           _buildManageSubscriptionButton(),
-
-        // Links de rodapé
         if (showFooterLinks) _buildFooterLinks(),
       ],
     );
@@ -178,13 +171,10 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         children: [
-          // Botão de restaurar se fornecido
           if (onRestore != null && !isPremium) ...[
             _buildRestoreButton(),
             const SizedBox(height: 20),
           ],
-
-          // Linha de separação
           Container(
             height: 1,
             margin: const EdgeInsets.symmetric(vertical: 20),
@@ -198,8 +188,6 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
               ),
             ),
           ),
-
-          // Links principais
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -214,8 +202,6 @@ class PlantisPaymentActionsWidget extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
-          // Texto de renovação automática
           _buildAutoRenewalText(),
         ],
       ),

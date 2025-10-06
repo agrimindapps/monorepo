@@ -73,7 +73,6 @@ class CommodityPricesWidget extends StatelessWidget {
   }
 
   Widget _buildPricesList(BuildContext context) {
-    // Group prices by category
     final groupedPrices = <CommodityType, List<CommodityPriceEntity>>{};
     
     for (final price in prices) {

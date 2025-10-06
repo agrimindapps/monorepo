@@ -73,7 +73,6 @@ extension UserEntityReceitaAgroExtension on UserEntity {
     String? userId,
     String? moduleName,
   }) {
-    // Converte string provider para AuthProvider enum
     AuthProvider authProvider;
     switch (provider.toLowerCase()) {
       case 'google':
@@ -91,8 +90,6 @@ extension UserEntityReceitaAgroExtension on UserEntity {
       default:
         authProvider = AuthProvider.email;
     }
-    
-    // Armazena informações específicas no campo phone
     final phone = '$deviceId:$platform:$appVersion';
     
     return UserEntity(
@@ -152,8 +149,6 @@ extension UserEntityReceitaAgroExtension on UserEntity {
   /// Cria UserEntity a partir de Firebase map no formato UserProfileSyncEntity
   static UserEntity fromReceitaAgroFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-    
-    // Converte string provider para AuthProvider enum
     AuthProvider authProvider;
     final providerStr = map['provider'] as String? ?? 'email';
     switch (providerStr.toLowerCase()) {
@@ -172,8 +167,6 @@ extension UserEntityReceitaAgroExtension on UserEntity {
       default:
         authProvider = AuthProvider.email;
     }
-    
-    // Monta dados específicos no campo phone
     final deviceId = map['deviceId'] as String? ?? '';
     final platform = map['platform'] as String? ?? '';
     final appVersion = map['appVersion'] as String? ?? '';

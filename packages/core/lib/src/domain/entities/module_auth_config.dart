@@ -108,12 +108,9 @@ class ModuleAuthConfig {
     ModuleAuthConfig from, 
     ModuleAuthConfig to
   ) {
-    // Módulos com verificação de email obrigatória são mais restritivos
     if (to.requireEmailVerification && !from.requireEmailVerification) {
       return false;
     }
-    
-    // Timeout deve ser compatível (o menor prevalece)
     if (to.sessionTimeoutMinutes < from.sessionTimeoutMinutes) {
       return false;
     }

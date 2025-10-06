@@ -24,12 +24,9 @@ class PromoFeaturesSection extends StatelessWidget {
       color: SplashColors.backgroundColor,
       child: Column(
         children: [
-          // Section Header
           _buildSectionHeader(context, isMobile),
           
           const SizedBox(height: 60),
-          
-          // Features Grid
           _buildFeaturesGrid(context, isMobile, isTablet),
         ],
       ),
@@ -39,7 +36,6 @@ class PromoFeaturesSection extends StatelessWidget {
   Widget _buildSectionHeader(BuildContext context, bool isMobile) {
     return Column(
       children: [
-        // Section Title
         Text(
           'Recursos Completos para o Cuidado do seu Pet',
           style: TextStyle(
@@ -52,8 +48,6 @@ class PromoFeaturesSection extends StatelessWidget {
         ),
         
         const SizedBox(height: 16),
-        
-        // Section Subtitle
         Container(
           constraints: const BoxConstraints(maxWidth: 600),
           child: Text(
@@ -66,8 +60,6 @@ class PromoFeaturesSection extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
-        // Accent line
         Container(
           margin: const EdgeInsets.only(top: 24),
           width: 60,
@@ -94,8 +86,6 @@ class PromoFeaturesSection extends StatelessWidget {
         ).toList(),
       );
     }
-
-    // Grid layout for tablet and desktop
     final crossAxisCount = isTablet ? 2 : 3;
     final children = <Widget>[];
     
@@ -145,7 +135,6 @@ class PromoFeaturesSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Feature Icon
           Container(
             width: 72,
             height: 72,
@@ -161,8 +150,6 @@ class PromoFeaturesSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 20),
-          
-          // Feature Title
           Text(
             feature.title,
             style: const TextStyle(
@@ -175,8 +162,6 @@ class PromoFeaturesSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 12),
-          
-          // Feature Description
           Expanded(
             child: Text(
               feature.description,

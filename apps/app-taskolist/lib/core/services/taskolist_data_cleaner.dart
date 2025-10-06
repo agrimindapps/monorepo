@@ -34,10 +34,7 @@ class TaskolistDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Obter estatísticas antes da limpeza
       final statsBefore = await getDataStatsBeforeCleaning();
-
-      // 1. Limpar Hive boxes
       final boxNames = [
         'tasks',
         'task_box',
@@ -59,8 +56,6 @@ class TaskolistDataCleaner implements IAppDataCleaner {
           result['success'] = false;
         }
       }
-
-      // 2. Limpar SharedPreferences (apenas chaves do app)
       final prefsKeys = _prefs.getKeys();
       final appSpecificKeys = prefsKeys.where(
         (key) =>
@@ -105,7 +100,6 @@ class TaskolistDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Contar tasks
       if (await _hive.boxExists('tasks') || await _hive.boxExists('task_box')) {
         try {
           final tasksBox = await _hive.openBox<dynamic>('tasks');
@@ -117,12 +111,9 @@ class TaskolistDataCleaner implements IAppDataCleaner {
             stats['totalTasks'] = tasksBox.length;
             await tasksBox.close();
           } catch (_) {
-            // Ignore
           }
         }
       }
-
-      // Contar categories
       if (await _hive.boxExists('categories') ||
           await _hive.boxExists('category_box')) {
         try {
@@ -135,12 +126,9 @@ class TaskolistDataCleaner implements IAppDataCleaner {
             stats['totalCategories'] = categoriesBox.length;
             await categoriesBox.close();
           } catch (_) {
-            // Ignore
           }
         }
       }
-
-      // Contar preferences
       final prefsKeys = _prefs.getKeys();
       stats['totalPreferences'] =
           prefsKeys
@@ -164,15 +152,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      // Verificar se boxes foram deletadas
       final boxNames = ['tasks', 'task_box', 'categories', 'category_box'];
       for (final boxName in boxNames) {
         if (await _hive.boxExists(boxName)) {
           return false;
         }
       }
-
-      // Verificar se preferences foram limpas
       final prefsKeys = _prefs.getKeys();
       final remainingAppKeys = prefsKeys.where(
         (key) => key.startsWith('taskolist_') || key.startsWith('task_'),
@@ -187,15 +172,12 @@ class TaskolistDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      // Verificar se existe alguma box
       final boxNames = ['tasks', 'task_box', 'categories', 'category_box'];
       for (final boxName in boxNames) {
         if (await _hive.boxExists(boxName)) {
           return true;
         }
       }
-
-      // Verificar se existem preferences
       final prefsKeys = _prefs.getKeys();
       final hasPrefs = prefsKeys.any(
         (key) => key.startsWith('taskolist_') || key.startsWith('task_'),

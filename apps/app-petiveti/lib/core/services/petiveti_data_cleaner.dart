@@ -34,10 +34,7 @@ class PetivetiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Obter estatísticas antes da limpeza
       final statsBefore = await getDataStatsBeforeCleaning();
-
-      // 1. Limpar Hive boxes
       final boxNames = [
         'pets',
         'pet_box',
@@ -59,8 +56,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
           result['success'] = false;
         }
       }
-
-      // 2. Limpar SharedPreferences (apenas chaves do app)
       final prefsKeys = _prefs.getKeys();
       final appSpecificKeys = prefsKeys.where(
         (key) =>
@@ -103,7 +98,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      // Contar pets
       if (await _hive.boxExists('pets') || await _hive.boxExists('pet_box')) {
         try {
           final petsBox = await _hive.openBox<dynamic>('pets');
@@ -115,34 +109,25 @@ class PetivetiDataCleaner implements IAppDataCleaner {
             stats['totalPets'] = petsBox.length;
             await petsBox.close();
           } catch (_) {
-            // Ignore
           }
         }
       }
-
-      // Contar reminders
       if (await _hive.boxExists('reminders')) {
         try {
           final remindersBox = await _hive.openBox<dynamic>('reminders');
           stats['totalReminders'] = remindersBox.length;
           await remindersBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar schedules
       if (await _hive.boxExists('schedules')) {
         try {
           final schedulesBox = await _hive.openBox<dynamic>('schedules');
           stats['totalSchedules'] = schedulesBox.length;
           await schedulesBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar health_records
       if (await _hive.boxExists('health_records')) {
         try {
           final healthRecordsBox = await _hive.openBox<dynamic>(
@@ -151,11 +136,8 @@ class PetivetiDataCleaner implements IAppDataCleaner {
           stats['totalHealthRecords'] = healthRecordsBox.length;
           await healthRecordsBox.close();
         } catch (_) {
-          // Ignore
         }
       }
-
-      // Contar preferences
       final prefsKeys = _prefs.getKeys();
       stats['totalPreferences'] =
           prefsKeys
@@ -180,7 +162,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> verifyDataCleanup() async {
     try {
-      // Verificar se boxes foram deletadas
       final boxNames = [
         'pets',
         'pet_box',
@@ -193,8 +174,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
           return false;
         }
       }
-
-      // Verificar se preferences foram limpas
       final prefsKeys = _prefs.getKeys();
       final remainingAppKeys = prefsKeys.where(
         (key) => key.startsWith('petiveti_') || key.startsWith('pet_'),
@@ -209,7 +188,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
   @override
   Future<bool> hasDataToClear() async {
     try {
-      // Verificar se existe alguma box
       final boxNames = [
         'pets',
         'pet_box',
@@ -222,8 +200,6 @@ class PetivetiDataCleaner implements IAppDataCleaner {
           return true;
         }
       }
-
-      // Verificar se existem preferences
       final prefsKeys = _prefs.getKeys();
       final hasPrefs = prefsKeys.any(
         (key) => key.startsWith('petiveti_') || key.startsWith('pet_'),

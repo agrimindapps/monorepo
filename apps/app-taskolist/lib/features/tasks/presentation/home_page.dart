@@ -80,11 +80,8 @@ class _HomePageState extends ConsumerState<HomePage>
 
   Future<void> _loadSampleDataIfEmpty() async {
     try {
-      // Buscar tasks existentes usando o provider
       const tasksRequest = GetTasksRequest();
       final tasks = await ref.read(getTasksProvider(tasksRequest).future);
-
-      // Se não há tasks, carregar dados de exemplo
       if (tasks.isEmpty) {
         final sampleTasks = SampleData.getSampleTasks();
         for (final task in sampleTasks) {
@@ -92,7 +89,6 @@ class _HomePageState extends ConsumerState<HomePage>
         }
       }
     } catch (e) {
-      // Se houve erro ao buscar tasks, ainda assim carregar dados de exemplo
       final sampleTasks = SampleData.getSampleTasks();
       for (final task in sampleTasks) {
         await ref.read(taskNotifierProvider.notifier).createTask(task);
@@ -131,7 +127,6 @@ class _HomePageState extends ConsumerState<HomePage>
       _selectedTag = selectedTag;
     });
     _closeFilterDrawer();
-    // Reload tasks com o novo filtro
     _loadTasks();
   }
 
@@ -140,7 +135,6 @@ class _HomePageState extends ConsumerState<HomePage>
     return Scaffold(
       body: Stack(
         children: [
-          // Main content
           Scaffold(
             drawer: const ModernDrawer(),
             appBar: AppBar(
@@ -207,7 +201,6 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
             body: Column(
               children: [
-                // Premium Banner
                 const PremiumBanner(),
 
                 Container(
@@ -234,8 +227,6 @@ class _HomePageState extends ConsumerState<HomePage>
               ],
             ),
           ),
-
-          // Overlay quando drawer está aberto
           if (_selectedTask != null)
             GestureDetector(
               onTap: _closeTaskDrawer,
@@ -245,8 +236,6 @@ class _HomePageState extends ConsumerState<HomePage>
                 height: double.infinity,
               ),
             ),
-
-          // Filter Side Panel Overlay
           AnimatedBuilder(
             animation: _filterDrawerAnimationController,
             builder: (context, child) {
@@ -265,8 +254,6 @@ class _HomePageState extends ConsumerState<HomePage>
               );
             },
           ),
-
-          // Filter Side Panel
           Positioned(
             left: 0,
             top: 0,
@@ -280,8 +267,6 @@ class _HomePageState extends ConsumerState<HomePage>
               ),
             ),
           ),
-
-          // Task Detail Drawer
           if (_selectedTask != null)
             Positioned(
               right: 0,

@@ -18,10 +18,6 @@ class PlantisStorageAdapter {
   }) : _secureStorage = secureStorage,
        _encryptedStorage = encryptedStorage;
 
-  // ==========================================================================
-  // BACKWARD COMPATIBLE METHODS - SecureStorageService Interface
-  // ==========================================================================
-
   /// Store user credentials securely (backward compatible)
   Future<void> storeUserCredentials(UserCredentials credentials) async {
     final result = await _secureStorage.storeSecureData<UserCredentials>(
@@ -139,10 +135,6 @@ class PlantisStorageAdapter {
     );
   }
 
-  // ==========================================================================
-  // ENCRYPTED HIVE BOX METHODS - EncryptedHiveService Interface
-  // ==========================================================================
-
   /// Get encrypted box with error handling (backward compatible)
   Future<Box<String>> getEncryptedBox(String boxName) async {
     final result = await _encryptedStorage.getEncryptedBox(boxName);
@@ -190,10 +182,6 @@ class PlantisStorageAdapter {
       (box) => box,
     );
   }
-
-  // ==========================================================================
-  // ENHANCED FUNCTIONALITY - New capabilities
-  // ==========================================================================
 
   /// Store any type of secure data with type safety
   Future<void> storeSecureDataTyped<T>({
@@ -262,10 +250,6 @@ class PlantisStorageAdapter {
   }
 }
 
-// ==========================================================================
-// DATA SERIALIZERS - Type-safe serialization for complex data types
-// ==========================================================================
-
 /// Serializer for UserCredentials
 class UserCredentialsSerializer
     implements SecureDataSerializer<UserCredentials> {
@@ -296,10 +280,6 @@ class PersonalInfoSerializer implements SecureDataSerializer<PersonalInfo> {
   PersonalInfo deserialize(String json) =>
       PersonalInfo.fromJson(jsonDecode(json) as Map<String, dynamic>);
 }
-
-// ==========================================================================
-// LEGACY ADAPTER - Zero Breaking Changes
-// ==========================================================================
 
 /// Legacy adapter that provides the same functionality as SecureStorageService
 /// Ensures zero breaking changes during migration

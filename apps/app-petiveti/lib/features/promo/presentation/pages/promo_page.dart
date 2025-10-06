@@ -23,8 +23,6 @@ class PromoPage extends ConsumerStatefulWidget {
 
 class _PromoPageState extends ConsumerState<PromoPage> {
   final ScrollController _scrollController = ScrollController();
-  
-  // Keys para navegação entre seções
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _screenshotsKey = GlobalKey();
   final GlobalKey _testimonialsKey = GlobalKey();
@@ -75,8 +73,6 @@ class _PromoPageState extends ConsumerState<PromoPage> {
             const PromoLoadingWidget()
           else
             _buildContent(context, state),
-          
-          // App Bar fixo
           PromoAppBar(
             onFeaturesPressed: () => _scrollToSection(_featuresKey),
             onScreenshotsPressed: () => _scrollToSection(_screenshotsKey),
@@ -84,8 +80,6 @@ class _PromoPageState extends ConsumerState<PromoPage> {
             onFaqPressed: () => _scrollToSection(_faqKey),
             onLoginPressed: _navigateToLogin,
           ),
-          
-          // Diálogo de pré-cadastro
           if (state.showPreRegistrationDialog)
             PromoPreRegistrationDialog(
               onClose: () => ref.read(promoProvider.notifier).togglePreRegistrationDialog(),
@@ -100,7 +94,6 @@ class _PromoPageState extends ConsumerState<PromoPage> {
       controller: _scrollController,
       child: Column(
         children: [
-          // Hero Section
           PromoHeroSection(
             appName: SplashConstants.appName,
             appTagline: SplashConstants.appTagline,
@@ -111,14 +104,10 @@ class _PromoPageState extends ConsumerState<PromoPage> {
               ref.read(promoProvider.notifier).trackEvent('promo_pre_register_clicked');
             },
           ),
-          
-          // Features Section (no spacing needed, handled internally)
           PromoFeaturesSection(
             key: _featuresKey,
             features: const [], // Will use hardcoded features
           ),
-          
-          // Screenshots Section
           PromoScreenshotsSection(
             key: _screenshotsKey,
             screenshots: const [], // Will use hardcoded screenshots
@@ -127,19 +116,13 @@ class _PromoPageState extends ConsumerState<PromoPage> {
               ref.read(promoProvider.notifier).changeScreenshot(index);
             },
           ),
-          
-          // FAQ Section
           PromoSimpleFaqSection(key: _faqKey),
-          
-          // CTA Section
           PromoCTASection(
             onPreRegisterPressed: () {
               ref.read(promoProvider.notifier).togglePreRegistrationDialog();
               ref.read(promoProvider.notifier).trackEvent('promo_cta_clicked');
             },
           ),
-          
-          // Footer
           const PromoFooter(),
         ],
       ),

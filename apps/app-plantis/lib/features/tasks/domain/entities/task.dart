@@ -177,8 +177,6 @@ class Task extends BaseSyncEntity {
 
   bool get isOverdue {
     if (status != TaskStatus.pending) return false;
-
-    // Comparar apenas a data (sem hora) para evitar falsos positivos
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final taskDate = DateTime(dueDate.year, dueDate.month, dueDate.day);
@@ -206,8 +204,6 @@ class Task extends BaseSyncEntity {
   String toString() {
     return 'Task{id: $id, title: $title, plantId: $plantId, type: ${type.displayName}, status: ${status.displayName}, dueDate: $dueDate}';
   }
-
-  // Implementação dos métodos abstratos do BaseSyncEntity
   @override
   Map<String, dynamic> toFirebaseMap() {
     return {
@@ -267,7 +263,6 @@ class Task extends BaseSyncEntity {
 
   /// Cria uma Task entity a partir de um TarefaModel
   static Task fromModel(dynamic tarefaModel) {
-    // Mapeia tipos de cuidado para TaskType
     TaskType mapCareType(String tipoCuidado) {
       switch (tipoCuidado) {
         case 'agua':
@@ -286,8 +281,6 @@ class Task extends BaseSyncEntity {
           return TaskType.custom;
       }
     }
-
-    // Mapeia prioridade baseado no tipo de cuidado
     TaskPriority mapPriority(String tipoCuidado) {
       switch (tipoCuidado) {
         case 'agua':

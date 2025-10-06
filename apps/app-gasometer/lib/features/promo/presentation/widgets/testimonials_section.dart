@@ -9,8 +9,6 @@ class TestimonialsSection extends StatefulWidget {
 
 class _TestimonialsSectionState extends State<TestimonialsSection> {
   int _selectedIndex = 0;
-
-  // Cores para os cartões de depoimentos
   final _avatarColors = [
     Colors.blue[100]!,
     Colors.green[100]!,
@@ -59,7 +57,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
       ),
       child: Column(
         children: [
-          // Título da seção
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -108,8 +105,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
             ),
           ),
           const SizedBox(height: 60),
-
-          // Depoimentos
           Container(
             constraints: const BoxConstraints(maxWidth: 1000),
             child: isMobile ? _buildMobileTestimonials() : _buildDesktopTestimonials(),
@@ -138,7 +133,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
   Widget _buildMobileTestimonials() {
     return Column(
       children: [
-        // Seletor de depoimentos
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
@@ -164,8 +158,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
           ),
         ),
         const SizedBox(height: 30),
-        
-        // Depoimento selecionado
         _buildTestimonialCard(_testimonials[_selectedIndex], _selectedIndex),
       ],
     );
@@ -187,7 +179,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
       ),
       child: Column(
         children: [
-          // Avatar
           Container(
             width: 80,
             height: 80,
@@ -202,8 +193,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // Rating
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -216,8 +205,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Texto do depoimento
           Text(
             '"${testimonial['text']}"',
             style: const TextStyle(
@@ -229,8 +216,6 @@ class _TestimonialsSectionState extends State<TestimonialsSection> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-
-          // Nome e cargo
           Text(
             testimonial['name'] as String,
             style: const TextStyle(

@@ -101,7 +101,6 @@ class TecnologiaTabWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header da seção
           Container(
             padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
@@ -157,7 +156,6 @@ class TecnologiaTabWidget extends StatelessWidget {
                       size: 18,
                     ),
                     onPressed: () {
-                      // Implementar TTS aqui se necessário
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Lendo: $title')),
                       );
@@ -168,8 +166,6 @@ class TecnologiaTabWidget extends StatelessWidget {
               ],
             ),
           ),
-
-          // Conteúdo da seção
           Container(
             padding: const EdgeInsets.all(8.0),
             child: SelectableText(

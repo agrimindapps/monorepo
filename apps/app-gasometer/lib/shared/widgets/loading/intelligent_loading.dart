@@ -88,7 +88,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
   }
 
   void _setupAnimations() {
-    // Animação do ícone (bounce entrance)
     _iconController = AnimationController(
       duration: LoadingDesignTokens.normalDuration,
       vsync: this,
@@ -97,14 +96,10 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
       parent: _iconController,
       curve: LoadingDesignTokens.bounceCurve,
     );
-
-    // Animação do progresso
     _progressController = AnimationController(
       duration: LoadingDesignTokens.slowDuration,
       vsync: this,
     );
-
-    // Iniciar primeira etapa
     _iconController.forward();
   }
 
@@ -118,8 +113,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
           _advanceToNextStep();
         }
       });
-
-      // Animação do progresso para esta etapa
       _progressController.forward();
     }
   }
@@ -129,15 +122,12 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
       setState(() {
         currentStepIndex++;
       });
-      
-      // Resetar e iniciar animações para próxima etapa
       _iconController.reset();
       _progressController.reset();
       
       _iconController.forward();
       _startAutoAdvance();
     } else {
-      // Última etapa concluída
       _completeLoading();
     }
   }
@@ -148,8 +138,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
     setState(() {
       _completed = true;
     });
-
-    // Delay before calling onComplete to show final step
     Timer(const Duration(milliseconds: 500), () {
       if (mounted) {
         widget.onComplete?.call();
@@ -180,18 +168,13 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Indicador de progresso
           if (widget.showProgress && widget.expandedView) ...[
             _buildProgressIndicator(colors),
             const SizedBox(height: LoadingDesignTokens.spacingLg),
           ],
-
-          // Ícone animado
           _buildAnimatedIcon(currentStep, colors),
           
           const SizedBox(height: LoadingDesignTokens.spacingMd),
-
-          // Título
           AnimatedSwitcher(
             duration: LoadingDesignTokens.fastDuration,
             child: Text(
@@ -206,8 +189,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
 
           if (widget.expandedView) ...[
             const SizedBox(height: LoadingDesignTokens.spacingSm),
-
-            // Subtítulo
             AnimatedSwitcher(
               duration: LoadingDesignTokens.fastDuration,
               child: Text(
@@ -221,8 +202,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
             ),
 
             const SizedBox(height: LoadingDesignTokens.spacingLg),
-
-            // Indicador de loading circular
             _buildCircularIndicator(colors),
           ],
         ],
@@ -233,7 +212,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
   Widget _buildProgressIndicator(LoadingColorScheme colors) {
     return Column(
       children: [
-        // Barra de progresso
         ClipRRect(
           borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
           child: LinearProgressIndicator(
@@ -246,8 +224,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
           ),
         ),
         const SizedBox(height: LoadingDesignTokens.spacingSm),
-        
-        // Texto do progresso
         Text(
           'Etapa ${currentStepIndex + 1} de ${widget.steps.length}',
           style: LoadingDesignTokens.captionTextStyle.copyWith(
@@ -353,10 +329,7 @@ class IntelligentLoadingOverlay {
     );
 
     Overlay.of(context).insert(overlayEntry);
-    
-    // Handle dismissible
     if (dismissible) {
-      // Auto-remove after total duration
       final totalDuration = steps.fold<Duration>(
         Duration.zero,
         (total, step) => total + step.duration,

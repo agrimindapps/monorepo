@@ -18,8 +18,6 @@ class RouteGuard {
   /// Retorna null se a navegação deve continuar, ou uma string com a rota de destino
   /// se deve redirecionar.
   String? handleRedirect(String currentLocation) {
-    // If AuthState is not available or not initialized yet, allow navigation to continue
-    // This prevents race conditions during app initialization
     if (_authState == null || !_authState.isInitialized) {
       return null;
     }
@@ -28,28 +26,18 @@ class RouteGuard {
     final hasAuthError = _authState.errorMessage != null;
     final isLoading = _authState.isLoading;
     final routeType = _getRouteType(currentLocation);
-
-    // SECURITY + UX FIX: If there's an authentication error and we're on login page,
-    // don't redirect to prevent login error handling from being interrupted
     if (hasAuthError && currentLocation == '/login') {
       if (kDebugMode) {
         debugPrint('🛡️ RouteGuard: Erro de auth detectado em /login - mantendo usuário na página');
       }
       return null;
     }
-
-    // SECURITY + UX FIX: If authentication is in progress and we're on login page,
-    // don't redirect to avoid interrupting the auth flow
     if (isLoading && currentLocation == '/login') {
       if (kDebugMode) {
         debugPrint('🛡️ RouteGuard: Login em progresso em /login - mantendo usuário na página');
       }
       return null;
     }
-
-    // Removed verbose debug logging - only critical errors are logged
-
-    // Aplicar regras de redirecionamento baseadas no tipo de rota
     switch (routeType) {
       case RouteType.authProtected:
         return _handleAuthProtectedRoute(isAuthenticated, currentLocation);
@@ -67,13 +55,11 @@ class RouteGuard {
 
   /// Determina a localização inicial baseada no estado de autenticação e plataforma
   String getInitialLocation() {
-    // Always start with home route - redirect logic will handle proper routing
     return '/';
   }
 
   /// Classifica o tipo de rota baseado no path
   RouteType _getRouteType(String location) {
-    // Páginas sempre públicas - não requerem autenticação
     const publicRoutes = [
       '/privacy',
       '/terms', 
@@ -114,30 +100,20 @@ class RouteGuard {
     if (isAuthenticated) {
       return '/';
     }
-    // SECURITY + UX FIX: Stay on login/promo pages when not authenticated
-    // This prevents unwanted redirects during failed login attempts
     return null;
   }
 
   /// Handle de rotas de conteúdo da aplicação
   String? _handleAppContentRoute(bool isAuthenticated, String location) {
-    // Para web
     if (_platformService.isWeb) {
-      // Se autenticado (incluindo anônimo), permitir acesso
       if (isAuthenticated) {
         return null;
       }
-      
-      // Se não autenticado, redirecionar para promo
       return '/promo';
     }
-    
-    // Para mobile, permitir acesso direto às funcionalidades (modo anônimo)
     if (_platformService.isMobile) {
       return null; // Sempre permitir acesso no mobile
     }
-    
-    // Lógica padrão para outras plataformas
     if (!isAuthenticated) {
       return '/login';
     }

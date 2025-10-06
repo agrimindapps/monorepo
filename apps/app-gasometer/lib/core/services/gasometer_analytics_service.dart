@@ -14,8 +14,6 @@ class GasometerAnalyticsService {
 
   final EnhancedAnalyticsService _enhanced;
 
-  // ===== DELEGATE CORE ANALYTICS METHODS =====
-
   /// Logs a custom event
   Future<void> logEvent(String eventName, Map<String, Object>? parameters) async {
     await _enhanced.logEvent(eventName, parameters?.cast<String, dynamic>());
@@ -33,8 +31,6 @@ class GasometerAnalyticsService {
       ...?parameters,
     });
   }
-
-  // ===== AUTH EVENTS =====
 
   Future<void> logLogin(String method) async {
     await _enhanced.logAuthEvent('login', parameters: {'method': method});
@@ -54,8 +50,6 @@ class GasometerAnalyticsService {
     await _enhanced.logAuthEvent('logout');
   }
 
-  // ===== APP LIFECYCLE EVENTS =====
-
   Future<void> logAppOpen() async {
     await logEvent('app_open', null);
   }
@@ -63,8 +57,6 @@ class GasometerAnalyticsService {
   Future<void> logAppBackground() async {
     await logEvent('app_background', null);
   }
-
-  // ===== GASOMETER SPECIFIC EVENTS =====
 
   /// Eventos de abastecimento
   Future<void> logFuelRefill({
@@ -148,8 +140,6 @@ class GasometerAnalyticsService {
     });
   }
 
-  // ===== USER PROPERTIES =====
-
   Future<void> setUserId(String userId) async {
     await _enhanced.setUser(userId: userId);
   }
@@ -160,8 +150,6 @@ class GasometerAnalyticsService {
       properties: properties,
     );
   }
-
-  // ===== LGPD DATA EXPORT ANALYTICS =====
 
   /// Analytics para início de exportação de dados LGPD
   Future<void> logDataExportStarted({
@@ -243,11 +231,8 @@ class GasometerAnalyticsService {
 
   /// Hash do user ID para compliance (não armazenar ID real)
   String _hashUserId(String userId) {
-    // Simples hash para não armazenar o ID real do usuário
     return userId.hashCode.abs().toString();
   }
-
-  // ===== CRASHLYTICS METHODS =====
 
   /// Registra erro não fatal
   Future<void> recordError(
@@ -266,7 +251,6 @@ class GasometerAnalyticsService {
 
   /// Log customizado para Crashlytics
   Future<void> log(String message) async {
-    // Enhanced service doesn't have direct log method, using debug print for dev
     if (kDebugMode) {
       debugPrint('📝 [Gasometer] $message');
     }
@@ -274,13 +258,10 @@ class GasometerAnalyticsService {
 
   /// Define chave customizada
   Future<void> setCustomKey(String key, dynamic value) async {
-    // Custom keys are set during recordError in EnhancedAnalyticsService
     if (kDebugMode) {
       debugPrint('🔑 [Gasometer] Custom key - $key: $value');
     }
   }
-
-  // ===== TEST METHODS =====
 
   /// Força crash para teste (apenas em debug)
   Future<void> testCrash() async {

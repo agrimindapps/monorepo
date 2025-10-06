@@ -11,11 +11,8 @@ class RefreshSubscriptionStatusUseCase implements UseCase<bool, NoParams> {
 
   @override
   Future<Either<Failure, bool>> call(NoParams params) async {
-    // Limpa cache e busca status atualizado
     await repository.clearCache();
     final result = await repository.hasReceitaAgroSubscription();
-
-    // Atualiza cache após refresh
     await result.fold(
       (failure) => Future<void>.value(),
       (isPremium) => repository.cachePremiumStatus(isPremium),

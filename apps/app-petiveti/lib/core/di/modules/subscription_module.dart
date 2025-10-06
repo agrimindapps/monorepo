@@ -14,7 +14,6 @@ import '../di_module.dart';
 class SubscriptionModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
-    // Data sources
     getIt.registerLazySingleton<SubscriptionLocalDataSource>(
       () => SubscriptionLocalDataSourceImpl(),
     );
@@ -25,16 +24,12 @@ class SubscriptionModule implements DIModule {
         subscriptionRepository: getIt<ISubscriptionRepository>(),
       ),
     );
-
-    // Repository
     getIt.registerLazySingleton<SubscriptionRepository>(
       () => SubscriptionRepositoryImpl(
         localDataSource: getIt<SubscriptionLocalDataSource>(),
         remoteDataSource: getIt<SubscriptionRemoteDataSource>(),
       ),
     );
-
-    // Use cases
     getIt.registerLazySingleton<GetAvailablePlans>(
       () => GetAvailablePlans(getIt<SubscriptionRepository>()),
     );

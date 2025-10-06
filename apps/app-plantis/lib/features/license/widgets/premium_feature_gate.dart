@@ -45,15 +45,11 @@ class PremiumFeatureGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Simulação de verificação de premium por enquanto
-    // TODO: Implementar verificação real via provider
     final hasAccess = _checkFeatureAccess(feature);
 
     if (hasAccess) {
       return child;
     }
-
-    // Access denied - show fallback or upgrade prompt
     if (fallback != null) {
       return fallback!;
     }
@@ -67,8 +63,6 @@ class PremiumFeatureGate extends ConsumerWidget {
 
   /// Simula verificação de acesso a features premium
   bool _checkFeatureAccess(PremiumFeature feature) {
-    // Por enquanto, todas as features retornam false (não premium)
-    // TODO: Integrar com provider de premium real
     return false;
   }
 
@@ -152,7 +146,6 @@ class PremiumFeatureGate extends ConsumerWidget {
 }
 
 /// Loading state widget for feature gate
-// ignore: unused_element
 class _LoadingGate extends StatelessWidget {
   const _LoadingGate();
 
@@ -174,12 +167,6 @@ class SimplePremiumGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Simulação simples de verificação premium
-    // const isPremium = false; // TODO: Implementar verificação real
-
-    // if (isPremium) {
-    //   return child;
-    // }
 
     return fallback ??
         PremiumFeatureGate(feature: PremiumFeature.cloudSync, child: child);
@@ -192,38 +179,6 @@ class LicenseExpirationWarning extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO: Implementar verificação de expiração real
-    // const shouldShowWarning = false;
-    // const remainingDays = 0;
-
-    // if (!shouldShowWarning) {
     return const SizedBox.shrink();
-    // }
-
-    // return Container(
-    //   margin: const EdgeInsets.all(8),
-    //   padding: const EdgeInsets.all(12),
-    //   decoration: BoxDecoration(
-    //     color: Colors.orange.withValues(alpha: 0.1),
-    //     borderRadius: BorderRadius.circular(8),
-    //     border: Border.all(color: Colors.orange),
-    //   ),
-    //   child: Row(
-    //     children: [
-    //       const Icon(Icons.warning, color: Colors.orange),
-    //       const SizedBox(width: 8),
-    //       Expanded(
-    //         child: Text(
-    //           'Sua licença Premium expira em $remainingDays dias',
-    //           style: TextStyle(color: Colors.orange[800]),
-    //         ),
-    //       ),
-    //       TextButton(
-    //         onPressed: () => Navigator.of(context).pushNamed('/premium'),
-    //         child: const Text('Renovar'),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 }

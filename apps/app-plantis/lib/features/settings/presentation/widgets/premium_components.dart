@@ -297,7 +297,6 @@ class _UpgradePromptState extends State<UpgradePrompt>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with dismiss button
                   Row(
                     children: [
                       Container(
@@ -343,8 +342,6 @@ class _UpgradePromptState extends State<UpgradePrompt>
                   ),
 
                   const SizedBox(height: 12),
-
-                  // Description
                   Text(
                     widget.description,
                     style: TextStyle(
@@ -353,8 +350,6 @@ class _UpgradePromptState extends State<UpgradePrompt>
                       height: 1.4,
                     ),
                   ),
-
-                  // Features list
                   if (widget.features.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     ...widget.features.map(
@@ -384,8 +379,6 @@ class _UpgradePromptState extends State<UpgradePrompt>
                   ],
 
                   const SizedBox(height: 20),
-
-                  // Upgrade button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(

@@ -17,8 +17,6 @@ final bovineFormProvider = ChangeNotifierProvider<BovineFormProvider>((ref) {
   return BovineFormProvider(formService);
 });
 
-// Removido - já existe em bovines_provider.dart
-
 /// Página de formulário para criação/edição de bovinos - REFATORADO
 ///
 /// ARQUITETURA LIMPA:
@@ -74,10 +72,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
     );
   }
 
-  // =====================================================================
-  // UI BUILDERS - Componentes otimizados
-  // =====================================================================
-
   Widget _buildLoadingState() {
     return const Center(
       child: Column(
@@ -95,7 +89,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
     BovineFormProvider formProvider,
     BovinesProvider bovinesProvider,
   ) {
-    // Verifica erros de carregamento
     if (bovinesProvider.errorMessage != null && widget.isEditing) {
       return _buildErrorState(bovinesProvider);
     }
@@ -124,7 +117,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Seção: Informações Básicas
           BovineBasicInfoSection(
             commonNameController: formProvider.commonNameController,
             registrationIdController: formProvider.registrationIdController,
@@ -134,8 +126,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             enabled: !isOperating,
           ),
           const SizedBox(height: 24),
-
-          // Seção: Características
           BovineCharacteristicsSection(
             purposeController: formProvider.purposeController,
             formService: ref.read(bovineFormProvider).formService,
@@ -146,8 +136,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             enabled: !isOperating,
           ),
           const SizedBox(height: 24),
-
-          // Seção: Informações Adicionais
           BovineAdditionalInfoSection(
             tagsController: formProvider.tagsController,
             animalTypeController: formProvider.animalTypeController,
@@ -159,8 +147,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             enabled: !isOperating,
           ),
           const SizedBox(height: 24),
-
-          // Seção: Status (apenas para edição)
           if (widget.isEditing)
             BovineStatusSection(
               isActive: formProvider.isActive,
@@ -228,10 +214,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
     );
   }
 
-  // =====================================================================
-  // BUSINESS LOGIC - Centralizado e otimizado
-  // =====================================================================
-
   Future<void> _loadBovineData() async {
     if (!mounted) return;
 
@@ -255,11 +237,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
 
   Future<void> _loadBovineForEditing() async {
     final provider = ref.read(bovinesProviderProvider);
-
-    // Tenta buscar localmente primeiro
     var bovine = provider.getBovineById(widget.bovineId!);
-
-    // Se não encontrou, carrega via API
     if (bovine == null) {
       final success = await provider.loadBovineById(widget.bovineId!);
       if (success) bovine = provider.selectedBovine;
@@ -323,10 +301,6 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       _showErrorMessage('Erro ao excluir: ${provider.errorMessage}');
     }
   }
-
-  // =====================================================================
-  // HELPER METHODS - Utilitários otimizados
-  // =====================================================================
 
   void _scrollToFirstError() {
     _scrollController.animateTo(

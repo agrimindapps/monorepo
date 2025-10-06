@@ -74,8 +74,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-
-      // Carregar themeMode
       final savedTheme = prefs.getString(_themeKey);
       ThemeMode themeMode = ThemeMode.system;
 
@@ -85,8 +83,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
           orElse: () => ThemeMode.system,
         );
       }
-
-      // Carregar followSystemTheme
       final followSystemTheme = prefs.getBool(_followSystemKey) ?? true;
 
       final newSettings = ThemeSettingsEntity(
@@ -112,11 +108,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
         themeMode: themeMode,
         followSystemTheme: themeMode == ThemeMode.system,
       );
-
-      // Atualiza o estado imediatamente para UI responsiva
       state = state.copyWith(settings: newSettings, errorMessage: null);
-
-      // Persiste as configurações
       final prefs = await SharedPreferences.getInstance();
       await Future.wait<void>([
         prefs.setString(_themeKey, themeMode.toString()),
@@ -171,8 +163,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       );
 
       state = state.copyWith(settings: newSettings, errorMessage: null);
-
-      // Persiste as configurações
       final prefs = await SharedPreferences.getInstance();
       await Future.wait<void>([
         prefs.setBool(_followSystemKey, followSystem),
@@ -198,10 +188,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
     await _loadTheme();
   }
 }
-
-// =============================================================================
-// PROVIDERS
-// =============================================================================
 
 /// Provider principal do ThemeNotifier
 final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((
@@ -258,10 +244,6 @@ final contextAwareDarkModeProvider = Provider.family<bool, BuildContext>((
 
   return themeSettings.isDarkMode;
 });
-
-// =============================================================================
-// CONVENIENCE PROVIDERS
-// =============================================================================
 
 /// Provider para o texto de status do tema
 final themeStatusTextProvider = Provider<String>((ref) {

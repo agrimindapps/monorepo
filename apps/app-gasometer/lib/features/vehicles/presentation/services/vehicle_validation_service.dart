@@ -7,36 +7,24 @@ class VehicleValidationService {
   /// Validates a vehicle entity
   Map<String, String> validateVehicle(VehicleEntity vehicle) {
     final errors = <String, String>{};
-
-    // Validate name
     if (vehicle.name.trim().isEmpty) {
       errors['name'] = 'Nome é obrigatório';
     } else if (vehicle.name.trim().length < 2) {
       errors['name'] = 'Nome deve ter pelo menos 2 caracteres';
     }
-
-    // Validate brand
     if (vehicle.brand.trim().isEmpty) {
       errors['brand'] = 'Marca é obrigatória';
     }
-
-    // Validate model
     if (vehicle.model.trim().isEmpty) {
       errors['model'] = 'Modelo é obrigatório';
     }
-
-    // Validate year
     final currentYear = DateTime.now().year;
     if (vehicle.year < 1900 || vehicle.year > currentYear + 1) {
       errors['year'] = 'Ano inválido';
     }
-
-    // Validate fuel types
     if (vehicle.supportedFuels.isEmpty) {
       errors['supportedFuels'] = 'Selecione pelo menos um tipo de combustível';
     }
-
-    // Validate odometer
     if (vehicle.currentOdometer < 0) {
       errors['currentOdometer'] = 'Odômetro não pode ser negativo';
     }
@@ -58,8 +46,6 @@ class VehicleValidationService {
     List<VehicleEntity> existingVehicles,
   ) {
     final errors = validateVehicle(vehicle);
-
-    // Check name uniqueness
     if (!isNameUnique(vehicle.name, existingVehicles)) {
       errors['name'] = 'Já existe um veículo com este nome';
     }
@@ -73,8 +59,6 @@ class VehicleValidationService {
     List<VehicleEntity> existingVehicles,
   ) {
     final errors = validateVehicle(vehicle);
-
-    // Check name uniqueness (excluding current vehicle)
     if (!isNameUnique(vehicle.name, existingVehicles, excludeId: vehicle.id)) {
       errors['name'] = 'Já existe um veículo com este nome';
     }

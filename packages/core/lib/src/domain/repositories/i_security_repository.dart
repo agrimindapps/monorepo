@@ -2,9 +2,6 @@ import '../entities/security_entity.dart';
 
 /// Interface para operações de segurança
 abstract class ISecurityRepository {
-  // ==========================================================================
-  // CRIPTOGRAFIA E HASHING
-  // ==========================================================================
 
   /// Criptografar dados usando uma chave
   Future<EncryptionResult> encrypt({
@@ -47,10 +44,6 @@ abstract class ISecurityRepository {
   /// Gerar salt para hash
   Future<String> generateSalt({int length = 16});
 
-  // ==========================================================================
-  // BIOMETRIA
-  // ==========================================================================
-
   /// Verificar se biometria está disponível
   Future<BiometricPermissionStatus> getBiometricStatus();
 
@@ -69,10 +62,6 @@ abstract class ISecurityRepository {
   /// Verificar se um tipo específico de biometria está disponível
   Future<bool> isBiometricTypeAvailable(BiometricType type);
 
-  // ==========================================================================
-  // SEGURANÇA DO DISPOSITIVO
-  // ==========================================================================
-
   /// Verificar integridade e segurança do dispositivo
   Future<DeviceSecurityResult> checkDeviceSecurity();
 
@@ -87,10 +76,6 @@ abstract class ISecurityRepository {
 
   /// Verificar se a conexão SSL é segura
   Future<bool> isSSLConnectionSecure(String url);
-
-  // ==========================================================================
-  // ARMAZENAMENTO SEGURO
-  // ==========================================================================
 
   /// Armazenar dados de forma segura no dispositivo
   Future<bool> storeSecureData({
@@ -113,10 +98,6 @@ abstract class ISecurityRepository {
 
   /// Limpar todos os dados seguros
   Future<bool> clearAllSecureData();
-
-  // ==========================================================================
-  // VALIDAÇÕES
-  // ==========================================================================
 
   /// Validar força de uma senha
   Future<double> validatePasswordStrength(String password);

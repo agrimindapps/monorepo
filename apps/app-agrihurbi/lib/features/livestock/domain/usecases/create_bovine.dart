@@ -15,13 +15,10 @@ class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
   
   @override
   Future<Either<Failure, BovineEntity>> call(CreateBovineParams params) async {
-    // Validação dos campos obrigatórios
     final validation = _validateBovineData(params.bovine);
     if (validation != null) {
       return Left(ValidationFailure(validation));
     }
-    
-    // Preparar entidade para criação
     final now = DateTime.now();
     final bovineToCreate = params.bovine.copyWith(
       id: params.bovine.id.isEmpty ? _generateUniqueId() : params.bovine.id,
@@ -29,16 +26,12 @@ class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
       updatedAt: now,
       isActive: true,
     );
-    
-    // Validar registrationId único se fornecido
     if (bovineToCreate.registrationId.isNotEmpty) {
       final duplicateCheck = await _checkDuplicateRegistrationId(bovineToCreate.registrationId);
       if (duplicateCheck != null) {
         return Left(duplicateCheck);
       }
     }
-    
-    // Criar no repositório
     return await repository.createBovine(bovineToCreate);
   }
   
@@ -55,16 +48,12 @@ class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
     if (bovine.originCountry.trim().isEmpty) {
       return 'País de origem é obrigatório';
     }
-    
-    // Validar formato do registrationId se fornecido
     if (bovine.registrationId.isNotEmpty) {
       final regIdPattern = RegExp(r'^[A-Z0-9\-_]{3,20}$');
       if (!regIdPattern.hasMatch(bovine.registrationId)) {
         return 'ID de registro deve conter apenas letras maiúsculas, números, hífens e underscores (3-20 caracteres)';
       }
     }
-    
-    // Validar tags se fornecidas
     if (bovine.tags.any((tag) => tag.trim().isEmpty)) {
       return 'Tags não podem estar vazias';
     }
@@ -74,8 +63,6 @@ class CreateBovineUseCase implements UseCase<BovineEntity, CreateBovineParams> {
   
   /// Verifica se o registrationId já existe
   Future<Failure?> _checkDuplicateRegistrationId(String registrationId) async {
-    // Esta verificação será implementada quando o repository estiver completo
-    // Por ora, retornamos null (sem duplicata)
     return null;
   }
   

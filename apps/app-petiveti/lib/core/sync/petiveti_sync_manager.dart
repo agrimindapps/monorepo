@@ -27,10 +27,7 @@ class PetivetiSyncManager {
     }
 
     try {
-      // Criar configuração baseada no modo
       _config = _createConfigForMode(mode);
-
-      // Inicializar com UnifiedSyncManager
       final result = await UnifiedSyncManager.instance.initializeApp(
         appName: 'petiveti',
         config: _config!.appSyncConfig,
@@ -73,8 +70,6 @@ class PetivetiSyncManager {
     if (!_isInitialized) {
       return const Left(InitializationFailure('Sync manager not initialized'));
     }
-
-    // Sincronizar especificamente entidades críticas
     final medicationsResult = await UnifiedSyncManager.instance
         .forceSyncEntity<MedicationSyncEntity>('petiveti');
 

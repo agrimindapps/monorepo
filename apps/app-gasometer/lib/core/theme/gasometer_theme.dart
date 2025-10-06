@@ -35,7 +35,6 @@ class GasometerTheme {
       inversePrimary: GasometerColors.primaryLight,
     ),
   ).copyWith(
-    // AppBar personalizado
     appBarTheme: const AppBarTheme(
       backgroundColor: GasometerColors.primary,
       foregroundColor: Colors.white,
@@ -49,16 +48,12 @@ class GasometerTheme {
         fontFamily: 'Inter',
       ),
     ),
-    
-    // FAB personalizado
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: GasometerColors.primary,
       foregroundColor: Colors.white,
       elevation: 6,
       shape: CircleBorder(),
     ),
-    
-    // Bottom navigation personalizado
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.white,
       selectedItemColor: GasometerColors.primary,
@@ -67,8 +62,6 @@ class GasometerTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-    
-    // Card theme personalizado
     cardTheme: CardThemeData(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -77,8 +70,6 @@ class GasometerTheme {
       color: Colors.white,
       shadowColor: GasometerColors.primary.withValues(alpha: 0.1),
     ),
-    
-    // Elevated button personalizado
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: GasometerColors.primary,
@@ -95,8 +86,6 @@ class GasometerTheme {
         ),
       ),
     ),
-    
-    // Switch personalizado
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -111,15 +100,11 @@ class GasometerTheme {
         return Colors.grey.shade300;
       }),
     ),
-    
-    // Progress indicator personalizado
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: GasometerColors.primary,
       linearTrackColor: GasometerColors.primaryLight,
       circularTrackColor: GasometerColors.primaryLight,
     ),
-    
-    // Chip theme personalizado para combustíveis
     chipTheme: ChipThemeData(
       backgroundColor: GasometerColors.secondaryLight.withValues(alpha: 0.2),
       selectedColor: GasometerColors.primary,
@@ -135,8 +120,6 @@ class GasometerTheme {
         side: BorderSide.none,
       ),
     ),
-    
-    // ListTile theme MUITO simples (apenas cores básicas)
     listTileTheme: const ListTileThemeData(
       iconColor: Color(0xFF1A1C1E),
       textColor: Color(0xFF1A1C1E),
@@ -171,7 +154,6 @@ class GasometerTheme {
       inversePrimary: GasometerColors.primaryLight,
     ),
   ).copyWith(
-    // AppBar personalizado para modo escuro
     appBarTheme: const AppBarTheme(
       backgroundColor: GasometerColors.primaryDark,
       foregroundColor: Colors.white,
@@ -185,16 +167,12 @@ class GasometerTheme {
         fontFamily: 'Inter',
       ),
     ),
-    
-    // FAB para modo escuro
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: GasometerColors.primary,
       foregroundColor: Colors.white,
       elevation: 6,
       shape: CircleBorder(),
     ),
-    
-    // Bottom navigation para modo escuro
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: const Color(0xFF1E1E1E),
       selectedItemColor: GasometerColors.primaryLight,
@@ -203,8 +181,6 @@ class GasometerTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-    
-    // Card theme para modo escuro
     cardTheme: CardThemeData(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -213,8 +189,6 @@ class GasometerTheme {
       color: const Color(0xFF2D2D2D),
       shadowColor: Colors.black.withValues(alpha: 0.3),
     ),
-    
-    // Elevated button para modo escuro
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: GasometerColors.primary,
@@ -231,8 +205,6 @@ class GasometerTheme {
         ),
       ),
     ),
-    
-    // Switch para modo escuro
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -247,15 +219,11 @@ class GasometerTheme {
         return Colors.grey.shade800;
       }),
     ),
-    
-    // Progress indicator para modo escuro
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: GasometerColors.primaryLight,
       linearTrackColor: GasometerColors.primary,
       circularTrackColor: GasometerColors.primary,
     ),
-    
-    // Chip theme para modo escuro
     chipTheme: ChipThemeData(
       backgroundColor: GasometerColors.secondaryLight.withValues(alpha: 0.2),
       selectedColor: GasometerColors.primary,
@@ -271,8 +239,6 @@ class GasometerTheme {
         side: BorderSide.none,
       ),
     ),
-    
-    // ListTile theme MUITO simples para modo escuro
     listTileTheme: const ListTileThemeData(
       iconColor: Color(0xFFE2E3E3),
       textColor: Color(0xFFE2E3E3),

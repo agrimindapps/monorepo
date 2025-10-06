@@ -42,28 +42,20 @@ class PlantisSyncService implements ISyncService {
 
   @override
   final List<String> dependencies = [];
-
-  // Estado interno
   bool _isInitialized = false;
   final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
-
-  // Estatísticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
   int _totalItemsSynced = 0;
-
-  // Stream controllers
   final StreamController<SyncServiceStatus> _statusController =
       StreamController<SyncServiceStatus>.broadcast();
   final StreamController<ServiceProgress> _progressController =
       StreamController<ServiceProgress>.broadcast();
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
-
-  // Entidades específicas do Plantis (na ordem de prioridade)
   final List<String> _entityTypes = ['plants', 'spaces', 'tasks', 'comments'];
 
   @override
@@ -124,8 +116,6 @@ class PlantisSyncService implements ISyncService {
 
       int totalSynced = 0;
       final errors = <String>[];
-
-      // Sincronizar cada tipo de entidade (DELEGATION PATTERN)
       for (int i = 0; i < _entityTypes.length; i++) {
         final entityType = _entityTypes[i];
 
@@ -138,8 +128,6 @@ class PlantisSyncService implements ISyncService {
             currentItem: entityType,
           ),
         );
-
-        // Delegar sync para o repository correspondente
         final syncResult = await _syncEntity(entityType);
 
         syncResult.fold(
@@ -165,8 +153,6 @@ class PlantisSyncService implements ISyncService {
 
       _lastSync = endTime;
       _totalItemsSynced += totalSynced;
-
-      // Considerar sucesso se sincronizou pelo menos uma entidade
       if (errors.isEmpty || totalSynced > 0) {
         _successfulSyncs++;
         _updateStatus(SyncServiceStatus.completed);
@@ -244,14 +230,12 @@ class PlantisSyncService implements ISyncService {
   /// Sincroniza plantas delegando para PlantsRepository.syncPendingChanges()
   Future<Either<Failure, int>> _syncPlants() async {
     try {
-      // O repository já implementa syncPendingChanges()
       final result =
           await plantsRepository.syncPendingChanges() as Either<Failure, void>;
 
       return await result.fold(
         (Failure failure) async => Left<Failure, int>(failure),
         (_) async {
-          // Obter contagem de plantas sincronizadas
           final plantsResult =
               await plantsRepository.getPlants()
                   as Either<Failure, List<dynamic>>;
@@ -343,9 +327,6 @@ class PlantisSyncService implements ISyncService {
         message: 'Starting specific sync for Plantis items',
         metadata: {'item_count': ids.length, 'item_ids': ids},
       );
-
-      // Sync específico pode ser implementado posteriormente
-      // Por ora, sincroniza tudo
       return await sync();
     } catch (e, stackTrace) {
       _failedSyncs++;
@@ -369,8 +350,6 @@ class PlantisSyncService implements ISyncService {
 
   @override
   Future<bool> checkConnectivity() async {
-    // Delegar para NetworkInfo através dos repositories
-    // Por ora, retorna true (será implementado com NetworkMonitor)
     return true;
   }
 
@@ -423,8 +402,6 @@ class PlantisSyncService implements ISyncService {
   @override
   Future<void> dispose() async {
     logger.logInfo(message: 'Disposing Plantis Sync Service');
-
-    // Cancel connectivity monitoring
     await _connectivitySubscription?.cancel();
     _connectivitySubscription = null;
 
@@ -439,10 +416,7 @@ class PlantisSyncService implements ISyncService {
   /// Chame este método após inicializar o serviço se quiser auto-sync on reconnect
   void startConnectivityMonitoring(Stream<bool> connectivityStream) {
     try {
-      // Cancel existing subscription if any
       _connectivitySubscription?.cancel();
-
-      // Listen to connectivity changes
       _connectivitySubscription = connectivityStream.listen(
         (isConnected) {
           logger.logConnectivityChange(
@@ -455,8 +429,6 @@ class PlantisSyncService implements ISyncService {
               message: 'Connection restored - triggering auto-sync',
               metadata: {'pending_sync': true},
             );
-
-            // Trigger sync when connection is restored and there's pending data
             sync();
           }
         },
@@ -490,8 +462,6 @@ class PlantisSyncService implements ISyncService {
       metadata: {'service': serviceId},
     );
   }
-
-  // Métodos privados
 
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {

@@ -15,12 +15,8 @@ class IdealWeightPage extends ConsumerStatefulWidget {
 
 class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
   final _formKey = GlobalKey<FormState>();
-  
-  // Form controllers
   final _ageController = TextEditingController();
   final _weightController = TextEditingController();
-  
-  // Form state
   String _selectedSpecies = 'Cão';
   String _selectedBreed = 'Sem raça definida';
   String _selectedSex = 'Macho';
@@ -152,8 +148,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Espécie
             DropdownButtonFormField<String>(
               value: _selectedSpecies,
               decoration: const InputDecoration(
@@ -170,7 +164,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
                 if (value != null) {
                   setState(() {
                     _selectedSpecies = value;
-                    // Reset breed when species changes
                     _selectedBreed = value == 'Cão' 
                         ? 'Sem raça definida' 
                         : 'Gato doméstico';
@@ -185,8 +178,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Raça/Porte
             DropdownButtonFormField<String>(
               value: _selectedBreed,
               decoration: const InputDecoration(
@@ -214,8 +205,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Sexo
             DropdownButtonFormField<String>(
               value: _selectedSex,
               decoration: const InputDecoration(
@@ -243,8 +232,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Castrado
             SwitchListTile(
               title: const Text('Animal Castrado/Esterilizado'),
               subtitle: const Text('Influencia no cálculo das necessidades calóricas'),
@@ -275,8 +262,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               ),
             ),
             const SizedBox(height: 16),
-            
-            // Idade
             TextFormField(
               controller: _ageController,
               decoration: const InputDecoration(
@@ -298,8 +283,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               },
             ),
             const SizedBox(height: 16),
-            
-            // Peso Atual
             TextFormField(
               controller: _weightController,
               decoration: const InputDecoration(
@@ -427,8 +410,6 @@ class _IdealWeightPageState extends ConsumerState<IdealWeightPage> {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Results
             ...result.results.map((item) => _buildResultItem(item)),
             
             if (result.summary != null) ...[

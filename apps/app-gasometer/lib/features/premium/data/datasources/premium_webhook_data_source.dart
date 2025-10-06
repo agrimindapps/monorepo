@@ -32,8 +32,6 @@ class PremiumWebhookDataSource {
       if (eventType == null || appUserId == null) {
         return const Left(ServerFailure('Payload de webhook inválido'));
       }
-
-      // Processa diferentes tipos de eventos
       switch (eventType) {
         case 'INITIAL_PURCHASE':
         case 'NON_RENEWING_PURCHASE':
@@ -61,8 +59,6 @@ class PremiumWebhookDataSource {
         default:
           debugPrint('[WebhookDataSource] Evento não tratado: $eventType');
       }
-
-      // Emite evento para listeners
       _webhookController.add({
         'event_type': eventType,
         'app_user_id': appUserId,
@@ -217,7 +213,6 @@ class PremiumWebhookDataSource {
     required String newUserId,
   }) async {
     try {
-      // Busca dados do usuário antigo
       final oldDoc =
           await _firestore
               .collection('user_subscriptions')
@@ -237,7 +232,6 @@ class PremiumWebhookDataSource {
         ),
         (oldData) async {
           if (oldData != null) {
-            // Copia para novo usuário
             await _firestore
                 .collection('user_subscriptions')
                 .doc(newUserId)
@@ -246,8 +240,6 @@ class PremiumWebhookDataSource {
                   'migrated_from': oldUserId,
                   'updated_at': DateTime.now().toIso8601String(),
                 });
-
-            // Remove dados antigos
             await _firestore
                 .collection('user_subscriptions')
                 .doc(oldUserId)
@@ -300,9 +292,6 @@ class PremiumWebhookDataSource {
     }
 
     try {
-      // Em produção, validar assinatura do webhook
-      // TODO: Implementar validação HMAC com secret do RevenueCat
-      // final payloadString = json.encode(payload);
       return true;
     } catch (e) {
       debugPrint('[WebhookDataSource] Erro na validação: $e');

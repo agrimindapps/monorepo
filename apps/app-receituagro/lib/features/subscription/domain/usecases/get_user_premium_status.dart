@@ -11,21 +11,15 @@ class GetUserPremiumStatusUseCase implements UseCase<bool, NoParams> {
 
   @override
   Future<Either<Failure, bool>> call(NoParams params) async {
-    // Primeiro tenta cache local para resposta rápida
     final cachedResult = await repository.getCachedPremiumStatus();
 
     return cachedResult.fold(
       (failure) => repository.hasReceitaAgroSubscription(),
       (cachedStatus) async {
-        // Se tem cache, usa cache
         if (cachedStatus != null) {
           return Right(cachedStatus);
         }
-
-        // Senão, busca status atualizado
         final freshResult = await repository.hasReceitaAgroSubscription();
-
-        // Salva no cache se bem-sucedido
         await freshResult.fold(
           (failure) => Future<void>.value(),
           (isPremium) => repository.cachePremiumStatus(isPremium),

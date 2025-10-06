@@ -38,12 +38,9 @@ class NewsRemoteDataSource {
           final articles = await _parseRSSFeed(feedUrl);
           allArticles.addAll(articles);
         } catch (e) {
-          // Continue with other feeds if one fails
           print('Failed to fetch from feed $feedUrl: $e');
         }
       }
-
-      // Sort by publication date (newest first) and apply limit
       allArticles.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
       return allArticles.take(limit).toList();
     } catch (e) {
@@ -245,24 +242,18 @@ class NewsRemoteDataSource {
           item.findElements('pubDate').firstOrNull?.innerText ?? '';
       final category =
           item.findElements('category').firstOrNull?.innerText ?? 'agriculture';
-
-      // Extract image from content or enclosure
       String imageUrl = '';
       final enclosure = item.findElements('enclosure').firstOrNull;
       if (enclosure != null &&
           enclosure.getAttribute('type')?.startsWith('image/') == true) {
         imageUrl = enclosure.getAttribute('url') ?? '';
       }
-
-      // Parse publication date
       DateTime publishedAt;
       try {
         publishedAt = DateTime.parse(pubDateStr);
       } catch (e) {
         publishedAt = DateTime.now();
       }
-
-      // Generate unique ID from URL and title
       final id = '$link-${title.hashCode}'.replaceAll(RegExp(r'[^\w-]'), '');
 
       return NewsArticleModel(
@@ -294,8 +285,6 @@ class NewsRemoteDataSource {
   /// Fetch article content by URL (for full content)
   Future<String> fetchArticleContent(String articleUrl) async {
     try {
-      // This would typically use a web scraping service or API
-      // For now, return the URL as content indication
       return 'Content available at: $articleUrl';
     } catch (e) {
       throw ServerException('Failed to fetch article content: $e');

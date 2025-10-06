@@ -21,16 +21,12 @@ class GetDeviceStatisticsUseCase {
       if (kDebugMode) {
         debugPrint('📊 DeviceStats: Getting device statistics');
       }
-
-      // Obtém o usuário atual
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       final userId = currentUser.id;
-
-      // Obtém estatísticas do repository
       final result = await _deviceRepository.getDeviceStatistics(userId);
 
       return result.fold(
@@ -42,7 +38,6 @@ class GetDeviceStatisticsUseCase {
         },
         (statisticsMap) {
           try {
-            // Converte o Map para DeviceStatisticsModel
             final statistics = _mapToDeviceStatistics(statisticsMap);
 
             if (kDebugMode) {
@@ -51,8 +46,6 @@ class GetDeviceStatisticsUseCase {
                 '   Total: ${statistics.totalDevices}, Active: ${statistics.activeDevices}',
               );
             }
-
-            // Adiciona informações específicas do plantis se solicitado
             if (params?.includeExtendedInfo == true) {
               final enhancedStats = _enhanceStatistics(statistics);
               return Right(enhancedStats);
@@ -113,10 +106,7 @@ class GetDeviceStatisticsUseCase {
   /// Aprimora estatísticas com informações específicas do plantis
   DeviceStatisticsModel _enhanceStatistics(DeviceStatisticsModel stats) {
     try {
-      // Calcula métricas adicionais específicas do plantis
       final plantisMetrics = <String, dynamic>{};
-
-      // Análise de atividade
       if (stats.lastActiveDevice != null) {
         final hoursSinceLastActivity =
             DateTime.now()
@@ -126,8 +116,6 @@ class GetDeviceStatisticsUseCase {
         plantisMetrics['hoursSinceLastActivity'] = hoursSinceLastActivity;
         plantisMetrics['isActiveToday'] = hoursSinceLastActivity < 24;
       }
-
-      // Análise de plataformas
       if (stats.devicesByPlatform.isNotEmpty) {
         final mostUsedPlatform = stats.devicesByPlatform.entries.reduce(
           (a, b) => a.value > b.value ? a : b,
@@ -140,8 +128,6 @@ class GetDeviceStatisticsUseCase {
                 (stats.devicesByPlatform['Android'] ?? 0) >
             stats.totalDevices / 2;
       }
-
-      // Análise de segurança
       plantisMetrics['deviceUtilization'] =
           stats.totalDevices > 0
               ? (stats.activeDevices / stats.totalDevices * 100).round()
@@ -149,8 +135,6 @@ class GetDeviceStatisticsUseCase {
 
       plantisMetrics['hasInactiveDevices'] =
           stats.activeDevices < stats.totalDevices;
-
-      // Recomendações baseadas nos dados
       final recommendations = <String>[];
 
       if (stats.totalDevices >= 3) {
@@ -188,7 +172,6 @@ class GetDeviceStatisticsUseCase {
       if (kDebugMode) {
         debugPrint('⚠️ DeviceStats: Error enhancing statistics: $e');
       }
-      // Retorna estatísticas originais se falhar
       return stats;
     }
   }

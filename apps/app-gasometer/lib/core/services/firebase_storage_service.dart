@@ -75,10 +75,7 @@ class FirebaseStorageService {
       );
 
       final uploadTask = ref.putData(imageBytes, metadata);
-
-      // Monitor upload progress if needed
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        // Can emit progress events here if needed
       });
 
       final snapshot = await uploadTask.timeout(
@@ -128,10 +125,7 @@ class FirebaseStorageService {
       );
 
       final uploadTask = ref.putFile(file, metadata);
-
-      // Monitor upload progress
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        // Can emit progress events here if needed
       });
 
       final snapshot = await uploadTask.timeout(
@@ -155,7 +149,6 @@ class FirebaseStorageService {
       final ref = _storage.refFromURL(downloadUrl);
       await ref.delete();
     } catch (e) {
-      // Silently handle deletion errors - image might already be deleted
     }
   }
 
@@ -199,17 +192,12 @@ class FirebaseStorageService {
     String recordId,
     String category,
   ) {
-    // This would need to be implemented with a state management solution
-    // For now, returning empty stream
     return const Stream.empty();
   }
 
   /// Check if user has enough storage quota (Firebase has generous limits)
   Future<bool> hasStorageQuota(String userId) async {
     try {
-      // Firebase Storage has very generous free tier (5GB)
-      // For basic receipt images, this should rarely be an issue
-      // Could implement actual quota checking if needed
       return true;
     } catch (e) {
       return false;
@@ -219,9 +207,6 @@ class FirebaseStorageService {
   /// Get storage usage for user (if quota monitoring is needed)
   Future<int> getUserStorageUsage(String userId) async {
     try {
-      // This would require listing all user files and summing their sizes
-      // Firebase doesn't provide direct quota API
-      // For now, returning 0
       return 0;
     } catch (e) {
       return 0;
@@ -265,11 +250,9 @@ class FirebaseStorageService {
             }
           }
         } catch (e) {
-          // Continue with next image if one fails
         }
       }
     } catch (e) {
-      // Silently handle cleanup errors
     }
   }
 
@@ -299,7 +282,6 @@ class FirebaseStorageService {
       final metadata = SettableMetadata(customMetadata: customMetadata);
       await ref.updateMetadata(metadata);
     } catch (e) {
-      // Silently handle metadata update errors
     }
   }
 

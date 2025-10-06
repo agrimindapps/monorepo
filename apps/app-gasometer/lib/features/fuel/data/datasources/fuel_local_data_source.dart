@@ -31,8 +31,6 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
       final records = _localDataService.getAllFuelRecords()
           .map((record) => _mapToEntity(FuelSupplyModel.fromHiveMap(record)))
           .toList();
-      
-      // Sort by date descending
       records.sort((a, b) => b.date.compareTo(a.date));
       return records;
     } catch (e) {
@@ -46,8 +44,6 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
       final records = _localDataService.getFuelRecordsByVehicle(vehicleId)
           .map((record) => _mapToEntity(FuelSupplyModel.fromHiveMap(record)))
           .toList();
-      
-      // Sort by date descending
       records.sort((a, b) => b.date.compareTo(a.date));
       return records;
     } catch (e) {
@@ -134,7 +130,6 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
   @override
   Future<void> clearAllFuelRecords() async {
     try {
-      // Clear all fuel records - we'll need to implement this in LocalDataService
       final allRecords = _localDataService.getAllFuelRecords();
       for (final record in allRecords) {
         final id = record['id'] as String?;
@@ -149,7 +144,6 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
 
   @override
   Stream<List<FuelRecordEntity>> watchFuelRecords() {
-    // For now, return a simple stream - in production you'd implement proper listening
     return Stream.periodic(const Duration(seconds: 1), (_) => null)
         .asyncMap((_) => getAllFuelRecords());
   }
@@ -159,8 +153,6 @@ class FuelLocalDataSourceImpl implements FuelLocalDataSource {
     return watchFuelRecords()
         .map((records) => records.where((record) => record.vehicleId == vehicleId).toList());
   }
-
-  // Helper methods
   FuelRecordEntity _mapToEntity(FuelSupplyModel model) {
     return FuelRecordEntity(
       id: model.id,

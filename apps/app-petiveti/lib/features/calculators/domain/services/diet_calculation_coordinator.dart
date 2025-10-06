@@ -25,25 +25,12 @@ class DietCalculationCoordinator {
 
   /// Calculate complete diet plan for the pet
   AdvancedDietResult calculateDietPlan(AdvancedDietInput input) {
-    // Step 1: Calculate daily caloric needs
     final dailyCalories = _calorieService.calculateDailyCalories(input);
-    
-    // Step 2: Calculate macronutrient distribution
     final macronutrients = _macronutrientService.calculateMacronutrients(input, dailyCalories);
-    
-    // Step 3: Calculate vitamin requirements
     final vitamins = _micronutrientService.calculateVitamins(input);
-    
-    // Step 4: Calculate mineral requirements
     final minerals = _micronutrientService.calculateMinerals(input);
-    
-    // Step 5: Calculate water requirement
     final waterRequirement = _calculateWaterRequirement(input);
-    
-    // Step 6: Calculate feeding recommendations
     final feedingRecommendations = _calculateFeedingRecommendations(input, dailyCalories);
-    
-    // Step 7: Generate dietary recommendations
     final dietaryRecommendations = _generateDietaryRecommendations(input);
     
     return AdvancedDietResult(
@@ -60,14 +47,9 @@ class DietCalculationCoordinator {
 
   /// Calculate water requirement based on various factors
   double _calculateWaterRequirement(AdvancedDietInput input) {
-    // Base water requirement: 50-60ml per kg body weight
     double baseWater = input.weight * 55;
-    
-    // Adjust for activity level
     final activityMultiplier = _getActivityWaterMultiplier(input.activityLevel);
     baseWater *= activityMultiplier;
-    
-    // Adjust for health conditions
     switch (input.healthCondition) {
       case HealthCondition.kidneyDisease:
         baseWater *= 1.5; // Increase water intake
@@ -81,15 +63,11 @@ class DietCalculationCoordinator {
       default:
         break;
     }
-    
-    // Adjust for special conditions
     if (input.isLactating) {
       baseWater *= 1.8; // Lactating animals need significantly more water
     } else if (input.isPregnant) {
       baseWater *= 1.3;
     }
-    
-    // Adjust for diet type (dry vs wet food)
     switch (input.dietType) {
       case DietType.raw:
         baseWater *= 0.7; // Raw diets have higher moisture content
@@ -127,7 +105,6 @@ class DietCalculationCoordinator {
 
   /// Calculate feeding recommendations
   Map<String, dynamic> _calculateFeedingRecommendations(AdvancedDietInput input, double dailyCalories) {
-    // Calculate meals per day based on life stage
     int mealsPerDay;
     switch (input.lifeStage) {
       case LifeStage.puppy:
@@ -141,11 +118,7 @@ class DietCalculationCoordinator {
         mealsPerDay = 3; // Easier digestion with smaller meals
         break;
     }
-    
-    // Calculate calories per meal
     double caloriesPerMeal = dailyCalories / mealsPerDay;
-    
-    // Calculate grams per meal (estimated based on average food caloric density)
     double averageCaloriesPerGram = _getAverageCaloriesPerGram(input.dietType);
     double gramsPerMeal = caloriesPerMeal / averageCaloriesPerGram;
     
@@ -187,8 +160,6 @@ class DietCalculationCoordinator {
   /// Generate dietary recommendations based on input
   List<String> _generateDietaryRecommendations(AdvancedDietInput input) {
     List<String> recommendations = [];
-    
-    // Life stage recommendations
     switch (input.lifeStage) {
       case LifeStage.puppy:
         recommendations.add('Use puppy-specific food with higher protein and fat content');
@@ -206,8 +177,6 @@ class DietCalculationCoordinator {
         recommendations.add('Maintain consistent feeding schedule');
         break;
     }
-    
-    // Health condition recommendations
     switch (input.healthCondition) {
       case HealthCondition.kidneyDisease:
         recommendations.add('Use therapeutic kidney diet with restricted phosphorus');
@@ -228,8 +197,6 @@ class DietCalculationCoordinator {
       default:
         break;
     }
-    
-    // Body condition recommendations
     switch (input.bodyCondition) {
       case BodyCondition.underweight:
         recommendations.add('Increase caloric density and feeding frequency');
@@ -244,8 +211,6 @@ class DietCalculationCoordinator {
       default:
         break;
     }
-    
-    // Special condition recommendations
     if (input.isPregnant) {
       recommendations.add('Switch to puppy/kitten food for higher nutrition');
       recommendations.add('Allow free-choice feeding in later pregnancy');

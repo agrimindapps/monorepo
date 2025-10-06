@@ -88,8 +88,6 @@ class PlantsFilterService {
     PlantSortOption sortOption = PlantSortOption.nameAZ,
   }) {
     var result = plants;
-    
-    // Aplicar filtros sequencialmente
     if (searchTerm != null && searchTerm.isNotEmpty) {
       result = filterBySearchTerm(result, searchTerm);
     }
@@ -109,8 +107,6 @@ class PlantsFilterService {
     if (onlyNeedingWater) {
       result = filterNeedingWaterToday(result);
     }
-    
-    // Aplicar ordenação
     result = sortPlants(result, sortOption);
     
     return result;
@@ -140,8 +136,6 @@ class PlantsFilterService {
   int _compareByCareUrgency(Plant a, Plant b) {
     final statusA = _getPlantCareStatus(a);
     final statusB = _getPlantCareStatus(b);
-    
-    // Ordem de prioridade: critical > needsWater > soon > healthy > unknown
     const priorityOrder = {
       PlantCareStatus.critical: 0,
       PlantCareStatus.needsWater: 1,

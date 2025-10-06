@@ -13,8 +13,6 @@ class AuthRateLimiter {
   static const String _attemptCountKey = 'auth_attempt_count';
   static const String _lastAttemptTimeKey = 'auth_last_attempt_time';
   static const String _lockoutEndTimeKey = 'auth_lockout_end_time';
-  
-  // Configurações de rate limiting
   static const int _maxAttempts = 5;
   static const int _lockoutDurationMinutes = 15;
   static const int _attemptWindowMinutes = 10;
@@ -23,8 +21,6 @@ class AuthRateLimiter {
   /// Retorna true se pode tentar, false se está bloqueado
   Future<bool> canAttemptLogin() async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    
-    // Verifica se está em lockout
     final lockoutEndTimeStr = await _secureStorage.read(key: _lockoutEndTimeKey);
     if (lockoutEndTimeStr != null) {
       final lockoutEndTime = int.parse(lockoutEndTimeStr);
@@ -35,7 +31,6 @@ class AuthRateLimiter {
         }
         return false; // Ainda está em lockout
       } else {
-        // Lockout expirou, limpa os dados
         if (kDebugMode) {
           debugPrint('🔒 INTERNO: Lockout expirou - limpando dados');
         }
@@ -64,8 +59,6 @@ class AuthRateLimiter {
   /// Implementa backoff exponencial e lockout após muitas tentativas
   Future<void> recordFailedAttempt() async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    
-    // Obtém contadores atuais
     final attemptCountStr = await _secureStorage.read(key: _attemptCountKey);
     final lastAttemptTimeStr = await _secureStorage.read(key: _lastAttemptTimeKey);
     
@@ -75,8 +68,6 @@ class AuthRateLimiter {
     if (attemptCountStr != null && lastAttemptTimeStr != null) {
       attemptCount = int.parse(attemptCountStr);
       lastAttemptTime = int.parse(lastAttemptTimeStr);
-      
-      // Reset counter se a última tentativa foi há mais de 10 minutos
       final timeDiff = now - lastAttemptTime;
       if (timeDiff > _attemptWindowMinutes * 60 * 1000) {
         attemptCount = 0;
@@ -84,12 +75,8 @@ class AuthRateLimiter {
     }
     
     attemptCount++;
-    
-    // Salva contadores atualizados
     await _secureStorage.write(key: _attemptCountKey, value: attemptCount.toString());
     await _secureStorage.write(key: _lastAttemptTimeKey, value: now.toString());
-    
-    // Se excedeu o limite, inicia lockout
     if (attemptCount >= _maxAttempts) {
       final lockoutEndTime = now + (_lockoutDurationMinutes * 60 * 1000);
       await _secureStorage.write(key: _lockoutEndTimeKey, value: lockoutEndTime.toString());

@@ -42,7 +42,6 @@ class VaccineCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with name and status badge
               Row(
                 children: [
                   Expanded(
@@ -59,8 +58,6 @@ class VaccineCard extends ConsumerWidget {
               ),
               
               const SizedBox(height: 8),
-              
-              // Priority indicator
               if (vaccine.priorityLevel != 'Baixa')
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -93,8 +90,6 @@ class VaccineCard extends ConsumerWidget {
                 ),
               
               if (vaccine.priorityLevel != 'Baixa') const SizedBox(height: 8),
-              
-              // Veterinarian info
               Row(
                 children: [
                   Icon(
@@ -115,8 +110,6 @@ class VaccineCard extends ConsumerWidget {
               ),
               
               const SizedBox(height: 4),
-              
-              // Date information
               Row(
                 children: [
                   Icon(
@@ -146,8 +139,6 @@ class VaccineCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              
-              // Reminder info (if exists)
               if (vaccine.reminderDate != null) ...[
                 const SizedBox(height: 4),
                 Row(
@@ -174,8 +165,6 @@ class VaccineCard extends ConsumerWidget {
                   ],
                 ),
               ],
-              
-              // Additional info (batch, manufacturer)
               if (vaccine.batch != null || vaccine.manufacturer != null) ...[
                 const SizedBox(height: 8),
                 const Divider(height: 1),
@@ -193,8 +182,6 @@ class VaccineCard extends ConsumerWidget {
                     'Fabricante: ${vaccine.manufacturer}',
                   ),
               ],
-              
-              // Notes (if exists)
               if (vaccine.notes != null && vaccine.notes!.trim().isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Container(
@@ -213,12 +200,9 @@ class VaccineCard extends ConsumerWidget {
                   ),
                 ),
               ],
-              
-              // Action buttons
               const SizedBox(height: 12),
               Row(
                 children: [
-                  // Complete/Undo button
                   if (!vaccine.isCompleted && vaccine.canBeMarkedAsCompleted())
                     _buildActionChip(
                       context,
@@ -238,8 +222,6 @@ class VaccineCard extends ConsumerWidget {
                     ),
                   
                   const SizedBox(width: 8),
-                  
-                  // Reminder button
                   if (!vaccine.isCompleted && vaccine.nextDueDate != null)
                     _buildActionChip(
                       context,
@@ -254,8 +236,6 @@ class VaccineCard extends ConsumerWidget {
                     ),
                   
                   const Spacer(),
-                  
-                  // More actions menu
                   if (onEdit != null || onDelete != null)
                     PopupMenuButton<String>(
                       onSelected: (value) {

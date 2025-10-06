@@ -102,7 +102,6 @@ class PrimaryResultWidget extends StatelessWidget {
   }
 
   IconData _getIconForResult(CalculationResultValue result) {
-    // Mapear ícones baseado no tipo/contexto do resultado
     final label = result.label.toLowerCase();
     
     if (label.contains('produtividade') || label.contains('yield')) {
@@ -202,7 +201,6 @@ class SecondaryResultWidget extends StatelessWidget {
   }
 
   IconData _getIconForResult(CalculationResultValue result) {
-    // Mesmo método da classe anterior
     final label = result.label.toLowerCase();
     
     if (label.contains('produtividade') || label.contains('yield')) {
@@ -316,7 +314,6 @@ class DataTableWidget extends StatelessWidget {
   }
 
   String _formatHeaderText(String header) {
-    // Converte snake_case para Title Case
     return header
         .split('_')
         .map((word) => word[0].toUpperCase() + word.substring(1))

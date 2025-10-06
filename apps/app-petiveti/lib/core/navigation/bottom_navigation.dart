@@ -225,7 +225,6 @@ class BottomNavShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Páginas que não devem mostrar o bottom navigation
     final hideBottomNavPages = [
       '/login',
       '/onboarding',

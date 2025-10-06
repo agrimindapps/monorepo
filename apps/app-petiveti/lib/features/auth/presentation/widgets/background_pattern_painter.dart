@@ -12,8 +12,6 @@ class BackgroundPatternPainter extends CustomPainter {
       ..strokeWidth = 1;
     
     const spacing = 50.0;
-    
-    // Draw grid pattern
     for (double x = 0; x < size.width; x += spacing) {
       canvas.drawLine(
         Offset(x, 0),

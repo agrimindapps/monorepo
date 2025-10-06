@@ -26,7 +26,6 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
     });
 
     try {
-      // Simular envio do formulário
       await Future.delayed(const Duration(seconds: 2));
       
       if (mounted) {
@@ -68,7 +67,6 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             Row(
               children: [
                 Container(
@@ -99,8 +97,6 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            
-            // Descrição
             Text(
               'Deixe seu e-mail e seja o primeiro a saber quando o GasOMeter estiver disponível para download!',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -109,8 +105,6 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            
-            // Formulário
             Form(
               key: _formKey,
               child: Column(
@@ -138,8 +132,6 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  
-                  // Botão de envio
                   ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
@@ -170,8 +162,6 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
                 ],
               ),
             ),
-            
-            // Disclaimer
             const SizedBox(height: 16),
             Text(
               'Prometemos não enviar spam. Você receberá apenas uma notificação quando o app estiver disponível.',

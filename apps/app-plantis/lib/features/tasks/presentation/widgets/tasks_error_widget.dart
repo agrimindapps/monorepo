@@ -20,7 +20,6 @@ class TasksErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de erro
             Container(
               width: 80,
               height: 80,
@@ -36,8 +35,6 @@ class TasksErrorWidget extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-
-            // Título do erro
             Text(
               'Ops! Algo deu errado',
               style: theme.textTheme.titleLarge?.copyWith(
@@ -48,8 +45,6 @@ class TasksErrorWidget extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
-
-            // Mensagem do erro
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -59,11 +54,8 @@ class TasksErrorWidget extends StatelessWidget {
             ),
 
             const SizedBox(height: 32),
-
-            // Botões de ação
             Column(
               children: [
-                // Botão Tentar Novamente
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -82,8 +74,6 @@ class TasksErrorWidget extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 12),
-
-                // Texto de suporte
                 Text(
                   'Se o problema persistir, verifique sua conexão com a internet',
                   style: theme.textTheme.bodySmall?.copyWith(

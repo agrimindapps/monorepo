@@ -54,8 +54,6 @@ class CalculatorProvider extends ChangeNotifier {
        _saveCalculationToHistory = saveCalculationToHistory,
        _manageFavorites = manageFavorites;
 
-  // === STATE MANAGEMENT ===
-
   /// Estados de loading
   bool _isLoading = false;
   bool _isCalculating = false;
@@ -81,8 +79,6 @@ class CalculatorProvider extends ChangeNotifier {
 
   /// Erro handling
   String? _errorMessage;
-
-  // === GETTERS ===
 
   bool get isLoading => _isLoading;
   bool get isCalculating => _isCalculating;
@@ -127,8 +123,6 @@ class CalculatorProvider extends ChangeNotifier {
   bool isCalculatorFavorite(String calculatorId) {
     return _favoriteCalculatorIds.contains(calculatorId);
   }
-
-  // === OPERAÇÕES PRINCIPAIS ===
 
   /// Carrega todas as calculadoras
   Future<void> loadCalculators() async {
@@ -201,8 +195,6 @@ class CalculatorProvider extends ChangeNotifier {
     );
   }
 
-  // === OPERAÇÕES DE CÁLCULO ===
-
   /// Atualiza input de cálculo
   void updateInput(String parameterId, dynamic value) {
     _currentInputs[parameterId] = value;
@@ -251,8 +243,6 @@ class CalculatorProvider extends ChangeNotifier {
         _currentResult = calculationResult;
         success = true;
         debugPrint('CalculatorProvider: Cálculo executado com sucesso');
-
-        // Salva no histórico automaticamente se bem-sucedido
         if (calculationResult.isValid) {
           _saveToHistory(calculationResult);
         }
@@ -290,8 +280,6 @@ class CalculatorProvider extends ChangeNotifier {
     );
   }
 
-  // === OPERAÇÕES DE BUSCA E FILTROS ===
-
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
     _searchQuery = query;
@@ -322,14 +310,10 @@ class CalculatorProvider extends ChangeNotifier {
   /// Aplica filtros à lista de calculadoras
   void _applyFilters() {
     var filtered = List<CalculatorEntity>.from(_calculators);
-
-    // Filtrar por categoria
     if (_selectedCategory != null) {
       filtered =
           filtered.where((calc) => calc.category == _selectedCategory).toList();
     }
-
-    // Filtrar por busca
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered =
@@ -344,8 +328,6 @@ class CalculatorProvider extends ChangeNotifier {
 
     _filteredCalculators = filtered;
   }
-
-  // === OPERAÇÕES DE HISTÓRICO ===
 
   /// Carrega histórico de cálculos
   Future<void> loadCalculationHistory() async {
@@ -389,8 +371,6 @@ class CalculatorProvider extends ChangeNotifier {
     debugPrint('CalculatorProvider: Histórico limpo');
     return true;
   }
-
-  // === OPERAÇÕES DE FAVORITOS ===
 
   /// Carrega favoritos
   Future<void> loadFavorites() async {
@@ -454,8 +434,6 @@ class CalculatorProvider extends ChangeNotifier {
     return success;
   }
 
-  // === OPERAÇÕES AUXILIARES ===
-
   /// Limpa mensagens de erro
   void clearError() {
     _errorMessage = null;
@@ -475,8 +453,6 @@ class CalculatorProvider extends ChangeNotifier {
   void applyHistoryResult(CalculationHistory historyItem) {
     _currentResult = historyItem.result;
     _currentInputs = Map<String, dynamic>.from(historyItem.result.inputs);
-
-    // Tenta encontrar e selecionar a calculadora
     final calculator = _calculators.firstWhere(
       (calc) => calc.id == historyItem.calculatorId,
       orElse: () => _calculators.first,

@@ -10,8 +10,6 @@ import '../../domain/entities/bovine_entity.dart';
 @singleton
 class BovinesFilterProvider extends ChangeNotifier {
   
-  // === STATE MANAGEMENT ===
-  
   /// Filtros ativos
   String _searchQuery = '';
   String? _selectedBreed;
@@ -23,8 +21,6 @@ class BovinesFilterProvider extends ChangeNotifier {
   /// Cache de valores únicos para filtros
   final Set<String> _availableBreeds = {};
   final Set<String> _availableCountries = {};
-  
-  // === GETTERS ===
   
   String get searchQuery => _searchQuery;
   String? get selectedBreed => _selectedBreed;
@@ -59,8 +55,6 @@ class BovinesFilterProvider extends ChangeNotifier {
     return count;
   }
 
-  // === FILTER OPERATIONS ===
-
   /// Atualiza cache de valores disponíveis com base na lista de bovinos
   void updateAvailableValues(List<BovineEntity> bovines) {
     _availableBreeds.clear();
@@ -70,8 +64,6 @@ class BovinesFilterProvider extends ChangeNotifier {
       _availableBreeds.add(bovine.breed);
       _availableCountries.add(bovine.originCountry);
     }
-    
-    // Remove filtros que não existem mais
     if (_selectedBreed != null && !_availableBreeds.contains(_selectedBreed)) {
       _selectedBreed = null;
     }
@@ -85,13 +77,9 @@ class BovinesFilterProvider extends ChangeNotifier {
   /// Aplica todos os filtros a uma lista de bovinos
   List<BovineEntity> applyFilters(List<BovineEntity> bovines) {
     var filtered = List<BovineEntity>.from(bovines);
-
-    // Filtrar por status ativo/inativo
     if (_onlyActive) {
       filtered = filtered.where((bovine) => bovine.isActive).toList();
     }
-
-    // Filtrar por busca de texto
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((bovine) =>
@@ -100,35 +88,25 @@ class BovinesFilterProvider extends ChangeNotifier {
         bovine.registrationId.toLowerCase().contains(query)
       ).toList();
     }
-
-    // Filtrar por raça
     if (_selectedBreed != null) {
       filtered = filtered.where((bovine) => 
         bovine.breed.toLowerCase().contains(_selectedBreed!.toLowerCase())
       ).toList();
     }
-
-    // Filtrar por país de origem
     if (_selectedOriginCountry != null) {
       filtered = filtered.where((bovine) => 
         bovine.originCountry.toLowerCase().contains(_selectedOriginCountry!.toLowerCase())
       ).toList();
     }
-
-    // Filtrar por aptidão
     if (_selectedAptitude != null) {
       filtered = filtered.where((bovine) => bovine.aptitude == _selectedAptitude).toList();
     }
-
-    // Filtrar por sistema de criação
     if (_selectedBreedingSystem != null) {
       filtered = filtered.where((bovine) => bovine.breedingSystem == _selectedBreedingSystem).toList();
     }
 
     return filtered;
   }
-
-  // === FILTER SETTERS ===
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
@@ -265,8 +243,6 @@ class BovinesFilterProvider extends ChangeNotifier {
     _searchQuery = (filters['searchQuery'] as String?) ?? '';
     _selectedBreed = filters['selectedBreed'] as String?;
     _selectedOriginCountry = filters['selectedOriginCountry'] as String?;
-    
-    // Restaura enums por nome
     if (filters['selectedAptitude'] != null) {
       _selectedAptitude = BovineAptitude.values.firstWhere(
         (apt) => apt.name == filters['selectedAptitude'],

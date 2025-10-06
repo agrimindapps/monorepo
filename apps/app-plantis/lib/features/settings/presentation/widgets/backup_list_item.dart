@@ -27,7 +27,6 @@ class BackupListItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cabeçalho com data e tamanho
             Row(
               children: [
                 Container(
@@ -65,7 +64,6 @@ class BackupListItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Menu de ações
                 PopupMenuButton<String>(
                   onSelected: (value) {
                     switch (value) {
@@ -116,8 +114,6 @@ class BackupListItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Informações do backup
             Row(
               children: [
                 _buildInfoChip(
@@ -146,8 +142,6 @@ class BackupListItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Botões de ação
             Row(
               children: [
                 Expanded(

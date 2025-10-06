@@ -13,8 +13,6 @@ class PlantTaskValidationService {
   ) {
     final errors = <String>[];
     final warnings = <String>[];
-
-    // Validações obrigatórias
     if (task.id.isEmpty) {
       errors.add('ID da tarefa é obrigatório');
     }
@@ -30,8 +28,6 @@ class PlantTaskValidationService {
     if (task.intervalDays <= 0) {
       errors.add('Intervalo de dias deve ser maior que zero');
     }
-
-    // Validações de datas
     if (task.scheduledDate.isBefore(DateTime(2020))) {
       errors.add('Data agendada é muito antiga');
     }
@@ -48,20 +44,15 @@ class PlantTaskValidationService {
         task.nextScheduledDate!.isBefore(task.scheduledDate)) {
       warnings.add('Próxima data agendada é anterior à data atual');
     }
-
-    // Validações de planta relacionada
     if (plant == null) {
       warnings.add('Planta associada não encontrada (ID: ${task.plantId})');
     } else {
-      // Verificar se a configuração da planta suporta este tipo de tarefa
       if (!_plantSupportsTaskType(plant, task.type)) {
         warnings.add(
           'Planta não tem configuração para tipo de tarefa ${task.type.displayName}',
         );
       }
     }
-
-    // Validações de consistência temporal
     if (task.completedDate != null &&
         task.completedDate!.isAfter(DateTime.now())) {
       errors.add('Data de conclusão não pode ser no futuro');
@@ -70,8 +61,6 @@ class PlantTaskValidationService {
     if (task.createdAt.isAfter(DateTime.now().add(const Duration(minutes: 5)))) {
       warnings.add('Data de criação parece estar no futuro');
     }
-
-    // Validações específicas por tipo de tarefa
     _validateTaskTypeSpecific(task, errors, warnings);
 
     final result = PlantTaskValidationResult(
@@ -106,8 +95,6 @@ class PlantTaskValidationService {
     final duplicateIds = <String>[];
     final orphanTasks = <PlantTask>[];
     final inconsistentIntervals = <PlantTask>[];
-
-    // Validar cada tarefa individualmente
     for (final task in tasks) {
       final plant = plantsById[task.plantId];
       final result = validatePlantTask(task, plant);
@@ -117,8 +104,6 @@ class PlantTaskValidationService {
         orphanTasks.add(task);
       }
     }
-
-    // Verificar duplicações de ID
     final seenIds = <String>{};
     for (final task in tasks) {
       if (seenIds.contains(task.id)) {
@@ -127,8 +112,6 @@ class PlantTaskValidationService {
         seenIds.add(task.id);
       }
     }
-
-    // Verificar inconsistências de intervalos por planta e tipo
     final tasksByPlantAndType = <String, List<PlantTask>>{};
     for (final task in tasks) {
       final key = '${task.plantId}_${task.type.name}';
@@ -266,16 +249,12 @@ class PlantTaskValidationService {
   ) {
     final validation = validatePlantTasks(tasks, plantsById);
     final now = DateTime.now();
-
-    // Estatísticas de status
     final pendingTasks =
         tasks.where((t) => t.status == TaskStatus.pending).length;
     final completedTasks =
         tasks.where((t) => t.status == TaskStatus.completed).length;
     final overdueTasks =
         tasks.where((t) => t.status == TaskStatus.overdue).length;
-
-    // Estatísticas temporais
     final todayTasks = tasks.where((t) => t.isDueToday).length;
     final upcomingTasks =
         tasks.where((t) => t.isDueSoon && !t.isDueToday).length;
@@ -283,14 +262,10 @@ class PlantTaskValidationService {
         tasks.isEmpty
             ? null
             : tasks.reduce((a, b) => a.createdAt.isBefore(b.createdAt) ? a : b);
-
-    // Estatísticas por tipo
     final tasksByType = <TaskType, int>{};
     for (final task in tasks) {
       tasksByType[task.type] = (tasksByType[task.type] ?? 0) + 1;
     }
-
-    // Plantas com problemas
     final plantsWithoutTasks =
         plantsById.values
             .where((plant) => !tasks.any((task) => task.plantId == plant.id))
@@ -346,32 +321,20 @@ class PlantTaskValidationService {
     if (tasks.isEmpty) return 0.0;
 
     double score = 100.0;
-
-    // Penalizar tasks inválidas
     final invalidRatio = validation.invalidTasks / validation.totalTasks;
     score -= invalidRatio * 30;
-
-    // Penalizar duplicações
     if (validation.duplicateIds.isNotEmpty) {
       score -= 10;
     }
-
-    // Penalizar órfãs
     final orphanRatio = validation.orphanTasks.length / validation.totalTasks;
     score -= orphanRatio * 20;
-
-    // Penalizar intervalos inconsistentes
     final inconsistentRatio =
         validation.inconsistentIntervals.length / validation.totalTasks;
     score -= inconsistentRatio * 15;
-
-    // Penalizar muitas tasks atrasadas
     final overdueTasks =
         tasks.where((t) => t.status == TaskStatus.overdue).length;
     final overdueRatio = overdueTasks / tasks.length;
     score -= overdueRatio * 25;
-
-    // Bonus por plantas com tasks
     final plantsWithTasks = tasks.map((t) => t.plantId).toSet().length;
     if (plantsWithTasks == plantsById.length && plantsById.isNotEmpty) {
       score += 10;

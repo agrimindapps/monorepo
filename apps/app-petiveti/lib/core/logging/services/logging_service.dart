@@ -91,8 +91,6 @@ class LoggingService {
       metadata: metadata,
       duration: duration,
     );
-
-    // Report to Crashlytics for error tracking
     await _reportToCrashlytics(error, stackTrace, {
       'category': category.name,
       'operation': operation.name,
@@ -161,16 +159,12 @@ class LoggingService {
       'timestamp': DateTime.now().toIso8601String(),
       ...?parameters,
     };
-
-    // Log the event
     await logInfo(
       category: category,
       operation: LogOperation.create, // Using create as generic operation for events
       message: 'Analytics event: $eventName',
       metadata: enhancedParameters,
     );
-
-    // Send to Firebase Analytics via repository
     await _analyticsRepository?.logEvent(
       eventName,
       parameters: enhancedParameters,
@@ -230,11 +224,7 @@ class LoggingService {
       userId: _currentUserId,
       duration: duration,
     );
-
-    // Save to local storage
     await _logRepository?.saveLog(logEntry);
-
-    // Print to console in debug mode
     developer.log(
       logEntry.toString(),
       name: 'PetivetiLog',
@@ -251,15 +241,12 @@ class LoggingService {
     Map<String, dynamic> context,
   ) async {
     try {
-      // Set custom keys for better error tracking
       for (final entry in context.entries) {
         await _crashlyticsRepository?.setCustomKey(
           key: entry.key,
           value: entry.value.toString(),
         );
       }
-
-      // Record the error
       await _crashlyticsRepository?.recordError(
         exception: error,
         stackTrace: stackTrace ?? StackTrace.empty,
@@ -267,7 +254,6 @@ class LoggingService {
         additionalInfo: context,
       );
     } catch (e) {
-      // If Crashlytics fails, at least log it locally
       developer.log('Failed to report to Crashlytics: $e', name: 'LoggingService');
     }
   }

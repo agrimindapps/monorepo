@@ -48,8 +48,6 @@ class ComponentSpacing {
 class TabBarDesignTokens {
   TabBarDesignTokens._();
 
-  // === CORES ===
-
   /// Cor do indicador ativo (verde padrão do app)
   /// Extraído da implementação de favoritos: Color(0xFF4CAF50)
   static const Color indicatorActiveColor = Color(0xFF4CAF50);
@@ -73,8 +71,6 @@ class TabBarDesignTokens {
   /// Cor do ícone inativo
   static Color inactiveIconColor(BuildContext context) =>
       Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
-
-  // === DIMENSÕES E ESPAÇAMENTOS ===
 
   /// Altura padrão da TabBar
   static const double tabBarHeight = ComponentSpacing.tabBarHeight; // 44.0
@@ -104,8 +100,6 @@ class TabBarDesignTokens {
   /// Espaçamento entre ícone e texto
   /// Extraído: SizedBox(width: 6)
   static const double iconTextGap = 6.0;
-
-  // === TIPOGRAFIA ===
 
   /// Estilo do texto ativo
   /// Extraído: fontSize: 11, fontWeight: FontWeight.w600
@@ -176,7 +170,6 @@ mixin TabBarAnimationBehavior {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone sempre visível
             Icon(
               tabData.icon,
               size: TabBarDesignTokens.iconSize,
@@ -184,7 +177,6 @@ mixin TabBarAnimationBehavior {
                   ? TabBarDesignTokens.activeIconColor
                   : TabBarDesignTokens.inactiveIconColor(context),
             ),
-            // Texto apenas em tab ativa
             if (isActive) ...[
               const SizedBox(width: TabBarDesignTokens.iconTextGap),
               Text(

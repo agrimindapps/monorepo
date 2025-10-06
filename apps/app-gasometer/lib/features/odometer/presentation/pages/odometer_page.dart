@@ -199,7 +199,6 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
       icon: Icons.speed_outlined,
       actionLabel: 'Adicionar leitura',
       onAction: () {
-        // TODO: Implementar navegação para adicionar odômetro
       },
     );
   }
@@ -207,7 +206,6 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
-        // TODO: Implementar navegação para adicionar odômetro
       },
       tooltip: 'Adicionar leitura',
       child: const Icon(Icons.add),

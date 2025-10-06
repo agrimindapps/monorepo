@@ -16,23 +16,17 @@ class LoginUseCase implements UseCase<UserEntity, LoginParams> {
 
   @override
   Future<Either<Failure, UserEntity>> call(LoginParams params) async {
-    // Validações básicas
     final validationResult = _validateParams(params);
     if (validationResult != null) {
       return Left(validationResult);
     }
-
-    // Fazer login
     final loginResult = await _authRepository.signInWithEmailAndPassword(
       email: params.email,
       password: params.password,
     );
-
-    // Log analytics em caso de sucesso
     return loginResult.fold(
       (failure) => Left(failure),
       (user) async {
-        // Registrar evento de login
         await _analyticsRepository.logLogin(method: 'email');
         
         return Right(user);

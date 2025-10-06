@@ -52,11 +52,6 @@ class _SimpleSyncLoadingState extends State<SimpleSyncLoading> {
 
   /// Monitora automaticamente o estado da sincronização
   void _startListeningToSync() {
-    // For now, disable sync monitoring until we implement proper Riverpod providers
-    // final authProvider = context.read<local_auth.AuthProvider>();
-
-    // For now, disable sync monitoring until we implement proper Riverpod providers
-    // Auto-close after 2 seconds for now
     Timer(const Duration(seconds: 2), () {
       if (mounted) {
         _autoClose();

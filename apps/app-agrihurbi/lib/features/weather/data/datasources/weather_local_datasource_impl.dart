@@ -12,10 +12,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
   static const String _rainGaugesBox = 'rain_gauges';
   static const String _weatherStatisticsBox = 'weather_statistics';
   
-  // ============================================================================
-  // WEATHER MEASUREMENTS
-  // ============================================================================
-  
   @override
   Future<List<WeatherMeasurementModel>> getAllMeasurements({
     String? locationId,
@@ -26,13 +22,9 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     final box = await Hive.openBox<WeatherMeasurementModel>(_weatherMeasurementsBox);
     
     var measurements = box.values.toList();
-    
-    // Filter by locationId if provided
     if (locationId != null) {
       measurements = measurements.where((m) => m.locationId == locationId).toList();
     }
-    
-    // Filter by date range if provided
     if (startDate != null) {
       measurements = measurements.where((m) => 
         m.timestamp.isAfter(startDate) || m.timestamp.isAtSameMomentAs(startDate)
@@ -44,11 +36,7 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
         m.timestamp.isBefore(endDate) || m.timestamp.isAtSameMomentAs(endDate)
       ).toList();
     }
-    
-    // Sort by measurement time (newest first)
     measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    
-    // Apply limit if provided
     if (limit != null && limit > 0) {
       measurements = measurements.take(limit).toList();
     }
@@ -128,10 +116,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     final box = await Hive.openBox<WeatherMeasurementModel>(_weatherMeasurementsBox);
     await box.clear();
   }
-
-  // ============================================================================
-  // RAIN GAUGES
-  // ============================================================================
   
   @override
   Future<List<RainGaugeModel>> getAllRainGauges() async {
@@ -195,10 +179,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     final box = await Hive.openBox<RainGaugeModel>(_rainGaugesBox);
     await box.clear();
   }
-
-  // ============================================================================
-  // WEATHER STATISTICS
-  // ============================================================================
   
   @override
   Future<List<WeatherStatisticsModel>> getAllStatistics() async {
@@ -215,18 +195,12 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     final box = await Hive.openBox<WeatherStatisticsModel>(_weatherStatisticsBox);
     
     var statistics = box.values.toList();
-    
-    // Filter by locationId if provided
     if (locationId != null) {
       statistics = statistics.where((s) => s.locationId == locationId).toList();
     }
-    
-    // Filter by period if provided
     if (period != null) {
       statistics = statistics.where((s) => s.period == period).toList();
     }
-    
-    // Filter by date range if provided
     if (startDate != null) {
       statistics = statistics.where((s) => 
         s.startDate.isAfter(startDate) || s.startDate.isAtSameMomentAs(startDate)
@@ -238,8 +212,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
         s.endDate.isBefore(endDate) || s.endDate.isAtSameMomentAs(endDate)
       ).toList();
     }
-    
-    // Sort by start date (newest first)
     statistics.sort((a, b) => b.startDate.compareTo(a.startDate));
     
     return statistics;
@@ -304,10 +276,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     final box = await Hive.openBox<WeatherStatisticsModel>(_weatherStatisticsBox);
     await box.clear();
   }
-
-  // ============================================================================
-  // CACHE AND SYNC METHODS (to match interface)
-  // ============================================================================
   
   @override
   Future<void> clearCache() async {
@@ -361,13 +329,11 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
   @override
   Future<List<WeatherMeasurementModel>> getPendingMeasurements() async {
     final box = await Hive.openBox<WeatherMeasurementModel>(_weatherMeasurementsBox);
-    // Return all measurements as pending (simplified implementation)
     return box.values.toList();
   }
   
   @override
   Future<void> markMeasurementsAsSynced(List<String> measurementIds) async {
-    // Simplified implementation - could be extended to track sync status
     final box = await Hive.openBox<String>('weather_sync_metadata');
     final syncedIds = measurementIds.join(',');
     await box.put('synced_measurements', syncedIds);
@@ -417,8 +383,6 @@ class WeatherLocalDataSourceImpl implements WeatherLocalDataSource {
     }
     
     if (weatherCondition != null) {
-      // Weather condition filtering - simplified implementation
-      // Could be extended based on actual weather measurement model properties
       results = results.where((m) => m.locationName.toLowerCase().contains(weatherCondition.toLowerCase())).toList();
     }
     

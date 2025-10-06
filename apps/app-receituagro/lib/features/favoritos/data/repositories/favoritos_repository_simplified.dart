@@ -22,13 +22,9 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
       ]);
 
       final List<FavoritoEntity> allFavoritos = [];
-      
-      // Adiciona todos os tipos
       for (final typeList in futures) {
         allFavoritos.addAll(typeList);
       }
-
-      // Ordena por nome para exibição
       allFavoritos.sort((a, b) => a.nomeDisplay.compareTo(b.nomeDisplay));
       
       return allFavoritos;
@@ -154,8 +150,6 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
       throw FavoritosException('Erro ao buscar entidade por ID: $e', tipo: tipo, id: id);
     }
   }
-
-  // ========== MÉTODOS ESPECÍFICOS POR TIPO (para compatibilidade) ==========
 
   /// Obtém defensivos favoritos
   Future<List<FavoritoDefensivoEntity>> getDefensivos() async {

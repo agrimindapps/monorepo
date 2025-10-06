@@ -11,24 +11,18 @@ import '../interfaces/i_network_monitor.dart';
 /// Separada do UnifiedSyncManager seguindo Single Responsibility Principle
 class NetworkMonitorImpl implements INetworkMonitor {
   final Connectivity _connectivity = Connectivity();
-
-  // Stream controllers
   final StreamController<bool> _connectivityController =
       StreamController<bool>.broadcast();
   final StreamController<ConnectionQuality> _qualityController =
       StreamController<ConnectionQuality>.broadcast();
   final StreamController<NetworkEvent> _eventController =
       StreamController<NetworkEvent>.broadcast();
-
-  // Estado interno
   bool _isConnected = false;
   final ConnectionQuality _currentQuality = ConnectionQuality.poor;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _qualityCheckTimer;
   bool _isDisposed = false;
   List<String> _endpoints = [];
-
-  // Configurações
   final Duration _qualityCheckInterval = const Duration(seconds: 30);
 
   @override
@@ -38,11 +32,8 @@ class NetworkMonitorImpl implements INetworkMonitor {
     }
 
     try {
-      // Verificar estado inicial
       final initialResults = await _connectivity.checkConnectivity();
       _isConnected = _isConnectedFromResults(initialResults);
-
-      // Escutar mudanças de conectividade
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
         (List<ConnectivityResult> results) {
           final wasConnected = _isConnected;
@@ -99,7 +90,6 @@ class NetworkMonitorImpl implements INetworkMonitor {
 
   @override
   Future<bool> canReachEndpoint(String endpoint) async {
-    // Implementação simplificada - assume que se há conectividade, pode alcançar endpoint
     return await isConnected();
   }
 
@@ -110,7 +100,6 @@ class NetworkMonitorImpl implements INetworkMonitor {
 
   @override
   Future<Duration?> getLatency(String endpoint) async {
-    // Implementação simplificada - retorna latência simulada
     if (!await isConnected()) return null;
     return const Duration(milliseconds: 50);
   }
@@ -227,8 +216,6 @@ class NetworkMonitorImpl implements INetworkMonitor {
 
     developer.log('Network monitor disposed', name: 'NetworkMonitor');
   }
-
-  // Métodos privados
 
   bool _isConnectedFromResults(List<ConnectivityResult> results) {
     return results.isNotEmpty &&

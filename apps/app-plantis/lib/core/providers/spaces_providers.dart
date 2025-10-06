@@ -34,13 +34,9 @@ class SpacesState {
       error: clearError ? null : (error ?? this.error),
     );
   }
-
-  // Computed properties
   int get spacesCount => allSpaces.length;
 
   bool get hasSpaces => allSpaces.isNotEmpty;
-
-  // Find space by name (case insensitive)
   Space? findSpaceByName(String name) {
     try {
       return allSpaces.firstWhere(
@@ -50,8 +46,6 @@ class SpacesState {
       return null;
     }
   }
-
-  // Get spaces by light condition
   List<Space> getSpacesByLightCondition(String lightCondition) {
     return allSpaces
         .where((space) => space.lightCondition == lightCondition)
@@ -83,14 +77,11 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
 
   @override
   Future<SpacesState> build() async {
-    // Initialize use cases
     _getSpacesUseCase = ref.read(getSpacesUseCaseProvider);
     _getSpaceByIdUseCase = ref.read(getSpaceByIdUseCaseProvider);
     _addSpaceUseCase = ref.read(addSpaceUseCaseProvider);
     _updateSpaceUseCase = ref.read(updateSpaceUseCaseProvider);
     _deleteSpaceUseCase = ref.read(deleteSpaceUseCaseProvider);
-
-    // Load spaces automatically on initialization
     return _loadSpacesOperation();
   }
 
@@ -106,7 +97,6 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
     return result.fold(
       (failure) => throw _getErrorMessage(failure),
       (spaces) {
-        // Sort by creation date (newest first)
         final sortedSpaces = List<Space>.from(spaces);
         sortedSpaces.sort(
           (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
@@ -186,8 +176,6 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
           final updatedSpaces = currentState.allSpaces.map((space) {
             return space.id == updatedSpace.id ? updatedSpace : space;
           }).toList();
-
-          // Update selected space if it's the same one
           final newSelectedSpace = currentState.selectedSpace?.id == updatedSpace.id
               ? updatedSpace
               : currentState.selectedSpace;
@@ -218,8 +206,6 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
           final updatedSpaces = currentState.allSpaces
               .where((space) => space.id != id)
               .toList();
-
-          // Clear selected space if it was deleted
           final shouldClearSelected = currentState.selectedSpace?.id == id;
 
           return currentState.copyWith(
@@ -256,7 +242,6 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
       case NetworkFailure:
         return 'Sem conexão com a internet';
       case ServerFailure:
-        // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
@@ -270,13 +255,9 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
     }
   }
 }
-
-// Provider instances
 final spacesProvider = AsyncNotifierProvider<SpacesNotifier, SpacesState>(() {
   return SpacesNotifier();
 });
-
-// Use case providers
 final getSpacesUseCaseProvider = Provider<GetSpacesUseCase>((ref) {
   return GetIt.instance<GetSpacesUseCase>();
 });

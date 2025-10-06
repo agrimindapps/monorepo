@@ -17,22 +17,18 @@ class LicenseService {
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      // Check if license already exists
       final currentResult = await _licenseRepository.getCurrentLicense();
 
       return currentResult.fold(
         (failure) async {
-          // Error getting license, create new trial
           return await _licenseRepository.createTrialLicense(
             metadata: metadata,
           );
         },
         (existingLicense) async {
           if (existingLicense != null && existingLicense.isValid) {
-            // Valid license exists, return it
             return Right(existingLicense);
           } else {
-            // No valid license, create new trial
             return await _licenseRepository.createTrialLicense(
               metadata: metadata,
             );
@@ -120,7 +116,6 @@ class LicenseService {
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      // Create premium license
       final premiumLicense = LicenseModel(
         id: 'PREM-$subscriptionId',
         startDate: DateTime.now(),
@@ -195,7 +190,6 @@ class LicenseService {
       final premiumResult = await isPremiumAvailable();
 
       return premiumResult.fold((failure) => Left(failure), (isPremium) {
-        // All features require premium access
         return Right(isPremium);
       });
     } catch (e) {

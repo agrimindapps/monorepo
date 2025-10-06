@@ -13,8 +13,6 @@ class DeletePlantUseCase implements UseCase<void, String> {
     if (id.trim().isEmpty) {
       return const Left(ValidationFailure('ID da planta é obrigatório'));
     }
-
-    // Check if plant exists first
     final existingResult = await repository.getPlantById(id);
 
     return existingResult.fold(

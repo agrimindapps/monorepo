@@ -5,14 +5,10 @@
 library;
 
 import '../architecture/i_form_state_manager.dart';
-
-// Re-export core state classes
 export '../architecture/i_form_state_manager.dart'
     show
         FormState,
         FormStateChangeListener;
-
-// Additional utilities and extensions for form state
 
 /// Form state extensions for convenience methods
 extension FormStateExtensions<T> on FormState<T> {
@@ -180,8 +176,6 @@ class FormStateTracker<T> {
     );
     
     _changes.add(change);
-    
-    // Limit history size
     if (_changes.length > maxHistorySize) {
       _changes.removeAt(0);
     }
@@ -221,8 +215,6 @@ class FormStateTracker<T> {
     
     for (final change in _changes) {
       actions[change.action] = (actions[change.action] ?? 0) + 1;
-      
-      // Track field changes
       for (final fieldName in change.newState.fieldValues.keys) {
         final oldValue = change.oldState.getFieldValue(fieldName);
         final newValue = change.newState.getFieldValue(fieldName);
@@ -268,8 +260,6 @@ class FormStateChange<T> {
   /// Get changed field names
   List<String> get changedFields {
     final changed = <String>[];
-    
-    // Check all fields from both states
     final allFields = {...oldState.fieldValues.keys, ...newState.fieldValues.keys};
     
     for (final field in allFields) {

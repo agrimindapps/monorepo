@@ -30,8 +30,6 @@ class EquinesProvider extends ChangeNotifier {
        _getEquines = getEquines,
        _getEquineById = getEquineById;
 
-  // === STATE MANAGEMENT ===
-
   List<EquineEntity> _equines = [];
   EquineEntity? _selectedEquine;
 
@@ -40,8 +38,6 @@ class EquinesProvider extends ChangeNotifier {
 
   String? _errorMessage;
   String _searchQuery = '';
-
-  // === GETTERS ===
 
   List<EquineEntity> get equines => _equines;
   EquineEntity? get selectedEquine => _selectedEquine;
@@ -92,8 +88,6 @@ class EquinesProvider extends ChangeNotifier {
         activeEquines.map((equine) => equine.originCountry).toSet();
     return countries.toList()..sort();
   }
-
-  // === OPERAÇÕES PRINCIPAIS ===
 
   /// Carrega todos os equinos
   Future<void> loadEquines() async {
@@ -168,8 +162,6 @@ class EquinesProvider extends ChangeNotifier {
       },
       (EquineEntity equine) {
         _selectedEquine = equine;
-
-        // Atualiza na lista se já existe
         final index = _equines.indexWhere((e) => e.id == equine.id);
         if (index != -1) {
           _equines[index] = equine;
@@ -195,8 +187,6 @@ class EquinesProvider extends ChangeNotifier {
       'EquinesProvider: Equino selecionado - ${equine?.id ?? 'nenhum'}',
     );
   }
-
-  // === OPERAÇÕES DE BUSCA E FILTROS ===
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
@@ -231,8 +221,6 @@ class EquinesProvider extends ChangeNotifier {
         )
         .toList();
   }
-
-  // === OPERAÇÕES AUXILIARES ===
 
   /// Limpa mensagens de erro
   void clearError() {

@@ -7,36 +7,24 @@ import '../../core/di/injection.dart' as di;
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/crashlytics_service.dart';
 import '../../infrastructure/services/sync_service.dart';
-
-// Provider para o TaskManagerAuthService
 final taskManagerAuthServiceProvider = Provider<TaskManagerAuthService>((ref) {
   return di.getIt<TaskManagerAuthService>();
 });
-
-// Provider para o TaskManagerSyncService
 final taskManagerSyncServiceProvider = Provider<TaskManagerSyncService>((ref) {
   return di.getIt<TaskManagerSyncService>();
 });
-
-// Provider para o estado de autenticação usando o TaskManagerAuthService
 final authStateStreamProvider = StreamProvider<core.UserEntity?>((ref) {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return authService.currentUser;
 });
-
-// Provider para verificar se está logado
 final isLoggedInProvider = FutureProvider<bool>((ref) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return await authService.isLoggedIn;
 });
-
-// Provider para usuário atual
 final currentUserProvider = FutureProvider<core.UserEntity?>((ref) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   return authService.currentUser.first;
 });
-
-// Request classes para login/registro
 class SignInRequest {
   final String email;
   final String password;
@@ -55,8 +43,6 @@ class SignUpRequest {
     required this.displayName
   });
 }
-
-// Provider para login
 final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((ref, request) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   final crashlyticsService = di.getIt<TaskManagerCrashlyticsService>();
@@ -69,7 +55,6 @@ final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((re
     
     return result.fold(
       (failure) {
-        // Log erro de autenticação
         unawaited(crashlyticsService.recordAuthError(
           authMethod: 'email_password',
           errorCode: 'login_failed',
@@ -90,8 +75,6 @@ final signInProvider = FutureProvider.family<core.UserEntity, SignInRequest>((re
     rethrow;
   }
 });
-
-// Provider para registro
 final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((ref, request) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   final crashlyticsService = di.getIt<TaskManagerCrashlyticsService>();
@@ -125,8 +108,6 @@ final signUpProvider = FutureProvider.family<core.UserEntity, SignUpRequest>((re
     rethrow;
   }
 });
-
-// Provider para logout
 final signOutProvider = FutureProvider<void>((ref) async {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   
@@ -136,8 +117,6 @@ final signOutProvider = FutureProvider<void>((ref) async {
     (_) => null,
   );
 });
-
-// Auth notifier para gerenciar estado global de autenticação
 class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   AuthNotifier(this._authService, this._syncService) : super(const AsyncValue.loading()) {
     _init();
@@ -146,13 +125,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   final TaskManagerAuthService _authService;
   final TaskManagerSyncService _syncService;
   StreamSubscription<core.UserEntity?>? _subscription;
-  
-  // Sync related properties
   bool _isSyncInProgress = false;
   bool _hasPerformedInitialSync = false;
   String _syncMessage = 'Sincronizando dados...';
-  
-  // Sync related getters
   bool get isSyncInProgress => _isSyncInProgress;
   bool get hasPerformedInitialSync => _hasPerformedInitialSync;
   String get syncMessage => _syncMessage;
@@ -250,10 +225,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   /// Novo método que combina login + sincronização automática
   Future<void> loginAndSync(String email, String password) async {
     try {
-      // Primeiro fazer login normal
       await signInWithEmailAndPassword(email, password);
-
-      // Verificar se login foi bem-sucedido
       final currentState = state;
       if (currentState is AsyncError || 
           (currentState is AsyncData && currentState.value == null)) {
@@ -261,8 +233,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
       }
 
       final user = (currentState as AsyncData<core.UserEntity?>).value!;
-      
-      // Iniciar sincronização automática apenas se não foi feita ainda
       if (!_hasPerformedInitialSync && !isAnonymous(user)) {
         await _startPostLoginSync(user);
       }
@@ -274,8 +244,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   /// Inicia processo de sincronização pós-login (apenas para usuários não anônimos)
   Future<void> _startPostLoginSync(core.UserEntity user) async {
     if (_isSyncInProgress) return;
-    
-    // ⚠️ IMPORTANTE: Sincronizar apenas usuários não anônimos
     if (isAnonymous(user)) {
       return;
     }
@@ -284,10 +252,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
     _syncMessage = 'Sincronizando dados...';
     
     try {
-      // TODO: Verificar status Premium quando RevenueCat estiver configurado
       const isUserPremium = false;
-      
-      // Executar sincronização usando o SyncService
       final result = await _syncService.syncAll(
         userId: user.id,
         isUserPremium: isUserPremium,
@@ -295,11 +260,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
       
       result.fold(
         (failure) {
-          // Log do erro, mas não bloquear o usuário
           print('❌ Erro na sincronização pós-login: ${failure.message}');
         },
         (_) {
-          // Marcar sincronização inicial como realizada
           _hasPerformedInitialSync = true;
         },
       );
@@ -330,15 +293,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
     super.dispose();
   }
 }
-
-// Provider para o AuthNotifier
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AsyncValue<core.UserEntity?>>((ref) {
   final authService = ref.watch(taskManagerAuthServiceProvider);
   final syncService = ref.watch(taskManagerSyncServiceProvider);
   return AuthNotifier(authService, syncService);
 });
-
-// Convenience providers
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authNotifierProvider);
   return authState.when(

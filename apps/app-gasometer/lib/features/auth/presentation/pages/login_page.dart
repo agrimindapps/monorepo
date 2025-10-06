@@ -65,7 +65,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Replace with Riverpod providers for LoginController and AuthProvider
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
@@ -107,9 +106,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        // Lado esquerdo com branding
         Expanded(flex: 5, child: _buildBrandingSide()),
-        // Lado direito com formulário
         Expanded(
           flex: 4,
           child: FadeTransition(

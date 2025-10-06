@@ -103,13 +103,9 @@ class ValidationConfig {
       .setMode(_mode)
       .stopOnFirstError(_stopOnFirstError)
       .showWarnings(_showWarnings);
-    
-    // Copy field validators
     for (final entry in _fieldValidators.entries) {
       copy._fieldValidators[entry.key] = List.from(entry.value);
     }
-    
-    // Copy cross-field rules
     copy._crossFieldRules.addAll(_crossFieldRules);
     
     return copy;
@@ -118,14 +114,10 @@ class ValidationConfig {
   /// Merge with another validation configuration
   ValidationConfig merge(ValidationConfig other) {
     final merged = copy();
-    
-    // Merge field validators
     for (final entry in other._fieldValidators.entries) {
       merged._fieldValidators.putIfAbsent(entry.key, () => [])
           .addAll(entry.value);
     }
-    
-    // Merge cross-field rules
     merged._crossFieldRules.addAll(other._crossFieldRules);
     
     return merged;

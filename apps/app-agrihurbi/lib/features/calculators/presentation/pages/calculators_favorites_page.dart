@@ -201,7 +201,6 @@ class _CalculatorsFavoritesPageState
   }
 
   Widget _buildFavoritesList() {
-    // Agrupa favoritos por categoria
     final Map<CalculatorCategory, List<CalculatorEntity>> favoritesByCategory =
         {};
 
@@ -217,7 +216,6 @@ class _CalculatorsFavoritesPageState
       itemCount: favoritesByCategory.length + 1, // +1 para o header
       itemBuilder: (context, index) {
         if (index == 0) {
-          // Header com informações
           return _buildFavoritesHeader();
         }
 
@@ -228,7 +226,6 @@ class _CalculatorsFavoritesPageState
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cabeçalho da categoria
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
@@ -257,8 +254,6 @@ class _CalculatorsFavoritesPageState
                 ],
               ),
             ),
-
-            // Lista de calculadoras da categoria
             ...categoryCalculators.map((calculator) {
               return CalculatorCardWidget(
                 calculator: calculator,
@@ -268,8 +263,6 @@ class _CalculatorsFavoritesPageState
                 showCategory: false,
               );
             }),
-
-            // Espaçamento entre categorias
             if (categoryIndex < favoritesByCategory.length - 1)
               const SizedBox(height: 16),
           ],
@@ -325,7 +318,6 @@ class _CalculatorsFavoritesPageState
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
-        // Card de estatísticas gerais
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -359,8 +351,6 @@ class _CalculatorsFavoritesPageState
         ),
 
         const SizedBox(height: 16),
-
-        // Card de distribuição por categoria
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -381,8 +371,6 @@ class _CalculatorsFavoritesPageState
         ),
 
         const SizedBox(height: 16),
-
-        // Ações de manutenção
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -518,7 +506,6 @@ class _CalculatorsFavoritesPageState
   }
 
   void _exportFavorites() async {
-    // Implementar exportação
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Funcionalidade de exportação em desenvolvimento'),
@@ -527,7 +514,6 @@ class _CalculatorsFavoritesPageState
   }
 
   void _importFavorites() async {
-    // Implementar importação
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Funcionalidade de importação em desenvolvimento'),
@@ -572,7 +558,6 @@ class _CalculatorsFavoritesPageState
     if (success) {
       await _loadFavorites();
       if (!context.mounted) return;
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Todos os favoritos foram removidos')),
       );
@@ -586,7 +571,6 @@ class _CalculatorsFavoritesPageState
     if (success) {
       await _loadFavorites();
       if (!context.mounted) return;
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Favoritos sincronizados com sucesso')),
       );
@@ -614,7 +598,6 @@ class _CalculatorsFavoritesPageState
     if (success) {
       await _loadFavorites();
       if (!context.mounted) return;
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${calculator.name} removida dos favoritos'),

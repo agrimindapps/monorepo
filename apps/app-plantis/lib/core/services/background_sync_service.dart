@@ -22,34 +22,24 @@ class BackgroundSyncService extends ChangeNotifier {
   String _currentSyncMessage = 'Inicializando sincronização...';
   BackgroundSyncStatus _syncStatus = BackgroundSyncStatus.idle;
   final Map<String, bool> _operationStatus = {};
-
-  // Real sync dependencies
   GetPlantsUseCase? _getPlantsUseCase;
   GetTasksUseCase? _getTasksUseCase;
   SyncUserProfileUseCase? _syncUserProfileUseCase;
   SyncSettingsUseCase? _syncSettingsUseCase;
   AuthStateNotifier? _authStateNotifier;
-
-  // Providers for notification
   PlantsProvider? _plantsProvider;
   TasksProvider? _tasksProvider;
-
-  // Stream controllers for reactive updates
   final StreamController<String> _syncMessageController =
       StreamController<String>.broadcast();
   final StreamController<bool> _syncProgressController =
       StreamController<bool>.broadcast();
   final StreamController<BackgroundSyncStatus> _syncStatusController =
       StreamController<BackgroundSyncStatus>.broadcast();
-
-  // Lazy initialization of dependencies
   void _initializeDependencies() {
     try {
       _getPlantsUseCase ??= di.sl<GetPlantsUseCase>();
       _getTasksUseCase ??= di.sl<GetTasksUseCase>();
       _authStateNotifier ??= di.sl<AuthStateNotifier>();
-
-      // Initialize new UseCases for user and settings sync
       try {
         final authRepo = di.sl<IAuthRepository>();
         _syncUserProfileUseCase ??= SyncUserProfileUseCase(authRepo);
@@ -71,8 +61,6 @@ class BackgroundSyncService extends ChangeNotifier {
           );
         }
       }
-
-      // Try to get providers if available (they might not be registered yet)
       try {
         _plantsProvider ??= di.sl<PlantsProvider>();
       } catch (e) {
@@ -100,14 +88,10 @@ class BackgroundSyncService extends ChangeNotifier {
       }
     }
   }
-
-  // Getters
   bool get isSyncInProgress => _isSyncInProgress;
   bool get hasPerformedInitialSync => _hasPerformedInitialSync;
   String get currentSyncMessage => _currentSyncMessage;
   BackgroundSyncStatus get syncStatus => _syncStatus;
-
-  // Streams for reactive UI updates
   Stream<String> get syncMessageStream => _syncMessageController.stream;
   Stream<bool> get syncProgressStream => _syncProgressController.stream;
   Stream<BackgroundSyncStatus> get syncStatusStream =>
@@ -133,8 +117,6 @@ class BackgroundSyncService extends ChangeNotifier {
       }
       return;
     }
-
-    // Initialize dependencies before starting sync
     _initializeDependencies();
 
     _setSyncInProgress(true);
@@ -146,18 +128,12 @@ class BackgroundSyncService extends ChangeNotifier {
           '🔄 BackgroundSync: Iniciando sincronização REAL para usuário $userId',
         );
       }
-
-      // Perform REAL sync operations in sequence
       await _performSyncOperations(userId);
-
-      // Mark initial sync as completed
       if (isInitialSync || !_hasPerformedInitialSync) {
         _hasPerformedInitialSync = true;
       }
 
       _updateSyncStatus(BackgroundSyncStatus.completed);
-
-      // Notify providers that sync is complete
       _notifyProvidersAfterSync();
 
       if (kDebugMode) {
@@ -171,8 +147,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('❌ BackgroundSync: Erro durante sincronização REAL: $e');
       }
-
-      // Don't mark as completed if there was an error
     } finally {
       _setSyncInProgress(false);
     }
@@ -180,16 +154,9 @@ class BackgroundSyncService extends ChangeNotifier {
 
   /// Performs all sync operations in background
   Future<void> _performSyncOperations(String userId) async {
-    // 1. Sync user data
     await _syncUserData(userId);
-
-    // 2. Sync plants data
     await _syncPlantsData(userId);
-
-    // 3. Sync tasks data
     await _syncTasksData(userId);
-
-    // 4. Sync settings
     await _syncSettingsData(userId);
   }
 
@@ -205,7 +172,6 @@ class BackgroundSyncService extends ChangeNotifier {
             '⚠️ BackgroundSync: SyncUserProfileUseCase não disponível',
           );
         }
-        // Mark as failed but don't throw
         _operationStatus['user_data'] = false;
         return;
       }
@@ -213,8 +179,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('👤 BackgroundSync: Executando sync REAL do perfil...');
       }
-
-      // REAL sync - call the actual use case
       final result = await _syncUserProfileUseCase!.call();
 
       result.fold(
@@ -243,8 +207,6 @@ class BackgroundSyncService extends ChangeNotifier {
           '❌ BackgroundSync: Erro ao sincronizar dados do usuário: $e',
         );
       }
-
-      // Don't rethrow - allow other operations to continue
     }
   }
 
@@ -261,8 +223,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('📱 BackgroundSync: Executando sync REAL das plantas...');
       }
-
-      // REAL sync - call the actual use case
       final result = await _getPlantsUseCase!.call(const NoParams());
 
       result.fold(
@@ -292,8 +252,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('❌ BackgroundSync: Erro ao sincronizar plantas: $e');
       }
-
-      // Don't rethrow - allow other operations to continue
     }
   }
 
@@ -310,8 +268,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('📅 BackgroundSync: Executando sync REAL das tarefas...');
       }
-
-      // REAL sync - call the actual use case
       final result = await _getTasksUseCase!.call(const NoParams());
 
       result.fold(
@@ -341,8 +297,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('❌ BackgroundSync: Erro ao sincronizar tarefas: $e');
       }
-
-      // Don't rethrow - allow other operations to continue
     }
   }
 
@@ -358,7 +312,6 @@ class BackgroundSyncService extends ChangeNotifier {
             '⚠️ BackgroundSync: SyncSettingsUseCase não disponível',
           );
         }
-        // Mark as failed but don't throw
         _operationStatus['settings_data'] = false;
         return;
       }
@@ -366,8 +319,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('⚙️ BackgroundSync: Executando sync REAL das configurações...');
       }
-
-      // REAL sync - call the actual use case
       final result = await _syncSettingsUseCase!.call();
 
       result.fold(
@@ -392,8 +343,6 @@ class BackgroundSyncService extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('❌ BackgroundSync: Erro ao sincronizar configurações: $e');
       }
-
-      // Don't rethrow - allow other operations to continue
     }
   }
 
@@ -528,17 +477,12 @@ class BackgroundSyncService extends ChangeNotifier {
         '📢 BackgroundSync: Notificando providers sobre conclusão da sync...',
       );
     }
-
-    // Notify plants provider to refresh data if available
     if (_plantsProvider != null) {
       if (kDebugMode) {
         debugPrint(
           '🌱 BackgroundSync: Notificando PlantsProvider para refresh...',
         );
       }
-
-      // OPTIMIZED: Use microtask for immediate execution in next event loop
-      // This is faster than Future.delayed and still avoids sync issues
       Future.microtask(() {
         try {
           _plantsProvider?.refreshPlants();
@@ -554,16 +498,12 @@ class BackgroundSyncService extends ChangeNotifier {
         }
       });
     }
-
-    // Notify tasks provider to refresh data if available
     if (_tasksProvider != null) {
       if (kDebugMode) {
         debugPrint(
           '📅 BackgroundSync: Notificando TasksProvider para refresh...',
         );
       }
-
-      // OPTIMIZED: Use microtask for immediate execution in next event loop
       Future.microtask(() {
         try {
           _tasksProvider?.refresh();

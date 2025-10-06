@@ -24,11 +24,7 @@ class OdometerFormatter {
   /// Example: 1234.56 -> "1234,56"
   static String formatOdometer(double value) {
     if (value == 0.0) return '';
-    
-    // Format with proper decimal places
     final String formatted = value.toStringAsFixed(decimalPlaces);
-    
-    // Replace dot with comma for Brazilian format
     return formatted.replaceAll(dotSeparator, decimalSeparator);
   }
   
@@ -37,8 +33,6 @@ class OdometerFormatter {
   /// Example: "1234,56" -> 1234.56
   static double parseOdometer(String value) {
     if (value.isEmpty) return 0.0;
-    
-    // Replace comma with dot for parsing
     final String cleanValue = value.replaceAll(decimalSeparator, dotSeparator);
     
     return double.tryParse(cleanValue) ?? 0.0;
@@ -49,8 +43,6 @@ class OdometerFormatter {
   /// Returns true if the format is valid, false otherwise
   static bool isValidOdometerFormat(String value) {
     if (value.isEmpty) return true; // Empty is valid (will be 0.0)
-    
-    // Check for valid decimal format
     final cleanValue = value.replaceAll(decimalSeparator, dotSeparator);
     final number = double.tryParse(cleanValue);
     
@@ -62,18 +54,12 @@ class OdometerFormatter {
   /// Example: 1234.56 -> "1.234,56 km"
   static String formatOdometerWithUnit(double value, {String unit = 'km'}) {
     if (value == 0.0) return unit == 'km' ? zeroValueWithKm : '0,00 $unit';
-    
-    // Format with thousands separator
     String formatted = value.toStringAsFixed(decimalPlaces);
     formatted = formatted.replaceAll(dotSeparator, decimalSeparator);
-    
-    // Add thousands separator (simple implementation)
     if (value >= thousandsSeparatorThreshold) {
       final parts = formatted.split(decimalSeparator);
       final String integerPart = parts[0];
       final String decimalPart = parts.length > 1 ? parts[1] : '00';
-      
-      // Add dots for thousands
       String result = '';
       int count = 0;
       for (int i = integerPart.length - 1; i >= 0; i--) {
@@ -111,20 +97,12 @@ class OdometerFormatter {
   /// Returns cleaned and formatted string ready for display and processing
   static String cleanAndFormatInput(String input) {
     if (input.isEmpty) return input;
-    
-    // Remove any non-numeric characters except comma and dot
     String cleaned = input.replaceAll(RegExp(r'[^\d,.]'), '');
-    
-    // Replace dots with commas
     cleaned = cleaned.replaceAll(dotSeparator, decimalSeparator);
-    
-    // Ensure only one decimal separator
     final parts = cleaned.split(decimalSeparator);
     if (parts.length > 2) {
       cleaned = '${parts[0]}$decimalSeparator${parts.sublist(1).join('')}';
     }
-    
-    // Limit decimal places
     final finalParts = cleaned.split(decimalSeparator);
     if (finalParts.length == 2 && finalParts[1].length > decimalPlaces) {
       cleaned = '${finalParts[0]}$decimalSeparator${finalParts[1].substring(0, decimalPlaces)}';

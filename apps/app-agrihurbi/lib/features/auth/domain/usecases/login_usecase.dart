@@ -21,7 +21,6 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
     final startTime = DateTime.now();
     
     try {
-      // Analytics: track login attempt
       await _analyticsService.logEvent(
         'login_attempt',
         parameters: {
@@ -29,8 +28,6 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
           'email_domain': params.email.split('@').last,
         },
       );
-      
-      // Validação dos parâmetros de entrada
       final validation = _validateLoginData(params);
       if (validation != null) {
         await _analyticsService.logEvent(
@@ -42,20 +39,12 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
         );
         return Left(ValidationFailure(validation));
       }
-      
-      // Normalizar email
       final normalizedEmail = params.email.trim().toLowerCase();
-      
-      // Executar login no repository
       final result = await repository.login(
         email: normalizedEmail,
         password: params.password,
       );
-      
-      // Analytics: track login result
       final duration = DateTime.now().difference(startTime).inMilliseconds;
-      
-      // Fire and forget analytics
       _logAnalyticsAsync(result, duration, params.email);
       
       return result;
@@ -73,7 +62,6 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
   
   /// Valida os dados de login antes do processamento
   String? _validateLoginData(LoginParams params) {
-    // Validar email
     if (params.email.trim().isEmpty) {
       return 'Email é obrigatório';
     }
@@ -84,8 +72,6 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
     if (!emailPattern.hasMatch(params.email.trim())) {
       return 'Formato de email inválido';
     }
-    
-    // Validar senha
     if (params.password.isEmpty) {
       return 'Senha é obrigatória';
     }
@@ -117,8 +103,6 @@ class LoginUseCase implements UseCase<local_user.UserEntity, LoginParams> {
             'email_domain': email.split('@').last,
           },
         );
-        
-        // Set user properties for analytics
         await _analyticsService.setUserId(user.id);
         await _analyticsService.setUserProperty('user_type', 'farmer');
         await _analyticsService.setUserProperty('app_version', 'agrihurbi_v1');

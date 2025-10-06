@@ -64,8 +64,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     setState(() {
       _searchText = _searchController.text;
     });
-
-    // Atualizar drill-down notifier se estiver usando drill-down
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       ref.read(defensivosDrillDownNotifierProvider.notifier).updateSearchFilter(_searchText);
     }
@@ -76,8 +74,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     setState(() {
       _searchText = '';
     });
-
-    // Limpar filtro no drill-down notifier
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       ref.read(defensivosDrillDownNotifierProvider.notifier).clearSearchFilter();
     }
@@ -93,8 +89,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     setState(() {
       _isAscending = !_isAscending;
     });
-
-    // Atualizar ordenação no drill-down notifier
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
       ref.read(defensivosDrillDownNotifierProvider.notifier).toggleSort();
     }
@@ -104,12 +98,10 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     final notifier = ref.read(defensivosUnificadoNotifierProvider.notifier);
 
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      // Carrega defensivos agrupados e inicializa drill-down
       notifier.carregarDefensivosAgrupados(
         tipoAgrupamento: widget.tipoAgrupamento!,
         filtroTexto: widget.textoFiltro,
       ).then((_) {
-        // Inicializar drill-down notifier com dados carregados
         final state = ref.read(defensivosUnificadoNotifierProvider);
         state.whenData((data) {
           ref.read(defensivosDrillDownNotifierProvider.notifier).initializeWithDefensivos(
@@ -119,10 +111,8 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
         });
       });
     } else if (widget.modoCompleto) {
-      // Carrega defensivos completos (lista simples)
       notifier.carregarDefensivosCompletos();
     } else {
-      // Fallback para lista simples
       notifier.carregarDefensivosCompletos();
     }
   }
@@ -188,18 +178,14 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     String subtitulo;
 
     if (widget.isAgrupados && widget.tipoAgrupamento != null) {
-      // Header para drill-down
       final drillDownState = ref.watch(defensivosDrillDownNotifierProvider);
 
       drillDownState.whenData((drillDown) {
         titulo = drillDown.pageTitle;
         subtitulo = drillDown.pageSubtitle;
-
-        // Se está no nível de itens, mostrar contador dos itens filtrados
         if (drillDown.isAtItemLevel) {
           subtitulo = '${drillDown.currentGroupItems.length} defensivo(s) encontrado(s)';
         } else {
-          // No nível de grupos, mostrar quantidade de grupos
           subtitulo = '${drillDown.groups.length} grupo(s) encontrado(s)';
         }
       });
@@ -213,7 +199,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
         subtitulo = '${drillDownState.value?.groups.length ?? 0} grupo(s) encontrado(s)';
       }
     } else {
-      // Header tradicional
       titulo = 'Lista de Defensivos';
       subtitulo = '${state.defensivosFiltrados.length} defensivo(s) encontrado(s)';
     }
@@ -237,7 +222,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
   }
 
   Widget _buildContent(DefensivosUnificadoState state) {
-    // Aplicar ordenação local aos defensivos
     final defensivosOrdenados = List<DefensivoEntity>.from(state.defensivosFiltrados);
     defensivosOrdenados.sort((a, b) {
       final comparison = a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
@@ -407,8 +391,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     );
   }
 
-  // Handlers para drill-down navigation
-
   void _onGroupTap(DefensivoGroupEntity group) {
     ref.read(defensivosDrillDownNotifierProvider.notifier).drillDownToGroup(group);
   }
@@ -426,8 +408,6 @@ class _DefensivosUnificadoPageState extends ConsumerState<DefensivosUnificadoPag
     debugPrint('=== NAVEGANDO PARA DETALHES ===');
     debugPrint('Defensivo: ${defensivo.displayName}');
     debugPrint('Fabricante: ${defensivo.fabricante}');
-
-    // Navegação direta sem usar o service para debug
     Navigator.of(context).pushNamed(
       '/detalhe-defensivo',
       arguments: {

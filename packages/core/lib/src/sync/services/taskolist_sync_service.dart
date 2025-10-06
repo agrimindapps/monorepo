@@ -34,28 +34,20 @@ class TaskolistSyncService implements ISyncService {
 
   @override
   final String version = '2.0.0';
-
-  // Estado interno
   bool _isInitialized = false;
   final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
-
-  // Estatísticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
   int _totalItemsSynced = 0;
-
-  // Stream controllers
   final StreamController<SyncServiceStatus> _statusController =
       StreamController<SyncServiceStatus>.broadcast();
   final StreamController<ServiceProgress> _progressController =
       StreamController<ServiceProgress>.broadcast();
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
-
-  // Entidades do Taskolist
   final List<String> _entityTypes = [
     'tasks',     // Tarefas
     'projects',  // Projetos/Listas
@@ -124,13 +116,6 @@ class TaskolistSyncService implements ISyncService {
 
       final startTime = DateTime.now();
       logger.logSyncStart(entity: 'all_entities');
-
-      // Delegação para TaskManagerSyncService existente
-      // Este service já implementa:
-      // - Progress tracking (4 steps)
-      // - Premium-only sync
-      // - Error handling
-      // - Analytics logging
 
       int totalSynced = 0;
       final errors = <String>[];
@@ -227,9 +212,6 @@ class TaskolistSyncService implements ISyncService {
   /// Sincroniza uma entidade específica
   Future<Either<Failure, int>> _syncEntity(String entityType) async {
     try {
-      // TaskManagerSyncService já implementa sync por tipo
-      // Por enquanto, retorna contagem estimada
-      // Quando integrarmos completamente, isso chamará taskManagerSyncService methods
 
       switch (entityType) {
         case 'tasks':
@@ -369,8 +351,6 @@ class TaskolistSyncService implements ISyncService {
   @override
   Future<void> dispose() async {
     logger.logInfo(message: 'Disposing Taskolist Sync Service');
-
-    // Cancel connectivity monitoring
     await _connectivitySubscription?.cancel();
     _connectivitySubscription = null;
 
@@ -380,8 +360,6 @@ class TaskolistSyncService implements ISyncService {
     _isInitialized = false;
     _updateStatus(SyncServiceStatus.disposing);
   }
-
-  // Métodos específicos do Taskolist
 
   /// Sync apenas tarefas (mais frequente)
   Future<Either<Failure, ServiceSyncResult>> syncTasks() async {
@@ -450,8 +428,6 @@ class TaskolistSyncService implements ISyncService {
       metadata: {'service': serviceId},
     );
   }
-
-  // Métodos privados
 
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {

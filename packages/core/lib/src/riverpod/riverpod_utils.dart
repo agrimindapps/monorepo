@@ -6,8 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Utilitários e helpers para facilitar o uso do Riverpod nos apps
 /// Padroniza patterns comuns e reduz boilerplate
 
-// ========== WIDGETS BASE ==========
-
 /// Widget base que todos os apps devem usar em vez de StatelessWidget
 /// Automaticamente implementa ConsumerWidget para acesso ao Riverpod
 abstract class BaseConsumerWidget extends ConsumerWidget {
@@ -101,8 +99,6 @@ abstract class BaseFormWidget extends BaseConsumerWidget {
     );
   }
 }
-
-// ========== MIXINS UTILITÁRIOS ==========
 
 /// Mixin que adiciona funcionalidades de loading a qualquer ConsumerWidget
 mixin LoadingMixin on ConsumerWidget {
@@ -210,8 +206,6 @@ mixin NavigationMixin on ConsumerWidget {
   }
 }
 
-// ========== EXTENSIONS ÚTEIS ==========
-
 /// Extension para WidgetRef com funcionalidades extras
 extension WidgetRefExtensions on WidgetRef {
   /// Le um provider de forma segura, retornando null se houver erro
@@ -259,12 +253,9 @@ extension StateControllerExtensions<T> on StateController<T> {
     try {
       state = newState;
     } catch (e) {
-      // Controller já foi disposed, ignora
     }
   }
 }
-
-// ========== WIDGETS DE CONVENIÊNCIA ==========
 
 /// Widget que mostra loading, error ou conteúdo baseado em AsyncValue
 class AsyncValueWidget<T> extends StatelessWidget {
@@ -297,7 +288,6 @@ class AsyncValueWidget<T> extends StatelessWidget {
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
-                    // Callback para retry seria implementado aqui
                   },
                   child: const Text('Tentar Novamente'),
                 ),
@@ -338,8 +328,6 @@ class ProviderConsumerWidget<T> extends ConsumerWidget {
   }
 }
 
-// ========== PROVIDERS HELPERS ==========
-
 /// Helper para criar StateNotifierProvider com menos boilerplate
 StateNotifierProvider<TNotifier, TState> createStateNotifierProvider<TNotifier extends StateNotifier<TState>, TState>(
   TNotifier Function(Ref ref) create, {
@@ -363,8 +351,6 @@ StreamProvider<T> createStreamProvider<T>(
 }) {
   return StreamProvider<T>((ref) => create(ref), name: name);
 }
-
-// ========== DEBOUNCE E THROTTLE ==========
 
 /// Mixin que adiciona funcionalidades de debounce
 mixin DebounceMixin {

@@ -48,7 +48,6 @@ class LivestockFilterWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header com título e botão limpar
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -71,8 +70,6 @@ class LivestockFilterWidget extends StatelessWidget {
             ),
             
             const SizedBox(height: 16.0),
-            
-            // Grid de filtros
             _buildFiltersGrid(context),
           ],
         ),
@@ -83,7 +80,6 @@ class LivestockFilterWidget extends StatelessWidget {
   Widget _buildFiltersGrid(BuildContext context) {
     return Column(
       children: [
-        // Primeira linha: Raça e País
         Row(
           children: [
             Expanded(
@@ -97,8 +93,6 @@ class LivestockFilterWidget extends StatelessWidget {
         ),
         
         const SizedBox(height: 16.0),
-        
-        // Segunda linha: Aptidão e Sistema de Criação
         Row(
           children: [
             Expanded(
@@ -306,8 +300,6 @@ class CompactLivestockFilterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeFilters = <Widget>[];
-
-    // Chip de raça
     if (selectedBreed != null) {
       activeFilters.add(
         FilterChip(
@@ -322,8 +314,6 @@ class CompactLivestockFilterWidget extends StatelessWidget {
         ),
       );
     }
-
-    // Chip de aptidão
     if (selectedAptitude != null) {
       activeFilters.add(
         FilterChip(
@@ -338,8 +328,6 @@ class CompactLivestockFilterWidget extends StatelessWidget {
         ),
       );
     }
-
-    // Chip de sistema
     if (selectedBreedingSystem != null) {
       activeFilters.add(
         FilterChip(
@@ -459,7 +447,6 @@ class _AdvancedLivestockFilterWidgetState
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Filtros básicos
                 LivestockFilterWidget(
                   selectedBreed: widget.selectedBreed,
                   selectedOriginCountry: widget.selectedOriginCountry,
@@ -475,8 +462,6 @@ class _AdvancedLivestockFilterWidgetState
                 ),
 
                 const SizedBox(height: 16.0),
-
-                // Filtros de data e ordenação
                 Row(
                   children: [
                     Expanded(
@@ -490,8 +475,6 @@ class _AdvancedLivestockFilterWidgetState
                 ),
 
                 const SizedBox(height: 16.0),
-
-                // Botões de ação
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

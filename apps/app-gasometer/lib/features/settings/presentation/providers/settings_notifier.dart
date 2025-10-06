@@ -70,17 +70,10 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   @override
   Future<SettingsState> build() async {
-    // Obtém dependências do container
     _preferences = ref.read(gasometerSharedPreferencesProvider);
     _appRatingRepository = ref.read(appRatingRepositoryProvider);
-
-    // Carrega settings do storage
     return await _loadSettings();
   }
-
-  // =========================================================================
-  // PRIVATE METHODS - Data Loading
-  // =========================================================================
 
   /// Carrega settings do persistent storage
   Future<SettingsState> _loadSettings() async {
@@ -91,8 +84,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
           _preferences.getBool('notifications_enabled') ?? true;
       final fuelAlertsEnabled =
           _preferences.getBool('fuel_alerts_enabled') ?? true;
-
-      // Carrega theme mode
       final themeIndex =
           _preferences.getInt('theme_mode') ?? ThemeMode.system.index;
       final themeMode = ThemeMode.values[themeIndex];
@@ -104,7 +95,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         themeMode: themeMode,
       );
     } catch (e, stackTrace) {
-      // Em caso de erro, retorna defaults e loga
       debugPrint('Error loading settings: $e');
       _logError(
         local_error.StorageError(
@@ -113,15 +103,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         ),
         stackTrace: stackTrace,
       );
-
-      // Retorna defaults
       return const SettingsState();
     }
   }
-
-  // =========================================================================
-  // PUBLIC METHODS - Settings Management
-  // =========================================================================
 
   /// Toggle error boundary setting
   Future<void> toggleErrorBoundary(bool enabled) async {
@@ -191,10 +175,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     });
   }
 
-  // =========================================================================
-  // APP RATING METHODS
-  // =========================================================================
-
   /// Handle app rating with business logic
   Future<bool> handleAppRating(BuildContext context) async {
     try {
@@ -215,10 +195,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     }
   }
 
-  // =========================================================================
-  // HELPER METHODS
-  // =========================================================================
-
   /// Recarrega settings do storage
   Future<void> refresh() async {
     state = const AsyncValue.loading();
@@ -233,10 +209,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     }
   }
 }
-
-// =========================================================================
-// PROVIDER DEFINITION
-// =========================================================================
 
 /// Provider para SettingsNotifier
 /// Gerencia configurações do app de forma reativa

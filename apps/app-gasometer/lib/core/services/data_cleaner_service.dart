@@ -29,14 +29,11 @@ class DataCleanerService {
     };
 
     try {
-      // 1. Limpar todas as HiveBoxes
       final boxResults = await clearAllHiveBoxes();
       results['clearedBoxes'] = boxResults['clearedBoxes'];
       if (boxResults['errors'] != null) {
         results['errors'].addAll(boxResults['errors']);
       }
-
-      // 2. Limpar SharedPreferences (apenas chaves específicas do app)
       final prefsResults = await clearAppSharedPreferences();
       results['clearedPreferences'] = prefsResults['clearedKeys'];
       if (prefsResults['errors'] != null) {
@@ -152,8 +149,6 @@ class DataCleanerService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final allKeys = prefs.getKeys();
-
-      // Chaves específicas do app que devem ser limpas
       final appKeys =
           allKeys
               .where(
@@ -214,8 +209,6 @@ class DataCleanerService {
       'clearedBoxes': <String>[],
       'errors': <String>[],
     };
-
-    // Mapear módulos para suas boxes
     final moduleBoxes = <String, List<String>>{
       'Veículos': [GasOMeterDatabaseInspectorService.vehiclesBoxName],
       'Combustível': [GasOMeterDatabaseInspectorService.fuelRecordsBoxName],
@@ -255,7 +248,6 @@ class DataCleanerService {
   /// Obtém estatísticas antes da limpeza (para confirmação)
   Future<Map<String, dynamic>> getDataStatsBeforeCleaning() async {
     try {
-      // Estatísticas das boxes
       final availableBoxes = _inspectorService.getAvailableHiveBoxes();
       final boxStats = <String, Map<String, dynamic>>{};
       int totalRecords = 0;
@@ -265,8 +257,6 @@ class DataCleanerService {
         boxStats[boxKey] = stats;
         totalRecords += (stats['totalRecords'] as int? ?? 0);
       }
-
-      // Estatísticas SharedPreferences
       final sharedPrefsData =
           await _inspectorService.loadSharedPreferencesData();
       final appPrefsCount =

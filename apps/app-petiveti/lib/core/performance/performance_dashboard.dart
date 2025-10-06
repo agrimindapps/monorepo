@@ -364,7 +364,6 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
         trailing: IconButton(
           icon: const Icon(Icons.more_vert),
           onPressed: () {
-            // Show alert details
           },
         ),
       ),
@@ -688,7 +687,6 @@ class _PerformanceDashboardState extends State<PerformanceDashboard>
     );
 
     try {
-      // Execute optimizations
       await _dbOptimizer.runAutoOptimizations();
       _imageOptimizer.cleanupCache();
       _memoryManager.cleanup(aggressive: true);

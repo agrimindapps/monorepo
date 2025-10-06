@@ -18,24 +18,14 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       EnhancedNotificationService._internal();
   factory EnhancedNotificationService() => _instance;
   EnhancedNotificationService._internal();
-
-  // Core notification service (delegate pattern)
   late final INotificationRepository _coreService;
-
-  // Plugin and template management
   final Map<String, NotificationPlugin> _plugins = {};
   final Map<String, NotificationTemplate> _templates = {};
-
-  // Service utilities
   late final NotificationTemplateEngine _templateEngine;
   late final NotificationAnalyticsHelper _analyticsHelper;
-
-  // Service state
   bool _isInitialized = false;
   bool _testMode = false;
   EnhancedNotificationSettings _settings = const EnhancedNotificationSettings();
-
-  // Performance tracking
   final List<PerformanceTrackingEntry> _performanceData = [];
 
   /// Initializes the enhanced notification service
@@ -47,11 +37,8 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     if (_isInitialized) return true;
 
     try {
-      // Initialize core service based on platform
       _coreService =
           kIsWeb ? WebNotificationService() : LocalNotificationService();
-
-      // Initialize core service
       final coreInitialized = await _coreService.initialize(
         defaultChannels: defaultChannels,
       );
@@ -59,17 +46,11 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       if (!coreInitialized) {
         return false;
       }
-
-      // Initialize utilities
       _templateEngine = NotificationTemplateEngine();
       _analyticsHelper = NotificationAnalyticsHelper();
-
-      // Apply settings
       if (settings != null) {
         _settings = settings;
       }
-
-      // Configure core service callbacks
       _coreService.setNotificationTapCallback(_handleNotificationTap);
       _coreService.setNotificationActionCallback(_handleNotificationAction);
 
@@ -87,9 +68,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       return false;
     }
   }
-
-  // Core INotificationRepository Implementation (Delegate Pattern)
-  // Note: initialize method is already implemented above with enhanced parameters
 
   @override
   Future<NotificationPermissionEntity> getPermissionStatus() async {
@@ -137,8 +115,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     final start = DateTime.now();
     try {
       final result = await _coreService.showNotification(notification);
-
-      // Track analytics
       if (_settings.enableAnalytics && result) {
         await _trackEvent(
           NotificationEvent(
@@ -171,8 +147,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     final start = DateTime.now();
     try {
       final result = await _coreService.scheduleNotification(notification);
-
-      // Track analytics
       if (_settings.enableAnalytics && result) {
         await _trackEvent(
           NotificationEvent(
@@ -205,8 +179,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   @override
   Future<bool> cancelNotification(int notificationId) async {
     final result = await _coreService.cancelNotification(notificationId);
-
-    // Track analytics
     if (_settings.enableAnalytics && result) {
       await _trackEvent(
         NotificationEvent(
@@ -237,16 +209,12 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
 
   @override
   void setNotificationTapCallback(Function(String? payload) callback) {
-    // Enhanced service handles callbacks internally
-    // This method is kept for compatibility but delegates to internal handlers
   }
 
   @override
   void setNotificationActionCallback(
     Function(String actionId, String? payload) callback,
   ) {
-    // Enhanced service handles callbacks internally
-    // This method is kept for compatibility but delegates to internal handlers
   }
 
   @override
@@ -278,10 +246,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<bool> requestExactNotificationPermission() async {
     return await _coreService.requestExactNotificationPermission();
   }
-
-  // Enhanced Features Implementation
-
-  // Plugin Management
 
   @override
   Future<bool> registerPlugin(NotificationPlugin plugin) async {
@@ -319,8 +283,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
 
       await plugin.onUnregister();
       _plugins.remove(pluginId);
-
-      // Remove templates owned by this plugin
       _templates.removeWhere((key, template) => template.pluginId == pluginId);
 
       if (_settings.enableDebugLogs) {
@@ -349,8 +311,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   List<NotificationPlugin> getRegisteredPlugins() {
     return _plugins.values.toList();
   }
-
-  // Template Management
 
   @override
   Future<bool> registerTemplate(NotificationTemplate template) async {
@@ -410,16 +370,12 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       if (template == null) {
         throw ArgumentError('Template not found: $templateId');
       }
-
-      // Validate required fields
       for (final field in template.requiredFields) {
         if (!data.containsKey(field) &&
             !template.defaultData.containsKey(field)) {
           throw ArgumentError('Required field missing: $field');
         }
       }
-
-      // Check if plugin should handle this template
       final plugin =
           template.pluginId != null ? _plugins[template.pluginId] : null;
       NotificationRequest? request;
@@ -427,11 +383,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       if (plugin != null) {
         request = await plugin.processNotificationData(templateId, data);
       }
-
-      // Fallback to default template processing if plugin doesn't handle it
       request ??= NotificationRequest.fromTemplate(template, data);
-
-      // Convert to NotificationEntity and schedule
       final notification = _convertRequestToEntity(request);
       final result = await scheduleNotification(notification);
 
@@ -446,8 +398,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     }
   }
 
-  // Batch Operations
-
   @override
   Future<List<NotificationResult>> scheduleBatch(
     List<NotificationRequest> requests,
@@ -456,7 +406,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     final results = <NotificationResult>[];
 
     try {
-      // Process in batches to avoid overwhelming the system
       const batchSize = 10;
       for (int i = 0; i < requests.length; i += batchSize) {
         final endIndex =
@@ -465,8 +414,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         final batch = requests.sublist(i, endIndex);
         final batchResults = await _processBatch(batch);
         results.addAll(batchResults);
-
-        // Small delay between batches
         if (endIndex < requests.length) {
           await Future.delayed(const Duration(milliseconds: 100));
         }
@@ -476,8 +423,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       return results;
     } catch (e) {
       _trackPerformance('scheduleBatch', start, error: e.toString());
-
-      // Return partial results with errors for remaining items
       while (results.length < requests.length) {
         results.add(NotificationResult.failure(e.toString()));
       }
@@ -518,13 +463,10 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<List<NotificationResult>> updateBatch(
     List<NotificationUpdate> updates,
   ) async {
-    // For now, updates are implemented as cancel + reschedule
-    // This could be optimized with platform-specific update APIs
     final results = <NotificationResult>[];
 
     for (final update in updates) {
       try {
-        // Cancel existing notification
         final cancelled = await cancelNotification(update.id);
         if (!cancelled) {
           results.add(
@@ -534,10 +476,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
           );
           continue;
         }
-
-        // Create updated notification
-        // This is a simplified implementation - in practice, you'd need
-        // to retrieve the existing notification details and update them
         results.add(NotificationResult.success(update.id.toString()));
       } catch (e) {
         results.add(
@@ -551,13 +489,8 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     return results;
   }
 
-  // Advanced Scheduling
-
   @override
   Future<bool> scheduleRecurring(RecurringNotificationRequest request) async {
-    // REVIEW (converted TODO 2025-10-06): Implement recurring notification logic
-    // This would involve calculating multiple notification times
-    // and scheduling them individually
     throw UnimplementedError('Recurring notifications not yet implemented');
   }
 
@@ -565,18 +498,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<bool> scheduleConditional(
     ConditionalNotificationRequest request,
   ) async {
-    // REVIEW (converted TODO 2025-10-06): Implement conditional notification logic
-    // This would involve setting up periodic checks for the condition
     throw UnimplementedError('Conditional notifications not yet implemented');
   }
 
   @override
   Future<bool> scheduleSmartReminder(SmartReminderRequest request) async {
-    // REVIEW (converted TODO 2025-10-06): Implement smart reminder logic with adaptive timing
     throw UnimplementedError('Smart reminders not yet implemented');
   }
-
-  // Notification Management
 
   @override
   Future<List<ScheduledNotification>> getScheduledNotifications({
@@ -593,8 +521,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
             pending.payload != null
                 ? jsonDecode(pending.payload!) as Map<String, dynamic>
                 : <String, dynamic>{};
-
-        // Apply filters
         if (pluginId != null && payload['pluginId'] != pluginId) continue;
         if (templateId != null && payload['templateId'] != templateId) continue;
 
@@ -611,7 +537,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
           ),
         );
       } catch (e) {
-        // Skip notifications with invalid payload
         continue;
       }
     }
@@ -624,13 +549,8 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     int id,
     NotificationUpdate update,
   ) async {
-    // For now, implemented as cancel + reschedule
-    // This could be optimized with platform-specific update APIs
     try {
       await cancelNotification(id);
-
-      // REVIEW (converted TODO 2025-10-06): Reschedule with updated data
-      // This would require storing original notification data
 
       return true;
     } catch (e) {
@@ -642,8 +562,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<NotificationHistory> getNotificationHistory(DateRange range) async {
     return await _analyticsHelper.getNotificationHistory(range);
   }
-
-  // Analytics and Insights
 
   @override
   Future<void> trackNotificationEvent(NotificationEvent event) async {
@@ -665,8 +583,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   ) async {
     return await _analyticsHelper.getUserEngagement(userId, range);
   }
-
-  // Configuration and Settings
 
   @override
   Future<void> updateGlobalSettings(
@@ -694,8 +610,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     );
   }
 
-  // Testing and Development
-
   @override
   Future<void> enableTestMode(bool enabled) async {
     _testMode = enabled;
@@ -708,8 +622,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   @override
   Future<List<NotificationValidationResult>> validateConfiguration() async {
     final results = <NotificationValidationResult>[];
-
-    // Validate plugins
     for (final plugin in _plugins.values) {
       try {
         final pluginErrors = await plugin.validateConfiguration();
@@ -730,12 +642,8 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         );
       }
     }
-
-    // Validate templates
     for (final template in _templates.values) {
       final templateErrors = <String>[];
-
-      // Check template syntax
       if (template.title.isEmpty) {
         templateErrors.add('Template title cannot be empty');
       }
@@ -759,8 +667,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   @override
   Future<PerformanceMetrics> getPerformanceMetrics() async {
     final now = DateTime.now();
-
-    // Calculate averages from performance data
     final schedulingTimes = _performanceData
         .where((entry) => entry.operation == 'scheduleNotification')
         .map((entry) => entry.duration);
@@ -796,8 +702,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       frameDrops: 0, // Optional
     );
   }
-
-  // Private Helper Methods
 
   Future<List<NotificationResult>> _processBatch(
     List<NotificationRequest> batch,
@@ -864,8 +768,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         if (pluginId != null && _plugins.containsKey(pluginId)) {
           _plugins[pluginId]!.handleAction('notification_tapped', data);
         }
-
-        // Track analytics
         if (_settings.enableAnalytics) {
           _trackEvent(
             NotificationEvent(
@@ -894,8 +796,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         if (pluginId != null && _plugins.containsKey(pluginId)) {
           _plugins[pluginId]!.handleAction(actionId, data);
         }
-
-        // Track analytics
         if (_settings.enableAnalytics) {
           _trackEvent(
             NotificationEvent(
@@ -939,8 +839,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         error: error,
       ),
     );
-
-    // Keep only recent performance data to avoid memory issues
     if (_performanceData.length > 1000) {
       _performanceData.removeRange(0, 500);
     }

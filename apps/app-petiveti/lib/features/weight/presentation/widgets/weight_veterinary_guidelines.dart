@@ -269,8 +269,6 @@ class _WeightVeterinaryGuidelinesState extends State<WeightVeterinaryGuidelines>
       );
       return;
     }
-
-    // Mock calculation based on breed and age
     final result = _performWeightCalculation(_breedController.text, age);
     
     showDialog<void>(
@@ -296,7 +294,6 @@ class _WeightVeterinaryGuidelinesState extends State<WeightVeterinaryGuidelines>
   }
 
   String _performWeightCalculation(String breed, int age) {
-    // Simplified calculation logic for demonstration
     final breedLower = breed.toLowerCase();
     double minWeight, maxWeight;
 
@@ -313,12 +310,9 @@ class _WeightVeterinaryGuidelinesState extends State<WeightVeterinaryGuidelines>
       minWeight = 3;
       maxWeight = 6;
     } else {
-      // Default ranges
       minWeight = 15;
       maxWeight = 30;
     }
-
-    // Adjust for age
     if (age < 1) {
       minWeight *= 0.3;
       maxWeight *= 0.5;
@@ -353,7 +347,6 @@ class _WeightVeterinaryGuidelinesState extends State<WeightVeterinaryGuidelines>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              // Navigate to veterinary consultation booking
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Funcionalidade de agendamento será implementada em breve'),

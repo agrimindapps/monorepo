@@ -47,8 +47,6 @@ class BasePageScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    // Fundo baseado no mockup - gradiente sutil cinza claro
     final backgroundGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -132,8 +130,6 @@ class PlantisCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    // Estilo baseado no mockup - branco puro para contraste máximo
     final cardDecoration = BoxDecoration(
       color:
           backgroundColor ??

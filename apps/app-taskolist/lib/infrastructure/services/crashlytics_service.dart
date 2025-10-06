@@ -7,8 +7,6 @@ class TaskManagerCrashlyticsService {
 
   TaskManagerCrashlyticsService(this._crashlyticsRepository);
 
-  // Métodos específicos do Task Manager
-
   Future<void> recordTaskError({
     required String taskId,
     required String errorType,
@@ -148,8 +146,6 @@ class TaskManagerCrashlyticsService {
       data: data,
     );
   }
-
-  // Delegate methods do core
   Future<void> recordError({
     required dynamic exception,
     required StackTrace stackTrace,
@@ -231,8 +227,6 @@ class TaskManagerCrashlyticsService {
         context: context,
       );
 }
-
-// Exception customizada para issues de performance
 class PerformanceIssue implements Exception {
   final String metric;
   final double value;

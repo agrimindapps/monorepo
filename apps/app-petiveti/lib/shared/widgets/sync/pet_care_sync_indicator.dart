@@ -45,8 +45,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
   @override
   void initState() {
     super.initState();
-
-    // Configurar animações
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -62,8 +60,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
     _rotationAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _rotationController, curve: Curves.linear),
     );
-
-    // Inicializar listeners
     _setupListeners();
     _loadInitialStatus();
   }
@@ -77,7 +73,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
 
   /// Configura listeners de status
   void _setupListeners() {
-    // Listener para status de sync geral
     UnifiedSyncManager.instance.globalSyncStatusStream.listen((statusMap) {
       final petivetiStatus = statusMap['petiveti'];
       if (petivetiStatus != null && mounted) {
@@ -87,8 +82,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
         _updateAnimations();
       }
     });
-
-    // Listener para status de emergência
     if (widget.showEmergencyStatus) {
       PetivetiSyncService.instance.emergencyStatusStream.listen((emergencyStatus) {
         if (mounted) {
@@ -137,8 +130,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
         _pulseController.repeat(reverse: true);
         break;
     }
-
-    // Animação especial para emergência
     if (_hasEmergencyData && _emergencyStatus?.priorityDataPending == true) {
       _pulseController.repeat(reverse: true);
     }
@@ -198,7 +189,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Ícone de sync animado
           AnimatedBuilder(
             animation: Listenable.merge([_pulseAnimation, _rotationAnimation]),
             builder: (context, child) {
@@ -221,8 +211,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
           ),
 
           const SizedBox(width: 8),
-
-          // Texto de status
           Text(
             _getSyncStatusText(),
             style: TextStyle(
@@ -231,8 +219,6 @@ class _PetCareSyncIndicatorState extends State<PetCareSyncIndicator>
               fontWeight: FontWeight.w500,
             ),
           ),
-
-          // Indicador de emergência
           if (_hasEmergencyData && widget.showEmergencyStatus) ...[
             const SizedBox(width: 8),
             GestureDetector(
@@ -338,7 +324,6 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Icon(
@@ -359,8 +344,6 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
-          // Status geral
           _buildStatusCard(
             context,
             'Status Geral',
@@ -369,8 +352,6 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
           ),
 
           const SizedBox(height: 12),
-
-          // Status de entidades
           FutureBuilder<Map<String, dynamic>>(
             future: _loadEntityStats(),
             builder: (context, snapshot) {
@@ -383,8 +364,6 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
-          // Ações
           Row(
             children: [
               Expanded(
@@ -559,8 +538,6 @@ class PetCareSyncDetailsSheet extends StatelessWidget {
 
   /// Carrega estatísticas de entidades
   Future<Map<String, dynamic>> _loadEntityStats() async {
-    // TODO: Implementar carregamento real de estatísticas
-    // Por enquanto, retornar dados mock
     return {
       'animals': {'synced_count': 3, 'total_count': 3},
       'medications': {'synced_count': 2, 'total_count': 5},

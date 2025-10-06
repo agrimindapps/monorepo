@@ -10,17 +10,12 @@ import '../interfaces/i_cache_manager.dart';
 /// Implementação do gerenciador de cache para sincronização
 /// Separada do UnifiedSyncManager seguindo Single Responsibility Principle
 class CacheManagerImpl implements ICacheManager {
-  // Cache interno usando Map para simplicidade
   final Map<String, _CacheEntry> _cache = {};
   final StreamController<CacheEvent> _eventController =
       StreamController<CacheEvent>.broadcast();
-
-  // Configurações
   CacheCleanupStrategy _cleanupStrategy = const CacheCleanupStrategy();
   Timer? _cleanupTimer;
   bool _isDisposed = false;
-
-  // Estatísticas
   int _hitCount = 0;
   int _missCount = 0;
   DateTime _lastCleanup = DateTime.now();
@@ -32,7 +27,6 @@ class CacheManagerImpl implements ICacheManager {
     }
 
     try {
-      // Configurar limpeza automática
       if (_cleanupStrategy.enableAutoCleanup) {
         _setupAutoCleanup();
       }
@@ -89,8 +83,6 @@ class CacheManagerImpl implements ICacheManager {
           metadata: {'size': sizeBytes},
         ),
       );
-
-      // Verificar limites
       await _checkLimits();
 
       developer.log(
@@ -241,7 +233,6 @@ class CacheManagerImpl implements ICacheManager {
     }
 
     try {
-      // Preload data if provided
       if (preloadData != null) {
         for (final entry in preloadData.entries) {
           await put(entry.key, entry.value);
@@ -308,8 +299,6 @@ class CacheManagerImpl implements ICacheManager {
   @override
   void setCleanupStrategy(CacheCleanupStrategy strategy) {
     _cleanupStrategy = strategy;
-
-    // Reconfigurar timer de limpeza
     _cleanupTimer?.cancel();
     if (strategy.enableAutoCleanup) {
       _setupAutoCleanup();
@@ -328,14 +317,10 @@ class CacheManagerImpl implements ICacheManager {
   Future<CacheHealthCheck> checkHealth() async {
     final issues = <String>[];
     final metrics = <String, dynamic>{};
-
-    // Verificar entradas expiradas
     final expiredCount = _cache.values.where((e) => e.isExpired).length;
     if (expiredCount > _cache.length * 0.3) {
       issues.add('High number of expired entries: $expiredCount');
     }
-
-    // Verificar uso de memória
     final memoryUsage = _cache.values.fold<int>(
       0,
       (sum, e) => sum + e.sizeBytes,
@@ -345,8 +330,6 @@ class CacheManagerImpl implements ICacheManager {
         'Memory usage exceeds limit: ${memoryUsage / (1024 * 1024)}MB',
       );
     }
-
-    // Verificar número de entradas
     if (_cache.length > _cleanupStrategy.maxEntries) {
       issues.add('Entry count exceeds limit: ${_cache.length}');
     }
@@ -379,8 +362,6 @@ class CacheManagerImpl implements ICacheManager {
     developer.log('Cache manager disposed', name: 'CacheManager');
   }
 
-  // Métodos privados
-
   void _setupAutoCleanup() {
     _cleanupTimer = Timer.periodic(_cleanupStrategy.cleanupInterval, (timer) {
       clearExpired();
@@ -388,12 +369,9 @@ class CacheManagerImpl implements ICacheManager {
   }
 
   Future<void> _checkLimits() async {
-    // Verificar limite de entradas
     if (_cache.length > _cleanupStrategy.maxEntries) {
       await _evictOldestEntries(_cache.length - _cleanupStrategy.maxEntries);
     }
-
-    // Verificar limite de memória
     final memoryUsage = _cache.values.fold<int>(
       0,
       (sum, e) => sum + e.sizeBytes,
@@ -441,7 +419,6 @@ class CacheManagerImpl implements ICacheManager {
     try {
       return jsonEncode(data);
     } catch (e) {
-      // Fallback para dados não serializáveis
       return data.toString();
     }
   }
@@ -451,7 +428,6 @@ class CacheManagerImpl implements ICacheManager {
       final decoded = jsonDecode(serializedData);
       return decoded as T?;
     } catch (e) {
-      // Fallback: retornar string se não conseguir deserializar
       return serializedData as T?;
     }
   }

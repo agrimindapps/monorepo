@@ -52,7 +52,6 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Informações do backup
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -100,8 +99,6 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Título das opções
             Text(
               'O que deseja restaurar?',
               style: TextStyle(
@@ -111,8 +108,6 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Opções de restauração
             if (widget.backup.metadata.plantsCount > 0)
               _buildRestoreOption(
                 icon: Icons.eco,
@@ -168,8 +163,6 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
             ),
 
             const SizedBox(height: 16),
-
-            // Estratégia de merge
             Text(
               'Como lidar com dados existentes?',
               style: TextStyle(
@@ -206,8 +199,6 @@ class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
             ),
 
             const SizedBox(height: 12),
-
-            // Aviso importante
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

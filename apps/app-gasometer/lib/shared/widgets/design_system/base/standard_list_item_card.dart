@@ -248,16 +248,9 @@ class StandardListItemCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Coluna da data (lado esquerdo)
               _buildDateColumn(),
-              
-              // Divisor vertical
               _buildDivider(),
-              
-              // Conteúdo principal (lado direito)
               Expanded(child: _buildContent()),
-              
-              // Widget de ação opcional
               if (actionWidget != null) ...[ 
                 const SizedBox(width: 8),
                 actionWidget!,
@@ -298,11 +291,8 @@ class StandardListItemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Badges na parte superior
           if (badge != null || (additionalBadges?.isNotEmpty ?? false))
             _buildBadgeSection(),
-          
-          // Informações principais
           _buildInfoSection(),
         ],
       ),
@@ -330,14 +320,11 @@ class StandardListItemCard extends StatelessWidget {
   }
 
   Widget _buildInfoSection() {
-    // Organize info items in a responsive grid
     return _buildInfoGrid();
   }
 
   Widget _buildInfoGrid() {
     if (infoItems.isEmpty) return const SizedBox.shrink();
-
-    // Para 1-2 items: linha única
     if (infoItems.length <= 2) {
       return Row(
         children: infoItems
@@ -347,8 +334,6 @@ class StandardListItemCard extends StatelessWidget {
           ..removeLast(), // Remove último SizedBox
       );
     }
-
-    // Para 3-4 items: 2x2 grid
     if (infoItems.length <= 4) {
       return Column(
         children: [
@@ -375,8 +360,6 @@ class StandardListItemCard extends StatelessWidget {
         ],
       );
     }
-
-    // Para 5+ items: wrap layout
     return Wrap(
       spacing: 12,
       runSpacing: compact ? 6 : 8,

@@ -40,28 +40,20 @@ class AgrihUrbiSyncService implements ISyncService {
 
   @override
   final String version = '2.0.0';
-
-  // Estado interno
   bool _isInitialized = false;
   final bool _canSync = true;
   bool _hasPendingSync = false;
   DateTime? _lastSync;
-
-  // Estatísticas
   int _totalSyncs = 0;
   int _successfulSyncs = 0;
   int _failedSyncs = 0;
   int _totalItemsSynced = 0;
-
-  // Stream controllers
   final StreamController<SyncServiceStatus> _statusController =
       StreamController<SyncServiceStatus>.broadcast();
   final StreamController<ServiceProgress> _progressController =
       StreamController<ServiceProgress>.broadcast();
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
-
-  // Entidades do AgrihUrbi
   final List<String> _entityTypes = [
     'livestock',         // Gado/Animais
     'market_data',       // Dados de mercado/preços
@@ -229,8 +221,6 @@ class AgrihUrbiSyncService implements ISyncService {
   /// Sincroniza uma entidade específica
   Future<Either<Failure, int>> _syncEntity(String entityType) async {
     try {
-      // Delegation para repositories específicos
-      // Quando integrarmos completamente, isso chamará métodos de sync dos repositories
 
       switch (entityType) {
         case 'livestock':
@@ -376,8 +366,6 @@ class AgrihUrbiSyncService implements ISyncService {
   @override
   Future<void> dispose() async {
     logger.logInfo(message: 'Disposing AgrihUrbi Sync Service');
-
-    // Cancel connectivity monitoring
     await _connectivitySubscription?.cancel();
     _connectivitySubscription = null;
 
@@ -387,8 +375,6 @@ class AgrihUrbiSyncService implements ISyncService {
     _isInitialized = false;
     _updateStatus(SyncServiceStatus.disposing);
   }
-
-  // Métodos específicos do AgrihUrbi
 
   /// Sync apenas dados de gado/livestock
   Future<Either<Failure, ServiceSyncResult>> syncLivestock() async {
@@ -462,8 +448,6 @@ class AgrihUrbiSyncService implements ISyncService {
       metadata: {'service': serviceId},
     );
   }
-
-  // Métodos privados
 
   void _updateStatus(SyncServiceStatus status) {
     if (_currentStatus != status) {

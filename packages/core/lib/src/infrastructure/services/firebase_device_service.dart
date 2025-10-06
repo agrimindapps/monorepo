@@ -259,8 +259,6 @@ class FirebaseDeviceService {
         'lastActiveAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
       });
-
-      // Retorna o dispositivo atualizado
       final updatedDoc = await deviceDoc.reference.get();
       final data = updatedDoc.data()!;
       data['id'] = updatedDoc.id;

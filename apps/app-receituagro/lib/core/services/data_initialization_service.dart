@@ -50,8 +50,6 @@ class DataInitializationService {
       
       final currentVersion = await _versionManager.getCurrentVersionAsync();
       developer.log('Versão atual da aplicação: $currentVersion', name: 'DataInitializationService');
-      
-      // Lista de categorias e seus repositórios correspondentes
       final categories = [
         _CategoryData('tbculturas', _culturaRepository),
         _CategoryData('tbpragas', _pragasRepository),
@@ -61,8 +59,6 @@ class DataInitializationService {
         _CategoryData('tbplantasinf', _plantasInfRepository),
         _CategoryData('tbpragasinf', _pragasInfRepository),
       ];
-      
-      // Carrega cada categoria
       for (final category in categories) {
         final result = await _loadCategoryData(category, currentVersion);
         if (result.isLeft()) {
@@ -83,12 +79,8 @@ class DataInitializationService {
   Future<Either<Exception, void>> _loadCategoryData(_CategoryData category, String currentVersion) async {
     try {
       developer.log('🔍 Verificando necessidade de atualização para ${category.name}...', name: 'DataInitializationService');
-      
-      // DEBUG: Obter versão armazenada para mostrar comparação
       final storedVersion = await _versionManager.getStoredVersion(category.name);
       developer.log('📱 VERSION CHECK ${category.name}: Stored="$storedVersion", Current="$currentVersion"', name: 'DataInitializationService');
-      
-      // Verifica se precisa atualizar esta categoria
       final needsReload = await _versionManager.needsDataReload(category.name);
       developer.log('🔄 NEEDS RELOAD ${category.name}: $needsReload', name: 'DataInitializationService');
       
@@ -98,8 +90,6 @@ class DataInitializationService {
       }
       
       developer.log('📥 Carregando dados de ${category.name}...', name: 'DataInitializationService');
-      
-      // Carrega dados do JSON
       final jsonResult = await _assetLoader.loadCategoryData(category.name);
       if (jsonResult.isLeft()) {
         return Left(Exception('Erro ao carregar JSON de ${category.name}: ${jsonResult.fold((e) => e.toString(), (r) => '')}'));
@@ -107,15 +97,11 @@ class DataInitializationService {
       
       final jsonData = jsonResult.fold((l) => <Map<String, dynamic>>[], (r) => r);
       developer.log('📊 Carregados ${jsonData.length} registros de ${category.name}', name: 'DataInitializationService');
-      
-      // Salva no repositório
       developer.log('💾 Salvando ${jsonData.length} registros no Hive para ${category.name}...', name: 'DataInitializationService');
       final dynamic saveResult = await category.repository.loadFromJson(jsonData, currentVersion);
       if (saveResult is Either && saveResult.isLeft()) {
         return Left(Exception('Erro ao salvar dados de ${category.name}: ${saveResult.fold((e) => e.toString(), (r) => '')}'));
       }
-      
-      // Marca como atualizado
       developer.log('🔖 Marcando ${category.name} como atualizado para versão $currentVersion', name: 'DataInitializationService');
       await _versionManager.markAsUpdated(currentVersion, category.name);
       
@@ -178,8 +164,6 @@ class DataInitializationService {
         _plantasInfRepository.countAsync(),
         _pragasInfRepository.countAsync(),
       ]);
-      
-      // Verifica se pelo menos uma box tem dados
       return counts.any((itemCount) => itemCount > 0);
     } catch (e) {
       developer.log('Erro ao verificar se dados estão carregados: $e', name: 'DataInitializationService');

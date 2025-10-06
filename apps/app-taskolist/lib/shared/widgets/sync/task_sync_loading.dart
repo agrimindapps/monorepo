@@ -50,7 +50,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
   }
 
   void _initializeAnimations() {
-    // Rotação contínua
     _rotationController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -60,8 +59,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
       begin: 0,
       end: 2 * math.pi,
     ).animate(_rotationController);
-
-    // Pulso
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -74,8 +71,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
       parent: _pulseController,
       curve: Curves.easeInOut,
     ));
-
-    // Scale para entrada
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -93,7 +88,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
   }
 
   void _listenToStreams() {
-    // Listen to progress stream
     widget.progressStream?.listen(
       (progress) {
         if (mounted) {
@@ -114,8 +108,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
         }
       },
     );
-
-    // Listen to message stream
     widget.messageStream?.listen(
       (message) {
         if (mounted) {
@@ -130,8 +122,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
   void _handleCompletion() {
     _rotationController.stop();
     _pulseController.stop();
-    
-    // Delay para mostrar conclusão antes de chamar callback
     Future<void>.delayed(const Duration(milliseconds: 800), () {
       widget.onComplete?.call();
     });
@@ -183,12 +173,9 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo/Ícone animado
                 _buildAnimatedIcon(primaryColor),
                 
                 const SizedBox(height: 24),
-                
-                // Título
                 Text(
                   widget.title,
                   style: theme.textTheme.titleLarge?.copyWith(
@@ -199,14 +186,10 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
                 ),
                 
                 const SizedBox(height: 20),
-                
-                // Progress bar (se disponível)
                 if (_currentProgress != null && !_hasError) ...[
                   _buildProgressBar(primaryColor),
                   const SizedBox(height: 16),
                 ],
-                
-                // Mensagem atual
                 Text(
                   _currentMessage,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -218,8 +201,6 @@ class _TaskSyncLoadingState extends State<TaskSyncLoading>
                 ),
                 
                 const SizedBox(height: 24),
-                
-                // Indicador de progresso por steps (se disponível)
                 if (_currentProgress != null && !_hasError) ...[
                   _buildStepsIndicator(primaryColor),
                 ],

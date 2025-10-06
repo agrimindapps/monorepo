@@ -1,4 +1,3 @@
-// Result para operações de imagem de perfil
 class ProfileImageResult {
   final String downloadUrl;
   final String fileName;

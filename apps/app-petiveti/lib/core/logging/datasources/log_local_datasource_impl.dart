@@ -11,7 +11,6 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
     try {
       _logsBox = Hive.box(_boxName);
     } catch (e) {
-      // If logs box fails, we'll continue without persistent logging
       print('Warning: Failed to initialize logs box: $e');
     }
   }
@@ -38,8 +37,6 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
       if (_logsBox == null) return <LogEntry>[];
 
       var logs = _logsBox!.values.cast<LogEntry>().toList();
-
-      // Apply filters
       if (level != null) {
         logs = logs.where((log) => log.level == level).toList();
       }
@@ -69,11 +66,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
                 )
                 .toList();
       }
-
-      // Sort by timestamp (newest first)
       logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-      // Apply limit
       if (limit != null && limit > 0) {
         logs = logs.take(limit).toList();
       }
@@ -134,13 +127,9 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
       if (_logsBox == null) return <LogLevel, int>{};
 
       final counts = <LogLevel, int>{};
-
-      // Initialize counts
       for (final level in LogLevel.values) {
         counts[level] = 0;
       }
-
-      // Count logs by level
       for (final log in _logsBox!.values.cast<LogEntry>()) {
         counts[log.level] = (counts[log.level] ?? 0) + 1;
       }

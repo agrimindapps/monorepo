@@ -70,8 +70,6 @@ class SyncProgressController {
   double _overallProgress = 0.0;
   String? _currentMessage;
   Timer? _autoHideTimer;
-
-  // Getters
   Stream<SyncProgressState> get stateStream => _stateController.stream;
   Stream<List<SyncStep>> get stepsStream => _stepsController.stream;
   Stream<double> get progressStream => _progressController.stream;
@@ -140,8 +138,6 @@ class SyncProgressController {
     if (message != null) {
       updateMessage(message);
     }
-
-    // Auto-hide logic
     if (newState == SyncProgressState.completed) {
       _scheduleAutoHide();
     }
@@ -184,8 +180,6 @@ class SyncProgressController {
     if (message != null) {
       updateMessage(message);
     }
-    
-    // Verificar se todas as etapas foram completadas
     if (_steps.every((step) => step.isCompleted)) {
       updateState(SyncProgressState.completed, message: 'Seus dados automotivos estão sincronizados!');
     }
@@ -226,51 +220,10 @@ class SyncProgressController {
     _progressController.add(_overallProgress);
   }
 
-  // TODO: Implement with Riverpod UnifiedSyncProvider
-  // /// Conecta este controlador com o UnifiedSyncProvider
-  // void connectToUnifiedSync(UnifiedSyncProvider syncProvider) {
-  //   // Inicializar etapas específicas do Gasometer
-  //   initializeGasometerSteps();
-
-  //   // Escutar mudanças de status do sync provider
-  //   syncProvider.addListener(() {
-  //     _updateFromUnifiedSync(syncProvider);
-  //   });
-
-  //   // Atualizar estado inicial
-  //   _updateFromUnifiedSync(syncProvider);
-  // }
-
-  // /// Atualiza o estado do controlador baseado no UnifiedSyncProvider
-  // void _updateFromUnifiedSync(UnifiedSyncProvider syncProvider) {
-  //   switch (syncProvider.syncStatus) {
-  //     case SyncStatus.syncing:
-  //       updateState(SyncProgressState.syncing, message: 'Sincronizando dados automotivos...');
-  //       _updateStepsFromDebugInfo(syncProvider.debugInfo);
-  //       break;
-  //     case SyncStatus.synced:
-  //       // Marcar todas as etapas como completadas
-  //       for (final step in _steps) {
-  //         completeStep(step.id);
-  //       }
-  //       updateState(SyncProgressState.completed, message: 'Seus dados automotivos estão sincronizados!');
-  //       break;
-  //     case SyncStatus.error:
-  //       updateState(SyncProgressState.error, message: 'Erro na sincronização dos dados');
-  //       break;
-  //     case SyncStatus.offline:
-  //       updateState(SyncProgressState.preparing, message: 'Modo offline - dados salvos localmente');
-  //       break;
-  //     default:
-  //       updateState(SyncProgressState.preparing, message: 'Preparando sincronização...');
-  //   }
-  // }
-
   /// Agenda auto-hide após completar
   void _scheduleAutoHide() {
     _autoHideTimer?.cancel();
     _autoHideTimer = Timer(const Duration(seconds: 3), () {
-      // O overlay deve se esconder automaticamente
     });
   }
 
@@ -403,15 +356,12 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
       color: Colors.transparent,
       child: Stack(
         children: [
-          // Background semi-transparente
           FadeTransition(
             opacity: _fadeAnimation,
             child: Container(
               color: Colors.black.withValues(alpha: 0.3),
             ),
           ),
-          
-          // Overlay content
           Positioned(
             bottom: 0,
             left: 0,

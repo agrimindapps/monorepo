@@ -47,8 +47,6 @@ class ErrorHandlerService {
         suggestions: error.suggestions ?? [],
       );
     }
-
-    // Handle specific exception types
     if (error.toString().contains('InvalidComentarioException')) {
       return ErrorInfo(
         type: ErrorType.validation,
@@ -108,8 +106,6 @@ class ErrorHandlerService {
         suggestions: ['Comentários antigos não podem ser removidos'],
       );
     }
-
-    // Handle network-related errors
     if (error.toString().contains('SocketException') || 
         error.toString().contains('HttpException') ||
         error.toString().contains('TimeoutException')) {
@@ -121,8 +117,6 @@ class ErrorHandlerService {
         suggestions: ['Verifique sua conexão', 'Tente novamente'],
       );
     }
-
-    // Handle storage/database errors
     if (error.toString().contains('HiveError') || 
         error.toString().contains('DatabaseException')) {
       return ErrorInfo(
@@ -133,8 +127,6 @@ class ErrorHandlerService {
         suggestions: ['Tente novamente', 'Reinicie o aplicativo se persistir'],
       );
     }
-
-    // Generic error
     return ErrorInfo(
       type: ErrorType.unknown,
       userMessage: 'Algo deu errado',
@@ -168,8 +160,6 @@ class ErrorHandlerService {
         debugPrint('Metadata: ${metadata.toString()}');
       }
     }
-
-    // Use developer.log for better debugging in production
     developer.log(
       logMessage,
       name: 'ErrorHandler',
@@ -185,13 +175,6 @@ class ErrorHandlerService {
     Map<String, dynamic>? metadata,
     ErrorInfo errorInfo,
   ) {
-    // In a real app, this would integrate with services like:
-    // - Firebase Crashlytics
-    // - Sentry
-    // - Bugsnag
-    // etc.
-    
-    // For now, just log that it would be reported
     if (kDebugMode) {
       debugPrint('Would report error to crash reporting service: $context');
     }

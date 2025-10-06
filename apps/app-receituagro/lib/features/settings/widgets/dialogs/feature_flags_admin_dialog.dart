@@ -64,7 +64,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
         ),
         child: Column(
           children: [
-            // Header
             Container(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
               decoration: BoxDecoration(
@@ -108,8 +107,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
                 ],
               ),
             ),
-            
-            // Tab Bar
             TabBar(
               controller: _tabController,
               labelColor: theme.colorScheme.primary,
@@ -122,8 +119,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
                 Tab(text: 'Debug', icon: Icon(Icons.bug_report, size: 16)),
               ],
             ),
-            
-            // Tab Content
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -135,8 +130,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
                 ],
               ),
             ),
-            
-            // Actions
             Container(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
               child: Row(
@@ -179,7 +172,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Core Features
           _buildFeatureGroup(
             'Core Features',
             [
@@ -191,8 +183,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
           ),
 
           const SizedBox(height: 24),
-
-          // Performance Features
           _buildFeatureGroup(
             'Performance Features',
             [
@@ -203,8 +193,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
           ),
 
           const SizedBox(height: 24),
-
-          // Business Logic Features
           _buildFeatureGroup(
             'Business Logic Features',
             [
@@ -237,8 +225,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
             ),
           ),
           const SizedBox(height: 16),
-
-          // UI/UX A/B Tests
           _buildABTestGroup(
             'UI/UX Tests',
             [
@@ -249,8 +235,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
           ),
           
           const SizedBox(height: 24),
-          
-          // Feature Discovery
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -327,8 +311,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
             ],
           ),
           const SizedBox(height: 16),
-
-          // Remote Config Status
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -363,8 +345,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
           ),
           
           const SizedBox(height: 24),
-          
-          // Config Values (Mock data - in real implementation, this would come from RemoteConfig)
           ..._buildRemoteConfigValues().map((item) => _buildConfigValueItem(item)),
         ],
       ),
@@ -395,8 +375,6 @@ class _FeatureFlagsAdminDialogState extends ConsumerState<FeatureFlagsAdminDialo
             ],
           ),
           const SizedBox(height: 16),
-          
-          // Debug Info Display
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

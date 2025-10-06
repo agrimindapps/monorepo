@@ -25,8 +25,6 @@ class GetExpensesByVehicleUseCase implements UseCase<List<ExpenseEntity>, String
       }
 
       final expenses = await _repository.getExpensesByVehicle(vehicleId);
-
-      // Ordenar por data (mais recente primeiro)
       expenses.sort((a, b) => b.date.compareTo(a.date));
 
       return Right(expenses);

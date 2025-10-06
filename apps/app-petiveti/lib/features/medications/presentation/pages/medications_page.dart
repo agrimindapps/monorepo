@@ -93,14 +93,10 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   @override
   void initState() {
     super.initState();
-    
-    // Cache provider references for better performance
     _medicationsProvider = medicationsProvider;
     _filteredProvider = filteredMedicationsProvider;
     
     _tabController = TabController(length: MedicationsConstants.tabCount, vsync: this);
-    
-    // Optimized batch loading with error handling
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _loadInitialData();
@@ -137,8 +133,6 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   Future<void> _loadInitialData() async {
     try {
       final notifier = ref.read(_medicationsProvider.notifier);
-      
-      // Load primary data with timeout
       final primaryLoad = widget.animalId != null
           ? notifier.loadMedicationsByAnimalId(widget.animalId!)
           : notifier.loadMedications();
@@ -147,14 +141,10 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
         MedicationsConstants.loadingTimeout,
         onTimeout: () => throw Exception('Timeout loading medications'),
       );
-      
-      // Execute secondary loads in parallel with error handling
       final secondaryLoads = await Future.wait([
         notifier.loadActiveMedications().catchError((e) => null),
         notifier.loadExpiringMedications().catchError((e) => null),
       ]);
-      
-      // Log any secondary load failures for debugging
       if (secondaryLoads.contains(null)) {
         debugPrint('Some secondary medication loads failed');
       }
@@ -184,8 +174,6 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    
-    // Use cached provider references
     final medicationsState = ref.watch(_medicationsProvider);
     final filteredMedications = ref.watch(_filteredProvider);
 
@@ -281,12 +269,10 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       ),
       body: Column(
         children: [
-          // Search and filters
           Padding(
             padding: const EdgeInsets.all(MedicationsConstants.pageContentPadding),
             child: Column(
               children: [
-                // Search bar with accessibility
                 Semantics(
                   label: 'Campo de busca de medicamentos',
                   hint: 'Digite o nome do medicamento que você está procurando',
@@ -304,41 +290,31 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                   ),
                 ),
                 const SizedBox(height: MedicationsConstants.searchFiltersSpacing),
-                // Filters
                 const MedicationFilters(),
               ],
             ),
           ),
-          
-          // Content
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                // All medications
                 _buildMedicationsList(
                   medications: filteredMedications,
                   isLoading: medicationsState.isLoading,
                   error: medicationsState.error,
                 ),
-                
-                // Active medications
                 _buildMedicationsList(
                   medications: medicationsState.activeMedications,
                   isLoading: medicationsState.isLoading,
                   error: medicationsState.error,
                   emptyMessage: MedicationsConstants.noActiveMedications,
                 ),
-                
-                // Expiring medications
                 _buildMedicationsList(
                   medications: medicationsState.expiringMedications,
                   isLoading: medicationsState.isLoading,
                   error: medicationsState.error,
                   emptyMessage: MedicationsConstants.noExpiringMedications,
                 ),
-                
-                // Statistics
                 const MedicationStats(),
               ],
             ),
@@ -430,7 +406,6 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: RepaintBoundary(
-                      // RepaintBoundary prevents unnecessary repaints
                       child: MedicationCard(
                         key: ValueKey(medication.id), // Stable key for performance
                         medication: medication,
@@ -443,7 +418,6 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                   );
                 },
                 childCount: medications.length,
-                // Enhanced caching for better performance
                 addAutomaticKeepAlives: true,
                 addRepaintBoundaries: true,
                 addSemanticIndexes: false, // Disable for better performance in large lists
@@ -459,15 +433,11 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   Future<void> _refreshMedications() async {
     try {
       final notifier = ref.read(_medicationsProvider.notifier);
-      
-      // Primary refresh with timeout
       final primaryRefresh = widget.animalId != null
           ? notifier.loadMedicationsByAnimalId(widget.animalId!)
           : notifier.loadMedications();
       
       await primaryRefresh.timeout(MedicationsConstants.loadingTimeout);
-      
-      // Parallel secondary refreshes with error handling
       await Future.wait([
         notifier.loadActiveMedications().catchError((e) => null),
         notifier.loadExpiringMedications().catchError((e) => null),

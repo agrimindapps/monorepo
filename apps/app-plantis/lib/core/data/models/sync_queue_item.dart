@@ -1,7 +1,5 @@
 import 'package:core/core.dart';
 
-// Note: Hive adapter not generated - keeping @HiveType for future
-
 enum SyncOperationType { create, update, delete }
 
 @HiveType(typeId: 100)
@@ -10,27 +8,21 @@ class SyncQueueItem extends HiveObject {
   final String id;
 
   @HiveField(1)
-  //modelType')
   final String modelType;
 
   @HiveField(2)
-  //operation')
   final String operation;
 
   @HiveField(3)
-  //data')
   final Map<String, dynamic> data;
 
   @HiveField(4)
-  //timestamp')
   final DateTime timestamp;
 
   @HiveField(5)
-  //retryCount')
   int retryCount;
 
   @HiveField(6)
-  //isSynced')
   bool isSynced;
 
   SyncQueueItem({
@@ -42,8 +34,6 @@ class SyncQueueItem extends HiveObject {
     this.retryCount = 0,
     this.isSynced = false,
   }) : timestamp = timestamp ?? DateTime.now();
-
-  // JSON serialization methods removed - using Hive only
 
   SyncOperationType get operationType {
     switch (operation) {

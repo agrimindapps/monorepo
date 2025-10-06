@@ -10,7 +10,6 @@ class SettingsExportLocalDataSource implements SettingsExportDataSource {
   @override
   Future<UserSettingsExportData> getUserSettingsData(String userId) async {
     try {
-      // Mock data for demonstration
       return UserSettingsExportData(
         notificationSettings: const {
           'plantsReminder': true,

@@ -25,7 +25,6 @@ class RecoveryFormWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Descrição
           Center(
             child: Column(
               children: [
@@ -49,8 +48,6 @@ class RecoveryFormWidget extends ConsumerWidget {
           ),
 
           const SizedBox(height: 30),
-
-          // Campo de email
           AuthTextFieldWidget(
             controller: loginNotifier.emailController,
             label: 'Email',
@@ -60,16 +57,12 @@ class RecoveryFormWidget extends ConsumerWidget {
             validator: loginNotifier.validateEmail,
             onFieldSubmitted: (_) => _handlePasswordReset(context, ref),
           ),
-
-          // Mensagem de erro
           if (loginState.errorMessage != null) ...[
             const SizedBox(height: 16),
             _buildErrorMessage(context, ref, loginState.errorMessage!),
           ],
 
           const SizedBox(height: 30),
-
-          // Botão de enviar
           AuthButtonWidget(
             text: 'Recuperar Senha',
             isLoading: loginState.isLoading,
@@ -77,8 +70,6 @@ class RecoveryFormWidget extends ConsumerWidget {
           ),
 
           const SizedBox(height: 30),
-
-          // Botão de voltar ao login
           Center(
             child: TextButton.icon(
               onPressed: loginNotifier.hideRecoveryForm,
@@ -156,8 +147,6 @@ class RecoveryFormWidget extends ConsumerWidget {
     if (!context.mounted) return;
 
     final loginState = ref.read(loginNotifierProvider);
-
-    // Mostrar mensagem de sucesso se não houve erro
     if (loginState.errorMessage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -204,11 +193,8 @@ class RecoveryFormWidget extends ConsumerWidget {
           ),
         ),
       );
-
-      // Voltar ao login após envio bem-sucedido
       loginNotifier.hideRecoveryForm();
     } else {
-      // Mostrar erro via SnackBar superior
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -253,8 +239,6 @@ class RecoveryFormWidget extends ConsumerWidget {
           ),
         ),
       );
-
-      // Limpar erro após mostrar
       loginNotifier.clearError();
     }
   }

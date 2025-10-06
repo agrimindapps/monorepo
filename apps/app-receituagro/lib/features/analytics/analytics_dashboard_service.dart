@@ -143,11 +143,8 @@ class AnalyticsDashboardService {
   AnalyticsDashboardService._();
 
   late IAnalyticsRepository _analytics;
-  // ignore: unused_field
   late IStorageRepository _storage;
   bool _isInitialized = false;
-  
-  // Cache for analytics data
   final Map<String, dynamic> _metricsCache = {};
   Timer? _cacheRefreshTimer;
 
@@ -161,8 +158,6 @@ class AnalyticsDashboardService {
     _analytics = analytics;
     _storage = storage;
     _isInitialized = true;
-
-    // Start periodic cache refresh
     _startCacheRefresh();
 
     if (kDebugMode) {
@@ -191,7 +186,6 @@ class AnalyticsDashboardService {
     }
 
     try {
-      // Calculate engagement metrics from cached/local data or mock data for now
       final metrics = UserEngagementMetrics(
         dailyActiveUsers: _calculateDAU({}),
         weeklyActiveUsers: _calculateWAU({}),
@@ -224,15 +218,11 @@ class AnalyticsDashboardService {
     }
 
     try {
-      // Get funnel data for each step
       final funnelData = <ConversionFunnelStep, int>{};
       
       for (final step in ConversionFunnelStep.values) {
-        // For now, use mock data - in production this would come from actual analytics
         funnelData[step] = _getMockFunnelData(step);
       }
-
-      // Calculate conversion and drop-off rates
       final conversionRates = _calculateConversionRates(funnelData);
       final dropOffRates = _calculateDropOffRates(funnelData);
 
@@ -265,7 +255,6 @@ class AnalyticsDashboardService {
     }
 
     try {
-      // For now, use mock data - in production this would come from actual performance monitoring
       final metrics = PerformanceMetrics(
         avgAppStartupTime: _calculateAvgStartupTime({}),
         avgScreenLoadTime: _calculateAvgScreenLoadTime({}),
@@ -298,7 +287,6 @@ class AnalyticsDashboardService {
     }
 
     try {
-      // For now, use mock data - in production this would come from actual subscription data
       final mockSubscriptionData = <Map<String, dynamic>>[];
       
       final metrics = RevenueMetrics(
@@ -356,8 +344,6 @@ class AnalyticsDashboardService {
       'performance_metrics': performance.toJson(),
       'revenue_metrics': revenue.toJson(),
     };
-
-    // Log report export event
     await _analytics.logEvent(
       'analytics_report_exported',
       parameters: {
@@ -370,10 +356,7 @@ class AnalyticsDashboardService {
     return report;
   }
 
-  // ===== PRIVATE CALCULATION METHODS =====
-
   int _calculateDAU(Map<String, dynamic> data) {
-    // Mock calculation - in production, parse actual analytics data
     return Random().nextInt(1000) + 500;
   }
 
@@ -405,7 +388,6 @@ class AnalyticsDashboardService {
   }
 
   int _getMockFunnelData(ConversionFunnelStep step) {
-    // Mock funnel data with realistic conversion rates
     switch (step) {
       case ConversionFunnelStep.appOpened:
         return 10000;
@@ -525,8 +507,6 @@ class AnalyticsDashboardService {
 
     try {
       _metricsCache.clear();
-      
-      // Pre-load commonly requested metrics
       await getUserEngagementMetrics();
       await getConversionFunnelMetrics();
       await getPerformanceMetrics();

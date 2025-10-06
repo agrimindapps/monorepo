@@ -18,7 +18,6 @@ class AddMedication implements UseCase<void, Medication> {
 
   @override
   Future<Either<Failure, void>> call(Medication medication) async {
-    // Validate medication data
     if (medication.name.trim().isEmpty) {
       return const Left(ValidationFailure(message: 'Nome do medicamento é obrigatório'));
     }
@@ -38,8 +37,6 @@ class AddMedication implements UseCase<void, Medication> {
     if (medication.startDate.isAfter(medication.endDate)) {
       return const Left(ValidationFailure(message: 'Data de início deve ser anterior à data de fim'));
     }
-
-    // Check for potential conflicts using dedicated use case
     final conflictsResult = await checkConflicts(medication);
 
     return conflictsResult.fold(

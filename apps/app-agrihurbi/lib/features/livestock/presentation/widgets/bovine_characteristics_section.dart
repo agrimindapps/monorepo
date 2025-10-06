@@ -55,18 +55,12 @@ class BovineCharacteristicsSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
-          // Aptidão
           _buildAptitudeDropdown(context),
           
           const SizedBox(height: 16),
-          
-          // Sistema de Criação
           _buildBreedingSystemDropdown(context),
           
           const SizedBox(height: 16),
-          
-          // Finalidade
           DSTextField(
             label: 'Finalidade',
             hint: 'Ex: Reprodução, Engorda, Ordenha',
@@ -79,8 +73,6 @@ class BovineCharacteristicsSection extends StatelessWidget {
           ),
           
           const SizedBox(height: 8),
-          
-          // Dicas sobre finalidade
           _buildPurposeHints(context),
         ],
       ),
@@ -132,12 +124,9 @@ class BovineCharacteristicsSection extends StatelessWidget {
           }).toList(),
           onChanged: enabled ? onAptitudeChanged : null,
           validator: (value) {
-            // Aptidão é opcional, mas se selecionada deve ser válida
             return null;
           },
         ),
-        
-        // Informação adicional sobre aptidão selecionada
         if (selectedAptitude != null)
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 12),
@@ -205,12 +194,9 @@ class BovineCharacteristicsSection extends StatelessWidget {
           }).toList(),
           onChanged: enabled ? onBreedingSystemChanged : null,
           validator: (value) {
-            // Sistema é opcional, mas se selecionado deve ser válido
             return null;
           },
         ),
-        
-        // Informação adicional sobre sistema selecionado
         if (selectedBreedingSystem != null)
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 12),
@@ -282,10 +268,6 @@ class BovineCharacteristicsSection extends StatelessWidget {
     );
   }
 
-  // =====================================================================
-  // HELPER METHODS - APTITUDE
-  // =====================================================================
-
   Widget _getAptitudeIcon(BovineAptitude aptitude, {double size = 20}) {
     IconData iconData;
     Color color;
@@ -329,10 +311,6 @@ class BovineCharacteristicsSection extends StatelessWidget {
         return 'Animais que combinam produção de carne e leite, versáteis para sistemas mistos.';
     }
   }
-
-  // =====================================================================
-  // HELPER METHODS - BREEDING SYSTEM
-  // =====================================================================
 
   Widget _getBreedingSystemIcon(BreedingSystem system, {double size = 20}) {
     IconData iconData;

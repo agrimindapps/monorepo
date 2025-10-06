@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Typography base compartilhada entre todos os apps
 class BaseTypography {
-  // Font Family - can be customized per app
   static const String defaultFontFamily = 'Inter';
-  
-  // Display styles
   static const TextStyle displayLarge = TextStyle(
     fontSize: 57,
     fontWeight: FontWeight.w400,
@@ -26,8 +23,6 @@ class BaseTypography {
     letterSpacing: 0,
     height: 1.22,
   );
-  
-  // Headline styles
   static const TextStyle headlineLarge = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.w400,
@@ -48,8 +43,6 @@ class BaseTypography {
     letterSpacing: 0,
     height: 1.33,
   );
-  
-  // Title styles
   static const TextStyle titleLarge = TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.w500,
@@ -70,8 +63,6 @@ class BaseTypography {
     letterSpacing: 0.10,
     height: 1.43,
   );
-  
-  // Label styles
   static const TextStyle labelLarge = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
@@ -92,8 +83,6 @@ class BaseTypography {
     letterSpacing: 0.50,
     height: 1.45,
   );
-  
-  // Body styles
   static const TextStyle bodyLarge = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w400,
@@ -114,24 +103,18 @@ class BaseTypography {
     letterSpacing: 0.40,
     height: 1.33,
   );
-  
-  // Button style
   static const TextStyle button = TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.10,
     height: 1.43,
   );
-  
-  // Caption style
   static const TextStyle caption = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.40,
     height: 1.33,
   );
-  
-  // Overline style
   static const TextStyle overline = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.w500,

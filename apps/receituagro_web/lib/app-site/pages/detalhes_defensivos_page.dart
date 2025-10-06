@@ -136,8 +136,6 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
         'title': false
       });
     }
-
-    // ordenar por culturas, e depois por praganomecomum
     culturas = defensivo['culturas'] as List<dynamic>;
     culturas.sort((a, b) => a['cultura'].compareTo(b['cultura']));
 
@@ -147,14 +145,6 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   toolbarHeight: 70,
-      //   backgroundColor: Colors.white.withValues(alpha: 0.7), // Cor com transparência
-      //   title: SizedBox(
-      //     width: 1120,
-      //     child: rowOpcoesMenuSuperior(),
-      //   ),
-      // ),
       body: SingleChildScrollView(
         child: Center(
           child: SizedBox(
@@ -166,7 +156,6 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // iconbuttom voltar
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () {
@@ -299,10 +288,7 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
   }
 
   Widget _cardInfoGerais() {
-    // Obtém a largura da tela
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Usar ResponsiveHelper para obter crossAxisCount
     final crossAxisCount =
         ResponsiveHelper.getCrossAxisCount(screenWidth, type: GridType.detail);
 
@@ -354,10 +340,7 @@ class _DefensivosDetalhesPageState extends State<DefensivosDetalhesPage> {
   }
 
   Widget _cardWidgetInfoAdicionais() {
-    // Obtém a largura da tela
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Usar ResponsiveHelper para obter crossAxisCount
     final crossAxisCount =
         ResponsiveHelper.getCrossAxisCount(screenWidth, type: GridType.detail);
 

@@ -11,7 +11,6 @@ part 'data_migration_notifier.g.dart';
 /// Riverpod provider for GasometerDataMigrationService
 @riverpod
 GasometerDataMigrationService dataMigrationService(Ref ref) {
-  // Get service from GetIt
   return GetIt.I<GasometerDataMigrationService>();
 }
 
@@ -25,10 +24,7 @@ class DataMigration extends _$DataMigration {
 
   @override
   DataMigrationState build() {
-    // Listen to migration progress stream
     _listenToProgress();
-
-    // Cleanup when disposed
     ref.onDispose(() {
       _progressSubscription?.cancel();
     });
@@ -59,7 +55,6 @@ class DataMigration extends _$DataMigration {
     required String anonymousUserId,
     required String accountUserId,
   }) async {
-    // Guard clause: prevent concurrent operations
     if (state.isDetectingConflicts) return false;
 
     try {
@@ -127,7 +122,6 @@ class DataMigration extends _$DataMigration {
     required DataResolutionChoice choice,
     Map<String, dynamic> additionalParams = const {},
   }) async {
-    // Guard clauses: ensure preconditions are met
     if (state.conflictResult == null || state.isMigrating) return false;
 
     try {
@@ -194,7 +188,6 @@ class DataMigration extends _$DataMigration {
 
   /// Cancel ongoing migration operation
   Future<bool> cancelMigration() async {
-    // Guard clause: only cancel if migration is in progress
     if (!state.isMigrating) return false;
 
     try {

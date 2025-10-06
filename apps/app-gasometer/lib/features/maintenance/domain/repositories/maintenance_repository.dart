@@ -14,15 +14,11 @@ abstract class MaintenanceRepository {
   Future<Either<Failure, List<MaintenanceEntity>>> searchMaintenanceRecords(String query);
   Stream<Either<Failure, List<MaintenanceEntity>>> watchMaintenanceRecords();
   Stream<Either<Failure, List<MaintenanceEntity>>> watchMaintenanceRecordsByVehicle(String vehicleId);
-
-  // Maintenance-specific queries
   Future<Either<Failure, List<MaintenanceEntity>>> getMaintenanceRecordsByType(String vehicleId, MaintenanceType type);
   Future<Either<Failure, List<MaintenanceEntity>>> getMaintenanceRecordsByStatus(String vehicleId, MaintenanceStatus status);
   Future<Either<Failure, List<MaintenanceEntity>>> getMaintenanceRecordsByDateRange(String vehicleId, DateTime startDate, DateTime endDate);
   Future<Either<Failure, List<MaintenanceEntity>>> getUpcomingMaintenanceRecords(String vehicleId, {int days = 30});
   Future<Either<Failure, List<MaintenanceEntity>>> getOverdueMaintenanceRecords(String vehicleId);
-  
-  // Analytics methods
   Future<Either<Failure, double>> getTotalMaintenanceCost(String vehicleId, {DateTime? startDate, DateTime? endDate});
   Future<Either<Failure, Map<String, int>>> getMaintenanceCountByType(String vehicleId);
   Future<Either<Failure, double>> getAverageMaintenanceCost(String vehicleId);

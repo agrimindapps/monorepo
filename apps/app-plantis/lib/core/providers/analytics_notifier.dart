@@ -44,10 +44,6 @@ class AnalyticsProvider {
   /// Direct access to enhanced service for advanced features
   EnhancedAnalyticsService get enhancedService => _enhancedService;
 
-  // ==========================================================================
-  // BACKWARD COMPATIBILITY METHODS
-  // ==========================================================================
-
   /// Logs screen view with enhanced error handling
   Future<void> logScreenView(String screenName) async {
     await _enhancedService.setCurrentScreen(screenName);
@@ -89,10 +85,6 @@ class AnalyticsProvider {
     );
   }
 
-  // ==========================================================================
-  // AUTH EVENTS
-  // ==========================================================================
-
   Future<void> logLogin(String method) async {
     await _enhancedService.logAuthEvent(
       'login',
@@ -111,10 +103,6 @@ class AnalyticsProvider {
     await _enhancedService.logAuthEvent('logout');
   }
 
-  // ==========================================================================
-  // APP LIFECYCLE EVENTS
-  // ==========================================================================
-
   Future<void> logAppOpen() async {
     await _enhancedService.logEvent('app_open', {});
   }
@@ -130,10 +118,6 @@ class AnalyticsProvider {
   Future<void> logAppForeground() async {
     await _enhancedService.logEvent('app_foreground', {});
   }
-
-  // ==========================================================================
-  // PLANT EVENTS
-  // ==========================================================================
 
   Future<void> logPlantAdded(String plantId, String plantName) async {
     await _enhancedService.logEvent('plant_added', {
@@ -166,10 +150,6 @@ class AnalyticsProvider {
     });
   }
 
-  // ==========================================================================
-  // PREMIUM EVENTS
-  // ==========================================================================
-
   Future<void> logPremiumPurchase(String productId, double price) async {
     await _enhancedService.logEvent('premium_purchase', {
       'product_id': productId,
@@ -182,10 +162,6 @@ class AnalyticsProvider {
       'feature_name': featureName,
     });
   }
-
-  // ==========================================================================
-  // SYNC EVENTS
-  // ==========================================================================
 
   Future<void> logSyncStarted() async {
     await _enhancedService.logEvent('sync_started', {});
@@ -203,20 +179,12 @@ class AnalyticsProvider {
     });
   }
 
-  // ==========================================================================
-  // NAVIGATION EVENTS
-  // ==========================================================================
-
   Future<void> logNavigationEvent(String from, String to) async {
     await _enhancedService.logEvent('navigation', {
       'from': from,
       'to': to,
     });
   }
-
-  // ==========================================================================
-  // FEATURE USAGE TRACKING
-  // ==========================================================================
 
   Future<void> logFeatureUsed(String featureName) async {
     await _enhancedService.logEvent('feature_used', {
@@ -230,20 +198,12 @@ class AnalyticsProvider {
     });
   }
 
-  // ==========================================================================
-  // PERFORMANCE EVENTS
-  // ==========================================================================
-
   Future<void> logPerformanceMetric(String metricName, double value) async {
     await _enhancedService.logEvent('performance_metric', {
       'metric_name': metricName,
       'value': value,
     });
   }
-
-  // ==========================================================================
-  // ERROR TRACKING
-  // ==========================================================================
 
   Future<void> logCriticalError(String errorType, String message) async {
     await _enhancedService.recordError(
@@ -254,8 +214,6 @@ class AnalyticsProvider {
     );
   }
 }
-
-// Dependency Providers
 @riverpod
 IAnalyticsRepository analyticsRepository(Ref ref) {
   return GetIt.instance<IAnalyticsRepository>();

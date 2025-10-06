@@ -78,8 +78,6 @@ class Vaccine extends Equatable {
       isDeleted: isDeleted ?? this.isDeleted,
     );
   }
-
-  // Validation methods
   bool get isValid {
     return name.trim().isNotEmpty &&
         veterinarian.trim().isNotEmpty &&
@@ -186,8 +184,6 @@ class Vaccine extends Equatable {
     if (days > 0) return 'Lembrete em $days ${days == 1 ? 'dia' : 'dias'}';
     return 'Lembrete vencido';
   }
-
-  // Business logic methods
   bool canBeMarkedAsCompleted() {
     return !isCompleted &&
         status != VaccineStatus.cancelled &&

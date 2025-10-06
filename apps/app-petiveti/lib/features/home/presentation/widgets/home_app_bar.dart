@@ -31,14 +31,12 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
       title: const Text('PetiVeti'),
       centerTitle: true,
       actions: [
-        // Notification indicator
         _NotificationIcon(
           notificationsState: notificationsState,
           hasUnreadNotifications: hasUnreadNotifications,
           hasUrgentAlerts: hasUrgentAlerts,
           onTap: onNotificationTap,
         ),
-        // Status indicator
         _StatusIcon(
           statusState: statusState,
           onTap: onStatusTap,

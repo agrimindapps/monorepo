@@ -28,11 +28,7 @@ class ComentariosService extends ChangeNotifier {
   Future<List<ComentarioModel>> getAllComentarios({String? pkIdentificador}) async {
     try {
       final comentarios = await _repository?.getAllComentarios() ?? <ComentarioModel>[];
-      
-      // Sort by newest first
       comentarios.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      
-      // Filter by identifier if provided
       if (pkIdentificador != null && pkIdentificador.isNotEmpty) {
         return comentarios
             .where((element) => element.pkIdentificador == pkIdentificador)
@@ -52,8 +48,6 @@ class ComentariosService extends ChangeNotifier {
       print('📁 COMENTARIO_SERVICE: Salvando no repositório local...');
       await _repository?.addComentario(comentario);
       print('✅ COMENTARIO_SERVICE: Comentário salvo localmente com sucesso');
-      
-      // Sincroniza com Firestore se usuário autenticado
       print('🔄 COMENTARIO_SERVICE: Iniciando sincronização...');
       await _queueSyncOperation('create', comentario);
     } catch (e) {
@@ -68,8 +62,6 @@ class ComentariosService extends ChangeNotifier {
       print('📁 COMENTARIO_SERVICE: Atualizando no repositório local...');
       await _repository?.updateComentario(comentario);
       print('✅ COMENTARIO_SERVICE: Comentário atualizado localmente com sucesso');
-      
-      // Sincroniza com Firestore se usuário autenticado
       print('🔄 COMENTARIO_SERVICE: Iniciando sincronização...');
       await _queueSyncOperation('update', comentario);
     } catch (e) {
@@ -84,8 +76,6 @@ class ComentariosService extends ChangeNotifier {
       print('📁 COMENTARIO_SERVICE: Removendo do repositório local...');
       await _repository?.deleteComentario(id);
       print('✅ COMENTARIO_SERVICE: Comentário removido localmente com sucesso');
-      
-      // Sincroniza com Firestore se usuário autenticado  
       print('🔄 COMENTARIO_SERVICE: Iniciando sincronização de deleção...');
       await _queueSyncOperation('delete', ComentarioModel(
         id: id,
@@ -113,7 +103,6 @@ class ComentariosService extends ChangeNotifier {
     if (comentarios.isEmpty) return comentarios;
 
     return comentarios.where((comentario) {
-      // Search filter
       if (searchText.isNotEmpty) {
         final searchLower = _sanitizeSearchText(searchText);
         final contentMatch = comentario.conteudo.toLowerCase().contains(searchLower);
@@ -121,8 +110,6 @@ class ComentariosService extends ChangeNotifier {
 
         if (!contentMatch && !toolMatch) return false;
       }
-
-      // Context filters
       if (pkIdentificador != null && 
           pkIdentificador.isNotEmpty && 
           comentario.pkIdentificador != pkIdentificador) {
@@ -140,17 +127,13 @@ class ComentariosService extends ChangeNotifier {
   }
 
   String _sanitizeSearchText(String text) {
-    // Limit length for performance
     if (text.length > ComentariosDesignTokens.maxSearchLength) {
       text = text.substring(0, ComentariosDesignTokens.maxSearchLength);
     }
-
-    // Escape regex special characters for security
     return text.toLowerCase().replaceAll(RegExp(r'[\\\[\]{}()*+?.^$|]'), '');
   }
 
   int getMaxComentarios() {
-    // Temporariamente sem limites
     return ComentariosDesignTokens.freeTierMaxComments;
   }
 
@@ -160,7 +143,6 @@ class ComentariosService extends ChangeNotifier {
   }
 
   bool hasAdvancedFeatures() {
-    // Temporariamente todas as features estão disponíveis
     return true;
   }
 
@@ -177,7 +159,6 @@ class ComentariosService extends ChangeNotifier {
   }
 
   String generateIdReg() {
-    // Simple ID generation - replace with actual database utility if available
     return 'REG_${DateTime.now().millisecondsSinceEpoch}';
   }
 
@@ -193,7 +174,6 @@ class ComentariosService extends ChangeNotifier {
   Future<void> _queueSyncOperation(String operation, ComentarioModel comentario) async {
     print('💬 COMENTARIO_SERVICE: Iniciando operação de sync - operation=$operation, comentario_id=${comentario.id}');
     try {
-      // Verifica se o usuário está autenticado via Firebase Auth (synchronous access)
       final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
       if (userId == null || userId.isEmpty) {
         print('⚠️ COMENTARIO_SERVICE: Usuário não autenticado - pulando sincronização de comentário');
@@ -201,16 +181,12 @@ class ComentariosService extends ChangeNotifier {
       }
 
       print('✅ COMENTARIO_SERVICE: Usuário autenticado - userId=$userId');
-
-      // Verifica se há dados válidos para sincronização
       if (comentario.id.isEmpty) {
         print('❌ COMENTARIO_SERVICE: ID do comentário inválido - pulando sincronização');
         return;
       }
       
       print('📄 COMENTARIO_SERVICE: Dados do comentário válidos - id=${comentario.id}, titulo="${comentario.titulo}", ferramenta=${comentario.ferramenta}');
-
-      // Cria entidade de sincronização
       print('🔄 COMENTARIO_SERVICE: Criando entidade de sincronização...');
       final syncEntity = ComentarioSyncEntity(
         id: comentario.id,
@@ -225,8 +201,6 @@ class ComentariosService extends ChangeNotifier {
         userId: userId,
       );
       print('✅ COMENTARIO_SERVICE: Entidade de sincronização criada - syncEntity.id=${syncEntity.id}');
-
-      // Executa operação de sincronização via UnifiedSyncManager
       print('🚀 COMENTARIO_SERVICE: Executando operação de sync - $operation');
       if (operation == 'create') {
         print('🆕 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.create<ComentarioSyncEntity>()...');
@@ -267,7 +241,6 @@ class ComentariosService extends ChangeNotifier {
       
     } catch (e) {
       print('❌ COMENTARIO_SERVICE: Erro ao sincronizar comentário: $e');
-      // Não relança a exceção para não quebrar a operação local
     }
   }
 }

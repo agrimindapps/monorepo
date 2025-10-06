@@ -147,7 +147,6 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nome do template
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -165,8 +164,6 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
                 ),
                 
                 const SizedBox(height: 16),
-                
-                // Descrição
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(
@@ -179,8 +176,6 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
                 ),
                 
                 const SizedBox(height: 16),
-                
-                // Tags
                 Row(
                   children: [
                     Expanded(
@@ -204,8 +199,6 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
                 ),
                 
                 const SizedBox(height: 8),
-                
-                // Lista de tags
                 if (_tags.isNotEmpty)
                   Wrap(
                     spacing: 8,
@@ -220,8 +213,6 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
                   ),
                 
                 const SizedBox(height: 16),
-                
-                // Opção pública
                 CheckboxListTile(
                   title: const Text('Template público'),
                   subtitle: const Text(
@@ -237,8 +228,6 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
                 ),
                 
                 const SizedBox(height: 16),
-                
-                // Informações dos dados que serão salvos
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),

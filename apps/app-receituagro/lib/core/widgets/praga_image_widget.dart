@@ -52,8 +52,6 @@ class _PragaImageWidgetState extends State<PragaImageWidget> {
     if (nomeCientifico == null || nomeCientifico.isEmpty) {
       return 'assets/imagens/bigsize/a.jpg';
     }
-    
-    // Remove caracteres especiais e formata o nome científico
     final cleanName = nomeCientifico.trim();
     return 'assets/imagens/bigsize/$cleanName.jpg';
   }
@@ -130,7 +128,6 @@ class _PragaImageWidgetState extends State<PragaImageWidget> {
                 );
               },
               errorBuilder: (context, error, stackTrace) {
-                // Em caso de erro, tenta carregar a imagem de fallback
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (!_hasError) {
                     setState(() {

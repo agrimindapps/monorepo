@@ -24,8 +24,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
   CalculatorRepositoryImpl(this._localDataSource);
   
   final CalculatorLocalDatasource _localDataSource;
-
-  // Cache estático das calculadoras para melhor performance
   static final List<Calculator> _calculators = [
     const BodyConditionCalculator(),
     const CaloricNeedsCalculator(),
@@ -67,8 +65,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
   Future<void> saveCalculationHistory(CalculationHistory history) async {
     final model = CalculationHistoryModel.fromEntity(history);
     await _localDataSource.saveCalculationHistory(model);
-    
-    // Incrementar estatísticas de uso
     await _localDataSource.incrementCalculatorUsage(history.calculatorId);
   }
 
@@ -114,7 +110,6 @@ class CalculatorRepositoryImpl implements CalculatorRepository {
 
   @override
   Future<void> addFavoriteCalculator(String calculatorId) async {
-    // Verificar se a calculadora existe
     final calculator = await getCalculatorById(calculatorId);
     if (calculator == null) {
       throw ArgumentError('Calculadora não encontrada: $calculatorId');

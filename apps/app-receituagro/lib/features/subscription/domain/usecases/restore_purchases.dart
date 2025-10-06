@@ -16,8 +16,6 @@ class RestorePurchasesUseCase
     NoParams params,
   ) async {
     final result = await coreRepository.restorePurchases();
-
-    // Atualiza cache local após restaurar
     await result.fold(
       (failure) => Future<void>.value(),
       (subscriptions) async {

@@ -12,13 +12,10 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
   /// Busca por objectId (ID do Firebase) se idReg não funcionar
   Future<DiagnosticoHive?> getByIdOrObjectId(String id) async {
     try {
-      // Primeiro tenta buscar pela chave normal (idReg)
       final result = await getByKey(id);
       if (result.isSuccess && result.data != null) {
         return result.data;
       }
-      
-      // Se não encontrou, tenta buscar por objectId
       final matches = await findBy((item) => item.objectId == id);
       if (matches.isSuccess && matches.data!.isNotEmpty) {
         return matches.data!.first;

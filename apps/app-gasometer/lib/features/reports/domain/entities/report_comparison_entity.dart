@@ -2,7 +2,6 @@ import 'package:core/core.dart' show Equatable;
 import 'report_summary_entity.dart';
 
 class ReportComparisonEntity extends Equatable {
-  // 'month_to_month', 'year_to_year', etc.
 
   const ReportComparisonEntity({
     required this.vehicleId,
@@ -22,8 +21,6 @@ class ReportComparisonEntity extends Equatable {
     previousPeriod,
     comparisonType,
   ];
-
-  // Growth calculations
   double get fuelSpentGrowth =>
       currentPeriod.calculateGrowthRate(previousPeriod, 'fuel_spent');
   double get fuelLitersGrowth =>
@@ -32,20 +29,14 @@ class ReportComparisonEntity extends Equatable {
       currentPeriod.calculateGrowthRate(previousPeriod, 'distance');
   double get consumptionGrowth =>
       currentPeriod.calculateGrowthRate(previousPeriod, 'consumption');
-
-  // Comparison insights
   bool get isFuelSpentIncreasing => fuelSpentGrowth > 0;
   bool get isFuelLitersIncreasing => fuelLitersGrowth > 0;
   bool get isDistanceIncreasing => distanceGrowth > 0;
   bool get isConsumptionImproving =>
       consumptionGrowth > 0; // Higher km/L is better
-
-  // Summary
   bool get hasImprovedEfficiency => isConsumptionImproving;
   bool get hasReducedCosts => !isFuelSpentIncreasing;
   bool get hasIncreasedUsage => isDistanceIncreasing;
-
-  // Formatted growth rates
   String get formattedFuelSpentGrowth =>
       '${fuelSpentGrowth.abs().toStringAsFixed(1)}%';
   String get formattedFuelLitersGrowth =>
@@ -54,8 +45,6 @@ class ReportComparisonEntity extends Equatable {
       '${distanceGrowth.abs().toStringAsFixed(1)}%';
   String get formattedConsumptionGrowth =>
       '${consumptionGrowth.abs().toStringAsFixed(1)}%';
-
-  // Comparison insights text
   String get fuelSpentInsight {
     if (fuelSpentGrowth > 5) {
       return 'Gastos com combustível aumentaram significativamente';
@@ -97,8 +86,6 @@ class ReportComparisonEntity extends Equatable {
       return 'Uso do veículo mantido estável';
     }
   }
-
-  // Overall assessment
   String get overallAssessment {
     int positiveFactors = 0;
     int negativeFactors = 0;

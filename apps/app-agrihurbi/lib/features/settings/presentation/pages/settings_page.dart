@@ -20,8 +20,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
-
-    // Initialize settings provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(settingsProviderProvider).initialize();
     });
@@ -707,9 +705,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _exportSettings(SettingsProvider provider) async {
     final data = await provider.exportSettings();
     if (data != null) {
-      // Implement file export logic here
       if (!context.mounted) return;
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Configurações exportadas com sucesso')),
       );
@@ -717,7 +713,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _importSettings(SettingsProvider provider) {
-    // Implement file picker logic here
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Funcionalidade de importação será implementada'),

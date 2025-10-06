@@ -4,23 +4,15 @@ import 'package:core/core.dart';
 /// Registra todos os serviços necessários para exclusão de conta segura
 class AccountDeletionModule {
   static void init(GetIt sl) {
-    // 1. FirestoreDeletionService
     sl.registerLazySingleton<FirestoreDeletionService>(
       () => FirestoreDeletionService(),
     );
-
-    // 2. RevenueCatCancellationService
     sl.registerLazySingleton<RevenueCatCancellationService>(
       () => RevenueCatCancellationService(),
     );
-
-    // 3. AccountDeletionRateLimiter
     sl.registerLazySingleton<AccountDeletionRateLimiter>(
       () => AccountDeletionRateLimiter(),
     );
-
-    // 4. EnhancedAccountDeletionService
-    // Depende de: IAuthRepository, IAppDataCleaner, e os serviços acima
     sl.registerLazySingleton<EnhancedAccountDeletionService>(
       () => EnhancedAccountDeletionService(
         authRepository: sl<IAuthRepository>(),

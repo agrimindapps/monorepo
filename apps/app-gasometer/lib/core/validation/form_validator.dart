@@ -173,16 +173,12 @@ class FormValidator {
   /// Valida um campo individualmente usando o sistema existente
   Future<ValidationResult> _validateField(FormFieldData field) async {
     final text = field.controller.text;
-
-    // Validador customizado tem prioridade
     if (field.customValidator != null) {
       final error = field.customValidator!(text);
       return error != null
           ? ValidationResult.error(error)
           : ValidationResult.success();
     }
-
-    // Usar sistema de validação existente do ValidatedFormField
     final validationService = _ValidationServiceAdapter();
 
     return validationService.validateByType(
@@ -276,8 +272,6 @@ class _ValidationServiceAdapter {
     double? initialOdometer,
     double? tankCapacity,
   }) {
-    // Importar ValidationService do sistema existente
-    // Note: Isso será resolvido na implementação real
 
     switch (type) {
       case ValidationType.none:
@@ -342,8 +336,6 @@ class _ValidationServiceAdapter {
         return ValidationResult.success(); // Handled by customValidator
     }
   }
-
-  // Implementações das validações (baseadas no sistema existente)
 
   ValidationResult _validateRequired(String text, String label) {
     if (text.trim().isEmpty) {
@@ -461,8 +453,6 @@ class _ValidationServiceAdapter {
 
   ValidationResult _validateLicensePlate(String text) {
     if (text.isEmpty) return ValidationResult.success();
-
-    // Formato brasileiro: ABC1234 ou ABC1D23 (Mercosul)
     final oldFormatRegex = RegExp(r'^[A-Z]{3}\d{4}$');
     final mercosulFormatRegex = RegExp(r'^[A-Z]{3}\d[A-Z]\d{2}$');
 
@@ -479,8 +469,6 @@ class _ValidationServiceAdapter {
     if (text.length != 17) {
       return ValidationResult.error('Chassi deve ter 17 caracteres');
     }
-
-    // Chassi não pode conter I, O, Q
     final invalidChars = RegExp(r'[IOQ]');
     if (invalidChars.hasMatch(text)) {
       return ValidationResult.error('Chassi não pode conter as letras I, O ou Q');
@@ -495,8 +483,6 @@ class _ValidationServiceAdapter {
     if (text.length != 11) {
       return ValidationResult.error('Renavam deve ter 11 dígitos');
     }
-
-    // Validação básica de dígito verificador
     final digits = text.split('').map(int.parse).toList();
     final sequence = [3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 

@@ -294,13 +294,11 @@ class _NewsFilterWidgetState extends State<NewsFilterWidget> {
       setState(() {
         if (isFromDate) {
           _fromDate = date;
-          // If from date is after to date, clear to date
           if (_toDate != null && date.isAfter(_toDate!)) {
             _toDate = null;
           }
         } else {
           _toDate = date;
-          // If to date is before from date, clear from date
           if (_fromDate != null && date.isBefore(_fromDate!)) {
             _fromDate = null;
           }

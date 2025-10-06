@@ -145,7 +145,6 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
         icon: Icons.directions_car_outlined,
         actionLabel: 'Selecionar veículo',
         onAction: () {
-          // TODO: Implementar seleção de veículo
         },
       );
     }

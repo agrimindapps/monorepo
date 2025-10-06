@@ -45,7 +45,6 @@ class ImagePickerService {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Título (opcional)
                 if (title != null) ...[
                   Text(
                     title,
@@ -53,8 +52,6 @@ class ImagePickerService {
                   ),
                   const SizedBox(height: 16),
                 ],
-
-                // Opção Câmera
                 ListTile(
                   leading: const Icon(Icons.camera_alt),
                   title: Text(texts.cameraTitle),
@@ -64,8 +61,6 @@ class ImagePickerService {
                     onCameraSelected();
                   },
                 ),
-
-                // Opção Galeria
                 ListTile(
                   leading: const Icon(Icons.photo_library),
                   title: Text(texts.galleryTitle),
@@ -75,8 +70,6 @@ class ImagePickerService {
                     onGallerySelected();
                   },
                 ),
-
-                // Opção Cancelar
                 ListTile(
                   leading: const Icon(Icons.cancel),
                   title: Text(texts.cancelTitle),

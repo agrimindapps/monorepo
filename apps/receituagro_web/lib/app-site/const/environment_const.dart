@@ -40,7 +40,6 @@ class Environment {
           ? prod['altAdmobBanner-android']
           : prod['altAdmobBanner-ios'];
     } else {
-      // Android Test
       admobBanner = GetPlatform.isAndroid
           ? hml['admobBanner-android']
           : hml['admobBanner-ios'];

@@ -11,8 +11,6 @@ class PromoRepositoryImpl implements PromoRepository {
   @override
   Future<Either<Failure, PromoContent>> getPromoContent() async {
     try {
-      // For now, return mock data. In a real implementation,
-      // this would fetch from an API or local storage
       await Future<void>.delayed(const Duration(seconds: 1)); // Simulate network delay
       
       final promoContent = PromoContentModel.mock();
@@ -25,11 +23,7 @@ class PromoRepositoryImpl implements PromoRepository {
   @override
   Future<Either<Failure, void>> submitPreRegistration(String email) async {
     try {
-      // Simulate API call
       await Future<void>.delayed(const Duration(seconds: 2));
-      
-      // For now, just simulate success. In a real implementation,
-      // this would send the email to a backend service
       if (email.isEmpty || !email.contains('@')) {
         return const Left(ValidationFailure(message: 'E-mail inválido'));
       }
@@ -43,11 +37,7 @@ class PromoRepositoryImpl implements PromoRepository {
   @override
   Future<Either<Failure, void>> trackEvent(String event, Map<String, dynamic> parameters) async {
     try {
-      // For now, just simulate success. In a real implementation,
-      // this would send analytics events to services like Firebase Analytics
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      
-      // Log the event for development purposes
       print('Analytics Event: $event with parameters: $parameters');
       
       return const Right(null);

@@ -11,16 +11,10 @@ class NotificationsSettingsProvider extends ChangeNotifier {
     required SharedPreferences prefs,
   }) : _notificationService = notificationService,
        _prefs = prefs;
-
-  // Estado de carregamento
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-
-  // Estado das permissões
   bool _areNotificationsEnabled = false;
   bool get areNotificationsEnabled => _areNotificationsEnabled;
-
-  // Configurações gerais
   bool _taskRemindersEnabled = true;
   bool _overdueNotificationsEnabled = true;
   bool _dailySummaryEnabled = true;
@@ -28,15 +22,11 @@ class NotificationsSettingsProvider extends ChangeNotifier {
   bool get taskRemindersEnabled => _taskRemindersEnabled;
   bool get overdueNotificationsEnabled => _overdueNotificationsEnabled;
   bool get dailySummaryEnabled => _dailySummaryEnabled;
-
-  // Configurações de tempo
   int _reminderMinutesBefore = 60;
   TimeOfDay _dailySummaryTime = const TimeOfDay(hour: 8, minute: 0);
 
   int get reminderMinutesBefore => _reminderMinutesBefore;
   TimeOfDay get dailySummaryTime => _dailySummaryTime;
-
-  // Configurações por tipo de tarefa
   final Map<String, bool> _taskTypeSettings = {
     'Regar': true,
     'Adubar': true,
@@ -49,8 +39,6 @@ class NotificationsSettingsProvider extends ChangeNotifier {
   };
 
   Map<String, bool> get taskTypeSettings => Map.unmodifiable(_taskTypeSettings);
-
-  // Chaves para SharedPreferences
   static const String _keyTaskReminders = 'notifications_task_reminders';
   static const String _keyOverdueNotifications = 'notifications_overdue';
   static const String _keyDailySummary = 'notifications_daily_summary';
@@ -65,11 +53,8 @@ class NotificationsSettingsProvider extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      // Verificar permissões
       _areNotificationsEnabled =
           await _notificationService.areNotificationsEnabled();
-
-      // Carregar configurações salvas
       _taskRemindersEnabled = _prefs.getBool(_keyTaskReminders) ?? true;
       _overdueNotificationsEnabled =
           _prefs.getBool(_keyOverdueNotifications) ?? true;
@@ -79,8 +64,6 @@ class NotificationsSettingsProvider extends ChangeNotifier {
       final hour = _prefs.getInt(_keyDailySummaryHour) ?? 8;
       final minute = _prefs.getInt(_keyDailySummaryMinute) ?? 0;
       _dailySummaryTime = TimeOfDay(hour: hour, minute: minute);
-
-      // Carregar configurações por tipo de tarefa
       for (final key in _taskTypeSettings.keys) {
         _taskTypeSettings[key] =
             _prefs.getBool(_keyTaskTypePrefix + key) ?? true;

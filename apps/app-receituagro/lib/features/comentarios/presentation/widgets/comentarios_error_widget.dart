@@ -109,13 +109,10 @@ class ComentariosErrorWidget extends StatelessWidget {
   }
 
   String _getFormattedMessage() {
-    // Clean up technical error prefixes
     String cleanError = error
         .replaceAll(RegExp(r'^[A-Za-z]+Exception:\s*'), '')
         .replaceAll(RegExp(r'^Exception:\s*'), '')
         .replaceAll(RegExp(r'^Error:\s*'), '');
-
-    // Provide user-friendly fallback messages
     if (cleanError.isEmpty || cleanError.length < 10) {
       return _getDefaultMessage();
     }
@@ -160,8 +157,6 @@ class ComentariosErrorWidget extends StatelessWidget {
       ),
     );
   }
-
-  // Helper methods to classify errors
   bool _isNetworkError() {
     final lowerError = error.toLowerCase();
     return lowerError.contains('network') ||

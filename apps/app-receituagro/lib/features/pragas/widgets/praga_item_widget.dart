@@ -62,11 +62,8 @@ class PragaItemWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
-              // Imagem da praga ocupando todo o card
               _buildFullImage(),
-              // Gradiente overlay para legibilidade do texto
               _buildGradientOverlay(),
-              // Conteúdo textual sobreposto
               _buildOverlayContent(),
             ],
           ),
@@ -174,8 +171,6 @@ class PragaItemWidget extends StatelessWidget {
         return FontAwesomeIcons.exclamationTriangle;
     }
   }
-
-  // Métodos específicos para o modo grid com imagem em tela cheia
   Widget _buildFullImage() {
     final color = _getTypeColor();
 

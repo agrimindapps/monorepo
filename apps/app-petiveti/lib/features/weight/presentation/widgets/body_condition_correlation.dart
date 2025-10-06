@@ -163,8 +163,6 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
             ),
           ),
           const SizedBox(height: 16),
-          
-          // Correlation chart placeholder
           Container(
             height: 180,
             decoration: BoxDecoration(
@@ -181,8 +179,6 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
           ),
           
           const SizedBox(height: 16),
-          
-          // Correlation metrics
           _buildCorrelationMetrics(theme, mockData),
         ],
       ),
@@ -448,8 +444,6 @@ class _BodyConditionCorrelationState extends ConsumerState<BodyConditionCorrelat
       ),
     );
   }
-
-  // Mock data and helpers
   List<Map<String, double>> _generateMockCorrelationData() {
     return [
       {'weight': 18.5, 'bcs': 3.0},
@@ -512,8 +506,6 @@ class CorrelationChartPainter extends CustomPainter {
       ..color = Colors.red
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-
-    // Chart bounds
     const padding = 40.0;
     final chartRect = Rect.fromLTWH(
       padding,
@@ -521,8 +513,6 @@ class CorrelationChartPainter extends CustomPainter {
       size.width - padding * 2,
       size.height - padding * 2,
     );
-
-    // Find min/max values
     final weights = data.map((d) => d['weight']!).toList();
     final bcsValues = data.map((d) => d['bcs']!).toList();
     
@@ -530,8 +520,6 @@ class CorrelationChartPainter extends CustomPainter {
     final maxWeight = weights.reduce((a, b) => a > b ? a : b);
     final minBcs = bcsValues.reduce((a, b) => a < b ? a : b);
     final maxBcs = bcsValues.reduce((a, b) => a > b ? a : b);
-
-    // Draw data points
     for (final point in data) {
       final x = chartRect.left + 
           ((point['weight']! - minWeight) / (maxWeight - minWeight)) * chartRect.width;
@@ -540,8 +528,6 @@ class CorrelationChartPainter extends CustomPainter {
       
       canvas.drawCircle(Offset(x, y), 4, paint);
     }
-
-    // Draw trend line (simplified)
     if (data.length > 1) {
       final firstPoint = data.first;
       final lastPoint = data.last;
@@ -558,20 +544,14 @@ class CorrelationChartPainter extends CustomPainter {
       
       canvas.drawLine(Offset(startX, startY), Offset(endX, endY), linePaint);
     }
-
-    // Draw axes
     final axisPaint = Paint()
       ..color = Colors.grey[400]!
       ..strokeWidth = 1;
-
-    // X axis
     canvas.drawLine(
       Offset(chartRect.left, chartRect.bottom),
       Offset(chartRect.right, chartRect.bottom),
       axisPaint,
     );
-
-    // Y axis
     canvas.drawLine(
       Offset(chartRect.left, chartRect.top),
       Offset(chartRect.left, chartRect.bottom),

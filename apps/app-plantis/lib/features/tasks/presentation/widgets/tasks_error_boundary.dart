@@ -38,13 +38,9 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
   }
 
   void _logError(FlutterErrorDetails details) {
-    // Log to console for debugging
     debugPrint('🚨 Tasks Error Boundary caught error:');
     debugPrint('Error: ${details.exception}');
     debugPrint('Stack trace: ${details.stack}');
-
-    // In production, you might want to report to crash analytics
-    // Example: FirebaseCrashlytics.instance.recordFlutterError(details);
   }
 
   @override
@@ -52,15 +48,12 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
     if (_hasError) {
       return _buildErrorUI(context);
     }
-
-    // Use proper Flutter error boundary pattern with runZonedGuarded
     return _buildWithErrorZone(context);
   }
 
   Widget _buildWithErrorZone(BuildContext context) {
     return Builder(
       builder: (context) {
-        // Use a simple try-catch approach for error boundary
         try {
           return widget.child;
         } catch (error, stackTrace) {
@@ -98,7 +91,6 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Error icon
               Container(
                 width: 120,
                 height: 120,
@@ -116,8 +108,6 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
               ),
 
               const SizedBox(height: 32),
-
-              // Error title
               Text(
                 'Oops! Algo deu errado',
                 style: theme.textTheme.headlineMedium?.copyWith(
@@ -128,8 +118,6 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
               ),
 
               const SizedBox(height: 16),
-
-              // Error message
               Text(
                 widget.customErrorMessage ??
                     'Ocorreu um erro inesperado. Não se preocupe, seus dados estão seguros.',
@@ -140,16 +128,12 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
               ),
 
               const SizedBox(height: 8),
-
-              // Technical details (only in debug mode)
               if (_errorDetails != null) ...[
                 const SizedBox(height: 16),
                 _buildTechnicalDetails(theme),
               ],
 
               const SizedBox(height: 48),
-
-              // Action buttons
               Row(
                 children: [
                   Expanded(
@@ -179,8 +163,6 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
               ),
 
               const SizedBox(height: 16),
-
-              // Report issue button
               TextButton.icon(
                 onPressed: () => _handleReportIssue(context),
                 icon: const Icon(Icons.bug_report, size: 18),
@@ -255,23 +237,18 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
 
   void _handleRefresh(BuildContext context) {
     try {
-      // Try to refresh the tasks
       if (widget.onRetry != null) {
         widget.onRetry!();
       } else {
-        // Safely access TasksNotifier with error handling
         final tasksNotifier = ref.read(tasksProvider.notifier);
         tasksNotifier.clearError(); // Clear any existing errors
         tasksNotifier.loadTasks();
       }
-
-      // Reset error state
       setState(() {
         _hasError = false;
         _errorDetails = null;
       });
     } catch (e) {
-      // If refresh also fails, show a snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Não foi possível recarregar. Tente reiniciar.'),
@@ -287,18 +264,13 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
   }
 
   void _handleRestart(BuildContext context) {
-    // Reset error state and rebuild the entire widget
     setState(() {
       _hasError = false;
       _errorDetails = null;
     });
-
-    // Clear any cached state in the notifier
     try {
       final tasksNotifier = ref.read(tasksProvider.notifier);
       tasksNotifier.clearError();
-
-      // Reload tasks from scratch
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           tasksNotifier.loadTasks();
@@ -306,7 +278,6 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
       });
     } catch (e) {
       debugPrint('Error during restart: $e');
-      // Show error feedback to user
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -325,11 +296,7 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
         _errorDetails != null
             ? 'Erro: ${_errorDetails!.exception}\n\nStack Trace:\n${_errorDetails!.stack}'
             : 'Erro não identificado';
-
-    // Copy error details to clipboard
     Clipboard.setData(ClipboardData(text: errorInfo));
-
-    // Show feedback to user
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text(
@@ -344,22 +311,10 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
         ),
       ),
     );
-
-    // In a real app, you might want to open email or support form
-    // Example:
-    // final Uri emailUri = Uri(
-    //   scheme: 'mailto',
-    //   path: 'support@plantis.app',
-    //   query: 'subject=Bug Report&body=${Uri.encodeComponent(errorInfo)}',
-    // );
-    // if (await canLaunchUrl(emailUri)) {
-    //   await launchUrl(emailUri);
-    // }
   }
 
   @override
   void dispose() {
-    // Clean up any resources
     _errorDetails = null;
     super.dispose();
   }

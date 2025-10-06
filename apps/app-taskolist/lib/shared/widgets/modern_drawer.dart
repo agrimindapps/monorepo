@@ -21,7 +21,6 @@ class ModernDrawer extends ConsumerWidget {
       elevation: 0,
       child: Column(
         children: [
-          // Header com gradiente
           Container(
             height: 200,
             decoration: BoxDecoration(
@@ -40,7 +39,6 @@ class ModernDrawer extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Avatar com animação
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
                       duration: const Duration(milliseconds: 800),
@@ -68,8 +66,6 @@ class ModernDrawer extends ConsumerWidget {
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // Nome do usuário
                     Text(
                       userDisplayName,
                       style: const TextStyle(
@@ -80,8 +76,6 @@ class ModernDrawer extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-
-                    // Email ou status anônimo
                     Text(
                       isAnonymous ? 'Modo Anônimo' : userEmail,
                       style: TextStyle(
@@ -95,8 +89,6 @@ class ModernDrawer extends ConsumerWidget {
               ),
             ),
           ),
-
-          // Menu items
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -172,8 +164,6 @@ class ModernDrawer extends ConsumerWidget {
               ],
             ),
           ),
-
-          // Footer com logout
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

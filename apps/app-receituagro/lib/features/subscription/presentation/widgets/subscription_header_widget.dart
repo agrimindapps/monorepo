@@ -13,7 +13,6 @@ class SubscriptionHeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Título principal
         const Text(
           'Tenha acesso ilimitado\na todos os recursos',
           textAlign: TextAlign.center,
@@ -26,8 +25,6 @@ class SubscriptionHeaderWidget extends StatelessWidget {
         ),
         
         const SizedBox(height: 12),
-        
-        // Subtítulo
         Text(
           'Desbloqueie todo o potencial do ReceitAgro',
           textAlign: TextAlign.center,

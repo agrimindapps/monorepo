@@ -59,27 +59,16 @@ class _CalculatorSearchFiltersWidgetState extends State<CalculatorSearchFiltersW
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Categoria
             _buildCategoryFilter(),
             const SizedBox(height: 16),
-            
-            // Complexidade
             _buildComplexityFilter(),
             const SizedBox(height: 16),
-            
-            // Tags
             _buildTagsFilter(),
             const SizedBox(height: 16),
-            
-            // Ordenação
             _buildSortOrderFilter(),
             const SizedBox(height: 16),
-            
-            // Favoritos
             _buildFavoritesFilter(),
             const SizedBox(height: 16),
-            
-            // Botões de ação
             _buildActionButtons(),
           ],
         ),

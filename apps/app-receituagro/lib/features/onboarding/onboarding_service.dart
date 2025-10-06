@@ -152,16 +152,10 @@ class OnboardingService {
   late ILocalStorageRepository _localStorage;
   late IAnalyticsRepository _analytics;
   bool _isInitialized = false;
-
-  // Onboarding configuration
   final List<OnboardingStep> _onboardingSteps = [];
   OnboardingProgress? _currentProgress;
-  
-  // Feature discovery
   final List<FeatureTooltip> _featureTooltips = [];
   final Set<String> _shownTooltips = {};
-
-  // Constants
   static const String _progressKey = 'receituagro_onboarding_progress';
   static const String _tooltipsKey = 'receituagro_shown_tooltips';
 
@@ -174,14 +168,8 @@ class OnboardingService {
 
     _localStorage = localStorage;
     _analytics = analytics;
-
-    // Setup default onboarding flow
     await _setupOnboardingSteps();
-
-    // Setup feature discovery tooltips
     await _setupFeatureTooltips();
-
-    // Load saved progress
     await _loadProgress();
 
     _isInitialized = true;
@@ -345,8 +333,6 @@ class OnboardingService {
 
     _currentProgress = progress;
     await _saveProgress();
-
-    // Log analytics
     await _analytics.logEvent(
       'onboarding_started',
       parameters: {
@@ -368,25 +354,17 @@ class OnboardingService {
       (s) => s.id == stepId,
       orElse: () => throw Exception('Step not found: $stepId'),
     );
-
-    // Check dependencies
     for (final dependency in step.dependencies) {
       if (_currentProgress!.completedSteps[dependency] != true) {
         throw Exception('Dependency not completed: $dependency');
       }
     }
-
-    // Mark step as completed
     final updatedSteps = Map<String, bool>.from(_currentProgress!.completedSteps);
     updatedSteps[stepId] = true;
-
-    // Find next step
     final currentIndex = _onboardingSteps.indexWhere((s) => s.id == stepId);
     final nextStep = currentIndex < _onboardingSteps.length - 1 
         ? _onboardingSteps[currentIndex + 1] 
         : null;
-
-    // Check if onboarding is complete
     final requiredSteps = _onboardingSteps.where((s) => s.isRequired).toList();
     final completedRequired = requiredSteps.where((s) => updatedSteps[s.id] == true).length;
     final isCompleted = completedRequired == requiredSteps.length;
@@ -399,8 +377,6 @@ class OnboardingService {
     );
 
     await _saveProgress();
-
-    // Log analytics
     await _analytics.logEvent(
       'onboarding_step_completed',
       parameters: {
@@ -448,8 +424,6 @@ class OnboardingService {
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
-
-    // Mark as completed (skipped)
     await completeStep(stepId);
   }
 
@@ -555,7 +529,6 @@ class OnboardingService {
       final tooltipsResult = await _localStorage.get<String>(key: _tooltipsKey);
       await tooltipsResult.fold(
         (failure) async {
-          // No saved tooltips
         },
         (data) async {
           if (data != null) {

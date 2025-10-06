@@ -19,7 +19,6 @@ import '../di_module.dart';
 class AnimalsModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
-    // Data sources
     getIt.registerLazySingleton<AnimalLocalDataSource>(
       () => AnimalLocalDataSourceImpl(getIt()),
     );
@@ -27,8 +26,6 @@ class AnimalsModule implements DIModule {
     getIt.registerLazySingleton<AnimalRemoteDataSource>(
       () => AnimalRemoteDataSourceImpl(),
     );
-
-    // Repository
     getIt.registerLazySingleton<AnimalRepository>(
       () => AnimalRepositoryImpl(
         localDataSource: getIt<AnimalLocalDataSource>(),
@@ -36,8 +33,6 @@ class AnimalsModule implements DIModule {
         connectivity: getIt(),
       ),
     );
-
-    // Use cases
     getIt.registerLazySingleton<GetAnimals>(
       () => GetAnimals(getIt<AnimalRepository>()),
     );

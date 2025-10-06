@@ -322,8 +322,6 @@ class WidgetFactory {
     Widget? child,
     bool isLoading = true,
   }) {
-    // Import UIComponents dynamically to avoid circular imports
-    // This will be refactored when UIComponents is fully integrated
     switch (type) {
       case LoadingType.center:
         return Center(

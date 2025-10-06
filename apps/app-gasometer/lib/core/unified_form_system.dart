@@ -22,15 +22,10 @@
 /// )
 /// ```
 library;
-
-// Mixins
 export 'mixins/rate_limited_submission.dart';
-// Services & Validators
 export 'services/unified_formatters.dart';
 export 'services/unified_validators.dart';
-// Design System
 export 'theme/unified_design_tokens.dart';
-// Core Components
 export 'widgets/unified_date_picker.dart';
 export 'widgets/unified_form_dialog.dart';
 export 'widgets/unified_form_field.dart';

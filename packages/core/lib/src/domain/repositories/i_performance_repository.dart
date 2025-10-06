@@ -2,9 +2,6 @@ import '../entities/performance_entity.dart';
 
 /// Interface para operações de monitoramento de performance
 abstract class IPerformanceRepository {
-  // ==========================================================================
-  // CONTROLE DE MONITORAMENTO
-  // ==========================================================================
 
   /// Inicializar monitoramento de performance
   Future<bool> startPerformanceTracking({PerformanceConfig? config});
@@ -24,10 +21,6 @@ abstract class IPerformanceRepository {
   /// Configurar thresholds de performance
   Future<void> setPerformanceThresholds(PerformanceThresholds thresholds);
 
-  // ==========================================================================
-  // MONITORAMENTO DE FPS
-  // ==========================================================================
-
   /// Stream de FPS em tempo real
   Stream<double> getFpsStream();
 
@@ -39,10 +32,6 @@ abstract class IPerformanceRepository {
 
   /// Verificar se FPS está dentro do threshold aceitável
   Future<bool> isFpsHealthy();
-
-  // ==========================================================================
-  // MONITORAMENTO DE MEMÓRIA
-  // ==========================================================================
 
   /// Stream de uso de memória em tempo real
   Stream<MemoryUsage> getMemoryStream();
@@ -56,10 +45,6 @@ abstract class IPerformanceRepository {
   /// Forçar garbage collection (apenas para debug)
   Future<void> forceGarbageCollection();
 
-  // ==========================================================================
-  // MONITORAMENTO DE CPU
-  // ==========================================================================
-
   /// Obter uso atual de CPU
   Future<double> getCpuUsage();
 
@@ -68,10 +53,6 @@ abstract class IPerformanceRepository {
 
   /// Verificar se CPU está com uso saudável
   Future<bool> isCpuHealthy();
-
-  // ==========================================================================
-  // MÉTRICAS DE INICIALIZAÇÃO
-  // ==========================================================================
 
   /// Obter métricas de startup do app
   Future<AppStartupMetrics> getStartupMetrics();
@@ -84,10 +65,6 @@ abstract class IPerformanceRepository {
 
   /// Marcar app como interativo
   Future<void> markAppInteractive();
-
-  // ==========================================================================
-  // TRACES CUSTOMIZADOS
-  // ==========================================================================
 
   /// Iniciar trace customizado
   Future<void> startTrace(String traceName, {Map<String, String>? attributes});
@@ -104,10 +81,6 @@ abstract class IPerformanceRepository {
 
   /// Obter traces ativos
   List<String> getActiveTraces();
-
-  // ==========================================================================
-  // MÉTRICAS CUSTOMIZADAS
-  // ==========================================================================
 
   /// Registrar métrica customizada
   Future<void> recordCustomMetric({
@@ -126,10 +99,6 @@ abstract class IPerformanceRepository {
 
   /// Registrar tempo de operação
   Future<void> recordTiming(String name, Duration duration, {Map<String, String>? tags});
-
-  // ==========================================================================
-  // RELATÓRIOS E HISTÓRICO
-  // ==========================================================================
 
   /// Obter métricas atuais consolidadas
   Future<PerformanceMetrics> getCurrentMetrics();
@@ -154,10 +123,6 @@ abstract class IPerformanceRepository {
     DateTime? endTime,
   });
 
-  // ==========================================================================
-  // ALERTAS E NOTIFICAÇÕES
-  // ==========================================================================
-
   /// Stream de alertas de performance
   Stream<Map<String, dynamic>> getPerformanceAlertsStream();
 
@@ -169,10 +134,6 @@ abstract class IPerformanceRepository {
     void Function(String alertType, Map<String, dynamic> data) callback,
   );
 
-  // ==========================================================================
-  // INTEGRAÇÃO FIREBASE
-  // ==========================================================================
-
   /// Enviar métricas para Firebase Performance
   Future<bool> syncWithFirebase();
 
@@ -181,10 +142,6 @@ abstract class IPerformanceRepository {
 
   /// Desabilitar integração com Firebase
   Future<void> disableFirebaseSync();
-
-  // ==========================================================================
-  // UTILITÁRIOS
-  // ==========================================================================
 
   /// Limpar dados de performance antigos
   Future<void> clearOldPerformanceData({Duration? olderThan});

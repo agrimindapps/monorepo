@@ -48,8 +48,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       data: (authData) {
         final isAuthenticated = authData.isAuthenticated && !authData.isAnonymous;
         final user = authData.currentUser;
-
-        // Initialize settings once when authenticated
         if (!_settingsInitialized && isAuthenticated && user?.id != null) {
           _settingsInitialized = true;
           final userId = user?.id;
@@ -59,8 +57,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             });
           }
         }
-
-        // Debug: Log auth state changes para monitoramento
         debugPrint('🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}');
 
         return Scaffold(
@@ -70,7 +66,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: ResponsiveContentWrapper(
                 child: Column(
                   children: [
-                    // Modern Header
                     ModernHeaderWidget(
                       title: isAuthenticated 
                           ? _getUserDisplayTitle(user)
@@ -84,37 +79,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                     
                     const SizedBox(height: 16),
-                    
-                    // Content
                     Expanded(
                       child: settingsState.when(
                         data: (settingsData) => SingleChildScrollView(
                           padding: const EdgeInsets.all(8),
                           child: Column(
                             children: [
-                              // Seção do Usuário (estilo Plantis)
                               _buildUserSection(context, authData),
                               const SizedBox(height: 12),
-
-                              // Informações da Conta (apenas para usuários logados)
                               if (isAuthenticated) ...[
                                 _buildAccountInfoSection(context, authData),
                                 const SizedBox(height: 12),
                               ],
-
-                              // Seção de Dispositivos Conectados
                               if (isAuthenticated) ...[
                                 _buildDevicesSection(context, settingsData),
                                 const SizedBox(height: 12),
                               ],
-
-                              // Dados e Sincronização
                               if (isAuthenticated) ...[
                                 _buildDataSyncSection(context, authData),
                                 const SizedBox(height: 12),
                               ],
-
-                              // Ações do Usuário (nova seção)
                               if (isAuthenticated) ...[
                                 _buildUserActionsSection(context, authData),
                                 const SizedBox(height: 12),
@@ -162,7 +146,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              // Avatar com design melhorado
               DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -198,8 +181,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ),
               const SizedBox(width: 16),
-              
-              // Informações do usuário
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,15 +364,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         builder: (context) => const LoginPage(),
       ),
     );
-    
-    // Log quando retornar da LoginPage
     debugPrint('🔙 ProfilePage: Returned from LoginPage with result: $result');
-    
-    // Força rebuild do Consumer para garantir que o estado seja atualizado
     if (mounted) {
       debugPrint('📱 ProfilePage: State refresh triggered');
-      // O Consumer automaticamente detecta mudanças no AuthProvider
-      // Não é necessário chamar setState() pois estamos usando Provider
     }
   }
 
@@ -480,8 +455,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Helper: Obter tempo de membro
   String _getMemberSince(dynamic createdAt) {
     if (createdAt == null) return 'Membro desde 10 dias';
-
-    // Convert to DateTime if needed
     final DateTime date = createdAt is DateTime ? createdAt : DateTime.now();
 
     final now = DateTime.now();
@@ -497,8 +470,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       return 'Membro desde $years ${years == 1 ? 'ano' : 'anos'}';
     }
   }
-
-  // Placeholder methods for navigation
 
 
 

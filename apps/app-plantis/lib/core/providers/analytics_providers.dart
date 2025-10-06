@@ -91,10 +91,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   /// Direct access to enhanced service para funcionalidades avançadas
   EnhancedAnalyticsService get enhancedService => _enhancedService;
 
-  // ==========================================================================
-  // MÉTODOS PRINCIPAIS DE ANALYTICS
-  // ==========================================================================
-
   /// Logs screen view com tratamento de erro aprimorado
   Future<void> logScreenView(String screenName) async {
     if (!state.isAnalyticsEnabled) return;
@@ -172,10 +168,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     }
   }
 
-  // ==========================================================================
-  // EVENTOS DE AUTENTICAÇÃO
-  // ==========================================================================
-
   Future<void> logLogin(String method) async {
     await logEvent('login', {'method': method});
   }
@@ -188,10 +180,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     await logEvent('logout', null);
   }
 
-  // ==========================================================================
-  // EVENTOS DE LIFECYCLE DO APP
-  // ==========================================================================
-
   Future<void> logAppOpen() async {
     await logEvent('app_open', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
@@ -200,17 +188,9 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     await logEvent('app_background', {AppConstants.analyticsAppParam: AppConstants.appId});
   }
 
-  // ==========================================================================
-  // EVENTOS DE USO DE FUNCIONALIDADES
-  // ==========================================================================
-
   Future<void> logFeatureUsed(String featureName) async {
     await logEvent('feature_used', {'feature': featureName});
   }
-
-  // ==========================================================================
-  // EVENTOS ESPECÍFICOS DO PLANTIS (Enhanced com eventos tipados)
-  // ==========================================================================
 
   Future<void> logPlantCreated({Map<String, dynamic>? additionalData}) async {
     if (!state.isAnalyticsEnabled) return;
@@ -387,10 +367,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     }
   }
 
-  // ==========================================================================
-  // EVENTOS PREMIUM
-  // ==========================================================================
-
   Future<void> logSubscriptionPurchased(String productId, double price) async {
     if (!state.isAnalyticsEnabled) return;
 
@@ -420,10 +396,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     await logEvent('trial_ended', {'app': 'plantis', 'reason': reason});
   }
 
-  // ==========================================================================
-  // EVENTOS DE PESQUISA E DESCOBERTA
-  // ==========================================================================
-
   Future<void> logSearch(String query, int resultCount) async {
     await logEvent('search', {
       'query': query,
@@ -438,10 +410,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       'content_id': contentId,
     });
   }
-
-  // ==========================================================================
-  // EVENTOS DE ENGAJAMENTO
-  // ==========================================================================
 
   Future<void> logUserEngagement(String action, int durationSeconds) async {
     await logEvent('user_engagement', {
@@ -464,10 +432,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       'duration_seconds': durationSeconds,
     });
   }
-
-  // ==========================================================================
-  // DESENVOLVIMENTO E TESTES
-  // ==========================================================================
 
   Future<void> testCrash() async {
     try {
@@ -512,19 +476,13 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   }
 }
 
-// =============================================================================
-// PROVIDERS PRINCIPAIS
-// =============================================================================
-
 /// Provider do repositório de analytics (obtido via DI)
 final analyticsRepositoryProvider = Provider<IAnalyticsRepository>((ref) {
-  // TODO: Integrar com GetIt ou criar factory
   throw UnimplementedError('IAnalyticsRepository deve ser fornecido via DI');
 });
 
 /// Provider do repositório de crashlytics (obtido via DI)
 final crashlyticsRepositoryProvider = Provider<ICrashlyticsRepository>((ref) {
-  // TODO: Integrar com GetIt ou criar factory
   throw UnimplementedError('ICrashlyticsRepository deve ser fornecido via DI');
 });
 
@@ -539,10 +497,6 @@ final analyticsNotifierProvider =
         crashlyticsRepository: crashlyticsRepository,
       );
     });
-
-// =============================================================================
-// PROVIDERS DERIVADOS PARA FACILITAR USO
-// =============================================================================
 
 /// Provider para verificar se analytics está inicializado
 final analyticsInitializedProvider = Provider<bool>((ref) {
@@ -564,10 +518,6 @@ final isDebugModeProvider = Provider<bool>((ref) {
   return kDebugMode;
 });
 
-// =============================================================================
-// PROVIDERS DE CONVENIÊNCIA PARA USO DIRETO
-// =============================================================================
-
 /// Provider para acesso direto ao AnalyticsNotifier para métodos específicos
 final analyticsServiceProvider = Provider<AnalyticsNotifier>((ref) {
   return ref.watch(analyticsNotifierProvider.notifier);
@@ -577,8 +527,6 @@ final analyticsServiceProvider = Provider<AnalyticsNotifier>((ref) {
 final shouldShowAnalyticsSettingsProvider = Provider<bool>((ref) {
   final isDebug = ref.watch(isDebugModeProvider);
   final isEnabled = ref.watch(analyticsEnabledProvider);
-
-  // Mostrar configurações apenas em modo debug ou se analytics estiver habilitado
   return isDebug || isEnabled;
 });
 

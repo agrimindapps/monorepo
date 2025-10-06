@@ -1,5 +1,3 @@
-// Example of how to use the adapter pattern for Core entity integration
-// This demonstrates the bridge between Supabase models and Core entities
 
 import '../adapters/adapters.dart';
 import '../classes/fitossanitario_class.dart';
@@ -12,8 +10,6 @@ class AdapterUsageExample {
   /// Demonstrates Fitossanitario adapter usage
   static void demonstrateFitossanitarioAdapter() {
     print('=== Demonstrating Fitossanitario Adapter ===');
-    
-    // Create a sample Supabase model
     final supabaseModel = Fitossanitario(
       objectId: 'fit001',
       createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -32,13 +28,9 @@ class AdapterUsageExample {
       quantProduto: '250g/L',
       elegivel: true,
     );
-
-    // Convert to Core entity
     final coreEntity = FitossanitarioAdapter.toEntity(supabaseModel);
     print('Original: ${supabaseModel.nomeComum}');
     print('Core Entity: ${coreEntity.nome} (ID: ${coreEntity.id})');
-
-    // Convert back to Supabase model
     final backToSupabase = FitossanitarioAdapter.fromEntity(coreEntity);
     print('Converted back: ${backToSupabase.nomeComum}');
   }
@@ -117,8 +109,6 @@ class AdapterUsageExample {
   /// Demonstrates batch conversion
   static void demonstrateBatchConversion() {
     print('\n=== Demonstrating Batch Conversion ===');
-    
-    // Create multiple Supabase models
     final supabaseModels = [
       Fitossanitario(
         objectId: 'fit001',
@@ -157,16 +147,12 @@ class AdapterUsageExample {
         elegivel: true,
       ),
     ];
-
-    // Convert all to Core entities
     final coreEntities = FitossanitarioAdapter.toEntityList(supabaseModels);
     print('Converted ${supabaseModels.length} Supabase models to ${coreEntities.length} Core entities');
     
     for (int i = 0; i < coreEntities.length; i++) {
       print('  ${i + 1}. ${coreEntities[i].nome} (ID: ${coreEntities[i].id})');
     }
-
-    // Convert back to Supabase models
     final backToSupabase = FitossanitarioAdapter.fromEntityList(coreEntities);
     print('Converted back to ${backToSupabase.length} Supabase models');
   }
@@ -197,9 +183,6 @@ class RepositoryUsageExample {
   /// Shows how to use the new Core entity methods in repositories
   static Future<void> demonstrateRepositoryUsage() async {
     print('\n=== Repository Usage with Core Entities ===');
-    
-    // Note: This is pseudo-code since we don't have actual Supabase connection
-    // In real usage, you would instantiate the repositories with Supabase client
     
     print('Example repository calls:');
     print('');

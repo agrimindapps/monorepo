@@ -175,7 +175,6 @@ extension AuthResultExtension<T> on AuthResult<T> {
 
 /// Factory methods convenientes para casos comuns
 class AuthResults {
-  // Private constructor to prevent instantiation
   AuthResults._();
   /// Resultado de login bem-sucedido
   static AuthUserResult loginSuccess(UserEntity user, [String? moduleName]) {

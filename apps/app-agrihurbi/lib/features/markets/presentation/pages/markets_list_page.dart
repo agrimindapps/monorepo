@@ -31,13 +31,9 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
-    // Initialize market data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(marketProviderProvider).initialize();
     });
-
-    // Setup pagination on scroll
     _scrollController.addListener(_onScroll);
   }
 
@@ -52,7 +48,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      // TODO: Implement pagination
     }
   }
 
@@ -129,7 +124,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Market Summary Card
             if (provider.marketSummary != null)
               MarketSummaryCard(summary: provider.marketSummary!)
             else if (provider.isLoadingSummary)
@@ -141,8 +135,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
               ),
 
             const SizedBox(height: 24),
-
-            // Market Types
             Text(
               'Categorias de Mercado',
               style: Theme.of(
@@ -158,8 +150,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
             ),
 
             const SizedBox(height: 24),
-
-            // Top Performers Section
             TopPerformersSection(
               topGainers: provider.topGainers,
               topLosers: provider.topLosers,
@@ -178,7 +168,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
       onRefresh: () => provider.loadMarkets(refresh: true),
       child: Column(
         children: [
-          // Active filters indicator
           if (provider.currentFilter.hasActiveFilters)
             Container(
               width: double.infinity,
@@ -201,8 +190,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
                         .toList(),
               ),
             ),
-
-          // Markets list
           Expanded(
             child:
                 provider.isLoadingMarkets && provider.markets.isEmpty
@@ -304,8 +291,6 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
     if (query.trim().isNotEmpty) {
       final provider = ref.read(marketProviderProvider);
       provider.searchMarkets(query: query.trim());
-
-      // Switch to markets tab to show results
       _tabController.animateTo(1);
     }
   }

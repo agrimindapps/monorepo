@@ -39,7 +39,6 @@ class RevenueCatService implements ISubscriptionRepository {
     if (_isInitialized) return;
 
     try {
-      // Skip RevenueCat initialization in web environment
       if (kIsWeb) {
         if (kDebugMode) {
           debugPrint('[RevenueCat] Skipped - Web environment detected');
@@ -48,8 +47,6 @@ class RevenueCatService implements ISubscriptionRepository {
         _isInitialized = true;
         return;
       }
-
-      // Get API key without fallback - fail fast if missing
       final apiKey = EnvironmentConfig.getApiKey('REVENUE_CAT_API_KEY');
 
       if (apiKey.isEmpty) {
@@ -65,8 +62,6 @@ class RevenueCatService implements ISubscriptionRepository {
 
       final configuration = PurchasesConfiguration(apiKey);
       await Purchases.configure(configuration);
-
-      // Escutar mudanças nas compras
       Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
 
       _isInitialized = true;
@@ -74,7 +69,6 @@ class RevenueCatService implements ISubscriptionRepository {
       if (kDebugMode) {
         debugPrint('[RevenueCat] Initialization error: ${e.runtimeType}');
       }
-      // Don't set _isInitialized = true on error
     }
   }
 
@@ -124,8 +118,6 @@ class RevenueCatService implements ISubscriptionRepository {
       
       final customerInfo = await Purchases.getCustomerInfo();
       final subscriptions = <core_entities.SubscriptionEntity>[];
-
-      // Mapear assinaturas ativas
       for (final entry in customerInfo.entitlements.active.entries) {
         final entitlement = entry.value;
         final subscription = _mapEntitlementToSubscription(entitlement);
@@ -133,8 +125,6 @@ class RevenueCatService implements ISubscriptionRepository {
           subscriptions.add(subscription);
         }
       }
-
-      // Mapear assinaturas não-ativas (históricas)
       for (final entry in customerInfo.entitlements.all.entries) {
         final entitlement = entry.value;
         if (!entitlement.isActive) {
@@ -191,8 +181,6 @@ class RevenueCatService implements ISubscriptionRepository {
 
       final offerings = await Purchases.getOfferings();
       Package? targetPackage;
-
-      // Encontrar o package correspondente ao productId
       for (final offering in offerings.all.values) {
         for (final package in offering.availablePackages) {
           if (package.storeProduct.identifier == productId) {
@@ -297,9 +285,6 @@ class RevenueCatService implements ISubscriptionRepository {
   }) async {
     try {
       await _ensureInitialized();
-      
-      // TODO: Implementar lógica específica de elegibilidade para trial
-      // Por enquanto, verificar se não tem assinatura ativa
       final hasActive = await hasActiveSubscription();
       
       return hasActive.fold(
@@ -329,7 +314,6 @@ class RevenueCatService implements ISubscriptionRepository {
 
   @override
   Future<Either<Failure, String?>> getSubscriptionManagementUrl() async {
-    // Alias para getManagementUrl para compatibilidade
     return getManagementUrl();
   }
 
@@ -337,8 +321,6 @@ class RevenueCatService implements ISubscriptionRepository {
   Future<Either<Failure, void>> cancelSubscription({
     String? reason,
   }) async {
-    // RevenueCat não permite cancelar assinaturas diretamente do app
-    // Deve direcionar para as configurações da loja
     return const Left(RevenueCatFailure(
       'Cancelamento deve ser feito nas configurações da App Store/Play Store'
     ));
@@ -410,16 +392,12 @@ class RevenueCatService implements ISubscriptionRepository {
     if (!_isInitialized) {
       await _initialize();
     }
-    
-    // If disabled (web/dummy key), throw an exception
     if (_isDisabled) {
       throw PlatformException(
         code: 'NOT_AVAILABLE', 
         message: 'RevenueCat não disponível nesta plataforma',
       );
     }
-    
-    // If still not initialized, throw an exception
     if (!_isInitialized) {
       throw PlatformException(
         code: 'INITIALIZATION_ERROR',
@@ -505,7 +483,6 @@ class RevenueCatService implements ISubscriptionRepository {
         return DateTime.parse(date);
       } catch (e) {
         try {
-          // Tenta ISO 8601
           return DateTime.parse(date.replaceAll('Z', ''));
         } catch (e2) {
           return null;
@@ -560,8 +537,6 @@ class RevenueCatService implements ISubscriptionRepository {
     if (_isDisposed) return;
 
     _isDisposed = true;
-
-    // Remove listener do RevenueCat para evitar memory leak
     try {
       if (_isInitialized && !_isDisabled) {
         Purchases.removeCustomerInfoUpdateListener(_onCustomerInfoUpdated);
@@ -571,8 +546,6 @@ class RevenueCatService implements ISubscriptionRepository {
         debugPrint('[RevenueCat] Error removing listener: $e');
       }
     }
-
-    // Close stream controller
     _subscriptionController.close();
 
     if (kDebugMode) {

@@ -127,42 +127,24 @@ class NPKCalculator extends CalculatorEntity {
       final String soilTexture = inputs['soil_texture'].toString();
       final double organicMatter = double.parse(inputs['organic_matter'].toString());
       final String previousCrop = inputs['previous_crop'].toString();
-
-      // Obter exigências nutricionais da cultura
       final Map<String, dynamic> cropRequirements = _getCropRequirements(cropType, expectedYield);
       final double nRequirement = cropRequirements['n'] as double;
       final double pRequirement = cropRequirements['p'] as double;
       final double kRequirement = cropRequirements['k'] as double;
-
-      // Calcular fornecimento do solo
       final Map<String, double> soilSupply = _calculateSoilSupply(
         soilN, soilP, soilK, soilTexture, organicMatter, previousCrop);
-
-      // Calcular fatores de eficiência
       final Map<String, double> efficiencyFactors = _getEfficiencyFactors(soilTexture, organicMatter);
-
-      // Calcular necessidades líquidas
       double nNeed = math.max(0, (nRequirement - soilSupply['n']!) / efficiencyFactors['n']!);
       double pNeed = math.max(0, (pRequirement - soilSupply['p']!) / efficiencyFactors['p']!);
       double kNeed = math.max(0, (kRequirement - soilSupply['k']!) / efficiencyFactors['k']!);
-
-      // Calcular para a área total
       final double totalN = nNeed * area;
       final double totalP = pNeed * area;
       final double totalK = kNeed * area;
-
-      // Recomendações de fertilizantes
       final Map<String, dynamic> fertilizerRecommendations = _calculateFertilizerRecommendations(
         nNeed, pNeed, kNeed, soilTexture);
-
-      // Cronograma de aplicação
       final List<Map<String, dynamic>> applicationSchedule = _generateApplicationSchedule(
         cropType, nNeed, pNeed, kNeed);
-
-      // Custo estimado
       final double estimatedCost = _calculateCost(totalN, totalP, totalK);
-
-      // Recomendações agronômicas
       final List<String> recommendations = _generateRecommendations(
         cropType, nNeed, pNeed, kNeed, soilTexture, organicMatter);
 
@@ -252,7 +234,6 @@ class NPKCalculator extends CalculatorEntity {
   }
 
   Map<String, dynamic> _getCropRequirements(String crop, double yield) {
-    // Exigências nutricionais por tonelada de produção (kg/t)
     final Map<String, Map<String, double>> cropData = {
       'Milho': {'n': 25.0, 'p': 8.0, 'k': 18.0},
       'Soja': {'n': 80.0, 'p': 15.0, 'k': 37.0}, // N da FBN
@@ -283,19 +264,12 @@ class NPKCalculator extends CalculatorEntity {
     double organicMatter,
     String previousCrop,
   ) {
-    // Fatores de conversão mg/dm³ para kg/ha (considerando 20 cm de profundidade)
     const double conversionFactor = 2.0;
-
-    // Fornecimento base do solo
     double nSupply = soilN * conversionFactor;
     double pSupply = soilP * conversionFactor * 2.29; // Conversão P para P₂O₅
     double kSupply = soilK * conversionFactor * 1.20; // Conversão K para K₂O
-
-    // Ajuste por matéria orgânica (mineralização de N)
     final double omBonus = (organicMatter - 2.0) * 10.0; // kg N/ha por % de MO acima de 2%
     nSupply += math.max(0, omBonus);
-
-    // Ajuste por cultura anterior
     switch (previousCrop) {
       case 'Leguminosa':
         nSupply += 40.0; // Contribuição da FBN residual
@@ -307,8 +281,6 @@ class NPKCalculator extends CalculatorEntity {
         nSupply += 15.0; // Mineralização durante pousio
         break;
     }
-
-    // Ajuste por textura (capacidade de retenção)
     final Map<String, double> textureFactors = {
       'Arenoso': 0.7,
       'Franco-arenoso': 0.8,
@@ -329,7 +301,6 @@ class NPKCalculator extends CalculatorEntity {
   }
 
   Map<String, double> _getEfficiencyFactors(String texture, double organicMatter) {
-    // Eficiência de aproveitamento dos fertilizantes
     final Map<String, Map<String, double>> efficiencyByTexture = {
       'Arenoso': {'n': 0.6, 'p': 0.15, 'k': 0.8},
       'Franco-arenoso': {'n': 0.7, 'p': 0.20, 'k': 0.85},
@@ -339,8 +310,6 @@ class NPKCalculator extends CalculatorEntity {
     };
 
     final efficiency = efficiencyByTexture[texture] ?? efficiencyByTexture['Franco']!;
-    
-    // Ajuste por matéria orgânica
     final double omFactor = 1.0 + (organicMatter - 3.0) * 0.05;
     
     return {
@@ -357,8 +326,6 @@ class NPKCalculator extends CalculatorEntity {
     String soilTexture,
   ) {
     final List<Map<String, dynamic>> products = [];
-
-    // Fonte de Nitrogênio
     if (nNeed > 0) {
       final double ureaQuantity = nNeed / 0.45; // Ureia 45% N
       products.add({
@@ -370,8 +337,6 @@ class NPKCalculator extends CalculatorEntity {
         'observacao': 'Aplicação parcelada recomendada'
       });
     }
-
-    // Fonte de Fósforo
     if (pNeed > 0) {
       final double mapQuantity = pNeed / 0.52; // MAP 52% P₂O₅
       products.add({
@@ -383,8 +348,6 @@ class NPKCalculator extends CalculatorEntity {
         'observacao': 'Aplicação no plantio'
       });
     }
-
-    // Fonte de Potássio
     if (kNeed > 0) {
       final double kclQuantity = kNeed / 0.60; // KCl 60% K₂O
       products.add({
@@ -396,8 +359,6 @@ class NPKCalculator extends CalculatorEntity {
         'observacao': 'Aplicação parcelada em solos arenosos'
       });
     }
-
-    // Formulação NPK alternativa
     if (nNeed > 0 && pNeed > 0 && kNeed > 0) {
       final double ratio1 = nNeed / math.min(nNeed, math.min(pNeed, kNeed));
       final double ratio2 = pNeed / math.min(nNeed, math.min(pNeed, kNeed));
@@ -426,8 +387,6 @@ class NPKCalculator extends CalculatorEntity {
     double kNeed,
   ) {
     final List<Map<String, dynamic>> schedule = [];
-
-    // Cronograma baseado na cultura
     switch (cropType) {
       case 'Milho':
         schedule.addAll([
@@ -479,7 +438,6 @@ class NPKCalculator extends CalculatorEntity {
   }
 
   double _calculateCost(double totalN, double totalP, double totalK) {
-    // Preços estimados por kg de nutriente (R\$/kg)
     const double nPrice = 4.50; // Ureia
     const double pPrice = 8.00; // MAP
     const double kPrice = 5.50; // KCl
@@ -496,8 +454,6 @@ class NPKCalculator extends CalculatorEntity {
     double organicMatter,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações por nutriente
     if (nNeed > 150) {
       recommendations.add('Alto requerimento de N. Considere aplicação parcelada em 3 vezes.');
     } else if (nNeed < 50) {
@@ -511,22 +467,16 @@ class NPKCalculator extends CalculatorEntity {
     if (kNeed > 120) {
       recommendations.add('Alto requerimento de K. Em solos arenosos, aplique parceladamente.');
     }
-
-    // Recomendações por textura
     if (soilTexture == 'Arenoso') {
       recommendations.add('Solo arenoso: parcelar N e K para evitar perdas por lixiviação.');
     } else if (soilTexture == 'Argiloso') {
       recommendations.add('Solo argiloso: atenção ao parcelamento de P em cultivos sucessivos.');
     }
-
-    // Recomendações por matéria orgânica
     if (organicMatter < 2.0) {
       recommendations.add('Baixo teor de MO. Considere adubação orgânica complementar.');
     } else if (organicMatter > 5.0) {
       recommendations.add('Alto teor de MO. Monitore disponibilidade de micronutrientes.');
     }
-
-    // Recomendações específicas por cultura
     switch (cropType) {
       case 'Milho':
         recommendations.add('Milho: aplicar N em V6 para máxima eficiência.');
@@ -538,8 +488,6 @@ class NPKCalculator extends CalculatorEntity {
         recommendations.add('Café: dividir adubação em 3-4 aplicações ao longo do ano.');
         break;
     }
-
-    // Recomendações gerais
     recommendations.add('Realizar análise foliar para acompanhamento nutricional.');
     recommendations.add('Considerar aplicação de micronutrientes conforme análise de solo.');
     recommendations.add('Adequar pH do solo para melhor aproveitamento dos nutrientes.');

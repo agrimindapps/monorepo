@@ -31,12 +31,8 @@ class EnhancedDefensivosBottomSheet extends StatefulWidget {
 
 class _EnhancedDefensivosBottomSheetState
     extends State<EnhancedDefensivosBottomSheet> {
-  // Novos serviços
   final _resolver = DiagnosticoEntityResolver.instance;
-  // Cache service available but not needed for this widget
   final _compatibilityService = DiagnosticoCompatibilityService.instance;
-
-  // Estado do componente
   final TextEditingController _searchController = TextEditingController();
   List<String> _filteredDefensivos = [];
   List<String> _allDefensivos = [];
@@ -50,11 +46,8 @@ class _EnhancedDefensivosBottomSheetState
   }
 
   Future<void> _initializeData() async {
-    // Inicializar dados
     _allDefensivos = List.from(widget.pragaPorCultura.defensivosRelacionados);
     _filteredDefensivos = List.from(_allDefensivos);
-
-    // Validar compatibilidade em background
     unawaited(_validateCompatibilityInBackground());
 
     setState(() {});
@@ -66,7 +59,6 @@ class _EnhancedDefensivosBottomSheetState
     setState(() => _isLoadingCompatibility = true);
 
     try {
-      // Validar cada defensivo
       for (final defensivo in _allDefensivos) {
         final validation = await _compatibilityService
             .validateFullCompatibility(
@@ -92,8 +84,6 @@ class _EnhancedDefensivosBottomSheetState
       });
       return;
     }
-
-    // ✅ CORRETO: Resolve usando ID do defensivo, NUNCA nome cached
     final filtered = <String>[];
     for (final defensivoId in _allDefensivos) {
       final resolvedName = await _resolver.resolveDefensivoNome(
@@ -335,8 +325,6 @@ class _EnhancedDefensivosBottomSheetState
   ) {
     final theme = Theme.of(context);
     final compatibility = _compatibilityCache[defensivoId];
-
-    // ✅ CORRETO: Resolve usando ID, não nome cached
     return FutureBuilder<String>(
       future: _resolver.resolveDefensivoNome(idDefensivo: defensivoId),
       builder: (context, snapshot) {
@@ -423,7 +411,6 @@ class _EnhancedDefensivosBottomSheetState
               onTap: () {
                 Navigator.of(context).pop();
                 widget.onDefensivoTap?.call();
-                // Implementar navegação para detalhes do defensivo
               },
             ),
           ),
@@ -531,7 +518,6 @@ class _EnhancedDefensivosBottomSheetState
   }
 
   /// Método estático para facilitar o uso - show method
-  // ignore: unused_element
   static Future<void> show(
     BuildContext context,
     PragaPorCultura pragaPorCultura, {

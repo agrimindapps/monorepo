@@ -12,8 +12,6 @@ import '../../features/vehicles/domain/usecases/delete_vehicle.dart';
 import '../../features/vehicles/domain/usecases/get_all_vehicles.dart';
 import '../../features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import '../../features/vehicles/domain/usecases/update_vehicle.dart';
-
-// Core Services Providers using GetIt integration
 final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) {
   return GetIt.instance<FirebaseAuthService>();
 });
@@ -33,8 +31,6 @@ final firebaseCrashlyticsServiceProvider = Provider<FirebaseCrashlyticsService>(
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   return GetIt.instance<ConnectivityService>();
 });
-
-// Repository Providers
 final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
   return GetIt.instance<VehicleRepository>();
 });
@@ -42,8 +38,6 @@ final vehicleRepositoryProvider = Provider<VehicleRepository>((ref) {
 final fuelRepositoryProvider = Provider<FuelRepository>((ref) {
   return GetIt.instance<FuelRepository>();
 });
-
-// Vehicle Use Cases Providers
 final getAllVehiclesProvider = Provider<GetAllVehicles>((ref) {
   return GetIt.instance<GetAllVehicles>();
 });
@@ -63,8 +57,6 @@ final deleteVehicleProvider = Provider<DeleteVehicle>((ref) {
 final getVehicleByIdProvider = Provider<GetVehicleById>((ref) {
   return GetIt.instance<GetVehicleById>();
 });
-
-// Fuel Use Cases Providers
 final getAllFuelRecordsProvider = Provider<GetAllFuelRecords>((ref) {
   return GetIt.instance<GetAllFuelRecords>();
 });
@@ -84,13 +76,9 @@ final updateFuelRecordProvider = Provider<UpdateFuelRecord>((ref) {
 final deleteFuelRecordProvider = Provider<DeleteFuelRecord>((ref) {
   return GetIt.instance<DeleteFuelRecord>();
 });
-
-// SharedPreferences Provider (renomeado para evitar conflito com core)
 final gasometerSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   return GetIt.instance<SharedPreferences>();
 });
-
-// App Rating Repository Provider
 final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
   try {
     return GetIt.instance<IAppRatingRepository>();

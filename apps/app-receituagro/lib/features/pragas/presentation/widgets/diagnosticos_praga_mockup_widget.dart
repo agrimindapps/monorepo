@@ -37,10 +37,7 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Filtros superiores pixel-perfect
             _buildFiltersMockup(ref),
-
-            // Lista de diagnósticos com gerenciamento de estados
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(
@@ -89,8 +86,6 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
     final pragaState = ref.read(detalhePragaNotifierProvider).value;
 
     ref.read(diagnosticosPragaNotifierProvider.notifier).clearError();
-
-    // Recarregar diagnósticos se temos os dados da praga
     if (pragaState?.pragaData != null && pragaState!.pragaData!.idReg.isNotEmpty) {
       ref.read(diagnosticosPragaNotifierProvider.notifier).loadDiagnosticos(
         pragaState.pragaData!.idReg,
@@ -132,19 +127,14 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
     final List<Widget> widgets = [];
 
     groupedDiagnostics.forEach((cultura, diagnostics) {
-      // Seção de cultura mockup
       widgets.add(
         CulturaSectionMockupFactory.basic(
           cultura: cultura,
           diagnosticoCount: diagnostics.length,
         ),
       );
-
-      // Espaçamento após seção
       widgets
           .add(const SizedBox(height: DiagnosticoMockupTokens.sectionToCardSpacing));
-
-      // Cards de diagnósticos mockup
       for (int i = 0; i < diagnostics.length; i++) {
         final diagnostic = diagnostics[i];
         widgets.add(
@@ -157,8 +147,6 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
           ),
         );
       }
-
-      // Espaçamento entre grupos de cultura
       widgets.add(const SizedBox(height: 24));
     });
 
@@ -230,18 +218,13 @@ class _DiagnosticosPragaMockupDebugWidgetState
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Debug controls
         if (_showDebugInfo) _buildDebugControls(),
-
-        // Main widget
         Expanded(
           child: DiagnosticosPragaTransitionWidget(
             pragaName: widget.pragaName,
             useMockupLayout: _useMockupLayout,
           ),
         ),
-
-        // Debug toggle
         _buildDebugToggle(),
       ],
     );

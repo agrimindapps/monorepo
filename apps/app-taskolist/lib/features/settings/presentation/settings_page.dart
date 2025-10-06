@@ -20,12 +20,9 @@ class SettingsPage extends ConsumerWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header do usuário
             _buildUserHeader(context, userDisplayName),
 
             const SizedBox(height: 24),
-
-            // Seção de Aparência
             _buildSectionCard(
               context,
               title: 'Aparência',
@@ -43,8 +40,6 @@ class SettingsPage extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // Seção de Conta
             _buildSectionCard(
               context,
               title: 'Conta',
@@ -69,8 +64,6 @@ class SettingsPage extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // Seção de Notificações
             _buildSectionCard(
               context,
               title: 'Notificações',
@@ -86,8 +79,6 @@ class SettingsPage extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // Seção de Dados
             _buildSectionCard(
               context,
               title: 'Dados',
@@ -116,8 +107,6 @@ class SettingsPage extends ConsumerWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // Seção Sobre
             _buildSectionCard(
               context,
               title: 'Sobre',
@@ -145,8 +134,6 @@ class SettingsPage extends ConsumerWidget {
             ),
 
             const SizedBox(height: 32),
-
-            // Footer
             Text(
               'Task Manager',
               style: TextStyle(

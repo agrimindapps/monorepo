@@ -14,19 +14,13 @@ import '../interfaces/i_sync_service.dart';
 class SyncOrchestratorImpl implements ISyncOrchestrator {
   final ICacheManager _cacheManager;
   final INetworkMonitor _networkMonitor;
-
-  // Estado interno
   final Map<String, ISyncService> _services = {};
   final Map<String, SyncServiceStatus> _serviceStatuses = {};
   final Map<String, Timer?> _serviceTimers = {};
-
-  // Stream controllers
   final StreamController<SyncProgress> _progressController =
       StreamController<SyncProgress>.broadcast();
   final StreamController<SyncEvent> _eventController =
       StreamController<SyncEvent>.broadcast();
-
-  // Estado de execução
   bool _isDisposed = false;
   bool _isSyncingAll = false;
   String? _currentSyncingService;
@@ -49,20 +43,14 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
       'Registering sync service: ${service.serviceId}',
       name: 'SyncOrchestrator',
     );
-
-    // Verificar se já existe
     if (_services.containsKey(service.serviceId)) {
       developer.log(
         'Service ${service.serviceId} already registered, replacing',
         name: 'SyncOrchestrator',
       );
     }
-
-    // Registrar serviço
     _services[service.serviceId] = service;
     _serviceStatuses[service.serviceId] = SyncServiceStatus.idle;
-
-    // Inicializar serviço se necessário
     try {
       final result = await service.initialize();
       if (result.isLeft()) {
@@ -79,8 +67,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
       );
       _serviceStatuses[service.serviceId] = SyncServiceStatus.failed;
     }
-
-    // Escutar status do serviço
     _listenToServiceStatus(service);
 
     _emitEvent(
@@ -106,12 +92,8 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
       'Unregistering sync service: $serviceId',
       name: 'SyncOrchestrator',
     );
-
-    // Parar timer se existir
     _serviceTimers[serviceId]?.cancel();
     _serviceTimers.remove(serviceId);
-
-    // Dispose do serviço
     final service = _services[serviceId];
     if (service != null) {
       try {
@@ -123,8 +105,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
         );
       }
     }
-
-    // Remover registros
     _services.remove(serviceId);
     _serviceStatuses.remove(serviceId);
 
@@ -154,8 +134,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
         'Starting sync all for ${_services.length} services',
         name: 'SyncOrchestrator',
       );
-
-      // Verificar conectividade
       if (!await _networkMonitor.isConnected()) {
         _isSyncingAll = false;
         return const Left(NetworkFailure('No network connectivity'));
@@ -166,13 +144,9 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
         _isSyncingAll = false;
         return const Right(null);
       }
-
-      // Executar sync de cada serviço
       for (int i = 0; i < services.length; i++) {
         final service = services[i];
         _currentSyncingService = service.serviceId;
-
-        // Emitir progresso
         _emitProgress(
           SyncProgress(
             current: i + 1,
@@ -181,11 +155,8 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
             operation: 'Syncing ${service.displayName}',
           ),
         );
-
-        // Executar sync
         final result = await _syncSingleService(service);
         if (result.isLeft()) {
-          // Log erro mas continua com outros serviços
           developer.log(
             'Sync failed for ${service.serviceId}: ${result.fold((f) => f.message, (_) => '')}',
             name: 'SyncOrchestrator',
@@ -225,12 +196,9 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
 
   Future<Either<Failure, void>> _syncSingleService(ISyncService service) async {
     try {
-      // Verificar se pode fazer sync
       if (!service.canSync) {
         return Left(SyncFailure('Service ${service.serviceId} cannot sync'));
       }
-
-      // Atualizar status
       _serviceStatuses[service.serviceId] = SyncServiceStatus.syncing;
 
       _emitEvent(
@@ -240,8 +208,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
           message: 'Starting sync for ${service.displayName}',
         ),
       );
-
-      // Executar sync
       final result = await service.sync();
 
       if (result.isRight()) {
@@ -330,15 +296,12 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
     }
 
     try {
-      // Limpar dados de todos os serviços
       for (final service in _services.values) {
         final result = await service.clearLocalData();
         if (result.isLeft()) {
           return result;
         }
       }
-
-      // Limpar cache
       final cacheResult = await _cacheManager.clear();
       if (cacheResult.isLeft()) {
         return cacheResult;
@@ -356,8 +319,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
   Future<void> stopAllSync() async {
     _isSyncingAll = false;
     _currentSyncingService = null;
-
-    // Parar sync de cada serviço
     for (final service in _services.values) {
       try {
         await service.stopSync();
@@ -386,11 +347,7 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
     _isDisposed = true;
 
     developer.log('Disposing sync orchestrator', name: 'SyncOrchestrator');
-
-    // Parar todas as sincronizações
     await stopAllSync();
-
-    // Dispose de todos os serviços
     for (final service in _services.values) {
       try {
         await service.dispose();
@@ -401,23 +358,15 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
         );
       }
     }
-
-    // Cancel timers
     for (final timer in _serviceTimers.values) {
       timer?.cancel();
     }
-
-    // Fechar streams
     await _progressController.close();
     await _eventController.close();
-
-    // Limpar estado
     _services.clear();
     _serviceStatuses.clear();
     _serviceTimers.clear();
   }
-
-  // Métodos privados
 
   void _setupNetworkListener() {
     _networkMonitor.connectivityStream.listen(
@@ -475,7 +424,6 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
             'Found pending sync for ${service.serviceId}, triggering sync',
             name: 'SyncOrchestrator',
           );
-          // Trigger sync in background
           _syncSingleService(service);
         }
       } catch (e) {

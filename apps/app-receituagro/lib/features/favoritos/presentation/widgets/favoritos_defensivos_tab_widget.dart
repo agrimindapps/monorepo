@@ -240,10 +240,7 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
         TipoFavorito.defensivo,
         defensivo.id,
       );
-
-      // Remover favorito sem feedback de SnackBar
     } catch (e) {
-      // Erro silencioso
     }
   }
 

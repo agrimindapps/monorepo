@@ -8,8 +8,6 @@ import '../../domain/usecases/get_appointment_by_id.dart';
 import '../../domain/usecases/get_appointments.dart';
 import '../../domain/usecases/get_upcoming_appointments.dart';
 import '../../domain/usecases/update_appointment.dart';
-
-// State classes
 class AppointmentState {
   final List<Appointment> appointments;
   final List<Appointment> upcomingAppointments;
@@ -43,8 +41,6 @@ class AppointmentState {
     );
   }
 }
-
-// Provider
 class AppointmentsNotifier extends StateNotifier<AppointmentState> {
   final GetAppointments _getAppointments;
   final GetUpcomingAppointments _getUpcomingAppointments;
@@ -210,8 +206,6 @@ class AppointmentsNotifier extends StateNotifier<AppointmentState> {
     );
   }
 }
-
-// Provider instance
 final appointmentsProvider = StateNotifierProvider<AppointmentsNotifier, AppointmentState>((ref) {
   return AppointmentsNotifier(
     di.getIt<GetAppointments>(),
@@ -222,8 +216,6 @@ final appointmentsProvider = StateNotifierProvider<AppointmentsNotifier, Appoint
     di.getIt<DeleteAppointment>(),
   );
 });
-
-// Convenience providers
 final appointmentsListProvider = Provider<List<Appointment>>((ref) {
   return ref.watch(appointmentsProvider).appointments;
 });

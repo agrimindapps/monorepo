@@ -16,8 +16,6 @@ class EquinesManagementProvider extends ChangeNotifier {
     required GetEquinesUseCase getEquines,
   }) : _getEquines = getEquines;
 
-  // === STATE MANAGEMENT ===
-
   List<EquineEntity> _equines = [];
   EquineEntity? _selectedEquine;
   
@@ -28,8 +26,6 @@ class EquinesManagementProvider extends ChangeNotifier {
   final bool _isDeleting = false;
   
   String? _errorMessage;
-
-  // === GETTERS ===
 
   List<EquineEntity> get equines => _equines;
   EquineEntity? get selectedEquine => _selectedEquine;
@@ -52,8 +48,6 @@ class EquinesManagementProvider extends ChangeNotifier {
   
   /// Verifica se tem equino selecionado
   bool get hasSelectedEquine => _selectedEquine != null;
-
-  // === EQUINES OPERATIONS ===
 
   /// Carrega todos os equinos
   Future<void> loadEquines() async {
@@ -134,24 +128,18 @@ class EquinesManagementProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
   }
-
-  // === FUTURE IMPLEMENTATIONS ===
-  // TODO: Implementar quando use cases estiverem disponíveis
   
   Future<bool> createEquine(EquineEntity equine) async {
-    // TODO: Implementar quando CreateEquineUseCase estiver disponível
     debugPrint('EquinesManagementProvider: createEquine não implementado ainda');
     return false;
   }
 
   Future<bool> updateEquine(EquineEntity equine) async {
-    // TODO: Implementar quando UpdateEquineUseCase estiver disponível
     debugPrint('EquinesManagementProvider: updateEquine não implementado ainda');
     return false;
   }
 
   Future<bool> deleteEquine(String equineId) async {
-    // TODO: Implementar quando DeleteEquineUseCase estiver disponível
     debugPrint('EquinesManagementProvider: deleteEquine não implementado ainda');
     return false;
   }

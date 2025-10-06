@@ -19,15 +19,12 @@ class TaskRepositoryImpl implements TaskRepository {
   ResultFuture<String> createTask(TaskEntity task) async {
     try {
       final taskModel = TaskModel.fromEntity(task);
-
-      // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         final taskId = await _remoteDataSource.createTask(taskModel);
         final updatedTask = taskModel.copyWith(id: taskId);
         await _localDataSource.cacheTask(updatedTask);
         return Right(taskId);
       } else {
-        // Modo offline - salvar apenas localmente
         await _localDataSource.cacheTask(taskModel);
         return Right(taskModel.id);
       }
@@ -43,14 +40,11 @@ class TaskRepositoryImpl implements TaskRepository {
       if (localTask != null) {
         return Right(localTask);
       }
-
-      // Se tiver remote data source, buscar remotamente
       if (_remoteDataSource != null) {
         final remoteTask = await _remoteDataSource.getTask(id);
         await _localDataSource.cacheTask(remoteTask);
         return Right(remoteTask);
       } else {
-        // Modo offline - retornar erro se não encontrar localmente
         return const Left(
           local_failures.CacheFailure('Task not found locally'),
         );
@@ -71,7 +65,6 @@ class TaskRepositoryImpl implements TaskRepository {
     DateTime? dueAfter,
   }) async {
     try {
-      // Se tiver remote data source, tentar buscar remotamente primeiro
       if (_remoteDataSource != null) {
         try {
           final remoteTasks = await _remoteDataSource.getTasks(
@@ -87,11 +80,8 @@ class TaskRepositoryImpl implements TaskRepository {
           await _localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks);
         } catch (e) {
-          // Fallback para local se remoto falhar
         }
       }
-
-      // Buscar localmente
       final localTasks = await _localDataSource.getTasks(
         listId: listId,
         userId: userId,
@@ -99,7 +89,6 @@ class TaskRepositoryImpl implements TaskRepository {
         priority: priority,
         isStarred: isStarred,
       );
-      // Filtrar subtasks da lista principal (apenas tarefas principais)
       final mainTasks =
           localTasks.where((task) => task.parentTaskId == null).toList();
       return Right(mainTasks);
@@ -112,11 +101,7 @@ class TaskRepositoryImpl implements TaskRepository {
   ResultFuture<void> updateTask(TaskEntity task) async {
     try {
       final taskModel = TaskModel.fromEntity(task);
-
-      // Sempre atualizar localmente
       await _localDataSource.updateTask(taskModel);
-
-      // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         await _remoteDataSource.updateTask(taskModel);
       }
@@ -130,10 +115,7 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultFuture<void> deleteTask(String id) async {
     try {
-      // Sempre deletar localmente
       await _localDataSource.deleteTask(id);
-
-      // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         await _remoteDataSource.deleteTask(id);
       }
@@ -155,8 +137,6 @@ class TaskRepositoryImpl implements TaskRepository {
         );
         await _localDataSource.updateTask(updatedTask);
       }
-
-      // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         await _remoteDataSource.updateTaskStatus(id, status);
       }
@@ -178,8 +158,6 @@ class TaskRepositoryImpl implements TaskRepository {
         );
         await _localDataSource.updateTask(updatedTask);
       }
-
-      // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         await _remoteDataSource.toggleTaskStar(id);
       }
@@ -193,7 +171,6 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultFuture<void> reorderTasks(List<String> taskIds) async {
     try {
-      // Atualizar posições localmente
       final List<TaskModel> updatedTasks = [];
 
       for (int i = 0; i < taskIds.length; i++) {
@@ -201,7 +178,6 @@ class TaskRepositoryImpl implements TaskRepository {
         final localTask = await _localDataSource.getTask(taskId);
 
         if (localTask != null) {
-          // Atualizar posição da task
           final updatedTask = localTask.copyWith(
             position: i,
             updatedAt: DateTime.now(),
@@ -209,13 +185,9 @@ class TaskRepositoryImpl implements TaskRepository {
           updatedTasks.add(updatedTask);
         }
       }
-
-      // Salvar todas as tasks atualizadas em batch
       if (updatedTasks.isNotEmpty) {
         await _localDataSource.cacheTasks(updatedTasks);
       }
-
-      // Se tiver remote data source, sincronizar
       if (_remoteDataSource != null) {
         await _remoteDataSource.reorderTasks(taskIds);
       }
@@ -234,7 +206,6 @@ class TaskRepositoryImpl implements TaskRepository {
     TaskPriority? priority,
     bool? isStarred,
   }) {
-    // Se tiver remote data source, usar stream remoto
     if (_remoteDataSource != null) {
       return _remoteDataSource.watchTasks(
         listId: listId,
@@ -244,7 +215,6 @@ class TaskRepositoryImpl implements TaskRepository {
         isStarred: isStarred,
       );
     } else {
-      // Modo offline - usar stream local
       return _localDataSource.watchTasks(
         listId: listId,
         userId: userId,
@@ -258,12 +228,10 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultFuture<List<TaskEntity>> searchTasks(String query) async {
     try {
-      // Se tiver remote data source, buscar remotamente
       if (_remoteDataSource != null) {
         final tasks = await _remoteDataSource.searchTasks(query);
         return Right(tasks);
       } else {
-        // Modo offline - buscar localmente
         final allTasks = await _localDataSource.getTasks();
         final filteredTasks =
             allTasks.where((task) {
@@ -286,18 +254,14 @@ class TaskRepositoryImpl implements TaskRepository {
   @override
   ResultFuture<List<TaskEntity>> getSubtasks(String parentTaskId) async {
     try {
-      // Se tiver remote data source, buscar remotamente primeiro
       if (_remoteDataSource != null) {
         try {
           final remoteTasks = await _remoteDataSource.getSubtasks(parentTaskId);
           await _localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks);
         } catch (e) {
-          // Fallback para local se remoto falhar
         }
       }
-
-      // Buscar subtasks localmente
       final allTasks = await _localDataSource.getTasks();
       final subtasks =
           allTasks.where((task) => task.parentTaskId == parentTaskId).toList();

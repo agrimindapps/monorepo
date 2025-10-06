@@ -14,8 +14,6 @@ class UsageStats {
     this.activeTasksThisWeek = 0,
     this.completedSubtasks = 0,
   });
-
-  // Getter para compatibilidade com o código existente
   int get totalCompletedSubtasks => completedSubtasks;
 
   UsageStats copyWith({

@@ -31,7 +31,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
   Future<String?> _getCurrentUserIdWithRetry({int maxRetries = 3}) async {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        // Wait for user with increasing timeout per attempt
         final timeoutDuration = Duration(seconds: 2 * attempt);
         final user =
             await authService.currentUser.timeout(timeoutDuration).first;
@@ -39,8 +38,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         if (user != null && user.id.isNotEmpty) {
           return user.id;
         }
-
-        // If user is null or has empty ID, wait and retry (except on last attempt)
         if (attempt < maxRetries) {
           await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
           continue;
@@ -48,19 +45,14 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
         return null;
       } catch (e) {
-        // Log error for debugging with attempt number
         if (kDebugMode) {
           print(
             'PlantTasksRepository: Auth attempt $attempt/$maxRetries failed: $e',
           );
         }
-
-        // If it's the last attempt, return null
         if (attempt >= maxRetries) {
           return null;
         }
-
-        // Wait before retrying, with exponential backoff
         await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
       }
     }
@@ -79,11 +71,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           ),
         );
       }
-
-      // ALWAYS return local data first for instant UI response
       final localTasks = await localDatasource.getPlantTasks();
-
-      // Start background sync immediately (fire and forget)
       if (await networkInfo.isConnected) {
         _syncPlantTasksInBackground(userId);
       }
@@ -121,11 +109,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (userId == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
-
-      // ALWAYS get from local first for instant response
       final localTasks = await localDatasource.getPlantTasksByPlantId(plantId);
-
-      // Start background sync for this plant if connected (fire and forget)
       if (await networkInfo.isConnected) {
         _syncPlantTasksByPlantIdInBackground(plantId, userId);
       }
@@ -155,8 +139,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (userId == null) {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
-
-      // ALWAYS get from local first for instant response
       final localTask = await localDatasource.getPlantTaskById(id);
 
       if (localTask != null) {
@@ -188,19 +170,14 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       final taskModel = PlantTaskModel.fromEntity(task);
-
-      // Always save locally first
       await localDatasource.addPlantTask(task);
 
       if (await networkInfo.isConnected) {
         try {
-          // Try to save remotely
           final remoteTask = await remoteDatasource.addPlantTask(
             taskModel,
             userId,
           );
-
-          // Update local with remote data (with Firebase ID)
           await localDatasource.updatePlantTask(remoteTask.toEntity());
 
           if (kDebugMode) {
@@ -216,11 +193,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
               '⚠️ PlantTasksRepository: Falha ao salvar remotamente, será sincronizada depois: $e',
             );
           }
-          // If remote fails, return local version (will sync later)
           return Right(task);
         }
       } else {
-        // Offline - return local version
         if (kDebugMode) {
           print(
             '📴 PlantTasksRepository: Offline, task salva apenas localmente',
@@ -258,11 +233,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           '💾 PlantTasksRepository: Adicionando ${tasks.length} tasks em lote',
         );
       }
-
-      // Always save locally first
       await localDatasource.addPlantTasks(tasks);
-
-      // TODO: Implementar sync com remote quando disponível
 
       if (kDebugMode) {
         print(
@@ -293,11 +264,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (userId == null) {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
-
-      // Always save locally first
       await localDatasource.updatePlantTask(task);
-
-      // TODO: Implementar sync com remote quando disponível
 
       return Right(task);
     } on CacheFailure catch (e) {
@@ -316,11 +283,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (userId == null) {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
-
-      // Always delete locally first
       await localDatasource.deletePlantTask(id);
-
-      // TODO: Implementar sync com remote quando disponível
 
       return const Right(null);
     } on CacheFailure catch (e) {
@@ -347,9 +310,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId usando UnifiedSyncManager',
         );
       }
-
-      // MODERNIZADO: Usar UnifiedSyncManager com Task entity (suporta Firebase sync)
-      // 1. Buscar todas as tasks da planta
       final tasksResult = await UnifiedSyncManager.instance.findAll<Task>(
         'plantis',
       );
@@ -362,7 +322,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           return Left(failure);
         },
         (allTasks) async {
-          // 2. Filtrar tasks desta planta específica que não estão deletadas
           final plantTasks =
               allTasks
                   .where((task) => task.plantId == plantId && !task.isDeleted)
@@ -373,8 +332,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
               '🗑️ Encontradas ${plantTasks.length} tasks para deletar da planta $plantId',
             );
           }
-
-          // 3. Deletar cada task (soft delete + sync Firebase automático)
           for (final task in plantTasks) {
             final deleteResult = await UnifiedSyncManager.instance.delete<Task>(
               'plantis',
@@ -385,7 +342,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
               if (kDebugMode) {
                 print('⚠️ Erro ao deletar task ${task.id}');
               }
-              // Continue deletando outras tasks mesmo se uma falhar
             }
           }
 
@@ -516,8 +472,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       if (!(await networkInfo.isConnected)) {
         return const Left(NetworkFailure('Sem conexão com a internet'));
       }
-
-      // Get all local tasks that need sync
       final localTasks = await localDatasource.getPlantTasks();
       final tasksToSync =
           localTasks
@@ -534,8 +488,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
         try {
           await remoteDatasource.syncPlantTasks(tasksToSync, userId);
-
-          // Update local tasks to mark as synced
           for (final task in tasksToSync) {
             final syncedTask = task.markAsSynced();
             await localDatasource.updatePlantTask(syncedTask.toEntity());
@@ -567,8 +519,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       );
     }
   }
-
-  // Background sync methods (fire and forget)
   void _syncPlantTasksInBackground(String userId) {
     remoteDatasource
         .getPlantTasks(userId)
@@ -578,13 +528,11 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
               '✅ PlantTasksRepository: Background sync completed - ${remoteTasks.length} plant tasks',
             );
           }
-          // Update local cache with remote data
           for (final task in remoteTasks) {
             localDatasource.updatePlantTask(task.toEntity());
           }
         })
         .catchError((Object e) {
-          // Log background sync errors for debugging
           if (kDebugMode) {
             print('⚠️ PlantTasksRepository: Background sync failed: $e');
           }
@@ -600,13 +548,11 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
               '✅ PlantTasksRepository: Background sync for plant $plantId completed - ${remoteTasks.length} tasks',
             );
           }
-          // Update local cache with remote data
           for (final task in remoteTasks) {
             localDatasource.updatePlantTask(task.toEntity());
           }
         })
         .catchError((Object e) {
-          // Log background sync errors for debugging
           if (kDebugMode) {
             print(
               '⚠️ PlantTasksRepository: Background sync for plant $plantId failed: $e',
@@ -617,9 +563,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
   @override
   Stream<List<PlantTask>> watchPlantTasks() {
-    // For now, return a simple stream that emits current tasks
-    // In a more advanced implementation, you might use Firestore snapshots
-    // or a local database with reactive queries
     return Stream.fromFuture(
       getPlantTasks().then(
         (result) => result.fold((failure) => <PlantTask>[], (tasks) => tasks),
@@ -629,7 +572,6 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
   @override
   Stream<List<PlantTask>> watchPlantTasksByPlantId(String plantId) {
-    // For now, return a simple stream that emits current tasks for plant
     return Stream.fromFuture(
       getPlantTasksByPlantId(plantId).then(
         (result) => result.fold((failure) => <PlantTask>[], (tasks) => tasks),

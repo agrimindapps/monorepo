@@ -36,7 +36,6 @@ class FavoritoLoadingStates {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Ícone skeleton
               Container(
                 width: 48,
                 height: 48,
@@ -46,14 +45,11 @@ class FavoritoLoadingStates {
                 ),
               ),
               const SizedBox(width: 16),
-              
-              // Conteúdo skeleton
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Título
                     Container(
                       height: 18,
                       width: double.infinity,
@@ -63,8 +59,6 @@ class FavoritoLoadingStates {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    
-                    // Subtítulo
                     Container(
                       height: 14,
                       width: 200,
@@ -74,8 +68,6 @@ class FavoritoLoadingStates {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
-                    // Metadata
                     Container(
                       height: 12,
                       width: 120,
@@ -87,8 +79,6 @@ class FavoritoLoadingStates {
                   ],
                 ),
               ),
-              
-              // Botão favorito skeleton
               Container(
                 width: 32,
                 height: 32,
@@ -130,7 +120,6 @@ class FavoritoLoadingStates {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Ícone
             Container(
               width: 24,
               height: 24,
@@ -140,8 +129,6 @@ class FavoritoLoadingStates {
               ),
             ),
             const SizedBox(width: 12),
-            
-            // Título
             Container(
               height: 20,
               width: 120,
@@ -152,8 +139,6 @@ class FavoritoLoadingStates {
             ),
             
             const Spacer(),
-            
-            // Contador
             Container(
               height: 16,
               width: 60,
@@ -209,7 +194,6 @@ class FavoritoLoadingStates {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone animado
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
               duration: const Duration(milliseconds: 800),
@@ -236,8 +220,6 @@ class FavoritoLoadingStates {
             ),
             
             const SizedBox(height: 24),
-            
-            // Título com fade-in
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
               duration: const Duration(milliseconds: 600),
@@ -258,8 +240,6 @@ class FavoritoLoadingStates {
             ),
             
             const SizedBox(height: 12),
-            
-            // Subtítulo com fade-in atrasado
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
               duration: const Duration(milliseconds: 600),
@@ -277,8 +257,6 @@ class FavoritoLoadingStates {
                 );
               },
             ),
-            
-            // Botão de ação se fornecido
             if (actionText != null && onAction != null) ...[
               const SizedBox(height: 24),
               TweenAnimationBuilder<double>(
@@ -325,7 +303,6 @@ class FavoritoLoadingStates {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Ícone de erro animado
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
               duration: const Duration(milliseconds: 600),

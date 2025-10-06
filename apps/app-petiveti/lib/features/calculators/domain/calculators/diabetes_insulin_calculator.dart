@@ -241,32 +241,16 @@ class DiabetesInsulinCalculator extends Calculator {
 
   static DiabetesInsulinResult _calculateInternal(DiabetesInsulinInput input) {
     _validateInput(input);
-
-    // Calcular dose base de insulina
     final baseDose = _calculateBaseDose(input);
-
-    // Ajustar dose baseada na glicemia
     final adjustedDose = _adjustDoseForGlucose(baseDose, input.glucoseLevel);
-
-    // Aplicar fatores do tipo de insulina
     final finalDoseUnits = _applyInsulinTypeFactor(
       adjustedDose,
       input.insulinType,
     );
-
-    // Converter para mL (assumindo concentração padrão de 40 UI/mL)
     final doseML = finalDoseUnits / 40.0;
-
-    // Determinar via de administração
     final route = _determineAdministrationRoute(input);
-
-    // Gerar avisos de segurança
     final warnings = _generateWarnings(input, finalDoseUnits);
-
-    // Calcular próxima dose
     final nextDoseTime = _calculateNextDoseTime(input.insulinType);
-
-    // Criar resultados
     final results = [
       ResultItem(
         label: 'Dose de Insulina',
@@ -281,8 +265,6 @@ class DiabetesInsulinCalculator extends Calculator {
       ResultItem(label: 'Via de Administração', value: route),
       ResultItem(label: 'Próxima Dose', value: nextDoseTime),
     ];
-
-    // Criar recomendações
     final recommendations =
         warnings.map((warning) {
           final severity =
@@ -326,8 +308,6 @@ class DiabetesInsulinCalculator extends Calculator {
   }
 
   static double _calculateBaseDose(DiabetesInsulinInput input) {
-    // Dose base: 0.25-0.5 UI/kg para cães, 0.25-1.0 UI/kg para gatos
-    // Assumindo que é um cão (seria ideal ter a espécie como parâmetro)
     double baseDosePerKg;
 
     switch (input.diabetesType) {

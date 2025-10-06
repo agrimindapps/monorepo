@@ -91,7 +91,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
 
         return Column(
           children: [
-            // Water Care Section
             _buildCareSection(
               title: 'Água',
               icon: Icons.water_drop,
@@ -109,8 +108,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
             ),
 
             const SizedBox(height: 20),
-
-            // Fertilizer Care Section
             _buildCareSection(
               title: 'Adubo',
               icon: Icons.eco,
@@ -128,8 +125,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
             ),
 
             const SizedBox(height: 20),
-
-            // Sunlight Care Section
             _buildCareSection(
               title: 'Luz solar',
               icon: Icons.wb_sunny,
@@ -145,8 +140,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
             ),
 
             const SizedBox(height: 20),
-
-            // Pest Inspection Section
             _buildCareSection(
               title: 'Verificação de pragas',
               icon: Icons.bug_report,
@@ -162,8 +155,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
             ),
 
             const SizedBox(height: 20),
-
-            // Pruning Section
             _buildCareSection(
               title: 'Poda',
               icon: Icons.content_cut,
@@ -181,8 +172,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
             ),
 
             const SizedBox(height: 20),
-
-            // Replanting Section
             _buildCareSection(
               title: 'Replantio',
               icon: Icons.grass,
@@ -245,7 +234,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
       ),
       child: Column(
         children: [
-          // Header with toggle
           Row(
             children: [
               Container(
@@ -274,8 +262,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               ),
             ],
           ),
-
-          // Expanded content when enabled
           if (isEnabled) ...[
             const SizedBox(height: 16),
             _buildExpandedContent(
@@ -286,8 +272,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               iconColor: iconColor,
             ),
           ],
-
-          // Error text display
           if (errorText != null) ...[
             const SizedBox(height: 8),
             Row(
@@ -324,7 +308,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
   }) {
     return Column(
       children: [
-        // Interval selector
         _buildIntervalSelector(
           label: 'Intervalo',
           value: interval,
@@ -333,8 +316,6 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
         ),
 
         const SizedBox(height: 12),
-
-        // Last date selector
         _buildDateSelector(
           label: 'Última vez',
           value: lastDate,

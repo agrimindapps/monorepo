@@ -16,8 +16,6 @@ import '../services/plants_data_service.dart';
 import '../services/plants_filter_service.dart';
 import 'state/plants_state_manager.dart' hide ViewMode;
 
-// part 'plants_providers.g.dart';
-
 /// Plants State model for Riverpod state management
 class PlantsState {
   final List<Plant> allPlants;
@@ -45,8 +43,6 @@ class PlantsState {
     this.sortBy = SortBy.newest,
     this.filterBySpace,
   });
-
-  // Convenience getters
   bool get isEmpty => allPlants.isEmpty;
   bool get hasError => error != null;
   bool get isGroupedBySpaces => viewMode == ViewMode.groupedBySpaces;
@@ -74,8 +70,6 @@ class PlantsState {
     final grouped = plantsGroupedBySpaces;
     return grouped.map((spaceId, plants) => MapEntry(spaceId, plants.length));
   }
-
-  // Get plants that need watering soon (next 2 days)
   List<Plant> getPlantsNeedingWater() {
     final now = DateTime.now();
     final threshold = now.add(const Duration(days: 2));
@@ -83,8 +77,6 @@ class PlantsState {
     return allPlants.where((plant) {
       final config = plant.config;
       if (config == null) return false;
-
-      // Check if watering care is enabled and has valid interval
       if (config.enableWateringCare == true &&
           config.wateringIntervalDays != null) {
         final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
@@ -95,8 +87,6 @@ class PlantsState {
         return nextWatering.isBefore(threshold) ||
             nextWatering.isAtSameMomentAs(threshold);
       }
-
-      // Fallback to old logic for backward compatibility
       if (config.wateringIntervalDays != null) {
         final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
         final nextWatering = lastWatering.add(
@@ -110,8 +100,6 @@ class PlantsState {
       return false;
     }).toList();
   }
-
-  // Get plants that need fertilizer soon (next 2 days)
   List<Plant> getPlantsNeedingFertilizer() {
     final now = DateTime.now();
     final threshold = now.add(const Duration(days: 2));
@@ -119,8 +107,6 @@ class PlantsState {
     return allPlants.where((plant) {
       final config = plant.config;
       if (config == null) return false;
-
-      // Check if fertilizer care is enabled and has valid interval
       if (config.enableFertilizerCare == true &&
           config.fertilizingIntervalDays != null) {
         final lastFertilizer =
@@ -132,8 +118,6 @@ class PlantsState {
         return nextFertilizer.isBefore(threshold) ||
             nextFertilizer.isAtSameMomentAs(threshold);
       }
-
-      // Fallback to old logic for backward compatibility
       if (config.fertilizingIntervalDays != null) {
         final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
         final nextFertilizer = lastFertilizer.add(
@@ -147,8 +131,6 @@ class PlantsState {
       return false;
     }).toList();
   }
-
-  // Get plants by care status
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     final now = DateTime.now();
 
@@ -175,13 +157,9 @@ class PlantsState {
       }
     }).toList();
   }
-
-  // Helper method to check water status
   bool _checkWaterStatus(Plant plant, DateTime now, int dayThreshold) {
     final config = plant.config;
     if (config == null) return false;
-
-    // Use new care system if enabled
     if (config.enableWateringCare == true &&
         config.wateringIntervalDays != null) {
       final lastWatering = config.lastWateringDate ?? plant.createdAt ?? now;
@@ -194,8 +172,6 @@ class PlantsState {
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
-
-    // Fallback to old system
     if (config.wateringIntervalDays != null) {
       final lastWatering = plant.updatedAt ?? plant.createdAt ?? now;
       final nextWatering = lastWatering.add(
@@ -210,13 +186,9 @@ class PlantsState {
 
     return false;
   }
-
-  // Helper method to check fertilizer status
   bool _checkFertilizerStatus(Plant plant, DateTime now, int dayThreshold) {
     final config = plant.config;
     if (config == null) return false;
-
-    // Use new care system if enabled
     if (config.enableFertilizerCare == true &&
         config.fertilizingIntervalDays != null) {
       final lastFertilizer =
@@ -230,8 +202,6 @@ class PlantsState {
           ? daysDifference <= 0
           : daysDifference > 0 && daysDifference <= dayThreshold;
     }
-
-    // Fallback to old system
     if (config.fertilizingIntervalDays != null) {
       final lastFertilizer = plant.updatedAt ?? plant.createdAt ?? now;
       final nextFertilizer = lastFertilizer.add(
@@ -246,8 +216,6 @@ class PlantsState {
 
     return false;
   }
-
-  // Helper method to check if plant is in good condition
   bool _isPlantInGoodCondition(Plant plant, DateTime now) {
     final waterGood =
         !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
@@ -262,13 +230,9 @@ class PlantsState {
     final hasFertilizerCare =
         config?.enableFertilizerCare == true ||
         config?.fertilizingIntervalDays != null;
-
-    // Plant is good if it doesn't need water or fertilizer within 2 days
     return (hasWaterCare ? waterGood : true) &&
         (hasFertilizerCare ? fertilizerGood : true);
   }
-
-  // Get plants by space
   List<Plant> getPlantsBySpace(String spaceId) {
     return allPlants.where((plant) => plant.spaceId == spaceId).toList();
   }
@@ -345,16 +309,11 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   late final UpdatePlantUseCase _updatePlantUseCase;
   late final DeletePlantUseCase _deletePlantUseCase;
   late final AuthStateNotifier _authStateNotifier;
-
-  // Stream subscriptions
-  // ignore: cancel_subscriptions
   StreamSubscription<UserEntity?>? _authSubscription;
-  // ignore: cancel_subscriptions
   StreamSubscription<List<dynamic>>? _realtimeDataSubscription;
 
   @override
   Future<PlantsState> build() async {
-    // Initialize dependencies (assuming they are registered in DI)
     _getPlantsUseCase = ref.read(getPlantsUseCaseProvider);
     _getPlantByIdUseCase = ref.read(getPlantByIdUseCaseProvider);
     _searchPlantsUseCase = ref.read(searchPlantsUseCaseProvider);
@@ -362,24 +321,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     _updatePlantUseCase = ref.read(updatePlantUseCaseProvider);
     _deletePlantUseCase = ref.read(deletePlantUseCaseProvider);
     _authStateNotifier = AuthStateNotifier.instance;
-
-    // Initialize auth listener
     _initializeAuthListener();
-
-    // Initialize real-time data stream
     _initializeRealtimeDataStream();
-
-    // Setup cleanup when provider is disposed
     ref.onDispose(() {
       _authSubscription?.cancel();
       _realtimeDataSubscription?.cancel();
     });
-
-    // BUGFIX: Carrega dados iniciais se usuário já está autenticado
-    // Isso resolve o problema de plantas não aparecerem ao abrir a página
     if (_authStateNotifier.isInitialized &&
         _authStateNotifier.currentUser != null) {
-      // Load initial data immediately
       final result = await _getPlantsUseCase.call(const NoParams());
       return result.fold(
         (failure) => PlantsState(error: failure.message),
@@ -392,19 +341,15 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
         },
       );
     }
-
-    // Start with empty state if not authenticated
     return const PlantsState();
   }
 
   /// Initializes the authentication state listener
   void _initializeAuthListener() {
     _authSubscription = _authStateNotifier.userStream.listen((user) {
-      // Only load plants if auth is fully initialized AND stable
       if (_authStateNotifier.isInitialized && user != null) {
         loadInitialData();
       } else if (_authStateNotifier.isInitialized && user == null) {
-        // Clear plants when user logs out
         final currentState = state.valueOrNull ?? const PlantsState();
         state = AsyncData(
           currentState.copyWith(
@@ -426,15 +371,12 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       if (dataStream != null) {
         _realtimeDataSubscription = dataStream.listen(
           (List<dynamic> plants) {
-            // Convert from sync entities to domain entities
             final domainPlants =
                 plants
                     .map((syncPlant) => _convertSyncPlantToDomain(syncPlant))
                     .where((plant) => plant != null)
                     .cast<Plant>()
                     .toList();
-
-            // Update only if there are real changes
             if (_hasDataChanged(domainPlants)) {
               final currentState = state.valueOrNull ?? const PlantsState();
               final sortedPlants = _sortPlants(
@@ -462,7 +404,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
           },
         );
       } else {
-        // FALLBACK: Se stream não está disponível, força carregamento manual
         Future.delayed(const Duration(milliseconds: 500), () {
           loadInitialData();
         });
@@ -471,7 +412,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       if (kDebugMode) {
         print('PlantsProvider stream initialization error: $e');
       }
-      // FALLBACK: Em caso de erro, tenta carregar dados manualmente
       Future.delayed(const Duration(milliseconds: 500), () {
         loadInitialData();
       });
@@ -481,18 +421,12 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   /// Converts sync entity to domain entity
   Plant? _convertSyncPlantToDomain(dynamic syncPlant) {
     try {
-      // If already a Plant domain object, return directly
       if (syncPlant is Plant) {
         return syncPlant;
       }
-
-      // If it's a sync entity, convert to domain
       if (syncPlant is BaseSyncEntity) {
-        // Use PlantisSyncConfig mapping
         return Plant.fromJson(syncPlant.toFirebaseMap());
       }
-
-      // If it's a Map, convert directly
       if (syncPlant is Map<String, dynamic>) {
         return Plant.fromJson(syncPlant);
       }
@@ -512,19 +446,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (currentState.allPlants.length != newPlants.length) {
       return true;
     }
-
-    // Compare IDs and update timestamps
     for (int i = 0; i < currentState.allPlants.length; i++) {
       final currentPlant = currentState.allPlants[i];
       Plant? newPlant;
       try {
         newPlant = newPlants.firstWhere((p) => p.id == currentPlant.id);
       } catch (e) {
-        // Plant not found in new list - was removed
         return true;
       }
-
-      // Compare update timestamp
       if (currentPlant.updatedAt != newPlant.updatedAt) {
         return true;
       }
@@ -561,16 +490,12 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       return false;
     }
   }
-
-  // Load plants with offline-first approach
   Future<void> loadPlants() async {
     if (kDebugMode) {
       print(
         '📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first',
       );
     }
-
-    // Wait for authentication before loading plants
     if (!await _waitForAuthenticationWithTimeout()) {
       final currentState = state.valueOrNull ?? const PlantsState();
       state = AsyncData(
@@ -578,11 +503,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       );
       return;
     }
-
-    // OFFLINE-FIRST: Try to load local data first
     await _loadLocalDataFirst();
-
-    // Then attempt to sync in background
     _syncInBackground();
   }
 
@@ -594,16 +515,12 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       }
 
       final currentState = state.valueOrNull ?? const PlantsState();
-
-      // Only show loading if no plants exist yet (first load)
       final shouldShowLoading = currentState.allPlants.isEmpty;
       if (shouldShowLoading) {
         state = AsyncData(
           currentState.copyWith(isLoading: true, clearError: true),
         );
       }
-
-      // Try to get cached/local data first (immediate response)
       final localResult = await _getPlantsUseCase.call(const NoParams());
 
       localResult.fold(
@@ -613,7 +530,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
               '⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}',
             );
           }
-          // Don't set error yet - try remote sync
         },
         (plants) {
           if (kDebugMode) {
@@ -636,8 +552,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (kDebugMode) {
       print('🔄 PlantsProvider: Iniciando sync em background...');
     }
-
-    // Execute sync in background
     Future.delayed(const Duration(milliseconds: 100), () async {
       final result = await _getPlantsUseCase.call(const NoParams());
 
@@ -648,7 +562,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
               '❌ PlantsProvider: Background sync falhou: ${_getErrorMessage(failure)}',
             );
           }
-          // Only set error if no local data was loaded
           final currentState = state.valueOrNull ?? const PlantsState();
           if (currentState.allPlants.isEmpty) {
             state = AsyncData(
@@ -696,8 +609,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       }
     }
   }
-
-  // Get plant by ID
   Future<Plant?> getPlantById(String id) async {
     final result = await _getPlantByIdUseCase.call(id);
 
@@ -716,8 +627,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
-
-  // Search plants
   Future<void> searchPlants(String query) async {
     final currentState = state.valueOrNull ?? const PlantsState();
 
@@ -757,8 +666,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
-
-  // Add new plant
   Future<bool> addPlant(AddPlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
@@ -794,8 +701,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
-
-  // Update existing plant
   Future<bool> updatePlant(UpdatePlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
@@ -840,8 +745,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
-
-  // Delete plant
   Future<bool> deletePlant(String id) async {
     final currentState = state.valueOrNull ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
@@ -882,8 +785,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
-
-  // UI state methods
   void setViewMode(ViewMode mode) {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.viewMode != mode) {
@@ -970,13 +871,9 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       state = AsyncData(currentState.copyWith(clearError: true));
     }
   }
-
-  // Load initial data for the plants list page
   Future<void> loadInitialData() async {
     await loadPlants();
   }
-
-  // Refresh plants data and clear any existing errors
   Future<void> refreshPlants() async {
     if (kDebugMode) {
       print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
@@ -997,8 +894,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       );
     }
   }
-
-  // Helper methods
   List<Plant> _sortPlants(List<Plant> plants, SortBy sortBy) {
     final sortedPlants = List<Plant>.from(plants);
 
@@ -1046,7 +941,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   }
 
   String _getErrorMessage(Failure failure) {
-    // Log detailed error for debugging
     if (kDebugMode) {
       print('PlantsProvider Error Details:');
       print('- Type: ${failure.runtimeType}');
@@ -1060,7 +954,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
             ? failure.message
             : 'Dados inválidos fornecidos';
       case CacheFailure _:
-        // More specific cache error messages
         if (failure.message.contains('PlantaModelAdapter') ||
             failure.message.contains('TypeAdapter')) {
           return 'Erro ao acessar dados locais. O app será reiniciado para corrigir o problema.';
@@ -1075,7 +968,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       case NetworkFailure _:
         return 'Sem conexão com a internet. Verifique sua conectividade.';
       case ServerFailure _:
-        // Check if it's specifically an auth error
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
@@ -1108,8 +1000,6 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 final plantsProvider = AsyncNotifierProvider<PlantsNotifier, PlantsState>(() {
   return PlantsNotifier();
 });
-
-// Compatibility providers for legacy code
 final allPlantsProvider = Provider<List<Plant>>((ref) {
   final plantsState = ref.watch(plantsProvider);
   return plantsState.maybeWhen(
@@ -1143,8 +1033,6 @@ final plantsErrorProvider = Provider<String?>((ref) {
     orElse: () => null,
   );
 });
-
-// Dependency providers using GetIt DI
 final getPlantsUseCaseProvider = Provider<GetPlantsUseCase>((ref) {
   return GetIt.instance<GetPlantsUseCase>();
 });
@@ -1168,8 +1056,6 @@ final updatePlantUseCaseProvider = Provider<UpdatePlantUseCase>((ref) {
 final deletePlantUseCaseProvider = Provider<DeletePlantUseCase>((ref) {
   return GetIt.instance<DeletePlantUseCase>();
 });
-
-// Enums (ensure these are defined elsewhere or define them here)
 enum ViewMode {
   grid,
   list,
@@ -1188,8 +1074,6 @@ enum CareStatus {
   good,
   unknown,
 }
-
-// === NEW SOLID-COMPLIANT PROVIDERS ===
 
 /// Provider for AuthStateProvider interface
 final authStateProvider = Provider<IAuthStateProvider>((ref) {
@@ -1243,8 +1127,6 @@ final plantsLoadingProvider = Provider((ref) {
   final state = ref.watch(plantsStateProvider);
   return state.isLoading;
 });
-
-// Removed duplicate - already defined above
 
 /// Provider for care statistics
 final plantsCareStatisticsProvider = Provider((ref) {

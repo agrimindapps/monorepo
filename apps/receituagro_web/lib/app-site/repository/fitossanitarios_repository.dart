@@ -1,4 +1,3 @@
-// fitossanitario_repository.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../classes/fitossanitario_class.dart';
 import '../adapters/fitossanitario_adapter.dart';
@@ -8,8 +7,6 @@ class FitossanitarioRepository {
   final SupabaseClient _client;
 
   FitossanitarioRepository(this._client);
-
-  // === LEGACY METHODS (Backward Compatibility) ===
 
   Future<List<Fitossanitario>> fetchAll() async {
     try {
@@ -49,8 +46,6 @@ class FitossanitarioRepository {
       throw Exception('Erro ao deletar fitossanitário: $e');
     }
   }
-
-  // === CORE ENTITY METHODS (New SOLID Approach) ===
 
   /// Fetches all fitossanitarios as Core entities
   Future<List<FitossanitarioEntity>> fetchAllEntities() async {

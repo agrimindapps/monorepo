@@ -116,22 +116,16 @@ class AnimalSyncEntity extends BaseSyncEntity {
       'notes': notes,
       'photo_url': photoUrl,
       'is_active': isActive,
-
-      // Dados de emergência/médicos
       'emergency_contact': emergencyContact,
       'veterinarian_id': veterinarianId,
       'medical_notes': medicalNotes,
       'allergies': allergies,
       'last_health_check_date': lastHealthCheckDate?.toIso8601String(),
-
-      // Metadados de pet care
       'has_emergency_data': hasEmergencyData,
       'age_in_days': ageInDays,
       'age_in_months': ageInMonths,
       'age_in_years': ageInYears,
     };
-
-    // Remover valores nulos
     map.removeWhere((key, value) => value == null);
     return map;
   }
@@ -149,8 +143,6 @@ class AnimalSyncEntity extends BaseSyncEntity {
       version: (baseFields['version'] as int?) ?? 1,
       userId: baseFields['userId'] as String?,
       moduleName: baseFields['moduleName'] as String?,
-
-      // Campos específicos do animal
       name: map['name'] as String,
       species: AnimalSpeciesExtension.fromString(map['species'] as String? ?? 'other'),
       breed: map['breed'] as String?,
@@ -167,8 +159,6 @@ class AnimalSyncEntity extends BaseSyncEntity {
       notes: map['notes'] as String?,
       photoUrl: map['photo_url'] as String?,
       isActive: map['is_active'] as bool? ?? true,
-
-      // Dados de emergência/médicos
       emergencyContact: map['emergency_contact'] as String?,
       veterinarianId: map['veterinarian_id'] as String?,
       medicalNotes: map['medical_notes'] as String?,
@@ -383,6 +373,4 @@ class AnimalSyncEntity extends BaseSyncEntity {
     lastHealthCheckDate,
   ];
 }
-
-// Import removido para evitar circular dependency
 // Use toLegacyAnimal() method for compatibility instead

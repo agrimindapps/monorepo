@@ -32,8 +32,6 @@ class TopPerformersSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        
-        // Top Gainers
         _buildSection(
           context,
           title: 'Maiores Altas',
@@ -43,8 +41,6 @@ class TopPerformersSection extends StatelessWidget {
         ),
         
         const SizedBox(height: 16),
-        
-        // Top Losers
         _buildSection(
           context,
           title: 'Maiores Quedas',
@@ -54,8 +50,6 @@ class TopPerformersSection extends StatelessWidget {
         ),
         
         const SizedBox(height: 16),
-        
-        // Most Active
         _buildSection(
           context,
           title: 'Mais Negociados',

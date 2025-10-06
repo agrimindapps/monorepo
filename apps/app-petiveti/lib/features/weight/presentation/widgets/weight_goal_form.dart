@@ -300,7 +300,6 @@ class _WeightGoalFormState extends State<WeightGoalForm> {
 
   void _saveGoal() {
     if (_formKey.currentState!.validate()) {
-      // Create goal data structure
       final goalData = {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'type': _goalType,
@@ -312,8 +311,6 @@ class _WeightGoalFormState extends State<WeightGoalForm> {
         'enableWeeklyReminders': _enableWeeklyReminders,
         'createdAt': DateTime.now(),
       };
-
-      // Save goal using repository/provider
       print('Saving goal: $goalData'); // TODO: Replace with actual save logic
       
       ScaffoldMessenger.of(context).showSnackBar(

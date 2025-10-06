@@ -117,25 +117,15 @@ class MaintenanceEntity extends BaseSyncEntity {
   final double cost;
   final DateTime serviceDate;
   final double odometer;
-  
-  // Informações da oficina
   final String? workshopName;
   final String? workshopPhone;
   final String? workshopAddress;
-  
-  // Próximo serviço
   final DateTime? nextServiceDate;
   final double? nextServiceOdometer;
-  
-  // Anexos
   final List<String> photosPaths;
   final List<String> invoicesPaths;
-  
-  // Peças e informações técnicas
   final Map<String, String> parts; // nome da peça -> info/número da peça
   final String? notes;
-  
-  // Metadados do sistema
   final Map<String, dynamic> metadata;
 
   @override
@@ -223,28 +213,20 @@ class MaintenanceEntity extends BaseSyncEntity {
       metadata: metadata ?? this.metadata,
     );
   }
-
-  // Helper getters - Status
   bool get isCompleted => status == MaintenanceStatus.completed;
   bool get isPending => status == MaintenanceStatus.pending;
   bool get isInProgress => status == MaintenanceStatus.inProgress;
   bool get isCancelled => status == MaintenanceStatus.cancelled;
-  
-  // Helper getters - Type
   bool get isPreventive => type == MaintenanceType.preventive;
   bool get isCorrective => type == MaintenanceType.corrective;
   bool get isInspection => type == MaintenanceType.inspection;
   bool get isEmergency => type == MaintenanceType.emergency;
-  
-  // Helper getters - Data presence
   bool get hasWorkshopInfo => workshopName != null && workshopName!.trim().isNotEmpty;
   bool get hasNextService => nextServiceDate != null || nextServiceOdometer != null;
   bool get hasPhotos => photosPaths.isNotEmpty;
   bool get hasInvoices => invoicesPaths.isNotEmpty;
   bool get hasParts => parts.isNotEmpty;
   bool get hasNotes => notes != null && notes!.trim().isNotEmpty;
-  
-  // Business logic
   
   /// Verifica se a próxima manutenção está vencida
   bool isNextServiceDue(double currentOdometer) {
@@ -270,13 +252,9 @@ class MaintenanceEntity extends BaseSyncEntity {
     if (!hasNextService) return 'none';
     
     final now = DateTime.now();
-    
-    // Verifica se já está vencida
     if (nextServiceDate != null && now.isAfter(nextServiceDate!)) {
       return 'overdue';
     }
-    
-    // Verifica proximidade da data
     if (nextServiceDate != null) {
       final daysUntilService = nextServiceDate!.difference(now).inDays;
       if (daysUntilService <= 7) {
@@ -303,8 +281,6 @@ class MaintenanceEntity extends BaseSyncEntity {
         return 'N/A';
     }
   }
-  
-  // Formatters
   
   String get formattedCost => 'R\$ ${cost.toStringAsFixed(2).replaceAll('.', ',')}';
   String get formattedOdometer => '${odometer.toStringAsFixed(0)} km';

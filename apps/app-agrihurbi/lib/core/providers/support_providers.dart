@@ -24,11 +24,6 @@ import '../../features/news/domain/usecases/get_commodity_prices.dart';
 import '../../features/news/domain/usecases/get_news.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';
 import '../../features/settings/domain/usecases/manage_settings.dart';
-// NOTE: Subscription imports commented - feature not yet implemented
-// import '../../features/subscription/domain/entities/subscription_entity.dart';
-// import '../../features/subscription/domain/usecases/manage_subscription.dart';
-
-// === SUPPORT STATE CLASSES ===
 
 /// State para gerenciamento de configurações
 class SettingsState {
@@ -49,34 +44,24 @@ class SettingsState {
   bool get hasError => errorMessage != null;
   bool get hasSuccess => successMessage != null;
   bool get isInitialized => settings != null;
-
-  // Theme settings
   AppTheme get theme => settings?.theme ?? AppTheme.system;
   String get language => settings?.language ?? 'pt_BR';
-
-  // Notification settings
   NotificationSettings get notifications =>
       settings?.notifications ?? const NotificationSettings();
   bool get pushNotificationsEnabled => notifications.pushNotifications;
   bool get newsNotificationsEnabled => notifications.newsNotifications;
   bool get marketAlertsEnabled => notifications.marketAlerts;
   bool get weatherAlertsEnabled => notifications.weatherAlerts;
-
-  // Data settings
   DataSettings get dataSettings =>
       settings?.dataSettings ?? const DataSettings();
   bool get autoSyncEnabled => dataSettings.autoSync;
   bool get wifiOnlySyncEnabled => dataSettings.wifiOnlySync;
   bool get cacheImagesEnabled => dataSettings.cacheImages;
   DataExportFormat get exportFormat => dataSettings.exportFormat;
-
-  // Privacy settings
   PrivacySettings get privacy => settings?.privacy ?? const PrivacySettings();
   bool get analyticsEnabled => privacy.analyticsEnabled;
   bool get crashReportingEnabled => privacy.crashReportingEnabled;
   bool get shareUsageDataEnabled => privacy.shareUsageData;
-
-  // Display settings
   DisplaySettings get display => settings?.display ?? const DisplaySettings();
   double get fontSize => display.fontSize;
   bool get highContrastEnabled => display.highContrast;
@@ -84,15 +69,11 @@ class SettingsState {
   String get dateFormat => display.dateFormat;
   String get currency => display.currency;
   String get unitSystem => display.unitSystem;
-
-  // Security settings
   SecuritySettings get security =>
       settings?.security ?? const SecuritySettings();
   bool get biometricAuthEnabled => security.biometricAuth;
   bool get requireAuthOnOpenEnabled => security.requireAuthOnOpen;
   int get autoLockMinutes => security.autoLockMinutes;
-
-  // Backup settings
   BackupSettings get backup => settings?.backup ?? const BackupSettings();
   bool get autoBackupEnabled => backup.autoBackup;
   BackupFrequency get backupFrequency => backup.frequency;
@@ -283,9 +264,6 @@ class NewsState {
     );
   }
 }
-
-// TODO: Subscription feature not yet implemented
-// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
 /*
 /// State para gerenciamento de assinaturas
 class SubscriptionState {
@@ -338,8 +316,6 @@ class SubscriptionState {
   }
 }
 */
-
-// === STATE NOTIFIERS ===
 
 /// StateNotifier para gerenciamento de configurações
 class SettingsStateNotifier extends StateNotifier<SettingsState> {
@@ -628,8 +604,6 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
   /// Busca artigos
   Future<void> searchArticles(String query) async {
     state = state.copyWith(isSearching: true, currentSearchQuery: query);
-
-    // TODO: Implementar busca quando o use case estiver disponível
     final updatedHistory = List<String>.from(state.searchHistory);
     if (!updatedHistory.contains(query)) {
       updatedHistory.insert(0, query);
@@ -650,9 +624,6 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
     state = state.copyWith(errorMessage: null);
   }
 }
-
-// TODO: Subscription feature not yet implemented
-// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
 /*
 /// StateNotifier para gerenciamento de assinaturas
 class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
@@ -682,7 +653,6 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
 
   /// Carrega métodos de pagamento
   Future<void> loadPaymentMethods() async {
-    // TODO: Implementar quando o use case estiver disponível
     state = state.copyWith(paymentMethods: []);
   }
 
@@ -746,8 +716,6 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
 }
 */
 
-// === PROVIDER DEFINITIONS ===
-
 /// Provider para gerenciamento de configurações
 final settingsProvider =
     StateNotifierProvider<SettingsStateNotifier, SettingsState>((ref) {
@@ -769,9 +737,6 @@ final marketProvider = StateNotifierProvider<MarketStateNotifier, MarketState>((
 final newsProvider = StateNotifierProvider<NewsStateNotifier, NewsState>((ref) {
   return NewsStateNotifier(di.getIt<GetNews>(), di.getIt<GetCommodityPrices>());
 });
-
-// TODO: Subscription feature not yet implemented
-// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
 /*
 /// Provider para gerenciamento de assinaturas
 final subscriptionProvider = StateNotifierProvider<SubscriptionStateNotifier, SubscriptionState>((ref) {
@@ -780,8 +745,6 @@ final subscriptionProvider = StateNotifierProvider<SubscriptionStateNotifier, Su
   );
 });
 */
-
-// === CONVENIENCE PROVIDERS ===
 
 /// Provider para configurações atuais
 final currentSettingsProvider = Provider<SettingsEntity?>((ref) {
@@ -806,9 +769,6 @@ final loadedArticlesProvider = Provider<List<NewsArticleEntity>>((ref) {
   final state = ref.watch(newsProvider);
   return state.articles;
 });
-
-// TODO: Subscription feature not yet implemented
-// Uncomment when SubscriptionEntity, SubscriptionTier, PaymentMethod, and ManageSubscription are available
 /*
 /// Provider para assinatura ativa
 final activeSubscriptionProvider = Provider<SubscriptionEntity?>((ref) {

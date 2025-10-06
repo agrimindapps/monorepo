@@ -71,13 +71,9 @@ class _SaveIndicatorState extends State<SaveIndicator>
   @override
   void didUpdateWidget(SaveIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Handle save completion
     if (oldWidget.isSaving && !widget.isSaving) {
       _onSaveCompleted();
     }
-
-    // Handle unsaved changes pulsing
     if (widget.hasUnsavedChanges != oldWidget.hasUnsavedChanges) {
       if (widget.hasUnsavedChanges) {
         _pulseController.repeat(reverse: true);
@@ -98,8 +94,6 @@ class _SaveIndicatorState extends State<SaveIndicator>
   void _onSaveCompleted() async {
     await _saveController.forward();
     setState(() => _showSaved = true);
-
-    // Auto-hide after duration
     await Future<void>.delayed(widget.autoHideDuration);
 
     if (mounted) {
@@ -430,8 +424,6 @@ class _AutoSaveIndicatorState extends State<AutoSaveIndicator> {
           _isSaving = false;
           _savedRecently = true;
         });
-
-        // Hide "saved" status after 3 seconds
         Timer(const Duration(seconds: 3), () {
           if (mounted) {
             setState(() => _savedRecently = false);

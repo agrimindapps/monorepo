@@ -93,7 +93,6 @@ class EmailValidator extends StringValidator {
   
   /// Strict email validation (more comprehensive)
   bool _strictEmailValidation(String email) {
-    // Check overall structure
     if (!email.contains('@') || email.split('@').length != 2) {
       return false;
     }
@@ -101,13 +100,9 @@ class EmailValidator extends StringValidator {
     final parts = email.split('@');
     final localPart = parts[0];
     final domain = parts[1];
-    
-    // Validate local part
     if (!_isValidLocalPart(localPart)) {
       return false;
     }
-    
-    // Validate domain
     if (!_isValidDomain(domain)) {
       return false;
     }
@@ -117,8 +112,6 @@ class EmailValidator extends StringValidator {
   
   /// RFC 5322 compliant email validation (most strict)
   bool _rfc5322EmailValidation(String email) {
-    // This is a simplified version of RFC 5322
-    // Full RFC 5322 implementation would be extremely complex
     const pattern = r'^[a-zA-Z0-9!#$%&\*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&\*+/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$';
     
     return RegExp(pattern).hasMatch(email);
@@ -129,18 +122,12 @@ class EmailValidator extends StringValidator {
     if (localPart.isEmpty || localPart.length > 64) {
       return false;
     }
-    
-    // Cannot start or end with dot
     if (localPart.startsWith('.') || localPart.endsWith('.')) {
       return false;
     }
-    
-    // Cannot have consecutive dots
     if (localPart.contains('..')) {
       return false;
     }
-    
-    // Check allowed characters
     const allowedChars = r'^[a-zA-Z0-9._%+-]+$';
     return RegExp(allowedChars).hasMatch(localPart);
   }
@@ -150,27 +137,19 @@ class EmailValidator extends StringValidator {
     if (domain.isEmpty || domain.length > 253) {
       return false;
     }
-    
-    // Cannot start or end with dot or hyphen
     if (domain.startsWith('.') || domain.endsWith('.') ||
         domain.startsWith('-') || domain.endsWith('-')) {
       return false;
     }
-    
-    // Must contain at least one dot
     if (!domain.contains('.')) {
       return false;
     }
-    
-    // Check domain parts
     final domainParts = domain.split('.');
     for (final part in domainParts) {
       if (!_isValidDomainPart(part)) {
         return false;
       }
     }
-    
-    // TLD must be at least 2 characters
     final tld = domainParts.last;
     if (tld.length < 2) {
       return false;
@@ -184,13 +163,9 @@ class EmailValidator extends StringValidator {
     if (part.isEmpty || part.length > 63) {
       return false;
     }
-    
-    // Cannot start or end with hyphen
     if (part.startsWith('-') || part.endsWith('-')) {
       return false;
     }
-    
-    // Check allowed characters
     const allowedChars = r'^[a-zA-Z0-9-]+$';
     return RegExp(allowedChars).hasMatch(part);
   }
@@ -287,15 +262,11 @@ class EmailDomainValidator extends StringValidator {
   @override
   ValidationResult validateString(String value) {
     final email = caseSensitive ? value.trim() : value.trim().toLowerCase();
-    
-    // Basic email format check
     if (!email.contains('@')) {
       return ValidationResult.invalid('Email inválido');
     }
     
     final domain = email.split('@').last;
-    
-    // Check blocked domains
     if (blockedDomains.isNotEmpty) {
       final normalizedBlockedDomains = caseSensitive 
           ? blockedDomains 
@@ -305,8 +276,6 @@ class EmailDomainValidator extends StringValidator {
         return ValidationResult.invalid(errorMessage);
       }
     }
-    
-    // Check allowed domains
     if (allowedDomains.isNotEmpty) {
       final normalizedAllowedDomains = caseSensitive 
           ? allowedDomains 

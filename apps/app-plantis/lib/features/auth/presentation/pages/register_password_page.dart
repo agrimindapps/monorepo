@@ -1,15 +1,8 @@
 import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
-
-// Removed unused import
-// import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/register_loading_overlay.dart';
 import '../../utils/auth_validators.dart';
-// Removed unused auth provider import
-// import '../providers/auth_provider.dart' as local;
-// Removed legacy provider import
-// import '../providers/register_provider.dart';
 
 class RegisterPasswordPage extends ConsumerStatefulWidget {
   const RegisterPasswordPage({super.key});
@@ -25,28 +18,10 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  // Removed legacy provider - will be replaced with Riverpod
-  // RegisterProvider? _registerProvider;
 
   @override
   void initState() {
     super.initState();
-    // TODO: Initialize controllers with Riverpod provider data
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   final registerProvider = ref.read(registerProviderNotifier);
-    //   registerProvider.goToStep(2);
-    //   _passwordController.text = registerProvider.registerData.password;
-    //   _confirmPasswordController.text = registerProvider.registerData.confirmPassword;
-    //
-    //   // Add listeners to update provider in real-time
-    //   _passwordController.addListener(() {
-    //     ref.read(registerProviderNotifier).updatePassword(_passwordController.text);
-    //   });
-    //
-    //   _confirmPasswordController.addListener(() {
-    //     ref.read(registerProviderNotifier).updateConfirmPassword(_confirmPasswordController.text);
-    //   });
-    // });
   }
 
   @override
@@ -63,7 +38,6 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
 
   Future<void> _handleCreateAccount() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Validate passwords match
       if (_passwordController.text != _confirmPasswordController.text) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Senhas não coincidem')),
@@ -72,15 +46,8 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
       }
 
       showRegisterLoading(message: 'Criando conta...');
-
-      // TODO: Replace with actual auth provider
-      // final authProvider = ref.read(authProviderNotifier);
-      // final registerData = ref.read(registerProviderNotifier).registerData;
-      // await authProvider.register(registerData.email, password, registerData.name);
       
       updateRegisterLoadingMessage('Conectando ao servidor...');
-
-      // Simulate registration for now
       await Future<void>.delayed(const Duration(seconds: 1));
 
       if (mounted) {
@@ -90,9 +57,6 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
         ); // Small delay for UX
 
         hideRegisterLoading();
-
-        // TODO: Clear registration data after successful registration
-        // ref.read(registerProviderNotifier).reset();
 
         if (mounted) {
           context.go('/plants');
@@ -129,7 +93,6 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Logo and title
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -158,8 +121,6 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Tab navigation
                     Row(
                       children: [
                         Expanded(
@@ -209,13 +170,10 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                       ],
                     ),
                     const SizedBox(height: 32),
-
-                    // Progress indicator (step 3/3 - password step)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children:
                           List.generate(3, (index) {
-                            // Step 3 de 3 - todas etapas anteriores completas
                             final steps = [true, true, true];
                             return [
                               Container(
@@ -234,14 +192,11 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                           }).expand((widget) => widget).toList(),
                     ),
                     const SizedBox(height: 48),
-
-                    // Form
                     Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Password field
                           const Text(
                             'Senha',
                             style: TextStyle(
@@ -306,8 +261,6 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                             validator: _validatePassword,
                           ),
                           const SizedBox(height: 24),
-
-                          // Confirm Password field
                           TextFormField(
                             controller: _confirmPasswordController,
                             obscureText: _obscureConfirmPassword,
@@ -368,14 +321,8 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                             },
                           ),
                           const SizedBox(height: 48),
-
-                          // Error message placeholder
                           const SizedBox.shrink(),
-
-                          // Auth error message placeholder - will be handled by Riverpod later
                           const SizedBox.shrink(),
-
-                          // Navigation buttons
                           Row(
                             children: [
                               Expanded(
@@ -428,8 +375,6 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                             ],
                           ),
                           const SizedBox(height: 24),
-
-                          // Terms text
                           const Center(
                             child: Text(
                               'Ao criar uma conta, você concorda com nossos\nTermos de Serviço e Política de Privacidade',

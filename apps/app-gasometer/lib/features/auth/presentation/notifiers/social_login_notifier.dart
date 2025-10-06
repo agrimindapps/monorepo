@@ -17,19 +17,13 @@ part 'social_login_notifier.g.dart';
 /// Utiliza GetIt para injeção de dependências do AuthRepository
 @riverpod
 class SocialLoginNotifier extends _$SocialLoginNotifier {
-  // AuthRepository injetado via GetIt
   late final AuthRepository _authRepository;
 
   @override
   SocialLoginState build() {
-    // Inicializa repository via GetIt
     _authRepository = getIt<AuthRepository>();
-
-    // Estado inicial
     return const SocialLoginState.initial();
   }
-
-  // ==================== Social Sign In Methods ====================
 
   /// Sign in com Google
   ///
@@ -174,8 +168,6 @@ class SocialLoginNotifier extends _$SocialLoginNotifier {
       return false;
     }
   }
-
-  // ==================== Link Anonymous Account Methods ====================
 
   /// Link conta anônima com Google
   ///
@@ -329,8 +321,6 @@ class SocialLoginNotifier extends _$SocialLoginNotifier {
       return false;
     }
   }
-
-  // ==================== Utility Methods ====================
 
   /// Limpa erro mantendo estado atual
   void clearError() {

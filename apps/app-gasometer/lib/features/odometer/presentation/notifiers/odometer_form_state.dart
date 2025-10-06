@@ -7,7 +7,6 @@ import '../../domain/entities/odometer_entity.dart';
 ///
 /// Segue o padrão Dart Style Guide: Constructors primeiro, fields depois, methods por último
 class OdometerFormState extends Equatable {
-  // ==================== CONSTRUCTORS ====================
 
   const OdometerFormState({
     this.id = '',
@@ -51,8 +50,6 @@ class OdometerFormState extends Equatable {
     );
   }
 
-  // ==================== FIELDS ====================
-
   final String id;
   final String userId;
   final String vehicleId;
@@ -66,8 +63,6 @@ class OdometerFormState extends Equatable {
   final bool hasChanges;
   final String? errorMessage;
   final Map<String, String> fieldErrors;
-
-  // ==================== METHODS ====================
 
   @override
   List<Object?> get props => [
@@ -85,8 +80,6 @@ class OdometerFormState extends Equatable {
     errorMessage,
     fieldErrors,
   ];
-
-  // ==================== Computed Properties ====================
 
   /// Verifica se tem veículo selecionado
   bool get hasVehicle => vehicle != null;
@@ -109,8 +102,6 @@ class OdometerFormState extends Equatable {
 
   /// Verifica se um campo tem erro
   bool hasFieldError(String field) => fieldErrors.containsKey(field);
-
-  // ==================== CopyWith Methods ====================
 
   OdometerFormState copyWith({
     String? id,

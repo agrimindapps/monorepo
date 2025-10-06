@@ -21,7 +21,6 @@ import '../di_module.dart';
 class ExpensesModule implements DIModule {
   @override
   Future<void> register(GetIt getIt) async {
-    // Data sources
     getIt.registerLazySingleton<ExpenseLocalDataSource>(
       () => ExpenseLocalDataSourceImpl(),
     );
@@ -29,8 +28,6 @@ class ExpensesModule implements DIModule {
     getIt.registerLazySingleton<ExpenseRemoteDataSource>(
       () => ExpenseRemoteDataSourceImpl(),
     );
-
-    // Repository
     getIt.registerLazySingleton<ExpenseRepository>(
       () => ExpenseRepositoryHybridImpl(
         localDataSource: getIt<ExpenseLocalDataSource>(),
@@ -38,8 +35,6 @@ class ExpensesModule implements DIModule {
         connectivity: getIt(),
       ),
     );
-
-    // Use cases
     getIt.registerLazySingleton<GetExpenses>(
       () => GetExpenses(getIt<ExpenseRepository>()),
     );

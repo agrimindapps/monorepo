@@ -36,14 +36,10 @@ class _CalculatorsListPageState extends ConsumerState<CalculatorsListPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
-    // Carrega dados iniciais
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return; // ✅ Safety check
       final provider = ref.read(calculatorProvider.notifier);
       provider.refreshAllData();
-
-      // Aplica filtro de categoria se especificado
       if (widget.category != null) {
         final category = _mapStringToCategory(widget.category!);
         if (category != null) {
@@ -87,10 +83,7 @@ class _CalculatorsListPageState extends ConsumerState<CalculatorsListPage>
       ),
       body: Column(
         children: [
-          // Barra de busca e filtros
           _buildSearchAndFilters(provider, providerNotifier),
-
-          // Conteúdo principal em abas
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -265,10 +258,6 @@ class _CalculatorsListPageState extends ConsumerState<CalculatorsListPage>
     );
   }
 
-  // Método removido - funcionalidade movida para CalculatorListWidget
-
-  // Método removido - funcionalidade movida para CalculatorUIService
-
   void _navigateToCalculatorWithHistory(
     CalculationHistory historyItem,
     CalculatorProvider providerNotifier,
@@ -276,14 +265,6 @@ class _CalculatorsListPageState extends ConsumerState<CalculatorsListPage>
     providerNotifier.applyHistoryResult(historyItem);
     CalculatorUIService.navigateToCalculatorWithHistory(context, historyItem);
   }
-
-  // Método removido - funcionalidade movida para CalculatorHistoryListWidget
-
-  // Método removido - funcionalidade movida para CalculatorHistoryListWidget
-
-  // Método removido - funcionalidade movida para CalculatorUIService
-
-  // Método removido - funcionalidade movida para CalculatorUIService
 
   String _getPageTitle() {
     return CalculatorUIService.getPageTitle(widget.category);

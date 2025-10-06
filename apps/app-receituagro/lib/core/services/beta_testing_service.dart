@@ -11,27 +11,21 @@ class BetaTestingService {
   static String get currentPhase => 'production';
   
   static Future<void> initialize() async {
-    // Stub implementation - no-op
     await Future<void>.delayed(const Duration(milliseconds: 100));
   }
   
   static Future<bool> checkBetaStatus() async {
-    // Stub implementation - return false (not in beta)
     await Future<void>.delayed(const Duration(milliseconds: 50));
     return false;
   }
   
   static void recordBetaEvent(String event, Map<String, dynamic> data) {
-    // Stub implementation - no-op
   }
   
   static Future<Map<String, dynamic>> getBetaConfig() async {
-    // Stub implementation - return empty config
     await Future<void>.delayed(const Duration(milliseconds: 50));
     return {};
   }
-  
-  // Instance methods for release dashboard
   Future<List<ReleaseChecklistItem>> getReleaseChecklist() async {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     return [];
@@ -54,7 +48,6 @@ class BetaTestingService {
   
   Future<void> completeChecklistItem(String itemId) async {
     await Future<void>.delayed(const Duration(milliseconds: 50));
-    // Stub implementation - no-op
   }
   
   Future<Map<String, dynamic>> exportBetaData() async {
@@ -78,7 +71,6 @@ class BetaTestingService {
   
   Future<void> setBetaPhase(BetaPhase phase) async {
     await Future<void>.delayed(const Duration(milliseconds: 50));
-    // Stub implementation - no-op
   }
 }
 

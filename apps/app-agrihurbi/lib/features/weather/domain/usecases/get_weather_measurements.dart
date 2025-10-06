@@ -37,7 +37,6 @@ class GetWeatherMeasurements {
     String? locationId,
   }) async {
     try {
-      // Validate date range
       if (startDate.isAfter(endDate)) {
         return Left(InvalidDateRangeFailure(
           startDate, 
@@ -45,8 +44,6 @@ class GetWeatherMeasurements {
           'Start date must be before end date'
         ));
       }
-
-      // Check if date range is not too large (e.g., max 1 year)
       final daysDifference = endDate.difference(startDate).inDays;
       if (daysDifference > 365) {
         return Left(InvalidDateRangeFailure(
@@ -120,21 +117,16 @@ class GetWeatherMeasurements {
     int? limit,
   }) async {
     try {
-      // Validate temperature range
       if (minTemperature != null && maxTemperature != null) {
         if (minTemperature > maxTemperature) {
           return const Left(WeatherDataFailure('Minimum temperature cannot be greater than maximum temperature'));
         }
       }
-
-      // Validate rainfall range
       if (minRainfall != null && maxRainfall != null) {
         if (minRainfall > maxRainfall) {
           return const Left(WeatherDataFailure('Minimum rainfall cannot be greater than maximum rainfall'));
         }
       }
-
-      // Validate date range if both provided
       if (fromDate != null && toDate != null) {
         if (fromDate.isAfter(toDate)) {
           return Left(InvalidDateRangeFailure(
@@ -232,7 +224,6 @@ class GetWeatherMeasurements {
     int? limit,
   }) async {
     try {
-      // Define favorable agricultural conditions
       const double minTemp = 10.0;
       const double maxTemp = 35.0;
       const double maxWindSpeed = 50.0;
@@ -249,7 +240,6 @@ class GetWeatherMeasurements {
       return result.fold(
         (failure) => Left(failure),
         (measurements) {
-          // Filter by additional agricultural criteria
           final favorable = measurements.where((measurement) {
             return measurement.isFavorableForAgriculture &&
                    measurement.windSpeed <= maxWindSpeed;

@@ -15,8 +15,6 @@ class DevelopmentSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // DEVELOPMENT: Always show during app development
-    // TODO: Remove or gate this properly for production builds
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -39,54 +39,35 @@ import 'package:flutter/material.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'feedback_system.dart';
 import 'unified_feedback_system.dart';
-
-// Loading integration
 export '../loading/contextual_loading_manager.dart';
 export 'animated_feedback.dart';
 export 'confirmation_system.dart';
-// Individual components
 export 'feedback_system.dart';
 export 'haptic_service.dart';
 export 'progress_tracker.dart';
 export 'toast_service.dart';
-// Core system
 export 'unified_feedback_system.dart';
-
-// Pre-defined contexts for common operations
 class FeedbackOperations {
-  // Tasks
   static const String taskComplete = 'task_complete';
   static const String taskCreate = 'task_create';
   static const String taskDelete = 'task_delete';
-
-  // Plants
   static const String plantSave = 'plant_save';
   static const String plantUpdate = 'plant_update';
   static const String plantDelete = 'plant_delete';
   static const String plantWater = 'plant_water';
-
-  // Premium
   static const String premiumPurchase = 'premium_purchase';
   static const String premiumRestore = 'premium_restore';
   static const String premiumCancel = 'premium_cancel';
-
-  // Auth
   static const String login = 'login';
   static const String logout = 'logout';
   static const String register = 'register';
-
-  // Data
   static const String sync = 'sync';
   static const String backup = 'backup';
   static const String restore = 'restore';
   static const String upload = 'upload';
-
-  // Settings
   static const String saveSettings = 'save_settings';
   static const String resetData = 'reset_data';
 }
-
-// Common feedback patterns
 class FeedbackPatterns {
   /// Pattern para salvar dados
   static Future<T> saveData<T>({
@@ -115,7 +96,6 @@ class FeedbackPatterns {
     required String itemType,
     bool requireConfirmation = true,
   }) async {
-    // Confirmação
     if (requireConfirmation) {
       final confirmed = await UnifiedFeedbackSystem.confirmDestruction(
         context: context,
@@ -126,8 +106,6 @@ class FeedbackPatterns {
 
       if (!confirmed) return false;
     }
-
-    // Executar operação
     await UnifiedFeedbackSystem.executeWithFeedback<void>(
       context: context,
       operationKey:
@@ -201,8 +179,6 @@ class FeedbackPatterns {
     );
   }
 }
-
-// Quick access helpers
 class QuickFeedback {
   /// Toast de sucesso rápido
   static void success(BuildContext context, String message) {

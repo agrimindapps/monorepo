@@ -29,13 +29,11 @@ class ExpenseFormView extends ConsumerWidget {
       child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1ª Seção: Informações da Despesa (O QUE foi gasto e QUANDO)
               FormSectionHeader(
                 title: 'Informações da Despesa',
                 icon: Icons.shopping_cart,
                 child: Column(
                   children: [
-                    // Seletor de tipo de despesa
                     ExpenseTypeSelector(
                       selectedType: state.expenseType,
                       onTypeSelected: notifier.updateExpenseType,
@@ -43,21 +41,16 @@ class ExpenseFormView extends ConsumerWidget {
                     ),
 
                     const SizedBox(height: GasometerDesignTokens.spacingMd),
-
-                    // Descrição com validação em tempo real
                     DescriptionField(
                       controller: notifier.descriptionController,
                       label: 'Descrição da Despesa',
                       hint: ExpenseConstants.descriptionPlaceholder,
                       required: true,
                       onChanged: (value) {
-                        // O notifier já está conectado ao controller
                       },
                     ),
 
                     const SizedBox(height: GasometerDesignTokens.spacingMd),
-
-                    // Data e Hora unified
                     DateTimeField(
                       value: state.date ?? DateTime.now(),
                       onChanged: (newDate) => notifier.updateDate(newDate),
@@ -68,8 +61,6 @@ class ExpenseFormView extends ConsumerWidget {
               ),
 
               const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-
-              // 2ª Seção: Informações Financeiras e Técnicas (QUANTO custou e quilometragem)
               FormSectionHeader(
                 title: 'Informações Financeiras e Técnicas',
                 icon: Icons.monetization_on,
@@ -77,23 +68,19 @@ class ExpenseFormView extends ConsumerWidget {
                   children: [
                     FormFieldRow.standard(
                       children: [
-                        // Valor com validação monetária
                         AmountFormField(
                           controller: notifier.amountController,
                           label: 'Valor Total',
                           required: true,
                           onChanged: (value) {
-                            // O notifier já está conectado ao controller
                           },
                         ),
-                        // Odômetro
                         OdometerField(
                           controller: notifier.odometerController,
                           label: 'Quilometragem Atual',
                           hint: ExpenseConstants.odometerPlaceholder,
                           currentOdometer: state.vehicle?.currentOdometer,
                           onChanged: (value) {
-                            // Notifier já está conectado ao controller
                           },
                         ),
                       ],
@@ -103,34 +90,27 @@ class ExpenseFormView extends ConsumerWidget {
               ),
 
               const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-
-              // 3ª Seção: Detalhes Adicionais (ONDE foi realizada)
               FormSectionHeader(
                 title: 'Detalhes Adicionais',
                 icon: Icons.location_on,
                 child: Column(
                   children: [
-                    // Localização (opcional)
                     LocationField(
                       controller: notifier.locationController,
                       label: 'Local da Despesa',
                       hint: ExpenseConstants.locationPlaceholder,
                       required: false,
                       onChanged: (value) {
-                        // O notifier já está conectado ao controller
                       },
                     ),
 
                     const SizedBox(height: GasometerDesignTokens.spacingMd),
-
-                    // Observações
                     ObservationsField(
                       controller: notifier.notesController,
                       label: 'Observações Adicionais',
                       hint: ExpenseConstants.notesPlaceholder,
                       required: false,
                       onChanged: (value) {
-                        // O notifier já está conectado ao controller
                       },
                     ),
                   ],
@@ -138,8 +118,6 @@ class ExpenseFormView extends ConsumerWidget {
               ),
 
               const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-
-              // 4ª Seção: Comprovante da Despesa
               OptionalReceiptSection(
                 imagePath: state.receiptImagePath,
                 hasImage: state.hasReceiptImage,
@@ -153,8 +131,6 @@ class ExpenseFormView extends ConsumerWidget {
               ),
 
               const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-
-              // Resumo do formulário (se tem dados válidos)
               if (state.hasMinimumData)
                 _buildFormSummary(context, state),
             ],
@@ -227,12 +203,9 @@ class ExpenseFormView extends ConsumerWidget {
                 ],
               ),
             ],
-
-            // Indicadores de status
             const SizedBox(height: GasometerDesignTokens.spacingMd),
             Row(
               children: [
-                // Status de validação
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: GasometerDesignTokens.spacingSm,
@@ -265,8 +238,6 @@ class ExpenseFormView extends ConsumerWidget {
                 ),
 
                 const SizedBox(width: GasometerDesignTokens.spacingSm),
-
-                // Indicador de valor alto
                 if (state.isHighValue)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -295,8 +266,6 @@ class ExpenseFormView extends ConsumerWidget {
                       ],
                     ),
                   ),
-
-                // Indicador de recorrente (baseado no tipo de despesa)
                 if (state.expenseType == ExpenseType.maintenance ||
                     state.expenseType == ExpenseType.insurance) ...[
                   const SizedBox(width: GasometerDesignTokens.spacingSm),
@@ -368,15 +337,4 @@ class ExpenseFormView extends ConsumerWidget {
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
-
-  // Campo de data/hora removido - agora usa DateTimeField
-
-  // Método de seleção de data removido - agora é tratado pelo DateTimeField
-
-
-
-
-
-
-  // Validador de odômetro removido - agora é tratado pelo OdometerField
 }

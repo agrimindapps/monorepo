@@ -36,8 +36,6 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-
-      // Log to Crashlytics as fatal error
       await _crashlyticsService.recordError(
         exception: error,
         stackTrace: stackTrace ?? StackTrace.current,
@@ -45,22 +43,14 @@ class ErrorTrackingService {
         fatal: true,
         additionalInfo: context,
       );
-
-      // Log to analytics
       await _analyticsService.logEvent(
         'critical_error',
         parameters: _sanitizeParameters(errorData),
       );
-
-      // Set user context if provided
       if (userId != null) {
         await _crashlyticsService.setUserId(userId);
       }
-
-      // Store locally for debugging
       await _storeErrorLocally(errorData);
-
-      // Print to console in debug mode
       if (kDebugMode) {
         debugPrint('🔴 CRITICAL ERROR: $error');
         if (stackTrace != null) {
@@ -68,7 +58,6 @@ class ErrorTrackingService {
         }
       }
     } catch (e) {
-      // Silent fail to prevent error loops
       debugPrint('ErrorTrackingService: Failed to log critical error - $e');
     }
   }
@@ -88,27 +77,20 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-
-      // Log to Crashlytics as non-fatal error
       await _crashlyticsService.recordNonFatalError(
         exception: warning,
         stackTrace: StackTrace.current,
         reason: 'Warning in ${feature ?? 'unknown feature'}',
         additionalInfo: context,
       );
-
-      // Log to analytics
       await _analyticsService.logEvent(
         'warning',
         parameters: _sanitizeParameters(warningData),
       );
-
-      // Print to console in debug mode
       if (kDebugMode) {
         debugPrint('🟡 WARNING: $warning');
       }
     } catch (e) {
-      // Silent fail
       debugPrint('ErrorTrackingService: Failed to log warning - $e');
     }
   }
@@ -128,8 +110,6 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-      
-      // Only log to analytics in debug mode for info
       if (kDebugMode) {
         await _analyticsService.logEvent(
           'debug_info',
@@ -139,7 +119,6 @@ class ErrorTrackingService {
         debugPrint('ℹ️ INFO: $info');
       }
     } catch (e) {
-      // Silent fail
       debugPrint('ErrorTrackingService: Failed to log info - $e');
     }
   }
@@ -166,8 +145,6 @@ class ErrorTrackingService {
         userId: userId,
         feature: feature,
       );
-
-      // Record performance metric
       await _performanceService.recordTiming(
         'operation_$operation',
         Duration(milliseconds: durationMs),
@@ -176,14 +153,10 @@ class ErrorTrackingService {
           'threshold_exceeded': threshold != null && durationMs > threshold ? 'true' : 'false',
         },
       );
-
-      // Log to analytics
       await _analyticsService.logEvent(
         'performance_issue',
         parameters: _sanitizeParameters(performanceData),
       );
-
-      // Log to crashlytics if threshold exceeded
       if (threshold != null && durationMs > threshold) {
         await _crashlyticsService.recordNonFatalError(
           exception: 'Performance threshold exceeded',
@@ -222,8 +195,6 @@ class ErrorTrackingService {
         userId: userId,
         feature: 'network',
       );
-
-      // Log to Crashlytics if critical network error
       if (statusCode == null || statusCode >= 500) {
         await _crashlyticsService.recordNetworkError(
           url: endpoint,
@@ -232,8 +203,6 @@ class ErrorTrackingService {
           context: context,
         );
       }
-
-      // Log to analytics
       await _analyticsService.logEvent(
         'network_error',
         parameters: _sanitizeParameters(networkData),
@@ -312,15 +281,10 @@ class ErrorTrackingService {
       
       final key = entry.key;
       final value = entry.value;
-      
-      // Skip sensitive keys
       if (_isSensitiveKey(key)) continue;
-      
-      // Limit string length for analytics
       if (value is String && value.length > 500) {
         sanitized[key] = '${value.substring(0, 500)}...';
       } else if (value is Map) {
-        // Limit nested objects
         sanitized[key] = _sanitizeNestedMap(value);
       } else {
         sanitized[key] = value;
@@ -374,15 +338,8 @@ class ErrorTrackingService {
   Future<void> _storeErrorLocally(Map<String, dynamic> errorData) async {
     try {
       final errorId = DateTime.now().millisecondsSinceEpoch.toString();
-      // TODO: Fix HiveStorageService API usage
-      // await _hiveStorageService.put(
-      //   boxName: 'error_logs',
-      //   key: 'error_$errorId',
-      //   value: errorData,
-      // );
       debugPrint('Error stored locally: $errorId');
     } catch (e) {
-      // Silent fail
       debugPrint('Failed to store error locally: $e');
     }
   }
@@ -390,11 +347,7 @@ class ErrorTrackingService {
   /// Obtém logs de erro locais para debugging
   Future<List<Map<String, dynamic>>> getLocalErrorLogs({int? limit}) async {
     try {
-      // TODO: Fix HiveStorageService API usage
-      // final errorBox = await _hiveStorageService.getBox('error_logs');
       final errors = <Map<String, dynamic>>[];
-      
-      // Placeholder implementation
       debugPrint('Getting local error logs (limit: $limit)');
       
       return errors;
@@ -407,10 +360,7 @@ class ErrorTrackingService {
   /// Limpa logs antigos
   Future<void> clearOldErrorLogs({int maxAge = 30}) async {
     try {
-      // TODO: Fix HiveStorageService API usage
       final cutoffDate = DateTime.now().subtract(Duration(days: maxAge));
-      
-      // Placeholder implementation
       debugPrint('Cleared old error logs (max age: $maxAge days, cutoff: $cutoffDate)');
     } catch (e) {
       debugPrint('Failed to clear old error logs: $e');

@@ -126,15 +126,11 @@ class AnimalAgeCalculator extends Calculator {
   @override
   List<String> getValidationErrors(Map<String, dynamic> inputs) {
     final errors = <String>[];
-
-    // Validar campos obrigatórios
     for (final field in inputFields) {
       if (field.isRequired && !inputs.containsKey(field.key)) {
         errors.add('${field.label} é obrigatório');
       }
     }
-
-    // Validar idade
     if (inputs.containsKey('age_years')) {
       final age = inputs['age_years'];
       if (age is! double && age is! int) {
@@ -149,8 +145,6 @@ class AnimalAgeCalculator extends Calculator {
         }
       }
     }
-
-    // Validar porte para cães
     if (inputs['species'] == 'Cão' && !inputs.containsKey('dog_size')) {
       errors.add('Porte do cão é obrigatório');
     }

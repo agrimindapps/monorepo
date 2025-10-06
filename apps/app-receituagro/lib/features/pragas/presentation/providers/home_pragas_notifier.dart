@@ -19,8 +19,6 @@ class HomePragasState {
   final dynamic stats;
   final List<PragaEntity> suggestedPragas;
   final List<PragaEntity> recentPragas;
-
-  // Callback references for widget interactions
   final void Function(PragaEntity)? _onRecordPragaAccess;
   final void Function(int)? _onUpdateCarouselIndex;
 
@@ -138,20 +136,14 @@ class HomePragasNotifier extends _$HomePragasNotifier {
 
   @override
   Future<HomePragasState> build() async {
-    // Get dependencies from DI
     _culturaRepository = di.sl<CulturaHiveRepository>();
-
-    // Initialize and return initial state
     return await _initialize();
   }
 
   /// Inicializa o notifier e carrega dados necessários
   Future<HomePragasState> _initialize() async {
     try {
-      // Carrega dados de culturas
       final totalCulturas = await _loadCulturaData();
-
-      // Wait for pragas notifier to load (it loads automatically now)
       final pragasState = await ref.watch(pragasNotifierProvider.future);
 
       return HomePragasState(
@@ -212,8 +204,6 @@ class HomePragasNotifier extends _$HomePragasNotifier {
 
     final currentState = state.value;
     if (currentState == null) return;
-
-    // Update state with new pragas data
     final pragasState = ref.read(pragasNotifierProvider).value;
 
     state = AsyncValue.data(

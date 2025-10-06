@@ -78,8 +78,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     setState(() {
       _currentBottomNavIndex = index;
     });
-
-    // Recarrega favoritos quando a tab for selecionada
     if (index == 2) { // Index 2 é a página de favoritos
       FavoritosPage.reloadIfActive();
     }

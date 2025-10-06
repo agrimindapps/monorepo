@@ -10,8 +10,6 @@ class DiagnosticosDebug {
   static Future<void> checkStatus() async {
     try {
       debugPrint('🔍 [DEBUG] ===== VERIFICAÇÃO DE DIAGNÓSTICOS =====');
-
-      // 1. Verificar repository
       final repository = di.sl<DiagnosticoHiveRepository>();
       final allDiagnosticosResult = await repository.getAll();
 
@@ -27,11 +25,7 @@ class DiagnosticosDebug {
 
           if (allDiagnosticos.isEmpty) {
             debugPrint('⚠️ [DEBUG] Box vazia! Tentando forçar carregamento...');
-
-            // 2. Tentar carregar
             await DiagnosticosDataLoader.forceReload();
-
-            // 3. Verificar novamente
             final newResult = await repository.getAll();
             await newResult.fold(
               (error) async {
@@ -90,16 +84,10 @@ class DiagnosticosDebug {
   static Future<void> _debugLoadingProcess() async {
     try {
       debugPrint('🔧 [DEBUG] Debugando processo de carregamento...');
-
-      // Verificar stats do loader
       final stats = await DiagnosticosDataLoader.getStats();
       debugPrint('📊 [DEBUG] Stats do loader: $stats');
-
-      // Verificar se loader pensa que está carregado
       final isLoaded = DiagnosticosDataLoader.isLoaded;
       debugPrint('🔍 [DEBUG] Loader isLoaded: $isLoaded');
-
-      // Tentar verificar dados
       final hasData = await DiagnosticosDataLoader.isDataLoaded();
       debugPrint('🔍 [DEBUG] isDataLoaded(): $hasData');
 

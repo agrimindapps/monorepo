@@ -26,7 +26,6 @@ class MarketSummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 Icon(
@@ -46,8 +45,6 @@ class MarketSummaryCard extends StatelessWidget {
             ),
             
             const SizedBox(height: 16),
-
-            // Market Index
             Row(
               children: [
                 Text(
@@ -87,8 +84,6 @@ class MarketSummaryCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 20),
-
-            // Market Statistics Grid
             Row(
               children: [
                 Expanded(
@@ -130,8 +125,6 @@ class MarketSummaryCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-
-            // Market Sentiment
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -172,8 +165,6 @@ class MarketSummaryCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
-
-            // Last Update
             Text(
               'Atualizado em ${_formatDateTime(summary.lastUpdated)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(

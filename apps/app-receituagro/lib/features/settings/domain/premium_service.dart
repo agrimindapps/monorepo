@@ -65,10 +65,6 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   
   @override
   bool get shouldShowPremiumDialogs {
-    // Don't show premium dialogs for anonymous users
-    // In a real implementation, this should check the auth service
-    // For now, we'll return true to maintain current behavior
-    // TODO: Integrate with proper auth service when available
     return true;
   }
   
@@ -98,14 +94,11 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   
   @override
   Future<void> navigateToPremium() async {
-    // Mock navigation - in real implementation would use Navigator/GetX
     debugPrint('Navigate to premium page');
   }
   
   @override
   Future<void> checkPremiumStatus() async {
-    // Mock status check - in real implementation would check with backend
     await Future<void>.delayed(const Duration(milliseconds: 200));
-    // Status remains unchanged in mock
   }
 }

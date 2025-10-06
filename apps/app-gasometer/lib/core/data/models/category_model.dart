@@ -7,7 +7,6 @@ part 'category_model.g.dart';
 /// Category model with Firebase sync support
 /// TypeId: 5 - New sequential numbering
 @HiveType(typeId: 5)
-// ignore: must_be_immutable
 class CategoryModel extends BaseSyncModel {
   CategoryModel({
     required this.id,
@@ -107,9 +106,7 @@ class CategoryModel extends BaseSyncModel {
       CategoryModel.fromHiveMap(json);
   @override
   void removeFromHive() {
-    // Stub implementation to satisfy HiveObjectMixin
   }
-  // Sync fields from BaseSyncModel (stored as milliseconds for Hive)
   @HiveField(0)
   @override
   final String id;
@@ -134,8 +131,6 @@ class CategoryModel extends BaseSyncModel {
   @HiveField(8)
   @override
   final String? moduleName;
-
-  // Category specific fields
   @HiveField(10)
   final int categoria;
   @HiveField(11)
@@ -191,8 +186,6 @@ class CategoryModel extends BaseSyncModel {
       descricao: descricao ?? this.descricao,
     );
   }
-
-  // Convenience methods for different serialization formats
   Map<String, dynamic> toMap() => toHiveMap();
   Map<String, dynamic> toJson() => toHiveMap();
 

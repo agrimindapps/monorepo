@@ -88,12 +88,9 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header com ícone e título da tarefa
               _buildHeader(theme),
 
               const SizedBox(height: 24),
-
-              // Data de vencimento atual
               _buildInfoCard(
                 theme,
                 Icons.calendar_today,
@@ -103,8 +100,6 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
               ),
 
               const SizedBox(height: 12),
-
-              // Próximo vencimento
               _buildInfoCard(
                 theme,
                 Icons.schedule,
@@ -114,8 +109,6 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
               ),
 
               const SizedBox(height: 12),
-
-              // Intervalo
               _buildInfoCard(
                 theme,
                 Icons.repeat,
@@ -125,13 +118,9 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
               ),
 
               const SizedBox(height: 12),
-
-              // Data de conclusão (editável)
               _buildCompletionSection(theme),
 
               const SizedBox(height: 32),
-
-              // Botões
               Row(
                 children: [
                   Expanded(
@@ -340,7 +329,6 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   }
 
   String _formatDateDescription(DateTime date) {
-    // Formato: dd/MM/yyyy
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
     final year = date.year.toString();
@@ -348,11 +336,8 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   }
 
   String _getNextDueDescription() {
-    // Calcula o próximo vencimento baseado no intervalo da tarefa
     final interval = _getTaskInterval();
     final nextDate = _completionDate.add(Duration(days: interval));
-
-    // Formato: dd/MM/yyyy
     final day = nextDate.day.toString().padLeft(2, '0');
     final month = nextDate.month.toString().padLeft(2, '0');
     final year = nextDate.year.toString();
@@ -377,7 +362,6 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   }
 
   int _getTaskInterval() {
-    // Define intervalos padrão baseados no tipo de tarefa
     switch (widget.task.type) {
       case TaskType.watering:
         return 3; // 3 dias

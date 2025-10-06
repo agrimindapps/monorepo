@@ -16,7 +16,6 @@ class ManageFavoritoUseCase implements app_usecase.UseCase<bool, ManageFavoritoP
 
   @override
   ResultFuture<bool> call(ManageFavoritoParams params) async {
-    // Validação de entrada
     if (!params.isValid) {
       return const Left(
         app_failures.ServerFailure('Parâmetros inválidos para gerenciar favorito'),
@@ -24,10 +23,7 @@ class ManageFavoritoUseCase implements app_usecase.UseCase<bool, ManageFavoritoP
     }
 
     try {
-      // Primeiro verifica se já está favoritado
       final isFavoritoResult = await _repository.isFavorito(params.itemId, params.tipo);
-      
-      // Se houve erro ao verificar, retorna o erro
       if (isFavoritoResult.isLeft()) {
         return isFavoritoResult.fold(
           (failure) => Left(failure),
@@ -41,14 +37,12 @@ class ManageFavoritoUseCase implements app_usecase.UseCase<bool, ManageFavoritoP
       );
       
       if (isFavorito) {
-        // Se já está favoritado, remove
         final removeResult = await _repository.removeFavorito(params.itemId, params.tipo);
         return removeResult.fold(
           (failure) => Left(failure),
           (_) => const Right(false), // Retorna false indicando que foi removido
         );
       } else {
-        // Se não está favoritado, adiciona
         final favorito = FavoritoEntity(
           id: _generateFavoritoId(params.itemId, params.tipo),
           itemId: params.itemId,

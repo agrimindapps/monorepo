@@ -70,8 +70,6 @@ class SettingsState {
   SettingsState clearError() {
     return copyWith(error: null);
   }
-
-  // Settings getters for easier access
   bool get isDarkTheme => settings?.isDarkTheme ?? false;
   bool get notificationsEnabled => settings?.notificationsEnabled ?? true;
   bool get soundEnabled => settings?.soundEnabled ?? true;
@@ -114,29 +112,20 @@ class SettingsState {
 class SettingsNotifier extends _$SettingsNotifier {
   late final GetUserSettingsUseCase _getUserSettingsUseCase;
   late final UpdateUserSettingsUseCase _updateUserSettingsUseCase;
-
-  // Services from DI
   late final IPremiumService _premiumService;
   late final ReceitaAgroNotificationService _notificationService;
   late final PromotionalNotificationManager _promotionalManager;
   late final IAnalyticsRepository _analyticsRepository;
   late final ICrashlyticsRepository _crashlyticsRepository;
   late final IAppRatingRepository _appRatingRepository;
-  // DeviceIdentityService not currently used
-  // late final DeviceIdentityService _deviceIdentityService;
   late final FeatureFlagsNotifier _featureFlagsNotifier;
   DeviceManagementService? _deviceManagementService;
 
   @override
   Future<SettingsState> build() async {
-    // Get use cases from DI
     _getUserSettingsUseCase = di.sl<GetUserSettingsUseCase>();
     _updateUserSettingsUseCase = di.sl<UpdateUserSettingsUseCase>();
-
-    // Initialize services
     _initializeServices();
-
-    // Cleanup on dispose
     ref.onDispose(() {
       unawaited(
         _notificationService.cancelAllNotifications().catchError((Object e) {
@@ -157,10 +146,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       _analyticsRepository = di.sl<IAnalyticsRepository>();
       _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
       _appRatingRepository = di.sl<IAppRatingRepository>();
-      // _deviceIdentityService = di.sl<DeviceIdentityService>(); // Not currently used
       _featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
-
-      // DeviceManagementService may not be available on Web
       if (di.sl.isRegistered<DeviceManagementService>()) {
         _deviceManagementService = di.sl<DeviceManagementService>();
       } else {
@@ -247,7 +233,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     final success = await _updateSingleSetting('notificationsEnabled', enabled);
 
     if (success) {
-      // Atualizar preferências promocionais baseado na configuração geral
       try {
         final currentPrefs =
             await _promotionalManager.getUserNotificationPreferences();
@@ -281,8 +266,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     return await _updateSingleSetting('analyticsEnabled', enabled);
   }
 
-  // Premium Management Methods
-
   /// Generate test license (development only)
   Future<bool> generateTestLicense() async {
     try {
@@ -315,12 +298,9 @@ class SettingsNotifier extends _$SettingsNotifier {
     }
   }
 
-  // Notification Management Methods
-
   /// Test notification functionality
   Future<bool> testNotification() async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implement notification test when interface is available
       debugPrint('Notification test - not implemented yet');
 
       await _analyticsRepository.logEvent(
@@ -354,8 +334,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     }
   }
 
-  // Analytics Management Methods
-
   /// Test analytics functionality
   Future<bool> testAnalytics() async {
     try {
@@ -373,12 +351,6 @@ class SettingsNotifier extends _$SettingsNotifier {
         parameters: testData,
       );
 
-      // REVIEW (converted TODO 2025-10-06): Implement setUserProperty when interface is available
-      // await _analyticsRepository.setUserProperty(
-      //   name: 'last_analytics_test',
-      //   value: DateTime.now().toIso8601String(),
-      // );
-
       return true;
     } catch (e) {
       final currentState = state.value;
@@ -389,8 +361,6 @@ class SettingsNotifier extends _$SettingsNotifier {
       return false;
     }
   }
-
-  // Crashlytics Management Methods
 
   /// Test crashlytics functionality
   Future<bool> testCrashlytics() async {
@@ -425,16 +395,9 @@ class SettingsNotifier extends _$SettingsNotifier {
     }
   }
 
-  // App Rating Methods
-
   /// Show rate app dialog
   Future<bool> showRateAppDialog(BuildContext context) async {
     try {
-      // REVIEW (converted TODO 2025-10-06): Implement app rating when interface methods are available
-      // final shouldShow = await _appRatingRepository.shouldShowRatingPrompt();
-      // if (!shouldShow) {
-      //   return false;
-      // }
 
       await _appRatingRepository.showRatingDialog();
 
@@ -541,8 +504,6 @@ class SettingsNotifier extends _$SettingsNotifier {
         );
         return;
       }
-
-      // REVIEW (converted TODO 2025-10-06): Implement device loading when interface methods are available
       DeviceEntity? currentDevice;
       List<DeviceEntity> connectedDevices = [];
 
@@ -578,8 +539,6 @@ class SettingsNotifier extends _$SettingsNotifier {
       }
 
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
-
-      // REVIEW (converted TODO 2025-10-06): Implement revokeDevice when interface is available
       final result = await _deviceManagementService!.revokeDevice(deviceUuid);
 
       await result.fold(
@@ -624,8 +583,6 @@ class SettingsNotifier extends _$SettingsNotifier {
       }
 
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
-
-      // REVIEW (converted TODO 2025-10-06): Implement registerDevice when interface is available
       final result = Right<Failure, DeviceEntity>(device); // Placeholder
 
       return result.fold(
@@ -666,19 +623,16 @@ class SettingsNotifier extends _$SettingsNotifier {
         debugPrint(
           '⚠️  DeviceManagementService not available - using local fallback',
         );
-        // Fallback: allow if less than 3 devices locally
         return currentState.connectedDevices.length < 3;
       }
 
       final result = await _deviceManagementService!.canAddMoreDevices();
       return result.fold((failure) {
         debugPrint('Error checking if can add more devices: $failure');
-        // Fallback to local count check
         return currentState.connectedDevices.length < 3;
       }, (canAdd) => canAdd);
     } catch (e) {
       debugPrint('Unexpected error checking device limit: $e');
-      // Fallback to local count check
       return currentState.connectedDevices.length < 3;
     }
   }

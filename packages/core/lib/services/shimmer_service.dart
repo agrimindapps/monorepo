@@ -120,7 +120,6 @@ class ShimmerService {
           padding: padding ?? const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Ícone/Avatar skeleton
               Container(
                 width: 48,
                 height: 48,
@@ -130,14 +129,11 @@ class ShimmerService {
                 ),
               ),
               const SizedBox(width: 16),
-              
-              // Conteúdo skeleton
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Título
                     Container(
                       height: 18,
                       width: double.infinity,
@@ -147,8 +143,6 @@ class ShimmerService {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    
-                    // Subtítulo
                     Container(
                       height: 14,
                       width: 200,
@@ -158,8 +152,6 @@ class ShimmerService {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
-                    // Metadata
                     Container(
                       height: 12,
                       width: 120,
@@ -226,7 +218,6 @@ class ShimmerService {
           padding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              // Ícone/título principal
               Container(
                 width: 120,
                 height: 20,
@@ -236,7 +227,6 @@ class ShimmerService {
                 ),
               ),
               const Spacer(),
-              // Ação/botão
               Container(
                 width: 60,
                 height: 16,

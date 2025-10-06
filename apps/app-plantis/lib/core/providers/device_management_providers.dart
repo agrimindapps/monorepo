@@ -70,8 +70,6 @@ class DeviceManagementState {
       isValidating: isValidating ?? this.isValidating,
     );
   }
-
-  // Computed properties
   List<DeviceModel> get activeDevices => devices.where((d) => d.isActive).toList();
   List<DeviceModel> get inactiveDevices => devices.where((d) => !d.isActive).toList();
   int get activeDeviceCount => activeDevices.length;
@@ -85,8 +83,6 @@ class DeviceManagementState {
     if (activeDeviceCount == 1) return '1 dispositivo ativo';
     return '$activeDeviceCount dispositivos ativos';
   }
-
-  // UI Helpers
   String get statusText {
     if (!hasDevices) return 'Nenhum dispositivo registrado';
 
@@ -156,24 +152,18 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
 
   @override
   Future<DeviceManagementState> build() async {
-    // Initialize use cases
     _getUserDevicesUseCase = GetIt.instance<GetUserDevicesUseCase>();
     _validateDeviceUseCase = GetIt.instance<ValidateDeviceUseCase>();
     _revokeDeviceUseCase = GetIt.instance<RevokeDeviceUseCase>();
     _revokeAllOtherDevicesUseCase = GetIt.instance<RevokeAllOtherDevicesUseCase>();
     _getDeviceStatisticsUseCase = GetIt.instance<GetDeviceStatisticsUseCase>();
-
-    // Initialize device management
     return _initializeDeviceManagement();
   }
 
   /// Initialize device management
   Future<DeviceManagementState> _initializeDeviceManagement() async {
     try {
-      // Identify current device
       final currentDevice = await _identifyCurrentDevice();
-
-      // Load devices
       final devicesResult = await _getUserDevicesUseCase.call(const GetUserDevicesParams());
 
       final List<DeviceModel> devices = devicesResult.fold(
@@ -274,7 +264,6 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
     );
 
     if (success) {
-      // Reload devices after successful revocation
       await loadDevices();
 
       final updatedState = (state.valueOrNull ?? currentState).copyWith(
@@ -313,7 +302,6 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
     );
 
     if (resultData.success) {
-      // Reload devices after successful revocation
       await loadDevices();
 
       final updatedState = (state.valueOrNull ?? currentState).copyWith(
@@ -336,8 +324,6 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
   /// Validate current device
   Future<DeviceValidationResult?> validateCurrentDevice() async {
     final currentState = state.valueOrNull ?? DeviceManagementState.initial();
-
-    // Check if already validating
     if (currentState.isValidating) return null;
 
     state = AsyncValue.data(currentState.copyWith(
@@ -376,7 +362,6 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
         },
         (DeviceValidationResult validationResult) async {
           if (validationResult.isValid) {
-            // Reload devices after successful validation
             await loadDevices();
 
             final updatedState = (state.valueOrNull ?? currentState).copyWith(
@@ -458,8 +443,6 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
     state = AsyncValue.data(DeviceManagementState.initial());
   }
 }
-
-// Provider instances
 final deviceManagementProvider =
     AsyncNotifierProvider<DeviceManagementNotifier, DeviceManagementState>(() {
   return DeviceManagementNotifier();

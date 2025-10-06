@@ -18,20 +18,15 @@ class PromoFooter extends StatelessWidget {
       color: const Color(0xFF2D2D2D), // Dark grey
       child: Column(
         children: [
-          // Footer Content
           _buildFooterContent(context, isMobile),
           
           const SizedBox(height: 32),
-          
-          // Divider
           Container(
             height: 1,
             color: Colors.white.withValues(alpha: 0.2),
           ),
           
           const SizedBox(height: 24),
-          
-          // Copyright
           _buildCopyright(context, isMobile),
         ],
       ),
@@ -54,17 +49,12 @@ class PromoFooter extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Brand section
         Expanded(flex: 2, child: _buildBrandSection()),
         
         const SizedBox(width: 40),
-        
-        // Links section
         Expanded(flex: 2, child: _buildLinksSection()),
         
         const SizedBox(width: 40),
-        
-        // Social section
         Expanded(flex: 1, child: _buildSocialSection()),
       ],
     );
@@ -74,7 +64,6 @@ class PromoFooter extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Logo and name
         Row(
           children: [
             Container(
@@ -103,8 +92,6 @@ class PromoFooter extends StatelessWidget {
         ),
         
         const SizedBox(height: 16),
-        
-        // Description
         Text(
           SplashConstants.appDescription,
           style: TextStyle(
@@ -115,8 +102,6 @@ class PromoFooter extends StatelessWidget {
         ),
         
         const SizedBox(height: 16),
-        
-        // Contact info
         Text(
           'Contato: suporte@petiveti.com',
           style: TextStyle(
@@ -147,7 +132,6 @@ class PromoFooter extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 12),
           child: InkWell(
             onTap: () {
-              // Handle link tap
             },
             child: Text(
               link,
@@ -177,8 +161,6 @@ class PromoFooter extends StatelessWidget {
         ),
         
         const SizedBox(height: 16),
-        
-        // Social icons
         Wrap(
           spacing: 16,
           runSpacing: 16,
@@ -196,7 +178,6 @@ class PromoFooter extends StatelessWidget {
   Widget _buildSocialIcon(IconData icon, String platform) {
     return InkWell(
       onTap: () {
-        // Handle social link
       },
       child: Container(
         width: 40,

@@ -11,8 +11,6 @@ import '../premium/subscription_providers.dart';
 /// Providers unificados para analytics e tracking
 /// Consolidam Firebase Analytics, Crashlytics e métricas customizadas entre todos os apps
 
-// ========== CORE ANALYTICS PROVIDERS ==========
-
 /// Provider principal para serviço de analytics
 final analyticsServiceProvider = Provider<FirebaseAnalyticsService>((ref) {
   return FirebaseAnalyticsService();
@@ -34,8 +32,6 @@ final isAnalyticsEnabledProvider = Provider<bool>((ref) {
   final state = ref.watch(analyticsStateProvider);
   return state.maybeWhen(enabled: () => true, orElse: () => false);
 });
-
-// ========== USER ANALYTICS PROVIDERS ==========
 
 /// Provider para propriedades do usuário para analytics
 final userAnalyticsPropertiesProvider = Provider<Map<String, String>>((ref) {
@@ -69,8 +65,6 @@ final currentSessionDurationProvider = Provider<Duration>((ref) {
     orElse: () => Duration.zero,
   );
 });
-
-// ========== EVENT TRACKING PROVIDERS ==========
 
 /// Provider para ações de tracking de eventos
 final eventTrackingProvider = Provider<EventTracking>((ref) {
@@ -129,8 +123,6 @@ final appMetricsProvider =
       return AppMetricsNotifier(appId);
     });
 
-// ========== BUSINESS METRICS PROVIDERS ==========
-
 /// Provider para métricas de negócio por app
 final businessMetricsProvider = Provider.family<BusinessMetrics, String>((
   ref,
@@ -155,8 +147,6 @@ final kpiProvider = Provider<KPIMetrics>((ref) {
     retentionDay: _calculateRetentionDay(user?.createdAt),
   );
 });
-
-// ========== CRASH REPORTING PROVIDERS ==========
 
 /// Provider para serviço de crash reporting
 final crashReportingProvider = Provider<FirebaseCrashlyticsService>((ref) {
@@ -194,15 +184,11 @@ final crashReportingActionsProvider = Provider<CrashReportingActions>((ref) {
   );
 });
 
-// ========== A/B TESTING PROVIDERS ==========
-
 /// Provider para configuração de A/B tests
 final abTestConfigProvider = FutureProvider<ABTestConfig>((ref) async {
   final user = ref.watch(domainCurrentUserProvider);
 
   if (user == null) return ABTestConfig.empty();
-
-  // TODO: Implementar A/B testing real quando necessário
   return ABTestConfig.empty();
 });
 
@@ -234,8 +220,6 @@ final abTestActionsProvider = Provider<ABTestActions>((ref) {
   );
 });
 
-// ========== CUSTOM METRICS PROVIDERS ==========
-
 /// Provider para métricas customizadas por app
 final customMetricsProvider = Provider.family<CustomMetrics, String>((
   ref,
@@ -265,8 +249,6 @@ final engagementMetricsProvider =
       return EngagementMetricsNotifier();
     });
 
-// ========== PRIVACY & CONSENT PROVIDERS ==========
-
 /// Provider para configurações de privacidade
 final privacySettingsProvider = StateProvider<PrivacySettings>((ref) {
   return const PrivacySettings(
@@ -282,8 +264,6 @@ final canCollectAnalyticsProvider = Provider<bool>((ref) {
   final settings = ref.watch(privacySettingsProvider);
   return settings.analyticsEnabled && settings.dataProcessingConsent;
 });
-
-// ========== MODELS ==========
 
 /// Estados de analytics
 abstract class AnalyticsState {
@@ -467,7 +447,6 @@ class BusinessMetrics {
   }
 
   static double _calculateRetentionRate(AppMetrics metrics) {
-    // Simplified retention calculation based on engagement
     return (metrics.engagementScore / 100.0).clamp(0.0, 1.0);
   }
 }
@@ -757,8 +736,6 @@ class DefaultMetrics extends CustomMetrics {
   }
 }
 
-// ========== NOTIFIER IMPLEMENTATIONS ==========
-
 /// Notifier para analytics
 class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   AnalyticsNotifier() : super(const AnalyticsInitializing()) {
@@ -788,7 +765,6 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
       state = const AnalyticsDisabled();
     } catch (e) {
-      // Manter estado atual se falhar
     }
   }
 }
@@ -926,8 +902,6 @@ class EngagementMetricsNotifier extends StateNotifier<EngagementMetrics> {
     state = state.copyWith(engagementScore: totalScore.clamp(0.0, 100.0));
   }
 }
-
-// ========== UTILITY FUNCTIONS ==========
 
 int _calculateAccountAge(DateTime? creationTime) {
   if (creationTime == null) return 0;

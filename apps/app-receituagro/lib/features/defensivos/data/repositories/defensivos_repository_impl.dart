@@ -210,8 +210,6 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
       }
       final allDefensivos = result.data ?? [];
-      
-      // Como não temos timestamp real, vamos pegar os primeiros N
       final defensivosRecentes = allDefensivos.take(limit).toList();
       final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosRecentes);
       
@@ -281,8 +279,6 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
       final allDefensivos = result.data ?? [];
       var defensivosFiltrados = allDefensivos.toList();
-      
-      // Aplicar filtro de texto se fornecido
       if (filtroTexto != null && filtroTexto.isNotEmpty) {
         defensivosFiltrados = defensivosFiltrados.where((defensivo) {
           final nomeMatch = defensivo.nomeComum.toLowerCase().contains(filtroTexto.toLowerCase());
@@ -291,9 +287,6 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
           return nomeMatch || ingredienteMatch || classeMatch;
         }).toList();
       }
-      
-      // CORREÇÃO: Não fazer agrupamento no repositório
-      // Retornar lista simples para que DefensivosGroupingService faça o agrupamento correto
       final defensivosEntities = DefensivoMapper.fromHiveToEntityList(defensivosFiltrados);
       return Right(defensivosEntities);
     } catch (e) {
@@ -304,8 +297,6 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   @override
   Future<Either<Failure, List<DefensivoEntity>>> getDefensivosCompletos() async {
     try {
-      // Esta implementação seria expandida para incluir dados de diagnósticos
-      // Por agora, retorna todos os defensivos com informações básicas
       final result = await _repository.getAll();
       if (result.isFailure) {
         return Left(CacheFailure('Erro ao buscar defensivos: ${result.error?.message}'));
@@ -341,8 +332,6 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       }
       final allDefensivos = result.data ?? [];
       var defensivosFiltrados = DefensivoMapper.fromHiveToEntityList(allDefensivos);
-      
-      // Aplicar filtros
       if (apenasComercializados) {
         defensivosFiltrados = defensivosFiltrados.where((d) => d.isComercializado).toList();
       }
@@ -370,8 +359,6 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
           return classe.contains(filtroTipo);
         }).toList();
       }
-      
-      // Aplicar ordenação
       switch (ordenacao) {
         case 'nome':
           defensivosFiltrados.sort((a, b) => a.displayName.compareTo(b.displayName));

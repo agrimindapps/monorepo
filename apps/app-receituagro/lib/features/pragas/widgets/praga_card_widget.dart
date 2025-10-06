@@ -21,6 +21,4 @@
 /// - praga_card_compact_mode.dart: Modo compacto
 /// - praga_card_featured_mode.dart: Modo destaque
 library;
-
-// Re-export do sistema modular para backward compatibility
 export 'praga_card/praga_card_exports.dart';

@@ -17,57 +17,41 @@ class BackupValidationService {
 
       final validationErrors = <String>[];
       final validationWarnings = <String>[];
-
-      // 1. Validação básica da estrutura
       final structureValidation = _validateBackupStructure(backup);
       structureValidation.fold(
         (error) => validationErrors.add(error),
         (_) => <String, dynamic>{},
       );
-
-      // 2. Validação de compatibilidade
       final compatibilityValidation = _validateCompatibility(backup);
       compatibilityValidation.fold(
         (error) => validationErrors.add(error),
         (_) => <String, dynamic>{},
       );
-
-      // 3. Validação de metadados
       final metadataValidation = _validateMetadata(backup);
       metadataValidation.fold(
         (error) => validationErrors.add(error),
         (_) => <String, dynamic>{},
       );
-
-      // 4. Validação dos dados de plantas
       final plantsValidation = await _validatePlantsData(backup.data.plants);
       plantsValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-
-      // 5. Validação dos dados de tarefas
       final tasksValidation = await _validateTasksData(backup.data.tasks);
       tasksValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-
-      // 6. Validação dos dados de espaços
       final spacesValidation = await _validateSpacesData(backup.data.spaces);
       spacesValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-
-      // 7. Validação de configurações
       final settingsValidation = _validateSettingsData(backup.data.settings);
       settingsValidation.fold(
         (error) => validationErrors.add(error),
         (warnings) => validationWarnings.addAll(warnings),
       );
-
-      // Determinar resultado final
       if (validationErrors.isNotEmpty) {
         return Left(
           ValidationFailure(
@@ -99,8 +83,6 @@ class BackupValidationService {
   Either<String, void> validateCompatibility(BackupModel backup) {
     return _validateCompatibility(backup);
   }
-
-  // ===== VALIDAÇÕES ESPECÍFICAS =====
 
   /// Valida estrutura básica do backup
   Either<String, void> _validateBackupStructure(BackupModel backup) {
@@ -138,8 +120,6 @@ class BackupValidationService {
         metadata.spacesCount < 0) {
       return const Left('Metadados possuem valores inválidos');
     }
-
-    // Validar consistência entre metadados e dados reais
     if (metadata.plantsCount != backup.data.plants.length) {
       return Left(
         'Inconsistência nos metadados: esperado ${metadata.plantsCount} plantas, '
@@ -172,8 +152,6 @@ class BackupValidationService {
 
     for (int i = 0; i < plantsData.length; i++) {
       final plant = plantsData[i];
-
-      // Validação de campos obrigatórios
       if (!plant.containsKey('id') || plant['id'].toString().isEmpty) {
         return Left('Planta ${i + 1} não possui ID');
       }
@@ -185,8 +163,6 @@ class BackupValidationService {
       if (!plant.containsKey('userId') || plant['userId'].toString().isEmpty) {
         return Left('Planta ${i + 1} não possui ID de usuário');
       }
-
-      // Validações que geram warnings (não impedem restore)
       if ((!plant.containsKey('imageUrls') ||
               (plant['imageUrls'] as List?)?.isEmpty == true) &&
           (!plant.containsKey('imageBase64') ||
@@ -198,8 +174,6 @@ class BackupValidationService {
           plant['species'].toString().isEmpty) {
         warnings.add('Planta "${plant['name']}" não possui espécie informada');
       }
-
-      // Validação de datas
       if (plant.containsKey('plantingDate')) {
         if (!_isValidDate(plant['plantingDate'])) {
           return Left('Planta ${i + 1} possui data de plantio inválida');
@@ -218,8 +192,6 @@ class BackupValidationService {
 
     for (int i = 0; i < tasksData.length; i++) {
       final task = tasksData[i];
-
-      // Validação de campos obrigatórios
       if (!task.containsKey('id') || task['id'].toString().isEmpty) {
         return Left('Tarefa ${i + 1} não possui ID');
       }
@@ -235,14 +207,10 @@ class BackupValidationService {
       if (!task.containsKey('userId') || task['userId'].toString().isEmpty) {
         return Left('Tarefa ${i + 1} não possui ID de usuário');
       }
-
-      // Validações que geram warnings
       if (!task.containsKey('description') ||
           task['description'].toString().isEmpty) {
         warnings.add('Tarefa "${task['name']}" não possui descrição');
       }
-
-      // Validação de datas
       if (task.containsKey('dueDate')) {
         if (!_isValidDate(task['dueDate'])) {
           return Left('Tarefa ${i + 1} possui data de vencimento inválida');
@@ -267,8 +235,6 @@ class BackupValidationService {
 
     for (int i = 0; i < spacesData.length; i++) {
       final space = spacesData[i];
-
-      // Validação de campos obrigatórios
       if (!space.containsKey('id') || space['id'].toString().isEmpty) {
         return Left('Espaço ${i + 1} não possui ID');
       }
@@ -280,8 +246,6 @@ class BackupValidationService {
       if (!space.containsKey('userId') || space['userId'].toString().isEmpty) {
         return Left('Espaço ${i + 1} não possui ID de usuário');
       }
-
-      // Validações que geram warnings
       if (!space.containsKey('description') ||
           space['description'].toString().isEmpty) {
         warnings.add('Espaço "${space['name']}" não possui descrição');
@@ -296,13 +260,9 @@ class BackupValidationService {
     Map<String, dynamic> settings,
   ) {
     final warnings = <String>[];
-
-    // Validações básicas de configurações
     if (settings.isEmpty) {
       warnings.add('Backup não contém configurações do usuário');
     }
-
-    // Validar estrutura esperada
     final expectedKeys = [
       'notifications_enabled',
       'backup_settings',
@@ -318,8 +278,6 @@ class BackupValidationService {
 
     return Right(warnings);
   }
-
-  // ===== UTILITÁRIOS =====
 
   /// Valida se uma string é uma data válida
   bool _isValidDate(dynamic dateValue) {

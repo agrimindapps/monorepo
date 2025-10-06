@@ -5,8 +5,6 @@ import '../../features/favoritos/domain/entities/favorito_sync_entity.dart';
 import '../../features/settings/domain/entities/user_history_sync_entity.dart';
 import '../../features/settings/domain/entities/user_settings_sync_entity.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
-
-// Funções auxiliares para contornar problema do analyzer
 FavoritoSyncEntity _favoritoFromFirebaseMap(Map<String, dynamic> map) {
   return FavoritoSyncEntity.fromMap(map);
 }
@@ -64,47 +62,36 @@ abstract final class ReceitaAgroSyncConfig {
         conflictStrategy: ConflictStrategy.timestamp,
       ),
       entities: [
-        // Favoritos - Ferramentas favoritas do usuário
         EntitySyncRegistration<FavoritoSyncEntity>.simple(
           entityType: FavoritoSyncEntity,
           collectionName: 'favoritos',
           fromMap: _favoritoFromFirebaseMap,
           toMap: _favoritoToFirebaseMap,
         ),
-
-        // Comentários - Feedback sobre diagnósticos
         EntitySyncRegistration<ComentarioSyncEntity>.simple(
           entityType: ComentarioSyncEntity,
           collectionName: 'comentarios',
           fromMap: _comentarioFromFirebaseMap,
           toMap: _comentarioToFirebaseMap,
         ),
-
-        // Configurações do Usuário - Preferências e configurações
         EntitySyncRegistration<UserSettingsSyncEntity>.simple(
           entityType: UserSettingsSyncEntity,
           collectionName: 'user_settings',
           fromMap: _userSettingsFromFirebaseMap,
           toMap: _userSettingsToFirebaseMap,
         ),
-
-        // Histórico do Usuário - Analytics e comportamento
         EntitySyncRegistration<UserHistorySyncEntity>.simple(
           entityType: UserHistorySyncEntity,
           collectionName: 'user_history',
           fromMap: _userHistoryFromFirebaseMap,
           toMap: _userHistoryToFirebaseMap,
         ),
-
-        // Usuários (profile compartilhado entre apps)
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: _userEntityFromFirebaseMap,
           toMap: _userEntityToFirebaseMap,
         ),
-
-        // Assinaturas (subscription compartilhada entre apps)
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',

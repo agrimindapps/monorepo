@@ -30,7 +30,6 @@ class DataCleanerService implements IAppDataCleaner {
 
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
-    // Para logout, usar limpeza local sem marcação como deletado
     return clearAllAppDataForLogout();
   }
 
@@ -46,11 +45,8 @@ class DataCleanerService implements IAppDataCleaner {
     };
 
     try {
-      // Obter estatísticas antes da limpeza
       final statsBefore = await getDataStatsBeforeCleaning();
       final totalBefore = statsBefore['totalRecords'] as int;
-
-      // 1. Limpar todas as tarefas individualmente (limpeza local sem soft delete)
       try {
         final tasksResult = await tasksRepository.getTasks();
         if (tasksResult.isRight()) {
@@ -71,8 +67,6 @@ class DataCleanerService implements IAppDataCleaner {
           'Erro ao limpar tasks localmente: $e',
         );
       }
-
-      // 2. Limpar todas as plantas individualmente (limpeza local sem soft delete)
       try {
         final plantsResult = await plantsRepository.getPlants();
         if (plantsResult.isRight()) {
@@ -93,8 +87,6 @@ class DataCleanerService implements IAppDataCleaner {
           'Erro ao limpar plants localmente: $e',
         );
       }
-
-      // 3. Limpar todos os espaços individualmente (limpeza local sem soft delete)
       try {
         final spacesResult = await spacesRepository.getSpaces();
         if (spacesResult.isRight()) {
@@ -137,11 +129,8 @@ class DataCleanerService implements IAppDataCleaner {
     };
 
     try {
-      // Obter estatísticas antes da limpeza
       final statsBefore = await getDataStatsBeforeCleaning();
       final totalBefore = statsBefore['totalRecords'] as int;
-
-      // 1. Limpar todas as tarefas com soft delete para sincronização
       final tasksResult = await tasksRepository.getTasks();
       if (tasksResult.isRight()) {
         final tasks = tasksResult.getOrElse(() => []);
@@ -156,8 +145,6 @@ class DataCleanerService implements IAppDataCleaner {
         }
         (result['clearedBoxes'] as List<String>).add('tasks_box');
       }
-
-      // 2. Limpar todas as plantas com soft delete para sincronização
       final plantsResult = await plantsRepository.getPlants();
       if (plantsResult.isRight()) {
         final plants = plantsResult.getOrElse(() => []);
@@ -343,10 +330,7 @@ class DataCleanerService implements IAppDataCleaner {
     };
 
     try {
-      // Obter estatísticas antes da limpeza
       int totalCleared = 0;
-
-      // 1. Limpar todas as tarefas
       final tasksResult = await tasksRepository.getTasks();
       if (tasksResult.isRight()) {
         final tasks = tasksResult.getOrElse(() => []);
@@ -363,8 +347,6 @@ class DataCleanerService implements IAppDataCleaner {
         totalCleared += tasks.length;
         (result['clearedBoxes'] as List<String>).add('tasks_box');
       }
-
-      // 2. Limpar todas as plantas
       final plantsResult = await plantsRepository.getPlants();
       if (plantsResult.isRight()) {
         final plants = plantsResult.getOrElse(() => []);
@@ -381,8 +363,6 @@ class DataCleanerService implements IAppDataCleaner {
         totalCleared += plants.length;
         (result['clearedBoxes'] as List<String>).add('plants_box');
       }
-
-      // 3. Limpar todos os espaços
       final spacesResult = await spacesRepository.getSpaces();
       if (spacesResult.isRight()) {
         final spaces = spacesResult.getOrElse(() => []);
@@ -409,11 +389,8 @@ class DataCleanerService implements IAppDataCleaner {
       return result;
     }
   }
-
-  // Métodos legados mantidos para compatibilidade
   Future<Either<Failure, void>> clearAllData() async {
     try {
-      // 1. Primeiro, obter todas as plantas
       final plantsResult = await plantsRepository.getPlants();
 
       if (plantsResult.isLeft()) {
@@ -421,8 +398,6 @@ class DataCleanerService implements IAppDataCleaner {
       }
 
       final plants = plantsResult.getOrElse(() => []);
-
-      // 2. Obter todas as tarefas
       final tasksResult = await tasksRepository.getTasks();
 
       if (tasksResult.isLeft()) {
@@ -430,13 +405,9 @@ class DataCleanerService implements IAppDataCleaner {
       }
 
       final tasks = tasksResult.getOrElse(() => []);
-
-      // 3. Deletar todas as tarefas primeiro
       for (final task in tasks) {
         await tasksRepository.deleteTask(task.id);
       }
-
-      // 4. Deletar todas as plantas
       for (final plant in plants) {
         await deletePlantUseCase(plant.id);
       }

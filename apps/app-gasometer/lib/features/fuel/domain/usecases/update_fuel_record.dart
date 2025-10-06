@@ -10,7 +10,6 @@ class UpdateFuelRecord implements UseCase<FuelRecordEntity, UpdateFuelRecordPara
 
   @override
   Future<Either<Failure, FuelRecordEntity>> call(UpdateFuelRecordParams params) async {
-    // Validate fuel record data
     final validationResult = _validateFuelRecord(params.fuelRecord);
     if (validationResult.isLeft()) {
       return validationResult.fold((failure) => Left(failure), (_) => throw Exception());
@@ -43,8 +42,6 @@ class UpdateFuelRecord implements UseCase<FuelRecordEntity, UpdateFuelRecordPara
     if (fuelRecord.odometer <= 0) {
       return const Left(ValidationFailure('Odômetro deve ser maior que zero'));
     }
-
-    // Validate price consistency
     final calculatedTotal = fuelRecord.liters * fuelRecord.pricePerLiter;
     final difference = (fuelRecord.totalPrice - calculatedTotal).abs();
     final tolerance = calculatedTotal * 0.05; // 5% tolerance

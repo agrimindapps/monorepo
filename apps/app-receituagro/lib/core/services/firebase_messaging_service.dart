@@ -36,25 +36,15 @@ class ReceitaAgroFirebaseMessagingService {
     
     try {
       _navigationService = navigationService;
-      
-      // Configurar notificações locais
       await _configureLocalNotifications();
-      
-      // Solicitar permissões
       final settings = await _requestPermissions();
       if (settings.authorizationStatus != AuthorizationStatus.authorized) {
         debugPrint('Push notifications not authorized');
         return false;
       }
-
-      // Obter FCM token
       _fcmToken = await _firebaseMessaging.getToken();
       debugPrint('FCM Token: $_fcmToken');
-
-      // Configurar handlers de mensagens
       _configureMessageHandlers();
-
-      // Subscrever a tópicos promocionais por padrão
       await subscribeToPromotionalNotifications();
 
       _isInitialized = true;
@@ -83,8 +73,6 @@ class ReceitaAgroFirebaseMessagingService {
       initializationSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
-
-    // Criar canal de notificação para Android
     if (Platform.isAndroid) {
       await _createNotificationChannels();
     }
@@ -142,13 +130,8 @@ class ReceitaAgroFirebaseMessagingService {
 
   /// Configura handlers para diferentes tipos de mensagens
   void _configureMessageHandlers() {
-    // Mensagem recebida quando app está em foreground
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-
-    // Mensagem tocada quando app está em background
     FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessageTap);
-
-    // Mensagem que abriu o app (cold start)
     FirebaseMessaging.instance.getInitialMessage().then((message) {
       if (message != null) {
         _handleBackgroundMessageTap(message);
@@ -240,7 +223,6 @@ class ReceitaAgroFirebaseMessagingService {
         }
         break;
       case NotificationType.general:
-        // Navegação padrão ou mostrar dialog
         break;
     }
   }
@@ -267,7 +249,6 @@ class ReceitaAgroFirebaseMessagingService {
 
   /// Trata deep links personalizados
   void _handleDeepLink(String deepLink) {
-    // Implementar lógica de deep link conforme necessário
     debugPrint('Handling deep link: $deepLink');
   }
 

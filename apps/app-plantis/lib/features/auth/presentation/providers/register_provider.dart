@@ -131,11 +131,7 @@ class RegisterProvider extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-
-      // Simulate API call delay
       await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      // Simulate email check (replace with real implementation)
       final exists = email.toLowerCase() == 'test@test.com';
 
       _isLoading = false;
@@ -159,8 +155,6 @@ class RegisterProvider extends ChangeNotifier {
     if (!validatePersonalInfo()) {
       return false;
     }
-
-    // Check if email already exists
     final emailExists = await checkEmailExists(_registerData.email);
     if (emailExists) {
       _setError('Este email já possui uma conta.');

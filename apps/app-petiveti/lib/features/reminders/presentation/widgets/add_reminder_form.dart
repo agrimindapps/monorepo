@@ -41,7 +41,6 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
   void initState() {
     super.initState();
     _initializeForm();
-    // Load animals when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(animalsProvider.notifier).loadAnimals();
     });
@@ -186,7 +185,6 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
     return PetiVetiFormComponents.reminderTypeDropdown(
       value: _selectedType.name,
       onChanged: (dynamic value) {
-        // Converter string de volta para enum
         if (value is String) {
           final type = ReminderType.values.firstWhere((t) => t.name == value);
           setState(() => _selectedType = type);
@@ -200,7 +198,6 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
     return PetiVetiFormComponents.priorityDropdown(
       value: _selectedPriority.name,
       onChanged: (dynamic value) {
-        // Converter string de volta para enum
         if (value is String) {
           final priority = ReminderPriority.values.firstWhere((p) => p.name == value);
           setState(() => _selectedPriority = priority);
@@ -211,7 +208,6 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
   }
 
   Widget _buildDateTimeSection() {
-    // Combinar data e hora atuais em um DateTime
     final scheduledDateTime = DateTime(
       _scheduledDate.year,
       _scheduledDate.month,

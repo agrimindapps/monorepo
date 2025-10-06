@@ -6,12 +6,9 @@ import '../../../../core/theme/design_tokens.dart';
 /// Complementa os GasometerDesignTokens com valores específicos
 /// para garantir consistência visual entre todos os tipos de list items.
 abstract class ListItemDesignTokens {
-  // Dimensões do layout base
   static const double dateColumnWidth = 80.0;
   static const double dividerThickness = 1.0;
   static const double cardMinHeight = 80.0;
-  
-  // Padding e spacing
   static EdgeInsets get cardPadding => const EdgeInsets.all(GasometerDesignTokens.spacingLg);
   static EdgeInsets get contentPadding => const EdgeInsets.only(
     left: GasometerDesignTokens.spacingMd,
@@ -24,17 +21,11 @@ abstract class ListItemDesignTokens {
     top: GasometerDesignTokens.spacingSm,
     bottom: GasometerDesignTokens.spacingSm,
   );
-  
-  // Espaçamento interno
   static double get infoItemsSpacing => GasometerDesignTokens.spacingSm;
   static double get badgeSpacing => GasometerDesignTokens.spacingXs;
-  
-  // Cores específicas para list items
   static Color get dividerColor => GasometerDesignTokens.colorNeutral300;
   static Color get cardBackgroundColor => GasometerDesignTokens.colorBackground;
   static Color get cardHoverColor => GasometerDesignTokens.colorPrimaryLight.withValues(alpha: 0.1);
-  
-  // Tipografia para datas
   static TextStyle get dateTextStyle => const TextStyle(
     fontSize: GasometerDesignTokens.fontSizeSm,
     fontWeight: GasometerDesignTokens.fontWeightMedium,
@@ -46,8 +37,6 @@ abstract class ListItemDesignTokens {
     fontWeight: GasometerDesignTokens.fontWeightRegular,
     color: GasometerDesignTokens.colorTextSecondary,
   );
-  
-  // Tipografia para info items
   static TextStyle get infoLabelStyle => const TextStyle(
     fontSize: GasometerDesignTokens.fontSizeXs,
     fontWeight: GasometerDesignTokens.fontWeightRegular,
@@ -59,12 +48,8 @@ abstract class ListItemDesignTokens {
     fontWeight: GasometerDesignTokens.fontWeightMedium,
     color: GasometerDesignTokens.colorTextPrimary,
   );
-  
-  // Border radius
   static BorderRadius get cardBorderRadius => BorderRadius.circular(GasometerDesignTokens.radiusCard);
   static BorderRadius get badgeBorderRadius => BorderRadius.circular(GasometerDesignTokens.radiusSm);
-  
-  // Shadows
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
       color: GasometerDesignTokens.colorNeutral500.withValues(alpha: 0.1),
@@ -72,15 +57,9 @@ abstract class ListItemDesignTokens {
       offset: const Offset(0, 2),
     ),
   ];
-  
-  // Animation
   static const Duration animationDuration = Duration(milliseconds: 200);
   static const Curve animationCurve = Curves.easeInOut;
-  
-  // Accessibility
   static const double minimumTouchTargetSize = 48.0;
-  
-  // Responsive breakpoints
   static const double mobileBreakpoint = 600.0;
   static const double tabletBreakpoint = 900.0;
   

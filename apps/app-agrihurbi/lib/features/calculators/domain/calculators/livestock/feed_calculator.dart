@@ -149,48 +149,28 @@ class FeedCalculator extends CalculatorEntity {
       final String activityLevel = inputs['activity_level'].toString();
       final String feedQuality = inputs['feed_quality'].toString();
       final int numberAnimals = int.parse(inputs['number_animals'].toString());
-
-      // Obter parâmetros da espécie
       final Map<String, dynamic> speciesData = _getSpeciesParameters(animalSpecies);
-
-      // Calcular necessidades energéticas
       final Map<String, dynamic> energyRequirements = _calculateEnergyRequirements(
         animalSpecies, animalCategory, liveWeight, dailyGain, milkProduction, 
         milkFat, pregnancyMonth, environmentalTemp, activityLevel, speciesData);
-
-      // Calcular necessidades proteicas
       final Map<String, dynamic> proteinRequirements = _calculateProteinRequirements(
         animalSpecies, animalCategory, liveWeight, dailyGain, milkProduction, 
         pregnancyMonth, energyRequirements, speciesData);
-
-      // Calcular consumo de matéria seca
       final Map<String, dynamic> dryMatterIntake = _calculateDryMatterIntake(
         animalSpecies, liveWeight, milkProduction, pregnancyMonth, 
         environmentalTemp, feedQuality, speciesData);
-
-      // Calcular necessidades de minerais
       final Map<String, dynamic> mineralRequirements = _calculateMineralRequirements(
         animalSpecies, liveWeight, milkProduction, dailyGain, pregnancyMonth, speciesData);
-
-      // Formulação da ração
       final Map<String, dynamic> feedFormulation = _formulateFeed(
         energyRequirements, proteinRequirements, dryMatterIntake, 
         mineralRequirements, feedQuality, animalSpecies);
-
-      // Cronograma alimentar
       final List<Map<String, dynamic>> feedingSchedule = _generateFeedingSchedule(
         animalSpecies, animalCategory, feedFormulation);
-
-      // Análise econômica
       final Map<String, dynamic> economicAnalysis = _calculateEconomicAnalysis(
         feedFormulation, numberAnimals, animalSpecies);
-
-      // Indicadores zootécnicos
       final Map<String, dynamic> zootechnicalIndicators = _calculateZootechnicalIndicators(
         energyRequirements, proteinRequirements, dryMatterIntake, 
         liveWeight, milkProduction, dailyGain);
-
-      // Recomendações nutricionais
       final List<String> recommendations = _generateNutritionalRecommendations(
         animalSpecies, animalCategory, energyRequirements, proteinRequirements,
         feedQuality, environmentalTemp, zootechnicalIndicators);
@@ -388,18 +368,13 @@ class FeedCalculator extends CalculatorEntity {
     String activity,
     Map<String, dynamic> speciesData,
   ) {
-    // Energia de mantença (EM mantença)
     final double metabolicWeight = math.pow(weight, 0.75).toDouble();
     double maintenanceEM = (speciesData['maintenance_factor'] as double) * metabolicWeight / 1000;
-
-    // Ajuste por temperatura
     if (temperature < 5 || temperature > 30) {
       final double tempDiff = temperature - 20;
       final double tempStress = math.max(0.05, math.min(0.25, (tempDiff < 0 ? -tempDiff : tempDiff) * 0.01));
       maintenanceEM *= (1 + tempStress);
     }
-
-    // Ajuste por atividade
     final Map<String, double> activityFactors = {
       'Baixo (confinamento)': 1.0,
       'Moderado (pasto pequeno)': 1.15,
@@ -407,21 +382,15 @@ class FeedCalculator extends CalculatorEntity {
       'Muito Alto (trabalho)': 1.4,
     };
     maintenanceEM *= (activityFactors[activity] ?? 1.0);
-
-    // Energia para produção de leite
     double milkEM = 0.0;
     if (milkProduction > 0) {
       final double fatCorrectedMilk = milkProduction * (0.4 + 0.15 * milkFat);
       milkEM = fatCorrectedMilk * (speciesData['milk_energy_factor'] as double);
     }
-
-    // Energia para ganho de peso
     double gainEM = 0.0;
     if (gain > 0) {
       gainEM = gain * (speciesData['gain_energy_factor'] as double);
     }
-
-    // Energia para gestação
     double pregnancyEM = 0.0;
     if (pregnancyMonth >= 6) { // Últimos meses de gestação
       final double pregnancyFactor = speciesData['pregnancy_factor'] as double;
@@ -451,24 +420,17 @@ class FeedCalculator extends CalculatorEntity {
     Map<String, dynamic> energyReq,
     Map<String, dynamic> speciesData,
   ) {
-    // Proteína de mantença
     final double metabolicWeight = math.pow(weight, 0.75).toDouble();
     final double maintenancePB = (speciesData['protein_maintenance'] as double) * metabolicWeight;
-
-    // Proteína para produção de leite
     double milkPB = 0.0;
     if (milkProduction > 0) {
       milkPB = milkProduction * (speciesData['protein_milk_factor'] as double);
     }
-
-    // Proteína para ganho de peso
     double gainPB = 0.0;
     if (gain > 0) {
       final double proteinDeposition = gain * 140; // g proteína/kg ganho (bovinos)
       gainPB = proteinDeposition / 0.59; // Eficiência de utilização da proteína
     }
-
-    // Proteína para gestação
     double pregnancyPB = 0.0;
     if (pregnancyMonth >= 6) {
       pregnancyPB = maintenancePB * 0.15; // 15% adicional
@@ -494,23 +456,16 @@ class FeedCalculator extends CalculatorEntity {
     String feedQuality,
     Map<String, dynamic> speciesData,
   ) {
-    // Consumo base como % do peso vivo
     double baseDMI = weight * (speciesData['max_dmi_factor'] as double) / 100;
-
-    // Ajuste por produção de leite (bovinos)
     if (species.contains('Bovino') && milkProduction > 0) {
       baseDMI += milkProduction * 0.1; // 0.1 kg MS/L leite adicional
     }
-
-    // Ajuste por temperatura
     if (temperature > 30) {
       final double heatStress = (temperature - 30) * 0.02;
       baseDMI *= (1 - math.min(heatStress, 0.15));
     } else if (temperature < 5) {
       baseDMI *= 1.05; // Ligeiro aumento em frio
     }
-
-    // Ajuste por qualidade da forragem
     final Map<String, double> qualityFactors = {
       'Excelente': 1.0,
       'Boa': 0.95,
@@ -519,8 +474,6 @@ class FeedCalculator extends CalculatorEntity {
       'Sem Forragem': 1.0, // Ração completa
     };
     baseDMI *= (qualityFactors[feedQuality] ?? 0.9);
-
-    // Ajuste por gestação (redução no final)
     if (pregnancyMonth >= 8) {
       baseDMI *= 0.9; // Redução de 10%
     }
@@ -539,25 +492,18 @@ class FeedCalculator extends CalculatorEntity {
     int pregnancyMonth,
     Map<String, dynamic> speciesData,
   ) {
-    // Necessidades básicas de minerais (g/dia)
     double calcium = weight * 0.05; // Base: 0.05g Ca/kg PV
     double phosphorus = weight * 0.04; // Base: 0.04g P/kg PV
     double sodium = weight * 0.02;
     double magnesium = weight * 0.015;
-
-    // Adicionais para produção de leite
     if (milkProduction > 0) {
       calcium += milkProduction * 1.2; // 1.2g Ca/L leite
       phosphorus += milkProduction * 0.9; // 0.9g P/L leite
     }
-
-    // Adicionais para ganho de peso
     if (gain > 0) {
       calcium += gain * 8.0; // 8g Ca/kg ganho
       phosphorus += gain * 4.5; // 4.5g P/kg ganho
     }
-
-    // Adicionais para gestação
     if (pregnancyMonth >= 6) {
       calcium *= 1.2;
       phosphorus *= 1.15;
@@ -583,8 +529,6 @@ class FeedCalculator extends CalculatorEntity {
     final double totalDMI = dmiReq['total_dmi'] as double;
     final double totalNDT = energyReq['total_ndt'] as double;
     final double totalPB = proteinReq['total_pb'] as double;
-
-    // Características dos volumosos baseado na qualidade
     final Map<String, Map<String, double>> roughageData = {
       'Excelente': {'ndt': 68.0, 'pb': 14.0, 'proportion': 0.6},
       'Boa': {'ndt': 60.0, 'pb': 12.0, 'proportion': 0.65},
@@ -594,35 +538,22 @@ class FeedCalculator extends CalculatorEntity {
     };
 
     final roughageSpecs = roughageData[feedQuality] ?? roughageData['Boa']!;
-    
-    // Proporção de volumoso e concentrado
     double roughageProportion = roughageSpecs['proportion']!;
     double concentrateProportion = 1.0 - roughageProportion;
-
-    // Ajustar proporções baseado nas necessidades
     final double requiredNDT = (totalNDT / totalDMI) * 100; // % NDT necessário
     if (requiredNDT > 65) {
-      // Aumentar concentrado para dietas de alta energia
       concentrateProportion = math.min(0.6, concentrateProportion + 0.1);
       roughageProportion = 1.0 - concentrateProportion;
     }
 
     final double roughageKg = totalDMI * roughageProportion;
     final double concentrateKg = totalDMI * concentrateProportion;
-
-    // NDT fornecido pelo volumoso
     final double roughageNDT = roughageKg * (roughageSpecs['ndt']! / 100);
-    
-    // NDT necessário do concentrado
     final double concentrateNDTNeeded = totalNDT - roughageNDT;
     final double concentrateNDTPercent = concentrateKg > 0 
         ? math.min(85.0, (concentrateNDTNeeded / concentrateKg) * 100)
         : 75.0;
-
-    // Proteína fornecida pelo volumoso
     final double roughagePB = roughageKg * (roughageSpecs['pb']! / 100) * 1000; // em gramas
-    
-    // Proteína necessária do concentrado
     final double concentratePBNeeded = totalPB - roughagePB;
     final double concentratePBPercent = concentrateKg > 0 
         ? math.min(25.0, (concentratePBNeeded / (concentrateKg * 1000)) * 100)
@@ -648,7 +579,6 @@ class FeedCalculator extends CalculatorEntity {
     final List<Map<String, dynamic>> schedule = [];
 
     if (species.contains('Bovino')) {
-      // Bovinos - 2-3 refeições por dia
       schedule.addAll([
         {
           'horario': '06:00',
@@ -670,7 +600,6 @@ class FeedCalculator extends CalculatorEntity {
         },
       ]);
     } else if (species == 'Suíno') {
-      // Suínos - 3-4 refeições por dia
       final double totalFeed = (formulation['concentrate_kg'] as double);
       schedule.addAll([
         {
@@ -690,7 +619,6 @@ class FeedCalculator extends CalculatorEntity {
         },
       ]);
     } else {
-      // Outros animais - esquema genérico
       schedule.addAll([
         {
           'horario': '07:00',
@@ -713,7 +641,6 @@ class FeedCalculator extends CalculatorEntity {
     int numberAnimals,
     String species,
   ) {
-    // Preços médios dos ingredientes (R\$/kg)
     final Map<String, double> ingredientPrices = {
       'volumoso': 0.25, // Silagem, feno, pasto
       'concentrado_bovino': 1.20, // Ração concentrada bovinos
@@ -762,20 +689,10 @@ class FeedCalculator extends CalculatorEntity {
     final double totalDMI = dmiReq['total_dmi'] as double;
     final double totalEM = energyReq['total_em'] as double;
     final double totalPB = proteinReq['total_pb'] as double;
-
-    // Eficiência alimentar
     final double feedEfficiency = dailyGain > 0 ? totalDMI / dailyGain : 0.0;
-
-    // Densidade energética da dieta
     final double energyDensity = totalEM / totalDMI;
-
-    // Concentração proteica da dieta
     final double proteinConcentration = (totalPB / (totalDMI * 1000)) * 100;
-
-    // Consumo relativo (% peso vivo)
     final double relativeDMI = (totalDMI / weight) * 100;
-
-    // Eficiência de produção de leite
     final double milkEfficiency = milkProduction > 0 ? totalDMI / milkProduction : 0.0;
 
     return {
@@ -797,39 +714,29 @@ class FeedCalculator extends CalculatorEntity {
     Map<String, dynamic> indicators,
   ) {
     final List<String> recommendations = [];
-
-    // Recomendações por densidade energética
     final double energyDensity = indicators['energy_density'] as double;
     if (energyDensity > 2.8) {
       recommendations.add('Dieta de alta energia - monitorar acidose ruminal.');
     } else if (energyDensity < 2.2) {
       recommendations.add('Dieta de baixa energia - pode limitar produção.');
     }
-
-    // Recomendações por concentração proteica
     final double proteinConc = indicators['protein_concentration'] as double;
     if (proteinConc > 18) {
       recommendations.add('Alta proteína - verificar eficiência de utilização.');
     } else if (proteinConc < 12) {
       recommendations.add('Baixa proteína - pode limitar crescimento/produção.');
     }
-
-    // Recomendações por qualidade da forragem
     if (feedQuality == 'Ruim') {
       recommendations.add('Forragem de baixa qualidade - aumentar concentrado.');
     } else if (feedQuality == 'Excelente') {
       recommendations.add('Forragem excelente - otimizar custo com menos concentrado.');
     }
-
-    // Recomendações por temperatura
     if (temperature > 30) {
       recommendations.add('Calor - fornecer água fresca e sombra.');
       recommendations.add('Considerar eletrólitos na água.');
     } else if (temperature < 5) {
       recommendations.add('Frio - aumentar energia da dieta.');
     }
-
-    // Recomendações específicas por espécie
     if (species.contains('Bovino de Leite')) {
       recommendations.add('Monitorar gordura e proteína do leite.');
       recommendations.add('Ajustar cálcio e fósforo para prevenção de doenças metabólicas.');
@@ -838,8 +745,6 @@ class FeedCalculator extends CalculatorEntity {
     } else if (species.contains('Frango')) {
       recommendations.add('Monitorar conversão alimentar diariamente.');
     }
-
-    // Recomendações gerais
     recommendations.add('Fornecer água limpa e fresca à vontade.');
     recommendations.add('Dividir concentrado em 2-3 refeições diárias.');
     recommendations.add('Monitorar escore corporal regularmente.');

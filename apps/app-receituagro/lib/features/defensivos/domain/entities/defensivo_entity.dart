@@ -19,8 +19,6 @@ class DefensivoEntity extends Equatable {
   final bool isComercializado;
   final bool isElegivel;
   final DateTime? lastUpdated;
-  
-  // Campos para compatibilidade com modelo antigo
   final String? line1;
   final String? line2;
   final String? count;
@@ -68,8 +66,6 @@ class DefensivoEntity extends Equatable {
   
   /// Toxicidade para exibição
   String get displayToxico => toxico ?? 'Não informado';
-
-  // Business Logic Properties
   bool get isDefensivo => ingredienteAtivo.isNotEmpty && (line2?.isNotEmpty ?? true);
   bool get isGroup => !isDefensivo;
   int get itemCount => int.tryParse(count ?? '0') ?? 0;

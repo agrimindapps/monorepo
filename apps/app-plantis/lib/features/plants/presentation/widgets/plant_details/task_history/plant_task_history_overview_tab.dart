@@ -33,8 +33,6 @@ class _PlantTaskHistoryOverviewTabState
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-
-    // Criar animações escalonadas para os itens
     _itemAnimations = List.generate(8, (index) {
       return Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
@@ -60,8 +58,6 @@ class _PlantTaskHistoryOverviewTabState
   /// Calcula estatísticas por tipo de cuidado
   Map<TaskType, Map<String, dynamic>> _calculateCareTypeStats() {
     final stats = <TaskType, Map<String, dynamic>>{};
-
-    // Inicializar estatísticas para todos os tipos
     for (final type in TaskType.values) {
       stats[type] = {
         'count': 0,
@@ -70,8 +66,6 @@ class _PlantTaskHistoryOverviewTabState
         'streak': 0,
       };
     }
-
-    // Calcular estatísticas
     for (final task in widget.completedTasks) {
       final typeStats = stats[task.type]!;
       typeStats['count'] = (typeStats['count'] as int) + 1;
@@ -194,7 +188,6 @@ class _PlantTaskHistoryOverviewTabState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cards de estatísticas principais
           AnimatedBuilder(
             animation: _itemAnimations[0],
             builder: (context, child) {
@@ -216,8 +209,6 @@ class _PlantTaskHistoryOverviewTabState
           ),
 
           const SizedBox(height: 24),
-
-          // Grid de tipos de cuidado
           AnimatedBuilder(
             animation: _itemAnimations[1],
             builder: (context, child) {
@@ -235,8 +226,6 @@ class _PlantTaskHistoryOverviewTabState
           ),
 
           const SizedBox(height: 24),
-
-          // Progresso da sequência
           if (currentStreak > 0)
             AnimatedBuilder(
               animation: _itemAnimations[2],
@@ -255,8 +244,6 @@ class _PlantTaskHistoryOverviewTabState
             ),
 
           if (currentStreak > 0) const SizedBox(height: 24),
-
-          // Últimos cuidados realizados
           AnimatedBuilder(
             animation: _itemAnimations[3],
             builder: (context, child) {

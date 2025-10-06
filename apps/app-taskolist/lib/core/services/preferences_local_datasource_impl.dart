@@ -69,8 +69,6 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       }
     }
   }
-
-  // Método para limpar todas as preferências (útil para debug)
   Future<void> clearAllPreferences() async {
     try {
       final box = await _preferencesBox;
@@ -81,8 +79,6 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       }
     }
   }
-
-  // Método para fechar a box (cleanup)
   Future<void> close() async {
     try {
       await _box?.close();

@@ -26,8 +26,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Getting devices for user $userId');
       }
-
-      // Primeiro tenta obter do remote (Firestore)
       final remoteResult = await _remoteDataSource.getUserDevices(userId);
 
       return remoteResult.fold(
@@ -37,7 +35,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
               '⚠️ DeviceRepository: Remote failed, falling back to local cache',
             );
           }
-          // Se falhar, usa o cache local como fallback
           return await _localDataSource.getUserDevices(userId);
         },
         (devices) async {
@@ -46,8 +43,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
               '✅ DeviceRepository: Found ${devices.length} devices from remote',
             );
           }
-
-          // Salva os dispositivos no cache local para uso offline
           for (final device in devices) {
             await _localDataSource.saveDevice(device);
           }
@@ -96,15 +91,12 @@ class DeviceRepositoryImpl implements DeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Validating device ${device.uuid}');
       }
-
-      // Valida com o Firebase primeiro
       final result = await _remoteDataSource.validateDevice(
         userId: userId,
         device: device,
       );
 
       return result.fold((failure) => Left(failure), (validatedDevice) async {
-        // Salva o dispositivo validado no cache local
         await _localDataSource.saveDevice(validatedDevice);
 
         if (kDebugMode) {
@@ -135,15 +127,12 @@ class DeviceRepositoryImpl implements DeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Revoking device $deviceUuid');
       }
-
-      // Revoga no Firebase primeiro
       final result = await _remoteDataSource.revokeDevice(
         userId: userId,
         deviceUuid: deviceUuid,
       );
 
       return result.fold((failure) => Left(failure), (_) async {
-        // Remove do cache local também
         await _localDataSource.removeDevice(deviceUuid);
 
         if (kDebugMode) {
@@ -174,12 +163,9 @@ class DeviceRepositoryImpl implements DeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Revoking all other devices (stub)');
       }
-
-      // Obtém todos os dispositivos
       final devicesResult = await _localDataSource.getUserDevices(userId);
 
       return devicesResult.fold((failure) => Left(failure), (devices) async {
-        // Remove todos exceto o atual
         for (final device in devices) {
           if (device.uuid != currentDeviceUuid) {
             await _localDataSource.removeDevice(device.uuid);
@@ -209,8 +195,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
           '🔄 DeviceRepository: Updating last activity for $deviceUuid (stub)',
         );
       }
-
-      // Busca o dispositivo atual
       final deviceResult = await _localDataSource.getDeviceByUuid(deviceUuid);
 
       return deviceResult.fold((failure) => Left(failure), (device) async {
@@ -219,8 +203,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
             NotFoundFailure('Dispositivo não encontrado: $deviceUuid'),
           );
         }
-
-        // Cria uma nova instância com timestamp atualizado
         final updatedDevice = DeviceModel(
           id: device.id,
           uuid: device.uuid,
@@ -239,8 +221,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
           updatedAt: DateTime.now(),
           plantisSpecificData: device.plantisSpecificData,
         );
-
-        // Salva no cache
         await _localDataSource.saveDevice(updatedDevice);
 
         return Right(updatedDevice);
@@ -338,8 +318,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
       if (kDebugMode) {
         debugPrint('🔄 DeviceRepository: Syncing devices for $userId (stub)');
       }
-
-      // Por enquanto, apenas retorna os dispositivos do cache
       return await _localDataSource.getUserDevices(userId);
     } catch (e) {
       return Left(

@@ -51,8 +51,6 @@ class LocalNotificationService implements INotificationRepository {
   @override
   Future<bool> initialize({List<NotificationChannelEntity>? defaultChannels}) async {
     if (_isInitialized) return true;
-
-    // Web platform doesn't support local notifications
     if (_PlatformHelper.isWeb) {
       _isInitialized = true;
       if (_settings.enableDebugLogs) {
@@ -62,19 +60,14 @@ class LocalNotificationService implements INotificationRepository {
     }
 
     try {
-      // Configurações de inicialização para Android
       const AndroidInitializationSettings androidSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
-
-      // Configurações de inicialização para iOS
       const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
         requestCriticalPermission: false,
       );
-
-      // Configurações de inicialização para macOS
       const DarwinInitializationSettings macosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -91,8 +84,6 @@ class LocalNotificationService implements INotificationRepository {
         initSettings,
         onDidReceiveNotificationResponse: _handleNotificationResponse,
       );
-
-      // Criar canais padrão para Android
       if (_PlatformHelper.isAndroid && defaultChannels != null) {
         for (final channel in defaultChannels) {
           await createNotificationChannel(channel);
@@ -642,10 +633,8 @@ class LocalNotificationService implements INotificationRepository {
     }
 
     if (response.actionId != null) {
-      // Ação específica foi executada
       _onNotificationAction?.call(response.actionId!, response.payload);
     } else {
-      // Notificação foi tocada
       _onNotificationTap?.call(response.payload);
     }
   }

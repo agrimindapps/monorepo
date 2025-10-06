@@ -50,8 +50,6 @@ class _MarketDetailPageState extends ConsumerState<MarketDetailPage>
 
     try {
       final provider = ref.read(marketProviderProvider);
-
-      // Load market details
       final market = await provider.getMarketById(widget.marketId);
 
       if (market != null) {
@@ -170,22 +168,15 @@ class _MarketDetailPageState extends ConsumerState<MarketDetailPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Market Info Card
             MarketInfoCard(market: _market!),
             
             const SizedBox(height: 16),
-
-            // Price Information
             _buildPriceSection(),
             
             const SizedBox(height: 16),
-
-            // Market Details
             _buildMarketDetails(),
             
             const SizedBox(height: 16),
-
-            // Status and Exchange Information
             _buildStatusSection(),
           ],
         ),
@@ -439,17 +430,6 @@ class _MarketDetailPageState extends ConsumerState<MarketDetailPage>
   /// Share market information
   void _shareMarket() {
     if (_market == null) return;
-
-    // final shareText = '''
-    // ${_market!.name} (${_market!.symbol})
-    // Preço atual: ${_market!.formattedPrice}
-    // Variação: ${_market!.formattedChange}
-    // Bolsa: ${_market!.exchange}
-    //
-    // Via AgriHurbi
-    // ''';
-
-    // TODO: Implement share functionality
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Funcionalidade de compartilhamento em desenvolvimento')),
     );

@@ -98,8 +98,6 @@ class ReceiptImageService {
       String finalImagePath = imagePath;
       Map<String, dynamic> compressionStats = {};
       bool wasCompressed = false;
-
-      // Check connectivity and optimize compression accordingly
       bool shouldAggressivelyCompress = false;
       final connectivityResult = await _connectivityService.getConnectivityType();
       connectivityResult.fold(
@@ -109,12 +107,9 @@ class ReceiptImageService {
           print('🔌 Conexão: $connectivityType, compressão agressiva: $shouldAggressivelyCompress');
         },
       );
-
-      // Compress image if requested and needed
       if (compressImage) {
         final needsCompression = await _compressionService.needsCompression(imagePath);
         if (needsCompression || shouldAggressivelyCompress) {
-          // Use more aggressive compression for mobile connections
           final compressedPath = await _compressionService.compressImage(imagePath);
           compressionStats = await _compressionService.getCompressionStats(
             imagePath,
@@ -126,12 +121,8 @@ class ReceiptImageService {
       }
 
       String? downloadUrl;
-
-      // Check if online before uploading
       final isOnlineResult = await _connectivityService.isOnline();
       final isOnline = isOnlineResult.fold((failure) => false, (online) => online);
-
-      // Upload to Firebase Storage if requested and online
       if (uploadToFirebase && isOnline) {
         print('🔌 Uploading receipt online...');
         switch (category) {
@@ -160,9 +151,7 @@ class ReceiptImageService {
             throw Exception('Invalid category: $category');
         }
       } else if (uploadToFirebase && !isOnline) {
-        // Offline - store locally for later upload
         print('🔌 Offline - receipt saved locally, will upload when online');
-        // TODO: Implement offline queue for receipt uploads
       }
 
       return ImageProcessingResult(
@@ -194,8 +183,6 @@ class ReceiptImageService {
       Uint8List finalImageBytes = imageBytes;
       Map<String, dynamic> compressionStats = {};
       bool wasCompressed = false;
-
-      // Compress image if requested
       if (compressImage) {
         final compressedBytes = await _compressionService.compressImageBytes(imageBytes);
         if (compressedBytes.length < imageBytes.length) {
@@ -211,8 +198,6 @@ class ReceiptImageService {
       }
 
       String? downloadUrl;
-      
-      // Upload to Firebase Storage if requested
       if (uploadToFirebase) {
         downloadUrl = await _storageService.uploadReceiptImageBytes(
           userId,
@@ -221,8 +206,6 @@ class ReceiptImageService {
           finalImageBytes,
         );
       }
-
-      // Save locally for offline access
       final localPath = await _saveImageBytesLocally(finalImageBytes, recordId);
 
       return ImageProcessingResult(
@@ -241,15 +224,9 @@ class ReceiptImageService {
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = '${recordId}_$timestamp.webp';
-      
-      // Use the compression service to get the proper directory
       final tempFile = File('/tmp/$fileName');
       await tempFile.writeAsBytes(bytes);
-      
-      // Move to proper location using compression service
       final finalPath = await _compressionService.compressImage(tempFile.path);
-      
-      // Clean up temp file
       if (await tempFile.exists()) {
         await tempFile.delete();
       }
@@ -266,13 +243,9 @@ class ReceiptImageService {
     String? downloadUrl,
   }) async {
     final futures = <Future<void>>[];
-
-    // Delete local file
     if (localPath != null) {
       futures.add(_compressionService.deleteCompressedImage(localPath));
     }
-
-    // Delete from Firebase Storage
     if (downloadUrl != null) {
       futures.add(_storageService.deleteReceiptImage(downloadUrl));
     }
@@ -316,15 +289,11 @@ class ReceiptImageService {
     List<String>? downloadUrls,
   }) async {
     final futures = <Future<void>>[];
-
-    // Delete local files
     if (localPaths != null) {
       for (final path in localPaths) {
         futures.add(_compressionService.deleteCompressedImage(path));
       }
     }
-
-    // Delete from Firebase Storage
     if (downloadUrls != null) {
       futures.add(_storageService.batchDeleteImages(downloadUrls));
     }
@@ -354,8 +323,6 @@ class ReceiptImageService {
 
   /// Get local storage usage
   Future<int> _getLocalStorageStats() async {
-    // This would need to scan the local receipts directory
-    // For now, returning 0
     return 0;
   }
 
@@ -382,7 +349,6 @@ class ReceiptImageService {
         );
         downloadUrls.add(downloadUrl);
       } catch (e) {
-        // Continue with other images if one fails
         downloadUrls.add('');
       }
     }

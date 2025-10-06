@@ -154,44 +154,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildContent(BuildContext context, dynamic user, bool isAnonymous) {
     return Column(
       children: [
-        // Seção principal do perfil
         _buildProfileSection(context, user, isAnonymous),
-
-        // Seção de dispositivos conectados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const DevicesSectionWidget(),
         ],
-
-        // Informações da conta (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildAccountInfoSection(context, user),
         ],
-
-        // Sincronização (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildSyncSection(context),
         ],
-
-        // Configurações e privacidade
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildSettingsSection(context, isAnonymous),
-
-        // Exportação de dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const ExportDataSection(),
         ],
-
-        // Limpeza de Dados (apenas para usuários registrados)
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           _buildDataManagementSection(context),
         ],
-
-        // Ações da conta
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildActionsSection(context, isAnonymous),
       ],
@@ -222,12 +207,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                // Avatar section with edit functionality
                 _buildAvatarSection(context, user, isAnonymous),
                 const SizedBox(height: 20),
 
                 if (isAnonymous) ...[
-                  // Anonymous user info
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -285,7 +268,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                   ),
                 ] else ...[
-                  // Registered user profile display
                   Column(
                     children: [
                       _buildProfileInfoRow(
@@ -303,8 +285,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         icon: Icons.email,
                       ),
                       const SizedBox(height: 24),
-
-                      // Premium status
                       if (isPremium) ...[
                         const SizedBox(height: 16),
                         Container(
@@ -405,7 +385,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildSyncSection(BuildContext context) {
-    // TODO: Phase 2 - Replace with UnifiedSync
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -421,22 +400,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         trailing: const Icon(Icons.info_outline),
       ),
     );
-    // Original sync implementation commented out for Phase 2
-    // return Consumer<SyncStatusProvider>(
-    //   builder: (context, syncProvider, _) {
-    //     return Container(
-    //       decoration: BoxDecoration(
-    //         color: Theme.of(context).colorScheme.surfaceContainerHigh,
-    //         borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
-    //         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-    //       ),
-    //       child: _buildSyncListTile(context, syncProvider),
-    //     );
-    //   },
-    // );
   }
-
-  // TODO: Phase 2 - Replace with UnifiedSync helper functions
   /// Constrói ListTile único para sincronização com status e ação - COMMENTED OUT FOR PHASE 1
   /*
   Widget _buildSyncListTile(BuildContext context, SyncStatusProvider syncProvider) {
@@ -458,7 +422,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Ícone de status
                 Container(
                   width: 40,
                   height: 40,
@@ -482,8 +445,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 
                 const SizedBox(width: 16),
-                
-                // Texto principal e subtítulo
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,8 +468,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ],
                   ),
                 ),
-                
-                // Ícone de ação à direita
                 if (!isLoading)
                   Container(
                     width: 32,
@@ -910,7 +869,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Avatar principal
         Container(
           width: 120,
           height: 120,
@@ -940,8 +898,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     : _buildDefaultAvatar(context, user, isAnonymous),
           ),
         ),
-
-        // Botão de editar (apenas para usuários registrados)
         if (!isAnonymous)
           Positioned(
             bottom: 0,
@@ -955,11 +911,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Constrói imagem do avatar a partir do base64
   Widget _buildAvatarImage(String imageSource) {
     try {
-      // Verifica se é base64 ou URL
       if (imageSource.startsWith('data:image') ||
           imageSource.startsWith('/9j/') ||
           imageSource.startsWith('iVBOR')) {
-        // É base64
         final base64String =
             imageSource.contains(',')
                 ? imageSource.split(',').last
@@ -978,7 +932,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         );
       } else {
-        // É URL
         return Image.network(
           imageSource,
           width: 120,
@@ -1095,22 +1048,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (kDebugMode) {
         debugPrint('📷 ProfilePage: Processing new image: ${imageFile.path}');
       }
-
-      // Mostrar loading
       _showImageProcessingDialog(context);
-
-      // Obter serviço de processamento de imagem
       final imageService = GetIt.instance<GasometerProfileImageService>();
-
-      // Validar imagem
       final validationResult = imageService.validateImageFile(imageFile);
       if (validationResult.isFailure) {
         Navigator.of(context).pop(); // Remove loading dialog
         _showErrorSnackBar(context, validationResult.failure.message);
         return;
       }
-
-      // Processar imagem
       final result = await imageService.processImageToBase64(imageFile);
 
       result.fold(
@@ -1119,7 +1064,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           _showErrorSnackBar(context, failure.message);
         },
         (base64String) async {
-          // Atualizar avatar via AuthNotifier
           final success = await ref
               .read(authProvider.notifier)
               .updateAvatar(base64String);
@@ -1156,15 +1100,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       if (kDebugMode) {
         debugPrint('🗑️ ProfilePage: Removing current avatar');
       }
-
-      // Mostrar confirmação
       final confirmed = await _showRemoveConfirmationDialog(context);
       if (!confirmed) return;
-
-      // Mostrar loading
       _showImageProcessingDialog(context);
-
-      // Remover avatar via AuthNotifier
       final success = await ref.read(authProvider.notifier).removeAvatar();
 
       Navigator.of(context).pop(); // Remove loading dialog
@@ -1276,75 +1214,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  // TODO: Phase 2 - Replace with UnifiedSync color mapping
-  // Color _getSyncStatusColor(BuildContext context, SyncStatusProvider syncProvider) {
-  //   switch (syncProvider.status) {
-  //     case SyncStatus.idle:
-  //       return syncProvider.hasQueueItems
-  //           ? GasometerDesignTokens.colorWarning
-  //           : GasometerDesignTokens.colorSuccess;
-  //     case SyncStatus.syncing:
-  //       return Theme.of(context).colorScheme.primary;
-  //     case SyncStatus.error:
-  //       return Theme.of(context).colorScheme.error;
-  //     case SyncStatus.success:
-  //       return GasometerDesignTokens.colorSuccess;
-  //     case SyncStatus.conflict:
-  //       return Theme.of(context).colorScheme.error;
-  //     case SyncStatus.offline:
-  //       return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
-  //   }
-  // }
-
-  // TODO: Phase 2 - Replace with UnifiedSync icon mapping
-  // IconData _getSyncStatusIcon(SyncStatusProvider syncProvider) {
-  //   switch (syncProvider.status) {
-  //     case SyncStatus.idle:
-  //       return syncProvider.hasQueueItems ? Icons.schedule : Icons.check_circle;
-  //     case SyncStatus.syncing:
-  //       return Icons.sync;
-  //     case SyncStatus.error:
-  //       return Icons.error;
-  //     case SyncStatus.success:
-  //       return Icons.check_circle;
-  //     case SyncStatus.conflict:
-  //       return Icons.warning;
-  //     case SyncStatus.offline:
-  //       return Icons.cloud_off;
-  //   }
-  // }
-
-  // TODO: Phase 2 - Replace with UnifiedSync force sync
-  // Future<void> _handleForceSync(BuildContext context, SyncStatusProvider syncProvider) async {
-  //   HapticFeedback.lightImpact();
-  //
-  //   try {
-  //     await syncProvider.forceSyncNow();
-  //
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: const Text('Sincronização iniciada'),
-  //           backgroundColor: GasometerDesignTokens.colorSuccess,
-  //           behavior: SnackBarBehavior.floating,
-  //           duration: const Duration(seconds: 2),
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text('Erro ao sincronizar: $e'),
-  //           backgroundColor: Theme.of(context).colorScheme.error,
-  //           behavior: SnackBarBehavior.floating,
-  //           duration: const Duration(seconds: 3),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
-
   /// Mostra dialog de confirmação para exclusão de conta
   Future<void> _showAccountDeletionDialog(BuildContext context) async {
     await showDialog<void>(
@@ -1355,8 +1224,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       },
     );
   }
-
-  // Auth handling methods
   /// Mostra dialog de confirmação para limpeza de dados
   Future<void> _showClearDataDialog(BuildContext context) async {
     await showDialog<void>(
@@ -1494,7 +1361,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   /// Executa logout com progress dialog animado
   Future<void> _performLogoutWithProgressDialog(BuildContext context) async {
-    // Mostrar progress dialog
     unawaited(
       showDialog<void>(
         context: context,
@@ -1504,17 +1370,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
 
     try {
-      // Simular processamento para melhor UX
       await Future<void>.delayed(const Duration(milliseconds: 800));
-
-      // Executar logout real via AuthNotifier
       await ref.read(authProvider.notifier).logout();
-
-      // Fechar progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-
-        // Mostrar mensagem de sucesso e navegar
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Logout realizado com sucesso'),
@@ -1527,11 +1386,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         context.go('/');
       }
     } catch (e) {
-      // Fechar progress dialog
       if (context.mounted) {
         Navigator.of(context).pop();
-
-        // Mostrar mensagem de erro
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -1832,7 +1688,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
   }
 
   void _startProgressSteps() {
-    // Cycle through progress steps
     Timer.periodic(const Duration(milliseconds: 600), (timer) {
       if (mounted) {
         setState(() {
@@ -1868,7 +1723,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated logout icon
               Container(
                 width: 64,
                 height: 64,
@@ -1887,8 +1741,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 24),
-
-              // Title
               Text(
                 'Saindo da Conta',
                 style: theme.textTheme.titleLarge?.copyWith(
@@ -1899,8 +1751,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 16),
-
-              // Progress indicator
               SizedBox(
                 width: 40,
                 height: 40,
@@ -1913,8 +1763,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 20),
-
-              // Dynamic progress text
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: Text(
@@ -1929,8 +1777,6 @@ class _LogoutProgressDialogState extends State<_LogoutProgressDialog>
               ),
 
               const SizedBox(height: 16),
-
-              // Info message
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -2015,7 +1861,6 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Ícone centralizado
           Container(
             width: 64,
             height: 64,
@@ -2031,8 +1876,6 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
           ),
 
           const SizedBox(height: 20),
-
-          // Título
           const Text(
             'Limpar Dados do App',
             style: TextStyle(
@@ -2044,8 +1887,6 @@ class __DataClearDialogState extends ConsumerState<_DataClearDialog> {
           ),
 
           const SizedBox(height: 16),
-
-          // Conteúdo alinhado à esquerda
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

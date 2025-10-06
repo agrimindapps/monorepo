@@ -88,7 +88,6 @@ class TypeDropdownField<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label com indicador obrigatório
         if (label != null) ...[
           Row(
             children: [
@@ -114,8 +113,6 @@ class TypeDropdownField<T> extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-
-        // Dropdown
         DropdownButtonFormField<T>(
           value: value,
           onChanged: enabled ? onChanged : null,
@@ -170,7 +167,6 @@ class TypeDropdownField<T> extends StatelessWidget {
 
     return Row(
       children: [
-        // Ícone ou indicador de cor
         if (icon != null) ...[
           Icon(
             icon,
@@ -189,8 +185,6 @@ class TypeDropdownField<T> extends StatelessWidget {
           ),
           const SizedBox(width: 12),
         ],
-
-        // Nome
         Expanded(
           child: Text(
             displayName,
@@ -228,8 +222,6 @@ class TypeDropdownField<T> extends StatelessWidget {
 
 /// **Implementações específicas para entidades do PetiVeti**
 
-// Assumindo que estas enums existem - podem ser adaptadas conforme necessário
-
 /// Dropdown para prioridades
 class PriorityDropdownField extends StatelessWidget {
   final String? value;
@@ -249,7 +241,6 @@ class PriorityDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lista simulada de prioridades - ajustar conforme enum real
     final priorities = ['low', 'medium', 'high', 'urgent'];
 
     return TypeDropdownField<String>(
@@ -330,7 +321,6 @@ class ReminderTypeDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lista simulada de tipos - ajustar conforme enum real
     final types = ['vaccine', 'medication', 'appointment', 'weight', 'general'];
 
     return TypeDropdownField<String>(
@@ -399,7 +389,6 @@ class MedicationTypeDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lista simulada de tipos - ajustar conforme enum real
     final types = ['antibiotic', 'vitamin', 'antiparasitic', 'painkiller', 'other'];
 
     return TypeDropdownField<String>(

@@ -238,8 +238,6 @@ class VehicleFormModel extends Equatable {
   /// Validates all fields and returns error map
   Map<String, String> validate() {
     final validationErrors = <String, String>{};
-
-    // Validate brand
     if (brand.trim().isEmpty) {
       validationErrors['brand'] = 'Marca é obrigatória';
     } else if (brand.trim().length < 2) {
@@ -247,8 +245,6 @@ class VehicleFormModel extends Equatable {
     } else if (brand.trim().length > 50) {
       validationErrors['brand'] = 'Marca muito longa (máximo 50 caracteres)';
     }
-
-    // Validate model
     if (model.trim().isEmpty) {
       validationErrors['model'] = 'Modelo é obrigatório';
     } else if (model.trim().length < 2) {
@@ -256,16 +252,12 @@ class VehicleFormModel extends Equatable {
     } else if (model.trim().length > 50) {
       validationErrors['model'] = 'Modelo muito longo (máximo 50 caracteres)';
     }
-
-    // Validate year
     final currentYear = DateTime.now().year;
     if (year < 1900) {
       validationErrors['year'] = 'Ano inválido';
     } else if (year > currentYear + 1) {
       validationErrors['year'] = 'Ano não pode ser futuro';
     }
-
-    // Validate color
     if (color.trim().isEmpty) {
       validationErrors['color'] = 'Cor é obrigatória';
     } else if (color.trim().length < 3) {
@@ -273,8 +265,6 @@ class VehicleFormModel extends Equatable {
     } else if (color.trim().length > 30) {
       validationErrors['color'] = 'Cor muito longa';
     }
-
-    // Validate license plate
     if (licensePlate.trim().isEmpty) {
       validationErrors['licensePlate'] = 'Placa é obrigatória';
     } else {
@@ -283,7 +273,6 @@ class VehicleFormModel extends Equatable {
       if (cleanPlate.length != 7) {
         validationErrors['licensePlate'] = 'Placa deve ter 7 caracteres';
       } else {
-        // Brazilian plate format: ABC-1234 or ABC1D234 (Mercosul)
         final isOldFormat = RegExp(r'^[A-Z]{3}\d{4}$').hasMatch(cleanPlate);
         final isMercosulFormat = RegExp(
           r'^[A-Z]{3}\d[A-Z]\d{2}$',
@@ -294,15 +283,11 @@ class VehicleFormModel extends Equatable {
         }
       }
     }
-
-    // Validate odometer
     if (currentOdometer < 0) {
       validationErrors['currentOdometer'] = 'Odômetro não pode ser negativo';
     } else if (currentOdometer > 9999999) {
       validationErrors['currentOdometer'] = 'Valor muito alto';
     }
-
-    // Validate chassis (optional)
     if (chassis.trim().isNotEmpty) {
       final cleanChassis =
           chassis.replaceAll(RegExp(r'[^A-Z0-9]'), '').toUpperCase();
@@ -310,16 +295,12 @@ class VehicleFormModel extends Equatable {
         validationErrors['chassis'] = 'Chassi deve ter 17 caracteres';
       }
     }
-
-    // Validate Renavam (optional)
     if (renavam.trim().isNotEmpty) {
       final cleanRenavam = renavam.replaceAll(RegExp(r'\D'), '');
       if (cleanRenavam.length != 11) {
         validationErrors['renavam'] = 'Renavam deve ter 11 dígitos';
       }
     }
-
-    // Validate supported fuels
     if (supportedFuels.isEmpty) {
       validationErrors['supportedFuels'] =
           'Selecione pelo menos um tipo de combustível';
@@ -332,8 +313,6 @@ class VehicleFormModel extends Equatable {
   /// Applies sanitization to all text fields for security
   VehicleEntity toVehicleEntity() {
     final now = DateTime.now();
-
-    // Sanitize all text fields before persistence
     final sanitizedBrand = InputSanitizer.sanitizeName(brand);
     final sanitizedModel = InputSanitizer.sanitizeName(model);
     final sanitizedColor = InputSanitizer.sanitizeName(color);
@@ -345,8 +324,6 @@ class VehicleFormModel extends Equatable {
             : InputSanitizer.sanitize(chassis).toUpperCase();
     final sanitizedRenavam =
         renavam.trim().isEmpty ? '' : InputSanitizer.sanitizeNumeric(renavam);
-
-    // Generate name from brand and model if not explicitly set
     final finalName =
         name.trim().isEmpty
             ? '$sanitizedBrand $sanitizedModel'

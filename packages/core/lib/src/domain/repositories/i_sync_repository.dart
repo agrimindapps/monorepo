@@ -159,8 +159,6 @@ enum ConnectivityType {
   bluetooth,
   vpn,
   other,
-  
-  // Aliases para compatibilidade com app-plantis NetworkStatus
   offline, // = none
   online,  // = wifi/mobile/ethernet (usado genericamente)
 }

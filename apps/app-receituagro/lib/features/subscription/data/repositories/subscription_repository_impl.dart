@@ -25,7 +25,6 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
 
   @override
   Future<Either<Failure, bool>> hasFeatureAccess(String featureKey) async {
-    // Primeiro verifica se tem assinatura ativa
     final subscriptionResult = await hasReceitaAgroSubscription();
     
     return subscriptionResult.fold(
@@ -34,8 +33,6 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
         if (!hasSubscription) {
           return const Right(false);
         }
-
-        // Features específicas do ReceitaAgro que requerem premium
         final premiumFeatures = {
           'diagnosticos_avancados',
           'receitas_completas',
@@ -103,8 +100,6 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
           }
 
           final timestamp = data['timestamp'] as int?;
-          
-          // Cache válido por 5 minutos
           if (timestamp != null) {
             final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
             final isExpired = DateTime.now().difference(cacheTime) > 

@@ -18,8 +18,6 @@ class BaseTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      
-      // Color Scheme
       colorScheme: ColorScheme.light(
         primary: primaryColor,
         onPrimary: BaseColors.white,
@@ -53,17 +51,11 @@ class BaseTheme {
         shadow: BaseColors.shadow,
         scrim: BaseColors.black,
       ),
-      
-      // Scaffold
       scaffoldBackgroundColor: BaseColors.backgroundLight,
-      
-      // Typography
       textTheme: textTheme.apply(
         bodyColor: BaseColors.textPrimaryLight,
         displayColor: BaseColors.textPrimaryLight,
       ),
-      
-      // AppBar Theme
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
@@ -81,8 +73,6 @@ class BaseTheme {
           color: BaseColors.textPrimaryLight,
         ),
       ),
-      
-      // Card Theme
       cardTheme: const CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -92,8 +82,6 @@ class BaseTheme {
         shadowColor: BaseColors.shadow,
         surfaceTintColor: BaseColors.transparent,
       ),
-      
-      // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
@@ -126,8 +114,6 @@ class BaseTheme {
           textStyle: BaseTypography.button.copyWith(fontFamily: fontFamily),
         ),
       ),
-      
-      // Input Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: BaseColors.surfaceLight,
@@ -161,8 +147,6 @@ class BaseTheme {
           color: BaseColors.textDisabledLight,
         ),
       ),
-      
-      // Navigation Theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: BaseColors.surfaceLight,
         selectedItemColor: primaryColor,
@@ -172,16 +156,12 @@ class BaseTheme {
         selectedLabelStyle: BaseTypography.labelSmall.copyWith(fontFamily: fontFamily),
         unselectedLabelStyle: BaseTypography.labelSmall.copyWith(fontFamily: fontFamily),
       ),
-      
-      // FAB Theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primaryColor,
         foregroundColor: BaseColors.white,
         elevation: 4,
         shape: const CircleBorder(),
       ),
-      
-      // Other Themes
       dividerTheme: const DividerThemeData(
         color: BaseColors.dividerLight,
         thickness: 1,
@@ -249,8 +229,6 @@ class BaseTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      
-      // Color Scheme
       colorScheme: ColorScheme.dark(
         primary: primaryColor,
         onPrimary: BaseColors.white,
@@ -284,17 +262,11 @@ class BaseTheme {
         shadow: BaseColors.shadowDark,
         scrim: BaseColors.black,
       ),
-      
-      // Scaffold
       scaffoldBackgroundColor: BaseColors.backgroundDark,
-      
-      // Typography
       textTheme: textTheme.apply(
         bodyColor: BaseColors.textPrimaryDark,
         displayColor: BaseColors.textPrimaryDark,
       ),
-      
-      // AppBar Theme
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
@@ -312,8 +284,6 @@ class BaseTheme {
           color: BaseColors.textPrimaryDark,
         ),
       ),
-      
-      // Card Theme
       cardTheme: const CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -323,8 +293,6 @@ class BaseTheme {
         shadowColor: BaseColors.shadowDark,
         surfaceTintColor: BaseColors.transparent,
       ),
-      
-      // Button Themes
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
@@ -337,8 +305,6 @@ class BaseTheme {
           textStyle: BaseTypography.button.copyWith(fontFamily: fontFamily),
         ),
       ),
-      
-      // Navigation Theme
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: BaseColors.surfaceDark,
         selectedItemColor: primaryColor,

@@ -10,8 +10,6 @@ import '../../domain/task_entity.dart';
 import '../../domain/update_task.dart';
 import '../../domain/watch_tasks.dart';
 import 'task_provider.dart';
-
-// Provider para TaskNotifier
 final taskNotifierProvider =
     StateNotifierProvider<TaskNotifier, AsyncValue<List<TaskEntity>>>((ref) {
       return TaskNotifier(
@@ -23,8 +21,6 @@ final taskNotifierProvider =
         watchTasks: di.getIt<WatchTasks>(),
       );
     });
-
-// Provider para stream de tasks
 final tasksStreamProvider =
     StreamProvider.family<List<TaskEntity>, TasksStreamParams>((ref, params) {
       final watchTasks = di.getIt<WatchTasks>();
@@ -39,8 +35,6 @@ final tasksStreamProvider =
         ),
       );
     });
-
-// Provider para criar task com ID automático
 final createTaskProvider = FutureProvider.family<String, TaskCreationData>((
   ref,
   taskData,
@@ -74,8 +68,6 @@ final createTaskProvider = FutureProvider.family<String, TaskCreationData>((
     (taskId) => taskId,
   );
 });
-
-// Provider para buscar tasks
 final getTasksProvider =
     FutureProvider.family<List<TaskEntity>, GetTasksRequest>((
       ref,
@@ -98,8 +90,6 @@ final getTasksProvider =
         (tasks) => tasks,
       );
     });
-
-// Provider para reordenar tasks
 final reorderTasksProvider = FutureProvider.family<void, List<String>>((
   ref,
   taskIds,
@@ -113,8 +103,6 @@ final reorderTasksProvider = FutureProvider.family<void, List<String>>((
     (_) => null,
   );
 });
-
-// Classes para parâmetros
 class TasksStreamParams {
   final String? listId;
   final String? userId;

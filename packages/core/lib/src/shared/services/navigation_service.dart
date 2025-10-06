@@ -101,7 +101,6 @@ class NavigationService implements INavigationService {
   Future<void> openUrl(String url) async {
     try {
       debugPrint('NavigationService: Opening URL: $url');
-      // For now, show dialog with URL (since url_launcher isn't added yet)
       final context = currentContext;
       if (context != null) {
         await showDialog<void>(
@@ -129,7 +128,6 @@ class NavigationService implements INavigationService {
 
   @override
   Future<void> openExternalUrl(String url) async {
-    // Alias for openUrl for compatibility
     return openUrl(url);
   }
   
@@ -235,7 +233,6 @@ class MockNavigationService implements INavigationService {
 
   @override
   Future<void> openExternalUrl(String url) async {
-    // Alias for openUrl for compatibility
     return openUrl(url);
   }
   

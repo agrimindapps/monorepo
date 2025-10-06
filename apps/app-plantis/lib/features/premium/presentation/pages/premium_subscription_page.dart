@@ -43,15 +43,11 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
   @override
   void initState() {
     super.initState();
-    // O provider já é inicializado automaticamente no construtor
-    // com _initialize() que carrega produtos e subscription
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = ref.watch(premiumProviderRiverpod);
-
-    // Mostrar mensagens se existirem
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showMessages(context, provider);
     });
@@ -73,10 +69,7 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
         child: SafeArea(
           child: Column(
             children: [
-              // Header com título e botão de fechar
               _buildHeader(context),
-
-              // Conteúdo principal
               Expanded(
                 child:
                     provider.isLoading
@@ -132,21 +125,15 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
       child: Column(
         children: [
           const SizedBox(height: 20),
-
-          // Status premium ativo
           _buildPremiumStatusCard(),
 
           const SizedBox(height: 32),
-
-          // Lista de recursos ativados (estilo card)
           PlantisSubscriptionBenefitsWidget(
             provider: provider,
             showModernStyle: false,
           ),
 
           const SizedBox(height: 32),
-
-          // Botão de gerenciar assinatura
           PlantisPaymentActionsWidget(
             isPremium: true,
             isLoading: provider.isLoading,
@@ -167,8 +154,6 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
       child: Column(
         children: [
           const SizedBox(height: 20),
-
-          // Título principal
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
@@ -184,8 +169,6 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
           ),
 
           const SizedBox(height: 32),
-
-          // Seleção de planos
           PlantisSubscriptionPlansWidget(
             availableProducts: provider.availableProducts,
             selectedPlanId: _selectedPlanId,
@@ -197,16 +180,12 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
           ),
 
           const SizedBox(height: 40),
-
-          // Lista de benefícios/recursos (estilo moderno)
           PlantisSubscriptionBenefitsWidget(
             provider: provider,
             showModernStyle: true,
           ),
 
           const SizedBox(height: 40),
-
-          // Botões de compra e restaurar + Links de rodapé
           PlantisPaymentActionsWidget(
             selectedPlanId: _selectedPlanId,
             isPremium: false,
@@ -329,7 +308,6 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
 
   /// Abre gerenciamento de assinatura
   Future<void> _manageSubscription(PremiumProvider provider) async {
-    // Implementar abertura do URL de gerenciamento
     _showInfoSnackBar('Redirecionando para gerenciamento...');
   }
 

@@ -26,7 +26,6 @@ class SettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section header
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
           child: Row(
@@ -49,8 +48,6 @@ class SettingsSection extends StatelessWidget {
             ],
           ),
         ),
-        
-        // Optional subtitle
         if (subtitle != null) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
@@ -62,8 +59,6 @@ class SettingsSection extends StatelessWidget {
             ),
           ),
         ],
-
-        // Section content
         Card(
           elevation: 3,
           shape: RoundedRectangleBorder(

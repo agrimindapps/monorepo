@@ -14,8 +14,6 @@ import '../../domain/usecases/update_fuel_record.dart';
 
 part 'fuel_riverpod_notifier.g.dart';
 
-// ========== MODELS ==========
-
 /// Statistics for analytics caching
 class FuelStatistics {
   const FuelStatistics({
@@ -66,8 +64,6 @@ class FuelAnalytics {
   );
 }
 
-// ========== STATE ==========
-
 /// Fuel State - manages fuel records, analytics, offline queue
 class FuelState {
   const FuelState({
@@ -95,8 +91,6 @@ class FuelState {
   final bool isOnline;
   final List<FuelRecordEntity> pendingRecords; // Offline queue
   final bool isSyncing;
-
-  // Computed getters
   bool get hasRecords => fuelRecords.isNotEmpty;
   int get recordCount => fuelRecords.length;
   bool get hasError => errorMessage != null;
@@ -109,13 +103,9 @@ class FuelState {
   /// Filtered records by vehicle and search
   List<FuelRecordEntity> get filteredRecords {
     var records = fuelRecords;
-
-    // Filter by vehicle
     if (selectedVehicleId != null) {
       records = records.where((r) => r.vehicleId == selectedVehicleId).toList();
     }
-
-    // Filter by search query
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
       records = records.where((record) {
@@ -167,8 +157,6 @@ class FuelState {
   }
 }
 
-// ========== RIVERPOD NOTIFIER ==========
-
 @riverpod
 class FuelRiverpod extends _$FuelRiverpod {
   late GetAllFuelRecords _getAllFuelRecords;
@@ -186,7 +174,6 @@ class FuelRiverpod extends _$FuelRiverpod {
 
   @override
   FutureOr<FuelState> build() async {
-    // Inject use cases from GetIt
     final getIt = ModularInjectionContainer.instance;
     _getAllFuelRecords = getIt<GetAllFuelRecords>();
     _getFuelRecordsByVehicle = getIt<GetFuelRecordsByVehicle>();
@@ -197,32 +184,22 @@ class FuelRiverpod extends _$FuelRiverpod {
     _getTotalSpent = getIt<GetTotalSpent>();
     _getRecentFuelRecords = getIt<GetRecentFuelRecords>();
     _connectivityService = getIt<ConnectivityService>();
-
-    // Setup lifecycle cleanup
     ref.onDispose(() {
       _connectivitySubscription?.cancel();
       _offlineQueueBox?.close();
     });
-
-    // Initialize
     await _setupConnectivityListener();
     await _loadOfflineQueue();
 
     final initialState = await _loadAllRecords();
-
-    // Sync offline records if online
     if (initialState.isOnline && initialState.hasPendingRecords) {
-      // ignore: unawaited_futures
       syncPendingRecords(); // Fire and forget - sync in background
     }
 
     return initialState;
   }
 
-  // ========== INITIALIZATION ==========
-
   Future<void> _setupConnectivityListener() async {
-    // Get initial connectivity state
     final result = await _connectivityService.isOnline();
     var isOnline = true;
 
@@ -239,11 +216,7 @@ class FuelRiverpod extends _$FuelRiverpod {
         }
       },
     );
-
-    // Update state with initial connectivity
     state = AsyncValue.data(const FuelState().copyWith(isOnline: isOnline));
-
-    // Listen to connectivity changes
     _connectivitySubscription = _connectivityService.connectivityStream.listen(
       (online) {
         _onConnectivityChanged(online);
@@ -264,15 +237,11 @@ class FuelRiverpod extends _$FuelRiverpod {
       if (kDebugMode) {
         debugPrint('🔌 Conectividade mudou: ${wasOnline ? 'online' : 'offline'} → ${isOnline ? 'online' : 'offline'}');
       }
-
-      // Auto-sync when coming back online
       if (!wasOnline && isOnline && currentState.hasPendingRecords) {
         syncPendingRecords();
       }
     });
   }
-
-  // ========== OFFLINE QUEUE PERSISTENCE ==========
 
   Future<void> _loadOfflineQueue() async {
     try {
@@ -331,8 +300,6 @@ class FuelRiverpod extends _$FuelRiverpod {
       }
     }
   }
-
-  // ========== CRUD OPERATIONS ==========
 
   Future<FuelState> _loadAllRecords() async {
     final result = await _getAllFuelRecords();
@@ -421,12 +388,8 @@ class FuelRiverpod extends _$FuelRiverpod {
     state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
 
     try {
-      // Check if online
       if (!currentState.isOnline) {
-        // Save to offline queue
         await _addToOfflineQueue(record);
-
-        // Add to local list immediately for UI
         final updatedRecords = [record, ...currentState.fuelRecords];
         state = AsyncValue.data(currentState.copyWith(
           fuelRecords: updatedRecords,
@@ -440,13 +403,10 @@ class FuelRiverpod extends _$FuelRiverpod {
 
         return true;
       }
-
-      // Try to add online
       final result = await _addFuelRecord(AddFuelRecordParams(fuelRecord: record));
 
       return result.fold(
         (failure) async {
-          // Failed online - save offline as fallback
           await _addToOfflineQueue(record);
 
           final updatedRecords = [record, ...currentState.fuelRecords];
@@ -557,8 +517,6 @@ class FuelRiverpod extends _$FuelRiverpod {
     );
   }
 
-  // ========== OFFLINE QUEUE MANAGEMENT ==========
-
   Future<void> _addToOfflineQueue(FuelRecordEntity record) async {
     final currentState = state.value;
     if (currentState != null) {
@@ -605,8 +563,6 @@ class FuelRiverpod extends _$FuelRiverpod {
         }
       }
     }
-
-    // Update pending records with only failed ones
     state = AsyncValue.data(currentState.copyWith(
       pendingRecords: failedRecords,
       isSyncing: false,
@@ -623,12 +579,8 @@ class FuelRiverpod extends _$FuelRiverpod {
         debugPrint('🔌 ${failedRecords.length} registros ainda pendentes');
       }
     }
-
-    // Reload records after sync
     await loadFuelRecords();
   }
-
-  // ========== SEARCH & FILTER ==========
 
   void searchFuelRecords(String query) {
     state.whenData((currentState) {
@@ -670,8 +622,6 @@ class FuelRiverpod extends _$FuelRiverpod {
     loadFuelRecords();
   }
 
-  // ========== ANALYTICS ==========
-
   Future<void> loadAnalytics(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
@@ -679,7 +629,6 @@ class FuelRiverpod extends _$FuelRiverpod {
     if (currentState == null) return;
 
     try {
-      // Load average consumption
       final consumptionResult = await _getAverageConsumption(
         GetAverageConsumptionParams(vehicleId: vehicleId),
       );
@@ -689,8 +638,6 @@ class FuelRiverpod extends _$FuelRiverpod {
         (failure) => debugPrint('Erro ao carregar consumo médio: ${failure.message}'),
         (consumption) => averageConsumption = consumption,
       );
-
-      // Load total spent (last 30 days)
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       final totalSpentResult = await _getTotalSpent(
         GetTotalSpentParams(
@@ -704,8 +651,6 @@ class FuelRiverpod extends _$FuelRiverpod {
         (failure) => debugPrint('Erro ao carregar total gasto: ${failure.message}'),
         (total) => totalSpent = total,
       );
-
-      // Load recent records
       final recentResult = await _getRecentFuelRecords(
         GetRecentFuelRecordsParams(vehicleId: vehicleId, limit: 5),
       );
@@ -715,8 +660,6 @@ class FuelRiverpod extends _$FuelRiverpod {
         (failure) => debugPrint('Erro ao carregar registros recentes: ${failure.message}'),
         (records) => recentRecords = records,
       );
-
-      // Update analytics cache
       final analytics = FuelAnalytics(
         vehicleId: vehicleId,
         averageConsumption: averageConsumption,
@@ -739,8 +682,6 @@ class FuelRiverpod extends _$FuelRiverpod {
       }
     }
   }
-
-  // ========== UTILITY METHODS ==========
 
   FuelRecordEntity? getFuelRecordById(String id) {
     return state.whenData((currentState) {
@@ -781,8 +722,6 @@ class FuelRiverpod extends _$FuelRiverpod {
     state = const AsyncValue.data(FuelState());
   }
 
-  // ========== STATISTICS CALCULATION ==========
-
   FuelStatistics _calculateStatistics(List<FuelRecordEntity> records) {
     if (records.isEmpty) {
       return FuelStatistics(
@@ -798,8 +737,6 @@ class FuelRiverpod extends _$FuelRiverpod {
     final totalLiters = records.fold<double>(0, (total, record) => total + record.liters);
     final totalCost = records.fold<double>(0, (total, record) => total + record.totalPrice);
     final averagePrice = records.fold<double>(0, (total, record) => total + record.pricePerLiter) / records.length;
-
-    // Calculate average consumption only for records with data
     double averageConsumption = 0.0;
     final recordsWithConsumption = records.where((r) => r.consumption != null && r.consumption! > 0).toList();
     if (recordsWithConsumption.isNotEmpty) {
@@ -830,8 +767,6 @@ class FuelRiverpod extends _$FuelRiverpod {
     }
   }
 }
-
-// ========== DERIVED PROVIDERS ==========
 
 /// Filtered records provider
 @riverpod

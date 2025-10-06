@@ -12,7 +12,6 @@ import 'i_notification_repository.dart';
 /// - Analytics and insights
 /// - Configuration management
 abstract class IEnhancedNotificationRepository extends INotificationRepository {
-  // Plugin Management
 
   /// Registers a notification plugin
   ///
@@ -36,8 +35,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   ///
   /// Returns list of all currently registered plugins
   List<NotificationPlugin> getRegisteredPlugins();
-
-  // Template Management
 
   /// Registers a notification template
   ///
@@ -69,8 +66,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// Returns true if scheduling was successful
   Future<bool> scheduleFromTemplate(String templateId, Map<String, dynamic> data);
 
-  // Batch Operations
-
   /// Schedules multiple notifications in batch
   ///
   /// [requests] - List of notification requests to schedule
@@ -89,8 +84,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// Returns list of results for each update
   Future<List<NotificationResult>> updateBatch(List<NotificationUpdate> updates);
 
-  // Advanced Scheduling
-
   /// Schedules a recurring notification
   ///
   /// [request] - Recurring notification configuration
@@ -108,8 +101,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// [request] - Smart reminder configuration
   /// Returns true if scheduling was successful
   Future<bool> scheduleSmartReminder(SmartReminderRequest request);
-
-  // Notification Management
 
   /// Gets scheduled notifications with optional filters
   ///
@@ -136,8 +127,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// Returns notification history for the specified range
   Future<NotificationHistory> getNotificationHistory(DateRange range);
 
-  // Analytics and Insights
-
   /// Tracks a notification event for analytics
   ///
   /// [event] - The event to track
@@ -157,8 +146,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// Returns engagement metrics for the user
   Future<UserEngagementMetrics> getUserEngagement(String userId, DateRange range);
 
-  // Configuration and Settings
-
   /// Updates global notification settings
   ///
   /// [settings] - New settings to apply
@@ -174,8 +161,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// [pluginId] - ID of the plugin to update settings for
   /// [settings] - Settings data to apply
   Future<void> updatePluginSettings(String pluginId, Map<String, dynamic> settings);
-
-  // Testing and Development
 
   /// Enables/disables test mode
   ///
@@ -193,8 +178,6 @@ abstract class IEnhancedNotificationRepository extends INotificationRepository {
   /// Returns current performance metrics
   Future<PerformanceMetrics> getPerformanceMetrics();
 }
-
-// Core Data Models
 
 /// Base class for notification plugins
 abstract class NotificationPlugin {
@@ -720,13 +703,11 @@ class NotificationTrend {
 
 /// Enhanced notification settings
 class EnhancedNotificationSettings {
-  // Base settings
   final String defaultIcon;
   final int? defaultColor;
   final bool enableDebugLogs;
   final bool autoCancel;
   final bool showBadge;
-  // Enhanced settings
   final bool enableAnalytics;
   final bool enableSmartScheduling;
   final Duration defaultSnoozeInterval;
@@ -735,13 +716,11 @@ class EnhancedNotificationSettings {
   final Map<String, dynamic> pluginSettings;
 
   const EnhancedNotificationSettings({
-    // Base settings
     this.defaultIcon = '@mipmap/ic_launcher',
     this.defaultColor,
     this.enableDebugLogs = false,
     this.autoCancel = true,
     this.showBadge = true,
-    // Enhanced settings
     this.enableAnalytics = true,
     this.enableSmartScheduling = true,
     this.defaultSnoozeInterval = const Duration(hours: 1),
@@ -765,10 +744,6 @@ class NotificationValidationResult {
     this.errors = const [],
   });
 }
-
-// PerformanceMetrics is imported from ../entities/performance_entity.dart
-
-// Enums
 
 /// Notification action data
 class NotificationAction {

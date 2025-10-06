@@ -29,16 +29,9 @@ class ErrorHandler {
 
   /// Trata um erro capturado
   void handleError(AppError error) {
-    // Adiciona ao histórico
     _addToHistory(error);
-
-    // Log do erro
     _logError(error);
-
-    // Notifica listeners
     _notifyListeners(error);
-
-    // Report para serviços externos (Crashlytics, etc.)
     _reportToExternalServices(error);
   }
 
@@ -54,8 +47,6 @@ class ErrorHandler {
     if (exception is AppError) {
       return exception;
     }
-
-    // Mapear exceções conhecidas para tipos específicos de erro
     if (exception is ArgumentError ||
         exception is FormatException ||
         exception is RangeError) {
@@ -75,8 +66,6 @@ class ErrorHandler {
         severity: severity,
       );
     }
-
-    // Erro genérico
     return UnknownError(
       message: '$message: ${exception.toString()}',
       details: exception.toString(),
@@ -89,8 +78,6 @@ class ErrorHandler {
   /// Reporta um erro para análise posterior
   void reportError(AppError error) {
     handleError(error);
-
-    // Pode ser expandido para enviar relatórios específicos
     if (kDebugMode) {
       developer.log(
         'Error reported by user',
@@ -141,8 +128,6 @@ class ErrorHandler {
 
   void _addToHistory(AppError error) {
     _errorHistory.add(error);
-
-    // Limita o tamanho do histórico
     if (_errorHistory.length > _maxHistorySize) {
       _errorHistory.removeAt(0);
     }
@@ -171,8 +156,6 @@ class ErrorHandler {
         );
         break;
     }
-
-    // Debug log detalhado
     if (kDebugMode) {
       developer.log('Error Details: ${error.toMap()}', name: 'ErrorHandler');
     }
@@ -183,7 +166,6 @@ class ErrorHandler {
       try {
         listener.onError(error);
       } catch (e) {
-        // Evita loop infinito se o listener falhar
         developer.log(
           'Error in ErrorListener: $e',
           name: 'ErrorHandler',
@@ -194,15 +176,6 @@ class ErrorHandler {
   }
 
   void _reportToExternalServices(AppError error) {
-    // TODO: Integrar com Crashlytics ou outros serviços
-    // Exemplo:
-    // if (error.severity == ErrorSeverity.critical) {
-    //   FirebaseCrashlytics.instance.recordError(
-    //     error,
-    //     error.stackTrace,
-    //     fatal: true,
-    //   );
-    // }
   }
 }
 
@@ -238,7 +211,6 @@ class NotificationErrorListener implements ErrorListener {
 
   @override
   void onError(AppError error) {
-    // Só mostra notificação para erros de severidade média ou alta
     if (error.severity == ErrorSeverity.medium ||
         error.severity == ErrorSeverity.high ||
         error.severity == ErrorSeverity.critical) {

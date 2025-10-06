@@ -16,7 +16,6 @@ class CreateWeatherMeasurement {
     WeatherMeasurementEntity measurement,
   ) async {
     try {
-      // Validate the measurement data
       final validationResult = _validateMeasurement(measurement);
       if (validationResult.isLeft()) {
         return validationResult.fold(
@@ -24,8 +23,6 @@ class CreateWeatherMeasurement {
           (_) => throw Exception('Unexpected validation success'),
         );
       }
-
-      // Check for duplicate measurements in same location and time
       final duplicateCheck = await _checkForDuplicates(measurement);
       if (duplicateCheck.isLeft()) {
         return duplicateCheck.fold(
@@ -33,8 +30,6 @@ class CreateWeatherMeasurement {
           (_) => throw Exception('Unexpected duplicate check success'),
         );
       }
-
-      // Set creation metadata
       final now = DateTime.now();
       final measurementWithMetadata = measurement.copyWith(
         id: measurement.id.isEmpty ? _generateMeasurementId() : measurement.id,
@@ -109,7 +104,6 @@ class CreateWeatherMeasurement {
     required double longitude,
   }) async {
     try {
-      // Parse sensor data
       final parsedData = _parseSensorData(sensorData);
       if (parsedData == null) {
         return Left(InvalidWeatherMeasurementFailure(
@@ -159,7 +153,6 @@ class CreateWeatherMeasurement {
     required String apiSource,
   }) async {
     try {
-      // Parse API data based on source
       final parsedData = _parseApiData(apiData, apiSource);
       if (parsedData == null) {
         return Left(InvalidWeatherMeasurementFailure(
@@ -222,7 +215,6 @@ class CreateWeatherMeasurement {
       }
 
       if (errors.isNotEmpty) {
-        // Partial success - some measurements failed
         return Left(WeatherMeasurementSaveFailure(
           'Some measurements failed to save: ${errors.length} failures out of ${measurements.length} total'
         ));
@@ -234,15 +226,9 @@ class CreateWeatherMeasurement {
     }
   }
 
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
   /// Validate weather measurement data
   Either<WeatherFailure, void> _validateMeasurement(WeatherMeasurementEntity measurement) {
     final List<String> errors = [];
-
-    // Required fields validation
     if (measurement.locationId.trim().isEmpty) {
       errors.add('Location ID is required');
     }
@@ -250,48 +236,30 @@ class CreateWeatherMeasurement {
     if (measurement.locationName.trim().isEmpty) {
       errors.add('Location name is required');
     }
-
-    // Temperature validation
     if (measurement.temperature < -100 || measurement.temperature > 70) {
       errors.add('Temperature must be between -100°C and 70°C');
     }
-
-    // Humidity validation
     if (measurement.humidity < 0 || measurement.humidity > 100) {
       errors.add('Humidity must be between 0% and 100%');
     }
-
-    // Pressure validation (typical range: 950-1050 hPa)
     if (measurement.pressure < 800 || measurement.pressure > 1200) {
       errors.add('Atmospheric pressure must be between 800 hPa and 1200 hPa');
     }
-
-    // Wind speed validation
     if (measurement.windSpeed < 0 || measurement.windSpeed > 300) {
       errors.add('Wind speed must be between 0 km/h and 300 km/h');
     }
-
-    // Wind direction validation
     if (measurement.windDirection < 0 || measurement.windDirection >= 360) {
       errors.add('Wind direction must be between 0° and 359°');
     }
-
-    // Rainfall validation
     if (measurement.rainfall < 0 || measurement.rainfall > 500) {
       errors.add('Rainfall must be between 0 mm and 500 mm');
     }
-
-    // UV index validation
     if (measurement.uvIndex < 0 || measurement.uvIndex > 15) {
       errors.add('UV index must be between 0 and 15');
     }
-
-    // Visibility validation
     if (measurement.visibility < 0 || measurement.visibility > 50) {
       errors.add('Visibility must be between 0 km and 50 km');
     }
-
-    // Coordinates validation
     if (measurement.latitude < -90 || measurement.latitude > 90) {
       errors.add('Latitude must be between -90° and 90°');
     }
@@ -299,8 +267,6 @@ class CreateWeatherMeasurement {
     if (measurement.longitude < -180 || measurement.longitude > 180) {
       errors.add('Longitude must be between -180° and 180°');
     }
-
-    // Quality score validation
     if (measurement.qualityScore < 0 || measurement.qualityScore > 1) {
       errors.add('Quality score must be between 0.0 and 1.0');
     }
@@ -320,7 +286,6 @@ class CreateWeatherMeasurement {
     WeatherMeasurementEntity measurement,
   ) async {
     try {
-      // Check for measurements at same location within 1 hour
       final startTime = measurement.timestamp.subtract(const Duration(hours: 1));
       final endTime = measurement.timestamp.add(const Duration(hours: 1));
 
@@ -348,7 +313,6 @@ class CreateWeatherMeasurement {
         },
       );
     } catch (e) {
-      // If duplicate check fails, allow creation but log the error
       return const Right(null);
     }
   }
@@ -394,8 +358,6 @@ class CreateWeatherMeasurement {
   /// Parse API data based on source
   Map<String, dynamic>? _parseApiData(Map<String, dynamic> apiData, String source) {
     try {
-      // This would be implemented based on specific API formats
-      // For now, return a generic parser
       return {
         'timestamp': apiData['timestamp'] != null
             ? DateTime.parse(apiData['timestamp'].toString())
@@ -419,16 +381,12 @@ class CreateWeatherMeasurement {
   /// Calculate quality score for sensor data
   double _calculateSensorQualityScore(Map<String, dynamic> sensorData) {
     double score = 1.0;
-
-    // Reduce score for missing data
     final requiredFields = ['temperature', 'humidity', 'pressure'];
     for (final field in requiredFields) {
       if (sensorData[field] == null) {
         score -= 0.1;
       }
     }
-
-    // Reduce score for out-of-range values
     final temp = double.tryParse(sensorData['temperature']?.toString() ?? '0') ?? 0;
     if (temp < -50 || temp > 60) score -= 0.2;
 

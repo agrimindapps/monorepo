@@ -109,22 +109,15 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
       subscriptionRepository: _subscriptionRepository,
       analytics: _analytics,
     );
-
-    // Setup subscriptions
     _setupSubscriptions();
-
-    // Load initial data
     await _loadAvailableProducts();
     await _checkCurrentSubscription();
-
-    // Start auto sync
     _syncService.startAutoSync();
 
     return const PremiumImprovedState();
   }
 
   void _setupSubscriptions() {
-    // Escuta eventos de sincronização em tempo real
     _syncEventsStream = _syncService.syncEventsStream.listen(
       (event) async {
         final currentState = state.valueOrNull ?? const PremiumImprovedState();
@@ -183,20 +176,14 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
         );
       },
     );
-
-    // Escuta mudanças na assinatura do RevenueCat
     _subscriptionStream =
         _subscriptionRepository.subscriptionStatus.listen((subscription) async {
       final currentState = state.valueOrNull ?? const PremiumImprovedState();
       state = AsyncValue.data(
         currentState.copyWith(currentSubscription: subscription),
       );
-
-      // Trigger sincronização cross-device
       await _triggerSync();
     });
-
-    // Escuta stream de assinatura em tempo real do Firebase
     _realtimeSubscriptionStream =
         _syncService.getRealtimeSubscriptionStream().listen((subscription) {
       final currentState = state.valueOrNull ?? const PremiumImprovedState();
@@ -206,8 +193,6 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
         );
       }
     });
-
-    // Escuta mudanças de autenticação
     _authStream = _authRepository.currentUser.listen((user) {
       if (user != null) {
         _syncUserSubscription(user.id);
@@ -215,8 +200,6 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
         _resetSubscriptionState();
       }
     });
-
-    // Cleanup on dispose
     ref.onDispose(() {
       _syncService.stopAutoSync();
       _subscriptionStream?.cancel();
@@ -359,11 +342,7 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
             currentOperation: null,
           ),
         );
-
-        // Trigger sincronização após compra
         await _triggerSync();
-
-        // Log analytics
         final product = currentState.availableProducts.firstWhere(
           (p) => p.productId == productId,
           orElse: () => ProductInfo(
@@ -467,8 +446,6 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
     final currentState = state.valueOrNull ?? const PremiumImprovedState();
     state = AsyncValue.data(currentState.copyWith(currentOperation: null));
   }
-
-  // Advanced feature checks
   bool canCreateUnlimitedPlants() {
     final currentState = state.valueOrNull;
     final maxPlants = currentState?.plantLimits?['maxPlants'] as int?;
@@ -546,8 +523,6 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
     if (canCreateUnlimitedPlants()) return true;
     return currentPlantCount < getCurrentPlantLimit();
   }
-
-  // Event handlers
   Future<void> _handlePurchaseEvent(
     PlantisSubscriptionSyncEvent event,
   ) async {
@@ -618,8 +593,6 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
   Future<String> _getAppVersion() async {
     return '1.0.0';
   }
-
-  // Public methods
   Future<void> forceSyncSubscription() async {
     await _triggerSync();
   }
@@ -669,8 +642,6 @@ class PremiumImprovedNotifier extends _$PremiumImprovedNotifier {
     };
   }
 }
-
-// Dependency Providers
 @riverpod
 ISubscriptionRepository subscriptionRepository(Ref ref) {
   return GetIt.instance<ISubscriptionRepository>();

@@ -151,7 +151,6 @@ class SobrePageState extends State<SobrePage> {
           ],
         ),
       ),
-      //bottomSheet: AdBanner()
     );
   }
 }

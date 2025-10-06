@@ -187,8 +187,6 @@ class CurrencyValidator implements UnifiedValidator {
           ? UnifiedValidationResult.error('Valor é obrigatório')
           : UnifiedValidationResult.initial();
     }
-    
-    // Remove símbolos monetários e espaços
     final cleanValue = value
         .replaceAll(RegExp(r'[R\$\s]'), '')
         .replaceAll(',', '.');
@@ -223,8 +221,6 @@ class OdometerValidator implements UnifiedValidator {
           ? UnifiedValidationResult.error('Odômetro é obrigatório')
           : UnifiedValidationResult.initial();
     }
-    
-    // Remove unidade 'km' e separadores de milhares
     final cleanValue = value
         .replaceAll('km', '')
         .replaceAll('.', '')
@@ -243,8 +239,6 @@ class OdometerValidator implements UnifiedValidator {
     if (number > 999999) {
       return UnifiedValidationResult.warning('Odômetro muito alto. Confirme o valor.');
     }
-    
-    // Validação contextual - odômetro atual vs último registrado
     if (context != null && context!['lastOdometer'] != null) {
       final lastOdometer = context!['lastOdometer'] as double;
       if (number < lastOdometer) {
@@ -252,8 +246,6 @@ class OdometerValidator implements UnifiedValidator {
           'Odômetro atual (${number.toStringAsFixed(0)} km) deve ser maior que o último registrado (${lastOdometer.toStringAsFixed(0)} km)',
         );
       }
-      
-      // Aviso para odômetros com diferença muito grande
       final difference = number - lastOdometer;
       if (difference > 5000) {
         return UnifiedValidationResult.warning(
@@ -288,8 +280,6 @@ class LicensePlateValidator implements UnifiedValidator {
     if (cleanValue.length > 7) {
       return UnifiedValidationResult.error('Placa deve ter apenas 7 caracteres');
     }
-    
-    // Verifica formato antigo (ABC1234) ou Mercosul (ABC1A23)
     if (_oldFormat.hasMatch(cleanValue) || _newFormat.hasMatch(cleanValue)) {
       return UnifiedValidationResult.valid();
     }
@@ -313,8 +303,6 @@ class ChassiValidator implements UnifiedValidator {
     if (cleanValue.length != 17) {
       return UnifiedValidationResult.error('Chassi deve ter 17 caracteres');
     }
-    
-    // Verifica se contém apenas letras e números (sem I, O, Q)
     final validChars = RegExp(r'^[A-HJ-NPR-Z0-9]{17}$');
     if (!validChars.hasMatch(cleanValue)) {
       return UnifiedValidationResult.error('Chassi contém caracteres inválidos. Não deve conter I, O ou Q');
@@ -339,8 +327,6 @@ class RenavamValidator implements UnifiedValidator {
     if (cleanValue.length < 9 || cleanValue.length > 11) {
       return UnifiedValidationResult.error('RENAVAM deve ter entre 9 e 11 dígitos');
     }
-    
-    // Algoritmo de validação do dígito verificador do RENAVAM
     if (!_isValidRenavam(cleanValue)) {
       return UnifiedValidationResult.error('RENAVAM inválido');
     }
@@ -350,12 +336,8 @@ class RenavamValidator implements UnifiedValidator {
   
   bool _isValidRenavam(String renavam) {
     if (renavam.length < 9) return false;
-    
-    // Separar dígitos e dígito verificador
     final digits = renavam.substring(0, renavam.length - 1);
     final checkDigit = int.parse(renavam[renavam.length - 1]);
-    
-    // Sequência para cálculo: 3, 2, 9, 8, 7, 6, 5, 4, 3, 2
     final sequence = [3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
     
     int sum = 0;

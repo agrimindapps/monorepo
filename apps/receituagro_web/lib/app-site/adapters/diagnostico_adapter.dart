@@ -1,8 +1,4 @@
-// Adapter to bridge Supabase Diagnostico model with Core DiagnosticoEntity
-// Note: Currently using minimal core integration for demonstration purposes
 import '../classes/diagnostico_class.dart';
-
-// Temporary stub types until core package is fully implemented
 class DiagnosticoEntity {
   final String id;
   final String titulo;
@@ -70,8 +66,6 @@ class DiagnosticoAdapter {
   static List<Diagnostico> fromEntityList(List<DiagnosticoEntity> entities) {
     return entities.map((entity) => fromEntity(entity)).toList();
   }
-
-  // === PRIVATE HELPER METHODS ===
 
   /// Generates diagnosis title from model
   static String _gerarTituloDiagnostico(Diagnostico model) {

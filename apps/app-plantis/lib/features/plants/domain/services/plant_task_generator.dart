@@ -15,8 +15,6 @@ class PlantTaskGenerator {
     final plantingDate =
         plant.plantingDate ?? plant.createdAt ?? DateTime.now();
     final now = DateTime.now();
-
-    // Generate watering tasks
     if (config.hasWateringSchedule) {
       final wateringTask = _generateTask(
         plantId: plant.id,
@@ -27,8 +25,6 @@ class PlantTaskGenerator {
       );
       tasks.add(wateringTask);
     }
-
-    // Generate fertilizing tasks
     if (config.hasFertilizingSchedule) {
       final fertilizingTask = _generateTask(
         plantId: plant.id,
@@ -39,8 +35,6 @@ class PlantTaskGenerator {
       );
       tasks.add(fertilizingTask);
     }
-
-    // Generate pruning tasks
     if (config.hasPruningSchedule) {
       final pruningTask = _generateTask(
         plantId: plant.id,
@@ -51,8 +45,6 @@ class PlantTaskGenerator {
       );
       tasks.add(pruningTask);
     }
-
-    // Generate sunlight check tasks
     if (config.hasSunlightCheckSchedule) {
       final sunlightTask = _generateTask(
         plantId: plant.id,
@@ -63,8 +55,6 @@ class PlantTaskGenerator {
       );
       tasks.add(sunlightTask);
     }
-
-    // Generate pest inspection tasks
     if (config.hasPestInspectionSchedule) {
       final pestTask = _generateTask(
         plantId: plant.id,
@@ -75,8 +65,6 @@ class PlantTaskGenerator {
       );
       tasks.add(pestTask);
     }
-
-    // Generate replanting tasks
     if (config.hasReplantingSchedule) {
       final replantingTask = _generateTask(
         plantId: plant.id,
@@ -104,8 +92,6 @@ class PlantTaskGenerator {
     PlantTask completedTask, {
     DateTime? completionDate,
   }) {
-    // Usa data de conclusão real, não data agendada
-    // Isso garante que tarefas atrasadas geram próxima no futuro
     final baseDate = completionDate ?? DateTime.now();
     final nextScheduledDate = baseDate.add(
       Duration(days: completedTask.intervalDays),
@@ -158,14 +144,11 @@ class PlantTaskGenerator {
     required DateTime plantingDate,
     required DateTime currentDate,
   }) {
-    // Calculate the next scheduled date based on planting date and interval
     final daysSincePlanting = currentDate.difference(plantingDate).inDays;
     final cyclesSincePlanting = (daysSincePlanting / intervalDays).floor();
     final nextScheduledDate = plantingDate.add(
       Duration(days: (cyclesSincePlanting + 1) * intervalDays),
     );
-
-    // If the next scheduled date is in the past, use today
     final scheduledDate =
         nextScheduledDate.isBefore(currentDate)
             ? currentDate

@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive, Box;
 
 import '../../../../core/error/exceptions.dart';
 import '../models/appointment_model.dart';
@@ -34,15 +34,17 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
   Future<List<AppointmentModel>> getAppointments(String animalId) async {
     try {
       await _initBox();
-      final appointments = _box.values
-          .where((appointment) => 
-              appointment.animalId == animalId && 
-              !appointment.isDeleted)
-          .toList();
-      
+      final appointments =
+          _box.values
+              .where(
+                (appointment) =>
+                    appointment.animalId == animalId && !appointment.isDeleted,
+              )
+              .toList();
+
       // Sort by date descending (most recent first)
       appointments.sort((a, b) => b.dateTimestamp.compareTo(a.dateTimestamp));
-      
+
       return appointments;
     } catch (e) {
       throw CacheException(message: 'Failed to get appointments: $e');
@@ -50,22 +52,29 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
   }
 
   @override
-  Future<List<AppointmentModel>> getUpcomingAppointments(String animalId) async {
+  Future<List<AppointmentModel>> getUpcomingAppointments(
+    String animalId,
+  ) async {
     try {
       await _initBox();
       final now = DateTime.now().millisecondsSinceEpoch;
-      
-      final upcomingAppointments = _box.values
-          .where((appointment) => 
-              appointment.animalId == animalId && 
-              !appointment.isDeleted &&
-              appointment.dateTimestamp > now &&
-              appointment.status == 0) // scheduled status
-          .toList();
-      
+
+      final upcomingAppointments =
+          _box.values
+              .where(
+                (appointment) =>
+                    appointment.animalId == animalId &&
+                    !appointment.isDeleted &&
+                    appointment.dateTimestamp > now &&
+                    appointment.status == 0,
+              ) // scheduled status
+              .toList();
+
       // Sort by date ascending (soonest first)
-      upcomingAppointments.sort((a, b) => a.dateTimestamp.compareTo(b.dateTimestamp));
-      
+      upcomingAppointments.sort(
+        (a, b) => a.dateTimestamp.compareTo(b.dateTimestamp),
+      );
+
       return upcomingAppointments;
     } catch (e) {
       throw CacheException(message: 'Failed to get upcoming appointments: $e');
@@ -77,7 +86,9 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
     try {
       await _initBox();
       return _box.values
-          .where((appointment) => appointment.id == id && !appointment.isDeleted)
+          .where(
+            (appointment) => appointment.id == id && !appointment.isDeleted,
+          )
           .firstOrNull;
     } catch (e) {
       throw CacheException(message: 'Failed to get appointment by id: $e');
@@ -99,7 +110,7 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
     try {
       await _initBox();
       final Map<String, AppointmentModel> appointmentMap = {
-        for (var appointment in appointments) appointment.id: appointment
+        for (var appointment in appointments) appointment.id: appointment,
       };
       await _box.putAll(appointmentMap);
     } catch (e) {

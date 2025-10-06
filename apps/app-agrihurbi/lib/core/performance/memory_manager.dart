@@ -2,17 +2,15 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
 /// Callback para situações de pressão de memória
-typedef MemoryPressureCallback = Future<void> Function(MemoryPressureLevel level);
+typedef MemoryPressureCallback =
+    Future<void> Function(MemoryPressureLevel level);
 
 /// Níveis de pressão de memória
-enum MemoryPressureLevel { 
-  normal, 
-  warning, 
-  critical 
-}
+enum MemoryPressureLevel { normal, warning, critical }
 
 /// Entrada de cache gerenciado
 class CacheEntry {
@@ -111,7 +109,7 @@ class MemoryState {
 // === MEMORY NOTIFIER ===
 
 /// StateNotifier para gerenciamento de memória
-/// 
+///
 /// Monitora e gerencia o uso de memória da aplicação:
 /// - Automatic memory cleanup
 /// - Memory pressure detection
@@ -143,15 +141,17 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
       // No Flutter, não há uma API direta para memória
       // Usaremos uma estimativa baseada no developer tools
       // final info = await developer.Service.getInfo();
-      
+
       // Estimativa baseada em heurísticas
       final currentUsage = _estimateMemoryUsage();
-      
-      final newMaxUsage = currentUsage > state.maxMemoryUsageMB ? 
-          currentUsage : state.maxMemoryUsageMB;
+
+      final newMaxUsage =
+          currentUsage > state.maxMemoryUsageMB
+              ? currentUsage
+              : state.maxMemoryUsageMB;
 
       final level = _getMemoryPressureLevel(currentUsage);
-      
+
       if (level != MemoryPressureLevel.normal && !state.isMemoryPressure) {
         state = state.copyWith(
           currentMemoryUsageMB: currentUsage,
@@ -159,7 +159,8 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
           isMemoryPressure: true,
         );
         await _handleMemoryPressure(level);
-      } else if (level == MemoryPressureLevel.normal && state.isMemoryPressure) {
+      } else if (level == MemoryPressureLevel.normal &&
+          state.isMemoryPressure) {
         state = state.copyWith(
           currentMemoryUsageMB: currentUsage,
           maxMemoryUsageMB: newMaxUsage,
@@ -172,7 +173,10 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
         );
       }
     } catch (e) {
-      developer.log('Erro ao verificar uso de memória: $e', name: 'MemoryManager');
+      developer.log(
+        'Erro ao verificar uso de memória: $e',
+        name: 'MemoryManager',
+      );
     }
   }
 
@@ -182,14 +186,19 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
     // - Número de caches registrados
     // - Tempo de execução da app
     // - Número de widgets ativos
-    
+
     const baseMB = 20.0; // Uso base da aplicação
     final cacheMB = state.managedCaches.length * 2.0; // 2MB por cache
     // Uso de tempo relativo limitado para evitar overflow de memória
-    final runTimeMinutes = state.startTime != null ? 
-        DateTime.now().difference(state.startTime!).inMinutes : 0;
-    final timeMB = (runTimeMinutes * 0.1).clamp(0.0, 50.0); // Max 50MB por tempo
-    
+    final runTimeMinutes =
+        state.startTime != null
+            ? DateTime.now().difference(state.startTime!).inMinutes
+            : 0;
+    final timeMB = (runTimeMinutes * 0.1).clamp(
+      0.0,
+      50.0,
+    ); // Max 50MB por tempo
+
     return baseMB + cacheMB + timeMB;
   }
 
@@ -205,20 +214,26 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
 
   /// Lida com situações de pressão de memória
   Future<void> _handleMemoryPressure(MemoryPressureLevel level) async {
-    developer.log('Pressão de memória detectada: $level', name: 'MemoryManager');
+    developer.log(
+      'Pressão de memória detectada: $level',
+      name: 'MemoryManager',
+    );
 
     // Executa callbacks registrados
     for (final callback in _pressureCallbacks) {
       try {
         await callback(level);
       } catch (e) {
-        developer.log('Erro em callback de pressão de memória: $e', name: 'MemoryManager');
+        developer.log(
+          'Erro em callback de pressão de memória: $e',
+          name: 'MemoryManager',
+        );
       }
     }
 
     // Limpa caches automaticamente
     await _performAutomaticCleanup(level);
-    
+
     // Força garbage collection
     await _forceGarbageCollection();
   }
@@ -227,7 +242,7 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
   Future<void> _performAutomaticCleanup(MemoryPressureLevel level) async {
     final now = DateTime.now();
     final entries = state.managedCaches.values.toList();
-    
+
     // Ordena por prioridade (menor = mais prioritário) e último acesso
     entries.sort((a, b) {
       final priorityComparison = b.priority.compareTo(a.priority);
@@ -236,27 +251,31 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
     });
 
     int cleanupCount = 0;
-    final maxCleanup = level == MemoryPressureLevel.critical ? 
-        entries.length : 
-        (entries.length * 0.3).ceil();
+    final maxCleanup =
+        level == MemoryPressureLevel.critical
+            ? entries.length
+            : (entries.length * 0.3).ceil();
 
     final newManagedCaches = Map<String, CacheEntry>.from(state.managedCaches);
 
     for (final entry in entries) {
       if (cleanupCount >= maxCleanup) break;
-      
+
       // Remove caches de baixa prioridade ou não acessados recentemente
       final hoursSinceAccess = now.difference(entry.lastAccessed).inHours;
-      
+
       if (entry.priority >= 4 || hoursSinceAccess >= 2) {
         try {
           entry.clearCallback();
           newManagedCaches.remove(entry.name);
           cleanupCount++;
-          
+
           developer.log('Cache limpo: ${entry.name}', name: 'MemoryManager');
         } catch (e) {
-          developer.log('Erro ao limpar cache ${entry.name}: $e', name: 'MemoryManager');
+          developer.log(
+            'Erro ao limpar cache ${entry.name}: $e',
+            name: 'MemoryManager',
+          );
         }
       }
     }
@@ -266,8 +285,11 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
       cleanupCycles: state.cleanupCycles + 1,
       lastCleanup: now,
     );
-    
-    developer.log('Limpeza automática: $cleanupCount caches removidos', name: 'MemoryManager');
+
+    developer.log(
+      'Limpeza automática: $cleanupCount caches removidos',
+      name: 'MemoryManager',
+    );
   }
 
   /// Força garbage collection
@@ -276,13 +298,16 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
       // Força GC através de alocação e liberação rápida
       final list = List.generate(1000, (i) => Object());
       list.clear();
-      
+
       // Pequena pausa para permitir GC
       await Future<void>.delayed(const Duration(milliseconds: 100));
-      
+
       developer.log('Garbage collection forçado', name: 'MemoryManager');
     } catch (e) {
-      developer.log('Erro ao forçar garbage collection: $e', name: 'MemoryManager');
+      developer.log(
+        'Erro ao forçar garbage collection: $e',
+        name: 'MemoryManager',
+      );
     }
   }
 
@@ -299,17 +324,22 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
       priority: priority,
       lastAccessed: DateTime.now(),
     );
-    
+
     state = state.copyWith(managedCaches: newManagedCaches);
-    
-    developer.log('Cache registrado: $name (prioridade: $priority)', name: 'MemoryManager');
+
+    developer.log(
+      'Cache registrado: $name (prioridade: $priority)',
+      name: 'MemoryManager',
+    );
   }
 
   /// Marca um cache como acessado (atualiza timestamp)
   void markCacheAccessed(String name) {
     final entry = state.managedCaches[name];
     if (entry != null) {
-      final newManagedCaches = Map<String, CacheEntry>.from(state.managedCaches);
+      final newManagedCaches = Map<String, CacheEntry>.from(
+        state.managedCaches,
+      );
       newManagedCaches[name] = entry.copyWithAccess();
       state = state.copyWith(managedCaches: newManagedCaches);
     }
@@ -354,7 +384,9 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
 // === MEMORY PROVIDERS ===
 
 /// Provider para gerenciamento de memória
-final memoryProvider = StateNotifierProvider<MemoryNotifier, MemoryState>((ref) {
+final memoryProvider = StateNotifierProvider<MemoryNotifier, MemoryState>((
+  ref,
+) {
   return MemoryNotifier();
 });
 

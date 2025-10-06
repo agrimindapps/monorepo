@@ -1,19 +1,20 @@
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
-import 'package:core/core.dart' show Failure;
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart' show Failure, Either;
 
 /// Settings Repository Interface
-/// 
+///
 /// Defines contract for app settings management,
 /// user preferences, and configuration persistence
 abstract class SettingsRepository {
   // === GENERAL SETTINGS ===
-  
+
   /// Get user settings
   Future<Either<Failure, SettingsEntity>> getSettings();
 
   /// Update complete settings
-  Future<Either<Failure, SettingsEntity>> updateSettings(SettingsEntity settings);
+  Future<Either<Failure, SettingsEntity>> updateSettings(
+    SettingsEntity settings,
+  );
 
   /// Reset settings to defaults
   Future<Either<Failure, SettingsEntity>> resetToDefaults();
@@ -22,7 +23,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, SettingsEntity>> getDefaultSettings();
 
   // === THEME & APPEARANCE ===
-  
+
   /// Update app theme
   Future<Either<Failure, void>> updateTheme(AppTheme theme);
 
@@ -36,7 +37,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, DisplaySettings>> getDisplaySettings();
 
   // === LANGUAGE & LOCALIZATION ===
-  
+
   /// Update app language
   Future<Either<Failure, void>> updateLanguage(String languageCode);
 
@@ -47,9 +48,11 @@ abstract class SettingsRepository {
   Future<Either<Failure, List<SupportedLanguage>>> getAvailableLanguages();
 
   // === NOTIFICATION SETTINGS ===
-  
+
   /// Update notification settings
-  Future<Either<Failure, void>> updateNotificationSettings(NotificationSettings notifications);
+  Future<Either<Failure, void>> updateNotificationSettings(
+    NotificationSettings notifications,
+  );
 
   /// Get notification settings
   Future<Either<Failure, NotificationSettings>> getNotificationSettings();
@@ -58,7 +61,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, void>> testNotifications();
 
   // === DATA & SYNC SETTINGS ===
-  
+
   /// Update data settings
   Future<Either<Failure, void>> updateDataSettings(DataSettings dataSettings);
 
@@ -72,7 +75,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, DateTime?>> getLastSyncTime();
 
   // === PRIVACY SETTINGS ===
-  
+
   /// Update privacy settings
   Future<Either<Failure, void>> updatePrivacySettings(PrivacySettings privacy);
 
@@ -83,9 +86,11 @@ abstract class SettingsRepository {
   Future<Either<Failure, void>> clearAnalyticsData();
 
   // === SECURITY SETTINGS ===
-  
+
   /// Update security settings
-  Future<Either<Failure, void>> updateSecuritySettings(SecuritySettings security);
+  Future<Either<Failure, void>> updateSecuritySettings(
+    SecuritySettings security,
+  );
 
   /// Get security settings
   Future<Either<Failure, SecuritySettings>> getSecuritySettings();
@@ -100,7 +105,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, bool>> verifyBiometricAuth();
 
   // === BACKUP & RESTORE ===
-  
+
   /// Update backup settings
   Future<Either<Failure, void>> updateBackupSettings(BackupSettings backup);
 
@@ -122,7 +127,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, void>> deleteBackup(String backupId);
 
   // === DATA EXPORT ===
-  
+
   /// Export all data
   Future<Either<Failure, ExportResult>> exportAllData({
     required DataExportFormat format,
@@ -140,7 +145,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, List<ExportInfo>>> getExportHistory();
 
   // === CACHE MANAGEMENT ===
-  
+
   /// Get cache size information
   Future<Either<Failure, CacheInfo>> getCacheInfo();
 
@@ -151,7 +156,7 @@ abstract class SettingsRepository {
   Future<Either<Failure, void>> clearCache(CacheType type);
 
   // === APP INFO & DIAGNOSTICS ===
-  
+
   /// Get app version info
   Future<Either<Failure, AppVersionInfo>> getAppVersion();
 
@@ -168,7 +173,7 @@ abstract class SettingsRepository {
   });
 
   // === SETTINGS VALIDATION ===
-  
+
   /// Validate settings integrity
   Future<Either<Failure, SettingsValidationResult>> validateSettings();
 
@@ -205,12 +210,7 @@ class BiometricInfo {
 }
 
 /// Biometric Types
-enum BiometricType {
-  fingerprint,
-  faceID,
-  iris,
-  voice,
-}
+enum BiometricType { fingerprint, faceID, iris, voice }
 
 /// Backup Info Entity
 class BackupInfo {
@@ -234,12 +234,7 @@ class BackupInfo {
 }
 
 /// Backup Status
-enum BackupStatus {
-  creating,
-  completed,
-  failed,
-  corrupted,
-}
+enum BackupStatus { creating, completed, failed, corrupted }
 
 /// Export Result Entity
 class ExportResult {
@@ -278,22 +273,10 @@ class ExportInfo {
 }
 
 /// Export Status
-enum ExportStatus {
-  inProgress,
-  completed,
-  failed,
-  expired,
-}
+enum ExportStatus { inProgress, completed, failed, expired }
 
 /// Data Types for Export
-enum DataType {
-  livestock,
-  calculations,
-  weather,
-  news,
-  settings,
-  favorites,
-}
+enum DataType { livestock, calculations, weather, news, settings, favorites }
 
 /// Cache Info Entity
 class CacheInfo {
@@ -309,13 +292,7 @@ class CacheInfo {
 }
 
 /// Cache Types
-enum CacheType {
-  images,
-  news,
-  weather,
-  calculations,
-  all,
-}
+enum CacheType { images, news, weather, calculations, all }
 
 /// App Version Info Entity
 class AppVersionInfo {
@@ -405,16 +382,8 @@ class SettingsValidationWarning {
   final String field;
   final String message;
 
-  const SettingsValidationWarning({
-    required this.field,
-    required this.message,
-  });
+  const SettingsValidationWarning({required this.field, required this.message});
 }
 
 /// Settings Error Severity
-enum SettingsErrorSeverity {
-  low,
-  medium,
-  high,
-  critical,
-}
+enum SettingsErrorSeverity { low, medium, high, critical }

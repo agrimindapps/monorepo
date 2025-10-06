@@ -2,8 +2,7 @@ import 'package:app_agrihurbi/core/error/failures.dart';
 import 'package:app_agrihurbi/core/utils/typedef.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
-import 'package:dartz/dartz.dart';
-import 'package:core/core.dart' show injectable;
+import 'package:core/core.dart' show injectable, Left, Right;
 
 /// Manage Settings Use Case
 ///

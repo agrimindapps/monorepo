@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
 import 'bovines_filter_provider.dart';
 import 'bovines_management_provider.dart';

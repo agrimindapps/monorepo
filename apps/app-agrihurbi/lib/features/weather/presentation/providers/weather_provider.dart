@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
 import '../../../../core/di/injection.dart';
 import '../../domain/entities/rain_gauge_entity.dart';
@@ -34,11 +35,11 @@ class WeatherProvider with ChangeNotifier {
     required GetRainGauges getRainGauges,
     required CalculateWeatherStatistics calculateWeatherStatistics,
     required WeatherRepository weatherRepository,
-  })  : _getWeatherMeasurements = getWeatherMeasurements,
-        _createWeatherMeasurement = createWeatherMeasurement,
-        _getRainGauges = getRainGauges,
-        _calculateWeatherStatistics = calculateWeatherStatistics,
-        _weatherRepository = weatherRepository;
+  }) : _getWeatherMeasurements = getWeatherMeasurements,
+       _createWeatherMeasurement = createWeatherMeasurement,
+       _getRainGauges = getRainGauges,
+       _calculateWeatherStatistics = calculateWeatherStatistics,
+       _weatherRepository = weatherRepository;
 
   // ============================================================================
   // STATE MANAGEMENT
@@ -85,9 +86,11 @@ class WeatherProvider with ChangeNotifier {
   bool get isSyncing => _isSyncing;
 
   // Data states
-  List<WeatherMeasurementEntity> get measurements => List.unmodifiable(_measurements);
+  List<WeatherMeasurementEntity> get measurements =>
+      List.unmodifiable(_measurements);
   List<RainGaugeEntity> get rainGauges => List.unmodifiable(_rainGauges);
-  List<WeatherStatisticsEntity> get statistics => List.unmodifiable(_statistics);
+  List<WeatherStatisticsEntity> get statistics =>
+      List.unmodifiable(_statistics);
   WeatherMeasurementEntity? get currentWeather => _currentWeather;
   WeatherMeasurementEntity? get latestMeasurement => _latestMeasurement;
 
@@ -113,17 +116,17 @@ class WeatherProvider with ChangeNotifier {
   // Rain gauge computed states
   List<RainGaugeEntity> get activeRainGauges =>
       _rainGauges.where((gauge) => gauge.isActive).toList();
-  
+
   List<RainGaugeEntity> get operationalRainGauges =>
       _rainGauges.where((gauge) => gauge.isOperational).toList();
-  
+
   List<RainGaugeEntity> get rainGaugesNeedingMaintenance =>
       _rainGauges.where((gauge) => gauge.needsMaintenance).toList();
 
   // Weather summary
   Map<String, dynamic> get weatherSummary {
     if (_latestMeasurement == null) return {};
-    
+
     return {
       'temperature': _latestMeasurement!.temperature,
       'humidity': _latestMeasurement!.humidity,
@@ -159,9 +162,10 @@ class WeatherProvider with ChangeNotifier {
       if (_measurements.isNotEmpty) {
         await loadStatistics();
       }
-
     } catch (e) {
-      _setError(WeatherDataFailure('Failed to initialize weather provider: $e'));
+      _setError(
+        WeatherDataFailure('Failed to initialize weather provider: $e'),
+      );
     } finally {
       _setLoading(false);
     }
@@ -190,19 +194,16 @@ class WeatherProvider with ChangeNotifier {
         limit: _measurementsLimit,
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (newMeasurements) {
-          if (refresh) {
-            _measurements = newMeasurements;
-          } else {
-            _measurements.addAll(newMeasurements);
-          }
-          
-          _hasMoreMeasurements = newMeasurements.length == _measurementsLimit;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure), (newMeasurements) {
+        if (refresh) {
+          _measurements = newMeasurements;
+        } else {
+          _measurements.addAll(newMeasurements);
+        }
+
+        _hasMoreMeasurements = newMeasurements.length == _measurementsLimit;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherMeasurementFetchFailure(e.toString()));
     } finally {
@@ -222,14 +223,11 @@ class WeatherProvider with ChangeNotifier {
   Future<void> loadLatestMeasurement() async {
     try {
       final result = await _getWeatherMeasurements.latest(_selectedLocationId);
-      
-      result.fold(
-        (failure) => _setError(failure),
-        (measurement) {
-          _latestMeasurement = measurement;
-          notifyListeners();
-        },
-      );
+
+      result.fold((failure) => _setError(failure), (measurement) {
+        _latestMeasurement = measurement;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherMeasurementFetchFailure(e.toString()));
     }
@@ -262,13 +260,10 @@ class WeatherProvider with ChangeNotifier {
         limit: _measurementsLimit,
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (measurements) {
-          _measurements = measurements;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure), (measurements) {
+        _measurements = measurements;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherMeasurementFetchFailure(e.toString()));
     } finally {
@@ -364,28 +359,33 @@ class WeatherProvider with ChangeNotifier {
   }
 
   /// Get current weather from external API
-  Future<void> getCurrentWeatherFromAPI(double latitude, double longitude) async {
+  Future<void> getCurrentWeatherFromAPI(
+    double latitude,
+    double longitude,
+  ) async {
     _setLoading(true);
     _clearError();
 
     try {
-      final result = await _weatherRepository.getCurrentWeatherFromAPI(latitude, longitude);
-
-      result.fold(
-        (failure) => _setError(failure),
-        (measurement) {
-          _currentWeather = measurement;
-          _latestMeasurement = measurement;
-          
-          // Add to measurements list if not already present
-          final existingIndex = _measurements.indexWhere((m) => m.id == measurement.id);
-          if (existingIndex == -1) {
-            _measurements.insert(0, measurement);
-          }
-          
-          notifyListeners();
-        },
+      final result = await _weatherRepository.getCurrentWeatherFromAPI(
+        latitude,
+        longitude,
       );
+
+      result.fold((failure) => _setError(failure), (measurement) {
+        _currentWeather = measurement;
+        _latestMeasurement = measurement;
+
+        // Add to measurements list if not already present
+        final existingIndex = _measurements.indexWhere(
+          (m) => m.id == measurement.id,
+        );
+        if (existingIndex == -1) {
+          _measurements.insert(0, measurement);
+        }
+
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherApiFailure('external_api', 500, e.toString()));
     } finally {
@@ -409,22 +409,21 @@ class WeatherProvider with ChangeNotifier {
         days: days,
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (forecastMeasurements) {
-          // Add forecast measurements to the list
-          for (final measurement in forecastMeasurements) {
-            final existingIndex = _measurements.indexWhere((m) => m.id == measurement.id);
-            if (existingIndex == -1) {
-              _measurements.add(measurement);
-            }
+      result.fold((failure) => _setError(failure), (forecastMeasurements) {
+        // Add forecast measurements to the list
+        for (final measurement in forecastMeasurements) {
+          final existingIndex = _measurements.indexWhere(
+            (m) => m.id == measurement.id,
+          );
+          if (existingIndex == -1) {
+            _measurements.add(measurement);
           }
-          
-          // Sort by timestamp
-          _measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-          notifyListeners();
-        },
-      );
+        }
+
+        // Sort by timestamp
+        _measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherApiFailure('external_api', 500, e.toString()));
     } finally {
@@ -444,13 +443,10 @@ class WeatherProvider with ChangeNotifier {
     try {
       final result = await _getRainGauges();
 
-      result.fold(
-        (failure) => _setError(failure),
-        (rainGauges) {
-          _rainGauges = rainGauges;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure), (rainGauges) {
+        _rainGauges = rainGauges;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(RainGaugeFetchFailure(e.toString()));
     } finally {
@@ -466,13 +462,10 @@ class WeatherProvider with ChangeNotifier {
     try {
       final result = await _getRainGauges.byLocation(locationId);
 
-      result.fold(
-        (failure) => _setError(failure),
-        (rainGauges) {
-          _rainGauges = rainGauges;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure), (rainGauges) {
+        _rainGauges = rainGauges;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(RainGaugeFetchFailure(e.toString()));
     } finally {
@@ -484,14 +477,11 @@ class WeatherProvider with ChangeNotifier {
   Future<Map<String, dynamic>?> getRainGaugesHealthReport() async {
     try {
       final result = await _getRainGauges.getHealthReport();
-      
-      return result.fold(
-        (failure) {
-          _setError(failure);
-          return null;
-        },
-        (report) => report,
-      );
+
+      return result.fold((failure) {
+        _setError(failure);
+        return null;
+      }, (report) => report);
     } catch (e) {
       _setError(RainGaugeFetchFailure(e.toString()));
       return null;
@@ -516,25 +506,32 @@ class WeatherProvider with ChangeNotifier {
       final result = await _calculateWeatherStatistics(
         locationId: locationId ?? _selectedLocationId ?? 'default',
         period: period ?? _selectedPeriod,
-        startDate: startDate ?? _startDate ?? DateTime.now().subtract(const Duration(days: 30)),
+        startDate:
+            startDate ??
+            _startDate ??
+            DateTime.now().subtract(const Duration(days: 30)),
         endDate: endDate ?? _endDate ?? DateTime.now(),
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (statistics) {
-          // Find if statistics already exists and replace, otherwise add
-          final existingIndex = _statistics.indexWhere((s) => s.id == statistics.id);
-          if (existingIndex != -1) {
-            _statistics[existingIndex] = statistics;
-          } else {
-            _statistics.add(statistics);
-          }
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure), (statistics) {
+        // Find if statistics already exists and replace, otherwise add
+        final existingIndex = _statistics.indexWhere(
+          (s) => s.id == statistics.id,
+        );
+        if (existingIndex != -1) {
+          _statistics[existingIndex] = statistics;
+        } else {
+          _statistics.add(statistics);
+        }
+        notifyListeners();
+      });
     } catch (e) {
-      _setError(WeatherStatisticsCalculationFailure(e.toString(), period ?? _selectedPeriod));
+      _setError(
+        WeatherStatisticsCalculationFailure(
+          e.toString(),
+          period ?? _selectedPeriod,
+        ),
+      );
     } finally {
       _setStatisticsLoading(false);
     }
@@ -546,19 +543,16 @@ class WeatherProvider with ChangeNotifier {
     DateTime? date,
   }) async {
     final targetDate = date ?? DateTime.now();
-    
+
     try {
       final result = await _calculateWeatherStatistics.daily(
         locationId: locationId,
         date: targetDate,
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (statistics) {
-          _updateStatistics(statistics);
-        },
-      );
+      result.fold((failure) => _setError(failure), (statistics) {
+        _updateStatistics(statistics);
+      });
     } catch (e) {
       _setError(WeatherStatisticsCalculationFailure(e.toString(), 'daily'));
     }
@@ -570,19 +564,16 @@ class WeatherProvider with ChangeNotifier {
     DateTime? monthDate,
   }) async {
     final targetDate = monthDate ?? DateTime.now();
-    
+
     try {
       final result = await _calculateWeatherStatistics.monthly(
         locationId: locationId,
         monthDate: targetDate,
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (statistics) {
-          _updateStatistics(statistics);
-        },
-      );
+      result.fold((failure) => _setError(failure), (statistics) {
+        _updateStatistics(statistics);
+      });
     } catch (e) {
       _setError(WeatherStatisticsCalculationFailure(e.toString(), 'monthly'));
     }
@@ -611,7 +602,7 @@ class WeatherProvider with ChangeNotifier {
             loadMeasurements(refresh: true),
             loadRainGauges(refresh: true),
           ]);
-          
+
           return true;
         },
       );
@@ -632,7 +623,7 @@ class WeatherProvider with ChangeNotifier {
     if (_selectedLocationId != locationId) {
       _selectedLocationId = locationId;
       notifyListeners();
-      
+
       // Reload data with new filter
       loadMeasurements(refresh: true);
       if (locationId != null) {
@@ -649,7 +640,7 @@ class WeatherProvider with ChangeNotifier {
       _startDate = startDate;
       _endDate = endDate;
       notifyListeners();
-      
+
       // Reload data with new filter
       loadMeasurements(refresh: true);
     }
@@ -660,7 +651,7 @@ class WeatherProvider with ChangeNotifier {
     if (_selectedPeriod != period) {
       _selectedPeriod = period;
       notifyListeners();
-      
+
       // Reload statistics with new period
       loadStatistics();
     }
@@ -682,7 +673,7 @@ class WeatherProvider with ChangeNotifier {
     _selectedPeriod = 'daily';
     _measurementsLimit = 50;
     notifyListeners();
-    
+
     // Reload data
     loadMeasurements(refresh: true);
     loadRainGauges(refresh: true);
@@ -696,14 +687,11 @@ class WeatherProvider with ChangeNotifier {
   Future<void> loadTodayMeasurements() async {
     try {
       final result = await _getWeatherMeasurements.today(_selectedLocationId);
-      
-      result.fold(
-        (failure) => _setError(failure),
-        (measurements) {
-          _measurements = measurements;
-          notifyListeners();
-        },
-      );
+
+      result.fold((failure) => _setError(failure), (measurements) {
+        _measurements = measurements;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherMeasurementFetchFailure(e.toString()));
     }
@@ -719,13 +707,10 @@ class WeatherProvider with ChangeNotifier {
         limit: _measurementsLimit,
       );
 
-      result.fold(
-        (failure) => _setError(failure),
-        (measurements) {
-          _measurements = measurements;
-          notifyListeners();
-        },
-      );
+      result.fold((failure) => _setError(failure), (measurements) {
+        _measurements = measurements;
+        notifyListeners();
+      });
     } catch (e) {
       _setError(WeatherMeasurementFetchFailure(e.toString()));
     }
@@ -739,7 +724,9 @@ class WeatherProvider with ChangeNotifier {
   /// Get average temperature for loaded measurements
   double get averageTemperature {
     if (_measurements.isEmpty) return 0.0;
-    final total = _measurements.map((m) => m.temperature).reduce((a, b) => a + b);
+    final total = _measurements
+        .map((m) => m.temperature)
+        .reduce((a, b) => a + b);
     return total / _measurements.length;
   }
 
@@ -803,17 +790,19 @@ class WeatherProvider with ChangeNotifier {
   }
 
   void _updateStatistics(WeatherStatisticsEntity statistics) {
-    final existingIndex = _statistics.indexWhere((s) => 
-        s.locationId == statistics.locationId && 
-        s.period == statistics.period &&
-        s.startDate.isAtSameMomentAs(statistics.startDate));
-    
+    final existingIndex = _statistics.indexWhere(
+      (s) =>
+          s.locationId == statistics.locationId &&
+          s.period == statistics.period &&
+          s.startDate.isAtSameMomentAs(statistics.startDate),
+    );
+
     if (existingIndex != -1) {
       _statistics[existingIndex] = statistics;
     } else {
       _statistics.add(statistics);
     }
-    
+
     notifyListeners();
   }
 

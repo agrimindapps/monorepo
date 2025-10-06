@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import 'financial_sync_service.dart';
 
 final financialSyncServiceProvider = Provider<FinancialSyncService>((ref) {

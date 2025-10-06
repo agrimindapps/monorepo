@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/subscription_plan.dart';
@@ -50,7 +51,8 @@ class SubscriptionState {
       currentSubscription: currentSubscription ?? this.currentSubscription,
       isLoading: isLoading ?? this.isLoading,
       isLoadingPlans: isLoadingPlans ?? this.isLoadingPlans,
-      isLoadingCurrentSubscription: isLoadingCurrentSubscription ?? this.isLoadingCurrentSubscription,
+      isLoadingCurrentSubscription:
+          isLoadingCurrentSubscription ?? this.isLoadingCurrentSubscription,
       isProcessingPurchase: isProcessingPurchase ?? this.isProcessingPurchase,
       isRestoringPurchases: isRestoringPurchases ?? this.isRestoringPurchases,
       isCancelling: isCancelling ?? this.isCancelling,
@@ -133,14 +135,10 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     final result = await _getAvailablePlans(const local.NoParams());
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingPlans: false,
-        error: failure.message,
-      ),
-      (plans) => state = state.copyWith(
-        availablePlans: plans,
-        isLoadingPlans: false,
-      ),
+      (failure) =>
+          state = state.copyWith(isLoadingPlans: false, error: failure.message),
+      (plans) =>
+          state = state.copyWith(availablePlans: plans, isLoadingPlans: false),
     );
   }
 
@@ -150,14 +148,16 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     final result = await _getCurrentSubscription(userId);
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingCurrentSubscription: false,
-        error: failure.message,
-      ),
-      (subscription) => state = state.copyWith(
-        currentSubscription: subscription,
-        isLoadingCurrentSubscription: false,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingCurrentSubscription: false,
+            error: failure.message,
+          ),
+      (subscription) =>
+          state = state.copyWith(
+            currentSubscription: subscription,
+            isLoadingCurrentSubscription: false,
+          ),
     );
   }
 
@@ -198,10 +198,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isCancelling: false,
-          error: failure.message,
-        );
+        state = state.copyWith(isCancelling: false, error: failure.message);
         return false;
       },
       (_) {
@@ -219,10 +216,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          error: failure.message,
-        );
+        state = state.copyWith(isLoading: false, error: failure.message);
         return false;
       },
       (_) {
@@ -240,10 +234,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isResuming: false,
-          error: failure.message,
-        );
+        state = state.copyWith(isResuming: false, error: failure.message);
         return false;
       },
       (_) {
@@ -262,10 +253,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          error: failure.message,
-        );
+        state = state.copyWith(isLoading: false, error: failure.message);
         return false;
       },
       (subscription) {
@@ -304,15 +292,16 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   }
 }
 
-final subscriptionProvider = StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
-  return SubscriptionNotifier(
-    di.getIt<GetAvailablePlans>(),
-    di.getIt<GetCurrentSubscription>(),
-    di.getIt<SubscribeToPlan>(),
-    di.getIt<CancelSubscription>(),
-    di.getIt<PauseSubscription>(),
-    di.getIt<ResumeSubscription>(),
-    di.getIt<UpgradePlan>(),
-    di.getIt<RestorePurchases>(),
-  );
-});
+final subscriptionProvider =
+    StateNotifierProvider<SubscriptionNotifier, SubscriptionState>((ref) {
+      return SubscriptionNotifier(
+        di.getIt<GetAvailablePlans>(),
+        di.getIt<GetCurrentSubscription>(),
+        di.getIt<SubscribeToPlan>(),
+        di.getIt<CancelSubscription>(),
+        di.getIt<PauseSubscription>(),
+        di.getIt<ResumeSubscription>(),
+        di.getIt<UpgradePlan>(),
+        di.getIt<RestorePurchases>(),
+      );
+    });

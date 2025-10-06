@@ -1,4 +1,5 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart' show Either, Left;
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/subscription_plan.dart';
@@ -24,7 +25,9 @@ class GetCurrentSubscription implements UseCase<UserSubscription?, String> {
   @override
   Future<Either<Failure, UserSubscription?>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
     return await repository.getCurrentSubscription(userId);
   }
@@ -34,25 +37,29 @@ class SubscribeToPlanParams {
   final String userId;
   final String planId;
 
-  SubscribeToPlanParams({
-    required this.userId,
-    required this.planId,
-  });
+  SubscribeToPlanParams({required this.userId, required this.planId});
 }
 
-class SubscribeToPlan implements UseCase<UserSubscription, SubscribeToPlanParams> {
+class SubscribeToPlan
+    implements UseCase<UserSubscription, SubscribeToPlanParams> {
   final SubscriptionRepository repository;
 
   SubscribeToPlan(this.repository);
 
   @override
-  Future<Either<Failure, UserSubscription>> call(SubscribeToPlanParams params) async {
+  Future<Either<Failure, UserSubscription>> call(
+    SubscribeToPlanParams params,
+  ) async {
     if (params.userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
 
     if (params.planId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do plano é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do plano é obrigatório'),
+      );
     }
 
     return await repository.subscribeToPlan(params.userId, params.planId);
@@ -67,7 +74,9 @@ class CancelSubscription implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
     return await repository.cancelSubscription(userId);
   }
@@ -81,7 +90,9 @@ class PauseSubscription implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
     return await repository.pauseSubscription(userId);
   }
@@ -95,7 +106,9 @@ class ResumeSubscription implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
     return await repository.resumeSubscription(userId);
   }
@@ -105,10 +118,7 @@ class UpgradePlanParams {
   final String userId;
   final String newPlanId;
 
-  UpgradePlanParams({
-    required this.userId,
-    required this.newPlanId,
-  });
+  UpgradePlanParams({required this.userId, required this.newPlanId});
 }
 
 class UpgradePlan implements UseCase<UserSubscription, UpgradePlanParams> {
@@ -117,13 +127,19 @@ class UpgradePlan implements UseCase<UserSubscription, UpgradePlanParams> {
   UpgradePlan(this.repository);
 
   @override
-  Future<Either<Failure, UserSubscription>> call(UpgradePlanParams params) async {
+  Future<Either<Failure, UserSubscription>> call(
+    UpgradePlanParams params,
+  ) async {
     if (params.userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
 
     if (params.newPlanId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do novo plano é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do novo plano é obrigatório'),
+      );
     }
 
     return await repository.upgradePlan(params.userId, params.newPlanId);
@@ -138,7 +154,9 @@ class RestorePurchases implements UseCase<void, String> {
   @override
   Future<Either<Failure, void>> call(String userId) async {
     if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+      return const Left(
+        ValidationFailure(message: 'ID do usuário é obrigatório'),
+      );
     }
     return await repository.restorePurchases(userId);
   }
@@ -152,7 +170,9 @@ class ValidateReceipt implements UseCase<bool, String> {
   @override
   Future<Either<Failure, bool>> call(String receiptData) async {
     if (receiptData.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Dados do recibo são obrigatórios'));
+      return const Left(
+        ValidationFailure(message: 'Dados do recibo são obrigatórios'),
+      );
     }
     return await repository.validateReceipt(receiptData);
   }

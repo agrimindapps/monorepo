@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider, Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;
@@ -55,7 +56,9 @@ class CalculatorState {
 
   // Getters
   List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
-    return filteredCalculators.where((calc) => calc.category == category).toList();
+    return filteredCalculators
+        .where((calc) => calc.category == category)
+        .toList();
   }
 
   List<CalculatorEntity> get favoriteCalculators {
@@ -106,7 +109,8 @@ class CalculatorState {
       selectedCategory: selectedCategory ?? this.selectedCategory,
       currentResult: currentResult ?? this.currentResult,
       calculationHistory: calculationHistory ?? this.calculationHistory,
-      favoriteCalculatorIds: favoriteCalculatorIds ?? this.favoriteCalculatorIds,
+      favoriteCalculatorIds:
+          favoriteCalculatorIds ?? this.favoriteCalculatorIds,
       currentInputs: currentInputs ?? this.currentInputs,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -231,15 +235,13 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     final result = await _getCalculators();
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        errorMessage: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          ),
       (calculators) {
-        state = state.copyWith(
-          isLoading: false,
-          calculators: calculators,
-        );
+        state = state.copyWith(isLoading: false, calculators: calculators);
         _applyFilters();
       },
     );
@@ -253,10 +255,11 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     bool success = false;
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        errorMessage: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          ),
       (calculator) {
         state = state.copyWith(
           isLoading: false,
@@ -298,10 +301,7 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
   /// Limpa inputs atuais
   void clearInputs() {
-    state = state.copyWith(
-      currentInputs: {},
-      currentResult: null,
-    );
+    state = state.copyWith(currentInputs: {}, currentResult: null);
   }
 
   /// Executa cálculo na calculadora selecionada
@@ -322,10 +322,11 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     bool success = false;
     result.fold(
-      (failure) => state = state.copyWith(
-        isCalculating: false,
-        errorMessage: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isCalculating: false,
+            errorMessage: failure.message,
+          ),
       (calculationResult) {
         state = state.copyWith(
           isCalculating: false,
@@ -381,10 +382,7 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
   /// Limpa todos os filtros
   void clearFilters() {
-    state = state.copyWith(
-      searchQuery: '',
-      selectedCategory: null,
-    );
+    state = state.copyWith(searchQuery: '', selectedCategory: null);
     _applyFilters();
   }
 
@@ -394,16 +392,23 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     // Filtrar por categoria
     if (state.selectedCategory != null) {
-      filtered = filtered.where((calc) => calc.category == state.selectedCategory).toList();
+      filtered =
+          filtered
+              .where((calc) => calc.category == state.selectedCategory)
+              .toList();
     }
 
     // Filtrar por busca
     if (state.searchQuery.isNotEmpty) {
       final query = state.searchQuery.toLowerCase();
-      filtered = filtered.where((calc) =>
-        calc.name.toLowerCase().contains(query) ||
-        calc.description.toLowerCase().contains(query)
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (calc) =>
+                    calc.name.toLowerCase().contains(query) ||
+                    calc.description.toLowerCase().contains(query),
+              )
+              .toList();
     }
 
     state = state.copyWith(filteredCalculators: filtered);
@@ -416,22 +421,23 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     final result = await _getCalculationHistory.call();
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingHistory: false,
-        errorMessage: failure.message,
-      ),
-      (history) => state = state.copyWith(
-        isLoadingHistory: false,
-        calculationHistory: history,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingHistory: false,
+            errorMessage: failure.message,
+          ),
+      (history) =>
+          state = state.copyWith(
+            isLoadingHistory: false,
+            calculationHistory: history,
+          ),
     );
   }
 
   /// Remove item do histórico
   Future<bool> removeFromHistory(String historyId) async {
-    final newHistory = state.calculationHistory
-        .where((item) => item.id != historyId)
-        .toList();
+    final newHistory =
+        state.calculationHistory.where((item) => item.id != historyId).toList();
 
     state = state.copyWith(calculationHistory: newHistory);
     return true;
@@ -450,12 +456,14 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     final result = await _manageFavorites.call(const GetFavoritesParams());
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingFavorites: false,
-        errorMessage: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingFavorites: false,
+            errorMessage: failure.message,
+          ),
       (favorites) {
-        final favoriteIds = favorites is List ? List<String>.from(favorites) : <String>[];
+        final favoriteIds =
+            favorites is List ? List<String>.from(favorites) : <String>[];
         state = state.copyWith(
           isLoadingFavorites: false,
           favoriteCalculatorIds: favoriteIds,
@@ -470,8 +478,8 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     final result = await _manageFavorites.call(
       isFavorite
-        ? RemoveFavoriteParams(calculatorId)
-        : AddFavoriteParams(calculatorId),
+          ? RemoveFavoriteParams(calculatorId)
+          : AddFavoriteParams(calculatorId),
     );
 
     bool success = false;
@@ -514,7 +522,8 @@ class CalculatorNotifier extends _$CalculatorNotifier {
         (calc) => calc.id == historyItem.calculatorId,
       );
     } catch (e) {
-      calculator = state.calculators.isNotEmpty ? state.calculators.first : null;
+      calculator =
+          state.calculators.isNotEmpty ? state.calculators.first : null;
     }
 
     state = state.copyWith(
@@ -581,10 +590,7 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
 
   /// Limpa todos os inputs
   void clearInputs() {
-    state = state.copyWith(
-      currentInputs: {},
-      currentResult: null,
-    );
+    state = state.copyWith(currentInputs: {}, currentResult: null);
   }
 
   /// Limpa resultado atual
@@ -595,7 +601,9 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
   /// Executa cálculo com a calculadora ativa
   Future<bool> executeCalculation() async {
     if (state.activeCalculator == null) {
-      state = state.copyWith(errorMessage: 'Nenhuma calculadora ativa definida');
+      state = state.copyWith(
+        errorMessage: 'Nenhuma calculadora ativa definida',
+      );
       return false;
     }
 
@@ -603,7 +611,9 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
   }
 
   /// Executa cálculo com calculadora específica
-  Future<bool> executeCalculationWithCalculator(CalculatorEntity calculator) async {
+  Future<bool> executeCalculationWithCalculator(
+    CalculatorEntity calculator,
+  ) async {
     state = state.copyWith(
       isCalculating: true,
       errorMessage: null,
@@ -619,10 +629,11 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
 
     bool success = false;
     result.fold(
-      (failure) => state = state.copyWith(
-        isCalculating: false,
-        errorMessage: failure.message,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isCalculating: false,
+            errorMessage: failure.message,
+          ),
       (calculationResult) {
         state = state.copyWith(
           isCalculating: false,
@@ -641,10 +652,7 @@ class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
     Map<String, dynamic> inputs,
   ) async {
     final result = await _executeCalculation.execute(
-      ExecuteCalculationParams(
-        calculatorId: calculator.id,
-        inputs: inputs,
-      ),
+      ExecuteCalculationParams(calculatorId: calculator.id, inputs: inputs),
     );
 
     return result.fold(
@@ -687,10 +695,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
 
   /// Inicializa os serviços
   Future<void> initialize() async {
-    await Future.wait([
-      loadFavorites(),
-      loadTemplates(),
-    ]);
+    await Future.wait([loadFavorites(), loadTemplates()]);
   }
 
   /// Carrega lista de favoritos
@@ -721,7 +726,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
       }
       return false;
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao alterar favorito: ${e.toString()}');
+      state = state.copyWith(
+        errorMessage: 'Erro ao alterar favorito: ${e.toString()}',
+      );
       return false;
     }
   }
@@ -736,7 +743,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
       }
       return false;
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao adicionar favorito: ${e.toString()}');
+      state = state.copyWith(
+        errorMessage: 'Erro ao adicionar favorito: ${e.toString()}',
+      );
       return false;
     }
   }
@@ -751,7 +760,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
       }
       return false;
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao remover favorito: ${e.toString()}');
+      state = state.copyWith(
+        errorMessage: 'Erro ao remover favorito: ${e.toString()}',
+      );
       return false;
     }
   }
@@ -762,10 +773,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
 
     try {
       final templates = await _templateService.getAllTemplates();
-      state = state.copyWith(
-        isLoadingTemplates: false,
-        templates: templates,
-      );
+      state = state.copyWith(isLoadingTemplates: false, templates: templates);
       _applyTemplateFilters();
     } catch (e) {
       state = state.copyWith(
@@ -776,7 +784,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   }
 
   /// Carrega templates de uma calculadora específica
-  Future<List<CalculationTemplate>> getTemplatesForCalculator(String calculatorId) async {
+  Future<List<CalculationTemplate>> getTemplatesForCalculator(
+    String calculatorId,
+  ) async {
     try {
       return await _templateService.getTemplatesForCalculator(calculatorId);
     } catch (e) {
@@ -794,7 +804,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
       }
       return false;
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao salvar template: ${e.toString()}');
+      state = state.copyWith(
+        errorMessage: 'Erro ao salvar template: ${e.toString()}',
+      );
       return false;
     }
   }
@@ -809,7 +821,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
       }
       return false;
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao remover template: ${e.toString()}');
+      state = state.copyWith(
+        errorMessage: 'Erro ao remover template: ${e.toString()}',
+      );
       return false;
     }
   }
@@ -847,11 +861,19 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
     // Filtrar por busca
     if (state.templateSearchQuery.isNotEmpty) {
       final query = state.templateSearchQuery.toLowerCase();
-      filtered = filtered.where((template) =>
-        template.name.toLowerCase().contains(query) ||
-        (template.description?.toLowerCase() ?? '').contains(query) ||
-        template.tags.any((tag) => tag.toLowerCase().contains(query))
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (template) =>
+                    template.name.toLowerCase().contains(query) ||
+                    (template.description?.toLowerCase() ?? '').contains(
+                      query,
+                    ) ||
+                    template.tags.any(
+                      (tag) => tag.toLowerCase().contains(query),
+                    ),
+              )
+              .toList();
     }
 
     // Ordenar por uso recente
@@ -898,10 +920,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
 
   /// Refresh completo dos dados
   Future<void> refreshAllData() async {
-    await Future.wait([
-      loadFavorites(),
-      loadTemplates(),
-    ]);
+    await Future.wait([loadFavorites(), loadTemplates()]);
   }
 }
 

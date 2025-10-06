@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive;
 
 // Generated Hive Adapters
 import '../../features/auth/data/models/user_model.dart';

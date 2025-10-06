@@ -1,7 +1,8 @@
 import 'package:core/core.dart' show EnhancedAccountDeletionService;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/di/injection.dart';

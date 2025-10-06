@@ -4,7 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive;
 
 import '../../../../core/utils/receita_agro_data_inspector_initializer.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
@@ -53,10 +53,11 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   void _initializeInspector() {
     ReceitaAgroDataInspectorInitializer.initialize();
 
-    final modules = _inspector.customBoxes
-        .map((box) => box.module ?? 'Outros')
-        .toSet()
-        .toList();
+    final modules =
+        _inspector.customBoxes
+            .map((box) => box.module ?? 'Outros')
+            .toSet()
+            .toList();
     modules.sort();
     _availableModules = ['Todos', ...modules];
   }
@@ -88,10 +89,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
               child: Column(
-                children: [
-                  _buildHeader(isDark),
-                  Expanded(child: _buildBody()),
-                ],
+                children: [_buildHeader(isDark), Expanded(child: _buildBody())],
               ),
             ),
           ),
@@ -109,7 +107,8 @@ class _DataInspectorPageState extends State<DataInspectorPage>
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+      onBackPressed:
+          () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
       onRightIconPressed: _loadData,
     );
   }
@@ -136,10 +135,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
             ),
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildHiveBoxesTab(),
-                _buildSharedPrefsTab(),
-              ],
+              children: [_buildHiveBoxesTab(), _buildSharedPrefsTab()],
             ),
           ),
         ),
@@ -149,10 +145,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
 
   Widget _buildHiveBoxesTab() {
     return Column(
-      children: [
-        _buildHiveFilters(),
-        Expanded(child: _buildHiveBoxesList()),
-      ],
+      children: [_buildHiveFilters(), Expanded(child: _buildHiveBoxesList())],
     );
   }
 
@@ -170,14 +163,15 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
             ),
-            items: _availableModules.map((module) {
-              return DropdownMenuItem(
-                value: module,
-                child: Text(module),
-              );
-            }).toList(),
+            items:
+                _availableModules.map((module) {
+                  return DropdownMenuItem(value: module, child: Text(module));
+                }).toList(),
             onChanged: (value) {
               setState(() => _selectedModule = value!);
             },
@@ -191,7 +185,10 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
             ),
             onChanged: (value) {
               setState(() => _searchQuery = value);
@@ -203,12 +200,17 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   }
 
   Widget _buildHiveBoxesList() {
-    final filteredBoxes = _inspector.customBoxes.where((box) {
-      final matchesModule = _selectedModule == 'Todos' || box.module == _selectedModule;
-      final matchesSearch = _searchQuery.isEmpty ||
-          box.displayName.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesModule && matchesSearch;
-    }).toList();
+    final filteredBoxes =
+        _inspector.customBoxes.where((box) {
+          final matchesModule =
+              _selectedModule == 'Todos' || box.module == _selectedModule;
+          final matchesSearch =
+              _searchQuery.isEmpty ||
+              box.displayName.toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              );
+          return matchesModule && matchesSearch;
+        }).toList();
 
     if (filteredBoxes.isEmpty) {
       return _buildEmptyState('Nenhuma HiveBox encontrada', Icons.folder_off);
@@ -239,9 +241,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
           // Header do card
@@ -265,20 +265,22 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: hasError
-                          ? Colors.red.withValues(alpha: 0.1)
-                          : (isOpen
-                              ? Colors.green.withValues(alpha: 0.1)
-                              : Colors.grey.withValues(alpha: 0.1)),
+                      color:
+                          hasError
+                              ? Colors.red.withValues(alpha: 0.1)
+                              : (isOpen
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.grey.withValues(alpha: 0.1)),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       hasError
                           ? Icons.error_outline
                           : (isOpen ? Icons.folder_open : Icons.folder),
-                      color: hasError
-                          ? Colors.red
-                          : (isOpen ? Colors.green : Colors.grey),
+                      color:
+                          hasError
+                              ? Colors.red
+                              : (isOpen ? Colors.green : Colors.grey),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -400,7 +402,9 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                 child: ElevatedButton.icon(
                   onPressed: () => _exportBoxData(box, records),
                   icon: const Icon(Icons.download),
-                  label: Text('Exportar ${records.length} ${records.length == 1 ? "registro" : "registros"}'),
+                  label: Text(
+                    'Exportar ${records.length} ${records.length == 1 ? "registro" : "registros"}',
+                  ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -453,7 +457,9 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Center(
@@ -473,9 +479,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                       children: [
                         Text(
                           'Registro #${index + 1}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -524,10 +528,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
               ),
               child: SelectableText(
                 _formatJson(record.data),
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                ),
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
               ),
             ),
           ],
@@ -552,10 +553,11 @@ class _DataInspectorPageState extends State<DataInspectorPage>
         decoration: InputDecoration(
           labelText: 'Buscar SharedPreference',
           prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         ),
         onChanged: (value) {
           setState(() => _searchQuery = value);
@@ -565,14 +567,20 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   }
 
   Widget _buildSharedPrefsList() {
-    final filteredPrefs = _sharedPrefsData.where((pref) {
-      return _searchQuery.isEmpty ||
-          pref.key.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          pref.value.toString().toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    final filteredPrefs =
+        _sharedPrefsData.where((pref) {
+          return _searchQuery.isEmpty ||
+              pref.key.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              pref.value.toString().toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              );
+        }).toList();
 
     if (filteredPrefs.isEmpty) {
-      return _buildEmptyState('Nenhuma SharedPreference encontrada', Icons.settings_suggest);
+      return _buildEmptyState(
+        'Nenhuma SharedPreference encontrada',
+        Icons.settings_suggest,
+      );
     }
 
     return ListView.separated(
@@ -591,9 +599,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
 
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
         children: [
           InkWell(
@@ -651,7 +657,9 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                     children: [
                       IconButton(
                         icon: const Icon(Icons.copy, size: 18),
-                        onPressed: () => _copyToClipboard('${pref.key}: ${pref.value}'),
+                        onPressed:
+                            () =>
+                                _copyToClipboard('${pref.key}: ${pref.value}'),
                         tooltip: 'Copiar',
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -694,7 +702,8 @@ class _DataInspectorPageState extends State<DataInspectorPage>
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => _copyToClipboard(pref.value.toString()),
+                          onPressed:
+                              () => _copyToClipboard(pref.value.toString()),
                           icon: const Icon(Icons.copy, size: 16),
                           label: const Text('Copiar Valor'),
                         ),
@@ -731,10 +740,7 @@ class _DataInspectorPageState extends State<DataInspectorPage>
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -764,14 +770,17 @@ class _DataInspectorPageState extends State<DataInspectorPage>
 
           if (value != null) {
             // Converte para Map se necessário
-            final dataMap = value is Map<String, dynamic>
-                ? value
-                : <String, dynamic>{'raw': value};
+            final dataMap =
+                value is Map<String, dynamic>
+                    ? value
+                    : <String, dynamic>{'raw': value};
 
-            records.add(DatabaseRecord(
-              id: key?.toString() ?? i.toString(),
-              data: dataMap,
-            ));
+            records.add(
+              DatabaseRecord(
+                id: key?.toString() ?? i.toString(),
+                data: dataMap,
+              ),
+            );
           }
         } catch (e) {
           if (kDebugMode) {
@@ -800,14 +809,17 @@ class _DataInspectorPageState extends State<DataInspectorPage>
 
               if (value != null) {
                 // Converte para Map se necessário
-                final dataMap = value is Map<String, dynamic>
-                    ? value
-                    : <String, dynamic>{'raw': value};
+                final dataMap =
+                    value is Map<String, dynamic>
+                        ? value
+                        : <String, dynamic>{'raw': value};
 
-                records.add(DatabaseRecord(
-                  id: key?.toString() ?? i.toString(),
-                  data: dataMap,
-                ));
+                records.add(
+                  DatabaseRecord(
+                    id: key?.toString() ?? i.toString(),
+                    data: dataMap,
+                  ),
+                );
               }
             } catch (readError) {
               if (kDebugMode) {
@@ -893,7 +905,10 @@ class _DataInspectorPageState extends State<DataInspectorPage>
     _showSnackBar('Copiado!', isError: false);
   }
 
-  Future<void> _exportBoxData(CustomBoxType box, List<DatabaseRecord> records) async {
+  Future<void> _exportBoxData(
+    CustomBoxType box,
+    List<DatabaseRecord> records,
+  ) async {
     try {
       // Estratégia: abrir → ler → exportar → fechar
       // Garante que sempre temos os dados mais recentes
@@ -908,20 +923,22 @@ class _DataInspectorPageState extends State<DataInspectorPage>
           'exportedAt': DateTime.now().toIso8601String(),
           'totalRecords': freshRecords.length,
         },
-        'data': freshRecords.map((record) => {
-          'id': record.id,
-          'data': record.data,
-        }).toList(),
+        'data':
+            freshRecords
+                .map((record) => {'id': record.id, 'data': record.data})
+                .toList(),
       };
 
       final jsonString = _formatJson(jsonData);
 
-      await SharePlus.instance.share(ShareParams(
-        text: jsonString,
-        subject: 'Export: ${box.displayName}',
-      ));
+      await SharePlus.instance.share(
+        ShareParams(text: jsonString, subject: 'Export: ${box.displayName}'),
+      );
 
-      _showSnackBar('${freshRecords.length} registros exportados!', isError: false);
+      _showSnackBar(
+        '${freshRecords.length} registros exportados!',
+        isError: false,
+      );
     } catch (e) {
       _showSnackBar('Erro ao exportar: $e', isError: true);
     }
@@ -930,24 +947,25 @@ class _DataInspectorPageState extends State<DataInspectorPage>
   Future<void> _confirmRemoveSharedPref(String key) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Remoção'),
-        content: Text('Deseja remover a chave "$key"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Confirmar Remoção'),
+            content: Text('Deseja remover a chave "$key"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Remover'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Remover'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {

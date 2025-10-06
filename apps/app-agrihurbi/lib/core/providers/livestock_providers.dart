@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider, Ref;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/di/injection_container.dart' as di;
@@ -10,7 +11,8 @@ import '../../features/livestock/domain/usecases/create_bovine.dart';
 import '../../features/livestock/domain/usecases/delete_bovine.dart';
 import '../../features/livestock/domain/usecases/get_bovines.dart';
 import '../../features/livestock/domain/usecases/get_equines.dart';
-import '../../features/livestock/domain/usecases/search_animals.dart' as search_use_case;
+import '../../features/livestock/domain/usecases/search_animals.dart'
+    as search_use_case;
 import '../../features/livestock/domain/usecases/update_bovine.dart';
 
 part 'livestock_providers.g.dart';
@@ -37,11 +39,13 @@ class BovinesState {
   final BovineEntity? selectedBovine;
   final String? errorMessage;
 
-  List<BovineEntity> get activeBovines => bovines.where((b) => b.isActive).toList();
+  List<BovineEntity> get activeBovines =>
+      bovines.where((b) => b.isActive).toList();
   int get totalBovines => bovines.length;
   int get totalActiveBovines => activeBovines.length;
   bool get hasSelectedBovine => selectedBovine != null;
-  bool get isAnyOperationInProgress => isLoading || isCreating || isUpdating || isDeleting;
+  bool get isAnyOperationInProgress =>
+      isLoading || isCreating || isUpdating || isDeleting;
 
   BovinesState copyWith({
     List<BovineEntity>? bovines,
@@ -78,7 +82,8 @@ class EquinesState {
   final EquineEntity? selectedEquine;
   final String? errorMessage;
 
-  List<EquineEntity> get activeEquines => equines.where((e) => e.isActive).toList();
+  List<EquineEntity> get activeEquines =>
+      equines.where((e) => e.isActive).toList();
   int get totalEquines => equines.length;
   int get totalActiveEquines => activeEquines.length;
 
@@ -114,11 +119,11 @@ class LivestockFiltersState {
   final BreedingSystem? selectedBreedingSystem;
 
   bool get hasActiveFilters =>
-    searchQuery.isNotEmpty ||
-    selectedBreed != null ||
-    selectedOriginCountry != null ||
-    selectedAptitude != null ||
-    selectedBreedingSystem != null;
+      searchQuery.isNotEmpty ||
+      selectedBreed != null ||
+      selectedOriginCountry != null ||
+      selectedAptitude != null ||
+      selectedBreedingSystem != null;
 
   LivestockFiltersState copyWith({
     String? searchQuery,
@@ -130,9 +135,11 @@ class LivestockFiltersState {
     return LivestockFiltersState(
       searchQuery: searchQuery ?? this.searchQuery,
       selectedBreed: selectedBreed ?? this.selectedBreed,
-      selectedOriginCountry: selectedOriginCountry ?? this.selectedOriginCountry,
+      selectedOriginCountry:
+          selectedOriginCountry ?? this.selectedOriginCountry,
       selectedAptitude: selectedAptitude ?? this.selectedAptitude,
-      selectedBreedingSystem: selectedBreedingSystem ?? this.selectedBreedingSystem,
+      selectedBreedingSystem:
+          selectedBreedingSystem ?? this.selectedBreedingSystem,
     );
   }
 }
@@ -191,16 +198,10 @@ class BovinesNotifier extends _$BovinesNotifier {
     final result = await _getAllBovines();
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (bovines) {
-        state = state.copyWith(
-          bovines: bovines,
-          isLoading: false,
-        );
+        state = state.copyWith(bovines: bovines, isLoading: false);
       },
     );
   }
@@ -248,13 +249,17 @@ class BovinesNotifier extends _$BovinesNotifier {
         return false;
       },
       (updatedBovine) {
-        final updatedBovines = state.bovines.map((b) {
-          return b.id == updatedBovine.id ? updatedBovine : b;
-        }).toList();
+        final updatedBovines =
+            state.bovines.map((b) {
+              return b.id == updatedBovine.id ? updatedBovine : b;
+            }).toList();
 
         state = state.copyWith(
           bovines: updatedBovines,
-          selectedBovine: state.selectedBovine?.id == updatedBovine.id ? updatedBovine : state.selectedBovine,
+          selectedBovine:
+              state.selectedBovine?.id == updatedBovine.id
+                  ? updatedBovine
+                  : state.selectedBovine,
           isUpdating: false,
         );
         return true;
@@ -276,13 +281,17 @@ class BovinesNotifier extends _$BovinesNotifier {
         return false;
       },
       (_) {
-        final updatedBovines = state.bovines.map((b) {
-          return b.id == bovineId ? b.copyWith(isActive: false) : b;
-        }).toList();
+        final updatedBovines =
+            state.bovines.map((b) {
+              return b.id == bovineId ? b.copyWith(isActive: false) : b;
+            }).toList();
 
         state = state.copyWith(
           bovines: updatedBovines,
-          selectedBovine: state.selectedBovine?.id == bovineId ? null : state.selectedBovine,
+          selectedBovine:
+              state.selectedBovine?.id == bovineId
+                  ? null
+                  : state.selectedBovine,
           isDeleting: false,
         );
         return true;
@@ -336,16 +345,10 @@ class EquinesNotifier extends _$EquinesNotifier {
     final result = await _getEquines(const GetEquinesParams());
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (equines) {
-        state = state.copyWith(
-          equines: equines,
-          isLoading: false,
-        );
+        state = state.copyWith(equines: equines, isLoading: false);
       },
     );
   }
@@ -395,31 +398,60 @@ class LivestockFiltersNotifier extends _$LivestockFiltersNotifier {
     var filtered = bovines.where((bovine) => bovine.isActive).toList();
 
     if (state.searchQuery.isNotEmpty) {
-      filtered = filtered.where((bovine) =>
-        bovine.commonName.toLowerCase().contains(state.searchQuery.toLowerCase()) ||
-        bovine.breed.toLowerCase().contains(state.searchQuery.toLowerCase()) ||
-        bovine.registrationId.toLowerCase().contains(state.searchQuery.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) =>
+                    bovine.commonName.toLowerCase().contains(
+                      state.searchQuery.toLowerCase(),
+                    ) ||
+                    bovine.breed.toLowerCase().contains(
+                      state.searchQuery.toLowerCase(),
+                    ) ||
+                    bovine.registrationId.toLowerCase().contains(
+                      state.searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
     }
 
     if (state.selectedBreed != null) {
-      filtered = filtered.where((bovine) =>
-        bovine.breed.toLowerCase().contains(state.selectedBreed!.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) => bovine.breed.toLowerCase().contains(
+                  state.selectedBreed!.toLowerCase(),
+                ),
+              )
+              .toList();
     }
 
     if (state.selectedOriginCountry != null) {
-      filtered = filtered.where((bovine) =>
-        bovine.originCountry.toLowerCase().contains(state.selectedOriginCountry!.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) => bovine.originCountry.toLowerCase().contains(
+                  state.selectedOriginCountry!.toLowerCase(),
+                ),
+              )
+              .toList();
     }
 
     if (state.selectedAptitude != null) {
-      filtered = filtered.where((bovine) => bovine.aptitude == state.selectedAptitude).toList();
+      filtered =
+          filtered
+              .where((bovine) => bovine.aptitude == state.selectedAptitude)
+              .toList();
     }
 
     if (state.selectedBreedingSystem != null) {
-      filtered = filtered.where((bovine) => bovine.breedingSystem == state.selectedBreedingSystem).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) =>
+                    bovine.breedingSystem == state.selectedBreedingSystem,
+              )
+              .toList();
     }
 
     return filtered;
@@ -474,7 +506,9 @@ class LivestockSearchNotifier extends _$LivestockSearchNotifier {
 @riverpod
 List<BovineEntity> filteredBovines(Ref ref) {
   final bovines = ref.watch(bovinesNotifierProvider).bovines;
-  return ref.read(livestockFiltersNotifierProvider.notifier).applyFilters(bovines);
+  return ref
+      .read(livestockFiltersNotifierProvider.notifier)
+      .applyFilters(bovines);
 }
 
 /// Provider derivado para total de animais
@@ -493,8 +527,8 @@ bool isAnyLivestockOperationInProgress(Ref ref) {
   final searchState = ref.watch(livestockSearchNotifierProvider);
 
   return bovinesState.isAnyOperationInProgress ||
-         equinesState.isLoading ||
-         searchState.isSearching;
+      equinesState.isLoading ||
+      searchState.isSearching;
 }
 
 /// Provider para erros consolidados
@@ -558,16 +592,10 @@ class LivestockStatisticsNotifier extends _$LivestockStatisticsNotifier {
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isLoading: false, errorMessage: failure.message);
       },
       (stats) {
-        state = state.copyWith(
-          statistics: stats,
-          isLoading: false,
-        );
+        state = state.copyWith(statistics: stats, isLoading: false);
       },
     );
   }
@@ -624,16 +652,17 @@ class LivestockSyncNotifier extends _$LivestockSyncNotifier {
   }
 
   Future<bool> forceSyncNow({void Function(double)? onProgress}) async {
-    state = state.copyWith(isSyncing: true, errorMessage: null, syncProgress: 0.0);
+    state = state.copyWith(
+      isSyncing: true,
+      errorMessage: null,
+      syncProgress: 0.0,
+    );
 
     final result = await _repository.syncLivestockData();
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isSyncing: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isSyncing: false, errorMessage: failure.message);
         return false;
       },
       (_) {
@@ -674,10 +703,10 @@ bool isAnyLivestockOperationInProgressComplete(Ref ref) {
   final syncState = ref.watch(livestockSyncNotifierProvider);
 
   return bovinesState.isAnyOperationInProgress ||
-         equinesState.isLoading ||
-         searchState.isSearching ||
-         statsState.isLoading ||
-         syncState.isSyncing;
+      equinesState.isLoading ||
+      searchState.isSearching ||
+      statsState.isLoading ||
+      syncState.isSyncing;
 }
 
 /// Provider atualizado para erros consolidados (incluindo stats e sync)
@@ -686,7 +715,8 @@ String? consolidatedLivestockErrorComplete(Ref ref) {
   final bovinesError = ref.watch(bovinesNotifierProvider).errorMessage;
   final equinesError = ref.watch(equinesNotifierProvider).errorMessage;
   final searchError = ref.watch(livestockSearchNotifierProvider).errorMessage;
-  final statsError = ref.watch(livestockStatisticsNotifierProvider).errorMessage;
+  final statsError =
+      ref.watch(livestockStatisticsNotifierProvider).errorMessage;
   final syncError = ref.watch(livestockSyncNotifierProvider).errorMessage;
 
   final errors = <String>[];
@@ -728,7 +758,9 @@ class LivestockCoordinatorActions {
 
   /// Sincronização completa com callback de progresso
   Future<bool> performCompleteSync({void Function(double)? onProgress}) async {
-    final syncSuccess = await ref.read(livestockSyncNotifierProvider.notifier).forceSyncNow(onProgress: onProgress);
+    final syncSuccess = await ref
+        .read(livestockSyncNotifierProvider.notifier)
+        .forceSyncNow(onProgress: onProgress);
 
     if (syncSuccess) {
       await refreshAllData();

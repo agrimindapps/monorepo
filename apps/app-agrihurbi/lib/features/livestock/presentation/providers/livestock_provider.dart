@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/di/injection.dart';
@@ -22,7 +23,7 @@ final livestockProviderProvider = Provider<LivestockProvider>((ref) {
 });
 
 /// Provider principal para gerenciamento de estado do livestock
-/// 
+///
 /// Substitui os antigos controllers GetX por ChangeNotifier
 /// Implementa padrões clean architecture com Provider pattern
 /// Gerencia bovinos, equinos e operações unificadas
@@ -44,13 +45,13 @@ class LivestockProvider extends ChangeNotifier {
     required UpdateBovineUseCase updateBovine,
     required DeleteBovineUseCase deleteBovine,
     required search_use_case.SearchAnimalsUseCase searchAnimals,
-  })  : _repository = repository,
-        _getAllBovines = getAllBovines,
-        _getEquines = getEquines,
-        _createBovine = createBovine,
-        _updateBovine = updateBovine,
-        _deleteBovine = deleteBovine,
-        _searchAnimals = searchAnimals;
+  }) : _repository = repository,
+       _getAllBovines = getAllBovines,
+       _getEquines = getEquines,
+       _createBovine = createBovine,
+       _updateBovine = updateBovine,
+       _deleteBovine = deleteBovine,
+       _searchAnimals = searchAnimals;
 
   // === STATE MANAGEMENT ===
 
@@ -80,7 +81,7 @@ class LivestockProvider extends ChangeNotifier {
 
   /// Erro handling
   String? _errorMessage;
-  
+
   /// Estatísticas
   Map<String, dynamic>? _statistics;
 
@@ -114,31 +115,59 @@ class LivestockProvider extends ChangeNotifier {
     var filtered = _bovines.where((bovine) => bovine.isActive).toList();
 
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((bovine) =>
-        bovine.commonName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        bovine.breed.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        bovine.registrationId.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) =>
+                    bovine.commonName.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    bovine.breed.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    bovine.registrationId.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
     }
 
     if (_selectedBreed != null) {
-      filtered = filtered.where((bovine) => 
-        bovine.breed.toLowerCase().contains(_selectedBreed!.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) => bovine.breed.toLowerCase().contains(
+                  _selectedBreed!.toLowerCase(),
+                ),
+              )
+              .toList();
     }
 
     if (_selectedOriginCountry != null) {
-      filtered = filtered.where((bovine) => 
-        bovine.originCountry.toLowerCase().contains(_selectedOriginCountry!.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) => bovine.originCountry.toLowerCase().contains(
+                  _selectedOriginCountry!.toLowerCase(),
+                ),
+              )
+              .toList();
     }
 
     if (_selectedAptitude != null) {
-      filtered = filtered.where((bovine) => bovine.aptitude == _selectedAptitude).toList();
+      filtered =
+          filtered
+              .where((bovine) => bovine.aptitude == _selectedAptitude)
+              .toList();
     }
 
     if (_selectedBreedingSystem != null) {
-      filtered = filtered.where((bovine) => bovine.breedingSystem == _selectedBreedingSystem).toList();
+      filtered =
+          filtered
+              .where(
+                (bovine) => bovine.breedingSystem == _selectedBreedingSystem,
+              )
+              .toList();
     }
 
     return filtered;
@@ -149,10 +178,18 @@ class LivestockProvider extends ChangeNotifier {
     var filtered = _equines.where((equine) => equine.isActive).toList();
 
     if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((equine) =>
-        equine.commonName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        equine.registrationId.toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
+      filtered =
+          filtered
+              .where(
+                (equine) =>
+                    equine.commonName.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    equine.registrationId.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
     }
 
     return filtered;
@@ -172,7 +209,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getAllBovines();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -201,7 +238,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _createBovine(CreateBovineParams(bovine: bovine));
-    
+
     bool success = false;
     result.fold(
       (failure) {
@@ -227,7 +264,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _updateBovine(UpdateBovineParams(bovine: bovine));
-    
+
     bool success = false;
     result.fold(
       (failure) {
@@ -238,12 +275,12 @@ class LivestockProvider extends ChangeNotifier {
         final index = _bovines.indexWhere((b) => b.id == updatedBovine.id);
         if (index != -1) {
           _bovines[index] = updatedBovine;
-          
+
           // Atualiza o selecionado se for o mesmo
           if (_selectedBovine?.id == updatedBovine.id) {
             _selectedBovine = updatedBovine;
           }
-          
+
           success = true;
           debugPrint('Bovino atualizado com sucesso: ${updatedBovine.id}');
         }
@@ -262,7 +299,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _deleteBovine(DeleteBovineParams(bovineId: bovineId));
-    
+
     bool success = false;
     result.fold(
       (failure) {
@@ -274,12 +311,12 @@ class LivestockProvider extends ChangeNotifier {
         final index = _bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
           _bovines[index] = _bovines[index].copyWith(isActive: false);
-          
+
           // Limpa seleção se foi o selecionado
           if (_selectedBovine?.id == bovineId) {
             _selectedBovine = null;
           }
-          
+
           success = true;
           debugPrint('Bovino deletado com sucesso: $bovineId');
         }
@@ -300,7 +337,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getEquines(const GetEquinesParams());
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -372,7 +409,7 @@ class LivestockProvider extends ChangeNotifier {
 
     final params = search_use_case.SearchAnimalsParams(query: query);
     final result = await _searchAnimals(params);
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -396,7 +433,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _repository.getLivestockStatistics();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -419,7 +456,7 @@ class LivestockProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _repository.syncLivestockData();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
@@ -445,36 +482,32 @@ class LivestockProvider extends ChangeNotifier {
 
   /// Refresh completo de todos os dados
   Future<void> refreshAllData() async {
-    await Future.wait([
-      loadBovines(),
-      loadEquines(),
-      loadStatistics(),
-    ]);
+    await Future.wait([loadBovines(), loadEquines(), loadStatistics()]);
   }
 
   /// Obtém lista de raças únicas para filtros
   List<String> get uniqueBreeds {
     final breeds = <String>{};
-    
+
     for (final bovine in _bovines) {
       breeds.add(bovine.breed);
     }
-    
+
     return breeds.toList()..sort();
   }
 
   /// Obtém lista de países únicos para filtros
   List<String> get uniqueOriginCountries {
     final countries = <String>{};
-    
+
     for (final bovine in _bovines) {
       countries.add(bovine.originCountry);
     }
-    
+
     for (final equine in _equines) {
       countries.add(equine.originCountry);
     }
-    
+
     return countries.toList()..sort();
   }
 
@@ -486,7 +519,7 @@ class LivestockProvider extends ChangeNotifier {
 }
 
 /// Provider específico para operações de bovinos
-/// 
+///
 /// Separado do provider principal para otimização e especialização
 class BovinesProvider extends ChangeNotifier {
   final LivestockRepository _repository;
@@ -507,7 +540,7 @@ class BovinesProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _repository.getBovines();
-    
+
     result.fold(
       (failure) => _errorMessage = failure.message,
       (bovines) => _bovines = bovines,
@@ -519,7 +552,7 @@ class BovinesProvider extends ChangeNotifier {
 }
 
 /// Provider específico para operações de equinos
-/// 
+///
 /// Separado do provider principal para otimização e especialização
 class EquinesProvider extends ChangeNotifier {
   final LivestockRepository _repository;
@@ -540,7 +573,7 @@ class EquinesProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _repository.getEquines();
-    
+
     result.fold(
       (failure) => _errorMessage = failure.message,
       (equines) => _equines = equines,

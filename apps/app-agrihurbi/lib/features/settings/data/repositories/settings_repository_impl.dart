@@ -5,8 +5,7 @@ import 'package:app_agrihurbi/features/settings/data/datasources/settings_local_
 import 'package:app_agrihurbi/features/settings/data/models/settings_model.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/repositories/settings_repository.dart';
-import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
+import 'package:core/core.dart' show Either, Right, Left, LazySingleton;
 
 @LazySingleton(as: SettingsRepository)
 class SettingsRepositoryImpl implements SettingsRepository {
@@ -27,7 +26,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       if (settings != null) {
         return Right(settings);
       } else {
-        final defaultSettings = await _localDataSource.getDefaultSettings(_getCurrentUserId());
+        final defaultSettings = await _localDataSource.getDefaultSettings(
+          _getCurrentUserId(),
+        );
         await _localDataSource.saveSettings(defaultSettings);
         return Right(defaultSettings);
       }
@@ -39,7 +40,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<Either<Failure, SettingsEntity>> updateSettings(SettingsEntity settings) async {
+  Future<Either<Failure, SettingsEntity>> updateSettings(
+    SettingsEntity settings,
+  ) async {
     try {
       final settingsModel = SettingsModel.fromEntity(settings);
       await _localDataSource.saveSettings(settingsModel);
@@ -55,7 +58,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Either<Failure, SettingsEntity>> resetToDefaults() async {
     try {
       await _localDataSource.clearSettings();
-      final defaultSettings = await _localDataSource.getDefaultSettings(_getCurrentUserId());
+      final defaultSettings = await _localDataSource.getDefaultSettings(
+        _getCurrentUserId(),
+      );
       await _localDataSource.saveSettings(defaultSettings);
       return Right(defaultSettings);
     } on CacheException catch (e) {
@@ -68,7 +73,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<Either<Failure, SettingsEntity>> getDefaultSettings() async {
     try {
-      final defaultSettings = await _localDataSource.getDefaultSettings(_getCurrentUserId());
+      final defaultSettings = await _localDataSource.getDefaultSettings(
+        _getCurrentUserId(),
+      );
       return Right(defaultSettings);
     } catch (e) {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
@@ -90,8 +97,12 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<Either<Failure, AppTheme>> getCurrentTheme() async {
     try {
-      final themeStr = _localDataSource.getQuickPreference<String>('app_theme') ?? 'system';
-      final theme = AppTheme.values.firstWhere((t) => t.name == themeStr, orElse: () => AppTheme.system);
+      final themeStr =
+          _localDataSource.getQuickPreference<String>('app_theme') ?? 'system';
+      final theme = AppTheme.values.firstWhere(
+        (t) => t.name == themeStr,
+        orElse: () => AppTheme.system,
+      );
       return Right(theme);
     } catch (e) {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
@@ -99,18 +110,20 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateDisplaySettings(DisplaySettings display) async {
+  Future<Either<Failure, void>> updateDisplaySettings(
+    DisplaySettings display,
+  ) async {
     final settingsResult = await getSettings();
-    return settingsResult.fold(
-      (failure) => Left(failure),
-      (settings) async {
-        final updatedSettings = settings.copyWith(display: display, lastUpdated: DateTime.now());
-        return await updateSettings(updatedSettings).then((result) => result.fold(
-          (failure) => Left(failure),
-          (_) => const Right(null),
-        ));
-      },
-    );
+    return settingsResult.fold((failure) => Left(failure), (settings) async {
+      final updatedSettings = settings.copyWith(
+        display: display,
+        lastUpdated: DateTime.now(),
+      );
+      return await updateSettings(updatedSettings).then(
+        (result) =>
+            result.fold((failure) => Left(failure), (_) => const Right(null)),
+      );
+    });
   }
 
   @override
@@ -137,7 +150,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<Either<Failure, String>> getCurrentLanguage() async {
     try {
-      final language = _localDataSource.getQuickPreference<String>('app_language') ?? 'pt_BR';
+      final language =
+          _localDataSource.getQuickPreference<String>('app_language') ??
+          'pt_BR';
       return Right(language);
     } catch (e) {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
@@ -145,32 +160,44 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<Either<Failure, List<SupportedLanguage>>> getAvailableLanguages() async {
+  Future<Either<Failure, List<SupportedLanguage>>>
+  getAvailableLanguages() async {
     const languages = [
-      SupportedLanguage(code: 'pt_BR', name: 'Portuguese (Brazil)', nativeName: 'Português (Brasil)'),
-      SupportedLanguage(code: 'en_US', name: 'English (US)', nativeName: 'English (US)'),
+      SupportedLanguage(
+        code: 'pt_BR',
+        name: 'Portuguese (Brazil)',
+        nativeName: 'Português (Brasil)',
+      ),
+      SupportedLanguage(
+        code: 'en_US',
+        name: 'English (US)',
+        nativeName: 'English (US)',
+      ),
       SupportedLanguage(code: 'es_ES', name: 'Spanish', nativeName: 'Español'),
     ];
     return const Right(languages);
   }
 
   @override
-  Future<Either<Failure, void>> updateNotificationSettings(NotificationSettings notifications) async {
+  Future<Either<Failure, void>> updateNotificationSettings(
+    NotificationSettings notifications,
+  ) async {
     final settingsResult = await getSettings();
-    return settingsResult.fold(
-      (failure) => Left(failure),
-      (settings) async {
-        final updatedSettings = settings.copyWith(notifications: notifications, lastUpdated: DateTime.now());
-        return await updateSettings(updatedSettings).then((result) => result.fold(
-          (failure) => Left(failure),
-          (_) => const Right(null),
-        ));
-      },
-    );
+    return settingsResult.fold((failure) => Left(failure), (settings) async {
+      final updatedSettings = settings.copyWith(
+        notifications: notifications,
+        lastUpdated: DateTime.now(),
+      );
+      return await updateSettings(updatedSettings).then(
+        (result) =>
+            result.fold((failure) => Left(failure), (_) => const Right(null)),
+      );
+    });
   }
 
   @override
-  Future<Either<Failure, NotificationSettings>> getNotificationSettings() async {
+  Future<Either<Failure, NotificationSettings>>
+  getNotificationSettings() async {
     final settingsResult = await getSettings();
     return settingsResult.fold(
       (failure) => Left(failure),
@@ -185,18 +212,20 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateDataSettings(DataSettings dataSettings) async {
+  Future<Either<Failure, void>> updateDataSettings(
+    DataSettings dataSettings,
+  ) async {
     final settingsResult = await getSettings();
-    return settingsResult.fold(
-      (failure) => Left(failure),
-      (settings) async {
-        final updatedSettings = settings.copyWith(dataSettings: dataSettings, lastUpdated: DateTime.now());
-        return await updateSettings(updatedSettings).then((result) => result.fold(
-          (failure) => Left(failure),
-          (_) => const Right(null),
-        ));
-      },
-    );
+    return settingsResult.fold((failure) => Left(failure), (settings) async {
+      final updatedSettings = settings.copyWith(
+        dataSettings: dataSettings,
+        lastUpdated: DateTime.now(),
+      );
+      return await updateSettings(updatedSettings).then(
+        (result) =>
+            result.fold((failure) => Left(failure), (_) => const Right(null)),
+      );
+    });
   }
 
   @override
@@ -217,8 +246,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<Either<Failure, DateTime?>> getLastSyncTime() async {
     try {
-      final timestampStr = _localDataSource.getQuickPreference<String>('last_sync_time');
-      final lastSync = timestampStr != null ? DateTime.tryParse(timestampStr) : null;
+      final timestampStr = _localDataSource.getQuickPreference<String>(
+        'last_sync_time',
+      );
+      final lastSync =
+          timestampStr != null ? DateTime.tryParse(timestampStr) : null;
       return Right(lastSync);
     } catch (e) {
       return Left(GeneralFailure(message: 'Unexpected error: $e'));
@@ -227,14 +259,19 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   // Simplified implementations for remaining methods
   @override
-  Future<Either<Failure, void>> updatePrivacySettings(PrivacySettings privacy) async {
+  Future<Either<Failure, void>> updatePrivacySettings(
+    PrivacySettings privacy,
+  ) async {
     return const Right(null);
   }
 
   @override
   Future<Either<Failure, PrivacySettings>> getPrivacySettings() async {
     final settingsResult = await getSettings();
-    return settingsResult.fold((failure) => Left(failure), (settings) => Right(settings.privacy));
+    return settingsResult.fold(
+      (failure) => Left(failure),
+      (settings) => Right(settings.privacy),
+    );
   }
 
   @override
@@ -243,19 +280,26 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateSecuritySettings(SecuritySettings security) async {
+  Future<Either<Failure, void>> updateSecuritySettings(
+    SecuritySettings security,
+  ) async {
     return const Right(null);
   }
 
   @override
   Future<Either<Failure, SecuritySettings>> getSecuritySettings() async {
     final settingsResult = await getSettings();
-    return settingsResult.fold((failure) => Left(failure), (settings) => Right(settings.security));
+    return settingsResult.fold(
+      (failure) => Left(failure),
+      (settings) => Right(settings.security),
+    );
   }
 
   @override
   Future<Either<Failure, BiometricInfo>> getBiometricInfo() async {
-    return const Right(BiometricInfo(isAvailable: false, isEnrolled: false, availableTypes: []));
+    return const Right(
+      BiometricInfo(isAvailable: false, isEnrolled: false, availableTypes: []),
+    );
   }
 
   @override
@@ -269,19 +313,28 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateBackupSettings(BackupSettings backup) async {
+  Future<Either<Failure, void>> updateBackupSettings(
+    BackupSettings backup,
+  ) async {
     return const Right(null);
   }
 
   @override
   Future<Either<Failure, BackupSettings>> getBackupSettings() async {
     final settingsResult = await getSettings();
-    return settingsResult.fold((failure) => Left(failure), (settings) => Right(settings.backup));
+    return settingsResult.fold(
+      (failure) => Left(failure),
+      (settings) => Right(settings.backup),
+    );
   }
 
   @override
-  Future<Either<Failure, BackupInfo>> createBackup({bool includeImages = false}) async {
-    return const Left(GeneralFailure(message: 'Backup creation not implemented'));
+  Future<Either<Failure, BackupInfo>> createBackup({
+    bool includeImages = false,
+  }) async {
+    return const Left(
+      GeneralFailure(message: 'Backup creation not implemented'),
+    );
   }
 
   @override
@@ -323,11 +376,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, CacheInfo>> getCacheInfo() async {
-    return Right(CacheInfo(
-      cacheSizes: {CacheType.all: 0},
-      totalSizeBytes: 0,
-      lastCleared: DateTime.now(),
-    ));
+    return Right(
+      CacheInfo(
+        cacheSizes: {CacheType.all: 0},
+        totalSizeBytes: 0,
+        lastCleared: DateTime.now(),
+      ),
+    );
   }
 
   @override
@@ -342,41 +397,68 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, AppVersionInfo>> getAppVersion() async {
-    return Right(AppVersionInfo(
-      version: '1.0.0',
-      buildNumber: '1',
-      buildDate: DateTime.now(),
-      gitCommit: 'unknown',
-      isDebug: true,
-    ));
+    return Right(
+      AppVersionInfo(
+        version: '1.0.0',
+        buildNumber: '1',
+        buildDate: DateTime.now(),
+        gitCommit: 'unknown',
+        isDebug: true,
+      ),
+    );
   }
 
   @override
   Future<Either<Failure, DeviceInfo>> getDeviceInfo() async {
-    return const Right(DeviceInfo(
-      platform: 'Flutter',
-      version: 'Unknown',
-      model: 'Unknown',
-      brand: 'Unknown',
-      totalMemory: 0,
-      availableMemory: 0,
-      totalStorage: 0,
-      availableStorage: 0,
-    ));
+    return const Right(
+      DeviceInfo(
+        platform: 'Flutter',
+        version: 'Unknown',
+        model: 'Unknown',
+        brand: 'Unknown',
+        totalMemory: 0,
+        availableMemory: 0,
+        totalStorage: 0,
+        availableStorage: 0,
+      ),
+    );
   }
 
   @override
   Future<Either<Failure, DiagnosticInfo>> getDiagnosticInfo() async {
     final appVersion = await getAppVersion();
     final deviceInfo = await getDeviceInfo();
-    
-    return Right(DiagnosticInfo(
-      appVersion: appVersion.fold((_) => AppVersionInfo(version: '1.0.0', buildNumber: '1', buildDate: DateTime.now(), gitCommit: 'unknown', isDebug: true), (info) => info),
-      deviceInfo: deviceInfo.fold((_) => const DeviceInfo(platform: 'Flutter', version: 'Unknown', model: 'Unknown', brand: 'Unknown', totalMemory: 0, availableMemory: 0, totalStorage: 0, availableStorage: 0), (info) => info),
-      systemMetrics: {},
-      errorLogs: [],
-      generatedAt: DateTime.now(),
-    ));
+
+    return Right(
+      DiagnosticInfo(
+        appVersion: appVersion.fold(
+          (_) => AppVersionInfo(
+            version: '1.0.0',
+            buildNumber: '1',
+            buildDate: DateTime.now(),
+            gitCommit: 'unknown',
+            isDebug: true,
+          ),
+          (info) => info,
+        ),
+        deviceInfo: deviceInfo.fold(
+          (_) => const DeviceInfo(
+            platform: 'Flutter',
+            version: 'Unknown',
+            model: 'Unknown',
+            brand: 'Unknown',
+            totalMemory: 0,
+            availableMemory: 0,
+            totalStorage: 0,
+            availableStorage: 0,
+          ),
+          (info) => info,
+        ),
+        systemMetrics: {},
+        errorLogs: [],
+        generatedAt: DateTime.now(),
+      ),
+    );
   }
 
   @override
@@ -389,7 +471,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<Either<Failure, SettingsValidationResult>> validateSettings() async {
-    return const Right(SettingsValidationResult(isValid: true, errors: [], warnings: []));
+    return const Right(
+      SettingsValidationResult(isValid: true, errors: [], warnings: []),
+    );
   }
 
   @override

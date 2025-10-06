@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive, HiveX, Box;
 
 // Generated Adapters
 import '../../features/animals/data/models/animal_model.dart';
@@ -11,17 +11,17 @@ import '../../features/weight/data/models/weight_model.dart';
 class HiveService {
   static HiveService? _instance;
   static HiveService get instance => _instance ??= HiveService._();
-  
+
   HiveService._();
 
   /// Inicializa o Hive e registra todos os adapters
   Future<void> init() async {
     // Inicializar Hive com Flutter
     await Hive.initFlutter();
-    
+
     // Registrar adapters gerados
     _registerGeneratedAdapters();
-    
+
     // Abrir boxes essenciais
     await _openEssentialBoxes();
   }
@@ -33,7 +33,7 @@ class HiveService {
       Hive.registerAdapter(AnimalModelAdapter());
     }
 
-    // Appointments  
+    // Appointments
     if (!Hive.isAdapterRegistered(12)) {
       Hive.registerAdapter(AppointmentModelAdapter());
     }
@@ -65,11 +65,11 @@ class HiveService {
       await Hive.openBox<MedicationModel>(HiveBoxNames.medications);
       await Hive.openBox<VaccineModel>(HiveBoxNames.vaccines);
       await Hive.openBox<WeightModel>(HiveBoxNames.weights);
-      
+
       // Boxes para configurações e cache
       await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.settings);
       await Hive.openBox<Map<dynamic, dynamic>>(HiveBoxNames.cache);
-      
+
       // Logging box (JSON strings for now)
       await Hive.openBox<String>('logs_json');
     } catch (e) {
@@ -178,17 +178,17 @@ class HiveBoxNames {
   static const String weights = 'weights';
   static const String reminders = 'reminders';
   static const String expenses = 'expenses';
-  
+
   // Boxes de sistema
   static const String settings = 'settings';
   static const String cache = 'cache';
   static const String userPreferences = 'user_preferences';
   static const String syncQueue = 'sync_queue';
-  
+
   // Boxes de autenticação e assinatura
   static const String auth = 'auth';
   static const String subscription = 'subscription';
-  
+
   /// Lista de todas as boxes para operações em lote
   static const List<String> allBoxes = [
     animals,
@@ -216,12 +216,12 @@ class HiveKeys {
   static const String notifications = 'notifications';
   static const String autoSync = 'auto_sync';
   static const String lastSyncTimestamp = 'last_sync_timestamp';
-  
+
   // Auth
   static const String currentUser = 'current_user';
   static const String authToken = 'auth_token';
   static const String rememberLogin = 'remember_login';
-  
+
   // Cache
   static const String lastAppVersion = 'last_app_version';
   static const String cacheVersion = 'cache_version';

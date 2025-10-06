@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
 // === LAZY LOADING STATE ===
 
@@ -48,7 +49,7 @@ class LazyLoadingState {
 // === LAZY LOADING NOTIFIER ===
 
 /// StateNotifier para gerenciamento de lazy loading
-/// 
+///
 /// Implementa estratégias de carregamento preguiçoso para:
 /// - Providers
 /// - Datasets grandes
@@ -80,42 +81,48 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
 
     // Inicia o carregamento
     final completer = Completer<T>();
-    final newLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+    final newLoadingFutures = Map<String, Future<dynamic>>.from(
+      state.loadingFutures,
+    );
     newLoadingFutures[key] = completer.future;
     state = state.copyWith(loadingFutures: newLoadingFutures);
 
     try {
       final factory = state.lazyCache[key] as T Function();
       final instance = factory();
-      
+
       final newCache = Map<String, dynamic>.from(state.lazyCache);
       newCache[key] = instance;
-      
+
       final newLoadedKeys = Set<String>.from(state.loadedKeys);
       newLoadedKeys.add(key);
-      
-      final finalLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+
+      final finalLoadingFutures = Map<String, Future<dynamic>>.from(
+        state.loadingFutures,
+      );
       // Ignore unawaited_futures para remove() que retorna Future?
       // ignore: unawaited_futures
       finalLoadingFutures.remove(key);
-      
+
       state = state.copyWith(
         lazyCache: newCache,
         loadedKeys: newLoadedKeys,
         loadingFutures: finalLoadingFutures,
       );
-      
+
       // Evitar warning unawaited_futures - completer é síncrono
       // ignore: unawaited_futures
       completer.complete(instance);
       return instance;
     } catch (error) {
-      final errorLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+      final errorLoadingFutures = Map<String, Future<dynamic>>.from(
+        state.loadingFutures,
+      );
       // Ignore unawaited_futures para remove() que retorna Future?
       // ignore: unawaited_futures
       errorLoadingFutures.remove(key);
       state = state.copyWith(loadingFutures: errorLoadingFutures);
-      
+
       // Evitar warning unawaited_futures - completer é síncrono
       // ignore: unawaited_futures
       completer.completeError(error);
@@ -144,13 +151,15 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
   void unloadProvider(String key) {
     final newCache = Map<String, dynamic>.from(state.lazyCache);
     newCache.remove(key);
-    
+
     final newLoadedKeys = Set<String>.from(state.loadedKeys);
     newLoadedKeys.remove(key);
-    
-    final newLoadingFutures = Map<String, Future<dynamic>>.from(state.loadingFutures);
+
+    final newLoadingFutures = Map<String, Future<dynamic>>.from(
+      state.loadingFutures,
+    );
     newLoadingFutures.remove(key);
-    
+
     state = state.copyWith(
       lazyCache: newCache,
       loadedKeys: newLoadedKeys,
@@ -170,9 +179,10 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
 // === LAZY LOADING PROVIDERS ===
 
 /// Provider para lazy loading
-final lazyLoadingProvider = StateNotifierProvider<LazyLoadingNotifier, LazyLoadingState>((ref) {
-  return LazyLoadingNotifier();
-});
+final lazyLoadingProvider =
+    StateNotifierProvider<LazyLoadingNotifier, LazyLoadingState>((ref) {
+      return LazyLoadingNotifier();
+    });
 
 /// Provider derivado para estatísticas do cache
 final lazyLoadingStatsProvider = Provider<Map<String, dynamic>>((ref) {
@@ -227,7 +237,8 @@ class LazyProvider<T> {
   }
 
   /// Obtém a instância (carrega se necessário)
-  Future<T> get instance => _ref.read(lazyLoadingProvider.notifier).getProvider<T>(key);
+  Future<T> get instance =>
+      _ref.read(lazyLoadingProvider.notifier).getProvider<T>(key);
 
   /// Verifica se está carregado
   bool get isLoaded => _ref.read(lazyLoadingProvider.notifier).isLoaded(key);

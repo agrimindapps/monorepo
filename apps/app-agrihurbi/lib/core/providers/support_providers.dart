@@ -1,11 +1,22 @@
-import 'package:core/core.dart' hide NotificationSettings, SubscriptionEntity, SubscriptionTier, Provider, StateNotifier, Consumer, ProviderContainer, PrivacySettings;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    hide
+        NotificationSettings,
+        SubscriptionEntity,
+        SubscriptionTier,
+        Provider,
+        StateNotifier,
+        Consumer,
+        ProviderContainer,
+        PrivacySettings;
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 
 import '../../core/di/injection_container.dart' as di;
 import '../../features/markets/domain/entities/market_entity.dart';
 import '../../features/markets/domain/entities/market_filter_entity.dart';
 import '../../features/markets/domain/repositories/market_repository.dart';
-import '../../features/markets/domain/usecases/get_market_summary.dart' as market_summary;
+import '../../features/markets/domain/usecases/get_market_summary.dart'
+    as market_summary;
 import '../../features/markets/domain/usecases/get_markets.dart';
 import '../../features/news/domain/entities/commodity_price_entity.dart';
 import '../../features/news/domain/entities/news_article_entity.dart';
@@ -44,14 +55,16 @@ class SettingsState {
   String get language => settings?.language ?? 'pt_BR';
 
   // Notification settings
-  NotificationSettings get notifications => settings?.notifications ?? const NotificationSettings();
+  NotificationSettings get notifications =>
+      settings?.notifications ?? const NotificationSettings();
   bool get pushNotificationsEnabled => notifications.pushNotifications;
   bool get newsNotificationsEnabled => notifications.newsNotifications;
   bool get marketAlertsEnabled => notifications.marketAlerts;
   bool get weatherAlertsEnabled => notifications.weatherAlerts;
 
   // Data settings
-  DataSettings get dataSettings => settings?.dataSettings ?? const DataSettings();
+  DataSettings get dataSettings =>
+      settings?.dataSettings ?? const DataSettings();
   bool get autoSyncEnabled => dataSettings.autoSync;
   bool get wifiOnlySyncEnabled => dataSettings.wifiOnlySync;
   bool get cacheImagesEnabled => dataSettings.cacheImages;
@@ -73,7 +86,8 @@ class SettingsState {
   String get unitSystem => display.unitSystem;
 
   // Security settings
-  SecuritySettings get security => settings?.security ?? const SecuritySettings();
+  SecuritySettings get security =>
+      settings?.security ?? const SecuritySettings();
   bool get biometricAuthEnabled => security.biometricAuth;
   bool get requireAuthOnOpenEnabled => security.requireAuthOnOpen;
   int get autoLockMinutes => security.autoLockMinutes;
@@ -329,9 +343,7 @@ class SubscriptionState {
 
 /// StateNotifier para gerenciamento de configurações
 class SettingsStateNotifier extends StateNotifier<SettingsState> {
-  SettingsStateNotifier(
-    this._manageSettings,
-  ) : super(const SettingsState());
+  SettingsStateNotifier(this._manageSettings) : super(const SettingsState());
 
   final ManageSettings _manageSettings;
 
@@ -342,14 +354,13 @@ class SettingsStateNotifier extends StateNotifier<SettingsState> {
     final result = await _manageSettings.getSettings();
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingSettings: false,
-        errorMessage: 'Erro ao carregar configurações: ${failure.message}',
-      ),
-      (settings) => state = state.copyWith(
-        isLoadingSettings: false,
-        settings: settings,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingSettings: false,
+            errorMessage: 'Erro ao carregar configurações: ${failure.message}',
+          ),
+      (settings) =>
+          state = state.copyWith(isLoadingSettings: false, settings: settings),
     );
   }
 
@@ -428,7 +439,9 @@ class SettingsStateNotifier extends StateNotifier<SettingsState> {
   }
 
   /// Atualiza configurações de notificação
-  Future<bool> updateNotificationSettings(NotificationSettings newNotifications) async {
+  Future<bool> updateNotificationSettings(
+    NotificationSettings newNotifications,
+  ) async {
     if (state.settings == null) return false;
 
     final updatedSettings = state.settings!.copyWith(
@@ -480,16 +493,18 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingMarkets: false,
-        errorMessage: failure.message,
-      ),
-      (markets) => state = state.copyWith(
-        isLoadingMarkets: false,
-        markets: markets,
-        currentFilter: filter ?? state.currentFilter,
-        lastUpdate: DateTime.now(),
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingMarkets: false,
+            errorMessage: failure.message,
+          ),
+      (markets) =>
+          state = state.copyWith(
+            isLoadingMarkets: false,
+            markets: markets,
+            currentFilter: filter ?? state.currentFilter,
+            lastUpdate: DateTime.now(),
+          ),
     );
   }
 
@@ -500,31 +515,31 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
     final result = await _getMarketSummary();
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingSummary: false,
-        errorMessage: failure.message,
-      ),
-      (summary) => state = state.copyWith(
-        isLoadingSummary: false,
-        marketSummary: summary,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingSummary: false,
+            errorMessage: failure.message,
+          ),
+      (summary) =>
+          state = state.copyWith(
+            isLoadingSummary: false,
+            marketSummary: summary,
+          ),
     );
   }
 
   /// Busca mercados
   Future<void> searchMarkets(String query) async {
-    state = state.copyWith(
-      isLoadingSearch: true,
-      currentSearchQuery: query,
-    );
+    state = state.copyWith(isLoadingSearch: true, currentSearchQuery: query);
 
     final result = await _repository.searchMarkets(query: query);
 
     result.fold(
-      (Failure failure) => state = state.copyWith(
-        isLoadingSearch: false,
-        errorMessage: failure.message,
-      ),
+      (Failure failure) =>
+          state = state.copyWith(
+            isLoadingSearch: false,
+            errorMessage: failure.message,
+          ),
       (List<MarketEntity> results) {
         final updatedHistory = List<String>.from(state.searchHistory);
         if (!updatedHistory.contains(query)) {
@@ -551,10 +566,8 @@ class MarketStateNotifier extends StateNotifier<MarketState> {
 
 /// StateNotifier para gerenciamento de notícias
 class NewsStateNotifier extends StateNotifier<NewsState> {
-  NewsStateNotifier(
-    this._getNews,
-    this._getCommodityPrices,
-  ) : super(const NewsState());
+  NewsStateNotifier(this._getNews, this._getCommodityPrices)
+    : super(const NewsState());
 
   final GetNews _getNews;
   final GetCommodityPrices _getCommodityPrices;
@@ -577,16 +590,18 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
     );
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingNews: false,
-        errorMessage: failure.message,
-      ),
-      (articles) => state = state.copyWith(
-        isLoadingNews: false,
-        articles: articles,
-        currentCategory: category,
-        lastUpdate: DateTime.now(),
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingNews: false,
+            errorMessage: failure.message,
+          ),
+      (articles) =>
+          state = state.copyWith(
+            isLoadingNews: false,
+            articles: articles,
+            currentCategory: category,
+            lastUpdate: DateTime.now(),
+          ),
     );
   }
 
@@ -597,23 +612,22 @@ class NewsStateNotifier extends StateNotifier<NewsState> {
     final result = await _getCommodityPrices();
 
     result.fold(
-      (failure) => state = state.copyWith(
-        isLoadingCommodities: false,
-        errorMessage: failure.message,
-      ),
-      (prices) => state = state.copyWith(
-        isLoadingCommodities: false,
-        commodityPrices: prices,
-      ),
+      (failure) =>
+          state = state.copyWith(
+            isLoadingCommodities: false,
+            errorMessage: failure.message,
+          ),
+      (prices) =>
+          state = state.copyWith(
+            isLoadingCommodities: false,
+            commodityPrices: prices,
+          ),
     );
   }
 
   /// Busca artigos
   Future<void> searchArticles(String query) async {
-    state = state.copyWith(
-      isSearching: true,
-      currentSearchQuery: query,
-    );
+    state = state.copyWith(isSearching: true, currentSearchQuery: query);
 
     // TODO: Implementar busca quando o use case estiver disponível
     final updatedHistory = List<String>.from(state.searchHistory);
@@ -735,14 +749,15 @@ class SubscriptionStateNotifier extends StateNotifier<SubscriptionState> {
 // === PROVIDER DEFINITIONS ===
 
 /// Provider para gerenciamento de configurações
-final settingsProvider = StateNotifierProvider<SettingsStateNotifier, SettingsState>((ref) {
-  return SettingsStateNotifier(
-    di.getIt<ManageSettings>(),
-  );
-});
+final settingsProvider =
+    StateNotifierProvider<SettingsStateNotifier, SettingsState>((ref) {
+      return SettingsStateNotifier(di.getIt<ManageSettings>());
+    });
 
 /// Provider para gerenciamento de mercados
-final marketProvider = StateNotifierProvider<MarketStateNotifier, MarketState>((ref) {
+final marketProvider = StateNotifierProvider<MarketStateNotifier, MarketState>((
+  ref,
+) {
   return MarketStateNotifier(
     di.getIt<GetMarkets>(),
     di.getIt<market_summary.GetMarketSummary>(),
@@ -752,10 +767,7 @@ final marketProvider = StateNotifierProvider<MarketStateNotifier, MarketState>((
 
 /// Provider para gerenciamento de notícias
 final newsProvider = StateNotifierProvider<NewsStateNotifier, NewsState>((ref) {
-  return NewsStateNotifier(
-    di.getIt<GetNews>(),
-    di.getIt<GetCommodityPrices>(),
-  );
+  return NewsStateNotifier(di.getIt<GetNews>(), di.getIt<GetCommodityPrices>());
 });
 
 // TODO: Subscription feature not yet implemented

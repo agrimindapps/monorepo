@@ -5,7 +5,8 @@ import 'package:app_agrihurbi/features/news/domain/repositories/news_repository.
 import 'package:app_agrihurbi/features/news/domain/usecases/get_commodity_prices.dart';
 import 'package:app_agrihurbi/features/news/domain/usecases/get_news.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import 'package:core/core.dart' show injectable;
 
 /// Provider Riverpod para NewsProvider

@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive, HiveX, Box;
 
 // Generated Adapters - Using existing gasometer models
 import '../../core/data/models/category_model.dart';
@@ -11,7 +11,6 @@ import '../../features/vehicles/data/models/vehicle_model.dart';
 
 /// Serviço centralizado para inicialização e gerenciamento do Hive
 class HiveService {
-
   HiveService._();
   static HiveService? _instance;
   static HiveService get instance => _instance ??= HiveService._();

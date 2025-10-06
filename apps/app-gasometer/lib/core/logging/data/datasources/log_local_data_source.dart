@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive, Box;
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../entities/log_entry.dart';
@@ -63,7 +63,8 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<List<LogEntry>> getAllLogs() async {
     try {
       final box = await _logBox;
-      return box.values.toList()..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      return box.values.toList()
+        ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
       throw CacheException('Failed to get logs: $e');
     }
@@ -73,9 +74,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<List<LogEntry>> getLogsByCategory(String category) async {
     try {
       final box = await _logBox;
-      return box.values
-          .where((log) => log.category == category)
-          .toList()
+      return box.values.where((log) => log.category == category).toList()
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
       throw CacheException('Failed to get logs by category: $e');
@@ -86,9 +85,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<List<LogEntry>> getLogsByLevel(String level) async {
     try {
       final box = await _logBox;
-      return box.values
-          .where((log) => log.level == level)
-          .toList()
+      return box.values.where((log) => log.level == level).toList()
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
       throw CacheException('Failed to get logs by level: $e');
@@ -99,9 +96,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<List<LogEntry>> getLogsByOperation(String operation) async {
     try {
       final box = await _logBox;
-      return box.values
-          .where((log) => log.operation == operation)
-          .toList()
+      return box.values.where((log) => log.operation == operation).toList()
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
       throw CacheException('Failed to get logs by operation: $e');
@@ -116,9 +111,11 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
     try {
       final box = await _logBox;
       return box.values
-          .where((log) => 
-              log.timestamp.isAfter(startDate) && 
-              log.timestamp.isBefore(endDate))
+          .where(
+            (log) =>
+                log.timestamp.isAfter(startDate) &&
+                log.timestamp.isBefore(endDate),
+          )
           .toList()
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
@@ -130,10 +127,9 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
   Future<List<LogEntry>> getUnsyncedLogs() async {
     try {
       final box = await _logBox;
-      return box.values
-          .where((log) => !log.synced)
-          .toList()
-        ..sort((a, b) => a.timestamp.compareTo(b.timestamp)); // Mais antigos primeiro
+      return box.values.where((log) => !log.synced).toList()..sort(
+        (a, b) => a.timestamp.compareTo(b.timestamp),
+      ); // Mais antigos primeiro
     } catch (e) {
       throw CacheException('Failed to get unsynced logs: $e');
     }
@@ -180,13 +176,13 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
     try {
       final box = await _logBox;
       final logsToDelete = <String>[];
-      
+
       for (final log in box.values) {
         if (log.timestamp.isBefore(cutoffDate)) {
           logsToDelete.add(log.id);
         }
       }
-      
+
       for (final logId in logsToDelete) {
         await box.delete(logId);
       }
@@ -200,13 +196,15 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
     try {
       final box = await _logBox;
       final searchQuery = query.toLowerCase();
-      
+
       return box.values
-          .where((log) => 
-              log.message.toLowerCase().contains(searchQuery) ||
-              log.category.toLowerCase().contains(searchQuery) ||
-              log.operation.toLowerCase().contains(searchQuery) ||
-              (log.error?.toLowerCase().contains(searchQuery) ?? false))
+          .where(
+            (log) =>
+                log.message.toLowerCase().contains(searchQuery) ||
+                log.category.toLowerCase().contains(searchQuery) ||
+                log.operation.toLowerCase().contains(searchQuery) ||
+                (log.error?.toLowerCase().contains(searchQuery) ?? false),
+          )
           .toList()
         ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     } catch (e) {
@@ -219,7 +217,7 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
     try {
       final box = await _logBox;
       final logs = box.values.toList();
-      
+
       if (logs.isEmpty) {
         return {
           'total': 0,
@@ -245,25 +243,26 @@ class LogLocalDataSourceImpl implements LogLocalDataSource {
       for (final log in logs) {
         // Count by category
         byCategory[log.category] = (byCategory[log.category] ?? 0) + 1;
-        
+
         // Count by level
         byLevel[log.level] = (byLevel[log.level] ?? 0) + 1;
-        
+
         // Count by operation
         byOperation[log.operation] = (byOperation[log.operation] ?? 0) + 1;
-        
+
         // Count errors
         if (log.error != null) {
           errorCount++;
         }
-        
+
         // Count unsynced
         if (!log.synced) {
           unsyncedCount++;
         }
-        
+
         // Track oldest/newest
-        if (oldestTimestamp == null || log.timestamp.isBefore(oldestTimestamp)) {
+        if (oldestTimestamp == null ||
+            log.timestamp.isBefore(oldestTimestamp)) {
           oldestTimestamp = log.timestamp;
         }
         if (newestTimestamp == null || log.timestamp.isAfter(newestTimestamp)) {

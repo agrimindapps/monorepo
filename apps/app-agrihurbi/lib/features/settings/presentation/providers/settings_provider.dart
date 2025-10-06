@@ -2,7 +2,8 @@ import 'package:app_agrihurbi/core/di/injection.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
 import 'package:app_agrihurbi/features/settings/domain/usecases/manage_settings.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:core/core.dart'
+    show StateNotifier, StateNotifierProvider, WidgetRef, Provider;
 import 'package:core/core.dart' show injectable;
 
 /// Provider Riverpod para SettingsProvider

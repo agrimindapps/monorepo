@@ -1,4 +1,4 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:core/core.dart' show Hive, Box;
 
 import '../models/medication_model.dart';
 
@@ -21,7 +21,9 @@ abstract class MedicationLocalDataSource {
     DateTime startDate,
     DateTime endDate,
   );
-  Future<List<MedicationModel>> checkMedicationConflicts(MedicationModel medication);
+  Future<List<MedicationModel>> checkMedicationConflicts(
+    MedicationModel medication,
+  );
   Future<int> getActiveMedicationsCount(String animalId);
   Future<void> clearAllMedications();
   Stream<List<MedicationModel>> watchMedications();
@@ -47,11 +49,15 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   }
 
   @override
-  Future<List<MedicationModel>> getMedicationsByAnimalId(String animalId) async {
+  Future<List<MedicationModel>> getMedicationsByAnimalId(
+    String animalId,
+  ) async {
     final box = await medicationBox;
     return box.values
-        .where((medication) => 
-            medication.animalId == animalId && !medication.isDeleted)
+        .where(
+          (medication) =>
+              medication.animalId == animalId && !medication.isDeleted,
+        )
         .toList();
   }
 
@@ -59,26 +65,32 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<List<MedicationModel>> getActiveMedications() async {
     final box = await medicationBox;
     final now = DateTime.now();
-    
+
     return box.values
-        .where((medication) => 
-            !medication.isDeleted &&
-            now.isAfter(medication.startDate) &&
-            now.isBefore(medication.endDate))
+        .where(
+          (medication) =>
+              !medication.isDeleted &&
+              now.isAfter(medication.startDate) &&
+              now.isBefore(medication.endDate),
+        )
         .toList();
   }
 
   @override
-  Future<List<MedicationModel>> getActiveMedicationsByAnimalId(String animalId) async {
+  Future<List<MedicationModel>> getActiveMedicationsByAnimalId(
+    String animalId,
+  ) async {
     final box = await medicationBox;
     final now = DateTime.now();
-    
+
     return box.values
-        .where((medication) => 
-            medication.animalId == animalId &&
-            !medication.isDeleted &&
-            now.isAfter(medication.startDate) &&
-            now.isBefore(medication.endDate))
+        .where(
+          (medication) =>
+              medication.animalId == animalId &&
+              !medication.isDeleted &&
+              now.isAfter(medication.startDate) &&
+              now.isBefore(medication.endDate),
+        )
         .toList();
   }
 
@@ -87,12 +99,14 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     final box = await medicationBox;
     final now = DateTime.now();
     final threeDaysFromNow = now.add(const Duration(days: 3));
-    
+
     return box.values
-        .where((medication) => 
-            !medication.isDeleted &&
-            medication.endDate.isAfter(now) &&
-            medication.endDate.isBefore(threeDaysFromNow))
+        .where(
+          (medication) =>
+              !medication.isDeleted &&
+              medication.endDate.isAfter(now) &&
+              medication.endDate.isBefore(threeDaysFromNow),
+        )
         .toList();
   }
 
@@ -100,7 +114,7 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<MedicationModel?> getMedicationById(String id) async {
     final box = await medicationBox;
     final medication = box.get(id);
-    
+
     if (medication != null && !medication.isDeleted) {
       return medication;
     }
@@ -117,11 +131,11 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<void> cacheMedications(List<MedicationModel> medications) async {
     final box = await medicationBox;
     final medicationMap = <String, MedicationModel>{};
-    
+
     for (final medication in medications) {
       medicationMap[medication.id] = medication;
     }
-    
+
     await box.putAll(medicationMap);
   }
 
@@ -135,7 +149,7 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<void> deleteMedication(String id) async {
     final box = await medicationBox;
     final medication = box.get(id);
-    
+
     if (medication != null) {
       final updatedMedication = medication.copyWith(
         isDeleted: true,
@@ -155,7 +169,7 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<void> discontinueMedication(String id, String reason) async {
     final box = await medicationBox;
     final medication = box.get(id);
-    
+
     if (medication != null) {
       final updatedMedication = medication.copyWith(
         discontinuedReason: reason,
@@ -170,13 +184,18 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Future<List<MedicationModel>> searchMedications(String query) async {
     final box = await medicationBox;
     final lowerQuery = query.toLowerCase();
-    
+
     return box.values
-        .where((medication) => 
-            !medication.isDeleted &&
-            (medication.name.toLowerCase().contains(lowerQuery) ||
-             medication.type.toLowerCase().contains(lowerQuery) ||
-             (medication.prescribedBy?.toLowerCase().contains(lowerQuery) ?? false)))
+        .where(
+          (medication) =>
+              !medication.isDeleted &&
+              (medication.name.toLowerCase().contains(lowerQuery) ||
+                  medication.type.toLowerCase().contains(lowerQuery) ||
+                  (medication.prescribedBy?.toLowerCase().contains(
+                        lowerQuery,
+                      ) ??
+                      false)),
+        )
         .toList();
   }
 
@@ -187,13 +206,15 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     DateTime endDate,
   ) async {
     final box = await medicationBox;
-    
+
     return box.values
-        .where((medication) => 
-            medication.animalId == animalId &&
-            !medication.isDeleted &&
-            medication.startDate.isBefore(endDate) &&
-            medication.endDate.isAfter(startDate))
+        .where(
+          (medication) =>
+              medication.animalId == animalId &&
+              !medication.isDeleted &&
+              medication.startDate.isBefore(endDate) &&
+              medication.endDate.isAfter(startDate),
+        )
         .toList();
   }
 
@@ -202,15 +223,17 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     MedicationModel medication,
   ) async {
     final box = await medicationBox;
-    
+
     // Check for medications with overlapping periods for the same animal
     return box.values
-        .where((existing) => 
-            existing.id != medication.id &&
-            existing.animalId == medication.animalId &&
-            !existing.isDeleted &&
-            existing.startDate.isBefore(medication.endDate) &&
-            existing.endDate.isAfter(medication.startDate))
+        .where(
+          (existing) =>
+              existing.id != medication.id &&
+              existing.animalId == medication.animalId &&
+              !existing.isDeleted &&
+              existing.startDate.isBefore(medication.endDate) &&
+              existing.endDate.isAfter(medication.startDate),
+        )
         .toList();
   }
 
@@ -229,27 +252,33 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   @override
   Stream<List<MedicationModel>> watchMedications() async* {
     final box = await medicationBox;
-    
+
     yield box.values.where((medication) => !medication.isDeleted).toList();
-    
+
     await for (final _ in box.watch()) {
       yield box.values.where((medication) => !medication.isDeleted).toList();
     }
   }
 
   @override
-  Stream<List<MedicationModel>> watchMedicationsByAnimalId(String animalId) async* {
+  Stream<List<MedicationModel>> watchMedicationsByAnimalId(
+    String animalId,
+  ) async* {
     final box = await medicationBox;
-    
+
     yield box.values
-        .where((medication) => 
-            medication.animalId == animalId && !medication.isDeleted)
+        .where(
+          (medication) =>
+              medication.animalId == animalId && !medication.isDeleted,
+        )
         .toList();
-    
+
     await for (final _ in box.watch()) {
       yield box.values
-          .where((medication) => 
-              medication.animalId == animalId && !medication.isDeleted)
+          .where(
+            (medication) =>
+                medication.animalId == animalId && !medication.isDeleted,
+          )
           .toList();
     }
   }
@@ -258,21 +287,25 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   Stream<List<MedicationModel>> watchActiveMedications() async* {
     final box = await medicationBox;
     final now = DateTime.now();
-    
+
     yield box.values
-        .where((medication) => 
-            !medication.isDeleted &&
-            now.isAfter(medication.startDate) &&
-            now.isBefore(medication.endDate))
+        .where(
+          (medication) =>
+              !medication.isDeleted &&
+              now.isAfter(medication.startDate) &&
+              now.isBefore(medication.endDate),
+        )
         .toList();
-    
+
     await for (final _ in box.watch()) {
       final currentNow = DateTime.now();
       yield box.values
-          .where((medication) => 
-              !medication.isDeleted &&
-              currentNow.isAfter(medication.startDate) &&
-              currentNow.isBefore(medication.endDate))
+          .where(
+            (medication) =>
+                !medication.isDeleted &&
+                currentNow.isAfter(medication.startDate) &&
+                currentNow.isBefore(medication.endDate),
+          )
           .toList();
     }
   }

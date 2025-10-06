@@ -15,37 +15,9 @@ dependencies:
   core:
     path: ../../packages/core
 
-  
-  
-  cloud_firestore: any
-  firebase_auth: any
-  get_it: any
-  injectable: any
-  shared_preferences: any
-  connectivity_plus: any
-  firebase_analytics: any
-  firebase_crashlytics: any
-  dartz: any
-  hive_flutter: any
-  hive: any
-  equatable: any
-  flutter_local_notifications: any
-  timezone: any
-  json_annotation: any
-  intl: any
-  provider: any
-  url_launcher: any
-  firebase_core: any
-  package_info_plus: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # Code Generation
-  build_runner: any
-  injectable_generator: any
-
-  # Linting
 
 flutter:
   uses-material-design: true

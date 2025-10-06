@@ -8,12 +8,7 @@ import '../../domain/strategies/body_condition_strategy.dart';
 import '../../domain/strategies/calculator_strategy.dart';
 
 /// Estados para o provider de condição corporal
-enum BodyConditionCalculatorStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum BodyConditionCalculatorStatus { initial, loading, success, error }
 
 /// Estado do calculator de condição corporal
 class BodyConditionState {
@@ -41,8 +36,10 @@ class BodyConditionState {
 
   /// Getters de conveniência
   bool get isLoading => status == BodyConditionCalculatorStatus.loading;
-  bool get hasResult => status == BodyConditionCalculatorStatus.success && output != null;
-  bool get hasError => status == BodyConditionCalculatorStatus.error && error != null;
+  bool get hasResult =>
+      status == BodyConditionCalculatorStatus.success && output != null;
+  bool get hasError =>
+      status == BodyConditionCalculatorStatus.error && error != null;
   bool get hasValidationErrors => validationErrors.isNotEmpty;
   bool get canCalculate => input.isValid && validationErrors.isEmpty;
 
@@ -74,7 +71,7 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
   /// Atualiza entrada da calculadora
   void updateInput(BodyConditionInput input) {
     final validationErrors = _strategy.validateInput(input);
-    
+
     state = state.copyWith(
       input: input,
       validationErrors: validationErrors,
@@ -121,7 +118,7 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
         );
       }
     }
-    
+
     final newInput = state.input.copyWith(currentWeight: weight);
     updateInput(newInput);
   }
@@ -167,7 +164,9 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
   }
 
   void updateHasMetabolicConditions(bool hasConditions) {
-    final newInput = state.input.copyWith(hasMetabolicConditions: hasConditions);
+    final newInput = state.input.copyWith(
+      hasMetabolicConditions: hasConditions,
+    );
     updateInput(newInput);
   }
 
@@ -194,7 +193,7 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
     try {
       final result = _strategy.calculate(state.input);
       final newHistory = [...state.history, result];
-      
+
       state = state.copyWith(
         status: BodyConditionCalculatorStatus.success,
         output: result,
@@ -258,7 +257,6 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
     }
   }
 
-  /// Limpa todo o histórico
   void clearHistory() {
     state = state.copyWith(history: []);
   }
@@ -268,11 +266,17 @@ class BodyConditionNotifier extends StateNotifier<BodyConditionState> {
     if (index >= 0 && index < state.history.length) {
       final historicalResult = state.history[index];
       final reconstructedInput = state.input.copyWith(
-        currentWeight: (historicalResult.results
-            .firstWhere((r) => r.label == 'Peso Atual', orElse: () => const ResultItem(label: '', value: 0.0))
-            .value as num?)?.toDouble(),
+        currentWeight:
+            (historicalResult.results
+                        .firstWhere(
+                          (r) => r.label == 'Peso Atual',
+                          orElse: () => const ResultItem(label: '', value: 0.0),
+                        )
+                        .value
+                    as num?)
+                ?.toDouble(),
       );
-      
+
       updateInput(reconstructedInput);
       state = state.copyWith(output: historicalResult);
     }
@@ -285,10 +289,11 @@ final bodyConditionStrategyProvider = Provider<BodyConditionStrategy>((ref) {
 });
 
 /// Provider principal da calculadora de condição corporal
-final bodyConditionProvider = StateNotifierProvider<BodyConditionNotifier, BodyConditionState>((ref) {
-  final strategy = ref.watch(bodyConditionStrategyProvider);
-  return BodyConditionNotifier(strategy);
-});
+final bodyConditionProvider =
+    StateNotifierProvider<BodyConditionNotifier, BodyConditionState>((ref) {
+      final strategy = ref.watch(bodyConditionStrategyProvider);
+      return BodyConditionNotifier(strategy);
+    });
 
 /// Providers de conveniência para componentes específicos
 
@@ -336,18 +341,22 @@ final bodyConditionSuggestionsProvider = Provider<List<String>>((ref) {
     if (input.idealWeight == null) {
       suggestions.add('💡 Informe o peso ideal para cálculos mais precisos');
     }
-    
+
     if (input.animalBreed == null || input.animalBreed!.isEmpty) {
       suggestions.add('🐕 Informe a raça para recomendações mais específicas');
     }
-    
+
     if (input.animalAge == null) {
       suggestions.add('📅 Informe a idade para ajustes metabólicos');
     }
     if (input.species == AnimalSpecies.cat && input.currentWeight > 6) {
-      suggestions.add('⚠️ Peso elevado para gatos - considere avaliação veterinária');
+      suggestions.add(
+        '⚠️ Peso elevado para gatos - considere avaliação veterinária',
+      );
     } else if (input.species == AnimalSpecies.dog && input.currentWeight < 2) {
-      suggestions.add('⚠️ Peso muito baixo - verifique se é filhote ou raça toy');
+      suggestions.add(
+        '⚠️ Peso muito baixo - verifique se é filhote ou raça toy',
+      );
     }
     if (input.observations == null || input.observations!.isEmpty) {
       suggestions.add('📝 Adicione observações sobre comportamento alimentar');
@@ -360,17 +369,19 @@ final bodyConditionSuggestionsProvider = Provider<List<String>>((ref) {
 /// Provider com estatísticas do histórico
 final bodyConditionHistoryStatsProvider = Provider<Map<String, dynamic>>((ref) {
   final history = ref.watch(bodyConditionHistoryProvider);
-  
+
   if (history.isEmpty) {
     return {'count': 0};
   }
 
   final scores = history.map((result) => result.bcsScore).toList();
   final avgScore = scores.reduce((a, b) => a + b) / scores.length;
-  
-  final classifications = history.map((result) => result.classification).toList();
-  final idealCount = classifications.where((c) => c == BcsClassification.ideal).length;
-  
+
+  final classifications =
+      history.map((result) => result.classification).toList();
+  final idealCount =
+      classifications.where((c) => c == BcsClassification.ideal).length;
+
   return {
     'count': history.length,
     'averageScore': avgScore,

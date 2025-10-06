@@ -234,7 +234,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reminders',
         name: 'reminders',
-        builder: (context, state) => const RemindersPage(userId: 'temp_user_id'), // TODO: Get from auth service
+        builder: (context, state) => const RemindersPage(userId: 'temp_user_id'),
         routes: [
           GoRoute(
             path: '/add',
@@ -243,7 +243,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final args = state.extra as Map<String, dynamic>? ?? {};
               return AddReminderForm(
                 initialAnimalId: args['animalId'] as String?,
-                userId: 'temp_user_id', // TODO: Get from auth service
+                userId: 'temp_user_id',
               );
             },
           ),
@@ -254,7 +254,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final args = state.extra as Map<String, dynamic>? ?? {};
               return AddReminderForm(
                 reminder: args['reminder'] as Reminder?,
-                userId: 'temp_user_id', // TODO: Get from auth service
+                userId: 'temp_user_id',
               );
             },
           ),
@@ -263,7 +263,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/expenses',
         name: 'expenses',
-        builder: (context, state) => const ExpensesPage(userId: 'temp_user_id'), // TODO: Get from auth service
+        builder: (context, state) => const ExpensesPage(userId: 'temp_user_id'),
         routes: [
           GoRoute(
             path: '/add',
@@ -355,7 +355,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/subscription',
         name: 'subscription',
-        builder: (context, state) => const local.SubscriptionPage(userId: 'temp_user_id'), // TODO: Get from auth service
+        builder: (context, state) => const local.SubscriptionPage(userId: 'temp_user_id'),
       ),
         ],
       ),

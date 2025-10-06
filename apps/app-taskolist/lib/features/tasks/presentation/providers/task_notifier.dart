@@ -109,7 +109,6 @@ class TaskNotifier extends _$TaskNotifier {
     });
   }
 
-  /// Método específico para criar subtasks
   Future<void> createSubtask(TaskEntity subtask) async {
     await createTask(subtask);
   }

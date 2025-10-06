@@ -7,7 +7,7 @@ import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/save_calculation_to_history.dart';
 
 /// Provider especializado para histórico de cálculos
-/// 
+///
 /// Responsabilidade única: Gerenciar histórico de cálculos
 /// Seguindo Single Responsibility Principle
 @singleton
@@ -18,8 +18,8 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   CalculatorHistoryProvider({
     required GetCalculationHistory getCalculationHistory,
     required SaveCalculationToHistory saveCalculationToHistory,
-  })  : _getCalculationHistory = getCalculationHistory,
-        _saveCalculationToHistory = saveCalculationToHistory;
+  }) : _getCalculationHistory = getCalculationHistory,
+       _saveCalculationToHistory = saveCalculationToHistory;
 
   List<CalculationHistory> _calculationHistory = [];
   bool _isLoadingHistory = false;
@@ -30,10 +30,10 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   bool get isLoadingHistory => _isLoadingHistory;
   bool get isSavingToHistory => _isSavingToHistory;
   String? get errorMessage => _errorMessage;
-  
+
   int get totalHistoryItems => _calculationHistory.length;
   bool get hasHistory => _calculationHistory.isNotEmpty;
-  
+
   /// Obtém os últimos N itens do histórico
   List<CalculationHistory> getRecentHistory(int count) {
     return _calculationHistory.take(count).toList();
@@ -49,9 +49,10 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   /// Obtém histórico por data
   List<CalculationHistory> getHistoryByDateRange(DateTime start, DateTime end) {
     return _calculationHistory
-        .where((item) => 
-          item.createdAt.isAfter(start) && 
-          item.createdAt.isBefore(end))
+        .where(
+          (item) =>
+              item.createdAt.isAfter(start) && item.createdAt.isBefore(end),
+        )
         .toList();
   }
 
@@ -62,15 +63,19 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _getCalculationHistory.call();
-    
+
     result.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorHistoryProvider: Erro ao carregar histórico - ${failure.message}');
+        debugPrint(
+          'CalculatorHistoryProvider: Erro ao carregar histórico - ${failure.message}',
+        );
       },
       (history) {
         _calculationHistory = history;
-        debugPrint('CalculatorHistoryProvider: Histórico carregado - ${history.length} itens');
+        debugPrint(
+          'CalculatorHistoryProvider: Histórico carregado - ${history.length} itens',
+        );
       },
     );
 
@@ -92,7 +97,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
     final historyItem = CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      userId: userId ?? 'current_user', // TODO: Obter do contexto de autenticação
+      userId: userId ?? 'current_user',
       calculatorId: calculatorId,
       calculatorName: calculatorName,
       result: result,
@@ -101,17 +106,21 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     );
 
     final saveResult = await _saveCalculationToHistory.call(historyItem);
-    
+
     bool success = false;
     saveResult.fold(
       (failure) {
         _errorMessage = failure.message;
-        debugPrint('CalculatorHistoryProvider: Erro ao salvar no histórico - ${failure.message}');
+        debugPrint(
+          'CalculatorHistoryProvider: Erro ao salvar no histórico - ${failure.message}',
+        );
       },
       (_) {
         _calculationHistory.insert(0, historyItem);
         success = true;
-        debugPrint('CalculatorHistoryProvider: Resultado salvo no histórico - ${historyItem.id}');
+        debugPrint(
+          'CalculatorHistoryProvider: Resultado salvo no histórico - ${historyItem.id}',
+        );
       },
     );
 
@@ -125,13 +134,15 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     final initialCount = _calculationHistory.length;
     _calculationHistory.removeWhere((item) => item.id == historyId);
     final removed = initialCount - _calculationHistory.length;
-    
+
     if (removed > 0) {
       notifyListeners();
-      debugPrint('CalculatorHistoryProvider: Item removido do histórico - $historyId');
+      debugPrint(
+        'CalculatorHistoryProvider: Item removido do histórico - $historyId',
+      );
       return true;
     }
-    
+
     return false;
   }
 
@@ -139,18 +150,19 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   Future<bool> removeMultipleFromHistory(List<String> historyIds) async {
     final initialCount = _calculationHistory.length;
     _calculationHistory.removeWhere((item) => historyIds.contains(item.id));
-    
+
     final removedCount = initialCount - _calculationHistory.length;
     if (removedCount > 0) {
       notifyListeners();
-      debugPrint('CalculatorHistoryProvider: $removedCount itens removidos do histórico');
+      debugPrint(
+        'CalculatorHistoryProvider: $removedCount itens removidos do histórico',
+      );
       return true;
     }
-    
+
     return false;
   }
 
-  /// Limpa todo o histórico
   Future<bool> clearAllHistory() async {
     _calculationHistory.clear();
     notifyListeners();
@@ -161,27 +173,34 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   /// Limpa histórico de uma calculadora específica
   Future<bool> clearCalculatorHistory(String calculatorId) async {
     final initialCount = _calculationHistory.length;
-    _calculationHistory.removeWhere((item) => item.calculatorId == calculatorId);
-    
+    _calculationHistory.removeWhere(
+      (item) => item.calculatorId == calculatorId,
+    );
+
     final removedCount = initialCount - _calculationHistory.length;
     if (removedCount > 0) {
       notifyListeners();
-      debugPrint('CalculatorHistoryProvider: Histórico da calculadora $calculatorId limpo - $removedCount itens removidos');
+      debugPrint(
+        'CalculatorHistoryProvider: Histórico da calculadora $calculatorId limpo - $removedCount itens removidos',
+      );
       return true;
     }
-    
+
     return false;
   }
 
   /// Busca no histórico por termo
   List<CalculationHistory> searchHistory(String searchTerm) {
     if (searchTerm.trim().isEmpty) return _calculationHistory;
-    
+
     final term = searchTerm.toLowerCase();
-    return _calculationHistory.where((item) =>
-      item.calculatorName.toLowerCase().contains(term) ||
-      (item.notes?.toLowerCase().contains(term) ?? false)
-    ).toList();
+    return _calculationHistory
+        .where(
+          (item) =>
+              item.calculatorName.toLowerCase().contains(term) ||
+              (item.notes?.toLowerCase().contains(term) ?? false),
+        )
+        .toList();
   }
 
   /// Filtra histórico por calculadora
@@ -193,10 +212,12 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
   /// Filtra histórico por período
   List<CalculationHistory> filterByPeriod(DateTime start, DateTime end) {
-    return _calculationHistory.where((item) =>
-      item.createdAt.isAfter(start) && 
-      item.createdAt.isBefore(end)
-    ).toList();
+    return _calculationHistory
+        .where(
+          (item) =>
+              item.createdAt.isAfter(start) && item.createdAt.isBefore(end),
+        )
+        .toList();
   }
 
   /// Obtém estatísticas do histórico
@@ -217,7 +238,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     DateTime? newest;
 
     for (final item in _calculationHistory) {
-      calculatorCounts[item.calculatorId] = 
+      calculatorCounts[item.calculatorId] =
           (calculatorCounts[item.calculatorId] ?? 0) + 1;
       if (oldest == null || item.createdAt.isBefore(oldest)) {
         oldest = item.createdAt;
@@ -248,13 +269,14 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   /// Obtém histórico agrupado por data
   Map<String, List<CalculationHistory>> getHistoryGroupedByDate() {
     final grouped = <String, List<CalculationHistory>>{};
-    
+
     for (final item in _calculationHistory) {
-      final dateKey = '${item.createdAt.year}-${item.createdAt.month.toString().padLeft(2, '0')}-${item.createdAt.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${item.createdAt.year}-${item.createdAt.month.toString().padLeft(2, '0')}-${item.createdAt.day.toString().padLeft(2, '0')}';
       grouped[dateKey] ??= [];
       grouped[dateKey]!.add(item);
     }
-    
+
     return grouped;
   }
 

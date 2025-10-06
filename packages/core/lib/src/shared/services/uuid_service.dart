@@ -30,7 +30,6 @@ class UuidService {
 
   /// Gera um UUID v4 (aleatório)
   ///
-  /// Este é o método mais comum e recomendado para IDs únicos
   /// Retorna uma string no formato: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
   ///
   /// Exemplo: '550e8400-e29b-41d4-a716-446655440000'
@@ -106,10 +105,7 @@ class UuidService {
   /// // isValid = true
   /// ```
   bool isValidCompact(String uuid) {
-    final uuidPattern = RegExp(
-      r'^[0-9a-f]{32}$',
-      caseSensitive: false,
-    );
+    final uuidPattern = RegExp(r'^[0-9a-f]{32}$', caseSensitive: false);
     return uuidPattern.hasMatch(uuid);
   }
 

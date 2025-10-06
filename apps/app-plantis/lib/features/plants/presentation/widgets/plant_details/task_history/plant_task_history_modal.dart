@@ -19,7 +19,6 @@ class PlantTaskHistoryModal extends StatefulWidget {
     required this.completedTasks,
   });
 
-  /// Método estático para abrir o modal
   static Future<void> show(
     BuildContext context, {
     required Plant plant,

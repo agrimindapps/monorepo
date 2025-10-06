@@ -14,7 +14,7 @@ abstract class SyncDIModule {
         vehicleRepository: sl<VehicleRepository>(),
         fuelRepository: sl<FuelRepository>(),
         maintenanceRepository: sl<MaintenanceRepository>(),
-        expensesRepository: null, // TODO: Implementar ExpensesRepository quando disponível
+        expensesRepository: null,
       ),
     );
   }

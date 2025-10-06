@@ -79,11 +79,11 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
         userId: anonymousUserId,
         userInfo: userEntity,
         recordCount: vehicleCount + (fuelData['count'] as int),
-        lastModified: DateTime.now(), // TODO: Get actual last modified date
+        lastModified: DateTime.now(),
         vehicleCount: vehicleCount,
         fuelRecordCount: fuelData['count'] as int,
         maintenanceRecordCount:
-            0, // TODO: Add maintenance records when implemented
+            0,
         totalDistance: fuelData['totalDistance'] as double,
         totalFuelCost: fuelData['totalCost'] as double,
       );
@@ -142,11 +142,11 @@ class GasometerMigrationDataSourceImpl implements GasometerMigrationDataSource {
         userId: accountUserId,
         userInfo: userEntity,
         recordCount: vehicleCount + fuelRecordCount,
-        lastModified: DateTime.now(), // TODO: Get actual last modified date
+        lastModified: DateTime.now(),
         vehicleCount: vehicleCount,
         fuelRecordCount: fuelRecordCount,
         maintenanceRecordCount:
-            0, // TODO: Add maintenance records when implemented
+            0,
         totalDistance: fuelTotals['totalDistance'] as double,
         totalFuelCost: fuelTotals['totalCost'] as double,
         accountAge: accountAge,

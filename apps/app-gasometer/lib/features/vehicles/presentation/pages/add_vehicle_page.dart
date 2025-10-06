@@ -554,7 +554,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage> with FormErrorH
     );
   }
 
-  /// Método otimizado para carregamento de imagens com cache e shimmer loading
   Widget _buildOptimizedImage(
     File imageFile, {
     required double height,

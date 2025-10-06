@@ -5,7 +5,6 @@ import '../../../core/theme/loading_design_tokens.dart';
 /// Widget de loading inteligente com múltiplas etapas
 /// Fornece feedback visual detalhado durante processos longos
 class IntelligentLoading extends StatefulWidget {
-
   const IntelligentLoading({
     super.key,
     required this.steps,
@@ -124,7 +123,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
       });
       _iconController.reset();
       _progressController.reset();
-      
+
       _iconController.forward();
       _startAutoAdvance();
     } else {
@@ -134,7 +133,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
 
   void _completeLoading() {
     if (_completed) return;
-    
+
     setState(() {
       _completed = true;
     });
@@ -151,9 +150,11 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
     final currentStep = widget.steps[currentStepIndex];
 
     return Container(
-      padding: EdgeInsets.all(widget.expandedView 
-        ? LoadingDesignTokens.spacingXl 
-        : LoadingDesignTokens.spacingLg),
+      padding: EdgeInsets.all(
+        widget.expandedView
+            ? LoadingDesignTokens.spacingXl
+            : LoadingDesignTokens.spacingLg,
+      ),
       decoration: BoxDecoration(
         color: widget.backgroundColor ?? colors.surface,
         borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusLg),
@@ -173,7 +174,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
             const SizedBox(height: LoadingDesignTokens.spacingLg),
           ],
           _buildAnimatedIcon(currentStep, colors),
-          
+
           const SizedBox(height: LoadingDesignTokens.spacingMd),
           AnimatedSwitcher(
             duration: LoadingDesignTokens.fastDuration,
@@ -213,7 +214,9 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(LoadingDesignTokens.borderRadiusSm),
+          borderRadius: BorderRadius.circular(
+            LoadingDesignTokens.borderRadiusSm,
+          ),
           child: LinearProgressIndicator(
             value: (currentStepIndex + 1) / widget.steps.length,
             backgroundColor: colors.onSurface.withValues(alpha: 0.1),
@@ -270,16 +273,16 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
     );
   }
 
-  /// Método público para avançar manualmente
   void nextStep() {
     if (!widget.autoAdvance && currentStepIndex < widget.steps.length - 1) {
       _advanceToNextStep();
     }
   }
 
-  /// Método público para pular para etapa específica
   void jumpToStep(int stepIndex) {
-    if (stepIndex >= 0 && stepIndex < widget.steps.length && !widget.autoAdvance) {
+    if (stepIndex >= 0 &&
+        stepIndex < widget.steps.length &&
+        !widget.autoAdvance) {
       setState(() {
         currentStepIndex = stepIndex;
       });
@@ -288,7 +291,6 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
     }
   }
 
-  /// Método público para finalizar manualmente
   void complete() {
     _stepTimer?.cancel();
     _completeLoading();
@@ -306,26 +308,27 @@ class IntelligentLoadingOverlay {
     VoidCallback? onComplete,
   }) async {
     final completer = Completer<void>();
-    
+
     late OverlayEntry overlayEntry;
-    
+
     overlayEntry = OverlayEntry(
-      builder: (context) => Material(
-        color: Colors.black.withValues(alpha: 0.7),
-        child: Center(
-          child: IntelligentLoading(
-            steps: steps,
-            primaryColor: primaryColor,
-            onComplete: () {
-              overlayEntry.remove();
-              onComplete?.call();
-              if (!completer.isCompleted) {
-                completer.complete();
-              }
-            },
+      builder:
+          (context) => Material(
+            color: Colors.black.withValues(alpha: 0.7),
+            child: Center(
+              child: IntelligentLoading(
+                steps: steps,
+                primaryColor: primaryColor,
+                onComplete: () {
+                  overlayEntry.remove();
+                  onComplete?.call();
+                  if (!completer.isCompleted) {
+                    completer.complete();
+                  }
+                },
+              ),
+            ),
           ),
-        ),
-      ),
     );
 
     Overlay.of(context).insert(overlayEntry);
@@ -334,7 +337,7 @@ class IntelligentLoadingOverlay {
         Duration.zero,
         (total, step) => total + step.duration,
       );
-      
+
       Timer(totalDuration + const Duration(seconds: 1), () {
         if (overlayEntry.mounted) {
           overlayEntry.remove();

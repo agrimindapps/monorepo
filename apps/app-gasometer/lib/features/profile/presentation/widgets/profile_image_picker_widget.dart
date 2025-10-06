@@ -24,7 +24,6 @@ class ProfileImagePickerWidget extends StatelessWidget {
   final bool hasCurrentImage;
   final bool isLoading;
 
-  /// Método estático para mostrar o modal
   static Future<void> show({
     required BuildContext context,
     required void Function(File) onImageSelected,

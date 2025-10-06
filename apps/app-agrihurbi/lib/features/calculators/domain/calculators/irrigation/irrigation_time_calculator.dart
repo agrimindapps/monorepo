@@ -113,7 +113,7 @@ class IrrigationTimeCalculator extends CalculatorEntity {
       final double volumeNeededLiters = CalculatorMath.cubicToLiters(volumeNeededM3);
       final double realVolumeNeeded = volumeNeededLiters / systemEfficiency;
       final double basicTimeHours = realVolumeNeeded / flowRate;
-      final double basicTimeMinutes = basicTimeHours * 60; // TODO: Use in time breakdown analysis
+      final double basicTimeMinutes = basicTimeHours * 60;
       final double windFactor = _calculateWindFactor(systemType, windSpeed);
       final double uniformityFactor = _calculateUniformityFactor(uniformity);
       final double correctedTimeHours = basicTimeHours * windFactor * uniformityFactor;
@@ -122,9 +122,9 @@ class IrrigationTimeCalculator extends CalculatorEntity {
       final double applicationRate = waterDepth / correctedTimeHours; // mm/h real
       final int numberOfSectors = _calculateOptimalSectors(systemType, irrigatedArea);
       final double sectorTime = correctedTimeHours / numberOfSectors;
-      final double time25 = correctedTimeMinutes * 0.25; // TODO: Use in partial irrigation scenarios
+      final double time25 = correctedTimeMinutes * 0.25;
       final double time50 = correctedTimeMinutes * 0.50;
-      final double time75 = correctedTimeMinutes * 0.75; // TODO: Use in stress management
+      final double time75 = correctedTimeMinutes * 0.75;
       final double powerEstimated = _estimatePower(flowRate, systemType);
       final double energyConsumption = powerEstimated * correctedTimeHours;
       final List<String> recommendations = _generateRecommendations(

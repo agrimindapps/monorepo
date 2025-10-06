@@ -68,7 +68,8 @@ class ProfileState {
       uploadProgress: uploadProgress ?? this.uploadProgress,
       errorMessage: errorMessage ?? this.errorMessage,
       lastUploadResult: lastUploadResult ?? this.lastUploadResult,
-      currentProfileImageUrl: currentProfileImageUrl ?? this.currentProfileImageUrl,
+      currentProfileImageUrl:
+          currentProfileImageUrl ?? this.currentProfileImageUrl,
       hasProfileImage: hasProfileImage ?? this.hasProfileImage,
       userInitials: userInitials ?? this.userInitials,
       currentUser: currentUser ?? this.currentUser,
@@ -146,7 +147,9 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   /// Selecionar e fazer upload de imagem da galeria
   Future<bool> pickAndUploadFromGallery() async {
-    return await _pickAndUpload(() => _profileRepository.pickImageFromGallery());
+    return await _pickAndUpload(
+      () => _profileRepository.pickImageFromGallery(),
+    );
   }
 
   /// Capturar e fazer upload de imagem da câmera
@@ -154,13 +157,16 @@ class ProfileNotifier extends _$ProfileNotifier {
     return await _pickAndUpload(() => _profileRepository.pickImageFromCamera());
   }
 
-  /// Método genérico para pick e upload
-  Future<bool> _pickAndUpload(Future<Result<File>> Function() pickFunction) async {
+  Future<bool> _pickAndUpload(
+    Future<Result<File>> Function() pickFunction,
+  ) async {
     final currentState = state.value;
     if (currentState == null) return false;
 
     if (!currentState.isAuthenticated) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: 'Usuário não autenticado'));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: 'Usuário não autenticado'),
+      );
       return false;
     }
 
@@ -182,7 +188,9 @@ class ProfileNotifier extends _$ProfileNotifier {
       }
 
       final imageFile = pickResult.data!;
-      final validationResult = _profileRepository.validateProfileImage(imageFile);
+      final validationResult = _profileRepository.validateProfileImage(
+        imageFile,
+      );
       if (validationResult.isError) {
         state = AsyncValue.data(
           currentState.copyWith(
@@ -216,15 +224,19 @@ class ProfileNotifier extends _$ProfileNotifier {
       }
       final updatedState = await _refreshState();
       state = AsyncValue.data(
-        updatedState.copyWith(
-          isUploading: false,
-          uploadProgress: 1.0,
-          lastUploadResult: uploadResult.data,
-        ).clearError(),
+        updatedState
+            .copyWith(
+              isUploading: false,
+              uploadProgress: 1.0,
+              lastUploadResult: uploadResult.data,
+            )
+            .clearError(),
       );
 
       if (kDebugMode) {
-        print('✅ ProfileNotifier: Upload bem-sucedido - ${uploadResult.data?.downloadUrl}');
+        print(
+          '✅ ProfileNotifier: Upload bem-sucedido - ${uploadResult.data?.downloadUrl}',
+        );
       }
 
       return true;
@@ -249,15 +261,21 @@ class ProfileNotifier extends _$ProfileNotifier {
     if (currentState == null) return false;
 
     if (!currentState.isAuthenticated) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: 'Usuário não autenticado'));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: 'Usuário não autenticado'),
+      );
       return false;
     }
 
     try {
       state = AsyncValue.data(
-        currentState.copyWith(isUploading: true, uploadProgress: 0.0).clearError(),
+        currentState
+            .copyWith(isUploading: true, uploadProgress: 0.0)
+            .clearError(),
       );
-      final validationResult = _profileRepository.validateProfileImage(imageFile);
+      final validationResult = _profileRepository.validateProfileImage(
+        imageFile,
+      );
       if (validationResult.isError) {
         state = AsyncValue.data(
           currentState.copyWith(
@@ -283,11 +301,13 @@ class ProfileNotifier extends _$ProfileNotifier {
       }
       final updatedState = await _refreshState();
       state = AsyncValue.data(
-        updatedState.copyWith(
-          isUploading: false,
-          uploadProgress: 1.0,
-          lastUploadResult: uploadResult.data,
-        ).clearError(),
+        updatedState
+            .copyWith(
+              isUploading: false,
+              uploadProgress: 1.0,
+              lastUploadResult: uploadResult.data,
+            )
+            .clearError(),
       );
 
       return true;
@@ -308,19 +328,25 @@ class ProfileNotifier extends _$ProfileNotifier {
     if (currentState == null) return false;
 
     if (!currentState.isAuthenticated) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: 'Usuário não autenticado'));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: 'Usuário não autenticado'),
+      );
       return false;
     }
 
     if (!currentState.hasProfileImage) {
       state = AsyncValue.data(
-        currentState.copyWith(errorMessage: 'Nenhuma imagem de perfil para deletar'),
+        currentState.copyWith(
+          errorMessage: 'Nenhuma imagem de perfil para deletar',
+        ),
       );
       return false;
     }
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isUploading: true).clearError());
+      state = AsyncValue.data(
+        currentState.copyWith(isUploading: true).clearError(),
+      );
 
       final result = await _profileRepository.deleteProfileImage();
 
@@ -335,10 +361,9 @@ class ProfileNotifier extends _$ProfileNotifier {
       }
       final updatedState = await _refreshState();
       state = AsyncValue.data(
-        updatedState.copyWith(
-          isUploading: false,
-          lastUploadResult: null,
-        ).clearError(),
+        updatedState
+            .copyWith(isUploading: false, lastUploadResult: null)
+            .clearError(),
       );
 
       if (kDebugMode) {
@@ -363,12 +388,16 @@ class ProfileNotifier extends _$ProfileNotifier {
     if (currentState == null) return false;
 
     if (!currentState.isAuthenticated) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: 'Usuário não autenticado'));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: 'Usuário não autenticado'),
+      );
       return false;
     }
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isUploading: true).clearError());
+      state = AsyncValue.data(
+        currentState.copyWith(isUploading: true).clearError(),
+      );
 
       final result = await _profileRepository.updateAuthPhotoUrl(photoUrl);
 
@@ -382,7 +411,9 @@ class ProfileNotifier extends _$ProfileNotifier {
         return false;
       }
       final updatedState = await _refreshState();
-      state = AsyncValue.data(updatedState.copyWith(isUploading: false).clearError());
+      state = AsyncValue.data(
+        updatedState.copyWith(isUploading: false).clearError(),
+      );
 
       return true;
     } catch (e) {

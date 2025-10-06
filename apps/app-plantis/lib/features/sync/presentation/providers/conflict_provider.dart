@@ -97,7 +97,6 @@ class ConflictProvider extends ChangeNotifier {
     }
   }
 
-  /// Limpa todo o histórico de conflitos
   Future<void> clearConflictHistory() async {
     _state = _state.copyWith(isLoading: true);
     notifyListeners();

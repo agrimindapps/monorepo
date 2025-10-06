@@ -44,7 +44,6 @@ abstract class IHiveRepository<T extends HiveObject> {
   /// Conta o número total de itens
   Future<Result<int>> count();
 
-  /// Método de compatibilidade que retorna count diretamente como int
   Future<int> countAsync();
 
   /// Conta itens que atendem ao predicado

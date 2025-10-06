@@ -117,7 +117,6 @@ class ConflictNotifier extends _$ConflictNotifier {
     }
   }
 
-  /// Limpa todo o histórico de conflitos
   Future<void> clearConflictHistory() async {
     state = AsyncValue.data(
       (state.valueOrNull ?? const ConflictState()).copyWith(isLoading: true),
@@ -139,6 +138,7 @@ class ConflictNotifier extends _$ConflictNotifier {
     }
   }
 }
+
 @riverpod
 ConflictHistoryService conflictHistoryService(Ref ref) {
   return GetIt.instance<ConflictHistoryService>();

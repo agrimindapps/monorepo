@@ -4,7 +4,7 @@ import '../entities/calculation_history.dart';
 import '../repositories/calculator_repository.dart';
 
 /// Use case para salvar resultado de cálculo no histórico
-/// 
+///
 /// Segue padrão Clean Architecture com Either para error handling
 /// Utilizado pelo CalculatorProvider para persistir resultados
 class SaveCalculationToHistory {
@@ -28,7 +28,6 @@ class RemoveFromHistory {
   }
 }
 
-/// Use case para limpar todo o histórico
 class ClearHistory {
   final CalculatorRepository repository;
 

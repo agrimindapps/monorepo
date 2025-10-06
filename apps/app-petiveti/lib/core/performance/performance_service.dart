@@ -9,17 +9,25 @@ class PerformanceService {
 
   final Map<String, PerformanceMetric> _metrics = {};
   final List<PerformanceEvent> _events = [];
-  
+
   static const int maxEventsToKeep = 100;
 
   /// Inicia medição de performance para uma operação
-  PerformanceTracker startTracking(String operationName, {Map<String, dynamic>? metadata}) {
+  PerformanceTracker startTracking(
+    String operationName, {
+    Map<String, dynamic>? metadata,
+  }) {
     final tracker = PerformanceTracker._(operationName, metadata);
     return tracker;
   }
 
   /// Registra uma métrica de performance
-  void recordMetric(String name, double value, {String? unit, Map<String, dynamic>? metadata}) {
+  void recordMetric(
+    String name,
+    double value, {
+    String? unit,
+    Map<String, dynamic>? metadata,
+  }) {
     final metric = PerformanceMetric(
       name: name,
       value: value,
@@ -29,16 +37,22 @@ class PerformanceService {
     );
 
     _metrics[name] = metric;
-    _addEvent(PerformanceEvent(
-      type: PerformanceEventType.metric,
-      name: name,
-      timestamp: DateTime.now(),
-      data: {'value': value, 'unit': unit},
-    ));
+    _addEvent(
+      PerformanceEvent(
+        type: PerformanceEventType.metric,
+        name: name,
+        timestamp: DateTime.now(),
+        data: {'value': value, 'unit': unit},
+      ),
+    );
   }
 
   /// Registra tempo de execução de uma operação
-  void recordExecutionTime(String operationName, Duration duration, {Map<String, dynamic>? metadata}) {
+  void recordExecutionTime(
+    String operationName,
+    Duration duration, {
+    Map<String, dynamic>? metadata,
+  }) {
     recordMetric(
       '${operationName}_execution_time',
       duration.inMilliseconds.toDouble(),
@@ -51,7 +65,7 @@ class PerformanceService {
   Future<MemoryUsage> getMemoryUsage() async {
     final info = ProcessInfo.currentRss;
     final maxRss = ProcessInfo.maxRss;
-    
+
     return MemoryUsage(
       currentRss: info,
       maxRss: maxRss,
@@ -66,7 +80,7 @@ class PerformanceService {
     Map<String, dynamic>? metadata,
   }) async {
     final tracker = startTracking(operationName, metadata: metadata);
-    
+
     try {
       final result = await operation();
       tracker.finish(success: true);
@@ -84,7 +98,7 @@ class PerformanceService {
     Map<String, dynamic>? metadata,
   }) {
     final tracker = startTracking(operationName, metadata: metadata);
-    
+
     try {
       final result = operation();
       tracker.finish(success: true);
@@ -100,9 +114,12 @@ class PerformanceService {
     final now = DateTime.now();
     final startTime = period != null ? now.subtract(period) : null;
 
-    final relevantEvents = startTime != null 
-        ? _events.where((event) => event.timestamp.isAfter(startTime)).toList()
-        : _events;
+    final relevantEvents =
+        startTime != null
+            ? _events
+                .where((event) => event.timestamp.isAfter(startTime))
+                .toList()
+            : _events;
 
     final operationStats = <String, OperationStatistics>{};
     final operationTimes = <String, List<double>>{};
@@ -128,10 +145,13 @@ class PerformanceService {
           );
         } else {
           final totalExec = currentStats.totalExecutions + 1;
-          final successExec = currentStats.successfulExecutions + (success ? 1 : 0);
+          final successExec =
+              currentStats.successfulExecutions + (success ? 1 : 0);
           final totalTime = currentStats.totalTime + duration;
-          final minTime = duration < currentStats.minTime ? duration : currentStats.minTime;
-          final maxTime = duration > currentStats.maxTime ? duration : currentStats.maxTime;
+          final minTime =
+              duration < currentStats.minTime ? duration : currentStats.minTime;
+          final maxTime =
+              duration > currentStats.maxTime ? duration : currentStats.maxTime;
           final avgTime = totalTime / totalExec;
 
           operationStats[operationName] = OperationStatistics(
@@ -158,40 +178,51 @@ class PerformanceService {
 
   /// Limpa métricas antigas
   void cleanup({Duration? olderThan}) {
-    final cutoff = DateTime.now().subtract(olderThan ?? const Duration(hours: 24));
-    
+    final cutoff = DateTime.now().subtract(
+      olderThan ?? const Duration(hours: 24),
+    );
+
     _events.removeWhere((event) => event.timestamp.isBefore(cutoff));
-    
-    final expiredMetrics = _metrics.entries
-        .where((entry) => entry.value.timestamp.isBefore(cutoff))
-        .map((entry) => entry.key)
-        .toList();
-    
+
+    final expiredMetrics =
+        _metrics.entries
+            .where((entry) => entry.value.timestamp.isBefore(cutoff))
+            .map((entry) => entry.key)
+            .toList();
+
     for (final key in expiredMetrics) {
       _metrics.remove(key);
     }
   }
 
   /// Obtém estatísticas de uma operação específica
-  OperationStatistics? getOperationStatistics(String operationName, {Duration? period}) {
+  OperationStatistics? getOperationStatistics(
+    String operationName, {
+    Duration? period,
+  }) {
     final report = getReport(period: period);
     return report.operationStatistics[operationName];
   }
 
   /// Detecta operações lentas
-  List<SlowOperation> getSlowOperations({double thresholdMs = 1000, Duration? period}) {
+  List<SlowOperation> getSlowOperations({
+    double thresholdMs = 1000,
+    Duration? period,
+  }) {
     final report = getReport(period: period);
     final slowOps = <SlowOperation>[];
 
     for (final stat in report.operationStatistics.values) {
       if (stat.avgTime > thresholdMs) {
-        slowOps.add(SlowOperation(
-          name: stat.name,
-          avgTime: stat.avgTime,
-          maxTime: stat.maxTime,
-          executions: stat.totalExecutions,
-          successRate: stat.successRate,
-        ));
+        slowOps.add(
+          SlowOperation(
+            name: stat.name,
+            avgTime: stat.avgTime,
+            maxTime: stat.maxTime,
+            executions: stat.totalExecutions,
+            successRate: stat.successRate,
+          ),
+        );
       }
     }
 
@@ -222,8 +253,9 @@ class PerformanceTracker {
   final String operationName;
   final Map<String, dynamic>? metadata;
   final DateTime _startTime;
-  
-  PerformanceTracker._(this.operationName, this.metadata) : _startTime = DateTime.now();
+
+  PerformanceTracker._(this.operationName, this.metadata)
+    : _startTime = DateTime.now();
 
   /// Finaliza o tracking e registra as métricas
   void finish({bool success = true, dynamic error}) {
@@ -231,19 +263,25 @@ class PerformanceTracker {
     final duration = endTime.difference(_startTime);
 
     final performanceService = PerformanceService();
-    performanceService.recordExecutionTime(operationName, duration, metadata: metadata);
-    
-    performanceService._addEvent(PerformanceEvent(
-      type: PerformanceEventType.operationComplete,
-      name: operationName,
-      timestamp: endTime,
-      data: {
-        'duration': duration.inMilliseconds.toDouble(),
-        'success': success,
-        'error': error?.toString(),
-        'metadata': metadata,
-      },
-    ));
+    performanceService.recordExecutionTime(
+      operationName,
+      duration,
+      metadata: metadata,
+    );
+
+    performanceService._addEvent(
+      PerformanceEvent(
+        type: PerformanceEventType.operationComplete,
+        name: operationName,
+        timestamp: endTime,
+        data: {
+          'duration': duration.inMilliseconds.toDouble(),
+          'success': success,
+          'error': error?.toString(),
+          'metadata': metadata,
+        },
+      ),
+    );
   }
 }
 
@@ -294,12 +332,7 @@ class PerformanceEvent {
   };
 }
 
-enum PerformanceEventType {
-  metric,
-  operationStart,
-  operationComplete,
-  error,
-}
+enum PerformanceEventType { metric, operationStart, operationComplete, error }
 
 /// Uso de memória
 class MemoryUsage {
@@ -315,7 +348,7 @@ class MemoryUsage {
 
   /// RSS atual formatado
   String get formattedCurrentRss => _formatBytes(currentRss);
-  
+
   /// RSS máximo formatado
   String get formattedMaxRss => _formatBytes(maxRss);
 
@@ -347,13 +380,15 @@ class OperationStatistics {
   });
 
   /// Taxa de sucesso
-  double get successRate => totalExecutions > 0 ? successfulExecutions / totalExecutions : 0.0;
-  
+  double get successRate =>
+      totalExecutions > 0 ? successfulExecutions / totalExecutions : 0.0;
+
   /// Taxa de erro
   double get errorRate => 1.0 - successRate;
 
   /// Taxa de sucesso formatada
-  String get formattedSuccessRate => '${(successRate * 100).toStringAsFixed(1)}%';
+  String get formattedSuccessRate =>
+      '${(successRate * 100).toStringAsFixed(1)}%';
 }
 
 /// Relatório de performance
@@ -375,16 +410,18 @@ class PerformanceReport {
   Map<String, dynamic> toJson() => {
     'generated_at': generatedAt.toIso8601String(),
     'period_hours': period?.inHours,
-    'operation_statistics': operationStatistics.map((key, stats) => MapEntry(key, {
-      'name': stats.name,
-      'total_executions': stats.totalExecutions,
-      'successful_executions': stats.successfulExecutions,
-      'success_rate': stats.successRate,
-      'total_time_ms': stats.totalTime,
-      'min_time_ms': stats.minTime,
-      'max_time_ms': stats.maxTime,
-      'avg_time_ms': stats.avgTime,
-    })),
+    'operation_statistics': operationStatistics.map(
+      (key, stats) => MapEntry(key, {
+        'name': stats.name,
+        'total_executions': stats.totalExecutions,
+        'successful_executions': stats.successfulExecutions,
+        'success_rate': stats.successRate,
+        'total_time_ms': stats.totalTime,
+        'min_time_ms': stats.minTime,
+        'max_time_ms': stats.maxTime,
+        'avg_time_ms': stats.avgTime,
+      }),
+    ),
     'total_events': totalEvents,
     'memory_usage_bytes': memoryUsage,
   };
@@ -410,8 +447,15 @@ class SlowOperation {
 /// Extension para facilitar uso do PerformanceService
 extension PerformanceExtensions on Future<dynamic> {
   /// Monitora esta Future automaticamente
-  Future<T> withPerformanceTracking<T>(String operationName, {Map<String, dynamic>? metadata}) {
-    return PerformanceService().monitorAsync(operationName, () => this as Future<T>, metadata: metadata);
+  Future<T> withPerformanceTracking<T>(
+    String operationName, {
+    Map<String, dynamic>? metadata,
+  }) {
+    return PerformanceService().monitorAsync(
+      operationName,
+      () => this as Future<T>,
+      metadata: metadata,
+    );
   }
 }
 
@@ -419,12 +463,13 @@ extension PerformanceExtensions on Future<dynamic> {
 mixin PerformanceMonitoring {
   final PerformanceService _performanceService = PerformanceService();
 
-  /// Monitora execução de método
   Future<T> trackAsync<T>(String methodName, Future<T> Function() operation) {
-    return _performanceService.monitorAsync('${runtimeType}_$methodName', operation);
+    return _performanceService.monitorAsync(
+      '${runtimeType}_$methodName',
+      operation,
+    );
   }
 
-  /// Monitora execução síncrona de método
   T track<T>(String methodName, T Function() operation) {
     return _performanceService.monitor('${runtimeType}_$methodName', operation);
   }

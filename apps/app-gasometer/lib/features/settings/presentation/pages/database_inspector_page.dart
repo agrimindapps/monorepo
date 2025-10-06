@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Database Inspector Page for GasOMeter - Simplified Version
-/// TODO: Integrate with unified data inspector when available in core package
+//
 class DatabaseInspectorPage extends StatelessWidget {
   const DatabaseInspectorPage({super.key});
 

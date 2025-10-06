@@ -34,15 +34,15 @@ abstract class LivestockLocalDataSource {
 class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   static const String _bovinesBoxName = 'bovines';
   static const String _equinesBoxName = 'equines';
-  
+
   LivestockLocalDataSourceImpl();
-  
+
   /// Getter para box de bovinos
   Box<BovineModel> get _bovinesBox => Hive.box<BovineModel>(_bovinesBoxName);
-  
-  /// Getter para box de equinos  
+
+  /// Getter para box de equinos
   Box<EquineModel> get _equinesBox => Hive.box<EquineModel>(_equinesBoxName);
-  
+
   @override
   Future<List<BovineModel>> getAllBovines() async {
     try {
@@ -51,7 +51,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao buscar bovinos: $e');
     }
   }
-  
+
   @override
   Future<BovineModel?> getBovineById(String id) async {
     try {
@@ -60,7 +60,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao buscar bovino por ID: $e');
     }
   }
-  
+
   @override
   Future<void> saveBovine(BovineModel bovine) async {
     try {
@@ -69,13 +69,13 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
         updatedAt: now,
         createdAt: bovine.createdAt ?? now,
       );
-      
+
       await _bovinesBox.put(updatedBovine.id, updatedBovine);
     } catch (e) {
       throw CacheException('Erro ao salvar bovino: $e');
     }
   }
-  
+
   @override
   Future<void> deleteBovine(String id) async {
     try {
@@ -91,7 +91,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao deletar bovino: $e');
     }
   }
-  
+
   @override
   Future<List<BovineModel>> searchBovines({
     String? breed,
@@ -101,37 +101,48 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   }) async {
     try {
       final allBovines = await getAllBovines();
-      
+
       return allBovines.where((bovine) {
         bool matches = true;
-        
+
         if (breed != null && breed.isNotEmpty) {
-          matches = matches && bovine.breed.toLowerCase().contains(breed.toLowerCase());
+          matches =
+              matches &&
+              bovine.breed.toLowerCase().contains(breed.toLowerCase());
         }
-        
+
         if (aptitude != null && aptitude.isNotEmpty) {
-          matches = matches && bovine.aptitude.displayName.toLowerCase().contains(aptitude.toLowerCase());
+          matches =
+              matches &&
+              bovine.aptitude.displayName.toLowerCase().contains(
+                aptitude.toLowerCase(),
+              );
         }
-        
+
         if (purpose != null && purpose.isNotEmpty) {
-          matches = matches && bovine.purpose.toLowerCase().contains(purpose.toLowerCase());
+          matches =
+              matches &&
+              bovine.purpose.toLowerCase().contains(purpose.toLowerCase());
         }
-        
+
         if (tags != null && tags.isNotEmpty) {
-          matches = matches && tags.any((tag) => 
-            bovine.tags.any((bovineTag) => 
-              bovineTag.toLowerCase().contains(tag.toLowerCase())
-            )
-          );
+          matches =
+              matches &&
+              tags.any(
+                (tag) => bovine.tags.any(
+                  (bovineTag) =>
+                      bovineTag.toLowerCase().contains(tag.toLowerCase()),
+                ),
+              );
         }
-        
+
         return matches;
       }).toList();
     } catch (e) {
       throw CacheException('Erro ao buscar bovinos com filtros: $e');
     }
   }
-  
+
   @override
   Future<List<EquineModel>> getAllEquines() async {
     try {
@@ -140,7 +151,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao buscar equinos: $e');
     }
   }
-  
+
   @override
   Future<EquineModel?> getEquineById(String id) async {
     try {
@@ -149,7 +160,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao buscar equino por ID: $e');
     }
   }
-  
+
   @override
   Future<void> saveEquine(EquineModel equine) async {
     try {
@@ -158,13 +169,13 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
         updatedAt: now,
         createdAt: equine.createdAt ?? now,
       );
-      
+
       await _equinesBox.put(updatedEquine.id, updatedEquine);
     } catch (e) {
       throw CacheException('Erro ao salvar equino: $e');
     }
   }
-  
+
   @override
   Future<void> deleteEquine(String id) async {
     try {
@@ -180,7 +191,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao deletar equino: $e');
     }
   }
-  
+
   @override
   Future<List<EquineModel>> searchEquines({
     String? temperament,
@@ -190,52 +201,68 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
   }) async {
     try {
       final allEquines = await getAllEquines();
-      
+
       return allEquines.where((equine) {
         bool matches = true;
-        
+
         if (temperament != null && temperament.isNotEmpty) {
-          matches = matches && equine.temperament.displayName.toLowerCase().contains(temperament.toLowerCase());
+          matches =
+              matches &&
+              equine.temperament.displayName.toLowerCase().contains(
+                temperament.toLowerCase(),
+              );
         }
-        
+
         if (coat != null && coat.isNotEmpty) {
-          matches = matches && equine.coat.displayName.toLowerCase().contains(coat.toLowerCase());
+          matches =
+              matches &&
+              equine.coat.displayName.toLowerCase().contains(
+                coat.toLowerCase(),
+              );
         }
-        
+
         if (primaryUse != null && primaryUse.isNotEmpty) {
-          matches = matches && equine.primaryUse.displayName.toLowerCase().contains(primaryUse.toLowerCase());
+          matches =
+              matches &&
+              equine.primaryUse.displayName.toLowerCase().contains(
+                primaryUse.toLowerCase(),
+              );
         }
-        
+
         if (geneticInfluences != null && geneticInfluences.isNotEmpty) {
-          matches = matches && equine.geneticInfluences.toLowerCase().contains(geneticInfluences.toLowerCase());
+          matches =
+              matches &&
+              equine.geneticInfluences.toLowerCase().contains(
+                geneticInfluences.toLowerCase(),
+              );
         }
-        
+
         return matches;
       }).toList();
     } catch (e) {
       throw CacheException('Erro ao buscar equinos com filtros: $e');
     }
   }
-  
+
   @override
   Future<String> exportData() async {
     try {
       final bovines = await getAllBovines();
       final equines = await getAllEquines();
-      
+
       final exportData = {
         'bovines': bovines.map((b) => b.toJson()).toList(),
         'equines': equines.map((e) => e.toJson()).toList(),
         'exportDate': DateTime.now().toIso8601String(),
         'version': '1.0.0',
       };
-      
+
       return exportData.toString();
     } catch (e) {
       throw CacheException('Erro ao exportar dados: $e');
     }
   }
-  
+
   @override
   Future<void> importData(String backupData) async {
     try {
@@ -244,8 +271,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       throw CacheException('Erro ao importar dados: $e');
     }
   }
-  
-  /// Método para inicializar boxes do Hive
+
   static Future<void> initializeBoxes() async {
     if (!Hive.isBoxOpen(_bovinesBoxName)) {
       await Hive.openBox<BovineModel>(_bovinesBoxName);
@@ -254,8 +280,7 @@ class LivestockLocalDataSourceImpl implements LivestockLocalDataSource {
       await Hive.openBox<EquineModel>(_equinesBoxName);
     }
   }
-  
-  /// Método para fechar boxes do Hive (cleanup)
+
   static Future<void> closeBoxes() async {
     if (Hive.isBoxOpen(_bovinesBoxName)) {
       await Hive.box<BovineModel>(_bovinesBoxName).close();

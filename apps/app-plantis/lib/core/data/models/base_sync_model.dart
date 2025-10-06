@@ -198,7 +198,6 @@ abstract class BaseSyncModel extends BaseSyncEntity
     return calculateContentHash(toFirebaseMap());
   }
 
-  /// Método de conversão para sync queue
   Map<String, dynamic> toJson() {
     return {
       ...toHiveMap(),

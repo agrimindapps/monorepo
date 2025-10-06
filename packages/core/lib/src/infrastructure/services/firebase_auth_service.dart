@@ -184,7 +184,7 @@ class FirebaseAuthService implements IAuthRepository {
         ],
         webAuthenticationOptions: kIsWeb
             ? WebAuthenticationOptions(
-                clientId: 'your.bundle.id', // TODO: Configure from Firebase project
+                clientId: 'your.bundle.id',
                 redirectUri: Uri.parse('https://your-project.firebaseapp.com/__/auth/handler'),
               )
             : null,

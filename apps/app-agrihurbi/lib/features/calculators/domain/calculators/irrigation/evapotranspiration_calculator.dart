@@ -7,7 +7,6 @@ import '../../entities/calculator_entity.dart';
 import '../../entities/calculator_parameter.dart';
 
 /// Calculadora de Evapotranspiração de Referência (ETo)
-/// Calcula ETo pelo método de Penman-Monteith (FAO-56)
 class EvapotranspirationCalculator extends CalculatorEntity {
   const EvapotranspirationCalculator()
       : super(
@@ -110,7 +109,7 @@ class EvapotranspirationCalculator extends CalculatorEntity {
       final double windSpeed = double.parse(inputs['wind_speed'].toString());
       final double solarRadiation = double.parse(inputs['solar_radiation'].toString());
       final double altitude = double.parse(inputs['altitude'].toString());
-      final double latitude = double.parse(inputs['latitude'].toString()); // TODO: Use in solar angle calculations
+      final double latitude = double.parse(inputs['latitude'].toString());
       if (tempMax <= tempMin) {
         return CalculationError(
           calculatorId: id,
@@ -119,7 +118,7 @@ class EvapotranspirationCalculator extends CalculatorEntity {
         );
       }
       final double tempMean = (tempMax + tempMin) / 2;
-      final double deltaTemp = tempMax - tempMin; // TODO: Use in temperature range calculations
+      final double deltaTemp = tempMax - tempMin;
       final double atmPressure = 101.3 * math.pow((293 - 0.0065 * altitude) / 293, 5.26);
       final double gamma = 0.665 * atmPressure;
       final double delta = 4098 * (0.6108 * math.exp(17.27 * tempMean / (tempMean + 237.3))) /

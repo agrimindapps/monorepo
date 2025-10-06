@@ -11,7 +11,6 @@ import 'presentation/widgets/favoritos_tabs_widget.dart';
 /// MIGRAÇÃO PARA RIVERPOD:
 /// ✅ Migrado de Provider para Riverpod com code generation
 /// ✅ ConsumerStatefulWidget para state management
-/// ✅ Mantido método estático reloadIfActive()
 /// ✅ Template consolidado aplicado
 /// ✅ Tab system optimization
 ///
@@ -32,15 +31,16 @@ class FavoritosPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<FavoritosPage> createState() => _FavoritosPageState();
 
-  /// Método estático para recarregar a página quando estiver ativa
   static void reloadIfActive() {
     _currentState?._reloadFavoritos();
   }
 }
 
 class _FavoritosPageState extends ConsumerState<FavoritosPage>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-
+    with
+        TickerProviderStateMixin,
+        AutomaticKeepAliveClientMixin,
+        WidgetsBindingObserver {
   late TabController _tabController;
   bool _hasInitialized = false;
 
@@ -115,12 +115,17 @@ class _FavoritosPageState extends ConsumerState<FavoritosPage>
     );
   }
 
-  Widget _buildModernHeader(BuildContext context, bool isDark, FavoritosState state) {
+  Widget _buildModernHeader(
+    BuildContext context,
+    bool isDark,
+    FavoritosState state,
+  ) {
     return ModernHeaderWidget(
       title: 'Favoritos',
-      subtitle: state.hasAnyFavoritos
-          ? '${state.allFavoritos.length} itens salvos'
-          : 'Seus itens salvos',
+      subtitle:
+          state.hasAnyFavoritos
+              ? '${state.allFavoritos.length} itens salvos'
+              : 'Seus itens salvos',
       leftIcon: Icons.favorite,
       showBackButton: false,
       showActions: false,

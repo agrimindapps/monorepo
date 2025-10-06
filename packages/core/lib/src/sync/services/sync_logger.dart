@@ -7,16 +7,10 @@ class SyncLogger {
   final String appName;
   final bool enableDebugLogs;
 
-  SyncLogger({
-    required this.appName,
-    this.enableDebugLogs = kDebugMode,
-  });
+  SyncLogger({required this.appName, this.enableDebugLogs = kDebugMode});
 
   /// Log de início de sincronização
-  void logSyncStart({
-    required String entity,
-    Map<String, dynamic>? metadata,
-  }) {
+  void logSyncStart({required String entity, Map<String, dynamic>? metadata}) {
     _log(
       level: LogLevel.info,
       category: SyncLogCategory.sync,
@@ -182,10 +176,7 @@ class SyncLogger {
       level: LogLevel.info,
       category: category,
       message: message,
-      metadata: {
-        'app': appName,
-        ...?metadata,
-      },
+      metadata: {'app': appName, ...?metadata},
     );
   }
 
@@ -199,10 +190,7 @@ class SyncLogger {
       level: LogLevel.warning,
       category: category,
       message: message,
-      metadata: {
-        'app': appName,
-        ...?metadata,
-      },
+      metadata: {'app': appName, ...?metadata},
     );
   }
 
@@ -227,7 +215,6 @@ class SyncLogger {
     );
   }
 
-  /// Método interno de log
   void _log({
     required LogLevel level,
     required SyncLogCategory category,
@@ -237,9 +224,10 @@ class SyncLogger {
     if (!enableDebugLogs && level == LogLevel.debug) {
       return;
     }
-    final metadataStr = metadata != null && metadata.isNotEmpty
-        ? ' | ${metadata.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
-        : '';
+    final metadataStr =
+        metadata != null && metadata.isNotEmpty
+            ? ' | ${metadata.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
+            : '';
     developer.log(
       '$message$metadataStr',
       name: '${appName.toUpperCase()}:${category.name.toUpperCase()}',
@@ -299,18 +287,7 @@ class SyncLogger {
 }
 
 /// Níveis de log
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
-}
+enum LogLevel { debug, info, warning, error }
 
 /// Categorias de log específicas para sincronização
-enum SyncLogCategory {
-  sync,
-  network,
-  storage,
-  conflict,
-  performance,
-}
+enum SyncLogCategory { sync, network, storage, conflict, performance }

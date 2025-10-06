@@ -163,10 +163,8 @@ class RepositoryWrapper<T> {
 
 /// Helper para migração gradual de UseCases
 abstract class MigratedUseCase<T, P> {
-  /// Novo método que retorna Result
   Future<Result<T>> executeNew(P params);
 
-  /// Método antigo que retorna Either (para compatibilidade)
   Future<Either<Failure, T>> call(P params) async {
     final result = await executeNew(params);
     return result.toEither();

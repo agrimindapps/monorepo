@@ -4,7 +4,6 @@ import 'package:core/core.dart' show Equatable;
 ///
 /// NOTE: Similar enums exist in features/tasks/domain/entities/task.dart
 /// These are simplified versions for the PlantTask context
-/// TODO: Consider unification with main Task enums in future refactor
 enum TaskType {
   watering,
   fertilizing,

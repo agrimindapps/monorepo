@@ -820,7 +820,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           description: null,
           tags: const [],
           createdAt: DateTime.now(),
-          userId: 'current_user', // TODO: Implementar sistema de usuários
+          userId: 'current_user',
           isPublic: false,
         );
         CalculatorFeaturesProvider? featuresProvider;

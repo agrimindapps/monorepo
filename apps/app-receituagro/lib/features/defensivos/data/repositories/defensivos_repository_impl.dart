@@ -304,7 +304,7 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
       final allDefensivos = result.data ?? [];
       final defensivosEntities = allDefensivos.map((hive) {
         return DefensivoMapper.fromHiveToEntity(hive).copyWith(
-          quantidadeDiagnosticos: 0, // TODO: integrar com DiagnosticoIntegrationService
+          quantidadeDiagnosticos: 0,
           nivelPrioridade: 1,
           isComercializado: hive.status,
           isElegivel: hive.status,

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 /// Widget que exibe o status atual da sincronização
 /// Pode ser usado na AppBar ou em qualquer lugar da UI
-/// TODO: Migrar para usar Riverpod providers específicos
 class SyncStatusWidget extends ConsumerWidget {
   const SyncStatusWidget({
     super.key,

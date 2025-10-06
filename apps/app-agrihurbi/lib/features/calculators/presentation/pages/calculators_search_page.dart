@@ -194,7 +194,6 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
     });
   }
 
-  /// Método para atualizar resultados da busca
   void _updateSearchResults() {
     _performOptimizedSearch(_searchController.text);
   }

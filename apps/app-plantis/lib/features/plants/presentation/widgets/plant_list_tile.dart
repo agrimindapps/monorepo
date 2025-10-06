@@ -121,7 +121,7 @@ class PlantListTile extends ConsumerWidget {
                           ),
                           const SizedBox(width: 2),
                           Text(
-                            'Sala de Estar', // TODO: Resolver nome do espaço
+                            'Sala de Estar',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
                                   isDark

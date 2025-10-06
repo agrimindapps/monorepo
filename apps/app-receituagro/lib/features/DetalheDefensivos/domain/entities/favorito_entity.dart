@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
 /// Entidade de domínio que representa um favorito
-/// 
+///
 /// Esta entidade representa um item favoritado pelo usuário,
 /// seguindo os princípios de Clean Architecture
 class FavoritoEntity extends Equatable {
@@ -54,7 +54,6 @@ class FavoritoEntity extends Equatable {
     return '';
   }
 
-  /// Método para criar uma nova instância com valores alterados
   FavoritoEntity copyWith({
     String? id,
     String? itemId,
@@ -81,14 +80,14 @@ class FavoritoEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        itemId,
-        tipo,
-        nome,
-        fabricante,
-        cultura,
-        metadata,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    itemId,
+    tipo,
+    nome,
+    fabricante,
+    cultura,
+    metadata,
+    createdAt,
+    updatedAt,
+  ];
 }

@@ -125,10 +125,10 @@ class FieldCapacityCalculator extends CalculatorEntity {
       final double totalVolumeLiters = CalculatorMath.cubicToLiters(totalVolumeM3);
       final double totalPorosity = 1 - (bulkDensity / 2.65);
       final double macroporosity = totalPorosity - thetaS;
-      final double microporosity = thetaS; // TODO: Use in detailed soil analysis
-      final double lamina25 = availableWaterMm * 0.25; // TODO: Use in irrigation scenarios
+      final double microporosity = thetaS;
+      final double lamina25 = availableWaterMm * 0.25;
       final double lamina50 = availableWaterMm * 0.50;
-      final double lamina75 = availableWaterMm * 0.75; // TODO: Use in stress management
+      final double lamina75 = availableWaterMm * 0.75;
       const double etMedia = 5.0;
       final double diasEsgotamento = availableWaterMm / etMedia;
       final int frequenciaIrrigacao = _calculateIrrigationFrequency(availableWaterMm, soilType);

@@ -26,7 +26,6 @@ part 'auth_notifier.g.dart';
 
 /// AuthNotifier - Riverpod v2 com code generation
 ///
-/// Gerencia todo o estado de autenticação do app-gasometer:
 /// - Login (email/password, anonymous)
 /// - Logout
 /// - Register/SignUp

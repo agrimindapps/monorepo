@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
+
 const int _defaultMaxSize = 100;
 const Duration _defaultTtl = Duration(minutes: 30);
 const int _maxMemoryUsageKB = 5 * 1024; // 5MB
@@ -64,7 +65,8 @@ class CacheEntry<T> {
 
   double get score {
     final frequency = accessCount.toDouble();
-    final recency = DateTime.now().difference(lastAccessed).inMinutes.toDouble();
+    final recency =
+        DateTime.now().difference(lastAccessed).inMinutes.toDouble();
     return frequency / (recency + 1);
   }
 }
@@ -74,7 +76,7 @@ class _CacheLayer<T> {
   final String name;
   final CacheConfig config;
   final LinkedHashMap<String, CacheEntry<T>> _data = LinkedHashMap();
-  
+
   int _hits = 0;
   int _misses = 0;
   int _evictions = 0;
@@ -82,133 +84,136 @@ class _CacheLayer<T> {
   _CacheLayer(this.name, this.config);
 
   CacheEntry<T>? get(String key) {
-      final entry = _data[key];
-      
-      if (entry == null) {
-        _misses++;
-        return null;
-      }
+    final entry = _data[key];
 
-      if (entry.isExpired) {
-        _data.remove(key);
-        _misses++;
-        return null;
-      }
+    if (entry == null) {
+      _misses++;
+      return null;
+    }
+
+    if (entry.isExpired) {
       _data.remove(key);
-      final updatedEntry = entry.copyWithAccess();
-      _data[key] = updatedEntry;
-      
-      _hits++;
-      return updatedEntry;
+      _misses++;
+      return null;
     }
+    _data.remove(key);
+    final updatedEntry = entry.copyWithAccess();
+    _data[key] = updatedEntry;
 
-    void put(String key, T value) {
-      final sizeBytes = _estimateSize(value);
-      final expiresAt = DateTime.now().add(config.ttl);
-      
-      final entry = CacheEntry<T>(
-        key: key,
-        value: value,
-        createdAt: DateTime.now(),
-        expiresAt: expiresAt,
-        lastAccessed: DateTime.now(),
-        sizeBytes: sizeBytes,
-      );
-      _data.remove(key);
-      _evictIfNecessary();
-      _data[key] = entry;
+    _hits++;
+    return updatedEntry;
+  }
+
+  void put(String key, T value) {
+    final sizeBytes = _estimateSize(value);
+    final expiresAt = DateTime.now().add(config.ttl);
+
+    final entry = CacheEntry<T>(
+      key: key,
+      value: value,
+      createdAt: DateTime.now(),
+      expiresAt: expiresAt,
+      lastAccessed: DateTime.now(),
+      sizeBytes: sizeBytes,
+    );
+    _data.remove(key);
+    _evictIfNecessary();
+    _data[key] = entry;
+  }
+
+  void remove(String key) {
+    _data.remove(key);
+  }
+
+  void clear() {
+    _data.clear();
+  }
+
+  void _evictIfNecessary() {
+    _removeExpiredEntries();
+    while (_data.length >= config.maxSize) {
+      _evictLeastValuable();
     }
-
-    void remove(String key) {
-      _data.remove(key);
-    }
-
-    void clear() {
-      _data.clear();
-    }
-
-    void _evictIfNecessary() {
-      _removeExpiredEntries();
-      while (_data.length >= config.maxSize) {
-        _evictLeastValuable();
-      }
-      while (_getTotalSizeKB() > _maxMemoryUsageKB && _data.isNotEmpty) {
-        _evictLeastValuable();
-      }
-    }
-
-    void _removeExpiredEntries() {
-      final keysToRemove = <String>[];
-      
-      for (final entry in _data.values) {
-        if (entry.isExpired) {
-          keysToRemove.add(entry.key);
-        }
-      }
-
-      for (final key in keysToRemove) {
-        _data.remove(key);
-        _evictions++;
-      }
-    }
-
-    void _evictLeastValuable() {
-      if (_data.isEmpty) return;
-      CacheEntry<T>? leastValuable;
-      String? keyToRemove;
-
-      for (final entry in _data.entries) {
-        if (leastValuable == null || entry.value.score < leastValuable.score) {
-          leastValuable = entry.value;
-          keyToRemove = entry.key;
-        }
-      }
-
-      if (keyToRemove != null) {
-        _data.remove(keyToRemove);
-        _evictions++;
-      }
-    }
-
-    double _getTotalSizeKB() {
-      return _data.values.fold(0.0, (sum, entry) => sum + entry.sizeBytes) / 1024.0;
-    }
-
-    int _estimateSize(T value) {
-      if (value is String) {
-        return utf8.encode(value).length;
-      } else if (value is List) {
-        return value.length * 8; // Estimativa
-      } else if (value is Map) {
-        return value.length * 16; // Estimativa
-      }
-      return 64; // Estimativa padrão
-    }
-
-    Map<String, dynamic> getStats() {
-      return {
-        'name': name,
-        'size': _data.length,
-        'max_size': config.maxSize,
-        'hits': _hits,
-        'misses': _misses,
-        'evictions': _evictions,
-        'hit_rate': _hits / (_hits + _misses + 1),
-        'total_size_kb': _getTotalSizeKB(),
-        'avg_entry_size_bytes': _data.isEmpty ? 0 : _getTotalSizeKB() * 1024 / _data.length,
-      };
+    while (_getTotalSizeKB() > _maxMemoryUsageKB && _data.isNotEmpty) {
+      _evictLeastValuable();
     }
   }
 
+  void _removeExpiredEntries() {
+    final keysToRemove = <String>[];
+
+    for (final entry in _data.values) {
+      if (entry.isExpired) {
+        keysToRemove.add(entry.key);
+      }
+    }
+
+    for (final key in keysToRemove) {
+      _data.remove(key);
+      _evictions++;
+    }
+  }
+
+  void _evictLeastValuable() {
+    if (_data.isEmpty) return;
+    CacheEntry<T>? leastValuable;
+    String? keyToRemove;
+
+    for (final entry in _data.entries) {
+      if (leastValuable == null || entry.value.score < leastValuable.score) {
+        leastValuable = entry.value;
+        keyToRemove = entry.key;
+      }
+    }
+
+    if (keyToRemove != null) {
+      _data.remove(keyToRemove);
+      _evictions++;
+    }
+  }
+
+  double _getTotalSizeKB() {
+    return _data.values.fold(0.0, (sum, entry) => sum + entry.sizeBytes) /
+        1024.0;
+  }
+
+  int _estimateSize(T value) {
+    if (value is String) {
+      return utf8.encode(value).length;
+    } else if (value is List) {
+      return value.length * 8; // Estimativa
+    } else if (value is Map) {
+      return value.length * 16; // Estimativa
+    }
+    return 64; // Estimativa padrão
+  }
+
+  Map<String, dynamic> getStats() {
+    return {
+      'name': name,
+      'size': _data.length,
+      'max_size': config.maxSize,
+      'hits': _hits,
+      'misses': _misses,
+      'evictions': _evictions,
+      'hit_rate': _hits / (_hits + _misses + 1),
+      'total_size_kb': _getTotalSizeKB(),
+      'avg_entry_size_bytes':
+          _data.isEmpty ? 0 : _getTotalSizeKB() * 1024 / _data.length,
+    };
+  }
+}
+
 /// Sistema de cache otimizado para high performance
-/// 
+///
 /// Implementa múltiplas estratégias de cache:
 /// - LRU (Least Recently Used)
 /// - TTL (Time To Live)
 /// - Size-based eviction
 /// - Memory pressure aware
 class OptimizedCacheManager extends ChangeNotifier {
-  static final OptimizedCacheManager _instance = OptimizedCacheManager._internal();
+  static final OptimizedCacheManager _instance =
+      OptimizedCacheManager._internal();
   factory OptimizedCacheManager() => _instance;
   OptimizedCacheManager._internal();
   final Map<String, _CacheLayer<dynamic>> _cacheLayers = {};
@@ -225,13 +230,11 @@ class OptimizedCacheManager extends ChangeNotifier {
   }
 
   /// Armazena um valor no cache
-  void put<T>(
-    String layerName, 
-    String key, 
-    T value, {
-    CacheConfig? config,
-  }) {
-    final layer = _getOrCreateLayer<T>(layerName, config ?? const CacheConfig());
+  void put<T>(String layerName, String key, T value, {CacheConfig? config}) {
+    final layer = _getOrCreateLayer<T>(
+      layerName,
+      config ?? const CacheConfig(),
+    );
     layer.put(key, value);
     notifyListeners();
   }
@@ -280,7 +283,6 @@ class OptimizedCacheManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Limpa todo o cache
   void clearAll() {
     for (final layer in _cacheLayers.values) {
       layer.clear();
@@ -301,9 +303,17 @@ class OptimizedCacheManager extends ChangeNotifier {
 
   /// Obtém estatísticas gerais
   Map<String, dynamic> getGlobalStats() {
-    final layerStats = _cacheLayers.values.map((layer) => layer.getStats()).toList();
-    final totalSize = layerStats.fold<int>(0, (int sum, Map<String, dynamic> stats) => sum + (stats['size'] as int));
-    final totalSizeKB = layerStats.fold<double>(0.0, (double sum, Map<String, dynamic> stats) => sum + (stats['total_size_kb'] as double));
+    final layerStats =
+        _cacheLayers.values.map((layer) => layer.getStats()).toList();
+    final totalSize = layerStats.fold<int>(
+      0,
+      (int sum, Map<String, dynamic> stats) => sum + (stats['size'] as int),
+    );
+    final totalSizeKB = layerStats.fold<double>(
+      0.0,
+      (double sum, Map<String, dynamic> stats) =>
+          sum + (stats['total_size_kb'] as double),
+    );
 
     return {
       'total_layers': _cacheLayers.length,
@@ -322,7 +332,7 @@ class OptimizedCacheManager extends ChangeNotifier {
     for (final layer in _cacheLayers.values) {
       layer._evictIfNecessary();
     }
-    
+
     developer.log('Cache otimizado: ${getGlobalStats()}', name: 'CacheManager');
     notifyListeners();
   }
@@ -363,16 +373,8 @@ class CacheLayers {
       ttl: Duration(minutes: 15),
       priority: 2,
     ),
-    news: const CacheConfig(
-      maxSize: 50,
-      ttl: Duration(hours: 1),
-      priority: 3,
-    ),
-    user: const CacheConfig(
-      maxSize: 10,
-      ttl: Duration(hours: 24),
-      priority: 1,
-    ),
+    news: const CacheConfig(maxSize: 50, ttl: Duration(hours: 1), priority: 3),
+    user: const CacheConfig(maxSize: 10, ttl: Duration(hours: 24), priority: 1),
     settings: const CacheConfig(
       maxSize: 20,
       ttl: Duration(days: 7),

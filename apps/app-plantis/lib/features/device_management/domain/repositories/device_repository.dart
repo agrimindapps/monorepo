@@ -55,7 +55,6 @@ abstract class DeviceRepository {
   /// Força refresh completo dos dados
   Future<Either<Failure, List<DeviceModel>>> syncDevices(String userId);
 
-  /// Limpa todo o cache local de dispositivos
   /// Útil para logout ou reset de dados
   Future<Either<Failure, void>> clearCache();
 }

@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 /// Serviço otimizado para carregamento de imagens com cache e lazy loading
 /// Resolve o problema de performance com 1181+ imagens (143MB)
-/// 
+///
 /// Funcionalidades:
 /// - Cache em memória com LRU eviction
 /// - Lazy loading sob demanda
@@ -13,7 +13,8 @@ import 'package:flutter/services.dart';
 /// - Pre-loading inteligente
 /// - Gerenciamento de memória otimizado
 class OptimizedImageService {
-  static final OptimizedImageService _instance = OptimizedImageService._internal();
+  static final OptimizedImageService _instance =
+      OptimizedImageService._internal();
   factory OptimizedImageService() => _instance;
   OptimizedImageService._internal();
   final Map<String, Uint8List> _cache = {};
@@ -31,7 +32,7 @@ class OptimizedImageService {
   Future<Uint8List?> loadImage(String imagePath) async {
     if (_cache.containsKey(imagePath)) {
       final timestamp = _cacheTimestamps[imagePath];
-      if (timestamp != null && 
+      if (timestamp != null &&
           DateTime.now().difference(timestamp) < _cacheExpiration) {
         _cacheHits++;
         developer.log('Cache HIT: $imagePath', name: 'OptimizedImageService');
@@ -41,7 +42,10 @@ class OptimizedImageService {
       }
     }
     if (_loadingFutures.containsKey(imagePath)) {
-      developer.log('Loading in progress: $imagePath', name: 'OptimizedImageService');
+      developer.log(
+        'Loading in progress: $imagePath',
+        name: 'OptimizedImageService',
+      );
       return await _loadingFutures[imagePath];
     }
     _cacheMisses++;
@@ -54,14 +58,19 @@ class OptimizedImageService {
 
       if (imageData != null) {
         _addToCache(imagePath, imageData);
-        developer.log('Image loaded and cached: $imagePath (${imageData.length} bytes)', 
-                     name: 'OptimizedImageService');
+        developer.log(
+          'Image loaded and cached: $imagePath (${imageData.length} bytes)',
+          name: 'OptimizedImageService',
+        );
       }
 
       return imageData;
     } catch (e) {
       _loadingFutures.remove(imagePath);
-      developer.log('Error loading image $imagePath: $e', name: 'OptimizedImageService');
+      developer.log(
+        'Error loading image $imagePath: $e',
+        name: 'OptimizedImageService',
+      );
       return null;
     }
   }
@@ -71,20 +80,23 @@ class OptimizedImageService {
     try {
       final ByteData data = await rootBundle.load(imagePath);
       final Uint8List bytes = data.buffer.asUint8List();
-      if (bytes.length > 500000) { // Se > 500KB, comprime
+      if (bytes.length > 500000) {
+        // Se > 500KB, comprime
         return await _compressImage(bytes);
       }
-      
+
       _totalLoaded++;
       _totalSize += bytes.length;
       return bytes;
-      
     } catch (e) {
-      developer.log('Error loading asset $imagePath: $e', name: 'OptimizedImageService');
+      developer.log(
+        'Error loading asset $imagePath: $e',
+        name: 'OptimizedImageService',
+      );
       if (imagePath != 'assets/imagens/bigsize/a.jpg') {
         return await _loadImageFromAssets('assets/imagens/bigsize/a.jpg');
       }
-      
+
       return null;
     }
   }
@@ -97,22 +109,27 @@ class OptimizedImageService {
         targetWidth: 400, // Máximo 400px de largura
         targetHeight: 400, // Máximo 400px de altura
       );
-      
+
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
       final ByteData? compressedData = await frameInfo.image.toByteData(
-        format: ui.ImageByteFormat.png
+        format: ui.ImageByteFormat.png,
       );
-      
+
       if (compressedData != null) {
         final compressed = compressedData.buffer.asUint8List();
-        developer.log('Image compressed: ${bytes.length} -> ${compressed.length} bytes', 
-                     name: 'OptimizedImageService');
+        developer.log(
+          'Image compressed: ${bytes.length} -> ${compressed.length} bytes',
+          name: 'OptimizedImageService',
+        );
         return compressed;
       }
-      
+
       return bytes;
     } catch (e) {
-      developer.log('Error compressing image: $e', name: 'OptimizedImageService');
+      developer.log(
+        'Error compressing image: $e',
+        name: 'OptimizedImageService',
+      );
       return bytes;
     }
   }
@@ -141,10 +158,11 @@ class OptimizedImageService {
   /// Limpa itens expirados do cache
   void _cleanExpiredCache() {
     final now = DateTime.now();
-    final expiredKeys = _cacheTimestamps.entries
-        .where((entry) => now.difference(entry.value) > _cacheExpiration)
-        .map((entry) => entry.key)
-        .toList();
+    final expiredKeys =
+        _cacheTimestamps.entries
+            .where((entry) => now.difference(entry.value) > _cacheExpiration)
+            .map((entry) => entry.key)
+            .toList();
 
     for (final key in expiredKeys) {
       _removeFromCache(key);
@@ -155,21 +173,25 @@ class OptimizedImageService {
   void _evictOldestCacheItem() {
     if (_cacheTimestamps.isEmpty) return;
 
-    final oldestEntry = _cacheTimestamps.entries
-        .reduce((a, b) => a.value.isBefore(b.value) ? a : b);
-    
+    final oldestEntry = _cacheTimestamps.entries.reduce(
+      (a, b) => a.value.isBefore(b.value) ? a : b,
+    );
+
     _removeFromCache(oldestEntry.key);
-    developer.log('Evicted oldest cache item: ${oldestEntry.key}', 
-                 name: 'OptimizedImageService');
+    developer.log(
+      'Evicted oldest cache item: ${oldestEntry.key}',
+      name: 'OptimizedImageService',
+    );
   }
 
   /// Remove itens do cache até ficar abaixo do limite de memória
   void _evictCacheBySize() {
-    final sortedEntries = _cacheTimestamps.entries.toList()
-      ..sort((a, b) => a.value.compareTo(b.value));
+    final sortedEntries =
+        _cacheTimestamps.entries.toList()
+          ..sort((a, b) => a.value.compareTo(b.value));
 
-    while (_calculateTotalCacheSize() > _maxMemoryUsageMB * 1024 * 1024 && 
-           sortedEntries.isNotEmpty) {
+    while (_calculateTotalCacheSize() > _maxMemoryUsageMB * 1024 * 1024 &&
+        sortedEntries.isNotEmpty) {
       final entry = sortedEntries.removeAt(0);
       _removeFromCache(entry.key);
     }
@@ -190,9 +212,11 @@ class OptimizedImageService {
 
     final futures = criticalImages.map((path) => loadImage(path));
     await Future.wait(futures);
-    
-    developer.log('Preloaded ${criticalImages.length} critical images', 
-                 name: 'OptimizedImageService');
+
+    developer.log(
+      'Preloaded ${criticalImages.length} critical images',
+      name: 'OptimizedImageService',
+    );
   }
 
   /// Verifica se uma imagem existe nos assets
@@ -205,7 +229,6 @@ class OptimizedImageService {
     }
   }
 
-  /// Limpa todo o cache
   void clearCache() {
     _cache.clear();
     _cacheTimestamps.clear();
@@ -219,14 +242,17 @@ class OptimizedImageService {
     return {
       'cacheHits': _cacheHits,
       'cacheMisses': _cacheMisses,
-      'hitRate': _cacheHits + _cacheMisses > 0 
-          ? (_cacheHits / (_cacheHits + _cacheMisses) * 100).toStringAsFixed(1)
-          : '0',
+      'hitRate':
+          _cacheHits + _cacheMisses > 0
+              ? (_cacheHits / (_cacheHits + _cacheMisses) * 100)
+                  .toStringAsFixed(1)
+              : '0',
       'cachedItems': _cache.length,
       'totalCacheSizeMB': (totalCacheSize / (1024 * 1024)).toStringAsFixed(2),
       'totalImagesLoaded': _totalLoaded,
       'totalDataLoadedMB': (_totalSize / (1024 * 1024)).toStringAsFixed(2),
-      'memoryUsage': '${(totalCacheSize / (1024 * 1024)).toStringAsFixed(1)}MB / ${_maxMemoryUsageMB}MB',
+      'memoryUsage':
+          '${(totalCacheSize / (1024 * 1024)).toStringAsFixed(1)}MB / ${_maxMemoryUsageMB}MB',
     };
   }
 
@@ -234,6 +260,9 @@ class OptimizedImageService {
   void forceGarbageCollection() {
     _cleanExpiredCache();
     _evictCacheBySize();
-    developer.log('Forced garbage collection completed', name: 'OptimizedImageService');
+    developer.log(
+      'Forced garbage collection completed',
+      name: 'OptimizedImageService',
+    );
   }
 }

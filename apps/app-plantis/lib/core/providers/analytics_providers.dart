@@ -374,7 +374,7 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
       await _enhancedService.logPurchaseEvent(
         productId: productId,
         value: price,
-        currency: 'USD', // TODO: Get from user locale or RevenueCat
+        currency: 'USD',
         additionalParameters: {'subscription_type': 'premium'},
       );
       state = state.clearError();

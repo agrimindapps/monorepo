@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 import 'main_navigation_page.dart';
 
 /// Widget wrapper que adiciona BottomNavigationBar a páginas secundárias
-/// para manter a navegação consistente em todo o app
+
 class BottomNavWrapper extends StatelessWidget {
   final Widget child;
   final int? selectedIndex;
 
-  const BottomNavWrapper({
-    super.key,
-    required this.child,
-    this.selectedIndex,
-  });
+  const BottomNavWrapper({super.key, required this.child, this.selectedIndex});
 
   @override
   Widget build(BuildContext context) {

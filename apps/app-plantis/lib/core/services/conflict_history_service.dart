@@ -30,7 +30,6 @@ class ConflictHistoryService {
     await _conflictHistoryBox.delete(conflictId);
   }
 
-  /// Limpa todo o histórico de conflitos
   Future<void> clearConflictHistory() async {
     await _conflictHistoryBox.clear();
   }

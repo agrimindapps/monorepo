@@ -318,7 +318,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
 
       final animal = Animal(
         id: widget.animal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: 'temp_user_id', // TODO: Implement proper auth service integration
+        userId: 'temp_user_id',
         name: _nameController.text.trim(),
         species: _selectedSpecies,
         breed: _breedController.text.trim().isEmpty ? null : _breedController.text.trim(),

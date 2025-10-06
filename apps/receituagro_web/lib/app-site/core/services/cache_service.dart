@@ -93,9 +93,10 @@ class CacheService {
 
         if (!isExpired) {
           _hitCount++;
-          final data = deserializer != null
-              ? deserializer(jsonDecode(cachedData))
-              : jsonDecode(cachedData) as T;
+          final data =
+              deserializer != null
+                  ? deserializer(jsonDecode(cachedData))
+                  : jsonDecode(cachedData) as T;
           if (useMemoryCache) {
             _memoryCache[cacheKey] = data;
             _memoryCacheTimestamp[cacheKey] = cacheTime;
@@ -126,10 +127,7 @@ class CacheService {
       _memoryCache.remove(cacheKey);
       _memoryCacheTimestamp.remove(cacheKey);
       final prefs = await SharedPreferences.getInstance();
-      await Future.wait([
-        prefs.remove(cacheKey),
-        prefs.remove(timestampKey),
-      ]);
+      await Future.wait([prefs.remove(cacheKey), prefs.remove(timestampKey)]);
 
       SecureLogger.debug('Cache removido para key: $key');
     } catch (e) {
@@ -137,7 +135,6 @@ class CacheService {
     }
   }
 
-  /// Limpa todo o cache
   static Future<void> clear() async {
     try {
       _memoryCache.clear();
@@ -169,11 +166,16 @@ class CacheService {
     Duration? ttl,
   }) async {
     unawaited(
-      fetcher().then((data) async {
-        await set(key, data, ttl: ttl);
-      }).catchError((e) {
-        SecureLogger.error('Erro ao atualizar cache em background', error: e);
-      }),
+      fetcher()
+          .then((data) async {
+            await set(key, data, ttl: ttl);
+          })
+          .catchError((e) {
+            SecureLogger.error(
+              'Erro ao atualizar cache em background',
+              error: e,
+            );
+          }),
     );
   }
 
@@ -239,7 +241,8 @@ class CacheService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys().where(
-          (key) => key.startsWith(_cachePrefix) && key.contains(pattern));
+        (key) => key.startsWith(_cachePrefix) && key.contains(pattern),
+      );
 
       for (final key in keys) {
         await prefs.remove(key);
@@ -277,5 +280,4 @@ extension CacheExtension on String {
 }
 
 /// Função para evitar warning do unawaited
-void unawaited(Future<void> future) {
-}
+void unawaited(Future<void> future) {}

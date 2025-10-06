@@ -6,12 +6,7 @@ import '../../domain/strategies/calculator_strategy.dart';
 import '../../domain/strategies/calorie_calculator_strategy.dart';
 
 /// Estados para o provider de cálculo calórico
-enum CalorieCalculatorStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
+enum CalorieCalculatorStatus { initial, loading, success, error }
 
 /// Estado da calculadora de necessidades calóricas
 class CalorieState {
@@ -44,24 +39,25 @@ class CalorieState {
 
   /// Getters de conveniência
   bool get isLoading => status == CalorieCalculatorStatus.loading;
-  bool get hasResult => status == CalorieCalculatorStatus.success && output != null;
+  bool get hasResult =>
+      status == CalorieCalculatorStatus.success && output != null;
   bool get hasError => status == CalorieCalculatorStatus.error && error != null;
   bool get hasValidationErrors => validationErrors.isNotEmpty;
   bool get canCalculate => _isInputValid() && validationErrors.isEmpty;
-  
+
   /// Verifica se todos os campos obrigatórios estão preenchidos
   bool _isInputValid() {
-    return input.weight > 0 && 
-           input.age >= 0 &&
-           (!input.isLactating || input.numberOfOffspring != null);
+    return input.weight > 0 &&
+        input.age >= 0 &&
+        (!input.isLactating || input.numberOfOffspring != null);
   }
 
   /// Total de steps no formulário
   int get totalSteps => 5;
-  
+
   /// Indica se é o último step
   bool get isLastStep => currentStep >= totalSteps - 1;
-  
+
   /// Indica se é o primeiro step
   bool get isFirstStep => currentStep <= 0;
 
@@ -97,7 +93,7 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   /// Atualiza entrada da calculadora
   void updateInput(CalorieInput input) {
     final validationErrors = _strategy.validateInput(input);
-    
+
     state = state.copyWith(
       input: input,
       validationErrors: validationErrors,
@@ -127,7 +123,9 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   }
 
   void updatePhysiologicalState(PhysiologicalState physiologicalState) {
-    final newInput = state.input.copyWith(physiologicalState: physiologicalState);
+    final newInput = state.input.copyWith(
+      physiologicalState: physiologicalState,
+    );
     updateInput(newInput);
   }
 
@@ -137,12 +135,18 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   }
 
   void updateBodyConditionScore(BodyConditionScore bodyConditionScore) {
-    final newInput = state.input.copyWith(bodyConditionScore: bodyConditionScore);
+    final newInput = state.input.copyWith(
+      bodyConditionScore: bodyConditionScore,
+    );
     updateInput(newInput);
   }
 
-  void updateEnvironmentalCondition(EnvironmentalCondition environmentalCondition) {
-    final newInput = state.input.copyWith(environmentalCondition: environmentalCondition);
+  void updateEnvironmentalCondition(
+    EnvironmentalCondition environmentalCondition,
+  ) {
+    final newInput = state.input.copyWith(
+      environmentalCondition: environmentalCondition,
+    );
     updateInput(newInput);
   }
 
@@ -197,10 +201,10 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   bool canProceedToNextStep() {
     switch (state.currentStep) {
       case 0: // Informações básicas
-        return state.input.weight > 0 && 
-               state.input.age >= 0;
+        return state.input.weight > 0 && state.input.age >= 0;
       case 1: // Estado fisiológico
-        return !state.input.isLactating || state.input.numberOfOffspring != null;
+        return !state.input.isLactating ||
+            state.input.numberOfOffspring != null;
       case 2: // Atividade e condição corporal
         return state.input.bodyConditionScore != null;
       case 3: // Condições especiais
@@ -230,7 +234,7 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
     try {
       final result = _strategy.calculate(state.input);
       final newHistory = [...state.history, result];
-      
+
       state = state.copyWith(
         status: CalorieCalculatorStatus.success,
         output: result,
@@ -295,7 +299,6 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
     }
   }
 
-  /// Limpa todo o histórico
   void clearHistory() {
     state = state.copyWith(history: []);
   }
@@ -312,7 +315,7 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
   /// Cria input pré-configurado para diferentes cenários
   void loadPreset(CaloriePreset preset) {
     CalorieInput presetInput;
-    
+
     switch (preset) {
       case CaloriePreset.adultDogNormal:
         presetInput = const CalorieInput(
@@ -366,14 +369,13 @@ class CalorieNotifier extends StateNotifier<CalorieState> {
         );
         break;
     }
-    
+
     updateInput(presetInput);
   }
 
   /// Salva cálculo atual como favorito (em implementação futura)
   void saveAsFavorite() {
-    if (state.hasResult) {
-    }
+    if (state.hasResult) {}
   }
 }
 
@@ -387,12 +389,16 @@ enum CaloriePreset {
 }
 
 /// Provider da estratégia de cálculo calórico
-final calorieCalculatorStrategyProvider = Provider<CalorieCalculatorStrategy>((ref) {
+final calorieCalculatorStrategyProvider = Provider<CalorieCalculatorStrategy>((
+  ref,
+) {
   return CalorieCalculatorStrategy();
 });
 
 /// Provider principal da calculadora de necessidades calóricas
-final calorieProvider = StateNotifierProvider<CalorieNotifier, CalorieState>((ref) {
+final calorieProvider = StateNotifierProvider<CalorieNotifier, CalorieState>((
+  ref,
+) {
   final strategy = ref.watch(calorieCalculatorStrategyProvider);
   return CalorieNotifier(strategy);
 });
@@ -444,12 +450,13 @@ final calorieCurrentStepProvider = Provider<int>((ref) {
 /// Optimized to watch state instead of calling method repeatedly
 final calorieCanProceedProvider = Provider<bool>((ref) {
   final state = ref.watch(calorieProvider);
-  
+
   switch (state.currentStep) {
     case 0: // Informações básicas
       return state.input.weight > 0 && state.input.age >= 0;
     case 1: // Estado fisiológico
-      return (!state.input.isLactating || state.input.numberOfOffspring != null);
+      return (!state.input.isLactating ||
+          state.input.numberOfOffspring != null);
     case 2: // Atividade e condição corporal
       return true; // BodyConditionScore is non-nullable enum
     case 3: // Condições especiais
@@ -466,12 +473,18 @@ final calorieSuggestionsProvider = Provider<List<String>>((ref) {
   final input = ref.watch(calorieInputProvider);
   final suggestions = <String>[];
   if (input.species == AnimalSpecies.cat && input.weight > 6) {
-    suggestions.add('⚠️ Peso elevado para gatos - considere avaliação veterinária');
+    suggestions.add(
+      '⚠️ Peso elevado para gatos - considere avaliação veterinária',
+    );
   } else if (input.species == AnimalSpecies.dog && input.weight < 2) {
-    suggestions.add('💡 Para cães pequenos, monitore alimentação mais frequentemente');
+    suggestions.add(
+      '💡 Para cães pequenos, monitore alimentação mais frequentemente',
+    );
   }
   if (input.age < 6) {
-    suggestions.add('🍼 Filhotes necessitam alimentação mais frequente (3-4x/dia)');
+    suggestions.add(
+      '🍼 Filhotes necessitam alimentação mais frequente (3-4x/dia)',
+    );
   } else if (input.age > 84) {
     suggestions.add('👴 Animais idosos podem precisar de dieta especial');
   }
@@ -483,12 +496,17 @@ final calorieSuggestionsProvider = Provider<List<String>>((ref) {
   if (input.bodyConditionScore == BodyConditionScore.overweight) {
     suggestions.add('⚖️ Considere programa de perda de peso supervisionado');
   } else if (input.bodyConditionScore == BodyConditionScore.underweight) {
-    suggestions.add('🍽️ Aumente frequência de refeições e monitorar ganho de peso');
+    suggestions.add(
+      '🍽️ Aumente frequência de refeições e monitorar ganho de peso',
+    );
   }
   if (input.medicalCondition != MedicalCondition.none) {
-    suggestions.add('🏥 Consulte veterinário para dieta terapêutica específica');
+    suggestions.add(
+      '🏥 Consulte veterinário para dieta terapêutica específica',
+    );
   }
-  if (input.idealWeight == null && input.bodyConditionScore != BodyConditionScore.ideal) {
+  if (input.idealWeight == null &&
+      input.bodyConditionScore != BodyConditionScore.ideal) {
     suggestions.add('🎯 Informe peso ideal para cálculos mais precisos');
   }
 
@@ -502,17 +520,19 @@ final calorieSuggestionsProvider = Provider<List<String>>((ref) {
 /// Provider com estatísticas do histórico
 final calorieHistoryStatsProvider = Provider<Map<String, dynamic>>((ref) {
   final history = ref.watch(calorieHistoryProvider);
-  
+
   if (history.isEmpty) {
     return {'count': 0};
   }
 
-  final derValues = history.map((result) => result.dailyEnergyRequirement).toList();
+  final derValues =
+      history.map((result) => result.dailyEnergyRequirement).toList();
   final avgDer = derValues.reduce((a, b) => a + b) / derValues.length;
-  
-  final rerValues = history.map((result) => result.restingEnergyRequirement).toList();
+
+  final rerValues =
+      history.map((result) => result.restingEnergyRequirement).toList();
   final avgRer = rerValues.reduce((a, b) => a + b) / rerValues.length;
-  
+
   final weights = history.map((result) => result.input.weight).toList();
   final avgWeight = weights.reduce((a, b) => a + b) / weights.length;
 
@@ -523,8 +543,12 @@ final calorieHistoryStatsProvider = Provider<Map<String, dynamic>>((ref) {
     'averageWeight': avgWeight,
     'latestDer': derValues.last,
     'latestRer': rerValues.last,
-    'calorieRange': '${derValues.reduce((a, b) => a < b ? a : b).round()}-${derValues.reduce((a, b) => a > b ? a : b).round()} kcal/dia',
-    'trend': derValues.length > 1 ? derValues.last - derValues[derValues.length - 2] : 0,
+    'calorieRange':
+        '${derValues.reduce((a, b) => a < b ? a : b).round()}-${derValues.reduce((a, b) => a > b ? a : b).round()} kcal/dia',
+    'trend':
+        derValues.length > 1
+            ? derValues.last - derValues[derValues.length - 2]
+            : 0,
   };
 });
 

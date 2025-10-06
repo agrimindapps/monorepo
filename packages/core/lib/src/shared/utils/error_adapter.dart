@@ -63,19 +63,16 @@ class RepositoryWrapper<T> {
       final either = await _operation();
       return either.toResult();
     } catch (error, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(error, stackTrace),
-      );
+      return Result.error(AppErrorFactory.fromException(error, stackTrace));
     }
   }
 }
 
 /// Helper para migração gradual de UseCases
 abstract class MigratedUseCase<T, P> {
-  /// Novo método que retorna Result
   Future<Result<T>> executeNew(P params);
 
-  /// Método antigo que retorna Either (para compatibilidade)
+  /// Chamado para manter a compatibilidade com o sistema antigo
   Future<Either<Failure, T>> call(P params) async {
     final result = await executeNew(params);
     return result.toEither();
@@ -135,13 +132,13 @@ mixin ErrorHandlingMixin on ChangeNotifier {
     void Function(AppError error)? onError,
   }) async {
     final result = await handleOperation(operation);
-    
+
     if (result != null) {
       onSuccess?.call(result);
     } else if (_lastError != null) {
       onError?.call(_lastError!);
     }
-    
+
     return result;
   }
 }
@@ -154,13 +151,16 @@ mixin ErrorDisplayMixin {
       SnackBar(
         content: Text(error.userMessage),
         backgroundColor: _getErrorColor(error.severity),
-        duration: Duration(seconds: error.severity == ErrorSeverity.critical ? 10 : 4),
-        action: error.severity == ErrorSeverity.critical
-            ? SnackBarAction(
-                label: 'Detalhes',
-                onPressed: () => _showErrorDetails(context, error),
-              )
-            : null,
+        duration: Duration(
+          seconds: error.severity == ErrorSeverity.critical ? 10 : 4,
+        ),
+        action:
+            error.severity == ErrorSeverity.critical
+                ? SnackBarAction(
+                  label: 'Detalhes',
+                  onPressed: () => _showErrorDetails(context, error),
+                )
+                : null,
       ),
     );
   }
@@ -169,29 +169,30 @@ mixin ErrorDisplayMixin {
   void _showErrorDetails(BuildContext context, AppError error) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Detalhes do Erro'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Mensagem: ${error.message}'),
-              if (error.code != null) Text('Código: ${error.code}'),
-              if (error.details != null) Text('Detalhes: ${error.details}'),
-              Text('Categoria: ${error.category.name}'),
-              Text('Severidade: ${error.severity.name}'),
-              Text('Timestamp: ${error.timestamp}'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Detalhes do Erro'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Mensagem: ${error.message}'),
+                  if (error.code != null) Text('Código: ${error.code}'),
+                  if (error.details != null) Text('Detalhes: ${error.details}'),
+                  Text('Categoria: ${error.category.name}'),
+                  Text('Severidade: ${error.severity.name}'),
+                  Text('Timestamp: ${error.timestamp}'),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -219,7 +220,8 @@ class ErrorLogger {
       debugPrint('   Category: ${error.category.name}');
       debugPrint('   Severity: ${error.severity.name}');
       if (error.code != null) debugPrint('   Code: ${error.code}');
-      if (error.stackTrace != null && error.severity == ErrorSeverity.critical) {
+      if (error.stackTrace != null &&
+          error.severity == ErrorSeverity.critical) {
         debugPrint('   Stack: [Stack trace available for critical errors]');
       }
     }
@@ -246,7 +248,9 @@ class ErrorLogger {
     }
 
     if (kDebugMode) {
-      debugPrint('🚨 AppError with context: ${_sanitizeMessage(error.message)}');
+      debugPrint(
+        '🚨 AppError with context: ${_sanitizeMessage(error.message)}',
+      );
       debugPrint('   Context: $sanitizedContext');
     }
   }
@@ -254,12 +258,30 @@ class ErrorLogger {
   /// Sanitizes error messages to remove sensitive information
   static String _sanitizeMessage(String message) {
     return message
-        .replaceAll(RegExp(r'password[\s:=][\w]+', caseSensitive: false), 'password=[REDACTED]')
-        .replaceAll(RegExp(r'token[\s:=][\w\-._]+', caseSensitive: false), 'token=[REDACTED]')
-        .replaceAll(RegExp(r'key[\s:=][\w\-._]+', caseSensitive: false), 'key=[REDACTED]')
-        .replaceAll(RegExp(r'secret[\s:=][\w\-._]+', caseSensitive: false), 'secret=[REDACTED]')
-        .replaceAll(RegExp(r'[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}'), '[EMAIL_REDACTED]')
-        .replaceAll(RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'), '[CARD_REDACTED]');
+        .replaceAll(
+          RegExp(r'password[\s:=][\w]+', caseSensitive: false),
+          'password=[REDACTED]',
+        )
+        .replaceAll(
+          RegExp(r'token[\s:=][\w\-._]+', caseSensitive: false),
+          'token=[REDACTED]',
+        )
+        .replaceAll(
+          RegExp(r'key[\s:=][\w\-._]+', caseSensitive: false),
+          'key=[REDACTED]',
+        )
+        .replaceAll(
+          RegExp(r'secret[\s:=][\w\-._]+', caseSensitive: false),
+          'secret=[REDACTED]',
+        )
+        .replaceAll(
+          RegExp(r'[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}'),
+          '[EMAIL_REDACTED]',
+        )
+        .replaceAll(
+          RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
+          '[CARD_REDACTED]',
+        );
   }
 
   /// Sanitizes user ID to remove sensitive information while keeping it useful for debugging
@@ -270,7 +292,15 @@ class ErrorLogger {
 
   /// Checks if a key contains sensitive information
   static bool _isSensitiveKey(String key) {
-    final sensitivePatterns = ['password', 'secret', 'token', 'key', 'credential', 'auth', 'session'];
+    final sensitivePatterns = [
+      'password',
+      'secret',
+      'token',
+      'key',
+      'credential',
+      'auth',
+      'session',
+    ];
     final keyLower = key.toLowerCase();
     return sensitivePatterns.any((pattern) => keyLower.contains(pattern));
   }

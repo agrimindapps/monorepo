@@ -4,7 +4,6 @@ import '../theme/design_tokens.dart';
 
 /// Header padronizado para seções de formulário
 ///
-/// Substitui o método _buildSectionWithoutPadding duplicado em
 /// múltiplos formulários, centralizando a lógica de exibição
 /// de seções com título, ícone e conteúdo.
 ///

@@ -28,7 +28,6 @@ abstract class WeightLocalDataSource {
   /// Remove permanentemente um registro de peso
   Future<void> hardDeleteWeight(String id);
 
-  /// Limpa todo o cache de registros de peso
   Future<void> clearCache();
 
   /// Retorna stream de registros de peso para observar mudanças em tempo real
@@ -52,7 +51,6 @@ abstract class WeightLocalDataSource {
 }
 
 class WeightLocalDataSourceImpl implements WeightLocalDataSource {
-  
   @override
   Future<List<WeightModel>> getWeights() async {
     return [];
@@ -74,28 +72,22 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
   }
 
   @override
-  Future<void> cacheWeight(WeightModel weight) async {
-  }
+  Future<void> cacheWeight(WeightModel weight) async {}
 
   @override
-  Future<void> cacheWeights(List<WeightModel> weights) async {
-  }
+  Future<void> cacheWeights(List<WeightModel> weights) async {}
 
   @override
-  Future<void> updateWeight(WeightModel weight) async {
-  }
+  Future<void> updateWeight(WeightModel weight) async {}
 
   @override
-  Future<void> deleteWeight(String id) async {
-  }
+  Future<void> deleteWeight(String id) async {}
 
   @override
-  Future<void> hardDeleteWeight(String id) async {
-  }
+  Future<void> hardDeleteWeight(String id) async {}
 
   @override
-  Future<void> clearCache() async {
-  }
+  Future<void> clearCache() async {}
 
   @override
   Stream<List<WeightModel>> watchWeights() {
@@ -123,11 +115,6 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
 
   @override
   Future<Map<String, double>> getWeightStatistics(String animalId) async {
-    return {
-      'min': 0.0,
-      'max': 0.0,
-      'average': 0.0,
-      'current': 0.0,
-    };
+    return {'min': 0.0, 'max': 0.0, 'average': 0.0, 'current': 0.0};
   }
 }

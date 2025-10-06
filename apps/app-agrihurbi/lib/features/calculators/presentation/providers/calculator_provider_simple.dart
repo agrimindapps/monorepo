@@ -302,7 +302,6 @@ class CalculatorProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Limpa todo o histórico (simulação)
   Future<bool> clearHistory() async {
     _calculationHistory.clear();
     notifyListeners();

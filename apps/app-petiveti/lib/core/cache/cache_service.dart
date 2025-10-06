@@ -78,7 +78,6 @@ class CacheService {
     await _removeFromDisk(key);
   }
 
-  /// Limpa todo o cache
   Future<void> clear() async {
     _memoryCache.clear();
     if (_prefs != null) {
@@ -219,8 +218,7 @@ class CacheService {
       };
 
       await _prefs!.setString(diskKey, jsonEncode(serializedEntry));
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   Future<CacheEntry<T>?> _loadFromDisk<T>(String key) async {
@@ -280,8 +278,7 @@ class CacheService {
       try {
         final freshData = await fetchFunction();
         await put(key, freshData, duration: duration, persistToDisk: true);
-      } catch (e) {
-      }
+      } catch (e) {}
     });
   }
 }

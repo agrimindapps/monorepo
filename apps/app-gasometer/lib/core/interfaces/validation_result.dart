@@ -1,7 +1,6 @@
 /// Resultado de validação com suporte para mensagens de erro e aviso
-/// Usado em todo o sistema de validação do app
-class ValidationResult {
 
+class ValidationResult {
   const ValidationResult._({
     required this.isValid,
     required this.message,
@@ -123,12 +122,7 @@ class ValidationResult {
 }
 
 /// Severity levels for validation results
-enum ValidationSeverity {
-  none,
-  info,
-  warning,
-  error,
-}
+enum ValidationSeverity { none, info, warning, error }
 
 /// Extensions for ValidationSeverity
 extension ValidationSeverityExtension on ValidationSeverity {

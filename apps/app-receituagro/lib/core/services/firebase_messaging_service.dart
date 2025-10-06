@@ -12,7 +12,7 @@ import 'receituagro_navigation_service.dart';
 /// Serviço para gerenciar Firebase Cloud Messaging (Push Notifications)
 /// Focado em notificações promocionais do ReceitaAgro
 class ReceitaAgroFirebaseMessagingService {
-  static final ReceitaAgroFirebaseMessagingService _instance = 
+  static final ReceitaAgroFirebaseMessagingService _instance =
       ReceitaAgroFirebaseMessagingService._internal();
   factory ReceitaAgroFirebaseMessagingService() => _instance;
   ReceitaAgroFirebaseMessagingService._internal();
@@ -23,17 +23,19 @@ class ReceitaAgroFirebaseMessagingService {
   static const String _topicUpdates = '${_topicPrefix}updates';
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = 
+  final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
-  
+
   ReceitaAgroNavigationService? _navigationService;
   bool _isInitialized = false;
   String? _fcmToken;
 
   /// Inicializa o serviço de push notifications
-  Future<bool> initialize({ReceitaAgroNavigationService? navigationService}) async {
+  Future<bool> initialize({
+    ReceitaAgroNavigationService? navigationService,
+  }) async {
     if (_isInitialized) return true;
-    
+
     try {
       _navigationService = navigationService;
       await _configureLocalNotifications();
@@ -57,7 +59,9 @@ class ReceitaAgroFirebaseMessagingService {
 
   /// Configura notificações locais para mostrar push notifications
   Future<void> _configureLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -83,7 +87,8 @@ class ReceitaAgroFirebaseMessagingService {
     const promotionalChannel = AndroidNotificationChannel(
       'receituagro_promotional',
       'Ofertas e Promoções',
-      description: 'Notificações sobre ofertas especiais e promoções do ReceitaAgro',
+      description:
+          'Notificações sobre ofertas especiais e promoções do ReceitaAgro',
       importance: Importance.high,
       sound: RawResourceAndroidNotificationSound('notification'),
     );
@@ -103,15 +108,21 @@ class ReceitaAgroFirebaseMessagingService {
     );
 
     await _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(promotionalChannel);
-    
+
     await _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(newsChannel);
-    
+
     await _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(updatesChannel);
   }
 
@@ -142,7 +153,7 @@ class ReceitaAgroFirebaseMessagingService {
   /// Trata mensagens recebidas em foreground
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     debugPrint('Foreground message received: ${message.messageId}');
-    
+
     final promotional = PromotionalNotification.fromRemoteMessage(message);
     await _showLocalNotification(promotional);
   }
@@ -150,7 +161,7 @@ class ReceitaAgroFirebaseMessagingService {
   /// Trata toque em notificação que abriu o app
   Future<void> _handleBackgroundMessageTap(RemoteMessage message) async {
     debugPrint('Background message tapped: ${message.messageId}');
-    
+
     final promotional = PromotionalNotification.fromRemoteMessage(message);
     await _handleNotificationNavigation(promotional);
   }
@@ -169,7 +180,9 @@ class ReceitaAgroFirebaseMessagingService {
   }
 
   /// Mostra notificação local personalizada
-  Future<void> _showLocalNotification(PromotionalNotification notification) async {
+  Future<void> _showLocalNotification(
+    PromotionalNotification notification,
+  ) async {
     final androidDetails = AndroidNotificationDetails(
       notification.channelId,
       notification.channelName,
@@ -178,9 +191,10 @@ class ReceitaAgroFirebaseMessagingService {
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
       color: const Color(0xFF4CAF50), // Verde ReceitaAgro
-      largeIcon: notification.imageUrl != null 
-          ? const DrawableResourceAndroidBitmap('@mipmap/ic_launcher')
-          : null,
+      largeIcon:
+          notification.imageUrl != null
+              ? const DrawableResourceAndroidBitmap('@mipmap/ic_launcher')
+              : null,
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -204,13 +218,14 @@ class ReceitaAgroFirebaseMessagingService {
   }
 
   /// Trata navegação baseada no tipo de notificação
-  Future<void> _handleNotificationNavigation(PromotionalNotification notification) async {
+  Future<void> _handleNotificationNavigation(
+    PromotionalNotification notification,
+  ) async {
     if (_navigationService == null) return;
 
     switch (notification.type) {
       case NotificationType.premium:
-        _navigationService!.navigateTo<void>('/premium',
-          pageType: 'premium');
+        _navigationService!.navigateTo<void>('/premium', pageType: 'premium');
         break;
       case NotificationType.newFeature:
         if (notification.targetScreen != null) {
@@ -301,14 +316,14 @@ class ReceitaAgroFirebaseMessagingService {
     _navigationService = service;
   }
 
-  /// Método para testar push notifications (desenvolvimento)
   Future<void> sendTestPromotionalNotification() async {
     if (!kDebugMode) return;
-    
+
     final testNotification = PromotionalNotification(
       id: DateTime.now().millisecondsSinceEpoch,
       title: '🌱 Oferta Especial ReceitaAgro!',
-      body: 'Descubra os melhores defensivos com 20% de desconto. Aproveite agora!',
+      body:
+          'Descubra os melhores defensivos com 20% de desconto. Aproveite agora!',
       type: NotificationType.promotional,
       channelId: 'receituagro_promotional',
       channelName: 'Ofertas e Promoções',
@@ -326,4 +341,3 @@ class ReceitaAgroFirebaseMessagingService {
     await _showLocalNotification(testNotification);
   }
 }
-

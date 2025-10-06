@@ -530,7 +530,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
             title: pending.title,
             body: pending.body,
             scheduledDate:
-                DateTime.now(), // REVIEW (converted TODO 2025-10-06): Get actual scheduled date
+                DateTime.now(),
             templateId: payload['templateId'] as String?,
             pluginId: payload['pluginId'] as String?,
             data: payload,
@@ -678,17 +678,17 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     return PerformanceMetrics(
       timestamp: now,
       fps:
-          60.0, // REVIEW (converted TODO 2025-10-06): Implement actual FPS tracking
+          60.0,
       memoryUsage: const MemoryUsage(
         usedMemory:
-            0, // REVIEW (converted TODO 2025-10-06): Implement memory tracking
+            0,
         totalMemory:
-            0, // REVIEW (converted TODO 2025-10-06): Implement memory tracking
+            0,
         availableMemory:
-            0, // REVIEW (converted TODO 2025-10-06): Implement memory tracking
+            0,
       ),
       cpuUsage:
-          0.0, // REVIEW (converted TODO 2025-10-06): Implement CPU usage tracking
+          0.0,
       batteryLevel: null, // Optional
       networkLatency: null, // Optional
       renderTime:

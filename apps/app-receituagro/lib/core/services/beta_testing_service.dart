@@ -1,6 +1,5 @@
 /// Stub for BetaTestingService - removed service
 /// This stub provides the same interface for compatibility
-/// TODO: Remove references to this service or implement proper beta testing functionality
 class BetaTestingService {
   static final BetaTestingService _instance = BetaTestingService._();
   static BetaTestingService get instance => _instance;

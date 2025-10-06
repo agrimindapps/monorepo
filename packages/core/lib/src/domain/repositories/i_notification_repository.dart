@@ -3,9 +3,9 @@ import '../entities/notification_entity.dart';
 /// Interface para repositório de notificações locais
 abstract class INotificationRepository {
   /// Inicializa o sistema de notificações
-  /// 
+  ///
   /// [defaultChannels] - Lista de canais padrão para criar na inicialização
-  /// 
+  ///
   /// Retorna [true] se inicializado com sucesso
   Future<bool> initialize({List<NotificationChannelEntity>? defaultChannels});
 
@@ -19,17 +19,17 @@ abstract class INotificationRepository {
   Future<bool> openNotificationSettings();
 
   /// Cria um novo canal de notificação (Android)
-  /// 
-  /// No iOS, este método não faz nada e retorna [true]
+  ///
+
   Future<bool> createNotificationChannel(NotificationChannelEntity channel);
 
   /// Remove um canal de notificação (Android)
-  /// 
-  /// No iOS, este método não faz nada e retorna [true]
+  ///
+
   Future<bool> deleteNotificationChannel(String channelId);
 
   /// Lista todos os canais de notificação criados (Android)
-  /// 
+  ///
   /// No iOS, retorna lista vazia
   Future<List<NotificationChannelEntity>> getNotificationChannels();
 
@@ -40,7 +40,7 @@ abstract class INotificationRepository {
   Future<bool> scheduleNotification(NotificationEntity notification);
 
   /// Agenda uma notificação recorrente
-  /// 
+  ///
   /// [repeatInterval] - Intervalo de repetição
   Future<bool> schedulePeriodicNotification(
     NotificationEntity notification,
@@ -63,7 +63,9 @@ abstract class INotificationRepository {
   void setNotificationTapCallback(Function(String? payload) callback);
 
   /// Define callback para quando uma ação de notificação for executada
-  void setNotificationActionCallback(Function(String actionId, String? payload) callback);
+  void setNotificationActionCallback(
+    Function(String actionId, String? payload) callback,
+  );
 
   /// Verifica se uma notificação específica está agendada
   Future<bool> isNotificationScheduled(int notificationId);
@@ -88,7 +90,8 @@ abstract class INotificationRepository {
 typedef NotificationTapCallback = void Function(String? payload);
 
 /// Callback executado quando uma ação de notificação é executada
-typedef NotificationActionCallback = void Function(String actionId, String? payload);
+typedef NotificationActionCallback =
+    void Function(String actionId, String? payload);
 
 /// Configurações globais para notificações
 class NotificationSettings {
@@ -102,16 +105,16 @@ class NotificationSettings {
 
   /// Ícone padrão das notificações
   final String defaultIcon;
-  
+
   /// Cor padrão das notificações (Android)
   final int? defaultColor;
-  
+
   /// Se deve mostrar logs de debug
   final bool enableDebugLogs;
-  
+
   /// Se deve cancelar automaticamente ao tocar
   final bool autoCancel;
-  
+
   /// Se deve mostrar badge no ícone do app
   final bool showBadge;
 }

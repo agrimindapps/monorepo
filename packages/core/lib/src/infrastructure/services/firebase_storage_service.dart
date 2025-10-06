@@ -359,7 +359,7 @@ class FirebaseStorageService implements IStorageRepository {
               );
 
               final variantResult = await uploadImage(
-                imageFile: imageFile, // TODO: Usar imagem redimensionada
+                imageFile: imageFile,
                 path: variantPath,
                 onProgress: onProgress != null 
                     ? (p) => onProgress(0.5 + (p * 0.5 * (i + 1) / variants.length))

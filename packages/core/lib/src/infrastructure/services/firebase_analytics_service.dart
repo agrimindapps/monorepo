@@ -351,7 +351,7 @@ class FirebaseAnalyticsService implements IAnalyticsRepository {
       }
     }
     sanitized['environment'] = EnvironmentConfig.environmentName;
-    sanitized['app_version'] = '1.0.0'; // TODO: Pegar versão real
+    sanitized['app_version'] = '1.0.0';
 
     return sanitized;
   }

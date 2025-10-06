@@ -72,7 +72,7 @@ class _TemplateSaveDialogState extends State<TemplateSaveDialog> {
             : null,
         tags: _tags,
         createdAt: DateTime.now(),
-        userId: 'current_user', // TODO: Implementar sistema de usuários
+        userId: 'current_user',
         isPublic: _isPublic,
       );
 

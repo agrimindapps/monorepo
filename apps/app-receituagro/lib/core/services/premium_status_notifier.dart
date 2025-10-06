@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 
 /// Stub for PremiumStatusNotifier - removed service
 /// This stub provides the same interface for compatibility
-/// TODO: Remove references to this service and use IPremiumService instead
 class PremiumStatusNotifier extends ChangeNotifier {
   static final PremiumStatusNotifier _instance = PremiumStatusNotifier._();
   static PremiumStatusNotifier get instance => _instance;

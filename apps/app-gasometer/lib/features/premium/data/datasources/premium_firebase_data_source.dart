@@ -228,7 +228,6 @@ class PremiumFirebaseDataSource {
     }
   }
 
-  /// Método privado para sincronização automática
   Future<void> _syncPremiumStatus(String userId) async {
     try {
       await syncCrossDevice(userId: userId);

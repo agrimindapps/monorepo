@@ -69,7 +69,6 @@ abstract class BaseSyncEntity extends BaseEntity {
   /// Define módulo/app
   BaseSyncEntity withModule(String moduleName);
 
-  /// Método copyWith genérico - deve ser implementado por subclasses
   @override
   BaseSyncEntity copyWith({
     String? id,
@@ -97,38 +96,47 @@ abstract class BaseSyncEntity extends BaseEntity {
     if (version != other.version) {
       return version > other.version ? this : other;
     }
-    final thisUpdate = updatedAt ?? createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-    final otherUpdate = other.updatedAt ?? other.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final thisUpdate =
+        updatedAt ?? createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+    final otherUpdate =
+        other.updatedAt ??
+        other.createdAt ??
+        DateTime.fromMillisecondsSinceEpoch(0);
 
     return thisUpdate.isAfter(otherUpdate) ? this : other;
   }
 
   /// Campos base para toFirebaseMap
   Map<String, dynamic> get baseFirebaseFields => {
-        'id': id,
-        'created_at': createdAt?.toIso8601String(),
-        'updated_at': updatedAt?.toIso8601String(),
-        'last_sync_at': lastSyncAt?.toIso8601String(),
-        'is_dirty': isDirty,
-        'is_deleted': isDeleted,
-        'version': version,
-        'user_id': userId,
-        'module_name': moduleName,
-      };
+    'id': id,
+    'created_at': createdAt?.toIso8601String(),
+    'updated_at': updatedAt?.toIso8601String(),
+    'last_sync_at': lastSyncAt?.toIso8601String(),
+    'is_dirty': isDirty,
+    'is_deleted': isDeleted,
+    'version': version,
+    'user_id': userId,
+    'module_name': moduleName,
+  };
 
   /// Campos base para fromFirebaseMap
-  static Map<String, dynamic> parseBaseFirebaseFields(Map<String, dynamic> map) {
+  static Map<String, dynamic> parseBaseFirebaseFields(
+    Map<String, dynamic> map,
+  ) {
     return {
       'id': map['id'] as String,
-      'createdAt': map['created_at'] != null 
-          ? DateTime.parse(map['created_at'] as String) 
-          : null,
-      'updatedAt': map['updated_at'] != null 
-          ? DateTime.parse(map['updated_at'] as String) 
-          : null,
-      'lastSyncAt': map['last_sync_at'] != null 
-          ? DateTime.parse(map['last_sync_at'] as String) 
-          : null,
+      'createdAt':
+          map['created_at'] != null
+              ? DateTime.parse(map['created_at'] as String)
+              : null,
+      'updatedAt':
+          map['updated_at'] != null
+              ? DateTime.parse(map['updated_at'] as String)
+              : null,
+      'lastSyncAt':
+          map['last_sync_at'] != null
+              ? DateTime.parse(map['last_sync_at'] as String)
+              : null,
       'isDirty': map['is_dirty'] as bool? ?? false,
       'isDeleted': map['is_deleted'] as bool? ?? false,
       'version': map['version'] as int? ?? 1,
@@ -139,14 +147,14 @@ abstract class BaseSyncEntity extends BaseEntity {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        lastSyncAt,
-        isDirty,
-        isDeleted,
-        version,
-        userId,
-        moduleName,
-      ];
+    ...super.props,
+    lastSyncAt,
+    isDirty,
+    isDeleted,
+    version,
+    userId,
+    moduleName,
+  ];
 }
 
 /// Mixin para funcionalidades de sincronização
@@ -201,19 +209,19 @@ mixin SyncEntityMixin {
 enum SyncEntityStatus {
   /// Sincronizado com sucesso
   synced,
-  
+
   /// Pendente de sincronização
   pending,
-  
+
   /// Erro na sincronização
   error,
-  
+
   /// Conflito detectado
   conflict,
-  
+
   /// Apenas local (nunca sincronizado)
   localOnly,
-  
+
   /// Marcado para exclusão
   markedForDeletion,
 }
@@ -222,14 +230,12 @@ enum SyncEntityStatus {
 extension SyncEntityStatusExtension on SyncEntityStatus {
   bool get isSuccessful => this == SyncEntityStatus.synced;
   bool get needsAction => [
-        SyncEntityStatus.pending,
-        SyncEntityStatus.error,
-        SyncEntityStatus.conflict,
-      ].contains(this);
-  bool get canDelete => [
-        SyncEntityStatus.synced,
-        SyncEntityStatus.localOnly,
-      ].contains(this);
+    SyncEntityStatus.pending,
+    SyncEntityStatus.error,
+    SyncEntityStatus.conflict,
+  ].contains(this);
+  bool get canDelete =>
+      [SyncEntityStatus.synced, SyncEntityStatus.localOnly].contains(this);
 }
 
 /// Resultado de operação de sincronização
@@ -275,6 +281,6 @@ class SyncResult<T extends BaseSyncEntity> {
   @override
   String toString() {
     return 'SyncResult(status: $status, hasEntity: ${entity != null}, '
-           'hasError: $hasError, hasConflict: $hasConflict, attempts: $attempts)';
+        'hasError: $hasError, hasConflict: $hasConflict, attempts: $attempts)';
   }
 }

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../theme/design_tokens.dart';
 
-/// Card padrão para consistência visual em todo o app
 ///
 /// Baseado no design system do GasOMeter, mantém padding,
 /// border radius, elevação e estilos consistentes.
 class StandardCard extends StatelessWidget {
-
   const StandardCard({
     super.key,
     this.padding,
@@ -76,13 +74,15 @@ class StandardCard extends StatelessWidget {
         GasometerDesignTokens.spacingCardPadding,
       ),
       margin:
-          margin ?? const EdgeInsets.only(bottom: GasometerDesignTokens.spacingLg),
+          margin ??
+          const EdgeInsets.only(bottom: GasometerDesignTokens.spacingLg),
       onTap: onTap,
       hasElevation: false,
       showBorder: showBorder,
       child: child,
     );
   }
+
   /// Conteúdo do card
   final Widget child;
 
@@ -109,7 +109,8 @@ class StandardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardChild = padding != null ? Padding(padding: padding!, child: child) : child;
+    final cardChild =
+        padding != null ? Padding(padding: padding!, child: child) : child;
 
     return Container(
       margin: margin,
@@ -148,7 +149,6 @@ class StandardCard extends StatelessWidget {
 
 /// Widget para título de seção dentro de um card
 class CardSectionTitle extends StatelessWidget {
-
   const CardSectionTitle({
     super.key,
     this.icon,
@@ -194,7 +194,6 @@ class CardSectionTitle extends StatelessWidget {
 
 /// Widget para informações em linha dentro de cards
 class CardInfoRow extends StatelessWidget {
-
   const CardInfoRow({
     super.key,
     this.icon,

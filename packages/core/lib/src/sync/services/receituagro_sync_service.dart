@@ -413,7 +413,7 @@ class ReceitaAgroSyncService implements ISyncService {
   }
 
   /// Inicia monitoramento de conectividade (integração com ConnectivityService)
-  /// Chame este método após inicializar o serviço para habilitar auto-sync on reconnect
+
   void startConnectivityMonitoring(Stream<bool> connectivityStream) {
     try {
       _connectivitySubscription?.cancel();

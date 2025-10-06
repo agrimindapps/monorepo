@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
 /// Entidade de domínio que representa um defensivo
-/// 
+///
 /// Esta entidade segue os princípios de Clean Architecture,
 /// sendo independente de frameworks e implementações específicas
 class DefensivoEntity extends Equatable {
@@ -41,16 +41,16 @@ class DefensivoEntity extends Equatable {
   bool get isToxico => !toxico.toLowerCase().contains('não');
   bool get isInflamavel => !inflamavel.toLowerCase().contains('não');
   bool get isCorrosivo => !corrosivo.toLowerCase().contains('não');
-  
+
   String get toxicidadeLevel {
     if (toxico.toLowerCase().contains('classe i')) return 'Extremamente tóxico';
     if (toxico.toLowerCase().contains('classe ii')) return 'Altamente tóxico';
-    if (toxico.toLowerCase().contains('classe iii')) return 'Medianamente tóxico';
+    if (toxico.toLowerCase().contains('classe iii'))
+      return 'Medianamente tóxico';
     if (toxico.toLowerCase().contains('classe iv')) return 'Pouco tóxico';
     return 'Não classificado';
   }
 
-  /// Método para criar uma nova instância com valores alterados
   DefensivoEntity copyWith({
     String? idReg,
     String? nomeComum,
@@ -87,19 +87,19 @@ class DefensivoEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        idReg,
-        nomeComum,
-        nomeTecnico,
-        fabricante,
-        ingredienteAtivo,
-        toxico,
-        inflamavel,
-        corrosivo,
-        modoAcao,
-        classeAgronomica,
-        classAmbiental,
-        formulacao,
-        createdAt,
-        updatedAt,
-      ];
+    idReg,
+    nomeComum,
+    nomeTecnico,
+    fabricante,
+    ingredienteAtivo,
+    toxico,
+    inflamavel,
+    corrosivo,
+    modoAcao,
+    classeAgronomica,
+    classAmbiental,
+    formulacao,
+    createdAt,
+    updatedAt,
+  ];
 }

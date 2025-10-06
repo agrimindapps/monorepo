@@ -11,7 +11,6 @@ import '../shared/utils/failure.dart';
 import 'app_sync_config.dart';
 import 'entity_sync_registration.dart';
 
-/// Gerenciador central de sincronização para todo o monorepo
 /// Coordena sync de múltiplas entidades across diferentes apps
 class UnifiedSyncManager {
   static final UnifiedSyncManager _instance = UnifiedSyncManager._internal();

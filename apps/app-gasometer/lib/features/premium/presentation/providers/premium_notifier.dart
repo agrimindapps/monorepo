@@ -415,7 +415,6 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   Future<bool> canAccessAdvancedAnalytics() async =>
       await _canUseFeatureById('advanced_analytics');
 
-  /// Método auxiliar para verificar features
   Future<bool> _canUseFeatureById(String featureId) async {
     if (_canUseFeature == null) return false;
     final result = await _canUseFeature!(

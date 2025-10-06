@@ -31,7 +31,6 @@ abstract class DeviceLocalDataSource {
     String userId,
   );
 
-  /// Limpa todo o cache de dispositivos
   Future<Either<Failure, void>> clearAll();
 
   /// Verifica se há dados em cache para o usuário

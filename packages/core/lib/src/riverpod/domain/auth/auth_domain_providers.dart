@@ -146,7 +146,7 @@ final sessionInfoProvider = Provider<SessionInfo?>((ref) {
 
   return SessionInfo(
     userId: user.id,
-    deviceId: null, // TODO: Será implementado via device management
+    deviceId: null,
     sessionStart: DateTime.now(), // Será persistido
     isOnline: isConnected,
     lastActivity: DateTime.now(),

@@ -265,7 +265,7 @@ class CalculatorEngine {
       String formattedValue;
       String displayUnit = resultValue.unit;
       if (preferredUnits != null && preferredUnits.containsKey(resultValue.label)) {
-        final targetUnit = preferredUnits[resultValue.label]!; // TODO: Implement unit conversion
+        final targetUnit = preferredUnits[resultValue.label]!;
         formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);
       } else {
         formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);

@@ -42,7 +42,7 @@ class CoreModule implements DIModule {
           crashlytics: getIt<core.ICrashlyticsRepository>(),
           config: core.AnalyticsConfig.forApp(
             appId: 'gasometer',
-            version: '1.0.0', // TODO: Get from package_info_plus
+            version: '1.0.0',
           ),
         ),
       );

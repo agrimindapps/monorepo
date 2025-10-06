@@ -380,7 +380,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Deleta a conta do usuário
-  /// TODO: Integrate EnhancedAccountDeletionService when IAuthRepository adapter is implemented
+
   Future<bool> deleteAccount({String? password}) async {
     if (_currentUser == null) {
       _setError('Nenhum usuário autenticado');

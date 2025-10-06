@@ -9,16 +9,14 @@ import '../interfaces/i_hive_repository.dart';
 
 /// Implementação base para repositórios Hive
 /// Fornece operações CRUD genéricas com error handling robusto
-abstract class BaseHiveRepository<T extends HiveObject> implements IHiveRepository<T> {
+abstract class BaseHiveRepository<T extends HiveObject>
+    implements IHiveRepository<T> {
   final IHiveManager hiveManager;
-  
+
   @override
   final String boxName;
 
-  BaseHiveRepository({
-    required this.hiveManager,
-    required this.boxName,
-  });
+  BaseHiveRepository({required this.hiveManager, required this.boxName});
 
   /// Obtém a box associada a este repositório
   Future<Result<Box<T>>> _getBox() async {
@@ -33,10 +31,11 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       final items = box.values.toList();
-      
-      debugPrint('BaseHiveRepository ($boxName): Retrieved ${items.length} items');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Retrieved ${items.length} items',
+      );
       return Result.success(items);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in getAll - $e');
       return Result.error(
@@ -61,10 +60,11 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       final item = box.get(key);
-      
-      debugPrint('BaseHiveRepository ($boxName): Retrieved item with key: $key');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Retrieved item with key: $key',
+      );
       return Result.success(item);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in getByKey($key) - $e');
       return Result.error(
@@ -90,17 +90,18 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       final items = <T>[];
-      
+
       for (final key in keys) {
         final item = box.get(key);
         if (item != null) {
           items.add(item);
         }
       }
-      
-      debugPrint('BaseHiveRepository ($boxName): Retrieved ${items.length}/${keys.length} items');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Retrieved ${items.length}/${keys.length} items',
+      );
       return Result.success(items);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in getByKeys - $e');
       return Result.error(
@@ -124,10 +125,11 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
       if (allResult.isError) return allResult;
 
       final filteredItems = allResult.data!.where(predicate).toList();
-      
-      debugPrint('BaseHiveRepository ($boxName): Found ${filteredItems.length} items matching predicate');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Found ${filteredItems.length} items matching predicate',
+      );
       return Result.success(filteredItems);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in findBy - $e');
       return Result.error(
@@ -152,10 +154,11 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final items = findResult.data!;
       final firstItem = items.isNotEmpty ? items.first : null;
-      
-      debugPrint('BaseHiveRepository ($boxName): Found first item: ${firstItem != null}');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Found first item: ${firstItem != null}',
+      );
       return Result.success(firstItem);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in findFirst - $e');
       return Result.error(
@@ -179,16 +182,17 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
       if (boxResult.isError) return Result.error(boxResult.error!);
 
       final box = boxResult.data!;
-      
+
       if (key != null) {
         await box.put(key, item);
       } else {
         await box.add(item);
       }
-      
-      debugPrint('BaseHiveRepository ($boxName): Saved item${key != null ? ' with key: $key' : ''}');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Saved item${key != null ? ' with key: $key' : ''}',
+      );
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in save - $e');
       return Result.error(
@@ -214,10 +218,9 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       await box.putAll(items);
-      
+
       debugPrint('BaseHiveRepository ($boxName): Saved ${items.length} items');
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in saveAll - $e');
       return Result.error(
@@ -242,12 +245,13 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       await box.delete(key);
-      
+
       debugPrint('BaseHiveRepository ($boxName): Deleted item with key: $key');
       return Result.success(null);
-      
     } catch (e, stackTrace) {
-      debugPrint('BaseHiveRepository ($boxName): Error in deleteByKey($key) - $e');
+      debugPrint(
+        'BaseHiveRepository ($boxName): Error in deleteByKey($key) - $e',
+      );
       return Result.error(
         AppErrorFactory.fromException(
           HiveCrudException(
@@ -271,10 +275,9 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       await box.deleteAll(keys);
-      
+
       debugPrint('BaseHiveRepository ($boxName): Deleted ${keys.length} items');
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in deleteByKeys - $e');
       return Result.error(
@@ -299,19 +302,20 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       final keysToDelete = <dynamic>[];
-      
+
       for (final key in box.keys) {
         final item = box.get(key);
         if (item != null && predicate(item)) {
           keysToDelete.add(key);
         }
       }
-      
+
       await box.deleteAll(keysToDelete);
-      
-      debugPrint('BaseHiveRepository ($boxName): Deleted ${keysToDelete.length} items by predicate');
+
+      debugPrint(
+        'BaseHiveRepository ($boxName): Deleted ${keysToDelete.length} items by predicate',
+      );
       return Result.success(keysToDelete.length);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in deleteWhere - $e');
       return Result.error(
@@ -337,10 +341,9 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
       final box = boxResult.data!;
       final itemCount = box.length;
       await box.clear();
-      
+
       debugPrint('BaseHiveRepository ($boxName): Cleared $itemCount items');
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in clear - $e');
       return Result.error(
@@ -365,7 +368,6 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       return Result.success(box.length);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in count - $e');
       return Result.error(
@@ -382,7 +384,6 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
     }
   }
 
-  /// Método de compatibilidade para countAsync()
   /// Retorna o count diretamente como int ao invés de Result&lt;int&gt;
   @override
   Future<int> countAsync() async {
@@ -402,7 +403,6 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
       if (findResult.isError) return Result.error(findResult.error!);
 
       return Result.success(findResult.data!.length);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in countWhere - $e');
       return Result.error(
@@ -423,7 +423,7 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
   Future<Result<bool>> isEmpty() async {
     final countResult = await count();
     if (countResult.isError) return Result.error(countResult.error!);
-    
+
     return Result.success(countResult.data! == 0);
   }
 
@@ -435,7 +435,6 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       return Result.success(box.containsKey(key));
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in containsKey - $e');
       return Result.error(
@@ -461,7 +460,6 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       return Result.success(box.keys.toList());
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in getAllKeys - $e');
       return Result.error(
@@ -485,7 +483,7 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
       if (boxResult.isError) return Result.error(boxResult.error!);
 
       final box = boxResult.data!;
-      
+
       final stats = {
         'boxName': boxName,
         'totalItems': box.length,
@@ -494,9 +492,8 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
         'path': box.path,
         'keys': box.keys.length,
       };
-      
+
       return Result.success(stats);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in getStatistics - $e');
       return Result.error(
@@ -521,10 +518,9 @@ abstract class BaseHiveRepository<T extends HiveObject> implements IHiveReposito
 
       final box = boxResult.data!;
       await box.compact();
-      
+
       debugPrint('BaseHiveRepository ($boxName): Compacted box');
       return Result.success(null);
-      
     } catch (e, stackTrace) {
       debugPrint('BaseHiveRepository ($boxName): Error in compact - $e');
       return Result.error(

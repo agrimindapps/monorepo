@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// AppBar comum usado em todo o aplicativo
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
-
   const CommonAppBar({
     super.key,
     required this.title,
@@ -96,7 +94,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget? _buildBackButton(BuildContext context) {
     if (!showBackButton) return null;
-    
+
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () => Navigator.of(context).pop(),
@@ -105,7 +103,6 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(
-    kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
-  );
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 }

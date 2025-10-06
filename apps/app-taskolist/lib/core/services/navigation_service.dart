@@ -7,15 +7,16 @@ import '../providers/service_providers.dart';
 
 /// Serviço de navegação para gerenciar deep linking e navegação por notificações
 class NavigationService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   /// Referência ao ProviderContainer para acessar providers durante navegação
   static late ProviderContainer _container;
-  
+
   static void initialize(ProviderContainer container) {
     _container = container;
   }
-  
+
   /// Navegação principal para diferentes tipos de payloads
   static Future<void> navigateFromNotification(String payload) async {
     final context = navigatorKey.currentContext;
@@ -40,16 +41,16 @@ class NavigationService {
       }
     }
   }
-  
+
   /// Navegar para tarefa específica com foco
   static Future<void> _navigateToTask(
-    BuildContext context, 
-    String taskId, 
-    TaskDetailFocus focus
+    BuildContext context,
+    String taskId,
+    TaskDetailFocus focus,
   ) async {
     try {
       final taskProviderFuture = _container.read(tasksProvider.future);
-      
+
       try {
         final tasks = await taskProviderFuture;
         final task = tasks.firstWhere(
@@ -59,10 +60,8 @@ class NavigationService {
         if (context.mounted) {
           Navigator.of(context).push(
             MaterialPageRoute<dynamic>(
-              builder: (context) => TaskDetailPage(
-                task: task,
-                initialFocus: focus,
-              ),
+              builder:
+                  (context) => TaskDetailPage(task: task, initialFocus: focus),
             ),
           );
         }
@@ -74,10 +73,7 @@ class NavigationService {
             SnackBar(
               content: Text('Tarefa não encontrada: $taskId'),
               backgroundColor: Colors.orange,
-              action: SnackBarAction(
-                label: 'OK',
-                onPressed: () {},
-              ),
+              action: SnackBarAction(label: 'OK', onPressed: () {}),
             ),
           );
         }
@@ -95,11 +91,11 @@ class NavigationService {
       }
     }
   }
-  
+
   /// Navegar para revisão semanal (placeholder para futura implementação)
   static Future<void> _navigateToWeeklyReview(BuildContext context) async {
     _navigateToHome(context);
-    
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -109,11 +105,11 @@ class NavigationService {
       );
     }
   }
-  
-  /// Navegar para view de produtividade (placeholder para futura implementação)  
+
+  /// Navegar para view de produtividade (placeholder para futura implementação)
   static Future<void> _navigateToProductivityView(BuildContext context) async {
     _navigateToHome(context);
-    
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -123,7 +119,7 @@ class NavigationService {
       );
     }
   }
-  
+
   /// Navegar para página principal
   static void _navigateToHome(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
@@ -131,23 +127,21 @@ class NavigationService {
       (route) => false,
     );
   }
-  
-  /// Navegar para task específica (método público para uso externo)
+
   static Future<void> navigateToTask(String taskId) async {
     final context = navigatorKey.currentContext;
     if (context == null) return;
-    
+
     await _navigateToTask(context, taskId, TaskDetailFocus.general);
   }
-  
-  /// Navegar para home (método público)
+
   static void navigateToHome() {
     final context = navigatorKey.currentContext;
     if (context == null) return;
-    
+
     _navigateToHome(context);
   }
-  
+
   /// Helper para mostrar SnackBar de erro
   static void _showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -167,19 +161,13 @@ class NavigationService {
 }
 
 /// Enum para definir o foco inicial na página de detalhes
-enum TaskDetailFocus {
-  general,
-  deadline,
-  reminder,
-  notes,
-}
+enum TaskDetailFocus { general, deadline, reminder, notes }
 
 /// Exception para task não encontrada
 class TaskNotFoundException implements Exception {
   final String taskId;
   const TaskNotFoundException(this.taskId);
-  
+
   @override
   String toString() => 'Task not found: $taskId';
 }
-

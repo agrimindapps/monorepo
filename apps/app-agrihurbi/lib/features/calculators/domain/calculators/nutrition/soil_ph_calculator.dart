@@ -339,7 +339,7 @@ class SoilPHCalculator extends CalculatorEntity {
       
       if (maxDiff > average * 0.5) {
         selectedValue = average;
-        selectedMethod = 0.0; // Indica método médio
+        selectedMethod = 0.0;
       }
     }
 

@@ -422,7 +422,7 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
 
     return FertilizerRecommendations(
       products: recommendations,
-      schedule: [], // Será preenchido em outro método
+      schedule: [],
       estimatedCost: _calculateCosts(netNeeds, 1.0), // Por hectare
       applicationNotes: [
         'Aplicar conforme cronograma específico da cultura',

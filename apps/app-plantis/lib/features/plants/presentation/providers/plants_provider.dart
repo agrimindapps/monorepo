@@ -130,7 +130,7 @@ class PlantsProvider extends ChangeNotifier {
   /// Inicializa o stream de dados em tempo real do UnifiedSyncManager
   /// ENHANCED: Improved validation, logging and error handling
   ///
-  /// Este método configura um listener para receber atualizações automáticas
+
   /// dos dados de plantas quando o real-time sync estiver ativo.
   void _initializeRealtimeDataStream() {
     try {
@@ -140,7 +140,9 @@ class PlantsProvider extends ChangeNotifier {
         );
       }
 
-      final dataStream = UnifiedSyncManager.instance.streamAll<Plant>('plantis');
+      final dataStream = UnifiedSyncManager.instance.streamAll<Plant>(
+        'plantis',
+      );
 
       if (dataStream == null) {
         if (kDebugMode) {
@@ -187,7 +189,8 @@ class PlantsProvider extends ChangeNotifier {
               conversionResults['successful'] =
                   (conversionResults['successful'] as int) + 1;
             } else {
-              conversionResults['failed'] = (conversionResults['failed'] as int) + 1;
+              conversionResults['failed'] =
+                  (conversionResults['failed'] as int) + 1;
             }
           }
 
@@ -244,9 +247,7 @@ class PlantsProvider extends ChangeNotifier {
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        debugPrint(
-          '❌ PlantsProvider: Erro ao configurar stream de dados',
-        );
+        debugPrint('❌ PlantsProvider: Erro ao configurar stream de dados');
         debugPrint('   Erro: $e');
         debugPrint('   Stack: $stackTrace');
       }
@@ -306,8 +307,7 @@ class PlantsProvider extends ChangeNotifier {
         }
       }
       if (syncPlant is Map<String, dynamic>) {
-        if (!syncPlant.containsKey('id') ||
-            !syncPlant.containsKey('name')) {
+        if (!syncPlant.containsKey('id') || !syncPlant.containsKey('name')) {
           if (kDebugMode) {
             debugPrint(
               '⚠️ PlantsProvider: Map inválido (faltam campos essenciais)',
@@ -319,9 +319,7 @@ class PlantsProvider extends ChangeNotifier {
         final plant = Plant.fromJson(syncPlant);
 
         if (kDebugMode) {
-          debugPrint(
-            '✅ PlantsProvider: Convertido Map → Plant: ${plant.name}',
-          );
+          debugPrint('✅ PlantsProvider: Convertido Map → Plant: ${plant.name}');
         }
 
         return plant;
@@ -399,6 +397,7 @@ class PlantsProvider extends ChangeNotifier {
       return false;
     }
   }
+
   Future<void> loadPlants() async {
     if (kDebugMode) {
       print(
@@ -498,6 +497,7 @@ class PlantsProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
   Future<Plant?> getPlantById(String id) async {
     final result = await _crudService.getPlantById(id);
 
@@ -513,6 +513,7 @@ class PlantsProvider extends ChangeNotifier {
       },
     );
   }
+
   Future<void> searchPlants(String query) async {
     _searchQuery = query;
 
@@ -528,13 +529,16 @@ class PlantsProvider extends ChangeNotifier {
 
     final result = await _searchPlantsUseCase.call(SearchPlantsParams(query));
 
-    result.fold((failure) => _setError(_crudService.getErrorMessage(failure)), (results) {
+    result.fold((failure) => _setError(_crudService.getErrorMessage(failure)), (
+      results,
+    ) {
       _searchResults = _sortService.sortPlants(results, _sortBy);
       _isSearching = false;
     });
 
     notifyListeners();
   }
+
   Future<bool> addPlant(AddPlantParams params) async {
     _setLoading(true);
     _clearError();
@@ -556,6 +560,7 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(false);
     return success;
   }
+
   Future<bool> updatePlant(UpdatePlantParams params) async {
     _setLoading(true);
     _clearError();
@@ -585,6 +590,7 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(false);
     return success;
   }
+
   Future<bool> deletePlant(String id) async {
     _setLoading(true);
     _clearError();
@@ -611,12 +617,14 @@ class PlantsProvider extends ChangeNotifier {
     _setLoading(false);
     return success;
   }
+
   void setViewMode(ViewMode mode) {
     if (_viewMode != mode) {
       _viewMode = mode;
       notifyListeners();
     }
   }
+
   void setSortBy(SortBy sort) {
     if (_sortBy != sort) {
       _sortBy = sort;
@@ -625,12 +633,14 @@ class PlantsProvider extends ChangeNotifier {
       _applyFilters();
     }
   }
+
   void setSpaceFilter(String? spaceId) {
     if (_filterBySpace != spaceId) {
       _filterBySpace = spaceId;
       _applyFilters();
     }
   }
+
   void clearSearch() {
     if (_searchQuery.isNotEmpty || _searchResults.isNotEmpty || _isSearching) {
       _searchQuery = '';
@@ -666,9 +676,11 @@ class PlantsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   void clearError() {
     _clearError();
   }
+
   List<Plant> getPlantsBySpace(String spaceId) {
     return _plants.where((plant) => plant.spaceId == spaceId).toList();
   }
@@ -699,16 +711,20 @@ class PlantsProvider extends ChangeNotifier {
       );
     }
   }
+
   int get plantsCount => _crudService.getPlantCount(_plants);
   List<Plant> getPlantsNeedingWater() {
     return _careService.getPlantsNeedingWater(_plants);
   }
+
   List<Plant> getPlantsNeedingFertilizer() {
     return _careService.getPlantsNeedingFertilizer(_plants);
   }
+
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     return _careService.getPlantsByCareStatus(_plants, status);
   }
+
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
       _isLoading = loading;

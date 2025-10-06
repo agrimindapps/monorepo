@@ -42,7 +42,7 @@ abstract class CalculatorRemoteDataSource {
 @LazySingleton(as: CalculatorRemoteDataSource)
 class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
   final DioClient
-  _dioClient; // REVIEW (converted TODO 2025-10-06): Will be used when implementing real API calls
+  _dioClient;
 
   CalculatorRemoteDataSourceImpl(this._dioClient);
 

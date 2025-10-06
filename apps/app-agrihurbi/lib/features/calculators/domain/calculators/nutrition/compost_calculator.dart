@@ -446,8 +446,8 @@ class CompostCalculator extends CalculatorEntity {
     double targetCN,
     double desiredFinalAmount,
   ) {
-    final double brownCN = brownData['cn_ratio'] as double; // TODO: Use in detailed nutrient analysis
-    final double greenCN = greenData['cn_ratio'] as double; // TODO: Use in composting optimization
+    final double brownCN = brownData['cn_ratio'] as double;
+    final double greenCN = greenData['cn_ratio'] as double;
     
     final double brownC = brownData['carbon_content'] as double;
     final double brownN = brownData['nitrogen_content'] as double;

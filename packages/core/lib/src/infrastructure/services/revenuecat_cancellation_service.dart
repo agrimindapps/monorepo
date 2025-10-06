@@ -13,7 +13,6 @@ class RevenueCatCancellationService {
   /// Verifica e processa cancelamento de assinaturas ativas
   ///
   /// NOTA: RevenueCat não cancela diretamente - ele trabalha com as stores.
-  /// Este método registra a intenção de cancelamento e fornece instruções
   /// para o usuário cancelar manualmente nas lojas.
   Future<Result<SubscriptionCancellationResult>>
   handleSubscriptionCancellation() async {

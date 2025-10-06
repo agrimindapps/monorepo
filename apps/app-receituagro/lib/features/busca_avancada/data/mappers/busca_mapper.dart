@@ -71,7 +71,7 @@ class BuscaMapper {
       subtitulo:
           praga.nomeCientifico != nomeExibicao ? praga.nomeCientifico : null,
       descricao:
-          'Praga identificada', // Simplified - TODO: usar propriedade correta
+          'Praga identificada',
       metadata: {
         'nomeCientifico': praga.nomeCientifico,
         'nomeComum': praga.nomeComum,
@@ -114,7 +114,7 @@ class BuscaMapper {
     return BuscaResultEntity(
       id: cultura.objectId,
       tipo: 'cultura',
-      titulo: 'Cultura', // TODO: usar propriedade correta
+      titulo: 'Cultura',
       subtitulo: null,
       metadata: const {},
       relevancia: 1.0,
@@ -155,8 +155,8 @@ class BuscaMapper {
   static DropdownItemEntity culturaToDropdownItem(CulturaHive cultura) {
     return DropdownItemEntity(
       id: cultura.objectId,
-      nome: 'Cultura', // TODO: usar propriedade correta
-      grupo: 'Grupo não definido', // TODO: usar propriedade correta
+      nome: 'Cultura',
+      grupo: 'Grupo não definido',
       isActive: true,
     );
   }

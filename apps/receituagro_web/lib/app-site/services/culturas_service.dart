@@ -9,7 +9,9 @@ class CulturasService {
 
   /// Cria nova cultura
   Future<CulturaOperationResult> createCultura(
-      String cultura, int status) async {
+    String cultura,
+    int status,
+  ) async {
     try {
       final validation = ValidationService.validateCulturaData(cultura, status);
 
@@ -27,10 +29,7 @@ class CulturasService {
 
       await _repository.createCultura(novaCultura);
 
-      return CulturaOperationResult(
-        success: true,
-        cultura: novaCultura,
-      );
+      return CulturaOperationResult(success: true, cultura: novaCultura);
     } catch (e) {
       SecureLogger.error('Erro ao criar cultura', error: e);
       return CulturaOperationResult(
@@ -42,7 +41,10 @@ class CulturasService {
 
   /// Atualiza cultura existente
   Future<CulturaOperationResult> updateCultura(
-      String objectId, String cultura, int status) async {
+    String objectId,
+    String cultura,
+    int status,
+  ) async {
     try {
       final validation = ValidationService.validateCulturaData(cultura, status);
 
@@ -61,10 +63,7 @@ class CulturasService {
 
       await _repository.updateCultura(objectId, culturaAtualizada);
 
-      return CulturaOperationResult(
-        success: true,
-        cultura: culturaAtualizada,
-      );
+      return CulturaOperationResult(success: true, cultura: culturaAtualizada);
     } catch (e) {
       SecureLogger.error('Erro ao atualizar cultura', error: e);
       return CulturaOperationResult(
@@ -94,10 +93,7 @@ class CulturasService {
     try {
       final culturas = await _repository.getAllCulturas();
 
-      return CulturaListResult(
-        success: true,
-        culturas: culturas,
-      );
+      return CulturaListResult(success: true, culturas: culturas);
     } catch (e) {
       SecureLogger.error('Erro ao listar culturas', error: e);
       return CulturaListResult(
@@ -107,7 +103,6 @@ class CulturasService {
     }
   }
 
-  /// Obtém cultura por ID (método simulado - implementar conforme necessário)
   Future<CulturaOperationResult> getCulturaById(String objectId) async {
     try {
       final culturas = await _repository.getAllCulturas();
@@ -116,10 +111,7 @@ class CulturasService {
         orElse: () => throw Exception('Cultura não encontrada'),
       );
 
-      return CulturaOperationResult(
-        success: true,
-        cultura: cultura,
-      );
+      return CulturaOperationResult(success: true, cultura: cultura);
     } catch (e) {
       SecureLogger.error('Erro ao obter cultura', error: e);
       return CulturaOperationResult(
@@ -136,11 +128,7 @@ class CulturaOperationResult {
   final Cultura? cultura;
   final String? error;
 
-  CulturaOperationResult({
-    required this.success,
-    this.cultura,
-    this.error,
-  });
+  CulturaOperationResult({required this.success, this.cultura, this.error});
 }
 
 /// Resultado de listagem de culturas
@@ -149,9 +137,5 @@ class CulturaListResult {
   final List<Cultura>? culturas;
   final String? error;
 
-  CulturaListResult({
-    required this.success,
-    this.culturas,
-    this.error,
-  });
+  CulturaListResult({required this.success, this.culturas, this.error});
 }

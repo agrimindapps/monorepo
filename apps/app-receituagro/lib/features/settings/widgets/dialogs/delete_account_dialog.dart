@@ -221,7 +221,6 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
     );
   }
 
-  /// Método estático para mostrar o diálogo
   static Future<bool?> show(BuildContext context) async {
     return showDialog<bool>(
       context: context,

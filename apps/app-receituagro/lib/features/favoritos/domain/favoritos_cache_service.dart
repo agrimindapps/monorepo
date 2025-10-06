@@ -15,11 +15,14 @@ class FavoritosCacheService {
   final PragasHiveRepository _pragasRepository;
   final CulturaHiveRepository _culturaRepository;
   final DiagnosticoIntegrationService _integrationService;
-  final Map<String, _CacheEntry<List<FavoritoDefensivoModel>>> _defensivosCache = {};
+  final Map<String, _CacheEntry<List<FavoritoDefensivoModel>>>
+  _defensivosCache = {};
   final Map<String, _CacheEntry<List<FavoritoPragaModel>>> _pragasCache = {};
-  final Map<String, _CacheEntry<List<FavoritoDiagnosticoModel>>> _diagnosticosCache = {};
+  final Map<String, _CacheEntry<List<FavoritoDiagnosticoModel>>>
+  _diagnosticosCache = {};
   final Map<String, _CacheEntry<Map<String, String>>> _culturaNameCache = {};
-  final Map<String, _CacheEntry<Map<String, List<String>>>> _pragaCulturaCache = {};
+  final Map<String, _CacheEntry<Map<String, List<String>>>> _pragaCulturaCache =
+      {};
   static const int _cacheLifetimeMinutes = 15;
 
   FavoritosCacheService({
@@ -28,85 +31,117 @@ class FavoritosCacheService {
     required PragasHiveRepository pragasRepository,
     required CulturaHiveRepository culturaRepository,
     required DiagnosticoIntegrationService integrationService,
-  })  : _favoritosRepository = favoritosRepository,
-        _fitossanitarioRepository = fitossanitarioRepository,
-        _pragasRepository = pragasRepository,
-        _culturaRepository = culturaRepository,
-        _integrationService = integrationService;
+  }) : _favoritosRepository = favoritosRepository,
+       _fitossanitarioRepository = fitossanitarioRepository,
+       _pragasRepository = pragasRepository,
+       _culturaRepository = culturaRepository,
+       _integrationService = integrationService;
 
   /// Obtém defensivos favoritos com cache inteligente
   Future<List<FavoritoDefensivoModel>> getFavoritosDefensivos() async {
     const cacheKey = 'defensivos_favoritos';
-    if (_defensivosCache.containsKey(cacheKey) && !_isCacheExpired(_defensivosCache[cacheKey]!)) {
+    if (_defensivosCache.containsKey(cacheKey) &&
+        !_isCacheExpired(_defensivosCache[cacheKey]!)) {
       return _defensivosCache[cacheKey]!.data;
     }
-    final favoritosDefensivos = await _favoritosRepository.getFavoritosByTipoAsync('defensivos');
+    final favoritosDefensivos = await _favoritosRepository
+        .getFavoritosByTipoAsync('defensivos');
     final List<FavoritoDefensivoModel> defensivosCompletos = [];
-    
-    print('🔍 [CacheService] Processando ${favoritosDefensivos.length} favoritos de defensivos...');
-    
+
+    print(
+      '🔍 [CacheService] Processando ${favoritosDefensivos.length} favoritos de defensivos...',
+    );
+
     for (final favorito in favoritosDefensivos) {
       print('📝 Buscando defensivo com ID: ${favorito.itemId}');
       final result = await _fitossanitarioRepository.getByKey(favorito.itemId);
       final defensivo = result.isSuccess ? result.data : null;
-      
+
       if (defensivo != null) {
         print('✅ Defensivo encontrado: ${defensivo.nomeComum}');
-        defensivosCompletos.add(FavoritoDefensivoModel(
-          id: defensivo.hashCode,
-          idReg: defensivo.objectId ?? favorito.itemId,
-          line1: defensivo.nomeComum.isNotEmpty ? defensivo.nomeComum : defensivo.nomeTecnico,
-          line2: defensivo.ingredienteAtivo?.isNotEmpty == true ? defensivo.ingredienteAtivo! : 'Ingrediente não informado',
-          nomeComum: defensivo.nomeComum.isNotEmpty ? defensivo.nomeComum : null,
-          ingredienteAtivo: defensivo.ingredienteAtivo,
-          classeAgronomica: defensivo.classeAgronomica,
-          fabricante: defensivo.fabricante,
-          modoAcao: defensivo.modoAcao,
-          dataCriacao: DateTime.fromMillisecondsSinceEpoch(favorito.createdAt),
-        ));
+        defensivosCompletos.add(
+          FavoritoDefensivoModel(
+            id: defensivo.hashCode,
+            idReg: defensivo.objectId ?? favorito.itemId,
+            line1:
+                defensivo.nomeComum.isNotEmpty
+                    ? defensivo.nomeComum
+                    : defensivo.nomeTecnico,
+            line2:
+                defensivo.ingredienteAtivo?.isNotEmpty == true
+                    ? defensivo.ingredienteAtivo!
+                    : 'Ingrediente não informado',
+            nomeComum:
+                defensivo.nomeComum.isNotEmpty ? defensivo.nomeComum : null,
+            ingredienteAtivo: defensivo.ingredienteAtivo,
+            classeAgronomica: defensivo.classeAgronomica,
+            fabricante: defensivo.fabricante,
+            modoAcao: defensivo.modoAcao,
+            dataCriacao: DateTime.fromMillisecondsSinceEpoch(
+              favorito.createdAt,
+            ),
+          ),
+        );
       } else {
         print('❌ Defensivo não encontrado para ID: ${favorito.itemId}');
       }
     }
-    _defensivosCache[cacheKey] = _CacheEntry(defensivosCompletos, DateTime.now());
+    _defensivosCache[cacheKey] = _CacheEntry(
+      defensivosCompletos,
+      DateTime.now(),
+    );
     return defensivosCompletos;
   }
 
   /// Obtém pragas favoritas com cache inteligente
   Future<List<FavoritoPragaModel>> getFavoritosPragas() async {
     const cacheKey = 'pragas_favoritas';
-    if (_pragasCache.containsKey(cacheKey) && !_isCacheExpired(_pragasCache[cacheKey]!)) {
+    if (_pragasCache.containsKey(cacheKey) &&
+        !_isCacheExpired(_pragasCache[cacheKey]!)) {
       return _pragasCache[cacheKey]!.data;
     }
-    final favoritosPragas = await _favoritosRepository.getFavoritosByTipoAsync('pragas');
+    final favoritosPragas = await _favoritosRepository.getFavoritosByTipoAsync(
+      'pragas',
+    );
     final List<FavoritoPragaModel> pragasCompletas = [];
-    
-    print('🔍 [CacheService] Processando ${favoritosPragas.length} favoritos de pragas...');
+
+    print(
+      '🔍 [CacheService] Processando ${favoritosPragas.length} favoritos de pragas...',
+    );
     await _preloadCulturaRelations();
-    
+
     for (final favorito in favoritosPragas) {
       final result = await _pragasRepository.getByKey(favorito.itemId);
       final praga = result.isSuccess ? result.data : null;
       if (praga != null) {
-        final diagnosticosRelacionados = await _integrationService.buscarPorPraga(praga.objectId);
-        final culturas = diagnosticosRelacionados
-            .map((d) => d.nomeCultura)
-            .where((c) => c != 'Cultura não encontrada')
-            .toSet()
-            .toList();
-        
-        pragasCompletas.add(FavoritoPragaModel(
-          id: praga.hashCode,
-          idReg: praga.objectId,
-          nomeComum: praga.nomeComum,
-          nomeSecundario: praga.nomeCientifico,
-          nomeCientifico: praga.nomeCientifico,
-          tipoPraga: _determinaTipoPraga(praga.nomeComum),
-          descricao: 'Praga controlada em ${culturas.isNotEmpty ? culturas.join(", ") : "múltiplas culturas"}',
-          sintomas: 'Consulte diagnósticos específicos para sintomas detalhados',
-          controle: '${diagnosticosRelacionados.length} diagnóstico(s) disponível(is)',
-          dataCriacao: DateTime.fromMillisecondsSinceEpoch(favorito.createdAt),
-        ));
+        final diagnosticosRelacionados = await _integrationService
+            .buscarPorPraga(praga.objectId);
+        final culturas =
+            diagnosticosRelacionados
+                .map((d) => d.nomeCultura)
+                .where((c) => c != 'Cultura não encontrada')
+                .toSet()
+                .toList();
+
+        pragasCompletas.add(
+          FavoritoPragaModel(
+            id: praga.hashCode,
+            idReg: praga.objectId,
+            nomeComum: praga.nomeComum,
+            nomeSecundario: praga.nomeCientifico,
+            nomeCientifico: praga.nomeCientifico,
+            tipoPraga: _determinaTipoPraga(praga.nomeComum),
+            descricao:
+                'Praga controlada em ${culturas.isNotEmpty ? culturas.join(", ") : "múltiplas culturas"}',
+            sintomas:
+                'Consulte diagnósticos específicos para sintomas detalhados',
+            controle:
+                '${diagnosticosRelacionados.length} diagnóstico(s) disponível(is)',
+            dataCriacao: DateTime.fromMillisecondsSinceEpoch(
+              favorito.createdAt,
+            ),
+          ),
+        );
       }
     }
     _pragasCache[cacheKey] = _CacheEntry(pragasCompletas, DateTime.now());
@@ -116,43 +151,57 @@ class FavoritosCacheService {
   /// Obtém diagnósticos favoritos com cache inteligente
   Future<List<FavoritoDiagnosticoModel>> getFavoritosDiagnosticos() async {
     const cacheKey = 'diagnosticos_favoritos';
-    if (_diagnosticosCache.containsKey(cacheKey) && !_isCacheExpired(_diagnosticosCache[cacheKey]!)) {
+    if (_diagnosticosCache.containsKey(cacheKey) &&
+        !_isCacheExpired(_diagnosticosCache[cacheKey]!)) {
       return _diagnosticosCache[cacheKey]!.data;
     }
-    final favoritosDiagnosticos = await _favoritosRepository.getFavoritosByTipoAsync('diagnosticos');
+    final favoritosDiagnosticos = await _favoritosRepository
+        .getFavoritosByTipoAsync('diagnosticos');
     final List<FavoritoDiagnosticoModel> diagnosticosCompletos = [];
-    
+
     for (final favorito in favoritosDiagnosticos) {
-      final diagnosticoCompleto = await _integrationService.getDiagnosticoCompleto(favorito.itemId);
+      final diagnosticoCompleto = await _integrationService
+          .getDiagnosticoCompleto(favorito.itemId);
       if (diagnosticoCompleto != null) {
-        diagnosticosCompletos.add(FavoritoDiagnosticoModel(
-          id: diagnosticoCompleto.diagnostico.hashCode,
-          idReg: diagnosticoCompleto.diagnostico.objectId,
-          nome: '${diagnosticoCompleto.nomeDefensivo} para ${diagnosticoCompleto.nomePraga}',
-          descricao: 'Diagnóstico completo com dosagem: ${diagnosticoCompleto.dosagem}',
-          cultura: diagnosticoCompleto.nomeCultura,
-          categoria: diagnosticoCompleto.classeAgronomica,
-          recomendacoes: 'Fabricante: ${diagnosticoCompleto.fabricante} • Modo de ação: ${diagnosticoCompleto.modoAcao}',
-          dataCriacao: DateTime.fromMillisecondsSinceEpoch(favorito.createdAt),
-        ));
+        diagnosticosCompletos.add(
+          FavoritoDiagnosticoModel(
+            id: diagnosticoCompleto.diagnostico.hashCode,
+            idReg: diagnosticoCompleto.diagnostico.objectId,
+            nome:
+                '${diagnosticoCompleto.nomeDefensivo} para ${diagnosticoCompleto.nomePraga}',
+            descricao:
+                'Diagnóstico completo com dosagem: ${diagnosticoCompleto.dosagem}',
+            cultura: diagnosticoCompleto.nomeCultura,
+            categoria: diagnosticoCompleto.classeAgronomica,
+            recomendacoes:
+                'Fabricante: ${diagnosticoCompleto.fabricante} • Modo de ação: ${diagnosticoCompleto.modoAcao}',
+            dataCriacao: DateTime.fromMillisecondsSinceEpoch(
+              favorito.createdAt,
+            ),
+          ),
+        );
       }
     }
-    _diagnosticosCache[cacheKey] = _CacheEntry(diagnosticosCompletos, DateTime.now());
+    _diagnosticosCache[cacheKey] = _CacheEntry(
+      diagnosticosCompletos,
+      DateTime.now(),
+    );
     return diagnosticosCompletos;
   }
 
   /// Pré-carrega relações de culturas para otimizar consultas
   Future<void> _preloadCulturaRelations() async {
     const cacheKey = 'cultura_relations';
-    
-    if (_culturaNameCache.containsKey(cacheKey) && !_isCacheExpired(_culturaNameCache[cacheKey]!)) {
+
+    if (_culturaNameCache.containsKey(cacheKey) &&
+        !_isCacheExpired(_culturaNameCache[cacheKey]!)) {
       return; // Cache ainda válido
     }
 
     final result = await _culturaRepository.getAll();
     final culturas = result.isSuccess ? result.data ?? [] : <dynamic>[];
     final Map<String, String> culturaNames = {};
-    
+
     for (final cultura in culturas) {
       try {
         final objectId = cultura.objectId?.toString();
@@ -170,7 +219,8 @@ class FavoritosCacheService {
 
   /// Verifica se o cache expirou
   bool _isCacheExpired<T>(_CacheEntry<T> entry) {
-    return DateTime.now().difference(entry.timestamp).inMinutes > _cacheLifetimeMinutes;
+    return DateTime.now().difference(entry.timestamp).inMinutes >
+        _cacheLifetimeMinutes;
   }
 
   /// Determina o tipo da praga baseado no nome
@@ -212,7 +262,7 @@ class FavoritosCacheService {
         nomeMinusculo.contains('euphorbia')) {
       return '3'; // Planta daninha
     }
-    
+
     return '1'; // Padrão: inseto/praga
   }
 
@@ -231,7 +281,6 @@ class FavoritosCacheService {
     }
   }
 
-  /// Invalida todo o cache
   void clearAllCache() {
     _defensivosCache.clear();
     _pragasCache.clear();
@@ -247,7 +296,11 @@ class FavoritosCacheService {
       'pragas_cached': _pragasCache.isNotEmpty,
       'diagnosticos_cached': _diagnosticosCache.isNotEmpty,
       'cultura_relations_cached': _culturaNameCache.isNotEmpty,
-      'total_cache_entries': _defensivosCache.length + _pragasCache.length + _diagnosticosCache.length + _culturaNameCache.length,
+      'total_cache_entries':
+          _defensivosCache.length +
+          _pragasCache.length +
+          _diagnosticosCache.length +
+          _culturaNameCache.length,
       'cache_lifetime_minutes': _cacheLifetimeMinutes,
     };
   }

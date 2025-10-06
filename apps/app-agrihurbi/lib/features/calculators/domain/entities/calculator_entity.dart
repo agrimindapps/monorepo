@@ -31,7 +31,6 @@ abstract class CalculatorEntity extends Equatable {
     this.complexity = CalculatorComplexity.medium,
   });
 
-  /// Método abstrato que deve ser implementado por cada calculadora específica
   CalculationResult calculate(Map<String, dynamic> inputs);
 
   /// Valida os inputs antes de executar o cálculo

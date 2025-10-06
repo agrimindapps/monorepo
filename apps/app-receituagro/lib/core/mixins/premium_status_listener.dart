@@ -4,7 +4,6 @@ import '../services/premium_status_notifier.dart';
 
 /// Stub mixin for PremiumStatusListener - removed service
 /// This stub provides the same interface for compatibility
-/// TODO: Remove references to this mixin and use IPremiumService directly
 mixin PremiumStatusListener<T extends StatefulWidget> on State<T> {
   StreamSubscription<bool>? _premiumStatusSubscription;
   bool _isPremium = false;

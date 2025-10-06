@@ -34,7 +34,6 @@ abstract class CalculatorRepository {
   /// Remove um item do histórico
   Future<Either<Failure, Unit>> removeFromHistory(String historyId);
 
-  /// Limpa todo o histórico
   Future<Either<Failure, Unit>> clearHistory();
 
   /// Busca calculadoras por termo

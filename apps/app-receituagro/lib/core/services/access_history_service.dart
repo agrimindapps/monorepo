@@ -1,6 +1,5 @@
 /// Stub for AccessHistoryService - removed service
 /// This stub provides the same interface for compatibility
-/// TODO: Remove references to this service or implement proper access tracking
 class AccessHistoryService {
   void recordAccess(String entityType, String entityId) {
   }

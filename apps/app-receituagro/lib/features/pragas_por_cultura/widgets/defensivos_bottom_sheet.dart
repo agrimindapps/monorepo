@@ -30,9 +30,7 @@ class DefensivosBottomSheet extends StatelessWidget {
           children: [
             _buildHeader(context),
             const SizedBox(height: 16),
-            Expanded(
-              child: _buildDefensivosList(context),
-            ),
+            Expanded(child: _buildDefensivosList(context)),
           ],
         ),
       ),
@@ -41,15 +39,14 @@ class DefensivosBottomSheet extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName = pragaPorCultura.praga.nomeComum ?? pragaPorCultura.praga.nomeCientifico;
+    final pragaName =
+        pragaPorCultura.praga.nomeComum ?? pragaPorCultura.praga.nomeCientifico;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor.withValues(alpha: 0.3),
-          ),
+          bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.3)),
         ),
       ),
       child: Row(
@@ -59,10 +56,7 @@ class DefensivosBottomSheet extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.blue.shade200,
-                  Colors.blue.shade400,
-                ],
+                colors: [Colors.blue.shade200, Colors.blue.shade400],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -99,10 +93,7 @@ class DefensivosBottomSheet extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(
-              Icons.close,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -119,9 +110,9 @@ class DefensivosBottomSheet extends StatelessWidget {
 
     return ListView.separated(
       itemCount: defensivos.length,
-      separatorBuilder: (context, index) => Divider(
-        color: theme.dividerColor.withValues(alpha: 0.3),
-      ),
+      separatorBuilder:
+          (context, index) =>
+              Divider(color: theme.dividerColor.withValues(alpha: 0.3)),
       itemBuilder: (context, index) {
         final defensivo = defensivos[index];
         return _buildDefensivoTile(context, defensivo, index);
@@ -129,7 +120,11 @@ class DefensivosBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDefensivoTile(BuildContext context, String defensivo, int index) {
+  Widget _buildDefensivoTile(
+    BuildContext context,
+    String defensivo,
+    int index,
+  ) {
     final theme = Theme.of(context);
 
     return RepaintBoundary(
@@ -138,12 +133,13 @@ class DefensivosBottomSheet extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.dividerColor.withValues(alpha: 0.2),
-          ),
+          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.2)),
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
           leading: Container(
             width: 40,
             height: 40,
@@ -229,7 +225,6 @@ class DefensivosBottomSheet extends StatelessWidget {
     );
   }
 
-  /// Método estático para facilitar o uso
   static Future<void> show(
     BuildContext context,
     PragaPorCultura pragaPorCultura, {
@@ -239,10 +234,11 @@ class DefensivosBottomSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DefensivosBottomSheet(
-        pragaPorCultura: pragaPorCultura,
-        onDefensivoTap: onDefensivoTap,
-      ),
+      builder:
+          (context) => DefensivosBottomSheet(
+            pragaPorCultura: pragaPorCultura,
+            onDefensivoTap: onDefensivoTap,
+          ),
     );
   }
 }

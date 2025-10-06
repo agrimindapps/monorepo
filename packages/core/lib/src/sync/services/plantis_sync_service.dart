@@ -413,7 +413,7 @@ class PlantisSyncService implements ISyncService {
   }
 
   /// Inicia monitoramento de conectividade (integração com NetworkInfoAdapter)
-  /// Chame este método após inicializar o serviço se quiser auto-sync on reconnect
+
   void startConnectivityMonitoring(Stream<bool> connectivityStream) {
     try {
       _connectivitySubscription?.cancel();

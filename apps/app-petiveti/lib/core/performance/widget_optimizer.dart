@@ -28,12 +28,15 @@ class WidgetOptimizer {
   void trackRebuild(String widgetKey, String widgetType) {
     if (!_isProfileMode) return;
 
-    final tracker = _rebuildTrackers[widgetKey] ??= RebuildTracker(widgetKey, widgetType);
+    final tracker =
+        _rebuildTrackers[widgetKey] ??= RebuildTracker(widgetKey, widgetType);
     tracker.recordRebuild();
 
     if (tracker.rebuildCount > 10) {
-      log('High rebuild count detected for $widgetKey: ${tracker.rebuildCount}', 
-          name: 'WidgetOptimizer');
+      log(
+        'High rebuild count detected for $widgetKey: ${tracker.rebuildCount}',
+        name: 'WidgetOptimizer',
+      );
     }
   }
 
@@ -41,15 +44,19 @@ class WidgetOptimizer {
   RebuildReport getRebuildReport({Duration? period}) {
     final now = DateTime.now();
     final cutoff = period != null ? now.subtract(period) : null;
-    
+
     final problematicWidgets = <RebuildTracker>[];
-    
+
     for (final tracker in _rebuildTrackers.values) {
-      final relevantRebuilds = cutoff != null 
-          ? tracker.rebuildTimes.where((time) => time.isAfter(cutoff)).length
-          : tracker.rebuildCount;
-          
-      if (relevantRebuilds > 5) { // Threshold para rebuilds problemáticos
+      final relevantRebuilds =
+          cutoff != null
+              ? tracker.rebuildTimes
+                  .where((time) => time.isAfter(cutoff))
+                  .length
+              : tracker.rebuildCount;
+
+      if (relevantRebuilds > 5) {
+        // Threshold para rebuilds problemáticos
         problematicWidgets.add(tracker);
       }
     }
@@ -67,8 +74,10 @@ class WidgetOptimizer {
 
   /// Limpa dados de profiling antigos
   void clearProfilingData({Duration? olderThan}) {
-    final cutoff = DateTime.now().subtract(olderThan ?? const Duration(hours: 1));
-    
+    final cutoff = DateTime.now().subtract(
+      olderThan ?? const Duration(hours: 1),
+    );
+
     _rebuildTrackers.removeWhere((key, tracker) {
       return tracker.firstRebuild.isBefore(cutoff);
     });
@@ -92,11 +101,13 @@ class RebuildTracker {
 
   int get rebuildCount => rebuildTimes.length;
 
-  Duration get totalLifetime => 
-      rebuildTimes.isEmpty ? Duration.zero : rebuildTimes.last.difference(firstRebuild);
+  Duration get totalLifetime =>
+      rebuildTimes.isEmpty
+          ? Duration.zero
+          : rebuildTimes.last.difference(firstRebuild);
 
-  double get rebuildRate => 
-      totalLifetime.inMilliseconds > 0 
+  double get rebuildRate =>
+      totalLifetime.inMilliseconds > 0
           ? rebuildCount / (totalLifetime.inMilliseconds / 1000.0)
           : 0.0;
 }
@@ -139,7 +150,7 @@ class OptimizedWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final optimizer = WidgetOptimizer();
     final widgetKey = debugLabel ?? '${child.runtimeType}_${child.hashCode}';
-    
+
     if (enableProfiling) {
       optimizer.trackRebuild(widgetKey, child.runtimeType.toString());
     }
@@ -154,10 +165,10 @@ class OptimizedWidget extends StatelessWidget {
 
   bool _shouldApplyRepaintBoundary() {
     return child is ListView ||
-           child is GridView ||
-           child is CustomScrollView ||
-           child is AnimatedWidget ||
-           child is CustomPaint;
+        child is GridView ||
+        child is CustomScrollView ||
+        child is AnimatedWidget ||
+        child is CustomPaint;
   }
 }
 
@@ -180,11 +191,12 @@ class OptimizedBuilder extends StatefulWidget {
 
 class _OptimizedBuilderState extends State<OptimizedBuilder> {
   late String _widgetKey;
-  
+
   @override
   void initState() {
     super.initState();
-    _widgetKey = widget.debugLabel ?? '${widget.runtimeType}_${widget.hashCode}';
+    _widgetKey =
+        widget.debugLabel ?? '${widget.runtimeType}_${widget.hashCode}';
     if (widget.listenables != null) {
       for (final listenable in widget.listenables!) {
         listenable.addListener(_onListenableChanged);
@@ -204,18 +216,15 @@ class _OptimizedBuilderState extends State<OptimizedBuilder> {
 
   void _onListenableChanged() {
     if (mounted) {
-      setState(() {
-      });
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
     WidgetOptimizer().trackRebuild(_widgetKey, widget.runtimeType.toString());
-    
-    return RepaintBoundary(
-      child: widget.builder(context),
-    );
+
+    return RepaintBoundary(child: widget.builder(context));
   }
 }
 
@@ -246,7 +255,7 @@ class OptimizedListView<T> extends StatefulWidget {
 
 class _OptimizedListViewState<T> extends State<OptimizedListView<T>> {
   final Map<int, Widget> _cachedWidgets = {};
-  
+
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -259,7 +268,7 @@ class _OptimizedListViewState<T> extends State<OptimizedListView<T>> {
         itemBuilder: (context, index) {
           final item = widget.items[index];
           final itemKey = '${item.hashCode}_$index';
-          
+
           return _cachedWidgets[index] ??= RepaintBoundary(
             key: ValueKey(itemKey),
             child: widget.itemBuilder(context, item, index),
@@ -343,12 +352,12 @@ class OptimizedAnimatedBuilder extends StatefulWidget {
   });
 
   @override
-  State<OptimizedAnimatedBuilder> createState() => _OptimizedAnimatedBuilderState();
+  State<OptimizedAnimatedBuilder> createState() =>
+      _OptimizedAnimatedBuilderState();
 }
 
 class _OptimizedAnimatedBuilderState extends State<OptimizedAnimatedBuilder>
     with SingleTickerProviderStateMixin {
-  
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
@@ -365,7 +374,7 @@ class _OptimizedAnimatedBuilderState extends State<OptimizedAnimatedBuilder>
 /// Mixin para otimização automática de widgets
 mixin WidgetOptimizationMixin<T extends StatefulWidget> on State<T> {
   late String _widgetKey;
-  
+
   @override
   void initState() {
     super.initState();
@@ -378,7 +387,6 @@ mixin WidgetOptimizationMixin<T extends StatefulWidget> on State<T> {
     return buildOptimized(context);
   }
 
-  /// Implementar este método ao invés de build()
   Widget buildOptimized(BuildContext context);
 
   /// Envolve um widget com RepaintBoundary se necessário
@@ -391,9 +399,9 @@ mixin WidgetOptimizationMixin<T extends StatefulWidget> on State<T> {
 
   bool _shouldOptimize(Widget widget) {
     return widget is ListView ||
-           widget is GridView ||
-           widget is CustomPaint ||
-           widget is AnimatedWidget;
+        widget is GridView ||
+        widget is CustomPaint ||
+        widget is AnimatedWidget;
   }
 }
 
@@ -401,10 +409,7 @@ mixin WidgetOptimizationMixin<T extends StatefulWidget> on State<T> {
 extension WidgetOptimizationExtensions on Widget {
   /// Aplica RepaintBoundary neste widget
   Widget optimized({String? debugLabel}) {
-    return OptimizedWidget(
-      debugLabel: debugLabel,
-      child: this,
-    );
+    return OptimizedWidget(debugLabel: debugLabel, child: this);
   }
 
   /// Aplica otimizações específicas baseadas no tipo
@@ -412,11 +417,11 @@ extension WidgetOptimizationExtensions on Widget {
     if (this is ListView || this is GridView || this is CustomScrollView) {
       return RepaintBoundary(child: this);
     }
-    
+
     if (this is AnimatedWidget || this is CustomPaint) {
       return RepaintBoundary(child: this);
     }
-    
+
     return this;
   }
 }
@@ -438,7 +443,6 @@ class PerformanceDetector extends StatefulWidget {
 
 class _PerformanceDetectorState extends State<PerformanceDetector>
     with WidgetsBindingObserver {
-  
   final List<Duration> _frameTimes = [];
   DateTime? _lastFrameTime;
 
@@ -457,23 +461,27 @@ class _PerformanceDetectorState extends State<PerformanceDetector>
 
   void _recordFrameTime(Duration timestamp) {
     final now = DateTime.now();
-    
+
     if (_lastFrameTime != null) {
       final frameDuration = now.difference(_lastFrameTime!);
       _frameTimes.add(frameDuration);
       if (_frameTimes.length > 60) {
         _frameTimes.removeAt(0);
       }
-      if (frameDuration.inMilliseconds > 16) { // >16ms = <60fps
-        widget.onIssueDetected?.call(PerformanceIssue(
-          type: PerformanceIssueType.frameDrop,
-          severity: _calculateSeverity(frameDuration),
-          description: 'Frame drop detected: ${frameDuration.inMilliseconds}ms',
-          timestamp: now,
-        ));
+      if (frameDuration.inMilliseconds > 16) {
+        // >16ms = <60fps
+        widget.onIssueDetected?.call(
+          PerformanceIssue(
+            type: PerformanceIssueType.frameDrop,
+            severity: _calculateSeverity(frameDuration),
+            description:
+                'Frame drop detected: ${frameDuration.inMilliseconds}ms',
+            timestamp: now,
+          ),
+        );
       }
     }
-    
+
     _lastFrameTime = now;
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback(_recordFrameTime);
@@ -516,9 +524,4 @@ enum PerformanceIssueType {
   slowRender,
 }
 
-enum PerformanceIssueSeverity {
-  low,
-  medium,
-  high,
-  critical,
-}
+enum PerformanceIssueSeverity { low, medium, high, critical }

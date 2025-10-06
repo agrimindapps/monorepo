@@ -60,7 +60,6 @@ class FuelTypeMapper {
     return _stringToFuelType.containsKey(fuelString);
   }
 
-  /// Obtém o nome display do enum (usando o método nativo do enum)
   static String getDisplayName(FuelType fuelType) {
     return fuelType.displayName;
   }

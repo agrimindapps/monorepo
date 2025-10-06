@@ -494,7 +494,6 @@ void _initDataExport() {
 }
 
 /// Stub implementation of IPerformanceRepository for development
-/// TODO: Implement full performance tracking using Firebase Performance
 class _StubPerformanceRepository implements IPerformanceRepository {
   @override
   Future<bool> startPerformanceTracking({PerformanceConfig? config}) async =>

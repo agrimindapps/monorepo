@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Simplified version of OptimizedRemoteImageWidget without RemoteAssetService dependency
 /// This stub provides the same API but uses only local assets
-/// TODO: Implement proper remote asset functionality when RemoteAssetService is available
 class OptimizedRemoteImageWidget extends StatefulWidget {
   final String imagePath;
   final double? width;

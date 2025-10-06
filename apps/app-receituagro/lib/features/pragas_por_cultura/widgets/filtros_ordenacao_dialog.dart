@@ -27,20 +27,13 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.purple.shade200,
-                    Colors.purple.shade400,
-                  ],
+                  colors: [Colors.purple.shade200, Colors.purple.shade400],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.tune,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: const Icon(Icons.tune, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
             const Text('Filtros e Ordenação'),
@@ -75,11 +68,7 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.sort,
-              size: 18,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(Icons.sort, size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'Ordenar por:',
@@ -124,11 +113,7 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.filter_alt,
-              size: 18,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(Icons.filter_alt, size: 18, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
             Text(
               'Filtrar por:',
@@ -178,14 +163,16 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected
-            ? theme.colorScheme.primary.withValues(alpha: 0.1)
-            : Colors.transparent,
+        color:
+            isSelected
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.dividerColor.withValues(alpha: 0.3),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.dividerColor.withValues(alpha: 0.3),
         ),
       ),
       child: RadioListTile<String>(
@@ -199,11 +186,7 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(
-                icon,
-                size: 16,
-                color: color,
-              ),
+              child: Icon(icon, size: 16, color: color),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -244,14 +227,16 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected
-            ? theme.colorScheme.primary.withValues(alpha: 0.1)
-            : Colors.transparent,
+        color:
+            isSelected
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isSelected
-              ? theme.colorScheme.primary
-              : theme.dividerColor.withValues(alpha: 0.3),
+          color:
+              isSelected
+                  ? theme.colorScheme.primary
+                  : theme.dividerColor.withValues(alpha: 0.3),
         ),
       ),
       child: RadioListTile<String>(
@@ -265,11 +250,7 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(
-                icon,
-                size: 16,
-                color: color,
-              ),
+              child: Icon(icon, size: 16, color: color),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -297,7 +278,6 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
     );
   }
 
-  /// Método estático para facilitar o uso
   static Future<void> show(
     BuildContext context, {
     required String ordenacaoAtual,
@@ -307,12 +287,13 @@ class FiltrosOrdenacaoDialog extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
-      builder: (context) => FiltrosOrdenacaoDialog(
-        ordenacaoAtual: ordenacaoAtual,
-        filtroTipoAtual: filtroTipoAtual,
-        onOrdenacaoChanged: onOrdenacaoChanged,
-        onFiltroTipoChanged: onFiltroTipoChanged,
-      ),
+      builder:
+          (context) => FiltrosOrdenacaoDialog(
+            ordenacaoAtual: ordenacaoAtual,
+            filtroTipoAtual: filtroTipoAtual,
+            onOrdenacaoChanged: onOrdenacaoChanged,
+            onFiltroTipoChanged: onFiltroTipoChanged,
+          ),
     );
   }
 }

@@ -6,7 +6,6 @@ import 'date_display_widget.dart';
 import 'info_item_widget.dart';
 import 'type_badge_widget.dart';
 
-/// Widget padronizado para list items em todo o app
 /// 
 /// Segue o padrão estabelecido pelo OdometerListItem, garantindo
 /// consistência visual entre todos os tipos de list items.

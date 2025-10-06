@@ -4,7 +4,6 @@ import '../../../core/theme/loading_design_tokens.dart';
 /// Widget para transições suaves entre páginas
 /// Fornece animações personalizadas e profissionais para navegação
 class SmoothPageTransition extends StatefulWidget {
-
   const SmoothPageTransition({
     super.key,
     required this.child,
@@ -82,9 +81,10 @@ class SmoothPageTransition extends StatefulWidget {
   }) {
     return SmoothPageTransition(
       key: key,
-      transitionType: direction == SlideDirection.fromBottom 
-        ? SmoothTransitionType.fadeSlide 
-        : _getFadeSlideType(direction),
+      transitionType:
+          direction == SlideDirection.fromBottom
+              ? SmoothTransitionType.fadeSlide
+              : _getFadeSlideType(direction),
       duration: duration ?? LoadingDesignTokens.normalDuration,
       onComplete: onComplete,
       child: child,
@@ -142,10 +142,7 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
   }
 
   void _setupAnimations() {
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
     final curvedAnimation = CurvedAnimation(
       parent: _controller,
@@ -236,10 +233,7 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
   Widget _buildTransition() {
     switch (widget.transitionType) {
       case SmoothTransitionType.fade:
-        return FadeTransition(
-          opacity: _primaryAnimation,
-          child: widget.child,
-        );
+        return FadeTransition(opacity: _primaryAnimation, child: widget.child);
 
       case SmoothTransitionType.scale:
         return ScaleTransition(
@@ -254,10 +248,7 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
       case SmoothTransitionType.slideFromRight:
       case SmoothTransitionType.slideFromTop:
       case SmoothTransitionType.slideFromBottom:
-        return SlideTransition(
-          position: _slideAnimation,
-          child: widget.child,
-        );
+        return SlideTransition(position: _slideAnimation, child: widget.child);
 
       case SmoothTransitionType.fadeSlide:
       case SmoothTransitionType.fadeSlideFromLeft:
@@ -294,7 +285,6 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
     }
   }
 
-  /// Método público para controlar animação manualmente
   void forward() => _controller.forward();
   void reverse() => _controller.reverse();
   void reset() => _controller.reset();
@@ -303,7 +293,6 @@ class _SmoothPageTransitionState extends State<SmoothPageTransition>
 
 /// Widget para transição entre múltiplas páginas com sequência
 class SmoothPageSequence extends StatefulWidget {
-
   const SmoothPageSequence({
     super.key,
     required this.pages,
@@ -414,7 +403,6 @@ class _SmoothPageSequenceState extends State<SmoothPageSequence> {
 
 /// Utilitário para criar transições personalizadas de rota
 class SmoothPageRoute<T> extends PageRoute<T> {
-
   SmoothPageRoute({
     required this.child,
     this.transitionType = SmoothTransitionType.fadeSlide,
@@ -486,9 +474,4 @@ enum SmoothTransitionType {
 }
 
 /// Direções de slide
-enum SlideDirection {
-  fromLeft,
-  fromRight,
-  fromTop,
-  fromBottom,
-}
+enum SlideDirection { fromLeft, fromRight, fromTop, fromBottom }

@@ -88,8 +88,8 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       await _analytics.setUserId(user.id);
       await _analytics.setUserProperties(
         userType: _mapToAnalyticsUserType(state.userType),
-        isPremium: false, // TODO: Check premium status
-        deviceCount: 1, // TODO: Get actual device count
+        isPremium: false,
+        deviceCount: 1,
       );
 
       state = state.copyWith(

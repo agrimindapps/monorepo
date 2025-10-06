@@ -517,7 +517,6 @@ class _EnhancedDefensivosBottomSheetState
     super.dispose();
   }
 
-  /// Método estático para facilitar o uso - show method
   static Future<void> show(
     BuildContext context,
     PragaPorCultura pragaPorCultura, {

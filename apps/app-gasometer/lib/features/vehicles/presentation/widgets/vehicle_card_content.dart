@@ -42,7 +42,7 @@ class VehicleCardContent extends StatelessWidget {
           _buildDetailRow(
             context,
             'Combustível',
-            'Gasolina', // TODO: Add fuel type to VehicleEntity
+            'Gasolina',
             Icons.local_gas_station_outlined,
           ),
         ],

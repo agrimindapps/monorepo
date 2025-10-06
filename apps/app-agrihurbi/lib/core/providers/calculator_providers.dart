@@ -339,7 +339,7 @@ class CalculatorNotifier extends _$CalculatorNotifier {
   Future<void> _saveToHistory(CalculationResult result) async {
     final historyItem = CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      userId: 'current_user', // TODO: Obter do contexto de autenticação
+      userId: 'current_user',
       calculatorId: result.calculatorId,
       calculatorName: state.selectedCalculator?.name ?? 'Calculadora',
       result: result,
@@ -348,14 +348,10 @@ class CalculatorNotifier extends _$CalculatorNotifier {
 
     final saveResult = await _saveCalculationToHistory.call(historyItem);
 
-    saveResult.fold(
-      (failure) {
-      },
-      (_) {
-        final newHistory = [historyItem, ...state.calculationHistory];
-        state = state.copyWith(calculationHistory: newHistory);
-      },
-    );
+    saveResult.fold((failure) {}, (_) {
+      final newHistory = [historyItem, ...state.calculationHistory];
+      state = state.copyWith(calculationHistory: newHistory);
+    });
   }
 
   /// Atualiza query de busca
@@ -429,7 +425,6 @@ class CalculatorNotifier extends _$CalculatorNotifier {
     return true;
   }
 
-  /// Limpa todo o histórico
   Future<bool> clearHistory() async {
     state = state.copyWith(calculationHistory: []);
     return true;

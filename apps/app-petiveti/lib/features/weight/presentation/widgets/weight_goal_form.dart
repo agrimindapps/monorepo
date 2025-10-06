@@ -311,7 +311,7 @@ class _WeightGoalFormState extends State<WeightGoalForm> {
         'enableWeeklyReminders': _enableWeeklyReminders,
         'createdAt': DateTime.now(),
       };
-      print('Saving goal: $goalData'); // TODO: Replace with actual save logic
+      print('Saving goal: $goalData');
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

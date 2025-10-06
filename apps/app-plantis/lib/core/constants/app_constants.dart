@@ -6,7 +6,7 @@ class AppConstants {
   static const String appName = 'Plantis';
   static const String packageName = 'br.com.agrimsolution.plantis';
   /// App Store ID - Update this before production release
-  static const String appStoreId = '123456789'; // TODO: Replace with actual App Store ID
+  static const String appStoreId = '123456789';
 
   /// Google Play Store ID
   static const String googlePlayId = packageName;
@@ -45,7 +45,7 @@ class AppConstants {
   static const String successPlantUpdated = 'Planta atualizada com sucesso';
   static const String successPlantDeleted = 'Planta excluída com sucesso';
   static const String defaultVersion = '1.0.0';
-  static const String defaultCurrency = 'USD'; // TODO: Get from user locale or RevenueCat
+  static const String defaultCurrency = 'USD';
   static const int appRatingMinDays = 3;
   static const int appRatingMinLaunches = 5;
   static const int appRatingRemindDays = 7;

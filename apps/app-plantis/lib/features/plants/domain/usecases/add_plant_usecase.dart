@@ -422,7 +422,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     }
   }
 
-  /// Converte PlantConfig entity para PlantaConfigModel usando o método robusto
   PlantaConfigModel _convertToPlantaConfigModel(Plant plant) {
     final config = plant.config!;
 

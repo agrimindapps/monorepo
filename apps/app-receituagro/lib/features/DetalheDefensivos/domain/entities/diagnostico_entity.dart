@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 
 /// Entidade de domínio que representa um diagnóstico
-/// 
+///
 /// Esta entidade representa a relação entre defensivo, praga e cultura,
 /// seguindo os princípios de Clean Architecture
 class DiagnosticoEntity extends Equatable {
@@ -40,15 +40,14 @@ class DiagnosticoEntity extends Equatable {
   });
 
   /// Getters computados
-  String get dosagemFormatada => 
-      dosagem + (unidadeDosagem ?? '');
-  
-  String get intervaloFormatado => 
+  String get dosagemFormatada => dosagem + (unidadeDosagem ?? '');
+
+  String get intervaloFormatado =>
       intervaloDias != null ? '$intervaloDias dias' : 'Não especificado';
 
-  bool get hasCompleteInfo => 
-      nomeDefensivo != null && 
-      nomeCultura != null && 
+  bool get hasCompleteInfo =>
+      nomeDefensivo != null &&
+      nomeCultura != null &&
       nomePraga != null &&
       dosagem.isNotEmpty;
 
@@ -56,7 +55,6 @@ class DiagnosticoEntity extends Equatable {
 
   String get nome => nomeDefensivo ?? 'Defensivo não identificado';
 
-  /// Método para criar uma nova instância com valores alterados
   DiagnosticoEntity copyWith({
     String? id,
     String? idDefensivo,
@@ -95,20 +93,20 @@ class DiagnosticoEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        idDefensivo,
-        nomeDefensivo,
-        nomeCultura,
-        nomePraga,
-        dosagem,
-        unidadeDosagem,
-        modoAplicacao,
-        intervaloDias,
-        observacoes,
-        ingredienteAtivo,
-        cultura,
-        grupo,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    idDefensivo,
+    nomeDefensivo,
+    nomeCultura,
+    nomePraga,
+    dosagem,
+    unidadeDosagem,
+    modoAplicacao,
+    intervaloDias,
+    observacoes,
+    ingredienteAtivo,
+    cultura,
+    grupo,
+    createdAt,
+    updatedAt,
+  ];
 }

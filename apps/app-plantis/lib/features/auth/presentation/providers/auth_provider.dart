@@ -546,8 +546,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Realiza cleanup do dispositivo atual durante logout
-  ///
-  /// Este método remove o dispositivo atual da lista de dispositivos
+  //  /
   /// autorizados no Firestore, garantindo que ele não possa ser usado
   /// novamente sem nova validação.
   ///
@@ -625,7 +624,6 @@ class AuthProvider extends ChangeNotifier {
 
   /// Exclui permanentemente a conta do usuário
   ///
-  /// Este método delega para o EnhancedAccountDeletionService que realiza:
   /// 1. Re-autenticação do usuário para confirmar identidade
   /// 2. Exclusão de todos os dados pessoais do Firestore
   /// 3. Cancelamento de assinaturas ativas (RevenueCat)
@@ -703,5 +701,4 @@ class AuthProvider extends ChangeNotifier {
 
     notifyListeners();
   }
-
 }

@@ -9,7 +9,6 @@ import '../transitions/smooth_page_transition.dart';
 /// Widget que gerencia o fluxo completo de login melhorado
 /// Combina IntelligentLoading, SkeletonLoading e navegação suave
 class EnhancedLoginFlow extends StatefulWidget {
-
   const EnhancedLoginFlow({
     super.key,
     this.onLoginStart,
@@ -126,9 +125,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: _buildCurrentPhase(),
-      ),
+      body: SafeArea(child: _buildCurrentPhase()),
     );
   }
 
@@ -136,10 +133,10 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
     switch (_currentPhase) {
       case LoginFlowPhase.intelligent:
         return _buildIntelligentPhase();
-      
+
       case LoginFlowPhase.skeleton:
         return _buildSkeletonPhase();
-      
+
       case LoginFlowPhase.navigation:
         return _buildNavigationPhase();
     }
@@ -172,10 +169,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
 
     return SmoothPageTransition.fadeSlide(
       child: Column(
-        children: [
-          _buildSkeletonHeader(),
-          Expanded(child: skeletonContent),
-        ],
+        children: [_buildSkeletonHeader(), Expanded(child: skeletonContent)],
       ),
     );
   }
@@ -192,7 +186,9 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: LoadingDesignTokens.successColor.withValues(alpha: 0.1),
+                  color: LoadingDesignTokens.successColor.withValues(
+                    alpha: 0.1,
+                  ),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: LoadingDesignTokens.successColor,
@@ -205,7 +201,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
                   color: LoadingDesignTokens.successColor,
                 ),
               ),
-              
+
               const SizedBox(height: LoadingDesignTokens.spacingLg),
               Text(
                 'Tudo pronto!',
@@ -213,13 +209,15 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              
+
               const SizedBox(height: LoadingDesignTokens.spacingSm),
-              
+
               Text(
                 'Redirecionando...',
                 style: LoadingDesignTokens.bodyTextStyle.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -231,7 +229,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
 
   Widget _buildSkeletonHeader() {
     final colors = LoadingDesignTokens.getColorScheme(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(LoadingDesignTokens.spacingMd),
       decoration: BoxDecoration(
@@ -256,7 +254,7 @@ class _EnhancedLoginFlowState extends State<EnhancedLoginFlow> {
               ),
             ),
           ),
-          
+
           const SizedBox(width: LoadingDesignTokens.spacingMd),
           Expanded(
             child: Text(
@@ -286,31 +284,32 @@ class EnhancedLoginFlowOverlay {
     VoidCallback? onLoginComplete,
   }) async {
     final completer = Completer<void>();
-    
+
     late OverlayEntry overlayEntry;
-    
+
     overlayEntry = OverlayEntry(
-      builder: (context) => Material(
-        child: EnhancedLoginFlow(
-          destinationRoute: destinationRoute,
-          customSteps: customSteps,
-          showSkeletonPreview: showSkeletonPreview,
-          skeletonDuration: skeletonDuration,
-          primaryColor: primaryColor,
-          onLoginStart: onLoginStart,
-          onLoginComplete: () {
-            onLoginComplete?.call();
-            overlayEntry.remove();
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          },
-        ),
-      ),
+      builder:
+          (context) => Material(
+            child: EnhancedLoginFlow(
+              destinationRoute: destinationRoute,
+              customSteps: customSteps,
+              showSkeletonPreview: showSkeletonPreview,
+              skeletonDuration: skeletonDuration,
+              primaryColor: primaryColor,
+              onLoginStart: onLoginStart,
+              onLoginComplete: () {
+                onLoginComplete?.call();
+                overlayEntry.remove();
+                if (!completer.isCompleted) {
+                  completer.complete();
+                }
+              },
+            ),
+          ),
     );
 
     Overlay.of(context).insert(overlayEntry);
-    
+
     return completer.future;
   }
 
@@ -333,7 +332,6 @@ class EnhancedLoginFlowOverlay {
 
 /// Widget para substituir a tela de login existente
 class EnhancedLoginPage extends StatelessWidget {
-
   const EnhancedLoginPage({
     super.key,
     this.destinationRoute = '/vehicles',
@@ -359,12 +357,11 @@ class EnhancedLoginPage extends StatelessWidget {
 
 /// Controller para gerenciar o fluxo de login melhorado
 class EnhancedLoginFlowController {
-  
   factory EnhancedLoginFlowController() {
     _instance ??= EnhancedLoginFlowController._internal();
     return _instance!;
   }
-  
+
   EnhancedLoginFlowController._internal();
   static EnhancedLoginFlowController? _instance;
 
@@ -379,20 +376,17 @@ class EnhancedLoginFlowController {
   }) async {
     await Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => 
-          EnhancedLoginFlow(
-            destinationRoute: destinationRoute,
-            customSteps: customSteps,
-            showSkeletonPreview: showSkeletonPreview,
-            primaryColor: primaryColor,
-            onLoginComplete: onComplete,
-          ),
+        pageBuilder:
+            (context, animation, secondaryAnimation) => EnhancedLoginFlow(
+              destinationRoute: destinationRoute,
+              customSteps: customSteps,
+              showSkeletonPreview: showSkeletonPreview,
+              primaryColor: primaryColor,
+              onLoginComplete: onComplete,
+            ),
         transitionDuration: LoadingDesignTokens.normalDuration,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
         fullscreenDialog: true,
       ),
@@ -417,27 +411,23 @@ class EnhancedLoginFlowController {
 
 /// Utilitários para integração com AuthProvider
 class AuthFlowIntegration {
-  /// Método para usar no _handleAuthSuccess do LoginPage
   static void handleAuthSuccess(
     BuildContext context, {
     required bool isSignUp,
     String vehiclesRoute = '/vehicles',
     Color? primaryColor,
   }) {
-    final destinationRoute = isSignUp 
-      ? '$vehiclesRoute?first_access=true'
-      : vehiclesRoute;
-    
+    final destinationRoute =
+        isSignUp ? '$vehiclesRoute?first_access=true' : vehiclesRoute;
+
     EnhancedLoginFlowController.startAfterAuth(
       context,
       destinationRoute: destinationRoute,
       primaryColor: primaryColor,
-      onComplete: () {
-      },
+      onComplete: () {},
     );
   }
-  
-  /// Método para integrar com Provider existente
+
   static void integrateWithAuthProvider(
     BuildContext context, {
     required VoidCallback originalOnSuccess,
@@ -455,7 +445,7 @@ class AuthFlowIntegration {
 
 /// Fases do fluxo de login melhorado
 enum LoginFlowPhase {
-  intelligent,    // Loading inteligente com etapas
-  skeleton,       // Preview skeleton da página destino
-  navigation,     // Finalização e navegação
+  intelligent, // Loading inteligente com etapas
+  skeleton, // Preview skeleton da página destino
+  navigation, // Finalização e navegação
 }

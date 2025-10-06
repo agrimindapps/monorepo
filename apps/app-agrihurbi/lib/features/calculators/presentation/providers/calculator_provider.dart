@@ -258,7 +258,7 @@ class CalculatorProvider extends ChangeNotifier {
   Future<void> _saveToHistory(CalculationResult result) async {
     final historyItem = CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      userId: 'current_user', // TODO: Obter do contexto de autenticação
+      userId: 'current_user',
       calculatorId: result.calculatorId,
       calculatorName: _selectedCalculator?.name ?? 'Calculadora',
       result: result,
@@ -364,7 +364,6 @@ class CalculatorProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Limpa todo o histórico
   Future<bool> clearHistory() async {
     _calculationHistory.clear();
     notifyListeners();

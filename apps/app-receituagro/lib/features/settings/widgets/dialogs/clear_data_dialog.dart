@@ -11,9 +11,7 @@ class ClearDataDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -32,22 +30,24 @@ class ClearDataDialog extends StatelessWidget {
                 color: SettingsDesignTokens.warningColor,
               ),
             ),
-            
+
             const SizedBox(height: 20),
             Text(
               'Limpar Dados Locais',
-              style: SettingsDesignTokens.getSectionTitleStyle(context).copyWith(
-                fontSize: 20,
-              ),
+              style: SettingsDesignTokens.getSectionTitleStyle(
+                context,
+              ).copyWith(fontSize: 20),
               textAlign: TextAlign.center,
             ),
-            
+
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -57,15 +57,16 @@ class ClearDataDialog extends StatelessWidget {
                     'Ao limpar os dados locais:',
                     style: SettingsDesignTokens.getListTitleStyle(context),
                   ),
-                  
+
                   const SizedBox(height: 12),
                   _buildInfoItem(
                     context,
                     icon: Icons.storage,
-                    text: 'Todas as receitas, diagnósticos e dados salvos localmente serão removidos',
+                    text:
+                        'Todas as receitas, diagnósticos e dados salvos localmente serão removidos',
                     iconColor: SettingsDesignTokens.warningColor,
                   ),
-                  
+
                   const SizedBox(height: 8),
                   _buildInfoItem(
                     context,
@@ -73,28 +74,30 @@ class ClearDataDialog extends StatelessWidget {
                     text: 'Suas configurações e preferências serão resetadas',
                     iconColor: SettingsDesignTokens.warningColor,
                   ),
-                  
+
                   const SizedBox(height: 8),
                   _buildInfoItem(
                     context,
                     icon: Icons.cloud,
-                    text: 'Seus dados na nuvem permanecerão seguros e poderão ser baixados novamente',
+                    text:
+                        'Seus dados na nuvem permanecerão seguros e poderão ser baixados novamente',
                     iconColor: SettingsDesignTokens.successColor,
                     textColor: SettingsDesignTokens.successColor,
                   ),
-                  
+
                   const SizedBox(height: 8),
                   _buildInfoItem(
                     context,
                     icon: Icons.refresh,
-                    text: 'Você pode sincronizar seus dados novamente após a limpeza',
+                    text:
+                        'Você pode sincronizar seus dados novamente após a limpeza',
                     iconColor: SettingsDesignTokens.primaryColor,
                     textColor: SettingsDesignTokens.primaryColor,
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
             Row(
               children: [
@@ -104,11 +107,11 @@ class ClearDataDialog extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(SettingsDesignTokens.iconContainerRadius),
+                        borderRadius: BorderRadius.circular(
+                          SettingsDesignTokens.iconContainerRadius,
+                        ),
                       ),
-                      side: BorderSide(
-                        color: theme.colorScheme.outline,
-                      ),
+                      side: BorderSide(color: theme.colorScheme.outline),
                     ),
                     child: Text(
                       'Cancelar',
@@ -119,7 +122,7 @@ class ClearDataDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
@@ -129,14 +132,14 @@ class ClearDataDialog extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(SettingsDesignTokens.iconContainerRadius),
+                        borderRadius: BorderRadius.circular(
+                          SettingsDesignTokens.iconContainerRadius,
+                        ),
                       ),
                     ),
                     child: const Text(
                       'Limpar Dados',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -157,15 +160,11 @@ class ClearDataDialog extends StatelessWidget {
     Color? textColor,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: iconColor,
-        ),
+        Icon(icon, size: 18, color: iconColor),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -180,7 +179,6 @@ class ClearDataDialog extends StatelessWidget {
     );
   }
 
-  /// Método estático para mostrar o diálogo
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool>(
       context: context,

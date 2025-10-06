@@ -25,9 +25,9 @@ abstract class CalculatorLocalDatasource {
 /// Implementação do data source local para calculadoras usando HiveService
 class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   final HiveService _hiveService;
-  
+
   CalculatorLocalDatasourceImpl(this._hiveService);
-  
+
   static const String _historyBoxName = 'calculation_history';
   static const String _favoritesBoxName = 'favorite_calculators';
   static const String _statsBoxName = 'calculator_usage_stats';
@@ -35,7 +35,9 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   /// Salva item no histórico
   @override
   Future<void> saveCalculationHistory(CalculationHistoryModel history) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
+    final box = await _hiveService.getBox<CalculationHistoryModel>(
+      _historyBoxName,
+    );
     await box.put(history.id, history);
   }
 
@@ -48,24 +50,47 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
     DateTime? fromDate,
     DateTime? toDate,
   }) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
+    final box = await _hiveService.getBox<CalculationHistoryModel>(
+      _historyBoxName,
+    );
     var histories = box.values.toList();
     if (calculatorId != null) {
-      histories = histories.where((CalculationHistoryModel h) => h.calculatorId == calculatorId).toList();
+      histories =
+          histories
+              .where(
+                (CalculationHistoryModel h) => h.calculatorId == calculatorId,
+              )
+              .toList();
     }
-    
+
     if (animalId != null) {
-      histories = histories.where((CalculationHistoryModel h) => h.animalId == animalId).toList();
+      histories =
+          histories
+              .where((CalculationHistoryModel h) => h.animalId == animalId)
+              .toList();
     }
-    
+
     if (fromDate != null) {
-      histories = histories.where((CalculationHistoryModel h) => h.createdAt.isAfter(fromDate)).toList();
+      histories =
+          histories
+              .where(
+                (CalculationHistoryModel h) => h.createdAt.isAfter(fromDate),
+              )
+              .toList();
     }
-    
+
     if (toDate != null) {
-      histories = histories.where((CalculationHistoryModel h) => h.createdAt.isBefore(toDate)).toList();
+      histories =
+          histories
+              .where(
+                (CalculationHistoryModel h) => h.createdAt.isBefore(toDate),
+              )
+              .toList();
     }
-    histories.sort((CalculationHistoryModel a, CalculationHistoryModel b) => b.createdAt.compareTo(a.createdAt));
+    histories.sort(
+      (CalculationHistoryModel a, CalculationHistoryModel b) =>
+          b.createdAt.compareTo(a.createdAt),
+    );
     if (limit != null && limit > 0) {
       histories = histories.take(limit).toList();
     }
@@ -75,14 +100,17 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
 
   /// Remove item do histórico
   Future<void> removeCalculationHistory(String historyId) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
+    final box = await _hiveService.getBox<CalculationHistoryModel>(
+      _historyBoxName,
+    );
     await box.delete(historyId);
   }
 
-  /// Limpa todo o histórico
   @override
   Future<void> clearCalculationHistory() async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
+    final box = await _hiveService.getBox<CalculationHistoryModel>(
+      _historyBoxName,
+    );
     await box.clear();
   }
 
@@ -115,13 +143,18 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   /// Registra uso de calculadora para estatísticas
   Future<void> recordCalculatorUsage(String calculatorId) async {
     final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
-    final existingStats = box.get(calculatorId, defaultValue: <String, dynamic>{});
-    final stats = Map<String, dynamic>.from(existingStats ?? <String, dynamic>{});
-    
+    final existingStats = box.get(
+      calculatorId,
+      defaultValue: <String, dynamic>{},
+    );
+    final stats = Map<String, dynamic>.from(
+      existingStats ?? <String, dynamic>{},
+    );
+
     final now = DateTime.now();
     stats['lastUsed'] = now.millisecondsSinceEpoch;
     stats['usageCount'] = (stats['usageCount'] ?? 0) + 1;
-    
+
     await box.put(calculatorId, stats);
   }
 
@@ -141,7 +174,9 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   /// Obtém item específico do histórico por ID
   @override
   Future<CalculationHistoryModel?> getCalculationHistoryById(String id) async {
-    final box = await _hiveService.getBox<CalculationHistoryModel>(_historyBoxName);
+    final box = await _hiveService.getBox<CalculationHistoryModel>(
+      _historyBoxName,
+    );
     return box.get(id);
   }
 
@@ -181,7 +216,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
   Future<Map<String, int>> getCalculatorUsageStats() async {
     final box = await _hiveService.getBox<Map<dynamic, dynamic>>(_statsBoxName);
     final stats = <String, int>{};
-    
+
     for (final key in box.keys) {
       final calculatorStats = box.get(key);
       if (calculatorStats != null) {
@@ -189,7 +224,7 @@ class CalculatorLocalDatasourceImpl implements CalculatorLocalDatasource {
         stats[key.toString()] = usageCount as int;
       }
     }
-    
+
     return stats;
   }
 }

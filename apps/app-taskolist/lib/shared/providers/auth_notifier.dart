@@ -48,7 +48,8 @@ class AuthState {
     return AuthState(
       user: clearUser == true ? null : (user ?? this.user),
       isSyncInProgress: isSyncInProgress ?? this.isSyncInProgress,
-      hasPerformedInitialSync: hasPerformedInitialSync ?? this.hasPerformedInitialSync,
+      hasPerformedInitialSync:
+          hasPerformedInitialSync ?? this.hasPerformedInitialSync,
       syncMessage: syncMessage ?? this.syncMessage,
     );
   }
@@ -66,7 +67,9 @@ class AuthNotifier extends _$AuthNotifier {
     _syncService = ref.read(syncServiceProvider);
     _authSubscription = _authService.currentUser.listen(
       (user) {
-        state = AsyncValue.data(state.value?.copyWith(user: user) ?? AuthState(user: user));
+        state = AsyncValue.data(
+          state.value?.copyWith(user: user) ?? AuthState(user: user),
+        );
       },
       onError: (Object error, StackTrace stackTrace) {
         state = AsyncValue.error(error, stackTrace);
@@ -165,7 +168,6 @@ class AuthNotifier extends _$AuthNotifier {
     });
   }
 
-  /// Novo método que combina login + sincronização automática
   Future<void> loginAndSync(String email, String password) async {
     try {
       await signInWithEmailAndPassword(email, password);
@@ -191,10 +193,12 @@ class AuthNotifier extends _$AuthNotifier {
     if (_isAnonymous(user)) {
       return;
     }
-    state = AsyncValue.data(currentState.copyWith(
-      isSyncInProgress: true,
-      syncMessage: 'Sincronizando dados...',
-    ));
+    state = AsyncValue.data(
+      currentState.copyWith(
+        isSyncInProgress: true,
+        syncMessage: 'Sincronizando dados...',
+      ),
+    );
 
     try {
       const isUserPremium = false;
@@ -206,24 +210,30 @@ class AuthNotifier extends _$AuthNotifier {
       result.fold(
         (failure) {
           print('❌ Erro na sincronização pós-login: ${failure.message}');
-          state = AsyncValue.data(currentState.copyWith(
-            isSyncInProgress: false,
-            hasPerformedInitialSync: false,
-          ));
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isSyncInProgress: false,
+              hasPerformedInitialSync: false,
+            ),
+          );
         },
         (_) {
-          state = AsyncValue.data(currentState.copyWith(
-            isSyncInProgress: false,
-            hasPerformedInitialSync: true,
-          ));
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isSyncInProgress: false,
+              hasPerformedInitialSync: true,
+            ),
+          );
         },
       );
     } catch (e) {
       print('❌ Erro durante sincronização: $e');
-      state = AsyncValue.data(currentState.copyWith(
-        isSyncInProgress: false,
-        hasPerformedInitialSync: false,
-      ));
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isSyncInProgress: false,
+          hasPerformedInitialSync: false,
+        ),
+      );
     }
   }
 
@@ -235,10 +245,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> sendPasswordResetEmail(String email) async {
     final result = await _authService.sendPasswordResetEmail(email: email);
 
-    result.fold(
-      (failure) => throw Exception(failure.message),
-      (_) => null,
-    );
+    result.fold((failure) => throw Exception(failure.message), (_) => null);
   }
 }
 
@@ -276,11 +283,13 @@ Future<core.UserEntity> signIn(SignInRef ref, SignInRequest request) async {
 
     return result.fold(
       (failure) {
-        unawaited(crashlyticsService.recordAuthError(
-          authMethod: 'email_password',
-          errorCode: 'login_failed',
-          errorMessage: failure.message,
-        ));
+        unawaited(
+          crashlyticsService.recordAuthError(
+            authMethod: 'email_password',
+            errorCode: 'login_failed',
+            errorMessage: failure.message,
+          ),
+        );
         throw Exception(failure.message);
       },
       (user) {
@@ -288,11 +297,13 @@ Future<core.UserEntity> signIn(SignInRef ref, SignInRequest request) async {
       },
     );
   } catch (e) {
-    unawaited(crashlyticsService.recordError(
-      exception: e,
-      stackTrace: StackTrace.current,
-      reason: 'Login error in provider',
-    ));
+    unawaited(
+      crashlyticsService.recordError(
+        exception: e,
+        stackTrace: StackTrace.current,
+        reason: 'Login error in provider',
+      ),
+    );
     rethrow;
   }
 }
@@ -312,11 +323,13 @@ Future<core.UserEntity> signUp(SignUpRef ref, SignUpRequest request) async {
 
     return result.fold(
       (failure) {
-        unawaited(crashlyticsService.recordAuthError(
-          authMethod: 'email_password',
-          errorCode: 'registration_failed',
-          errorMessage: failure.message,
-        ));
+        unawaited(
+          crashlyticsService.recordAuthError(
+            authMethod: 'email_password',
+            errorCode: 'registration_failed',
+            errorMessage: failure.message,
+          ),
+        );
         throw Exception(failure.message);
       },
       (user) {
@@ -324,11 +337,13 @@ Future<core.UserEntity> signUp(SignUpRef ref, SignUpRequest request) async {
       },
     );
   } catch (e) {
-    unawaited(crashlyticsService.recordError(
-      exception: e,
-      stackTrace: StackTrace.current,
-      reason: 'Registration error in provider',
-    ));
+    unawaited(
+      crashlyticsService.recordError(
+        exception: e,
+        stackTrace: StackTrace.current,
+        reason: 'Registration error in provider',
+      ),
+    );
     rethrow;
   }
 }

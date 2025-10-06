@@ -56,7 +56,7 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
       crashlytics: crashlyticsRepository,
       config: AnalyticsConfig.forApp(
         appId: 'receituagro',
-        version: '1.0.0', // TODO: Get from package_info
+        version: '1.0.0',
         enableAnalytics: EnvironmentConfig.enableAnalytics,
         enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
       ),
@@ -295,7 +295,7 @@ class EnhancedAnalyticsNotifier extends _$EnhancedAnalyticsNotifier {
     await _enhancedService.logPurchaseEvent(
       productId: productId,
       value: price,
-      currency: 'USD', // TODO: Get from user locale or RevenueCat
+      currency: 'USD',
       additionalParameters: {'subscription_type': 'premium'},
     );
   }

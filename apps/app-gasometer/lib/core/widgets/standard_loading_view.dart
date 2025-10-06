@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import '../theme/design_tokens.dart';
 import 'centralized_loading_widget.dart';
 
-/// Tipos padronizados de loading states para consistência em todo o app
 enum LoadingType {
   /// Carregamento inicial de dados - loading completo
   initial,
+
   /// Refresh de dados - indicador mais discreto
   refresh,
+
   /// Submit de formulário - com overlay
   submit,
+
   /// Ação específica - loading compacto
   action,
+
   /// Loading em lista - skeleton screens
   list,
+
   /// Loading inline - pequeno indicador
   inline,
 }
@@ -93,53 +97,43 @@ class StandardLoadingView extends StatelessWidget {
   }
 
   /// Loading skeleton para listas
-  factory StandardLoadingView.list({
-    int itemCount = 3,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.list,
-      itemCount: itemCount,
-    );
+  factory StandardLoadingView.list({int itemCount = 3}) {
+    return StandardLoadingView(type: LoadingType.list, itemCount: itemCount);
   }
 
   /// Loading inline pequeno
-  factory StandardLoadingView.inline({
-    Color? color,
-  }) {
-    return StandardLoadingView(
-      type: LoadingType.inline,
-      color: color,
-    );
+  factory StandardLoadingView.inline({Color? color}) {
+    return StandardLoadingView(type: LoadingType.inline, color: color);
   }
 
   /// Tipo de loading a ser exibido
   final LoadingType type;
-  
+
   /// Mensagem personalizada para o loading
   final String message;
-  
+
   /// Se deve mostrar indicador de progresso
   final bool showProgress;
-  
+
   /// Valor do progresso (0.0 a 1.0) se showProgress for true
   final double? progress;
-  
+
   /// Altura customizada para alguns tipos
   final double? height;
-  
+
   /// Cor customizada para o indicador
   final Color? color;
-  
+
   /// Número de itens skeleton (para LoadingType.list)
   final int itemCount;
-  
+
   /// Widget child para wrapping (usado em LoadingType.action)
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
-    
+
     switch (type) {
       case LoadingType.initial:
         return _buildInitialLoading(context, effectiveColor);
@@ -172,7 +166,9 @@ class StandardLoadingView extends StatelessWidget {
   /// Loading discreto para refresh (pull-to-refresh style)
   Widget _buildRefreshLoading(BuildContext context, Color color) {
     return Container(
-      padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
+      padding: GasometerDesignTokens.paddingAll(
+        GasometerDesignTokens.spacingLg,
+      ),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -180,17 +176,16 @@ class StandardLoadingView extends StatelessWidget {
             SizedBox(
               width: GasometerDesignTokens.iconSizeLg,
               height: GasometerDesignTokens.iconSizeLg,
-              child: CircularProgressIndicator(
-                color: color,
-                strokeWidth: 2.0,
-              ),
+              child: CircularProgressIndicator(color: color, strokeWidth: 2.0),
             ),
             const SizedBox(height: GasometerDesignTokens.spacingMd),
             Text(
               message,
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withValues(
+                  alpha: GasometerDesignTokens.opacitySecondary,
+                ),
               ),
             ),
           ],
@@ -202,15 +197,17 @@ class StandardLoadingView extends StatelessWidget {
   /// Loading com overlay para submits de formulário
   Widget _buildSubmitLoading(BuildContext context, Color color) {
     return Container(
-      constraints: BoxConstraints(
-        minHeight: height ?? 120,
-      ),
+      constraints: BoxConstraints(minHeight: height ?? 120),
       child: Center(
         child: Container(
-          padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXxl),
+          padding: GasometerDesignTokens.paddingAll(
+            GasometerDesignTokens.spacingXxl,
+          ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+            borderRadius: GasometerDesignTokens.borderRadius(
+              GasometerDesignTokens.radiusDialog,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
@@ -271,7 +268,9 @@ class StandardLoadingView extends StatelessWidget {
                 'Por favor, aguarde...',
                 style: TextStyle(
                   fontSize: GasometerDesignTokens.fontSizeBody,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(
+                    alpha: GasometerDesignTokens.opacitySecondary,
+                  ),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -294,10 +293,14 @@ class StandardLoadingView extends StatelessWidget {
                 color: Colors.black.withValues(alpha: 0.3),
                 child: Center(
                   child: Container(
-                    padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
+                    padding: GasometerDesignTokens.paddingAll(
+                      GasometerDesignTokens.spacingLg,
+                    ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusDialog),
+                      borderRadius: GasometerDesignTokens.borderRadius(
+                        GasometerDesignTokens.radiusDialog,
+                      ),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -338,17 +341,16 @@ class StandardLoadingView extends StatelessWidget {
             SizedBox(
               width: GasometerDesignTokens.iconSizeMd,
               height: GasometerDesignTokens.iconSizeMd,
-              child: CircularProgressIndicator(
-                color: color,
-                strokeWidth: 2.0,
-              ),
+              child: CircularProgressIndicator(color: color, strokeWidth: 2.0),
             ),
             const SizedBox(width: GasometerDesignTokens.spacingMd),
             Text(
               message,
               style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeBody,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacitySecondary),
+                color: Theme.of(context).colorScheme.onSurface.withValues(
+                  alpha: GasometerDesignTokens.opacitySecondary,
+                ),
               ),
             ),
           ],
@@ -369,7 +371,9 @@ class StandardLoadingView extends StatelessWidget {
             bottom: GasometerDesignTokens.spacingLg,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
+            color: Theme.of(context).colorScheme.onSurface.withValues(
+              alpha: GasometerDesignTokens.opacityDivider,
+            ),
             borderRadius: GasometerDesignTokens.borderRadius(
               GasometerDesignTokens.radiusSm,
             ),
@@ -384,20 +388,26 @@ class StandardLoadingView extends StatelessWidget {
               bottom: GasometerDesignTokens.spacingMd,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
+              color: Theme.of(context).colorScheme.onSurface.withValues(
+                alpha: GasometerDesignTokens.opacityDivider,
+              ),
               borderRadius: GasometerDesignTokens.borderRadius(
                 GasometerDesignTokens.radiusCard,
               ),
             ),
             child: Padding(
-              padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingLg),
+              padding: GasometerDesignTokens.paddingAll(
+                GasometerDesignTokens.spacingLg,
+              ),
               child: Row(
                 children: [
                   Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider * 1.5),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(
+                        alpha: GasometerDesignTokens.opacityDivider * 1.5,
+                      ),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -411,7 +421,11 @@ class StandardLoadingView extends StatelessWidget {
                           width: double.infinity,
                           height: 16,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider * 1.5),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(
+                              alpha: GasometerDesignTokens.opacityDivider * 1.5,
+                            ),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
@@ -422,7 +436,11 @@ class StandardLoadingView extends StatelessWidget {
                           width: MediaQuery.of(context).size.width * 0.4,
                           height: 14,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: GasometerDesignTokens.opacityDivider),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(
+                              alpha: GasometerDesignTokens.opacityDivider,
+                            ),
                             borderRadius: GasometerDesignTokens.borderRadius(
                               GasometerDesignTokens.radiusXs,
                             ),
@@ -445,10 +463,7 @@ class StandardLoadingView extends StatelessWidget {
     return SizedBox(
       width: GasometerDesignTokens.iconSizeButton,
       height: GasometerDesignTokens.iconSizeButton,
-      child: CircularProgressIndicator(
-        color: color,
-        strokeWidth: 2.0,
-      ),
+      child: CircularProgressIndicator(color: color, strokeWidth: 2.0),
     );
   }
 }
@@ -500,29 +515,29 @@ class StandardLoadingOverlay extends StatelessWidget {
 
   /// Se deve mostrar o loading overlay
   final bool isLoading;
-  
+
   /// Widget filho que será coberto pelo overlay quando loading
   final Widget child;
-  
+
   /// Mensagem do loading
   final String message;
-  
+
   /// Tipo de loading
   final LoadingType type;
-  
+
   /// Se deve mostrar progresso
   final bool showProgress;
-  
+
   /// Valor do progresso
   final double? progress;
-  
+
   /// Cor do indicador
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     if (!isLoading) return child;
-    
+
     return StandardLoadingView(
       type: type,
       message: message,

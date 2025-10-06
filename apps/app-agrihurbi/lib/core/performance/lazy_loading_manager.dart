@@ -147,7 +147,6 @@ class LazyLoadingNotifier extends StateNotifier<LazyLoadingState> {
     );
   }
 
-  /// Limpa todo o cache
   void clearCache() {
     state = const LazyLoadingState();
   }
@@ -192,8 +191,7 @@ mixin LazyLoadingMixin {
   }
 
   /// Limpa recursos do lazy loading
-  void disposeLazyLoading() {
-  }
+  void disposeLazyLoading() {}
 }
 
 /// Decorator para automatizar o lazy loading
@@ -225,7 +223,7 @@ class LazyProvider<T> {
 }
 
 /// Extensão para facilitar o uso do lazy loading
-/// 
+///
 /// Nota: Widget-dependent classes foram removidas para evitar
 /// dependências de UI em arquivos core. Implemente widgets
 /// específicos nos módulos de UI quando necessário.

@@ -17,7 +17,7 @@ class LogRepositoryService {
   static const int _rotationThreshold = 8000;
 
   final List<LogEntry> _logs = [];
-  final StreamController<LogEntry> _logStreamController = 
+  final StreamController<LogEntry> _logStreamController =
       StreamController<LogEntry>.broadcast();
 
   LogRepositoryService._internal();
@@ -59,12 +59,7 @@ class LogRepositoryService {
     log(message, level: LogLevel.debug, context: context);
   }
 
-  /// Método principal de logging
-  void log(
-    String message, {
-    LogLevel level = LogLevel.info,
-    String? context,
-  }) {
+  void log(String message, {LogLevel level = LogLevel.info, String? context}) {
     final entry = LogEntry(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       descricao: message,
@@ -94,8 +89,11 @@ class LogRepositoryService {
   void _printToConsole(LogEntry entry) {
     final levelStr = entry.level.name.toUpperCase().padRight(7);
     final contextStr = entry.context != null ? '[${entry.context}] ' : '';
-    final timeStr = entry.hora.toIso8601String().substring(11, 23); // HH:mm:ss.SSS
-    
+    final timeStr = entry.hora.toIso8601String().substring(
+      11,
+      23,
+    ); // HH:mm:ss.SSS
+
     print('$levelStr [$timeStr] $contextStr${entry.descricao}');
   }
 
@@ -104,7 +102,10 @@ class LogRepositoryService {
     final logsToRemove = _logs.length - _rotationThreshold;
     if (logsToRemove > 0) {
       _logs.removeRange(0, logsToRemove);
-      info('Log rotation: removed $logsToRemove old entries', context: 'LogService');
+      info(
+        'Log rotation: removed $logsToRemove old entries',
+        context: 'LogService',
+      );
     }
   }
 
@@ -117,26 +118,36 @@ class LogRepositoryService {
   }) async {
     var filteredLogs = List<LogEntry>.from(_logs);
     if (filterLevel != null) {
-      filteredLogs = filteredLogs
-          .where((log) => log.level == filterLevel)
-          .toList();
+      filteredLogs =
+          filteredLogs.where((log) => log.level == filterLevel).toList();
     }
     if (searchText != null && searchText.isNotEmpty) {
       final searchLower = searchText.toLowerCase();
-      filteredLogs = filteredLogs.where((log) {
-        return log.descricao.toLowerCase().contains(searchLower) ||
-            (log.context?.toLowerCase().contains(searchLower) ?? false);
-      }).toList();
+      filteredLogs =
+          filteredLogs.where((log) {
+            return log.descricao.toLowerCase().contains(searchLower) ||
+                (log.context?.toLowerCase().contains(searchLower) ?? false);
+          }).toList();
     }
     if (startDate != null) {
-      filteredLogs = filteredLogs
-          .where((log) => log.hora.isAfter(startDate) || log.hora.isAtSameMomentAs(startDate))
-          .toList();
+      filteredLogs =
+          filteredLogs
+              .where(
+                (log) =>
+                    log.hora.isAfter(startDate) ||
+                    log.hora.isAtSameMomentAs(startDate),
+              )
+              .toList();
     }
     if (endDate != null) {
-      filteredLogs = filteredLogs
-          .where((log) => log.hora.isBefore(endDate) || log.hora.isAtSameMomentAs(endDate))
-          .toList();
+      filteredLogs =
+          filteredLogs
+              .where(
+                (log) =>
+                    log.hora.isBefore(endDate) ||
+                    log.hora.isAtSameMomentAs(endDate),
+              )
+              .toList();
     }
     filteredLogs.sort((a, b) => b.hora.compareTo(a.hora));
 
@@ -174,9 +185,12 @@ class LogRepositoryService {
     buffer.writeln('# Total entries: ${logs.length}');
     buffer.writeln('# Filters applied:');
     if (filterLevel != null) buffer.writeln('#   Level: ${filterLevel.name}');
-    if (searchText?.isNotEmpty == true) buffer.writeln('#   Search: $searchText');
-    if (startDate != null) buffer.writeln('#   Start: ${startDate.toIso8601String()}');
-    if (endDate != null) buffer.writeln('#   End: ${endDate.toIso8601String()}');
+    if (searchText?.isNotEmpty == true)
+      buffer.writeln('#   Search: $searchText');
+    if (startDate != null)
+      buffer.writeln('#   Start: ${startDate.toIso8601String()}');
+    if (endDate != null)
+      buffer.writeln('#   End: ${endDate.toIso8601String()}');
     buffer.writeln('# ==========================================');
     buffer.writeln();
 
@@ -185,7 +199,7 @@ class LogRepositoryService {
     }
 
     await file.writeAsString(buffer.toString());
-    
+
     info('Logs exported to: ${file.path}', context: 'LogService');
     return file;
   }
@@ -195,7 +209,7 @@ class LogRepositoryService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final logsJson = prefs.getStringList(_prefsKey);
-      
+
       if (logsJson != null) {
         for (final logJson in logsJson) {
           try {
@@ -209,7 +223,7 @@ class LogRepositoryService {
           }
         }
         _logs.sort((a, b) => a.hora.compareTo(b.hora));
-        
+
         info('Loaded ${_logs.length} persisted logs', context: 'LogService');
       }
     } catch (e) {
@@ -223,14 +237,12 @@ class LogRepositoryService {
   Future<void> _persistLogs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final logsToSave = _logs.length > 1000 
-          ? _logs.sublist(_logs.length - 1000)
-          : _logs;
-          
-      final logsJson = logsToSave
-          .map((log) => jsonEncode(log.toJson()))
-          .toList();
-      
+      final logsToSave =
+          _logs.length > 1000 ? _logs.sublist(_logs.length - 1000) : _logs;
+
+      final logsJson =
+          logsToSave.map((log) => jsonEncode(log.toJson())).toList();
+
       await prefs.setStringList(_prefsKey, logsJson);
     } catch (e) {
       if (kDebugMode) {
@@ -266,9 +278,7 @@ class LogRepositoryService {
     };
     final byLevelMap = stats['byLevel'] as Map<String, int>;
     for (final level in LogLevel.values) {
-      byLevelMap[level.name] = _logs
-          .where((log) => log.level == level)
-          .length;
+      byLevelMap[level.name] = _logs.where((log) => log.level == level).length;
     }
     final contextCounts = <String, int>{};
     for (final log in _logs) {

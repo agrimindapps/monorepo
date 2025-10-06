@@ -457,7 +457,6 @@ class WeightSyncEntity extends BaseSyncEntity {
   ];
 }
 
-/// Método de medição do peso
 enum WeightMeasurementMethod {
   scale,          // Balança comum
   veterinaryScale, // Balança veterinária

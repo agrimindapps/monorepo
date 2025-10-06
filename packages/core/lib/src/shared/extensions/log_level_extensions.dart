@@ -96,7 +96,8 @@ extension LogLevelExtensions on LogLevel {
   }
 
   /// Verifica se é um nível de desenvolvimento
-  bool get isDevelopmentLevel => this == LogLevel.debug || this == LogLevel.trace;
+  bool get isDevelopmentLevel =>
+      this == LogLevel.debug || this == LogLevel.trace;
 
   /// Obtém a cor do texto baseada no fundo
   Color get textColor {
@@ -134,12 +135,10 @@ extension LogLevelExtensions on LogLevel {
     }
   }
 
-  /// Método helper para comparar níveis
   bool isHigherPriorityThan(LogLevel other) {
     return priority > other.priority;
   }
 
-  /// Método helper para comparar níveis
   bool isLowerPriorityThan(LogLevel other) {
     return priority < other.priority;
   }
@@ -147,9 +146,9 @@ extension LogLevelExtensions on LogLevel {
   /// Converte string para LogLevel (case insensitive)
   static LogLevel? fromString(String? value) {
     if (value == null || value.isEmpty) return null;
-    
+
     final normalized = value.toLowerCase().trim();
-    
+
     switch (normalized) {
       case 'trace':
       case 'trc':
@@ -178,6 +177,7 @@ extension LogLevelExtensions on LogLevel {
 /// Classe helper para trabalhar com múltiplos LogLevels
 class LogLevelUtils {
   LogLevelUtils._();
+
   /// Obtém todos os níveis ordenados por prioridade (menor para maior)
   static List<LogLevel> get allLevelsByPriority {
     final levels = LogLevel.values.toList();
@@ -204,30 +204,22 @@ class LogLevelUtils {
 
   /// Obtém níveis acima de uma determinada prioridade
   static List<LogLevel> getLevelsAbove(LogLevel level) {
-    return LogLevel.values
-        .where((l) => l.isHigherPriorityThan(level))
-        .toList();
+    return LogLevel.values.where((l) => l.isHigherPriorityThan(level)).toList();
   }
 
   /// Obtém níveis abaixo de uma determinada prioridade
   static List<LogLevel> getLevelsBelow(LogLevel level) {
-    return LogLevel.values
-        .where((l) => l.isLowerPriorityThan(level))
-        .toList();
+    return LogLevel.values.where((l) => l.isLowerPriorityThan(level)).toList();
   }
 
   /// Obtém níveis incluindo e acima de uma determinada prioridade
   static List<LogLevel> getLevelsIncludingAndAbove(LogLevel level) {
-    return LogLevel.values
-        .where((l) => l.priority >= level.priority)
-        .toList();
+    return LogLevel.values.where((l) => l.priority >= level.priority).toList();
   }
 
   /// Obtém níveis incluindo e abaixo de uma determinada prioridade
   static List<LogLevel> getLevelsIncludingAndBelow(LogLevel level) {
-    return LogLevel.values
-        .where((l) => l.priority <= level.priority)
-        .toList();
+    return LogLevel.values.where((l) => l.priority <= level.priority).toList();
   }
 
   /// Filtra uma lista de LogLevel baseado em critérios
@@ -268,7 +260,7 @@ class LogLevelUtils {
 
     for (final level in levels) {
       final levelName = level.name;
-      stats['distribution'][levelName] = 
+      stats['distribution'][levelName] =
           (stats['distribution'][levelName] as int? ?? 0) + 1;
 
       if (level.isCritical) {

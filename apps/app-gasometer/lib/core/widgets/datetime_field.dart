@@ -24,7 +24,6 @@ import 'package:intl/intl.dart';
 /// )
 /// ```
 class DateTimeField extends StatelessWidget {
-
   const DateTimeField({
     super.key,
     required this.value,
@@ -36,6 +35,7 @@ class DateTimeField extends StatelessWidget {
     this.enabled = true,
     this.helperText,
   });
+
   /// Valor atual da data/hora
   final DateTime value;
 
@@ -69,13 +69,8 @@ class DateTimeField extends StatelessWidget {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: label,
-            suffixIcon: Icon(
-              suffixIcon,
-              size: 24,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            suffixIcon: Icon(suffixIcon, size: 24),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: Colors.white,
             helperText: helperText,
@@ -110,10 +105,10 @@ class DateTimeField extends StatelessWidget {
     );
   }
 
-  /// Método privado que implementa exatamente a mesma lógica
   /// que existe em todos os formulários atualmente
   Future<void> _selectDateTime(BuildContext context) async {
-    final defaultFirstDate = firstDate ?? DateTime.now().subtract(const Duration(days: 365));
+    final defaultFirstDate =
+        firstDate ?? DateTime.now().subtract(const Duration(days: 365));
     final defaultLastDate = lastDate ?? DateTime.now();
     final date = await showDatePicker(
       context: context,
@@ -176,7 +171,6 @@ class DateTimeField extends StatelessWidget {
 
 /// Variação do DateTimeField para casos onde pode ser opcional/futuro
 class FutureDateTimeField extends StatelessWidget {
-
   const FutureDateTimeField({
     super.key,
     required this.value,
@@ -204,13 +198,8 @@ class FutureDateTimeField extends StatelessWidget {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: label,
-            suffixIcon: Icon(
-              suffixIcon,
-              size: 24,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            suffixIcon: Icon(suffixIcon, size: 24),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: Colors.white,
             helperText: helperText,
@@ -221,13 +210,16 @@ class FutureDateTimeField extends StatelessWidget {
               Expanded(
                 child: Text(
                   value != null
-                    ? DateFormat('dd/MM/yyyy').format(value!)
-                    : placeholder,
+                      ? DateFormat('dd/MM/yyyy').format(value!)
+                      : placeholder,
                   style: TextStyle(
                     fontSize: 16,
-                    color: value != null
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color:
+                        value != null
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -279,9 +271,10 @@ class FutureDateTimeField extends StatelessWidget {
     );
 
     if (date != null && context.mounted) {
-      final currentTime = value != null
-        ? TimeOfDay.fromDateTime(value!)
-        : const TimeOfDay(hour: 9, minute: 0); // Default to 9:00 AM
+      final currentTime =
+          value != null
+              ? TimeOfDay.fromDateTime(value!)
+              : const TimeOfDay(hour: 9, minute: 0); // Default to 9:00 AM
 
       final time = await showTimePicker(
         context: context,
@@ -321,7 +314,6 @@ class FutureDateTimeField extends StatelessWidget {
 
 /// Variação simplificada para casos específicos com ranges customizados
 class CustomRangeDateTimeField extends StatelessWidget {
-
   const CustomRangeDateTimeField({
     super.key,
     required this.value,

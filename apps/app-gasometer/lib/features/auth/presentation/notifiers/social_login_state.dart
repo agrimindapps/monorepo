@@ -48,7 +48,6 @@ class SocialLoginState {
   /// Indica se está em processo de login
   bool get isProcessing => isLoading;
 
-  /// Retorna mensagem amigável do método atual
   String? get currentMethodLabel {
     if (currentMethod == null) return null;
     switch (currentMethod!) {

@@ -69,7 +69,7 @@ class PlantDetailsInfo extends StatelessWidget {
                   context,
                   icon: Icons.room_outlined,
                   label: 'Localização',
-                  value: 'Espaço ${plant.spaceId}', // TODO: Get space name
+                  value: 'Espaço ${plant.spaceId}',
                   color: Colors.orange,
                 ),
                 const SizedBox(height: 16),

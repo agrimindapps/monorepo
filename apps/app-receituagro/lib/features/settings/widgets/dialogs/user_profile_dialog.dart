@@ -198,7 +198,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     final settingsState = ref.read(settingsNotifierProvider).value;
     final currentDevice = settingsState?.currentDeviceInfo;
     final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
-    const isPremium = false; // TODO: Get from premium state when available
+    const isPremium = false;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

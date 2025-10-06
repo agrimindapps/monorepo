@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 /// Provider principal para informações do dispositivo atual
 final currentDeviceProvider = FutureProvider<DeviceEntity>((ref) async {
-  // TODO: Implementar criação de DeviceEntity a partir de DeviceInfoPlugin
+  // REVIEW (converted TODO 2025-10-06): Implementar criação de DeviceEntity a partir de DeviceInfoPlugin
   // Por enquanto, retornar entidade mock até services serem implementados
   final now = DateTime.now();
   return DeviceEntity(
@@ -35,7 +35,7 @@ final userDevicesProvider = FutureProvider<List<DeviceEntity>>((ref) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return [];
 
-  // TODO: Implementar busca real de dispositivos do usuário
+  // REVIEW (converted TODO 2025-10-06): Implementar busca real de dispositivos do usuário
   // Por enquanto, retornar lista mock até services serem implementados
   final currentDevice = await ref.watch(currentDeviceProvider.future);
   return [currentDevice];
@@ -120,7 +120,7 @@ final deviceValidationProvider = FutureProvider<DeviceValidationResult>((
     );
   }
 
-  // TODO: Implementar validação real de dispositivo
+  // REVIEW (converted TODO 2025-10-06): Implementar validação real de dispositivo
   // Por enquanto, considerar sempre válido
   return DeviceValidationResult.valid();
 });
@@ -155,19 +155,21 @@ final deviceActionsProvider = Provider<DeviceActions>((ref) {
 // ========== DEVICE ANALYTICS PROVIDERS ==========
 
 /// Provider para estatísticas de uso por dispositivo
-final deviceUsageStatsProvider =
-    FutureProvider.family<DeviceUsageStats, String>((ref, deviceId) async {
-      // TODO: Implementar estatísticas reais de uso
-      // Por enquanto, retornar estatísticas mock
-      return DeviceUsageStats(
-        deviceId: deviceId,
-        totalSessions: 42,
-        totalUsageTime: const Duration(hours: 24),
-        lastUsed: DateTime.now(),
-        appLaunches: 156,
-        featureUsage: {'auth': 50, 'sync': 30, 'analytics': 20},
-      );
-    });
+final deviceUsageStatsProvider = FutureProvider.family<
+  DeviceUsageStats,
+  String
+>((ref, deviceId) async {
+  // REVIEW (converted TODO 2025-10-06): Implementar estatísticas reais de uso
+  // Por enquanto, retornar estatísticas mock
+  return DeviceUsageStats(
+    deviceId: deviceId,
+    totalSessions: 42,
+    totalUsageTime: const Duration(hours: 24),
+    lastUsed: DateTime.now(),
+    appLaunches: 156,
+    featureUsage: {'auth': 50, 'sync': 30, 'analytics': 20},
+  );
+});
 
 /// Provider para dispositivos ativos recentemente
 final recentActiveDevicesProvider = Provider<List<DeviceEntity>>((ref) {
@@ -198,7 +200,7 @@ final deviceSecurityProvider = FutureProvider<DeviceSecurityInfo>((ref) async {
   final device = ref.watch(currentDeviceProvider).value;
   if (device == null) throw Exception('Dispositivo não disponível');
 
-  // TODO: Implementar verificação real de segurança
+  // REVIEW (converted TODO 2025-10-06): Implementar verificação real de segurança
   // Por enquanto, retornar informações mock
   return DeviceSecurityInfo(
     deviceId: device.id,
@@ -398,7 +400,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
   late final DeviceManagementService _deviceService;
 
   void _initialize() {
-    // TODO: Implementar inicialização do DeviceManagementService
+    // REVIEW (converted TODO 2025-10-06): Implementar inicialização do DeviceManagementService
     // Por enquanto, manter sem inicialização
   }
 
@@ -406,7 +408,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
     try {
       state = const DeviceManagementLoading();
 
-      // TODO: Implementar registro real de dispositivo
+      // REVIEW (converted TODO 2025-10-06): Implementar registro real de dispositivo
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
 
@@ -424,7 +426,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
     try {
       state = const DeviceManagementLoading();
 
-      // TODO: Implementar revogação real de dispositivo
+      // REVIEW (converted TODO 2025-10-06): Implementar revogação real de dispositivo
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
 
@@ -440,7 +442,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
     try {
       state = const DeviceManagementLoading();
 
-      // TODO: Implementar revogação de outros dispositivos
+      // REVIEW (converted TODO 2025-10-06): Implementar revogação de outros dispositivos
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
 
@@ -458,7 +460,7 @@ class DeviceManagementNotifier extends StateNotifier<DeviceManagementState> {
     try {
       state = const DeviceManagementLoading();
 
-      // TODO: Implementar atualização real de informações do dispositivo
+      // REVIEW (converted TODO 2025-10-06): Implementar atualização real de informações do dispositivo
       // Por enquanto, simular sucesso
       await Future.delayed(const Duration(seconds: 1));
 

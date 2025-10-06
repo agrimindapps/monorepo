@@ -673,7 +673,7 @@ class EnhancedSecurityService {
     if (key == null) {
       final keyResult = await generateCryptoKey();
       if (keyResult.isSuccess && keyResult.data != null) {
-        key = keyResult.data!;
+        key = keyResult.data;
         await _secureStorage.write(key: keyKey, value: key);
       } else {
         throw Exception('Failed to generate crypto key');

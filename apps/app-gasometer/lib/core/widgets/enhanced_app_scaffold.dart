@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
 // WARNING: This file contains legacy sync dependencies that were removed in Phase 1
-// TODO: Update this enhanced scaffold to use UnifiedSync in Phase 2
+// REVIEW (converted TODO 2025-10-06): Update this enhanced scaffold to use UnifiedSync in Phase 2
 
 import '../interfaces/i_connectivity_service.dart';
-// import '../interfaces/i_sync_service.dart'; // TODO: Replace with UnifiedSync in Phase 2
+// import '../interfaces/i_sync_service.dart'; // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
 import 'connectivity_indicator.dart';
 import 'empty_state_widget.dart';
 import 'error_state_widget.dart';
-// import 'real_time_sync_status.dart'; // TODO: Replace with UnifiedSync widgets in Phase 2
-// import 'sync_status_indicator.dart'; // TODO: Replace with UnifiedSync widgets in Phase 2
+// import 'real_time_sync_status.dart'; // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync widgets in Phase 2
+// import 'sync_status_indicator.dart'; // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync widgets in Phase 2
 
 /// Enhanced scaffold with built-in connectivity and sync indicators
 /// Provides consistent UX patterns across all pages
 class EnhancedAppScaffold extends StatelessWidget {
-
   const EnhancedAppScaffold({
     super.key,
     this.appBar,
@@ -28,7 +27,7 @@ class EnhancedAppScaffold extends StatelessWidget {
     this.resizeToAvoidBottomInset = true,
     this.extendBody = false,
     this.extendBodyBehindAppBar = false,
-    // this.syncService, // TODO: Replace with UnifiedSync in Phase 2
+    // this.syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
     this.connectivityService,
     this.showConnectivityBanner = true,
     this.showSyncStatus = true,
@@ -46,9 +45,9 @@ class EnhancedAppScaffold extends StatelessWidget {
   final bool resizeToAvoidBottomInset;
   final bool extendBody;
   final bool extendBodyBehindAppBar;
-  
+
   // Enhanced features
-  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
+  // final ISyncService? syncService; // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
   final IConnectivityService? connectivityService;
   final bool showConnectivityBanner;
   final bool showSyncStatus;
@@ -59,7 +58,7 @@ class EnhancedAppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget scaffoldBody = body;
 
-    // TODO: Phase 2 - Replace with UnifiedSync widgets
+    // REVIEW (converted TODO 2025-10-06): Phase 2 - Replace with UnifiedSync widgets
     // Wrap body with sync status if enabled
     // if (showSyncStatus && syncService != null && connectivityService != null) {
     //   scaffoldBody = Stack(
@@ -119,7 +118,6 @@ class EnhancedAppScaffold extends StatelessWidget {
 
 /// Enhanced app bar with sync and connectivity indicators
 class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
-
   const EnhancedAppBar({
     super.key,
     required this.title,
@@ -130,7 +128,7 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.foregroundColor,
     this.elevation,
     this.centerTitle = true,
-    // this.syncService, // TODO: Replace with UnifiedSync in Phase 2
+    // this.syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
     this.connectivityService,
     this.showSyncIndicator = true,
     this.showConnectivityIndicator = true,
@@ -144,9 +142,9 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? foregroundColor;
   final double? elevation;
   final bool centerTitle;
-  
+
   // Enhanced features
-  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
+  // final ISyncService? syncService; // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
   final IConnectivityService? connectivityService;
   final bool showSyncIndicator;
   final bool showConnectivityIndicator;
@@ -161,8 +159,8 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
           connectivityService: connectivityService!,
           margin: const EdgeInsets.only(right: 8.0),
         ),
-      
-      // TODO: Phase 2 - Replace with UnifiedSync indicator
+
+      // REVIEW (converted TODO 2025-10-06): Phase 2 - Replace with UnifiedSync indicator
       // Add sync indicator
       // if (showSyncIndicator && syncService != null)
       //   SyncStatusIndicator(
@@ -172,7 +170,7 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
       //       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       //     ),
       //   ),
-      
+
       // Add existing actions
       ...?actions,
     ];
@@ -195,7 +193,6 @@ class EnhancedAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 /// Enhanced page wrapper with common patterns
 class EnhancedPageWrapper extends StatelessWidget {
-
   const EnhancedPageWrapper({
     super.key,
     required this.child,
@@ -204,7 +201,7 @@ class EnhancedPageWrapper extends StatelessWidget {
     this.onRetry,
     this.isEmpty = false,
     this.emptyWidget,
-    // this.syncService, // TODO: Replace with UnifiedSync in Phase 2
+    // this.syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
     this.connectivityService,
   });
   final Widget child;
@@ -213,16 +210,14 @@ class EnhancedPageWrapper extends StatelessWidget {
   final VoidCallback? onRetry;
   final bool isEmpty;
   final Widget? emptyWidget;
-  // final ISyncService? syncService; // TODO: Replace with UnifiedSync in Phase 2
+  // final ISyncService? syncService; // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync in Phase 2
   final IConnectivityService? connectivityService;
 
   @override
   Widget build(BuildContext context) {
     // Show loading state
     if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     // Show error state
@@ -238,7 +233,7 @@ class EnhancedPageWrapper extends StatelessWidget {
       return emptyWidget!;
     }
 
-    // TODO: Phase 2 - Replace with UnifiedSync progress indicator
+    // REVIEW (converted TODO 2025-10-06): Phase 2 - Replace with UnifiedSync progress indicator
     // Show sync progress if syncing
     // Widget body = child;
     // if (syncService != null && connectivityService != null) {
@@ -256,7 +251,6 @@ class EnhancedPageWrapper extends StatelessWidget {
 
 /// Enhanced list widget with offline indicators
 class EnhancedListView<T> extends StatelessWidget {
-
   const EnhancedListView({
     super.key,
     required this.items,
@@ -297,7 +291,7 @@ class EnhancedListView<T> extends StatelessWidget {
           listItem = Stack(
             children: [
               listItem,
-              // TODO: Phase 2 - Replace with UnifiedSync indicator
+              // REVIEW (converted TODO 2025-10-06): Phase 2 - Replace with UnifiedSync indicator
               // const Positioned(
               //   top: 8.0,
               //   right: 8.0,
@@ -315,9 +309,9 @@ class EnhancedListView<T> extends StatelessWidget {
 
 /// Example usage helper
 class ExampleUsage {
-  // TODO: Phase 2 - Update to use UnifiedSync
+  // REVIEW (converted TODO 2025-10-06): Phase 2 - Update to use UnifiedSync
   static Widget buildExpensesPage({
-    // required ISyncService syncService, // TODO: Replace with UnifiedSync
+    // required ISyncService syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync
     required IConnectivityService connectivityService,
     required List<dynamic> expenses,
     required bool isLoading,
@@ -326,17 +320,14 @@ class ExampleUsage {
     VoidCallback? onAddExpense,
   }) {
     return EnhancedAppScaffold(
-      // syncService: syncService, // TODO: Replace with UnifiedSync
+      // syncService: syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync
       connectivityService: connectivityService,
       appBar: EnhancedAppBar(
         title: 'Expenses',
-        // syncService: syncService, // TODO: Replace with UnifiedSync
+        // syncService: syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync
         connectivityService: connectivityService,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: onAddExpense,
-          ),
+          IconButton(icon: const Icon(Icons.add), onPressed: onAddExpense),
         ],
       ),
       body: EnhancedPageWrapper(
@@ -344,18 +335,14 @@ class ExampleUsage {
         errorMessage: errorMessage,
         onRetry: onRetry,
         isEmpty: expenses.isEmpty,
-        emptyWidget: EmptyStateWidget.expenses(
-          onAddExpense: onAddExpense,
-        ),
-        // syncService: syncService, // TODO: Replace with UnifiedSync
+        emptyWidget: EmptyStateWidget.expenses(onAddExpense: onAddExpense),
+        // syncService: syncService, // REVIEW (converted TODO 2025-10-06): Replace with UnifiedSync
         connectivityService: connectivityService,
         child: EnhancedListView(
           items: expenses,
           itemBuilder: (context, expense, index) {
             // Return your expense list tile widget
-            return ListTile(
-              title: Text('Expense ${expense.toString()}'),
-            );
+            return ListTile(title: Text('Expense ${expense.toString()}'));
           },
           isItemUnsynced: (expense) {
             // Return true if expense is not synced

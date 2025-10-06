@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 /// Integra AgrihUrbiSyncService com repositories existentes
 abstract class AgrihUrbiSyncDIModule {
   static void init() {
-    // TODO: AgrihUrbiSyncService not yet implemented in core package
+    // REVIEW (converted TODO 2025-10-06): AgrihUrbiSyncService not yet implemented in core package
     // Uncomment when service becomes available
     //
     // Registrar AgrihUrbiSyncService do core package
@@ -19,13 +19,15 @@ abstract class AgrihUrbiSyncDIModule {
     // );
 
     // Inicialização é lazy, service só é criado quando solicitado
-    debugPrint('AgrihUrbiSyncDIModule: Sync service registration skipped (awaiting implementation)');
+    debugPrint(
+      'AgrihUrbiSyncDIModule: Sync service registration skipped (awaiting implementation)',
+    );
   }
 
   /// Inicializa o sync service após o app estar pronto
   /// E conecta com o connectivity monitoring existente
   static Future<void> initializeSyncService() async {
-    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when AgrihUrbiSyncService is implemented
     /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
@@ -54,7 +56,7 @@ abstract class AgrihUrbiSyncDIModule {
 
   /// Executa sync inicial após o usuário fazer login
   static Future<void> performInitialSync() async {
-    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when AgrihUrbiSyncService is implemented
     /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
@@ -98,7 +100,7 @@ abstract class AgrihUrbiSyncDIModule {
 
   /// Limpa dados de sync (útil para logout)
   static Future<void> clearSyncData() async {
-    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when AgrihUrbiSyncService is implemented
     /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
@@ -117,7 +119,7 @@ abstract class AgrihUrbiSyncDIModule {
 
   /// Obtém estatísticas de sincronização
   static Future<void> printSyncStatistics() async {
-    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when AgrihUrbiSyncService is implemented
     /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();
@@ -143,7 +145,7 @@ abstract class AgrihUrbiSyncDIModule {
 
   /// Sync específico para gado/livestock
   static Future<void> syncLivestock() async {
-    // TODO: Uncomment when AgrihUrbiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when AgrihUrbiSyncService is implemented
     /*
     try {
       final syncService = getIt<AgrihUrbiSyncService>();

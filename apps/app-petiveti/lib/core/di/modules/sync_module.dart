@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 /// Integra PetivetiSyncService com repositories existentes
 abstract class PetivetiSyncDIModule {
   static void init() {
-    // TODO: PetivetiSyncService not yet implemented in core package
+    // REVIEW (converted TODO 2025-10-06): PetivetiSyncService not yet implemented in core package
     // Uncomment when service becomes available
     //
     // Registrar PetivetiSyncService do core package
@@ -32,7 +32,7 @@ abstract class PetivetiSyncDIModule {
   /// Inicializa o sync service após o app estar pronto
   /// E conecta com o connectivity monitoring existente
   static Future<void> initializeSyncService() async {
-    // TODO: Uncomment when PetivetiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -61,7 +61,7 @@ abstract class PetivetiSyncDIModule {
 
   /// Executa sync inicial após o usuário fazer login
   static Future<void> performInitialSync() async {
-    // TODO: Uncomment when PetivetiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -105,7 +105,7 @@ abstract class PetivetiSyncDIModule {
 
   /// Limpa dados de sync (útil para logout)
   static Future<void> clearSyncData() async {
-    // TODO: Uncomment when PetivetiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -124,7 +124,7 @@ abstract class PetivetiSyncDIModule {
 
   /// Obtém estatísticas de sincronização
   static Future<void> printSyncStatistics() async {
-    // TODO: Uncomment when PetivetiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();
@@ -150,7 +150,7 @@ abstract class PetivetiSyncDIModule {
 
   /// Sync específico para animais
   static Future<void> syncAnimals() async {
-    // TODO: Uncomment when PetivetiSyncService is implemented
+    // REVIEW (converted TODO 2025-10-06): Uncomment when PetivetiSyncService is implemented
     /*
     try {
       final syncService = GetIt.instance<PetivetiSyncService>();

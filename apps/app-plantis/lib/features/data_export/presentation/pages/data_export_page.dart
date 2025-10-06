@@ -35,7 +35,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     _tabController = TabController(length: 2, vsync: this);
     _loadDataStatistics();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // TODO: Initialize provider using Riverpod
+      // REVIEW (converted TODO 2025-10-06): Initialize provider using Riverpod
       // ref.read(dataExportProvider.notifier).initialize();
     });
   }
@@ -48,7 +48,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
   Future<void> _loadDataStatistics() async {
     try {
-      // TODO: Load statistics using Riverpod provider
+      // REVIEW (converted TODO 2025-10-06): Load statistics using Riverpod provider
       // final provider = ref.read(dataExportProvider.notifier);
       // final stats = await provider.getDataTypeStatistics();
       if (mounted) {
@@ -72,7 +72,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
       return;
     }
 
-    // TODO: Replace with Riverpod provider
+    // REVIEW (converted TODO 2025-10-06): Replace with Riverpod provider
     // final provider = ref.read(dataExportProvider.notifier);
 
     // Simulate provider behavior for now
@@ -88,7 +88,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     //   return;
     // }
 
-    // TODO: Replace with actual export request
+    // REVIEW (converted TODO 2025-10-06): Replace with actual export request
     // final request = await provider.requestExport(
     //   dataTypes: _selectedDataTypes,
     //   format: _selectedFormat,
@@ -166,9 +166,9 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Widget _buildExportTab() {
     return Consumer(
       builder: (context, ref, child) {
-        // TODO: Watch data export provider
+        // REVIEW (converted TODO 2025-10-06): Watch data export provider
         // final provider = ref.watch(dataExportProvider);
-        
+
         // Simulate provider state for now
         const isLoading = false;
         // ignore: unused_local_variable
@@ -287,16 +287,17 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                               (availabilityResult?.isAvailable != true)
                           ? null
                           : _requestExport,
-                  icon: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.download),
+                  icon:
+                      isLoading
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                          : const Icon(Icons.download),
                   label: const Text(
                     isLoading ? 'Processando...' : 'Exportar Dados',
                   ),
@@ -355,7 +356,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Widget _buildHistoryTab() {
     return Consumer(
       builder: (context, ref, child) {
-        // TODO: Watch data export provider
+        // REVIEW (converted TODO 2025-10-06): Watch data export provider
         // final provider = ref.watch(dataExportProvider);
 
         // Simulate provider state for now
@@ -407,7 +408,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
         return RefreshIndicator(
           onRefresh: () async {
-            // TODO: Refresh export history using Riverpod
+            // REVIEW (converted TODO 2025-10-06): Refresh export history using Riverpod
             // await ref.read(dataExportProvider.notifier).loadExportHistory();
           },
           color: PlantisColors.primary,
@@ -469,7 +470,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 if (request.status == ExportRequestStatus.completed) ...[
                   IconButton(
                     onPressed: () {
-                      // TODO: Download export using Riverpod
+                      // REVIEW (converted TODO 2025-10-06): Download export using Riverpod
                       // ref.read(dataExportProvider.notifier).downloadExport(request.id);
                     },
                     icon: const Icon(Icons.download, color: PlantisColors.leaf),
@@ -480,7 +481,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                     if (value == 'delete') {
                       final confirmed = await _showDeleteConfirmation();
                       if (confirmed) {
-                        // TODO: Delete export using Riverpod
+                        // REVIEW (converted TODO 2025-10-06): Delete export using Riverpod
                         // ref.read(dataExportProvider.notifier).deleteExport(request.id);
                       }
                     }

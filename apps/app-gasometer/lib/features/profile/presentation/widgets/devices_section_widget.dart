@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/design_tokens.dart';
-// TODO: Replace with Riverpod providers
+// REVIEW (converted TODO 2025-10-06): Replace with Riverpod providers
 // import '../../../device_management/presentation/providers/vehicle_device_provider.dart';
 
 /// Seção de gerenciamento de dispositivos otimizada para UX na página de perfil
@@ -20,7 +20,7 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   @override
   void initState() {
     super.initState();
-    // TODO: Replace with Riverpod provider
+    // REVIEW (converted TODO 2025-10-06): Replace with Riverpod provider
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   ref.read(vehicleDeviceProviderNotifier).loadUserDevices();
     // });
@@ -28,7 +28,7 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Replace Consumer<VehicleDeviceProvider> with Riverpod provider
+    // REVIEW (converted TODO 2025-10-06): Replace Consumer<VehicleDeviceProvider> with Riverpod provider
     // final provider = ref.watch(vehicleDeviceProviderNotifier);
 
     // Placeholder implementation without provider dependencies
@@ -113,7 +113,7 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   }
 
   Widget _buildPlaceholderDevicesOverview(BuildContext context) {
-    // TODO: Replace with actual provider implementation
+    // REVIEW (converted TODO 2025-10-06): Replace with actual provider implementation
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -157,7 +157,7 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
     );
   }
 
-  // TODO: Implement with Riverpod providers
+  // REVIEW (converted TODO 2025-10-06): Implement with Riverpod providers
   // Widget _buildDevicesOverview(BuildContext context, VehicleDeviceProvider provider) {
   //   if (provider.isLoading) {
   //     return _buildLoadingState(context);
@@ -196,7 +196,7 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   //   );
   // }
 
-  // TODO: Implement with Riverpod providers
+  // REVIEW (converted TODO 2025-10-06): Implement with Riverpod providers
   // Widget _buildCurrentDeviceListTile(BuildContext context, DeviceEntity device) {
   //   return Semantics(
   //     label: 'Dispositivo atual: ${device.name}',
@@ -350,7 +350,7 @@ class _DevicesSectionWidgetState extends ConsumerState<DevicesSectionWidget> {
   //   );
   // }
 
-  // TODO: Implement with Riverpod providers
+  // REVIEW (converted TODO 2025-10-06): Implement with Riverpod providers
   // Widget _buildErrorState(BuildContext context, VehicleDeviceProvider provider) {
   //   return Container(
   //     padding: const EdgeInsets.all(16),

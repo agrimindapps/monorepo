@@ -122,8 +122,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               }
             },
             onShowDialog: (dialog) {
-              if (mounted)
+              if (mounted) {
                 showDialog<void>(context: context, builder: (_) => dialog);
+              }
             },
             onShowBottomSheet: (bottomSheet) {
               if (mounted) {

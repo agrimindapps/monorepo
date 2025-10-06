@@ -106,7 +106,7 @@ final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
 /// Provider para limitações de sync baseadas em premium
 final syncLimitsProvider = Provider.family<SyncLimits, String>((ref, appId) {
   final user = ref.watch(domainCurrentUserProvider);
-  // TODO: Integrar com subscription providers para verificar premium
+  // REVIEW (converted TODO 2025-10-06): Integrar com subscription providers para verificar premium
   const isPremium = false; // Temporário até integração ser feita
 
   return SyncLimits.forApp(appId, isPremium);

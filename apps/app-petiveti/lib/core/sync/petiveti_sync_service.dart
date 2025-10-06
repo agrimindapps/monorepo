@@ -31,10 +31,12 @@ class PetivetiSyncService {
       StreamController<EmergencySyncStatus>.broadcast();
 
   /// Stream de eventos específicos do pet care
-  Stream<PetCareSyncEvent> get petCareEventStream => _petCareEventController.stream;
+  Stream<PetCareSyncEvent> get petCareEventStream =>
+      _petCareEventController.stream;
 
   /// Stream de status de emergência
-  Stream<EmergencySyncStatus> get emergencyStatusStream => _emergencyStatusController.stream;
+  Stream<EmergencySyncStatus> get emergencyStatusStream =>
+      _emergencyStatusController.stream;
 
   /// Inicializa o serviço de sync do Petiveti
   Future<Either<Failure, void>> initialize({
@@ -43,7 +45,10 @@ class PetivetiSyncService {
   }) async {
     try {
       if (_isInitialized) {
-        developer.log('PetivetiSyncService already initialized', name: 'PetivetiSync');
+        developer.log(
+          'PetivetiSyncService already initialized',
+          name: 'PetivetiSync',
+        );
         return const Right(null);
       }
 
@@ -85,7 +90,9 @@ class PetivetiSyncService {
         'Error initializing PetivetiSyncService: $e',
         name: 'PetivetiSync',
       );
-      return Left(InitializationFailure('Failed to initialize sync service: $e'));
+      return Left(
+        InitializationFailure('Failed to initialize sync service: $e'),
+      );
     }
   }
 
@@ -101,17 +108,21 @@ class PetivetiSyncService {
   /// Configura listeners de sync
   void _setupListeners() {
     // Listener para status global
-    _statusSubscription = UnifiedSyncManager.instance.globalSyncStatusStream.listen(
-      (statusMap) {
-        final petivetiStatus = statusMap[_config!.appSyncConfig.appName];
-        if (petivetiStatus != null) {
-          _handleStatusChange(petivetiStatus);
-        }
-      },
-      onError: (Object error) {
-        developer.log('Error in status stream: $error', name: 'PetivetiSync');
-      },
-    );
+    _statusSubscription = UnifiedSyncManager.instance.globalSyncStatusStream
+        .listen(
+          (statusMap) {
+            final petivetiStatus = statusMap[_config!.appSyncConfig.appName];
+            if (petivetiStatus != null) {
+              _handleStatusChange(petivetiStatus);
+            }
+          },
+          onError: (Object error) {
+            developer.log(
+              'Error in status stream: $error',
+              name: 'PetivetiSync',
+            );
+          },
+        );
 
     // Listener para eventos de sync
     _eventSubscription = UnifiedSyncManager.instance.syncEventStream.listen(
@@ -153,17 +164,17 @@ class PetivetiSyncService {
 
   /// Configura alertas médicos
   Future<void> _setupMedicalAlerts() async {
-    // TODO: Implementar alertas para medicações vencendo
-    // TODO: Implementar alertas para consultas próximas
-    // TODO: Implementar alertas para vacinas em atraso
+    // REVIEW (converted TODO 2025-10-06): Implementar alertas para medicações vencendo
+    // REVIEW (converted TODO 2025-10-06): Implementar alertas para consultas próximas
+    // REVIEW (converted TODO 2025-10-06): Implementar alertas para vacinas em atraso
     developer.log('Medical alerts configured', name: 'PetivetiSync');
   }
 
   /// Configura lembretes de cronograma
   Future<void> _setupScheduleReminders() async {
-    // TODO: Implementar lembretes de alimentação
-    // TODO: Implementar lembretes de exercícios
-    // TODO: Implementar lembretes de medicação
+    // REVIEW (converted TODO 2025-10-06): Implementar lembretes de alimentação
+    // REVIEW (converted TODO 2025-10-06): Implementar lembretes de exercícios
+    // REVIEW (converted TODO 2025-10-06): Implementar lembretes de medicação
     developer.log('Schedule reminders configured', name: 'PetivetiSync');
   }
 
@@ -177,7 +188,10 @@ class PetivetiSyncService {
 
   /// Manipula mudanças de status
   void _handleStatusChange(SyncStatus status) {
-    developer.log('Sync status changed to: ${status.name}', name: 'PetivetiSync');
+    developer.log(
+      'Sync status changed to: ${status.name}',
+      name: 'PetivetiSync',
+    );
 
     // Emitir status de emergência se necessário
     if (_config!.emergencyDataConfig.enableEmergencyMode) {
@@ -264,13 +278,13 @@ class PetivetiSyncService {
 
     // Consultas de emergência
     if (event.entityType.toString() == 'AppointmentSyncEntity') {
-      // TODO: Verificar se é consulta de emergência
+      // REVIEW (converted TODO 2025-10-06): Verificar se é consulta de emergência
       return false;
     }
 
     // Mudanças significativas de peso
     if (event.entityType.toString() == 'WeightSyncEntity') {
-      // TODO: Verificar se é mudança significativa
+      // REVIEW (converted TODO 2025-10-06): Verificar se é mudança significativa
       return false;
     }
 
@@ -284,8 +298,8 @@ class PetivetiSyncService {
       name: 'PetivetiSync',
     );
 
-    // TODO: Implementar notificações de emergência
-    // TODO: Implementar sync prioritário
+    // REVIEW (converted TODO 2025-10-06): Implementar notificações de emergência
+    // REVIEW (converted TODO 2025-10-06): Implementar sync prioritário
   }
 
   /// Emite status de emergência
@@ -309,27 +323,24 @@ class PetivetiSyncService {
     developer.log('Forcing emergency sync', name: 'PetivetiSync');
 
     // Forçar sync de medicações primeiro (prioridade crítica)
-    final medicationResult = await UnifiedSyncManager.instance.forceSyncEntity<MedicationSyncEntity>(
-      _config!.appSyncConfig.appName,
-    );
+    final medicationResult = await UnifiedSyncManager.instance
+        .forceSyncEntity<MedicationSyncEntity>(_config!.appSyncConfig.appName);
 
     if (medicationResult.isLeft()) {
       return medicationResult;
     }
 
     // Forçar sync de animais
-    final animalResult = await UnifiedSyncManager.instance.forceSyncEntity<AnimalSyncEntity>(
-      _config!.appSyncConfig.appName,
-    );
+    final animalResult = await UnifiedSyncManager.instance
+        .forceSyncEntity<AnimalSyncEntity>(_config!.appSyncConfig.appName);
 
     if (animalResult.isLeft()) {
       return animalResult;
     }
 
     // Forçar sync de consultas
-    final appointmentResult = await UnifiedSyncManager.instance.forceSyncEntity<AppointmentSyncEntity>(
-      _config!.appSyncConfig.appName,
-    );
+    final appointmentResult = await UnifiedSyncManager.instance
+        .forceSyncEntity<AppointmentSyncEntity>(_config!.appSyncConfig.appName);
 
     return appointmentResult;
   }
@@ -337,7 +348,9 @@ class PetivetiSyncService {
   /// Obtém status de sync atual
   SyncStatus get currentStatus {
     if (!_isInitialized) return SyncStatus.offline;
-    return UnifiedSyncManager.instance.getAppSyncStatus(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.getAppSyncStatus(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   /// Obtém informações de debug
@@ -346,7 +359,9 @@ class PetivetiSyncService {
       return {'error': 'Not initialized'};
     }
 
-    final baseInfo = UnifiedSyncManager.instance.getAppDebugInfo(_config!.appSyncConfig.appName);
+    final baseInfo = UnifiedSyncManager.instance.getAppDebugInfo(
+      _config!.appSyncConfig.appName,
+    );
 
     return {
       ...baseInfo,
@@ -362,75 +377,140 @@ class PetivetiSyncService {
 
   // Animal operations
   Future<Either<Failure, String>> createAnimal(AnimalSyncEntity animal) async {
-    return UnifiedSyncManager.instance.create(_config!.appSyncConfig.appName, animal);
+    return UnifiedSyncManager.instance.create(
+      _config!.appSyncConfig.appName,
+      animal,
+    );
   }
 
-  Future<Either<Failure, void>> updateAnimal(String id, AnimalSyncEntity animal) async {
-    return UnifiedSyncManager.instance.update(_config!.appSyncConfig.appName, id, animal);
+  Future<Either<Failure, void>> updateAnimal(
+    String id,
+    AnimalSyncEntity animal,
+  ) async {
+    return UnifiedSyncManager.instance.update(
+      _config!.appSyncConfig.appName,
+      id,
+      animal,
+    );
   }
 
   Future<Either<Failure, List<AnimalSyncEntity>>> getAnimals() async {
-    return UnifiedSyncManager.instance.findAll<AnimalSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.findAll<AnimalSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   Stream<List<AnimalSyncEntity>>? get animalsStream {
-    return UnifiedSyncManager.instance.streamAll<AnimalSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.streamAll<AnimalSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   // Medication operations
-  Future<Either<Failure, String>> createMedication(MedicationSyncEntity medication) async {
-    return UnifiedSyncManager.instance.create(_config!.appSyncConfig.appName, medication);
+  Future<Either<Failure, String>> createMedication(
+    MedicationSyncEntity medication,
+  ) async {
+    return UnifiedSyncManager.instance.create(
+      _config!.appSyncConfig.appName,
+      medication,
+    );
   }
 
-  Future<Either<Failure, void>> updateMedication(String id, MedicationSyncEntity medication) async {
-    return UnifiedSyncManager.instance.update(_config!.appSyncConfig.appName, id, medication);
+  Future<Either<Failure, void>> updateMedication(
+    String id,
+    MedicationSyncEntity medication,
+  ) async {
+    return UnifiedSyncManager.instance.update(
+      _config!.appSyncConfig.appName,
+      id,
+      medication,
+    );
   }
 
   Future<Either<Failure, List<MedicationSyncEntity>>> getMedications() async {
-    return UnifiedSyncManager.instance.findAll<MedicationSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.findAll<MedicationSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   Stream<List<MedicationSyncEntity>>? get medicationsStream {
-    return UnifiedSyncManager.instance.streamAll<MedicationSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.streamAll<MedicationSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   // Appointment operations
-  Future<Either<Failure, String>> createAppointment(AppointmentSyncEntity appointment) async {
-    return UnifiedSyncManager.instance.create(_config!.appSyncConfig.appName, appointment);
+  Future<Either<Failure, String>> createAppointment(
+    AppointmentSyncEntity appointment,
+  ) async {
+    return UnifiedSyncManager.instance.create(
+      _config!.appSyncConfig.appName,
+      appointment,
+    );
   }
 
-  Future<Either<Failure, void>> updateAppointment(String id, AppointmentSyncEntity appointment) async {
-    return UnifiedSyncManager.instance.update(_config!.appSyncConfig.appName, id, appointment);
+  Future<Either<Failure, void>> updateAppointment(
+    String id,
+    AppointmentSyncEntity appointment,
+  ) async {
+    return UnifiedSyncManager.instance.update(
+      _config!.appSyncConfig.appName,
+      id,
+      appointment,
+    );
   }
 
   Future<Either<Failure, List<AppointmentSyncEntity>>> getAppointments() async {
-    return UnifiedSyncManager.instance.findAll<AppointmentSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.findAll<AppointmentSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   Stream<List<AppointmentSyncEntity>>? get appointmentsStream {
-    return UnifiedSyncManager.instance.streamAll<AppointmentSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.streamAll<AppointmentSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   // Weight operations
   Future<Either<Failure, String>> createWeight(WeightSyncEntity weight) async {
-    return UnifiedSyncManager.instance.create(_config!.appSyncConfig.appName, weight);
+    return UnifiedSyncManager.instance.create(
+      _config!.appSyncConfig.appName,
+      weight,
+    );
   }
 
   Future<Either<Failure, List<WeightSyncEntity>>> getWeights() async {
-    return UnifiedSyncManager.instance.findAll<WeightSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.findAll<WeightSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   Stream<List<WeightSyncEntity>>? get weightsStream {
-    return UnifiedSyncManager.instance.streamAll<WeightSyncEntity>(_config!.appSyncConfig.appName);
+    return UnifiedSyncManager.instance.streamAll<WeightSyncEntity>(
+      _config!.appSyncConfig.appName,
+    );
   }
 
   // User Settings operations
-  Future<Either<Failure, void>> updateUserSettings(String id, UserSettingsSyncEntity settings) async {
-    return UnifiedSyncManager.instance.update(_config!.appSyncConfig.appName, id, settings);
+  Future<Either<Failure, void>> updateUserSettings(
+    String id,
+    UserSettingsSyncEntity settings,
+  ) async {
+    return UnifiedSyncManager.instance.update(
+      _config!.appSyncConfig.appName,
+      id,
+      settings,
+    );
   }
 
-  Future<Either<Failure, UserSettingsSyncEntity?>> getUserSettings(String id) async {
-    return UnifiedSyncManager.instance.findById<UserSettingsSyncEntity>(_config!.appSyncConfig.appName, id);
+  Future<Either<Failure, UserSettingsSyncEntity?>> getUserSettings(
+    String id,
+  ) async {
+    return UnifiedSyncManager.instance.findById<UserSettingsSyncEntity>(
+      _config!.appSyncConfig.appName,
+      id,
+    );
   }
 
   /// Dispose de recursos
@@ -446,7 +526,10 @@ class PetivetiSyncService {
 
       developer.log('PetivetiSyncService disposed', name: 'PetivetiSync');
     } catch (e) {
-      developer.log('Error disposing PetivetiSyncService: $e', name: 'PetivetiSync');
+      developer.log(
+        'Error disposing PetivetiSyncService: $e',
+        name: 'PetivetiSync',
+      );
     }
   }
 }
@@ -474,23 +557,10 @@ class PetCareSyncEvent {
 }
 
 /// Tipos de entidade específicos do pet care
-enum PetCareEntityType {
-  animal,
-  medication,
-  appointment,
-  weight,
-  settings,
-}
+enum PetCareEntityType { animal, medication, appointment, weight, settings }
 
 /// Ações de sync específicas do pet care
-enum PetCareSyncAction {
-  create,
-  update,
-  delete,
-  sync,
-  conflict,
-  error,
-}
+enum PetCareSyncAction { create, update, delete, sync, conflict, error }
 
 /// Status de sincronização de emergência
 class EmergencySyncStatus {
@@ -514,6 +584,6 @@ class EmergencySyncStatus {
   @override
   String toString() {
     return 'EmergencySyncStatus(emergency: $isEmergencyMode, '
-           'synced: $medicalDataSynced, pending: $priorityDataPending)';
+        'synced: $medicalDataSynced, pending: $priorityDataPending)';
   }
 }

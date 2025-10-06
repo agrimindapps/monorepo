@@ -2,25 +2,25 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
 /// **Enhanced Form Components Library**
-/// 
+///
 /// A comprehensive collection of form-related components that provide
 /// consistent styling, validation feedback, and accessibility support
 /// across the entire PetiVeti application.
-/// 
+///
 /// ## Components Included:
 /// - **Enhanced Text Fields**: With validation states and feedback
 /// - **Validation Indicators**: Visual feedback for form validation
 /// - **Form Sections**: Structured form organization
 /// - **Input Hints**: Helpful guidance for users
 /// - **Error States**: Clear error messaging and recovery
-/// 
+///
 /// ## Features:
 /// - **Material Design 3 Compliance**: Latest design standards
 /// - **Accessibility Support**: Screen reader and keyboard navigation
-/// - **Validation Feedback**: Real-time visual and semantic feedback  
+/// - **Validation Feedback**: Real-time visual and semantic feedback
 /// - **Consistent Styling**: Unified appearance across all forms
 /// - **Performance Optimized**: Efficient rendering and state management
-/// 
+///
 /// @author PetiVeti UX/UI Team
 /// @since 1.0.0
 class FormComponents {
@@ -29,10 +29,10 @@ class FormComponents {
   // ========== ENHANCED TEXT FIELDS ==========
 
   /// **Enhanced Text Form Field**
-  /// 
+  ///
   /// A text form field with enhanced validation feedback, accessibility support,
   /// and consistent styling across the application.
-  /// 
+  ///
   /// **Parameters:**
   /// - [controller]: Text editing controller
   /// - [label]: Field label text
@@ -49,7 +49,7 @@ class FormComponents {
   /// - [autofocus]: Whether to focus automatically
   /// - [textCapitalization]: Text capitalization behavior
   /// - [validationState]: Current validation state for visual feedback
-  /// 
+  ///
   /// **Usage Example:**
   /// ```dart
   /// FormComponents.enhancedTextField(
@@ -83,7 +83,7 @@ class FormComponents {
   }) {
     final borderColor = _getValidationColor(validationState);
     final prefixIconColor = _getValidationColor(validationState, isIcon: true);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -108,12 +108,10 @@ class FormComponents {
               labelText: label,
               hintText: hint,
               helperText: helperText,
-              prefixIcon: prefixIcon != null 
-                  ? Icon(
-                      prefixIcon, 
-                      color: prefixIconColor,
-                    )
-                  : null,
+              prefixIcon:
+                  prefixIcon != null
+                      ? Icon(prefixIcon, color: prefixIconColor)
+                      : null,
               suffixIcon: _buildSuffixIcon(suffixIcon, validationState),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -125,10 +123,7 @@ class FormComponents {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: borderColor,
-                  width: 2,
-                ),
+                borderSide: BorderSide(color: borderColor, width: 2),
               ),
               errorBorder: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -141,7 +136,7 @@ class FormComponents {
             ),
           ),
         ),
-        
+
         // Validation feedback
         if (validationState != ValidationState.none)
           _buildValidationFeedback(validationState),
@@ -150,9 +145,9 @@ class FormComponents {
   }
 
   /// **Password Text Field**
-  /// 
+  ///
   /// Specialized text field for password input with visibility toggle.
-  /// 
+  ///
   /// **Parameters:**
   /// - [controller]: Text editing controller
   /// - [label]: Field label (defaults to 'Senha')
@@ -160,7 +155,7 @@ class FormComponents {
   /// - [validator]: Password validation function
   /// - [helperText]: Optional helper text with password requirements
   /// - [showStrengthIndicator]: Whether to show password strength
-  /// 
+  ///
   /// **Features:**
   /// - Password visibility toggle
   /// - Strength indicator (optional)
@@ -179,7 +174,7 @@ class FormComponents {
     return StatefulBuilder(
       builder: (context, setState) {
         bool isObscured = true;
-        
+
         return Column(
           children: [
             enhancedTextField(
@@ -201,7 +196,7 @@ class FormComponents {
               validationState: validationState,
               onChanged: onChanged,
             ),
-            
+
             // Password strength indicator
             if (showStrengthIndicator)
               _buildPasswordStrengthIndicator(controller.text),
@@ -212,9 +207,9 @@ class FormComponents {
   }
 
   /// **Dropdown Field**
-  /// 
+  ///
   /// Enhanced dropdown field with consistent styling and validation support.
-  /// 
+  ///
   /// **Parameters:**
   /// - [value]: Currently selected value
   /// - [items]: List of dropdown items
@@ -224,12 +219,12 @@ class FormComponents {
   /// - [prefixIcon]: Optional leading icon
   /// - [validator]: Validation function
   /// - [enabled]: Whether the field is interactive
-  /// 
+  ///
   /// **Usage Example:**
   /// ```dart
   /// FormComponents.dropdownField<AnimalType>(
   ///   value: selectedType,
-  ///   items: AnimalType.values.map((type) => 
+  ///   items: AnimalType.values.map((type) =>
   ///     DropdownMenuItem(value: type, child: Text(type.name))
   ///   ).toList(),
   ///   onChanged: (value) => setState(() => selectedType = value),
@@ -249,7 +244,7 @@ class FormComponents {
     ValidationState validationState = ValidationState.none,
   }) {
     final borderColor = _getValidationColor(validationState);
-    
+
     return Semantics(
       label: label,
       hint: hint,
@@ -261,12 +256,13 @@ class FormComponents {
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          prefixIcon: prefixIcon != null 
-              ? Icon(
-                  prefixIcon,
-                  color: _getValidationColor(validationState, isIcon: true),
-                )
-              : null,
+          prefixIcon:
+              prefixIcon != null
+                  ? Icon(
+                    prefixIcon,
+                    color: _getValidationColor(validationState, isIcon: true),
+                  )
+                  : null,
           suffixIcon: _buildSuffixIcon(null, validationState),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -288,9 +284,9 @@ class FormComponents {
   // ========== FORM SECTIONS ==========
 
   /// **Form Section**
-  /// 
+  ///
   /// Groups related form fields with consistent styling and spacing.
-  /// 
+  ///
   /// **Parameters:**
   /// - [title]: Section title
   /// - [children]: List of form widgets in this section
@@ -298,7 +294,7 @@ class FormComponents {
   /// - [description]: Optional section description
   /// - [isRequired]: Whether this section is required
   /// - [isCollapsible]: Whether the section can be collapsed
-  /// 
+  ///
   /// **Features:**
   /// - Consistent spacing
   /// - Optional collapsible behavior
@@ -315,7 +311,7 @@ class FormComponents {
     return StatefulBuilder(
       builder: (context, setState) {
         bool isExpanded = true;
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           child: Padding(
@@ -325,20 +321,17 @@ class FormComponents {
               children: [
                 // Section header
                 InkWell(
-                  onTap: isCollapsible 
-                      ? () => setState(() => isExpanded = !isExpanded)
-                      : null,
+                  onTap:
+                      isCollapsible
+                          ? () => setState(() => isExpanded = !isExpanded)
+                          : null,
                   borderRadius: BorderRadius.circular(8),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
                         if (icon != null) ...[
-                          Icon(
-                            icon,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
+                          Icon(icon, color: AppColors.primary, size: 20),
                           const SizedBox(width: 8),
                         ],
                         Expanded(
@@ -372,7 +365,7 @@ class FormComponents {
                           ),
                         if (isCollapsible)
                           Icon(
-                            isExpanded 
+                            isExpanded
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                             color: AppColors.textSecondary,
@@ -381,7 +374,7 @@ class FormComponents {
                     ),
                   ),
                 ),
-                
+
                 // Description
                 if (description != null && isExpanded) ...[
                   const SizedBox(height: 8),
@@ -393,14 +386,16 @@ class FormComponents {
                     ),
                   ),
                 ],
-                
+
                 // Form fields
                 if (isExpanded) ...[
                   const SizedBox(height: 16),
-                  ...children.map((child) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: child,
-                  )),
+                  ...children.map(
+                    (child) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: child,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -438,7 +433,7 @@ class FormComponents {
     ValidationState validationState,
   ) {
     if (customSuffix != null) return customSuffix;
-    
+
     switch (validationState) {
       case ValidationState.valid:
         return const Icon(
@@ -447,11 +442,7 @@ class FormComponents {
           size: 20,
         );
       case ValidationState.error:
-        return const Icon(
-          Icons.error,
-          color: AppColors.error,
-          size: 20,
-        );
+        return const Icon(Icons.error, color: AppColors.error, size: 20);
       case ValidationState.warning:
         return const Icon(
           Icons.warning_amber,
@@ -476,7 +467,7 @@ class FormComponents {
     IconData icon;
     Color color;
     String message;
-    
+
     switch (state) {
       case ValidationState.valid:
         icon = Icons.check_circle_outline;
@@ -501,7 +492,7 @@ class FormComponents {
       case ValidationState.none:
         return const SizedBox.shrink();
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(top: 4, left: 12),
       child: Row(
@@ -526,7 +517,7 @@ class FormComponents {
     final strength = _calculatePasswordStrength(password);
     final strengthLabel = _getStrengthLabel(strength);
     final strengthColor = _getStrengthColor(strength);
-    
+
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Column(
@@ -534,10 +525,7 @@ class FormComponents {
         children: [
           Row(
             children: [
-              const Text(
-                'Força da senha: ',
-                style: TextStyle(fontSize: 12),
-              ),
+              const Text('Força da senha: ', style: TextStyle(fontSize: 12)),
               Text(
                 strengthLabel,
                 style: TextStyle(
@@ -561,13 +549,13 @@ class FormComponents {
 
   static int _calculatePasswordStrength(String password) {
     int strength = 0;
-    
+
     if (password.length >= 8) strength++;
     if (password.contains(RegExp(r'[a-z]'))) strength++;
     if (password.contains(RegExp(r'[A-Z]'))) strength++;
     if (password.contains(RegExp(r'[0-9]'))) strength++;
     if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength++;
-    
+
     return strength > 4 ? 4 : strength;
   }
 
@@ -605,22 +593,22 @@ class FormComponents {
 }
 
 /// **Validation State Enumeration**
-/// 
+///
 /// Represents the current validation state of a form field
 /// for appropriate visual feedback and user guidance.
 enum ValidationState {
   /// No validation state
   none,
-  
+
   /// Field is valid
   valid,
-  
+
   /// Field has an error
   error,
-  
+
   /// Field has a warning
   warning,
-  
+
   /// Field is being validated
   loading,
 }

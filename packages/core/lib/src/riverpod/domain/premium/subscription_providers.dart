@@ -37,14 +37,14 @@ final subscriptionInfoProvider = Provider<SubscriptionInfo?>((ref) {
 final availableProductsProvider = FutureProvider<List<StoreProduct>>((
   ref,
 ) async {
-  // TODO: Implementar getOfferings no RevenueCatService
+  // REVIEW (converted TODO 2025-10-06): Implementar getOfferings no RevenueCatService
   // Por enquanto, retornar lista vazia
   return <StoreProduct>[];
 });
 
 /// Provider para ofertas atuais do RevenueCat
 final currentOfferingsProvider = FutureProvider<Offerings?>((ref) async {
-  // TODO: Implementar getOfferings no RevenueCatService
+  // REVIEW (converted TODO 2025-10-06): Implementar getOfferings no RevenueCatService
   // Por enquanto, retornar null
   return null;
 });
@@ -124,7 +124,7 @@ final purchaseActionsProvider = Provider<PurchaseActions>((ref) {
 final purchaseHistoryProvider = FutureProvider<List<StoreTransaction>>((
   ref,
 ) async {
-  // TODO: Implementar getCustomerInfo no RevenueCatService
+  // REVIEW (converted TODO 2025-10-06): Implementar getCustomerInfo no RevenueCatService
   // Por enquanto, retornar lista vazia
   return <StoreTransaction>[];
 });
@@ -133,7 +133,7 @@ final purchaseHistoryProvider = FutureProvider<List<StoreTransaction>>((
 
 /// Provider para informações do cliente RevenueCat
 final customerInfoProvider = FutureProvider<CustomerInfo?>((ref) async {
-  // TODO: Implementar getCustomerInfo no RevenueCatService
+  // REVIEW (converted TODO 2025-10-06): Implementar getCustomerInfo no RevenueCatService
   // Por enquanto, retornar null
   return null;
 });
@@ -421,12 +421,12 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     try {
       state = const SubscriptionLoading();
 
-      // TODO: Implementar getCustomerInfo no RevenueCatService
+      // REVIEW (converted TODO 2025-10-06): Implementar getCustomerInfo no RevenueCatService
       // Por enquanto, simular usuário sem premium
       final entitlements = <String, EntitlementInfo>{};
 
       if (entitlements.isNotEmpty) {
-        // TODO: Implementar parsing real do EntitlementInfo quando service estiver pronto
+        // REVIEW (converted TODO 2025-10-06): Implementar parsing real do EntitlementInfo quando service estiver pronto
         final info = SubscriptionInfo(
           productId: 'premium_monthly',
           isPremium: true,
@@ -453,7 +453,7 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
     try {
       state = const SubscriptionLoading();
 
-      // TODO: Implementar purchasePackage no RevenueCatService
+      // REVIEW (converted TODO 2025-10-06): Implementar purchasePackage no RevenueCatService
       // Por enquanto, simular compra bem-sucedida
       await Future.delayed(const Duration(seconds: 2));
 

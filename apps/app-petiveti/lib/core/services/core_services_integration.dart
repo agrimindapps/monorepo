@@ -9,7 +9,8 @@ import '../sync/petiveti_sync_service.dart';
 /// Substitui serviços locais por serviços do core package para maximizar reuso
 /// Target: >80% de uso do core package
 class CoreServicesIntegration {
-  static final CoreServicesIntegration _instance = CoreServicesIntegration._internal();
+  static final CoreServicesIntegration _instance =
+      CoreServicesIntegration._internal();
   static CoreServicesIntegration get instance => _instance;
 
   CoreServicesIntegration._internal();
@@ -28,7 +29,7 @@ class CoreServicesIntegration {
 
   // Petiveti specific services
   late final PetivetiSyncService _syncService;
-  // late final MonorepoAuthCache _authCache; // TODO: Implementar quando disponível
+  // late final MonorepoAuthCache _authCache; // REVIEW (converted TODO 2025-10-06): Implementar quando disponível
 
   /// Core Storage Service (substitui local HiveService)
   CoreHiveStorageService get storageService {
@@ -96,12 +97,18 @@ class CoreServicesIntegration {
     bool enableDevelopmentMode = false,
   }) async {
     if (_isInitialized) {
-      developer.log('CoreServicesIntegration already initialized', name: 'CoreIntegration');
+      developer.log(
+        'CoreServicesIntegration already initialized',
+        name: 'CoreIntegration',
+      );
       return const Right(null);
     }
 
     try {
-      developer.log('Initializing CoreServicesIntegration', name: 'CoreIntegration');
+      developer.log(
+        'Initializing CoreServicesIntegration',
+        name: 'CoreIntegration',
+      );
 
       // Inicializar serviços do core em ordem de dependência
       await _initializeCoreServices();
@@ -125,7 +132,9 @@ class CoreServicesIntegration {
         'Error initializing CoreServicesIntegration: $e',
         name: 'CoreIntegration',
       );
-      return Left(InitializationFailure('Failed to initialize core services: $e'));
+      return Left(
+        InitializationFailure('Failed to initialize core services: $e'),
+      );
     }
   }
 
@@ -154,7 +163,7 @@ class CoreServicesIntegration {
 
     // Version Manager Service - para controle de versão do app
     _versionService = VersionManagerService();
-    // await _versionService.initialize(); // TODO: Verificar se método existe
+    // await _versionService.initialize(); // REVIEW (converted TODO 2025-10-06): Verificar se método existe
 
     // Firebase Device Service - para integração Firebase
     _deviceService = FirebaseDeviceService();
@@ -209,19 +218,19 @@ class CoreServicesIntegration {
   /// Integra cache com storage
   Future<void> _setupCacheStorageIntegration() async {
     // Configurar cache para usar core storage ao invés de storage local
-    // TODO: Implementar quando CacheManagementService suportar storage personalizado
+    // REVIEW (converted TODO 2025-10-06): Implementar quando CacheManagementService suportar storage personalizado
   }
 
   /// Integra sync com cache
   Future<void> _setupSyncCacheIntegration() async {
     // Configurar sync para usar cache do core para dados frequentes
-    // TODO: Implementar cache de entidades frequentemente acessadas
+    // REVIEW (converted TODO 2025-10-06): Implementar cache de entidades frequentemente acessadas
   }
 
   /// Integra auth cache com preferences
   Future<void> _setupAuthPreferencesIntegration() async {
     // Configurar auth cache para usar preferences do core
-    // TODO: Migrar configurações de auth para core preferences
+    // REVIEW (converted TODO 2025-10-06): Migrar configurações de auth para core preferences
   }
 
   /// Integra imagens com cache
@@ -233,7 +242,9 @@ class CoreServicesIntegration {
   /// Verifica se foi inicializado
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw StateError('CoreServicesIntegration not initialized. Call initialize() first.');
+      throw StateError(
+        'CoreServicesIntegration not initialized. Call initialize() first.',
+      );
     }
   }
 
@@ -316,7 +327,7 @@ class CoreServicesIntegration {
 
   /// Obtém versão do serviço
   String _getServiceVersion(String serviceName) {
-    // TODO: Implementar obtenção de versão real
+    // REVIEW (converted TODO 2025-10-06): Implementar obtenção de versão real
     return '1.0.0';
   }
 
@@ -325,16 +336,22 @@ class CoreServicesIntegration {
   /// Migra dados do HiveService local para CoreHiveStorageService
   Future<Either<Failure, void>> migrateLocalHiveData() async {
     try {
-      developer.log('Migrating local Hive data to core storage', name: 'CoreIntegration');
+      developer.log(
+        'Migrating local Hive data to core storage',
+        name: 'CoreIntegration',
+      );
 
-      // TODO: Implementar migração de dados do Hive local
+      // REVIEW (converted TODO 2025-10-06): Implementar migração de dados do Hive local
       // 1. Ler dados do HiveService local
       // 2. Converter para formato do CoreHiveStorageService
       // 3. Salvar no core storage
       // 4. Verificar integridade
       // 5. Remover dados locais (opcional)
 
-      developer.log('Local Hive data migration completed', name: 'CoreIntegration');
+      developer.log(
+        'Local Hive data migration completed',
+        name: 'CoreIntegration',
+      );
       return const Right(null);
     } catch (e) {
       return Left(MigrationFailure('Failed to migrate Hive data: $e'));
@@ -344,15 +361,21 @@ class CoreServicesIntegration {
   /// Migra configurações locais para PreferencesService
   Future<Either<Failure, void>> migrateLocalPreferences() async {
     try {
-      developer.log('Migrating local preferences to core service', name: 'CoreIntegration');
+      developer.log(
+        'Migrating local preferences to core service',
+        name: 'CoreIntegration',
+      );
 
-      // TODO: Implementar migração de SharedPreferences
+      // REVIEW (converted TODO 2025-10-06): Implementar migração de SharedPreferences
       // 1. Ler configurações do SharedPreferences
       // 2. Mapear para structure do PreferencesService
       // 3. Salvar usando core service
       // 4. Verificar migração
 
-      developer.log('Local preferences migration completed', name: 'CoreIntegration');
+      developer.log(
+        'Local preferences migration completed',
+        name: 'CoreIntegration',
+      );
       return const Right(null);
     } catch (e) {
       return Left(MigrationFailure('Failed to migrate preferences: $e'));
@@ -362,9 +385,12 @@ class CoreServicesIntegration {
   /// Migra cache local para CacheManagementService
   Future<Either<Failure, void>> migrateLocalCache() async {
     try {
-      developer.log('Migrating local cache to core service', name: 'CoreIntegration');
+      developer.log(
+        'Migrating local cache to core service',
+        name: 'CoreIntegration',
+      );
 
-      // TODO: Implementar migração de cache
+      // REVIEW (converted TODO 2025-10-06): Implementar migração de cache
       // 1. Ler dados do cache local
       // 2. Converter para formato do CacheManagementService
       // 3. Importar no core cache
@@ -379,7 +405,10 @@ class CoreServicesIntegration {
 
   /// Executa migração completa para core services
   Future<Either<Failure, void>> executeFullMigration() async {
-    developer.log('Starting full migration to core services', name: 'CoreIntegration');
+    developer.log(
+      'Starting full migration to core services',
+      name: 'CoreIntegration',
+    );
 
     // Migrar dados em ordem de dependência
     final hiveResult = await migrateLocalHiveData();
@@ -391,7 +420,10 @@ class CoreServicesIntegration {
     final cacheResult = await migrateLocalCache();
     if (cacheResult.isLeft()) return cacheResult;
 
-    developer.log('Full migration to core services completed', name: 'CoreIntegration');
+    developer.log(
+      'Full migration to core services completed',
+      name: 'CoreIntegration',
+    );
     return const Right(null);
   }
 
@@ -405,9 +437,15 @@ class CoreServicesIntegration {
       }
 
       _isInitialized = false;
-      developer.log('CoreServicesIntegration disposed', name: 'CoreIntegration');
+      developer.log(
+        'CoreServicesIntegration disposed',
+        name: 'CoreIntegration',
+      );
     } catch (e) {
-      developer.log('Error disposing CoreServicesIntegration: $e', name: 'CoreIntegration');
+      developer.log(
+        'Error disposing CoreServicesIntegration: $e',
+        name: 'CoreIntegration',
+      );
     }
   }
 }
@@ -453,7 +491,7 @@ class CoreIntegrationStats {
   @override
   String toString() {
     return 'CoreIntegration: $coreServicesInUse/$totalServicesAvailable services '
-           '(${integrationPercentage.toStringAsFixed(1)}% - Grade $integrationGrade)';
+        '(${integrationPercentage.toStringAsFixed(1)}% - Grade $integrationGrade)';
   }
 }
 

@@ -198,14 +198,20 @@ class SettingsNotifier extends _$SettingsNotifier {
     if (currentState == null) return;
 
     if (currentState.currentUserId.isEmpty) {
-      state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+      state = AsyncValue.data(
+        currentState.copyWith(error: 'User not initialized'),
+      );
       return;
     }
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true).clearError(),
+      );
 
-      final settings = await _getUserSettingsUseCase(currentState.currentUserId);
+      final settings = await _getUserSettingsUseCase(
+        currentState.currentUserId,
+      );
 
       state = AsyncValue.data(
         currentState.copyWith(isLoading: false, settings: settings),
@@ -314,7 +320,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Test notification functionality
   Future<bool> testNotification() async {
     try {
-      // TODO: Implement notification test when interface is available
+      // REVIEW (converted TODO 2025-10-06): Implement notification test when interface is available
       debugPrint('Notification test - not implemented yet');
 
       await _analyticsRepository.logEvent(
@@ -356,7 +362,10 @@ class SettingsNotifier extends _$SettingsNotifier {
       final testData = {
         'test_event': 'settings_test_analytics',
         'timestamp': DateTime.now().toIso8601String(),
-        'platform': Theme.of(NavigationService.navigatorKey.currentContext!).platform.toString(),
+        'platform':
+            Theme.of(
+              NavigationService.navigatorKey.currentContext!,
+            ).platform.toString(),
       };
 
       await _analyticsRepository.logEvent(
@@ -364,7 +373,7 @@ class SettingsNotifier extends _$SettingsNotifier {
         parameters: testData,
       );
 
-      // TODO: Implement setUserProperty when interface is available
+      // REVIEW (converted TODO 2025-10-06): Implement setUserProperty when interface is available
       // await _analyticsRepository.setUserProperty(
       //   name: 'last_analytics_test',
       //   value: DateTime.now().toIso8601String(),
@@ -421,7 +430,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Show rate app dialog
   Future<bool> showRateAppDialog(BuildContext context) async {
     try {
-      // TODO: Implement app rating when interface methods are available
+      // REVIEW (converted TODO 2025-10-06): Implement app rating when interface methods are available
       // final shouldShow = await _appRatingRepository.shouldShowRatingPrompt();
       // if (!shouldShow) {
       //   return false;
@@ -459,22 +468,32 @@ class SettingsNotifier extends _$SettingsNotifier {
 
       switch (key) {
         case 'isDarkTheme':
-          updatedSettings = currentSettings.copyWith(isDarkTheme: value as bool);
+          updatedSettings = currentSettings.copyWith(
+            isDarkTheme: value as bool,
+          );
           break;
         case 'notificationsEnabled':
-          updatedSettings = currentSettings.copyWith(notificationsEnabled: value as bool);
+          updatedSettings = currentSettings.copyWith(
+            notificationsEnabled: value as bool,
+          );
           break;
         case 'soundEnabled':
-          updatedSettings = currentSettings.copyWith(soundEnabled: value as bool);
+          updatedSettings = currentSettings.copyWith(
+            soundEnabled: value as bool,
+          );
           break;
         case 'language':
           updatedSettings = currentSettings.copyWith(language: value as String);
           break;
         case 'speechToTextEnabled':
-          updatedSettings = currentSettings.copyWith(speechToTextEnabled: value as bool);
+          updatedSettings = currentSettings.copyWith(
+            speechToTextEnabled: value as bool,
+          );
           break;
         case 'analyticsEnabled':
-          updatedSettings = currentSettings.copyWith(analyticsEnabled: value as bool);
+          updatedSettings = currentSettings.copyWith(
+            analyticsEnabled: value as bool,
+          );
           break;
         default:
           debugPrint('Unknown setting key: $key');
@@ -517,11 +536,13 @@ class SettingsNotifier extends _$SettingsNotifier {
       }
 
       if (_deviceManagementService == null) {
-        debugPrint('⚠️  DeviceManagementService not available - skipping device load');
+        debugPrint(
+          '⚠️  DeviceManagementService not available - skipping device load',
+        );
         return;
       }
 
-      // TODO: Implement device loading when interface methods are available
+      // REVIEW (converted TODO 2025-10-06): Implement device loading when interface methods are available
       DeviceEntity? currentDevice;
       List<DeviceEntity> connectedDevices = [];
 
@@ -543,7 +564,9 @@ class SettingsNotifier extends _$SettingsNotifier {
 
     try {
       if (currentState.currentUserId.isEmpty) {
-        state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+        state = AsyncValue.data(
+          currentState.copyWith(error: 'User not initialized'),
+        );
         return;
       }
 
@@ -556,7 +579,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
-      // TODO: Implement revokeDevice when interface is available
+      // REVIEW (converted TODO 2025-10-06): Implement revokeDevice when interface is available
       final result = await _deviceManagementService!.revokeDevice(deviceUuid);
 
       await result.fold(
@@ -567,7 +590,9 @@ class SettingsNotifier extends _$SettingsNotifier {
         },
         (_) async {
           await _loadDeviceInfo();
-          state = AsyncValue.data(currentState.copyWith(isLoading: false).clearError());
+          state = AsyncValue.data(
+            currentState.copyWith(isLoading: false).clearError(),
+          );
         },
       );
     } catch (e) {
@@ -585,7 +610,9 @@ class SettingsNotifier extends _$SettingsNotifier {
 
     try {
       if (currentState.currentUserId.isEmpty) {
-        state = AsyncValue.data(currentState.copyWith(error: 'User not initialized'));
+        state = AsyncValue.data(
+          currentState.copyWith(error: 'User not initialized'),
+        );
         return false;
       }
 
@@ -598,7 +625,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
-      // TODO: Implement registerDevice when interface is available
+      // REVIEW (converted TODO 2025-10-06): Implement registerDevice when interface is available
       final result = Right<Failure, DeviceEntity>(device); // Placeholder
 
       return result.fold(
@@ -610,7 +637,9 @@ class SettingsNotifier extends _$SettingsNotifier {
         },
         (DeviceEntity registeredDevice) async {
           await _loadDeviceInfo();
-          state = AsyncValue.data(currentState.copyWith(isLoading: false).clearError());
+          state = AsyncValue.data(
+            currentState.copyWith(isLoading: false).clearError(),
+          );
           return true;
         },
       );
@@ -635,20 +664,18 @@ class SettingsNotifier extends _$SettingsNotifier {
 
       if (_deviceManagementService == null) {
         debugPrint(
-            '⚠️  DeviceManagementService not available - using local fallback');
+          '⚠️  DeviceManagementService not available - using local fallback',
+        );
         // Fallback: allow if less than 3 devices locally
         return currentState.connectedDevices.length < 3;
       }
 
       final result = await _deviceManagementService!.canAddMoreDevices();
-      return result.fold(
-        (failure) {
-          debugPrint('Error checking if can add more devices: $failure');
-          // Fallback to local count check
-          return currentState.connectedDevices.length < 3;
-        },
-        (canAdd) => canAdd,
-      );
+      return result.fold((failure) {
+        debugPrint('Error checking if can add more devices: $failure');
+        // Fallback to local count check
+        return currentState.connectedDevices.length < 3;
+      }, (canAdd) => canAdd);
     } catch (e) {
       debugPrint('Unexpected error checking device limit: $e');
       // Fallback to local count check
@@ -662,8 +689,9 @@ class SettingsNotifier extends _$SettingsNotifier {
     if (currentState == null) return null;
 
     try {
-      return currentState.connectedDevices
-          .firstWhere((device) => device.uuid == uuid);
+      return currentState.connectedDevices.firstWhere(
+        (device) => device.uuid == uuid,
+      );
     } catch (e) {
       return null;
     }

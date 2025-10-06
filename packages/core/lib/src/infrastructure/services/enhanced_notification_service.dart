@@ -555,7 +555,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
 
   @override
   Future<bool> scheduleRecurring(RecurringNotificationRequest request) async {
-    // TODO: Implement recurring notification logic
+    // REVIEW (converted TODO 2025-10-06): Implement recurring notification logic
     // This would involve calculating multiple notification times
     // and scheduling them individually
     throw UnimplementedError('Recurring notifications not yet implemented');
@@ -565,14 +565,14 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<bool> scheduleConditional(
     ConditionalNotificationRequest request,
   ) async {
-    // TODO: Implement conditional notification logic
+    // REVIEW (converted TODO 2025-10-06): Implement conditional notification logic
     // This would involve setting up periodic checks for the condition
     throw UnimplementedError('Conditional notifications not yet implemented');
   }
 
   @override
   Future<bool> scheduleSmartReminder(SmartReminderRequest request) async {
-    // TODO: Implement smart reminder logic with adaptive timing
+    // REVIEW (converted TODO 2025-10-06): Implement smart reminder logic with adaptive timing
     throw UnimplementedError('Smart reminders not yet implemented');
   }
 
@@ -603,7 +603,8 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
             id: pending.id,
             title: pending.title,
             body: pending.body,
-            scheduledDate: DateTime.now(), // TODO: Get actual scheduled date
+            scheduledDate:
+                DateTime.now(), // REVIEW (converted TODO 2025-10-06): Get actual scheduled date
             templateId: payload['templateId'] as String?,
             pluginId: payload['pluginId'] as String?,
             data: payload,
@@ -628,7 +629,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     try {
       await cancelNotification(id);
 
-      // TODO: Reschedule with updated data
+      // REVIEW (converted TODO 2025-10-06): Reschedule with updated data
       // This would require storing original notification data
 
       return true;
@@ -770,13 +771,18 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
 
     return PerformanceMetrics(
       timestamp: now,
-      fps: 60.0, // TODO: Implement actual FPS tracking
+      fps:
+          60.0, // REVIEW (converted TODO 2025-10-06): Implement actual FPS tracking
       memoryUsage: const MemoryUsage(
-        usedMemory: 0, // TODO: Implement memory tracking
-        totalMemory: 0, // TODO: Implement memory tracking
-        availableMemory: 0, // TODO: Implement memory tracking
+        usedMemory:
+            0, // REVIEW (converted TODO 2025-10-06): Implement memory tracking
+        totalMemory:
+            0, // REVIEW (converted TODO 2025-10-06): Implement memory tracking
+        availableMemory:
+            0, // REVIEW (converted TODO 2025-10-06): Implement memory tracking
       ),
-      cpuUsage: 0.0, // TODO: Implement CPU usage tracking
+      cpuUsage:
+          0.0, // REVIEW (converted TODO 2025-10-06): Implement CPU usage tracking
       batteryLevel: null, // Optional
       networkLatency: null, // Optional
       renderTime:

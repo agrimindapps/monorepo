@@ -6,7 +6,10 @@ import '../models/license_model.dart';
 import '../src/shared/utils/failure.dart';
 import 'license_repository.dart';
 
-/// Local storage implementation of LicenseRepository using Hive
+/// A concrete implementation of [LicenseRepository] that uses [Hive] for local storage.
+///
+/// This class manages the lifecycle of a [LicenseModel], including creation,
+/// validation, and history tracking.
 @Injectable(as: LicenseRepository)
 class LicenseLocalStorage implements LicenseRepository {
   static const String _boxName = 'license_box';
@@ -14,12 +17,15 @@ class LicenseLocalStorage implements LicenseRepository {
   static const String _licenseHistoryKey = 'license_history';
 
   Box<LicenseModel>? _licenseBox;
-  Box<List<LicenseModel>>? _historyBox;
+  Box<List<dynamic>>? _historyBox;
 
-  /// Initialize Hive boxes
+  /// Initializes the Hive boxes required for license storage.
+  ///
+  /// This method ensures that the license and history boxes are open before
+  /// any operations are performed.
   Future<void> _initializeBoxes() async {
     _licenseBox ??= await Hive.openBox<LicenseModel>(_boxName);
-    _historyBox ??= await Hive.openBox<List<LicenseModel>>('${_boxName}_history');
+    _historyBox ??= await Hive.openBox<List<dynamic>>('${_boxName}_history');
   }
 
   @override
@@ -28,38 +34,22 @@ class LicenseLocalStorage implements LicenseRepository {
   }) async {
     try {
       await _initializeBoxes();
-      final currentResult = await getCurrentLicense();
+      final currentLicenseResult = await getCurrentLicense();
 
-      return currentResult.fold(
-        (failure) async {
+      return currentLicenseResult.fold(
+        (failure) => Left(failure),
+        (existingLicense) {
+          if (existingLicense != null && existingLicense.isValid) {
+            return Right(existingLicense);
+          }
+
           final trialLicense = LicenseModel.createTrial(metadata: metadata);
-
-          final saveResult = await saveLicense(trialLicense);
-          return saveResult.fold(
-            (failure) => Left(failure),
-            (_) => Right(trialLicense),
-          );
-        },
-        (existingLicense) async {
-          if (existingLicense != null) {
-            if (existingLicense.isValid) {
-              return Right(existingLicense);
-            } else {
-              final trialLicense = LicenseModel.createTrial(metadata: metadata);
-              final saveResult = await saveLicense(trialLicense);
-              return saveResult.fold(
-                (failure) => Left(failure),
-                (_) => Right(trialLicense),
-              );
-            }
-          } else {
-            final trialLicense = LicenseModel.createTrial(metadata: metadata);
-            final saveResult = await saveLicense(trialLicense);
+          return saveLicense(trialLicense).then((saveResult) {
             return saveResult.fold(
               (failure) => Left(failure),
               (_) => Right(trialLicense),
             );
-          }
+          });
         },
       );
     } catch (e) {
@@ -80,100 +70,79 @@ class LicenseLocalStorage implements LicenseRepository {
 
   @override
   Future<Either<Failure, bool>> isLicenseValid() async {
-    try {
-      final result = await getCurrentLicense();
-      return result.fold(
-        (failure) => Left(failure),
-        (license) => Right(license?.isValid ?? false),
-      );
-    } catch (e) {
-      return Left(CacheFailure('Failed to check license validity: $e'));
-    }
+    final result = await getCurrentLicense();
+    return result.map((license) => license?.isValid ?? false);
   }
 
   @override
   Future<Either<Failure, int>> getRemainingDays() async {
-    try {
-      final result = await getCurrentLicense();
-      return result.fold(
-        (failure) => Left(failure),
-        (license) => Right(license?.remainingDays ?? 0),
-      );
-    } catch (e) {
-      return Left(CacheFailure('Failed to get remaining days: $e'));
-    }
+    final result = await getCurrentLicense();
+    return result.map((license) => license?.remainingDays ?? 0);
   }
 
   @override
   Future<Either<Failure, LicenseModel>> extendLicense(int days) async {
-    try {
-      final result = await getCurrentLicense();
-      return result.fold(
-        (failure) => Left(failure),
-        (license) async {
-          if (license == null) {
-            return const Left(NotFoundFailure('No license found to extend'));
-          }
+    final currentLicenseResult = await getCurrentLicense();
 
-          final extendedLicense = license.copyWith(
-            expirationDate: license.expirationDate.add(Duration(days: days)),
-            isActive: true,
-          );
+    return currentLicenseResult.fold(
+      (failure) => Left(failure),
+      (license) {
+        if (license == null) {
+          return const Left(NotFoundFailure('No license found to extend.'));
+        }
 
-          final saveResult = await saveLicense(extendedLicense);
+        final extendedLicense = license.copyWith(
+          expirationDate: license.expirationDate.add(Duration(days: days)),
+          isActive: true,
+        );
+
+        return saveLicense(extendedLicense).then((saveResult) {
           return saveResult.fold(
             (failure) => Left(failure),
             (_) => Right(extendedLicense),
           );
-        },
-      );
-    } catch (e) {
-      return Left(CacheFailure('Failed to extend license: $e'));
-    }
+        });
+      },
+    );
   }
 
   @override
   Future<Either<Failure, LicenseModel>> activateLicense(String licenseId) async {
-    try {
-      final result = await getCurrentLicense();
-      return result.fold(
-        (failure) => Left(failure),
-        (license) async {
-          if (license == null || license.id != licenseId) {
-            return const Left(NotFoundFailure('License not found'));
-          }
+    final currentLicenseResult = await getCurrentLicense();
 
-          final activatedLicense = license.copyWith(isActive: true);
-          final saveResult = await saveLicense(activatedLicense);
+    return currentLicenseResult.fold(
+      (failure) => Left(failure),
+      (license) {
+        if (license == null || license.id != licenseId) {
+          return const Left(NotFoundFailure('License not found.'));
+        }
+
+        final activatedLicense = license.copyWith(isActive: true);
+        return saveLicense(activatedLicense).then((saveResult) {
           return saveResult.fold(
             (failure) => Left(failure),
             (_) => Right(activatedLicense),
           );
-        },
-      );
-    } catch (e) {
-      return Left(CacheFailure('Failed to activate license: $e'));
-    }
+        });
+      },
+    );
   }
 
   @override
   Future<Either<Failure, void>> deactivateLicense() async {
-    try {
-      final result = await getCurrentLicense();
-      return result.fold(
-        (failure) => Left(failure),
-        (license) async {
-          if (license == null) {
-            return const Right(null);
-          }
+    final currentLicenseResult = await getCurrentLicense();
 
-          final deactivatedLicense = license.copyWith(isActive: false);
-          return await saveLicense(deactivatedLicense);
-        },
-      );
-    } catch (e) {
-      return Left(CacheFailure('Failed to deactivate license: $e'));
-    }
+    return currentLicenseResult.fold(
+      (failure) => Left(failure),
+      (license) async {
+        if (license == null) {
+          return const Right(null);
+        }
+
+        final deactivatedLicense = license.copyWith(isActive: false);
+        return saveLicense(deactivatedLicense);
+      },
+    );
   }
 
   @override
@@ -182,7 +151,6 @@ class LicenseLocalStorage implements LicenseRepository {
       await _initializeBoxes();
       await _licenseBox!.put(_currentLicenseKey, license);
       await _addToHistory(license);
-
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Failed to save license: $e'));
@@ -201,48 +169,40 @@ class LicenseLocalStorage implements LicenseRepository {
   }
 
   @override
-  Future<Either<Failure, LicenseModel?>> syncLicense() async {
-    final result = await getCurrentLicense();
-    return result;
+  Future<Either<Failure, LicenseModel?>> syncLicense() {
+    return getCurrentLicense();
   }
 
   @override
   Future<Either<Failure, List<LicenseModel>>> getLicenseHistory() async {
     try {
       await _initializeBoxes();
-      final history = _historyBox!.get(_licenseHistoryKey) ?? <LicenseModel>[];
+      final history = _historyBox!.get(_licenseHistoryKey, defaultValue: [])?.cast<LicenseModel>() ?? [];
       return Right(history);
     } catch (e) {
       return Left(CacheFailure('Failed to get license history: $e'));
     }
   }
 
-  /// Add license to history
+  /// Adds a license to the history, ensuring the history does not exceed 10 entries.
   Future<void> _addToHistory(LicenseModel license) async {
-    try {
-      final historyResult = await getLicenseHistory();
-      await historyResult.fold(
-        (failure) async => null, // Ignore history errors
-        (history) async {
-          final updatedHistory = List<LicenseModel>.from(history);
-          final existingIndex = updatedHistory.indexWhere((l) => l.id == license.id);
-          if (existingIndex != -1) {
-            updatedHistory[existingIndex] = license;
-          } else {
-            updatedHistory.add(license);
-          }
-          if (updatedHistory.length > 10) {
-            updatedHistory.removeRange(0, updatedHistory.length - 10);
-          }
+    final historyResult = await getLicenseHistory();
+    historyResult.fold(
+      (_) => null, // Ignore history errors
+      (history) async {
+        final updatedHistory = history.where((l) => l.id != license.id).toList();
+        updatedHistory.add(license);
 
-          await _historyBox!.put(_licenseHistoryKey, updatedHistory);
-        },
-      );
-    } catch (e) {
-    }
+        if (updatedHistory.length > 10) {
+          updatedHistory.removeAt(0);
+        }
+
+        await _historyBox!.put(_licenseHistoryKey, updatedHistory);
+      },
+    );
   }
 
-  /// Clear all license data (useful for testing)
+  /// Clears all license data from storage. Useful for testing.
   Future<Either<Failure, void>> clearAllData() async {
     try {
       await _initializeBoxes();
@@ -254,7 +214,7 @@ class LicenseLocalStorage implements LicenseRepository {
     }
   }
 
-  /// Close Hive boxes
+  /// Closes the Hive boxes.
   Future<void> dispose() async {
     await _licenseBox?.close();
     await _historyBox?.close();

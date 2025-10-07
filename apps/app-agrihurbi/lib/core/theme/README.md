@@ -1,118 +1,118 @@
-# Design System - AgriHurbi
+# AgriHurbi Design System
 
-## 🎨 Visão Geral
+## 🎨 Overview
 
-Este design system consolida e unifica todos os elementos visuais do app AgriHurbi, eliminando inconsistências e magic numbers, e fornecendo componentes reutilizáveis padronizados.
+This design system consolidates and unifies all visual elements of the AgriHurbi app, eliminating inconsistencies and magic numbers while providing standardized, reusable components.
 
-## 📁 Estrutura dos Arquivos
+## 📁 File Structure
 
 ```
 core/
 ├── theme/
-│   ├── design_tokens.dart          # Tokens centralizados (cores, spacing, typography)
-│   ├── app_text_styles.dart        # Estilos de texto padronizados
-│   ├── app_theme.dart              # Configuração do tema (refatorado)
-│   └── README.md                   # Esta documentação
+│   ├── design_tokens.dart          # Centralized tokens (colors, spacing, typography)
+│   ├── app_text_styles.dart        # Standardized text styles
+│   ├── app_theme.dart              # Refactored theme configuration
+│   └── README.md                   # This documentation
 ├── widgets/
-│   ├── design_system_components.dart  # Componentes reutilizáveis
+│   ├── design_system_components.dart  # Reusable components
 │   └── examples/
-│       └── design_system_examples.dart  # Exemplos e guia de migração
+│       └── design_system_examples.dart  # Examples and migration guide
 ```
 
-## 🏗️ Principais Componentes
+## 🏗️ Key Components
 
 ### 1. Design Tokens (`design_tokens.dart`)
 
-**Centraliza todas as constantes de design:**
+**Centralizes all design constants:**
 
-- **Cores**: Sistema unificado para cores primárias, secundárias, status, categorias
-- **Spacing**: Sistema baseado em 4dp/8dp grid
-- **Typography**: Tamanhos, pesos e espaçamentos consistentes
-- **Border Radius**: Valores padronizados para bordas
-- **Elevação**: Elevações Material Design
-- **Ícones**: Tamanhos padronizados
-- **Animações**: Durações consistentes
-- **Componentes**: Dimensões padrão
-- **Breakpoints**: Para design responsivo
+- **Colors**: Unified system for primary, secondary, status, and category colors.
+- **Spacing**: System based on a 4dp/8dp grid.
+- **Typography**: Consistent sizes, weights, and spacing.
+- **Border Radius**: Standardized values for borders.
+- **Elevation**: Material Design elevations.
+- **Icons**: Standardized sizes.
+- **Animations**: Consistent durations.
+- **Components**: Default dimensions.
+- **Breakpoints**: For responsive design.
 
 ### 2. Text Styles (`app_text_styles.dart`)
 
-**Sistema de tipografia completo:**
+**A complete typography system:**
 
 - Display Styles (Large, Medium, Small)
-- Headline Styles (Large, Medium, Small)  
+- Headline Styles (Large, Medium, Small)
 - Title Styles (Large, Medium, Small)
 - Body Styles (Large, Medium, Small)
 - Label Styles (Large, Medium, Small)
-- Estilos específicos (botões, cards, preços, status)
-- Métodos helper para contextos específicos
+- Specific styles (buttons, cards, prices, status)
+- Helper methods for specific contexts.
 
-### 3. Componentes (`design_system_components.dart`)
+### 3. Components (`design_system_components.dart`)
 
-**Widgets reutilizáveis padronizados:**
+**Standardized reusable widgets:**
 
-- `DSCard` - Card genérico com acessibilidade
-- `DSMarketCard` - Card específico para dados de mercado
-- `DSPrimaryButton` / `DSSecondaryButton` - Botões padronizados
-- `DSTextField` - Campo de texto consistente
-- `DSStatusIndicator` - Indicador visual de status
-- `DSSectionHeader` - Cabeçalho de seção
-- `DSLoadingCard` - Estado de carregamento
-- `DSErrorState` - Estado de erro
+- `DSCard` - Generic card with accessibility support.
+- `DSMarketCard` - Specific card for market data.
+- `DSPrimaryButton` / `DSSecondaryButton` - Standardized buttons.
+- `DSTextField` - Consistent text field.
+- `DSStatusIndicator` - Visual status indicator.
+- `DSSectionHeader` - Section header.
+- `DSLoadingCard` - Loading state placeholder.
+- `DSErrorState` - Error state placeholder.
 
-## 🔄 Migração do Código Legado
+## 🔄 Migrating Legacy Code
 
-### Antes vs Depois
+### Before vs. After
 
-#### Cores
+#### Colors
 ```dart
-// ❌ ANTES - Inconsistente
+// ❌ BEFORE - Inconsistent
 AppTheme.primaryColor
 AppColors.active
 Color(0xFF2E7D32)
 
-// ✅ DEPOIS - Unificado
+// ✅ AFTER - Unified
 DesignTokens.Colors.primary
 DesignTokens.Colors.marketUp
 ```
 
 #### Spacing
 ```dart
-// ❌ ANTES - Magic numbers
+// ❌ BEFORE - Magic numbers
 EdgeInsets.all(16)
 SizedBox(height: 8)
 padding: 24
 
-// ✅ DEPOIS - Tokens consistentes
+// ✅ AFTER - Consistent tokens
 EdgeInsets.all(DesignTokens.Spacing.md)
-SizedBox(height: DesignTokens.Spacing.sm)  
+SizedBox(height: DesignTokens.Spacing.sm)
 padding: DesignTokens.Spacing.lg
 ```
 
 #### Typography
 ```dart
-// ❌ ANTES - Inconsistente
+// ❌ BEFORE - Inconsistent
 Theme.of(context).textTheme.titleMedium
 TextStyle(fontSize: 16, fontWeight: FontWeight.w600)
 
-// ✅ DEPOIS - Padronizado
+// ✅ AFTER - Standardized
 AppTextStyles.titleMedium
 AppTextStyles.titleLarge
 ```
 
-#### Componentes
+#### Components
 ```dart
-// ❌ ANTES - Duplicado
+// ❌ BEFORE - Duplicated
 Card(
   margin: EdgeInsets.only(bottom: 12),
   elevation: 2,
   shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(12),
   ),
-  child: // ... código duplicado
+  child: // ... duplicated code
 )
 
-// ✅ DEPOIS - Componente reutilizável
+// ✅ AFTER - Reusable component
 DSMarketCard(
   title: market.name,
   price: 'R\$ ${market.price}',
@@ -122,27 +122,27 @@ DSMarketCard(
 )
 ```
 
-## 🎯 Benefícios da Consolidação
+## 🎯 Benefits of Consolidation
 
-### ✅ Problemas Resolvidos
+### ✅ Problems Solved
 
-1. **Inconsistência Visual**: Sistema unificado de cores e estilos
-2. **Magic Numbers**: Todas as constantes centralizadas em tokens
-3. **Componentes Duplicados**: Widgets reutilizáveis padronizados
-4. **Manutenibilidade**: Mudanças centralizadas em um local
-5. **Acessibilidade**: Componentes com suporte a accessibility
-6. **Performance**: Estilos const reutilizáveis
+1.  **Visual Inconsistency**: Unified system of colors and styles.
+2.  **Magic Numbers**: All constants are centralized in tokens.
+3.  **Duplicated Components**: Standardized reusable widgets.
+4.  **Maintainability**: Changes are centralized in one place.
+5.  **Accessibility**: Components with accessibility support.
+6.  **Performance**: Reusable `const` styles.
 
-### 📊 Métricas de Melhoria
+### 📊 Improvement Metrics
 
-- **Linhas de código reduzidas**: ~30% menos código duplicado
-- **Constantes centralizadas**: 50+ magic numbers eliminados
-- **Componentes reutilizáveis**: 8 novos componentes padronizados
-- **Consistência visual**: 100% das cores padronizadas
+-   **Lines of code reduced**: ~30% less duplicated code.
+-   **Centralized constants**: 50+ magic numbers eliminated.
+-   **Reusable components**: 8 new standardized components.
+-   **Visual consistency**: 100% of colors standardized.
 
-## 🛠️ Como Usar
+## 🛠️ How to Use
 
-### 1. Importações Necessárias
+### 1. Required Imports
 
 ```dart
 import 'package:app_agrihurbi/core/theme/design_tokens.dart';
@@ -150,10 +150,10 @@ import 'package:app_agrihurbi/core/theme/app_text_styles.dart';
 import 'package:app_agrihurbi/core/widgets/design_system_components.dart';
 ```
 
-### 2. Usando Design Tokens
+### 2. Using Design Tokens
 
 ```dart
-// Cores
+// Colors
 color: DesignTokens.Colors.primary
 backgroundColor: DesignTokens.Colors.surface
 
@@ -161,52 +161,52 @@ backgroundColor: DesignTokens.Colors.surface
 padding: EdgeInsets.all(DesignTokens.Spacing.md)
 margin: EdgeInsets.only(bottom: DesignTokens.Spacing.sm)
 
-// Bordas
+// Borders
 borderRadius: DesignTokens.BorderRadius.cardRadius
 shape: RoundedRectangleBorder(
   borderRadius: DesignTokens.BorderRadius.buttonRadius,
 )
 
-// Elevação
+// Elevation
 elevation: DesignTokens.Elevation.card
 
-// Ícones
+// Icons
 size: DesignTokens.IconSize.md
 ```
 
-### 3. Usando Text Styles
+### 3. Using Text Styles
 
 ```dart
-// Títulos
-Text('Título', style: AppTextStyles.headlineMedium)
+// Titles
+Text('Title', style: AppTextStyles.headlineMedium)
 
-// Corpo do texto
-Text('Descrição', style: AppTextStyles.bodyLarge)
+// Body text
+Text('Description', style: AppTextStyles.bodyLarge)
 
-// Labels e captions
+// Labels and captions
 Text('Label', style: AppTextStyles.labelMedium)
 
-// Status específicos
-Text('Sucesso', style: AppTextStyles.success)
-Text('Erro', style: AppTextStyles.error)
+// Specific status
+Text('Success', style: AppTextStyles.success)
+Text('Error', style: AppTextStyles.error)
 
-// Market trends (dinâmico)
+// Dynamic market trends
 Text(
-  '${change}%', 
+  '${change}%',
   style: AppTextStyles.getMarketTrendStyle(changeValue)
 )
 ```
 
-### 4. Usando Componentes
+### 4. Using Components
 
 ```dart
-// Cards padronizados
+// Standardized cards
 DSCard(
   child: Column(children: [...]),
   onTap: () => handleTap(),
 )
 
-// Market card específico  
+// Specific market card
 DSMarketCard(
   title: 'Boi Gordo',
   price: 'R\$ 320,50',
@@ -215,9 +215,9 @@ DSMarketCard(
   onTap: () => navigateToDetails(),
 )
 
-// Botões padronizados
+// Standardized buttons
 DSPrimaryButton(
-  text: 'Confirmar',
+  text: 'Confirm',
   onPressed: () => submit(),
   icon: Icons.check,
 )
@@ -225,14 +225,14 @@ DSPrimaryButton(
 // Status indicators
 DSStatusIndicator(
   status: 'active',
-  text: 'Ativo',
+  text: 'Active',
 )
 ```
 
-### 5. Design Responsivo
+### 5. Responsive Design
 
 ```dart
-// Helper responsivo
+// Responsive helper
 final spacing = DesignTokens.responsive(
   context,
   mobile: DesignTokens.Spacing.sm,
@@ -240,85 +240,85 @@ final spacing = DesignTokens.responsive(
   desktop: DesignTokens.Spacing.lg,
 );
 
-// Verificações de breakpoint
+// Breakpoint checks
 if (DesignTokens.isMobile(context)) {
-  // Layout mobile
+  // Mobile layout
 } else if (DesignTokens.isTablet(context)) {
-  // Layout tablet
+  // Tablet layout
 }
 ```
 
-## 🔍 Compatibilidade Legada
+## 🔍 Backward Compatibility
 
-Para facilitar a migração gradual, mantemos compatibilidade com o código existente:
+To facilitate a gradual migration, we maintain compatibility with existing code:
 
 ```dart
-// Classes legadas redirecionam para DesignTokens
+// Legacy classes redirect to DesignTokens
 AppTheme.primaryColor → DesignTokens.Colors.primary
 AppColors.active → DesignTokens.Colors.marketUp
 ```
 
-## 📝 Próximos Passos
+## 📝 Next Steps
 
-1. **Migração Gradual**: Refatorar widgets existentes para usar componentes DS
-2. **Testes Visuais**: Validar consistência em todas as telas
-3. **Documentação**: Expandir exemplos e casos de uso
-4. **Performance**: Otimizar componentes para reutilização
-5. **Acessibilidade**: Expandir suporte a recursos de acessibilidade
+1.  **Gradual Migration**: Refactor existing widgets to use DS components.
+2.  **Visual Testing**: Validate consistency across all screens.
+3.  **Documentation**: Expand examples and use cases.
+4.  **Performance**: Optimize components for reuse.
+5.  **Accessibility**: Expand support for accessibility features.
 
-## 🎨 Paleta de Cores
+## 🎨 Color Palette
 
-### Cores Principais
-- **Primary**: #2E7D32 (Verde agricultura)
-- **Secondary**: #4CAF50 (Verde claro)
-- **Accent**: #FF9800 (Laranja destaque)
+### Primary Colors
+- **Primary**: #2E7D32 (Agriculture Green)
+- **Secondary**: #4CAF50 (Light Green)
+- **Accent**: #FF9800 (Highlight Orange)
 
-### Cores de Status
+### Status Colors
 - **Success**: #388E3C
-- **Error**: #D32F2F  
+- **Error**: #D32F2F
 - **Warning**: #F57C00
 - **Info**: #1976D2
 
-### Cores de Mercado
-- **Market Up**: #4CAF50 (Verde alta)
-- **Market Down**: #D32F2F (Vermelho baixa)
-- **Market Neutral**: #9E9E9E (Cinza neutro)
+### Market Colors
+- **Market Up**: #4CAF50 (Green Up)
+- **Market Down**: #D32F2F (Red Down)
+- **Market Neutral**: #9E9E9E (Gray Neutral)
 
-### Cores de Categoria (Livestock)
-- **Cattle**: #8D6E63 (Marrom bovinos)
-- **Poultry**: #FFCC02 (Amarelo aves)
-- **Pigs**: #FFAB91 (Rosa suínos)
-- **Sheep**: #E0E0E0 (Cinza ovinos)
+### Category Colors (Livestock)
+- **Cattle**: #8D6E63 (Brown)
+- **Poultry**: #FFCC02 (Yellow)
+- **Pigs**: #FFAB91 (Pink)
+- **Sheep**: #E0E0E0 (Gray)
 
-## 📐 Sistema de Spacing
+## 📐 Spacing System
 
-Baseado no grid de 4dp:
+Based on a 4dp grid:
 - **xs**: 4dp
-- **sm**: 8dp  
-- **md**: 16dp (padrão)
+- **sm**: 8dp
+- **md**: 16dp (default)
 - **lg**: 24dp
 - **xl**: 32dp
 - **xxl**: 48dp
 
-## 🔤 Escala Tipográfica
+## 🔤 Typographic Scale
 
-### Display (Headlines grandes)
+### Display (Large Headlines)
 - **Large**: 32sp, Bold
 - **Medium**: 28sp, Bold
 - **Small**: 24sp, Bold
 
-### Headlines (Títulos)
+### Headlines (Titles)
 - **Large**: 22sp, SemiBold
 - **Medium**: 20sp, SemiBold
 - **Small**: 18sp, SemiBold
 
-### Body (Corpo do texto)
+### Body (Body Text)
 - **Large**: 16sp, Regular
 - **Medium**: 14sp, Regular
 - **Small**: 12sp, Regular
 
-## 🔄 Conclusão
+## 🔄 Conclusion
 
-Este design system oferece uma base sólida e consistente para o desenvolvimento do AgriHurbi, eliminando inconsistências visuais e fornecendo componentes reutilizáveis que melhoram tanto a experiência do usuário quanto a produtividade de desenvolvimento.
+This design system offers a solid and consistent foundation for AgriHurbi's development, eliminating visual inconsistencies and providing reusable components that improve both user experience and development productivity.
 
-A migração gradual permite adoção sem disruption, enquanto os novos componentes garantem consistência visual e melhor manutenibilidade do código.
+The gradual migration allows for adoption without disruption, while the new components ensure visual consistency and better code maintainability.

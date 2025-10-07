@@ -1,181 +1,193 @@
 import 'package:flutter/material.dart';
 
-/// Design Tokens - Central source of truth for all design constants
-/// This replaces scattered magic numbers and consolidates design decisions
+/// A centralized source of truth for all design constants in the application.
+///
+/// This class uses nested static classes to organize design tokens, replacing
+/// scattered magic numbers and consolidating design decisions into a single,
+/// easy-to-navigate file.
 abstract class DesignTokens {
   DesignTokens._();
-  
-  /// Primary colors
-  static const Color primaryColor = Color(0xFF2E7D32); // Green for agriculture
-  static const Color primaryLightColor = Color(0xFF4CAF50);
-  static const Color primaryDarkColor = Color(0xFF1B5E20);
-  
-  /// Secondary colors
-  static const Color secondaryColor = Color(0xFF4CAF50);
-  static const Color accentColor = Color(0xFFFF9800); // Orange for emphasis
-  
-  /// Surface colors
-  static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color surfaceDarkColor = Color(0xFF121212);
-  static const Color backgroundColor = Color(0xFFF5F5F5);
-  static const Color backgroundDarkColor = Color(0xFF1E1E1E);
-  
-  /// Status colors
-  static const Color successColor = Color(0xFF388E3C);
-  static const Color errorColor = Color(0xFFD32F2F);
-  static const Color warningColor = Color(0xFFF57C00);
-  static const Color infoColor = Color(0xFF1976D2);
-  
-  /// Text colors
-  static const Color textPrimaryColor = Color(0xFF212121);
-  static const Color textSecondaryColor = Color(0xFF757575);
-  static const Color textLightColor = Color(0xFFFFFFFF);
-  static const Color textDisabledColor = Color(0xFFBDBDBD);
-  
-  /// Border & divider colors
-  static const Color borderColor = Color(0xFFE0E0E0);
-  static const Color dividerColor = Color(0xFFBDBDBD);
-  
-  /// Livestock specific colors
-  static const Color cattleColor = Color(0xFF8D6E63);
-  static const Color horsesColor = Color(0xFF795548);
-  static const Color sheepColor = Color(0xFFE0E0E0);
-  static const Color goatsColor = Color(0xFFBCAAA4);
-  static const Color pigsColor = Color(0xFFFFAB91);
-  static const Color poultryColor = Color(0xFFFFCC02);
-  
-  /// Weather colors
-  static const Color sunnyColor = Color(0xFFFFEB3B);
-  static const Color cloudyColor = Color(0xFF9E9E9E);
-  static const Color rainyColor = Color(0xFF2196F3);
-  static const Color stormyColor = Color(0xFF673AB7);
-  
-  /// Market status colors
-  static const Color marketUpColor = Color(0xFF4CAF50);
-  static const Color marketDownColor = Color(0xFFD32F2F);
-  static const Color marketNeutralColor = Color(0xFF9E9E9E);
-  static const Color marketPendingColor = Color(0xFFFF9800);
-  
-  /// Base spacing unit (4dp)
-  static const double spacingBase = 4.0;
-  
-  /// Common spacing values
-  static const double spacingXs = 4.0;    // Extra small
-  static const double spacingSm = 8.0;    // Small
-  static const double spacingMd = 16.0;   // Medium (default)
-  static const double spacingLg = 24.0;   // Large
-  static const double spacingXl = 32.0;   // Extra large
-  static const double spacingXxl = 48.0;  // Extra extra large
-  
-  /// Specific use cases
-  static const double cardPadding = spacingMd;
-  static const double screenPadding = spacingMd;
-  static const double sectionSpacing = spacingLg;
-  static const double itemSpacing = spacingSm;
-  static const double buttonPadding = spacingMd;
-  
-  /// Font weights
-  static const FontWeight fontWeightLight = FontWeight.w300;
-  static const FontWeight fontWeightRegular = FontWeight.w400;
-  static const FontWeight fontWeightMedium = FontWeight.w500;
-  static const FontWeight fontWeightSemiBold = FontWeight.w600;
-  static const FontWeight fontWeightBold = FontWeight.w700;
-  
-  /// Font sizes
-  static const double fontSize10 = 10.0;
-  static const double fontSize12 = 12.0;
-  static const double fontSize14 = 14.0;
-  static const double fontSize16 = 16.0;
-  static const double fontSize18 = 18.0;
-  static const double fontSize20 = 20.0;
-  static const double fontSize22 = 22.0;
-  static const double fontSize24 = 24.0;
-  static const double fontSize28 = 28.0;
-  static const double fontSize32 = 32.0;
-  
-  /// Line heights (multipliers)
-  static const double lineHeightTight = 1.2;
-  static const double lineHeightNormal = 1.4;
-  static const double lineHeightRelaxed = 1.6;
-  
-  /// Letter spacing
-  static const double letterSpacingTight = -0.5;
-  static const double letterSpacingNormal = 0.0;
-  static const double letterSpacingWide = 0.5;
-  
-  static const double borderRadiusNone = 0.0;
-  static const double borderRadiusXs = 2.0;
-  static const double borderRadiusSm = 4.0;
-  static const double borderRadiusMd = 8.0;
-  static const double borderRadiusLg = 12.0;
-  static const double borderRadiusXl = 16.0;
-  static const double borderRadiusXxl = 24.0;
-  static const double borderRadiusCircular = 999.0; // For circular elements
-  
-  /// Common border radius objects
-  static const BorderRadius cardBorderRadius = BorderRadius.all(Radius.circular(borderRadiusLg));
-  static const BorderRadius buttonBorderRadius = BorderRadius.all(Radius.circular(borderRadiusMd));
-  static const BorderRadius inputBorderRadius = BorderRadius.all(Radius.circular(borderRadiusMd));
-  static const BorderRadius chipBorderRadius = BorderRadius.all(Radius.circular(borderRadiusXl));
-  
-  static const double elevationNone = 0.0;
-  static const double elevationSm = 1.0;
-  static const double elevationMd = 2.0;
-  static const double elevationLg = 4.0;
-  static const double elevationXl = 8.0;
-  static const double elevationXxl = 16.0;
-  
-  /// Component specific elevations
-  static const double cardElevation = elevationMd;
-  static const double buttonElevation = elevationSm;
-  static const double appBarElevation = elevationNone;
-  static const double drawerElevation = elevationXl;
-  static const double modalElevation = elevationXxl;
-  
-  static const double iconSizeXs = 16.0;
-  static const double iconSizeSm = 20.0;
-  static const double iconSizeMd = 24.0;
-  static const double iconSizeLg = 32.0;
-  static const double iconSizeXl = 40.0;
-  static const double iconSizeXxl = 48.0;
-  
-  static const Duration animationDurationFast = Duration(milliseconds: 150);
-  static const Duration animationDurationMedium = Duration(milliseconds: 300);
-  static const Duration animationDurationSlow = Duration(milliseconds: 500);
-  
-  /// Specific use cases
-  static const Duration buttonPressAnimation = animationDurationFast;
-  static const Duration pageTransitionAnimation = animationDurationMedium;
-  static const Duration modalAnimation = animationDurationMedium;
-  
-  /// Button heights
-  static const double buttonHeightSmall = 32.0;
-  static const double buttonHeightMedium = 40.0;
-  static const double buttonHeightLarge = 48.0;
-  
-  /// Input field heights
-  static const double inputHeight = 48.0;
-  
-  /// App bar height
-  static const double appBarHeight = 56.0;
-  
-  /// Bottom navigation height
-  static const double bottomNavHeight = 80.0;
-  
-  /// Card minimum height
-  static const double cardMinHeight = 80.0;
-  
-  /// Avatar sizes
-  static const double avatarSmall = 32.0;
-  static const double avatarMedium = 48.0;
-  static const double avatarLarge = 64.0;
-  
-  static const double breakpointMobile = 480.0;
-  static const double breakpointTablet = 768.0;
-  static const double breakpointDesktop = 1024.0;
-  static const double breakpointLargeDesktop = 1440.0;
-  
-  /// Get primary color swatch for ThemeData
+
+  /// A collection of all colors used in the application.
+  abstract class Colors {
+    Colors._();
+
+    // Primary Palette
+    static const Color primary = Color(0xFF2E7D32); // Green for agriculture
+    static const Color primaryLight = Color(0xFF4CAF50);
+    static const Color primaryDark = Color(0xFF1B5E20);
+
+    // Secondary & Accent
+    static const Color secondary = Color(0xFF4CAF50);
+    static const Color accent = Color(0xFFFF9800); // Orange for emphasis
+
+    // Surface & Background
+    static const Color surface = Color(0xFFFFFFFF);
+    static const Color surfaceDark = Color(0xFF121212);
+    static const Color background = Color(0xFFF5F5F5);
+    static const Color backgroundDark = Color(0xFF1E1E1E);
+
+    // Status Colors
+    static const Color success = Color(0xFF388E3C);
+    static const Color error = Color(0xFFD32F2F);
+    static const Color warning = Color(0xFFF57C00);
+    static const Color info = Color(0xFF1976D2);
+
+    // Text Colors
+    static const Color textPrimary = Color(0xFF212121);
+    static const Color textSecondary = Color(0xFF757575);
+    static const Color textLight = Color(0xFFFFFFFF);
+    static const Color textDisabled = Color(0xFFBDBDBD);
+
+    // Border & Divider
+    static const Color border = Color(0xFFE0E0E0);
+    static const Color divider = Color(0xFFBDBDBD);
+
+    // Livestock Category Colors
+    static const Color cattle = Color(0xFF8D6E63);
+    static const Color horses = Color(0xFF795548);
+    static const Color sheep = Color(0xFFE0E0E0);
+    static const Color goats = Color(0xFFBCAAA4);
+    static const Color pigs = Color(0xFFFFAB91);
+    static const Color poultry = Color(0xFFFFCC02);
+
+    // Weather Colors
+    static const Color sunny = Color(0xFFFFEB3B);
+    static const Color cloudy = Color(0xFF9E9E9E);
+    static const Color rainy = Color(0xFF2196F3);
+    static const Color stormy = Color(0xFF673AB7);
+
+    // Market Status Colors
+    static const Color marketUp = Color(0xFF4CAF50);
+    static const Color marketDown = Color(0xFFD32F2F);
+    static const Color marketNeutral = Color(0xFF9E9E9E);
+    static const Color marketPending = Color(0xFFFF9800);
+  }
+
+  /// A collection of spacing and padding values based on a 4dp grid.
+  abstract class Spacing {
+    Spacing._();
+    static const double xs = 4.0; // Extra small
+    static const double sm = 8.0; // Small
+    static const double md = 16.0; // Medium (default)
+    static const double lg = 24.0; // Large
+    static const double xl = 32.0; // Extra large
+    static const double xxl = 48.0; // Extra extra large
+  }
+
+  /// A collection of typography-related constants.
+  abstract class Typography {
+    Typography._();
+    // Font Weights
+    static const FontWeight light = FontWeight.w300;
+    static const FontWeight regular = FontWeight.w400;
+    static const FontWeight medium = FontWeight.w500;
+    static const FontWeight semiBold = FontWeight.w600;
+    static const FontWeight bold = FontWeight.w700;
+
+    // Font Sizes
+    static const double f10 = 10.0;
+    static const double f12 = 12.0;
+    static const double f14 = 14.0;
+    static const double f16 = 16.0;
+    static const double f18 = 18.0;
+    static const double f20 = 20.0;
+    static const double f22 = 22.0;
+    static const double f24 = 24.0;
+    static const double f28 = 28.0;
+    static const double f32 = 32.0;
+
+    // Line Heights (multipliers)
+    static const double lineHeightTight = 1.2;
+    static const double lineHeightNormal = 1.4;
+    static const double lineHeightRelaxed = 1.6;
+
+    // Letter Spacing
+    static const double letterSpacingTight = -0.5;
+    static const double letterSpacingNormal = 0.0;
+    static const double letterSpacingWide = 0.5;
+  }
+
+  /// A collection of border radius values.
+  abstract class Radii {
+    Radii._();
+    static const double none = 0.0;
+    static const double xs = 2.0;
+    static const double sm = 4.0;
+    static const double md = 8.0;
+    static const double lg = 12.0;
+    static const double xl = 16.0;
+    static const double xxl = 24.0;
+    static const double circular = 999.0;
+  }
+
+  /// A collection of pre-configured [BorderRadius] objects.
+  abstract class Borders {
+    Borders._();
+    static const BorderRadius card = BorderRadius.all(Radius.circular(Radii.lg));
+    static const BorderRadius button = BorderRadius.all(Radius.circular(Radii.md));
+    static const BorderRadius input = BorderRadius.all(Radius.circular(Radii.md));
+    static const BorderRadius chip = BorderRadius.all(Radius.circular(Radii.xl));
+  }
+
+  /// A collection of elevation values based on Material Design guidelines.
+  abstract class Elevations {
+    Elevations._();
+    static const double none = 0.0;
+    static const double sm = 1.0;
+    static const double md = 2.0;
+    static const double lg = 4.0;
+    static const double xl = 8.0;
+    static const double xxl = 16.0;
+  }
+
+  /// A collection of standardized icon sizes.
+  abstract class IconSizes {
+    IconSizes._();
+    static const double xs = 16.0;
+    static const double sm = 20.0;
+    static const double md = 24.0;
+    static const double lg = 32.0;
+    static const double xl = 40.0;
+    static const double xxl = 48.0;
+  }
+
+  /// A collection of standardized animation durations.
+  abstract class Animations {
+    Animations._();
+    static const Duration fast = Duration(milliseconds: 150);
+    static const Duration medium = Duration(milliseconds: 300);
+    static const Duration slow = Duration(milliseconds: 500);
+  }
+
+  /// A collection of default dimensions for common UI components.
+  abstract class Dimensions {
+    Dimensions._();
+    // Heights
+    static const double buttonHeightSmall = 32.0;
+    static const double buttonHeightMedium = 40.0;
+    static const double buttonHeightLarge = 48.0;
+    static const double inputHeight = 48.0;
+    static const double appBarHeight = 56.0;
+    static const double bottomNavHeight = 80.0;
+    static const double cardMinHeight = 80.0;
+
+    // Avatar Sizes
+    static const double avatarSmall = 32.0;
+    static const double avatarMedium = 48.0;
+    static const double avatarLarge = 64.0;
+  }
+
+  /// A collection of breakpoints for building responsive layouts.
+  abstract class Breakpoints {
+    Breakpoints._();
+    static const double mobile = 480.0;
+    static const double tablet = 768.0;
+    static const double desktop = 1024.0;
+    static const double largeDesktop = 1440.0;
+  }
+
+  /// A [MaterialColor] swatch generated from the primary color for use in [ThemeData].
   static MaterialColor get primarySwatch {
     return const MaterialColor(0xFF2E7D32, {
       50: Color(0xFFE8F5E8),
@@ -190,24 +202,23 @@ abstract class DesignTokens {
       900: Color(0xFF1B5E20),
     });
   }
-  
-  /// Check if screen is mobile
-  static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < breakpointTablet;
-  }
-  
-  /// Check if screen is tablet
-  static bool isTablet(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    return width >= breakpointTablet && width < breakpointDesktop;
-  }
-  
-  /// Check if screen is desktop
-  static bool isDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= breakpointDesktop;
-  }
-  
-  /// Get responsive value based on screen size
+
+  // --- Responsive Helpers ---
+
+  /// Returns `true` if the screen width is considered mobile.
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < Breakpoints.tablet;
+
+  /// Returns `true` if the screen width is considered tablet.
+  static bool isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width >= Breakpoints.tablet &&
+      MediaQuery.of(context).size.width < Breakpoints.desktop;
+
+  /// Returns `true` if the screen width is considered desktop.
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= Breakpoints.desktop;
+
+  /// Returns a value based on the current screen size.
   static T responsive<T>(
     BuildContext context, {
     required T mobile,

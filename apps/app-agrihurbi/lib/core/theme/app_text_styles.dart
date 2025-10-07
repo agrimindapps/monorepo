@@ -1,236 +1,187 @@
+import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:flutter/material.dart';
 
-/// Centralized text styles with constant values
-/// This provides consistency and eliminates scattered TextStyle definitions
+/// A centralized collection of standardized [TextStyle]s for the application.
+///
+/// This class ensures typographic consistency by providing a predefined set of
+/// styles that are derived from the [DesignTokens].
 class AppTextStyles {
   AppTextStyles._();
-  
-  /// Display Large - For large headlines (32sp)
+
+  // --- TYPOGRAPHY SCALE ---
+
+  /// Display styles are reserved for very large, important text or numerals.
   static const TextStyle displayLarge = TextStyle(
-    fontSize: 32.0,
-    fontWeight: FontWeight.w700,
-    color: Color(0xFF212121),
-    height: 1.2,
-    letterSpacing: -0.5,
+    fontSize: DesignTokens.Typography.f32,
+    fontWeight: DesignTokens.Typography.bold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightTight,
+    letterSpacing: DesignTokens.Typography.letterSpacingTight,
   );
-
-  /// Display Medium - For medium headlines (28sp)
   static const TextStyle displayMedium = TextStyle(
-    fontSize: 28.0,
-    fontWeight: FontWeight.w700,
-    color: Color(0xFF212121),
-    height: 1.2,
+    fontSize: DesignTokens.Typography.f28,
+    fontWeight: DesignTokens.Typography.bold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightTight,
   );
-
-  /// Display Small - For small headlines (24sp)
   static const TextStyle displaySmall = TextStyle(
-    fontSize: 24.0,
-    fontWeight: FontWeight.w700,
-    color: Color(0xFF212121),
-    height: 1.2,
+    fontSize: DesignTokens.Typography.f24,
+    fontWeight: DesignTokens.Typography.bold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightTight,
   );
-  
-  /// Headline Large - For section headers (22sp)
+
+  /// Headline styles are best for titles and section headers.
   static const TextStyle headlineLarge = TextStyle(
-    fontSize: 22.0,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f22,
+    fontWeight: DesignTokens.Typography.semiBold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-
-  /// Headline Medium - For subsection headers (20sp)
   static const TextStyle headlineMedium = TextStyle(
-    fontSize: 20.0,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f20,
+    fontWeight: DesignTokens.Typography.semiBold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-
-  /// Headline Small - For small headers (18sp)
   static const TextStyle headlineSmall = TextStyle(
-    fontSize: 18.0,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f18,
+    fontWeight: DesignTokens.Typography.semiBold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-  
-  /// Title Large - For card titles and important labels (16sp)
+
+  /// Title styles are well-suited for card titles and important labels.
   static const TextStyle titleLarge = TextStyle(
-    fontSize: 16.0,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f16,
+    fontWeight: DesignTokens.Typography.semiBold,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-
-  /// Title Medium - For medium titles (14sp)
   static const TextStyle titleMedium = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f14,
+    fontWeight: DesignTokens.Typography.medium,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-
-  /// Title Small - For small titles (12sp)
   static const TextStyle titleSmall = TextStyle(
-    fontSize: 12.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f12,
+    fontWeight: DesignTokens.Typography.medium,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-  
-  /// Body Large - For main body text (16sp)
+
+  /// Body styles are ideal for paragraphs and other long-form content.
   static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16.0,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF212121),
-    height: 1.6,
+    fontSize: DesignTokens.Typography.f16,
+    fontWeight: DesignTokens.Typography.regular,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightRelaxed,
   );
-
-  /// Body Medium - For secondary body text (14sp)
   static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF212121),
-    height: 1.6,
+    fontSize: DesignTokens.Typography.f14,
+    fontWeight: DesignTokens.Typography.regular,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightRelaxed,
   );
-
-  /// Body Small - For small body text (12sp)
   static const TextStyle bodySmall = TextStyle(
-    fontSize: 12.0,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF757575),
-    height: 1.6,
+    fontSize: DesignTokens.Typography.f12,
+    fontWeight: DesignTokens.Typography.regular,
+    color: DesignTokens.Colors.textSecondary,
+    height: DesignTokens.Typography.lineHeightRelaxed,
   );
-  
-  /// Label Large - For prominent labels and buttons (14sp)
+
+  /// Label styles are used for buttons, captions, and other supplementary text.
   static const TextStyle labelLarge = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF212121),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f14,
+    fontWeight: DesignTokens.Typography.medium,
+    color: DesignTokens.Colors.textPrimary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-
-  /// Label Medium - For medium labels (12sp)
   static const TextStyle labelMedium = TextStyle(
-    fontSize: 12.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF757575),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f12,
+    fontWeight: DesignTokens.Typography.medium,
+    color: DesignTokens.Colors.textSecondary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-
-  /// Label Small - For small labels and captions (10sp)
   static const TextStyle labelSmall = TextStyle(
-    fontSize: 10.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF757575),
-    height: 1.4,
+    fontSize: DesignTokens.Typography.f10,
+    fontWeight: DesignTokens.Typography.medium,
+    color: DesignTokens.Colors.textSecondary,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
-  
-  /// Button text style
+
+  // --- SPECIFIC & SEMANTIC STYLES ---
+
+  /// The default style for button text.
   static const TextStyle button = TextStyle(
-    fontSize: 16.0,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
+    fontSize: DesignTokens.Typography.f16,
+    fontWeight: DesignTokens.Typography.semiBold,
+    letterSpacing: DesignTokens.Typography.letterSpacingWide,
   );
 
-  /// Card title style
-  static const TextStyle cardTitle = TextStyle(
-    fontSize: 18.0,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFF212121),
-    height: 1.4,
+  /// The default style for card titles. Alias for [headlineSmall].
+  static const TextStyle cardTitle = headlineSmall;
+
+  /// The default style for card subtitles.
+  static final TextStyle cardSubtitle = bodyMedium.copyWith(
+    color: DesignTokens.Colors.textSecondary,
   );
 
-  /// Card subtitle style
-  static const TextStyle cardSubtitle = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF757575),
-    height: 1.4,
+  /// The default style for app bar titles.
+  static final TextStyle appBarTitle = headlineMedium.copyWith(
+    color: DesignTokens.Colors.textLight,
   );
 
-  /// App bar title style
-  static const TextStyle appBarTitle = TextStyle(
-    fontSize: 20.0,
-    fontWeight: FontWeight.w600,
-    color: Color(0xFFFFFFFF),
-  );
+  /// The default style for tab labels.
+  static const TextStyle tabLabel = titleMedium;
 
-  /// Tab label style
-  static const TextStyle tabLabel = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-  );
-
-  /// Price display style - for market prices
+  /// A prominent style for displaying prices.
   static const TextStyle priceDisplay = TextStyle(
-    fontSize: 20.0,
-    fontWeight: FontWeight.w700,
-    color: Color(0xFF212121),
+    fontSize: DesignTokens.Typography.f20,
+    fontWeight: DesignTokens.Typography.bold,
+    color: DesignTokens.Colors.textPrimary,
   );
 
-  /// Price change style - for market price changes
-  static const TextStyle priceChange = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-  );
+  /// The style for indicating a price change.
+  static const TextStyle priceChange = titleMedium;
 
-  /// Caption style - for small explanatory text
-  static const TextStyle caption = TextStyle(
-    fontSize: 12.0,
-    fontWeight: FontWeight.w400,
-    color: Color(0xFF757575),
-    height: 1.4,
-  );
+  /// A style for small, explanatory text. Alias for [bodySmall].
+  static const TextStyle caption = bodySmall;
 
-  /// Overline style - for categories and tags
+  /// A style for categories and tags.
   static const TextStyle overline = TextStyle(
-    fontSize: 10.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF757575),
-    letterSpacing: 0.5,
-    height: 1.4,
-  );
-  
-  /// Success text style
-  static const TextStyle success = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF388E3C),
+    fontSize: DesignTokens.Typography.f10,
+    fontWeight: DesignTokens.Typography.medium,
+    color: DesignTokens.Colors.textSecondary,
+    letterSpacing: DesignTokens.Typography.letterSpacingWide,
+    height: DesignTokens.Typography.lineHeightNormal,
   );
 
-  /// Error text style
-  static const TextStyle error = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFFD32F2F),
-  );
+  // --- STATUS STYLES ---
 
-  /// Warning text style
-  static const TextStyle warning = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFFF57C00),
-  );
+  /// A text style for success messages.
+  static final TextStyle success = labelLarge.copyWith(color: DesignTokens.Colors.success);
 
-  /// Info text style
-  static const TextStyle info = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w500,
-    color: Color(0xFF1976D2),
-  );
-  
-  /// Get market trend text style based on value
+  /// A text style for error messages.
+  static final TextStyle error = labelLarge.copyWith(color: DesignTokens.Colors.error);
+
+  /// A text style for warning messages.
+  static final TextStyle warning = labelLarge.copyWith(color: DesignTokens.Colors.warning);
+
+  /// A text style for informational messages.
+  static final TextStyle info = labelLarge.copyWith(color: DesignTokens.Colors.info);
+
+  // --- HELPER METHODS ---
+
+  /// Returns a [TextStyle] for market trends based on the change value.
   static TextStyle getMarketTrendStyle(double changeValue) {
-    if (changeValue > 0) {
-      return priceChange.copyWith(color: const Color(0xFF4CAF50));
-    } else if (changeValue < 0) {
-      return priceChange.copyWith(color: const Color(0xFFD32F2F));
-    }
-    return priceChange.copyWith(color: const Color(0xFF9E9E9E));
+    if (changeValue > 0) return priceChange.copyWith(color: DesignTokens.Colors.marketUp);
+    if (changeValue < 0) return priceChange.copyWith(color: DesignTokens.Colors.marketDown);
+    return priceChange.copyWith(color: DesignTokens.Colors.marketNeutral);
   }
 
-  /// Get status text style based on status type
+  /// Returns a [TextStyle] appropriate for a given status string.
   static TextStyle getStatusStyle(String status) {
     switch (status.toLowerCase()) {
       case 'success':
@@ -250,17 +201,13 @@ class AppTextStyles {
     }
   }
 
-  /// Get responsive text style based on screen size
+  /// Returns a responsive [TextStyle] by scaling the font size based on screen width.
   static TextStyle getResponsiveStyle(BuildContext context, TextStyle baseStyle) {
-    final width = MediaQuery.of(context).size.width;
-    if (width >= 1024) {
-      return baseStyle.copyWith(
-        fontSize: (baseStyle.fontSize ?? 14) * 1.2,
-      );
-    } else if (width >= 768) {
-      return baseStyle.copyWith(
-        fontSize: (baseStyle.fontSize ?? 14) * 1.1,
-      );
+    if (DesignTokens.isDesktop(context)) {
+      return baseStyle.copyWith(fontSize: (baseStyle.fontSize ?? 14) * 1.2);
+    }
+    if (DesignTokens.isTablet(context)) {
+      return baseStyle.copyWith(fontSize: (baseStyle.fontSize ?? 14) * 1.1);
     }
     return baseStyle;
   }

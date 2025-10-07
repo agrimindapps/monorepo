@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// Serviço centralizado para efeitos shimmer
-/// Fornece builders padronizados para diferentes tipos de loading states
+/// A centralized service for creating standardized shimmer effects.
+///
+/// This class provides a set of static builders for generating consistent
+/// loading animations for different UI components like images, text, and cards.
 class ShimmerService {
-  /// Cores padrão do shimmer baseadas no tema
+  /// Returns the base color for the shimmer effect, adapting to the current theme.
   static Color _getBaseColor(BuildContext context, Color? customBaseColor) {
-    if (customBaseColor != null) return customBaseColor;
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark
-        ? theme.colorScheme.surface.withValues(alpha: 0.1)
-        : Colors.grey.shade300;
+    return customBaseColor ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey[800]!
+            : Colors.grey[300]!);
   }
 
+  /// Returns the highlight color for the shimmer effect, adapting to the current theme.
   static Color _getHighlightColor(
     BuildContext context,
     Color? customHighlightColor,
   ) {
-    if (customHighlightColor != null) return customHighlightColor;
-    final theme = Theme.of(context);
-    return theme.brightness == Brightness.dark
-        ? theme.colorScheme.surface.withValues(alpha: 0.05)
-        : Colors.grey.shade100;
+    return customHighlightColor ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey[700]!
+            : Colors.grey[100]!);
   }
 
-  /// Shimmer básico com cores adaptáveis ao tema
+  /// Creates a generic shimmer effect with theme-adaptive colors.
+  ///
+  /// This is the base for all other shimmer builders in this service.
   static Widget fromColors({
     required BuildContext context,
     required Widget child,
@@ -40,7 +43,7 @@ class ShimmerService {
     );
   }
 
-  /// Shimmer específico para imagens
+  /// Creates a shimmer placeholder for an image.
   static Widget imageShimmer({
     required BuildContext context,
     double? width,
@@ -64,7 +67,7 @@ class ShimmerService {
     );
   }
 
-  /// Shimmer para texto/conteúdo
+  /// Creates a shimmer placeholder for a line of text.
   static Widget textShimmer({
     required BuildContext context,
     double width = double.infinity,
@@ -88,7 +91,7 @@ class ShimmerService {
     );
   }
 
-  /// Shimmer para cards com estrutura padrão
+  /// Creates a shimmer placeholder for a card component.
   static Widget cardShimmer({
     required BuildContext context,
     double height = 120,
@@ -99,6 +102,9 @@ class ShimmerService {
     Color? baseColor,
     Color? highlightColor,
   }) {
+    final theme = Theme.of(context);
+    final placeholderColor = _getHighlightColor(context, highlightColor);
+
     return fromColors(
       context: context,
       baseColor: baseColor,
@@ -110,17 +116,16 @@ class ShimmerService {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: borderRadius ?? BorderRadius.circular(12),
-          boxShadow:
-              showShadow
-                  ? [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      spreadRadius: 1,
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                  : null,
+          boxShadow: showShadow
+              ? [
+                  BoxShadow(
+                    color: theme.shadowColor.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Padding(
           padding: padding ?? const EdgeInsets.all(16),
@@ -130,7 +135,7 @@ class ShimmerService {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
+                  color: placeholderColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -144,7 +149,7 @@ class ShimmerService {
                       height: 18,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
+                        color: placeholderColor,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -153,16 +158,7 @@ class ShimmerService {
                       height: 14,
                       width: 200,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      height: 12,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
+                        color: placeholderColor,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -176,7 +172,7 @@ class ShimmerService {
     );
   }
 
-  /// Shimmer para lista de cards
+  /// Creates a shimmer placeholder for a list of items.
   static Widget listShimmer({
     required BuildContext context,
     int itemCount = 5,
@@ -189,18 +185,17 @@ class ShimmerService {
       itemCount: itemCount,
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemBuilder:
-          (context, index) => cardShimmer(
-            context: context,
-            height: itemHeight,
-            margin: itemMargin,
-            baseColor: baseColor,
-            highlightColor: highlightColor,
-          ),
+      itemBuilder: (context, index) => cardShimmer(
+        context: context,
+        height: itemHeight,
+        margin: itemMargin,
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+      ),
     );
   }
 
-  /// Shimmer para barras/headers
+  /// Creates a shimmer placeholder for a header or app bar.
   static Widget headerShimmer({
     required BuildContext context,
     double height = 48,
@@ -210,6 +205,7 @@ class ShimmerService {
     Color? baseColor,
     Color? highlightColor,
   }) {
+    final placeholderColor = _getHighlightColor(context, highlightColor);
     return fromColors(
       context: context,
       baseColor: baseColor,
@@ -229,7 +225,7 @@ class ShimmerService {
                 width: 120,
                 height: 20,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
+                  color: placeholderColor,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -238,7 +234,7 @@ class ShimmerService {
                 width: 60,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
+                  color: placeholderColor,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -249,7 +245,7 @@ class ShimmerService {
     );
   }
 
-  /// Shimmer circular para avatars
+  /// Creates a circular shimmer placeholder, typically for avatars.
   static Widget circularShimmer({
     required BuildContext context,
     double size = 48,
@@ -271,28 +267,23 @@ class ShimmerService {
     );
   }
 
-  /// Builder para shimmer customizado
+  /// A flexible shimmer builder for creating custom shimmer layouts.
+  ///
+  /// The [builder] should return a widget tree that represents the shape of
+  /// the content being loaded.
   static Widget customShimmer({
     required BuildContext context,
-    required Widget Function(
-      BuildContext context,
-      Color baseColor,
-      Color highlightColor,
-    )
-    builder,
+    required WidgetBuilder builder,
     Color? baseColor,
     Color? highlightColor,
     Duration period = const Duration(milliseconds: 1500),
   }) {
-    final effectiveBaseColor = _getBaseColor(context, baseColor);
-    final effectiveHighlightColor = _getHighlightColor(context, highlightColor);
-
     return fromColors(
       context: context,
-      baseColor: effectiveBaseColor,
-      highlightColor: effectiveHighlightColor,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       period: period,
-      child: builder(context, effectiveBaseColor, effectiveHighlightColor),
+      child: builder(context),
     );
   }
 }

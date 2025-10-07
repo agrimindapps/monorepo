@@ -1,176 +1,100 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+import 'design_tokens.dart';
 
-/// Definição dos estilos de texto do aplicativo GasOMeter
+/// A centralized collection of standardized [TextStyle]s for the Gasometer app.
+///
+/// This class ensures typographic consistency by providing a predefined set of
+/// styles derived from [GasometerDesignTokens].
 class AppTextStyles {
   AppTextStyles._();
-  static const TextStyle displayLarge = TextStyle(
-    inherit: false,
-    fontSize: 57,
-    fontWeight: FontWeight.w400,
-    letterSpacing: -0.25,
-    color: AppColors.onSurface,
+
+  // --- TYPOGRAPHY SCALE ---
+
+  /// For very large, important text or numerals.
+  static const TextStyle display = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f32,
+    fontWeight: GasometerDesignTokens.Typography.bold,
+    color: GasometerDesignTokens.Colors.textPrimary,
   );
 
-  static const TextStyle displayMedium = TextStyle(
-    inherit: false,
-    fontSize: 45,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-    color: AppColors.onSurface,
+  /// For large headlines and section titles.
+  static const TextStyle headline = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f24,
+    fontWeight: GasometerDesignTokens.Typography.bold,
+    color: GasometerDesignTokens.Colors.textPrimary,
   );
 
-  static const TextStyle displaySmall = TextStyle(
-    inherit: false,
-    fontSize: 36,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-    color: AppColors.onSurface,
-  );
-  static const TextStyle headlineLarge = TextStyle(
-    inherit: false,
-    fontSize: 32,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-    color: AppColors.onSurface,
+  /// For titles of components like cards and dialogs.
+  static const TextStyle title = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f20,
+    fontWeight: GasometerDesignTokens.Typography.semiBold,
+    color: GasometerDesignTokens.Colors.textPrimary,
   );
 
-  static const TextStyle headlineMedium = TextStyle(
-    inherit: false,
-    fontSize: 28,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0,
-    color: AppColors.onSurface,
+  /// For subtitles and medium-emphasis text.
+  static const TextStyle subtitle = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f16,
+    fontWeight: GasometerDesignTokens.Typography.medium,
+    color: GasometerDesignTokens.Colors.textPrimary,
   );
 
-  static const TextStyle headlineSmall = TextStyle(
-    inherit: false,
-    fontSize: 24,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0,
-    color: AppColors.onSurface,
-  );
-  static const TextStyle titleLarge = TextStyle(
-    inherit: false,
-    fontSize: 22,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0,
-    color: AppColors.onSurface,
+  /// The default style for body text and paragraphs.
+  static const TextStyle body = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f14,
+    fontWeight: GasometerDesignTokens.Typography.regular,
+    color: GasometerDesignTokens.Colors.textPrimary,
   );
 
-  static const TextStyle titleMedium = TextStyle(
-    inherit: false,
-    fontSize: 16,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.15,
-    color: AppColors.onSurface,
+  /// For secondary body text with less emphasis.
+  static final TextStyle bodySecondary = body.copyWith(
+    color: GasometerDesignTokens.Colors.textSecondary,
   );
 
-  static const TextStyle titleSmall = TextStyle(
-    inherit: false,
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-    color: AppColors.onSurface,
-  );
-  static const TextStyle labelLarge = TextStyle(
-    inherit: false,
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-    color: AppColors.onSurface,
+  /// For captions, metadata, and other small text.
+  static const TextStyle caption = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f12,
+    fontWeight: GasometerDesignTokens.Typography.regular,
+    color: GasometerDesignTokens.Colors.textSecondary,
   );
 
-  static const TextStyle labelMedium = TextStyle(
-    inherit: false,
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
+  /// For labels on form fields and other UI elements.
+  static const TextStyle label = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f12,
+    fontWeight: GasometerDesignTokens.Typography.medium,
+    color: GasometerDesignTokens.Colors.textSecondary,
+  );
+
+  /// For small, uppercase labels or tags.
+  static const TextStyle overline = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f11,
+    fontWeight: GasometerDesignTokens.Typography.semiBold,
     letterSpacing: 0.5,
-    color: AppColors.onSurface,
+    color: GasometerDesignTokens.Colors.textSecondary,
   );
 
-  static const TextStyle labelSmall = TextStyle(
-    inherit: false,
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
+  // --- SEMANTIC & COMPONENT-SPECIFIC STYLES ---
+
+  /// The default text style for buttons.
+  static const TextStyle button = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f16,
+    fontWeight: GasometerDesignTokens.Typography.semiBold,
     letterSpacing: 0.5,
-    color: AppColors.onSurface,
-  );
-  static const TextStyle bodyLarge = TextStyle(
-    inherit: false,
-    fontSize: 16,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.15,
-    color: AppColors.onSurface,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
-    inherit: false,
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.25,
-    color: AppColors.onSurface,
+  /// A prominent style for displaying prices or important metrics.
+  static const TextStyle price = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f24,
+    fontWeight: GasometerDesignTokens.Typography.bold,
+    color: GasometerDesignTokens.Colors.textPrimary,
   );
 
-  static const TextStyle bodySmall = TextStyle(
-    inherit: false,
-    fontSize: 12,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.4,
-    color: AppColors.onSurface,
-  );
-  static const TextStyle premiumTitle = TextStyle(
-    inherit: false,
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
-    color: AppColors.premiumGold,
+  /// A style for titles within premium feature sections.
+  static final TextStyle premiumTitle = headline.copyWith(
+    color: GasometerDesignTokens.Colors.premiumAccent,
   );
 
-  static const TextStyle premiumSubtitle = TextStyle(
-    inherit: false,
-    fontSize: 16,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.15,
-    color: AppColors.onSurface,
-  );
-
-  static const TextStyle premiumPrice = TextStyle(
-    inherit: false,
-    fontSize: 28,
-    fontWeight: FontWeight.w700,
-    letterSpacing: 0,
-    color: AppColors.primary,
-  );
-
-  static const TextStyle premiumFeature = TextStyle(
-    inherit: false,
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    letterSpacing: 0.25,
-    color: AppColors.onSurface,
-  );
-  static const TextStyle buttonLarge = TextStyle(
-    inherit: false,
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-    color: AppColors.onPrimary,
-  );
-
-  static const TextStyle buttonMedium = TextStyle(
-    inherit: false,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-    color: AppColors.onPrimary,
-  );
-
-  static const TextStyle buttonSmall = TextStyle(
-    inherit: false,
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-    color: AppColors.onPrimary,
+  /// A style for prices within premium feature sections.
+  static final TextStyle premiumPrice = display.copyWith(
+    color: GasometerDesignTokens.Colors.primary,
   );
 }

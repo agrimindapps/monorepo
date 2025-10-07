@@ -1,47 +1,55 @@
 import 'dart:async';
 
-/// Manager para controlar buscas com debounce
-/// 
-/// Evita múltiplas chamadas de busca consecutivas, aplicando um delay
-/// configurável antes de executar a busca real.
+/// Manages debounced search operations to prevent excessive calls while a user is typing.
+///
+/// This utility class introduces a delay after the user stops typing before
+/// triggering a search, improving performance and user experience.
 class DebouncedSearchManager {
   Timer? _debounceTimer;
-  final Duration _debounceDelay;
-  
-  /// Cria um novo manager com delay padrão de 300ms
+
+  /// The duration to wait before executing the search.
+  final Duration debounceDelay;
+
+  /// Creates a new manager with a configurable [debounceDelay].
+  /// The default delay is 300 milliseconds.
   DebouncedSearchManager({
-    Duration debounceDelay = const Duration(milliseconds: 300),
-  }) : _debounceDelay = debounceDelay;
-  
-  /// Executa busca com debounce
-  /// 
-  /// Cancela timer anterior e agenda nova busca após o delay configurado.
-  /// [query] - Texto da busca
-  /// [onSearch] - Callback que será executado com o texto da busca
-  void searchWithDebounce(String query, void Function(String) onSearch) {
+    this.debounceDelay = const Duration(milliseconds: 300),
+  });
+
+  /// Schedules a search to be executed after the [debounceDelay].
+  ///
+  /// If another search is scheduled before the delay has passed, the previous
+  /// timer is canceled and a new one is started.
+  ///
+  /// - [query]: The search term to be used.
+  /// - [onSearch]: The callback to execute with the [query].
+  void search(String query, void Function(String) onSearch) {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(_debounceDelay, () {
+    _debounceTimer = Timer(debounceDelay, () {
       onSearch(query);
     });
   }
-  
-  /// Cancela qualquer busca pendente
-  void cancelPendingSearch() {
-    _debounceTimer?.cancel();
-    _debounceTimer = null;
-  }
-  
-  /// Executa busca imediatamente, cancelando delays
+
+  /// Executes a search immediately, canceling any pending debounced search.
   void searchImmediately(String query, void Function(String) onSearch) {
     _debounceTimer?.cancel();
     _debounceTimer = null;
     onSearch(query);
   }
-  
-  /// Verifica se existe busca pendente
-  bool get hasPendingSearch => _debounceTimer?.isActive == true;
-  
-  /// Limpa recursos
+
+  /// Cancels any pending search operation.
+  void cancel() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+  }
+
+  /// Returns `true` if a search operation is currently scheduled and pending.
+  bool get isPending => _debounceTimer?.isActive == true;
+
+  /// Releases the resources used by the manager.
+  ///
+  /// It's important to call this method when the manager is no longer needed
+  /// to prevent memory leaks from the active [Timer].
   void dispose() {
     _debounceTimer?.cancel();
     _debounceTimer = null;

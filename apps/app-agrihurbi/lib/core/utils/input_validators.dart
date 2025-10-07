@@ -1,225 +1,190 @@
 import 'dart:core';
 
-/// Security-focused input validators for the AgriHurbi application
-/// 
-/// This class provides robust validation methods to prevent security vulnerabilities
-/// related to input validation, including email, phone, password, and name validation.
+/// A utility class providing security-focused validators for user input.
+///
+/// This class offers static methods for validating common input fields like emails,
+/// phone numbers, and names, with a focus on preventing common vulnerabilities.
 class InputValidators {
   InputValidators._();
 
-  /// Validates email addresses with a more secure regex pattern
-  /// 
-  /// Security improvements:
-  /// - Prevents acceptance of invalid emails like "test@.com"
-  /// - Uses a more restrictive pattern that follows RFC 5322 guidelines
-  /// - Prevents potential injection attacks through email validation bypass
+  /// Validates an email address against a secure regex and common patterns.
+  ///
+  /// This validator checks for a valid format, reasonable length, and common
+  /// mistakes to prevent invalid data and potential injection vectors.
   static String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, digite seu e-mail';
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your email.'; // l10n
     }
 
     final trimmedValue = value.trim();
-    if (trimmedValue.isEmpty) {
-      return 'Por favor, digite seu e-mail';
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    
+    // A more RFC-compliant regex, though not perfect, it covers most cases.
+    final emailRegex = RegExp(
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$");
+
     if (!emailRegex.hasMatch(trimmedValue)) {
-      return 'Digite um e-mail válido';
+      return 'Please enter a valid email address.'; // l10n
     }
     if (trimmedValue.length > 254) {
-      return 'E-mail muito longo';
+      return 'Email address is too long.'; // l10n
     }
-    if (trimmedValue.contains('..')) {
-      return 'E-mail inválido';
-    }
-    if (trimmedValue.startsWith('.') || trimmedValue.endsWith('.') ||
-        trimmedValue.startsWith('@') || trimmedValue.endsWith('@')) {
-      return 'E-mail inválido';
-    }
-
     return null;
   }
 
-  /// Validates phone numbers with enhanced security
-  /// 
-  /// Security improvements:
-  /// - More restrictive pattern that prevents bypass
-  /// - Validates Brazilian phone number formats
-  /// - Prevents potential injection through phone field
+  /// Validates a phone number, specifically formatted for Brazil.
+  ///
+  /// This validator is optional and checks for common Brazilian phone formats,
+  /// including country code and DDD.
   static String? validatePhone(String? value) {
-    if (value == null || value.isEmpty) {
-      return null; // Phone is optional
+    if (value == null || value.trim().isEmpty) {
+      return null; // Phone is optional.
     }
 
-    final trimmedValue = value.trim();
-    if (trimmedValue.isEmpty) {
-      return null; // Phone is optional
-    }
-    final cleanPhone = trimmedValue.replaceAll(RegExp(r'[^\d\+]'), '');
-    final phoneRegex = RegExp(r'^(\+55)?(\d{2})(\d{8,9})$');
-    
-    if (!phoneRegex.hasMatch(cleanPhone)) {
-      return 'Digite um telefone válido (ex: (11) 99999-9999)';
-    }
-    if (cleanPhone.length > 15) { // E.164 format maximum
-      return 'Número de telefone muito longo';
-    }
-    final digitsOnly = cleanPhone.replaceAll(RegExp(r'[\+]'), '');
-    if (RegExp(r'^(\d)\1+$').hasMatch(digitsOnly)) {
-      return 'Digite um telefone válido';
+    final cleanPhone = value.trim().replaceAll(RegExp(r'[^\d]'), '');
+    // Validates Brazilian numbers: (e.g., 11987654321 or 5511987654321)
+    final phoneRegex = RegExp(r'^(?:[1-9]{2})?9[1-9][0-9]{7}$');
+
+    if (cleanPhone.length < 10 || cleanPhone.length > 13) {
+      return 'Please enter a valid phone number.'; // l10n
     }
 
+    final dddAndNumber =
+        cleanPhone.length >= 12 ? cleanPhone.substring(2) : cleanPhone;
+
+    if (!phoneRegex.hasMatch(dddAndNumber)) {
+      return 'Please use a valid format (e.g., (11) 99999-9999).'; // l10n
+    }
     return null;
   }
 
-  /// Validates full names with enhanced security
-  /// 
-  /// Security improvements:
-  /// - More rigorous validation that requires meaningful names
-  /// - Prevents injection through name fields
-  /// - Ensures both first and last name with minimum length requirements
+  /// Validates a full name, requiring at least a first and last name.
+  ///
+  /// This validator prevents common injection characters and ensures the name
+  /// is reasonably structured.
   static String? validateFullName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, digite seu nome';
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your full name.'; // l10n
     }
 
     final trimmedValue = value.trim();
-    if (trimmedValue.isEmpty) {
-      return 'Por favor, digite seu nome';
+    if (trimmedValue.length < 3) {
+      return 'Name is too short.'; // l10n
     }
     if (trimmedValue.length > 100) {
-      return 'Nome muito longo';
+      return 'Name is too long.'; // l10n
     }
-    if (RegExp(r'''[<>"'&\$@#%^*()[\]{}|\\\/`~]''').hasMatch(trimmedValue)) {
-      return 'Nome contém caracteres inválidos';
-    }
-    final nameParts = trimmedValue.split(RegExp(r'\s+'));
-    
-    if (nameParts.length < 2) {
-      return 'Por favor, digite seu nome completo';
-    }
-    for (final part in nameParts) {
-      if (part.length < 2) {
-        return 'Digite um nome completo válido';
-      }
-    }
-    if (nameParts.first.length == 1 || nameParts.last.length == 1) {
-      return 'Digite seu nome completo (nome e sobrenome)';
+    // Disallow characters often used in injection attacks.
+    if (RegExp(r'[<>"\'&$/\\|]').hasMatch(trimmedValue)) {
+      return 'Name contains invalid characters.'; // l10n
     }
     if (RegExp(r'\d').hasMatch(trimmedValue)) {
-      return 'Nome não pode conter números';
+      return 'Name cannot contain numbers.'; // l10n
     }
 
+    final nameParts = trimmedValue.split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    if (nameParts.length < 2) {
+      return 'Please enter both your first and last name.'; // l10n
+    }
     return null;
   }
 }
 
-/// Enhanced password validator with security-focused requirements
-/// 
-/// Implements secure password policies to prevent weak password vulnerabilities
+/// A utility class for validating passwords based on security policies.
 class PasswordValidator {
   PasswordValidator._();
 
-  /// Minimum password length for security
+  /// The minimum required length for a secure password.
   static const int minPasswordLength = 8;
 
-  /// Validates password with comprehensive security requirements
-  /// 
-  /// Security requirements:
-  /// - Minimum 8 characters
-  /// - At least 1 uppercase letter
-  /// - At least 1 lowercase letter
-  /// - At least 1 number
-  /// - At least 1 special character
-  /// - No common weak patterns
+  static final List<String> _commonWeakPasswords = [
+    'password', 'senha123', '12345678', 'qwerty', '123456', 'admin'
+  ];
+  static final List<String> _keyboardSequences = [
+    'qwerty', 'asdfgh', 'zxcvbn', '123456', '654321'
+  ];
+
+  /// Validates a password against a set of security requirements.
+  ///
+  /// Checks for length, character diversity, and common weak patterns.
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Por favor, digite sua senha';
+      return 'Please enter your password.'; // l10n
     }
     if (value.length < minPasswordLength) {
-      return 'A senha deve ter pelo menos $minPasswordLength caracteres';
+      return 'Password must be at least $minPasswordLength characters long.'; // l10n
     }
     if (value.length > 128) {
-      return 'Senha muito longa (máximo 128 caracteres)';
+      return 'Password is too long (max 128 characters).'; // l10n
     }
-    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos 1 letra maiúscula';
+    if (!value.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain an uppercase letter.'; // l10n
     }
-    if (!RegExp(r'[a-z]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos 1 letra minúscula';
+    if (!value.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain a lowercase letter.'; // l10n
     }
-    if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos 1 número';
+    if (!value.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain a number.'; // l10n
     }
-    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
-      return 'A senha deve conter pelo menos 1 símbolo (!@#\$%^&*(),.?":{}|<>)';
+    if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain a special character.'; // l10n
     }
+
     final lowercasePassword = value.toLowerCase();
-    final commonWeakPasswords = [
-      'password', 'senha123', '12345678', 'qwerty123', 'abc123456',
-      'admin123', 'user123', 'test123', '123456789', 'password123'
-    ];
-
-    for (final weak in commonWeakPasswords) {
-      if (lowercasePassword.contains(weak)) {
-        return 'Senha muito comum, escolha uma mais segura';
-      }
+    if (_commonWeakPasswords.any(lowercasePassword.contains)) {
+      return 'Password is too common. Please choose a stronger one.'; // l10n
     }
+    if (_keyboardSequences.any(lowercasePassword.contains)) {
+      return 'Avoid using keyboard sequences in your password.'; // l10n
+    }
+    // Check for more than 2 repeated characters (e.g., 'aaa').
     if (RegExp(r'(.)\1{2,}').hasMatch(value)) {
-      return 'Evite repetir o mesmo caractere consecutivamente';
+      return 'Avoid using repeating characters in your password.'; // l10n
     }
-    final keyboardSequences = ['qwerty', 'asdfgh', 'zxcvbn', '123456', '654321'];
-    for (final sequence in keyboardSequences) {
-      if (lowercasePassword.contains(sequence)) {
-        return 'Evite sequências de teclado na senha';
-      }
-    }
-
     return null;
   }
 
-  /// Validates password confirmation
-  /// 
-  /// Ensures passwords match exactly
-  static String? validatePasswordConfirmation(String? value, String? originalPassword) {
+  /// Validates that the password confirmation matches the original password.
+  static String? validatePasswordConfirmation(
+      String? value, String? originalPassword) {
     if (value == null || value.isEmpty) {
-      return 'Por favor, confirme sua senha';
+      return 'Please confirm your password.'; // l10n
     }
-
     if (value != originalPassword) {
-      return 'As senhas não coincidem';
+      return 'Passwords do not match.'; // l10n
     }
-
     return null;
   }
 
-  /// Gets password strength score (0-100)
-  /// 
-  /// Useful for providing user feedback on password security
+  /// Calculates a password strength score from 0 to 100.
+  ///
+  /// This can be used to provide real-time feedback to the user.
   static int getPasswordStrength(String password) {
     if (password.isEmpty) return 0;
 
     int score = 0;
-    if (password.length >= 8) score += 20;
-    if (password.length >= 12) score += 10;
-    if (password.length >= 16) score += 10;
-    if (RegExp(r'[a-z]').hasMatch(password)) score += 15;
-    if (RegExp(r'[A-Z]').hasMatch(password)) score += 15;
-    if (RegExp(r'[0-9]').hasMatch(password)) score += 15;
-    if (RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) score += 15;
+    // Length-based score
+    score += (password.length >= 8) ? 20 : 0;
+    score += (password.length >= 12) ? 10 : 0;
+    score += (password.length >= 16) ? 10 : 0;
+
+    // Character diversity score
+    if (password.contains(RegExp(r'[a-z]'))) score += 15;
+    if (password.contains(RegExp(r'[A-Z]'))) score += 15;
+    if (password.contains(RegExp(r'[0-9]'))) score += 15;
+    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) score += 15;
+
+    // Penalties for weak patterns
     if (RegExp(r'(.)\1{2,}').hasMatch(password)) score -= 10;
-    if (RegExp(r'123|abc|qwe').hasMatch(password.toLowerCase())) score -= 15;
+    if (_keyboardSequences.any(password.toLowerCase().contains)) score -= 15;
 
     return score.clamp(0, 100);
   }
 
-  /// Gets password strength description
+  /// Returns a human-readable description of the password strength.
   static String getPasswordStrengthDescription(int strength) {
-    if (strength < 30) return 'Muito fraca';
-    if (strength < 50) return 'Fraca';
-    if (strength < 70) return 'Regular';
-    if (strength < 90) return 'Boa';
-    return 'Muito boa';
+    if (strength < 30) return 'Very Weak'; // l10n
+    if (strength < 50) return 'Weak'; // l10n
+    if (strength < 70) return 'Fair'; // l10n
+    if (strength < 90) return 'Good'; // l10n
+    return 'Very Good'; // l10n
   }
 }

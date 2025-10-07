@@ -1,62 +1,86 @@
-/// Constants for Animals feature strings and UI values
+/// A centralized collection of constants for the Animals feature.
+///
+/// This includes UI strings, accessibility labels, and layout values to ensure
+/// consistency and ease of maintenance.
 class AnimalsConstants {
-  static const String addPetTooltip = 'Adicionar Pet';
-  static const String myPets = 'Meus Pets';
-  static const String searchPetsHint = 'Buscar pets...';
-  static const String synchronize = 'Sincronizar';
-  static const String synchronizing = 'Sincronizando...';
-  static const String clearFilters = 'Limpar Filtros';
-  static const String settings = 'Configurações';
-  static const String filters = 'Filtros';
-  static const String clearAll = 'Limpar Todos';
-  static const String apply = 'Aplicar';
-  static const String species = 'Espécie';
-  static const String allSpecies = 'Todas as espécies';
-  static const String gender = 'Gênero';
-  static const String allGenders = 'Todos os gêneros';
-  static const String size = 'Porte';
-  static const String allSizes = 'Todos os portes';
-  static const String addNewPetSemantic = 'Adicionar novo pet';
-  static const String addNewPetHint = 'Toque para abrir o formulário de cadastro de pets';
-  static const String backToList = 'Voltar para a lista de pets';
-  static const String backToListHint = 'Toque para sair do modo de busca';
-  static const String searchPets = 'Buscar pets';
-  static const String searchPetsAccessibilityHint = 'Toque para buscar pets por nome';
-  static const String searchActiveHint = 'Busca ativa. Toque para buscar pets por nome';
-  static const String filtersLabel = 'Filtros - Configurar filtros';
-  static const String filtersActiveLabel = 'Filtros ativos - Configurar filtros';
-  static const String filtersHint = 'Toque para filtrar pets por espécie, gênero e tamanho';
-  static const String filtersActiveHint = 'Filtros aplicados. Toque para modificar os filtros de espécie, gênero e tamanho';
-  static const String clearSearch = 'Limpar busca';
-  static const String clearSearchHint = 'Toque para limpar o campo de busca';
-  static const String optionsMenu = 'Menu de opções';
-  static const String optionsMenuHint = 'Toque para abrir menu com sincronização, configurações e outras opções';
-  static const String syncPets = 'Sincronizar pets';
-  static const String syncPetsHint = 'Toque para sincronizar a lista de pets com o servidor';
-  static const String clearAllFilters = 'Limpar todos os filtros';
-  static const String clearAllFiltersHint = 'Toque para remover todos os filtros aplicados e mostrar todos os pets';
-  static const String settingsLabel = 'Configurações';
-  static const String settingsHint = 'Toque para abrir as configurações do aplicativo';
-  static const String searchFieldLabel = 'Campo de busca de pets';
-  static const String searchFieldHint = 'Digite o nome do pet que você está procurando';
-  static const String clearAllFiltersDialog = 'Limpar todos os filtros';
-  static const String clearAllFiltersDialogHint = 'Toque para remover todos os filtros de espécie, gênero e tamanho';
-  static const String applyFilters = 'Aplicar filtros';
-  static const String applyFiltersHint = 'Toque para aplicar os filtros selecionados e fechar o menu';
-  static const String speciesFilterLabel = 'Filtro de espécie';
-  static const String speciesFilterHint = 'Selecione uma espécie para filtrar seus pets';
-  static const String genderFilterLabel = 'Filtro de gênero';
-  static const String genderFilterHint = 'Selecione um gênero para filtrar seus pets';
-  static const String sizeFilterLabel = 'Filtro de tamanho';
-  static const String sizeFilterHint = 'Selecione um tamanho para filtrar seus pets';
-  static const double filterContainerPadding = 16.0;
-  static const double filterSectionSpacing = 16.0;
-  static const double badgeHorizontalPadding = 8.0;
-  static const double badgeVerticalPadding = 2.0;
-  static const double badgeBorderRadius = 12.0;
-  static const double badgeFontSize = 12.0;
-  static const double filterTitleFontSize = 16.0;
-  static const double filterHeaderFontSize = 20.0;
-  static const double filterSectionSpacingSmall = 8.0;
-  static const int syncDurationSeconds = 2;
+  AnimalsConstants._();
+
+  /// Constants for user-facing UI strings.
+  /// These should be moved to a proper localization (l10n) system.
+  abstract class UI {
+    UI._();
+    static const String addPetTooltip = 'Add Pet';
+    static const String myPets = 'My Pets';
+    static const String searchPetsHint = 'Search pets...';
+    static const String synchronize = 'Synchronize';
+    static const String synchronizing = 'Synchronizing...';
+    static const String clearFilters = 'Clear Filters';
+    static const String settings = 'Settings';
+    static const String filters = 'Filters';
+    static const String clearAll = 'Clear All';
+    static const String apply = 'Apply';
+    static const String species = 'Species';
+    static const String allSpecies = 'All species';
+    static const String gender = 'Gender';
+    static const String allGenders = 'All genders';
+    static const String size = 'Size';
+    static const String allSizes = 'All sizes';
+    static const String optionsMenu = 'Options Menu';
+  }
+
+  /// Constants for accessibility labels and hints.
+  /// These should also be localized.
+  abstract class Accessibility {
+    Accessibility._();
+    static const String addNewPetSemantic = 'Add new pet';
+    static const String addNewPetHint = 'Tap to open the pet registration form';
+    static const String backToList = 'Back to pet list';
+    static const String backToListHint = 'Tap to exit search mode';
+    static const String searchPets = 'Search pets';
+    static const String searchPetsHint = 'Tap to search pets by name';
+    static const String searchActiveHint = 'Search is active. Tap to search pets by name';
+    static const String filtersLabel = 'Filters - Configure filters';
+    static const String filtersActiveLabel = 'Active filters - Configure filters';
+    static const String filtersHint = 'Tap to filter pets by species, gender, and size';
+    static const String filtersActiveHint = 'Filters are applied. Tap to modify species, gender, and size filters';
+    static const String clearSearch = 'Clear search';
+    static const String clearSearchHint = 'Tap to clear the search field';
+    static const String optionsMenuHint = 'Tap to open menu with sync, settings, and other options';
+    static const String syncPets = 'Synchronize pets';
+    static const String syncPetsHint = 'Tap to synchronize the pet list with the server';
+    static const String clearAllFilters = 'Clear all filters';
+    static const String clearAllFiltersHint = 'Tap to remove all applied filters and show all pets';
+    static const String settingsHint = 'Tap to open application settings';
+    static const String searchFieldLabel = 'Pet search field';
+    static const String searchFieldHint = 'Enter the name of the pet you are looking for';
+    static const String applyFilters = 'Apply filters';
+    static const String applyFiltersHint = 'Tap to apply the selected filters and close the menu';
+    static const String speciesFilterLabel = 'Species filter';
+    static const String speciesFilterHint = 'Select a species to filter your pets';
+    static const String genderFilterLabel = 'Gender filter';
+    static const String genderFilterHint = 'Select a gender to filter your pets';
+    static const String sizeFilterLabel = 'Size filter';
+    static const String sizeFilterHint = 'Select a size to filter your pets';
+  }
+
+  /// Layout and dimension constants.
+  /// TODO: These should be migrated to a centralized PetiVetiDesignTokens file.
+  abstract class Dimensions {
+    Dimensions._();
+    static const double filterContainerPadding = 16.0;
+    static const double filterSectionSpacing = 16.0;
+    static const double filterSectionSpacingSmall = 8.0;
+    static const double badgeHorizontalPadding = 8.0;
+    static const double badgeVerticalPadding = 2.0;
+    static const double badgeBorderRadius = 12.0;
+    static const double badgeFontSize = 12.0;
+    static const double filterTitleFontSize = 16.0;
+    static const double filterHeaderFontSize = 20.0;
+  }
+
+  /// Duration and timing constants.
+  abstract class Durations {
+    Durations._();
+    static const int syncDurationSeconds = 2;
+  }
 }

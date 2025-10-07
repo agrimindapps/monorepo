@@ -1,135 +1,125 @@
 import 'package:flutter/material.dart';
 
-/// Enhanced constants for the reminders page for better maintainability
+/// A centralized collection of constants for the Reminders feature.
+///
+/// This includes UI strings, accessibility labels, layout values, icons, and
+/// timings to ensure consistency and ease of maintenance.
 class RemindersConstants {
   RemindersConstants._();
+
+  // --- Feature-level Constants ---
   static const int tabCount = 3;
-  static const EdgeInsets cardMargin = EdgeInsets.only(bottom: 12);
-  static const EdgeInsets listPadding = EdgeInsets.all(16);
-  static const double emptyIconSize = 64.0;
-  static const double itemExtent = 120.0; // Fixed height for better performance
-  static const double cacheExtent = 1000.0; // Cache more items for smoother scrolling
-  static const double scheduleIconSize = 14.0;
-  static const double repeatIconSize = 14.0;
-  static const double iconSpacing = 4.0;
-  static const double subtitleSpacing = 4.0;
-  static const Duration snooze1Hour = Duration(hours: 1);
-  static const Duration snooze4Hours = Duration(hours: 4);
-  static const Duration snooze1Day = Duration(days: 1);
-  static const int todayDifference = 0;
-  static const int tomorrowDifference = 1;
-  static const int yesterdayDifference = -1;
-  static const String timePadChar = '0';
-  static const int timePadWidth = 2;
-  static const String pageTitle = 'Lembretes';
-  static const String refreshLabel = 'Atualizar lembretes';
-  static const String refreshHint = 'Toque para recarregar a lista de lembretes';
-  static const String addReminderLabel = 'Adicionar novo lembrete';
-  static const String addReminderHint = 'Toque para criar um novo lembrete';
-  static const String loadingLabel = 'Carregando lembretes';
-  static const String todayTabText = 'Hoje';
-  static const String overdueTabText = 'Atrasados';
-  static const String allTabText = 'Todos';
-  
-  static const String emptyTodayMessage = 'Nenhum lembrete para hoje';
-  static const String emptyOverdueMessage = 'Nenhum lembrete atrasado';
-  static const String emptyAllMessage = 'Nenhum lembrete cadastrado';
-  
-  static const String todayListLabel = 'Lembretes de hoje';
-  static const String overdueListLabel = 'Lembretes atrasados';
-  static const String allListLabel = 'Todos os lembretes';
-  static const String completedStatus = 'concluído';
-  static const String overdueStatus = 'atrasado';
-  static const String todayStatus = 'para hoje';
-  static const String scheduledStatus = 'agendado';
-  static const String completeAction = 'complete';
-  static const String snoozeAction = 'snooze';
-  static const String editAction = 'edit';
-  static const String deleteAction = 'delete';
-  static const String completeMenuLabel = 'Marcar como Concluído';
-  static const String snoozeMenuLabel = 'Adiar';
-  static const String editMenuLabel = 'Editar';
-  static const String deleteMenuLabel = 'Excluir';
-  static const String snoozeDialogTitle = 'Adiar Lembrete';
-  static const String snoozeDialogContent = 'Por quanto tempo deseja adiar este lembrete?';
-  static const String deleteDialogTitle = 'Confirmar Exclusão';
-  static const String snooze1HourLabel = '1 hora';
-  static const String snooze4HoursLabel = '4 horas';
-  static const String snooze1DayLabel = '1 dia';
-  static const String cancelButtonLabel = 'Cancelar';
-  static const String deleteButtonLabel = 'Excluir';
-  static const String retryButtonLabel = 'Tentar Novamente';
-  static const String todayLabel = 'Hoje às';
-  static const String tomorrowLabel = 'Amanhã às';
-  static const String yesterdayLabel = 'Ontem às';
-  static const String recurringLabel = 'Repete a cada';
-  static const String daysLabel = 'dias';
-  static const String errorPrefix = 'Erro: ';
-  static const String successSuffix = ' com sucesso';
-  static const String errorActionPrefix = 'Erro ao ';
-  static const String addFeatureDevelopment = 'Funcionalidade de adicionar lembrete em desenvolvimento';
-  static const String editFeatureDevelopment = 'Funcionalidade de editar lembrete em desenvolvimento';
-}
 
-/// Color constants for different reminder types and states
-class RemindersColors {
-  RemindersColors._();
-  static const Color vaccineColor = Colors.green;
-  static const Color medicationColor = Colors.blue;
-  static const Color appointmentColor = Colors.purple;
-  static const Color weightColor = Colors.teal;
-  static const Color generalColor = Colors.grey;
-  static const Color completedIconColor = Colors.white;
-}
+  /// Constants for user-facing UI strings.
+  /// These should be moved to a proper localization (l10n) system.
+  abstract class UI {
+    UI._();
+    static const String pageTitle = 'Reminders';
+    static const String todayTab = 'Today';
+    static const String overdueTab = 'Overdue';
+    static const String allTab = 'All';
+    static const String emptyToday = 'No reminders for today';
+    static const String emptyOverdue = 'No overdue reminders';
+    static const String emptyAll = 'No reminders have been added yet';
+    static const String completeMenu = 'Mark as Complete';
+    static const String snoozeMenu = 'Snooze';
+    static const String editMenu = 'Edit';
+    static const String deleteMenu = 'Delete';
+    static const String snoozeDialogTitle = 'Snooze Reminder';
+    static const String snoozeDialogContent = 'How long would you like to snooze this reminder?';
+    static const String snooze1Hour = '1 hour';
+    static const String snooze4Hours = '4 hours';
+    static const String snooze1Day = '1 day';
+    static const String deleteDialogTitle = 'Confirm Deletion';
+    static const String cancelButton = 'Cancel';
+    static const String deleteButton = 'Delete';
+    static const String retryButton = 'Try Again';
+    static const String todayAt = 'Today at';
+    static const String tomorrowAt = 'Tomorrow at';
+    static const String yesterdayAt = 'Yesterday at';
+    static const String repeatsEvery = 'Repeats every';
+    static const String days = 'days';
+    static const String addFeatureInDev = 'Add reminder feature is in development';
+    static const String editFeatureInDev = 'Edit reminder feature is in development';
+  }
 
-/// Icon constants for reminder types and actions
-class RemindersIcons {
-  RemindersIcons._();
-  static const IconData refreshIcon = Icons.refresh;
-  static const IconData addIcon = Icons.add;
-  static const IconData todayIcon = Icons.today;
-  static const IconData warningIcon = Icons.warning;
-  static const IconData listIcon = Icons.list;
-  static const IconData emptyScheduleIcon = Icons.schedule;
-  static const IconData vaccineIcon = Icons.vaccines;
-  static const IconData medicationIcon = Icons.medication;
-  static const IconData appointmentIcon = Icons.event;
-  static const IconData weightIcon = Icons.scale;
-  static const IconData generalIcon = Icons.notifications;
-  static const IconData scheduleIcon = Icons.schedule;
-  static const IconData repeatIcon = Icons.repeat;
-  static const IconData checkIcon = Icons.check;
-  static const IconData snoozeIcon = Icons.snooze;
-  static const IconData editIcon = Icons.edit;
-  static const IconData deleteIcon = Icons.delete;
-}
+  /// Constants for accessibility labels and hints.
+  /// These should also be localized.
+  abstract class Accessibility {
+    Accessibility._();
+    static const String refresh = 'Refresh reminders';
+    static const String addReminder = 'Add new reminder';
+    static const String loading = 'Loading reminders';
+    static const String todayList = 'Today\'s reminders';
+    static const String overdueList = 'Overdue reminders';
+    static const String allList = 'All reminders';
+    static const String reminderOptions = 'Reminder options';
+    static const String reminderOptionsHint = 'Tap to see available actions';
+    static const String cardHint = 'Tap to see reminder options';
 
-/// Semantic labels for accessibility
-class RemindersSemantics {
-  RemindersSemantics._();
+    static String reminderCardLabel(String title, String status, String date) =>
+        '$title, $status, $date';
+    static String reminderTypeLabel(String typeName) => 'Reminder type: $typeName';
+    static String tabLabel(String tabName, int count) => '$tabName tab, $count items';
+    static String deleteConfirmation(String title) =>
+        'Are you sure you want to delete the reminder "$title"?';
+  }
 
-  static const String reminderOptionsLabel = 'Opções do lembrete';
-  static const String reminderOptionsHint = 'Toque para ver ações disponíveis';
-  static const String cardHint = 'Toque para ver opções do lembrete';
+  /// Icon constants for the Reminders feature.
+  abstract class Icons {
+    Icons._();
+    static const IconData refresh = Icons.refresh;
+    static const IconData add = Icons.add;
+    static const IconData today = Icons.today;
+    static const IconData warning = Icons.warning;
+    static const IconData list = Icons.list;
+    static const IconData emptySchedule = Icons.schedule;
+    static const IconData vaccine = Icons.vaccines;
+    static const IconData medication = Icons.medication;
+    static const IconData appointment = Icons.event;
+    static const IconData weight = Icons.scale;
+    static const IconData general = Icons.notifications;
+    static const IconData schedule = Icons.schedule;
+    static const IconData repeat = Icons.repeat;
+    static const IconData check = Icons.check;
+    static const IconData snooze = Icons.snooze;
+    static const IconData edit = Icons.edit;
+    static const IconData delete = Icons.delete;
+  }
 
-  static String reminderCardLabel(String title, String status, String date) =>
-      '$title, $status, $date';
+  /// Color constants specific to the Reminders feature.
+  /// TODO: These should be migrated to a centralized PetiVetiDesignTokens file.
+  abstract class Colors {
+    Colors._();
+    static const Color vaccine = Colors.green;
+    static const Color medication = Colors.blue;
+    static const Color appointment = Colors.purple;
+    static const Color weight = Colors.teal;
+    static const Color general = Colors.grey;
+    static const Color completedIcon = Colors.white;
+  }
 
-  static String reminderTypeLabel(String typeName) =>
-      'Lembrete tipo $typeName';
+  /// Layout and dimension constants.
+  /// TODO: These should be migrated to a centralized PetiVetiDesignTokens file.
+  abstract class Dimensions {
+    Dimensions._();
+    static const EdgeInsets cardMargin = EdgeInsets.only(bottom: 12);
+    static const EdgeInsets listPadding = EdgeInsets.all(16);
+    static const double emptyIconSize = 64.0;
+    static const double itemExtent = 120.0;
+    static const double scheduleIconSize = 14.0;
+    static const double repeatIconSize = 14.0;
+    static const double iconSpacing = 4.0;
+    static const double subtitleSpacing = 4.0;
+  }
 
-  static String tabLabel(String tabName, int count) =>
-      'Lembretes de $tabName, $count itens';
-
-  static String deleteConfirmationContent(String title) =>
-      'Deseja realmente excluir o lembrete "$title"?';
-}
-
-/// Animation and performance constants
-class RemindersPerformance {
-  RemindersPerformance._();
-  static const double listCacheExtent = 1000.0;
-  static const double listItemExtent = 120.0;
-  static const Duration defaultAnimationDuration = Duration(milliseconds: 300);
-  static const Duration fastAnimationDuration = Duration(milliseconds: 150);
+  /// Duration and timing constants.
+  /// TODO: These should be migrated to a centralized PetiVetiDesignTokens file.
+  abstract class Timings {
+    Timings._();
+    static const double listCacheExtent = 1000.0;
+    static const Duration snooze1Hour = Duration(hours: 1);
+    static const Duration snooze4Hours = Duration(hours: 4);
+    static const Duration snooze1Day = Duration(days: 1);
+  }
 }

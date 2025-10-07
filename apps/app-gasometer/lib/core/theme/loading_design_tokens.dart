@@ -1,139 +1,115 @@
 import 'package:flutter/material.dart';
+import 'design_tokens.dart';
 
-/// Design tokens específicos para componentes de loading
-/// Centraliza configurações visuais para garantir consistência
-class LoadingDesignTokens {
-  LoadingDesignTokens._();
-  static const Color primaryLoadingColor = Color(0xFF2196F3);
-  static const Color secondaryLoadingColor = Color(0xFF64B5F6);
-  static const Color successColor = Color(0xFF4CAF50);
-  static const Color backgroundColor = Color(0xFFF5F5F5);
-  static const Color surfaceColor = Colors.white;
-  static const Color onSurfaceColor = Color(0xFF424242);
-  static const Color onSurfaceLightColor = Color(0xFF757575);
-  static const Color darkBackgroundColor = Color(0xFF121212);
-  static const Color darkSurfaceColor = Color(0xFF1E1E1E);
-  static const Color darkOnSurfaceColor = Color(0xFFE0E0E0);
-  static const Color darkOnSurfaceLightColor = Color(0xFFB0B0B0);
-  static const double loadingIndicatorSize = 24.0;
-  static const double loadingIndicatorStrokeWidth = 3.0;
-  static const double iconSize = 32.0;
-  static const double largeIconSize = 48.0;
-  static const double spacingXs = 4.0;
-  static const double spacingSm = 8.0;
-  static const double spacingMd = 16.0;
-  static const double spacingLg = 24.0;
-  static const double spacingXl = 32.0;
-  static const double borderRadiusSm = 8.0;
-  static const double borderRadiusMd = 12.0;
-  static const double borderRadiusLg = 16.0;
-  static const Duration fastDuration = Duration(milliseconds: 200);
-  static const Duration normalDuration = Duration(milliseconds: 400);
-  static const Duration slowDuration = Duration(milliseconds: 800);
-  static const Duration verySlowDuration = Duration(milliseconds: 1200);
-  static const Curve standardCurve = Curves.easeInOut;
-  static const Curve enterCurve = Curves.easeOut;
-  static const Curve exitCurve = Curves.easeIn;
-  static const Curve bounceCurve = Curves.elasticOut;
-  static const TextStyle titleTextStyle = TextStyle(
-    fontSize: 18.0,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0.5,
-  );
+// TODO: This file should be moved to the specific feature's directory that uses it,
+// as it is no longer a global design token file but a component-specific configuration.
 
-  static const TextStyle bodyTextStyle = TextStyle(
-    fontSize: 14.0,
-    fontWeight: FontWeight.w400,
-    height: 1.4,
-  );
+/// Defines configurations for loading-related components and animations.
+///
+/// This class provides component-specific configurations, such as the steps for
+/// a login animation, and derives its core styling from the global [GasometerDesignTokens].
+class LoadingComponentConfig {
+  LoadingComponentConfig._();
 
-  static const TextStyle captionTextStyle = TextStyle(
-    fontSize: 12.0,
-    fontWeight: FontWeight.w400,
-    height: 1.2,
-  );
+  /// A predefined list of steps for the login loading animation.
   static const List<LoadingStepConfig> loginSteps = [
     LoadingStepConfig(
       icon: Icons.account_circle_outlined,
-      title: 'Autenticando',
-      subtitle: 'Verificando suas credenciais...',
+      title: 'Authenticating',
+      subtitle: 'Verifying your credentials...',
       duration: Duration(milliseconds: 1000),
     ),
     LoadingStepConfig(
       icon: Icons.cloud_download_outlined,
-      title: 'Sincronizando',
-      subtitle: 'Baixando seus dados...',
+      title: 'Syncing',
+      subtitle: 'Downloading your data...',
       duration: Duration(milliseconds: 1500),
     ),
     LoadingStepConfig(
       icon: Icons.directions_car_outlined,
-      title: 'Carregando veículos',
-      subtitle: 'Preparando sua frota...',
+      title: 'Loading Vehicles',
+      subtitle: 'Preparing your fleet...',
       duration: Duration(milliseconds: 1200),
     ),
     LoadingStepConfig(
       icon: Icons.local_gas_station_outlined,
-      title: 'Processando dados',
-      subtitle: 'Analisando consumo...',
+      title: 'Processing Data',
+      subtitle: 'Analyzing consumption...',
       duration: Duration(milliseconds: 800),
     ),
     LoadingStepConfig(
       icon: Icons.check_circle_outline,
-      title: 'Pronto!',
-      subtitle: 'Redirecionando...',
+      title: 'Done!',
+      subtitle: 'Redirecting...',
       duration: Duration(milliseconds: 600),
     ),
   ];
-  static const double skeletonHeight = 16.0;
-  static const double skeletonHeightSm = 12.0;
-  static const double skeletonHeightLg = 20.0;
-  static const double skeletonCardHeight = 120.0;
-  static const double skeletonAvatarSize = 40.0;
-  
-  /// Retorna cores apropriadas para o tema atual
+
+  /// The default text style for titles in loading components.
+  static const TextStyle titleTextStyle = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f18,
+    fontWeight: GasometerDesignTokens.Typography.semiBold,
+    letterSpacing: 0.5,
+  );
+
+  /// The default text style for body text in loading components.
+  static const TextStyle bodyTextStyle = TextStyle(
+    fontSize: GasometerDesignTokens.Typography.f14,
+    fontWeight: GasometerDesignTokens.Typography.regular,
+    height: 1.4,
+  );
+
+  /// Returns a color scheme for loading components, adapted for the current theme.
   static LoadingColorScheme getColorScheme(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final themeColors = GasometerDesignTokens.Colors;
+
     return LoadingColorScheme(
-      primary: primaryLoadingColor,
-      secondary: secondaryLoadingColor,
-      success: successColor,
-      background: isDark ? darkBackgroundColor : backgroundColor,
-      surface: isDark ? darkSurfaceColor : surfaceColor,
-      onSurface: isDark ? darkOnSurfaceColor : onSurfaceColor,
-      onSurfaceLight: isDark ? darkOnSurfaceLightColor : onSurfaceLightColor,
+      primary: themeColors.secondary,
+      secondary: themeColors.secondaryLight,
+      success: themeColors.success,
+      background: isDark ? themeColors.neutral900 : themeColors.background,
+      surface: isDark ? themeColors.neutral700 : themeColors.surface,
+      onSurface: isDark ? themeColors.textOnPrimary : themeColors.textPrimary,
+      onSurfaceLight: isDark
+          ? themeColors.textOnPrimary.withOpacity(0.7)
+          : themeColors.textSecondary,
     );
   }
 
-  /// Retorna configuração de animação baseada no contexto
+  /// Returns an animation configuration based on the desired [AnimationSpeed].
   static AnimationConfig getAnimationConfig(AnimationSpeed speed) {
     switch (speed) {
       case AnimationSpeed.fast:
         return const AnimationConfig(
-          duration: fastDuration,
-          curve: enterCurve,
+          duration: GasometerDesignTokens.Animations.fast,
+          curve: GasometerDesignTokens.Animations.enter,
         );
       case AnimationSpeed.normal:
         return const AnimationConfig(
-          duration: normalDuration,
-          curve: standardCurve,
+          duration: GasometerDesignTokens.Animations.normal,
+          curve: GasometerDesignTokens.Animations.standard,
         );
       case AnimationSpeed.slow:
         return const AnimationConfig(
-          duration: slowDuration,
-          curve: exitCurve,
+          duration: GasometerDesignTokens.Animations.slow,
+          curve: GasometerDesignTokens.Animations.exit,
         );
       case AnimationSpeed.bounce:
         return const AnimationConfig(
-          duration: normalDuration,
-          curve: bounceCurve,
+          duration: GasometerDesignTokens.Animations.normal,
+          curve: GasometerDesignTokens.Animations.bounce,
         );
     }
   }
 }
 
-/// Configuração de uma etapa de loading
+/// A data class representing a single step in a multi-step loading indicator.
 class LoadingStepConfig {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Duration duration;
 
   const LoadingStepConfig({
     required this.icon,
@@ -141,14 +117,17 @@ class LoadingStepConfig {
     required this.subtitle,
     required this.duration,
   });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Duration duration;
 }
 
-/// Schema de cores para loading
+/// A set of colors tailored for loading components.
 class LoadingColorScheme {
+  final Color primary;
+  final Color secondary;
+  final Color success;
+  final Color background;
+  final Color surface;
+  final Color onSurface;
+  final Color onSurfaceLight;
 
   const LoadingColorScheme({
     required this.primary,
@@ -159,27 +138,20 @@ class LoadingColorScheme {
     required this.onSurface,
     required this.onSurfaceLight,
   });
-  final Color primary;
-  final Color secondary;
-  final Color success;
-  final Color background;
-  final Color surface;
-  final Color onSurface;
-  final Color onSurfaceLight;
 }
 
-/// Configuração de animação
+/// A data class holding the duration and curve for an animation.
 class AnimationConfig {
+  final Duration duration;
+  final Curve curve;
 
   const AnimationConfig({
     required this.duration,
     required this.curve,
   });
-  final Duration duration;
-  final Curve curve;
 }
 
-/// Velocidades de animação disponíveis
+/// An enum representing available animation speeds.
 enum AnimationSpeed {
   fast,
   normal,

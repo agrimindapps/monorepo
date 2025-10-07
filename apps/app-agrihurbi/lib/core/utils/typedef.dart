@@ -1,17 +1,28 @@
-import 'package:core/core.dart' show Failure;
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart';
 
-/// Result type that can contain either a Failure or a success value
-typedef Result<T> = Either<Failure, T>;
+/// Defines common type aliases used throughout the application to improve
+/// code readability and consistency, aligned with the modern [Result] system.
 
-/// Future that returns a Result type
+/// A type alias for a [Future] that returns a [Result].
+///
+/// This is the standard return type for asynchronous repository methods and
+/// use cases that can either succeed with data of type [T] or fail with an [AppError].
+///
+/// Example:
+/// `ResultFuture<User> fetchUser(String id);`
 typedef ResultFuture<T> = Future<Result<T>>;
 
-/// Void result for operations that don't return data
-typedef ResultVoid = Future<Result<void>>;
+/// A type alias for a [Future] that returns a `Result<void>`.
+///
+/// This is used for asynchronous operations that do not return a value upon
+/// success but may still fail, such as a delete or update operation.
+///
+/// Example:
+/// `ResultVoid deleteItem(String id);`
+typedef ResultVoid = ResultFuture<void>;
 
-/// Map result type
-typedef ResultMap = Map<String, dynamic>;
-
-/// Data map type for API responses
+/// A standard type alias for a map representing a JSON object.
+///
+/// This is commonly used when decoding API responses or sending data in a
+/// POST/PUT request.
 typedef DataMap = Map<String, dynamic>;

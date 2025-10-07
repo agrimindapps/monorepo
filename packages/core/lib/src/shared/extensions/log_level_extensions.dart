@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../enums/log_level.dart';
 
-/// Extensões para o enum LogLevel
+/// An extension on the [LogLevel] enum to provide utility methods and properties.
 extension LogLevelExtensions on LogLevel {
-  /// Cor associada ao nível do log
+  /// A color associated with the log level for UI representation.
   Color get color {
     switch (this) {
       case LogLevel.trace:
@@ -21,7 +21,7 @@ extension LogLevelExtensions on LogLevel {
     }
   }
 
-  /// Ícone associado ao nível do log
+  /// An icon associated with the log level for UI representation.
   IconData get icon {
     switch (this) {
       case LogLevel.trace:
@@ -39,133 +39,81 @@ extension LogLevelExtensions on LogLevel {
     }
   }
 
-  /// Prioridade do log (maior número = maior prioridade)
-  int get priority {
-    switch (this) {
-      case LogLevel.trace:
-        return 0;
-      case LogLevel.debug:
-        return 1;
-      case LogLevel.info:
-        return 2;
-      case LogLevel.warning:
-        return 3;
-      case LogLevel.error:
-        return 4;
-      case LogLevel.critical:
-        return 5;
-    }
-  }
+  /// A numeric priority for the log level (higher value means higher priority).
+  int get priority => index;
 
-  /// Nome formatado do nível
-  String get displayName {
-    switch (this) {
-      case LogLevel.trace:
-        return 'Trace';
-      case LogLevel.debug:
-        return 'Debug';
-      case LogLevel.info:
-        return 'Info';
-      case LogLevel.warning:
-        return 'Warning';
-      case LogLevel.error:
-        return 'Error';
-      case LogLevel.critical:
-        return 'Critical';
-    }
-  }
+  /// A user-friendly, capitalized name for the log level (e.g., "Debug").
+  String get displayName => name[0].toUpperCase() + name.substring(1);
 
-  /// Nome em maiúsculo para logs
+  /// The uppercase name of the log level for use in log messages.
   String get logName => name.toUpperCase();
 
-  /// Verifica se é um nível crítico
-  bool get isCritical => this == LogLevel.error || this == LogLevel.critical;
+  /// Returns `true` if the level is [LogLevel.error] or [LogLevel.critical].
+  bool get isCritical => priority >= LogLevel.error.priority;
 
-  /// Verifica se é um nível de produção
-  bool get isProductionLevel {
-    switch (this) {
-      case LogLevel.trace:
-      case LogLevel.debug:
-        return false;
-      case LogLevel.info:
-      case LogLevel.warning:
-      case LogLevel.error:
-      case LogLevel.critical:
-        return true;
-    }
-  }
+  /// Returns `true` if the log level is suitable for production environments.
+  bool get isProductionLevel => priority >= LogLevel.info.priority;
 
-  /// Verifica se é um nível de desenvolvimento
-  bool get isDevelopmentLevel =>
-      this == LogLevel.debug || this == LogLevel.trace;
+  /// Returns `true` if the log level is typically used for development.
+  bool get isDevelopmentLevel => priority < LogLevel.info.priority;
 
-  /// Obtém a cor do texto baseada no fundo
+  /// A suitable text color to be used on a background of this level's [color].
   Color get textColor {
     switch (this) {
-      case LogLevel.trace:
-        return Colors.white;
-      case LogLevel.debug:
-        return Colors.white;
-      case LogLevel.info:
-        return Colors.white;
       case LogLevel.warning:
         return Colors.black;
-      case LogLevel.error:
-        return Colors.white;
-      case LogLevel.critical:
+      default:
         return Colors.white;
     }
   }
 
-  /// Obtém cor de fundo mais suave para cards
+  /// A lighter version of the log level's color, suitable for backgrounds.
   Color get lightBackgroundColor {
     switch (this) {
       case LogLevel.trace:
-        return Colors.purple.withValues(alpha: 0.1);
+        return Colors.purple.withOpacity(0.1);
       case LogLevel.debug:
-        return Colors.grey.withValues(alpha: 0.1);
+        return Colors.grey.withOpacity(0.1);
       case LogLevel.info:
-        return Colors.blue.withValues(alpha: 0.1);
+        return Colors.blue.withOpacity(0.1);
       case LogLevel.warning:
-        return Colors.orange.withValues(alpha: 0.1);
+        return Colors.orange.withOpacity(0.1);
       case LogLevel.error:
-        return Colors.red.withValues(alpha: 0.1);
+        return Colors.red.withOpacity(0.1);
       case LogLevel.critical:
-        return Colors.red.shade900.withValues(alpha: 0.1);
+        return Colors.red.shade900.withOpacity(0.1);
     }
   }
 
-  bool isHigherPriorityThan(LogLevel other) {
-    return priority > other.priority;
-  }
+  /// Returns `true` if this log level has a higher priority than [other].
+  bool isHigherPriorityThan(LogLevel other) => priority > other.priority;
 
-  bool isLowerPriorityThan(LogLevel other) {
-    return priority < other.priority;
-  }
+  /// Returns `true` if this log level has a lower priority than [other].
+  bool isLowerPriorityThan(LogLevel other) => priority < other.priority;
 
-  /// Converte string para LogLevel (case insensitive)
+  /// Creates a [LogLevel] from a string, ignoring case.
+  ///
+  /// Supports full names (e.g., "debug") and common abbreviations (e.g., "dbg").
   static LogLevel? fromString(String? value) {
     if (value == null || value.isEmpty) return null;
 
     final normalized = value.toLowerCase().trim();
+    for (final level in LogLevel.values) {
+      if (level.name == normalized) return level;
+    }
 
+    // Check for common abbreviations
     switch (normalized) {
-      case 'trace':
       case 'trc':
         return LogLevel.trace;
-      case 'debug':
       case 'dbg':
         return LogLevel.debug;
-      case 'info':
       case 'information':
         return LogLevel.info;
-      case 'warning':
       case 'warn':
         return LogLevel.warning;
-      case 'error':
       case 'err':
         return LogLevel.error;
-      case 'critical':
       case 'crit':
         return LogLevel.critical;
       default:
@@ -174,108 +122,88 @@ extension LogLevelExtensions on LogLevel {
   }
 }
 
-/// Classe helper para trabalhar com múltiplos LogLevels
+/// A utility class for performing operations related to [LogLevel].
 class LogLevelUtils {
   LogLevelUtils._();
 
-  /// Obtém todos os níveis ordenados por prioridade (menor para maior)
-  static List<LogLevel> get allLevelsByPriority {
-    final levels = LogLevel.values.toList();
-    levels.sort((a, b) => a.priority.compareTo(b.priority));
-    return levels;
-  }
+  /// A list of all log levels, sorted from lowest to highest priority.
+  static final List<LogLevel> allLevelsByPriority = List.unmodifiable(
+    LogLevel.values..sort((a, b) => a.priority.compareTo(b.priority)),
+  );
 
-  /// Obtém todos os níveis ordenados por prioridade (maior para menor)
-  static List<LogLevel> get allLevelsByPriorityDesc {
-    final levels = LogLevel.values.toList();
-    levels.sort((a, b) => b.priority.compareTo(a.priority));
-    return levels;
-  }
+  /// A list of all log levels, sorted from highest to lowest priority.
+  static final List<LogLevel> allLevelsByPriorityDesc = List.unmodifiable(
+    LogLevel.values..sort((a, b) => b.priority.compareTo(a.priority)),
+  );
 
-  /// Obtém apenas níveis de produção
-  static List<LogLevel> get productionLevels {
-    return LogLevel.values.where((level) => level.isProductionLevel).toList();
-  }
+  /// A list of log levels suitable for production environments.
+  static final List<LogLevel> productionLevels = List.unmodifiable(
+    LogLevel.values.where((level) => level.isProductionLevel),
+  );
 
-  /// Obtém apenas níveis de desenvolvimento
-  static List<LogLevel> get developmentLevels {
-    return LogLevel.values.where((level) => level.isDevelopmentLevel).toList();
-  }
+  /// A list of log levels typically used during development.
+  static final List<LogLevel> developmentLevels = List.unmodifiable(
+    LogLevel.values.where((level) => level.isDevelopmentLevel),
+  );
 
-  /// Obtém níveis acima de uma determinada prioridade
+  /// Returns a list of log levels with a higher priority than the given [level].
   static List<LogLevel> getLevelsAbove(LogLevel level) {
-    return LogLevel.values.where((l) => l.isHigherPriorityThan(level)).toList();
+    return allLevelsByPriority.where((l) => l.isHigherPriorityThan(level)).toList();
   }
 
-  /// Obtém níveis abaixo de uma determinada prioridade
+  /// Returns a list of log levels with a lower priority than the given [level].
   static List<LogLevel> getLevelsBelow(LogLevel level) {
-    return LogLevel.values.where((l) => l.isLowerPriorityThan(level)).toList();
+    return allLevelsByPriority.where((l) => l.isLowerPriorityThan(level)).toList();
   }
 
-  /// Obtém níveis incluindo e acima de uma determinada prioridade
+  /// Returns a list of log levels with a priority greater than or equal to the given [level].
   static List<LogLevel> getLevelsIncludingAndAbove(LogLevel level) {
-    return LogLevel.values.where((l) => l.priority >= level.priority).toList();
+    return allLevelsByPriority.where((l) => l.priority >= level.priority).toList();
   }
 
-  /// Obtém níveis incluindo e abaixo de uma determinada prioridade
+  /// Returns a list of log levels with a priority less than or equal to the given [level].
   static List<LogLevel> getLevelsIncludingAndBelow(LogLevel level) {
-    return LogLevel.values.where((l) => l.priority <= level.priority).toList();
+    return allLevelsByPriority.where((l) => l.priority <= level.priority).toList();
   }
 
-  /// Filtra uma lista de LogLevel baseado em critérios
+  /// Filters a list of [LogLevel]s based on the provided criteria.
   static List<LogLevel> filterLevels({
     bool? productionOnly,
     bool? developmentOnly,
     int? minPriority,
     int? maxPriority,
   }) {
-    Iterable<LogLevel> levels = LogLevel.values;
-
-    if (productionOnly == true) {
-      levels = levels.where((level) => level.isProductionLevel);
-    } else if (developmentOnly == true) {
-      levels = levels.where((level) => level.isDevelopmentLevel);
-    }
-
-    if (minPriority != null) {
-      levels = levels.where((level) => level.priority >= minPriority);
-    }
-
-    if (maxPriority != null) {
-      levels = levels.where((level) => level.priority <= maxPriority);
-    }
-
-    return levels.toList();
+    return allLevelsByPriority.where((level) {
+      if (productionOnly == true && !level.isProductionLevel) return false;
+      if (developmentOnly == true && !level.isDevelopmentLevel) return false;
+      if (minPriority != null && level.priority < minPriority) return false;
+      if (maxPriority != null && level.priority > maxPriority) return false;
+      return true;
+    }).toList();
   }
 
-  /// Obtém estatísticas de níveis de log
+  /// Generates statistics for a given list of [LogLevel]s.
   static Map<String, dynamic> getStats(List<LogLevel> levels) {
-    final stats = <String, dynamic>{
-      'total': levels.length,
-      'distribution': <String, int>{},
-      'criticalCount': 0,
-      'productionCount': 0,
-      'developmentCount': 0,
+    final distribution = <LogLevel, int>{
+      for (final level in LogLevel.values) level: 0
     };
+    int criticalCount = 0;
+    int productionCount = 0;
+    int developmentCount = 0;
 
     for (final level in levels) {
-      final levelName = level.name;
-      stats['distribution'][levelName] =
-          (stats['distribution'][levelName] as int? ?? 0) + 1;
-
-      if (level.isCritical) {
-        stats['criticalCount'] = (stats['criticalCount'] as int) + 1;
-      }
-
-      if (level.isProductionLevel) {
-        stats['productionCount'] = (stats['productionCount'] as int) + 1;
-      }
-
-      if (level.isDevelopmentLevel) {
-        stats['developmentCount'] = (stats['developmentCount'] as int) + 1;
-      }
+      distribution[level] = (distribution[level] ?? 0) + 1;
+      if (level.isCritical) criticalCount++;
+      if (level.isProductionLevel) productionCount++;
+      if (level.isDevelopmentLevel) developmentCount++;
     }
 
-    return stats;
+    return {
+      'total': levels.length,
+      'distribution': distribution.map((key, value) => MapEntry(key.name, value)),
+      'criticalCount': criticalCount,
+      'productionCount': productionCount,
+      'developmentCount': developmentCount,
+    };
   }
 }

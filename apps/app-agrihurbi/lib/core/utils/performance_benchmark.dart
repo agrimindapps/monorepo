@@ -1,233 +1,200 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:core/core.dart';
 
-/// Utilitário para benchmark de performance das otimizações
+/// A utility for benchmarking the performance of synchronous and asynchronous operations.
 ///
-/// Mede tempos de execução, memoria usage e FPS para validar melhorias
+/// This class measures execution time and provides methods to generate reports
+/// and export results, helping to validate and compare optimizations.
 class PerformanceBenchmark {
   PerformanceBenchmark._();
 
   static final List<BenchmarkResult> _results = [];
-  
-  /// Executa benchmark de uma operação
+
+  /// Measures the execution time of an asynchronous [operation].
   static Future<T> measureAsync<T>(
     String operationName,
     Future<T> Function() operation,
   ) async {
-    final stopwatch = Stopwatch()..start();
-    
-    try {
-      final result = await operation();
-      stopwatch.stop();
-      
-      final benchmark = BenchmarkResult(
-        operationName: operationName,
-        duration: stopwatch.elapsedMilliseconds,
-        timestamp: DateTime.now(),
-        success: true,
-      );
-      
-      _results.add(benchmark);
-      _logResult(benchmark);
-      
-      return result;
-    } catch (e) {
-      stopwatch.stop();
-      
-      final benchmark = BenchmarkResult(
-        operationName: operationName,
-        duration: stopwatch.elapsedMilliseconds,
-        timestamp: DateTime.now(),
-        success: false,
-        error: e.toString(),
-      );
-      
-      _results.add(benchmark);
-      _logResult(benchmark);
-      
-      rethrow;
-    }
+    return _measureOperation(operationName, operation) as Future<T>;
   }
-  
-  /// Executa benchmark de operação síncrona
+
+  /// Measures the execution time of a synchronous [operation].
   static T measureSync<T>(
     String operationName,
     T Function() operation,
   ) {
+    return _measureOperation(operationName, operation) as T;
+  }
+
+  /// Private helper to measure and record the performance of an operation.
+  static FutureOr<T> _measureOperation<T>(
+    String operationName,
+    Function operation,
+  ) {
     final stopwatch = Stopwatch()..start();
-    
     try {
       final result = operation();
-      stopwatch.stop();
-      
-      final benchmark = BenchmarkResult(
-        operationName: operationName,
-        duration: stopwatch.elapsedMilliseconds,
-        timestamp: DateTime.now(),
-        success: true,
-      );
-      
-      _results.add(benchmark);
-      _logResult(benchmark);
-      
-      return result;
+      if (result is Future) {
+        return result.then((value) {
+          stopwatch.stop();
+          _addResult(operationName, stopwatch.elapsed, success: true);
+          return value;
+        }).catchError((e) {
+          stopwatch.stop();
+          _addResult(operationName, stopwatch.elapsed, success: false, error: e);
+          throw e;
+        });
+      } else {
+        stopwatch.stop();
+        _addResult(operationName, stopwatch.elapsed, success: true);
+        return result;
+      }
     } catch (e) {
       stopwatch.stop();
-      
-      final benchmark = BenchmarkResult(
-        operationName: operationName,
-        duration: stopwatch.elapsedMilliseconds,
-        timestamp: DateTime.now(),
-        success: false,
-        error: e.toString(),
-      );
-      
-      _results.add(benchmark);
-      _logResult(benchmark);
-      
+      _addResult(operationName, stopwatch.elapsed, success: false, error: e);
       rethrow;
     }
   }
-  
-  /// Obtém resultados dos benchmarks
-  static List<BenchmarkResult> getResults() => List.unmodifiable(_results);
-  
-  /// Obtém estatísticas de uma operação específica
-  static OperationStats getOperationStats(String operationName) {
-    final operationResults = _results
-        .where((r) => r.operationName == operationName && r.success)
-        .map((r) => r.duration)
-        .toList();
-    
-    if (operationResults.isEmpty) {
-      return OperationStats(
-        operationName: operationName,
-        totalExecutions: 0,
-        averageDuration: 0,
-        minDuration: 0,
-        maxDuration: 0,
-      );
-    }
-    
-    operationResults.sort();
-    
-    return OperationStats(
+
+  /// Adds a benchmark result to the internal list and logs it.
+  static void _addResult(
+    String operationName,
+    Duration duration, {
+    required bool success,
+    dynamic error,
+  }) {
+    final result = BenchmarkResult(
       operationName: operationName,
-      totalExecutions: operationResults.length,
-      averageDuration: operationResults.reduce((a, b) => a + b) / operationResults.length,
-      minDuration: operationResults.first,
-      maxDuration: operationResults.last,
+      duration: duration,
+      timestamp: DateTime.now(),
+      success: success,
+      error: error?.toString(),
+    );
+    _results.add(result);
+    Logger.debug(
+      '[BENCHMARK] ${result.operationName}: ${result.duration.inMilliseconds}ms ${success ? "✅" : "❌"}',
+      name: 'Performance',
     );
   }
-  
-  /// Gera relatório de performance
-  static String generateReport() {
-    final buffer = StringBuffer();
-    buffer.writeln('=== RELATÓRIO DE PERFORMANCE ===');
-    buffer.writeln('Gerado em: ${DateTime.now()}');
-    buffer.writeln('Total de operações medidas: ${_results.length}');
-    buffer.writeln();
-    final operationNames = _results.map((r) => r.operationName).toSet();
-    
-    for (final operation in operationNames) {
-      final stats = getOperationStats(operation);
-      buffer.writeln('--- $operation ---');
-      buffer.writeln('Execuções: ${stats.totalExecutions}');
-      buffer.writeln('Tempo médio: ${stats.averageDuration.toStringAsFixed(1)}ms');
-      buffer.writeln('Tempo mínimo: ${stats.minDuration}ms');
-      buffer.writeln('Tempo máximo: ${stats.maxDuration}ms');
-      String classification;
-      if (stats.averageDuration < 50) {
-        classification = '✅ EXCELENTE';
-      } else if (stats.averageDuration < 200) {
-        classification = '🟡 BOM';
-      } else if (stats.averageDuration < 500) {
-        classification = '🟠 ACEITÁVEL';
-      } else {
-        classification = '❌ LENTO';
-      }
-      buffer.writeln('Classificação: $classification');
-      buffer.writeln();
+
+  /// Returns an unmodifiable list of all benchmark results.
+  static List<BenchmarkResult> getResults() => List.unmodifiable(_results);
+
+  /// Calculates and returns performance statistics for a specific operation.
+  static OperationStats getOperationStats(String operationName) {
+    final durations = _results
+        .where((r) => r.operationName == operationName && r.success)
+        .map((r) => r.duration.inMilliseconds)
+        .toList();
+
+    if (durations.isEmpty) {
+      return OperationStats.empty(operationName);
     }
+
+    durations.sort();
+    final totalDuration = durations.reduce((a, b) => a + b);
+
+    return OperationStats(
+      operationName: operationName,
+      totalExecutions: durations.length,
+      averageDuration: totalDuration / durations.length,
+      minDuration: durations.first,
+      maxDuration: durations.last,
+    );
+  }
+
+  /// Generates a formatted string report of all captured performance data.
+  static String generateReport() {
+    final buffer = StringBuffer()
+      ..writeln('===== PERFORMANCE REPORT =====')
+      ..writeln('Generated at: ${DateTime.now()}')
+      ..writeln('Total operations measured: ${_results.length}')
+      ..writeln();
+
+    final operationNames = _results.map((r) => r.operationName).toSet();
+    for (final name in operationNames) {
+      final stats = getOperationStats(name);
+      if (stats.totalExecutions == 0) continue;
+
+      buffer
+        ..writeln('--- $name ---')
+        ..writeln('Executions: ${stats.totalExecutions}')
+        ..writeln('Average Time: ${stats.averageDuration.toStringAsFixed(1)}ms')
+        ..writeln('Min Time: ${stats.minDuration}ms')
+        ..writeln('Max Time: ${stats.maxDuration}ms')
+        ..writeln('Classification: ${stats.classification}')
+        ..writeln();
+    }
+
     _addComparativeAnalysis(buffer);
-    
     return buffer.toString();
   }
-  
-  /// Limpa resultados armazenados
-  static void clearResults() {
-    _results.clear();
-  }
-  
-  /// Exporta resultados para JSON
+
+  /// Clears all stored benchmark results.
+  static void clearResults() => _results.clear();
+
+  /// Exports all results and a summary to a JSON-serializable map.
   static Map<String, dynamic> exportToJson() {
+    final operationNames = _results.map((r) => r.operationName).toSet();
     return {
-      'timestamp': DateTime.now().toIso8601String(),
+      'reportTimestamp': DateTime.now().toIso8601String(),
       'totalResults': _results.length,
       'results': _results.map((r) => r.toJson()).toList(),
       'summary': {
-        for (final operation in _results.map((r) => r.operationName).toSet())
-          operation: getOperationStats(operation).toJson(),
+        for (final name in operationNames)
+          name: getOperationStats(name).toJson(),
       },
     };
   }
-  
-  static void _logResult(BenchmarkResult result) {
-    print('🔍 [BENCHMARK] ${result.operationName}: ${result.duration}ms ${result.success ? "✅" : "❌"}');
-  }
-  
+
+  /// Adds a comparative analysis section to the report for A/B testing.
+  ///
+  /// This method looks for operation names ending in `_before` and `_after`
+  /// to compare their performance.
   static void _addComparativeAnalysis(StringBuffer buffer) {
-    final beforeAfterPairs = <String, List<BenchmarkResult>>{};
-    
+    final pairs = <String, ({List<BenchmarkResult> before, List<BenchmarkResult> after})>{};
+
     for (final result in _results) {
-      if (result.operationName.contains('_antes') || result.operationName.contains('_depois')) {
-        final baseOperation = result.operationName.replaceAll('_antes', '').replaceAll('_depois', '');
-        beforeAfterPairs.putIfAbsent(baseOperation, () => []).add(result);
+      final isBefore = result.operationName.endsWith('_before');
+      final isAfter = result.operationName.endsWith('_after');
+      if (isBefore || isAfter) {
+        final baseName = result.operationName.replaceAll(RegExp(r'_before$|_after$'), '');
+        final entry = pairs.putIfAbsent(baseName, () => (before: [], after: []));
+        if (isBefore) entry.before.add(result);
+        if (isAfter) entry.after.add(result);
       }
     }
-    
-    if (beforeAfterPairs.isNotEmpty) {
-      buffer.writeln('=== ANÁLISE COMPARATIVA ===');
-      
-      for (final entry in beforeAfterPairs.entries) {
-        final operation = entry.key;
-        final results = entry.value;
-        
-        final beforeResults = results.where((r) => r.operationName.contains('_antes')).toList();
-        final afterResults = results.where((r) => r.operationName.contains('_depois')).toList();
-        
-        if (beforeResults.isNotEmpty && afterResults.isNotEmpty) {
-          final beforeAvg = beforeResults.map((r) => r.duration).reduce((a, b) => a + b) / beforeResults.length;
-          final afterAvg = afterResults.map((r) => r.duration).reduce((a, b) => a + b) / afterResults.length;
-          
+
+    if (pairs.isNotEmpty) {
+      buffer.writeln('===== COMPARATIVE ANALYSIS =====');
+      for (final MapEntry(key: baseName, value: record) in pairs.entries) {
+        if (record.before.isNotEmpty && record.after.isNotEmpty) {
+          final beforeAvg = getOperationStats('${baseName}_before').averageDuration;
+          final afterAvg = getOperationStats('${baseName}_after').averageDuration;
           final improvement = ((beforeAvg - afterAvg) / beforeAvg * 100);
-          
-          buffer.writeln('$operation:');
-          buffer.writeln('  Antes: ${beforeAvg.toStringAsFixed(1)}ms');
-          buffer.writeln('  Depois: ${afterAvg.toStringAsFixed(1)}ms');
-          buffer.writeln('  Melhoria: ${improvement.toStringAsFixed(1)}%');
-          
-          if (improvement > 20) {
-            buffer.writeln('  Status: 🚀 OTIMIZAÇÃO SIGNIFICATIVA');
-          } else if (improvement > 0) {
-            buffer.writeln('  Status: ✅ MELHORIA DETECTADA');
-          } else {
-            buffer.writeln('  Status: ⚠️ SEM MELHORIA');
-          }
-          buffer.writeln();
+
+          buffer
+            ..writeln('$baseName:')
+            ..writeln('  Before: ${beforeAvg.toStringAsFixed(1)}ms')
+            ..writeln('  After: ${afterAvg.toStringAsFixed(1)}ms')
+            ..writeln('  Improvement: ${improvement.toStringAsFixed(1)}%')
+            ..writeln('  Status: ${improvement > 20 ? '🚀 SIGNIFICANT OPTIMIZATION' : improvement > 0 ? '✅ IMPROVEMENT DETECTED' : '⚠️ NO IMPROVEMENT'}')
+            ..writeln();
         }
       }
     }
   }
 }
 
-/// Resultado de um benchmark
+/// Represents the result of a single benchmark measurement.
 class BenchmarkResult {
   final String operationName;
-  final int duration;
+  final Duration duration;
   final DateTime timestamp;
   final bool success;
   final String? error;
-  
+
   const BenchmarkResult({
     required this.operationName,
     required this.duration,
@@ -235,24 +202,24 @@ class BenchmarkResult {
     required this.success,
     this.error,
   });
-  
+
   Map<String, dynamic> toJson() => {
-    'operationName': operationName,
-    'duration': duration,
-    'timestamp': timestamp.toIso8601String(),
-    'success': success,
-    if (error != null) 'error': error,
-  };
+        'operationName': operationName,
+        'durationMs': duration.inMilliseconds,
+        'timestamp': timestamp.toIso8601String(),
+        'success': success,
+        if (error != null) 'error': error,
+      };
 }
 
-/// Estatísticas de uma operação
+/// Holds aggregated statistics for a set of benchmark measurements.
 class OperationStats {
   final String operationName;
   final int totalExecutions;
   final double averageDuration;
   final int minDuration;
   final int maxDuration;
-  
+
   const OperationStats({
     required this.operationName,
     required this.totalExecutions,
@@ -260,12 +227,31 @@ class OperationStats {
     required this.minDuration,
     required this.maxDuration,
   });
-  
+
+  factory OperationStats.empty(String operationName) {
+    return OperationStats(
+      operationName: operationName,
+      totalExecutions: 0,
+      averageDuration: 0,
+      minDuration: 0,
+      maxDuration: 0,
+    );
+  }
+
+  /// A human-readable classification of the operation's performance.
+  String get classification {
+    if (averageDuration < 50) return '✅ EXCELLENT';
+    if (averageDuration < 200) return '🟡 GOOD';
+    if (averageDuration < 500) return '🟠 ACCEPTABLE';
+    return '❌ SLOW';
+  }
+
   Map<String, dynamic> toJson() => {
-    'operationName': operationName,
-    'totalExecutions': totalExecutions,
-    'averageDuration': averageDuration,
-    'minDuration': minDuration,
-    'maxDuration': maxDuration,
-  };
+        'operationName': operationName,
+        'totalExecutions': totalExecutions,
+        'averageDurationMs': averageDuration,
+        'minDurationMs': minDuration,
+        'maxDurationMs': maxDuration,
+        'classification': classification,
+      };
 }

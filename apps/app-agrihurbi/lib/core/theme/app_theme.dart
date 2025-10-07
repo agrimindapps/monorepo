@@ -3,199 +3,186 @@ import 'package:flutter/material.dart';
 import 'app_text_styles.dart';
 import 'design_tokens.dart';
 
-/// Application theme configuration using Design Tokens
-/// This consolidates all theme-related constants and eliminates duplication
+/// A centralized class for the application's theme configuration.
+///
+/// This class constructs the [ThemeData] for both light and dark modes using
+/// the constants defined in [DesignTokens] and [AppTextStyles], ensuring a
+/// consistent and maintainable design system.
 class AppTheme {
   AppTheme._();
-  static Color get primaryColor => DesignTokens.primaryColor;
-  static Color get secondaryColor => DesignTokens.secondaryColor;
-  static Color get accentColor => DesignTokens.accentColor;
-  static Color get backgroundColor => DesignTokens.backgroundColor;
-  static Color get surfaceColor => DesignTokens.surfaceColor;
-  static Color get errorColor => DesignTokens.errorColor;
-  static Color get successColor => DesignTokens.successColor;
-  static Color get warningColor => DesignTokens.warningColor;
-  static Color get infoColor => DesignTokens.infoColor;
-  static Color get textPrimaryColor => DesignTokens.textPrimaryColor;
-  static Color get textSecondaryColor => DesignTokens.textSecondaryColor;
-  static Color get textLightColor => DesignTokens.textLightColor;
-  static Color get borderColor => DesignTokens.borderColor;
-  static Color get dividerColor => DesignTokens.dividerColor;
+
+  /// Exposes the available theme modes.
   static const light = ThemeMode.light;
   static const dark = ThemeMode.dark;
   static const system = ThemeMode.system;
 
-  /// Light theme configuration
+  /// The light theme configuration for the application.
   static ThemeData get lightTheme {
+    return _buildTheme(
+      brightness: Brightness.light,
+      colors: _lightColorScheme,
+    );
+  }
+
+  /// The dark theme configuration for the application.
+  static ThemeData get darkTheme {
+    return _buildTheme(
+      brightness: Brightness.dark,
+      colors: _darkColorScheme,
+    );
+  }
+
+  /// The base color scheme for the light theme.
+  static const _lightColorScheme = ColorScheme.light(
+    primary: DesignTokens.Colors.primary,
+    secondary: DesignTokens.Colors.secondary,
+    surface: DesignTokens.Colors.surface,
+    background: DesignTokens.Colors.background,
+    error: DesignTokens.Colors.error,
+    onPrimary: DesignTokens.Colors.textLight,
+    onSecondary: DesignTokens.Colors.textLight,
+    onSurface: DesignTokens.Colors.textPrimary,
+    onBackground: DesignTokens.Colors.textPrimary,
+    onError: DesignTokens.Colors.textLight,
+  );
+
+  /// The base color scheme for the dark theme.
+  static const _darkColorScheme = ColorScheme.dark(
+    primary: DesignTokens.Colors.primary,
+    secondary: DesignTokens.Colors.secondary,
+    surface: DesignTokens.Colors.surfaceDark,
+    background: DesignTokens.Colors.backgroundDark,
+    error: DesignTokens.Colors.error,
+    onPrimary: DesignTokens.Colors.textLight,
+    onSecondary: DesignTokens.Colors.textLight,
+    onSurface: DesignTokens.Colors.textLight,
+    onBackground: DesignTokens.Colors.textLight,
+    onError: DesignTokens.Colors.textLight,
+  );
+
+  /// A private helper method to build a [ThemeData] object.
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required ColorScheme colors,
+  }) {
+    final isDark = brightness == Brightness.dark;
+    final textTheme = _buildTextTheme(colors.onSurface);
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: const ColorScheme.light(
-        primary: DesignTokens.primaryColor,
-        secondary: DesignTokens.secondaryColor,
-        surface: DesignTokens.surfaceColor,
-        error: DesignTokens.errorColor,
-        onPrimary: DesignTokens.textLightColor,
-        onSecondary: DesignTokens.textLightColor,
-        onSurface: DesignTokens.textPrimaryColor,
-        onError: DesignTokens.textLightColor,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: DesignTokens.primaryColor,
-        foregroundColor: DesignTokens.textLightColor,
-        elevation: DesignTokens.appBarElevation,
+      brightness: brightness,
+      colorScheme: colors,
+      scaffoldBackgroundColor: colors.background,
+      appBarTheme: AppBarTheme(
+        backgroundColor: isDark ? colors.surface : colors.primary,
+        foregroundColor: colors.onPrimary,
+        elevation: DesignTokens.Elevations.none,
         centerTitle: true,
-        titleTextStyle: AppTextStyles.appBarTitle,
+        titleTextStyle: AppTextStyles.appBarTitle.copyWith(color: colors.onPrimary),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: DesignTokens.primaryColor,
-          foregroundColor: DesignTokens.textLightColor,
+          backgroundColor: colors.primary,
+          foregroundColor: colors.onPrimary,
           padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
+            horizontal: DesignTokens.Spacing.lg,
+            vertical: DesignTokens.Spacing.md,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: const RoundedRectangleBorder(borderRadius: DesignTokens.Borders.button),
           textStyle: AppTextStyles.button,
-          elevation: 1,
+          elevation: DesignTokens.Elevations.sm,
         ),
       ),
-      
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: DesignTokens.primaryColor,
+          foregroundColor: colors.primary,
           padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
+            horizontal: DesignTokens.Spacing.lg,
+            vertical: DesignTokens.Spacing.md,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          side: const BorderSide(color: DesignTokens.primaryColor),
+          shape: const RoundedRectangleBorder(borderRadius: DesignTokens.Borders.button),
+          side: BorderSide(color: colors.primary),
           textStyle: AppTextStyles.button,
         ),
       ),
-      
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: DesignTokens.primaryColor,
+          foregroundColor: colors.primary,
           padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
+            horizontal: DesignTokens.Spacing.md,
+            vertical: DesignTokens.Spacing.sm,
           ),
           textStyle: AppTextStyles.button,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: DesignTokens.borderColor),
+          borderRadius: DesignTokens.Borders.input,
+          borderSide: BorderSide(color: DesignTokens.Colors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: DesignTokens.borderColor),
+          borderRadius: DesignTokens.Borders.input,
+          borderSide: BorderSide(color: DesignTokens.Colors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: DesignTokens.primaryColor, width: 2),
+          borderRadius: DesignTokens.Borders.input,
+          borderSide: BorderSide(color: colors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: DesignTokens.errorColor),
+          borderRadius: DesignTokens.Borders.input,
+          borderSide: BorderSide(color: colors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: DesignTokens.errorColor, width: 2),
+          borderRadius: DesignTokens.Borders.input,
+          borderSide: BorderSide(color: colors.error, width: 2),
         ),
         filled: true,
-        fillColor: DesignTokens.surfaceColor,
-        contentPadding: const EdgeInsets.all(16),
+        fillColor: colors.surface,
+        contentPadding: const EdgeInsets.all(DesignTokens.Spacing.md),
       ),
-      cardTheme: CardThemeData(
-        color: DesignTokens.surfaceColor,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        margin: const EdgeInsets.all(8),
+      cardTheme: CardTheme(
+        color: colors.surface,
+        elevation: DesignTokens.Elevations.md,
+        shape: const RoundedRectangleBorder(borderRadius: DesignTokens.Borders.card),
+        margin: const EdgeInsets.all(DesignTokens.Spacing.sm),
       ),
       dividerTheme: const DividerThemeData(
-        color: DesignTokens.dividerColor,
+        color: DesignTokens.Colors.divider,
         thickness: 1,
         space: 1,
       ),
-      iconTheme: const IconThemeData(
-        color: DesignTokens.textSecondaryColor,
-        size: 24,
+      iconTheme: IconThemeData(
+        color: isDark ? DesignTokens.Colors.textLight : DesignTokens.Colors.textSecondary,
+        size: DesignTokens.IconSizes.md,
       ),
-      textTheme: const TextTheme(
-        displayLarge: AppTextStyles.displayLarge,
-        displayMedium: AppTextStyles.displayMedium,
-        displaySmall: AppTextStyles.displaySmall,
-        headlineLarge: AppTextStyles.headlineLarge,
-        headlineMedium: AppTextStyles.headlineMedium,
-        headlineSmall: AppTextStyles.headlineSmall,
-        titleLarge: AppTextStyles.titleLarge,
-        titleMedium: AppTextStyles.titleMedium,
-        titleSmall: AppTextStyles.titleSmall,
-        bodyLarge: AppTextStyles.bodyLarge,
-        bodyMedium: AppTextStyles.bodyMedium,
-        bodySmall: AppTextStyles.bodySmall,
-        labelLarge: AppTextStyles.labelLarge,
-        labelMedium: AppTextStyles.labelMedium,
-        labelSmall: AppTextStyles.labelSmall,
-      ),
+      textTheme: textTheme,
     );
   }
-  
-  /// Dark theme configuration
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: const ColorScheme.dark(
-        primary: DesignTokens.primaryColor,
-        secondary: DesignTokens.secondaryColor,
-        surface: DesignTokens.surfaceDarkColor,
-        error: DesignTokens.errorColor,
-        onPrimary: DesignTokens.textLightColor,
-        onSecondary: DesignTokens.textLightColor,
-        onSurface: DesignTokens.textLightColor,
-        onError: DesignTokens.textLightColor,
+
+  /// Builds the [TextTheme] by applying the correct text color.
+  static TextTheme _buildTextTheme(Color textColor) {
+    return TextTheme(
+      displayLarge: AppTextStyles.displayLarge.copyWith(color: textColor),
+      displayMedium: AppTextStyles.displayMedium.copyWith(color: textColor),
+      displaySmall: AppTextStyles.displaySmall.copyWith(color: textColor),
+      headlineLarge: AppTextStyles.headlineLarge.copyWith(color: textColor),
+      headlineMedium: AppTextStyles.headlineMedium.copyWith(color: textColor),
+      headlineSmall: AppTextStyles.headlineSmall.copyWith(color: textColor),
+      titleLarge: AppTextStyles.titleLarge.copyWith(color: textColor),
+      titleMedium: AppTextStyles.titleMedium.copyWith(color: textColor),
+      titleSmall: AppTextStyles.titleSmall.copyWith(color: textColor),
+      bodyLarge: AppTextStyles.bodyLarge.copyWith(color: textColor),
+      bodyMedium: AppTextStyles.bodyMedium.copyWith(color: textColor),
+      bodySmall: AppTextStyles.bodySmall.copyWith(
+        color: textColor.withOpacity(0.7),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: DesignTokens.backgroundDarkColor,
-        foregroundColor: DesignTokens.textLightColor,
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: AppTextStyles.appBarTitle,
+      labelLarge: AppTextStyles.labelLarge.copyWith(color: textColor),
+      labelMedium: AppTextStyles.labelMedium.copyWith(
+        color: textColor.withOpacity(0.7),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: DesignTokens.primaryColor,
-          foregroundColor: DesignTokens.textLightColor,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          textStyle: AppTextStyles.button,
-          elevation: 1,
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: DesignTokens.backgroundDarkColor,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        margin: const EdgeInsets.all(8),
+      labelSmall: AppTextStyles.labelSmall.copyWith(
+        color: textColor.withOpacity(0.7),
       ),
     );
   }
 }
-

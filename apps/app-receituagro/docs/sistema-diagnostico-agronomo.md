@@ -49,12 +49,42 @@ Pattern: AsyncNotifier com estados imutáveis
 Database: Hive (NoSQL key-value)
 Type: Static data (sem sincronização Firebase)
 Size: ~15-30MB de dados estáticos
+Access Pattern: Open -> Query -> Close (sem cache)
 
 // Arquitetura
 Pattern: Clean Architecture (Data/Domain/Presentation)
 Dependency Injection: GetIt + Injectable
 Error Handling: Either<Failure, T> (dartz)
 ```
+
+### 1.3. 🔴 Princípio Fundamental: Sem Sistema de Cache
+
+**IMPORTANTE:** Este sistema foi projetado para **NÃO** utilizar cache de dados. Todas as consultas às Hiveboxes seguem o padrão:
+
+```dart
+// ✅ PADRÃO CORRETO
+Box<T>? box;
+try {
+  box = await Hive.openBox<T>('boxName');
+  // Consultar dados
+  final data = box.values.where(...).toList();
+  return data;
+} finally {
+  await box?.close();  // SEMPRE fechar
+}
+```
+
+**Motivações:**
+- ✅ Dados sempre atualizados e consistentes
+- ✅ Sem complexidade de invalidação de cache
+- ✅ Gerenciamento explícito de recursos
+- ✅ Hive já otimiza acesso in-memory
+
+**Regras:**
+1. Abrir box → Consultar → Fechar (em try-finally)
+2. Para múltiplas consultas: abrir boxes uma vez, fechar ao final
+3. Nunca confiar em campos cached (ex: `nomeDefensivo`)
+4. Sempre resolver através de FKs e consultas diretas
 
 ---
 
@@ -613,22 +643,37 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
 
 ```dart
 Future<String> getDisplayNomeDefensivo() async {
+  Box<FitossanitarioHive>? box;
+  
   try {
-    final repository = di.sl<FitossanitarioHiveRepository>();
-    final defensivo = await repository.getById(fkIdDefensivo);
+    // 1. Abrir box de fitossanitários
+    box = await Hive.openBox<FitossanitarioHive>('fitossanitarios');
 
+    // 2. Consultar defensivo
+    final defensivo = box.values.firstWhere(
+      (f) => f.idReg == fkIdDefensivo,
+      orElse: () => null,
+    );
+
+    // 3. Retornar nome se encontrado
     if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
       return defensivo.nomeComum;
     }
   } catch (e) {
-    // Ignora erro
+    debugPrint('❌ Erro ao resolver nome do defensivo: $e');
+  } finally {
+    // 4. SEMPRE fechar box
+    await box?.close();
   }
 
   return 'Defensivo não identificado';
 }
 ```
 
-**⚠️ IMPORTANTE:** Este método **SEMPRE** busca no repositório usando `fkIdDefensivo`. **NUNCA** usa o campo `nomeDefensivo` armazenado no DiagnosticoHive, pois pode estar desatualizado.
+**⚠️ IMPORTANTE:** 
+- Este método **SEMPRE** abre a box, consulta e fecha imediatamente
+- **NUNCA** usa o campo `nomeDefensivo` armazenado no DiagnosticoHive, pois pode estar desatualizado
+- O padrão try-finally garante que a box seja fechada mesmo em caso de erro
 
 #### **displayDosagem** - Formata dosagem
 
@@ -657,85 +702,82 @@ String get displayVazaoTerrestre {
 }
 ```
 
-### 4.3. Serviço DiagnosticoEntityResolver
+### 4.3. Padrão de Acesso Direto às Hiveboxes
 
-**Responsabilidade:** Resolver IDs para nomes legíveis com cache inteligente.
+**Responsabilidade:** Consultar dados diretamente das Hiveboxes sem cache intermediário.
 
-**Localização:** `lib/core/services/diagnostico_entity_resolver.dart`
+**Localização:** Repositories em `lib/features/*/data/repositories/`
+
+**⚠️ IMPORTANTE:** Não utilizamos sistema de cache. Todas as consultas devem seguir o padrão:
+1. **Abrir** a Hivebox
+2. **Consultar** os dados necessários
+3. **Fechar** a Hivebox imediatamente
 
 ```dart
-class DiagnosticoEntityResolver {
-  // Singleton instance
-  static DiagnosticoEntityResolver get instance =>
-      _instance ??= DiagnosticoEntityResolver._internal();
+/// Exemplo de consulta direta seguindo o padrão correto
+Future<String> resolveCulturaNome({
+  required String idCultura,
+  String defaultValue = 'Cultura não especificada',
+}) async {
+  Box<CulturaHive>? box;
+  
+  try {
+    // 1. Abrir box
+    box = await Hive.openBox<CulturaHive>('culturas');
 
-  // Repositórios injetados
-  late final CulturaHiveRepository _culturaRepository;
-  late final FitossanitarioHiveRepository _defensivoRepository;
-  late final PragasHiveRepository _pragasRepository;
+    // 2. Consultar dados
+    if (idCultura.isNotEmpty) {
+      final culturaData = box.values.firstWhere(
+        (c) => c.idReg == idCultura,
+        orElse: () => null,
+      );
 
-  // Cache com TTL de 30 minutos
-  final Map<String, String> _culturaCache = {};
-  final Map<String, String> _defensivoCache = {};
-  final Map<String, String> _pragaCache = {};
-
-  DateTime? _lastCacheUpdate;
-  static const Duration _cacheTTL = Duration(minutes: 30);
-
-  /// Resolve nome de cultura APENAS usando ID
-  /// ✅ SEMPRE resolve via repository.getById()
-  /// ❌ NUNCA usa campos nomeCultura cached
-  Future<String> resolveCulturaNome({
-    required String idCultura,
-    String defaultValue = 'Cultura não especificada',
-  }) async {
-    try {
-      // 1. Verifica cache
-      if (_isCacheValid && _culturaCache.containsKey(idCultura)) {
-        return _culturaCache[idCultura]!;
+      if (culturaData != null && culturaData.cultura.isNotEmpty) {
+        return culturaData.cultura;
       }
-
-      // 2. Busca no repositório
-      if (idCultura.isNotEmpty) {
-        final culturaData = await _culturaRepository.getById(idCultura);
-
-        if (culturaData != null && culturaData.cultura.isNotEmpty) {
-          final resolvedName = culturaData.cultura;
-
-          // 3. Atualiza cache
-          _culturaCache[idCultura] = resolvedName;
-          _updateCacheTimestamp();
-
-          return resolvedName;
-        }
-      }
-
-      // 4. Retorna default se não encontrar
-      _culturaCache[idCultura] = defaultValue;
-      _updateCacheTimestamp();
-
-      return defaultValue;
-    } catch (e) {
-      debugPrint('❌ Erro ao resolver cultura: $e');
-      return defaultValue;
     }
-  }
 
-  // Métodos similares para:
-  // - resolveDefensivoNome()
-  // - resolvePragaNome()
-  // - resolveBatchCulturas()
-  // - resolveBatchDefensivos()
-  // - resolveBatchPragas()
+    // 3. Retorna default se não encontrar
+    return defaultValue;
+  } catch (e) {
+    debugPrint('❌ Erro ao resolver cultura: $e');
+    return defaultValue;
+  } finally {
+    // 4. Fechar box (CRÍTICO!)
+    await box?.close();
+  }
+}
+
+/// Exemplo de consulta de múltiplos registros
+Future<List<DiagnosticoHive>> findDiagnosticosByDefensivo(
+  String idDefensivo,
+) async {
+  Box<DiagnosticoHive>? box;
+  
+  try {
+    // 1. Abrir box
+    box = await Hive.openBox<DiagnosticoHive>('diagnosticos');
+
+    // 2. Consultar e retornar dados
+    return box.values
+        .where((d) => d.fkIdDefensivo == idDefensivo)
+        .toList();
+  } catch (e) {
+    debugPrint('❌ Erro ao buscar diagnósticos: $e');
+    return [];
+  } finally {
+    // 3. Fechar box (CRÍTICO!)
+    await box?.close();
+  }
 }
 ```
 
 **Características:**
-- ✅ Cache de 30 minutos para evitar consultas repetidas
-- ✅ Singleton pattern para cache global
-- ✅ Batch resolution para otimizar múltiplas consultas
-- ✅ Fallback para valores padrão
-- ⚠️ Cache pode retornar dados obsoletos até expiração
+- ✅ Consulta sempre dados atualizados
+- ✅ Sem risco de dados desatualizados por cache
+- ✅ Gerenciamento explícito de recursos (open/close)
+- ✅ Padrão try-finally garante fechamento da box
+- ⚠️ Importante sempre fechar boxes no bloco finally
 
 ---
 
@@ -1579,113 +1621,157 @@ class DiagnosticosState {
 
 ## ⚠️ Problemas Identificados no Código Fonte
 
-### 8.1. Problema Crítico: Campos Cached Desatualizados
+### 8.1. Abordagem: Campos Cached como Fallback
 
-**Severidade:** 🔴 CRÍTICA
+**Severidade:** ℹ️ INFORMACIONAL
 
 **Localização:** `DiagnosticoHive.nomeDefensivo`, `nomeCultura`, `nomePraga`
 
 **Descrição:**
-O modelo `DiagnosticoHive` armazena nomes das entidades relacionadas como cache, mas esses valores **podem estar desatualizados** se:
-- Um defensivo mudar de nome comercial
-- Uma praga tiver seu nome comum corrigido
-- Dados forem atualizados em produção
+O modelo `DiagnosticoHive` armazena nomes das entidades relacionadas, mas **esses campos não devem ser a fonte primária de dados**. Sempre consulte as boxes relacionadas:
 
-**Código Problemático:**
+**Modelo de Dados:**
 ```dart
 @HiveType(typeId: 101)
 class DiagnosticoHive extends HiveObject {
-  @HiveField(4) String fkIdDefensivo;         // ✅ Source of truth
-  @HiveField(5) String? nomeDefensivo;        // ❌ Pode estar desatualizado
+  @HiveField(4) String fkIdDefensivo;         // ✅ Source of truth - usar sempre
+  @HiveField(5) String? nomeDefensivo;        // ⚠️ Fallback apenas
 
-  @HiveField(6) String fkIdCultura;           // ✅ Source of truth
-  @HiveField(7) String? nomeCultura;          // ❌ Pode estar desatualizado
+  @HiveField(6) String fkIdCultura;           // ✅ Source of truth - usar sempre
+  @HiveField(7) String? nomeCultura;          // ⚠️ Fallback apenas
 
-  @HiveField(8) String fkIdPraga;             // ✅ Source of truth
-  @HiveField(9) String? nomePraga;            // ❌ Pode estar desatualizado
+  @HiveField(8) String fkIdPraga;             // ✅ Source of truth - usar sempre
+  @HiveField(9) String? nomePraga;            // ⚠️ Fallback apenas
 }
 ```
 
-**Impacto:**
-- ⚠️ UI pode exibir nomes incorretos/antigos
-- ⚠️ Buscas por nome podem retornar resultados inconsistentes
-- ⚠️ Dados de compartilhamento podem ter informações desatualizadas
-
-**Solução Atual (Mitigação):**
+**Solução Implementada:**
 ```dart
-// ✅ SEMPRE usa resolução dinâmica
+// ✅ SEMPRE consulta a box relacionada
 Future<String> getDisplayNomeDefensivo() async {
-  final repository = di.sl<FitossanitarioHiveRepository>();
-  final defensivo = await repository.getById(fkIdDefensivo);
+  Box<FitossanitarioHive>? box;
+  
+  try {
+    // 1. Abrir box
+    box = await Hive.openBox<FitossanitarioHive>('fitossanitarios');
+    
+    // 2. Consultar defensivo
+    final defensivo = box.values.firstWhere(
+      (f) => f.idReg == fkIdDefensivo,
+      orElse: () => null,
+    );
 
-  if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
-    return defensivo.nomeComum;  // ✅ Sempre atualizado
+    // 3. Retornar nome atualizado
+    if (defensivo != null && defensivo.nomeComum.isNotEmpty) {
+      return defensivo.nomeComum;  // ✅ Sempre atualizado
+    }
+  } catch (e) {
+    debugPrint('❌ Erro: $e');
+  } finally {
+    // 4. Fechar box
+    await box?.close();
   }
 
-  return 'Defensivo não identificado';
+  // Fallback para campo cached apenas se consulta falhar
+  return nomeDefensivo ?? 'Defensivo não identificado';
 }
 
 // ❌ NUNCA usar diretamente
 // String nomeIncorreto = diagnostico.nomeDefensivo;  // ERRADO!
 ```
 
-**Recomendação Final:**
-- ✅ Manter extensões `getDisplayNome*()` como única fonte
-- ⚠️ Remover campos cached ou marcar como `@deprecated`
-- ✅ Adicionar testes de integração para validar resolução
+**Regras de Uso:**
+- ✅ Sempre usar métodos `getDisplayNome*()` que consultam boxes
+- ✅ Campos cached (`nomeDefensivo`, etc.) são apenas fallback de erro
+- ✅ Sempre fechar boxes após consulta (try-finally)
+- ❌ Nunca acessar campos de nome diretamente na UI
 
-### 8.2. Problema de Performance: N+1 Queries
+### 8.2. Otimização: Consulta Eficiente com Boxes Abertas
 
-**Severidade:** 🟠 ALTA
+**Severidade:** ℹ️ INFORMACIONAL
 
 **Localização:** `toDataMap()`, list rendering
 
 **Descrição:**
-Ao carregar uma lista de diagnósticos, cada item executa múltiplas consultas assíncronas:
+Para renderizar listas de diagnósticos, o padrão recomendado é abrir as boxes uma vez e fechar ao final:
 
 ```dart
-// Para cada diagnóstico na lista...
-for (final diagnostico in diagnosticos) {
-  // Consulta 1: Buscar defensivo
-  final defensivo = await fitossanitarioRepo.getById(diagnostico.fkIdDefensivo);
+// ✅ Padrão otimizado: abrir boxes uma vez
+Future<List<Map<String, String>>> loadDiagnosticosParaLista(
+  List<DiagnosticoHive> diagnosticos,
+) async {
+  Box<FitossanitarioHive>? defBox;
+  Box<PragasHive>? pragaBox;
+  Box<CulturaHive>? cultBox;
+  
+  try {
+    // 1. Abrir todas as boxes necessárias UMA VEZ
+    defBox = await Hive.openBox<FitossanitarioHive>('fitossanitarios');
+    pragaBox = await Hive.openBox<PragasHive>('pragas');
+    cultBox = await Hive.openBox<CulturaHive>('culturas');
 
-  // Consulta 2: Buscar praga
-  final praga = await pragaRepo.getById(diagnostico.fkIdPraga);
+    // 2. Processar todos os diagnósticos
+    final results = <Map<String, String>>[];
+    
+    for (final diag in diagnosticos) {
+      // Consultar defensivo
+      final defensivo = defBox.values.firstWhere(
+        (f) => f.idReg == diag.fkIdDefensivo,
+        orElse: () => null,
+      );
+      
+      // Consultar praga
+      final praga = pragaBox.values.firstWhere(
+        (p) => p.idReg == diag.fkIdPraga,
+        orElse: () => null,
+      );
+      
+      // Consultar cultura
+      final cultura = cultBox.values.firstWhere(
+        (c) => c.idReg == diag.fkIdCultura,
+        orElse: () => null,
+      );
 
-  // Consulta 3: Buscar cultura
-  final cultura = await culturaRepo.getById(diagnostico.fkIdCultura);
+      results.add({
+        'nomeDefensivo': defensivo?.nomeComum ?? 'N/A',
+        'nomePraga': praga?.nomeComum ?? 'N/A',
+        'nomeCultura': cultura?.cultura ?? 'N/A',
+        'dosagem': diag.displayDosagem,
+        // ... outros campos
+      });
+    }
+    
+    return results;
+  } catch (e) {
+    debugPrint('❌ Erro: $e');
+    return [];
+  } finally {
+    // 3. Fechar TODAS as boxes
+    await defBox?.close();
+    await pragaBox?.close();
+    await cultBox?.close();
+  }
 }
-
-// Para 100 diagnósticos = 300+ consultas! 😱
 ```
 
-**Impacto:**
-- 🐢 Lentidão na renderização de listas
-- 🐢 Scroll lag quando lazy loading
-- 🐢 Timeout em listas grandes (>200 itens)
+**Vantagens:**
+- ✅ Boxes abertas uma única vez para múltiplas consultas
+- ✅ Consultas in-memory são extremamente rápidas
+- ✅ Gerenciamento explícito de recursos
+- ✅ Sem overhead de múltiplas aberturas/fechamentos
 
-**Mitigação Atual:**
-```dart
-// DiagnosticoEntityResolver usa cache de 30 minutos
-bool get _isCacheValid {
-  return _lastCacheUpdate != null &&
-         DateTime.now().difference(_lastCacheUpdate!) < _cacheTTL;
-}
-```
-
-**Recomendação Final:**
-- ✅ Implementar batch loading no resolver
-- ✅ Pre-fetch comum entities no startup
-- ✅ Usar `Future.wait()` para paralelizar consultas
-- ✅ Lazy load apenas campos essenciais na lista
+**Recomendações:**
+- ✅ Abrir boxes uma vez para processar lotes
+- ✅ Usar try-finally para garantir fechamento
+- ✅ Para consultas únicas, abrir e fechar imediatamente
+- ⚠️ Evitar manter boxes abertas por muito tempo
 
 **Código Otimizado Sugerido:**
 ```dart
-/// Batch resolution otimizado
-Future<Map<String, DiagnosticoDisplayData>> batchResolve(
+/// Helper para processar em lote
+Future<Map<String, DiagnosticoDisplayData>> batchLoadDiagnosticos(
   List<DiagnosticoHive> diagnosticos,
 ) async {
-  // 1. Coleta todos os IDs únicos
   final defensivoIds = diagnosticos.map((d) => d.fkIdDefensivo).toSet();
   final pragaIds = diagnosticos.map((d) => d.fkIdPraga).toSet();
   final culturaIds = diagnosticos.map((d) => d.fkIdCultura).toSet();
@@ -1828,36 +1914,48 @@ Future<void> validateDiagnosticosIntegrity() async {
 }
 ```
 
-### 8.5. Problema: Cache Pode Retornar Dados Obsoletos
+### 8.5. Solução: Consulta Direta sem Cache
 
-**Severidade:** 🟡 MÉDIA
+**Status:** ✅ RESOLVIDO
 
-**Localização:** `DiagnosticoEntityResolver`
+**Abordagem:** Consultas diretas às Hiveboxes
 
 **Descrição:**
-Cache de 30 minutos pode manter dados desatualizados por muito tempo:
+Sistema foi projetado para **NÃO** utilizar cache. Todas as consultas seguem o padrão:
+1. Abrir Hivebox
+2. Consultar dados
+3. Fechar Hivebox
 
 ```dart
-static const Duration _cacheTTL = Duration(minutes: 30);  // ⚠️ Muito longo?
+// ✅ Padrão correto sem cache
+Future<String> getNomeDefensivo(String id) async {
+  Box<FitossanitarioHive>? box;
+  
+  try {
+    box = await Hive.openBox<FitossanitarioHive>('fitossanitarios');
+    
+    final defensivo = box.values.firstWhere(
+      (f) => f.idReg == id,
+      orElse: () => null,
+    );
+    
+    return defensivo?.nomeComum ?? 'Não identificado';
+  } finally {
+    await box?.close();
+  }
+}
 ```
 
-**Cenário Problemático:**
-```
-09:00 - Usuário A acessa: Cache carrega "Glifosato 480"
-09:15 - Admin atualiza produto para "Glifosato 480 g/L SL"
-09:20 - Usuário A retorna: Ainda vê "Glifosato 480" (cache válido)
-09:30 - Cache expira, próxima busca verá novo nome
-```
+**Vantagens:**
+- ✅ Dados sempre atualizados
+- ✅ Sem inconsistências entre usuários
+- ✅ Gerenciamento explícito de recursos
+- ✅ Sem complexidade de invalidação de cache
 
-**Impacto:**
-- ⚠️ Dados podem estar 30 minutos desatualizados
-- ⚠️ Inconsistência entre usuários (uns veem versão antiga, outros nova)
-
-**Recomendação Final:**
-- ✅ Reduzir TTL para 5-10 minutos
-- ✅ Implementar invalidação manual após data loads
-- ✅ Adicionar versioning de cache
-- ✅ Force refresh ao pull-to-refresh
+**Pontos de Atenção:**
+- ⚠️ Boxes devem ser sempre fechadas (usar try-finally)
+- ⚠️ Para múltiplas consultas, abrir boxes uma única vez e fechar ao final
+- ⚠️ Monitorar vazamento de boxes abertas
 
 ### 8.6. Problema: Debug Excessivo em Produção
 
@@ -2025,39 +2123,97 @@ List<DiagnosticoHive> findByDefensivo(String id) {
 
 ### 10.1. Ações Imediatas (Sprint 1-2 semanas)
 
-#### **1. Implementar Batch Loading**
+#### **1. Implementar Gerenciamento Adequado de Boxes**
 **Impacto:** 🔴 CRÍTICO
 **Esforço:** 16h
 
 ```dart
-// Objetivo: Reduzir de 300 queries para 3 queries
-Future<List<DiagnosticoDisplayData>> loadDiagnosticosOptimized(
+// Objetivo: Garantir abertura e fechamento adequado de boxes
+// Pattern: Open -> Query -> Close
+
+/// Exemplo de consulta simples
+Future<FitossanitarioHive?> getDefensivoById(String id) async {
+  Box<FitossanitarioHive>? box;
+  
+  try {
+    // 1. Abrir box
+    box = await Hive.openBox<FitossanitarioHive>('fitossanitarios');
+    
+    // 2. Consultar
+    final result = box.values.firstWhere(
+      (f) => f.idReg == id,
+      orElse: () => null,
+    );
+    
+    return result;
+  } catch (e) {
+    debugPrint('❌ Erro: $e');
+    return null;
+  } finally {
+    // 3. Fechar (SEMPRE!)
+    await box?.close();
+  }
+}
+
+/// Exemplo de consulta com múltiplos relacionamentos
+Future<List<DiagnosticoDisplayData>> loadDiagnosticosWithRelations(
   List<String> diagnosticoIds,
 ) async {
-  // 1. Carregar diagnósticos em batch
-  final diagnosticos = await _diagnosticoRepo.getByIds(diagnosticoIds);
+  Box<DiagnosticoHive>? diagBox;
+  Box<FitossanitarioHive>? defBox;
+  Box<PragasHive>? pragaBox;
+  Box<CulturaHive>? cultBox;
+  
+  try {
+    // 1. Abrir todas as boxes necessárias
+    diagBox = await Hive.openBox<DiagnosticoHive>('diagnosticos');
+    defBox = await Hive.openBox<FitossanitarioHive>('fitossanitarios');
+    pragaBox = await Hive.openBox<PragasHive>('pragas');
+    cultBox = await Hive.openBox<CulturaHive>('culturas');
 
-  // 2. Extrair IDs únicos
-  final defensivoIds = diagnosticos.map((d) => d.fkIdDefensivo).toSet();
-  final pragaIds = diagnosticos.map((d) => d.fkIdPraga).toSet();
-  final culturaIds = diagnosticos.map((d) => d.fkIdCultura).toSet();
+    // 2. Consultar dados
+    final diagnosticos = diagBox.values
+        .where((d) => diagnosticoIds.contains(d.idReg))
+        .toList();
 
-  // 3. Carregar todas entidades relacionadas (3 queries)
-  final defensivos = await Future.wait([
-    _defensivoRepo.getByIds(defensivoIds),
-    _pragaRepo.getByIds(pragaIds),
-    _culturaRepo.getByIds(culturaIds),
-  ]);
+    // 3. Montar objetos display
+    final results = <DiagnosticoDisplayData>[];
+    
+    for (final diag in diagnosticos) {
+      final defensivo = defBox.values.firstWhere(
+        (f) => f.idReg == diag.fkIdDefensivo,
+        orElse: () => null,
+      );
+      
+      final praga = pragaBox.values.firstWhere(
+        (p) => p.idReg == diag.fkIdPraga,
+        orElse: () => null,
+      );
+      
+      final cultura = cultBox.values.firstWhere(
+        (c) => c.idReg == diag.fkIdCultura,
+        orElse: () => null,
+      );
 
-  // 4. Montar objetos display
-  return diagnosticos.map((diag) {
-    return DiagnosticoDisplayData(
-      diagnostico: diag,
-      defensivo: defensivosMap[diag.fkIdDefensivo],
-      praga: pragasMap[diag.fkIdPraga],
-      cultura: culturasMap[diag.fkIdCultura],
-    );
-  }).toList();
+      results.add(DiagnosticoDisplayData(
+        diagnostico: diag,
+        defensivo: defensivo,
+        praga: praga,
+        cultura: cultura,
+      ));
+    }
+    
+    return results;
+  } catch (e) {
+    debugPrint('❌ Erro: $e');
+    return [];
+  } finally {
+    // 4. Fechar TODAS as boxes
+    await diagBox?.close();
+    await defBox?.close();
+    await pragaBox?.close();
+    await cultBox?.close();
+  }
 }
 ```
 
@@ -2124,13 +2280,62 @@ if (state.hasWarnings) {
 
 ### 10.2. Melhorias de Médio Prazo (Sprint 3-4)
 
-#### **4. Otimizar Cache**
+#### **4. Implementar Helper de Gerenciamento de Boxes**
 **Impacto:** 🟠 MÉDIA
-**Esforço:** 4h
+**Esforço:** 6h
 
-- Reduzir TTL para 10 minutos
-- Implementar invalidação manual após data loads
-- Adicionar cache warming no startup
+```dart
+/// Classe auxiliar para gerenciar abertura e fechamento de boxes
+class HiveBoxManager {
+  /// Executa operação com box garantindo fechamento
+  static Future<T> withBox<T, B>(
+    String boxName,
+    Future<T> Function(Box<B> box) operation,
+  ) async {
+    Box<B>? box;
+    
+    try {
+      box = await Hive.openBox<B>(boxName);
+      return await operation(box);
+    } finally {
+      await box?.close();
+    }
+  }
+  
+  /// Executa operação com múltiplas boxes
+  static Future<T> withMultipleBoxes<T>(
+    Map<String, Type> boxes,
+    Future<T> Function(Map<String, Box>) operation,
+  ) async {
+    final openedBoxes = <String, Box>{};
+    
+    try {
+      // Abrir todas as boxes
+      for (final entry in boxes.entries) {
+        openedBoxes[entry.key] = await Hive.openBox(entry.key);
+      }
+      
+      return await operation(openedBoxes);
+    } finally {
+      // Fechar todas as boxes
+      for (final box in openedBoxes.values) {
+        await box.close();
+      }
+    }
+  }
+}
+
+// Uso:
+final defensivo = await HiveBoxManager.withBox<FitossanitarioHive?, FitossanitarioHive>(
+  'fitossanitarios',
+  (box) async {
+    return box.values.firstWhere(
+      (f) => f.idReg == id,
+      orElse: () => null,
+    );
+  },
+);
+```
 
 #### **5. Adicionar Testes**
 **Impacto:** 🟠 MÉDIA
@@ -2198,9 +2403,22 @@ Para dados dinâmicos:
 
 ### Para Desenvolvedores
 
+#### **Regras de Acesso a Dados**
 - [ ] **Sempre** usar `getDisplayNome*()` ao invés de campos cached
 - [ ] **Nunca** confiar em `nomeDefensivo`, `nomeCultura`, `nomePraga` do DiagnosticoHive
-- [ ] Usar batch loading quando carregar listas
+- [ ] **Sempre** abrir boxes no início da operação e fechar no bloco finally
+- [ ] **Nunca** deixar boxes abertas sem fechamento explícito
+- [ ] Para listas, abrir boxes uma vez e fechar após processar todos os itens
+- [ ] Para consultas únicas, usar padrão: abrir -> consultar -> fechar
+
+#### **Gerenciamento de Boxes**
+- [ ] Usar try-finally para garantir fechamento de boxes
+- [ ] Considerar usar HiveBoxManager helper para operações complexas
+- [ ] Monitorar boxes abertas em modo debug
+- [ ] Evitar abrir a mesma box múltiplas vezes em sequência
+- [ ] Fechar boxes o mais rápido possível após consulta
+
+#### **Qualidade e Performance**
 - [ ] Validar FKs antes de salvar novos diagnósticos
 - [ ] Logar erros de resolução para analytics
 - [ ] Testar com dados grandes (>1000 diagnósticos)
@@ -2231,18 +2449,20 @@ Para dados dinâmicos:
 | Data | Versão | Alterações |
 |------|--------|------------|
 | 2025-01-07 | 1.0.0 | Documento inicial criado com análise completa |
+| 2025-10-07 | 2.0.0 | **Revisão Arquitetural**: Abolição do sistema de cache. Todas consultas agora seguem padrão direto: abrir box → consultar → fechar. Atualização de exemplos, recomendações e checklist. |
 
 ### Próximas Tarefas (Backlog)
 
 #### **Críticas (P0)**
-- [ ] **TASK-RAG-001**: Implementar batch loading otimizado (16h)
-- [ ] **TASK-RAG-002**: Adicionar validação de integridade referencial (8h)
-- [ ] **TASK-RAG-003**: Melhorar tratamento de erros visíveis (6h)
+- [ ] **TASK-RAG-001**: Implementar padrão de abertura/fechamento de boxes em todos os repositórios (16h)
+- [ ] **TASK-RAG-002**: Criar HiveBoxManager helper para gerenciamento centralizado (6h)
+- [ ] **TASK-RAG-003**: Adicionar validação de integridade referencial (8h)
+- [ ] **TASK-RAG-004**: Melhorar tratamento de erros visíveis (6h)
 
 #### **Altas (P1)**
-- [ ] **TASK-RAG-004**: Otimizar cache do EntityResolver (4h)
-- [ ] **TASK-RAG-005**: Criar índices manuais para consultas (12h)
-- [ ] **TASK-RAG-006**: Remover/condicionar debug logs excessivos (2h)
+- [ ] **TASK-RAG-005**: Implementar monitoramento de boxes abertas (leak detection) (8h)
+- [ ] **TASK-RAG-006**: Adicionar logs de abertura/fechamento de boxes para debugging (4h)
+- [ ] **TASK-RAG-007**: Remover/condicionar debug logs excessivos (2h)
 
 #### **Médias (P2)**
 - [ ] **TASK-RAG-007**: Adicionar testes unitários (24h)
@@ -2279,9 +2499,9 @@ Para dados dinâmicos:
 ---
 
 **Documento mantido por:** Equipe de Desenvolvimento ReceitaAgro
-**Última atualização:** 2025-01-07
-**Versão:** 1.0.0
-**Status:** 📄 Completo e atualizado
+**Última atualização:** 2025-10-07
+**Versão:** 2.0.0
+**Status:** 📄 Completo e atualizado - Arquitetura sem cache
 
 ---
 
@@ -2306,8 +2526,9 @@ Para dados dinâmicos:
 | **Provider/Notifier** | Gerenciador de estado no Riverpod |
 | **Cached Field** | Campo armazenado que pode estar desatualizado |
 | **N+1 Problem** | Problema de performance onde N consultas adicionais são feitas |
-| **Batch Loading** | Carregamento em lote para otimizar múltiplas consultas |
-| **TTL** | Time To Live - tempo de vida do cache |
+| **Box Leakage** | Vazamento de boxes Hive abertas e não fechadas |
+| **Try-Finally** | Padrão de código que garante execução de cleanup mesmo com erros |
+| **Open-Query-Close** | Padrão de acesso: abrir box → consultar → fechar |
 
 ---
 

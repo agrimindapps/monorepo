@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
+import '../../../core/services/hive_box_manager.dart';
+
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../../../features/favoritos/data/favorito_defensivo_model.dart';
 import '../models/app_settings_model.dart';
@@ -32,10 +34,14 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      final box = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
-      final settings = box.values
-          .where((settings) => settings.userId == userId)
-          .firstOrNull;
+      final settings =
+          await HiveBoxManager.withBox<AppSettingsModel?, AppSettingsModel>(
+            _appSettingsBoxName,
+            (box) async =>
+                box.values
+                    .where((settings) => settings.userId == userId)
+                    .firstOrNull,
+          );
 
       return Right(settings);
     } catch (e) {
@@ -44,31 +50,33 @@ class UserDataRepository {
   }
 
   /// Salva configurações do app para o usuário atual
-  Future<Either<Exception, void>> saveAppSettings(AppSettingsModel settings) async {
+  Future<Either<Exception, void>> saveAppSettings(
+    AppSettingsModel settings,
+  ) async {
     try {
       final userId = currentUserId;
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      final box = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
-      final existingKey = box.keys.firstWhere(
-        (key) => box.get(key)?.userId == userId,
-        orElse: () => null,
-      );
-
-      final updatedSettings = settings.copyWith(
-        userId: userId,
-        updatedAt: DateTime.now(),
-        synchronized: false, // Marca como não sincronizado
-      );
-
-      if (existingKey != null) {
-        await box.put(existingKey, updatedSettings);
-      } else {
-        await box.add(updatedSettings);
+      var box = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
+      try {
+        final existingKey = box.keys.firstWhere(
+          (key) => box.get(key)?.userId == userId,
+          orElse: () => null,
+        );
+        final updatedSettings = settings.copyWith(
+          userId: userId,
+          updatedAt: DateTime.now(),
+          synchronized: false, // Marca como não sincronizado
+        );
+        if (existingKey != null) {
+          await box.put(existingKey, updatedSettings);
+        } else {
+          await box.add(updatedSettings);
+        }
+      } finally {
+        await box.close();
       }
-
       return const Right(null);
     } catch (e) {
       return Left(Exception('Error saving app settings: $e'));
@@ -106,11 +114,16 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-      final box = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
-      final subscriptionMap = box.values
-          .where((sub) => sub['userId'] == userId)
-          .firstOrNull;
-
+      Map<dynamic, dynamic>? subscriptionMap;
+      var box = await Hive.openBox<Map<dynamic, dynamic>>(
+        _subscriptionDataBoxName,
+      );
+      try {
+        subscriptionMap =
+            box.values.where((sub) => sub['userId'] == userId).firstOrNull;
+      } finally {
+        await box.close();
+      }
       if (subscriptionMap == null) {
         return const Right(null);
       }
@@ -128,35 +141,36 @@ class UserDataRepository {
   }
 
   /// Salva dados de subscription para o usuário atual
-  Future<Either<Exception, void>> saveSubscriptionData(SubscriptionEntity subscription) async {
+  Future<Either<Exception, void>> saveSubscriptionData(
+    SubscriptionEntity subscription,
+  ) async {
     try {
       final userId = currentUserId;
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
-      final box = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
-      final existingKey = box.keys.firstWhere(
-        (key) {
+      var box = await Hive.openBox<Map<dynamic, dynamic>>(
+        _subscriptionDataBoxName,
+      );
+      try {
+        final existingKey = box.keys.firstWhere((key) {
           final sub = box.get(key);
           return sub != null && sub['userId'] == userId;
-        },
-        orElse: () => null,
-      );
-
-      final updatedSubscription = subscription.copyWith(
-        userId: userId,
-        updatedAt: DateTime.now(),
-        isDirty: true, // Marca como não sincronizado
-      );
-      final subscriptionMap = updatedSubscription.toFirebaseMap();
-
-      if (existingKey != null) {
-        await box.put(existingKey, subscriptionMap);
-      } else {
-        await box.add(subscriptionMap);
+        }, orElse: () => null);
+        final updatedSubscription = subscription.copyWith(
+          userId: userId,
+          updatedAt: DateTime.now(),
+          isDirty: true, // Marca como não sincronizado
+        );
+        final subscriptionMap = updatedSubscription.toFirebaseMap();
+        if (existingKey != null) {
+          await box.put(existingKey, subscriptionMap);
+        } else {
+          await box.add(subscriptionMap);
+        }
+      } finally {
+        await box.close();
       }
-
       return const Right(null);
     } catch (e) {
       return Left(Exception('Error saving subscription data: $e'));
@@ -170,7 +184,7 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-      
+
       return const Right([]);
     } catch (e) {
       return Left(Exception('Error getting favoritos: $e'));
@@ -178,7 +192,9 @@ class UserDataRepository {
   }
 
   /// Salva favorito para o usuário atual
-  Future<Either<Exception, void>> saveFavorito(FavoritoDefensivoModel favorito) async {
+  Future<Either<Exception, void>> saveFavorito(
+    FavoritoDefensivoModel favorito,
+  ) async {
     try {
       final userId = currentUserId;
       if (userId == null) {
@@ -217,7 +233,7 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-      
+
       return const Right([]);
     } catch (e) {
       return Left(Exception('Error getting comentarios: $e'));
@@ -225,7 +241,9 @@ class UserDataRepository {
   }
 
   /// Salva comentário para o usuário atual
-  Future<Either<Exception, void>> saveComentario(ComentarioModel comentario) async {
+  Future<Either<Exception, void>> saveComentario(
+    ComentarioModel comentario,
+  ) async {
     try {
       final userId = currentUserId;
       if (userId == null) {
@@ -259,7 +277,8 @@ class UserDataRepository {
   }
 
   /// Obtém todos os itens não sincronizados do usuário
-  Future<Either<Exception, Map<String, List<dynamic>>>> getUnsynchronizedData() async {
+  Future<Either<Exception, Map<String, List<dynamic>>>>
+  getUnsynchronizedData() async {
     try {
       final userId = currentUserId;
       if (userId == null) {
@@ -268,43 +287,33 @@ class UserDataRepository {
 
       final unsynchronizedData = <String, List<dynamic>>{};
       final settingsResult = await getAppSettings();
-      settingsResult.fold(
-        (error) => null,
-        (settings) {
-          if (settings != null && !settings.synchronized) {
-            unsynchronizedData['app_settings'] = [settings];
-          }
-        },
-      );
+      settingsResult.fold((error) => null, (settings) {
+        if (settings != null && !settings.synchronized) {
+          unsynchronizedData['app_settings'] = [settings];
+        }
+      });
       final subscriptionResult = await getSubscriptionData();
-      subscriptionResult.fold(
-        (error) => null,
-        (subscription) {
-          if (subscription != null && subscription.isDirty) {
-            unsynchronizedData['subscription_data'] = [subscription];
-          }
-        },
-      );
+      subscriptionResult.fold((error) => null, (subscription) {
+        if (subscription != null && subscription.isDirty) {
+          unsynchronizedData['subscription_data'] = [subscription];
+        }
+      });
       final favoritosResult = await getFavoritos();
-      favoritosResult.fold(
-        (error) => null,
-        (favoritos) {
-          final unsyncedFavoritos = favoritos.where((f) => !f.synchronized).toList();
-          if (unsyncedFavoritos.isNotEmpty) {
-            unsynchronizedData['favoritos'] = unsyncedFavoritos;
-          }
-        },
-      );
+      favoritosResult.fold((error) => null, (favoritos) {
+        final unsyncedFavoritos =
+            favoritos.where((f) => !f.synchronized).toList();
+        if (unsyncedFavoritos.isNotEmpty) {
+          unsynchronizedData['favoritos'] = unsyncedFavoritos;
+        }
+      });
       final comentariosResult = await getComentarios();
-      comentariosResult.fold(
-        (error) => null,
-        (comentarios) {
-          final unsyncedComentarios = comentarios.where((c) => !c.synchronized).toList();
-          if (unsyncedComentarios.isNotEmpty) {
-            unsynchronizedData['comentarios'] = unsyncedComentarios;
-          }
-        },
-      );
+      comentariosResult.fold((error) => null, (comentarios) {
+        final unsyncedComentarios =
+            comentarios.where((c) => !c.synchronized).toList();
+        if (unsyncedComentarios.isNotEmpty) {
+          unsynchronizedData['comentarios'] = unsyncedComentarios;
+        }
+      });
 
       return Right(unsynchronizedData);
     } catch (e) {
@@ -326,29 +335,25 @@ class UserDataRepository {
       switch (type) {
         case 'app_settings':
           final settingsResult = await getAppSettings();
-          return settingsResult.fold(
-            (error) => Left(error),
-            (settings) async {
-              if (settings != null) {
-                final syncedSettings = settings.markAsSynchronized();
-                return await saveAppSettings(syncedSettings);
-              }
-              return Left(Exception('Settings not found'));
-            },
-          );
+          return settingsResult.fold((error) => Left(error), (settings) async {
+            if (settings != null) {
+              final syncedSettings = settings.markAsSynchronized();
+              return await saveAppSettings(syncedSettings);
+            }
+            return Left(Exception('Settings not found'));
+          });
 
         case 'subscription_data':
           final subscriptionResult = await getSubscriptionData();
-          return subscriptionResult.fold(
-            (error) => Left(error),
-            (subscription) async {
-              if (subscription != null) {
-                final syncedSubscription = subscription.markAsSynced();
-                return await saveSubscriptionData(syncedSubscription);
-              }
-              return Left(Exception('Subscription not found'));
-            },
-          );
+          return subscriptionResult.fold((error) => Left(error), (
+            subscription,
+          ) async {
+            if (subscription != null) {
+              final syncedSubscription = subscription.markAsSynced();
+              return await saveSubscriptionData(syncedSubscription);
+            }
+            return Left(Exception('Subscription not found'));
+          });
 
         case 'favoritos':
           return const Right(null);
@@ -371,25 +376,33 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-      final appSettingsBox = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
-      final settingsKeysToRemove = appSettingsBox.keys
-          .where((key) => appSettingsBox.get(key)?.userId == userId)
-          .toList();
-      
-      for (final key in settingsKeysToRemove) {
-        await appSettingsBox.delete(key);
-      }
-      final subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
-      final subscriptionKeysToRemove = subscriptionBox.keys
-          .where((key) {
-            final sub = subscriptionBox.get(key);
-            return sub != null && sub['userId'] == userId;
-          })
-          .toList();
-      
-      for (final key in subscriptionKeysToRemove) {
-        await subscriptionBox.delete(key);
-      }
+
+      await HiveBoxManager.withMultipleBoxes(
+        {_appSettingsBoxName: AppSettingsModel, _subscriptionDataBoxName: Map},
+        (boxes) async {
+          final appSettingsBox =
+              boxes[_appSettingsBoxName] as Box<AppSettingsModel>;
+          final subscriptionBox =
+              boxes[_subscriptionDataBoxName] as Box<Map<dynamic, dynamic>>;
+
+          final settingsKeysToRemove =
+              appSettingsBox.keys
+                  .where((key) => appSettingsBox.get(key)?.userId == userId)
+                  .toList();
+          for (final key in settingsKeysToRemove) {
+            await appSettingsBox.delete(key);
+          }
+
+          final subscriptionKeysToRemove =
+              subscriptionBox.keys.where((key) {
+                final sub = subscriptionBox.get(key);
+                return sub != null && sub['userId'] == userId;
+              }).toList();
+          for (final key in subscriptionKeysToRemove) {
+            await subscriptionBox.delete(key);
+          }
+        },
+      );
 
       return const Right(null);
     } catch (e) {
@@ -404,19 +417,31 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-
       final stats = <String, int>{};
-      final appSettingsBox = await Hive.openBox<AppSettingsModel>(_appSettingsBoxName);
-      stats['app_settings'] = appSettingsBox.values
-          .where((settings) => settings.userId == userId)
-          .length;
-      final subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(_subscriptionDataBoxName);
-      stats['subscription_data'] = subscriptionBox.values
-          .where((sub) => sub['userId'] == userId)
-          .length;
+      var appSettingsBox = await Hive.openBox<AppSettingsModel>(
+        _appSettingsBoxName,
+      );
+      try {
+        stats['app_settings'] =
+            appSettingsBox.values
+                .where((settings) => settings.userId == userId)
+                .length;
+      } finally {
+        await appSettingsBox.close();
+      }
+      var subscriptionBox = await Hive.openBox<Map<dynamic, dynamic>>(
+        _subscriptionDataBoxName,
+      );
+      try {
+        stats['subscription_data'] =
+            subscriptionBox.values
+                .where((sub) => sub['userId'] == userId)
+                .length;
+      } finally {
+        await subscriptionBox.close();
+      }
       stats['favoritos'] = 0; // Placeholder
       stats['comentarios'] = 0; // Placeholder
-
       return Right(stats);
     } catch (e) {
       return Left(Exception('Error getting user data stats: $e'));

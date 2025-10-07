@@ -18,11 +18,12 @@ import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
-import 'core/utils/receita_agro_data_inspector_initializer.dart';
+import 'core/utils/diagnostico_logger.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
+
 late ICrashlyticsRepository _crashlyticsRepository;
 late IPerformanceRepository _performanceRepository;
 
@@ -91,17 +92,20 @@ void main() async {
     }
   }
   if (kDebugMode) {
-    ReceitaAgroDataInspectorInitializer.initialize();
-    debugPrint('🔍 Data Inspector initialized for ReceitaAgro');
+    // TODO: Re-enable data inspector initialization
+    // ReceitaAgroDataInspectorInitializer.initialize();
+    DiagnosticoLogger.debug(
+      'Data Inspector initialization skipped (temporarily disabled)',
+    );
   }
   try {
-    print('🔄 MAIN: Forcing sync initialization...');
+    DiagnosticoLogger.debug('Forcing sync initialization...');
     await ReceitaAgroSyncConfig.configure();
-    print('✅ MAIN: Sync initialization completed successfully');
+    DiagnosticoLogger.debug('Sync initialization completed successfully');
     SyncDIModule.init(di.sl);
     await SyncDIModule.initializeSyncService(di.sl);
   } catch (e) {
-    print('❌ MAIN: Sync initialization failed: $e');
+    DiagnosticoLogger.debug('Sync initialization failed', e);
   }
   if (!kIsWeb) {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -122,16 +126,13 @@ void main() async {
     final analyticsService = di.sl<ReceitaAgroAnalyticsService>();
     await analyticsService.initialize();
   } catch (e) {
-    if (kDebugMode) {
-      print('❌ [MAIN] ReceitaAgroAnalyticsService not registered: $e');
-    }
+    DiagnosticoLogger.debug('ReceitaAgroAnalyticsService not registered', e);
   }
   final premiumService = di.sl<ReceitaAgroPremiumService>();
   await premiumService.initialize();
   final notificationService = di.sl<IReceitaAgroNotificationService>();
   await notificationService.initialize();
-  try {
-  } catch (e) {
+  try {} catch (e) {
     if (EnvironmentConfig.enableAnalytics) {
       await _crashlyticsRepository.recordError(
         exception: e,
@@ -155,33 +156,44 @@ void main() async {
       }
     },
     (_) {
-      print('✅ [MAIN] AppDataManager inicializado com sucesso - Hive pronto');
+      DiagnosticoLogger.serviceInit('AppDataManager', 'Hive pronto');
     },
   );
   try {
-    print('🔧 [FIXED] Iniciando ReceitaAgroDataSetup após AppDataManager...');
+    DiagnosticoLogger.debug(
+      'Iniciando ReceitaAgroDataSetup após AppDataManager...',
+    );
     await ReceitaAgroDataSetup.initialize();
-    print('✅ [MAIN] ReceitaAgroDataSetup concluído com sucesso');
-    print('🔍 [DEBUG] Verificando status dos diagnósticos após setup...');
+    DiagnosticoLogger.debug('ReceitaAgroDataSetup concluído com sucesso');
+    DiagnosticoLogger.debug(
+      'Verificando status dos diagnósticos após setup...',
+    );
     final diagnosticosStats = await DiagnosticosDataLoader.getStats();
-    print('📊 [DEBUG] Diagnósticos Stats: $diagnosticosStats');
+    DiagnosticoLogger.dataOperation(
+      'Diagnósticos Stats',
+      diagnosticosStats.toString(),
+    );
     if (diagnosticosStats['total_diagnosticos'] == 0) {
-      print(
-        '⚠️ [DEBUG] Nenhum diagnóstico encontrado, forçando carregamento...',
+      DiagnosticoLogger.debug(
+        'Nenhum diagnóstico encontrado, forçando carregamento...',
       );
       try {
         await DiagnosticosDataLoader.forceReload();
         final newStats = await DiagnosticosDataLoader.getStats();
-        print('🔄 [DEBUG] Diagnósticos após reload forçado: $newStats');
+        DiagnosticoLogger.dataOperation(
+          'Diagnósticos após reload forçado',
+          newStats.toString(),
+        );
       } catch (reloadError) {
-        print('❌ [DEBUG] Erro no reload forçado: $reloadError');
+        DiagnosticoLogger.debug('Erro no reload forçado', reloadError);
       }
     }
   } catch (e) {
-    print(
-      '⚠️ [MAIN] ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados: $e',
+    DiagnosticoLogger.warning(
+      'ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados',
+      e,
     );
-    print('🔧 [DEBUG] Stack trace do erro: ${StackTrace.current}');
+    DiagnosticoLogger.debug('Stack trace do erro: ${StackTrace.current}');
     if (EnvironmentConfig.enableAnalytics) {
       await _crashlyticsRepository.recordError(
         exception: e,
@@ -191,17 +203,13 @@ void main() async {
       );
     }
   }
-  print('🌱 [MAIN] Carregando dados de culturas...');
+  DiagnosticoLogger.debug('Carregando dados de culturas...');
   await CulturasDataLoader.loadCulturasData();
-  print('🌱 [MAIN] Dados de culturas carregados com sucesso.');
+  DiagnosticoLogger.debug('Dados de culturas carregados com sucesso.');
   if (!kIsWeb) {
     await _performanceRepository.markFirstFrame();
   }
-  runApp(
-    const ProviderScope(
-      child: ReceitaAgroApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: ReceitaAgroApp()));
 }
 
 /// Initialize Firebase services (Analytics, Crashlytics, Performance)
@@ -252,12 +260,15 @@ Future<void> _initializeFirebaseServices() async {
       'app_initialized',
       parameters: {
         'platform': kIsWeb ? 'web' : 'mobile',
-        'environment': EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+        'environment':
+            EnvironmentConfig.enableAnalytics ? 'production' : 'development',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       },
     );
 
-    await _crashlyticsRepository.log('ReceitaAgro app initialized successfully');
+    await _crashlyticsRepository.log(
+      'ReceitaAgro app initialized successfully',
+    );
 
     debugPrint('✅ Firebase services initialized successfully');
   } catch (e, stackTrace) {
@@ -268,8 +279,7 @@ Future<void> _initializeFirebaseServices() async {
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 }
 
@@ -281,14 +291,14 @@ class ReceitaAgroApp extends ConsumerWidget {
     final themeMode = ref.watch(themeNotifierProvider);
 
     return MaterialApp(
-        title: 'Pragas Soja',
-        theme: ReceitaAgroTheme.lightTheme,
-        darkTheme: ReceitaAgroTheme.darkTheme,
-        themeMode: themeMode,
-        home: const MainNavigationPage(),
-        onGenerateRoute: app_router.AppRouter.generateRoute,
-        navigatorKey: NavigationService.navigatorKey,
-        debugShowCheckedModeBanner: false,
+      title: 'Pragas Soja',
+      theme: ReceitaAgroTheme.lightTheme,
+      darkTheme: ReceitaAgroTheme.darkTheme,
+      themeMode: themeMode,
+      home: const MainNavigationPage(),
+      onGenerateRoute: app_router.AppRouter.generateRoute,
+      navigatorKey: NavigationService.navigatorKey,
+      debugShowCheckedModeBanner: false,
     );
   }
 }

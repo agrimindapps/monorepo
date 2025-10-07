@@ -11,6 +11,7 @@ import '../data/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_inf_hive_repository.dart';
 import 'data_initialization_service.dart';
 import 'hive_adapter_registry.dart';
+import 'hive_leak_monitor.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -85,6 +86,12 @@ class AppDataManager implements IAppDataManager {
       developer.log('Inicializando Hive...', name: 'AppDataManager');
       await Hive.initFlutter();
 
+      // Iniciar monitoramento de vazamentos de boxes em modo debug
+      assert(() {
+        HiveLeakMonitor.startMonitoring();
+        return true;
+      }());
+
       developer.log('Hive inicializado com sucesso', name: 'AppDataManager');
     } catch (e) {
       developer.log('Erro ao inicializar Hive: $e', name: 'AppDataManager');
@@ -142,8 +149,11 @@ class AppDataManager implements IAppDataManager {
         'Forçando recarregamento de dados...',
         name: 'AppDataManager',
       );
-      developer.log('Force reload requested but method not implemented', name: 'AppDataManager');
-      
+      developer.log(
+        'Force reload requested but method not implemented',
+        name: 'AppDataManager',
+      );
+
       return const Right(null);
     } catch (e) {
       developer.log(
@@ -171,10 +181,7 @@ class AppDataManager implements IAppDataManager {
         'timestamp': DateTime.now().toIso8601String(),
       };
     } catch (e) {
-      developer.log(
-        'Erro ao obter estatísticas: $e',
-        name: 'AppDataManager',
-      );
+      developer.log('Erro ao obter estatísticas: $e', name: 'AppDataManager');
       return {
         'error': e.toString(),
         'fallback_data': await _dataService.getLoadingStats(),
@@ -203,7 +210,9 @@ class AppDataManager implements IAppDataManager {
 
   /// Version control service removed - no longer available
   dynamic get versionControlService {
-    throw Exception('Version control service was removed - functionality not available');
+    throw Exception(
+      'Version control service was removed - functionality not available',
+    );
   }
 
   /// Limpa recursos do sistema

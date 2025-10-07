@@ -1,10 +1,10 @@
-
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
 /// PlantaConfig model with Firebase sync support
 /// TypeId: 4 - Sequential numbering
 @HiveType(typeId: 4)
+// ignore: must_be_immutable
 class PlantaConfigModel extends BaseSyncModel {
   @override
   @HiveField(0)
@@ -307,6 +307,7 @@ class PlantaConfigModel extends BaseSyncModel {
           intervaloReplantarDias ?? this.intervaloReplantarDias,
     );
   }
+
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();

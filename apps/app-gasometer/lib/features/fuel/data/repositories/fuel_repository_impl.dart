@@ -14,7 +14,6 @@ import '../datasources/fuel_remote_data_source.dart';
 
 @LazySingleton(as: FuelRepository)
 class FuelRepositoryImpl implements FuelRepository {
-
   FuelRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
@@ -35,21 +34,24 @@ class FuelRepositoryImpl implements FuelRepository {
 
   Future<String?> _getCurrentUserId() async {
     final userResult = await authRepository.getCurrentUser();
-    return userResult.fold(
-      (failure) => null,
-      (user) => user?.id,
-    );
+    return userResult.fold((failure) => null, (user) => user?.id);
   }
 
   /// Sync de novo fuel record para remoto em background sem bloquear UI
-  Future<void> _syncFuelRecordToRemoteInBackground(FuelRecordEntity fuelRecord) async {
+  Future<void> _syncFuelRecordToRemoteInBackground(
+    FuelRecordEntity fuelRecord,
+  ) async {
     try {
       final isConnected = await _isConnected();
       if (!isConnected) {
         await loggingService.logInfo(
           category: LogCategory.fuel,
-          message: 'No connection available for background sync, fuel record will sync later',
-          metadata: {'fuel_id': fuelRecord.id, 'vehicle_id': fuelRecord.vehicleId},
+          message:
+              'No connection available for background sync, fuel record will sync later',
+          metadata: {
+            'fuel_id': fuelRecord.id,
+            'vehicle_id': fuelRecord.vehicleId,
+          },
         );
         return;
       }
@@ -60,33 +62,41 @@ class FuelRepositoryImpl implements FuelRepository {
           category: LogCategory.fuel,
           operation: LogOperation.sync,
           message: 'No authenticated user for background sync',
-          metadata: {'fuel_id': fuelRecord.id, 'vehicle_id': fuelRecord.vehicleId},
+          metadata: {
+            'fuel_id': fuelRecord.id,
+            'vehicle_id': fuelRecord.vehicleId,
+          },
         );
         return;
       }
-      unawaited(remoteDataSource.addFuelRecord(userId, fuelRecord).then((_) async {
-        await loggingService.logInfo(
-          category: LogCategory.fuel,
-          message: 'Background sync to remote completed successfully',
-          metadata: {
-            'fuel_id': fuelRecord.id,
-            'vehicle_id': fuelRecord.vehicleId,
-            'user_id': userId,
-          },
-        );
-      }).catchError((Object error) async {
-        await loggingService.logOperationWarning(
-          category: LogCategory.fuel,
-          operation: LogOperation.sync,
-          message: 'Background sync to remote failed - will retry later',
-          metadata: {
-            'fuel_id': fuelRecord.id,
-            'vehicle_id': fuelRecord.vehicleId,
-            'user_id': userId,
-            'error': error.toString(),
-          },
-        );
-      }));
+      unawaited(
+        remoteDataSource
+            .addFuelRecord(userId, fuelRecord)
+            .then((_) async {
+              await loggingService.logInfo(
+                category: LogCategory.fuel,
+                message: 'Background sync to remote completed successfully',
+                metadata: {
+                  'fuel_id': fuelRecord.id,
+                  'vehicle_id': fuelRecord.vehicleId,
+                  'user_id': userId,
+                },
+              );
+            })
+            .catchError((Object error) async {
+              await loggingService.logOperationWarning(
+                category: LogCategory.fuel,
+                operation: LogOperation.sync,
+                message: 'Background sync to remote failed - will retry later',
+                metadata: {
+                  'fuel_id': fuelRecord.id,
+                  'vehicle_id': fuelRecord.vehicleId,
+                  'user_id': userId,
+                  'error': error.toString(),
+                },
+              );
+            }),
+      );
     } catch (e) {
       await loggingService.logOperationWarning(
         category: LogCategory.fuel,
@@ -108,7 +118,6 @@ class FuelRepositoryImpl implements FuelRepository {
       unawaited(_syncAllFuelRecordsInBackground());
 
       return Right(localRecords);
-      
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
@@ -124,26 +133,34 @@ class FuelRepositoryImpl implements FuelRepository {
 
       final userId = await _getCurrentUserId();
       if (userId == null) return;
-      unawaited(remoteDataSource.getAllFuelRecords(userId).then((remoteRecords) async {
-        for (final record in remoteRecords) {
-          await localDataSource.addFuelRecord(record);
-        }
-      }).catchError((Object error) {
-        debugPrint('Background fuel sync failed: $error');
-      }));
+      unawaited(
+        remoteDataSource
+            .getAllFuelRecords(userId)
+            .then((remoteRecords) async {
+              for (final record in remoteRecords) {
+                await localDataSource.addFuelRecord(record);
+              }
+            })
+            .catchError((Object error) {
+              debugPrint('Background fuel sync failed: $error');
+            }),
+      );
     } catch (e) {
       debugPrint('Background fuel sync error: $e');
     }
   }
 
   @override
-  Future<Either<Failure, List<FuelRecordEntity>>> getFuelRecordsByVehicle(String vehicleId) async {
+  Future<Either<Failure, List<FuelRecordEntity>>> getFuelRecordsByVehicle(
+    String vehicleId,
+  ) async {
     try {
-      final localRecords = await localDataSource.getFuelRecordsByVehicle(vehicleId);
+      final localRecords = await localDataSource.getFuelRecordsByVehicle(
+        vehicleId,
+      );
       unawaited(_syncFuelRecordsByVehicleInBackground(vehicleId));
 
       return Right(localRecords);
-      
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
@@ -160,31 +177,41 @@ class FuelRepositoryImpl implements FuelRepository {
       final userId = await _getCurrentUserId();
       if (userId == null) return;
 
-      unawaited(remoteDataSource.getFuelRecordsByVehicle(userId, vehicleId).then((remoteRecords) async {
-        for (final record in remoteRecords) {
-          await localDataSource.addFuelRecord(record);
-        }
-      }).catchError((Object error) {
-        debugPrint('Background fuel vehicle sync failed: $error');
-      }));
+      unawaited(
+        remoteDataSource
+            .getFuelRecordsByVehicle(userId, vehicleId)
+            .then((remoteRecords) async {
+              for (final record in remoteRecords) {
+                await localDataSource.addFuelRecord(record);
+              }
+            })
+            .catchError((Object error) {
+              debugPrint('Background fuel vehicle sync failed: $error');
+            }),
+      );
     } catch (e) {
       debugPrint('Background fuel vehicle sync error: $e');
     }
   }
 
   @override
-  Future<Either<Failure, FuelRecordEntity?>> getFuelRecordById(String id) async {
+  Future<Either<Failure, FuelRecordEntity?>> getFuelRecordById(
+    String id,
+  ) async {
     try {
       final userId = await _getCurrentUserId();
-      
+
       if (await _isConnected() && userId != null) {
         try {
-          final remoteRecord = await remoteDataSource.getFuelRecordById(userId, id);
-          
+          final remoteRecord = await remoteDataSource.getFuelRecordById(
+            userId,
+            id,
+          );
+
           if (remoteRecord != null) {
             await localDataSource.addFuelRecord(remoteRecord);
           }
-          
+
           return Right(remoteRecord);
         } catch (e) {
           final localRecord = await localDataSource.getFuelRecordById(id);
@@ -204,11 +231,14 @@ class FuelRepositoryImpl implements FuelRepository {
   }
 
   @override
-  Future<Either<Failure, FuelRecordEntity>> addFuelRecord(FuelRecordEntity fuelRecord) async {
+  Future<Either<Failure, FuelRecordEntity>> addFuelRecord(
+    FuelRecordEntity fuelRecord,
+  ) async {
     await loggingService.logOperationStart(
       category: LogCategory.fuel,
       operation: LogOperation.create,
-      message: 'Starting fuel record creation for vehicle ${fuelRecord.vehicleId}',
+      message:
+          'Starting fuel record creation for vehicle ${fuelRecord.vehicleId}',
       metadata: {
         'vehicle_id': fuelRecord.vehicleId,
         'fuel_type': fuelRecord.fuelType.toString(),
@@ -220,8 +250,6 @@ class FuelRepositoryImpl implements FuelRepository {
     );
 
     try {
-      final userId = await _getCurrentUserId();
-      
       await loggingService.logInfo(
         category: LogCategory.fuel,
         message: 'Saving fuel record to local storage',
@@ -241,10 +269,11 @@ class FuelRepositoryImpl implements FuelRepository {
         },
       );
       unawaited(_syncFuelRecordToRemoteInBackground(fuelRecord));
-      
+
       await loggingService.logInfo(
         category: LogCategory.fuel,
-        message: 'Fuel record saved locally, remote sync initiated in background',
+        message:
+            'Fuel record saved locally, remote sync initiated in background',
         metadata: {
           'fuel_id': fuelRecord.id,
           'vehicle_id': fuelRecord.vehicleId,
@@ -304,14 +333,19 @@ class FuelRepositoryImpl implements FuelRepository {
   }
 
   @override
-  Future<Either<Failure, FuelRecordEntity>> updateFuelRecord(FuelRecordEntity fuelRecord) async {
+  Future<Either<Failure, FuelRecordEntity>> updateFuelRecord(
+    FuelRecordEntity fuelRecord,
+  ) async {
     try {
       final userId = await _getCurrentUserId();
       final localRecord = await localDataSource.updateFuelRecord(fuelRecord);
-      
+
       if (await _isConnected() && userId != null) {
         try {
-          final remoteRecord = await remoteDataSource.updateFuelRecord(userId, fuelRecord);
+          final remoteRecord = await remoteDataSource.updateFuelRecord(
+            userId,
+            fuelRecord,
+          );
           return Right(remoteRecord);
         } catch (e) {
           return Right(localRecord);
@@ -333,14 +367,13 @@ class FuelRepositoryImpl implements FuelRepository {
     try {
       final userId = await _getCurrentUserId();
       await localDataSource.deleteFuelRecord(id);
-      
+
       if (await _isConnected() && userId != null) {
         try {
           await remoteDataSource.deleteFuelRecord(userId, id);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
-      
+
       return const Right(unit);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));
@@ -352,13 +385,18 @@ class FuelRepositoryImpl implements FuelRepository {
   }
 
   @override
-  Future<Either<Failure, List<FuelRecordEntity>>> searchFuelRecords(String query) async {
+  Future<Either<Failure, List<FuelRecordEntity>>> searchFuelRecords(
+    String query,
+  ) async {
     try {
       final userId = await _getCurrentUserId();
-      
+
       if (await _isConnected() && userId != null) {
         try {
-          final remoteResults = await remoteDataSource.searchFuelRecords(userId, query);
+          final remoteResults = await remoteDataSource.searchFuelRecords(
+            userId,
+            query,
+          );
           return Right(remoteResults);
         } catch (e) {
           final localResults = await localDataSource.searchFuelRecords(query);
@@ -381,123 +419,172 @@ class FuelRepositoryImpl implements FuelRepository {
   Stream<Either<Failure, List<FuelRecordEntity>>> watchFuelRecords() async* {
     try {
       final userId = await _getCurrentUserId();
-      
+
       if (await _isConnected() && userId != null) {
-        yield* remoteDataSource.watchFuelRecords(userId)
-            .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records))
+        yield* remoteDataSource
+            .watchFuelRecords(userId)
+            .map<Either<Failure, List<FuelRecordEntity>>>(
+              (records) => Right(records),
+            )
             .handleError((error) {
-          return localDataSource.watchFuelRecords()
-              .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records));
-        });
+              return localDataSource
+                  .watchFuelRecords()
+                  .map<Either<Failure, List<FuelRecordEntity>>>(
+                    (records) => Right(records),
+                  );
+            });
       } else {
-        yield* localDataSource.watchFuelRecords()
-            .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records));
+        yield* localDataSource
+            .watchFuelRecords()
+            .map<Either<Failure, List<FuelRecordEntity>>>(
+              (records) => Right(records),
+            );
       }
     } catch (e) {
-      yield Left(UnexpectedFailure('Erro ao observar registros: ${e.toString()}'));
+      yield Left(
+        UnexpectedFailure('Erro ao observar registros: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Stream<Either<Failure, List<FuelRecordEntity>>> watchFuelRecordsByVehicle(String vehicleId) async* {
+  Stream<Either<Failure, List<FuelRecordEntity>>> watchFuelRecordsByVehicle(
+    String vehicleId,
+  ) async* {
     try {
       final userId = await _getCurrentUserId();
-      
+
       if (await _isConnected() && userId != null) {
-        yield* remoteDataSource.watchFuelRecordsByVehicle(userId, vehicleId)
-            .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records))
+        yield* remoteDataSource
+            .watchFuelRecordsByVehicle(userId, vehicleId)
+            .map<Either<Failure, List<FuelRecordEntity>>>(
+              (records) => Right(records),
+            )
             .handleError((error) {
-          return localDataSource.watchFuelRecordsByVehicle(vehicleId)
-              .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records));
-        });
+              return localDataSource
+                  .watchFuelRecordsByVehicle(vehicleId)
+                  .map<Either<Failure, List<FuelRecordEntity>>>(
+                    (records) => Right(records),
+                  );
+            });
       } else {
-        yield* localDataSource.watchFuelRecordsByVehicle(vehicleId)
-            .map<Either<Failure, List<FuelRecordEntity>>>((records) => Right(records));
+        yield* localDataSource
+            .watchFuelRecordsByVehicle(vehicleId)
+            .map<Either<Failure, List<FuelRecordEntity>>>(
+              (records) => Right(records),
+            );
       }
     } catch (e) {
-      yield Left(UnexpectedFailure('Erro ao observar registros por veículo: ${e.toString()}'));
+      yield Left(
+        UnexpectedFailure(
+          'Erro ao observar registros por veículo: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, double>> getAverageConsumption(String vehicleId) async {
+  Future<Either<Failure, double>> getAverageConsumption(
+    String vehicleId,
+  ) async {
     try {
       final recordsResult = await getFuelRecordsByVehicle(vehicleId);
-      
-      return recordsResult.fold(
-        (failure) => Left(failure),
-        (records) {
-          if (records.length < 2) {
-            return const Right(0.0);
-          }
-          
-          final recordsWithConsumption = records.where((record) => 
-              record.consumption != null && record.consumption! > 0).toList();
-          
-          if (recordsWithConsumption.isEmpty) {
-            return const Right(0.0);
-          }
-          
-          final totalConsumption = recordsWithConsumption
-              .map((r) => r.consumption!)
-              .reduce((a, b) => a + b);
-          
-          final average = totalConsumption / recordsWithConsumption.length;
-          return Right(average);
-        },
-      );
+
+      return recordsResult.fold((failure) => Left(failure), (records) {
+        if (records.length < 2) {
+          return const Right(0.0);
+        }
+
+        final recordsWithConsumption =
+            records
+                .where(
+                  (record) =>
+                      record.consumption != null && record.consumption! > 0,
+                )
+                .toList();
+
+        if (recordsWithConsumption.isEmpty) {
+          return const Right(0.0);
+        }
+
+        final totalConsumption = recordsWithConsumption
+            .map((r) => r.consumption!)
+            .reduce((a, b) => a + b);
+
+        final average = totalConsumption / recordsWithConsumption.length;
+        return Right(average);
+      });
     } catch (e) {
-      return Left(UnexpectedFailure('Erro ao calcular consumo médio: ${e.toString()}'));
+      return Left(
+        UnexpectedFailure('Erro ao calcular consumo médio: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, double>> getTotalSpent(String vehicleId, {DateTime? startDate, DateTime? endDate}) async {
+  Future<Either<Failure, double>> getTotalSpent(
+    String vehicleId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final recordsResult = await getFuelRecordsByVehicle(vehicleId);
-      
-      return recordsResult.fold(
-        (failure) => Left(failure),
-        (records) {
-          var filteredRecords = records;
-          
-          if (startDate != null) {
-            filteredRecords = filteredRecords.where((r) => 
-                r.date.isAfter(startDate) || r.date.isAtSameMomentAs(startDate)).toList();
-          }
-          
-          if (endDate != null) {
-            filteredRecords = filteredRecords.where((r) => 
-                r.date.isBefore(endDate) || r.date.isAtSameMomentAs(endDate)).toList();
-          }
-          
-          final totalSpent = filteredRecords
-              .map((r) => r.totalPrice)
-              .fold(0.0, (a, b) => a + b);
-          
-          return Right(totalSpent);
-        },
-      );
+
+      return recordsResult.fold((failure) => Left(failure), (records) {
+        var filteredRecords = records;
+
+        if (startDate != null) {
+          filteredRecords =
+              filteredRecords
+                  .where(
+                    (r) =>
+                        r.date.isAfter(startDate) ||
+                        r.date.isAtSameMomentAs(startDate),
+                  )
+                  .toList();
+        }
+
+        if (endDate != null) {
+          filteredRecords =
+              filteredRecords
+                  .where(
+                    (r) =>
+                        r.date.isBefore(endDate) ||
+                        r.date.isAtSameMomentAs(endDate),
+                  )
+                  .toList();
+        }
+
+        final totalSpent = filteredRecords
+            .map((r) => r.totalPrice)
+            .fold(0.0, (a, b) => a + b);
+
+        return Right(totalSpent);
+      });
     } catch (e) {
-      return Left(UnexpectedFailure('Erro ao calcular total gasto: ${e.toString()}'));
+      return Left(
+        UnexpectedFailure('Erro ao calcular total gasto: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, List<FuelRecordEntity>>> getRecentFuelRecords(String vehicleId, {int limit = 10}) async {
+  Future<Either<Failure, List<FuelRecordEntity>>> getRecentFuelRecords(
+    String vehicleId, {
+    int limit = 10,
+  }) async {
     try {
       final recordsResult = await getFuelRecordsByVehicle(vehicleId);
-      
-      return recordsResult.fold(
-        (failure) => Left(failure),
-        (records) {
-          final sortedRecords = records..sort((a, b) => b.date.compareTo(a.date));
-          final recentRecords = sortedRecords.take(limit).toList();
-          return Right(recentRecords);
-        },
-      );
+
+      return recordsResult.fold((failure) => Left(failure), (records) {
+        final sortedRecords = records..sort((a, b) => b.date.compareTo(a.date));
+        final recentRecords = sortedRecords.take(limit).toList();
+        return Right(recentRecords);
+      });
     } catch (e) {
-      return Left(UnexpectedFailure('Erro ao buscar registros recentes: ${e.toString()}'));
+      return Left(
+        UnexpectedFailure('Erro ao buscar registros recentes: ${e.toString()}'),
+      );
     }
   }
 }

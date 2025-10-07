@@ -11,7 +11,7 @@ abstract class IStorageRepository {
     required String path,
     String? contentType,
     Map<String, String>? metadata,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   });
 
   /// Faz upload de uma imagem com redimensionamento opcional
@@ -21,25 +21,21 @@ abstract class IStorageRepository {
     int? maxWidth,
     int? maxHeight,
     int? quality,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   });
 
   /// Faz download de um arquivo
   Future<Either<Failure, File>> downloadFile({
     required String url,
     required String localPath,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   });
 
   /// Obtém URL de download de um arquivo
-  Future<Either<Failure, String>> getDownloadUrl({
-    required String path,
-  });
+  Future<Either<Failure, String>> getDownloadUrl({required String path});
 
   /// Deleta um arquivo
-  Future<Either<Failure, void>> deleteFile({
-    required String path,
-  });
+  Future<Either<Failure, void>> deleteFile({required String path});
 
   /// Lista arquivos em um diretório
   Future<Either<Failure, List<StorageItem>>> listFiles({
@@ -48,14 +44,10 @@ abstract class IStorageRepository {
   });
 
   /// Verifica se um arquivo existe
-  Future<Either<Failure, bool>> fileExists({
-    required String path,
-  });
+  Future<Either<Failure, bool>> fileExists({required String path});
 
   /// Obtém metadados de um arquivo
-  Future<Either<Failure, StorageMetadata>> getMetadata({
-    required String path,
-  });
+  Future<Either<Failure, StorageMetadata>> getMetadata({required String path});
 
   /// Atualiza metadados de um arquivo
   Future<Either<Failure, StorageMetadata>> updateMetadata({
@@ -80,7 +72,7 @@ abstract class IStorageRepository {
     required File imageFile,
     required String basePath,
     List<ImageVariant>? variants,
-    Function(double)? onProgress,
+    void Function(double)? onProgress,
   });
 }
 

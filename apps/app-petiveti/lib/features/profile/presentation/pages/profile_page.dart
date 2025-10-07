@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/profile_constants.dart';
 import '../../../../shared/widgets/dialogs/app_dialogs.dart';
-import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/profile_state_handlers.dart';
 
@@ -15,10 +14,7 @@ class ProfilePage extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Perfil'), centerTitle: true),
       body: _buildBody(context, ref, authState),
     );
   }
@@ -34,7 +30,8 @@ class ProfilePage extends ConsumerWidget {
         onRetry: () => _retryLoadProfile(ref),
       );
     }
-    if (authState.status == AuthStatus.unauthenticated || authState.user == null) {
+    if (authState.status == AuthStatus.unauthenticated ||
+        authState.user == null) {
       return ProfileStateHandlers.buildUnauthenticatedState(
         context: context,
         onSignIn: () => context.push('/login'),
@@ -46,88 +43,76 @@ class ProfilePage extends ConsumerWidget {
       child: SingleChildScrollView(
         padding: ProfileConstants.pageContentPadding,
         child: Column(
-        children: [
-          ProfileStateHandlers.buildProfileHeader(context, authState.user!),
+          children: [
+            ProfileStateHandlers.buildProfileHeader(context, authState.user!),
             const SizedBox(height: ProfileConstants.headerTopSpacing),
-            _buildMenuSection(
-              context,
-              ProfileConstants.financialSectionTitle,
-              [
-                _buildMenuItem(
-                  context,
-                  ProfileConstants.expensesMenuTitle,
-                  ProfileIcons.expensesIcon,
-                  () => context.push(ProfileConstants.expensesRoute),
-                ),
-                _buildMenuItem(
-                  context,
-                  ProfileConstants.subscriptionMenuTitle,
-                  ProfileIcons.subscriptionIcon,
-                  () => context.push(ProfileConstants.subscriptionRoute),
-                ),
-              ],
-            ),
-            
+            _buildMenuSection(context, ProfileConstants.financialSectionTitle, [
+              _buildMenuItem(
+                context,
+                ProfileConstants.expensesMenuTitle,
+                ProfileIcons.expensesIcon,
+                () => context.push(ProfileConstants.expensesRoute),
+              ),
+              _buildMenuItem(
+                context,
+                ProfileConstants.subscriptionMenuTitle,
+                ProfileIcons.subscriptionIcon,
+                () => context.push(ProfileConstants.subscriptionRoute),
+              ),
+            ]),
+
             const SizedBox(height: 24),
-            
-            _buildMenuSection(
-              context,
-              ProfileConstants.settingsSectionTitle,
-              [
-                _buildMenuItem(
-                  context,
-                  'Notificações',
-                  Icons.notifications,
-                  () => _showNotificationsSettings(context),
-                ),
-                _buildMenuItem(
-                  context,
-                  'Tema',
-                  Icons.palette,
-                  () => _showThemeSettings(context),
-                ),
-                _buildMenuItem(
-                  context,
-                  'Idioma',
-                  Icons.language,
-                  () => _showLanguageSettings(context),
-                ),
-                _buildMenuItem(
-                  context,
-                  'Backup e Sincronização',
-                  Icons.cloud_sync,
-                  () => _showBackupSettings(context),
-                ),
-              ],
-            ),
-            
+
+            _buildMenuSection(context, ProfileConstants.settingsSectionTitle, [
+              _buildMenuItem(
+                context,
+                'Notificações',
+                Icons.notifications,
+                () => _showNotificationsSettings(context),
+              ),
+              _buildMenuItem(
+                context,
+                'Tema',
+                Icons.palette,
+                () => _showThemeSettings(context),
+              ),
+              _buildMenuItem(
+                context,
+                'Idioma',
+                Icons.language,
+                () => _showLanguageSettings(context),
+              ),
+              _buildMenuItem(
+                context,
+                'Backup e Sincronização',
+                Icons.cloud_sync,
+                () => _showBackupSettings(context),
+              ),
+            ]),
+
             const SizedBox(height: 24),
-            
-            _buildMenuSection(
-              context,
-              ProfileConstants.supportSectionTitle,
-              [
-                _buildMenuItem(
-                  context,
-                  'Central de Ajuda',
-                  Icons.help,
-                  () => _showHelp(context),
-                ),
-                _buildMenuItem(
-                  context,
-                  'Contatar Suporte',
-                  Icons.support_agent,
-                  () => _contactSupport(context),
-                ),
-                _buildMenuItem(
-                  context,
-                  'Sobre o App',
-                  Icons.info,
-                  () => _showAbout(context),
-                ),
-              ],
-            ),
-            
+
+            _buildMenuSection(context, ProfileConstants.supportSectionTitle, [
+              _buildMenuItem(
+                context,
+                'Central de Ajuda',
+                Icons.help,
+                () => _showHelp(context),
+              ),
+              _buildMenuItem(
+                context,
+                'Contatar Suporte',
+                Icons.support_agent,
+                () => _contactSupport(context),
+              ),
+              _buildMenuItem(
+                context,
+                'Sobre o App',
+                Icons.info,
+                () => _showAbout(context),
+              ),
+            ]),
+
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -136,28 +121,36 @@ class ProfilePage extends ConsumerWidget {
                 hint: 'Faz logout e retorna para a tela de login',
                 child: OutlinedButton.icon(
                   onPressed: () => _showLogoutDialog(context, ref),
-                  icon: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+                  icon: Icon(
+                    Icons.logout,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                   label: Text(
                     'Sair da Conta',
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Theme.of(context).colorScheme.error),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
             Semantics(
               label: 'Informações da versão do aplicativo',
               child: FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (context, snapshot) {
-                  final version = snapshot.hasData 
-                      ? 'Versão ${snapshot.data!.version}'
-                      : 'Versão 1.0.0';
+                  final version =
+                      snapshot.hasData
+                          ? 'Versão ${snapshot.data!.version}'
+                          : 'Versão 1.0.0';
                   return Text(
                     version,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -174,101 +167,17 @@ class ProfilePage extends ConsumerWidget {
   }
 
   /// **Retry Profile Loading**
-  /// 
+  ///
   /// Attempts to reload the user profile data when an error occurs.
   void _retryLoadProfile(WidgetRef ref) {
     ref.invalidate(authProvider);
   }
 
-  Widget _buildProfileHeader(BuildContext context, User? user) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withValues(alpha: 0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
-            child: user?.photoUrl != null
-                ? Semantics(
-                    label: 'Foto do perfil do usuário ${user?.displayName ?? ""}'.trim(),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(40),
-                      child: Image.network(
-                        user!.photoUrl!,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          );
-                        },
-                      ),
-                    ),
-                  )
-                : Semantics(
-                    label: 'Avatar padrão do usuário',
-                    child: Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            user?.displayName ?? 'Usuário',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            user?.email ?? 'email@exemplo.com',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
-              fontSize: 14,
-            ),
-          ),
-          if (user?.hasValidPremium == true) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'PREMIUM',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuSection(BuildContext context, String title, List<Widget> items) {
+  Widget _buildMenuSection(
+    BuildContext context,
+    String title,
+    List<Widget> items,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -279,17 +188,15 @@ class ProfilePage extends ConsumerWidget {
             header: true,
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ),
         Semantics(
           label: 'Lista de opções da seção $title',
-          child: Card(
-            child: Column(children: items),
-          ),
+          child: Card(child: Column(children: items)),
         ),
       ],
     );
@@ -306,10 +213,7 @@ class ProfilePage extends ConsumerWidget {
       hint: 'Toque para acessar $title',
       button: true,
       child: ListTile(
-        leading: Semantics(
-          label: 'Ícone de $title',
-          child: Icon(icon),
-        ),
+        leading: Semantics(label: 'Ícone de $title', child: Icon(icon)),
         title: Text(title),
         trailing: Semantics(
           label: 'Indicador de navegação',
@@ -357,8 +261,13 @@ class ProfilePage extends ConsumerWidget {
     AppDialogs.showAboutApp(
       context,
       appName: 'PetiVeti',
-      appIcon: Icon(Icons.pets, size: 32, color: Theme.of(context).colorScheme.primary),
-      customDescription: 'App completo para cuidados veterinários com calculadoras especializadas, controle de medicamentos, agendamento de consultas e muito mais.',
+      appIcon: Icon(
+        Icons.pets,
+        size: 32,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      customDescription:
+          'App completo para cuidados veterinários com calculadoras especializadas, controle de medicamentos, agendamento de consultas e muito mais.',
       showTechnicalInfo: true,
     );
   }

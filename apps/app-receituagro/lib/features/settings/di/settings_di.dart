@@ -1,10 +1,7 @@
 import 'package:core/core.dart';
 
-import '../../../core/providers/receituagro_auth_notifier.dart';
-import '../data/repositories/profile_repository_impl.dart';
 import '../data/repositories/user_settings_repository_impl.dart';
 import '../domain/repositories/i_user_settings_repository.dart';
-import '../domain/repositories/profile_repository.dart';
 import '../domain/usecases/get_user_settings_usecase.dart';
 import '../domain/usecases/update_user_settings_usecase.dart';
 
@@ -25,17 +22,11 @@ abstract class SettingsDI {
     getIt.registerLazySingleton<ProfileImageService>(
       () => ProfileImageServiceFactory.createDefault(),
     );
-    getIt.registerLazySingleton<ProfileRepository>(
-      () => ProfileRepositoryImpl(
-        profileImageService: getIt<ProfileImageService>(),
-        authNotifier: getIt<ReceitaAgroAuthNotifier>(),
-      ),
-    );
+    // ProfileRepository now managed by Riverpod - see profile_providers.dart
   }
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
-
     if (getIt.isRegistered<UpdateUserSettingsUseCase>()) {
       getIt.unregister<UpdateUserSettingsUseCase>();
     }
@@ -48,9 +39,7 @@ abstract class SettingsDI {
       getIt.unregister<IUserSettingsRepository>();
     }
 
-    if (getIt.isRegistered<ProfileRepository>()) {
-      getIt.unregister<ProfileRepository>();
-    }
+    // ProfileRepository now managed by Riverpod
 
     if (getIt.isRegistered<ProfileImageService>()) {
       getIt.unregister<ProfileImageService>();

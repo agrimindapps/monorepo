@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart';
@@ -64,7 +63,6 @@ class PlantsDisplayData {
 /// View → Provider → Use Cases → Repository → Data Sources
 
 class PlantsListPage extends ConsumerStatefulWidget {
-
   const PlantsListPage({super.key});
 
   @override
@@ -95,8 +93,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
     final authState = ref.read(authProvider);
     if (authState.hasValue &&
         authState.value!.isAuthenticated &&
-        !authState.value!.isAnonymous) {
-    }
+        !authState.value!.isAnonymous) {}
     _monitorBackgroundSync();
   }
 
@@ -127,6 +124,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
 
     super.dispose();
   }
+
   @override
   void didPopNext() {
     if (mounted) {
@@ -135,16 +133,13 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
   }
 
   @override
-  void didPush() {
-  }
+  void didPush() {}
 
   @override
-  void didPop() {
-  }
+  void didPop() {}
 
   @override
-  void didPushNext() {
-  }
+  void didPushNext() {}
 
   Future<void> _onRefresh() async {
     await ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();

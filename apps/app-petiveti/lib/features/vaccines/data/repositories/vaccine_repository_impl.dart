@@ -16,20 +16,16 @@ class VaccineRepositoryImpl implements VaccineRepository {
     required this.localDataSource,
     required this.remoteDataSource,
   });
-  Either<Failure, List<Vaccine>> _handleLocalSuccess(List<VaccineModel> models) {
+  Either<Failure, List<Vaccine>> _handleLocalSuccess(
+    List<VaccineModel> models,
+  ) {
     try {
       final vaccines = models.map((model) => model.toEntity()).toList();
       return Right(vaccines);
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao converter dados: ${e.toString()}'));
-    }
-  }
-
-  Either<Failure, Vaccine> _handleLocalSuccessSingle(VaccineModel model) {
-    try {
-      return Right(model.toEntity());
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao converter dados: ${e.toString()}'));
+      return Left(
+        CacheFailure(message: 'Erro ao converter dados: ${e.toString()}'),
+      );
     }
   }
 
@@ -37,9 +33,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
     try {
       await remoteOperation();
     } on ServerException {
-    } catch (e) {
-    }
+    } catch (e) {}
   }
+
   @override
   Future<Either<Failure, List<Vaccine>>> getVaccines() async {
     try {
@@ -48,19 +44,32 @@ class VaccineRepositoryImpl implements VaccineRepository {
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao buscar vacinas: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message: 'Erro inesperado ao buscar vacinas: ${e.toString()}',
+        ),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getVaccinesByAnimal(String animalId) async {
+  Future<Either<Failure, List<Vaccine>>> getVaccinesByAnimal(
+    String animalId,
+  ) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByAnimalId(animalId);
+      final vaccineModels = await localDataSource.getVaccinesByAnimalId(
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao buscar vacinas do animal: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message:
+              'Erro inesperado ao buscar vacinas do animal: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -75,7 +84,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao buscar vacina: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message: 'Erro inesperado ao buscar vacina: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -85,12 +98,16 @@ class VaccineRepositoryImpl implements VaccineRepository {
       final vaccineModel = VaccineModel.fromEntity(vaccine);
       await localDataSource.addVaccine(vaccineModel);
       await _syncToRemote(() => remoteDataSource.addVaccine(vaccineModel));
-      
+
       return Right(vaccine);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao adicionar vacina: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message: 'Erro inesperado ao adicionar vacina: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -100,12 +117,16 @@ class VaccineRepositoryImpl implements VaccineRepository {
       final vaccineModel = VaccineModel.fromEntity(vaccine);
       await localDataSource.updateVaccine(vaccineModel);
       await _syncToRemote(() => remoteDataSource.updateVaccine(vaccineModel));
-      
+
       return Right(vaccine);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao atualizar vacina: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message: 'Erro inesperado ao atualizar vacina: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -114,12 +135,16 @@ class VaccineRepositoryImpl implements VaccineRepository {
     try {
       await localDataSource.deleteVaccine(id);
       await _syncToRemote(() => remoteDataSource.deleteVaccine(id));
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao excluir vacina: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message: 'Erro inesperado ao excluir vacina: ${e.toString()}',
+        ),
+      );
     }
   }
 
@@ -127,16 +152,25 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<Either<Failure, void>> deleteVaccinesByAnimal(String animalId) async {
     try {
       await localDataSource.deleteVaccinesByAnimalId(animalId);
-      await _syncToRemote(() => remoteDataSource.deleteVaccinesByAnimalId(animalId));
+      await _syncToRemote(
+        () => remoteDataSource.deleteVaccinesByAnimalId(animalId),
+      );
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro inesperado ao excluir vacinas: ${e.toString()}'));
+      return Left(
+        CacheFailure(
+          message: 'Erro inesperado ao excluir vacinas: ${e.toString()}',
+        ),
+      );
     }
   }
+
   @override
-  Future<Either<Failure, List<Vaccine>>> getPendingVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getPendingVaccines([
+    String? animalId,
+  ]) async {
     try {
       final vaccineModels = await localDataSource.getPendingVaccines(animalId);
       return _handleLocalSuccess(vaccineModels);
@@ -148,7 +182,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getOverdueVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getOverdueVaccines([
+    String? animalId,
+  ]) async {
     try {
       final vaccineModels = await localDataSource.getOverdueVaccines(animalId);
       return _handleLocalSuccess(vaccineModels);
@@ -160,9 +196,13 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getCompletedVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getCompletedVaccines([
+    String? animalId,
+  ]) async {
     try {
-      final vaccineModels = await localDataSource.getCompletedVaccines(animalId);
+      final vaccineModels = await localDataSource.getCompletedVaccines(
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -172,7 +212,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getRequiredVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getRequiredVaccines([
+    String? animalId,
+  ]) async {
     try {
       final vaccineModels = await localDataSource.getRequiredVaccines(animalId);
       return _handleLocalSuccess(vaccineModels);
@@ -184,7 +226,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getUpcomingVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getUpcomingVaccines([
+    String? animalId,
+  ]) async {
     try {
       final vaccineModels = await localDataSource.getUpcomingVaccines(animalId);
       return _handleLocalSuccess(vaccineModels);
@@ -196,7 +240,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getDueTodayVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getDueTodayVaccines([
+    String? animalId,
+  ]) async {
     try {
       final vaccineModels = await localDataSource.getDueTodayVaccines(animalId);
       return _handleLocalSuccess(vaccineModels);
@@ -208,7 +254,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getDueSoonVaccines([String? animalId]) async {
+  Future<Either<Failure, List<Vaccine>>> getDueSoonVaccines([
+    String? animalId,
+  ]) async {
     try {
       final vaccineModels = await localDataSource.getDueSoonVaccines(animalId);
       return _handleLocalSuccess(vaccineModels);
@@ -218,6 +266,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
+
   @override
   Future<Either<Failure, List<Vaccine>>> getVaccinesByDateRange(
     DateTime startDate,
@@ -225,7 +274,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByDateRange(startDate, endDate, animalId);
+      final vaccineModels = await localDataSource.getVaccinesByDateRange(
+        startDate,
+        endDate,
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -241,7 +294,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByMonth(year, month, animalId);
+      final vaccineModels = await localDataSource.getVaccinesByMonth(
+        year,
+        month,
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -257,15 +314,23 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByDateRange(startDate, endDate, animalId);
+      final vaccineModels = await localDataSource.getVaccinesByDateRange(
+        startDate,
+        endDate,
+        animalId,
+      );
       final vaccines = vaccineModels.map((model) => model.toEntity()).toList();
       final Map<DateTime, List<Vaccine>> calendar = {};
       for (final vaccine in vaccines) {
-        final date = DateTime(vaccine.date.year, vaccine.date.month, vaccine.date.day);
+        final date = DateTime(
+          vaccine.date.year,
+          vaccine.date.month,
+          vaccine.date.day,
+        );
         calendar[date] ??= [];
         calendar[date]!.add(vaccine);
       }
-      
+
       return Right(calendar);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -273,6 +338,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
+
   @override
   Future<Either<Failure, List<Vaccine>>> getVaccinesNeedingReminders() async {
     try {
@@ -286,9 +352,11 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getVaccinesWithActiveReminders() async {
+  Future<Either<Failure, List<Vaccine>>>
+  getVaccinesWithActiveReminders() async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesWithActiveReminders();
+      final vaccineModels =
+          await localDataSource.getVaccinesWithActiveReminders();
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -307,11 +375,15 @@ class VaccineRepositoryImpl implements VaccineRepository {
       if (vaccineModel == null) {
         return const Left(ValidationFailure(message: 'Vacina não encontrada'));
       }
-      final updatedVaccine = vaccineModel.toEntity().scheduleReminder(reminderDate);
+      final updatedVaccine = vaccineModel.toEntity().scheduleReminder(
+        reminderDate,
+      );
       final updatedModel = VaccineModel.fromEntity(updatedVaccine);
       await localDataSource.updateVaccine(updatedModel);
-      await _syncToRemote(() => remoteDataSource.scheduleVaccineReminder(vaccineId, reminderDate));
-      
+      await _syncToRemote(
+        () => remoteDataSource.scheduleVaccineReminder(vaccineId, reminderDate),
+      );
+
       return Right(updatedVaccine);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -327,11 +399,15 @@ class VaccineRepositoryImpl implements VaccineRepository {
       if (vaccineModel == null) {
         return const Left(ValidationFailure(message: 'Vacina não encontrada'));
       }
-      final updatedVaccine = vaccineModel.toEntity().copyWith(reminderDate: null);
+      final updatedVaccine = vaccineModel.toEntity().copyWith(
+        reminderDate: null,
+      );
       final updatedModel = VaccineModel.fromEntity(updatedVaccine);
       await localDataSource.updateVaccine(updatedModel);
-      await _syncToRemote(() => remoteDataSource.removeVaccineReminder(vaccineId));
-      
+      await _syncToRemote(
+        () => remoteDataSource.removeVaccineReminder(vaccineId),
+      );
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -339,13 +415,17 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
+
   @override
   Future<Either<Failure, List<Vaccine>>> searchVaccines(
     String query, [
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.searchVaccines(query, animalId);
+      final vaccineModels = await localDataSource.searchVaccines(
+        query,
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -360,7 +440,10 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByVeterinarian(veterinarian, animalId);
+      final vaccineModels = await localDataSource.getVaccinesByVeterinarian(
+        veterinarian,
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -375,7 +458,10 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByName(vaccineName, animalId);
+      final vaccineModels = await localDataSource.getVaccinesByName(
+        vaccineName,
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -390,7 +476,10 @@ class VaccineRepositoryImpl implements VaccineRepository {
     String? animalId,
   ]) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByManufacturer(manufacturer, animalId);
+      final vaccineModels = await localDataSource.getVaccinesByManufacturer(
+        manufacturer,
+        animalId,
+      );
       return _handleLocalSuccess(vaccineModels);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -398,13 +487,17 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
+
   @override
-  Future<Either<Failure, Map<String, int>>> getVaccineStatistics([String? animalId]) async {
+  Future<Either<Failure, Map<String, int>>> getVaccineStatistics([
+    String? animalId,
+  ]) async {
     try {
-      final allVaccines = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(animalId)
-        : await localDataSource.getVaccines();
-      
+      final allVaccines =
+          animalId != null
+              ? await localDataSource.getVaccinesByAnimalId(animalId)
+              : await localDataSource.getVaccines();
+
       final stats = <String, int>{
         'total': allVaccines.length,
         'completed': allVaccines.where((v) => v.isCompleted).length,
@@ -415,7 +508,7 @@ class VaccineRepositoryImpl implements VaccineRepository {
         'dueToday': allVaccines.where((v) => v.toEntity().isDueToday).length,
         'dueSoon': allVaccines.where((v) => v.toEntity().isDueSoon).length,
       };
-      
+
       return Right(stats);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -425,9 +518,13 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, List<Vaccine>>> getVaccineHistory(String animalId) async {
+  Future<Either<Failure, List<Vaccine>>> getVaccineHistory(
+    String animalId,
+  ) async {
     try {
-      final vaccineModels = await localDataSource.getVaccinesByAnimalId(animalId);
+      final vaccineModels = await localDataSource.getVaccinesByAnimalId(
+        animalId,
+      );
       final vaccines = vaccineModels.map((model) => model.toEntity()).toList();
       vaccines.sort((a, b) => b.date.compareTo(a.date));
       return Right(vaccines);
@@ -439,12 +536,15 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, List<Vaccine>>>> getVaccinesByStatus([String? animalId]) async {
+  Future<Either<Failure, Map<String, List<Vaccine>>>> getVaccinesByStatus([
+    String? animalId,
+  ]) async {
     try {
-      final vaccineModels = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(animalId)
-        : await localDataSource.getVaccines();
-      
+      final vaccineModels =
+          animalId != null
+              ? await localDataSource.getVaccinesByAnimalId(animalId)
+              : await localDataSource.getVaccines();
+
       final vaccines = vaccineModels.map((model) => model.toEntity()).toList();
       final Map<String, List<Vaccine>> statusMap = {
         'completed': [],
@@ -460,11 +560,12 @@ class VaccineRepositoryImpl implements VaccineRepository {
           statusMap['overdue']!.add(vaccine);
         } else if (vaccine.isPending) {
           statusMap['pending']!.add(vaccine);
-        } else if (vaccine.nextDueDate != null && vaccine.nextDueDate!.isAfter(DateTime.now())) {
+        } else if (vaccine.nextDueDate != null &&
+            vaccine.nextDueDate!.isAfter(DateTime.now())) {
           statusMap['upcoming']!.add(vaccine);
         }
       }
-      
+
       return Right(statusMap);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -490,7 +591,8 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<Either<Failure, List<String>>> getVeterinarians() async {
     try {
       final vaccines = await localDataSource.getVaccines();
-      final veterinarians = vaccines.map((v) => v.veterinarian).toSet().toList()..sort();
+      final veterinarians =
+          vaccines.map((v) => v.veterinarian).toSet().toList()..sort();
       return Right(veterinarians);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -503,11 +605,13 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<Either<Failure, List<String>>> getManufacturers() async {
     try {
       final vaccines = await localDataSource.getVaccines();
-      final manufacturers = vaccines
-          .where((v) => v.manufacturer != null)
-          .map((v) => v.manufacturer!)
-          .toSet()
-          .toList()..sort();
+      final manufacturers =
+          vaccines
+              .where((v) => v.manufacturer != null)
+              .map((v) => v.manufacturer!)
+              .toSet()
+              .toList()
+            ..sort();
       return Right(manufacturers);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -515,13 +619,19 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
+
   @override
-  Future<Either<Failure, List<Vaccine>>> addMultipleVaccines(List<Vaccine> vaccines) async {
+  Future<Either<Failure, List<Vaccine>>> addMultipleVaccines(
+    List<Vaccine> vaccines,
+  ) async {
     try {
-      final vaccineModels = vaccines.map((v) => VaccineModel.fromEntity(v)).toList();
+      final vaccineModels =
+          vaccines.map((v) => VaccineModel.fromEntity(v)).toList();
       await localDataSource.addMultipleVaccines(vaccineModels);
-      await _syncToRemote(() => remoteDataSource.addMultipleVaccines(vaccineModels));
-      
+      await _syncToRemote(
+        () => remoteDataSource.addMultipleVaccines(vaccineModels),
+      );
+
       return Right(vaccines);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -531,11 +641,15 @@ class VaccineRepositoryImpl implements VaccineRepository {
   }
 
   @override
-  Future<Either<Failure, void>> markVaccinesAsCompleted(List<String> vaccineIds) async {
+  Future<Either<Failure, void>> markVaccinesAsCompleted(
+    List<String> vaccineIds,
+  ) async {
     try {
       await localDataSource.markVaccinesAsCompleted(vaccineIds);
-      await _syncToRemote(() => remoteDataSource.markVaccinesAsCompleted(vaccineIds));
-      
+      await _syncToRemote(
+        () => remoteDataSource.markVaccinesAsCompleted(vaccineIds),
+      );
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -554,10 +668,12 @@ class VaccineRepositoryImpl implements VaccineRepository {
         final vaccine = await localDataSource.getVaccineById(id);
         if (vaccine != null) {
           final updatedVaccine = vaccine.toEntity().copyWith(status: status);
-          await localDataSource.updateVaccine(VaccineModel.fromEntity(updatedVaccine));
+          await localDataSource.updateVaccine(
+            VaccineModel.fromEntity(updatedVaccine),
+          );
         }
       }
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -565,27 +681,33 @@ class VaccineRepositoryImpl implements VaccineRepository {
       return Left(CacheFailure(message: 'Erro inesperado: ${e.toString()}'));
     }
   }
+
   @override
   Future<Either<Failure, void>> syncVaccines() async {
     try {
       final lastSync = await remoteDataSource.getLastSyncTime();
-      
+
       if (lastSync != null) {
-        final modifiedVaccines = await remoteDataSource.getVaccinesModifiedAfter(lastSync);
-        await localDataSource.cacheVaccines(modifiedVaccines.where((v) => !v.isDeleted).toList());
+        final modifiedVaccines = await remoteDataSource
+            .getVaccinesModifiedAfter(lastSync);
+        await localDataSource.cacheVaccines(
+          modifiedVaccines.where((v) => !v.isDeleted).toList(),
+        );
         for (final vaccine in modifiedVaccines.where((v) => v.isDeleted)) {
           await localDataSource.deleteVaccine(vaccine.id);
         }
       }
       await remoteDataSource.updateLastSyncTime();
-      
+
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(NetworkFailure(message: 'Erro de sincronização: ${e.toString()}'));
+      return Left(
+        NetworkFailure(message: 'Erro de sincronização: ${e.toString()}'),
+      );
     }
   }
 
@@ -597,46 +719,61 @@ class VaccineRepositoryImpl implements VaccineRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
     } catch (e) {
-      return Left(NetworkFailure(message: 'Erro ao obter tempo de sincronização: ${e.toString()}'));
+      return Left(
+        NetworkFailure(
+          message: 'Erro ao obter tempo de sincronização: ${e.toString()}',
+        ),
+      );
     }
   }
+
   @override
-  Future<Either<Failure, Map<String, dynamic>>> exportVaccineData([String? animalId]) async {
+  Future<Either<Failure, Map<String, dynamic>>> exportVaccineData([
+    String? animalId,
+  ]) async {
     try {
-      final vaccineModels = animalId != null 
-        ? await localDataSource.getVaccinesByAnimalId(animalId)
-        : await localDataSource.getVaccines();
-      
+      final vaccineModels =
+          animalId != null
+              ? await localDataSource.getVaccinesByAnimalId(animalId)
+              : await localDataSource.getVaccines();
+
       final data = {
         'vaccines': vaccineModels.map((v) => v.toMap()).toList(),
         'exportDate': DateTime.now().toIso8601String(),
         'animalId': animalId,
         'totalVaccines': vaccineModels.length,
       };
-      
+
       return Right(data);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao exportar dados: ${e.toString()}'));
+      return Left(
+        CacheFailure(message: 'Erro ao exportar dados: ${e.toString()}'),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, void>> importVaccineData(Map<String, dynamic> data) async {
+  Future<Either<Failure, void>> importVaccineData(
+    Map<String, dynamic> data,
+  ) async {
     try {
       final vaccinesData = data['vaccines'] as List<dynamic>;
-      final vaccineModels = vaccinesData
-          .map((v) => VaccineModel.fromMap(v as Map<String, dynamic>))
-          .toList();
-      
+      final vaccineModels =
+          vaccinesData
+              .map((v) => VaccineModel.fromMap(v as Map<String, dynamic>))
+              .toList();
+
       await localDataSource.cacheVaccines(vaccineModels);
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao importar dados: ${e.toString()}'));
+      return Left(
+        CacheFailure(message: 'Erro ao importar dados: ${e.toString()}'),
+      );
     }
   }
 }

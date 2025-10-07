@@ -8,22 +8,23 @@ class AnalyticsDashboardScreen extends StatefulWidget {
   const AnalyticsDashboardScreen({super.key});
 
   @override
-  State<AnalyticsDashboardScreen> createState() => _AnalyticsDashboardScreenState();
+  State<AnalyticsDashboardScreen> createState() =>
+      _AnalyticsDashboardScreenState();
 }
 
 class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AnalyticsDashboardService _analyticsService;
-  
+
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
-  
+
   UserEngagementMetrics? _engagementMetrics;
   ConversionFunnelMetrics? _funnelMetrics;
   PerformanceMetrics? _performanceMetrics;
   RevenueMetrics? _revenueMetrics;
-  
+
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -101,11 +102,6 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
 
   Future<void> _exportReport() async {
     try {
-      final report = await _analyticsService.exportAnalyticsReport(
-        startDate: _startDate,
-        endDate: _endDate,
-      );
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Relatório exportado com sucesso'),
@@ -151,42 +147,41 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : _errorMessage != null
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage != null
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error, size: 64, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text(_errorMessage!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadAnalyticsData,
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildDateRangeHeader(),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildEngagementTab(),
-                          _buildConversionTab(),
-                          _buildPerformanceTab(),
-                          _buildRevenueTab(),
-                        ],
-                      ),
+                    const Icon(Icons.error, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(_errorMessage!),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadAnalyticsData,
+                      child: const Text('Tentar novamente'),
                     ),
                   ],
                 ),
+              )
+              : Column(
+                children: [
+                  _buildDateRangeHeader(),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildEngagementTab(),
+                        _buildConversionTab(),
+                        _buildPerformanceTab(),
+                        _buildRevenueTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 
@@ -201,10 +196,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             'Período: ${_formatDate(_startDate)} - ${_formatDate(_endDate)}',
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          TextButton(
-            onPressed: _selectDateRange,
-            child: const Text('Alterar'),
-          ),
+          TextButton(onPressed: _selectDateRange, child: const Text('Alterar')),
         ],
       ),
     );
@@ -244,7 +236,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             ),
             _MetricCard(
               title: 'Duração Média da Sessão',
-              value: '${_engagementMetrics!.avgSessionDuration.toStringAsFixed(1)}min',
+              value:
+                  '${_engagementMetrics!.avgSessionDuration.toStringAsFixed(1)}min',
               icon: Icons.timer,
               color: Colors.orange,
             ),
@@ -303,13 +296,15 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
           _buildMetricsGrid([
             _MetricCard(
               title: 'Tempo de Inicialização',
-              value: '${_performanceMetrics!.avgAppStartupTime.toStringAsFixed(2)}s',
+              value:
+                  '${_performanceMetrics!.avgAppStartupTime.toStringAsFixed(2)}s',
               icon: Icons.speed,
               color: Colors.cyan,
             ),
             _MetricCard(
               title: 'Carregamento de Tela',
-              value: '${_performanceMetrics!.avgScreenLoadTime.toStringAsFixed(2)}s',
+              value:
+                  '${_performanceMetrics!.avgScreenLoadTime.toStringAsFixed(2)}s',
               icon: Icons.hourglass_empty,
               color: Colors.indigo,
             ),
@@ -332,7 +327,9 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
-          _buildFeaturePerformanceChart(_performanceMetrics!.featurePerformance),
+          _buildFeaturePerformanceChart(
+            _performanceMetrics!.featurePerformance,
+          ),
         ],
       ),
     );
@@ -360,7 +357,8 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
             ),
             _MetricCard(
               title: 'ARPU',
-              value: 'R\$ ${_revenueMetrics!.averageRevenuePerUser.toStringAsFixed(2)}',
+              value:
+                  'R\$ ${_revenueMetrics!.averageRevenuePerUser.toStringAsFixed(2)}',
               icon: Icons.person,
               color: Colors.blue,
             ),
@@ -424,10 +422,7 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
           ),
           Text(
             card.title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -445,35 +440,43 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        children: featureUsage.entries.map((entry) {
-          final percentage = entry.value / featureUsage.values.reduce((a, b) => a > b ? a : b);
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 120,
-                  child: Text(
-                    entry.key.replaceAll('_', ' ').toUpperCase(),
-                    style: const TextStyle(fontSize: 12),
-                  ),
+        children:
+            featureUsage.entries.map((entry) {
+              final percentage =
+                  entry.value /
+                  featureUsage.values.reduce((a, b) => a > b ? a : b);
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        entry.key.replaceAll('_', ' ').toUpperCase(),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: percentage,
+                        backgroundColor: Colors.grey[200],
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.blue,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      entry.value.toString(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: percentage,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  entry.value.toString(),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
@@ -486,69 +489,83 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        children: ConversionFunnelStep.values.map((step) {
-          final count = metrics.stepCounts[step] ?? 0;
-          final rate = metrics.conversionRates[step] ?? 0.0;
-          final maxCount = metrics.stepCounts.values.reduce((a, b) => a > b ? a : b);
-          final width = count / maxCount;
+        children:
+            ConversionFunnelStep.values.map((step) {
+              final count = metrics.stepCounts[step] ?? 0;
+              final rate = metrics.conversionRates[step] ?? 0.0;
+              final maxCount = metrics.stepCounts.values.reduce(
+                (a, b) => a > b ? a : b,
+              );
+              final width = count / maxCount;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step.stepName.replaceAll('_', ' ').toUpperCase(),
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Row(
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 30,
-                        child: Stack(
+                    Text(
+                      step.stepName.replaceAll('_', ' ').toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 30,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width *
+                                      0.6 *
+                                      width,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Container(
-                              width: double.infinity,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(15),
+                            Text(
+                              count.toString(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Container(
-                              width: MediaQuery.of(context).size.width * 0.6 * width,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(15),
+                            Text(
+                              '${rate.toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          count.toString(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${rate.toStringAsFixed(1)}%',
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         ),
                       ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
@@ -560,26 +577,25 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        children: rates.entries.map((entry) {
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey[200]!),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(entry.key.stepName.replaceAll('_', ' ')),
-                Text(
-                  '${entry.value.toStringAsFixed(1)}%',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+        children:
+            rates.entries.map((entry) {
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
                 ),
-              ],
-            ),
-          );
-        }).toList(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(entry.key.stepName.replaceAll('_', ' ')),
+                    Text(
+                      '${entry.value.toStringAsFixed(1)}%',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -593,32 +609,38 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        children: performance.entries.map((entry) {
-          final color = entry.value < 1.0 ? Colors.green : entry.value < 2.0 ? Colors.orange : Colors.red;
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: Text(entry.key.toUpperCase()),
+        children:
+            performance.entries.map((entry) {
+              final color =
+                  entry.value < 1.0
+                      ? Colors.green
+                      : entry.value < 2.0
+                      ? Colors.orange
+                      : Colors.red;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    SizedBox(width: 100, child: Text(entry.key.toUpperCase())),
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: (entry.value / 3.0).clamp(0.0, 1.0),
+                        backgroundColor: Colors.grey[200],
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${entry.value.toStringAsFixed(2)}s',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: (entry.value / 3.0).clamp(0.0, 1.0),
-                    backgroundColor: Colors.grey[200],
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${entry.value.toStringAsFixed(2)}s',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }
@@ -632,34 +654,37 @@ class _AnalyticsDashboardScreenState extends State<AnalyticsDashboardScreen>
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
-        children: revenueByPlan.entries.map((entry) {
-          final total = revenueByPlan.values.reduce((a, b) => a + b);
-          final percentage = entry.value / total;
-          
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: Text(entry.key.toUpperCase()),
+        children:
+            revenueByPlan.entries.map((entry) {
+              final total = revenueByPlan.values.reduce((a, b) => a + b);
+              final percentage = entry.value / total;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    SizedBox(width: 100, child: Text(entry.key.toUpperCase())),
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        value: percentage,
+                        backgroundColor: Colors.grey[200],
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.green,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'R\$ ${entry.value.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: percentage,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'R\$ ${entry.value.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
+              );
+            }).toList(),
       ),
     );
   }

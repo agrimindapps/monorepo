@@ -168,9 +168,10 @@ class PragaItemWidget extends StatelessWidget {
       case '3': // Plantas Daninhas
         return FontAwesomeIcons.seedling;
       default:
-        return FontAwesomeIcons.exclamationTriangle;
+        return FontAwesomeIcons.triangleExclamation;
     }
   }
+
   Widget _buildFullImage() {
     final color = _getTypeColor();
 

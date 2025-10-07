@@ -15,7 +15,7 @@ class TaskCompletionDialog extends StatefulWidget {
   final DateTime? nextTaskDate;
   final String? nextTaskDescription;
   final VoidCallback? onCancel;
-  final Function(DateTime completionDate, String? notes)? onConfirm;
+  final void Function(DateTime completionDate, String? notes)? onConfirm;
 
   const TaskCompletionDialog({
     super.key,

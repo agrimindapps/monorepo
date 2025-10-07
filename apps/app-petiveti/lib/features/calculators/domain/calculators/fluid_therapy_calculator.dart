@@ -14,7 +14,7 @@ class FluidTherapyCalculator extends Calculator {
   String get name => 'Fluidoterapia';
 
   @override
-  String get description => 
+  String get description =>
       'Calcula as necessidades de fluidos para manutenção, '
       'reposição de déficits e perdas contínuas.';
 
@@ -97,15 +97,23 @@ class FluidTherapyCalculator extends Calculator {
     }
 
     final weight = inputs['weight'] as double;
-    final dehydrationPercentage = _parseDehydrationPercentage(inputs['dehydration_percentage'] as String);
+    final dehydrationPercentage = _parseDehydrationPercentage(
+      inputs['dehydration_percentage'] as String,
+    );
     final ongoingLosses = (inputs['ongoing_losses'] as double?) ?? 0.0;
     final vomitingFrequency = inputs['vomiting_frequency'] as String;
     final diarrheaSeverity = inputs['diarrhea_severity'] as String;
     final correctionHours = int.parse(inputs['correction_hours'] as String);
     final maintenanceNeeds = _calculateMaintenanceNeeds(weight);
-    final dehydrationDeficit = _calculateDehydrationDeficit(weight, dehydrationPercentage);
+    final dehydrationDeficit = _calculateDehydrationDeficit(
+      weight,
+      dehydrationPercentage,
+    );
     final additionalLosses = _calculateAdditionalLosses(
-      weight, vomitingFrequency, diarrheaSeverity, ongoingLosses
+      weight,
+      vomitingFrequency,
+      diarrheaSeverity,
+      ongoingLosses,
     );
     final maintenanceRate = maintenanceNeeds / 24; // ml/h
     final deficitRate = dehydrationDeficit / correctionHours; // ml/h
@@ -145,7 +153,8 @@ class FluidTherapyCalculator extends Calculator {
     return _FluidTherapyResult(
       calculatorId: id,
       results: resultItems,
-      summary: 'Taxa total: ${totalRate.toStringAsFixed(1)} ml/h (${totalWithDeficit.round()} ml em ${correctionHours}h)',
+      summary:
+          'Taxa total: ${totalRate.toStringAsFixed(1)} ml/h (${totalWithDeficit.round()} ml em ${correctionHours}h)',
       calculatedAt: DateTime.now(),
     );
   }
@@ -170,7 +179,8 @@ class FluidTherapyCalculator extends Calculator {
       if (weight is! double && weight is! int) {
         errors.add('Peso deve ser um número');
       } else {
-        final weightValue = weight is int ? weight.toDouble() : weight as double;
+        final weightValue =
+            weight is int ? weight.toDouble() : weight as double;
         if (weightValue <= 0) {
           errors.add('Peso deve ser maior que zero');
         }
@@ -194,11 +204,19 @@ class FluidTherapyCalculator extends Calculator {
     return weight * 70;
   }
 
-  double _calculateDehydrationDeficit(double weight, double dehydrationPercentage) {
+  double _calculateDehydrationDeficit(
+    double weight,
+    double dehydrationPercentage,
+  ) {
     return weight * (dehydrationPercentage / 100) * 1000;
   }
 
-  double _calculateAdditionalLosses(double weight, String vomiting, String diarrhea, double ongoingLosses) {
+  double _calculateAdditionalLosses(
+    double weight,
+    String vomiting,
+    String diarrhea,
+    double ongoingLosses,
+  ) {
     double additionalLosses = ongoingLosses;
     switch (vomiting) {
       case '1-2':
@@ -227,69 +245,6 @@ class FluidTherapyCalculator extends Calculator {
     }
 
     return additionalLosses;
-  }
-
-  List<Map<String, String>> _generateFluidRecommendations(
-      double dehydrationPercentage, String vomiting, String diarrhea) {
-    final recommendations = <Map<String, String>>[];
-
-    if (dehydrationPercentage == 0.0 && vomiting == '0' && diarrhea == 'Nenhuma') {
-      recommendations.add({
-        'fluid': 'Solução de Ringer Lactato',
-        'indication': 'Manutenção normal',
-        'composition': 'Eletrólitos balanceados',
-      });
-    } else {
-      if (dehydrationPercentage <= 5.0) {
-        recommendations.add({
-          'fluid': 'Solução de Ringer Lactato',
-          'indication': 'Desidratação leve a moderada',
-          'composition': 'Na+ 130, K+ 4, Ca++ 2.7, Cl- 109, Lactato 28 mEq/L',
-        });
-      } else {
-        recommendations.add({
-          'fluid': 'Solução Salina 0.9%',
-          'indication': 'Desidratação grave - fase inicial',
-          'composition': 'Na+ 154, Cl- 154 mEq/L',
-        });
-        recommendations.add({
-          'fluid': 'Solução de Ringer Lactato',
-          'indication': 'Manutenção após estabilização',
-          'composition': 'Eletrólitos balanceados',
-        });
-      }
-      if (vomiting != '0') {
-        recommendations.add({
-          'fluid': 'Solução Salina 0.45% + KCl',
-          'indication': 'Reposição de perdas por vômito',
-          'composition': 'Hipotônica com potássio (20-40 mEq/L)',
-        });
-      }
-
-      if (diarrhea != 'Nenhuma') {
-        recommendations.add({
-          'fluid': 'Solução de Ringer + KCl',
-          'indication': 'Reposição de perdas por diarreia',
-          'composition': 'Eletrólitos + K+ adicional (20-40 mEq/L)',
-        });
-      }
-    }
-
-    return recommendations;
-  }
-
-  List<String> _getMonitoringParameters() {
-    return [
-      'Peso corporal (a cada 6-12h)',
-      'Sinais vitais (FC, FR, temperatura)',
-      'Turgor cutâneo e hidratação de mucosas',
-      'Produção urinária (2-4 ml/kg/h normal)',
-      'Pressão venosa central (se disponível)',
-      'Eletrólitos séricos (Na+, K+, Cl-)',
-      'Ureia e creatinina',
-      'Hematócrito e proteínas plasmáticas',
-      'Sinais de sobrecarga hídrica (edema, dispneia)',
-    ];
   }
 }
 

@@ -15,9 +15,9 @@ abstract class SpacesLocalDatasource {
 
 class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
   static const String _boxName = 'spaces';
-  Box? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
+  Box<dynamic>? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
 
-  Future<Box> get box async {
+  Future<Box<dynamic>> get box async {
     if (_box != null) return _box!;
     if (Hive.isBoxOpen(_boxName)) {
       _box = Hive.box(_boxName);

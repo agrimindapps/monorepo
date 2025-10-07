@@ -6,7 +6,8 @@ class UserHistorySyncEntity extends BaseSyncEntity {
   final String tipoItem; // 'praga', 'defensivo', 'diagnostico', 'cultura'
   final String itemId;
   final String nomeItem;
-  final String acaoTipo; // 'view', 'favorite', 'unfavorite', 'comment', 'search'
+  final String
+  acaoTipo; // 'view', 'favorite', 'unfavorite', 'comment', 'search'
   final DateTime dataAcao;
   final Map<String, dynamic> metadados; // Additional context data
   final String? categoria;
@@ -50,7 +51,6 @@ class UserHistorySyncEntity extends BaseSyncEntity {
     };
   }
 
-  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -110,9 +110,18 @@ class UserHistorySyncEntity extends BaseSyncEntity {
       categoria: map['categoria'] as String?,
       cultura: map['cultura'] as String?,
       tempoVisualizacaoSegundos: map['tempoVisualizacaoSegundos'] as int?,
-      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'] as String) : null,
-      updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt'] as String) : null,
-      lastSyncAt: map['lastSyncAt'] != null ? DateTime.parse(map['lastSyncAt'] as String) : null,
+      createdAt:
+          map['createdAt'] != null
+              ? DateTime.parse(map['createdAt'] as String)
+              : null,
+      updatedAt:
+          map['updatedAt'] != null
+              ? DateTime.parse(map['updatedAt'] as String)
+              : null,
+      lastSyncAt:
+          map['lastSyncAt'] != null
+              ? DateTime.parse(map['lastSyncAt'] as String)
+              : null,
       isDirty: map['isDirty'] as bool? ?? false,
       isDeleted: map['isDeleted'] as bool? ?? false,
       version: map['version'] as int? ?? 1,
@@ -251,7 +260,8 @@ class UserHistorySyncEntity extends BaseSyncEntity {
       metadados: metadados ?? this.metadados,
       categoria: categoria ?? this.categoria,
       cultura: cultura ?? this.cultura,
-      tempoVisualizacaoSegundos: tempoVisualizacaoSegundos ?? this.tempoVisualizacaoSegundos,
+      tempoVisualizacaoSegundos:
+          tempoVisualizacaoSegundos ?? this.tempoVisualizacaoSegundos,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
@@ -265,35 +275,22 @@ class UserHistorySyncEntity extends BaseSyncEntity {
 
   @override
   UserHistorySyncEntity markAsDirty() {
-    return copyWith(
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   UserHistorySyncEntity markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   UserHistorySyncEntity markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   UserHistorySyncEntity incrementVersion() {
-    return copyWith(
-      version: version + 1,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(version: version + 1, updatedAt: DateTime.now());
   }
 
   @override
@@ -313,22 +310,23 @@ class UserHistorySyncEntity extends BaseSyncEntity {
   bool get isViewAction => acaoTipo == 'view';
 
   /// Check if this is a favorite action
-  bool get isFavoriteAction => acaoTipo == 'favorite' || acaoTipo == 'unfavorite';
+  bool get isFavoriteAction =>
+      acaoTipo == 'favorite' || acaoTipo == 'unfavorite';
 
   /// Check if this is a search action
   bool get isSearchAction => acaoTipo == 'search';
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        tipoItem,
-        itemId,
-        nomeItem,
-        acaoTipo,
-        dataAcao,
-        metadados,
-        categoria,
-        cultura,
-        tempoVisualizacaoSegundos,
-      ];
+    ...super.props,
+    tipoItem,
+    itemId,
+    nomeItem,
+    acaoTipo,
+    dataAcao,
+    metadados,
+    categoria,
+    cultura,
+    tempoVisualizacaoSegundos,
+  ];
 }

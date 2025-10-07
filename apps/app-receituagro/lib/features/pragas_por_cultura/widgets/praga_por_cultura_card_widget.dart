@@ -22,14 +22,15 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       elevation: pragaPorCultura.isCritica ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: pragaPorCultura.isCritica 
-            ? const BorderSide(color: Colors.red, width: 1)
-            : BorderSide.none,
+        side:
+            pragaPorCultura.isCritica
+                ? const BorderSide(color: Colors.red, width: 1)
+                : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap,
@@ -68,16 +69,19 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: pragaPorCultura.isCritica 
-                    ? [Colors.red.shade400, Colors.red.shade600]
-                    : [Colors.orange.shade400, Colors.orange.shade600],
+                colors:
+                    pragaPorCultura.isCritica
+                        ? [Colors.red.shade400, Colors.red.shade600]
+                        : [Colors.orange.shade400, Colors.orange.shade600],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              pragaPorCultura.isCritica ? Icons.dangerous : FontAwesomeIcons.bug,
+              pragaPorCultura.isCritica
+                  ? Icons.dangerous
+                  : FontAwesomeIcons.bug,
               color: Colors.white,
               size: 24,
             ),
@@ -89,7 +93,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                pragaPorCultura.praga.nomeComum ?? pragaPorCultura.praga.nomeCientifico,
+                pragaPorCultura.praga.nomeComum,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -99,23 +103,23 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               ...[
-              const SizedBox(height: 4),
-              Text(
-                pragaPorCultura.praga.nomeCientifico,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                  color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 4),
+                Text(
+                  pragaPorCultura.praga.nomeCientifico,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
+              ],
               const SizedBox(height: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildChip(
-                    theme, 
-                    pragaPorCultura.nivelAmeaca, 
+                    theme,
+                    pragaPorCultura.nivelAmeaca,
                     _getNivelAmeacaColor(),
                   ),
                   const SizedBox(width: 8),
@@ -138,7 +142,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
   Widget _buildInformacoesTaxonomicas(ThemeData theme) {
     final info = pragaPorCultura.informacoesTaxonomicas;
     if (info.isEmpty) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -156,11 +160,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
                   color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(
-                  Icons.science,
-                  size: 14,
-                  color: Colors.green,
-                ),
+                child: const Icon(Icons.science, size: 14, color: Colors.green),
               ),
               const SizedBox(width: 8),
               Text(
@@ -177,9 +177,10 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 8,
-            children: info.entries.take(4).map((entry) {
-              return _buildTaxonomiaItem(theme, entry.key, entry.value);
-            }).toList(),
+            children:
+                info.entries.take(4).map((entry) {
+                  return _buildTaxonomiaItem(theme, entry.key, entry.value);
+                }).toList(),
           ),
         ],
       ),
@@ -233,10 +234,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.red.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,18 +315,11 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: color,
-          ),
+          Icon(icon, size: 16, color: color),
           const SizedBox(height: 4),
           Text(
             valor,
@@ -354,11 +345,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
     return Row(
       children: [
         if (pragaPorCultura.defensivosRelacionados.isNotEmpty) ...[
-          const Icon(
-            FontAwesomeIcons.vial,
-            size: 12,
-            color: Colors.green,
-          ),
+          const Icon(FontAwesomeIcons.vial, size: 12, color: Colors.green),
           const SizedBox(width: 4),
           Expanded(
             child: Text(
@@ -372,7 +359,7 @@ class PragaPorCulturaCardWidget extends StatelessWidget {
             ),
           ),
         ],
-        
+
         const Spacer(),
         if (onVerDefensivos != null)
           Container(

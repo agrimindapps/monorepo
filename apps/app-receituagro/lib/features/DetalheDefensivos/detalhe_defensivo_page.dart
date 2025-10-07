@@ -272,7 +272,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(detalheDefensivoNotifierProvider);
+    ref.watch(detalheDefensivoNotifierProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -450,9 +450,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DefensivoInfoCardsWidget(defensivo: entity),
-            ],
+            children: [DefensivoInfoCardsWidget(defensivo: entity)],
           ),
         );
       },

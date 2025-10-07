@@ -1,10 +1,10 @@
-
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
 /// Espaco model with Firebase sync support
 /// TypeId: 1 - Sequential numbering
 @HiveType(typeId: 1)
+// ignore: must_be_immutable
 class EspacoModel extends BaseSyncModel {
   @override
   @HiveField(0)
@@ -208,6 +208,7 @@ class EspacoModel extends BaseSyncModel {
       dataCriacao: dataCriacao ?? this.dataCriacao,
     );
   }
+
   Map<String, dynamic> toMap() => toHiveMap();
   @override
   Map<String, dynamic> toJson() => toHiveMap();

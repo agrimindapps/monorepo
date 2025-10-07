@@ -8,7 +8,7 @@ import '../../../../core/theme/plantis_colors.dart';
 /// Dialog para escolher opções de restauração do backup
 class RestoreOptionsDialog extends StatefulWidget {
   final BackupInfo backup;
-  final Function(RestoreOptions) onRestore;
+  final void Function(RestoreOptions) onRestore;
 
   const RestoreOptionsDialog({
     super.key,

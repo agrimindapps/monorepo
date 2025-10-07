@@ -40,7 +40,7 @@ import '../../domain/entities/task.dart';
 /// - Handles loading states during plant retrieval
 class TaskCreationDialog extends ConsumerStatefulWidget {
   final VoidCallback? onCancel;
-  final Function(TaskCreationData)? onConfirm;
+  final void Function(TaskCreationData)? onConfirm;
 
   const TaskCreationDialog({super.key, this.onCancel, this.onConfirm});
 

@@ -17,7 +17,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -40,11 +40,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Icon(
-                  Icons.share,
-                  size: 48,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.share, size: 48, color: theme.colorScheme.primary),
                 const SizedBox(height: 12),
                 Text(
                   'Compartilhar Diagnóstico',
@@ -94,7 +90,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(height: 20),
         ],
       ),
@@ -109,7 +105,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -121,10 +117,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: theme.dividerColor,
-              width: 1,
-            ),
+            border: Border.all(color: theme.dividerColor, width: 1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -135,11 +128,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  color: theme.colorScheme.primary,
-                  size: 20,
-                ),
+                child: Icon(icon, color: theme.colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -179,7 +168,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
 
   void _shareViaApps(BuildContext context) async {
     try {
-      await Share.share(shareText);
+      await SharePlus.instance.share(ShareParams(text: shareText));
       onSuccess?.call();
     } catch (e) {
       onError?.call('Erro ao compartilhar via apps');
@@ -214,7 +203,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
   Widget _buildCustomShareDialog(BuildContext context) {
     final theme = Theme.of(context);
     final textController = TextEditingController(text: shareText);
-    
+
     return AlertDialog(
       backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
       title: Text(
@@ -254,9 +243,7 @@ class ShareBottomSheetWidget extends StatelessWidget {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: theme.colorScheme.primary,
-                    ),
+                    borderSide: BorderSide(color: theme.colorScheme.primary),
                   ),
                 ),
               ),
@@ -279,11 +266,15 @@ class ShareBottomSheetWidget extends StatelessWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 try {
-                  await Clipboard.setData(ClipboardData(text: textController.text));
+                  await Clipboard.setData(
+                    ClipboardData(text: textController.text),
+                  );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Texto copiado para área de transferência'),
+                        content: Text(
+                          'Texto copiado para área de transferência',
+                        ),
                         backgroundColor: Colors.green,
                         behavior: SnackBarBehavior.floating,
                       ),
@@ -304,7 +295,9 @@ class ShareBottomSheetWidget extends StatelessWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 try {
-                  await Share.share(textController.text);
+                  await SharePlus.instance.share(
+                    ShareParams(text: textController.text),
+                  );
                   onSuccess?.call();
                 } catch (e) {
                   onError?.call('Erro ao compartilhar texto');

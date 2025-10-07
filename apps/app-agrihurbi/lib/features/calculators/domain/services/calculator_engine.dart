@@ -8,7 +8,7 @@ import 'result_formatter_service.dart';
 import 'unit_conversion_service.dart';
 
 /// Motor principal do sistema de calculadoras
-/// 
+///
 /// Orquestra validação, conversão, cálculo e formatação
 /// com tratamento robusto de erros e logging completo
 class CalculatorEngine {
@@ -79,7 +79,10 @@ class CalculatorEngine {
         );
 
         if (!validationResult.isValid) {
-          session.complete(success: false, errors: validationResult.errors.values.toList());
+          session.complete(
+            success: false,
+            errors: validationResult.errors.values.toList(),
+          );
           return CalculationEngineResult.validationError(validationResult);
         }
         if (validateOnly) {
@@ -101,10 +104,7 @@ class CalculatorEngine {
           preferredUnits,
         );
 
-        session.complete(
-          success: true,
-          result: formattedResult,
-        );
+        session.complete(success: true, result: formattedResult);
 
         return CalculationEngineResult.success(
           formattedResult,
@@ -170,10 +170,10 @@ class CalculatorEngine {
   CalculatorEngineStats getStats() {
     final totalCalculators = _registeredCalculators.length;
     final activeSessions = _activeSessions.length;
-    
+
     final categoryStats = <CalculatorCategory, int>{};
     for (final calculator in _registeredCalculators.values) {
-      categoryStats[calculator.category] = 
+      categoryStats[calculator.category] =
           (categoryStats[calculator.category] ?? 0) + 1;
     }
 
@@ -186,8 +186,12 @@ class CalculatorEngine {
 
   /// Limpa sessões antigas
   void cleanupSessions({Duration? olderThan}) {
-    final cutoff = DateTime.now().subtract(olderThan ?? const Duration(hours: 1));
-    _activeSessions.removeWhere((session) => session.startTime.isBefore(cutoff));
+    final cutoff = DateTime.now().subtract(
+      olderThan ?? const Duration(hours: 1),
+    );
+    _activeSessions.removeWhere(
+      (session) => session.startTime.isBefore(cutoff),
+    );
   }
 
   /// Métodos privados
@@ -197,7 +201,10 @@ class CalculatorEngine {
     Map<String, dynamic> parameters,
   ) async {
     final calculatorParameters = calculator.parameters;
-    return ParameterValidator.validateParameters(calculatorParameters, parameters);
+    return ParameterValidator.validateParameters(
+      calculatorParameters,
+      parameters,
+    );
   }
 
   Future<Map<String, dynamic>> _convertUnits(
@@ -214,10 +221,12 @@ class CalculatorEngine {
     for (final entry in preferredUnits.entries) {
       final parameterId = entry.key;
       final targetUnit = entry.value;
-      
-      final parameter = calculator.parameters
-          .firstWhere((p) => p.id == parameterId, orElse: () => 
-              throw ArgumentError('Parâmetro não encontrado: $parameterId'));
+
+      final parameter = calculator.parameters.firstWhere(
+        (p) => p.id == parameterId,
+        orElse:
+            () => throw ArgumentError('Parâmetro não encontrado: $parameterId'),
+      );
 
       final value = parameters[parameterId];
       if (value is num && parameter.unit != targetUnit) {
@@ -264,25 +273,34 @@ class CalculatorEngine {
     for (final resultValue in result.results) {
       String formattedValue;
       String displayUnit = resultValue.unit;
-      if (preferredUnits != null && preferredUnits.containsKey(resultValue.label)) {
-        final targetUnit = preferredUnits[resultValue.label]!;
-        formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);
+      if (preferredUnits != null &&
+          preferredUnits.containsKey(resultValue.label)) {
+        formattedValue = ResultFormatterService.formatPrimaryResult(
+          resultValue,
+        );
       } else {
-        formattedValue = ResultFormatterService.formatPrimaryResult(resultValue);
+        formattedValue = ResultFormatterService.formatPrimaryResult(
+          resultValue,
+        );
       }
 
-      formattedResults.add(FormattedResultValue(
-        label: resultValue.label,
-        formattedValue: formattedValue,
-        originalValue: resultValue.value as double,
-        unit: displayUnit,
-        description: resultValue.description ?? '',
-      ));
+      formattedResults.add(
+        FormattedResultValue(
+          label: resultValue.label,
+          formattedValue: formattedValue,
+          originalValue: resultValue.value as double,
+          unit: displayUnit,
+          description: resultValue.description ?? '',
+        ),
+      );
     }
 
-    final formattedRecommendations = result.recommendations?.isNotEmpty == true
-        ? ResultFormatterService.formatRecommendations(result.recommendations!)
-        : <String>[];
+    final formattedRecommendations =
+        result.recommendations?.isNotEmpty == true
+            ? ResultFormatterService.formatRecommendations(
+              result.recommendations!,
+            )
+            : <String>[];
 
     return FormattedCalculationResult(
       calculatorId: calculator.id,
@@ -327,26 +345,17 @@ class CalculationEngineResult {
   factory CalculationEngineResult.validationError(
     ValidationBatchResult validation,
   ) {
-    return CalculationEngineResult._(
-      isSuccess: false,
-      validation: validation,
-    );
+    return CalculationEngineResult._(isSuccess: false, validation: validation);
   }
 
   factory CalculationEngineResult.validationSuccess(
     ValidationBatchResult validation,
   ) {
-    return CalculationEngineResult._(
-      isSuccess: true,
-      validation: validation,
-    );
+    return CalculationEngineResult._(isSuccess: true, validation: validation);
   }
 
   factory CalculationEngineResult.error(CalculatorError error) {
-    return CalculationEngineResult._(
-      isSuccess: false,
-      error: error,
-    );
+    return CalculationEngineResult._(isSuccess: false, error: error);
   }
 }
 

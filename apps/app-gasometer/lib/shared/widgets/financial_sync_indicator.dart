@@ -120,7 +120,7 @@ class FinancialSyncIndicator extends ConsumerWidget {
   }
 
   Widget _buildSyncStats(BuildContext context, Map<String, dynamic> stats) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final pendingFinancial = stats['financial_queued'] as int? ?? 0;
     final highPriority = stats['high_priority_queued'] as int? ?? 0;
     final retrying = stats['retrying'] as int? ?? 0;

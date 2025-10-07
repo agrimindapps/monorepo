@@ -361,27 +361,6 @@ class DiabetesInsulinCalculator extends Calculator {
     return 'Subcutânea';
   }
 
-  static int _calculateMonitoringInterval(DiabetesInsulinInput input) {
-    if (input.isEmergency || input.isFirstDose) {
-      return 2;
-    } else if (input.glucoseLevel > 400) {
-      return 4;
-    } else {
-      return 8;
-    }
-  }
-
-  static double _getTargetGlucoseRange(DiabetesType type) {
-    switch (type) {
-      case DiabetesType.type1:
-        return 150.0;
-      case DiabetesType.type2:
-        return 180.0;
-      case DiabetesType.gestational:
-        return 120.0;
-    }
-  }
-
   static List<String> _generateWarnings(
     DiabetesInsulinInput input,
     double finalDose,
@@ -440,16 +419,5 @@ class DiabetesInsulinCalculator extends Calculator {
 
     final nextDose = now.add(Duration(hours: hoursToAdd));
     return '${nextDose.hour.toString().padLeft(2, '0')}:${nextDose.minute.toString().padLeft(2, '0')}';
-  }
-
-  static bool _requiresVeterinarySupervision(
-    DiabetesInsulinInput input,
-    double finalDose,
-  ) {
-    return input.isFirstDose ||
-        input.isEmergency ||
-        input.glucoseLevel > 500 ||
-        input.glucoseLevel < 80 ||
-        finalDose > input.weight * 0.8;
   }
 }

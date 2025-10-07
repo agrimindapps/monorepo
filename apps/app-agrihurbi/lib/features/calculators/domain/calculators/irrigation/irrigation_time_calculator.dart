@@ -8,127 +8,150 @@ import '../../entities/calculator_parameter.dart';
 /// Calcula o tempo necessário para aplicar determinada lâmina de água
 class IrrigationTimeCalculator extends CalculatorEntity {
   const IrrigationTimeCalculator()
-      : super(
-          id: 'irrigation_time',
-          name: 'Tempo de Irrigação',
-          description: 'Calcula o tempo necessário para aplicar a lâmina de irrigação desejada',
-          category: CalculatorCategory.irrigation,
-          parameters: const [
-            CalculatorParameter(
-              id: 'water_depth',
-              name: 'Lâmina de Irrigação',
-              description: 'Lâmina de água a ser aplicada (mm)',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.none,
-              minValue: 1.0,
-              maxValue: 100.0,
-              defaultValue: 15.0,
-              validationMessage: 'Lâmina deve estar entre 1 e 100 mm',
-            ),
-            CalculatorParameter(
-              id: 'flow_rate',
-              name: 'Vazão do Sistema',
-              description: 'Vazão total do sistema de irrigação (L/h)',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.none,
-              minValue: 100.0,
-              maxValue: 50000.0,
-              defaultValue: 3000.0,
-              validationMessage: 'Vazão deve estar entre 100 e 50.000 L/h',
-            ),
-            CalculatorParameter(
-              id: 'irrigated_area',
-              name: 'Área Irrigada',
-              description: 'Área a ser irrigada (hectares)',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.hectare,
-              minValue: 0.01,
-              maxValue: 1000.0,
-              defaultValue: 2.0,
-              validationMessage: 'Área deve estar entre 0.01 e 1000 hectares',
-            ),
-            CalculatorParameter(
-              id: 'system_efficiency',
-              name: 'Eficiência do Sistema',
-              description: 'Eficiência de aplicação do sistema (%)',
-              type: ParameterType.percentage,
-              unit: ParameterUnit.percentual,
-              minValue: 50.0,
-              maxValue: 98.0,
-              defaultValue: 85.0,
-              validationMessage: 'Eficiência deve estar entre 50% e 98%',
-            ),
-            CalculatorParameter(
-              id: 'uniformity',
-              name: 'Uniformidade de Aplicação',
-              description: 'Coeficiente de uniformidade (%)',
-              type: ParameterType.percentage,
-              unit: ParameterUnit.percentual,
-              minValue: 60.0,
-              maxValue: 95.0,
-              defaultValue: 80.0,
-              validationMessage: 'Uniformidade deve estar entre 60% e 95%',
-            ),
-            CalculatorParameter(
-              id: 'system_type',
-              name: 'Tipo de Sistema',
-              description: 'Tipo do sistema de irrigação',
-              type: ParameterType.selection,
-              options: ['Aspersão Convencional', 'Gotejamento', 'Microaspersão', 'Pivô Central', 'Aspersão Autopropelido'],
-              defaultValue: 'Aspersão Convencional',
-            ),
-            CalculatorParameter(
-              id: 'wind_speed',
-              name: 'Velocidade do Vento',
-              description: 'Velocidade média do vento (m/s) - opcional',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.none,
-              minValue: 0.0,
-              maxValue: 15.0,
-              defaultValue: 2.0,
-              required: false,
-              validationMessage: 'Velocidade do vento deve estar entre 0 e 15 m/s',
-            ),
-          ],
-          formula: 'Tempo = (Lâmina × Área) / (Vazão × Eficiência)',
-          references: const [
-            'Bernardo et al. (2006) - Manual de Irrigação',
-            'Mantovani et al. (2009) - Irrigação: Princípios e Métodos',
-          ],
-        );
+    : super(
+        id: 'irrigation_time',
+        name: 'Tempo de Irrigação',
+        description:
+            'Calcula o tempo necessário para aplicar a lâmina de irrigação desejada',
+        category: CalculatorCategory.irrigation,
+        parameters: const [
+          CalculatorParameter(
+            id: 'water_depth',
+            name: 'Lâmina de Irrigação',
+            description: 'Lâmina de água a ser aplicada (mm)',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.none,
+            minValue: 1.0,
+            maxValue: 100.0,
+            defaultValue: 15.0,
+            validationMessage: 'Lâmina deve estar entre 1 e 100 mm',
+          ),
+          CalculatorParameter(
+            id: 'flow_rate',
+            name: 'Vazão do Sistema',
+            description: 'Vazão total do sistema de irrigação (L/h)',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.none,
+            minValue: 100.0,
+            maxValue: 50000.0,
+            defaultValue: 3000.0,
+            validationMessage: 'Vazão deve estar entre 100 e 50.000 L/h',
+          ),
+          CalculatorParameter(
+            id: 'irrigated_area',
+            name: 'Área Irrigada',
+            description: 'Área a ser irrigada (hectares)',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.hectare,
+            minValue: 0.01,
+            maxValue: 1000.0,
+            defaultValue: 2.0,
+            validationMessage: 'Área deve estar entre 0.01 e 1000 hectares',
+          ),
+          CalculatorParameter(
+            id: 'system_efficiency',
+            name: 'Eficiência do Sistema',
+            description: 'Eficiência de aplicação do sistema (%)',
+            type: ParameterType.percentage,
+            unit: ParameterUnit.percentual,
+            minValue: 50.0,
+            maxValue: 98.0,
+            defaultValue: 85.0,
+            validationMessage: 'Eficiência deve estar entre 50% e 98%',
+          ),
+          CalculatorParameter(
+            id: 'uniformity',
+            name: 'Uniformidade de Aplicação',
+            description: 'Coeficiente de uniformidade (%)',
+            type: ParameterType.percentage,
+            unit: ParameterUnit.percentual,
+            minValue: 60.0,
+            maxValue: 95.0,
+            defaultValue: 80.0,
+            validationMessage: 'Uniformidade deve estar entre 60% e 95%',
+          ),
+          CalculatorParameter(
+            id: 'system_type',
+            name: 'Tipo de Sistema',
+            description: 'Tipo do sistema de irrigação',
+            type: ParameterType.selection,
+            options: [
+              'Aspersão Convencional',
+              'Gotejamento',
+              'Microaspersão',
+              'Pivô Central',
+              'Aspersão Autopropelido',
+            ],
+            defaultValue: 'Aspersão Convencional',
+          ),
+          CalculatorParameter(
+            id: 'wind_speed',
+            name: 'Velocidade do Vento',
+            description: 'Velocidade média do vento (m/s) - opcional',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.none,
+            minValue: 0.0,
+            maxValue: 15.0,
+            defaultValue: 2.0,
+            required: false,
+            validationMessage:
+                'Velocidade do vento deve estar entre 0 e 15 m/s',
+          ),
+        ],
+        formula: 'Tempo = (Lâmina × Área) / (Vazão × Eficiência)',
+        references: const [
+          'Bernardo et al. (2006) - Manual de Irrigação',
+          'Mantovani et al. (2009) - Irrigação: Princípios e Métodos',
+        ],
+      );
 
   @override
   CalculationResult calculate(Map<String, dynamic> inputs) {
     try {
       final double waterDepth = double.parse(inputs['water_depth'].toString());
       final double flowRate = double.parse(inputs['flow_rate'].toString());
-      final double irrigatedArea = double.parse(inputs['irrigated_area'].toString());
-      final double systemEfficiency = double.parse(inputs['system_efficiency'].toString()) / 100;
-      final double uniformity = double.parse(inputs['uniformity'].toString()) / 100;
+      final double irrigatedArea = double.parse(
+        inputs['irrigated_area'].toString(),
+      );
+      final double systemEfficiency =
+          double.parse(inputs['system_efficiency'].toString()) / 100;
+      final double uniformity =
+          double.parse(inputs['uniformity'].toString()) / 100;
       final String systemType = inputs['system_type'].toString();
-      final double windSpeed = inputs['wind_speed'] != null ? 
-                              double.parse(inputs['wind_speed'].toString()) : 0.0;
+      final double windSpeed =
+          inputs['wind_speed'] != null
+              ? double.parse(inputs['wind_speed'].toString())
+              : 0.0;
       final double areaM2 = CalculatorMath.hectareToSquareMeters(irrigatedArea);
       final double volumeNeededM3 = (waterDepth / 1000) * areaM2; // m³
-      final double volumeNeededLiters = CalculatorMath.cubicToLiters(volumeNeededM3);
+      final double volumeNeededLiters = CalculatorMath.cubicToLiters(
+        volumeNeededM3,
+      );
       final double realVolumeNeeded = volumeNeededLiters / systemEfficiency;
       final double basicTimeHours = realVolumeNeeded / flowRate;
-      final double basicTimeMinutes = basicTimeHours * 60;
       final double windFactor = _calculateWindFactor(systemType, windSpeed);
       final double uniformityFactor = _calculateUniformityFactor(uniformity);
-      final double correctedTimeHours = basicTimeHours * windFactor * uniformityFactor;
+      final double correctedTimeHours =
+          basicTimeHours * windFactor * uniformityFactor;
       final double correctedTimeMinutes = correctedTimeHours * 60;
       final double intensityApplication = flowRate / areaM2 * 1000; // mm/h
-      final double applicationRate = waterDepth / correctedTimeHours; // mm/h real
-      final int numberOfSectors = _calculateOptimalSectors(systemType, irrigatedArea);
+      final double applicationRate =
+          waterDepth / correctedTimeHours; // mm/h real
+      final int numberOfSectors = _calculateOptimalSectors(
+        systemType,
+        irrigatedArea,
+      );
       final double sectorTime = correctedTimeHours / numberOfSectors;
-      final double time25 = correctedTimeMinutes * 0.25;
       final double time50 = correctedTimeMinutes * 0.50;
-      final double time75 = correctedTimeMinutes * 0.75;
       final double powerEstimated = _estimatePower(flowRate, systemType);
       final double energyConsumption = powerEstimated * correctedTimeHours;
       final List<String> recommendations = _generateRecommendations(
-        systemType, windSpeed, correctedTimeHours, intensityApplication, uniformity);
+        systemType,
+        windSpeed,
+        correctedTimeHours,
+        intensityApplication,
+        uniformity,
+      );
 
       return CalculationResult(
         calculatorId: id,
@@ -263,7 +286,7 @@ class IrrigationTimeCalculator extends CalculatorEntity {
 
   double _estimatePower(double flowRate, String systemType) {
     final double flowRateM3h = flowRate / 1000;
-    
+
     switch (systemType) {
       case 'Aspersão Convencional':
         return flowRateM3h * 1.2; // kW
@@ -287,12 +310,18 @@ class IrrigationTimeCalculator extends CalculatorEntity {
   ) {
     final List<String> recommendations = [];
     if (timeHours < 0.5) {
-      recommendations.add('Tempo muito curto. Verifique se a vazão não está excessiva.');
+      recommendations.add(
+        'Tempo muito curto. Verifique se a vazão não está excessiva.',
+      );
     } else if (timeHours > 12) {
-      recommendations.add('Tempo muito longo. Considere aumentar a vazão ou setorizar.');
+      recommendations.add(
+        'Tempo muito longo. Considere aumentar a vazão ou setorizar.',
+      );
     }
     if (windSpeed > 3.0 && (systemType.contains('Aspersão'))) {
-      recommendations.add('Vento forte. Evite irrigar nas horas mais ventosas.');
+      recommendations.add(
+        'Vento forte. Evite irrigar nas horas mais ventosas.',
+      );
     }
     if (intensity > 25) {
       recommendations.add('Intensidade alta. Risco de escoamento superficial.');
@@ -300,14 +329,18 @@ class IrrigationTimeCalculator extends CalculatorEntity {
       recommendations.add('Intensidade baixa. Boa para infiltração.');
     }
     if (uniformity < 0.75) {
-      recommendations.add('Baixa uniformidade. Revise espaçamento e pressão dos emissores.');
+      recommendations.add(
+        'Baixa uniformidade. Revise espaçamento e pressão dos emissores.',
+      );
     }
     switch (systemType) {
       case 'Aspersão Convencional':
         recommendations.add('Monitore pressão e sobreposição dos aspersores.');
         break;
       case 'Gotejamento':
-        recommendations.add('Verifique entupimento dos gotejadores regularmente.');
+        recommendations.add(
+          'Verifique entupimento dos gotejadores regularmente.',
+        );
         break;
       case 'Pivô Central':
         recommendations.add('Monitore velocidade de deslocamento.');

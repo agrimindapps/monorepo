@@ -13,7 +13,7 @@ class PromoNavigationBar extends StatelessWidget {
     this.testimonialsKey,
   });
 
-  final Function(GlobalKey)? onNavigate;
+  final void Function(GlobalKey)? onNavigate;
   final GlobalKey? featuresKey;
   final GlobalKey? howItWorksKey;
   final GlobalKey? testimonialsKey;
@@ -61,11 +61,7 @@ class PromoNavigationBar extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.eco,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: const Icon(Icons.eco, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 12),
           RichText(
@@ -113,63 +109,64 @@ class PromoNavigationBar extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 20),
-            _buildMobileMenuItem(
-              'Funcionalidades',
-              () => _navigateToSection(featuresKey),
-              context,
-            ),
-            _buildMobileMenuItem(
-              'Como Funciona',
-              () => _navigateToSection(howItWorksKey),
-              context,
-            ),
-            _buildMobileMenuItem(
-              'Depoimentos',
-              () => _navigateToSection(testimonialsKey),
-              context,
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _navigateToLogin(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PlantisColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                child: const Text(
-                  'Entrar',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                const SizedBox(height: 20),
+                _buildMobileMenuItem(
+                  'Funcionalidades',
+                  () => _navigateToSection(featuresKey),
+                  context,
+                ),
+                _buildMobileMenuItem(
+                  'Como Funciona',
+                  () => _navigateToSection(howItWorksKey),
+                  context,
+                ),
+                _buildMobileMenuItem(
+                  'Depoimentos',
+                  () => _navigateToSection(testimonialsKey),
+                  context,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _navigateToLogin(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: PlantisColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Entrar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -181,10 +178,7 @@ class PromoNavigationBar extends StatelessWidget {
     return ListTile(
       title: Text(
         title,
-        style: TextStyle(
-          color: Colors.grey[800],
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(color: Colors.grey[800], fontWeight: FontWeight.w500),
       ),
       onTap: () {
         Navigator.pop(context);
@@ -256,10 +250,7 @@ class PromoNavigationBar extends StatelessWidget {
           ),
           child: const Text(
             'Entrar',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
         IconButton(
@@ -291,9 +282,10 @@ class PromoNavigationBar extends StatelessWidget {
             vertical: isSmallDesktop ? 6 : 8,
           ),
           decoration: BoxDecoration(
-            color: isActive
-                ? PlantisColors.primary.withValues(alpha: 0.1)
-                : Colors.transparent,
+            color:
+                isActive
+                    ? PlantisColors.primary.withValues(alpha: 0.1)
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

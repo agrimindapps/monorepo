@@ -156,7 +156,7 @@ class TaskNotificationService {
   }) async {
     try {
       await _ensureInitialized();
-      final notification = NotificationHelper.createReminderNotification(
+      NotificationHelper.createReminderNotification(
         appName: 'Plantis',
         id: id,
         title: title,

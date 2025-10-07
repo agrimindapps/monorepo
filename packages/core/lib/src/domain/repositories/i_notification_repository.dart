@@ -60,12 +60,10 @@ abstract class INotificationRepository {
   Future<List<PendingNotificationEntity>> getActiveNotifications();
 
   /// Define callback para quando uma notificação for tocada
-  void setNotificationTapCallback(Function(String? payload) callback);
+  void setNotificationTapCallback(NotificationTapCallback callback);
 
   /// Define callback para quando uma ação de notificação for executada
-  void setNotificationActionCallback(
-    Function(String actionId, String? payload) callback,
-  );
+  void setNotificationActionCallback(NotificationActionCallback callback);
 
   /// Verifica se uma notificação específica está agendada
   Future<bool> isNotificationScheduled(int notificationId);

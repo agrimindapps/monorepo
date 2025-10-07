@@ -24,18 +24,18 @@ abstract class PlantTasksLocalDatasource {
 
 class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   static const String _boxName = 'plant_tasks';
-  Box? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
+  Box<dynamic>? _box; // Untyped to accept Box<dynamic> from UnifiedSyncManager
   List<PlantTask>? _cachedTasks;
   DateTime? _cacheTimestamp;
   static const Duration _cacheValidity = Duration(minutes: 5);
 
-  Future<Box> get box async {
+  Future<Box<dynamic>> get box async {
     if (_box != null) return _box!;
     if (Hive.isBoxOpen(_boxName)) {
-      _box = Hive.box(_boxName);
+      _box = Hive.box<dynamic>(_boxName);
       return _box!;
     }
-    _box = await Hive.openBox(_boxName);
+    _box = await Hive.openBox<dynamic>(_boxName);
     return _box!;
   }
 

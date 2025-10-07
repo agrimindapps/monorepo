@@ -9,7 +9,7 @@ class DefensivoSearchField extends StatefulWidget {
   final void Function(ViewMode) onToggleViewMode;
   final VoidCallback? onClear;
   final VoidCallback? onSubmitted;
-  final Function(String)? onChanged;
+  final void Function(String)? onChanged;
 
   const DefensivoSearchField({
     super.key,

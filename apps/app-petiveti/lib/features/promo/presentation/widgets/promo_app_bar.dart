@@ -22,12 +22,12 @@ class PromoAppBar extends StatefulWidget {
 
 class _PromoAppBarState extends State<PromoAppBar> {
   final bool _isVisible = true;
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isMobile = MediaQuery.of(context).size.width < 768;
-    
+
     return Positioned(
       top: 0,
       left: 0,
@@ -77,12 +77,15 @@ class _PromoAppBarState extends State<PromoAppBar> {
                       ),
                     ],
                   ),
-                  
+
                   const Spacer(),
                   if (!isMobile) ...[
                     _buildNavButton('Recursos', widget.onFeaturesPressed),
                     _buildNavButton('Screenshots', widget.onScreenshotsPressed),
-                    _buildNavButton('Depoimentos', widget.onTestimonialsPressed),
+                    _buildNavButton(
+                      'Depoimentos',
+                      widget.onTestimonialsPressed,
+                    ),
                     _buildNavButton('FAQ', widget.onFaqPressed),
                     const SizedBox(width: 16),
                   ],
@@ -91,7 +94,10 @@ class _PromoAppBarState extends State<PromoAppBar> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: theme.colorScheme.primary,
                       side: BorderSide(color: theme.colorScheme.primary),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -126,25 +132,32 @@ class _PromoAppBarState extends State<PromoAppBar> {
   }
 
   void _showMobileMenu(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildMobileMenuItem('Recursos', widget.onFeaturesPressed),
-            _buildMobileMenuItem('Screenshots', widget.onScreenshotsPressed),
-            _buildMobileMenuItem('Depoimentos', widget.onTestimonialsPressed),
-            _buildMobileMenuItem('FAQ', widget.onFaqPressed),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildMobileMenuItem('Recursos', widget.onFeaturesPressed),
+                _buildMobileMenuItem(
+                  'Screenshots',
+                  widget.onScreenshotsPressed,
+                ),
+                _buildMobileMenuItem(
+                  'Depoimentos',
+                  widget.onTestimonialsPressed,
+                ),
+                _buildMobileMenuItem('FAQ', widget.onFaqPressed),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
     );
   }
 

@@ -6,7 +6,7 @@ import '../../domain/entities/export_request.dart';
 /// Widget for selecting data types to export in Plantis
 class DataTypeSelector extends StatefulWidget {
   final Set<DataType> selectedDataTypes;
-  final Function(Set<DataType>) onSelectionChanged;
+  final void Function(Set<DataType>) onSelectionChanged;
   final Map<DataType, int>? dataStatistics;
 
   const DataTypeSelector({

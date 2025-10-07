@@ -542,7 +542,6 @@ extension AppErrorExtensions on AppError {
         }
         return UnknownFailure(message, code: code, details: details);
       case ErrorCategory.general:
-      default:
         return UnknownFailure(message, code: code, details: details);
     }
   }

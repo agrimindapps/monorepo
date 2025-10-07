@@ -319,7 +319,7 @@ class GasometerSyncService implements ISyncService {
         message: 'Starting specific sync for Gasometer items: ${ids.length}',
         metadata: {'item_count': ids.length},
       );
-      await Future.delayed(Duration(milliseconds: ids.length * 50));
+      await Future<void>.delayed(Duration(milliseconds: ids.length * 50));
 
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);

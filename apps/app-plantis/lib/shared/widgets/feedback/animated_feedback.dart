@@ -221,7 +221,6 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
         );
       case SuccessAnimationType.checkmark:
       case null:
-      default:
         return child; // Checkmark será no ícone
     }
   }
@@ -242,7 +241,6 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
         );
       case ErrorAnimationType.fade:
       case null:
-      default:
         return child;
     }
   }

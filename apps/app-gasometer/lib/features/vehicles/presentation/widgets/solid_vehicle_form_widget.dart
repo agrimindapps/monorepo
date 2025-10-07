@@ -5,15 +5,14 @@ import '../../domain/entities/vehicle_entity.dart';
 import '../forms/vehicle_form_config.dart';
 
 /// Vehicle form widget using SOLID architecture
-/// 
+///
 /// This widget demonstrates the new form architecture following SOLID principles:
 /// - Single Responsibility: Each field handles its own logic
-/// - Open/Closed: Easy to extend with new field types  
+/// - Open/Closed: Easy to extend with new field types
 /// - Liskov Substitution: Field factories can be replaced
 /// - Interface Segregation: Clean field configuration interfaces
 /// - Dependency Inversion: Depends on abstractions, not concrete implementations
 class SolidVehicleFormWidget extends StatefulWidget {
-
   const SolidVehicleFormWidget({
     super.key,
     this.initialVehicle,
@@ -21,7 +20,7 @@ class SolidVehicleFormWidget extends StatefulWidget {
     this.onCancel,
   });
   final VehicleEntity? initialVehicle;
-  final Function(VehicleEntity)? onSubmit;
+  final void Function(VehicleEntity)? onSubmit;
   final VoidCallback? onCancel;
 
   @override
@@ -32,7 +31,7 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
   late final VehicleFormConfig _formConfig;
   late final MaterialFieldFactory _fieldFactory;
   late final FormStateManager<VehicleEntity> _stateManager;
-  
+
   final Map<String, dynamic> _fieldValues = {};
   bool _isSubmitting = false;
   String? _errorMessage;
@@ -63,11 +62,12 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
 
   String _mapFuelTypesToCombustivel(List<FuelType> fuelTypes) {
     if (fuelTypes.isEmpty) return 'Gasolina';
-    
-    if (fuelTypes.contains(FuelType.gasoline) && fuelTypes.contains(FuelType.ethanol)) {
+
+    if (fuelTypes.contains(FuelType.gasoline) &&
+        fuelTypes.contains(FuelType.ethanol)) {
       return 'Flex';
     }
-    
+
     final primaryFuel = fuelTypes.first;
     switch (primaryFuel) {
       case FuelType.gasoline:
@@ -119,7 +119,7 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
                 ),
               ),
             ),
-          
+
           if (_errorMessage != null)
             Container(
               width: double.infinity,
@@ -136,7 +136,7 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
                 ),
               ),
             ),
-          
+
           ..._buildFormFields(),
         ],
       ),
@@ -146,28 +146,32 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
   List<Widget> _buildFormFields() {
     final fields = _formConfig.buildFields();
     final widgets = <Widget>[];
-    
+
     for (final fieldConfig in fields) {
       final widget = _createFieldWidget(fieldConfig);
       widgets.add(widget);
       widgets.add(const SizedBox(height: 16.0));
     }
-    
+
     return widgets;
   }
 
   Widget _createFieldWidget(FieldConfig config) {
     Widget fieldWidget;
-    
+
     switch (config.fieldType) {
       case 'text':
         fieldWidget = _fieldFactory.createTextField(config as TextFieldConfig);
         break;
       case 'number':
-        fieldWidget = _fieldFactory.createNumberField(config as NumberFieldConfig);
+        fieldWidget = _fieldFactory.createNumberField(
+          config as NumberFieldConfig,
+        );
         break;
       case 'dropdown':
-        fieldWidget = _fieldFactory.createDropdownField(config as DropdownFieldConfig);
+        fieldWidget = _fieldFactory.createDropdownField(
+          config as DropdownFieldConfig,
+        );
         break;
       case 'date':
         fieldWidget = _fieldFactory.createDateField(config as DateFieldConfig);
@@ -176,10 +180,14 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
         fieldWidget = _fieldFactory.createTimeField(config as TimeFieldConfig);
         break;
       case 'switch':
-        fieldWidget = _fieldFactory.createSwitchField(config as SwitchFieldConfig);
+        fieldWidget = _fieldFactory.createSwitchField(
+          config as SwitchFieldConfig,
+        );
         break;
       case 'checkbox':
-        fieldWidget = _fieldFactory.createCheckboxField(config as CheckboxFieldConfig);
+        fieldWidget = _fieldFactory.createCheckboxField(
+          config as CheckboxFieldConfig,
+        );
         break;
       default:
         fieldWidget = const Text('Unsupported field type');
@@ -212,13 +220,14 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
         height: 48.0,
         child: ElevatedButton(
           onPressed: _isSubmitting ? null : _handleSubmit,
-          child: _isSubmitting
-              ? const SizedBox(
-                  height: 20.0,
-                  width: 20.0,
-                  child: CircularProgressIndicator(strokeWidth: 2.0),
-                )
-              : const Text('Salvar Veículo'),
+          child:
+              _isSubmitting
+                  ? const SizedBox(
+                    height: 20.0,
+                    width: 20.0,
+                    child: CircularProgressIndicator(strokeWidth: 2.0),
+                  )
+                  : const Text('Salvar Veículo'),
         ),
       ),
     );
@@ -236,7 +245,7 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
         throw Exception('Dados do formulário inválidos');
       }
       final result = await _formConfig.submitForm(vehicle);
-      
+
       if (result.isSuccess && result.data != null) {
         widget.onSubmit?.call(result.data!);
         if (mounted) {
@@ -249,7 +258,8 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
         }
       } else {
         setState(() {
-          _errorMessage = result.errorMessage ?? 'Erro desconhecido ao salvar veículo';
+          _errorMessage =
+              result.errorMessage ?? 'Erro desconhecido ao salvar veículo';
         });
       }
     } catch (e) {
@@ -274,6 +284,5 @@ class _SolidVehicleFormWidgetState extends State<SolidVehicleFormWidget> {
 
 /// State manager for form following Command pattern
 class FormStateManager<T> {
-  void dispose() {
-  }
+  void dispose() {}
 }

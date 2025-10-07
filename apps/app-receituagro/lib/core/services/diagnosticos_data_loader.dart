@@ -53,15 +53,15 @@ class DiagnosticosDataLoader {
                     item['fkIdPraga'] != null,
               )
               .toList();
+
+      // Use repository.loadFromJson which will persist items using IdReg as key
+      // (provides consistent retrieval by idReg/objectId later).
       final repository = di.sl<DiagnosticoHiveRepository>();
-      for (final diagnosticoData in diagnosticos) {
-        try {
-          final diagnosticoHive = DiagnosticoHive.fromJson(diagnosticoData);
-          await repository.save(diagnosticoHive);
-        } catch (e) {
-          debugPrint(
-            'Erro ao carregar diagnóstico ${diagnosticoData['IdReg']}: $e',
-          );
+      try {
+        await repository.loadFromJson(diagnosticos, 'assets_init');
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('Erro ao persistir diagnósticos via loadFromJson: $e');
         }
       }
 

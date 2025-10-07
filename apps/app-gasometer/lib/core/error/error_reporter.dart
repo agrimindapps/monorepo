@@ -45,17 +45,6 @@ class _CrashlyticsHelper {
       return false;
     }
   }
-
-  /// Mark as initialized (called after successful initialization)
-  static void markAsInitialized() {
-    _isInitialized = true;
-  }
-
-  /// Reset initialization status (for testing)
-  static void reset() {
-    _isInitialized = false;
-    _lastInitCheck = null;
-  }
 }
 
 /// Service responsible for reporting errors to external services

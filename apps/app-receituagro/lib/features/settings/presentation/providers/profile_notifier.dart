@@ -4,8 +4,8 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/repositories/profile_repository.dart';
+import '../../providers/profile_providers.dart';
 
 part 'profile_notifier.g.dart';
 
@@ -120,7 +120,7 @@ class ProfileNotifier extends _$ProfileNotifier {
 
   @override
   Future<ProfileState> build() async {
-    _profileRepository = di.sl<ProfileRepository>();
+    _profileRepository = ref.watch(profileRepositoryProvider);
     return ProfileState(
       isUploading: false,
       isPickingImage: false,

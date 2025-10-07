@@ -10,14 +10,16 @@ import '../../shared/utils/failure.dart';
 /// Serviço de conectividade usando connectivity_plus
 class ConnectivityService implements IConnectivityRepository {
   static ConnectivityService? _instance;
-  static ConnectivityService get instance => _instance ??= ConnectivityService._();
-  
+  static ConnectivityService get instance =>
+      _instance ??= ConnectivityService._();
+
   ConnectivityService._();
 
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
-  final StreamController<bool> _connectivityController = StreamController<bool>.broadcast();
-  
+  final StreamController<bool> _connectivityController =
+      StreamController<bool>.broadcast();
+
   bool _isInitialized = false;
   bool _isOnline = false;
 
@@ -27,19 +29,25 @@ class ConnectivityService implements IConnectivityRepository {
       if (_isInitialized) return const Right(null);
       final initialResult = await checkConnectivity();
       initialResult.fold(
-        (failure) => developer.log('Erro ao verificar conectividade inicial: ${failure.message}', name: 'Connectivity'),
+        (failure) => developer.log(
+          'Erro ao verificar conectividade inicial: ${failure.message}',
+          name: 'Connectivity',
+        ),
         (isOnline) => _isOnline = isOnline,
       );
       _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
         _onConnectivityChanged,
-        onError: (error) {
-          developer.log('Erro no listener de conectividade: $error', name: 'Connectivity');
+        onError: (Object error) {
+          developer.log(
+            'Erro no listener de conectividade: $error',
+            name: 'Connectivity',
+          );
         },
       );
 
       _isInitialized = true;
       developer.log('ConnectivityService inicializado', name: 'Connectivity');
-      
+
       return const Right(null);
     } catch (e) {
       return Left(NetworkFailure('Erro ao inicializar conectividade: $e'));
@@ -66,17 +74,17 @@ class ConnectivityService implements IConnectivityRepository {
     try {
       final result = await _connectivity.checkConnectivity();
       final isOnline = _isConnected(result);
-      
+
       if (_isOnline != isOnline) {
         _isOnline = isOnline;
         _connectivityController.add(isOnline);
-        
+
         developer.log(
-          isOnline ? 'Conectividade restaurada' : 'Conectividade perdida', 
+          isOnline ? 'Conectividade restaurada' : 'Conectividade perdida',
           name: 'Connectivity',
         );
       }
-      
+
       return Right(isOnline);
     } catch (e) {
       return Left(NetworkFailure('Erro ao verificar conectividade: $e'));
@@ -98,27 +106,30 @@ class ConnectivityService implements IConnectivityRepository {
   void _onConnectivityChanged(List<ConnectivityResult> results) {
     try {
       final isOnline = _isConnected(results);
-      
+
       if (_isOnline != isOnline) {
         _isOnline = isOnline;
         _connectivityController.add(isOnline);
-        
+
         developer.log(
-          isOnline 
-            ? 'Conectividade restaurada: ${results.map((r) => r.name).join(', ')}' 
-            : 'Conectividade perdida: ${results.map((r) => r.name).join(', ')}',
+          isOnline
+              ? 'Conectividade restaurada: ${results.map((r) => r.name).join(', ')}'
+              : 'Conectividade perdida: ${results.map((r) => r.name).join(', ')}',
           name: 'Connectivity',
         );
       }
     } catch (e) {
-      developer.log('Erro ao processar mudança de conectividade: $e', name: 'Connectivity');
+      developer.log(
+        'Erro ao processar mudança de conectividade: $e',
+        name: 'Connectivity',
+      );
     }
   }
 
   /// Verifica se há conexão baseado nos resultados
   bool _isConnected(List<ConnectivityResult> results) {
     if (results.isEmpty) return false;
-    
+
     for (final result in results) {
       switch (result) {
         case ConnectivityResult.wifi:
@@ -133,7 +144,7 @@ class ConnectivityService implements IConnectivityRepository {
           continue; // Verifica próximo resultado
       }
     }
-    
+
     return false;
   }
 
@@ -158,7 +169,7 @@ class ConnectivityService implements IConnectivityRepository {
           continue;
       }
     }
-    
+
     return ConnectivityType.none;
   }
 
@@ -209,7 +220,7 @@ class ConnectivityService implements IConnectivityRepository {
       final result = await _connectivity.checkConnectivity();
       final type = _mapConnectivityType(result);
       final isOnline = _isConnected(result);
-      
+
       return {
         'is_online': isOnline,
         'connectivity_type': type.name,
@@ -234,7 +245,7 @@ class ConnectivityService implements IConnectivityRepository {
     try {
       final basicCheck = await checkConnectivity();
       final basicResult = basicCheck.fold((l) => false, (r) => r);
-      
+
       if (!basicResult) {
         return const Right(false);
       }
@@ -249,7 +260,10 @@ class ConnectivityService implements IConnectivityRepository {
     try {
       await checkConnectivity();
     } catch (e) {
-      developer.log('Erro ao forçar verificação de conectividade: $e', name: 'Connectivity');
+      developer.log(
+        'Erro ao forçar verificação de conectividade: $e',
+        name: 'Connectivity',
+      );
     }
   }
 
@@ -259,10 +273,13 @@ class ConnectivityService implements IConnectivityRepository {
       await _connectivitySubscription?.cancel();
       await _connectivityController.close();
       _isInitialized = false;
-      
+
       developer.log('ConnectivityService disposed', name: 'Connectivity');
     } catch (e) {
-      developer.log('Erro ao fazer dispose do ConnectivityService: $e', name: 'Connectivity');
+      developer.log(
+        'Erro ao fazer dispose do ConnectivityService: $e',
+        name: 'Connectivity',
+      );
     }
   }
 

@@ -43,7 +43,10 @@ class EnhancedAnalyticsService {
     }
 
     try {
-      final result = await _analytics.logEvent(eventName, parameters: parameters);
+      final result = await _analytics.logEvent(
+        eventName,
+        parameters: parameters,
+      );
       result.fold(
         (failure) => throw Exception('Failed to log event: $failure'),
         (_) {},
@@ -54,7 +57,11 @@ class EnhancedAnalyticsService {
       }
     } catch (e, stackTrace) {
       if (enableErrorRecovery) {
-        await _recordAnalyticsError(e, stackTrace, 'Failed to log event: $eventName');
+        await _recordAnalyticsError(
+          e,
+          stackTrace,
+          'Failed to log event: $eventName',
+        );
       } else {
         rethrow;
       }
@@ -92,9 +99,12 @@ class EnhancedAnalyticsService {
       await _crashlytics.setUserId(userId);
 
       if (properties != null && properties.isNotEmpty) {
-        final propertiesResult = await _analytics.setUserProperties(properties: properties);
+        final propertiesResult = await _analytics.setUserProperties(
+          properties: properties,
+        );
         propertiesResult.fold(
-          (failure) => throw Exception('Failed to set user properties: $failure'),
+          (failure) =>
+              throw Exception('Failed to set user properties: $failure'),
           (_) {},
         );
       }
@@ -127,7 +137,9 @@ class EnhancedAnalyticsService {
 
     try {
       if (customKeys != null && customKeys.isNotEmpty) {
-        await _crashlytics.setCustomKeys(keys: customKeys.cast<String, String>());
+        await _crashlytics.setCustomKeys(
+          keys: customKeys.cast<String, String>(),
+        );
       }
       await _crashlytics.recordError(
         exception: error,
@@ -176,12 +188,19 @@ class EnhancedAnalyticsService {
         debugPrint('📱 Current screen set: $screenName');
       }
     } catch (e, stackTrace) {
-      await _recordAnalyticsError(e, stackTrace, 'Failed to set screen: $screenName');
+      await _recordAnalyticsError(
+        e,
+        stackTrace,
+        'Failed to set screen: $screenName',
+      );
     }
   }
 
   /// Logs authentication events
-  Future<void> logAuthEvent(String eventType, {Map<String, dynamic>? parameters}) async {
+  Future<void> logAuthEvent(
+    String eventType, {
+    Map<String, dynamic>? parameters,
+  }) async {
     final method = parameters?['method'] as String? ?? 'enhanced_analytics';
 
     try {
@@ -215,7 +234,11 @@ class EnhancedAnalyticsService {
           await logEvent('auth_$eventType', authParameters);
       }
     } catch (e, stackTrace) {
-      await _recordAnalyticsError(e, stackTrace, 'Failed to log auth event: $eventType');
+      await _recordAnalyticsError(
+        e,
+        stackTrace,
+        'Failed to log auth event: $eventType',
+      );
     }
   }
 
@@ -226,14 +249,6 @@ class EnhancedAnalyticsService {
     required String currency,
     Map<String, dynamic>? additionalParameters,
   }) async {
-    final purchaseParameters = <String, dynamic>{
-      'product_id': productId,
-      'value': value,
-      'currency': currency,
-      'app_id': _config.appIdentifier,
-      if (additionalParameters != null) ...additionalParameters,
-    };
-
     try {
       final result = await _analytics.logPurchase(
         productId: productId,
@@ -245,14 +260,20 @@ class EnhancedAnalyticsService {
         (_) {},
       );
     } catch (e, stackTrace) {
-      await _recordAnalyticsError(e, stackTrace, 'Failed to log purchase: $productId');
+      await _recordAnalyticsError(
+        e,
+        stackTrace,
+        'Failed to log purchase: $productId',
+      );
     }
   }
 
   /// Development and testing utilities
   Future<void> testCrash() async {
     if (kDebugMode && _config.enableDebugLogging) {
-      throw Exception('Test crash from Enhanced Analytics Service - App: ${_config.appIdentifier}');
+      throw Exception(
+        'Test crash from Enhanced Analytics Service - App: ${_config.appIdentifier}',
+      );
     }
   }
 
@@ -274,7 +295,8 @@ class EnhancedAnalyticsService {
       await _crashlytics.recordError(
         exception: error,
         stackTrace: stackTrace,
-        reason: 'Enhanced Analytics Error: $context (App: ${_config.appIdentifier})',
+        reason:
+            'Enhanced Analytics Error: $context (App: ${_config.appIdentifier})',
       );
     } catch (e) {
       if (_config.enableDebugLogging) {
@@ -303,13 +325,14 @@ class AnalyticsConfig {
   });
 
   /// Default configuration for development/testing
-  const AnalyticsConfig.defaultConfig() : this(
-    appIdentifier: 'unknown',
-    appVersion: '1.0.0',
-    environment: 'development',
-    isAnalyticsEnabled: false,
-    enableDebugLogging: true,
-  );
+  const AnalyticsConfig.defaultConfig()
+    : this(
+        appIdentifier: 'unknown',
+        appVersion: '1.0.0',
+        environment: 'development',
+        isAnalyticsEnabled: false,
+        enableDebugLogging: true,
+      );
 
   /// App-specific configuration using environment config
   AnalyticsConfig.forApp({
@@ -319,15 +342,18 @@ class AnalyticsConfig {
     bool? enableAnalytics,
     bool? enableLogging,
   }) : this(
-    appIdentifier: appId,
-    appVersion: version,
-    environment: environment ?? EnvironmentConfig.environmentName,
-    isAnalyticsEnabled: enableAnalytics ?? EnvironmentConfig.enableAnalytics,
-    enableDebugLogging: enableLogging ?? (kDebugMode || EnvironmentConfig.enableLogging),
-  );
+         appIdentifier: appId,
+         appVersion: version,
+         environment: environment ?? EnvironmentConfig.environmentName,
+         isAnalyticsEnabled:
+             enableAnalytics ?? EnvironmentConfig.enableAnalytics,
+         enableDebugLogging:
+             enableLogging ?? (kDebugMode || EnvironmentConfig.enableLogging),
+       );
 
   @override
-  String toString() => 'AnalyticsConfig(app: $appIdentifier, env: $environment, enabled: $isAnalyticsEnabled)';
+  String toString() =>
+      'AnalyticsConfig(app: $appIdentifier, env: $environment, enabled: $isAnalyticsEnabled)';
 }
 
 /// Base class for app-specific events with type safety
@@ -341,16 +367,46 @@ abstract class AppEvent {
 
 /// Plantis-specific events
 abstract class PlantisEvent extends AppEvent {
-  static final plantCreated = _PlantisEvent('plant_created', {'category': 'plants', 'action': 'create'});
-  static final plantDeleted = _PlantisEvent('plant_deleted', {'category': 'plants', 'action': 'delete'});
-  static final plantUpdated = _PlantisEvent('plant_updated', {'category': 'plants', 'action': 'update'});
-  static final taskCompleted = _PlantisEvent('task_completed', {'category': 'tasks', 'action': 'complete'});
-  static final taskCreated = _PlantisEvent('task_created', {'category': 'tasks', 'action': 'create'});
-  static final spaceCreated = _PlantisEvent('space_created', {'category': 'spaces', 'action': 'create'});
-  static final spaceDeleted = _PlantisEvent('space_deleted', {'category': 'spaces', 'action': 'delete'});
-  static final premiumFeatureAttempted = _PlantisEvent('premium_feature_attempted', {'category': 'premium', 'action': 'attempt'});
-  static final careLogAdded = _PlantisEvent('care_log_added', {'category': 'care', 'action': 'log'});
-  static final plantPhotoAdded = _PlantisEvent('plant_photo_added', {'category': 'photos', 'action': 'add'});
+  static final plantCreated = _PlantisEvent('plant_created', {
+    'category': 'plants',
+    'action': 'create',
+  });
+  static final plantDeleted = _PlantisEvent('plant_deleted', {
+    'category': 'plants',
+    'action': 'delete',
+  });
+  static final plantUpdated = _PlantisEvent('plant_updated', {
+    'category': 'plants',
+    'action': 'update',
+  });
+  static final taskCompleted = _PlantisEvent('task_completed', {
+    'category': 'tasks',
+    'action': 'complete',
+  });
+  static final taskCreated = _PlantisEvent('task_created', {
+    'category': 'tasks',
+    'action': 'create',
+  });
+  static final spaceCreated = _PlantisEvent('space_created', {
+    'category': 'spaces',
+    'action': 'create',
+  });
+  static final spaceDeleted = _PlantisEvent('space_deleted', {
+    'category': 'spaces',
+    'action': 'delete',
+  });
+  static final premiumFeatureAttempted = _PlantisEvent(
+    'premium_feature_attempted',
+    {'category': 'premium', 'action': 'attempt'},
+  );
+  static final careLogAdded = _PlantisEvent('care_log_added', {
+    'category': 'care',
+    'action': 'log',
+  });
+  static final plantPhotoAdded = _PlantisEvent('plant_photo_added', {
+    'category': 'photos',
+    'action': 'add',
+  });
   PlantisEvent._();
 }
 
@@ -369,11 +425,26 @@ class _PlantisEvent extends PlantisEvent {
 
 /// Gasometer-specific events
 abstract class GasometerEvent extends AppEvent {
-  static final vehicleCreated = _GasometerEvent('vehicle_created', {'category': 'vehicles', 'action': 'create'});
-  static final fuelRecorded = _GasometerEvent('fuel_recorded', {'category': 'fuel', 'action': 'record'});
-  static final expenseAdded = _GasometerEvent('expense_added', {'category': 'expenses', 'action': 'add'});
-  static final maintenanceScheduled = _GasometerEvent('maintenance_scheduled', {'category': 'maintenance', 'action': 'schedule'});
-  static final reportGenerated = _GasometerEvent('report_generated', {'category': 'reports', 'action': 'generate'});
+  static final vehicleCreated = _GasometerEvent('vehicle_created', {
+    'category': 'vehicles',
+    'action': 'create',
+  });
+  static final fuelRecorded = _GasometerEvent('fuel_recorded', {
+    'category': 'fuel',
+    'action': 'record',
+  });
+  static final expenseAdded = _GasometerEvent('expense_added', {
+    'category': 'expenses',
+    'action': 'add',
+  });
+  static final maintenanceScheduled = _GasometerEvent('maintenance_scheduled', {
+    'category': 'maintenance',
+    'action': 'schedule',
+  });
+  static final reportGenerated = _GasometerEvent('report_generated', {
+    'category': 'reports',
+    'action': 'generate',
+  });
 
   GasometerEvent._();
 }
@@ -393,19 +464,58 @@ class _GasometerEvent extends GasometerEvent {
 
 /// ReceitAGro-specific events
 abstract class ReceitAgroEvent extends AppEvent {
-  static final cropAnalyzed = _ReceitAgroEvent('crop_analyzed', {'category': 'analysis', 'action': 'analyze'});
-  static final reportViewed = _ReceitAgroEvent('report_viewed', {'category': 'reports', 'action': 'view'});
-  static final diagnosisRequested = _ReceitAgroEvent('diagnosis_requested', {'category': 'diagnosis', 'action': 'request'});
-  static final premiumAnalysisUsed = _ReceitAgroEvent('premium_analysis_used', {'category': 'premium', 'action': 'use'});
-  static final diseaseIdentified = _ReceitAgroEvent('disease_identified', {'category': 'diagnosis', 'action': 'identify'});
-  static final pestIdentified = _ReceitAgroEvent('pest_identified', {'category': 'diagnosis', 'action': 'identify'});
-  static final deficiencyIdentified = _ReceitAgroEvent('deficiency_identified', {'category': 'diagnosis', 'action': 'identify'});
-  static final treatmentViewed = _ReceitAgroEvent('treatment_viewed', {'category': 'treatment', 'action': 'view'});
-  static final symptomSearched = _ReceitAgroEvent('symptom_searched', {'category': 'search', 'action': 'symptom'});
-  static final favoriteAdded = _ReceitAgroEvent('favorite_added', {'category': 'favorites', 'action': 'add'});
-  static final favoriteRemoved = _ReceitAgroEvent('favorite_removed', {'category': 'favorites', 'action': 'remove'});
-  static final commentAdded = _ReceitAgroEvent('comment_added', {'category': 'engagement', 'action': 'comment'});
-  static final shareContent = _ReceitAgroEvent('share_content', {'category': 'engagement', 'action': 'share'});
+  static final cropAnalyzed = _ReceitAgroEvent('crop_analyzed', {
+    'category': 'analysis',
+    'action': 'analyze',
+  });
+  static final reportViewed = _ReceitAgroEvent('report_viewed', {
+    'category': 'reports',
+    'action': 'view',
+  });
+  static final diagnosisRequested = _ReceitAgroEvent('diagnosis_requested', {
+    'category': 'diagnosis',
+    'action': 'request',
+  });
+  static final premiumAnalysisUsed = _ReceitAgroEvent('premium_analysis_used', {
+    'category': 'premium',
+    'action': 'use',
+  });
+  static final diseaseIdentified = _ReceitAgroEvent('disease_identified', {
+    'category': 'diagnosis',
+    'action': 'identify',
+  });
+  static final pestIdentified = _ReceitAgroEvent('pest_identified', {
+    'category': 'diagnosis',
+    'action': 'identify',
+  });
+  static final deficiencyIdentified = _ReceitAgroEvent(
+    'deficiency_identified',
+    {'category': 'diagnosis', 'action': 'identify'},
+  );
+  static final treatmentViewed = _ReceitAgroEvent('treatment_viewed', {
+    'category': 'treatment',
+    'action': 'view',
+  });
+  static final symptomSearched = _ReceitAgroEvent('symptom_searched', {
+    'category': 'search',
+    'action': 'symptom',
+  });
+  static final favoriteAdded = _ReceitAgroEvent('favorite_added', {
+    'category': 'favorites',
+    'action': 'add',
+  });
+  static final favoriteRemoved = _ReceitAgroEvent('favorite_removed', {
+    'category': 'favorites',
+    'action': 'remove',
+  });
+  static final commentAdded = _ReceitAgroEvent('comment_added', {
+    'category': 'engagement',
+    'action': 'comment',
+  });
+  static final shareContent = _ReceitAgroEvent('share_content', {
+    'category': 'engagement',
+    'action': 'share',
+  });
 
   ReceitAgroEvent._();
 }
@@ -422,4 +532,3 @@ class _ReceitAgroEvent extends ReceitAgroEvent {
   @override
   Map<String, dynamic> get defaultParameters => _defaultParameters;
 }
-

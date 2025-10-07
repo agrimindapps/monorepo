@@ -8,7 +8,7 @@ class CommentsListWidget extends StatelessWidget {
   final List<ComentarioModel> comentarios;
   final Map<String, ComentarioEditState> editStates;
   final ValueChanged<ComentarioModel>? onStartEdit;
-  final Function(ComentarioModel, String)? onEdit;
+  final void Function(ComentarioModel, String)? onEdit;
   final ValueChanged<ComentarioModel>? onDelete;
   final ValueChanged<String>? onCancelEdit;
   final void Function(String, String)? onContentChanged;

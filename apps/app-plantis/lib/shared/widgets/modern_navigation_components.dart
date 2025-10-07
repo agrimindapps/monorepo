@@ -8,7 +8,7 @@ class ModernNavigationList extends StatelessWidget {
   final int currentIndex;
   final bool isExpanded;
   final Animation<double> expandAnimation;
-  final Function(int) onDestinationSelected;
+  final void Function(int) onDestinationSelected;
 
   const ModernNavigationList({
     super.key,

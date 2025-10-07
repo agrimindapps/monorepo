@@ -22,9 +22,9 @@ class FavoritosNavigationService {
     required FitossanitarioHiveRepository fitossanitarioRepository,
     required PragasHiveRepository pragasRepository,
     required DiagnosticoIntegrationService integrationService,
-  })  : _fitossanitarioRepository = fitossanitarioRepository,
-        _pragasRepository = pragasRepository,
-        _integrationService = integrationService;
+  }) : _fitossanitarioRepository = fitossanitarioRepository,
+       _pragasRepository = pragasRepository,
+       _integrationService = integrationService;
 
   /// Navega para detalhes do defensivo com dados reais
   Future<void> navigateToDefensivoDetails(
@@ -34,14 +34,19 @@ class FavoritosNavigationService {
     try {
       final result = await _fitossanitarioRepository.getByKey(defensivo.idReg);
       final defensivoReal = result.isSuccess ? result.data : null;
-      
+
       if (defensivoReal != null) {
-        final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+        final navigationService =
+            GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalheDefensivo(
-          defensivoName: defensivoReal.nomeComum.isNotEmpty == true
-              ? defensivoReal.nomeComum
-              : defensivoReal.nomeTecnico ?? 'Nome não disponível',
-          extraData: {'fabricante': defensivoReal.fabricante ?? 'Fabricante não informado'},
+          defensivoName:
+              defensivoReal.nomeComum.isNotEmpty == true
+                  ? defensivoReal.nomeComum
+                  : defensivoReal.nomeTecnico,
+          extraData: {
+            'fabricante':
+                defensivoReal.fabricante ?? 'Fabricante não informado',
+          },
         );
       } else {
         _showNotFoundError(context, 'Defensivo não encontrado');
@@ -59,15 +64,17 @@ class FavoritosNavigationService {
     try {
       final result = await _pragasRepository.getByKey(praga.idReg);
       final pragaReal = result.isSuccess ? result.data : null;
-      
+
       if (pragaReal != null) {
-        final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
+        final navigationService =
+            GetIt.instance<ReceitaAgroNavigationService>();
         await navigationService.navigateToDetalhePraga(
-          pragaName: pragaReal.nomeComum ?? 'Nome não disponível',
-          pragaId: pragaReal.objectId ?? praga.idReg, // Use objectId for better precision
-          pragaScientificName: pragaReal.nomeCientifico.isNotEmpty == true
-              ? pragaReal.nomeCientifico
-              : 'Nome científico não disponível',
+          pragaName: pragaReal.nomeComum,
+          pragaId: pragaReal.objectId, // Use objectId for better precision
+          pragaScientificName:
+              pragaReal.nomeCientifico.isNotEmpty == true
+                  ? pragaReal.nomeCientifico
+                  : 'Nome científico não disponível',
         );
       } else {
         _showNotFoundError(context, 'Praga não encontrada');
@@ -84,18 +91,20 @@ class FavoritosNavigationService {
     FavoritoDiagnosticoModel diagnostico,
   ) async {
     try {
-      final diagnosticoCompleto = await _integrationService.getDiagnosticoCompleto(diagnostico.idReg);
+      final diagnosticoCompleto = await _integrationService
+          .getDiagnosticoCompleto(diagnostico.idReg);
 
       if (diagnosticoCompleto != null) {
         await Navigator.push<void>(
           context,
           MaterialPageRoute<void>(
-            builder: (context) => DetalheDiagnosticoPage(
-              diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
-              nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
-              nomePraga: diagnosticoCompleto.nomePraga,
-              cultura: diagnosticoCompleto.nomeCultura,
-            ),
+            builder:
+                (context) => DetalheDiagnosticoPage(
+                  diagnosticoId: diagnosticoCompleto.diagnostico.objectId,
+                  nomeDefensivo: diagnosticoCompleto.nomeDefensivo,
+                  nomePraga: diagnosticoCompleto.nomePraga,
+                  cultura: diagnosticoCompleto.nomeCultura,
+                ),
           ),
         );
       } else {
@@ -115,16 +124,19 @@ class FavoritosNavigationService {
     try {
       showDialog<dynamic>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Cultura: $culturaNome'),
-          content: Text('Navegação para detalhes da cultura $culturaNome\n\nID: $culturaId'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+        builder:
+            (context) => AlertDialog(
+              title: Text('Cultura: $culturaNome'),
+              content: Text(
+                'Navegação para detalhes da cultura $culturaNome\n\nID: $culturaId',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     } catch (e) {
       _showNavigationError(context, 'Erro ao abrir página da cultura');
@@ -146,25 +158,27 @@ class FavoritosNavigationService {
 
       showDialog<dynamic>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Busca Avançada'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Navegação para busca avançada com filtros:'),
-              const SizedBox(height: 8),
-              ...filtros.entries.map((entry) =>
-                Text('• ${entry.key}: ${entry.value}')),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Busca Avançada'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Navegação para busca avançada com filtros:'),
+                  const SizedBox(height: 8),
+                  ...filtros.entries.map(
+                    (entry) => Text('• ${entry.key}: ${entry.value}'),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     } catch (e) {
       _showNavigationError(context, 'Erro ao abrir busca avançada');
@@ -182,7 +196,9 @@ class FavoritosNavigationService {
           final result = await _pragasRepository.getByKey(itemId);
           return result.isSuccess && result.data != null;
         case 'diagnosticos':
-          final diagnostico = await _integrationService.getDiagnosticoCompleto(itemId);
+          final diagnostico = await _integrationService.getDiagnosticoCompleto(
+            itemId,
+          );
           return diagnostico != null;
         default:
           return false;
@@ -193,7 +209,10 @@ class FavoritosNavigationService {
   }
 
   /// Obtém informações resumidas de um item para exibição
-  Future<Map<String, String>?> getItemSummary(String tipo, String itemId) async {
+  Future<Map<String, String>?> getItemSummary(
+    String tipo,
+    String itemId,
+  ) async {
     try {
       switch (tipo) {
         case 'defensivos':
@@ -201,9 +220,13 @@ class FavoritosNavigationService {
           final item = result.isSuccess ? result.data : null;
           if (item != null) {
             return {
-              'nome': item.nomeComum.isNotEmpty == true ? item.nomeComum : (item.nomeTecnico ?? 'Nome não disponível'),
+              'nome':
+                  item.nomeComum.isNotEmpty == true
+                      ? item.nomeComum
+                      : (item.nomeTecnico),
               'subtitulo': item.ingredienteAtivo ?? 'Ingrediente não informado',
-              'detalhes': '${item.fabricante ?? ''} • ${item.classeAgronomica ?? ''}',
+              'detalhes':
+                  '${item.fabricante ?? ''} • ${item.classeAgronomica ?? ''}',
             };
           }
           break;
@@ -212,10 +235,11 @@ class FavoritosNavigationService {
           final item = result.isSuccess ? result.data : null;
           if (item != null) {
             return {
-              'nome': item.nomeComum ?? 'Nome não disponível',
-              'subtitulo': item.nomeCientifico.isNotEmpty == true 
-                  ? item.nomeCientifico 
-                  : 'Nome científico não disponível',
+              'nome': item.nomeComum,
+              'subtitulo':
+                  item.nomeCientifico.isNotEmpty == true
+                      ? item.nomeCientifico
+                      : 'Nome científico não disponível',
               'detalhes': 'Praga agrícola',
             };
           }
@@ -243,11 +267,7 @@ class FavoritosNavigationService {
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.orange,
-        action: SnackBarAction(
-          label: 'Atualizar Favoritos',
-          onPressed: () {
-          },
-        ),
+        action: SnackBarAction(label: 'Atualizar Favoritos', onPressed: () {}),
       ),
     );
   }
@@ -255,14 +275,10 @@ class FavoritosNavigationService {
   /// Mostra erro de navegação
   void _showNavigationError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   /// Limpa cache de navegação se necessário
-  void clearNavigationCache() {
-  }
+  void clearNavigationCache() {}
 }

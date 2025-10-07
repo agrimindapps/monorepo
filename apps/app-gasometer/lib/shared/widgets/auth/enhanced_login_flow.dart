@@ -375,7 +375,7 @@ class EnhancedLoginFlowController {
     VoidCallback? onComplete,
   }) async {
     await Navigator.of(context).push(
-      PageRouteBuilder(
+      PageRouteBuilder<void>(
         pageBuilder:
             (context, animation, secondaryAnimation) => EnhancedLoginFlow(
               destinationRoute: destinationRoute,

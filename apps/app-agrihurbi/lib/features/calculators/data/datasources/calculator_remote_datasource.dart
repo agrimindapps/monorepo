@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 
-import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_category.dart';
@@ -41,10 +40,7 @@ abstract class CalculatorRemoteDataSource {
 
 @LazySingleton(as: CalculatorRemoteDataSource)
 class CalculatorRemoteDataSourceImpl implements CalculatorRemoteDataSource {
-  final DioClient
-  _dioClient;
-
-  CalculatorRemoteDataSourceImpl(this._dioClient);
+  CalculatorRemoteDataSourceImpl();
 
   @override
   Future<Either<Failure, List<CalculatorEntity>>> getAllCalculators() async {

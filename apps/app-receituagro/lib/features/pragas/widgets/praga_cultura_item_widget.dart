@@ -22,9 +22,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return viewMode.isList 
-        ? _buildListItem(context)
-        : _buildGridItem(context);
+    return viewMode.isList ? _buildListItem(context) : _buildGridItem(context);
   }
 
   Widget _buildListItem(BuildContext context) {
@@ -45,9 +43,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
             children: [
               _buildIcon(ReceitaAgroDimensions.itemImageSize),
               const SizedBox(width: ReceitaAgroSpacing.lg),
-              Expanded(
-                child: _buildListContent(),
-              ),
+              Expanded(child: _buildListContent()),
               const SizedBox(width: ReceitaAgroSpacing.md),
               _buildTrailingIcon(),
             ],
@@ -99,10 +95,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(ReceitaAgroBorderRadius.md),
-          border: Border.all(
-            color: color.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
           boxShadow: [
             BoxShadow(
               color: color.withValues(alpha: 0.1),
@@ -111,13 +104,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
             ),
           ],
         ),
-        child: Center(
-          child: FaIcon(
-            icon,
-            color: color,
-            size: size * 0.4,
-          ),
-        ),
+        child: Center(child: FaIcon(icon, color: color, size: size * 0.4)),
       ),
     );
   }
@@ -163,9 +150,6 @@ class PragaCulturaItemWidget extends StatelessWidget {
     );
   }
 
-
-
-
   Widget _buildTrailingIcon() {
     return Icon(
       Icons.chevron_right_rounded,
@@ -196,13 +180,13 @@ class PragaCulturaItemWidget extends StatelessWidget {
       case '3': // Plantas Daninhas
         return FontAwesomeIcons.seedling;
       default:
-        return FontAwesomeIcons.exclamationTriangle;
+        return FontAwesomeIcons.triangleExclamation;
     }
   }
 
   Widget _buildFullImage() {
     final color = _getTypeColor();
-    
+
     return Positioned.fill(
       child: PragaImageWidget(
         nomeCientifico: praga.nomeCientifico,
@@ -214,13 +198,7 @@ class PragaCulturaItemWidget extends StatelessWidget {
           width: double.infinity,
           height: double.infinity,
           color: color.withValues(alpha: 0.1),
-          child: Center(
-            child: FaIcon(
-              _getTypeIcon(),
-              color: color,
-              size: 48,
-            ),
-          ),
+          child: Center(child: FaIcon(_getTypeIcon(), color: color, size: 48)),
         ),
       ),
     );

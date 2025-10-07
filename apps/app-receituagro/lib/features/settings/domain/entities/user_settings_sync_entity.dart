@@ -50,7 +50,6 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
     };
   }
 
-  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -83,8 +82,12 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       notificacoesPush: map['notificacoesPush'] as bool,
       notificacoesEmail: map['notificacoesEmail'] as bool,
       modoProdutorRural: map['modoProdutorRural'] as bool,
-      configuracoesBusca: Map<String, dynamic>.from(map['configuracoesBusca'] as Map),
-      preferenciasVisualizacao: Map<String, dynamic>.from(map['preferenciasVisualizacao'] as Map),
+      configuracoesBusca: Map<String, dynamic>.from(
+        map['configuracoesBusca'] as Map,
+      ),
+      preferenciasVisualizacao: Map<String, dynamic>.from(
+        map['preferenciasVisualizacao'] as Map,
+      ),
       syncAutomatico: map['syncAutomatico'] as bool,
       frequenciaSyncMinutos: map['frequenciaSyncMinutos'] as int,
       createdAt: baseFields['createdAt'] as DateTime?,
@@ -106,13 +109,26 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       notificacoesPush: map['notificacoesPush'] as bool,
       notificacoesEmail: map['notificacoesEmail'] as bool,
       modoProdutorRural: map['modoProdutorRural'] as bool,
-      configuracoesBusca: Map<String, dynamic>.from(map['configuracoesBusca'] as Map),
-      preferenciasVisualizacao: Map<String, dynamic>.from(map['preferenciasVisualizacao'] as Map),
+      configuracoesBusca: Map<String, dynamic>.from(
+        map['configuracoesBusca'] as Map,
+      ),
+      preferenciasVisualizacao: Map<String, dynamic>.from(
+        map['preferenciasVisualizacao'] as Map,
+      ),
       syncAutomatico: map['syncAutomatico'] as bool,
       frequenciaSyncMinutos: map['frequenciaSyncMinutos'] as int,
-      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'] as String) : null,
-      updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt'] as String) : null,
-      lastSyncAt: map['lastSyncAt'] != null ? DateTime.parse(map['lastSyncAt'] as String) : null,
+      createdAt:
+          map['createdAt'] != null
+              ? DateTime.parse(map['createdAt'] as String)
+              : null,
+      updatedAt:
+          map['updatedAt'] != null
+              ? DateTime.parse(map['updatedAt'] as String)
+              : null,
+      lastSyncAt:
+          map['lastSyncAt'] != null
+              ? DateTime.parse(map['lastSyncAt'] as String)
+              : null,
       isDirty: map['isDirty'] as bool? ?? false,
       isDeleted: map['isDeleted'] as bool? ?? false,
       version: map['version'] as int? ?? 1,
@@ -122,9 +138,7 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
   }
 
   /// Factory para criar configurações padrão
-  factory UserSettingsSyncEntity.defaultSettings({
-    required String userId,
-  }) {
+  factory UserSettingsSyncEntity.defaultSettings({required String userId}) {
     return UserSettingsSyncEntity(
       id: 'user_settings_$userId',
       tema: 'light',
@@ -180,9 +194,11 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
       notificacoesEmail: notificacoesEmail ?? this.notificacoesEmail,
       modoProdutorRural: modoProdutorRural ?? this.modoProdutorRural,
       configuracoesBusca: configuracoesBusca ?? this.configuracoesBusca,
-      preferenciasVisualizacao: preferenciasVisualizacao ?? this.preferenciasVisualizacao,
+      preferenciasVisualizacao:
+          preferenciasVisualizacao ?? this.preferenciasVisualizacao,
       syncAutomatico: syncAutomatico ?? this.syncAutomatico,
-      frequenciaSyncMinutos: frequenciaSyncMinutos ?? this.frequenciaSyncMinutos,
+      frequenciaSyncMinutos:
+          frequenciaSyncMinutos ?? this.frequenciaSyncMinutos,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
@@ -196,35 +212,22 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
 
   @override
   UserSettingsSyncEntity markAsDirty() {
-    return copyWith(
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   UserSettingsSyncEntity markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   UserSettingsSyncEntity markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   UserSettingsSyncEntity incrementVersion() {
-    return copyWith(
-      version: version + 1,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(version: version + 1, updatedAt: DateTime.now());
   }
 
   @override
@@ -239,15 +242,15 @@ class UserSettingsSyncEntity extends BaseSyncEntity {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        tema,
-        idioma,
-        notificacoesPush,
-        notificacoesEmail,
-        modoProdutorRural,
-        configuracoesBusca,
-        preferenciasVisualizacao,
-        syncAutomatico,
-        frequenciaSyncMinutos,
-      ];
+    ...super.props,
+    tema,
+    idioma,
+    notificacoesPush,
+    notificacoesEmail,
+    modoProdutorRural,
+    configuracoesBusca,
+    preferenciasVisualizacao,
+    syncAutomatico,
+    frequenciaSyncMinutos,
+  ];
 }

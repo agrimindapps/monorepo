@@ -29,7 +29,9 @@ class GetUserSettingsUseCase {
   }
 
   /// Apply business rules and migrations
-  Future<UserSettingsEntity> _applyBusinessRules(UserSettingsEntity settings) async {
+  Future<UserSettingsEntity> _applyBusinessRules(
+    UserSettingsEntity settings,
+  ) async {
     var updatedSettings = settings;
     if (settings.needsMigration) {
       updatedSettings = await _migrateSettings(settings);
@@ -46,7 +48,9 @@ class GetUserSettingsUseCase {
   }
 
   /// Migrate settings from old versions
-  Future<UserSettingsEntity> _migrateSettings(UserSettingsEntity settings) async {
+  Future<UserSettingsEntity> _migrateSettings(
+    UserSettingsEntity settings,
+  ) async {
     var migrated = settings;
     if (settings.language.isEmpty) {
       migrated = migrated.copyWith(language: 'pt-BR');
@@ -60,7 +64,9 @@ class GetUserSettingsUseCase {
     var fixed = settings;
 
     if (settings.userId.isEmpty) {
-      return UserSettingsEntity.createDefault(_currentUserId ?? 'anonymous-fallback');
+      return UserSettingsEntity.createDefault(
+        _currentUserId ?? 'anonymous-fallback',
+      );
     }
 
     if (settings.language.isEmpty) {
@@ -76,14 +82,16 @@ class GetUserSettingsUseCase {
     if (settings.isDevelopmentMode && settings.analyticsEnabled) {
       secured = secured.copyWith(analyticsEnabled: false);
     }
-    if (settings.speechToTextEnabled) {
-    }
+    if (settings.speechToTextEnabled) {}
 
     return secured;
   }
 
   /// Get settings with specific business context
-  Future<UserSettingsEntity> getForContext(String userId, SettingsContext context) async {
+  Future<UserSettingsEntity> getForContext(
+    String userId,
+    SettingsContext context,
+  ) async {
     final settings = await call(userId);
 
     switch (context) {
@@ -95,23 +103,17 @@ class GetUserSettingsUseCase {
         return _optimizeForPrivacy(settings);
       case SettingsContext.default_:
         return settings;
-      default:
-        return settings;
     }
   }
 
   /// Optimize settings for accessibility
   UserSettingsEntity _optimizeForAccessibility(UserSettingsEntity settings) {
-    return settings.copyWith(
-      soundEnabled: true,
-    );
+    return settings.copyWith(soundEnabled: true);
   }
 
   /// Optimize settings for performance
   UserSettingsEntity _optimizeForPerformance(UserSettingsEntity settings) {
-    return settings.copyWith(
-      analyticsEnabled: false,
-    );
+    return settings.copyWith(analyticsEnabled: false);
   }
 
   /// Optimize settings for privacy
@@ -124,13 +126,7 @@ class GetUserSettingsUseCase {
 }
 
 /// Settings context for different use cases
-enum SettingsContext {
-  accessibility,
-  performance,
-  privacy,
-  default_,
-}
-
+enum SettingsContext { accessibility, performance, privacy, default_ }
 
 /// Exception thrown when settings are invalid
 class InvalidSettingsException implements Exception {

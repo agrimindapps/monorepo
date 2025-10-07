@@ -26,13 +26,15 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
     });
 
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      
+      await Future<void>.delayed(const Duration(seconds: 2));
+
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Cadastro realizado com sucesso! Você será notificado em breve.'),
+            content: Text(
+              'Cadastro realizado com sucesso! Você será notificado em breve.',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -58,9 +60,7 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(24),
@@ -99,9 +99,9 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
             const SizedBox(height: 16),
             Text(
               'Deixe seu e-mail e seja o primeiro a saber quando o GasOMeter estiver disponível para download!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -142,22 +142,23 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    child:
+                        _isLoading
+                            ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Text(
+                              'Quero ser Notificado',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            'Quero ser Notificado',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
                 ],
               ),
@@ -165,9 +166,9 @@ class _NotificationFormDialogState extends State<NotificationFormDialog> {
             const SizedBox(height: 16),
             Text(
               'Prometemos não enviar spam. Você receberá apenas uma notificação quando o app estiver disponível.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[500],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
               textAlign: TextAlign.center,
             ),
           ],

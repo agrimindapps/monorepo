@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Custom Pull-to-Refresh Widget for Sync Operations
-/// 
+///
 /// Features:
 /// - Custom sync animations and indicators
 /// - Multi-stage refresh (local + remote sync)
@@ -55,42 +55,34 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
   @override
   void initState() {
     super.initState();
-    
+
     _positionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    
+
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
     );
-    
+
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
 
-    _positionAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _positionController,
-      curve: Curves.easeOut,
-    ));
+    _positionAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _positionController, curve: Curves.easeOut),
+    );
 
     _rotationAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(_rotationController);
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    );
 
     _statusMessage = widget.refreshMessage;
   }
@@ -121,9 +113,10 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
             child: AnimatedBuilder(
               animation: _positionAnimation,
               builder: (context, child) {
-                final indicatorHeight = _positionAnimation.value * widget.refreshIndicatorExtent;
+                final indicatorHeight =
+                    _positionAnimation.value * widget.refreshIndicatorExtent;
                 if (indicatorHeight == 0) return const SizedBox.shrink();
-                
+
                 return SizedBox(
                   height: indicatorHeight,
                   child: _buildRefreshIndicator(context),
@@ -139,7 +132,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
   /// Handle scroll notifications for pull-to-refresh
   bool _handleScrollNotification(ScrollNotification notification) {
     if (_isRefreshing) return false;
-    
+
     if (notification is ScrollStartNotification) {
       _handleScrollStart(notification);
     } else if (notification is ScrollUpdateNotification) {
@@ -147,7 +140,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
     } else if (notification is ScrollEndNotification) {
       _handleScrollEnd(notification);
     }
-    
+
     return false;
   }
 
@@ -166,7 +159,10 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         _dragDistance = -metrics.pixels;
       });
 
-      final progress = math.min(_dragDistance / widget.refreshTriggerDistance, 1.0);
+      final progress = math.min(
+        _dragDistance / widget.refreshTriggerDistance,
+        1.0,
+      );
       _positionController.value = progress;
       if (_dragDistance >= widget.refreshTriggerDistance) {
         if (_currentPhase != RefreshPhase.readyToRefresh) {
@@ -194,7 +190,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
   void _updateRefreshPhase(RefreshPhase phase) {
     setState(() {
       _currentPhase = phase;
-      
+
       switch (phase) {
         case RefreshPhase.idle:
           _statusMessage = widget.refreshMessage;
@@ -225,15 +221,14 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
     setState(() {
       _isRefreshing = true;
     });
-    
+
     _updateRefreshPhase(RefreshPhase.refreshing);
     _rotationController.repeat();
-    
+
     try {
       await widget.onRefresh();
       _updateRefreshPhase(RefreshPhase.completed);
       await Future<void>.delayed(const Duration(milliseconds: 800));
-      
     } catch (error) {
       _updateRefreshPhase(RefreshPhase.error);
       await Future<void>.delayed(const Duration(milliseconds: 1200));
@@ -246,7 +241,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
   void _resetRefreshState() {
     _rotationController.stop();
     _rotationController.reset();
-    
+
     _positionController.reverse().then((_) {
       if (mounted) {
         setState(() {
@@ -280,7 +275,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildSyncIcon(primaryColor),
-            
+
             const SizedBox(height: 8),
             Text(
               _statusMessage,
@@ -299,53 +294,44 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
   /// Build sync icon with animations
   Widget _buildSyncIcon(Color color) {
     Widget iconWidget;
-    
+
     switch (_currentPhase) {
       case RefreshPhase.idle:
       case RefreshPhase.dragging:
-        final progress = math.min(_dragDistance / widget.refreshTriggerDistance, 1.0);
+        final progress = math.min(
+          _dragDistance / widget.refreshTriggerDistance,
+          1.0,
+        );
         iconWidget = Transform.rotate(
           angle: progress * math.pi,
-          child: Icon(
-            Icons.arrow_downward,
-            color: color,
-            size: 24,
-          ),
+          child: Icon(Icons.arrow_downward, color: color, size: 24),
         );
         break;
-        
+
       case RefreshPhase.readyToRefresh:
         iconWidget = AnimatedBuilder(
           animation: _scaleAnimation,
           builder: (context, child) {
             return Transform.scale(
               scale: _scaleAnimation.value,
-              child: Icon(
-                Icons.sync,
-                color: color,
-                size: 24,
-              ),
+              child: Icon(Icons.sync, color: color, size: 24),
             );
           },
         );
         break;
-        
+
       case RefreshPhase.refreshing:
         iconWidget = AnimatedBuilder(
           animation: _rotationAnimation,
           builder: (context, child) {
             return Transform.rotate(
               angle: _rotationAnimation.value * 2.0 * math.pi,
-              child: Icon(
-                Icons.sync,
-                color: color,
-                size: 24,
-              ),
+              child: Icon(Icons.sync, color: color, size: 24),
             );
           },
         );
         break;
-        
+
       case RefreshPhase.completed:
         iconWidget = const Icon(
           Icons.check_circle,
@@ -353,7 +339,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
           size: 24,
         );
         break;
-        
+
       case RefreshPhase.error:
         iconWidget = const Icon(
           Icons.error_outline,
@@ -362,7 +348,7 @@ class _SyncRefreshWidgetState extends State<SyncRefreshWidget>
         );
         break;
     }
-    
+
     return iconWidget;
   }
 }
@@ -378,7 +364,7 @@ enum RefreshPhase {
 }
 
 /// Simplified Sync Refresh Wrapper
-/// 
+///
 /// Easy-to-use wrapper for common sync refresh scenarios
 class SimpleSyncRefresh extends StatelessWidget {
   final Widget child;
@@ -403,7 +389,7 @@ class SimpleSyncRefresh extends StatelessWidget {
 }
 
 /// Multi-Stage Sync Refresh
-/// 
+///
 /// Supports multiple sync stages (local, remote, etc.)
 class MultiStageSyncRefresh extends StatefulWidget {
   final Widget child;
@@ -422,7 +408,6 @@ class MultiStageSyncRefresh extends StatefulWidget {
 }
 
 class _MultiStageSyncRefreshState extends State<MultiStageSyncRefresh> {
-  int _currentStageIndex = 0;
   String _currentStageMessage = '';
 
   @override
@@ -439,10 +424,9 @@ class _MultiStageSyncRefreshState extends State<MultiStageSyncRefresh> {
   Future<void> _performMultiStageSync() async {
     for (int i = 0; i < widget.syncStages.length; i++) {
       setState(() {
-        _currentStageIndex = i;
         _currentStageMessage = widget.syncStages[i].message;
       });
-      
+
       await widget.syncStages[i].operation();
       if (i < widget.syncStages.length - 1) {
         await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -456,8 +440,5 @@ class SyncStage {
   final String message;
   final Future<void> Function() operation;
 
-  const SyncStage({
-    required this.message,
-    required this.operation,
-  });
+  const SyncStage({required this.message, required this.operation});
 }

@@ -120,7 +120,7 @@ class _MemoryDebugWidgetState extends State<MemoryDebugWidget> {
   }
 
   void _showMemoryDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _MemoryReportDialog(report: _currentReport),
     );

@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 
 /// Base sync model for all Hive models in the GasOMeter app
 /// Integrates with core package's BaseSyncEntity for Firebase sync
-abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
+abstract class BaseSyncModel extends BaseSyncEntity {
   BaseSyncModel({
     required super.id,
     super.createdAt,
@@ -14,8 +14,7 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
     super.userId,
     super.moduleName = 'gasometer',
   });
-  void removeFromHive() {
-  }
+  void removeFromHive() {}
 
   /// Convert to Hive-compatible map (using millisecond timestamps)
   Map<String, dynamic> toHiveMap() {
@@ -36,15 +35,18 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
   static Map<String, dynamic> parseBaseHiveFields(Map<String, dynamic> map) {
     return {
       'id': map['id'] as String,
-      'createdAt': map['createdAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
-          : null,
-      'updatedAt': map['updatedAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
-          : null,
-      'lastSyncAt': map['lastSyncAt'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
-          : null,
+      'createdAt':
+          map['createdAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
+              : null,
+      'updatedAt':
+          map['updatedAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
+              : null,
+      'lastSyncAt':
+          map['lastSyncAt'] != null
+              ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
+              : null,
       'isDirty': map['isDirty'] as bool? ?? false,
       'isDeleted': map['isDeleted'] as bool? ?? false,
       'version': map['version'] as int? ?? 1,
@@ -55,48 +57,38 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
 
   /// Update timestamps for Hive operations
   BaseSyncModel updateTimestamps() {
-    return copyWith(
-      updatedAt: DateTime.now(),
-      isDirty: true,
-    ) as BaseSyncModel;
+    return copyWith(updatedAt: DateTime.now(), isDirty: true) as BaseSyncModel;
   }
 
   /// Mark as synced with Firebase
   @override
   BaseSyncModel markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      lastSyncAt: syncTime ?? DateTime.now(),
-      isDirty: false,
-    ) as BaseSyncModel;
+    return copyWith(lastSyncAt: syncTime ?? DateTime.now(), isDirty: false)
+        as BaseSyncModel;
   }
 
   /// Mark as dirty (needs sync)
   @override
   BaseSyncModel markAsDirty() {
-    return copyWith(
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    ) as BaseSyncModel;
+    return copyWith(isDirty: true, updatedAt: DateTime.now()) as BaseSyncModel;
   }
 
   /// Mark as deleted (soft delete)
   @override
   BaseSyncModel markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    ) as BaseSyncModel;
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now())
+        as BaseSyncModel;
   }
 
   /// Increment version for conflict resolution
   @override
   BaseSyncModel incrementVersion() {
     return copyWith(
-      version: version + 1,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    ) as BaseSyncModel;
+          version: version + 1,
+          isDirty: true,
+          updatedAt: DateTime.now(),
+        )
+        as BaseSyncModel;
   }
 
   /// Set user owner
@@ -116,9 +108,7 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
 
   /// Validation for Firebase sync
   bool get isValidForSync {
-    return id.isNotEmpty && 
-           userId?.isNotEmpty == true &&
-           !isDeleted;
+    return id.isNotEmpty && userId?.isNotEmpty == true && !isDeleted;
   }
 
   /// Get Firebase document path
@@ -137,7 +127,9 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
   };
 
   /// Parse timestamps from Firebase (Timestamp or ISO8601 strings)
-  static Map<String, DateTime?> parseFirebaseTimestamps(Map<String, dynamic> map) {
+  static Map<String, DateTime?> parseFirebaseTimestamps(
+    Map<String, dynamic> map,
+  ) {
     return {
       'createdAt': _parseTimestamp(map['created_at']),
       'updatedAt': _parseTimestamp(map['updated_at']),
@@ -148,7 +140,7 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
   /// Helper method to parse timestamp from various formats
   static DateTime? _parseTimestamp(dynamic value) {
     if (value == null) return null;
-    
+
     if (value is Timestamp) {
       return value.toDate();
     } else if (value is String) {
@@ -164,21 +156,20 @@ abstract class BaseSyncModel extends BaseSyncEntity with HiveObjectMixin {
         return null;
       }
     }
-    
+
     return null;
   }
 
   /// Parse base fields from Firebase map (delegate to BaseSyncEntity)
-  static Map<String, dynamic> parseBaseFirebaseFields(Map<String, dynamic> map) {
+  static Map<String, dynamic> parseBaseFirebaseFields(
+    Map<String, dynamic> map,
+  ) {
     return BaseSyncEntity.parseBaseFirebaseFields(map);
   }
 
   /// Default toFirebaseMap implementation
   @override
   Map<String, dynamic> toFirebaseMap() {
-    return {
-      ...baseFirebaseFields,
-      ...firebaseTimestampFields,
-    };
+    return {...baseFirebaseFields, ...firebaseTimestampFields};
   }
 }

@@ -38,13 +38,13 @@ class DioService {
 
   /// Configurações padrão do Dio
   static BaseOptions get _defaultOptions => BaseOptions(
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
-        validateStatus: (status) => status != null && status < 500,
-        followRedirects: true,
-        maxRedirects: 5,
-      );
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 30),
+    validateStatus: (status) => status != null && status < 500,
+    followRedirects: true,
+    maxRedirects: 5,
+  );
 
   /// Configura interceptors para logging e tratamento de erros
   void _setupInterceptors() {
@@ -236,7 +236,7 @@ class DioService {
   ///   },
   /// );
   /// ```
-  Future<Response> download(
+  Future<Response<dynamic>> download(
     String urlPath,
     dynamic savePath, {
     ProgressCallback? onReceiveProgress,

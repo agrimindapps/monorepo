@@ -220,12 +220,4 @@ class _DeleteAccountDialogState extends ConsumerState<DeleteAccountDialog> {
       ],
     );
   }
-
-  static Future<bool?> show(BuildContext context) async {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const DeleteAccountDialog(),
-    );
-  }
 }

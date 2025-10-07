@@ -20,7 +20,6 @@ import 'secure_storage_service.dart';
 /// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupService {
   final IBackupRepository _backupRepository;
-  final BackupValidationService _validationService;
   final BackupDataTransformerService _transformerService;
   final BackupRestoreService _restoreService;
   final BackupAuditService _auditService;
@@ -43,7 +42,6 @@ class BackupService {
     required SpacesRepository spacesRepository,
     required TasksRepository tasksRepository,
   }) : _backupRepository = backupRepository,
-       _validationService = validationService,
        _transformerService = transformerService,
        _restoreService = restoreService,
        _auditService = auditService,
@@ -112,12 +110,7 @@ class BackupService {
                 .map((plant) => _transformerService.plantToJson(plant))
                 .toList(),
         tasks:
-            tasks
-                .map(
-                  (task) =>
-                      _transformerService.taskToJson(task),
-                )
-                .toList(),
+            tasks.map((task) => _transformerService.taskToJson(task)).toList(),
         spaces:
             spaces
                 .map((space) => _transformerService.spaceToJson(space))

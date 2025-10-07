@@ -206,7 +206,6 @@ class CustomSyncServiceExample implements ISyncService {
   @override
   String get version => '1.0.0';
 
-  @override
   List<String> get dependencies => [];
 
   @override

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 /// **COMENTARIOS LOADING WIDGET**
-/// 
+///
 /// Displays loading state while comentarios are being fetched.
 /// Provides visual feedback during async operations.
-/// 
+///
 /// ## Features:
-/// 
+///
 /// - **Skeleton Loading**: Mimics the structure of actual content
 /// - **Smooth Animation**: Shimmer effect for better UX
 /// - **Responsive Design**: Adapts to different screen sizes
@@ -23,7 +23,8 @@ class ComentariosLoadingWidget extends StatefulWidget {
   });
 
   @override
-  State<ComentariosLoadingWidget> createState() => _ComentariosLoadingWidgetState();
+  State<ComentariosLoadingWidget> createState() =>
+      _ComentariosLoadingWidgetState();
 }
 
 class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
@@ -39,10 +40,7 @@ class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
       vsync: this,
     );
     _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.repeat(reverse: true);
   }
@@ -112,17 +110,14 @@ class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildItemHeader(),
-          _buildItemContent(),
-        ],
+        children: [_buildItemHeader(), _buildItemContent()],
       ),
     );
   }
 
   Widget _buildItemHeader() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 8),
       decoration: BoxDecoration(
@@ -170,45 +165,27 @@ class _ComentariosLoadingWidgetState extends State<ComentariosLoadingWidget>
     );
   }
 
-  Widget _buildShimmerBox(double width, double height, {bool isCircular = false}) {
+  Widget _buildShimmerBox(
+    double width,
+    double height, {
+    bool isCircular = false,
+  }) {
     return Opacity(
       opacity: _animation.value,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.grey.shade700
-              : Colors.grey.shade300,
-          borderRadius: isCircular 
-              ? BorderRadius.circular(height / 2)
-              : BorderRadius.circular(4),
+          color:
+              Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade700
+                  : Colors.grey.shade300,
+          borderRadius:
+              isCircular
+                  ? BorderRadius.circular(height / 2)
+                  : BorderRadius.circular(4),
         ),
       ),
-    );
-  }
-
-  /// Factory constructor for simple loading state
-  static ComentariosLoadingWidget simple() {
-    return const ComentariosLoadingWidget(
-      itemCount: 3,
-      showHeader: false,
-    );
-  }
-
-  /// Factory constructor for full page loading
-  static ComentariosLoadingWidget fullPage() {
-    return const ComentariosLoadingWidget(
-      itemCount: 5,
-      showHeader: true,
-    );
-  }
-
-  /// Factory constructor for minimal loading
-  static ComentariosLoadingWidget minimal() {
-    return const ComentariosLoadingWidget(
-      itemCount: 2,
-      showHeader: false,
     );
   }
 }

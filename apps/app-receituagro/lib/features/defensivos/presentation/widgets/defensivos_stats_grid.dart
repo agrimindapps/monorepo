@@ -135,8 +135,6 @@ class DefensivosStatsGrid extends ConsumerWidget {
     HomeDefensivosState data,
   ) {
     final theme = Theme.of(context);
-    final isMediumDevice =
-        MediaQuery.of(context).size.width < ReceitaAgroBreakpoints.mediumDevice;
     final buttonWidth =
         (availableWidth - 6) / 2; // Apenas o espaço do gap entre botões
     final standardColor = theme.colorScheme.primary;

@@ -15,7 +15,7 @@ abstract class IBoxRegistryService {
   /// Obtém uma box já registrada
   /// [boxName] - Nome da box a ser obtida
   /// Retorna erro se a box não estiver registrada
-  Future<Either<Failure, Box>> getBox(String boxName);
+  Future<Either<Failure, Box<dynamic>>> getBox(String boxName);
 
   /// Verifica se uma box está registrada
   /// [boxName] - Nome da box a verificar

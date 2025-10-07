@@ -17,7 +17,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final vehiclesState = ref.watch(vehiclesNotifierProvider);
+    ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -25,9 +25,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
           children: [
             _buildHeader(context),
             _buildVehicleSelector(context),
-            Expanded(
-              child: _buildContent(context),
-            ),
+            Expanded(child: _buildContent(context)),
           ],
         ),
       ),
@@ -141,11 +139,11 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     if (_selectedVehicleId == null) {
       return EnhancedEmptyState(
         title: 'Selecione um veículo',
-        description: 'Escolha um veículo para visualizar os relatórios e estatísticas.',
+        description:
+            'Escolha um veículo para visualizar os relatórios e estatísticas.',
         icon: Icons.directions_car_outlined,
         actionLabel: 'Selecionar veículo',
-        onAction: () {
-        },
+        onAction: () {},
       );
     }
 
@@ -172,9 +170,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       children: [
         Text(
           'Estatísticas',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
@@ -244,11 +242,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: color, size: 20),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -280,9 +274,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       children: [
         Text(
           'Gráficos',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Card(
@@ -309,7 +303,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   height: 200,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -324,8 +319,11 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         const SizedBox(height: 8),
                         Text(
                           'Gráficos serão implementados',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],

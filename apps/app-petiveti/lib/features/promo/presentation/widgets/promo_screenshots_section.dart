@@ -4,7 +4,7 @@ import '../../../../shared/constants/splash_constants.dart';
 class PromoScreenshotsSection extends StatelessWidget {
   final dynamic screenshots; // Will be ignored, using placeholder screenshots
   final int currentIndex;
-  final Function(int) onScreenshotChanged;
+  final void Function(int) onScreenshotChanged;
 
   const PromoScreenshotsSection({
     super.key,
@@ -17,7 +17,7 @@ class PromoScreenshotsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 768;
-    
+
     return Container(
       height: isMobile ? 500 : 600,
       decoration: const BoxDecoration(
@@ -123,7 +123,7 @@ class PromoScreenshotsSection extends StatelessWidget {
 
   Widget _buildScreenshotsCarousel(BuildContext context, bool isMobile) {
     final screenshots = _getPlaceholderScreenshots();
-    
+
     return SizedBox(
       height: isMobile ? 280 : 350,
       child: PageView.builder(
@@ -211,7 +211,7 @@ class PromoScreenshotsSection extends StatelessWidget {
 
   Widget _buildCarouselIndicators() {
     final screenshots = _getPlaceholderScreenshots();
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(screenshots.length, (index) {
@@ -221,9 +221,8 @@ class PromoScreenshotsSection extends StatelessWidget {
           width: isActive ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isActive 
-                ? Colors.white 
-                : Colors.white.withValues(alpha: 0.4),
+            color:
+                isActive ? Colors.white : Colors.white.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(4),
           ),
         );

@@ -1,6 +1,7 @@
 /// Financial Conflict Resolution Dialog
 /// UI for manual resolution of financial data conflicts
 library;
+
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,6 @@ import '../../core/services/financial_conflict_resolver.dart';
 
 /// Dialog for resolving financial data conflicts
 class FinancialConflictDialog extends StatefulWidget {
-
   const FinancialConflictDialog({
     super.key,
     required this.localEntity,
@@ -19,28 +19,34 @@ class FinancialConflictDialog extends StatefulWidget {
   });
   final BaseSyncEntity localEntity;
   final BaseSyncEntity remoteEntity;
-  final Function(FinancialConflictStrategy strategy, BaseSyncEntity? customResolution) onResolved;
+  final void Function(
+    FinancialConflictStrategy strategy,
+    BaseSyncEntity? customResolution,
+  )
+  onResolved;
 
   @override
-  State<FinancialConflictDialog> createState() => _FinancialConflictDialogState();
+  State<FinancialConflictDialog> createState() =>
+      _FinancialConflictDialogState();
 }
 
 class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
-  FinancialConflictStrategy _selectedStrategy = FinancialConflictStrategy.manualReview;
+  FinancialConflictStrategy _selectedStrategy =
+      FinancialConflictStrategy.manualReview;
   bool _showDetails = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final currencyFormatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+    );
 
     return AlertDialog(
       title: const Row(
         children: [
-          Icon(
-            Icons.warning,
-            color: Colors.orange,
-          ),
+          Icon(Icons.warning, color: Colors.orange),
           SizedBox(width: 8),
           Text('Conflito de Dados Financeiros'),
         ],
@@ -87,24 +93,28 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
-          onPressed: _selectedStrategy != FinancialConflictStrategy.manualReview
-              ? () => _resolveConflict(context)
-              : null,
+          onPressed:
+              _selectedStrategy != FinancialConflictStrategy.manualReview
+                  ? () => _resolveConflict(context)
+                  : null,
           child: const Text('Resolver'),
         ),
       ],
     );
   }
 
-  Widget _buildEntityComparison(BuildContext context, NumberFormat currencyFormatter) {
+  Widget _buildEntityComparison(
+    BuildContext context,
+    NumberFormat currencyFormatter,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Comparação de Versões:',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
 
@@ -153,11 +163,7 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.storage,
-                  color: color,
-                  size: 16,
-                ),
+                Icon(Icons.storage, color: color, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   title,
@@ -170,8 +176,10 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
             ),
             const SizedBox(height: 8),
 
-            if (entity is FuelSupplyModel) ..._buildFuelDetails(entity, currencyFormatter),
-            if (entity is ExpenseModel) ..._buildExpenseDetails(entity, currencyFormatter),
+            if (entity is FuelSupplyModel)
+              ..._buildFuelDetails(entity, currencyFormatter),
+            if (entity is ExpenseModel)
+              ..._buildExpenseDetails(entity, currencyFormatter),
 
             const SizedBox(height: 8),
             Text(
@@ -186,7 +194,10 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
     );
   }
 
-  List<Widget> _buildFuelDetails(FuelSupplyModel fuel, NumberFormat currencyFormatter) {
+  List<Widget> _buildFuelDetails(
+    FuelSupplyModel fuel,
+    NumberFormat currencyFormatter,
+  ) {
     return [
       Text('Valor: ${currencyFormatter.format(fuel.totalPrice)}'),
       Text('Litros: ${fuel.liters.toStringAsFixed(2)}L'),
@@ -196,7 +207,10 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
     ];
   }
 
-  List<Widget> _buildExpenseDetails(ExpenseModel expense, NumberFormat currencyFormatter) {
+  List<Widget> _buildExpenseDetails(
+    ExpenseModel expense,
+    NumberFormat currencyFormatter,
+  ) {
     return [
       Text('Valor: ${currencyFormatter.format(expense.valor)}'),
       Text('Tipo: ${expense.tipo}'),
@@ -251,10 +265,22 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDetailRow('ID da Entidade', widget.localEntity.id),
-              _buildDetailRow('Versão Local', widget.localEntity.version.toString()),
-              _buildDetailRow('Versão Remota', widget.remoteEntity.version.toString()),
-              _buildDetailRow('Usuário', widget.localEntity.userId ?? 'Não definido'),
-              _buildDetailRow('Módulo', widget.localEntity.moduleName ?? 'Não definido'),
+              _buildDetailRow(
+                'Versão Local',
+                widget.localEntity.version.toString(),
+              ),
+              _buildDetailRow(
+                'Versão Remota',
+                widget.remoteEntity.version.toString(),
+              ),
+              _buildDetailRow(
+                'Usuário',
+                widget.localEntity.userId ?? 'Não definido',
+              ),
+              _buildDetailRow(
+                'Módulo',
+                widget.localEntity.moduleName ?? 'Não definido',
+              ),
               const SizedBox(height: 8),
               Text(
                 'Conflito detectado devido a versões diferentes dos mesmos dados. '
@@ -283,9 +309,7 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
@@ -336,18 +360,15 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
       case FinancialConflictStrategy.smartMerge:
         return const _StrategyConfig(
           title: 'Mesclagem Inteligente',
-          description: 'Combinar automaticamente os melhores campos de cada versão',
+          description:
+              'Combinar automaticamente os melhores campos de cada versão',
         );
     }
   }
 }
 
 class _StrategyConfig {
-
-  const _StrategyConfig({
-    required this.title,
-    required this.description,
-  });
+  const _StrategyConfig({required this.title, required this.description});
   final String title;
   final String description;
 }

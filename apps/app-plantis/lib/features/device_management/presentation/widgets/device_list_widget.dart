@@ -1,4 +1,5 @@
-import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
+import 'package:core/core.dart'
+    hide deviceManagementProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -21,7 +22,8 @@ class DeviceListWidget extends ConsumerWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: () => ref.read(deviceManagementProvider.notifier).refresh(),
+          onRefresh:
+              () => ref.read(deviceManagementProvider.notifier).refresh(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -35,7 +37,8 @@ class DeviceListWidget extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 ...deviceState.activeDevices.map(
-                  (device) => _buildDeviceItem(context, ref, device, deviceState),
+                  (device) =>
+                      _buildDeviceItem(context, ref, device, deviceState),
                 ),
               ],
               if (deviceState.inactiveDevices.isNotEmpty) ...[
@@ -49,7 +52,8 @@ class DeviceListWidget extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 ...deviceState.inactiveDevices.map(
-                  (device) => _buildDeviceItem(context, ref, device, deviceState),
+                  (device) =>
+                      _buildDeviceItem(context, ref, device, deviceState),
                 ),
               ],
               const SizedBox(height: 80),
@@ -119,7 +123,8 @@ class DeviceListWidget extends ConsumerWidget {
     DeviceModel device,
     DeviceManagementState deviceState,
   ) {
-    final isBeingRevoked = deviceState.isRevoking && deviceState.revokingDeviceUuid == device.uuid;
+    final isBeingRevoked =
+        deviceState.isRevoking && deviceState.revokingDeviceUuid == device.uuid;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -127,7 +132,10 @@ class DeviceListWidget extends ConsumerWidget {
         device: device,
         isCurrentDevice: deviceState.currentDevice?.uuid == device.uuid,
         isBeingRevoked: isBeingRevoked,
-        onRevoke: device.isActive ? () => _showRevokeDialog(context, ref, device, deviceState) : null,
+        onRevoke:
+            device.isActive
+                ? () => _showRevokeDialog(context, ref, device, deviceState)
+                : null,
         onTap: () => _showDeviceDetails(context, device),
       ),
     );
@@ -226,10 +234,12 @@ class DeviceListWidget extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success = await ref.read(deviceManagementProvider.notifier).revokeDevice(
-        device.uuid,
-        reason: 'Revogado manualmente via interface',
-      );
+      final success = await ref
+          .read(deviceManagementProvider.notifier)
+          .revokeDevice(
+            device.uuid,
+            reason: 'Revogado manualmente via interface',
+          );
 
       if (success && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -243,7 +253,7 @@ class DeviceListWidget extends ConsumerWidget {
   }
 
   void _showDeviceDetails(BuildContext context, DeviceModel device) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -397,54 +407,60 @@ class _DeviceDetailsSheet extends ConsumerWidget {
                     ]),
 
                     const SizedBox(height: 24),
-                    ref.watch(deviceManagementProvider).when(
-                      data: (deviceState) {
-                        if (deviceState.currentDevice?.uuid == device.uuid) {
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.blue.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.smartphone,
-                                  color: Colors.blue.shade600,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Dispositivo Atual',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.blue.shade700,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Este é o dispositivo que você está usando agora',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.blue.shade600,
-                                        ),
-                                      ),
-                                    ],
+                    ref
+                        .watch(deviceManagementProvider)
+                        .when(
+                          data: (deviceState) {
+                            if (deviceState.currentDevice?.uuid ==
+                                device.uuid) {
+                              return Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.blue.shade200,
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                      loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
-                    ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.smartphone,
+                                      color: Colors.blue.shade600,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Dispositivo Atual',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.blue.shade700,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            'Este é o dispositivo que você está usando agora',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.blue.shade600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
                   ],
                 ),
               ),

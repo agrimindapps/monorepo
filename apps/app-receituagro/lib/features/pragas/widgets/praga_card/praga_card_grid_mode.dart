@@ -5,7 +5,7 @@ import 'praga_card_image_section.dart';
 import 'praga_card_main.dart';
 
 /// Widget específico para modo grid vertical
-/// 
+///
 /// Responsabilidades:
 /// - Layout vertical com imagem no topo
 /// - Aspect ratio controlado
@@ -15,10 +15,7 @@ import 'praga_card_main.dart';
 class PragaCardGridMode extends StatelessWidget {
   final PragaCardProperties properties;
 
-  const PragaCardGridMode({
-    super.key,
-    required this.properties,
-  });
+  const PragaCardGridMode({super.key, required this.properties});
 
   @override
   Widget build(BuildContext context) {
@@ -126,29 +123,5 @@ class PragaCardGridMode extends StatelessWidget {
         ],
       ),
     );
-  }
-  Color _getTypeColor() {
-    switch (properties.praga.tipoPraga) {
-      case '1': // Insetos
-        return const Color(0xFFE53935); // Vermelho
-      case '2': // Doenças
-        return const Color(0xFFFF9800); // Laranja
-      case '3': // Plantas Daninhas
-        return const Color(0xFF4CAF50); // Verde
-      default:
-        return const Color(0xFF757575); // Cinza
-    }
-  }
-  IconData _getTypeIcon() {
-    switch (properties.praga.tipoPraga) {
-      case '1': // Insetos
-        return Icons.bug_report_outlined;
-      case '2': // Doenças
-        return Icons.coronavirus_outlined;
-      case '3': // Plantas Daninhas
-        return Icons.grass_outlined;
-      default:
-        return Icons.pest_control_outlined;
-    }
   }
 }

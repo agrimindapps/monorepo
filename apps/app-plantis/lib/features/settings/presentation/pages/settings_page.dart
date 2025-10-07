@@ -383,7 +383,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
+                MaterialPageRoute<void>(
                   builder: (context) => const DataInspectorPage(),
                 ),
               );
@@ -742,7 +742,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   }
 
   void _showAboutDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

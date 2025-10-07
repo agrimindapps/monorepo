@@ -8,7 +8,6 @@ import '../../../core/theme/gasometer_colors.dart';
 
 /// Loading simples para sincronização que aparece e some automaticamente - padrão app-plantis
 class SimpleSyncLoading extends ConsumerStatefulWidget {
-  
   const SimpleSyncLoading({
     super.key,
     this.message = 'Sincronizando dados automotivos...',
@@ -21,9 +20,10 @@ class SimpleSyncLoading extends ConsumerStatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black26,
-      builder: (context) => SimpleSyncLoading(
-        message: message ?? 'Sincronizando dados automotivos...',
-      ),
+      builder:
+          (context) => SimpleSyncLoading(
+            message: message ?? 'Sincronizando dados automotivos...',
+          ),
     );
   }
 
@@ -57,8 +57,9 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
 
   /// Monitora automaticamente o estado da sincronização usando UnifiedSyncProvider
   void _startListeningToSync() {
-    _syncSubscription = Stream.periodic(const Duration(seconds: 2))
-        .listen((_) {
+    _syncSubscription = Stream<void>.periodic(
+      const Duration(seconds: 2),
+    ).listen((_) {
       if (!mounted) return;
       _autoClose();
     });
@@ -67,7 +68,7 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
   /// Fecha automaticamente o loading
   void _autoClose() {
     _syncSubscription?.cancel();
-    
+
     if (mounted && Navigator.canPop(context)) {
       Navigator.of(context).pop();
     }
@@ -114,7 +115,9 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(GasometerColors.primary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      GasometerColors.primary,
+                    ),
                     strokeWidth: 3,
                   ),
                 ),
@@ -131,10 +134,7 @@ class _SimpleSyncLoadingState extends ConsumerState<SimpleSyncLoading> {
                 const SizedBox(height: 8),
                 Text(
                   'Seus dados estarão atualizados em instantes',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   textAlign: TextAlign.center,
                 ),
               ],

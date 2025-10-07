@@ -106,7 +106,7 @@ void configureDependencies() {
   );
 
   getIt.registerSingleton<LivestockRemoteDataSource>(
-    LivestockRemoteDataSourceImpl(getIt<DioClient>()),
+    LivestockRemoteDataSourceImpl(),
   );
   getIt.registerSingleton<LivestockRepository>(
     LivestockRepositoryImpl(
@@ -158,7 +158,7 @@ void configureDependencies() {
   );
 
   getIt.registerSingleton<CalculatorRemoteDataSource>(
-    CalculatorRemoteDataSourceImpl(getIt<DioClient>()),
+    CalculatorRemoteDataSourceImpl(),
   );
   getIt.registerSingleton<CalculatorRepository>(
     CalculatorRepositoryImpl(getIt<CalculatorLocalDataSource>()),

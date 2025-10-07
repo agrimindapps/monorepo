@@ -7,7 +7,7 @@ import 'defensivos_empty_state_widget.dart';
 
 /// Widget simplificado para exibir lista de defensivos
 /// Usa o ContentListItemWidget padrão para consistência visual
-/// 
+///
 /// Características:
 /// - Design consistente com home defensivos
 /// - Renderização otimizada com SliverList
@@ -17,8 +17,8 @@ class DefensivosListWidget extends StatelessWidget {
   final List<DefensivoEntity> defensivos;
   final bool modoComparacao;
   final List<DefensivoEntity> defensivosSelecionados;
-  final Function(DefensivoEntity) onTap;
-  final Function(DefensivoEntity)? onSelecaoChanged;
+  final void Function(DefensivoEntity) onTap;
+  final void Function(DefensivoEntity)? onSelecaoChanged;
   final VoidCallback onClearFilters;
   final bool hasActiveSearch;
 

@@ -263,7 +263,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
     }
   }
 
-  @override
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     try {
       if (kDebugMode) {

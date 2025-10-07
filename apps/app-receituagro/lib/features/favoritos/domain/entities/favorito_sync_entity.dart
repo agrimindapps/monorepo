@@ -35,7 +35,6 @@ class FavoritoSyncEntity extends BaseSyncEntity {
     };
   }
 
-  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -80,9 +79,18 @@ class FavoritoSyncEntity extends BaseSyncEntity {
       itemId: map['itemId'] as String,
       itemData: Map<String, dynamic>.from(map['itemData'] as Map),
       adicionadoEm: DateTime.parse(map['adicionadoEm'] as String),
-      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt'] as String) : null,
-      updatedAt: map['updatedAt'] != null ? DateTime.parse(map['updatedAt'] as String) : null,
-      lastSyncAt: map['lastSyncAt'] != null ? DateTime.parse(map['lastSyncAt'] as String) : null,
+      createdAt:
+          map['createdAt'] != null
+              ? DateTime.parse(map['createdAt'] as String)
+              : null,
+      updatedAt:
+          map['updatedAt'] != null
+              ? DateTime.parse(map['updatedAt'] as String)
+              : null,
+      lastSyncAt:
+          map['lastSyncAt'] != null
+              ? DateTime.parse(map['lastSyncAt'] as String)
+              : null,
       isDirty: map['isDirty'] as bool? ?? false,
       isDeleted: map['isDeleted'] as bool? ?? false,
       version: map['version'] as int? ?? 1,
@@ -126,35 +134,22 @@ class FavoritoSyncEntity extends BaseSyncEntity {
 
   @override
   FavoritoSyncEntity markAsDirty() {
-    return copyWith(
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   FavoritoSyncEntity markAsSynced({DateTime? syncTime}) {
-    return copyWith(
-      isDirty: false,
-      lastSyncAt: syncTime ?? DateTime.now(),
-    );
+    return copyWith(isDirty: false, lastSyncAt: syncTime ?? DateTime.now());
   }
 
   @override
   FavoritoSyncEntity markAsDeleted() {
-    return copyWith(
-      isDeleted: true,
-      isDirty: true,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(isDeleted: true, isDirty: true, updatedAt: DateTime.now());
   }
 
   @override
   FavoritoSyncEntity incrementVersion() {
-    return copyWith(
-      version: version + 1,
-      updatedAt: DateTime.now(),
-    );
+    return copyWith(version: version + 1, updatedAt: DateTime.now());
   }
 
   @override
@@ -169,10 +164,10 @@ class FavoritoSyncEntity extends BaseSyncEntity {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        tipo,
-        itemId,
-        itemData,
-        adicionadoEm,
-      ];
+    ...super.props,
+    tipo,
+    itemId,
+    itemData,
+    adicionadoEm,
+  ];
 }

@@ -12,6 +12,7 @@ import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
 import '../widgets/tasks_error_boundary.dart';
+
 class TasksListState {
   final bool isLoading;
   final bool hasError;
@@ -165,8 +166,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   @override
   Widget build(BuildContext context) {
     return TasksErrorBoundary(
-      onRetry: () {
-      },
+      onRetry: () {},
       child: BasePageScaffold(
         body: ResponsiveLayout(
           child: Column(
@@ -276,7 +276,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     const Text('Atrasadas'),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.red,
                         borderRadius: BorderRadius.circular(10),
@@ -302,7 +305,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 checkmarkColor: Colors.red,
                 backgroundColor: Colors.red.withValues(alpha: 0.1),
                 side: BorderSide.none,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 labelStyle: TextStyle(
                   color:
                       tasksState.currentFilter == TasksFilterType.overdue
@@ -325,7 +331,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   if (tasksState.todayTasks > 0) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: PlantisColors.primary,
                         borderRadius: BorderRadius.circular(10),
@@ -374,7 +383,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   if (tasksState.upcomingTasksCount > 0) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: PlantisColors.primary,
                         borderRadius: BorderRadius.circular(10),
@@ -423,7 +435,10 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   if (tasksState.allFutureTasksCount > 0) ...[
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: PlantisColors.primary,
                         borderRadius: BorderRadius.circular(10),
@@ -466,37 +481,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTasksList() {
-    return Consumer(
-      builder: (context, WidgetRef ref, child) {
-        final tasksAsync = ref.watch(tasksProvider);
-        return tasksAsync.when(
-          data: (TasksState tasksState) {
-            final data = TasksListData(
-              filteredTasks: tasksState.filteredTasks,
-              isLoading: false,
-              currentFilter: tasksState.currentFilter,
-              totalTasks: tasksState.allTasks.length,
-            );
-            return _buildTasksListContent(data);
-          },
-          loading: () {
-            const data = TasksListData(
-              filteredTasks: [],
-              isLoading: true,
-              currentFilter: TasksFilterType.today,
-              totalTasks: 0,
-            );
-            return _buildTasksListContent(data);
-          },
-          error: (Object error, StackTrace stack) {
-            return Center(child: Text('Error loading tasks: $error'));
-          },
-        );
-      },
     );
   }
 
@@ -607,7 +591,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             (p) => p.id == task.plantId,
           );
           plantName = plant.name;
-          plantImageUrl = plant.imageUrls.isNotEmpty ? plant.imageUrls.first : null;
+          plantImageUrl =
+              plant.imageUrls.isNotEmpty ? plant.imageUrls.first : null;
         } catch (e) {
           plantName = 'Planta não encontrada';
         }
@@ -615,7 +600,14 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       orElse: () {},
     );
 
-    return _buildTaskCardContent(task, plantName, plantImageUrl, isLoading, theme, ref);
+    return _buildTaskCardContent(
+      task,
+      plantName,
+      plantImageUrl,
+      isLoading,
+      theme,
+      ref,
+    );
   }
 
   Widget _buildTaskCardContent(
@@ -663,25 +655,28 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 ),
               ),
               child: ClipOval(
-                child: plantImageUrl != null
-                    ? Image.network(
-                        plantImageUrl,
-                        width: 48,
-                        height: 48,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            Icons.local_florist,
-                            color: PlantisColors.primary.withValues(alpha: 0.6),
-                            size: 24,
-                          );
-                        },
-                      )
-                    : Icon(
-                        Icons.local_florist,
-                        color: PlantisColors.primary.withValues(alpha: 0.6),
-                        size: 24,
-                      ),
+                child:
+                    plantImageUrl != null
+                        ? Image.network(
+                          plantImageUrl,
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.local_florist,
+                              color: PlantisColors.primary.withValues(
+                                alpha: 0.6,
+                              ),
+                              size: 24,
+                            );
+                          },
+                        )
+                        : Icon(
+                          Icons.local_florist,
+                          color: PlantisColors.primary.withValues(alpha: 0.6),
+                          size: 24,
+                        ),
               ),
             ),
             const SizedBox(width: 12),
@@ -726,28 +721,31 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               onTap:
                   isLoading
                       ? null
-                      : () => _showTaskCompletionDialog(context, task, plantName, ref),
+                      : () => _showTaskCompletionDialog(
+                        context,
+                        task,
+                        plantName,
+                        ref,
+                      ),
               child: Container(
                 width: 20,
                 height: 20,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: PlantisColors.primary,
-                    width: 2,
-                  ),
+                  border: Border.all(color: PlantisColors.primary, width: 2),
                 ),
-                child: isLoading
-                    ? const Padding(
-                        padding: EdgeInsets.all(2),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            PlantisColors.primary,
+                child:
+                    isLoading
+                        ? const Padding(
+                          padding: EdgeInsets.all(2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              PlantisColors.primary,
+                            ),
                           ),
-                        ),
-                      )
-                    : const SizedBox(), // Círculo vazio = tarefa pendente
+                        )
+                        : const SizedBox(), // Círculo vazio = tarefa pendente
               ),
             ),
           ],
@@ -792,23 +790,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
           );
         }
       }
-    }
-  }
-
-  IconData _getTaskIcon(task_entity.TaskType type) {
-    switch (type) {
-      case task_entity.TaskType.watering:
-        return Icons.water_drop;
-      case task_entity.TaskType.fertilizing:
-        return Icons.eco;
-      case task_entity.TaskType.pruning:
-        return Icons.content_cut;
-      case task_entity.TaskType.pestInspection:
-        return Icons.search;
-      case task_entity.TaskType.repotting:
-        return Icons.grass;
-      default:
-        return Icons.task_alt;
     }
   }
 
@@ -947,21 +928,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       },
     );
   }
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final taskDate = DateTime(date.year, date.month, date.day);
-
-    if (taskDate == today) {
-      return 'Hoje';
-    } else if (taskDate == today.add(const Duration(days: 1))) {
-      return 'Amanhã';
-    } else if (taskDate == today.subtract(const Duration(days: 1))) {
-      return 'Ontem';
-    } else {
-      return '${date.day}/${date.month}/${date.year}';
-    }
-  }
 
   Widget _buildTasksContent(TasksListState state) {
     if (state.isLoading && state.isEmpty) {
@@ -991,8 +957,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-              },
+              onPressed: () {},
               child: const Text('Tentar novamente'),
             ),
           ],

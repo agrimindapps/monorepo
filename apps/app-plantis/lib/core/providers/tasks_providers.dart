@@ -103,34 +103,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
 
     return task;
   }
-  /// Wait for authentication initialization with timeout (currently unused)
-  Future<bool> _waitForAuthenticationWithTimeout({
-    Duration timeout = const Duration(seconds: 10),
-  }) async {
-    if (_authStateNotifier.isInitialized) {
-      return true;
-    }
-
-    debugPrint('⏳ TasksProvider: Waiting for auth initialization...');
-
-    try {
-      await _authStateNotifier.initializedStream
-          .where((isInitialized) => isInitialized)
-          .timeout(timeout)
-          .first;
-
-      debugPrint('✅ TasksProvider: Auth initialization complete');
-      return true;
-    } on TimeoutException {
-      debugPrint(
-        '⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s',
-      );
-      return false;
-    } catch (e) {
-      debugPrint('❌ TasksProvider: Auth initialization error: $e');
-      return false;
-    }
-  }
 
   /// Loads tasks from the remote data source with sync coordination
   Future<void> loadTasks() async {
@@ -1113,6 +1085,7 @@ class UnauthorizedAccessException implements Exception {
   @override
   String toString() => 'UnauthorizedAccessException: $message';
 }
+
 enum TaskSyncOperations { loadTasks, addTask, completeTask }
 
 enum OfflineTaskOperations { addTask, completeTask }

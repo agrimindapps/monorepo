@@ -122,7 +122,7 @@ class DebugPremiumSync {
         final timestamp = DateTime.now().toString().split(' ')[1];
         debugPrint('[$timestamp] 🔄 ${_formatSyncEvent(event)}');
       },
-      onError: (error) {
+      onError: (Object? error) {
         debugPrint('❌ Erro no monitoramento: $error');
       },
     );

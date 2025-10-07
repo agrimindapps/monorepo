@@ -1,5 +1,3 @@
-
-import 'package:app_agrihurbi/core/network/dio_client.dart';
 import 'package:core/core.dart';
 
 import '../models/bovine_model.dart';
@@ -23,9 +21,7 @@ abstract class LivestockRemoteDataSource {
 /// Implementação do data source remoto usando HTTP API
 @LazySingleton(as: LivestockRemoteDataSource)
 class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
-  final DioClient _dioClient;
-
-  LivestockRemoteDataSourceImpl(this._dioClient);
+  LivestockRemoteDataSourceImpl();
 
   @override
   Future<List<BovineModel>> getAllBovines() async {
@@ -47,24 +43,21 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
 
   @override
   Future<void> createBovine(BovineModel bovine) async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro ao criar bovino: $e');
     }
   }
 
   @override
   Future<void> updateBovine(BovineModel bovine) async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro ao atualizar bovino: $e');
     }
   }
 
   @override
   Future<void> deleteBovine(String id) async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro ao deletar bovino: $e');
     }
   }
@@ -89,32 +82,28 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
 
   @override
   Future<void> createEquine(EquineModel equine) async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro ao criar equino: $e');
     }
   }
 
   @override
   Future<void> updateEquine(EquineModel equine) async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro ao atualizar equino: $e');
     }
   }
 
   @override
   Future<void> deleteEquine(String id) async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro ao deletar equino: $e');
     }
   }
 
   @override
   Future<void> syncLivestockData() async {
-    try {
-    } catch (e) {
+    try {} catch (e) {
       throw Exception('Erro na sincronização: $e');
     }
   }

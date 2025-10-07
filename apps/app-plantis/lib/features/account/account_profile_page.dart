@@ -457,7 +457,10 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 
-  Widget _buildDataSyncSection(BuildContext context, local.AuthState authState) {
+  Widget _buildDataSyncSection(
+    BuildContext context,
+    local.AuthState authState,
+  ) {
     final theme = Theme.of(context);
 
     return riverpod.Consumer(
@@ -911,9 +914,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   'Cancelar',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
               ElevatedButton.icon(
@@ -958,11 +959,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
               color: PlantisColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: PlantisColors.primary,
-              size: 18,
-            ),
+            child: Icon(icon, color: PlantisColors.primary, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -987,11 +984,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
               ],
             ),
           ),
-          const Icon(
-            Icons.check_circle,
-            color: PlantisColors.leaf,
-            size: 18,
-          ),
+          const Icon(Icons.check_circle, color: PlantisColors.leaf, size: 18),
         ],
       ),
     );
@@ -1178,7 +1171,10 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
     );
   }
 
-  void _showDeleteAccountDialog(BuildContext context, local.AuthState authState) {
+  void _showDeleteAccountDialog(
+    BuildContext context,
+    local.AuthState authState,
+  ) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -1548,7 +1544,10 @@ class __DataClearDialogState extends State<_DataClearDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.orange, width: 2),
+                    borderSide: const BorderSide(
+                      color: Colors.orange,
+                      width: 2,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1900,64 +1899,6 @@ class __AccountDeletionDialogState
           ),
         ],
       ),
-    );
-  }
-  void _showDeletionSuccessDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: Row(
-              children: [
-                Icon(
-                  Icons.check_circle_outline,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Conta Excluída com Sucesso',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Sua conta foi excluída permanentemente. Todos os seus dados foram removidos de nossos servidores.',
-                  style: TextStyle(fontSize: 14),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Obrigado por ter usado o Plantis. Se precisar de ajuda, entre em contato conosco.',
-                  style: TextStyle(fontSize: 14),
-                ),
-              ],
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  context.go('/welcome');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Entendido'),
-              ),
-            ],
-          ),
     );
   }
 }

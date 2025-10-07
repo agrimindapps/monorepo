@@ -24,10 +24,11 @@ class LicenseStatusPage extends ConsumerWidget {
       body: ResponsiveLayout(
         child: licenseState.when(
           loading: () => const _LoadingView(),
-          error: (error, stack) => _ErrorView(
-            error: error.toString(),
-            onRetry: () => ref.refresh(licenseNotifierProvider),
-          ),
+          error:
+              (error, stack) => _ErrorView(
+                error: error.toString(),
+                onRetry: () => ref.refresh(licenseNotifierProvider),
+              ),
           data: (state) {
             if (state.isLoading) {
               return const _LoadingView();
@@ -36,7 +37,11 @@ class LicenseStatusPage extends ConsumerWidget {
             if (state.error != null) {
               return _ErrorView(
                 error: state.error!,
-                onRetry: () => ref.read(licenseNotifierProvider.notifier).refreshLicenseInfo(),
+                onRetry:
+                    () =>
+                        ref
+                            .read(licenseNotifierProvider.notifier)
+                            .refreshLicenseInfo(),
               );
             }
 
@@ -85,7 +90,7 @@ class _LicenseStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final licenseInfo = licenseState.licenseInfo;
 
     return Card(
@@ -395,7 +400,10 @@ class _ActionsSection extends StatelessWidget {
                 onPressed:
                     licenseState.isLoading
                         ? null
-                        : () => ref.read(licenseNotifierProvider.notifier).refreshLicenseInfo(),
+                        : () =>
+                            ref
+                                .read(licenseNotifierProvider.notifier)
+                                .refreshLicenseInfo(),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Atualizar Status'),
                 style: OutlinedButton.styleFrom(
@@ -443,7 +451,11 @@ class _DevelopmentTools extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.developer_mode, color: Colors.orange, size: 24),
+                const Icon(
+                  Icons.developer_mode,
+                  color: Colors.orange,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Ferramentas de Desenvolvimento',
@@ -487,7 +499,7 @@ class _DevelopmentTools extends StatelessWidget {
   }
 
   void _showExtendTrialDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -518,7 +530,7 @@ class _DevelopmentTools extends StatelessWidget {
   }
 
   void _showResetLicenseDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

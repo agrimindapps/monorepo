@@ -4,7 +4,6 @@ import 'package:core/core.dart' hide Failure;
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/failures.dart';
-import '../../features/tasks/domain/task_repository.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
@@ -14,7 +13,6 @@ import 'crashlytics_service.dart';
 class TaskManagerSyncService {
   final TaskManagerAnalyticsService _analyticsService;
   final TaskManagerCrashlyticsService _crashlyticsService;
-  final TaskRepository _taskRepository;
   final StreamController<SyncProgress> _progressController =
       StreamController<SyncProgress>.broadcast();
   final StreamController<String> _messageController =
@@ -22,11 +20,7 @@ class TaskManagerSyncService {
   bool _isSyncing = false;
   Timer? _autoSyncTimer;
 
-  TaskManagerSyncService(
-    this._analyticsService,
-    this._crashlyticsService,
-    this._taskRepository,
-  ) {
+  TaskManagerSyncService(this._analyticsService, this._crashlyticsService) {
     _initializeAutoSync();
   }
   Stream<SyncProgress> get progressStream => _progressController.stream;
@@ -205,7 +199,6 @@ class TaskManagerSyncService {
       if (currentUser == null) return;
       const isUserPremium = false;
 
-      if (!isUserPremium) return;
       if (kDebugMode) {
         debugPrint('🔄 TaskManagerSyncService: Executando sync em background');
       }

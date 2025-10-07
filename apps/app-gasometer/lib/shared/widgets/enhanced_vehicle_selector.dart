@@ -69,7 +69,7 @@ class _EnhancedVehicleSelectorState
           data: (data) async => data,
           loading: () async {
             debugPrint('⏳ Aguardando carregamento de veículos...');
-            await Future.delayed(const Duration(milliseconds: 100));
+            await Future<void>.delayed(const Duration(milliseconds: 100));
             return ref.read(vehiclesNotifierProvider).value ?? [];
           },
           error: (_, __) async => <VehicleEntity>[],

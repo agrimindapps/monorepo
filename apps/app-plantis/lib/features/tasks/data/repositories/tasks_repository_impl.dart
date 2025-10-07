@@ -8,6 +8,7 @@ import '../../domain/repositories/tasks_repository.dart';
 import '../datasources/local/tasks_local_datasource.dart';
 import '../datasources/remote/tasks_remote_datasource.dart';
 import '../models/task_model.dart';
+
 typedef Task = task_entity.Task;
 typedef TaskStatus = task_entity.TaskStatus;
 
@@ -98,6 +99,7 @@ class TasksRepositoryImpl implements TasksRepository {
       return Right(localTasks.cast<Task>());
     }
   }
+
   void _syncTasksInBackground(String userId) async {
     try {
       final syncStrategy = await _determineSyncStrategy();
@@ -219,7 +221,7 @@ class TasksRepositoryImpl implements TasksRepository {
             print('✅ TasksRepository: Basic sync completed');
           }
         })
-        .catchError((e) {
+        .catchError((Object e) {
           if (kDebugMode) {
             print('❌ TasksRepository: Basic sync failed: $e');
           }
@@ -270,8 +272,7 @@ class TasksRepositoryImpl implements TasksRepository {
             localDataSource.cacheTask(task);
           }
         })
-        .catchError((e) {
-        });
+        .catchError((Object e) {});
   }
 
   @override
@@ -302,8 +303,7 @@ class TasksRepositoryImpl implements TasksRepository {
             localDataSource.cacheTask(task);
           }
         })
-        .catchError((e) {
-        });
+        .catchError((e) {});
   }
 
   @override
@@ -347,8 +347,7 @@ class TasksRepositoryImpl implements TasksRepository {
             localDataSource.cacheTask(task);
           }
         })
-        .catchError((e) {
-        });
+        .catchError((e) {});
   }
 
   @override
@@ -392,8 +391,7 @@ class TasksRepositoryImpl implements TasksRepository {
             localDataSource.cacheTask(task);
           }
         })
-        .catchError((e) {
-        });
+        .catchError((e) {});
   }
 
   @override
@@ -422,8 +420,7 @@ class TasksRepositoryImpl implements TasksRepository {
             localDataSource.cacheTask(task);
           }
         })
-        .catchError((e) {
-        });
+        .catchError((e) {});
   }
 
   @override
@@ -459,8 +456,7 @@ class TasksRepositoryImpl implements TasksRepository {
             localDataSource.cacheTask(remoteTask);
           }
         })
-        .catchError((e) {
-        });
+        .catchError((e) {});
   }
 
   @override

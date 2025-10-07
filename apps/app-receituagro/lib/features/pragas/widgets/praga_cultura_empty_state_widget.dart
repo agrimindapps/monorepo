@@ -41,17 +41,14 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
   Widget _buildIcon() {
     final color = _getTypeColor();
     final icon = _getTypeIcon();
-    
+
     return Container(
       width: 120,
       height: 120,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(60),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-          width: 2,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 2),
         boxShadow: [
           BoxShadow(
             color: color.withValues(alpha: 0.1),
@@ -61,11 +58,7 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: FaIcon(
-          icon,
-          size: 48,
-          color: color.withValues(alpha: 0.6),
-        ),
+        child: FaIcon(icon, size: 48, color: color.withValues(alpha: 0.6)),
       ),
     );
   }
@@ -96,16 +89,13 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
 
   Widget _buildInfoCard() {
     final color = _getTypeColor();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -113,11 +103,7 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.info_outline_rounded,
-                size: 18,
-                color: color,
-              ),
+              Icon(Icons.info_outline_rounded, size: 18, color: color),
               const SizedBox(width: 8),
               Text(
                 _getInfoTitle(),
@@ -133,10 +119,7 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               _getEmptyStateTip(),
-              style: TextStyle(
-                fontSize: 13,
-                color: color,
-              ),
+              style: TextStyle(fontSize: 13, color: color),
               textAlign: TextAlign.center,
             ),
           ],
@@ -164,9 +147,9 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
 
   IconData _getTypeIcon() {
     if (hasSearchText) {
-      return FontAwesomeIcons.searchMinus;
+      return FontAwesomeIcons.magnifyingGlassMinus;
     }
-    
+
     switch (tipoPraga) {
       case '1': // Insetos
         return FontAwesomeIcons.bug;
@@ -175,7 +158,7 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
       case '3': // Plantas Daninhas
         return FontAwesomeIcons.seedling;
       default:
-        return FontAwesomeIcons.search;
+        return FontAwesomeIcons.magnifyingGlass;
     }
   }
 
@@ -183,7 +166,7 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
     if (hasSearchText) {
       return 'Nenhum resultado encontrado';
     }
-    
+
     switch (tipoPraga) {
       case '1':
         return 'Nenhum inseto encontrado';
@@ -200,12 +183,12 @@ class PragaCulturaEmptyStateWidget extends StatelessWidget {
     if (hasSearchText) {
       return 'Não encontramos nenhuma praga para "$searchText".\nTente buscar com outros termos.';
     }
-    
+
     if (culturaNome.isNotEmpty) {
       final tipoPragaName = _getTipoPragaName();
       return 'Não há $tipoPragaName registrados\npara a cultura $culturaNome.';
     }
-    
+
     switch (tipoPraga) {
       case '1':
         return 'Não há insetos registrados\nno momento.';

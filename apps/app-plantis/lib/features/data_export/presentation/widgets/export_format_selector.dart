@@ -6,7 +6,7 @@ import '../../domain/entities/export_request.dart';
 /// Widget for selecting export format in Plantis
 class ExportFormatSelector extends StatefulWidget {
   final ExportFormat selectedFormat;
-  final Function(ExportFormat) onFormatChanged;
+  final void Function(ExportFormat) onFormatChanged;
 
   const ExportFormatSelector({
     super.key,

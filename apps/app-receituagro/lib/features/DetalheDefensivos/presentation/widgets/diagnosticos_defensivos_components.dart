@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/data/models/cultura_hive.dart';
 import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../../../core/data/models/pragas_hive.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
@@ -64,8 +63,10 @@ class _DiagnosticoDefensivoFilterWidgetState
     return RepaintBoundary(
       child: diagnosticosAsync.when(
         data: (diagnosticosState) {
-          final availableCulturas = diagnosticosState.filtersData?.culturas ?? ['Todas'];
-          final selectedCultura = diagnosticosState.currentFilters.idCultura ?? 'Todas';
+          final availableCulturas =
+              diagnosticosState.filtersData?.culturas ?? ['Todas'];
+          final selectedCultura =
+              diagnosticosState.currentFilters.idCultura ?? 'Todas';
 
           return Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -76,7 +77,9 @@ class _DiagnosticoDefensivoFilterWidgetState
                   child: _SearchField(
                     focusNode: _searchFocusNode,
                     onChanged: (query) {
-                      ref.read(diagnosticosNotifierProvider.notifier).searchByPattern(query);
+                      ref
+                          .read(diagnosticosNotifierProvider.notifier)
+                          .searchByPattern(query);
                     },
                   ),
                 ),
@@ -89,12 +92,16 @@ class _DiagnosticoDefensivoFilterWidgetState
                       cultures: availableCulturas,
                       onChanged: (cultura) {
                         if (cultura == 'Todas') {
-                          ref.read(diagnosticosNotifierProvider.notifier).clearFilters();
+                          ref
+                              .read(diagnosticosNotifierProvider.notifier)
+                              .clearFilters();
                         } else {
-                          ref.read(diagnosticosNotifierProvider.notifier).getDiagnosticosByCultura(
-                            cultura,
-                            nomeCultura: cultura,
-                          );
+                          ref
+                              .read(diagnosticosNotifierProvider.notifier)
+                              .getDiagnosticosByCultura(
+                                cultura,
+                                nomeCultura: cultura,
+                              );
                         }
                       },
                     ),
@@ -104,17 +111,16 @@ class _DiagnosticoDefensivoFilterWidgetState
             ),
           );
         },
-        loading: () => Container(
-          padding: const EdgeInsets.all(SpacingTokens.sm),
-          child: const Center(child: CircularProgressIndicator()),
-        ),
-        error: (error, _) => Container(
-          padding: const EdgeInsets.all(SpacingTokens.sm),
-          child: const _SearchField(
-            focusNode: null,
-            onChanged: null,
-          ),
-        ),
+        loading:
+            () => Container(
+              padding: const EdgeInsets.all(SpacingTokens.sm),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        error:
+            (error, _) => Container(
+              padding: const EdgeInsets.all(SpacingTokens.sm),
+              child: const _SearchField(focusNode: null, onChanged: null),
+            ),
       ),
     );
   }
@@ -125,10 +131,7 @@ class _SearchField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
 
-  const _SearchField({
-    required this.onChanged,
-    required this.focusNode,
-  });
+  const _SearchField({required this.onChanged, required this.focusNode});
 
   @override
   Widget build(BuildContext context) {
@@ -211,18 +214,18 @@ class _CultureDropdown extends StatelessWidget {
           ...cultures
               .where((culture) => culture != 'Todas')
               .map<DropdownMenuItem<String>>((String culture) {
-            return DropdownMenuItem<String>(
-              value: culture,
-              child: Text(
-                culture,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            );
-          }),
+                return DropdownMenuItem<String>(
+                  value: culture,
+                  child: Text(
+                    culture,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                );
+              }),
         ],
       ),
     );
@@ -266,10 +269,11 @@ class DiagnosticoDefensivoStateManager extends ConsumerWidget {
         return builder(diagnosticosState.diagnosticos);
       },
       loading: () => const DiagnosticoDefensivoLoadingWidget(),
-      error: (error, _) => DiagnosticoDefensivoErrorWidget(
-        errorMessage: error.toString(),
-        onRetry: onRetry,
-      ),
+      error:
+          (error, _) => DiagnosticoDefensivoErrorWidget(
+            errorMessage: error.toString(),
+            onRetry: onRetry,
+          ),
     );
   }
 }
@@ -311,11 +315,7 @@ class DiagnosticoDefensivoErrorWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red.shade300,
-              ),
+              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
               const SizedBox(height: SpacingTokens.lg),
               Text(
                 'Erro ao carregar diagnósticos',
@@ -364,11 +364,7 @@ class DiagnosticoDefensivoEmptyWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.search_off,
-                size: 64,
-                color: Colors.grey.shade400,
-              ),
+              Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: SpacingTokens.lg),
               Text(
                 'Nenhum diagnóstico encontrado',
@@ -382,10 +378,7 @@ class DiagnosticoDefensivoEmptyWidget extends StatelessWidget {
               Text(
                 'Não há diagnósticos disponíveis para $defensivoName',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
               ),
             ],
           ),
@@ -417,7 +410,6 @@ class DiagnosticoDefensivoCultureSectionWidget extends StatefulWidget {
 
 class _DiagnosticoDefensivoCultureSectionWidgetState
     extends State<DiagnosticoDefensivoCultureSectionWidget> {
-  CulturaHive? _culturaData;
   bool _isLoadingCultura = false;
 
   @override
@@ -446,7 +438,6 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
                   widget.cultura.toLowerCase()) {
             if (mounted) {
               setState(() {
-                _culturaData = culturaData;
                 _isLoadingCultura = false;
               });
             }
@@ -454,10 +445,8 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
           }
         }
       }
-      final culturaData = await culturaRepository.findByName(widget.cultura);
       if (mounted) {
         setState(() {
-          _culturaData = culturaData;
           _isLoadingCultura = false;
         });
       }
@@ -596,8 +585,6 @@ class _DiagnosticoDefensivoListItemWidgetState
       final pragasRepository = sl<PragasHiveRepository>();
       final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
-
-
       if (idPraga != null) {
         final praga = await pragasRepository.getById(idPraga);
 
@@ -614,7 +601,6 @@ class _DiagnosticoDefensivoListItemWidgetState
           });
         }
       }
-
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -637,9 +623,7 @@ class _DiagnosticoDefensivoListItemWidgetState
             children: [
               _buildAvatar(context),
               const SizedBox(width: SpacingTokens.lg),
-              Expanded(
-                child: _buildContent(context),
-              ),
+              Expanded(child: _buildContent(context)),
               _buildTrailingActions(context),
             ],
           ),
@@ -749,7 +733,9 @@ class _DiagnosticoDefensivoListItemWidgetState
       nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
     } else {
       final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
-      if (nomePragaModel != null && nomePragaModel.isNotEmpty && nomePragaModel != 'Não especificado') {
+      if (nomePragaModel != null &&
+          nomePragaModel.isNotEmpty &&
+          nomePragaModel != 'Não especificado') {
         nomeComumPraga = nomePragaModel;
       } else if (_pragaData != null) {
         final nomeComumCompleto = _pragaData!.nomeComum;
@@ -837,8 +823,7 @@ class _DiagnosticoDefensivoListItemWidgetState
           if (fallback != null) return fallback.toString();
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return null;
   }
 
@@ -909,11 +894,12 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     return showDialog<void>(
       context: context,
-      builder: (context) => DiagnosticoDefensivoDialogWidget(
-        diagnostico: diagnostico,
-        defensivoName: defensivoName,
-        navigationService: navigationService,
-      ),
+      builder:
+          (context) => DiagnosticoDefensivoDialogWidget(
+            diagnostico: diagnostico,
+            defensivoName: defensivoName,
+            navigationService: navigationService,
+          ),
     );
   }
 }
@@ -921,7 +907,6 @@ class DiagnosticoDefensivoDialogWidget extends StatefulWidget {
 class _DiagnosticoDefensivoDialogWidgetState
     extends State<DiagnosticoDefensivoDialogWidget> {
   PragasHive? _pragaData;
-  bool _isLoadingPraga = true;
 
   @override
   void initState() {
@@ -939,21 +924,16 @@ class _DiagnosticoDefensivoDialogWidgetState
         if (mounted) {
           setState(() {
             _pragaData = praga;
-            _isLoadingPraga = false;
           });
         }
       } else {
         if (mounted) {
-          setState(() {
-            _isLoadingPraga = false;
-          });
+          setState(() {});
         }
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isLoadingPraga = false;
-        });
+        setState(() {});
       }
     }
   }
@@ -963,8 +943,8 @@ class _DiagnosticoDefensivoDialogWidgetState
     try {
       if (widget.diagnostico is Map<String, dynamic>) {
         final map = widget.diagnostico as Map<String, dynamic>;
-        return map[primaryKey]?.toString() ?? 
-               (secondaryKey != null ? map[secondaryKey]?.toString() : null);
+        return map[primaryKey]?.toString() ??
+            (secondaryKey != null ? map[secondaryKey]?.toString() : null);
       } else {
         switch (primaryKey) {
           case 'nomeDefensivo':
@@ -1020,12 +1000,13 @@ class _DiagnosticoDefensivoDialogWidgetState
     if (diagnosticoId != null) {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (context) => DetalheDiagnosticoPage(
-            diagnosticoId: diagnosticoId,
-            nomeDefensivo: widget.defensivoName,
-            nomePraga: nomePraga,
-            cultura: cultura,
-          ),
+          builder:
+              (context) => DetalheDiagnosticoPage(
+                diagnosticoId: diagnosticoId,
+                nomeDefensivo: widget.defensivoName,
+                nomePraga: nomePraga,
+                cultura: cultura,
+              ),
         ),
       );
     }
@@ -1058,9 +1039,7 @@ class _DiagnosticoDefensivoDialogWidgetState
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildModernHeader(context),
-            Flexible(
-              child: _buildModernContent(context),
-            ),
+            Flexible(child: _buildModernContent(context)),
             _buildModernActions(context),
           ],
         ),
@@ -1073,7 +1052,8 @@ class _DiagnosticoDefensivoDialogWidgetState
     final theme = Theme.of(context);
     final nomeDefensivo =
         _getProperty('nomeDefensivo', 'nome') ?? 'Defensivo não identificado';
-    final ingredienteAtivo = _getProperty('ingredienteAtivo') ??
+    final ingredienteAtivo =
+        _getProperty('ingredienteAtivo') ??
         'Ingrediente ativo não especificado';
 
     return Container(
@@ -1126,8 +1106,9 @@ class _DiagnosticoDefensivoDialogWidgetState
   /// Seção da imagem da praga
   Widget _buildPragaImageSection(BuildContext context) {
     final theme = Theme.of(context);
-    final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Praga não identificada';
-    
+    final nomePraga =
+        _getProperty('nomePraga', 'grupo') ?? 'Praga não identificada';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1183,7 +1164,9 @@ class _DiagnosticoDefensivoDialogWidgetState
                       children: [
                         Icon(
                           Icons.bug_report_outlined,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
                           size: 48,
                         ),
                         const SizedBox(height: 8),
@@ -1191,7 +1174,9 @@ class _DiagnosticoDefensivoDialogWidgetState
                           'Carregando imagem...',
                           style: TextStyle(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -1206,7 +1191,9 @@ class _DiagnosticoDefensivoDialogWidgetState
                       children: [
                         Icon(
                           Icons.bug_report_outlined,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.3,
+                          ),
                           size: 48,
                         ),
                         const SizedBox(height: 8),
@@ -1214,7 +1201,9 @@ class _DiagnosticoDefensivoDialogWidgetState
                           'Imagem não disponível',
                           style: TextStyle(
                             fontSize: 12,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -1254,11 +1243,6 @@ class _DiagnosticoDefensivoDialogWidgetState
         ],
       ),
     );
-  }
-
-  /// Cabeçalho do modal com título e botão de fechar
-  Widget _buildHeader(BuildContext context) {
-    return _buildModernHeader(context);
   }
 
   /// Conteúdo moderno com seções organizadas
@@ -1301,41 +1285,6 @@ class _DiagnosticoDefensivoDialogWidgetState
             isPremium: true,
           ),
           const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-
-  /// Conteúdo principal do modal
-  Widget _buildContent(BuildContext context) {
-    return _buildModernContent(context);
-  }
-
-  /// Constrói uma seção de informação
-  Widget _buildInfoSection(String label, String value, BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: SpacingTokens.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: SpacingTokens.xs),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
         ],
       ),
     );
@@ -1404,11 +1353,7 @@ class _DiagnosticoDefensivoDialogWidgetState
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.diamond,
-                    size: 12,
-                    color: Colors.amber.shade700,
-                  ),
+                  Icon(Icons.diamond, size: 12, color: Colors.amber.shade700),
                   const SizedBox(width: 4),
                   Text(
                     'Premium',
@@ -1476,10 +1421,7 @@ class _DiagnosticoDefensivoDialogWidgetState
               ),
               child: const Text(
                 'Diagnóstico',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),

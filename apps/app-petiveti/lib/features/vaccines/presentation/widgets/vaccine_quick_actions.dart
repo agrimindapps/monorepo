@@ -10,7 +10,7 @@ class VaccineQuickActions extends ConsumerWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onViewDetails;
-  
+
   const VaccineQuickActions({
     super.key,
     required this.vaccine,
@@ -84,26 +84,17 @@ class VaccineQuickActions extends ConsumerWidget {
 
   Widget _buildQuickActionChip(
     BuildContext context,
-    ThemeData theme,
-    {
-      required String label,
-      required IconData icon,
-      required Color color,
-      VoidCallback? onTap,
-    }
-  ) {
+    ThemeData theme, {
+    required String label,
+    required IconData icon,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
     return ActionChip(
-      avatar: Icon(
-        icon,
-        size: 18,
-        color: color,
-      ),
+      avatar: Icon(icon, size: 18, color: color),
       label: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(color: color, fontWeight: FontWeight.w500),
       ),
       backgroundColor: color.withValues(alpha: 0.1),
       side: BorderSide(color: color.withValues(alpha: 0.3)),
@@ -124,35 +115,41 @@ class VaccineQuickActions extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Marcar como Aplicada'),
-        content: Text('Confirmar que a vacina "${vaccine.name}" foi aplicada?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Marcar como Aplicada'),
+            content: Text(
+              'Confirmar que a vacina "${vaccine.name}" foi aplicada?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref
+                      .read(vaccinesProvider.notifier)
+                      .markAsCompleted(vaccine.id);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Vacina "${vaccine.name}" marcada como aplicada',
+                      ),
+                      backgroundColor: Colors.green,
+                      action: SnackBarAction(
+                        label: 'Desfazer',
+                        onPressed: () {},
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Confirmar'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(vaccinesProvider.notifier).markAsCompleted(vaccine.id);
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Vacina "${vaccine.name}" marcada como aplicada'),
-                  backgroundColor: Colors.green,
-                  action: SnackBarAction(
-                    label: 'Desfazer',
-                    onPressed: () {
-                    },
-                  ),
-                ),
-              );
-            },
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -161,46 +158,47 @@ class VaccineQuickActions extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder: (context) => _ReminderDatePicker(
-        vaccine: vaccine,
-        onReminderSet: (reminderDate) {
-          ref.read(vaccinesProvider.notifier).scheduleReminder(
-            vaccine.id,
-            reminderDate,
-          );
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Lembrete definido para ${_formatDate(reminderDate)}',
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
-        },
-      ),
+      builder:
+          (context) => _ReminderDatePicker(
+            vaccine: vaccine,
+            onReminderSet: (reminderDate) {
+              ref
+                  .read(vaccinesProvider.notifier)
+                  .scheduleReminder(vaccine.id, reminderDate);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Lembrete definido para ${_formatDate(reminderDate)}',
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+          ),
     );
   }
 
   void _rescheduleVaccine(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
-      builder: (context) => _RescheduleDatePicker(
-        vaccine: vaccine,
-        onRescheduled: (newDate) {
-          final updatedVaccine = vaccine.copyWith(nextDueDate: newDate);
-          ref.read(vaccinesProvider.notifier).updateVaccine(updatedVaccine);
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Vacina reagendada para ${_formatDate(newDate)}',
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
-        },
-      ),
+      builder:
+          (context) => _RescheduleDatePicker(
+            vaccine: vaccine,
+            onRescheduled: (newDate) {
+              final updatedVaccine = vaccine.copyWith(nextDueDate: newDate);
+              ref.read(vaccinesProvider.notifier).updateVaccine(updatedVaccine);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Vacina reagendada para ${_formatDate(newDate)}',
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+          ),
     );
   }
 
@@ -212,8 +210,8 @@ class VaccineQuickActions extends ConsumerWidget {
 /// Reminder date picker dialog
 class _ReminderDatePicker extends StatefulWidget {
   final Vaccine vaccine;
-  final Function(DateTime) onReminderSet;
-  
+  final void Function(DateTime) onReminderSet;
+
   const _ReminderDatePicker({
     required this.vaccine,
     required this.onReminderSet,
@@ -244,7 +242,7 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
       title: const Text('Definir Lembrete'),
       content: Column(
@@ -314,7 +312,7 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
               selectedTime.hour,
               selectedTime.minute,
             );
-            
+
             Navigator.pop(context);
             widget.onReminderSet(reminderDateTime);
           },
@@ -325,10 +323,12 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
   }
 
   bool _isSelectedPreset(int days) {
-    final presetDate = widget.vaccine.nextDueDate!.subtract(Duration(days: days));
+    final presetDate = widget.vaccine.nextDueDate!.subtract(
+      Duration(days: days),
+    );
     return selectedDate.year == presetDate.year &&
-           selectedDate.month == presetDate.month &&
-           selectedDate.day == presetDate.day;
+        selectedDate.month == presetDate.month &&
+        selectedDate.day == presetDate.day;
   }
 
   void _setPresetDays(int days) {
@@ -342,11 +342,11 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime.now(),
-      lastDate: widget.vaccine.nextDueDate ?? DateTime.now().add(
-        const Duration(days: 365),
-      ),
+      lastDate:
+          widget.vaccine.nextDueDate ??
+          DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (date != null) {
       setState(() {
         selectedDate = date;
@@ -359,7 +359,7 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
       context: context,
       initialTime: selectedTime,
     );
-    
+
     if (time != null) {
       setState(() {
         selectedTime = time;
@@ -375,8 +375,8 @@ class _ReminderDatePickerState extends State<_ReminderDatePicker> {
 /// Reschedule date picker dialog
 class _RescheduleDatePicker extends StatefulWidget {
   final Vaccine vaccine;
-  final Function(DateTime) onRescheduled;
-  
+  final void Function(DateTime) onRescheduled;
+
   const _RescheduleDatePicker({
     required this.vaccine,
     required this.onRescheduled,
@@ -392,15 +392,15 @@ class _RescheduleDatePickerState extends State<_RescheduleDatePicker> {
   @override
   void initState() {
     super.initState();
-    selectedDate = widget.vaccine.nextDueDate ?? DateTime.now().add(
-      const Duration(days: 7),
-    );
+    selectedDate =
+        widget.vaccine.nextDueDate ??
+        DateTime.now().add(const Duration(days: 7));
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AlertDialog(
       title: const Text('Reagendar Vacina'),
       content: Column(
@@ -472,8 +472,8 @@ class _RescheduleDatePickerState extends State<_RescheduleDatePicker> {
   bool _isSelectedPreset(int days) {
     final presetDate = DateTime.now().add(Duration(days: days));
     return selectedDate.year == presetDate.year &&
-           selectedDate.month == presetDate.month &&
-           selectedDate.day == presetDate.day;
+        selectedDate.month == presetDate.month &&
+        selectedDate.day == presetDate.day;
   }
 
   void _setPresetDays(int days) {
@@ -489,7 +489,7 @@ class _RescheduleDatePickerState extends State<_RescheduleDatePicker> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
-    
+
     if (date != null) {
       setState(() {
         selectedDate = date;

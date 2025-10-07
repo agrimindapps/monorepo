@@ -39,8 +39,7 @@ class DefensivosBottomSheet extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName =
-        pragaPorCultura.praga.nomeComum ?? pragaPorCultura.praga.nomeCientifico;
+    final pragaName = pragaPorCultura.praga.nomeComum;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),

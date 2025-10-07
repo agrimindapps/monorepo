@@ -119,7 +119,7 @@ class PragasEmptyStateWidget extends StatelessWidget {
       case '3': // Plantas Daninhas
         return FontAwesomeIcons.seedling;
       default:
-        return FontAwesomeIcons.search;
+        return FontAwesomeIcons.magnifyingGlass;
     }
   }
 

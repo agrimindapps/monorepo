@@ -29,6 +29,7 @@ class LicenseState {
       error: clearError ? null : (error ?? this.error),
     );
   }
+
   bool get hasValidLicense => licenseInfo.hasValidLicense;
   bool get isTrialActive => licenseInfo.isTrialActive;
   bool get isPremiumActive => licenseInfo.isPremiumActive;
@@ -337,13 +338,14 @@ class LicenseNotifier extends _$LicenseNotifier {
     return const LicenseState(licenseInfo: LicenseInfo.noLicense());
   }
 }
+
 @riverpod
 LicenseService licenseService(Ref ref) {
   return GetIt.instance<LicenseService>();
 }
+
 @riverpod
 Future<bool> canAddUnlimitedPlants(Ref ref) async {
-  final notifier = await ref.watch(licenseNotifierProvider.future);
   return ref
       .read(licenseNotifierProvider.notifier)
       .canAccessFeature(PremiumFeature.unlimitedPlants);
@@ -351,7 +353,6 @@ Future<bool> canAddUnlimitedPlants(Ref ref) async {
 
 @riverpod
 Future<bool> canUseCustomReminders(Ref ref) async {
-  final notifier = await ref.watch(licenseNotifierProvider.future);
   return ref
       .read(licenseNotifierProvider.notifier)
       .canAccessFeature(PremiumFeature.customReminders);
@@ -359,7 +360,6 @@ Future<bool> canUseCustomReminders(Ref ref) async {
 
 @riverpod
 Future<bool> canUseAdvancedAnalytics(Ref ref) async {
-  final notifier = await ref.watch(licenseNotifierProvider.future);
   return ref
       .read(licenseNotifierProvider.notifier)
       .canAccessFeature(PremiumFeature.advancedAnalytics);
@@ -367,7 +367,6 @@ Future<bool> canUseAdvancedAnalytics(Ref ref) async {
 
 @riverpod
 Future<bool> canUseWeatherIntegration(Ref ref) async {
-  final notifier = await ref.watch(licenseNotifierProvider.future);
   return ref
       .read(licenseNotifierProvider.notifier)
       .canAccessFeature(PremiumFeature.weatherIntegration);
@@ -375,7 +374,6 @@ Future<bool> canUseWeatherIntegration(Ref ref) async {
 
 @riverpod
 Future<bool> canUsePlantIdentification(Ref ref) async {
-  final notifier = await ref.watch(licenseNotifierProvider.future);
   return ref
       .read(licenseNotifierProvider.notifier)
       .canAccessFeature(PremiumFeature.plantIdentification);
@@ -383,7 +381,6 @@ Future<bool> canUsePlantIdentification(Ref ref) async {
 
 @riverpod
 Future<bool> canUseExpertSupport(Ref ref) async {
-  final notifier = await ref.watch(licenseNotifierProvider.future);
   return ref
       .read(licenseNotifierProvider.notifier)
       .canAccessFeature(PremiumFeature.expertSupport);

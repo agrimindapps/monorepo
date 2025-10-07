@@ -3,8 +3,8 @@ import '../../domain/entities/task.dart' as task_entity;
 
 class TasksListView extends StatelessWidget {
   final List<task_entity.Task> tasks;
-  final Function(String taskId) onTaskComplete;
-  final Function(task_entity.Task task) onTaskTap;
+  final void Function(String taskId) onTaskComplete;
+  final void Function(task_entity.Task task) onTaskTap;
 
   const TasksListView({
     super.key,
@@ -16,8 +16,7 @@ class TasksListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () async {
-      },
+      onRefresh: () async {},
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: tasks.length,

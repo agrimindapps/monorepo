@@ -68,7 +68,10 @@ class FeedbackOperations {
   static const String saveSettings = 'save_settings';
   static const String resetData = 'reset_data';
 }
-class FeedbackPatterns {
+/// Utility class for common feedback patterns
+final class FeedbackPatterns {
+  FeedbackPatterns._();
+
   /// Pattern para salvar dados
   static Future<T> saveData<T>({
     required BuildContext context,
@@ -96,9 +99,12 @@ class FeedbackPatterns {
     required String itemType,
     bool requireConfirmation = true,
   }) async {
+    // Capture context before async gap
+    final capturedContext = context;
+
     if (requireConfirmation) {
       final confirmed = await UnifiedFeedbackSystem.confirmDestruction(
-        context: context,
+        context: capturedContext,
         title: 'Deletar $itemType',
         message: 'Tem certeza que deseja remover "$itemName"?',
         requireDouble: true,
@@ -106,8 +112,12 @@ class FeedbackPatterns {
 
       if (!confirmed) return false;
     }
+
+    // Safe to use after check - UnifiedFeedbackSystem handles mounted checks internally
+    if (!capturedContext.mounted) return false;
+
     await UnifiedFeedbackSystem.executeWithFeedback<void>(
-      context: context,
+      context: capturedContext,
       operationKey:
           'delete_${itemName}_${DateTime.now().millisecondsSinceEpoch}',
       operation: operation,
@@ -123,7 +133,8 @@ class FeedbackPatterns {
   /// Pattern para upload com progresso
   static Future<T> uploadFile<T>({
     required BuildContext context,
-    required Future<T> Function(Function(double, String?) onProgress) operation,
+    required Future<T> Function(void Function(double, String?) onProgress)
+        operation,
     required String fileName,
   }) {
     return UnifiedFeedbackSystem.uploadImage<T>(
@@ -171,7 +182,8 @@ class FeedbackPatterns {
   /// Pattern para backup
   static Future<T> backupData<T>({
     required BuildContext context,
-    required Future<T> Function(Function(double, String?) onProgress) operation,
+    required Future<T> Function(void Function(double, String?) onProgress)
+        operation,
   }) {
     return UnifiedFeedbackSystem.backup<T>(
       context: context,
@@ -179,7 +191,11 @@ class FeedbackPatterns {
     );
   }
 }
-class QuickFeedback {
+
+/// Utility class for quick feedback shortcuts
+final class QuickFeedback {
+  QuickFeedback._();
+
   /// Toast de sucesso rápido
   static void success(BuildContext context, String message) {
     UnifiedFeedbackSystem.successToast(context, message);

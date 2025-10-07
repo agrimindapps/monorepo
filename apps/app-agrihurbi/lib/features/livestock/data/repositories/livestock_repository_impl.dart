@@ -12,7 +12,7 @@ import '../models/bovine_model.dart';
 import '../models/equine_model.dart';
 
 /// Implementação do repositório de livestock com estratégia local-first
-/// 
+///
 /// ESTRATÉGIA LOCAL-FIRST:
 /// 1. Sempre retorna dados locais primeiro (Hive)
 /// 2. Sync com Supabase em background quando há conectividade
@@ -23,31 +23,31 @@ class LivestockRepositoryImpl implements LivestockRepository {
   final LivestockLocalDataSource _localDataSource;
   final LivestockRemoteDataSource _remoteDataSource;
   final Connectivity _connectivity;
-  
+
   LivestockRepositoryImpl(
     this._localDataSource,
     this._remoteDataSource,
     this._connectivity,
   );
-  
+
   @override
   Future<Either<Failure, List<BovineEntity>>> getBovines() async {
     try {
       final localBovines = await _localDataSource.getAllBovines();
       final entities = localBovines.map((model) => model.toEntity()).toList();
       _performBackgroundSync();
-      
+
       return Right(entities);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, BovineEntity>> getBovineById(String id) async {
     try {
       final localBovine = await _localDataSource.getBovineById(id);
-      
+
       if (localBovine != null) {
         return Right(localBovine.toEntity());
       }
@@ -59,17 +59,20 @@ class LivestockRepositoryImpl implements LivestockRepository {
             return Right(remoteBovine.toEntity());
           }
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return const Left(BovineNotFoundFailure());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, BovineEntity>> createBovine(BovineEntity bovine) async {
+  Future<Either<Failure, BovineEntity>> createBovine(
+    BovineEntity bovine,
+  ) async {
     try {
       final bovineModel = BovineModel.fromEntity(bovine);
       await _localDataSource.saveBovine(bovineModel);
@@ -77,17 +80,20 @@ class LivestockRepositoryImpl implements LivestockRepository {
         try {
           await _remoteDataSource.createBovine(bovineModel);
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return Right(bovineModel.toEntity());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, BovineEntity>> updateBovine(BovineEntity bovine) async {
+  Future<Either<Failure, BovineEntity>> updateBovine(
+    BovineEntity bovine,
+  ) async {
     try {
       final bovineModel = BovineModel.fromEntity(bovine);
       await _localDataSource.saveBovine(bovineModel);
@@ -95,15 +101,16 @@ class LivestockRepositoryImpl implements LivestockRepository {
         try {
           await _remoteDataSource.updateBovine(bovineModel);
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return Right(bovineModel.toEntity());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, Unit>> deleteBovine(String id) async {
     try {
@@ -112,17 +119,20 @@ class LivestockRepositoryImpl implements LivestockRepository {
         try {
           await _remoteDataSource.deleteBovine(id);
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return const Right(unit);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, List<BovineEntity>>> searchBovines(BovineSearchParams params) async {
+  Future<Either<Failure, List<BovineEntity>>> searchBovines(
+    BovineSearchParams params,
+  ) async {
     try {
       final localBovines = await _localDataSource.searchBovines(
         breed: params.breed,
@@ -130,31 +140,31 @@ class LivestockRepositoryImpl implements LivestockRepository {
         purpose: params.purpose,
         tags: params.tags,
       );
-      
+
       return Right(localBovines.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, List<EquineEntity>>> getEquines() async {
     try {
       final localEquines = await _localDataSource.getAllEquines();
       final entities = localEquines.map((model) => model.toEntity()).toList();
       _performBackgroundSync();
-      
+
       return Right(entities);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, EquineEntity>> getEquineById(String id) async {
     try {
       final localEquine = await _localDataSource.getEquineById(id);
-      
+
       if (localEquine != null) {
         return Right(localEquine.toEntity());
       }
@@ -166,17 +176,20 @@ class LivestockRepositoryImpl implements LivestockRepository {
             return Right(remoteEquine.toEntity());
           }
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return const Left(EquineNotFoundFailure());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, EquineEntity>> createEquine(EquineEntity equine) async {
+  Future<Either<Failure, EquineEntity>> createEquine(
+    EquineEntity equine,
+  ) async {
     try {
       final equineModel = EquineModel.fromEntity(equine);
       await _localDataSource.saveEquine(equineModel);
@@ -184,17 +197,20 @@ class LivestockRepositoryImpl implements LivestockRepository {
         try {
           await _remoteDataSource.createEquine(equineModel);
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return Right(equineModel.toEntity());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, EquineEntity>> updateEquine(EquineEntity equine) async {
+  Future<Either<Failure, EquineEntity>> updateEquine(
+    EquineEntity equine,
+  ) async {
     try {
       final equineModel = EquineModel.fromEntity(equine);
       await _localDataSource.saveEquine(equineModel);
@@ -202,15 +218,16 @@ class LivestockRepositoryImpl implements LivestockRepository {
         try {
           await _remoteDataSource.updateEquine(equineModel);
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return Right(equineModel.toEntity());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, Unit>> deleteEquine(String id) async {
     try {
@@ -219,17 +236,20 @@ class LivestockRepositoryImpl implements LivestockRepository {
         try {
           await _remoteDataSource.deleteEquine(id);
         } catch (e) {
+          // Ignora falhas de sync remoto - local-first strategy
         }
       }
-      
+
       return const Right(unit);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, List<EquineEntity>>> searchEquines(EquineSearchParams params) async {
+  Future<Either<Failure, List<EquineEntity>>> searchEquines(
+    EquineSearchParams params,
+  ) async {
     try {
       final localEquines = await _localDataSource.searchEquines(
         temperament: params.temperament?.displayName,
@@ -237,91 +257,123 @@ class LivestockRepositoryImpl implements LivestockRepository {
         primaryUse: params.primaryUse?.displayName,
         geneticInfluences: null,
       );
-      
+
       return Right(localEquines.map((model) => model.toEntity()).toList());
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, List<AnimalBaseEntity>>> searchAllAnimals(SearchAnimalsParams params) async {
+  Future<Either<Failure, List<AnimalBaseEntity>>> searchAllAnimals(
+    SearchAnimalsParams params,
+  ) async {
     try {
       final bovines = await _localDataSource.getAllBovines();
       final equines = await _localDataSource.getAllEquines();
-      
+
       List<AnimalBaseEntity> allAnimals = [];
-      allAnimals.addAll(bovines.map((model) => model.toEntity() as AnimalBaseEntity));
-      allAnimals.addAll(equines.map((model) => model.toEntity() as AnimalBaseEntity));
+      allAnimals.addAll(
+        bovines.map((model) => model.toEntity() as AnimalBaseEntity),
+      );
+      allAnimals.addAll(
+        equines.map((model) => model.toEntity() as AnimalBaseEntity),
+      );
       if (params.query != null && params.query!.isNotEmpty) {
-        allAnimals = allAnimals.where((animal) => 
-          animal.commonName.toLowerCase().contains(params.query!.toLowerCase()) ||
-          animal.originCountry.toLowerCase().contains(params.query!.toLowerCase())
-        ).toList();
+        allAnimals =
+            allAnimals
+                .where(
+                  (animal) =>
+                      animal.commonName.toLowerCase().contains(
+                        params.query!.toLowerCase(),
+                      ) ||
+                      animal.originCountry.toLowerCase().contains(
+                        params.query!.toLowerCase(),
+                      ),
+                )
+                .toList();
       }
-      
+
       if (params.originCountry != null) {
-        allAnimals = allAnimals.where((animal) => 
-          animal.originCountry.toLowerCase().contains(params.originCountry!.toLowerCase())
-        ).toList();
+        allAnimals =
+            allAnimals
+                .where(
+                  (animal) => animal.originCountry.toLowerCase().contains(
+                    params.originCountry!.toLowerCase(),
+                  ),
+                )
+                .toList();
       }
-      
+
       if (params.isActive != null) {
-        allAnimals = allAnimals.where((animal) => animal.isActive == params.isActive).toList();
+        allAnimals =
+            allAnimals
+                .where((animal) => animal.isActive == params.isActive)
+                .toList();
       }
       final startIndex = params.offset;
       final endIndex = (startIndex + params.limit).clamp(0, allAnimals.length);
-      
+
       if (startIndex >= allAnimals.length) {
         return const Right([]);
       }
-      
+
       return Right(allAnimals.sublist(startIndex, endIndex));
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, List<String>>> uploadAnimalImages(String animalId, List<String> imagePaths) async {
+  Future<Either<Failure, List<String>>> uploadAnimalImages(
+    String animalId,
+    List<String> imagePaths,
+  ) async {
     try {
-      
-      return const Left(LivestockFailure(message: 'Upload de imagens não implementado ainda'));
+      return const Left(
+        LivestockFailure(message: 'Upload de imagens não implementado ainda'),
+      );
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, Unit>> deleteAnimalImages(String animalId, List<String> imageUrls) async {
+  Future<Either<Failure, Unit>> deleteAnimalImages(
+    String animalId,
+    List<String> imageUrls,
+  ) async {
     try {
-      
-      return const Left(LivestockFailure(message: 'Remoção de imagens não implementada ainda'));
+      return const Left(
+        LivestockFailure(message: 'Remoção de imagens não implementada ainda'),
+      );
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, Unit>> syncLivestockData() async {
     try {
       if (!await _hasConnectivity()) {
-        return const Left(LivestockFailure(message: 'Sem conectividade para sincronização'));
+        return const Left(
+          LivestockFailure(message: 'Sem conectividade para sincronização'),
+        );
       }
       await _performFullSync();
-      
+
       return const Right(unit);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
   Future<Either<Failure, Map<String, dynamic>>> getLivestockStatistics() async {
     try {
       final bovines = await _localDataSource.getAllBovines();
       final equines = await _localDataSource.getAllEquines();
-      
+
       final stats = {
         'totalBovines': bovines.length,
         'totalEquines': equines.length,
@@ -332,15 +384,17 @@ class LivestockRepositoryImpl implements LivestockRepository {
         'equinesByTemperament': _groupEquinesByTemperament(equines),
         'lastUpdate': DateTime.now().toIso8601String(),
       };
-      
+
       return Right(stats);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, String>> exportLivestockData({String format = 'json'}) async {
+  Future<Either<Failure, String>> exportLivestockData({
+    String format = 'json',
+  }) async {
     try {
       final exportData = await _localDataSource.exportData();
       return Right(exportData);
@@ -348,9 +402,12 @@ class LivestockRepositoryImpl implements LivestockRepository {
       return Left(_handleException(e));
     }
   }
-  
+
   @override
-  Future<Either<Failure, Unit>> importLivestockData(String backupData, {String format = 'json'}) async {
+  Future<Either<Failure, Unit>> importLivestockData(
+    String backupData, {
+    String format = 'json',
+  }) async {
     try {
       await _localDataSource.importData(backupData);
       return const Right(unit);
@@ -358,7 +415,7 @@ class LivestockRepositoryImpl implements LivestockRepository {
       return Left(_handleException(e));
     }
   }
-  
+
   /// Verifica conectividade com a internet
   Future<bool> _hasConnectivity() async {
     try {
@@ -368,7 +425,7 @@ class LivestockRepositoryImpl implements LivestockRepository {
       return false;
     }
   }
-  
+
   /// Executa sync em background sem bloquear UI
   void _performBackgroundSync() {
     Future.microtask(() async {
@@ -377,15 +434,16 @@ class LivestockRepositoryImpl implements LivestockRepository {
           await _performFullSync();
         }
       } catch (e) {
+        // Ignora falhas de sync em background - não deve impactar a UI
       }
     });
   }
-  
+
   /// Executa sync completo bidirecional
   Future<void> _performFullSync() async {
     await _remoteDataSource.syncLivestockData();
   }
-  
+
   /// Agrupa bovinos por aptidão para estatísticas
   Map<String, int> _groupBovinesByAptitude(List<BovineModel> bovines) {
     final Map<String, int> groups = {};
@@ -395,7 +453,7 @@ class LivestockRepositoryImpl implements LivestockRepository {
     }
     return groups;
   }
-  
+
   /// Agrupa equinos por temperamento para estatísticas
   Map<String, int> _groupEquinesByTemperament(List<EquineModel> equines) {
     final Map<String, int> groups = {};
@@ -405,7 +463,7 @@ class LivestockRepositoryImpl implements LivestockRepository {
     }
     return groups;
   }
-  
+
   /// Converte exceções em Failures apropriados
   Failure _handleException(dynamic exception) {
     if (exception is CacheException) {
@@ -416,26 +474,26 @@ class LivestockRepositoryImpl implements LivestockRepository {
       return LivestockFailure(message: 'Erro inesperado: $exception');
     }
   }
-  
+
   /// Força sync manual (para botão "Sincronizar" na UI)
   Future<Either<Failure, Unit>> forceSyncNow() async {
     try {
       if (!await _hasConnectivity()) {
         return const Left(LivestockFailure(message: 'Sem conectividade'));
       }
-      
+
       await _performFullSync();
       return const Right(unit);
     } catch (e) {
       return Left(_handleException(e));
     }
   }
-  
+
   /// Verifica se há dados pendentes de sincronização
   Future<bool> hasPendingSync() async {
     return false;
   }
-  
+
   /// Limpa cache local (reset completo)
   Future<Either<Failure, Unit>> clearLocalCache() async {
     try {

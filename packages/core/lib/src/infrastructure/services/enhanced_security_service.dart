@@ -683,12 +683,6 @@ class EnhancedSecurityService {
     return random.nextInt(1000000);
   }
 
-  String _generateIV() {
-    final random = Random.secure();
-    final bytes = List.generate(16, (_) => random.nextInt(256));
-    return base64Encode(bytes);
-  }
-
   /// Comparação em tempo constante para prevenir timing attacks
   bool _constantTimeCompare(String a, String b) {
     if (a.length != b.length) return false;

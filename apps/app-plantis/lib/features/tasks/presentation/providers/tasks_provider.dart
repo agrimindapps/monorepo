@@ -352,6 +352,7 @@ class TasksProvider extends ChangeNotifier {
 
     return task;
   }
+
   List<task_entity.Task> get highPriorityTasks =>
       _state.filteredTasks
           .where(
@@ -412,42 +413,6 @@ class TasksProvider extends ChangeNotifier {
           errorMessage: 'Erro ao sincronizar tarefas: $e',
         ),
       );
-    }
-  }
-
-  /// CRITICAL FIX: Wait for authentication initialization with timeout
-  ///
-  /// This method ensures that we don't attempt to load tasks before the
-  /// authentication system is fully initialized. This prevents race conditions
-  /// that cause data not to load properly.
-  ///
-  /// Returns:
-  /// - `true` if authentication is initialized within timeout
-  /// - `false` if timeout is reached
-  Future<bool> _waitForAuthenticationWithTimeout({
-    Duration timeout = const Duration(seconds: 10),
-  }) async {
-    if (_authStateNotifier.isInitialized) {
-      return true;
-    }
-
-    debugPrint('⏳ TasksProvider: Waiting for auth initialization...');
-    try {
-      await _authStateNotifier.initializedStream
-          .where((isInitialized) => isInitialized)
-          .timeout(timeout)
-          .first;
-
-      debugPrint('✅ TasksProvider: Auth initialization complete');
-      return true;
-    } on TimeoutException {
-      debugPrint(
-        '⚠️ TasksProvider: Auth initialization timeout after ${timeout.inSeconds}s',
-      );
-      return false;
-    } catch (e) {
-      debugPrint('❌ TasksProvider: Auth initialization error: $e');
-      return false;
     }
   }
 

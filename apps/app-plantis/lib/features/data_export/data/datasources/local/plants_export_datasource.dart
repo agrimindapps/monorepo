@@ -14,19 +14,13 @@ abstract class PlantsExportDataSource {
 
 class PlantsExportLocalDataSource implements PlantsExportDataSource {
   final PlantsRepository _plantsRepository;
-  final PlantCommentsRepository _commentsRepository;
-  final TasksRepository _tasksRepository;
-  final SpacesRepository _spacesRepository;
 
   PlantsExportLocalDataSource({
     required PlantsRepository plantsRepository,
     required PlantCommentsRepository commentsRepository,
     required TasksRepository tasksRepository,
     required SpacesRepository spacesRepository,
-  }) : _plantsRepository = plantsRepository,
-       _commentsRepository = commentsRepository,
-       _tasksRepository = tasksRepository,
-       _spacesRepository = spacesRepository;
+  }) : _plantsRepository = plantsRepository;
 
   @override
   Future<List<PlantExportData>> getUserPlantsData(String userId) async {

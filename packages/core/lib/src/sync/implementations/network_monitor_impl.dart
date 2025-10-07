@@ -22,8 +22,6 @@ class NetworkMonitorImpl implements INetworkMonitor {
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _qualityCheckTimer;
   bool _isDisposed = false;
-  List<String> _endpoints = [];
-  final Duration _qualityCheckInterval = const Duration(seconds: 30);
 
   @override
   Future<Either<Failure, void>> initialize() async {
@@ -58,7 +56,7 @@ class NetworkMonitorImpl implements INetworkMonitor {
             );
           }
         },
-        onError: (error) {
+        onError: (Object error) {
           developer.log(
             'Connectivity listener error: $error',
             name: 'NetworkMonitor',
@@ -134,7 +132,6 @@ class NetworkMonitorImpl implements INetworkMonitor {
 
   @override
   void configureEndpoints(List<String> endpoints) {
-    _endpoints = List.from(endpoints);
     developer.log(
       'Configured ${endpoints.length} endpoints for monitoring',
       name: 'NetworkMonitor',
@@ -235,7 +232,6 @@ class NetworkMonitorImpl implements INetworkMonitor {
       case ConnectivityResult.bluetooth:
       case ConnectivityResult.other:
       case ConnectivityResult.none:
-      default:
         return NetworkType.unknown;
     }
   }

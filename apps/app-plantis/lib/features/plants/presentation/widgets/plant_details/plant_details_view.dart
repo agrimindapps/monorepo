@@ -14,7 +14,6 @@ import '../../providers/plants_provider.dart';
 import '../plant_form_dialog.dart';
 import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
-import 'plant_image_section.dart';
 import 'plant_info_section.dart';
 import 'plant_notes_section.dart';
 import 'plant_tasks_section.dart';
@@ -94,10 +93,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                 }
               }
             },
-            onNavigateToImages: (plantId) {
-            },
-            onNavigateToSchedule: (plantId) {
-            },
+            onNavigateToImages: (plantId) {},
+            onNavigateToSchedule: (plantId) {},
             onShowSnackBar: (message, type) {
               if (mounted) _showSnackBar(message, type);
             },
@@ -1052,94 +1049,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               ],
         ),
       ],
-    );
-  }
-  Widget _buildAppBar(BuildContext context, Plant plant) {
-    final theme = Theme.of(context);
-
-    return SliverAppBar(
-      expandedHeight: 200,
-      pinned: true,
-      backgroundColor: theme.colorScheme.surface,
-      foregroundColor: theme.colorScheme.onSurface,
-      elevation: 0,
-      leading: Semantics(
-        label: 'Voltar para a lista de plantas',
-        button: true,
-        child: IconButton(
-          onPressed: () => _controller?.goBack(),
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.9),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          ),
-        ),
-      ),
-      actions: [
-        Semantics(
-          label: 'Opções da planta ${plant.displayName}',
-          button: true,
-          child: PopupMenuButton<String>(
-            color: const Color(0xFFFFFFFF), // Fundo branco puro
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFFFF), // Branco puro
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(Icons.more_vert, color: theme.colorScheme.onSurface),
-            ),
-            onSelected: (action) => _handleMenuAction(action, plant),
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: ListTile(
-                      leading: Icon(Icons.edit_outlined),
-                      title: Text('Editar'),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: ListTile(
-                      leading: Icon(Icons.delete_outline, color: Colors.red),
-                      title: Text(
-                        'Excluir',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
-          ),
-        ),
-        const SizedBox(width: 8),
-      ],
-      flexibleSpace: FlexibleSpaceBar(
-        background: PlantImageSection(
-          plant: plant,
-          onEditImages: () {
-          },
-        ),
-      ),
     );
   }
 

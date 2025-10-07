@@ -198,7 +198,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     final settingsState = ref.read(settingsNotifierProvider).value;
     final currentDevice = settingsState?.currentDeviceInfo;
     final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
-    const isPremium = false;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,7 +281,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
                 'Dispositivos Conectados',
                 '${connectedDevices.length} de 3',
               ),
-              _buildInfoRow('Status Premium', isPremium ? 'Ativo' : 'Inativo'),
               _buildInfoRow('Sincronização', 'Ativa'),
             ],
           ),

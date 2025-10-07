@@ -7,8 +7,8 @@ import '../../domain/entities/notification_entity.dart';
 import '../../domain/entities/performance_entity.dart';
 import '../../domain/repositories/i_enhanced_notification_repository.dart';
 import '../../domain/repositories/i_notification_repository.dart';
+import '../../shared/utils/logger.dart';
 import '../helpers/notification_analytics_helper.dart';
-import '../helpers/notification_template_engine.dart';
 import 'local_notification_service.dart';
 import 'web_notification_service.dart';
 
@@ -45,7 +45,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       if (!coreInitialized) {
         return false;
       }
-      _templateEngine = NotificationTemplateEngine();
       _analyticsHelper = NotificationAnalyticsHelper();
       if (settings != null) {
         _settings = settings;
@@ -55,13 +54,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       _isInitialized = true;
 
       if (_settings.enableDebugLogs) {
-        debugPrint('✅ EnhancedNotificationService initialized successfully');
+        Logger.debug('✅ EnhancedNotificationService initialized successfully');
       }
 
       return true;
     } catch (e) {
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error initializing EnhancedNotificationService: $e');
+        Logger.debug('❌ Error initializing EnhancedNotificationService: $e');
       }
       return false;
     }
@@ -103,7 +102,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<bool> showNotification(NotificationEntity notification) async {
     if (_testMode) {
       if (_settings.enableDebugLogs) {
-        debugPrint(
+        Logger.debug(
           '🧪 Test mode: Would show notification: ${notification.title}',
         );
       }
@@ -135,7 +134,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
   Future<bool> scheduleNotification(NotificationEntity notification) async {
     if (_testMode) {
       if (_settings.enableDebugLogs) {
-        debugPrint(
+        Logger.debug(
           '🧪 Test mode: Would schedule notification: ${notification.title}',
         );
       }
@@ -252,7 +251,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     try {
       if (_plugins.containsKey(plugin.id)) {
         if (_settings.enableDebugLogs) {
-          debugPrint('⚠️ Plugin ${plugin.id} is already registered');
+          Logger.debug('⚠️ Plugin ${plugin.id} is already registered');
         }
         return false;
       }
@@ -261,13 +260,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       _plugins[plugin.id] = plugin;
 
       if (_settings.enableDebugLogs) {
-        debugPrint('✅ Registered plugin: ${plugin.id} (${plugin.name})');
+        Logger.debug('✅ Registered plugin: ${plugin.id} (${plugin.name})');
       }
 
       return true;
     } catch (e) {
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error registering plugin ${plugin.id}: $e');
+        Logger.debug('❌ Error registering plugin ${plugin.id}: $e');
       }
       return false;
     }
@@ -286,13 +285,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       _templates.removeWhere((key, template) => template.pluginId == pluginId);
 
       if (_settings.enableDebugLogs) {
-        debugPrint('✅ Unregistered plugin: $pluginId');
+        Logger.debug('✅ Unregistered plugin: $pluginId');
       }
 
       return true;
     } catch (e) {
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error unregistering plugin $pluginId: $e');
+        Logger.debug('❌ Error unregistering plugin $pluginId: $e');
       }
       return false;
     }
@@ -318,13 +317,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       _templates[template.id] = template;
 
       if (_settings.enableDebugLogs) {
-        debugPrint('✅ Registered template: ${template.id}');
+        Logger.debug('✅ Registered template: ${template.id}');
       }
 
       return true;
     } catch (e) {
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error registering template ${template.id}: $e');
+        Logger.debug('❌ Error registering template ${template.id}: $e');
       }
       return false;
     }
@@ -336,13 +335,13 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       final removed = _templates.remove(templateId);
 
       if (removed != null && _settings.enableDebugLogs) {
-        debugPrint('✅ Unregistered template: $templateId');
+        Logger.debug('✅ Unregistered template: $templateId');
       }
 
       return removed != null;
     } catch (e) {
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error unregistering template $templateId: $e');
+        Logger.debug('❌ Error unregistering template $templateId: $e');
       }
       return false;
     }
@@ -392,7 +391,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     } catch (e) {
       _trackPerformance('scheduleFromTemplate', start, error: e.toString());
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error scheduling from template $templateId: $e');
+        Logger.debug('❌ Error scheduling from template $templateId: $e');
       }
       return false;
     }
@@ -415,7 +414,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         final batchResults = await _processBatch(batch);
         results.addAll(batchResults);
         if (endIndex < requests.length) {
-          await Future.delayed(const Duration(milliseconds: 100));
+          await Future<void>.delayed(const Duration(milliseconds: 100));
         }
       }
 
@@ -590,7 +589,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     _settings = settings;
 
     if (_settings.enableDebugLogs) {
-      debugPrint('✅ Updated global notification settings');
+      Logger.debug('✅ Updated global notification settings');
     }
   }
 
@@ -614,7 +613,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     _testMode = enabled;
 
     if (_settings.enableDebugLogs) {
-      debugPrint('🧪 Test mode ${enabled ? 'enabled' : 'disabled'}');
+      Logger.debug('🧪 Test mode ${enabled ? 'enabled' : 'disabled'}');
     }
   }
 
@@ -668,10 +667,6 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     final now = DateTime.now();
     final schedulingTimes = _performanceData
         .where((entry) => entry.operation == 'scheduleNotification')
-        .map((entry) => entry.duration);
-
-    final templateTimes = _performanceData
-        .where((entry) => entry.operation == 'scheduleFromTemplate')
         .map((entry) => entry.duration);
 
     return PerformanceMetrics(
@@ -775,7 +770,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         }
       } catch (e) {
         if (_settings.enableDebugLogs) {
-          debugPrint('❌ Error handling notification tap: $e');
+          Logger.debug('❌ Error handling notification tap: $e');
         }
       }
     }
@@ -804,7 +799,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
         }
       } catch (e) {
         if (_settings.enableDebugLogs) {
-          debugPrint('❌ Error handling notification action: $e');
+          Logger.debug('❌ Error handling notification action: $e');
         }
       }
     }
@@ -817,7 +812,7 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
       await _analyticsHelper.trackEvent(event);
     } catch (e) {
       if (_settings.enableDebugLogs) {
-        debugPrint('❌ Error tracking analytics event: $e');
+        Logger.debug('❌ Error tracking analytics event: $e');
       }
     }
   }
@@ -841,11 +836,19 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
 
 /// Performance tracking entry
 class PerformanceTrackingEntry {
+  /// The operation being tracked
   final String operation;
+
+  /// Duration of the operation
   final Duration duration;
+
+  /// Timestamp when the operation started
   final DateTime timestamp;
+
+  /// Error message if the operation failed
   final String? error;
 
+  /// Creates a performance tracking entry
   const PerformanceTrackingEntry({
     required this.operation,
     required this.duration,

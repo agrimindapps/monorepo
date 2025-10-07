@@ -56,7 +56,6 @@ class TaskNotifier extends _$TaskNotifier {
   late final GetTasks _getTasks;
   late final ReorderTasks _reorderTasks;
   late final UpdateTask _updateTask;
-  late final WatchTasks _watchTasks;
 
   @override
   Future<List<TaskEntity>> build() async {
@@ -65,7 +64,6 @@ class TaskNotifier extends _$TaskNotifier {
     _getTasks = ref.read(getTasksUseCaseProvider);
     _reorderTasks = ref.read(reorderTasksUseCaseProvider);
     _updateTask = ref.read(updateTaskUseCaseProvider);
-    _watchTasks = ref.read(watchTasksUseCaseProvider);
     final result = await _getTasks(const GetTasksParams());
 
     return result.fold((failure) => throw failure, (tasks) => tasks);

@@ -7,10 +7,9 @@ import '../../domain/entities/vehicle_entity.dart';
 part 'vehicle_model.g.dart';
 
 /// Vehicle model with Firebase sync support
-/// TypeId: 0 - New sequential numbering  
+/// TypeId: 0 - New sequential numbering
 @HiveType(typeId: 0)
 class VehicleModel extends BaseSyncModel {
-
   VehicleModel({
     required this.id,
     this.createdAtMs,
@@ -35,16 +34,16 @@ class VehicleModel extends BaseSyncModel {
     this.odometroAtual = 0.0,
     this.foto,
   }) : super(
-          id: id,
-          createdAt: null, // Será lazy-loaded
-          updatedAt: null, // Será lazy-loaded
-          lastSyncAt: null, // Será lazy-loaded
-          isDirty: isDirty,
-          isDeleted: isDeleted,
-          version: version,
-          userId: userId,
-          moduleName: moduleName,
-        );
+         id: id,
+         createdAt: null, // Será lazy-loaded
+         updatedAt: null, // Será lazy-loaded
+         lastSyncAt: null, // Será lazy-loaded
+         isDirty: isDirty,
+         isDeleted: isDeleted,
+         version: version,
+         userId: userId,
+         moduleName: moduleName,
+       );
 
   /// Factory constructor for creating new vehicle
   factory VehicleModel.create({
@@ -66,7 +65,7 @@ class VehicleModel extends BaseSyncModel {
   }) {
     final now = DateTime.now();
     final vehicleId = id ?? now.millisecondsSinceEpoch.toString();
-    
+
     return VehicleModel(
       id: vehicleId,
       createdAtMs: now.millisecondsSinceEpoch,
@@ -92,7 +91,7 @@ class VehicleModel extends BaseSyncModel {
   /// Create from Hive map
   factory VehicleModel.fromHiveMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncModel.parseBaseHiveFields(map);
-    
+
     return VehicleModel(
       id: baseFields['id'] as String,
       createdAtMs: map['createdAt'] as int?,
@@ -108,7 +107,9 @@ class VehicleModel extends BaseSyncModel {
       ano: (map['ano'] as num?)?.toInt() ?? 0,
       placa: map['placa']?.toString() ?? '',
       odometroInicial: (map['odometroInicial'] as num? ?? 0.0).toDouble(),
-      combustivel: (map['combustivel'] as num?)?.toInt() ?? FuelTypeMapper.toIndex(FuelType.gasoline),
+      combustivel:
+          (map['combustivel'] as num?)?.toInt() ??
+          FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
@@ -123,7 +124,7 @@ class VehicleModel extends BaseSyncModel {
   factory VehicleModel.fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
     final timestamps = BaseSyncModel.parseFirebaseTimestamps(map);
-    
+
     return VehicleModel(
       id: baseFields['id'] as String,
       createdAtMs: timestamps['createdAt']?.millisecondsSinceEpoch,
@@ -139,7 +140,9 @@ class VehicleModel extends BaseSyncModel {
       ano: (map['ano'] as num?)?.toInt() ?? 0,
       placa: map['placa']?.toString() ?? '',
       odometroInicial: (map['odometro_inicial'] as num?)?.toDouble() ?? 0.0,
-      combustivel: (map['combustivel'] as num?)?.toInt() ?? FuelTypeMapper.toIndex(FuelType.gasoline),
+      combustivel:
+          (map['combustivel'] as num?)?.toInt() ??
+          FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: map['renavan']?.toString() ?? '',
       chassi: map['chassi']?.toString() ?? '',
       cor: map['cor']?.toString() ?? '',
@@ -167,10 +170,12 @@ class VehicleModel extends BaseSyncModel {
       modelo: entity.model,
       ano: entity.year,
       placa: entity.licensePlate,
-      odometroInicial: (entity.metadata['odometroInicial'] as num?)?.toDouble() ?? 0.0,
-      combustivel: entity.supportedFuels.isNotEmpty 
-          ? FuelTypeMapper.toIndex(entity.supportedFuels.first) 
-          : FuelTypeMapper.toIndex(FuelType.gasoline),
+      odometroInicial:
+          (entity.metadata['odometroInicial'] as num?)?.toDouble() ?? 0.0,
+      combustivel:
+          entity.supportedFuels.isNotEmpty
+              ? FuelTypeMapper.toIndex(entity.supportedFuels.first)
+              : FuelTypeMapper.toIndex(FuelType.gasoline),
       renavan: entity.metadata['renavan']?.toString() ?? '',
       chassi: entity.metadata['chassi']?.toString() ?? '',
       cor: entity.color,
@@ -185,41 +190,70 @@ class VehicleModel extends BaseSyncModel {
   /// FIXED: fromJson now correctly handles Firebase Timestamp objects
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
     final hasTimestamp = json.values.any((value) => value is Timestamp);
-    
-    if (hasTimestamp || json.containsKey('created_at') || json.containsKey('updated_at')) {
+
+    if (hasTimestamp ||
+        json.containsKey('created_at') ||
+        json.containsKey('updated_at')) {
       return VehicleModel.fromFirebaseMap(json);
     } else {
       return VehicleModel.fromHiveMap(json);
     }
   }
   @override
-  void removeFromHive() {
-  }
-  @HiveField(0) @override final String id;
-  @HiveField(1) final int? createdAtMs;
-  @HiveField(2) final int? updatedAtMs;
-  @HiveField(3) final int? lastSyncAtMs;
-  @HiveField(4) @override final bool isDirty;
-  @HiveField(5) @override final bool isDeleted;
-  @HiveField(6) @override final int version;
-  @HiveField(7) @override final String? userId;
-  @HiveField(8) @override final String? moduleName;
-  @HiveField(10) final String marca;
-  @HiveField(11) final String modelo;
-  @HiveField(12) final int ano;
-  @HiveField(13) final String placa;
-  @HiveField(14) final double odometroInicial;
-  @HiveField(15) final int combustivel;
-  @HiveField(16) final String renavan;
-  @HiveField(17) final String chassi;
-  @HiveField(18) final String cor;
-  @HiveField(19) final bool vendido;
-  @HiveField(20) final double valorVenda;
-  @HiveField(21) final double odometroAtual;
-  @HiveField(22) final String? foto;
-  DateTime? _cachedCreatedAt;
-  DateTime? _cachedUpdatedAt;
-  DateTime? _cachedLastSyncAt;
+  void removeFromHive() {}
+  @HiveField(0)
+  @override
+  final String id;
+  @HiveField(1)
+  final int? createdAtMs;
+  @HiveField(2)
+  final int? updatedAtMs;
+  @HiveField(3)
+  final int? lastSyncAtMs;
+  @HiveField(4)
+  @override
+  final bool isDirty;
+  @HiveField(5)
+  @override
+  final bool isDeleted;
+  @HiveField(6)
+  @override
+  final int version;
+  @HiveField(7)
+  @override
+  final String? userId;
+  @HiveField(8)
+  @override
+  final String? moduleName;
+  @HiveField(10)
+  final String marca;
+  @HiveField(11)
+  final String modelo;
+  @HiveField(12)
+  final int ano;
+  @HiveField(13)
+  final String placa;
+  @HiveField(14)
+  final double odometroInicial;
+  @HiveField(15)
+  final int combustivel;
+  @HiveField(16)
+  final String renavan;
+  @HiveField(17)
+  final String chassi;
+  @HiveField(18)
+  final String cor;
+  @HiveField(19)
+  final bool vendido;
+  @HiveField(20)
+  final double valorVenda;
+  @HiveField(21)
+  final double odometroAtual;
+  @HiveField(22)
+  final String? foto;
+  late final DateTime? _cachedCreatedAt;
+  late final DateTime? _cachedUpdatedAt;
+  late final DateTime? _cachedLastSyncAt;
 
   @override
   String get collectionName => 'vehicles';
@@ -233,7 +267,7 @@ class VehicleModel extends BaseSyncModel {
     return _cachedCreatedAt;
   }
 
-  /// Lazy-loaded updatedAt com cache  
+  /// Lazy-loaded updatedAt com cache
   @override
   DateTime? get updatedAt {
     if (_cachedUpdatedAt == null && updatedAtMs != null) {
@@ -254,22 +288,21 @@ class VehicleModel extends BaseSyncModel {
   /// Convert to Hive map
   @override
   Map<String, dynamic> toHiveMap() {
-    return super.toHiveMap()
-      ..addAll({
-        'marca': marca,
-        'modelo': modelo,
-        'ano': ano,
-        'placa': placa,
-        'odometroInicial': odometroInicial,
-        'combustivel': combustivel,
-        'renavan': renavan,
-        'chassi': chassi,
-        'cor': cor,
-        'vendido': vendido,
-        'valorVenda': valorVenda,
-        'odometroAtual': odometroAtual,
-        'foto': foto,
-      });
+    return super.toHiveMap()..addAll({
+      'marca': marca,
+      'modelo': modelo,
+      'ano': ano,
+      'placa': placa,
+      'odometroInicial': odometroInicial,
+      'combustivel': combustivel,
+      'renavan': renavan,
+      'chassi': chassi,
+      'cor': cor,
+      'vendido': vendido,
+      'valorVenda': valorVenda,
+      'odometroAtual': odometroAtual,
+      'foto': foto,
+    });
   }
 
   /// Convert to Firebase map
@@ -310,8 +343,11 @@ class VehicleModel extends BaseSyncModel {
       year: ano,
       color: cor,
       licensePlate: placa,
-      type: VehicleType.car, // Default to car, you may want to map this properly
-      supportedFuels: [FuelTypeMapper.fromIndex(combustivel)], // Map from int to FuelType using FuelTypeMapper
+      type:
+          VehicleType.car, // Default to car, you may want to map this properly
+      supportedFuels: [
+        FuelTypeMapper.fromIndex(combustivel),
+      ], // Map from int to FuelType using FuelTypeMapper
       currentOdometer: odometroAtual,
       createdAt: createdAt ?? DateTime.now(),
       updatedAt: updatedAt ?? DateTime.now(),
@@ -378,7 +414,6 @@ class VehicleModel extends BaseSyncModel {
       foto: foto ?? this.foto,
     );
   }
-
 
   @override
   String toString() {

@@ -4,22 +4,26 @@ import 'package:flutter/foundation.dart';
 /// ReceitaAgro-specific validation service that integrates with Core Package's ValidationService
 /// Provides agricultural domain-specific validations while using core validation infrastructure
 class ReceitaAgroValidationService {
-  static final ReceitaAgroValidationService _instance = ReceitaAgroValidationService._internal();
+  static final ReceitaAgroValidationService _instance =
+      ReceitaAgroValidationService._internal();
   factory ReceitaAgroValidationService() => _instance;
   ReceitaAgroValidationService._internal();
-  late final ValidationService _coreValidationService;
   bool _isInitialized = false;
 
   /// Initialize with Core Package's ValidationService
   void initialize(ValidationService coreValidationService) {
-    _coreValidationService = coreValidationService;
     _isInitialized = true;
   }
 
   /// Validate agricultural data input
-  ReceitaAgroValidationResult validateAgriculturalData(Map<String, dynamic> data) {
+  ReceitaAgroValidationResult validateAgriculturalData(
+    Map<String, dynamic> data,
+  ) {
     if (!_isInitialized) {
-      if (kDebugMode) print('ReceitaAgroValidationService not initialized, using fallback mode');
+      if (kDebugMode)
+        print(
+          'ReceitaAgroValidationService not initialized, using fallback mode',
+        );
     }
 
     final errors = <String>[];
@@ -55,7 +59,9 @@ class ReceitaAgroValidationService {
     }
 
     if (data.containsKey('defensivo_name')) {
-      final defensivoResult = validateDefensivoName(data['defensivo_name'] as String);
+      final defensivoResult = validateDefensivoName(
+        data['defensivo_name'] as String,
+      );
       if (!defensivoResult.isValid) {
         errors.addAll(defensivoResult.errors);
       }
@@ -75,10 +81,7 @@ class ReceitaAgroValidationService {
       }
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate cultura (crop) name
@@ -110,13 +113,9 @@ class ReceitaAgroValidationService {
       'trigo': 'Trigo',
     };
 
-    if (standardizedNames.containsKey(culturaName.toLowerCase())) {
-    }
+    if (standardizedNames.containsKey(culturaName.toLowerCase())) {}
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate praga (pest) name
@@ -138,10 +137,7 @@ class ReceitaAgroValidationService {
       errors.add('Nome da praga contém caracteres inválidos');
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate defensivo (pesticide) name
@@ -163,10 +159,7 @@ class ReceitaAgroValidationService {
       errors.add('Nome do defensivo contém caracteres inválidos');
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate application rate (dose)
@@ -198,10 +191,7 @@ class ReceitaAgroValidationService {
       errors.add('Taxa de aplicação parece muito alta (máximo 1000)');
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate area size in hectares
@@ -209,7 +199,10 @@ class ReceitaAgroValidationService {
     final errors = <String>[];
 
     if (areaSize == null) {
-      return const ReceitaAgroValidationResult(isValid: true, errors: []); // Area is optional
+      return const ReceitaAgroValidationResult(
+        isValid: true,
+        errors: [],
+      ); // Area is optional
     }
 
     double? area;
@@ -232,10 +225,7 @@ class ReceitaAgroValidationService {
       errors.add('Área parece muito grande (máximo 100.000 hectares)');
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate comentário content
@@ -265,17 +255,15 @@ class ReceitaAgroValidationService {
           break;
         }
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate diagnostic search filters
-  ReceitaAgroValidationResult validateDiagnosticFilters(Map<String, dynamic> filters) {
+  ReceitaAgroValidationResult validateDiagnosticFilters(
+    Map<String, dynamic> filters,
+  ) {
     final errors = <String>[];
     if (filters.containsKey('cultura') && filters['cultura'] != null) {
       final culturaResult = validateCulturaName(filters['cultura'] as String);
@@ -296,14 +284,15 @@ class ReceitaAgroValidationService {
       }
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Validate favorite item data
-  ReceitaAgroValidationResult validateFavoriteItem(String type, String id, Map<String, dynamic> data) {
+  ReceitaAgroValidationResult validateFavoriteItem(
+    String type,
+    String id,
+    Map<String, dynamic> data,
+  ) {
     final errors = <String>[];
     final validTypes = ['defensivo', 'praga', 'cultura', 'diagnostico'];
     if (!validTypes.contains(type)) {
@@ -345,10 +334,7 @@ class ReceitaAgroValidationService {
         break;
     }
 
-    return ReceitaAgroValidationResult(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+    return ReceitaAgroValidationResult(isValid: errors.isEmpty, errors: errors);
   }
 
   /// Get validation suggestions for agricultural inputs
@@ -367,10 +353,18 @@ class ReceitaAgroValidationService {
 
   List<String> _getCulturaSuggestions(String input) {
     final commonCulturas = [
-      'Soja', 'Milho', 'Algodão', 'Cana-de-açúcar', 'Café',
-      'Arroz', 'Feijão', 'Trigo', 'Girassol', 'Sorgo'
+      'Soja',
+      'Milho',
+      'Algodão',
+      'Cana-de-açúcar',
+      'Café',
+      'Arroz',
+      'Feijão',
+      'Trigo',
+      'Girassol',
+      'Sorgo',
     ];
-    
+
     return commonCulturas
         .where((cultura) => cultura.toLowerCase().contains(input.toLowerCase()))
         .take(5)
@@ -379,10 +373,14 @@ class ReceitaAgroValidationService {
 
   List<String> _getPragaSuggestions(String input) {
     final commonPragas = [
-      'Lagarta-do-cartucho', 'Percevejos', 'Ferrugem asiática',
-      'Spodoptera frugiperda', 'Helicoverpa armigera', 'Diabrotica speciosa'
+      'Lagarta-do-cartucho',
+      'Percevejos',
+      'Ferrugem asiática',
+      'Spodoptera frugiperda',
+      'Helicoverpa armigera',
+      'Diabrotica speciosa',
     ];
-    
+
     return commonPragas
         .where((praga) => praga.toLowerCase().contains(input.toLowerCase()))
         .take(5)
@@ -391,12 +389,20 @@ class ReceitaAgroValidationService {
 
   List<String> _getDefensivoSuggestions(String input) {
     final commonDefensivos = [
-      'Glifosato', '2,4-D', 'Atrazina', 'Paraquat', 'Dicamba',
-      'Imidacloprida', 'Lambda-cialotrina', 'Tebuconazol'
+      'Glifosato',
+      '2,4-D',
+      'Atrazina',
+      'Paraquat',
+      'Dicamba',
+      'Imidacloprida',
+      'Lambda-cialotrina',
+      'Tebuconazol',
     ];
-    
+
     return commonDefensivos
-        .where((defensivo) => defensivo.toLowerCase().contains(input.toLowerCase()))
+        .where(
+          (defensivo) => defensivo.toLowerCase().contains(input.toLowerCase()),
+        )
         .take(5)
         .toList();
   }
@@ -413,10 +419,10 @@ class ReceitaAgroValidationResult {
   });
 
   String get firstError => errors.isNotEmpty ? errors.first : '';
-  
+
   @override
   String toString() => isValid ? 'Valid' : 'Invalid: ${errors.join(', ')}';
-  
+
   /// Convert to Core Package ValidationResult if needed
   /*
   ValidationResult toCoreValidationResult() {

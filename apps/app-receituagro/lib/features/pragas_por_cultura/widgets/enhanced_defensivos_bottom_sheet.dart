@@ -129,10 +129,7 @@ class _EnhancedDefensivosBottomSheetState
 
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
-    final pragaName =
-        widget.pragaPorCultura.praga.nomeComum ??
-        widget.pragaPorCultura.praga.nomeCientifico ??
-        'Praga não identificada';
+    final pragaName = widget.pragaPorCultura.praga.nomeComum;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -515,22 +512,5 @@ class _EnhancedDefensivosBottomSheetState
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  static Future<void> show(
-    BuildContext context,
-    PragaPorCultura pragaPorCultura, {
-    VoidCallback? onDefensivoTap,
-  }) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => EnhancedDefensivosBottomSheet(
-            pragaPorCultura: pragaPorCultura,
-            onDefensivoTap: onDefensivoTap,
-          ),
-    );
   }
 }

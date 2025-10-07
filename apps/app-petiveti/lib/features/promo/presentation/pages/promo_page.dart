@@ -60,11 +60,10 @@ class _PromoPageState extends ConsumerState<PromoPage> {
     context.go('/login');
   }
 
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(promoProvider);
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
@@ -82,7 +81,11 @@ class _PromoPageState extends ConsumerState<PromoPage> {
           ),
           if (state.showPreRegistrationDialog)
             PromoPreRegistrationDialog(
-              onClose: () => ref.read(promoProvider.notifier).togglePreRegistrationDialog(),
+              onClose:
+                  () =>
+                      ref
+                          .read(promoProvider.notifier)
+                          .togglePreRegistrationDialog(),
             ),
         ],
       ),
@@ -99,18 +102,21 @@ class _PromoPageState extends ConsumerState<PromoPage> {
             appTagline: SplashConstants.appTagline,
             appDescription: SplashConstants.appDescription,
             onGetStartedPressed: _navigateToLogin, // Já tenho conta -> Login
-            onPreRegisterPressed: () { // Pré-cadastro -> Modal
+            onPreRegisterPressed: () {
+              // Pré-cadastro -> Modal
               ref.read(promoProvider.notifier).togglePreRegistrationDialog();
-              ref.read(promoProvider.notifier).trackEvent('promo_pre_register_clicked');
+              ref
+                  .read(promoProvider.notifier)
+                  .trackEvent('promo_pre_register_clicked');
             },
           ),
           PromoFeaturesSection(
             key: _featuresKey,
-            features: const [], // Will use hardcoded features
+            features: const <dynamic>[], // Will use hardcoded features
           ),
           PromoScreenshotsSection(
             key: _screenshotsKey,
-            screenshots: const [], // Will use hardcoded screenshots
+            screenshots: const <dynamic>[], // Will use hardcoded screenshots
             currentIndex: state.currentScreenshotIndex,
             onScreenshotChanged: (index) {
               ref.read(promoProvider.notifier).changeScreenshot(index);

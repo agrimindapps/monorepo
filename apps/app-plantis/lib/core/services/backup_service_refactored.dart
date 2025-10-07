@@ -20,7 +20,6 @@ import 'secure_storage_service.dart';
 /// NOTE: Registrado manualmente em injection_container.dart (não via @singleton)
 class BackupServiceRefactored {
   final IBackupRepository _backupRepository;
-  final BackupValidationService _validationService;
   final BackupDataTransformerService _transformerService;
   final BackupRestoreService _restoreService;
   final BackupAuditService _auditService;
@@ -37,7 +36,6 @@ class BackupServiceRefactored {
     required BackupAuditService auditService,
     required SecureStorageService storageService,
   }) : _backupRepository = backupRepository,
-       _validationService = validationService,
        _transformerService = transformerService,
        _restoreService = restoreService,
        _auditService = auditService,

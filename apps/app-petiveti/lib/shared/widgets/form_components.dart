@@ -167,36 +167,15 @@ class FormComponents {
     ValidationState validationState = ValidationState.none,
     void Function(String)? onChanged,
   }) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        bool isObscured = true;
-
-        return Column(
-          children: [
-            enhancedTextField(
-              controller: controller,
-              label: label,
-              hint: hint ?? 'Digite sua senha',
-              helperText: helperText,
-              validator: validator,
-              keyboardType: TextInputType.visiblePassword,
-              prefixIcon: Icons.lock_outline,
-              suffixIcon: IconButton(
-                onPressed: () => setState(() => isObscured = !isObscured),
-                icon: Icon(
-                  isObscured ? Icons.visibility : Icons.visibility_off,
-                ),
-                tooltip: isObscured ? 'Mostrar senha' : 'Ocultar senha',
-              ),
-              obscureText: isObscured,
-              validationState: validationState,
-              onChanged: onChanged,
-            ),
-            if (showStrengthIndicator)
-              _buildPasswordStrengthIndicator(controller.text),
-          ],
-        );
-      },
+    return _PasswordTextField(
+      controller: controller,
+      label: label,
+      hint: hint,
+      validator: validator,
+      helperText: helperText,
+      showStrengthIndicator: showStrengthIndicator,
+      validationState: validationState,
+      onChanged: onChanged,
     );
   }
 
@@ -574,6 +553,67 @@ class FormComponents {
       default:
         return AppColors.error;
     }
+  }
+}
+
+/// Private stateful widget for password text field
+class _PasswordTextField extends StatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? hint;
+  final String? Function(String?)? validator;
+  final String? helperText;
+  final bool showStrengthIndicator;
+  final ValidationState validationState;
+  final void Function(String)? onChanged;
+
+  const _PasswordTextField({
+    required this.controller,
+    required this.label,
+    this.hint,
+    this.validator,
+    this.helperText,
+    required this.showStrengthIndicator,
+    required this.validationState,
+    this.onChanged,
+  });
+
+  @override
+  State<_PasswordTextField> createState() => _PasswordTextFieldState();
+}
+
+class _PasswordTextFieldState extends State<_PasswordTextField> {
+  bool _isObscured = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FormComponents.enhancedTextField(
+          controller: widget.controller,
+          label: widget.label,
+          hint: widget.hint ?? 'Digite sua senha',
+          helperText: widget.helperText,
+          validator: widget.validator,
+          keyboardType: TextInputType.visiblePassword,
+          prefixIcon: Icons.lock_outline,
+          suffixIcon: IconButton(
+            onPressed: () => setState(() => _isObscured = !_isObscured),
+            icon: Icon(
+              _isObscured ? Icons.visibility : Icons.visibility_off,
+            ),
+            tooltip: _isObscured ? 'Mostrar senha' : 'Ocultar senha',
+          ),
+          obscureText: _isObscured,
+          validationState: widget.validationState,
+          onChanged: widget.onChanged,
+        ),
+        if (widget.showStrengthIndicator)
+          FormComponents._buildPasswordStrengthIndicator(
+            widget.controller.text,
+          ),
+      ],
+    );
   }
 }
 

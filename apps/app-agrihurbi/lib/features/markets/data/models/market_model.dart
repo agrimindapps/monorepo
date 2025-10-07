@@ -5,92 +5,28 @@ import 'package:core/core.dart';
 part 'market_model.g.dart';
 
 /// Market Model for Data Layer
-/// 
+///
 /// Extends MarketEntity with JSON serialization and Hive persistence
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 5) // Ensure unique typeId across the app
 class MarketModel extends MarketEntity {
-  @override
-  @HiveField(0)
-  final String id;
-
-  @override
-  @HiveField(1)
-  final String name;
-
-  @override
-  @HiveField(2)
-  final String symbol;
-
-  @override
-  @HiveField(3)
-  final MarketType type;
-
-  @override
-  @HiveField(4)
-  final double currentPrice;
-
-  @override
-  @HiveField(5)
-  final double previousPrice;
-
-  @override
-  @HiveField(6)
-  final double changePercent;
-
-  @override
-  @HiveField(7)
-  final double volume;
-
-  @override
-  @HiveField(8)
-  final String currency;
-
-  @override
-  @HiveField(9)
-  final String unit;
-
-  @override
-  @HiveField(10)
-  final String exchange;
-
-  @override
-  @HiveField(11)
-  final DateTime lastUpdated;
-
-  @override
-  @HiveField(12)
-  final MarketStatus status;
-
-  @override
-  @HiveField(13)
-  final List<PriceHistoryModel> history;
-
-  @override
-  @HiveField(14)
-  final String? description;
-
-  @override
-  @HiveField(15)
-  final String? imageUrl;
-
   const MarketModel({
-    required this.id,
-    required this.name,
-    required this.symbol,
-    required this.type,
-    required this.currentPrice,
-    required this.previousPrice,
-    required this.changePercent,
-    required this.volume,
-    required this.currency,
-    required this.unit,
-    required this.exchange,
-    required this.lastUpdated,
-    required this.status,
-    this.history = const [],
-    this.description,
-    this.imageUrl,
+    @HiveField(0) required String id,
+    @HiveField(1) required String name,
+    @HiveField(2) required String symbol,
+    @HiveField(3) required MarketType type,
+    @HiveField(4) required double currentPrice,
+    @HiveField(5) required double previousPrice,
+    @HiveField(6) required double changePercent,
+    @HiveField(7) required double volume,
+    @HiveField(8) required String currency,
+    @HiveField(9) required String unit,
+    @HiveField(10) required String exchange,
+    @HiveField(11) required DateTime lastUpdated,
+    @HiveField(12) required MarketStatus status,
+    @HiveField(13) List<PriceHistoryModel> history = const [],
+    @HiveField(14) String? description,
+    @HiveField(15) String? imageUrl,
   }) : super(
           id: id,
           name: name,
@@ -144,22 +80,22 @@ class MarketModel extends MarketEntity {
   /// Convert to domain entity
   MarketEntity toEntity() {
     return MarketEntity(
-      id: id,
-      name: name,
-      symbol: symbol,
-      type: type,
-      currentPrice: currentPrice,
-      previousPrice: previousPrice,
-      changePercent: changePercent,
-      volume: volume,
-      currency: currency,
-      unit: unit,
-      exchange: exchange,
-      lastUpdated: lastUpdated,
-      status: status,
-      history: history.map((h) => h.toEntity()).toList(),
-      description: description,
-      imageUrl: imageUrl,
+      id: super.id,
+      name: super.name,
+      symbol: super.symbol,
+      type: super.type,
+      currentPrice: super.currentPrice,
+      previousPrice: super.previousPrice,
+      changePercent: super.changePercent,
+      volume: super.volume,
+      currency: super.currency,
+      unit: super.unit,
+      exchange: super.exchange,
+      lastUpdated: super.lastUpdated,
+      status: super.status,
+      history: super.history.map((h) => (h as PriceHistoryModel).toEntity()).toList(),
+      description: super.description,
+      imageUrl: super.imageUrl,
     );
   }
 
@@ -183,22 +119,22 @@ class MarketModel extends MarketEntity {
     String? imageUrl,
   }) {
     return MarketModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      symbol: symbol ?? this.symbol,
-      type: type ?? this.type,
-      currentPrice: currentPrice ?? this.currentPrice,
-      previousPrice: previousPrice ?? this.previousPrice,
-      changePercent: changePercent ?? this.changePercent,
-      volume: volume ?? this.volume,
-      currency: currency ?? this.currency,
-      unit: unit ?? this.unit,
-      exchange: exchange ?? this.exchange,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-      status: status ?? this.status,
-      history: history ?? this.history,
-      description: description ?? this.description,
-      imageUrl: imageUrl ?? this.imageUrl,
+      id: id ?? super.id,
+      name: name ?? super.name,
+      symbol: symbol ?? super.symbol,
+      type: type ?? super.type,
+      currentPrice: currentPrice ?? super.currentPrice,
+      previousPrice: previousPrice ?? super.previousPrice,
+      changePercent: changePercent ?? super.changePercent,
+      volume: volume ?? super.volume,
+      currency: currency ?? super.currency,
+      unit: unit ?? super.unit,
+      exchange: exchange ?? super.exchange,
+      lastUpdated: lastUpdated ?? super.lastUpdated,
+      status: status ?? super.status,
+      history: history ?? super.history.cast<PriceHistoryModel>(),
+      description: description ?? super.description,
+      imageUrl: imageUrl ?? super.imageUrl,
     );
   }
 }
@@ -207,42 +143,14 @@ class MarketModel extends MarketEntity {
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 6)
 class PriceHistoryModel extends PriceHistory {
-  @override
-  @HiveField(0)
-  final DateTime date;
-
-  @override
-  @HiveField(1)
-  final double price;
-
-  @override
-  @HiveField(2)
-  final double volume;
-
-  @override
-  @HiveField(3)
-  final double high;
-
-  @override
-  @HiveField(4)
-  final double low;
-
-  @override
-  @HiveField(5)
-  final double open;
-
-  @override
-  @HiveField(6)
-  final double close;
-
   const PriceHistoryModel({
-    required this.date,
-    required this.price,
-    required this.volume,
-    required this.high,
-    required this.low,
-    required this.open,
-    required this.close,
+    @HiveField(0) required DateTime date,
+    @HiveField(1) required double price,
+    @HiveField(2) required double volume,
+    @HiveField(3) required double high,
+    @HiveField(4) required double low,
+    @HiveField(5) required double open,
+    @HiveField(6) required double close,
   }) : super(
           date: date,
           price: price,
@@ -276,13 +184,13 @@ class PriceHistoryModel extends PriceHistory {
   /// Convert to domain entity
   PriceHistory toEntity() {
     return PriceHistory(
-      date: date,
-      price: price,
-      volume: volume,
-      high: high,
-      low: low,
-      open: open,
-      close: close,
+      date: super.date,
+      price: super.price,
+      volume: super.volume,
+      high: super.high,
+      low: super.low,
+      open: super.open,
+      close: super.close,
     );
   }
 }
@@ -291,51 +199,18 @@ class PriceHistoryModel extends PriceHistory {
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 16)
 class MarketSummaryModel extends MarketSummary {
-  @override
-  final String marketName;
-
-  @override
-  final DateTime lastUpdated;
-
-  @override
-  final List<MarketModel> topGainers;
-
-  @override
-  final List<MarketModel> topLosers;
-
-  @override
-  final List<MarketModel> mostActive;
-
-  @override
-  final double marketIndex;
-
-  @override
-  final double marketIndexChange;
-
-  @override
-  final int totalMarkets;
-
-  @override
-  final int marketsUp;
-
-  @override
-  final int marketsDown;
-
-  @override
-  final int marketsUnchanged;
-
   const MarketSummaryModel({
-    required this.marketName,
-    required this.lastUpdated,
-    required this.topGainers,
-    required this.topLosers,
-    required this.mostActive,
-    required this.marketIndex,
-    required this.marketIndexChange,
-    required this.totalMarkets,
-    required this.marketsUp,
-    required this.marketsDown,
-    required this.marketsUnchanged,
+    required String marketName,
+    required DateTime lastUpdated,
+    required List<MarketModel> topGainers,
+    required List<MarketModel> topLosers,
+    required List<MarketModel> mostActive,
+    required double marketIndex,
+    required double marketIndexChange,
+    required int totalMarkets,
+    required int marketsUp,
+    required int marketsDown,
+    required int marketsUnchanged,
   }) : super(
           marketName: marketName,
           lastUpdated: lastUpdated,
@@ -383,17 +258,17 @@ class MarketSummaryModel extends MarketSummary {
   /// Convert to domain entity
   MarketSummary toEntity() {
     return MarketSummary(
-      marketName: marketName,
-      lastUpdated: lastUpdated,
-      topGainers: topGainers.map((m) => m.toEntity()).toList(),
-      topLosers: topLosers.map((m) => m.toEntity()).toList(),
-      mostActive: mostActive.map((m) => m.toEntity()).toList(),
-      marketIndex: marketIndex,
-      marketIndexChange: marketIndexChange,
-      totalMarkets: totalMarkets,
-      marketsUp: marketsUp,
-      marketsDown: marketsDown,
-      marketsUnchanged: marketsUnchanged,
+      marketName: super.marketName,
+      lastUpdated: super.lastUpdated,
+      topGainers: super.topGainers.map((m) => (m as MarketModel).toEntity()).toList(),
+      topLosers: super.topLosers.map((m) => (m as MarketModel).toEntity()).toList(),
+      mostActive: super.mostActive.map((m) => (m as MarketModel).toEntity()).toList(),
+      marketIndex: super.marketIndex,
+      marketIndexChange: super.marketIndexChange,
+      totalMarkets: super.totalMarkets,
+      marketsUp: super.marketsUp,
+      marketsDown: super.marketsDown,
+      marketsUnchanged: super.marketsUnchanged,
     );
   }
 }

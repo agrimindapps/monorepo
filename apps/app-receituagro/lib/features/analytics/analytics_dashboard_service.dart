@@ -138,12 +138,12 @@ class RevenueMetrics {
 /// Provides comprehensive analytics insights and conversion tracking
 class AnalyticsDashboardService {
   static AnalyticsDashboardService? _instance;
-  static AnalyticsDashboardService get instance => _instance ??= AnalyticsDashboardService._();
-  
+  static AnalyticsDashboardService get instance =>
+      _instance ??= AnalyticsDashboardService._();
+
   AnalyticsDashboardService._();
 
   late IAnalyticsRepository _analytics;
-  late IStorageRepository _storage;
   bool _isInitialized = false;
   final Map<String, dynamic> _metricsCache = {};
   Timer? _cacheRefreshTimer;
@@ -156,7 +156,6 @@ class AnalyticsDashboardService {
     if (_isInitialized) return;
 
     _analytics = analytics;
-    _storage = storage;
     _isInitialized = true;
     _startCacheRefresh();
 
@@ -179,8 +178,9 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey = 'user_engagement_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
-    
+    final cacheKey =
+        'user_engagement_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+
     if (_metricsCache.containsKey(cacheKey)) {
       return _metricsCache[cacheKey] as UserEngagementMetrics;
     }
@@ -211,15 +211,16 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey = 'conversion_funnel_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
-    
+    final cacheKey =
+        'conversion_funnel_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+
     if (_metricsCache.containsKey(cacheKey)) {
       return _metricsCache[cacheKey] as ConversionFunnelMetrics;
     }
 
     try {
       final funnelData = <ConversionFunnelStep, int>{};
-      
+
       for (final step in ConversionFunnelStep.values) {
         funnelData[step] = _getMockFunnelData(step);
       }
@@ -248,8 +249,9 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey = 'performance_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
-    
+    final cacheKey =
+        'performance_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+
     if (_metricsCache.containsKey(cacheKey)) {
       return _metricsCache[cacheKey] as PerformanceMetrics;
     }
@@ -280,20 +282,23 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey = 'revenue_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
-    
+    final cacheKey =
+        'revenue_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+
     if (_metricsCache.containsKey(cacheKey)) {
       return _metricsCache[cacheKey] as RevenueMetrics;
     }
 
     try {
       final mockSubscriptionData = <Map<String, dynamic>>[];
-      
+
       final metrics = RevenueMetrics(
         totalRevenue: _calculateTotalRevenue(mockSubscriptionData),
         averageRevenuePerUser: _calculateARPU(mockSubscriptionData),
         totalSubscriptions: _calculateTotalSubscriptions(mockSubscriptionData),
-        activeSubscriptions: _calculateActiveSubscriptions(mockSubscriptionData),
+        activeSubscriptions: _calculateActiveSubscriptions(
+          mockSubscriptionData,
+        ),
         churnRate: _calculateChurnRate(mockSubscriptionData),
         revenueByPlan: _calculateRevenueByPlan(mockSubscriptionData),
         timestamp: DateTime.now(),
@@ -316,17 +321,17 @@ class AnalyticsDashboardService {
       startDate: startDate,
       endDate: endDate,
     );
-    
+
     final funnel = await getConversionFunnelMetrics(
       startDate: startDate,
       endDate: endDate,
     );
-    
+
     final performance = await getPerformanceMetrics(
       startDate: startDate,
       endDate: endDate,
     );
-    
+
     final revenue = await getRevenueMetrics(
       startDate: startDate,
       endDate: endDate,
@@ -348,7 +353,8 @@ class AnalyticsDashboardService {
       'analytics_report_exported',
       parameters: {
         'report_type': 'comprehensive',
-        'date_range': '${startDate?.toIso8601String()}_${endDate?.toIso8601String()}',
+        'date_range':
+            '${startDate?.toIso8601String()}_${endDate?.toIso8601String()}',
         'timestamp': DateTime.now().toIso8601String(),
       },
     );
@@ -408,7 +414,9 @@ class AnalyticsDashboardService {
     }
   }
 
-  Map<ConversionFunnelStep, double> _calculateConversionRates(Map<ConversionFunnelStep, int> funnelData) {
+  Map<ConversionFunnelStep, double> _calculateConversionRates(
+    Map<ConversionFunnelStep, int> funnelData,
+  ) {
     final rates = <ConversionFunnelStep, double>{};
     int previousCount = funnelData[ConversionFunnelStep.appOpened] ?? 1;
 
@@ -417,7 +425,8 @@ class AnalyticsDashboardService {
         rates[step] = 100.0;
       } else {
         final currentCount = funnelData[step] ?? 0;
-        rates[step] = previousCount > 0 ? (currentCount / previousCount * 100) : 0.0;
+        rates[step] =
+            previousCount > 0 ? (currentCount / previousCount * 100) : 0.0;
         previousCount = currentCount;
       }
     }
@@ -425,17 +434,22 @@ class AnalyticsDashboardService {
     return rates;
   }
 
-  Map<ConversionFunnelStep, double> _calculateDropOffRates(Map<ConversionFunnelStep, int> funnelData) {
+  Map<ConversionFunnelStep, double> _calculateDropOffRates(
+    Map<ConversionFunnelStep, int> funnelData,
+  ) {
     final rates = <ConversionFunnelStep, double>{};
-    
+
     for (int i = 0; i < ConversionFunnelStep.values.length - 1; i++) {
       final currentStep = ConversionFunnelStep.values[i];
       final nextStep = ConversionFunnelStep.values[i + 1];
-      
+
       final currentCount = funnelData[currentStep] ?? 0;
       final nextCount = funnelData[nextStep] ?? 0;
-      
-      rates[currentStep] = currentCount > 0 ? ((currentCount - nextCount) / currentCount * 100) : 0.0;
+
+      rates[currentStep] =
+          currentCount > 0
+              ? ((currentCount - nextCount) / currentCount * 100)
+              : 0.0;
     }
 
     return rates;
@@ -482,11 +496,15 @@ class AnalyticsDashboardService {
     return Random().nextDouble() * 20 + 5; // $5-$25
   }
 
-  int _calculateTotalSubscriptions(List<Map<String, dynamic>> subscriptionData) {
+  int _calculateTotalSubscriptions(
+    List<Map<String, dynamic>> subscriptionData,
+  ) {
     return Random().nextInt(500) + 100; // 100-599 subscriptions
   }
 
-  int _calculateActiveSubscriptions(List<Map<String, dynamic>> subscriptionData) {
+  int _calculateActiveSubscriptions(
+    List<Map<String, dynamic>> subscriptionData,
+  ) {
     return Random().nextInt(400) + 80; // 80-479 active
   }
 
@@ -494,7 +512,9 @@ class AnalyticsDashboardService {
     return Random().nextDouble() * 10 + 2; // 2-12% churn
   }
 
-  Map<String, double> _calculateRevenueByPlan(List<Map<String, dynamic>> subscriptionData) {
+  Map<String, double> _calculateRevenueByPlan(
+    List<Map<String, dynamic>> subscriptionData,
+  ) {
     return {
       'monthly': Random().nextDouble() * 2000 + 500,
       'yearly': Random().nextDouble() * 3000 + 1500,
@@ -511,7 +531,7 @@ class AnalyticsDashboardService {
       await getConversionFunnelMetrics();
       await getPerformanceMetrics();
       await getRevenueMetrics();
-      
+
       if (kDebugMode) {
         print('📊 Analytics metrics cache refreshed');
       }

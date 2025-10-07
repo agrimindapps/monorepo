@@ -142,7 +142,7 @@ class FeatureAvailabilityIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     Widget indicator = GestureDetector(
       onTap: onTap,
@@ -267,7 +267,7 @@ class _UpgradePromptState extends State<UpgradePrompt>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
 
     return AnimatedBuilder(
       animation: _animationController,

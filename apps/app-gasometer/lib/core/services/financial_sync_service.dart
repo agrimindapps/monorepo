@@ -1,6 +1,7 @@
 /// Financial Sync Service for GasOMeter
 /// Provides enhanced sync capabilities with retry mechanism and prioritization for financial data
 library;
+
 import 'dart:async';
 import 'dart:math';
 
@@ -12,7 +13,6 @@ import 'financial_validator.dart';
 
 /// Sync operation result
 class FinancialSyncResult {
-
   const FinancialSyncResult({
     required this.success,
     this.error,
@@ -68,7 +68,6 @@ class FinancialSyncResult {
 
 /// Sync queue item with priority
 class FinancialSyncQueueItem {
-
   FinancialSyncQueueItem({
     required this.entity,
     required this.priority,
@@ -97,7 +96,9 @@ class FinancialSyncQueueItem {
 
   /// Calculate next retry delay with exponential backoff
   Duration get nextRetryDelay {
-    final baseDelay = Duration(seconds: min(pow(2, retryCount).toInt(), 300)); // Max 5 minutes
+    final baseDelay = Duration(
+      seconds: min(pow(2, retryCount).toInt(), 300),
+    ); // Max 5 minutes
     final jitter = Duration(milliseconds: Random().nextInt(1000)); // Add jitter
     return baseDelay + jitter;
   }
@@ -119,33 +120,32 @@ class FinancialSyncQueueItem {
 
 /// Financial Sync Service
 class FinancialSyncService {
-
   FinancialSyncService({
     required FinancialValidator validator,
     required FinancialAuditTrailService auditService,
     required FinancialConflictResolver conflictResolver,
     required UnifiedSyncManager coreSync,
-  })  : // ignore: unused_field
-        _validator = validator,
-        _auditService = auditService,
-        _conflictResolver = conflictResolver,
-        _coreSync = coreSync;
-  final FinancialValidator _validator;
+  }) : // ignore: unused_field
+       _auditService = auditService,
+       _coreSync = coreSync;
   final FinancialAuditTrailService _auditService;
-  final FinancialConflictResolver _conflictResolver;
   final UnifiedSyncManager _coreSync;
   final List<FinancialSyncQueueItem> _syncQueue = [];
   final Map<String, Completer<FinancialSyncResult>> _pendingSyncs = {};
   bool _isSyncing = false;
   Timer? _syncTimer;
   DateTime? _lastSuccessfulSync;
-  static const Duration _syncInterval = Duration(minutes: 5);
-  static const Duration _financialSyncInterval = Duration(minutes: 2); // More frequent for financial data
+  static const Duration _financialSyncInterval = Duration(
+    minutes: 2,
+  ); // More frequent for financial data
   static const int _maxConcurrentSyncs = 3;
 
   /// Initialize the financial sync service
   Future<void> initialize() async {
-    _syncTimer = Timer.periodic(_financialSyncInterval, (_) => _processSyncQueue());
+    _syncTimer = Timer.periodic(
+      _financialSyncInterval,
+      (_) => _processSyncQueue(),
+    );
   }
 
   /// Queue entity for sync with financial prioritization
@@ -208,7 +208,6 @@ class FinancialSyncService {
       );
 
       return result.copyWith(totalTime: stopwatch.elapsed);
-
     } catch (e) {
       final error = 'Immediate sync failed: $e';
       await _auditService.logSync(
@@ -231,7 +230,8 @@ class FinancialSyncService {
     if (_pendingSyncs.containsKey(entityId)) {
       return FinancialSyncStatus.syncing;
     }
-    final queueItem = _syncQueue.where((item) => item.entity.id == entityId).firstOrNull;
+    final queueItem =
+        _syncQueue.where((item) => item.entity.id == entityId).firstOrNull;
     if (queueItem != null) {
       if (queueItem.retryCount > 0) {
         return FinancialSyncStatus.retrying;
@@ -243,7 +243,9 @@ class FinancialSyncService {
 
   /// Get pending financial sync count
   int get pendingFinancialSyncCount {
-    return _syncQueue.where((item) => FinancialValidator.isFinancialData(item.entity)).length;
+    return _syncQueue
+        .where((item) => FinancialValidator.isFinancialData(item.entity))
+        .length;
   }
 
   /// Get high priority pending count
@@ -262,14 +264,14 @@ class FinancialSyncService {
 
     try {
       _sortQueue();
-      final itemsToProcess = _syncQueue
-          .where((item) => item.shouldRetry)
-          .take(_maxConcurrentSyncs)
-          .toList();
+      final itemsToProcess =
+          _syncQueue
+              .where((item) => item.shouldRetry)
+              .take(_maxConcurrentSyncs)
+              .toList();
 
       final futures = itemsToProcess.map((item) => _processSyncItem(item));
       await Future.wait(futures, eagerError: false);
-
     } finally {
       _isSyncing = false;
     }
@@ -315,7 +317,6 @@ class FinancialSyncService {
           syncSource: 'queue',
         );
       }
-
     } catch (e) {
       final retryItem = item.copyWithRetry('Unexpected error: $e');
 
@@ -327,11 +328,13 @@ class FinancialSyncService {
       } else {
         _syncQueue.remove(item);
         final completer = _pendingSyncs.remove(item.entity.id);
-        completer?.complete(FinancialSyncResult.failure(
-          error: 'Max retries exceeded: $e',
-          attemptCount: retryItem.retryCount,
-          totalTime: stopwatch.elapsed,
-        ));
+        completer?.complete(
+          FinancialSyncResult.failure(
+            error: 'Max retries exceeded: $e',
+            attemptCount: retryItem.retryCount,
+            totalTime: stopwatch.elapsed,
+          ),
+        );
       }
     }
   }
@@ -352,7 +355,6 @@ class FinancialSyncService {
           totalTime: Duration.zero,
         ),
       );
-
     } catch (e) {
       return FinancialSyncResult.failure(
         error: 'Sync exception: $e',
@@ -367,10 +369,14 @@ class FinancialSyncService {
     int priority = 1; // Base priority
     if (FinancialValidator.isFinancialData(entity)) {
       priority = 2;
-      final importanceLevel = FinancialValidator.getFinancialImportanceLevel(entity);
+      final importanceLevel = FinancialValidator.getFinancialImportanceLevel(
+        entity,
+      );
       priority += importanceLevel;
     }
-    final age = DateTime.now().difference(entity.updatedAt ?? entity.createdAt ?? DateTime.now());
+    final age = DateTime.now().difference(
+      entity.updatedAt ?? entity.createdAt ?? DateTime.now(),
+    );
     if (age.inHours < 1) priority += 1;
     if (entity.isDirty) priority += 1;
 
@@ -395,7 +401,9 @@ class FinancialSyncService {
 
   /// Get queue statistics
   Map<String, dynamic> getQueueStats() {
-    final financial = _syncQueue.where((item) => FinancialValidator.isFinancialData(item.entity));
+    final financial = _syncQueue.where(
+      (item) => FinancialValidator.isFinancialData(item.entity),
+    );
     final highPriority = _syncQueue.where((item) => item.isHighPriority);
     final retrying = _syncQueue.where((item) => item.retryCount > 0);
 
@@ -414,11 +422,13 @@ class FinancialSyncService {
     _syncTimer?.cancel();
     for (final completer in _pendingSyncs.values) {
       if (!completer.isCompleted) {
-        completer.complete(FinancialSyncResult.failure(
-          error: 'Service disposed',
-          attemptCount: 0,
-          totalTime: Duration.zero,
-        ));
+        completer.complete(
+          FinancialSyncResult.failure(
+            error: 'Service disposed',
+            attemptCount: 0,
+            totalTime: Duration.zero,
+          ),
+        );
       }
     }
 

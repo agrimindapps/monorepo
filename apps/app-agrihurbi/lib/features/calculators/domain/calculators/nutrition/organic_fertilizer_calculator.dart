@@ -8,104 +8,121 @@ import '../../entities/calculator_parameter.dart';
 /// Calcula quantidade necessária de adubos orgânicos baseado na análise do solo
 class OrganicFertilizerCalculator extends CalculatorEntity {
   const OrganicFertilizerCalculator()
-      : super(
-          id: 'organic_fertilizer',
-          name: 'Adubação Orgânica',
-          description: 'Calcula a quantidade necessária de adubos orgânicos baseado na análise de solo e necessidades da cultura',
-          category: CalculatorCategory.nutrition,
-          parameters: const [
-            CalculatorParameter(
-              id: 'soil_organic_matter',
-              name: 'Matéria Orgânica do Solo',
-              description: 'Teor atual de matéria orgânica no solo (%)',
-              type: ParameterType.percentage,
-              unit: ParameterUnit.percentual,
-              minValue: 0.5,
-              maxValue: 15.0,
-              defaultValue: 2.5,
-              validationMessage: 'MO deve estar entre 0.5% e 15%',
-            ),
-            CalculatorParameter(
-              id: 'target_organic_matter',
-              name: 'Meta de Matéria Orgânica',
-              description: 'Teor desejado de matéria orgânica (%)',
-              type: ParameterType.percentage,
-              unit: ParameterUnit.percentual,
-              minValue: 1.0,
-              maxValue: 20.0,
-              defaultValue: 4.0,
-              validationMessage: 'Meta deve estar entre 1% e 20%',
-            ),
-            CalculatorParameter(
-              id: 'area',
-              name: 'Área a ser Adubada',
-              description: 'Área total a receber adubação orgânica (hectares)',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.hectare,
-              minValue: 0.01,
-              maxValue: 10000.0,
-              defaultValue: 1.0,
-              validationMessage: 'Área deve ser maior que 0.01 ha',
-            ),
-            CalculatorParameter(
-              id: 'soil_depth',
-              name: 'Profundidade de Incorporação',
-              description: 'Profundidade de incorporação do adubo (cm)',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.centimetro,
-              minValue: 10.0,
-              maxValue: 50.0,
-              defaultValue: 20.0,
-              validationMessage: 'Profundidade deve estar entre 10 e 50 cm',
-            ),
-            CalculatorParameter(
-              id: 'fertilizer_type',
-              name: 'Tipo de Adubo Orgânico',
-              description: 'Tipo do adubo orgânico a ser utilizado',
-              type: ParameterType.selection,
-              options: ['Esterco Bovino', 'Esterco Suíno', 'Esterco Galinha', 'Compostagem', 'Biossólido', 'Húmus de Minhoca'],
-              defaultValue: 'Esterco Bovino',
-            ),
-            CalculatorParameter(
-              id: 'fertilizer_mo_content',
-              name: 'Teor de MO do Adubo',
-              description: 'Teor de matéria orgânica do adubo (%)',
-              type: ParameterType.percentage,
-              unit: ParameterUnit.percentual,
-              minValue: 10.0,
-              maxValue: 80.0,
-              defaultValue: 30.0,
-              validationMessage: 'Teor de MO deve estar entre 10% e 80%',
-            ),
-            CalculatorParameter(
-              id: 'soil_density',
-              name: 'Densidade do Solo',
-              description: 'Densidade aparente do solo (g/cm³)',
-              type: ParameterType.decimal,
-              unit: ParameterUnit.none,
-              minValue: 1.0,
-              maxValue: 2.0,
-              defaultValue: 1.3,
-              validationMessage: 'Densidade deve estar entre 1.0 e 2.0 g/cm³',
-            ),
-          ],
-          formula: 'Necessidade = (Meta - Atual) × Densidade × Profundidade × Área / (Teor MO Adubo × Eficiência)',
-          references: const [
-            'Raij et al. (1997) - Recomendações de adubação para o Estado de São Paulo',
-            'CQFS-RS/SC (2016) - Manual de adubação e calagem',
-          ],
-        );
+    : super(
+        id: 'organic_fertilizer',
+        name: 'Adubação Orgânica',
+        description:
+            'Calcula a quantidade necessária de adubos orgânicos baseado na análise de solo e necessidades da cultura',
+        category: CalculatorCategory.nutrition,
+        parameters: const [
+          CalculatorParameter(
+            id: 'soil_organic_matter',
+            name: 'Matéria Orgânica do Solo',
+            description: 'Teor atual de matéria orgânica no solo (%)',
+            type: ParameterType.percentage,
+            unit: ParameterUnit.percentual,
+            minValue: 0.5,
+            maxValue: 15.0,
+            defaultValue: 2.5,
+            validationMessage: 'MO deve estar entre 0.5% e 15%',
+          ),
+          CalculatorParameter(
+            id: 'target_organic_matter',
+            name: 'Meta de Matéria Orgânica',
+            description: 'Teor desejado de matéria orgânica (%)',
+            type: ParameterType.percentage,
+            unit: ParameterUnit.percentual,
+            minValue: 1.0,
+            maxValue: 20.0,
+            defaultValue: 4.0,
+            validationMessage: 'Meta deve estar entre 1% e 20%',
+          ),
+          CalculatorParameter(
+            id: 'area',
+            name: 'Área a ser Adubada',
+            description: 'Área total a receber adubação orgânica (hectares)',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.hectare,
+            minValue: 0.01,
+            maxValue: 10000.0,
+            defaultValue: 1.0,
+            validationMessage: 'Área deve ser maior que 0.01 ha',
+          ),
+          CalculatorParameter(
+            id: 'soil_depth',
+            name: 'Profundidade de Incorporação',
+            description: 'Profundidade de incorporação do adubo (cm)',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.centimetro,
+            minValue: 10.0,
+            maxValue: 50.0,
+            defaultValue: 20.0,
+            validationMessage: 'Profundidade deve estar entre 10 e 50 cm',
+          ),
+          CalculatorParameter(
+            id: 'fertilizer_type',
+            name: 'Tipo de Adubo Orgânico',
+            description: 'Tipo do adubo orgânico a ser utilizado',
+            type: ParameterType.selection,
+            options: [
+              'Esterco Bovino',
+              'Esterco Suíno',
+              'Esterco Galinha',
+              'Compostagem',
+              'Biossólido',
+              'Húmus de Minhoca',
+            ],
+            defaultValue: 'Esterco Bovino',
+          ),
+          CalculatorParameter(
+            id: 'fertilizer_mo_content',
+            name: 'Teor de MO do Adubo',
+            description: 'Teor de matéria orgânica do adubo (%)',
+            type: ParameterType.percentage,
+            unit: ParameterUnit.percentual,
+            minValue: 10.0,
+            maxValue: 80.0,
+            defaultValue: 30.0,
+            validationMessage: 'Teor de MO deve estar entre 10% e 80%',
+          ),
+          CalculatorParameter(
+            id: 'soil_density',
+            name: 'Densidade do Solo',
+            description: 'Densidade aparente do solo (g/cm³)',
+            type: ParameterType.decimal,
+            unit: ParameterUnit.none,
+            minValue: 1.0,
+            maxValue: 2.0,
+            defaultValue: 1.3,
+            validationMessage: 'Densidade deve estar entre 1.0 e 2.0 g/cm³',
+          ),
+        ],
+        formula:
+            'Necessidade = (Meta - Atual) × Densidade × Profundidade × Área / (Teor MO Adubo × Eficiência)',
+        references: const [
+          'Raij et al. (1997) - Recomendações de adubação para o Estado de São Paulo',
+          'CQFS-RS/SC (2016) - Manual de adubação e calagem',
+        ],
+      );
 
   @override
   CalculationResult calculate(Map<String, dynamic> inputs) {
     try {
-      final double currentOM = double.parse(inputs['soil_organic_matter'].toString());
-      final double targetOM = double.parse(inputs['target_organic_matter'].toString());
+      final double currentOM = double.parse(
+        inputs['soil_organic_matter'].toString(),
+      );
+      final double targetOM = double.parse(
+        inputs['target_organic_matter'].toString(),
+      );
       final double area = double.parse(inputs['area'].toString());
       final double soilDepth = double.parse(inputs['soil_depth'].toString());
       final String fertilizerType = inputs['fertilizer_type'].toString();
-      final double fertilizerOMContent = double.parse(inputs['fertilizer_mo_content'].toString());
-      final double soilDensity = double.parse(inputs['soil_density'].toString());
+      final double fertilizerOMContent = double.parse(
+        inputs['fertilizer_mo_content'].toString(),
+      );
+      final double soilDensity = double.parse(
+        inputs['soil_density'].toString(),
+      );
       if (targetOM <= currentOM) {
         return CalculationError(
           calculatorId: id,
@@ -113,7 +130,9 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
           inputs: inputs,
         );
       }
-      final Map<String, dynamic> fertilizerData = _getFertilizerCharacteristics(fertilizerType);
+      final Map<String, dynamic> fertilizerData = _getFertilizerCharacteristics(
+        fertilizerType,
+      );
       final double efficiency = fertilizerData['efficiency'] as double;
       final double moistureContent = fertilizerData['moisture'] as double;
       final double npkN = fertilizerData['n'] as double;
@@ -121,23 +140,33 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
       final double npkK = fertilizerData['k'] as double;
       final double omDeficit = targetOM - currentOM; // % de MO a aumentar
       final double soilVolumePerHa = 10000 * (soilDepth / 100); // m³/ha
-      final double soilMassPerHa = soilVolumePerHa * soilDensity * 1000 / 1000; // t/ha
+      final double soilMassPerHa =
+          soilVolumePerHa * soilDensity * 1000 / 1000; // t/ha
       final double omNeedPerHa = (omDeficit / 100) * soilMassPerHa; // t MO/ha
-      final double fertilizerDryPerHa = omNeedPerHa / ((fertilizerOMContent / 100) * efficiency);
-      final double fertilizerWetPerHa = fertilizerDryPerHa / (1 - moistureContent / 100);
+      final double fertilizerDryPerHa =
+          omNeedPerHa / ((fertilizerOMContent / 100) * efficiency);
+      final double fertilizerWetPerHa =
+          fertilizerDryPerHa / (1 - moistureContent / 100);
       final double totalFertilizerWet = fertilizerWetPerHa * area;
       final double totalFertilizerDry = fertilizerDryPerHa * area;
       final double totalNitrogen = totalFertilizerDry * (npkN / 100);
       final double totalPhosphorus = totalFertilizerDry * (npkP / 100);
       final double totalPotassium = totalFertilizerDry * (npkK / 100);
       final double ureaEquivalent = totalNitrogen / 0.45; // Uréia 45% N
-      final double superphosphateEquivalent = totalPhosphorus / 0.18; // Super simples 18% P2O5
-      final double kclEquivalent = totalPotassium / 0.60; // KCl 60% K2O
-      final List<Map<String, dynamic>> applicationSchedule = _generateApplicationSchedule(
-        fertilizerWetPerHa, fertilizerType);
-      final double estimatedCost = _estimateCost(totalFertilizerWet, fertilizerType);
+      // Super simples 18% P2O5
+      // KCl 60% K2O
+      final List<Map<String, dynamic>> applicationSchedule =
+          _generateApplicationSchedule(fertilizerWetPerHa, fertilizerType);
+      final double estimatedCost = _estimateCost(
+        totalFertilizerWet,
+        fertilizerType,
+      );
       final List<String> recommendations = _generateRecommendations(
-        fertilizerType, omDeficit, fertilizerWetPerHa, currentOM);
+        fertilizerType,
+        omDeficit,
+        fertilizerWetPerHa,
+        currentOM,
+      );
 
       return CalculationResult(
         calculatorId: id,
@@ -286,7 +315,7 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
           'periodo': 'Preparo do Solo',
           'quantidade': quantityPerHa,
           'percentual': 100,
-          'observacao': 'Incorporar ao solo imediatamente'
+          'observacao': 'Incorporar ao solo imediatamente',
         });
         break;
       case 'Compostagem':
@@ -295,13 +324,13 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
           'periodo': 'Preparo (60 dias antes)',
           'quantidade': quantityPerHa * 0.7,
           'percentual': 70,
-          'observacao': 'Aplicação principal'
+          'observacao': 'Aplicação principal',
         });
         schedule.add({
           'periodo': 'Cobertura (30 dias após)',
           'quantidade': quantityPerHa * 0.3,
           'percentual': 30,
-          'observacao': 'Complemento nutricional'
+          'observacao': 'Complemento nutricional',
         });
         break;
       default:
@@ -309,10 +338,10 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
           'periodo': 'Aplicação Única',
           'quantidade': quantityPerHa,
           'percentual': 100,
-          'observacao': 'Conforme recomendação'
+          'observacao': 'Conforme recomendação',
         });
     }
-    
+
     return schedule;
   }
 
@@ -325,7 +354,7 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
       'Biossólido': 60.0,
       'Húmus de Minhoca': 300.0,
     };
-    
+
     final double pricePerTon = prices[fertilizerType] ?? 100.0;
     return totalQuantity * pricePerTon;
   }
@@ -338,33 +367,51 @@ class OrganicFertilizerCalculator extends CalculatorEntity {
   ) {
     final List<String> recommendations = [];
     if (omDeficit > 3.0) {
-      recommendations.add('Alto déficit de MO. Considere aplicação parcelada em 2-3 anos.');
+      recommendations.add(
+        'Alto déficit de MO. Considere aplicação parcelada em 2-3 anos.',
+      );
     } else if (omDeficit < 1.0) {
-      recommendations.add('Baixo déficit de MO. Aplicação única será suficiente.');
+      recommendations.add(
+        'Baixo déficit de MO. Aplicação única será suficiente.',
+      );
     }
     if (quantityPerHa > 20.0) {
-      recommendations.add('Quantidade elevada. Divida a aplicação para evitar perdas.');
+      recommendations.add(
+        'Quantidade elevada. Divida a aplicação para evitar perdas.',
+      );
     }
     if (currentOM < 2.0) {
-      recommendations.add('Solo com baixo teor de MO. Priorize melhoria da estrutura.');
+      recommendations.add(
+        'Solo com baixo teor de MO. Priorize melhoria da estrutura.',
+      );
     }
     switch (fertilizerType) {
       case 'Esterco Bovino':
-        recommendations.add('Esterco bovino: realize compostagem por 90 dias antes da aplicação.');
+        recommendations.add(
+          'Esterco bovino: realize compostagem por 90 dias antes da aplicação.',
+        );
         break;
       case 'Esterco Galinha':
-        recommendations.add('Esterco de galinha: cuidado com o excesso de nitrogênio.');
+        recommendations.add(
+          'Esterco de galinha: cuidado com o excesso de nitrogênio.',
+        );
         break;
       case 'Biossólido':
         recommendations.add('Biossólido: verifique análise de metais pesados.');
         break;
       case 'Húmus de Minhoca':
-        recommendations.add('Húmus: excelente para culturas sensíveis e mudas.');
+        recommendations.add(
+          'Húmus: excelente para culturas sensíveis e mudas.',
+        );
         break;
     }
-    recommendations.add('Incorpore o adubo orgânico em até 24 horas após aplicação.');
+    recommendations.add(
+      'Incorpore o adubo orgânico em até 24 horas após aplicação.',
+    );
     recommendations.add('Monitore a umidade do solo para melhor decomposição.');
-    recommendations.add('Faça análise de solo anualmente para acompanhar evolução da MO.');
+    recommendations.add(
+      'Faça análise de solo anualmente para acompanhar evolução da MO.',
+    );
 
     return recommendations;
   }

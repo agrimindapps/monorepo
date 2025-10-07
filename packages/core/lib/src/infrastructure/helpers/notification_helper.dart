@@ -17,9 +17,9 @@ class NotificationHelper {
     try {
       tz_data.initializeTimeZones();
       tz.setLocalLocation(tz.getLocation('America/Sao_Paulo'));
-      
+
       _isInitialized = true;
-      
+
       if (kDebugMode) {
         debugPrint('✅ Timezone initialized for notifications');
       }
@@ -31,7 +31,7 @@ class NotificationHelper {
   }
 
   /// Retorna canais de notificação padrão para um app
-  /// 
+  ///
   /// [appName] - Nome do app para identificar os canais
   /// [primaryColor] - Cor primária do app (formato 0xAARRGGBB)
   static List<NotificationChannelEntity> getDefaultChannels({
@@ -39,7 +39,7 @@ class NotificationHelper {
     required int primaryColor,
   }) {
     final lowercaseAppName = appName.toLowerCase();
-    
+
     return [
       NotificationChannelEntity(
         id: '${lowercaseAppName}_general',
@@ -95,7 +95,7 @@ class NotificationHelper {
     int? color,
   }) {
     final lowercaseAppName = appName.toLowerCase();
-    
+
     return NotificationEntity(
       id: id,
       title: title,
@@ -105,9 +105,10 @@ class NotificationHelper {
       channelName: '$appName - Lembretes',
       channelDescription: 'Lembretes e tarefas do $appName',
       scheduledDate: scheduledDate,
-      type: scheduledDate != null 
-          ? NotificationTypeEntity.scheduled 
-          : NotificationTypeEntity.instant,
+      type:
+          scheduledDate != null
+              ? NotificationTypeEntity.scheduled
+              : NotificationTypeEntity.instant,
       priority: NotificationPriorityEntity.high,
       importance: NotificationImportanceEntity.high,
       color: color,
@@ -128,7 +129,7 @@ class NotificationHelper {
     int? color,
   }) {
     final lowercaseAppName = appName.toLowerCase();
-    
+
     return NotificationEntity(
       id: id,
       title: title,
@@ -158,7 +159,7 @@ class NotificationHelper {
     int? color,
   }) {
     final lowercaseAppName = appName.toLowerCase();
-    
+
     return NotificationEntity(
       id: id,
       title: title,
@@ -205,7 +206,7 @@ class NotificationHelper {
     while (nextDate.isBefore(DateTime.now())) {
       nextDate = nextDate.add(interval);
     }
-    
+
     return nextDate;
   }
 

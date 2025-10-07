@@ -18,7 +18,7 @@ class VaccinesPage extends ConsumerStatefulWidget {
   ConsumerState<VaccinesPage> createState() => _VaccinesPageState();
 }
 
-class _VaccinesPageState extends ConsumerState<VaccinesPage> 
+class _VaccinesPageState extends ConsumerState<VaccinesPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
@@ -27,7 +27,10 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this); // Added dashboard tab
+    _tabController = TabController(
+      length: 5,
+      vsync: this,
+    ); // Added dashboard tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(vaccinesProvider.notifier).loadVaccines();
     });
@@ -49,7 +52,9 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
         title: const Text('Vacinas'),
         actions: [
           IconButton(
-            icon: Icon(_showCalendarView ? Icons.list : Icons.calendar_view_month),
+            icon: Icon(
+              _showCalendarView ? Icons.list : Icons.calendar_view_month,
+            ),
             onPressed: () {
               setState(() {
                 _showCalendarView = !_showCalendarView;
@@ -79,46 +84,44 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
                   break;
               }
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'filter',
-                child: ListTile(
-                  leading: Icon(Icons.filter_list),
-                  title: Text('Filtros'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'history',
-                child: ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('Histórico Completo'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'reminders',
-                child: ListTile(
-                  leading: Icon(Icons.notifications),
-                  title: Text('Gerenciar Lembretes'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'schedule',
-                child: ListTile(
-                  leading: Icon(Icons.schedule_send),
-                  title: Text('Agendamento Avançado'),
-                ),
-              ),
-            ],
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(
+                    value: 'filter',
+                    child: ListTile(
+                      leading: Icon(Icons.filter_list),
+                      title: Text('Filtros'),
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'history',
+                    child: ListTile(
+                      leading: Icon(Icons.history),
+                      title: Text('Histórico Completo'),
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'reminders',
+                    child: ListTile(
+                      leading: Icon(Icons.notifications),
+                      title: Text('Gerenciar Lembretes'),
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'schedule',
+                    child: ListTile(
+                      leading: Icon(Icons.schedule_send),
+                      title: Text('Agendamento Avançado'),
+                    ),
+                  ),
+                ],
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabs: [
-            const Tab(
-              icon: Icon(Icons.dashboard),
-              text: 'Painel',
-            ),
+            const Tab(icon: Icon(Icons.dashboard), text: 'Painel'),
             Tab(
               icon: const Icon(Icons.list),
               text: 'Todas (${vaccinesState.totalVaccines})',
@@ -149,9 +152,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
 
   Widget _buildBody(BuildContext context, VaccinesState state) {
     if (state.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (state.error != null) {
@@ -159,11 +160,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red[300],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar vacinas',
@@ -199,9 +196,18 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
       children: [
         _buildDashboardTab(context, state),
         _buildVaccinesList(context, state.filteredVaccines),
-        _buildVaccinesList(context, state.vaccines.where((v) => v.isOverdue).toList()),
-        _buildVaccinesList(context, state.vaccines.where((v) => v.isPending).toList()),
-        _buildVaccinesList(context, state.vaccines.where((v) => v.isCompleted).toList()),
+        _buildVaccinesList(
+          context,
+          state.vaccines.where((v) => v.isOverdue).toList(),
+        ),
+        _buildVaccinesList(
+          context,
+          state.vaccines.where((v) => v.isPending).toList(),
+        ),
+        _buildVaccinesList(
+          context,
+          state.vaccines.where((v) => v.isCompleted).toList(),
+        ),
       ],
     );
   }
@@ -248,7 +254,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -287,47 +293,48 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   void _showSearchDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Buscar Vacinas'),
-        content: TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: 'Digite o nome da vacina ou veterinário...',
-            prefixIcon: Icon(Icons.search),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Buscar Vacinas'),
+            content: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Digite o nome da vacina ou veterinário...',
+                prefixIcon: Icon(Icons.search),
+              ),
+              autofocus: true,
+              onSubmitted: (value) {
+                Navigator.pop(context);
+                ref.read(vaccinesProvider.notifier).searchVaccines(value);
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _searchController.clear();
+                  Navigator.pop(context);
+                  ref.read(vaccinesProvider.notifier).clearSearch();
+                },
+                child: const Text('Limpar'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref
+                      .read(vaccinesProvider.notifier)
+                      .searchVaccines(_searchController.text);
+                },
+                child: const Text('Buscar'),
+              ),
+            ],
           ),
-          autofocus: true,
-          onSubmitted: (value) {
-            Navigator.pop(context);
-            ref.read(vaccinesProvider.notifier).searchVaccines(value);
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _searchController.clear();
-              Navigator.pop(context);
-              ref.read(vaccinesProvider.notifier).clearSearch();
-            },
-            child: const Text('Limpar'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(vaccinesProvider.notifier).searchVaccines(_searchController.text);
-            },
-            child: const Text('Buscar'),
-          ),
-        ],
-      ),
     );
   }
 
   void _navigateToAddVaccine(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute<void>(
-        builder: (context) => const AddVaccineForm(),
-      ),
+      MaterialPageRoute<void>(builder: (context) => const AddVaccineForm()),
     );
   }
 
@@ -341,85 +348,90 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   }
 
   void _showVaccineDetails(BuildContext context, Vaccine vaccine) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.95,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => DecoratedBox(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(16),
-            ),
-          ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    VaccineCard(
-                      vaccine: vaccine,
-                      onEdit: () {
-                        Navigator.pop(context);
-                        _navigateToEditVaccine(context, vaccine);
-                      },
-                      onDelete: () {
-                        Navigator.pop(context);
-                        _deleteVaccine(context, vaccine.id);
-                      },
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            maxChildSize: 0.95,
+            minChildSize: 0.5,
+            builder:
+                (context, scrollController) => DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
                     ),
-                  ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            VaccineCard(
+                              vaccine: vaccine,
+                              onEdit: () {
+                                Navigator.pop(context);
+                                _navigateToEditVaccine(context, vaccine);
+                              },
+                              onDelete: () {
+                                Navigator.pop(context);
+                                _deleteVaccine(context, vaccine.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
           ),
-        ),
-      ),
     );
   }
 
   void _deleteVaccine(BuildContext context, String vaccineId) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Vacina'),
-        content: const Text('Tem certeza que deseja excluir esta vacina? Esta ação não pode ser desfeita.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Excluir Vacina'),
+            content: const Text(
+              'Tem certeza que deseja excluir esta vacina? Esta ação não pode ser desfeita.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref.read(vaccinesProvider.notifier).deleteVaccine(vaccineId);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Vacina excluída com sucesso'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Excluir'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(vaccinesProvider.notifier).deleteVaccine(vaccineId);
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Vacina excluída com sucesso'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Excluir'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -427,31 +439,37 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
     final vaccinesState = ref.watch(vaccinesProvider);
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filtros'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: VaccinesFilter.values
-              .map((filter) => RadioListTile<VaccinesFilter>(
-                    title: Text(filter.displayName),
-                    value: filter,
-                    groupValue: vaccinesState.filter,
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref.read(vaccinesProvider.notifier).setFilter(value);
-                      }
-                      Navigator.pop(context);
-                    },
-                  ))
-              .toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Filtros'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  VaccinesFilter.values
+                      .map(
+                        (filter) => RadioListTile<VaccinesFilter>(
+                          title: Text(filter.displayName),
+                          value: filter,
+                          groupValue: vaccinesState.filter,
+                          onChanged: (value) {
+                            if (value != null) {
+                              ref
+                                  .read(vaccinesProvider.notifier)
+                                  .setFilter(value);
+                            }
+                            Navigator.pop(context);
+                          },
+                        ),
+                      )
+                      .toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -459,14 +477,11 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Histórico de Vacinas'),
-          ),
-          body: const VaccineHistoryVisualization(
-            showAnalytics: true,
-          ),
-        ),
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(title: const Text('Histórico de Vacinas')),
+              body: const VaccineHistoryVisualization(showAnalytics: true),
+            ),
       ),
     );
   }
@@ -484,11 +499,12 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (context) => VaccineSchedulingInterface(
-          onScheduled: () {
-            ref.read(vaccinesProvider.notifier).loadVaccines();
-          },
-        ),
+        builder:
+            (context) => VaccineSchedulingInterface(
+              onScheduled: () {
+                ref.read(vaccinesProvider.notifier).loadVaccines();
+              },
+            ),
       ),
     );
   }

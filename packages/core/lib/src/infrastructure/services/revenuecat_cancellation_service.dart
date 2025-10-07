@@ -160,7 +160,7 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
       final details = <String, dynamic>{
         'hasActiveSubscription': customerInfo.activeSubscriptions.isNotEmpty,
         'activeSubscriptions': customerInfo.activeSubscriptions.toList(),
-        'entitlements': {},
+        'entitlements': <String, dynamic>{},
         'latestExpirationDate': null,
       };
       for (final entry in customerInfo.entitlements.active.entries) {

@@ -9,13 +9,13 @@ import '../../domain/repositories/profile_repository.dart';
 /// Utiliza o ProfileImageService do core package
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileImageService _profileImageService;
-  final ReceitaAgroAuthNotifier _authNotifier;
+  final ReceitaAgroAuthState? Function() _getAuthState;
 
   ProfileRepositoryImpl({
     required ProfileImageService profileImageService,
-    required ReceitaAgroAuthNotifier authNotifier,
-  })  : _profileImageService = profileImageService,
-        _authNotifier = authNotifier;
+    required ReceitaAgroAuthState? Function() getAuthState,
+  }) : _profileImageService = profileImageService,
+       _getAuthState = getAuthState;
 
   @override
   Future<Result<ProfileImageResult>> uploadProfileImage(
@@ -55,8 +55,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   String getUserInitials() {
-    final user = _authNotifier.state.value?.currentUser;
-    return _profileImageService.getUserInitials(user?.displayName ?? user?.email);
+    final authState = _getAuthState();
+    final user = authState?.currentUser;
+    return _profileImageService.getUserInitials(
+      user?.displayName ?? user?.email,
+    );
   }
 
   @override
@@ -73,8 +76,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileImageConfig get config => _profileImageService.config;
 
   @override
-  UserEntity? get currentUser => _authNotifier.state.value?.currentUser;
+  UserEntity? get currentUser {
+    final authState = _getAuthState();
+    return authState?.currentUser;
+  }
 
   @override
-  bool get isAuthenticated => _authNotifier.state.value?.isAuthenticated ?? false;
+  bool get isAuthenticated {
+    final authState = _getAuthState();
+    return authState?.isAuthenticated ?? false;
+  }
 }

@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../../constants/comentarios_design_tokens.dart';
 
 /// **ADD COMENTARIO DIALOG**
-/// 
+///
 /// Modal dialog for creating new comentarios with comprehensive validation.
 /// Follows Material Design guidelines and app-receituagro design system.
-/// 
+///
 /// ## Features:
-/// 
+///
 /// - **Smart Validation**: Real-time content validation
 /// - **Character Limits**: Visual feedback for min/max limits
 /// - **Context Display**: Shows origin information when available
@@ -41,7 +41,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
   final TextEditingController _commentController = TextEditingController();
   final ValueNotifier<String> _contentNotifier = ValueNotifier<String>('');
   bool _isSaving = false;
-  
+
   static const int _maxLength = ComentariosDesignTokens.maxCommentLength;
   static const int _minLength = ComentariosDesignTokens.minCommentLength;
 
@@ -72,7 +72,9 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ComentariosDesignTokens.dialogBorderRadius),
+        borderRadius: BorderRadius.circular(
+          ComentariosDesignTokens.dialogBorderRadius,
+        ),
       ),
       insetPadding: ComentariosDesignTokens.defaultPadding,
       child: Container(
@@ -81,9 +83,10 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
           maxHeight: ComentariosDesignTokens.maxDialogHeight,
         ),
         decoration: BoxDecoration(
-          color: isDark 
-              ? ComentariosDesignTokens.dialogBackgroundDark 
-              : Colors.white,
+          color:
+              isDark
+                  ? ComentariosDesignTokens.dialogBackgroundDark
+                  : Colors.white,
           borderRadius: BorderRadius.circular(
             ComentariosDesignTokens.dialogBorderRadius,
           ),
@@ -105,9 +108,10 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 12, top: 12, bottom: 8),
       decoration: BoxDecoration(
-        color: isDark 
-            ? ComentariosDesignTokens.dialogHeaderDark 
-            : ComentariosDesignTokens.dialogHeaderLight,
+        color:
+            isDark
+                ? ComentariosDesignTokens.dialogHeaderDark
+                : ComentariosDesignTokens.dialogHeaderLight,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(ComentariosDesignTokens.dialogBorderRadius),
           topRight: Radius.circular(ComentariosDesignTokens.dialogBorderRadius),
@@ -186,11 +190,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          _getOriginIcon(),
-          size: 16,
-          color: const Color(0xFF4CAF50),
-        ),
+        Icon(_getOriginIcon(), size: 16, color: const Color(0xFF4CAF50)),
         const SizedBox(width: 6),
         Text(
           widget.origem!,
@@ -205,7 +205,10 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
 
   Widget _buildItemNameRow(ThemeData theme, bool isDark) {
     return Padding(
-      padding: widget.origem != null ? const EdgeInsets.only(top: 4) : EdgeInsets.zero,
+      padding:
+          widget.origem != null
+              ? const EdgeInsets.only(top: 4)
+              : EdgeInsets.zero,
       child: Row(
         children: [
           Icon(
@@ -286,9 +289,10 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(
-        color: isFocused
-            ? const Color(0xFF4CAF50)
-            : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+        color:
+            isFocused
+                ? const Color(0xFF4CAF50)
+                : (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
         width: isFocused ? 2 : 1,
       ),
     );
@@ -300,15 +304,16 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
       builder: (context, content, child) {
         final length = content.length;
         final isOverLimit = length > _maxLength;
-        
+
         return Align(
           alignment: Alignment.centerRight,
           child: Text(
             '$length/$_maxLength',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isOverLimit
-                  ? Colors.red
-                  : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+              color:
+                  isOverLimit
+                      ? Colors.red
+                      : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
             ),
           ),
         );
@@ -323,9 +328,10 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
         valueListenable: _contentNotifier,
         builder: (context, content, child) {
           final trimmedContent = content.trim();
-          final canSave = trimmedContent.length >= _minLength && 
-                         trimmedContent.length <= _maxLength &&
-                         !_isSaving;
+          final canSave =
+              trimmedContent.length >= _minLength &&
+              trimmedContent.length <= _maxLength &&
+              !_isSaving;
 
           return Row(
             children: [
@@ -353,9 +359,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
           color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
         ),
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -363,16 +367,17 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
   Widget _buildSaveButton(bool canSave, String trimmedContent) {
     return ElevatedButton.icon(
       onPressed: canSave ? () => _handleSave(trimmedContent) : null,
-      icon: _isSaving
-          ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
-          : const Icon(Icons.check, size: 18),
+      icon:
+          _isSaving
+              ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+              : const Icon(Icons.check, size: 18),
       label: Text(
         _isSaving ? 'Salvando...' : 'Salvar',
         style: const TextStyle(fontWeight: FontWeight.w600),
@@ -383,9 +388,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
         disabledBackgroundColor: Colors.grey.shade400,
         disabledForegroundColor: Colors.grey.shade600,
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
     );
@@ -401,14 +404,14 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
 
     try {
       await widget.onSave(content);
-      
+
       if (mounted) {
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao salvar comentário: $e'),
@@ -425,7 +428,7 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
 
   IconData _getOriginIcon() {
     if (widget.origem == null) return Icons.comment_outlined;
-    
+
     switch (widget.origem!.toLowerCase()) {
       case 'defensivos':
         return Icons.shield_outlined;
@@ -439,35 +442,5 @@ class _AddComentarioDialogState extends State<AddComentarioDialog> {
       default:
         return Icons.comment_outlined;
     }
-  }
-
-  /// Factory constructor for context-specific comments
-  static AddComentarioDialog forContext({
-    required String pkIdentificador,
-    required String ferramenta,
-    required Future<void> Function(String) onSave,
-    VoidCallback? onCancel,
-  }) {
-    return AddComentarioDialog(
-      origem: ferramenta,
-      itemName: 'Item $pkIdentificador',
-      pkIdentificador: pkIdentificador,
-      ferramenta: ferramenta,
-      onSave: onSave,
-      onCancel: onCancel,
-    );
-  }
-
-  /// Factory constructor for general comments
-  static AddComentarioDialog general({
-    required Future<void> Function(String) onSave,
-    VoidCallback? onCancel,
-  }) {
-    return AddComentarioDialog(
-      origem: 'Comentários',
-      itemName: 'Comentário geral',
-      onSave: onSave,
-      onCancel: onCancel,
-    );
   }
 }

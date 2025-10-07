@@ -20,8 +20,8 @@ class AccountDeletionProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => isComplete || hasError,
+    return PopScope(
+      canPop: isComplete || hasError,
       child: AlertDialog(
         title: Row(
           children: [

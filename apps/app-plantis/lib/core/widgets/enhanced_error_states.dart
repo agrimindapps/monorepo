@@ -386,7 +386,7 @@ mixin ErrorStateMixin<T extends StatefulWidget> on State<T> {
 class ErrorBoundary extends StatefulWidget {
   final Widget child;
   final Widget Function(String error)? errorBuilder;
-  final Function(String error)? onError;
+  final void Function(String error)? onError;
 
   const ErrorBoundary({
     super.key,

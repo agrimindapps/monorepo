@@ -426,7 +426,7 @@ class QuickSettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final cardColor = color ?? PlantisColors.primary;
 
     return GestureDetector(

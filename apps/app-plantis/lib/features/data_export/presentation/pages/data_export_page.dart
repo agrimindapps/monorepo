@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
@@ -34,8 +36,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadDataStatistics();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-    });
   }
 
   @override
@@ -52,6 +52,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
         });
       }
     } catch (e) {
+      // Silently fail - statistics are optional
     }
   }
 
@@ -68,10 +69,12 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     const ExportRequest? request = null;
 
     if (request != null && mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => ExportProgressDialog(request: request),
+      unawaited(
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => ExportProgressDialog(request: request),
+        ),
       );
     }
   }
@@ -139,7 +142,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     return Consumer(
       builder: (context, ref, child) {
         const isLoading = false;
-        const canRequestExport = true;
         const availabilityResult = null;
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -231,6 +233,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               ExportAvailabilityWidget(
                 requestedDataTypes: _selectedDataTypes,
                 onAvailabilityChecked: () {
+                  // TODO: Handle availability check
                 },
               ),
 
@@ -239,25 +242,12 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed:
-                      isLoading ||
-                              _selectedDataTypes.isEmpty ||
+                      _selectedDataTypes.isEmpty ||
                               (availabilityResult?.isAvailable != true)
                           ? null
                           : _requestExport,
-                  icon:
-                      isLoading
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                          : const Icon(Icons.download),
-                  label: const Text(
-                    isLoading ? 'Processando...' : 'Exportar Dados',
-                  ),
+                  icon: const Icon(Icons.download),
+                  label: const Text('Exportar Dados'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PlantisColors.primary,
                     foregroundColor: Colors.white,
@@ -321,6 +311,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
         return RefreshIndicator(
           onRefresh: () async {
+            // TODO: Implement refresh logic
           },
           color: PlantisColors.primary,
           child: ListView.builder(
@@ -381,6 +372,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 if (request.status == ExportRequestStatus.completed) ...[
                   IconButton(
                     onPressed: () {
+                      // TODO: Implement download
                     },
                     icon: const Icon(Icons.download, color: PlantisColors.leaf),
                   ),
@@ -390,6 +382,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                     if (value == 'delete') {
                       final confirmed = await _showDeleteConfirmation();
                       if (confirmed) {
+                        // TODO: Implement delete
                       }
                     }
                   },
@@ -529,7 +522,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   }
 
   void _showHelpDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

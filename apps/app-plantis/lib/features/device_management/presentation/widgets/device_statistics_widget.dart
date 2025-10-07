@@ -1,4 +1,5 @@
-import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
+import 'package:core/core.dart'
+    hide deviceManagementProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -10,14 +11,18 @@ class DeviceStatisticsWidget extends ConsumerStatefulWidget {
   const DeviceStatisticsWidget({super.key});
 
   @override
-  ConsumerState<DeviceStatisticsWidget> createState() => _DeviceStatisticsWidgetState();
+  ConsumerState<DeviceStatisticsWidget> createState() =>
+      _DeviceStatisticsWidgetState();
 }
 
-class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget> {
+class _DeviceStatisticsWidgetState
+    extends ConsumerState<DeviceStatisticsWidget> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(deviceManagementProvider.notifier).loadStatistics());
+    Future.microtask(
+      () => ref.read(deviceManagementProvider.notifier).loadStatistics(),
+    );
   }
 
   @override
@@ -33,7 +38,10 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
         final stats = deviceState.statistics!;
 
         return RefreshIndicator(
-          onRefresh: () => ref.read(deviceManagementProvider.notifier).loadStatistics(refresh: true),
+          onRefresh:
+              () => ref
+                  .read(deviceManagementProvider.notifier)
+                  .loadStatistics(refresh: true),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -54,7 +62,9 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('Erro ao carregar estatísticas: $error')),
+      error:
+          (error, stack) =>
+              Center(child: Text('Erro ao carregar estatísticas: $error')),
     );
   }
 
@@ -367,10 +377,13 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
     }
   }
 
-  Widget _buildPlatformInsight(BuildContext context, stats) {
+  Widget _buildPlatformInsight(
+    BuildContext context,
+    DeviceStatisticsModel stats,
+  ) {
     final metrics = stats.plantisMetrics;
-    final mostUsed = metrics['mostUsedPlatform'] as String?;
-    final diversity = metrics['platformDiversity'] as int? ?? 0;
+    final mostUsed = metrics?['mostUsedPlatform'] as String?;
+    final diversity = metrics?['platformDiversity'] as int? ?? 0;
 
     if (mostUsed == null) return const SizedBox.shrink();
 
@@ -404,7 +417,10 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
     );
   }
 
-  Widget _buildActivitySection(BuildContext context, stats) {
+  Widget _buildActivitySection(
+    BuildContext context,
+    DeviceStatisticsModel stats,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -511,11 +527,14 @@ class _DeviceStatisticsWidgetState extends ConsumerState<DeviceStatisticsWidget>
     );
   }
 
-  Widget _buildRecommendations(BuildContext context, stats) {
+  Widget _buildRecommendations(
+    BuildContext context,
+    DeviceStatisticsModel stats,
+  ) {
     if (stats.plantisMetrics == null) return const SizedBox.shrink();
 
     final metrics = stats.plantisMetrics;
-    final recommendations = metrics['recommendations'] as List<String>? ?? [];
+    final recommendations = metrics?['recommendations'] as List<String>? ?? [];
 
     if (recommendations.isEmpty) {
       return Card(

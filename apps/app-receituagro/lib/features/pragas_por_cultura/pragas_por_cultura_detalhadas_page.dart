@@ -172,8 +172,8 @@ class _PragasPorCulturaDetalhadasPageState
     lista.sort((a, b) {
       switch (_ordenacao) {
         case 'nome':
-          final aNome = a.praga.nomeComum ?? a.praga.nomeCientifico;
-          final bNome = b.praga.nomeComum ?? b.praga.nomeCientifico;
+          final aNome = a.praga.nomeComum;
+          final bNome = b.praga.nomeComum;
           return aNome.compareTo(bNome);
         case 'diagnosticos':
           return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
@@ -199,8 +199,8 @@ class _PragasPorCulturaDetalhadasPageState
     filtradas.sort((a, b) {
       switch (_ordenacao) {
         case 'nome':
-          final aNome = a.praga.nomeComum ?? a.praga.nomeCientifico;
-          final bNome = b.praga.nomeComum ?? b.praga.nomeCientifico;
+          final aNome = a.praga.nomeComum;
+          final bNome = b.praga.nomeComum;
           return aNome.compareTo(bNome);
         case 'diagnosticos':
           return b.quantidadeDiagnosticos.compareTo(a.quantidadeDiagnosticos);
@@ -325,8 +325,7 @@ class _PragasPorCulturaDetalhadasPageState
                               margin: const EdgeInsets.all(16),
                               child: PragaCulturaTabBarWidget(
                                 tabController: _tabController,
-                                onTabTap: (index) {
-                                },
+                                onTabTap: (index) {},
                                 isDark: isDark,
                               ),
                             ),

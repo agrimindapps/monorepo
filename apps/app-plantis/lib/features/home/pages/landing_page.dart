@@ -53,7 +53,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
   }
 
   void _checkUserLoginStatus() {
-    final authState = ref.read(local.authProvider);
+    ref.read(local.authProvider);
     final isInitialized = ref.read(local.isInitializedProvider);
     final isAuthenticated = ref.read(local.isAuthenticatedProvider);
     if (isInitialized && isAuthenticated) {

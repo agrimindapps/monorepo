@@ -1,4 +1,5 @@
 library;
+
 export 'package:cached_network_image/cached_network_image.dart';
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 export 'package:cloud_functions/cloud_functions.dart' hide Result;
@@ -27,7 +28,22 @@ export 'package:package_info_plus/package_info_plus.dart';
 export 'package:purchases_flutter/purchases_flutter.dart' hide LogLevel, Store;
 export 'package:riverpod/riverpod.dart'
     hide Locator, AsyncValueX, StreamProvider;
-export 'package:riverpod_annotation/riverpod_annotation.dart';
+export 'package:riverpod_annotation/riverpod_annotation.dart'
+    hide
+        BuildlessAutoDisposeAsyncNotifier,
+        AutoDisposeAsyncNotifierProviderImpl,
+        BuildlessAsyncNotifier,
+        AsyncNotifierProviderImpl,
+        BuildlessAutoDisposeStreamNotifier,
+        AutoDisposeStreamNotifierProviderImpl,
+        BuildlessStreamNotifier,
+        StreamNotifierProviderImpl,
+        ProviderOverride,
+        FamilyOverride,
+        BuildlessAutoDisposeNotifier,
+        AutoDisposeNotifierProviderImpl,
+        BuildlessNotifier,
+        NotifierProviderImpl;
 export 'package:share_plus/share_plus.dart';
 export 'package:shared_preferences/shared_preferences.dart';
 export 'package:shimmer/shimmer.dart';

@@ -53,7 +53,7 @@ class BottomNavWrapper extends StatelessWidget {
 
   void _navigateToMainPage(BuildContext context, int index) {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
+      MaterialPageRoute<Widget>(
         builder: (context) => MainNavigationPage(initialIndex: index),
       ),
       (route) => false,

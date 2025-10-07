@@ -27,9 +27,10 @@ class HeaderSection extends StatelessWidget {
               horizontal: isMobile ? 24 : 40,
               vertical: 80,
             ),
-            child: isMobile
-                ? _buildMobileContent(context)
-                : _buildDesktopContent(context),
+            child:
+                isMobile
+                    ? _buildMobileContent(context)
+                    : _buildDesktopContent(context),
           ),
         ),
       ),
@@ -53,10 +54,7 @@ class HeaderSection extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(
-          flex: 5,
-          child: _buildAppShowcase(),
-        ),
+        Expanded(flex: 5, child: _buildAppShowcase()),
       ],
     );
   }
@@ -111,7 +109,7 @@ class HeaderSection extends StatelessWidget {
       children: [
         ElevatedButton(
           onPressed: () {
-            showDialog(
+            showDialog<void>(
               context: context,
               builder: (context) => const NotificationFormDialog(),
             );
@@ -131,10 +129,7 @@ class HeaderSection extends StatelessWidget {
             children: [
               Text(
                 'Quero ser Notificado',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               SizedBox(width: 8),
               Icon(Icons.notifications, size: 16),
@@ -150,7 +145,7 @@ class HeaderSection extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            showDialog(
+            showDialog<void>(
               context: context,
               builder: (context) => const NotificationFormDialog(),
             );
@@ -195,7 +190,7 @@ class HeaderSection extends StatelessWidget {
         const SizedBox(width: 12),
         GestureDetector(
           onTap: () {
-            showDialog(
+            showDialog<void>(
               context: context,
               builder: (context) => const NotificationFormDialog(),
             );
@@ -328,8 +323,9 @@ class HeaderSection extends StatelessWidget {
                                 width: 30,
                                 height: 70 + (index * 10),
                                 decoration: BoxDecoration(
-                                  color:
-                                      Colors.amber[400]!.withValues(alpha: 0.7),
+                                  color: Colors.amber[400]!.withValues(
+                                    alpha: 0.7,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -347,8 +343,10 @@ class HeaderSection extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.directions_car,
-                                color: Colors.amber[400]),
+                            Icon(
+                              Icons.directions_car,
+                              color: Colors.amber[400],
+                            ),
                             const SizedBox(width: 16),
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

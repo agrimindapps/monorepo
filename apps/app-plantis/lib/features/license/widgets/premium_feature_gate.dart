@@ -145,19 +145,6 @@ class PremiumFeatureGate extends ConsumerWidget {
   }
 }
 
-/// Loading state widget for feature gate
-class _LoadingGate extends StatelessWidget {
-  const _LoadingGate();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: const Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
 /// Simplified version for basic premium checks
 class SimplePremiumGate extends ConsumerWidget {
   final Widget child;
@@ -167,7 +154,6 @@ class SimplePremiumGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     return fallback ??
         PremiumFeatureGate(feature: PremiumFeature.cloudSync, child: child);
   }

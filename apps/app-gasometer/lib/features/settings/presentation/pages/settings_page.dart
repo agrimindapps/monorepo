@@ -367,7 +367,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _showThemeDialog(BuildContext context) {
     final currentThemeMode = ref.read(themeModeProvider);
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -470,7 +470,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showLogoutDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(
@@ -504,7 +504,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     if (!mounted) return;
 
-    showDialog(
+    await showDialog<void>(
       context: context,
       builder:
           (context) => AlertDialog(

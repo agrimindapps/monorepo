@@ -7,15 +7,19 @@ import '../../repositories/i_analytics_repository.dart';
 import '../../repositories/i_auth_repository.dart';
 import '../base_usecase.dart';
 
-/// Use case para fazer logout do usuário atual
-/// Inclui limpeza de dados locais para garantir privacidade
+/// A use case for logging out the current user.
+///
+/// This use case includes cleaning local data to ensure user privacy.
 class LogoutUseCase implements NoParamsUseCase<void> {
   final IAuthRepository _authRepository;
   final IAnalyticsRepository _analyticsRepository;
   final IAppDataCleaner? _appDataCleaner;
 
-  /// Construtor do LogoutUseCase
-  /// [_appDataCleaner] é opcional - se fornecido, fará limpeza de dados locais
+  /// Creates a new instance of [LogoutUseCase].
+  ///
+  /// [_authRepository] The repository for handling authentication tasks.
+  /// [_analyticsRepository] The repository for logging analytics events.
+  /// [_appDataCleaner] is optional. If provided, it will be used to clear local application data.
   LogoutUseCase(
     this._authRepository,
     this._analyticsRepository,

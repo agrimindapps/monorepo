@@ -5,11 +5,15 @@ import '../entities/device_entity.dart';
 import '../repositories/i_device_repository.dart';
 import 'base_usecase.dart';
 
-/// Use case para validar um dispositivo para um usuário
-/// Verifica se o dispositivo pode ser usado e o registra se válido
+/// A use case for validating a device for a user.
+///
+/// This use case checks if the device can be used and registers it if it is valid.
 class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParams> {
   final IDeviceRepository _deviceRepository;
 
+  /// Creates a new instance of [ValidateDeviceUseCase].
+  ///
+  /// [_deviceRepository] The repository to manage device data.
   const ValidateDeviceUseCase(this._deviceRepository);
 
   @override
@@ -62,11 +66,18 @@ class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParam
   }
 }
 
-/// Parâmetros para ValidateDeviceUseCase
+/// Parameters for the [ValidateDeviceUseCase].
 class ValidateDeviceParams {
+  /// The unique identifier of the user.
   final String userId;
+
+  /// The device entity to be validated.
   final DeviceEntity device;
 
+  /// Creates a new instance of [ValidateDeviceParams].
+  ///
+  /// [userId] The user's unique identifier.
+  /// [device] The device entity to be validated.
   const ValidateDeviceParams({
     required this.userId,
     required this.device,

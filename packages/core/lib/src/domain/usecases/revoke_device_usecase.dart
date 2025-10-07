@@ -4,11 +4,15 @@ import '../../shared/utils/failure.dart';
 import '../repositories/i_device_repository.dart';
 import 'base_usecase.dart';
 
-/// Use case para revogar um dispositivo específico
-/// Remove o acesso do dispositivo ao sistema
+/// A use case for revoking a specific device.
+///
+/// This use case removes the device's access to the system.
 class RevokeDeviceUseCase implements UseCase<void, RevokeDeviceParams> {
   final IDeviceRepository _deviceRepository;
 
+  /// Creates a new instance of [RevokeDeviceUseCase].
+  ///
+  /// [_deviceRepository] The repository to manage device data.
   const RevokeDeviceUseCase(this._deviceRepository);
 
   @override
@@ -56,11 +60,15 @@ class RevokeDeviceUseCase implements UseCase<void, RevokeDeviceParams> {
   }
 }
 
-/// Use case para revogar todos os outros dispositivos exceto o atual
-/// Útil para logout remoto ou segurança
+/// A use case for revoking all other devices except the current one.
+///
+/// This is useful for remote logout or security purposes.
 class RevokeAllOtherDevicesUseCase implements UseCase<void, RevokeAllOtherDevicesParams> {
   final IDeviceRepository _deviceRepository;
 
+  /// Creates a new instance of [RevokeAllOtherDevicesUseCase].
+  ///
+  /// [_deviceRepository] The repository to manage device data.
   const RevokeAllOtherDevicesUseCase(this._deviceRepository);
 
   @override
@@ -82,11 +90,18 @@ class RevokeAllOtherDevicesUseCase implements UseCase<void, RevokeAllOtherDevice
   }
 }
 
-/// Parâmetros para RevokeDeviceUseCase
+/// Parameters for the [RevokeDeviceUseCase].
 class RevokeDeviceParams {
+  /// The unique identifier of the user.
   final String userId;
+
+  /// The unique identifier of the device to be revoked.
   final String deviceUuid;
 
+  /// Creates a new instance of [RevokeDeviceParams].
+  ///
+  /// [userId] The user's unique identifier.
+  /// [deviceUuid] The unique identifier of the device to be revoked.
   const RevokeDeviceParams({
     required this.userId,
     required this.deviceUuid,
@@ -107,11 +122,18 @@ class RevokeDeviceParams {
   String toString() => 'RevokeDeviceParams(userId: $userId, deviceUuid: $deviceUuid)';
 }
 
-/// Parâmetros para RevokeAllOtherDevicesUseCase
+/// Parameters for the [RevokeAllOtherDevicesUseCase].
 class RevokeAllOtherDevicesParams {
+  /// The unique identifier of the user.
   final String userId;
+
+  /// The unique identifier of the current device, which should not be revoked.
   final String currentDeviceUuid;
 
+  /// Creates a new instance of [RevokeAllOtherDevicesParams].
+  ///
+  /// [userId] The user's unique identifier.
+  /// [currentDeviceUuid] The unique identifier of the current device.
   const RevokeAllOtherDevicesParams({
     required this.userId,
     required this.currentDeviceUuid,

@@ -2,28 +2,53 @@ import 'package:dartz/dartz.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/utils/result.dart';
 
-/// Interface base para todos os use cases
-/// Define o padrão de implementação com parâmetros opcionais
+/// The base class for all use cases.
+///
+/// Defines the implementation pattern with optional parameters.
+/// [Type] is the return type of the use case.
+/// [Params] is the type of the parameters.
 abstract class UseCase<Type, Params> {
+  /// Executes the use case.
+  ///
+  /// [params] The parameters for the use case.
+  /// Returns a [Future] with an [Either] containing a [Failure] or the [Type].
   Future<Either<Failure, Type>> call(Params params);
 }
 
-/// Interface base para use cases usando Result pattern
+/// The base class for use cases that use the `Result` pattern.
+///
+/// [Type] is the return type of the use case.
+/// [Params] is the type of the parameters.
 abstract class ResultUseCase<Type, Params> {
+  /// Executes the use case.
+  ///
+  /// [params] The parameters for the use case.
+  /// Returns a [Future] with a [Result] containing the [Type].
   Future<Result<Type>> call(Params params);
 }
 
-/// Use case sem parâmetros
+/// A use case that takes no parameters.
+///
+/// [Type] is the return type of the use case.
 abstract class NoParamsUseCase<Type> {
+  /// Executes the use case.
+  ///
+  /// Returns a [Future] with an [Either] containing a [Failure] or the [Type].
   Future<Either<Failure, Type>> call();
 }
 
-/// Use case sem parâmetros usando Result pattern
+/// A use case that takes no parameters and uses the `Result` pattern.
+///
+/// [Type] is the return type of the use case.
 abstract class NoParamsResultUseCase<Type> {
+  /// Executes the use case.
+  ///
+  /// Returns a [Future] with a [Result] containing the [Type].
   Future<Result<Type>> call();
 }
 
-/// Classe para use cases que não precisam de parâmetros
+/// A class to represent the absence of parameters for a use case.
 class NoParams {
+  /// Creates a new instance of [NoParams].
   const NoParams();
 }

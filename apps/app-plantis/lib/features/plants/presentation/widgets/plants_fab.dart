@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'plant_form_dialog.dart';
 
 class PlantsFab extends ConsumerWidget {
-  const PlantsFab({super.key});
+  const PlantsFab({super.key, this.onScrollToTop, this.scrollController});
+
+  final VoidCallback? onScrollToTop;
+  final ScrollController? scrollController;
 
   Future<void> _onAddPlant(BuildContext context) async {
     await PlantFormDialog.show(context);
@@ -17,11 +20,7 @@ class PlantsFab extends ConsumerWidget {
     return FloatingActionButton(
       onPressed: () => _onAddPlant(context),
       backgroundColor: theme.colorScheme.secondary,
-      child: Icon(
-        Icons.add,
-        color: theme.colorScheme.onSecondary,
-        size: 28,
-      ),
+      child: Icon(Icons.add, color: theme.colorScheme.onSecondary, size: 28),
     );
   }
 }

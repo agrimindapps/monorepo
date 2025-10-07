@@ -489,17 +489,11 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
         height: 36,
         margin: const EdgeInsets.only(right: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.4),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
         ),
-        child: const Icon(
-          Icons.sort,
-          color: Colors.white,
-          size: 18,
-        ),
+        child: const Icon(Icons.sort, color: Colors.white, size: 18),
       ),
     );
   }
@@ -509,30 +503,26 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
       onTap: () {
         final currentMode = plantsState.viewMode;
         final isGrouped = _isGroupedBySpaces(currentMode);
-        final newMode = isGrouped
-            ? ViewMode.list
-            : (currentMode == ViewMode.grid
-                ? ViewMode.groupedBySpacesGrid
-                : ViewMode.groupedBySpacesList);
+        final newMode =
+            isGrouped
+                ? ViewMode.list
+                : (currentMode == ViewMode.grid
+                    ? ViewMode.groupedBySpacesGrid
+                    : ViewMode.groupedBySpacesList);
         _onViewModeChanged(newMode);
       },
       child: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: _isGroupedBySpaces(plantsState.viewMode)
-              ? Colors.white.withOpacity(0.3)
-              : Colors.white.withOpacity(0.1),
+          color:
+              _isGroupedBySpaces(plantsState.viewMode)
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.4),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
         ),
-        child: const Icon(
-          Icons.category,
-          color: Colors.white,
-          size: 18,
-        ),
+        child: const Icon(Icons.category, color: Colors.white, size: 18),
       ),
     );
   }

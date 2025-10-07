@@ -54,9 +54,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             onTap: () => _showThemeDialog(context, ref),
                             child: GestureDetector(
                               onTap: () => _showThemeDialog(context, ref),
-                              child: _buildHeaderIcon(
-                                _getThemeIcon(themeMode),
-                              ),
+                              child: _buildHeaderIcon(_getThemeIcon(themeMode)),
                             ),
                           );
                         },
@@ -124,34 +122,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               CircleAvatar(
                 radius: 30,
                 backgroundColor: PlantisColors.primary,
-                child: hasPhoto
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.network(
-                          photoUrl,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Text(
-                              initials,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
+                child:
+                    hasPhoto
+                        ? ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Image.network(
+                            photoUrl,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text(
+                                initials,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        : Text(
+                          initials,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : Text(
-                        initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -159,7 +158,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.displayName ?? 'Usuário',
+                      user?.displayName?.toString() ?? 'Usuário',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -190,7 +189,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: PlantisColors.primary.withOpacity(0.2),
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -241,7 +240,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: PlantisColors.primary.withOpacity(0.3),
+            color: PlantisColors.primary.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -258,7 +257,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -443,7 +442,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: PlantisColors.primary.withOpacity(0.1),
+                color: PlantisColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: PlantisColors.primary, size: 20),
@@ -496,15 +495,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: (isWebPlatform ? Colors.grey : PlantisColors.primary)
-                  .withOpacity(0.1),
+                  .withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               isWebPlatform
                   ? Icons.web
                   : isEnabled
-                      ? Icons.notifications_active
-                      : Icons.notifications_off,
+                  ? Icons.notifications_active
+                  : Icons.notifications_off,
               color: isWebPlatform ? Colors.grey : PlantisColors.primary,
               size: 20,
             ),
@@ -526,8 +525,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   isWebPlatform
                       ? 'Não disponível na versão web'
                       : isEnabled
-                          ? 'Receba lembretes sobre suas plantas'
-                          : 'Notificações desabilitadas',
+                      ? 'Receba lembretes sobre suas plantas'
+                      : 'Notificações desabilitadas',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -537,25 +536,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           ),
           Switch.adaptive(
             value: isWebPlatform ? false : isEnabled,
-            onChanged: isWebPlatform
-                ? null
-                : (value) {
-                    ref
-                        .read(settingsNotifierProvider.notifier)
-                        .toggleTaskReminders(value);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          value
-                              ? 'Notificações ativadas'
-                              : 'Notificações desativadas',
+            onChanged:
+                isWebPlatform
+                    ? null
+                    : (value) {
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleTaskReminders(value);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            value
+                                ? 'Notificações ativadas'
+                                : 'Notificações desativadas',
+                          ),
+                          backgroundColor: PlantisColors.primary,
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
                         ),
-                        backgroundColor: PlantisColors.primary,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                      );
+                    },
             activeColor: PlantisColors.primary,
           ),
         ],
@@ -566,121 +566,122 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   void _showRateAppDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: Row(
-          children: [
-            const Icon(Icons.star_rate, color: PlantisColors.sun, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'Avaliar o App',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Está gostando do Plantis?',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 16,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                5,
-                (index) => const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(
-                    Icons.star,
-                    color: PlantisColors.sun,
-                    size: 32,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: Row(
+              children: [
+                const Icon(Icons.star_rate, color: PlantisColors.sun, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  'Avaliar o App',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: PlantisColors.primaryLight.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PlantisColors.primary.withOpacity(0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.favorite,
-                    color: PlantisColors.flower,
-                    size: 20,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Está gostando do Plantis?',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Obrigado por fazer parte da nossa comunidade!',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 16,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    5,
+                    (index) => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Icon(
+                        Icons.star,
+                        color: PlantisColors.sun,
+                        size: 32,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: PlantisColors.primaryLight.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: PlantisColors.primary.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.favorite,
+                        color: PlantisColors.flower,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Obrigado por fazer parte da nossa comunidade!',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Mais tarde',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Mais tarde',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
-            ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await _handleRateApp(context);
+                },
+                icon: const Icon(Icons.star, size: 18),
+                label: const Text('Avaliar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PlantisColors.sun,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
           ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _handleRateApp(context);
-            },
-            icon: const Icon(Icons.star, size: 18),
-            label: const Text('Avaliar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.sun,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -713,81 +714,82 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   void _showAboutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: PlantisColors.primaryGradient,
-              ),
-              child: const Icon(Icons.eco, color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Plantis',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Seu companheiro para cuidar de plantas',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoRow(context, 'Versão', '1.0.0'),
-            _buildInfoRow(context, 'Build', '1'),
-            _buildInfoRow(context, 'Plataforma', 'Flutter'),
-            const SizedBox(height: 16),
-            Text(
-              'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: Row(
               children: [
-                const Icon(
-                  Icons.favorite,
-                  color: PlantisColors.flower,
-                  size: 16,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: PlantisColors.primaryGradient,
+                  ),
+                  child: const Icon(Icons.eco, color: Colors.white, size: 24),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 12),
                 Text(
-                  'Feito com carinho para amantes de plantas',
+                  'Plantis',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Seu companheiro para cuidar de plantas',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildInfoRow(context, 'Versão', '1.0.0'),
+                _buildInfoRow(context, 'Build', '1'),
+                _buildInfoRow(context, 'Plataforma', 'Flutter'),
+                const SizedBox(height: 16),
+                Text(
+                  'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.favorite,
+                      color: PlantisColors.flower,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Feito com carinho para amantes de plantas',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -831,45 +833,46 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   void _showThemeDialog(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: const Text('Escolher Tema'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildThemeOption(
-              context,
-              ref,
-              ThemeMode.system,
-              'Automático (Sistema)',
-              'Segue a configuração do sistema',
-              Icons.brightness_auto,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFFFFFF),
+            title: const Text('Escolher Tema'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildThemeOption(
+                  context,
+                  ref,
+                  ThemeMode.system,
+                  'Automático (Sistema)',
+                  'Segue a configuração do sistema',
+                  Icons.brightness_auto,
+                ),
+                _buildThemeOption(
+                  context,
+                  ref,
+                  ThemeMode.light,
+                  'Claro',
+                  'Tema claro sempre ativo',
+                  Icons.brightness_high,
+                ),
+                _buildThemeOption(
+                  context,
+                  ref,
+                  ThemeMode.dark,
+                  'Escuro',
+                  'Tema escuro sempre ativo',
+                  Icons.brightness_2,
+                ),
+              ],
             ),
-            _buildThemeOption(
-              context,
-              ref,
-              ThemeMode.light,
-              'Claro',
-              'Tema claro sempre ativo',
-              Icons.brightness_high,
-            ),
-            _buildThemeOption(
-              context,
-              ref,
-              ThemeMode.dark,
-              'Escuro',
-              'Tema escuro sempre ativo',
-              Icons.brightness_2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -896,9 +899,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           children: [
             Icon(
               icon,
-              color: isSelected
-                  ? PlantisColors.primary
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color:
+                  isSelected
+                      ? PlantisColors.primary
+                      : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -910,19 +916,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     style: TextStyle(
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: isSelected
-                          ? PlantisColors.primary
-                          : Theme.of(context).colorScheme.onSurface,
+                      color:
+                          isSelected
+                              ? PlantisColors.primary
+                              : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -941,14 +947,10 @@ Widget _buildHeaderIcon(IconData icon) {
   return Container(
     padding: const EdgeInsets.all(8),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       borderRadius: BorderRadius.circular(8),
     ),
-    child: Icon(
-      icon,
-      color: Colors.white,
-      size: 20,
-    ),
+    child: Icon(icon, color: Colors.white, size: 20),
   );
 }
 

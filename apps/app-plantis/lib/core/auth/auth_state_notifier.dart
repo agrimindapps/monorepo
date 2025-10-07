@@ -51,6 +51,7 @@ class AuthStateNotifier {
     }
     return _instance!;
   }
+
   UserEntity? _currentUser;
   bool _isAuthenticated = false;
   bool _isPremium = false;

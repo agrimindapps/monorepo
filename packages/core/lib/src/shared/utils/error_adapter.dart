@@ -5,20 +5,20 @@ import 'app_error.dart';
 import 'failure.dart';
 import 'result.dart';
 
-/// Adaptador para converter entre o sistema antigo (Either<Failure, T>) e o novo (Result<T>)
-/// Facilita a migração gradual do sistema de erros
+/// An adapter to convert between the legacy error handling system (`Either<Failure, T>`)
+/// and the new system (`Result<T>`), facilitating a gradual migration.
 class ErrorAdapter {
-  /// Converte Failure para AppError
+  /// Converts a [Failure] object to its corresponding [AppError].
   static AppError failureToAppError(Failure failure) {
     return AppErrorFactory.fromFailure(failure);
   }
 
-  /// Converte AppError para Failure
+  /// Converts an [AppError] object back to a [Failure] for backward compatibility.
   static Failure appErrorToFailure(AppError error) {
     return error.toFailure();
   }
 
-  /// Converte Either<Failure, T> para Result<T>
+  /// Converts an [Either<Failure, T>] to a [Result<T>].
   static Result<T> eitherToResult<T>(Either<Failure, T> either) {
     return either.fold(
       (failure) => Result.error(failureToAppError(failure)),
@@ -26,7 +26,7 @@ class ErrorAdapter {
     );
   }
 
-  /// Converte Result<T> para Either<Failure, T>
+  /// Converts a [Result<T>] to an [Either<Failure, T>].
   static Either<Failure, T> resultToEither<T>(Result<T> result) {
     return result.fold(
       (error) => Left(appErrorToFailure(error)),
@@ -34,7 +34,7 @@ class ErrorAdapter {
     );
   }
 
-  /// Converte Future<Either<Failure, T>> para Future<Result<T>>
+  /// Converts a [Future<Either<Failure, T>>] to a [Future<Result<T>>].
   static Future<Result<T>> futureEitherToResult<T>(
     Future<Either<Failure, T>> futureEither,
   ) async {
@@ -42,7 +42,7 @@ class ErrorAdapter {
     return eitherToResult(either);
   }
 
-  /// Converte Future<Result<T>> para Future<Either<Failure, T>>
+  /// Converts a [Future<Result<T>>] to a [Future<Either<Failure, T>>].
   static Future<Either<Failure, T>> futureResultToEither<T>(
     Future<Result<T>> futureResult,
   ) async {
@@ -51,43 +51,52 @@ class ErrorAdapter {
   }
 }
 
-/// Wrapper para repositórios antigos que ainda usam Either
+/// A wrapper for legacy repository methods that still return [Either].
+///
+/// This class helps standardize operations by converting their output to a [Result].
 class RepositoryWrapper<T> {
   final Future<Either<Failure, T>> Function() _operation;
 
   RepositoryWrapper(this._operation);
 
-  /// Executa a operação e retorna Result
+  /// Executes the wrapped operation and returns its outcome as a [Result].
+  ///
+  /// It catches and converts any unexpected exceptions into an [AppError].
   Future<Result<T>> execute() async {
     try {
       final either = await _operation();
-      return either.toResult();
+      return ErrorAdapter.eitherToResult(either);
     } catch (error, stackTrace) {
       return Result.error(AppErrorFactory.fromException(error, stackTrace));
     }
   }
 }
 
-/// Helper para migração gradual de UseCases
+/// An abstract class to facilitate the migration of UseCases to the new [Result] system
+/// while maintaining backward compatibility with the old [Either] system.
 abstract class MigratedUseCase<T, P> {
+  /// The new method to be implemented by the subclass, using [Result].
   Future<Result<T>> executeNew(P params);
 
-  /// Chamado para manter a compatibilidade com o sistema antigo
+  /// The legacy `call` method, which ensures backward compatibility.
   Future<Either<Failure, T>> call(P params) async {
     final result = await executeNew(params);
-    return result.toEither();
+    return ErrorAdapter.resultToEither(result);
   }
 }
 
-/// Mixin para providers que facilita o uso do novo sistema de erros
+/// A mixin for `ChangeNotifier` providers that simplifies error handling.
 mixin ErrorHandlingMixin on ChangeNotifier {
   AppError? _lastError;
   bool _hasError = false;
 
+  /// The last error that occurred. `null` if there is no error.
   AppError? get lastError => _lastError;
+
+  /// Returns `true` if an error is currently set.
   bool get hasError => _hasError;
 
-  /// Limpa o erro atual
+  /// Clears the current error state and notifies listeners.
   void clearError() {
     if (_hasError) {
       _lastError = null;
@@ -96,107 +105,94 @@ mixin ErrorHandlingMixin on ChangeNotifier {
     }
   }
 
-  /// Define um erro
+  /// Sets the current error state and notifies listeners.
   void setError(AppError error) {
     _lastError = error;
     _hasError = true;
     notifyListeners();
   }
 
-  /// Executa uma operação e trata erros automaticamente
+  /// Executes an operation that returns a [Result] and handles any errors automatically.
   Future<T?> handleOperation<T>(Future<Result<T>> Function() operation) async {
     clearError();
-
     final result = await operation();
-
     return result.fold((error) {
       setError(error);
       return null;
     }, (data) => data);
   }
 
-  /// Executa uma operação Either e converte para Result
+  /// Executes an operation that returns an [Either] and handles errors automatically.
   Future<T?> handleEitherOperation<T>(
     Future<Either<Failure, T>> Function() operation,
-  ) async {
-    return handleOperation(() async {
-      final either = await operation();
-      return either.toResult();
-    });
+  ) {
+    return handleOperation(() async => ErrorAdapter.eitherToResult(await operation()));
   }
 
-  /// Executa operação com callback de sucesso
+  /// Executes an operation and invokes callbacks for success or error.
   Future<T?> handleOperationWithCallback<T>(
     Future<Result<T>> Function() operation, {
     void Function(T data)? onSuccess,
     void Function(AppError error)? onError,
   }) async {
-    final result = await handleOperation(operation);
-
-    if (result != null) {
-      onSuccess?.call(result);
-    } else if (_lastError != null) {
-      onError?.call(_lastError!);
+    final data = await handleOperation(operation);
+    if (hasError) {
+      onError?.call(lastError!);
+    } else if (data != null) {
+      onSuccess?.call(data);
     }
-
-    return result;
+    return data;
   }
 }
 
-/// Mixin para widgets que facilita o tratamento de erros
+/// A mixin for UI components that simplifies displaying [AppError]s.
 mixin ErrorDisplayMixin {
-  /// Mostra erro para o usuário
+  /// Displays a [SnackBar] with a user-friendly error message.
   void showError(BuildContext context, AppError error) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(error.userMessage),
         backgroundColor: _getErrorColor(error.severity),
-        duration: Duration(
-          seconds: error.severity == ErrorSeverity.critical ? 10 : 4,
-        ),
-        action:
-            error.severity == ErrorSeverity.critical
-                ? SnackBarAction(
-                  label: 'Detalhes',
-                  onPressed: () => _showErrorDetails(context, error),
-                )
-                : null,
+        duration: Duration(seconds: error.isCritical ? 10 : 4),
+        action: error.isCritical
+            ? SnackBarAction(
+                label: 'Detalhes',
+                onPressed: () => _showErrorDetails(context, error),
+              )
+            : null,
       ),
     );
   }
 
-  /// Mostra detalhes do erro em dialog
+  /// Shows a dialog with detailed information about a critical error.
   void _showErrorDetails(BuildContext context, AppError error) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Detalhes do Erro'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Mensagem: ${error.message}'),
-                  if (error.code != null) Text('Código: ${error.code}'),
-                  if (error.details != null) Text('Detalhes: ${error.details}'),
-                  Text('Categoria: ${error.category.name}'),
-                  Text('Severidade: ${error.severity.name}'),
-                  Text('Timestamp: ${error.timestamp}'),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
+      builder: (context) => AlertDialog(
+        title: const Text('Detalhes do Erro'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text('Mensagem: ${error.message}'),
+              if (error.code != null) Text('Código: ${error.code}'),
+              if (error.details != null) Text('Detalhes: ${error.details}'),
+              Text('Categoria: ${error.category.name}'),
+              Text('Severidade: ${error.severity.name}'),
+              Text('Timestamp: ${error.timestamp}'),
             ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Retorna cor baseada na severidade
+  /// Returns a color based on the error's severity.
   Color _getErrorColor(ErrorSeverity severity) {
     switch (severity) {
       case ErrorSeverity.low:
@@ -211,43 +207,42 @@ mixin ErrorDisplayMixin {
   }
 }
 
-/// Utilitários para logging de erros
+/// A utility class for logging errors with context and data sanitization.
 class ErrorLogger {
-  /// Registra erro no sistema de logging
+  /// Logs an [AppError] to the console in debug mode.
   static void logError(AppError error) {
     if (kDebugMode) {
       debugPrint('🚨 AppError: ${_sanitizeMessage(error.message)}');
       debugPrint('   Category: ${error.category.name}');
       debugPrint('   Severity: ${error.severity.name}');
       if (error.code != null) debugPrint('   Code: ${error.code}');
-      if (error.stackTrace != null &&
-          error.severity == ErrorSeverity.critical) {
+      if (error.stackTrace != null && error.isCritical) {
         debugPrint('   Stack: [Stack trace available for critical errors]');
       }
     }
   }
 
-  /// Registra erro com contexto adicional
+  /// Logs an [AppError] with additional context, such as a user ID.
   static void logErrorWithContext(
     AppError error, {
     String? userId,
     Map<String, dynamic>? additionalContext,
   }) {
-    final sanitizedContext = <String, dynamic>{
-      'user_id': userId != null ? _sanitizeUserId(userId) : null,
-      'error_category': error.category.name,
-      'error_severity': error.severity.name,
-      'error_code': error.code,
-    };
-    if (additionalContext != null) {
-      for (final entry in additionalContext.entries) {
-        if (!_isSensitiveKey(entry.key)) {
-          sanitizedContext[entry.key] = entry.value;
-        }
-      }
-    }
-
+    // In a real app, this would send data to a logging service like Sentry or Firebase.
     if (kDebugMode) {
+      final sanitizedContext = <String, dynamic>{
+        'user_id': userId != null ? _sanitizeUserId(userId) : 'N/A',
+        ...error.toMap(),
+      };
+
+      if (additionalContext != null) {
+        additionalContext.forEach((key, value) {
+          if (!_isSensitiveKey(key)) {
+            sanitizedContext[key] = value;
+          }
+        });
+      }
+
       debugPrint(
         '🚨 AppError with context: ${_sanitizeMessage(error.message)}',
       );
@@ -255,75 +250,54 @@ class ErrorLogger {
     }
   }
 
-  /// Sanitizes error messages to remove sensitive information
+  /// Sanitizes a message to remove potentially sensitive information.
   static String _sanitizeMessage(String message) {
     return message
-        .replaceAll(
-          RegExp(r'password[\s:=][\w]+', caseSensitive: false),
-          'password=[REDACTED]',
-        )
-        .replaceAll(
-          RegExp(r'token[\s:=][\w\-._]+', caseSensitive: false),
-          'token=[REDACTED]',
-        )
-        .replaceAll(
-          RegExp(r'key[\s:=][\w\-._]+', caseSensitive: false),
-          'key=[REDACTED]',
-        )
-        .replaceAll(
-          RegExp(r'secret[\s:=][\w\-._]+', caseSensitive: false),
-          'secret=[REDACTED]',
-        )
-        .replaceAll(
-          RegExp(r'[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}'),
-          '[EMAIL_REDACTED]',
-        )
-        .replaceAll(
-          RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
-          '[CARD_REDACTED]',
-        );
+        // Redact passwords
+        .replaceAll(RegExp(r'password[\s:=][\w]+', caseSensitive: false), 'password=[REDACTED]')
+        // Redact tokens
+        .replaceAll(RegExp(r'token[\s:=][\w\-._]+', caseSensitive: false), 'token=[REDACTED]')
+        // Redact API keys
+        .replaceAll(RegExp(r'key[\s:=][\w\-._]+', caseSensitive: false), 'key=[REDACTED]')
+        // Redact secrets
+        .replaceAll(RegExp(r'secret[\s:=][\w\-._]+', caseSensitive: false), 'secret=[REDACTED]')
+        // Redact email addresses
+        .replaceAll(RegExp(r'[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}'), '[EMAIL_REDACTED]')
+        // Redact credit card numbers
+        .replaceAll(RegExp(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'), '[CARD_REDACTED]');
   }
 
-  /// Sanitizes user ID to remove sensitive information while keeping it useful for debugging
+  /// Partially sanitizes a user ID for logging.
   static String _sanitizeUserId(String userId) {
     if (userId.length <= 8) return userId;
     return '${userId.substring(0, 4)}...${userId.substring(userId.length - 4)}';
   }
 
-  /// Checks if a key contains sensitive information
+  /// Checks if a map key is likely to contain sensitive information.
   static bool _isSensitiveKey(String key) {
-    final sensitivePatterns = [
-      'password',
-      'secret',
-      'token',
-      'key',
-      'credential',
-      'auth',
-      'session',
-    ];
+    final sensitivePatterns = ['password', 'secret', 'token', 'key', 'credential', 'auth', 'session'];
     final keyLower = key.toLowerCase();
-    return sensitivePatterns.any((pattern) => keyLower.contains(pattern));
+    return sensitivePatterns.any(keyLower.contains);
   }
 }
 
-/// Extensões de compatibilidade retroativa
-extension ResultCompatExtensions<T> on Result<T> {
-  /// Converte para Either (compatibilidade)
-  Either<Failure, T> asEither() => toEither();
+/// Extension methods for converting between [Result] and [Either].
+extension ResultEitherConversion<T> on Result<T> {
+  /// Converts this [Result] to an [Either].
+  Either<Failure, T> toEither() => ErrorAdapter.resultToEither(this);
 }
 
-extension EitherCompatExtensions<L extends Failure, R> on Either<L, R> {
-  /// Converte para Result (migração)
-  Result<R> asResult() => toResult();
+extension EitherResultConversion<L extends Failure, R> on Either<L, R> {
+  /// Converts this [Either] to a [Result].
+  Result<R> toResult() => ErrorAdapter.eitherToResult(this as Either<Failure, R>);
 }
 
-extension FutureEitherCompatExtensions<L extends Failure, R>
-    on Future<Either<L, R>> {
-  /// Converte para Future<Result> (migração)
-  Future<Result<R>> asResult() => toResult();
+extension FutureResultEitherConversion<T> on Future<Result<T>> {
+  /// Converts this [Future<Result>] to a [Future<Either>].
+  Future<Either<Failure, T>> toEither() => ErrorAdapter.futureResultToEither(this);
 }
 
-extension FutureResultCompatExtensions<T> on Future<Result<T>> {
-  /// Converte para Future<Either> (compatibilidade)
-  Future<Either<Failure, T>> asEither() => toEither();
+extension FutureEitherResultConversion<L extends Failure, R> on Future<Either<L, R>> {
+  /// Converts this [Future<Either>] to a [Future<Result>].
+  Future<Result<R>> toResult() => ErrorAdapter.futureEitherToResult(this as Future<Either<Failure, R>>);
 }

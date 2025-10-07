@@ -1,263 +1,368 @@
 import 'package:flutter/material.dart';
 
-/// Design Tokens para consistência visual no GasOMeter
-/// Centraliza cores, espaçamentos, tamanhos e outros valores de design
-/// para garantir consistência visual e facilitar manutenção
-class GasometerDesignTokens {
-  static const Color colorPrimary = Color(0xFFFF5722);        // Deep Orange - Main brand color
-  static const Color colorPrimaryLight = Color(0xFFFF8A65);   // Light orange variant
-  static const Color colorPrimaryDark = Color(0xFFE64A19);    // Dark orange variant
-  static const Color colorSecondary = Color(0xFF2196F3);      // Blue for secondary actions
-  static const Color colorSecondaryLight = Color(0xFF64B5F6); // Light blue variant
-  static const Color colorSecondaryDark = Color(0xFF1976D2);  // Dark blue variant
-  static const Color colorAccent = Color(0xFF4CAF50);         // Green for positive actions
-  static const Color colorAccentLight = Color(0xFF81C784);    // Light green variant
-  static const Color colorAccentDark = Color(0xFF388E3C);     // Dark green variant
-  static const Color colorHeaderBackground = Color(0xFF2C2C2E); // Dark header background
-  static const Color colorSurface = Color(0xFFFFFFFF);          // Primary surface
-  static const Color colorSurfaceVariant = Color(0xFFF8F9FA);   // Alternative surface
-  static const Color colorBackground = Color(0xFFF5F5F5);       // Main background
-  static const Color colorPremiumAccent = Color(0xFFFFA500);     // Orange premium accent
-  static const Color colorPremiumGold = Color(0xFFFFD700);       // Gold premium
-  static const Color colorPremiumBackground = Color(0xFFFFA500); // Premium background overlay
-  static const Color colorSuccess = Color(0xFF4CAF50);          // Success states
-  static const Color colorWarning = Color(0xFFFF9800);          // Warning states
-  static const Color colorError = Color(0xFFF44336);            // Error states
-  static const Color colorInfo = Color(0xFF2196F3);             // Info states
-  static const Color colorNeutral50 = Color(0xFFFAFAFA);        // Lightest neutral
-  static const Color colorNeutral100 = Color(0xFFF5F5F5);       // Very light neutral
-  static const Color colorNeutral200 = Color(0xFFEEEEEE);       // Light neutral
-  static const Color colorNeutral300 = Color(0xFFE0E0E0);       // Medium light neutral
-  static const Color colorNeutral400 = Color(0xFFBDBDBD);       // Medium neutral
-  static const Color colorNeutral500 = Color(0xFF9E9E9E);       // Base neutral
-  static const Color colorNeutral600 = Color(0xFF757575);       // Medium dark neutral
-  static const Color colorNeutral700 = Color(0xFF616161);       // Dark neutral
-  static const Color colorNeutral800 = Color(0xFF424242);       // Very dark neutral
-  static const Color colorNeutral900 = Color(0xFF212121);       // Darkest neutral
-  static const Color colorTextPrimary = Color(0xFF1C1B1F);      // Primary text
-  static const Color colorTextSecondary = Color(0xFF757575);     // Secondary text
-  static const Color colorTextOnPrimary = Color(0xFFFFFFFF);    // Text on primary background
-  static const Color colorTextOnSurface = Color(0xFF1C1B1F);    // Text on surface
-  static const Color colorFuelGasoline = Color(0xFFFF5722);     // Gasoline orange
-  static const Color colorFuelEthanol = Color(0xFF4CAF50);      // Ethanol green
-  static const Color colorFuelDiesel = Color(0xFF795548);       // Diesel brown
-  static const Color colorFuelGas = Color(0xFF9C27B0);          // Gas purple
-  static const Color colorAnalyticsBlue = Color(0xFF4299E1);    // Analytics blue
-  static const Color colorAnalyticsGreen = Color(0xFF48BB78);   // Analytics green
-  static const Color colorAnalyticsPurple = Color(0xFF9F7AEA);  // Analytics purple
-  static const Color colorContentBackground = Color(0xFFF8F9FA); // Content background
-  
-  /// Returns fuel-specific color based on fuel type
+/// Defines the design tokens for the Gasometer application.
+///
+/// This class centralizes all visual design constants, such as colors, spacing,
+/// and typography, to ensure a consistent and maintainable UI.
+abstract class GasometerDesignTokens {
+  GasometerDesignTokens._();
+
+  /// A collection of all colors used in the application.
+  abstract class Colors {
+    Colors._();
+    // Primary Palette
+    static const Color primary = Color(0xFFFF5722); // Deep Orange
+    static const Color primaryLight = Color(0xFFFF8A65);
+    static const Color primaryDark = Color(0xFFE64A19);
+
+    // Secondary & Accent
+    static const Color secondary = Color(0xFF2196F3); // Blue
+    static const Color secondaryLight = Color(0xFF64B5F6);
+    static const Color secondaryDark = Color(0xFF1976D2);
+    static const Color accent = Color(0xFF4CAF50); // Green
+    static const Color accentLight = Color(0xFF81C784);
+    static const Color accentDark = Color(0xFF388E3C);
+
+    // Surface & Background
+    static const Color surface = Color(0xFFFFFFFF);
+    static const Color surfaceVariant = Color(0xFFF8F9FA);
+    static const Color background = Color(0xFFF5F5F5);
+    static const Color headerBackground = Color(0xFF2C2C2E);
+
+    // Premium Colors
+    static const Color premiumGold = Color(0xFFFFD700);
+    static const Color premiumSilver = Color(0xFFC0C0C0);
+    static const Color premiumBronze = Color(0xFFCD7F32);
+    static const Color premiumAccent = Color(0xFFFFA500);
+
+    // Status Colors
+    static const Color success = Color(0xFF4CAF50);
+    static const Color warning = Color(0xFFFF9800);
+    static const Color error = Color(0xFFF44336);
+    static const Color info = Color(0xFF2196F3);
+
+    // Neutral Grayscale
+    static const Color neutral50 = Color(0xFFFAFAFA);
+    static const Color neutral100 = Color(0xFFF5F5F5);
+    static const Color neutral200 = Color(0xFFEEEEEE);
+    static const Color neutral300 = Color(0xFFE0E0E0);
+    static const Color neutral500 = Color(0xFF9E9E9E);
+    static const Color neutral700 = Color(0xFF616161);
+    static const Color neutral900 = Color(0xFF212121);
+
+    // Text Colors
+    static const Color textPrimary = Color(0xFF1C1B1F);
+    static const Color textSecondary = Color(0xFF757575);
+    static const Color textOnPrimary = Color(0xFFFFFFFF);
+
+    // Fuel-specific Colors
+    static const Color fuelGasoline = Color(0xFFFF5722);
+    static const Color fuelGasolineLight = Color(0xFFFFAB91);
+    static const Color fuelGasolineDark = Color(0xFFBF360C);
+    static const Color fuelEthanol = Color(0xFF4CAF50);
+    static const Color fuelEthanolLight = Color(0xFFA5D6A7);
+    static const Color fuelEthanolDark = Color(0xFF2E7D32);
+    static const Color fuelDiesel = Color(0xFF795548);
+    static const Color fuelDieselLight = Color(0xFFBCAAA4);
+    static const Color fuelDieselDark = Color(0xFF5D4037);
+    static const Color fuelGas = Color(0xFF9C27B0);
+    static const Color fuelGasLight = Color(0xFFCE93D8);
+    static const Color fuelGasDark = Color(0xFF7B1FA2);
+
+    // Analytics Colors
+    static const Color analyticsBlue = Color(0xFF4299E1);
+    static const Color analyticsGreen = Color(0xFF48BB78);
+    static const Color analyticsPurple = Color(0xFF9F7AEA);
+
+    // Chart Colors
+    static const List<Color> chartColors = [
+      Color(0xFFFF5722), // Orange
+      Color(0xFF2196F3), // Blue
+      Color(0xFF4CAF50), // Green
+      Color(0xFFFF9800), // Amber
+      Color(0xFF9C27B0), // Purple
+      Color(0xFF607D8B), // Blue Grey
+      Color(0xFFE91E63), // Pink
+      Color(0xFF795548), // Brown
+    ];
+  }
+
+  /// A collection of spacing and padding values.
+  abstract class Spacing {
+    Spacing._();
+    static const double xs = 4.0;
+    static const double sm = 8.0;
+    static const double md = 12.0;
+    static const double lg = 16.0;
+    static const double xl = 20.0;
+    static const double xxl = 24.0;
+    static const double xxxl = 32.0;
+  }
+
+  /// A collection of standardized icon sizes.
+  abstract class IconSizes {
+    IconSizes._();
+    static const double xs = 16.0;
+    static const double sm = 20.0;
+    static const double md = 24.0;
+    static const double lg = 28.0;
+    static const double xl = 32.0;
+    static const double xxl = 40.0;
+    static const double xxxl = 48.0;
+  }
+
+  /// A collection of border radius values.
+  abstract class Radii {
+    Radii._();
+    static const double xs = 4.0;
+    static const double sm = 6.0;
+    static const double md = 8.0;
+    static const double lg = 12.0;
+    static const double xl = 16.0;
+    static const double xxl = 20.0;
+    static const double round = 50.0;
+  }
+
+  /// A collection of elevation values.
+  abstract class Elevations {
+    Elevations._();
+    static const double none = 0.0;
+    static const double xs = 1.0;
+    static const double sm = 2.0;
+    static const double md = 4.0;
+    static const double lg = 8.0;
+    static const double xl = 16.0;
+  }
+
+  /// A collection of opacity values.
+  abstract class Opacities {
+    Opacities._();
+    static const double disabled = 0.38;
+    static const double secondary = 0.6;
+    static const double hint = 0.5;
+    static const double divider = 0.12;
+    static const double overlay = 0.1;
+    static const double backdrop = 0.5;
+  }
+
+  /// A collection of typography-related constants.
+  abstract class Typography {
+    Typography._();
+    // Font Weights
+    static const FontWeight light = FontWeight.w300;
+    static const FontWeight regular = FontWeight.w400;
+    static const FontWeight medium = FontWeight.w500;
+    static const FontWeight semiBold = FontWeight.w600;
+    static const FontWeight bold = FontWeight.w700;
+
+    // Font Sizes
+    static const double f11 = 11.0;
+    static const double f12 = 12.0;
+    static const double f14 = 14.0;
+    static const double f16 = 16.0;
+    static const double f18 = 18.0;
+    static const double f20 = 20.0;
+    static const double f24 = 24.0;
+    static const double f32 = 32.0;
+  }
+
+  /// A collection of standardized animation durations and curves.
+  abstract class Animations {
+    Animations._();
+    // Durations
+    static const Duration fast = Duration(milliseconds: 150);
+    static const Duration normal = Duration(milliseconds: 250);
+    static const Duration slow = Duration(milliseconds: 350);
+
+    // Curves
+    static const Curve standard = Curves.easeInOut;
+    static const Curve enter = Curves.easeOut;
+    static const Curve exit = Curves.easeIn;
+    static const Curve bounce = Curves.elasticOut;
+  }
+
+  /// A collection of breakpoints for building responsive layouts.
+  abstract class Breakpoints {
+    Breakpoints._();
+    static const double mobile = 480.0;
+    static const double tablet = 768.0;
+    static const double desktop = 1024.0;
+    static const double wide = 1200.0;
+  }
+
+  /// A collection of maximum width constraints for content areas.
+  abstract class MaxWidths {
+    MaxWidths._();
+    static const double content = 1200.0;
+    static const double dialog = 500.0;
+  }
+
+  /// A collection of dimensions for loading indicators.
+  abstract class Loaders {
+    Loaders._();
+    static const double indicatorSize = 24.0;
+    static const double strokeWidth = 3.0;
+  }
+
+  /// A collection of dimensions for skeleton UI components.
+  abstract class Skeletons {
+    Skeletons._();
+    static const double height = 16.0;
+    static const double heightSmall = 12.0;
+    static const double heightLarge = 20.0;
+    static const double cardHeight = 120.0;
+    static const double avatarSize = 40.0;
+  }
+
+  /// A collection of reusable gradients.
+  abstract class Gradients {
+    Gradients._();
+    static const LinearGradient primary = LinearGradient(
+      colors: [Colors.primaryLight, Colors.primaryDark],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    static const LinearGradient secondary = LinearGradient(
+      colors: [Colors.secondaryLight, Colors.secondaryDark],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    static const LinearGradient accent = LinearGradient(
+      colors: [Colors.accentLight, Colors.accentDark],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    static const LinearGradient gasoline = LinearGradient(
+      colors: [Colors.fuelGasoline, Colors.fuelGasolineLight],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    static const LinearGradient ethanol = LinearGradient(
+      colors: [Colors.fuelEthanol, Colors.fuelEthanolLight],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    static const LinearGradient diesel = LinearGradient(
+      colors: [Colors.fuelDiesel, Colors.fuelDieselLight],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+    static const LinearGradient premium = LinearGradient(
+      colors: [Colors.premiumGold, Colors.premiumAccent],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+
+  /// The minimum touch target size for accessible UI elements.
+  static const double minTouchTarget = 48.0;
+
+  // --- HELPER METHODS ---
+
+  /// Returns a fuel-specific color based on the fuel type string.
   static Color getFuelTypeColor(String fuelType) {
     switch (fuelType.toLowerCase()) {
       case 'gasoline':
       case 'gasolina':
-        return colorFuelGasoline;
+        return Colors.fuelGasoline;
       case 'ethanol':
       case 'etanol':
-        return colorFuelEthanol;
+        return Colors.fuelEthanol;
       case 'diesel':
-        return colorFuelDiesel;
+        return Colors.fuelDiesel;
       case 'gas':
       case 'gnv':
-        return colorFuelGas;
+        return Colors.fuelGas;
       default:
-        return colorPrimary;
+        return Colors.primary;
     }
   }
-  
-  /// Returns appropriate text color for given background
+
+  /// Returns an appropriate text color for a given background color.
   static Color getTextColorForBackground(Color backgroundColor) {
-    final luminance = backgroundColor.computeLuminance();
-    return luminance > 0.5 ? colorTextPrimary : colorTextOnPrimary;
+    return backgroundColor.computeLuminance() > 0.5
+        ? Colors.textPrimary
+        : Colors.textOnPrimary;
   }
-  
-  /// Returns premium background color with specified opacity
-  static Color getPremiumBackgroundWithOpacity(double opacity) {
-    return colorPremiumBackground.withValues(alpha: opacity);
-  }
-  
-  /// Returns surface color based on elevation level
-  static Color getSurfaceColorByElevation(int elevation) {
-    switch (elevation) {
-      case 0:
-        return colorSurface;
-      case 1:
-        return colorSurfaceVariant;
-      default:
-        return colorNeutral50;
-    }
-  }
-  static const double spacingXs = 4.0;
-  static const double spacingSm = 8.0;
-  static const double spacingMd = 12.0;
-  static const double spacingLg = 16.0;
-  static const double spacingXl = 20.0;
-  static const double spacingXxl = 24.0;
-  static const double spacingXxxl = 32.0;
-  static const double spacingCardPadding = spacingXl;          // 20.0
-  static const double spacingItemSpacing = spacingMd;         // 12.0
-  static const double spacingSectionSpacing = spacingXxl;     // 24.0
-  static const double spacingPagePadding = spacingLg;         // 16.0
-  static const double spacingDialogPadding = spacingXxl;      // 24.0
-  static const double spacingFormField = 16.0;        // Entre campos de formulário
-  static const double spacingSection = 24.0;          // Entre seções
-  static const double spacingPageMargin = 20.0;       // Margens da página
-  static const double iconSizeXs = 16.0;
-  static const double iconSizeSm = 20.0;
-  static const double iconSizeMd = 24.0;
-  static const double iconSizeLg = 28.0;
-  static const double iconSizeXl = 32.0;
-  static const double iconSizeXxl = 40.0;
-  static const double iconSizeXxxl = 48.0;
-  static const double iconSizeButton = iconSizeSm;            // 20.0
-  static const double iconSizeListItem = iconSizeMd;          // 24.0
-  static const double iconSizeHeader = iconSizeLg;            // 28.0
-  static const double iconSizeFeature = iconSizeXl;           // 32.0
-  static const double iconSizeAvatar = iconSizeXxl;           // 40.0
-  static const double radiusXs = 4.0;
-  static const double radiusSm = 6.0;
-  static const double radiusMd = 8.0;
-  static const double radiusLg = 12.0;
-  static const double radiusXl = 16.0;
-  static const double radiusXxl = 20.0;
-  static const double radiusRound = 50.0;
-  static const double radiusButton = radiusMd;               // 8.0
-  static const double radiusCard = radiusXl;                 // 16.0
-  static const double radiusDialog = radiusLg;               // 12.0
-  static const double radiusChip = radiusXxl;                // 20.0
-  static const double radiusInput = radiusMd;                // 8.0
-  static const double elevationNone = 0.0;
-  static const double elevationXs = 1.0;
-  static const double elevationSm = 2.0;
-  static const double elevationMd = 4.0;
-  static const double elevationLg = 8.0;
-  static const double elevationXl = 16.0;
-  static const double elevationCard = elevationSm;           // 2.0
-  static const double elevationButton = elevationSm;         // 2.0
-  static const double elevationDialog = elevationLg;         // 8.0
-  static const double elevationAppBar = elevationMd;         // 4.0
-  static const double opacityDisabled = 0.38;
-  static const double opacitySecondary = 0.6;
-  static const double opacityHint = 0.5;
-  static const double opacityDivider = 0.12;
-  static const double opacityOverlay = 0.1;
-  static const double opacityBackdrop = 0.5;
-  static const FontWeight fontWeightLight = FontWeight.w300;
-  static const FontWeight fontWeightRegular = FontWeight.w400;
-  static const FontWeight fontWeightMedium = FontWeight.w500;
-  static const FontWeight fontWeightSemiBold = FontWeight.w600;
-  static const FontWeight fontWeightBold = FontWeight.w700;
-  static const double fontSizeXs = 11.0;
-  static const double fontSizeSm = 12.0;
-  static const double fontSizeMd = 14.0;
-  static const double fontSizeLg = 16.0;
-  static const double fontSizeXl = 18.0;
-  static const double fontSizeXxl = 20.0;
-  static const double fontSizeXxxl = 24.0;
-  static const double fontSizeDisplay = 32.0;
-  static const double fontSizeBody = fontSizeMd;             // 14.0
-  static const double fontSizeBodyLarge = fontSizeLg;        // 16.0
-  static const double fontSizeCaption = fontSizeSm;          // 12.0
-  static const double fontSizeButton = fontSizeLg;           // 16.0
-  static const double fontSizeHeading = fontSizeXl;          // 18.0
-  static const double fontSizeTitle = fontSizeXxl;           // 20.0
-  static const double fontSizeDisplayLarge = fontSizeDisplay; // 32.0
-  static const Duration animationFast = Duration(milliseconds: 150);
-  static const Duration animationNormal = Duration(milliseconds: 250);
-  static const Duration animationSlow = Duration(milliseconds: 350);
-  static const double breakpointMobile = 480.0;
-  static const double breakpointTablet = 768.0;
-  static const double breakpointDesktop = 1024.0;
-  static const double breakpointWide = 1200.0;
-  static const double maxWidthContent = 1200.0;
-  static const double maxWidthDialog = 500.0;
-  static const double minTouchTarget = 48.0;
-  
-  /// Retorna espaçamento baseado no contexto
-  static EdgeInsets paddingAll(double value) => EdgeInsets.all(value);
-  static EdgeInsets paddingHorizontal(double value) => EdgeInsets.symmetric(horizontal: value);
-  static EdgeInsets paddingVertical(double value) => EdgeInsets.symmetric(vertical: value);
-  static EdgeInsets paddingOnly({
-    double left = 0,
-    double right = 0,
-    double top = 0,
-    double bottom = 0,
-  }) => EdgeInsets.only(left: left, right: right, top: top, bottom: bottom);
-  
-  /// Retorna BorderRadius baseado no token
-  static BorderRadius borderRadius(double radius) => BorderRadius.circular(radius);
-  static BorderRadius borderRadiusTop(double radius) => BorderRadius.only(
-    topLeft: Radius.circular(radius),
-    topRight: Radius.circular(radius),
-  );
-  static BorderRadius borderRadiusBottom(double radius) => BorderRadius.only(
-    bottomLeft: Radius.circular(radius),
-    bottomRight: Radius.circular(radius),
-  );
-  
-  /// Helper para cores do tema com opacidade
-  static Color withOpacity(Color color, double opacity) {
-    return color.withValues(alpha: opacity);
-  }
-  
-  /// Helper para tamanhos responsivos
-  static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < breakpointTablet;
-  }
-  
+
+  // --- RESPONSIVE HELPERS ---
+
+  /// Returns `true` if the screen width is considered mobile.
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < Breakpoints.tablet;
+
+  /// Returns `true` if the screen width is considered tablet.
   static bool isTablet(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    return width >= breakpointTablet && width < breakpointDesktop;
+    return width >= Breakpoints.tablet && width < Breakpoints.desktop;
   }
-  
-  static bool isDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= breakpointDesktop;
-  }
-  
-  /// Retorna espaçamento responsivo baseado no tamanho da tela (from UnifiedDesignTokens)
+
+  /// Returns `true` if the screen width is considered desktop.
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= Breakpoints.desktop;
+
+  /// Returns a responsive spacing value based on the screen size.
   static double responsiveSpacing(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width < breakpointTablet) return spacingLg;
-    if (width < breakpointDesktop) return spacingXl;
-    return spacingXxl;
+    if (isMobile(context)) return Spacing.lg;
+    if (isTablet(context)) return Spacing.xl;
+    return Spacing.xxl;
   }
-  
-  /// Retorna padding adaptativo baseado no tamanho da tela
-  static double adaptiveSpacing(BuildContext context) {
-    if (isMobile(context)) return spacingLg;
-    if (isTablet(context)) return spacingXl;
-    return spacingXxl;
-  }
-  
-  /// Retorna tamanho de ícone adaptativo
+
+  /// Returns a responsive icon size based on the screen size.
   static double adaptiveIconSize(BuildContext context) {
-    if (isMobile(context)) return iconSizeMd;
-    if (isTablet(context)) return iconSizeLg;
-    return iconSizeXl;
+    if (isMobile(context)) return IconSizes.md;
+    if (isTablet(context)) return IconSizes.lg;
+    return IconSizes.xl;
   }
+
+  // --- MATERIAL COLOR SWATCHES ---
+
+  /// The primary color swatch, based on the application's primary color (Deep Orange).
+  static const MaterialColor primarySwatch = MaterialColor(0xFFFF5722, {
+    50: Color(0xFFFBE9E7),
+    100: Color(0xFFFFCCBC),
+    200: Color(0xFFFFAB91),
+    300: Color(0xFFFF8A65),
+    400: Color(0xFFFF7043),
+    500: Color(0xFFFF5722),
+    600: Color(0xFFF4511E),
+    700: Color(0xFFE64A19),
+    800: Color(0xFFD84315),
+    900: Color(0xFFBF360C),
+  });
+
+  /// The secondary color swatch, based on the application's secondary color (Blue).
+  static const MaterialColor secondarySwatch = MaterialColor(0xFF2196F3, {
+    50: Color(0xFFE3F2FD),
+    100: Color(0xFFBBDEFB),
+    200: Color(0xFF90CAF9),
+    300: Color(0xFF64B5F6),
+    400: Color(0xFF42A5F5),
+    500: Color(0xFF2196F3),
+    600: Color(0xFF1E88E5),
+    700: Color(0xFF1976D2),
+    800: Color(0xFF1565C0),
+    900: Color(0xFF0D47A1),
+  });
 }
 
-/// Extension para facilitar uso dos design tokens
+/// An extension to provide convenient access to [GasometerDesignTokens] via the [BuildContext].
 extension GasometerDesignTokensExtension on BuildContext {
-  /// Acesso rápido aos tokens de design
-  static const tokens = GasometerDesignTokens;
-  
-  /// Verifica se é mobile
+  /// Provides quick access to the design tokens.
+  GasometerDesignTokens get tokens => GasometerDesignTokens();
+
+  /// Returns `true` if the current screen width is considered mobile.
   bool get isMobile => GasometerDesignTokens.isMobile(this);
-  
-  /// Verifica se é tablet
+
+  /// Returns `true` if the current screen width is considered tablet.
   bool get isTablet => GasometerDesignTokens.isTablet(this);
-  
-  /// Verifica se é desktop
+
+  /// Returns `true` if the current screen width is considered desktop.
   bool get isDesktop => GasometerDesignTokens.isDesktop(this);
-  
-  /// Retorna espaçamento adaptativo
-  double get adaptiveSpacing => GasometerDesignTokens.adaptiveSpacing(this);
-  
-  /// Retorna espaçamento responsivo (from UnifiedDesignTokens)
-  double get responsiveSpacing => GasometerDesignTokens.responsiveSpacing(this);
-  
-  /// Retorna tamanho de ícone adaptativo
+
+  /// Returns a responsive spacing value appropriate for the screen size.
+  double get adaptiveSpacing => GasometerDesignTokens.responsiveSpacing(this);
+
+  /// Returns a responsive icon size appropriate for the screen size.
   double get adaptiveIconSize => GasometerDesignTokens.adaptiveIconSize(this);
 }

@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../features/livestock/data/models/livestock_enums_adapter.dart';
 import '../../features/markets/data/models/market_enums_adapter.dart';
@@ -9,160 +10,124 @@ import '../../features/weather/data/models/rain_gauge_model.dart';
 import '../../features/weather/data/models/weather_measurement_model.dart';
 import '../../features/weather/data/models/weather_statistics_model.dart';
 
-/// Inicializador do Hive para configuração de adapters
-/// 
-/// Centraliza o registro de todos os adapters Hive do app
-/// Garante que todos os modelos estejam disponíveis para persistência local
+/// A utility class to centralize the initialization of Hive and the registration
+/// of all `TypeAdapter`s used in the application.
+///
+/// This ensures that all models are available for local persistence before the
+/// app runs.
 class HiveInitializer {
   HiveInitializer._();
-  /// Inicializa o Hive com todos os adapters necessários
+
+  /// Initializes Hive and registers all necessary adapters.
+  ///
+  /// This method should be called once at application startup.
   static Future<void> initialize() async {
     try {
-      debugPrint('HiveInitializer: Iniciando configuração do Hive');
+      Logger.info('HiveInitializer: Starting Hive setup...');
       await Hive.initFlutter();
+
       _registerAuthAdapters();
       _registerLivestockAdapters();
       _registerWeatherAdapters();
       _registerSubscriptionAdapters();
       _registerNewsAdapters();
       _registerMarketsAdapters();
-      
-      debugPrint('HiveInitializer: Configuração do Hive concluída');
+
+      Logger.info('HiveInitializer: Hive setup completed successfully.');
     } catch (e, stackTrace) {
-      debugPrint('HiveInitializer: Erro na inicialização - $e');
-      debugPrint('StackTrace: $stackTrace');
+      Logger.error(
+        'HiveInitializer: A critical error occurred during initialization.',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      // Rethrowing is important to halt app startup if Hive fails.
       rethrow;
     }
   }
-  
-  /// Registra adapters relacionados à autenticação
+
+  /// A generic helper to safely register a [TypeAdapter].
+  static void _registerAdapter<T>(TypeAdapter<T> adapter, int typeId) {
+    if (!Hive.isAdapterRegistered(typeId)) {
+      Hive.registerAdapter<T>(adapter);
+      Logger.debug('HiveInitializer: ${adapter.runtimeType} registered (TypeId: $typeId)');
+    }
+  }
+
+  /// Registers adapters related to authentication.
   static void _registerAuthAdapters() {
-    try {
-      debugPrint('HiveInitializer: Auth adapters skipped (awaiting code generation)');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de auth - $e');
-      rethrow;
-    }
+    // TODO: Implement auth model adapters once they are created.
+    // Example: _registerAdapter(UserModelAdapter(), 1);
+    Logger.info('HiveInitializer: Auth adapters skipped (awaiting code generation).');
   }
-  
-  /// Registra adapters relacionados ao livestock
+
+  /// Registers adapters related to the livestock feature.
   static void _registerLivestockAdapters() {
-    try {
-      _registerEnumAdapters();
-      
-      debugPrint('HiveInitializer: Livestock model adapters skipped (awaiting code generation)');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de livestock - $e');
-      rethrow;
-    }
+    _registerEnumAdapters();
+    // TODO: Implement livestock model adapters once they are created.
+    // Example: _registerAdapter(AnimalModelAdapter(), 20);
+    Logger.info('HiveInitializer: Livestock model adapters skipped (awaiting code generation).');
   }
-  
-  /// Registra adapters de enums
+
+  /// Registers all enum adapters.
   static void _registerEnumAdapters() {
-    try {
-      if (!Hive.isAdapterRegistered(10)) {
-        Hive.registerAdapter(BovineAptitudeAdapter());
-        debugPrint('HiveInitializer: BovineAptitudeAdapter registrado (TypeId: 10)');
-      }
-      if (!Hive.isAdapterRegistered(11)) {
-        Hive.registerAdapter(BreedingSystemAdapter());
-        debugPrint('HiveInitializer: BreedingSystemAdapter registrado (TypeId: 11)');
-      }
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de enums - $e');
-      rethrow;
-    }
+    _registerAdapter(BovineAptitudeAdapter(), 10);
+    _registerAdapter(BreedingSystemAdapter(), 11);
   }
-  
-  /// Limpa todos os dados do Hive (apenas para desenvolvimento)
-  static Future<void> clearAll() async {
-    try {
-      debugPrint('HiveInitializer: Limpando todos os dados do Hive');
-      
-      await Hive.deleteFromDisk();
-      
-      debugPrint('HiveInitializer: Dados limpos com sucesso');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao limpar dados - $e');
-      rethrow;
-    }
-  }
-  
-  /// Registra adapters relacionados ao weather
+
+  /// Registers adapters related to the weather feature.
   static void _registerWeatherAdapters() {
-    try {
-      if (!Hive.isAdapterRegistered(51)) {
-        Hive.registerAdapter<RainGaugeModel>(RainGaugeModelAdapter());
-        debugPrint('HiveInitializer: RainGaugeModelAdapter registrado (TypeId: 51)');
-      }
-      if (!Hive.isAdapterRegistered(50)) {
-        Hive.registerAdapter<WeatherMeasurementModel>(WeatherMeasurementModelAdapter());
-        debugPrint('HiveInitializer: WeatherMeasurementModelAdapter registrado (TypeId: 50)');
-      }
-      if (!Hive.isAdapterRegistered(52)) {
-        Hive.registerAdapter<WeatherStatisticsModel>(WeatherStatisticsModelAdapter());
-        debugPrint('HiveInitializer: WeatherStatisticsModelAdapter registrado (TypeId: 52)');
-      }
-      
-      debugPrint('HiveInitializer: Weather adapters registrados');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de weather - $e');
-      rethrow;
-    }
+    _registerAdapter(RainGaugeModelAdapter(), 51);
+    _registerAdapter(WeatherMeasurementModelAdapter(), 50);
+    _registerAdapter(WeatherStatisticsModelAdapter(), 52);
+    Logger.info('HiveInitializer: Weather adapters registered.');
   }
-  
-  /// Registra adapters relacionados à subscription
+
+  /// Registers adapters related to subscriptions.
   static void _registerSubscriptionAdapters() {
-    try {
-
-      debugPrint('HiveInitializer: Subscription adapters skipped (awaiting implementation)');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de subscription - $e');
-      rethrow;
-    }
+    // TODO: Implement subscription model adapters once they are created.
+    Logger.info('HiveInitializer: Subscription adapters skipped (awaiting implementation).');
   }
-  
-  /// Registra adapters relacionados ao news
+
+  /// Registers adapters related to the news feature.
   static void _registerNewsAdapters() {
-    try {
-      if (!Hive.isAdapterRegistered(30)) {
-        Hive.registerAdapter<CommodityPriceModel>(CommodityPriceModelAdapter());
-        debugPrint('HiveInitializer: CommodityPriceModelAdapter registrado (TypeId: 30)');
-      }
-      if (!Hive.isAdapterRegistered(31)) {
-        Hive.registerAdapter<NewsArticleModel>(NewsArticleModelAdapter());
-        debugPrint('HiveInitializer: NewsArticleModelAdapter registrado (TypeId: 31)');
-      }
-      
-      debugPrint('HiveInitializer: News adapters registrados');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de news - $e');
-      rethrow;
-    }
+    _registerAdapter(CommodityPriceModelAdapter(), 30);
+    _registerAdapter(NewsArticleModelAdapter(), 31);
+    Logger.info('HiveInitializer: News adapters registered.');
   }
 
-  /// Registra adapters relacionados aos markets
+  /// Registers adapters related to the markets feature.
   static void _registerMarketsAdapters() {
-    try {
-      registerMarketAdapters();
-      
-      debugPrint('HiveInitializer: Markets adapters registrados');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao registrar adapters de markets - $e');
-      rethrow;
+    registerMarketAdapters();
+    Logger.info('HiveInitializer: Markets adapters registered.');
+  }
+
+  /// Deletes all data from all Hive boxes.
+  ///
+  /// **WARNING**: This is a destructive operation and should only be used
+  /// in development or testing environments.
+  static Future<void> clearAllData() async {
+    if (kDebugMode) {
+      try {
+        Logger.warning('HiveInitializer: Clearing all Hive data...');
+        await Hive.deleteFromDisk();
+        Logger.info('HiveInitializer: All Hive data cleared successfully.');
+      } catch (e, stackTrace) {
+        Logger.error('HiveInitializer: Failed to clear Hive data.', error: e, stackTrace: stackTrace);
+        rethrow;
+      }
+    } else {
+      Logger.error('HiveInitializer: clearAllData() was called in a non-debug build. Operation aborted.');
     }
   }
 
-  /// Fecha todas as boxes abertas
+  /// Closes all open Hive boxes.
   static Future<void> closeAll() async {
     try {
-      debugPrint('HiveInitializer: Fechando todas as boxes');
-      
+      Logger.info('HiveInitializer: Closing all open Hive boxes...');
       await Hive.close();
-      
-      debugPrint('HiveInitializer: Todas as boxes fechadas');
-    } catch (e) {
-      debugPrint('HiveInitializer: Erro ao fechar boxes - $e');
+      Logger.info('HiveInitializer: All boxes closed.');
+    } catch (e, stackTrace) {
+      Logger.error('HiveInitializer: Error while closing Hive boxes.', error: e, stackTrace: stackTrace);
       rethrow;
     }
   }

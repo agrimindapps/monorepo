@@ -2,76 +2,81 @@ import 'package:dartz/dartz.dart';
 import 'app_error.dart';
 import 'failure.dart';
 
-/// Pattern Result para encapsular sucesso e erro de forma type-safe
-/// Substitui o Either<Failure, Success> por uma implementação mais simples e específica
+/// A sealed class representing the result of an operation that can either
+/// succeed with a value of type [T] or fail with an [AppError].
+///
+/// This is a type-safe alternative to throwing exceptions and is intended to
+/// replace the legacy `Either<Failure, Success>` pattern.
 sealed class Result<T> {
   const Result();
 
-  /// Cria um resultado de sucesso
+  /// Creates a [Result] representing a successful operation.
   factory Result.success(T data) = Success<T>;
 
-  /// Cria um resultado de erro
+  /// Creates a [Result] representing a failed operation.
   factory Result.error(AppError error) = Error<T>;
 
-  /// Cria um resultado de erro (alias para error - compatibilidade)
+  /// An alias for [Result.error], provided for backward compatibility.
   factory Result.failure(AppError error) = Error<T>;
 
-  /// Verifica se o resultado é um sucesso
+  /// Returns `true` if the result is a [Success].
   bool get isSuccess => this is Success<T>;
 
-  /// Verifica se o resultado é um erro
+  /// Returns `true` if the result is an [Error].
   bool get isError => this is Error<T>;
 
-  /// Verifica se o resultado é um erro (alias para isError - compatibilidade)
+  /// An alias for [isError], provided for backward compatibility.
   bool get isFailure => this is Error<T>;
 
-  /// Obtém os dados se for sucesso, null caso contrário
+  /// Returns the success data, or `null` if the result is an error.
   T? get data => switch (this) {
-    Success<T> success => success.data,
-    Error<T> _ => null,
-  };
+        Success<T>(data: final d) => d,
+        Error<T>() => null,
+      };
 
-  /// Obtém o erro se for erro, null caso contrário
+  /// Returns the error, or `null` if the result is a success.
   AppError? get error => switch (this) {
-    Success<T> _ => null,
-    Error<T> error => error.error,
-  };
+        Success<T>() => null,
+        Error<T>(error: final e) => e,
+      };
 
-  /// Executa uma função dependendo do resultado
+  /// Transforms the [Result] by applying [onError] if it's an error,
+  /// or [onSuccess] if it's a success.
   R fold<R>(R Function(AppError error) onError, R Function(T data) onSuccess) {
     return switch (this) {
-      Success<T> success => onSuccess(success.data),
-      Error<T> error => onError(error.error),
+      Success<T>(data: final d) => onSuccess(d),
+      Error<T>(error: final e) => onError(e),
     };
   }
 
-  /// Mapeia o valor de sucesso para outro tipo
+  /// Maps a [Success] value to a new `Result` of type [R].
+  /// If this is an [Error], it is returned unchanged.
   Result<R> map<R>(R Function(T data) mapper) {
     return switch (this) {
-      Success<T> success => Result.success(mapper(success.data)),
-      Error<T> error => Result.error(error.error),
+      Success<T>(data: final d) => Result.success(mapper(d)),
+      Error<T>(error: final e) => Result.error(e),
     };
   }
 
-  /// Mapeia o erro para outro erro
+  /// Maps an [Error]'s value to another [AppError].
+  /// If this is a [Success], it is returned unchanged.
   Result<T> mapError(AppError Function(AppError error) mapper) {
     return switch (this) {
-      Success<T> success => success,
-      Error<T> error => Result.error(mapper(error.error)),
+      Success<T>() => this,
+      Error<T>(error: final e) => Result.error(mapper(e)),
     };
   }
 
-  /// Executa uma operação assíncrona se for sucesso
-  Future<Result<R>> then<R>(
-    Future<Result<R>> Function(T data) operation,
-  ) async {
+  /// Chains an asynchronous operation that returns a [Result].
+  /// The [operation] is only executed if this result is a [Success].
+  Future<Result<R>> then<R>(Future<Result<R>> Function(T data) operation) async {
     return switch (this) {
-      Success<T> success => await operation(success.data),
-      Error<T> error => Result.error(error.error),
+      Success<T>(data: final d) => await operation(d),
+      Error<T>(error: final e) => Result.error(e),
     };
   }
 
-  /// Executa uma ação apenas se for sucesso
+  /// Performs an action if the result is a [Success].
   Result<T> onSuccess(void Function(T data) action) {
     if (this is Success<T>) {
       action((this as Success<T>).data);
@@ -79,7 +84,7 @@ sealed class Result<T> {
     return this;
   }
 
-  /// Executa uma ação apenas se for erro
+  /// Performs an action if the result is an [Error].
   Result<T> onError(void Function(AppError error) action) {
     if (this is Error<T>) {
       action((this as Error<T>).error);
@@ -87,31 +92,28 @@ sealed class Result<T> {
     return this;
   }
 
-  /// Tenta recuperar de um erro transformando-o em sucesso
+  /// Recovers from an error by transforming it into a [Success].
   Result<T> recover(T Function(AppError error) recovery) {
     return switch (this) {
-      Success<T> success => success,
-      Error<T> error => Result.success(recovery(error.error)),
+      Success<T>() => this,
+      Error<T>(error: final e) => Result.success(recovery(e)),
     };
   }
 
-  /// Adiciona um fallback para caso de erro
+  /// Returns the success data, or a [fallback] value if this is an [Error].
   T getOrElse(T fallback) {
-    return switch (this) {
-      Success<T> success => success.data,
-      Error<T> _ => fallback,
-    };
+    return fold((_) => fallback, (data) => data);
   }
 
-  /// Lança uma exceção se for erro, retorna dados se for sucesso
+  /// Returns the success data, or throws the [AppError] if this is an [Error].
   T getOrThrow() {
-    return switch (this) {
-      Success<T> success => success.data,
-      Error<T> error => throw Exception(error.error.toString()),
-    };
+    return fold(
+      (error) => throw error,
+      (data) => data,
+    );
   }
 
-  /// Converte Result<T> para Either<Failure, T> (compatibilidade)
+  /// Converts this [Result] to a legacy [Either] for backward compatibility.
   Either<Failure, T> toEither() {
     return fold(
       (error) => Left(error.toFailure()),
@@ -120,7 +122,7 @@ sealed class Result<T> {
   }
 }
 
-/// Representa um resultado de sucesso
+/// Represents a successful result containing [data].
 final class Success<T> extends Result<T> {
   @override
   final T data;
@@ -128,9 +130,7 @@ final class Success<T> extends Result<T> {
   const Success(this.data);
 
   @override
-  bool operator ==(Object other) {
-    return other is Success<T> && other.data == data;
-  }
+  bool operator ==(Object other) => other is Success<T> && other.data == data;
 
   @override
   int get hashCode => data.hashCode;
@@ -139,7 +139,7 @@ final class Success<T> extends Result<T> {
   String toString() => 'Success($data)';
 }
 
-/// Representa um resultado de erro
+/// Represents an error result containing an [AppError].
 final class Error<T> extends Result<T> {
   @override
   final AppError error;
@@ -147,9 +147,7 @@ final class Error<T> extends Result<T> {
   const Error(this.error);
 
   @override
-  bool operator ==(Object other) {
-    return other is Error<T> && other.error == error;
-  }
+  bool operator ==(Object other) => other is Error<T> && other.error == error;
 
   @override
   int get hashCode => error.hashCode;
@@ -158,51 +156,43 @@ final class Error<T> extends Result<T> {
   String toString() => 'Error($error)';
 }
 
-/// Extensões para facilitar o uso com Futures
+/// Utility extensions for working with `Future<Result<T>>`.
 extension FutureResultExtensions<T> on Future<Result<T>> {
-  /// Mapeia o resultado futuro
-  Future<Result<R>> mapResult<R>(R Function(T data) mapper) async {
-    final result = await this;
-    return result.map(mapper);
+  /// Maps the success value of a future [Result].
+  Future<Result<R>> map<R>(R Function(T data) mapper) async {
+    return (await this).map(mapper);
   }
 
-  /// Mapeia o erro futuro
-  Future<Result<T>> mapErrorResult(
-    AppError Function(AppError error) mapper,
-  ) async {
-    final result = await this;
-    return result.mapError(mapper);
+  /// Maps the error value of a future [Result].
+  Future<Result<T>> mapError(AppError Function(AppError error) mapper) async {
+    return (await this).mapError(mapper);
   }
 
-  /// Executa uma operação em cadeia
-  Future<Result<R>> thenResult<R>(
-    Future<Result<R>> Function(T data) operation,
-  ) async {
-    final result = await this;
-    return await result.then(operation);
+  /// Chains an asynchronous operation to a future [Result].
+  Future<Result<R>> then<R>(Future<Result<R>> Function(T data) operation) async {
+    return (await this).then(operation);
   }
 
-  /// Adiciona tratamento de erro
+  /// Catches exceptions from the future and converts them to an [Error] result.
   Future<Result<T>> catchError(
     AppError Function(dynamic error, StackTrace stackTrace) errorHandler,
   ) async {
     try {
       return await this;
-    } catch (error, stackTrace) {
-      return Result.error(errorHandler(error, stackTrace));
+    } catch (e, s) {
+      return Result.error(errorHandler(e, s));
     }
   }
 
-  /// Converte para Either (compatibilidade)
+  /// Converts a `Future<Result<T>>` to a `Future<Either<Failure, T>>`.
   Future<Either<Failure, T>> toEither() async {
-    final result = await this;
-    return result.toEither();
+    return (await this).toEither();
   }
 }
 
-/// Extensões para Either (compatibilidade retroativa)
+/// Backward compatibility extensions for [Either].
 extension EitherToResultExtension<L extends Failure, R> on Either<L, R> {
-  /// Converte Either para Result
+  /// Converts an [Either] to a [Result].
   Result<R> toResult() {
     return fold(
       (failure) => Result.error(AppErrorFactory.fromFailure(failure)),
@@ -211,98 +201,61 @@ extension EitherToResultExtension<L extends Failure, R> on Either<L, R> {
   }
 }
 
-extension FutureEitherToResultExtension<L extends Failure, R>
-    on Future<Either<L, R>> {
-  /// Converte Future<Either> para Future<Result>
+/// Backward compatibility extensions for `Future<Either>`.
+extension FutureEitherToResultExtension<L extends Failure, R> on Future<Either<L, R>> {
+  /// Converts a `Future<Either>` to a `Future<Result>`.
   Future<Result<R>> toResult() async {
     final either = await this;
     return either.toResult();
   }
 }
 
-/// Utilitários para criar Results a partir de operações comuns
+/// A utility class for creating [Result] instances from common operations.
 class ResultUtils {
-  /// Executa uma operação que pode lançar exceção
+  /// Creates a [Result] by executing a synchronous [operation] that may throw.
   static Result<T> tryExecute<T>(T Function() operation) {
     try {
       return Result.success(operation());
-    } catch (error, stackTrace) {
-      if (error is AppError) {
-        return Result.error(error);
-      }
-      return Result.error(
-        AppErrorFactory.fromException(error, stackTrace),
-      );
+    } catch (e, s) {
+      return Result.error(AppErrorFactory.fromException(e, s));
     }
   }
 
-  /// Executa uma operação assíncrona que pode lançar exceção
+  /// Creates a [Result] by executing an asynchronous [operation] that may throw.
   static Future<Result<T>> tryExecuteAsync<T>(
     Future<T> Function() operation,
   ) async {
     try {
-      final result = await operation();
-      return Result.success(result);
-    } catch (error, stackTrace) {
-      if (error is AppError) {
-        return Result.error(error);
-      }
-      return Result.error(
-        AppErrorFactory.fromException(error, stackTrace),
-      );
+      return Result.success(await operation());
+    } catch (e, s) {
+      return Result.error(AppErrorFactory.fromException(e, s));
     }
   }
 
-  /// Combina múltiplos Results em um só
+  /// Combines a list of [Result]s into a single `Result<List<T>>`.
+  /// If any result in the list is an [Error], this returns the first error found.
   static Result<List<T>> combine<T>(List<Result<T>> results) {
-    final List<T> data = [];
-
+    final data = <T>[];
     for (final result in results) {
-      switch (result) {
-        case Success<T> success:
-          data.add(success.data);
-        case Error<T> error:
-          return Result.error(error.error);
+      if (result.isError) {
+        return Result.error(result.error!);
       }
+      data.add(result.data!);
     }
-
     return Result.success(data);
   }
 
-  /// Executa uma operação apenas se todas as condições forem atendidas
+  /// Creates a [Result] conditionally.
   static Result<T> when<T>(
     bool condition,
     T Function() onTrue,
     AppError Function() onFalse,
   ) {
-    if (condition) {
-      return tryExecute(onTrue);
-    } else {
-      return Result.error(onFalse());
-    }
+    return condition ? tryExecute(onTrue) : Result.error(onFalse());
   }
 
-  /// Cria Result a partir de valor nullable
-  static Result<T> fromNullable<T>(
-    T? value,
-    AppError Function() onNull,
-  ) {
-    if (value != null) {
-      return Result.success(value);
-    } else {
-      return Result.error(onNull());
-    }
-  }
-
-  /// Converte Either para Result (factory method)
-  static Result<T> fromEither<T>(Either<Failure, T> either) {
-    return either.toResult();
-  }
-
-  /// Converte Future<Either> para Future<Result> (factory method)
-  static Future<Result<T>> fromFutureEither<T>(
-    Future<Either<Failure, T>> futureEither,
-  ) {
-    return futureEither.toResult();
+  /// Creates a [Result] from a nullable value.
+  static Result<T> fromNullable<T>(T? value, AppError Function() onNull) {
+    return value != null ? Result.success(value) : Result.error(onNull());
   }
 }

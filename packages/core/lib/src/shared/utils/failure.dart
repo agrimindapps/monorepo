@@ -1,22 +1,24 @@
 import 'package:equatable/equatable.dart';
 
-/// Classe base para representar falhas na aplicação
-/// Usado com Either<Failure, Success> para programação funcional
+/// An abstract base class for representing failures in the application.
+///
+/// This is part of a legacy error-handling system that uses `Either<Failure, Success>`.
+/// It is being gradually replaced by the [AppError] system.
 abstract class Failure extends Equatable {
+  /// The user-friendly error message.
+  final String message;
+
+  /// An optional error code, e.g., from an API.
+  final String? code;
+
+  /// Optional technical details about the error.
+  final dynamic details;
+
   const Failure({
     required this.message,
     this.code,
     this.details,
   });
-
-  /// Mensagem de erro para o usuário
-  final String message;
-
-  /// Código do erro (opcional)
-  final String? code;
-
-  /// Detalhes técnicos do erro (opcional)
-  final dynamic details;
 
   @override
   List<Object?> get props => [message, code, details];
@@ -25,7 +27,7 @@ abstract class Failure extends Equatable {
   String toString() => 'Failure(message: $message, code: $code)';
 }
 
-/// Falha de servidor/rede
+/// Represents a failure due to a server or network-related issue.
 class ServerFailure extends Failure {
   const ServerFailure(
     String message, {
@@ -34,7 +36,7 @@ class ServerFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de cache/storage local
+/// Represents a failure related to local cache or storage.
 class CacheFailure extends Failure {
   const CacheFailure(
     String message, {
@@ -43,7 +45,7 @@ class CacheFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de validação de dados
+/// Represents a failure due to invalid data.
 class ValidationFailure extends Failure {
   const ValidationFailure(
     String message, {
@@ -52,7 +54,7 @@ class ValidationFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de autenticação
+/// Represents a failure related to authentication or authorization.
 class AuthFailure extends Failure {
   const AuthFailure(
     String message, {
@@ -61,7 +63,7 @@ class AuthFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de permissão/autorização
+/// Represents a failure due to insufficient permissions.
 class PermissionFailure extends Failure {
   const PermissionFailure(
     String message, {
@@ -70,7 +72,7 @@ class PermissionFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de conexão de rede
+/// Represents a failure due to a network connectivity issue.
 class NetworkFailure extends Failure {
   const NetworkFailure(
     String message, {
@@ -79,7 +81,7 @@ class NetworkFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de parsing/conversão de dados
+/// Represents a failure in parsing or converting data.
 class ParseFailure extends Failure {
   const ParseFailure(
     String message, {
@@ -88,7 +90,7 @@ class ParseFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha genérica/desconhecida
+/// Represents a generic or unknown failure.
 class UnknownFailure extends Failure {
   const UnknownFailure(
     String message, {
@@ -97,7 +99,7 @@ class UnknownFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha específica do Firebase
+/// Represents a failure specific to a Firebase operation.
 class FirebaseFailure extends Failure {
   const FirebaseFailure(
     String message, {
@@ -106,7 +108,7 @@ class FirebaseFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha específica do RevenueCat
+/// Represents a failure specific to a RevenueCat operation.
 class RevenueCatFailure extends Failure {
   const RevenueCatFailure(
     String message, {
@@ -115,7 +117,7 @@ class RevenueCatFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de sincronização
+/// Represents a failure during a data synchronization process.
 class SyncFailure extends Failure {
   const SyncFailure(
     String message, {
@@ -124,7 +126,7 @@ class SyncFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de recurso não encontrado
+/// Represents a failure when a requested resource was not found.
 class NotFoundFailure extends Failure {
   const NotFoundFailure(
     String message, {
@@ -133,37 +135,18 @@ class NotFoundFailure extends Failure {
   }) : super(message: message);
 }
 
-/// Falha de autenticação específica
-class AuthenticationFailure extends AuthFailure {
-  const AuthenticationFailure(
-    super.message, {
-    super.code,
-    super.details,
-  });
-}
-
-/// Falha inesperada/desconhecida
-class UnexpectedFailure extends UnknownFailure {
-  const UnexpectedFailure(
-    super.message, {
-    super.code,
-    super.details,
-  });
-}
-
-/// Extensions para facilitar o uso
+/// Utility extensions for the [Failure] class.
 extension FailureExtension on Failure {
-  /// Retorna true se é uma falha de rede
-  bool get isNetworkFailure =>
-      this is NetworkFailure || this is ServerFailure;
+  /// Returns `true` if the failure is related to network or server issues.
+  bool get isNetworkFailure => this is NetworkFailure || this is ServerFailure;
 
-  /// Retorna true se é uma falha de autenticação
+  /// Returns `true` if the failure is related to authentication.
   bool get isAuthFailure => this is AuthFailure;
 
-  /// Retorna true se é uma falha de validação
+  /// Returns `true` if the failure is related to data validation.
   bool get isValidationFailure => this is ValidationFailure;
 
-  /// Retorna uma mensagem user-friendly
+  /// Returns a user-friendly message based on the failure type.
   String get userMessage {
     if (this is NetworkFailure || this is ServerFailure) {
       return 'Problema de conexão. Verifique sua internet e tente novamente.';
@@ -172,7 +155,7 @@ extension FailureExtension on Failure {
       return 'Erro de autenticação. Faça login novamente.';
     }
     if (this is ValidationFailure) {
-      return message; // Mensagens de validação já são user-friendly
+      return message; // Validation messages are typically user-friendly.
     }
     if (this is PermissionFailure) {
       return 'Você não tem permissão para esta ação.';

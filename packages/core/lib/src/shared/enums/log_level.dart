@@ -1,20 +1,22 @@
-/// Níveis de log disponíveis no sistema
+/// Defines the available levels for logging in the system.
+///
+/// The levels are ordered by severity, from least to most critical.
 enum LogLevel {
-  /// Informações de trace detalhadas (desenvolvimento)
+  /// Detailed trace information, typically for in-depth debugging.
   trace,
-  
-  /// Informações detalhadas para desenvolvimento
+
+  /// Detailed information useful for development and debugging.
   debug,
-  
-  /// Informações gerais da aplicação
+
+  /// General application information and flow events.
   info,
-  
-  /// Avisos que requerem atenção
+
+  /// Warnings that indicate potential issues that require attention.
   warning,
-  
-  /// Erros que necessitam correção
+
+  /// Errors that need to be addressed but do not halt the application.
   error,
-  
-  /// Erros críticos que podem causar falhas
+
+  /// Critical errors that can cause application failures or data loss.
   critical,
 }

@@ -1,16 +1,31 @@
 import 'package:equatable/equatable.dart';
 import 'failure.dart';
 
-/// Classe base para todos os erros da aplicação
-/// Fornece uma estrutura padronizada para tratamento de erros
-/// Sistema mais rico que substitui gradualmente Failure
+/// An abstract base class for all application-specific errors.
+///
+/// It provides a standardized structure for error handling, including
+/// properties for a message, code, severity, and category. This class is
+/// intended to gradually replace the simpler [Failure] system.
 abstract class AppError extends Equatable {
+  /// A human-readable message describing the error.
   final String message;
+
+  /// An optional error code (e.g., from an API response).
   final String? code;
+
+  /// Optional detailed information about the error.
   final String? details;
+
+  /// The stack trace associated with the error, if available.
   final StackTrace? stackTrace;
+
+  /// The timestamp when the error occurred.
   final DateTime timestamp;
+
+  /// The severity level of the error.
   final ErrorSeverity severity;
+
+  /// The category that the error belongs to.
   final ErrorCategory category;
 
   AppError({
@@ -20,10 +35,10 @@ abstract class AppError extends Equatable {
     this.stackTrace,
     DateTime? timestamp,
     this.severity = ErrorSeverity.medium,
-    this.category = ErrorCategory.general,
+    required this.category,
   }) : timestamp = timestamp ?? DateTime.now();
 
-  /// Factory method para criar erro customizado
+  /// Creates a custom error with the specified properties.
   factory AppError.custom({
     required String message,
     String? code,
@@ -44,7 +59,7 @@ abstract class AppError extends Equatable {
     );
   }
 
-  /// Factory method para erro desconhecido
+  /// Creates an error representing an unknown or unexpected issue.
   factory AppError.unknown(
     String message, {
     String? code,
@@ -63,7 +78,7 @@ abstract class AppError extends Equatable {
     );
   }
 
-  /// Converte o erro para um mapa para logging
+  /// Converts the error to a map for logging or serialization.
   Map<String, dynamic> toMap() {
     return {
       'type': runtimeType.toString(),
@@ -77,10 +92,10 @@ abstract class AppError extends Equatable {
     };
   }
 
-  /// Converte para JSON para APIs/logging
+  /// Converts the error to a JSON map. Alias for [toMap].
   Map<String, dynamic> toJson() => toMap();
 
-  /// Cria uma cópia do erro com novos valores
+  /// Creates a copy of this error with the given fields replaced with new values.
   AppError copyWith({
     String? message,
     String? code,
@@ -91,98 +106,100 @@ abstract class AppError extends Equatable {
     ErrorCategory? category,
   });
 
-  /// Retorna uma mensagem user-friendly baseada na categoria
+  /// A user-friendly message appropriate for display in the UI.
   String get userMessage {
     switch (category) {
       case ErrorCategory.network:
         return 'Problema de conexão. Verifique sua internet e tente novamente.';
       case ErrorCategory.authentication:
         return 'Erro de autenticação. Faça login novamente.';
+      // Validation and business errors often have user-friendly messages already.
       case ErrorCategory.validation:
-        return message; // Mensagens de validação já são user-friendly
+        return message;
+      case ErrorCategory.business:
+        return message;
       case ErrorCategory.permission:
         return 'Você não tem permissão para esta ação.';
       case ErrorCategory.storage:
         return 'Erro ao acessar dados locais. Tente novamente.';
-      case ErrorCategory.business:
-        return message; // Regras de negócio têm mensagens específicas
       case ErrorCategory.external:
         return 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.';
       case ErrorCategory.general:
+      default:
         return 'Ocorreu um erro inesperado. Tente novamente.';
     }
   }
 
-  /// Verifica se é um erro crítico que precisa de ação imediata
+  /// Returns `true` if the error is critical.
   bool get isCritical => severity == ErrorSeverity.critical;
 
-  /// Verifica se é um erro de rede
+  /// Returns `true` if the error is related to network connectivity.
   bool get isNetworkError => category == ErrorCategory.network;
 
-  /// Verifica se é um erro de autenticação
+  /// Returns `true` if the error is related to authentication.
   bool get isAuthenticationError => category == ErrorCategory.authentication;
 
-  /// Verifica se é um erro de validação
+  /// Returns `true` if the error is related to data validation.
   bool get isValidationError => category == ErrorCategory.validation;
 
   @override
   List<Object?> get props => [
-    message,
-    code,
-    details,
-    timestamp,
-    severity,
-    category,
-  ];
+        message,
+        code,
+        details,
+        timestamp,
+        severity,
+        category,
+      ];
 
   @override
   String toString() =>
       'AppError(message: $message, code: $code, category: ${category.name})';
 }
 
-/// Severidade do erro
+/// Defines the severity level of an [AppError].
 enum ErrorSeverity {
-  /// Avisos, informações não críticas
+  /// Low-impact issues, such as warnings or informational messages.
   low,
 
-  /// Erros que não impedem o funcionamento
+  /// Default severity. Errors that do not prevent the app from continuing.
   medium,
 
-  /// Erros críticos que afetam funcionalidades
+  /// Errors that critically affect a feature.
   high,
 
-  /// Erros que podem causar crash ou perda de dados
+  /// Errors that can cause a crash or data loss.
   critical,
 }
 
-/// Categoria do erro para melhor organização
+/// Defines the category of an [AppError] for better organization and handling.
 enum ErrorCategory {
-  /// Erros gerais
+  /// Uncategorized or general errors.
   general,
 
-  /// Problemas de rede/conectividade
+  /// Network or connectivity-related problems.
   network,
 
-  /// Problemas de autenticação
+  /// Authentication or authorization issues.
   authentication,
 
-  /// Erros de validação de dados
+  /// Data validation failures.
   validation,
 
-  /// Problemas de armazenamento
+  /// Local storage or caching problems.
   storage,
 
-  /// Problemas de permissão
+  /// Permission-related issues (e.g., file access, camera).
   permission,
 
-  /// Regras de negócio violadas
+  /// Violations of business logic or rules.
   business,
 
-  /// Erros de serviços externos
+  /// Errors originating from external services or APIs.
   external,
 }
 
-/// Erro de rede/conectividade
+/// An error indicating a network or connectivity problem.
 class NetworkError extends AppError {
   NetworkError({
     required super.message,
@@ -214,7 +231,7 @@ class NetworkError extends AppError {
   }
 }
 
-/// Erro de autenticação
+/// An error indicating an authentication or authorization failure.
 class AuthenticationError extends AppError {
   AuthenticationError({
     required super.message,
@@ -246,8 +263,9 @@ class AuthenticationError extends AppError {
   }
 }
 
-/// Erro de validação
+/// An error indicating a data validation failure.
 class ValidationError extends AppError {
+  /// A map of field names to a list of their validation errors.
   final Map<String, List<String>>? fieldErrors;
 
   ValidationError({
@@ -284,16 +302,14 @@ class ValidationError extends AppError {
 
   @override
   Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['fieldErrors'] = fieldErrors;
-    return map;
+    return super.toMap()..['fieldErrors'] = fieldErrors;
   }
 
   @override
   List<Object?> get props => [...super.props, fieldErrors];
 }
 
-/// Erro de armazenamento
+/// An error indicating a problem with local storage or caching.
 class StorageError extends AppError {
   StorageError({
     required super.message,
@@ -325,8 +341,9 @@ class StorageError extends AppError {
   }
 }
 
-/// Erro de permissão
+/// An error indicating that a required permission was not granted.
 class PermissionError extends AppError {
+  /// The specific permission that was denied, if known.
   final String? requiredPermission;
 
   PermissionError({
@@ -363,17 +380,16 @@ class PermissionError extends AppError {
 
   @override
   Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['requiredPermission'] = requiredPermission;
-    return map;
+    return super.toMap()..['requiredPermission'] = requiredPermission;
   }
 
   @override
   List<Object?> get props => [...super.props, requiredPermission];
 }
 
-/// Erro de regra de negócio
+/// An error indicating a violation of a business rule.
 class BusinessError extends AppError {
+  /// The specific business rule that was violated, if known.
   final String? businessRule;
 
   BusinessError({
@@ -410,18 +426,19 @@ class BusinessError extends AppError {
 
   @override
   Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['businessRule'] = businessRule;
-    return map;
+    return super.toMap()..['businessRule'] = businessRule;
   }
 
   @override
   List<Object?> get props => [...super.props, businessRule];
 }
 
-/// Erro de serviço externo
+/// An error indicating a problem with an external service or API.
 class ExternalServiceError extends AppError {
+  /// The name of the external service that failed.
   final String? serviceName;
+
+  /// The HTTP status code, if the error came from an HTTP response.
   final int? statusCode;
 
   ExternalServiceError({
@@ -461,18 +478,18 @@ class ExternalServiceError extends AppError {
 
   @override
   Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['serviceName'] = serviceName;
-    map['statusCode'] = statusCode;
-    return map;
+    return super.toMap()
+      ..['serviceName'] = serviceName
+      ..['statusCode'] = statusCode;
   }
 
   @override
   List<Object?> get props => [...super.props, serviceName, statusCode];
 }
 
-/// Erro desconhecido/genérico
+/// An error for unknown or uncategorized issues.
 class UnknownError extends AppError {
+  /// The original exception or error that was caught.
   final dynamic originalError;
 
   UnknownError({
@@ -509,18 +526,16 @@ class UnknownError extends AppError {
 
   @override
   Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['originalError'] = originalError?.toString();
-    return map;
+    return super.toMap()..['originalError'] = originalError?.toString();
   }
 
   @override
   List<Object?> get props => [...super.props, originalError];
 }
 
-/// Extensões utilitários para AppError
+/// Utility extensions for [AppError].
 extension AppErrorExtensions on AppError {
-  /// Converte AppError para Failure (compatibilidade retroativa)
+  /// Converts an [AppError] to a [Failure] for backward compatibility.
   Failure toFailure() {
     switch (category) {
       case ErrorCategory.network:
@@ -547,7 +562,7 @@ extension AppErrorExtensions on AppError {
   }
 }
 
-/// Implementação privada para erro customizado
+/// A private implementation for the [AppError.custom] factory.
 class _CustomError extends AppError {
   _CustomError({
     required super.message,
@@ -555,8 +570,8 @@ class _CustomError extends AppError {
     super.details,
     super.stackTrace,
     super.timestamp,
-    super.severity = ErrorSeverity.medium,
-    super.category = ErrorCategory.general,
+    required super.severity,
+    required super.category,
   });
 
   @override
@@ -581,74 +596,56 @@ class _CustomError extends AppError {
   }
 }
 
-/// Factory para criar AppErrors a partir de Failures
+/// A factory for creating [AppError] instances from other error types.
 class AppErrorFactory {
-  /// Converte Failure para AppError
+  /// Converts a [Failure] to a corresponding [AppError].
   static AppError fromFailure(Failure failure) {
-    switch (failure.runtimeType) {
-      case NetworkFailure:
+    final details = failure.details?.toString();
+    switch (failure) {
+      case NetworkFailure f:
         return NetworkError(
-          message: failure.message,
-          code: failure.code ?? 'NETWORK_ERROR',
-          details: failure.details?.toString(),
-        );
-
-      case ServerFailure:
+            message: f.message, code: f.code ?? 'NETWORK_ERROR', details: details);
+      case ServerFailure f:
         return ExternalServiceError(
-          message: failure.message,
-          code: failure.code ?? 'SERVER_ERROR',
-          details: failure.details?.toString(),
-          serviceName: 'API',
-        );
-
-      case CacheFailure:
+            message: f.message,
+            code: f.code ?? 'SERVER_ERROR',
+            details: details,
+            serviceName: 'API');
+      case CacheFailure f:
         return StorageError(
-          message: failure.message,
-          code: failure.code ?? 'CACHE_ERROR',
-          details: failure.details?.toString(),
-        );
-
-      case NotFoundFailure:
+            message: f.message, code: f.code ?? 'CACHE_ERROR', details: details);
+      case NotFoundFailure f:
         return BusinessError(
-          message: failure.message,
-          code: failure.code ?? 'NOT_FOUND',
-          details: failure.details?.toString(),
-          businessRule: 'RESOURCE_NOT_FOUND',
-        );
-
-      case AuthFailure:
+            message: f.message,
+            code: f.code ?? 'NOT_FOUND',
+            details: details,
+            businessRule: 'RESOURCE_NOT_FOUND');
+      case AuthFailure f:
         return AuthenticationError(
-          message: failure.message,
-          code: failure.code ?? 'UNAUTHORIZED',
-          details: failure.details?.toString(),
-        );
-
-      case ValidationFailure:
+            message: f.message,
+            code: f.code ?? 'UNAUTHORIZED',
+            details: details);
+      case ValidationFailure f:
         return ValidationError(
-          message: failure.message,
-          code: failure.code ?? 'VALIDATION_ERROR',
-          details: failure.details?.toString(),
-        );
-
-      case PermissionFailure:
+            message: f.message,
+            code: f.code ?? 'VALIDATION_ERROR',
+            details: details);
+      case PermissionFailure f:
         return PermissionError(
-          message: failure.message,
-          code: failure.code ?? 'PERMISSION_ERROR',
-          details: failure.details?.toString(),
-        );
-
-      case UnknownFailure:
+            message: f.message,
+            code: f.code ?? 'PERMISSION_ERROR',
+            details: details);
+      case UnknownFailure f:
       default:
         return UnknownError(
-          message: failure.message,
-          code: failure.code ?? 'UNKNOWN_ERROR',
-          details: failure.details?.toString(),
-          originalError: failure,
-        );
+            message: failure.message,
+            code: failure.code ?? 'UNKNOWN_ERROR',
+            details: details,
+            originalError: failure);
     }
   }
 
-  /// Cria AppError a partir de Exception genérica
+  /// Creates an [AppError] from a generic [Exception] or [Error].
   static AppError fromException(
     dynamic exception,
     StackTrace? stackTrace, {

@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:core/core.dart' as core;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
@@ -69,11 +66,8 @@ class PlantsListPage extends ConsumerStatefulWidget {
   ConsumerState<PlantsListPage> createState() => _PlantsListPageState();
 }
 
-class _PlantsListPageState extends ConsumerState<PlantsListPage>
-    with RouteAware {
+class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   final ScrollController _scrollController = ScrollController();
-
-  StreamSubscription<void>? _syncStatusSubscription;
 
   @override
   void initState() {
@@ -83,63 +77,39 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  /// Inicia sincronização em background sem bloquear UI
   void _tryStartAutoSync() {
     final authState = ref.read(authProvider);
     if (authState.hasValue &&
         authState.value!.isAuthenticated &&
-        !authState.value!.isAnonymous) {}
-    _monitorBackgroundSync();
+        !authState.value!.isAnonymous) {
+      _monitorBackgroundSync();
+    }
   }
 
-  /// Monitora sincronização em background de forma mais eficiente
   void _monitorBackgroundSync() {
-    Timer.periodic(const Duration(minutes: 15), (timer) {
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            final authState = ref.read(authProvider);
-            if (authState.hasValue &&
-                authState.value!.isAuthenticated &&
-                !authState.value!.isAnonymous) {
-              ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
-            }
-          }
-        });
-      } else {
-        timer.cancel();
-      }
-    });
+    // Timer.periodic(const Duration(minutes: 15), (timer) {
+    //   if (mounted) {
+    //     WidgetsBinding.instance.addPostFrameCallback((_) {
+    //       if (mounted) {
+    //         final authState = ref.read(authProvider);
+    //         if (authState.hasValue &&
+    //             authState.value!.isAuthenticated &&
+    //             !authState.value!.isAnonymous) {
+    //           ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
+    //         }
+    //       }
+    //     });
+    //   } else {
+    //     timer.cancel();
+    //   }
+    // });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _syncStatusSubscription?.cancel();
-
     super.dispose();
   }
-
-  @override
-  void didPopNext() {
-    if (mounted) {
-      ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
-    }
-  }
-
-  @override
-  void didPush() {}
-
-  @override
-  void didPop() {}
-
-  @override
-  void didPushNext() {}
 
   Future<void> _onRefresh() async {
     await ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
@@ -318,64 +288,8 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
                       ),
                     ),
                     actions: [
-                      GestureDetector(
-                        onTap: () => _showSortOptions(context),
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.sort,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          final currentMode = plantsState.viewMode;
-                          ViewMode newMode;
-                          if (currentMode == ViewMode.groupedBySpaces ||
-                              currentMode == ViewMode.groupedBySpacesGrid ||
-                              currentMode == ViewMode.groupedBySpacesList) {
-                            newMode = ViewMode.list;
-                          } else {
-                            if (currentMode == ViewMode.grid) {
-                              newMode = ViewMode.groupedBySpacesGrid;
-                            } else {
-                              newMode = ViewMode.groupedBySpacesList;
-                            }
-                          }
-
-                          _onViewModeChanged(newMode);
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color:
-                                _isGroupedBySpaces(plantsState.viewMode)
-                                    ? Colors.white.withValues(alpha: 0.3)
-                                    : Colors.white.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.4),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.category,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
+                      _buildSortButton(context),
+                      _buildGroupButton(plantsState),
                     ],
                   ),
                 ],
@@ -565,5 +479,61 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage>
     return viewMode == ViewMode.groupedBySpaces ||
         viewMode == ViewMode.groupedBySpacesGrid ||
         viewMode == ViewMode.groupedBySpacesList;
+  }
+
+  Widget _buildSortButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showSortOptions(context),
+      child: Container(
+        width: 36,
+        height: 36,
+        margin: const EdgeInsets.only(right: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.4),
+          ),
+        ),
+        child: const Icon(
+          Icons.sort,
+          color: Colors.white,
+          size: 18,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupButton(riverpod_plants.PlantsState plantsState) {
+    return GestureDetector(
+      onTap: () {
+        final currentMode = plantsState.viewMode;
+        final isGrouped = _isGroupedBySpaces(currentMode);
+        final newMode = isGrouped
+            ? ViewMode.list
+            : (currentMode == ViewMode.grid
+                ? ViewMode.groupedBySpacesGrid
+                : ViewMode.groupedBySpacesList);
+        _onViewModeChanged(newMode);
+      },
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: _isGroupedBySpaces(plantsState.viewMode)
+              ? Colors.white.withOpacity(0.3)
+              : Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.4),
+          ),
+        ),
+        child: const Icon(
+          Icons.category,
+          color: Colors.white,
+          size: 18,
+        ),
+      ),
+    );
   }
 }

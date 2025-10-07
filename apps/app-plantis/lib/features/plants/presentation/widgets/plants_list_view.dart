@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/plant.dart';
 import 'plant_list_tile.dart';
 
@@ -16,7 +18,10 @@ class PlantsListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.builder(
       controller: scrollController,
-      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      padding: const EdgeInsets.only(
+        top: AppSpacing.sm,
+        bottom: AppSpacing.md,
+      ),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: plants.length,
       itemBuilder: (context, index) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../domain/entities/plant.dart';
 import 'plant_card.dart';
 
@@ -18,11 +19,11 @@ class PlantsGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlignedGridView.count(
       controller: scrollController,
-      padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
       physics: const AlwaysScrollableScrollPhysics(),
       crossAxisCount: _getCrossAxisCount(context),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
+      mainAxisSpacing: AppSpacing.md,
+      crossAxisSpacing: AppSpacing.md,
       itemCount: plants.length,
       itemBuilder: (context, index) {
         final plant = plants[index];

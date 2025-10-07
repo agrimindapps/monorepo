@@ -181,13 +181,10 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color:
-                                                isAnonymous
-                                                    ? Colors.orange.withValues(
-                                                      alpha: 0.2,
-                                                    )
-                                                    : PlantisColors.primary
-                                                        .withValues(alpha: 0.2),
+                                            color: (isAnonymous
+                                                    ? Colors.orange
+                                                    : PlantisColors.primary)
+                                                .withOpacity(0.2),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
@@ -219,10 +216,10 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: Colors.orange.withValues(alpha: 0.1),
+                                  color: Colors.orange.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.orange.withValues(alpha: 0.3),
+                                    color: Colors.orange.withOpacity(0.3),
                                     width: 1,
                                   ),
                                 ),

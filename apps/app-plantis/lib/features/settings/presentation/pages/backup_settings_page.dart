@@ -32,15 +32,14 @@ class BackupSettingsPage extends ConsumerWidget {
         ),
       ),
       body: ResponsiveLayout(
-        child: Consumer(
-          builder: (context, ref, child) {
-            const isPremium = false;
+        child: () {
+          const isPremium = false;
 
-            if (!isPremium) {
-              return _buildPremiumRequired(context, theme);
-            }
-          },
-        ),
+          if (!isPremium) {
+            return _buildPremiumRequired(context, theme);
+          }
+          return const SizedBox.shrink();
+        }(),
       ),
     );
   }
@@ -77,8 +76,8 @@ class BackupSettingsPage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () => Navigator.of(context).pushNamed('/premium'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: PlantisColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,

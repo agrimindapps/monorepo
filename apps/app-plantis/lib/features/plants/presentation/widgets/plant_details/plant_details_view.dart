@@ -62,96 +62,76 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
-      try {
-        final provider = ref.read(plantDetailsProviderProvider);
-        final taskProvider = ref.read(plantTaskProviderProvider);
-        if (mounted) {
-          _controller = PlantDetailsController(
-            provider: provider,
-            onBack: () {
-              if (mounted) {
-                Navigator.of(context).pop();
-                _notifyListScreenUpdate();
-              }
-            },
-            onNavigateToEdit: (plantId) async {
-              if (mounted) {
-                final result = await PlantFormDialog.show(
-                  context,
-                  plantId: plantId,
-                );
-                if (result == true && mounted) {
-                  final provider = ref.read(plantDetailsProviderProvider);
-                  await provider.reloadPlant(plantId);
-
-                  if (kDebugMode) {
-                    print(
-                      '✅ PlantDetailsView - Planta recarregada após edição: ${provider.plant?.name}',
-                    );
-                  }
-                }
-              }
-            },
-            onNavigateToImages: (plantId) {},
-            onNavigateToSchedule: (plantId) {},
-            onShowSnackBar: (message, type) {
-              if (mounted) _showSnackBar(message, type);
-            },
-            onShowSnackBarWithColor: (message, type, {Color? backgroundColor}) {
-              if (mounted) {
-                _showSnackBarWithColor(
-                  message,
-                  backgroundColor: backgroundColor,
-                );
-              }
-            },
-            onShowDialog: (dialog) {
-              if (mounted) {
-                showDialog<void>(context: context, builder: (_) => dialog);
-              }
-            },
-            onShowBottomSheet: (bottomSheet) {
-              if (mounted) {
-                showModalBottomSheet<void>(
-                  context: context,
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  builder: (_) => bottomSheet,
-                );
-              }
-            },
-            onPlantDeleted: (plantId) {
-              if (mounted) _syncPlantDeletion(plantId);
-            },
-          );
-          if (_controller != null && mounted) {
-            _controller!.loadPlant(widget.plantId);
-          }
-          if (mounted) {
-            _initializeTasksIfNeeded(taskProvider);
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          debugPrint('Error initializing PlantDetailsView: $e');
-        }
-      }
+      _initializeController();
     });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    if (_controller != null) {
-      _controller = null;
-    }
-
+    _controller = null;
     super.dispose();
+  }
+
+  void _initializeController() {
+    try {
+      final provider = ref.read(plantDetailsProviderProvider);
+      final taskProvider = ref.read(plantTaskProviderProvider);
+      _controller = PlantDetailsController(
+        provider: provider,
+        onBack: _onBack,
+        onNavigateToEdit: _onNavigateToEdit,
+        onNavigateToImages: (plantId) {},
+        onNavigateToSchedule: (plantId) {},
+        onShowSnackBar: _showSnackBar,
+        onShowSnackBarWithColor: (message, type, {Color? backgroundColor}) =>
+            _showSnackBarWithColor(message, backgroundColor: backgroundColor),
+        onShowDialog: _onShowDialog,
+        onShowBottomSheet: _onShowBottomSheet,
+        onPlantDeleted: _syncPlantDeletion,
+      );
+      _controller!.loadPlant(widget.plantId);
+      _initializeTasksIfNeeded(taskProvider);
+    } catch (e) {
+      debugPrint('Error initializing PlantDetailsView: $e');
+    }
+  }
+
+  void _onBack() {
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    _notifyListScreenUpdate();
+  }
+
+  Future<void> _onNavigateToEdit(String plantId) async {
+    if (!mounted) return;
+    final result = await PlantFormDialog.show(context, plantId: plantId);
+    if (result == true && mounted) {
+      final provider = ref.read(plantDetailsProviderProvider);
+      await provider.reloadPlant(plantId);
+      if (kDebugMode) {
+        print(
+          '✅ PlantDetailsView - Plant reloaded after edit: ${provider.plant?.name}',
+        );
+      }
+    }
+  }
+
+  void _onShowDialog(Widget dialog) {
+    if (!mounted) return;
+    showDialog<void>(context: context, builder: (_) => dialog);
+  }
+
+  void _onShowBottomSheet(Widget bottomSheet) {
+    if (!mounted) return;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => bottomSheet,
+    );
   }
 
   @override
@@ -162,26 +142,25 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       body: ResponsiveLayout(
         child: Builder(
           builder: (context) {
-            if (plantDetailsProvider.isLoading &&
-                plantDetailsProvider.plant == null) {
+            final details = plantDetailsProvider;
+            final plant = details.plant;
+
+            if (details.isLoading && plant == null) {
               return _buildLoadingState(context);
             }
 
-            if (plantDetailsProvider.hasError &&
-                plantDetailsProvider.plant == null) {
-              return _buildErrorState(
-                context,
-                plantDetailsProvider.errorMessage,
-              );
+            if (details.hasError && plant == null) {
+              return _buildErrorState(context, details.errorMessage);
             }
 
-            final plant = plantDetailsProvider.plant;
             if (plant == null) {
-              return _buildLoadingState(context);
+              return _buildErrorState(context, 'Planta não encontrada.');
             }
+
             if (!_isPlantDataValid(plant)) {
               return _buildInvalidDataState(context, plant);
             }
+
             return _buildMainContent(context, plant);
           },
         ),
@@ -691,19 +670,16 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   void _initializeTasksIfNeeded(PlantTaskProvider taskProvider) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
       try {
         final provider = ref.read(plantDetailsProviderProvider);
-        if (provider.plant != null && mounted) {
+        if (provider.plant != null) {
           final tasks = taskProvider.getTasksForPlant(widget.plantId);
-          if (tasks.isEmpty && mounted) {
+          if (tasks.isEmpty) {
             taskProvider.generateTasksForPlant(provider.plant!);
           }
         }
       } catch (e) {
-        if (mounted) {
-          debugPrint('Error initializing tasks: $e');
-        }
+        debugPrint('Error initializing tasks: $e');
       }
     });
   }
@@ -762,82 +738,39 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   /// - [scheduledDate]: When the task should be performed
 
   void _syncPlantDeletion(String plantId) {
-    try {
-      final plantsProvider = ref.read(plantsProviderProvider);
-      plantsProvider.refreshPlants();
-
-      if (kDebugMode) {
-        print(
-          '✅ _syncPlantDeletion: Refresh solicitado para plantId: $plantId',
-        );
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-          '⚠️ _syncPlantDeletion: Provider não encontrado, tentando ref.read: $e',
-        );
-      }
+    // Schedule the refresh for after the current frame to avoid potential
+    // conflicts with the widget lifecycle.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       try {
-        Future.delayed(Duration.zero, () {
-          if (mounted) {
-            final plantsProvider = ref.read(plantsProviderProvider);
-            plantsProvider.refreshPlants();
-          }
-        });
-      } catch (fallbackError) {
+        ref.read(plantsProviderProvider).refreshPlants();
         if (kDebugMode) {
-          print(
-            '❌ _syncPlantDeletion: Falha total na sincronização: $fallbackError',
-          );
+          print('✅ _syncPlantDeletion: Refresh requested for plantId: $plantId');
         }
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            try {
-              final plantsProvider = ref.read(plantsProviderProvider);
-              plantsProvider.refreshPlants();
-
-              if (kDebugMode) {
-                print('✅ _syncPlantDeletion: Refresh com delay bem sucedido');
-              }
-            } catch (delayedError) {
-              if (kDebugMode) {
-                print(
-                  '❌ _syncPlantDeletion: Falha mesmo com delay: $delayedError',
-                );
-              }
-            }
-          }
-        });
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ _syncPlantDeletion: Failed to refresh plants list: $e');
+        }
       }
-    }
+    });
   }
 
-  /// Notifica a tela de lista para atualizar após mudanças
+  /// Notifies the list screen to update after changes.
   void _notifyListScreenUpdate() {
-    try {
-      Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted) {
-          try {
-            final plantsProvider = ref.read(plantsProviderProvider);
-            plantsProvider.refreshPlants();
-
-            if (kDebugMode) {
-              print(
-                '✅ _notifyListScreenUpdate: Atualização da lista solicitada',
-              );
-            }
-          } catch (e) {
-            if (kDebugMode) {
-              print('⚠️ _notifyListScreenUpdate: Erro ao atualizar lista: $e');
-            }
-          }
+    // A small delay ensures the update happens after any navigation animations.
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
+      try {
+        ref.read(plantsProviderProvider).refreshPlants();
+        if (kDebugMode) {
+          print('✅ _notifyListScreenUpdate: Plants list refresh requested.');
         }
-      });
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ _notifyListScreenUpdate: Erro geral: $e');
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ _notifyListScreenUpdate: Failed to refresh plants list: $e');
+        }
       }
-    }
+    });
   }
 
   void _handleMenuAction(String action, Plant plant) {

@@ -44,7 +44,7 @@ class PlantsErrorWidget extends StatelessWidget {
             Text(
               error,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -56,8 +56,8 @@ class PlantsErrorWidget extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Tentar novamente'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: PlantisColors.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,

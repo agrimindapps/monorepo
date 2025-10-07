@@ -24,25 +24,24 @@ class PlantFormPage extends ConsumerStatefulWidget {
   ConsumerState<PlantFormPage> createState() => _PlantFormPageState();
 }
 
-class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageMixin {
-  bool _initialized = false;
-
+class _PlantFormPageState extends ConsumerState<PlantFormPage>
+    with LoadingPageMixin {
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _initialized = true;
+  void initState() {
+    super.initState();
+    _initializeForm();
+  }
+
+  void _initializeForm() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final formManager = ref.read(solidPlantFormStateManagerProvider);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          if (widget.plantId != null) {
-            formManager.loadPlant(widget.plantId!);
-          } else {
-            formManager.initializeForNewPlant();
-          }
-        }
-      });
-    }
+      if (widget.plantId != null) {
+        formManager.loadPlant(widget.plantId!);
+      } else {
+        formManager.initializeForNewPlant();
+      }
+    });
   }
 
   @override
@@ -182,93 +181,18 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
 
     try {
       final success = await formManager.savePlant();
-
       if (!mounted) return;
       stopSaveLoading();
 
       if (success) {
-        if (kDebugMode) {
-          print(
-            '🔄 PlantFormPage._savePlant() - Atualizando lista de plantas via Riverpod',
-          );
-        }
-        if (mounted) {
-          if (kDebugMode) {
-            print('🔄 PlantFormPage._savePlant() - Chamando refreshPlants()');
-          }
-          unawaited(ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants());
-          if (kDebugMode) {
-            print('✅ PlantFormPage._savePlant() - refreshPlants() chamado com sucesso');
-          }
-        }
-
-        if (kDebugMode) {
-          print(
-            '✅ PlantFormPage._savePlant() - Lista atualizada via Riverpod, navegando de volta',
-          );
-        }
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      widget.plantId != null
-                          ? 'Planta atualizada com sucesso!'
-                          : 'Planta adicionada com sucesso!',
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          widget.onSaved?.call();
-
-          context.pop();
-        }
+        _handleSaveSuccess();
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error, color: Colors.white),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      formState.errorMessage ?? 'Erro ao salvar planta',
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        _showErrorSnackBar(formState.errorMessage ?? 'Erro ao salvar planta');
       }
     } catch (e) {
       if (mounted) {
         stopSaveLoading();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(child: Text('Erro inesperado ao salvar planta: $e')),
-              ],
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        _showErrorSnackBar('Erro inesperado ao salvar: $e');
       }
       if (kDebugMode) {
         print('❌ PlantFormPage._savePlant() - Erro: $e');
@@ -276,66 +200,107 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     }
   }
 
+  void _handleSaveSuccess() {
+    if (!mounted) return;
+
+    unawaited(ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants());
+    if (kDebugMode) {
+      print('✅ PlantFormPage: Plant list refresh triggered.');
+    }
+
+    final message = widget.plantId != null
+        ? 'Planta atualizada com sucesso!'
+        : 'Planta adicionada com sucesso!';
+    _showSuccessSnackBar(message);
+
+    widget.onSaved?.call();
+    context.pop();
+  }
+
+  void _showSuccessSnackBar(String message) {
+    _showSnackBar(message, icon: Icons.check_circle, backgroundColor: Colors.green);
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    _showSnackBar(
+      message,
+      icon: Icons.error,
+      backgroundColor: Theme.of(context).colorScheme.error,
+    );
+  }
+
+  void _showSnackBar(
+    String message, {
+    required IconData icon,
+    required Color backgroundColor,
+  }) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _handleBackPressed(BuildContext context) async {
     final formState = ref.read(solidPlantFormStateProvider);
-    final isEditing = widget.plantId != null;
-
-    if (kDebugMode) {
-      print('🔙 PlantFormPage._handleBackPressed - isEditing: $isEditing, plantId: ${widget.plantId}');
-    }
-    final hasChanges = isEditing && _hasUnsavedChanges(formState);
-
-    if (kDebugMode) {
-      print('🔙 PlantFormPage._handleBackPressed - hasChanges: $hasChanges');
-    }
-
-    if (!hasChanges) {
+    if (!_hasUnsavedChanges(formState)) {
       if (mounted) context.pop();
       return;
     }
 
-    if (!mounted) return;
-
     final navigator = Navigator.of(context);
     final shouldDiscard = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Descartar alterações?'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Você tem alterações não salvas que serão perdidas:',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 12),
-                ..._buildChangesList(formState),
-                const SizedBox(height: 16),
-                const Text(
-                  'Deseja realmente sair sem salvar?',
-                  style: TextStyle(fontWeight: FontWeight.w400),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Descartar'),
-              ),
-            ],
-          ),
+      builder: (context) => _buildDiscardDialog(formState),
     );
 
     if (shouldDiscard == true && mounted) {
       navigator.pop();
     }
+  }
+
+  Widget _buildDiscardDialog(PlantFormState formState) {
+    return AlertDialog(
+      title: const Text('Descartar alterações?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Você tem alterações não salvas que serão perdidas:',
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 12),
+          ..._buildChangesList(formState),
+          const SizedBox(height: 16),
+          const Text(
+            'Deseja realmente sair sem salvar?',
+            style: TextStyle(fontWeight: FontWeight.w400),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
+          child: const Text('Descartar'),
+        ),
+      ],
+    );
   }
 
   /// Check if there are unsaved changes in the form
@@ -346,8 +311,10 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage> with LoadingPageM
     if (formState.notes.trim().isNotEmpty) return true;
     if (formState.plantingDate != null) return true;
     if (formState.imageUrls.isNotEmpty) return true;
-    if (formState.enableWateringCare == true || formState.wateringIntervalDays != null) return true;
-    if (formState.enableFertilizerCare == true || formState.fertilizingIntervalDays != null) return true;
+    if (formState.enableWateringCare == true ||
+        formState.wateringIntervalDays != null) return true;
+    if (formState.enableFertilizerCare == true ||
+        formState.fertilizingIntervalDays != null) return true;
     if (formState.enableSunlightCare == true) return true;
     if (formState.enablePestInspection == true) return true;
     if (formState.enablePruning == true) return true;

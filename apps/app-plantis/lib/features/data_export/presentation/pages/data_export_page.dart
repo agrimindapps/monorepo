@@ -154,15 +154,15 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      PlantisColors.primary.withAlpha(30),
-                      PlantisColors.leaf.withAlpha(30),
+                      PlantisColors.primary.withOpacity(0.12),
+                      PlantisColors.leaf.withOpacity(0.12),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: PlantisColors.primary.withAlpha(60),
+                    color: PlantisColors.primary.withOpacity(0.24),
                   ),
                 ),
                 child: Column(
@@ -173,7 +173,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: PlantisColors.primary.withAlpha(50),
+                            color: PlantisColors.primary.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -200,7 +200,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                       'De acordo com a Lei Geral de Proteção de Dados, você tem o direito de exportar seus dados pessoais em formato estruturado e de uso comum.',
                       style: TextStyle(
                         fontSize: 14,
-                        color: PlantisColors.primary.withAlpha(180),
+                        color: PlantisColors.primary.withOpacity(0.7),
                         height: 1.4,
                       ),
                     ),
@@ -281,7 +281,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: PlantisColors.primary.withAlpha(30),
+                    color: PlantisColors.primary.withOpacity(0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -344,7 +344,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: statusColor.withAlpha(30),
+                    color: statusColor.withOpacity(0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(statusIcon, color: statusColor, size: 20),
@@ -426,7 +426,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.red.withAlpha(20),
+                  color: Colors.red.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(

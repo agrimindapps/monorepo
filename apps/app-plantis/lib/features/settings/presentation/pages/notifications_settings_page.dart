@@ -3,126 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../providers/settings_notifier.dart';
-class NotificationStatusData {
-  final IconData icon;
-  final Color color;
-  final String text;
-  final bool hasPermissions;
-
-  const NotificationStatusData({
-    required this.icon,
-    required this.color,
-    required this.text,
-    required this.hasPermissions,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is NotificationStatusData &&
-          icon == other.icon &&
-          color == other.color &&
-          text == other.text &&
-          hasPermissions == other.hasPermissions;
-
-  @override
-  int get hashCode => Object.hash(icon, color, text, hasPermissions);
-}
-
-class GeneralSettingsData {
-  final bool taskRemindersEnabled;
-  final bool overdueNotificationsEnabled;
-  final bool dailySummaryEnabled;
-  final bool hasPermissions;
-
-  const GeneralSettingsData({
-    required this.taskRemindersEnabled,
-    required this.overdueNotificationsEnabled,
-    required this.dailySummaryEnabled,
-    required this.hasPermissions,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GeneralSettingsData &&
-          taskRemindersEnabled == other.taskRemindersEnabled &&
-          overdueNotificationsEnabled == other.overdueNotificationsEnabled &&
-          dailySummaryEnabled == other.dailySummaryEnabled &&
-          hasPermissions == other.hasPermissions;
-
-  @override
-  int get hashCode => Object.hash(
-    taskRemindersEnabled,
-    overdueNotificationsEnabled,
-    dailySummaryEnabled,
-    hasPermissions,
-  );
-}
-
-class TimeSettingsData {
-  final int reminderMinutesBefore;
-  final TimeOfDay dailySummaryTime;
-  final bool dailySummaryEnabled;
-  final bool hasPermissions;
-
-  const TimeSettingsData({
-    required this.reminderMinutesBefore,
-    required this.dailySummaryTime,
-    required this.dailySummaryEnabled,
-    required this.hasPermissions,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TimeSettingsData &&
-          reminderMinutesBefore == other.reminderMinutesBefore &&
-          dailySummaryTime == other.dailySummaryTime &&
-          dailySummaryEnabled == other.dailySummaryEnabled &&
-          hasPermissions == other.hasPermissions;
-
-  @override
-  int get hashCode => Object.hash(
-    reminderMinutesBefore,
-    dailySummaryTime,
-    dailySummaryEnabled,
-    hasPermissions,
-  );
-}
-
-class TaskTypeSettingsData {
-  final Map<String, bool> taskTypeSettings;
-  final bool hasPermissions;
-
-  const TaskTypeSettingsData({
-    required this.taskTypeSettings,
-    required this.hasPermissions,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is TaskTypeSettingsData &&
-          _mapEquals(taskTypeSettings, other.taskTypeSettings) &&
-          hasPermissions == other.hasPermissions;
-
-  @override
-  int get hashCode =>
-      Object.hash(_mapHashCode(taskTypeSettings), hasPermissions);
-
-  bool _mapEquals(Map<String, bool> map1, Map<String, bool> map2) {
-    if (map1.length != map2.length) return false;
-    for (final key in map1.keys) {
-      if (map1[key] != map2[key]) return false;
-    }
-    return true;
-  }
-
-  int _mapHashCode(Map<String, bool> map) {
-    return Object.hashAll(map.entries.map((e) => Object.hash(e.key, e.value)));
-  }
-}
 
 class NotificationsSettingsPage extends ConsumerWidget {
   const NotificationsSettingsPage({super.key});
@@ -170,13 +50,6 @@ class NotificationsSettingsPage extends ConsumerWidget {
   Widget _buildNotificationStatusCard(BuildContext context, WidgetRef ref, SettingsState settingsData) {
     final theme = Theme.of(context);
 
-    final statusData = NotificationStatusData(
-      icon: settingsData.notificationStatusIcon,
-      color: settingsData.notificationStatusColor,
-      text: settingsData.notificationStatusText,
-      hasPermissions: settingsData.hasPermissionsGranted,
-    );
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -185,7 +58,10 @@ class NotificationsSettingsPage extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(statusData.icon, color: statusData.color),
+                Icon(
+                  settingsData.notificationStatusIcon,
+                  color: settingsData.notificationStatusColor,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Status das Notificações',
@@ -199,13 +75,13 @@ class NotificationsSettingsPage extends ConsumerWidget {
             const SizedBox(height: 8),
 
             Text(
-              statusData.text,
+              settingsData.notificationStatusText,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: statusData.color,
+                color: settingsData.notificationStatusColor,
               ),
             ),
 
-            if (!statusData.hasPermissions && !settingsData.isWebPlatform)
+            if (!settingsData.hasPermissionsGranted && !settingsData.isWebPlatform)
               Column(
                 children: [
                   const SizedBox(height: 12),

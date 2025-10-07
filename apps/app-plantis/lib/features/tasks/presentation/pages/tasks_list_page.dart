@@ -13,105 +13,6 @@ import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
 import '../widgets/tasks_error_boundary.dart';
 
-class TasksListState {
-  final bool isLoading;
-  final bool hasError;
-  final String? errorMessage;
-  final bool isEmpty;
-  final bool hasActiveOperations;
-  final String? currentOperationMessage;
-
-  const TasksListState({
-    required this.isLoading,
-    required this.hasError,
-    this.errorMessage,
-    required this.isEmpty,
-    required this.hasActiveOperations,
-    this.currentOperationMessage,
-  });
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is TasksListState &&
-        other.isLoading == isLoading &&
-        other.hasError == hasError &&
-        other.errorMessage == errorMessage &&
-        other.isEmpty == isEmpty &&
-        other.hasActiveOperations == hasActiveOperations &&
-        other.currentOperationMessage == currentOperationMessage;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      isLoading,
-      hasError,
-      errorMessage,
-      isEmpty,
-      hasActiveOperations,
-      currentOperationMessage,
-    );
-  }
-}
-
-class TasksListData {
-  final List<task_entity.Task> filteredTasks;
-  final bool isLoading;
-  final TasksFilterType currentFilter;
-  final int totalTasks;
-
-  const TasksListData({
-    required this.filteredTasks,
-    required this.isLoading,
-    required this.currentFilter,
-    required this.totalTasks,
-  });
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is TasksListData &&
-        other.isLoading == isLoading &&
-        other.currentFilter == currentFilter &&
-        other.totalTasks == totalTasks &&
-        _listEquals(other.filteredTasks, filteredTasks);
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      Object.hashAll(filteredTasks.map((t) => t.id)),
-      isLoading,
-      currentFilter,
-      totalTasks,
-    );
-  }
-
-  bool _listEquals(List<task_entity.Task> a, List<task_entity.Task> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i].id != b[i].id) return false;
-    }
-    return true;
-  }
-}
-
-class TaskDateGroup {
-  final String dateKey;
-  final List<task_entity.Task> tasks;
-
-  TaskDateGroup({required this.dateKey, required this.tasks});
-
-  DateTime get date {
-    final parts = dateKey.split('-');
-    return DateTime(
-      int.parse(parts[0]),
-      int.parse(parts[1]),
-      int.parse(parts[2]),
-    );
-  }
-}
 
 class TasksListPage extends ConsumerStatefulWidget {
   const TasksListPage({super.key});
@@ -205,7 +106,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         margin: const EdgeInsets.only(right: 16),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.task_alt, color: Colors.white, size: 24),
@@ -216,39 +117,47 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   Widget _buildTasksAsyncContent() {
     final tasksAsync = ref.watch(tasksProvider);
     return tasksAsync.when(
-      data: (TasksState tasksState) {
-        final state = TasksListState(
-          isLoading: false,
-          hasError: false,
-          errorMessage: null,
-          isEmpty: tasksState.allTasks.isEmpty,
-          hasActiveOperations: tasksState.activeOperations.isNotEmpty,
-          currentOperationMessage: tasksState.currentOperationMessage,
+      data: (tasksState) {
+        return RefreshIndicator(
+          onRefresh: () => ref.read(tasksProvider.notifier).loadTasks(),
+          child: Stack(
+            children: [
+              _buildTasksList(tasksState),
+              if (tasksState.activeOperations.isNotEmpty)
+                _buildOperationOverlay(tasksState),
+            ],
+          ),
         );
-        return _buildTasksContent(state);
       },
-      loading: () {
-        const state = TasksListState(
-          isLoading: true,
-          hasError: false,
-          errorMessage: null,
-          isEmpty: false,
-          hasActiveOperations: false,
-          currentOperationMessage: null,
-        );
-        return _buildTasksContent(state);
-      },
-      error: (Object error, StackTrace stack) {
-        final state = TasksListState(
-          isLoading: false,
-          hasError: true,
-          errorMessage: error.toString(),
-          isEmpty: false,
-          hasActiveOperations: false,
-          currentOperationMessage: null,
-        );
-        return _buildTasksContent(state);
-      },
+      loading: () => const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Carregando tarefas...'),
+          ],
+        ),
+      ),
+      error: (error, stack) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              error.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => ref.read(tasksProvider.notifier).loadTasks(),
+              child: const Text('Tentar novamente'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -301,9 +210,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                       .read(tasksProvider.notifier)
                       .filterTasks(TasksFilterType.overdue);
                 },
-                selectedColor: Colors.red.withValues(alpha: 0.2),
+                selectedColor: Colors.red.withOpacity(0.2),
                 checkmarkColor: Colors.red,
-                backgroundColor: Colors.red.withValues(alpha: 0.1),
+                backgroundColor: Colors.red.withOpacity(0.1),
                 side: BorderSide.none,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -357,9 +266,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksProvider.notifier)
                     .filterTasks(TasksFilterType.today);
               },
-              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+              selectedColor: PlantisColors.primary.withOpacity(0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+              backgroundColor: PlantisColors.primary.withOpacity(0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
@@ -409,9 +318,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksProvider.notifier)
                     .filterTasks(TasksFilterType.upcoming);
               },
-              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+              selectedColor: PlantisColors.primary.withOpacity(0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+              backgroundColor: PlantisColors.primary.withOpacity(0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
@@ -461,9 +370,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksProvider.notifier)
                     .filterTasks(TasksFilterType.allFuture);
               },
-              selectedColor: PlantisColors.primary.withValues(alpha: 0.2),
+              selectedColor: PlantisColors.primary.withOpacity(0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withValues(alpha: 0.1),
+              backgroundColor: PlantisColors.primary.withOpacity(0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
@@ -484,17 +393,17 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     );
   }
 
-  Widget _buildTasksListContent(TasksListData data) {
-    if (data.filteredTasks.isEmpty && !data.isLoading) {
+  Widget _buildTasksList(TasksState tasksState) {
+    if (tasksState.filteredTasks.isEmpty) {
       return EmptyTasksWidget(
-        filterType: data.currentFilter,
-        onAddTask: () {}, // Removido - tarefas geradas automaticamente
+        filterType: tasksState.currentFilter,
+        onAddTask: () {},
       );
     }
-    final groupedTasks = _groupTasksByDate(data.filteredTasks);
+    final groupedTasks = _groupTasksByDate(tasksState.filteredTasks);
     final shouldShowViewAllButton =
-        data.currentFilter == TasksFilterType.upcoming &&
-        data.totalTasks > data.filteredTasks.length;
+        tasksState.currentFilter == TasksFilterType.upcoming &&
+            tasksState.allTasks.length > tasksState.filteredTasks.length;
 
     return CustomScrollView(
       slivers: [
@@ -504,7 +413,6 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             if (shouldShowViewAllButton && index == groupedTasks.length) {
               return _buildViewAllButton();
             }
-
             final dateGroup = groupedTasks[index];
             return _buildDateGroup(dateGroup);
           },
@@ -513,7 +421,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     );
   }
 
-  List<TaskDateGroup> _groupTasksByDate(List<task_entity.Task> tasks) {
+  List<MapEntry<String, List<task_entity.Task>>> _groupTasksByDate(
+    List<task_entity.Task> tasks,
+  ) {
     final Map<String, List<task_entity.Task>> grouped = {};
 
     for (final task in tasks) {
@@ -524,20 +434,24 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       grouped[dateKey]!.add(task);
     }
 
-    return grouped.entries
-        .map((entry) => TaskDateGroup(dateKey: entry.key, tasks: entry.value))
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final sortedEntries = grouped.entries.toList()
+      ..sort((a, b) {
+        final dateA = DateTime.parse(a.key);
+        final dateB = DateTime.parse(b.key);
+        return dateA.compareTo(dateB);
+      });
+    return sortedEntries;
   }
 
   String _getDateKey(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildDateGroup(TaskDateGroup dateGroup) {
+  Widget _buildDateGroup(MapEntry<String, List<task_entity.Task>> dateGroup) {
     final theme = Theme.of(context);
+    final date = DateTime.parse(dateGroup.key);
     return Column(
-      key: ValueKey(dateGroup.dateKey),
+      key: ValueKey(dateGroup.key),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
@@ -555,7 +469,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               ),
               const SizedBox(width: 12),
               Text(
-                _formatDateHeader(dateGroup.date),
+                _formatDateHeader(date),
                 style: TextStyle(
                   color: theme.colorScheme.onSurface,
                   fontSize: 20,
@@ -565,7 +479,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ],
           ),
         ),
-        ...dateGroup.tasks.map((task) => _buildTaskCard(task)),
+        ...dateGroup.value.map((task) => _buildTaskCard(task)),
         const SizedBox(height: 16),
       ],
     );
@@ -648,9 +562,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: PlantisColors.primary.withValues(alpha: 0.1),
+                color: PlantisColors.primary.withOpacity(0.1),
                 border: Border.all(
-                  color: PlantisColors.primary.withValues(alpha: 0.3),
+                  color: PlantisColors.primary.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -665,8 +579,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
                               Icons.local_florist,
-                              color: PlantisColors.primary.withValues(
-                                alpha: 0.6,
+                              color: PlantisColors.primary.withOpacity(
+                                0.6,
                               ),
                               size: 24,
                             );
@@ -674,7 +588,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                         )
                         : Icon(
                           Icons.local_florist,
-                          color: PlantisColors.primary.withValues(alpha: 0.6),
+                          color: PlantisColors.primary.withOpacity(0.6),
                           size: 24,
                         ),
               ),
@@ -687,8 +601,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   Text(
                     task.title,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: isLoading ? 0.6 : 1.0,
+                      color: theme.colorScheme.onSurface.withOpacity(
+                        isLoading ? 0.6 : 1.0,
                       ),
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -698,7 +612,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   Text(
                     plantName,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
                       fontSize: 14,
                     ),
                   ),
@@ -863,149 +777,59 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     );
   }
 
-  Widget _buildOperationOverlay() {
-    return Consumer(
-      builder: (context, WidgetRef ref, child) {
-        final theme = Theme.of(context);
-        final tasksAsync = ref.watch(tasksProvider);
-        return tasksAsync.when(
-          data:
-              (TasksState tasksState) => Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            theme.colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          tasksState.currentOperationMessage?.toString() ??
-                              'Processando...',
-                          style: TextStyle(
-                            color: theme.colorScheme.onPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+  Widget _buildOperationOverlay(TasksState tasksState) {
+    final theme = Theme.of(context);
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  theme.colorScheme.onPrimary,
                 ),
               ),
-          loading: () => const SizedBox.shrink(),
-          error: (error, stack) => const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-
-  Widget _buildTasksContent(TasksListState state) {
-    if (state.isLoading && state.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Carregando tarefas...'),
-          ],
-        ),
-      );
-    }
-
-    if (state.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage ?? 'Erro desconhecido',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text('Tentar novamente'),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                tasksState.currentOperationMessage?.toString() ??
+                    'Processando...',
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
-      );
-    }
-
-    return _buildRefreshableTasksList(state);
-  }
-
-  Widget _buildRefreshableTasksList(TasksListState state) {
-    return RefreshIndicator(
-      onRefresh: () => ref.read(tasksProvider.notifier).loadTasks(),
-      child: Stack(
-        children: [
-          _buildTasksListAsync(),
-          if (state.hasActiveOperations ||
-              state.currentOperationMessage != null)
-            _buildOperationOverlay(),
-        ],
       ),
-    );
-  }
-
-  Widget _buildTasksListAsync() {
-    final tasksAsync = ref.watch(tasksProvider);
-    return tasksAsync.when(
-      data: (TasksState tasksState) {
-        final data = TasksListData(
-          filteredTasks: tasksState.filteredTasks,
-          isLoading: false,
-          currentFilter: tasksState.currentFilter,
-          totalTasks: tasksState.allTasks.length,
-        );
-        return _buildTasksListContent(data);
-      },
-      loading: () {
-        const data = TasksListData(
-          filteredTasks: [],
-          isLoading: true,
-          currentFilter: TasksFilterType.today,
-          totalTasks: 0,
-        );
-        return _buildTasksListContent(data);
-      },
-      error: (Object error, StackTrace stack) {
-        return Center(child: Text('Error loading tasks: $error'));
-      },
     );
   }
 }

@@ -98,7 +98,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
           end: Alignment.bottomCenter,
           colors: [
             PlantisColors.primary,
-            PlantisColors.primary.withValues(alpha: 0.8),
+            PlantisColors.primary.withOpacity(0.8),
           ],
         ),
       ),
@@ -115,7 +115,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(Icons.eco, size: 80, color: Colors.white),
@@ -149,7 +149,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
           end: Alignment.bottomCenter,
           colors: [
             PlantisColors.primary,
-            PlantisColors.primary.withValues(alpha: 0.8),
+            PlantisColors.primary.withOpacity(0.8),
           ],
         ),
       ),
@@ -162,7 +162,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Icon(Icons.eco, size: 80, color: Colors.white),
@@ -205,7 +205,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
           end: Alignment.bottomCenter,
           colors: [
             PlantisColors.primary,
-            PlantisColors.primary.withValues(alpha: 0.8),
+            PlantisColors.primary.withOpacity(0.8),
             Colors.white,
           ],
           stops: const [0.0, 0.6, 1.0],
@@ -291,7 +291,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
                   Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: const Icon(
@@ -322,7 +322,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
                     'O aplicativo que transforma você em um jardineiro expert.\nLembretes inteligentes, dicas personalizadas e muito mais.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: Colors.white.withOpacity(0.9),
                       fontSize: 18,
                       height: 1.4,
                     ),
@@ -442,7 +442,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, size: 32, color: color),
@@ -484,13 +484,13 @@ class _LandingPageState extends ConsumerState<LandingPage>
         gradient: LinearGradient(
           colors: [
             PlantisColors.primary,
-            PlantisColors.primary.withValues(alpha: 0.8),
+            PlantisColors.primary.withOpacity(0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: PlantisColors.primary.withValues(alpha: 0.3),
+            color: PlantisColors.primary.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -514,7 +514,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
             'Junte-se a milhares de pessoas que já transformaram seus lares em verdadeiros jardins.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white.withOpacity(0.9),
               fontSize: 16,
               height: 1.5,
             ),
@@ -544,7 +544,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
             '✓ Grátis para sempre  ✓ Sem cartão de crédito  ✓ Pronto em 30 segundos',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Colors.white.withOpacity(0.8),
               fontSize: 12,
             ),
           ),

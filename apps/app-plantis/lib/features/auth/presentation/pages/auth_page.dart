@@ -179,26 +179,20 @@ class _AuthPageState extends ConsumerState<AuthPage>
     }
   }
 
-  Future<void> _handleLogin() async {
-    if (_loginFormKey.currentState!.validate()) {
-      showLoading(message: 'Fazendo login...');
-
-      final router = GoRouter.of(context);
-      await _saveRememberedCredentials();
-      final authNotifier = ref.read(authProvider.notifier);
-
+  Future<void> _submitAuthAction({
+    GlobalKey<FormState>? formKey,
+    required String loadingMessage,
+    required Future<void> Function() authFuture,
+  }) async {
+    if (formKey == null || formKey.currentState!.validate()) {
+      showLoading(message: loadingMessage);
       try {
-        await authNotifier.login(
-          _loginEmailController.text,
-          _loginPasswordController.text,
-        );
-
+        await authFuture();
         if (!mounted) return;
-
         hideLoading();
         final authState = ref.read(authProvider);
         if (authState.hasValue && authState.value!.isAuthenticated) {
-          router.go('/plants');
+          GoRouter.of(context).go('/plants');
         }
       } catch (e) {
         if (mounted) {
@@ -208,33 +202,35 @@ class _AuthPageState extends ConsumerState<AuthPage>
     }
   }
 
+  Future<void> _handleLogin() async {
+    await _saveRememberedCredentials();
+    await _submitAuthAction(
+      formKey: _loginFormKey,
+      loadingMessage: 'Fazendo login...',
+      authFuture: () => ref.read(authProvider.notifier).login(
+            _loginEmailController.text,
+            _loginPasswordController.text,
+          ),
+    );
+  }
+
   Future<void> _handleRegister() async {
-    if (_registerFormKey.currentState!.validate()) {
-      showLoading(message: 'Criando conta...');
+    await _submitAuthAction(
+      formKey: _registerFormKey,
+      loadingMessage: 'Criando conta...',
+      authFuture: () => ref.read(authProvider.notifier).register(
+            _registerEmailController.text,
+            _registerPasswordController.text,
+            _registerNameController.text,
+          ),
+    );
+  }
 
-      final router = GoRouter.of(context);
-      final authNotifier = ref.read(authProvider.notifier);
-
-      try {
-        await authNotifier.register(
-          _registerEmailController.text,
-          _registerPasswordController.text,
-          _registerNameController.text,
-        );
-
-        if (!mounted) return;
-
-        hideLoading();
-        final authState = ref.read(authProvider);
-        if (authState.hasValue && authState.value!.isAuthenticated) {
-          router.go('/plants');
-        }
-      } catch (e) {
-        if (mounted) {
-          hideLoading();
-        }
-      }
-    }
+  Future<void> _handleAnonymousLogin() async {
+    await _submitAuthAction(
+      loadingMessage: 'Entrando anonimamente...',
+      authFuture: () => ref.read(authProvider.notifier).signInAnonymously(),
+    );
   }
 
   void _showSocialLoginDialog() {
@@ -299,29 +295,9 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 child: const Text('Cancelar'),
               ),
               TextButton(
-                onPressed: () async {
+                onPressed: () {
                   Navigator.of(context).pop();
-                  showLoading(message: 'Entrando anonimamente...');
-
-                  final router = GoRouter.of(context);
-                  final authNotifier = ref.read(authProvider.notifier);
-
-                  try {
-                    await authNotifier.signInAnonymously();
-
-                    if (!mounted) return;
-
-                    hideLoading();
-                    final authState = ref.read(authProvider);
-                    if (authState.hasValue &&
-                        authState.value!.isAuthenticated) {
-                      router.go('/plants');
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      hideLoading();
-                    }
-                  }
+                  _handleAnonymousLogin();
                 },
                 child: const Text('Prosseguir'),
               ),
@@ -851,36 +827,15 @@ class _AuthPageState extends ConsumerState<AuthPage>
               );
             },
             prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: Semantics(
-              label:
-                  _obscureLoginPassword
-                      ? AccessibilityTokens.getSemanticLabel(
-                        'show_password',
-                        'Mostrar senha',
-                      )
-                      : AccessibilityTokens.getSemanticLabel(
-                        'hide_password',
-                        'Ocultar senha',
-                      ),
-              button: true,
-              child: IconButton(
-                icon: Icon(
-                  _obscureLoginPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: PlantisColors.primary.withValues(alpha: 0.7),
-                  size: 22,
-                ),
-                onPressed: () {
-                  AccessibilityTokens.performHapticFeedback('light');
-                  setState(() {
-                    _obscureLoginPassword = !_obscureLoginPassword;
-                  });
-                  final message =
-                      _obscureLoginPassword ? 'Senha oculta' : 'Senha visível';
-                  SemanticsService.announce(message, ui.TextDirection.ltr);
-                },
-              ),
+            suffixIcon: _buildPasswordVisibilityToggle(
+              isObscured: _obscureLoginPassword,
+              onToggle: (value) {
+                setState(() {
+                  _obscureLoginPassword = value;
+                });
+              },
+              fieldName: 'senha',
+              fieldSemanticName: 'password',
             ),
             onSubmitted: (value) {
               _loginButtonFocusNode?.requestFocus();
@@ -1333,38 +1288,15 @@ class _AuthPageState extends ConsumerState<AuthPage>
               );
             },
             prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: Semantics(
-              label:
-                  _obscureRegisterPassword
-                      ? AccessibilityTokens.getSemanticLabel(
-                        'show_password',
-                        'Mostrar senha',
-                      )
-                      : AccessibilityTokens.getSemanticLabel(
-                        'hide_password',
-                        'Ocultar senha',
-                      ),
-              button: true,
-              child: IconButton(
-                icon: Icon(
-                  _obscureRegisterPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: PlantisColors.primary.withValues(alpha: 0.7),
-                  size: 22,
-                ),
-                onPressed: () {
-                  AccessibilityTokens.performHapticFeedback('light');
-                  setState(() {
-                    _obscureRegisterPassword = !_obscureRegisterPassword;
-                  });
-                  final message =
-                      _obscureRegisterPassword
-                          ? 'Senha oculta'
-                          : 'Senha visível';
-                  SemanticsService.announce(message, ui.TextDirection.ltr);
-                },
-              ),
+            suffixIcon: _buildPasswordVisibilityToggle(
+              isObscured: _obscureRegisterPassword,
+              onToggle: (value) {
+                setState(() {
+                  _obscureRegisterPassword = value;
+                });
+              },
+              fieldName: 'senha',
+              fieldSemanticName: 'register_password',
             ),
           ),
           const SizedBox(height: 16),
@@ -1384,39 +1316,15 @@ class _AuthPageState extends ConsumerState<AuthPage>
               );
             },
             prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: Semantics(
-              label:
-                  _obscureRegisterConfirmPassword
-                      ? AccessibilityTokens.getSemanticLabel(
-                        'show_password',
-                        'Mostrar confirmação de senha',
-                      )
-                      : AccessibilityTokens.getSemanticLabel(
-                        'hide_password',
-                        'Ocultar confirmação de senha',
-                      ),
-              button: true,
-              child: IconButton(
-                icon: Icon(
-                  _obscureRegisterConfirmPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: PlantisColors.primary.withValues(alpha: 0.7),
-                  size: 22,
-                ),
-                onPressed: () {
-                  AccessibilityTokens.performHapticFeedback('light');
-                  setState(() {
-                    _obscureRegisterConfirmPassword =
-                        !_obscureRegisterConfirmPassword;
-                  });
-                  final message =
-                      _obscureRegisterConfirmPassword
-                          ? 'Confirmação de senha oculta'
-                          : 'Confirmação de senha visível';
-                  SemanticsService.announce(message, ui.TextDirection.ltr);
-                },
-              ),
+            suffixIcon: _buildPasswordVisibilityToggle(
+              isObscured: _obscureRegisterConfirmPassword,
+              onToggle: (value) {
+                setState(() {
+                  _obscureRegisterConfirmPassword = value;
+                });
+              },
+              fieldName: 'confirmação de senha',
+              fieldSemanticName: 'register_confirm_password',
             ),
             onSubmitted: (value) {
               _registerButtonFocusNode?.requestFocus();
@@ -1788,4 +1696,40 @@ class PlantBackgroundPatternPainter extends CustomPainter {
   bool shouldRepaint(PlantBackgroundPatternPainter oldDelegate) {
     return oldDelegate.animation != animation;
   }
+}
+
+Widget _buildPasswordVisibilityToggle({
+  required bool isObscured,
+  required ValueChanged<bool> onToggle,
+  required String fieldName,
+  required String fieldSemanticName,
+}) {
+  return Semantics(
+    label: isObscured
+        ? AccessibilityTokens.getSemanticLabel(
+            'show_$fieldSemanticName',
+            'Mostrar $fieldName',
+          )
+        : AccessibilityTokens.getSemanticLabel(
+            'hide_$fieldSemanticName',
+            'Ocultar $fieldName',
+          ),
+    button: true,
+    child: IconButton(
+      icon: Icon(
+        isObscured
+            ? Icons.visibility_outlined
+            : Icons.visibility_off_outlined,
+        color: PlantisColors.primary.withOpacity(0.7),
+        size: 22,
+      ),
+      onPressed: () {
+        AccessibilityTokens.performHapticFeedback('light');
+        onToggle(!isObscured);
+        final message =
+            !isObscured ? '$fieldName ocultada' : '$fieldName visível';
+        SemanticsService.announce(message, ui.TextDirection.ltr);
+      },
+    ),
+  );
 }

@@ -21,7 +21,14 @@ class _LandingPageState extends ConsumerState<LandingPage>
   @override
   void initState() {
     super.initState();
+    _initAnimations();
+    _animationController.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _checkUserLoginStatus();
+    });
+  }
 
+  void _initAnimations() {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -43,13 +50,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
         curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
       ),
     );
-
-    _animationController.forward();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      _checkUserLoginStatus();
-    });
   }
 
   void _checkUserLoginStatus() {
@@ -58,9 +58,7 @@ class _LandingPageState extends ConsumerState<LandingPage>
     final isAuthenticated = ref.read(local.isAuthenticatedProvider);
     if (isInitialized && isAuthenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          context.go('/plants');
-        }
+        if (mounted) context.go('/plants');
       });
     }
   }
@@ -78,17 +76,15 @@ class _LandingPageState extends ConsumerState<LandingPage>
         builder: (context, ref, child) {
           final isInitialized = ref.watch(local.isInitializedProvider);
           final isAuthenticated = ref.watch(local.isAuthenticatedProvider);
-          if (!isInitialized) {
-            return _buildSplashScreen();
-          }
-          if (isAuthenticated) {
-            return _buildRedirectingScreen();
-          }
+          if (!isInitialized) return _buildSplashScreen();
+          if (isAuthenticated) return _buildRedirectingScreen();
           return _buildLandingContent();
         },
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
 
   Widget _buildSplashScreen() {
     return DecoratedBox(
@@ -226,6 +222,8 @@ class _LandingPageState extends ConsumerState<LandingPage>
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
 
   Widget _buildHeader() {
     return Container(
@@ -402,7 +400,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
             Colors.blue,
           ),
           const SizedBox(height: 32),
-
           _buildFeatureItem(
             Icons.photo_camera,
             'Diário Visual',
@@ -410,7 +407,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
             Colors.green,
           ),
           const SizedBox(height: 32),
-
           _buildFeatureItem(
             Icons.lightbulb_outline,
             'Dicas Personalizadas',
@@ -418,7 +414,6 @@ class _LandingPageState extends ConsumerState<LandingPage>
             Colors.orange,
           ),
           const SizedBox(height: 32),
-
           _buildFeatureItem(
             Icons.group,
             'Organize por Espaços',
@@ -513,8 +508,8 @@ class _LandingPageState extends ConsumerState<LandingPage>
           Text(
             'Junte-se a milhares de pessoas que já transformaram seus lares em verdadeiros jardins.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 16,
               height: 1.5,
             ),

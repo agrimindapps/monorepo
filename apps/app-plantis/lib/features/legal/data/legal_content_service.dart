@@ -1,14 +1,19 @@
+// Imports
 import '../../../core/constants/app_config.dart';
 import '../../../core/theme/plantis_colors.dart';
 import '../presentation/widgets/base_legal_page.dart';
 
-/// Service for managing legal content in structured data format
-/// Makes legal content easily updatable without code changes
+/// Service that provides legal content (Privacy Policy & Terms of Service)
+/// as structured data. The content is stored as static constants to
+/// avoid runtime parsing and to keep the service lightweight.
 class LegalContentService {
-  /// Last update date for legal content
+  // ---------------------------------------------------------------------
+  // Constants
+  // ---------------------------------------------------------------------
+  /// Last update date for all legal documents.
   static const String _lastUpdatedDate = '2024-12-15';
 
-  /// Privacy Policy content structured data
+  /// Privacy Policy content.
   static const Map<String, dynamic> _privacyPolicyContent = {
     'lastUpdated': _lastUpdatedDate,
     'sections': [
@@ -210,7 +215,7 @@ Ao usar nosso aplicativo, você concorda com a coleta e uso de informações de 
     ],
   };
 
-  /// Terms of Service content structured data
+  /// Terms of Service content.
   static const Map<String, dynamic> _termsOfServiceContent = {
     'lastUpdated': _lastUpdatedDate,
     'sections': [
@@ -346,7 +351,10 @@ Responderemos suas questões em até 48 horas úteis.''',
     ],
   };
 
-  /// Get Privacy Policy sections from structured data
+  // ---------------------------------------------------------------------
+  // Public API
+  // ---------------------------------------------------------------------
+  /// Returns a list of [LegalSection] objects for the Privacy Policy.
   static List<LegalSection> getPrivacyPolicySections() {
     final data = _privacyPolicyContent['sections'] as List;
     return data.asMap().entries.map((entry) {
@@ -361,7 +369,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     }).toList();
   }
 
-  /// Get Terms of Service sections from structured data
+  /// Returns a list of [LegalSection] objects for the Terms of Service.
   static List<LegalSection> getTermsOfServiceSections() {
     final data = _termsOfServiceContent['sections'] as List;
     return data.asMap().entries.map((entry) {
@@ -376,12 +384,10 @@ Responderemos suas questões em até 48 horas úteis.''',
     }).toList();
   }
 
-  /// Get the last updated date for legal content
-  static String getLastUpdatedDate() {
-    return _lastUpdatedDate;
-  }
+  /// Returns the raw last updated date string.
+  static String getLastUpdatedDate() => _lastUpdatedDate;
 
-  /// Get formatted last updated date in Portuguese
+  /// Returns the last updated date formatted in Portuguese.
   static String getFormattedLastUpdatedDate() {
     final date = DateTime.parse('$_lastUpdatedDate 00:00:00');
     final months = [
@@ -398,10 +404,11 @@ Responderemos suas questões em até 48 horas úteis.''',
       'Novembro',
       'Dezembro',
     ];
-    return '${date.day} de ${months[date.month - 1]} de ${date.year}';
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
   /// Check if content has been updated recently
+  /// Checks if the content has been updated recently (within 30 days).
   static bool hasRecentUpdates() {
     final lastUpdate = DateTime.parse('$_lastUpdatedDate 00:00:00');
     final now = DateTime.now();
@@ -409,7 +416,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     return difference <= 30; // Consider recent if updated within 30 days
   }
 
-  /// Get content version for tracking changes
+  /// Returns a version string for the content based on the last update date and section count.
   static String getContentVersion() {
     final privacySections = _privacyPolicyContent['sections'] as List;
     final termsSections = _termsOfServiceContent['sections'] as List;
@@ -417,7 +424,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     return '${_lastUpdatedDate}_v$totalSections';
   }
 
-  /// Get contact information for legal support
+  /// Retrieves contact information for legal support.
   static Map<String, String> getContactInfo() {
     return {
       'support_email': AppConfig.supportEmailUrl,
@@ -428,7 +435,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     };
   }
 
-  /// Get support actions for legal pages
+  /// Provides a list of support actions for legal pages.
   static List<Map<String, dynamic>> getSupportActions() {
     return [
       {
@@ -458,7 +465,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     ];
   }
 
-  /// Validate if all configured URLs are properly formatted
+  /// Validates if all configured URLs are properly formatted.
   static Map<String, bool> validateUrls() {
     final contactInfo = getContactInfo();
     final validationResults = <String, bool>{};
@@ -470,7 +477,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     return validationResults;
   }
 
-  /// Get environment-specific legal content metadata
+  /// Retrieves metadata about the legal content.
   static Map<String, dynamic> getContentMetadata() {
     return {
       'last_updated': _lastUpdatedDate,
@@ -487,7 +494,7 @@ Responderemos suas questões em até 48 horas úteis.''',
     };
   }
 
-  /// Retorna as seções da política de exclusão de contas
+  /// Returns the sections of the account deletion policy.
   /// Conforme requisitos das lojas de aplicativos e legislações de privacidade
   static List<LegalSection> getAccountDeletionSections() {
     return [

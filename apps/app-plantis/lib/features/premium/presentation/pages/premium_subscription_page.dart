@@ -36,7 +36,8 @@ class PremiumSubscriptionPage extends ConsumerStatefulWidget {
       _PremiumSubscriptionPageState();
 }
 
-class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPage>
+class _PremiumSubscriptionPageState
+    extends ConsumerState<PremiumSubscriptionPage>
     with LoadingPageMixin {
   String? _selectedPlanId;
 
@@ -322,9 +323,10 @@ class _PremiumSubscriptionPageState extends ConsumerState<PremiumSubscriptionPag
   }
 
   /// Exibe mensagens de erro, sucesso ou informação
+  // Update error handling to use the new PremiumError type
   void _showMessages(BuildContext context, PremiumProvider provider) {
-    if (provider.errorMessage != null) {
-      _showErrorSnackBar(provider.errorMessage!);
+    if (provider.error != null) {
+      _showErrorSnackBar(provider.error!.message);
       provider.clearError();
     }
   }

@@ -1,8 +1,26 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../providers/premium_notifier.dart';
+
+// NOTE: Centralizing strings here to make future i18n extraction easier.
+// TODO: Move these to the project's l10n/i18n system (intl/gen_l10n) when available.
+class _PremiumStrings {
+  static const pageTitle = 'GasOMeter Premium';
+  static const premiumActive = 'Premium Ativo';
+  static const unlockPremium = 'Desbloqueie o Premium';
+  static const premiumUnlocked = 'Todos os recursos premium desbloqueados';
+  static const premiumDescription =
+      'Acesse recursos avançados e análises detalhadas';
+  static const activeLabel = 'ATIVO';
+  static const choosePlan = 'Escolha seu Plano';
+  static const subscribeNow = 'Assinar Agora';
+  static const purchaseInProgress =
+      'Funcionalidade de compra em desenvolvimento';
+  static const mostPopular = 'MAIS POPULAR';
+}
 
 class PremiumPage extends ConsumerStatefulWidget {
   const PremiumPage({super.key});
@@ -26,20 +44,15 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
     _animationController.forward();
   }
 
@@ -53,7 +66,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
   @override
   Widget build(BuildContext context) {
     final premiumAsync = ref.watch(premiumNotifierProvider);
-    final bool isPremiumValue = premiumAsync.when(
+    final bool isPremium = premiumAsync.when(
       data: (premiumState) => premiumState.isPremium,
       loading: () => false,
       error: (_, __) => false,
@@ -66,13 +79,13 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
           position: _slideAnimation,
           child: CustomScrollView(
             slivers: [
-              _buildSliverAppBar(context, isPremiumValue),
+              _buildSliverAppBar(context, isPremium),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      _buildStatusCard(context, isPremiumValue),
+                      _buildStatusCard(context, isPremium),
                       const SizedBox(height: 24),
                       _buildFeatureTabs(context),
                       const SizedBox(height: 16),
@@ -81,14 +94,14 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                         child: TabBarView(
                           controller: _tabController,
                           children: [
-                            _buildEssentialFeatures(context, isPremiumValue),
-                            _buildAdvancedFeatures(context, isPremiumValue),
-                            _buildExclusiveFeatures(context, isPremiumValue),
+                            _buildEssentialFeatures(context, isPremium),
+                            _buildAdvancedFeatures(context, isPremium),
+                            _buildExclusiveFeatures(context, isPremium),
                           ],
                         ),
                       ),
                       const SizedBox(height: 24),
-                      if (!isPremiumValue) _buildPricingSection(context),
+                      if (!isPremium) _buildPricingSection(context),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -108,7 +121,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
       backgroundColor: GasometerDesignTokens.colorHeaderBackground,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          'GasOMeter Premium',
+          _PremiumStrings.pageTitle,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -138,14 +151,13 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: const AssetImage('assets/patterns/premium_pattern.png'),
-                        repeat: ImageRepeat.repeat,
-                        onError: (exception, stackTrace) {},
-                      ),
-                    ),
+                  child: Image.asset(
+                    'assets/patterns/premium_pattern.png',
+                    repeat: ImageRepeat.repeat,
+                    fit: BoxFit.none,
+                    // Use errorBuilder to avoid throwing if the asset is missing
+                    errorBuilder:
+                        (context, error, stackTrace) => const SizedBox.shrink(),
                   ),
                 ),
               ),
@@ -171,7 +183,6 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
   }
 
   Widget _buildStatusCard(BuildContext context, bool isPremium) {
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -179,26 +190,38 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isPremium
-              ? [
-                  GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.1),
-                  GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.05),
-                ]
-              : [
-                  GasometerDesignTokens.colorPrimary.withValues(alpha: 0.1),
-                  GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.05),
-                ],
+          colors:
+              isPremium
+                  ? [
+                    GasometerDesignTokens.colorPremiumAccent.withValues(
+                      alpha: 0.1,
+                    ),
+                    GasometerDesignTokens.colorPremiumAccent.withValues(
+                      alpha: 0.05,
+                    ),
+                  ]
+                  : [
+                    GasometerDesignTokens.colorPrimary.withValues(alpha: 0.1),
+                    GasometerDesignTokens.colorPremiumAccent.withValues(
+                      alpha: 0.05,
+                    ),
+                  ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isPremium
-              ? GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.3)
-              : GasometerDesignTokens.colorPrimary.withValues(alpha: 0.3),
+          color:
+              isPremium
+                  ? GasometerDesignTokens.colorPremiumAccent.withValues(
+                    alpha: 0.3,
+                  )
+                  : GasometerDesignTokens.colorPrimary.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: (isPremium ? GasometerDesignTokens.colorPremiumAccent : GasometerDesignTokens.colorPrimary)
+            color: (isPremium
+                    ? GasometerDesignTokens.colorPremiumAccent
+                    : GasometerDesignTokens.colorPrimary)
                 .withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -210,14 +233,22 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isPremium
-                  ? GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.2)
-                  : GasometerDesignTokens.colorPrimary.withValues(alpha: 0.2),
+              color:
+                  isPremium
+                      ? GasometerDesignTokens.colorPremiumAccent.withValues(
+                        alpha: 0.2,
+                      )
+                      : GasometerDesignTokens.colorPrimary.withValues(
+                        alpha: 0.2,
+                      ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               isPremium ? Icons.verified : Icons.workspace_premium,
-              color: isPremium ? GasometerDesignTokens.colorPremiumAccent : GasometerDesignTokens.colorPrimary,
+              color:
+                  isPremium
+                      ? GasometerDesignTokens.colorPremiumAccent
+                      : GasometerDesignTokens.colorPrimary,
               size: 32,
             ),
           ),
@@ -227,7 +258,9 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isPremium ? 'Premium Ativo' : 'Desbloqueie o Premium',
+                  isPremium
+                      ? _PremiumStrings.premiumActive
+                      : _PremiumStrings.unlockPremium,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -237,11 +270,13 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                 const SizedBox(height: 4),
                 Text(
                   isPremium
-                      ? 'Todos os recursos premium desbloqueados'
-                      : 'Acesse recursos avançados e análises detalhadas',
+                      ? _PremiumStrings.premiumUnlocked
+                      : _PremiumStrings.premiumDescription,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -255,7 +290,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
-                'ATIVO',
+                _PremiumStrings.activeLabel,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -376,80 +411,17 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
     return _buildFeatureList(context, features);
   }
 
-  Widget _buildFeatureList(BuildContext context, List<_PremiumFeature> features) {
+  Widget _buildFeatureList(
+    BuildContext context,
+    List<_PremiumFeature> features,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        children: features.map((feature) => _buildFeatureCard(context, feature)).toList(),
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard(BuildContext context, _PremiumFeature feature) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: feature.isEnabled
-            ? GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.05)
-            : Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: feature.isEnabled
-              ? GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.3)
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: feature.isEnabled
-                  ? GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.1)
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              feature.icon,
-              color: feature.isEnabled
-                  ? GasometerDesignTokens.colorPremiumAccent
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  feature.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: feature.isEnabled
-                        ? Theme.of(context).colorScheme.onSurface
-                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  feature.description,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            feature.isEnabled ? Icons.check_circle : Icons.lock_outline,
-            color: feature.isEnabled ? Colors.green : Theme.of(context).colorScheme.outline,
-            size: 20,
-          ),
-        ],
+        children:
+            features
+                .map((feature) => _PremiumFeatureCard(feature: feature))
+                .toList(),
       ),
     );
   }
@@ -459,7 +431,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Escolha seu Plano',
+          _PremiumStrings.choosePlan,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -467,8 +439,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
           ),
         ),
         const SizedBox(height: 16),
-        _buildPricingCard(
-          context,
+        const _PricingCardWidget(
           title: 'Premium Mensal',
           price: 'R\$ 9,90',
           period: '/mês',
@@ -481,8 +452,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
           isPopular: false,
         ),
         const SizedBox(height: 12),
-        _buildPricingCard(
-          context,
+        const _PricingCardWidget(
           title: 'Premium Anual',
           price: 'R\$ 79,90',
           period: '/ano',
@@ -500,36 +470,171 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
       ],
     );
   }
+}
 
-  Widget _buildPricingCard(
-    BuildContext context, {
-    required String title,
-    required String price,
-    required String period,
-    String? originalPrice,
-    String? discount,
-    required List<String> features,
-    required bool isPopular,
-  }) {
+/// Simple immutable model used to render a feature card in the Premium page.
+@immutable
+class _PremiumFeature {
+  const _PremiumFeature({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.isEnabled,
+  });
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool isEnabled;
+}
+
+class _PremiumFeatureCard extends StatelessWidget {
+  const _PremiumFeatureCard({Key? key, required this.feature})
+    : super(key: key);
+
+  final _PremiumFeature feature;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color:
+            feature.isEnabled
+                ? GasometerDesignTokens.colorPremiumAccent.withValues(
+                  alpha: 0.05,
+                )
+                : Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              feature.isEnabled
+                  ? GasometerDesignTokens.colorPremiumAccent.withValues(
+                    alpha: 0.3,
+                  )
+                  : Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color:
+                  feature.isEnabled
+                      ? GasometerDesignTokens.colorPremiumAccent.withValues(
+                        alpha: 0.1,
+                      )
+                      : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              feature.icon,
+              color:
+                  feature.isEnabled
+                      ? GasometerDesignTokens.colorPremiumAccent
+                      : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  feature.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        feature.isEnabled
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  feature.description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            feature.isEnabled ? Icons.check_circle : Icons.lock_outline,
+            color:
+                feature.isEnabled
+                    ? Colors.green
+                    : Theme.of(context).colorScheme.outline,
+            size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PricingCardWidget extends StatelessWidget {
+  const _PricingCardWidget({
+    Key? key,
+    required this.title,
+    required this.price,
+    required this.period,
+    this.originalPrice,
+    this.discount,
+    required this.features,
+    required this.isPopular,
+  }) : super(key: key);
+
+  final String title;
+  final String price;
+  final String period;
+  final String? originalPrice;
+  final String? discount;
+  final List<String> features;
+  final bool isPopular;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: isPopular
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  GasometerDesignTokens.colorPremiumAccent.withValues(alpha: 0.1),
-                  GasometerDesignTokens.colorPrimary.withValues(alpha: 0.05),
-                ],
-              )
-            : null,
+        gradient:
+            isPopular
+                ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    GasometerDesignTokens.colorPremiumAccent.withValues(
+                      alpha: 0.1,
+                    ),
+                    GasometerDesignTokens.colorPrimary.withValues(alpha: 0.05),
+                  ],
+                )
+                : null,
         color: isPopular ? null : Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isPopular
-              ? GasometerDesignTokens.colorPremiumAccent
-              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          color:
+              isPopular
+                  ? GasometerDesignTokens.colorPremiumAccent
+                  : Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.2),
           width: isPopular ? 2 : 1,
         ),
       ),
@@ -544,7 +649,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
-                'MAIS POPULAR',
+                _PremiumStrings.mostPopular,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -570,28 +675,34 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: isPopular
-                      ? GasometerDesignTokens.colorPremiumAccent
-                      : Theme.of(context).colorScheme.primary,
+                  color:
+                      isPopular
+                          ? GasometerDesignTokens.colorPremiumAccent
+                          : Theme.of(context).colorScheme.primary,
                 ),
               ),
               Text(
                 period,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               if (discount != null) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    discount,
+                    discount!,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -609,47 +720,57 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
               style: TextStyle(
                 fontSize: 14,
                 decoration: TextDecoration.lineThrough,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
           const SizedBox(height: 16),
-          ...features.map((feature) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: isPopular ? GasometerDesignTokens.colorPremiumAccent : Colors.green,
-                      size: 16,
+          ...features.map(
+            (feature) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color:
+                        isPopular
+                            ? GasometerDesignTokens.colorPremiumAccent
+                            : Colors.green,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    feature,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.8),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      feature,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Funcionalidade de compra em desenvolvimento'),
+                  SnackBar(
+                    content: Text(_PremiumStrings.purchaseInProgress),
                     backgroundColor: Colors.orange,
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPopular
-                    ? GasometerDesignTokens.colorPremiumAccent
-                    : Theme.of(context).colorScheme.primary,
+                backgroundColor:
+                    isPopular
+                        ? GasometerDesignTokens.colorPremiumAccent
+                        : Theme.of(context).colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -658,11 +779,8 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                 elevation: isPopular ? 6 : 2,
               ),
               child: const Text(
-                'Assinar Agora',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                _PremiumStrings.subscribeNow,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -670,18 +788,4 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
       ),
     );
   }
-}
-
-class _PremiumFeature {
-
-  const _PremiumFeature({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.isEnabled,
-  });
-  final IconData icon;
-  final String title;
-  final String description;
-  final bool isEnabled;
 }

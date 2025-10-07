@@ -1609,7 +1609,7 @@ PODS:
     - PurchasesHybridCommon (= 16.2.0)
   - PurchasesHybridCommon (16.2.0):
     - RevenueCat (= 5.34.0)
-  - rate_my_app (2.3.2):
+  - rate_my_app (2.2.0):
     - Flutter
     - FlutterMacOS
   - RecaptchaInterop (101.0.0)
@@ -1835,7 +1835,7 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   purchases_flutter: b0a7ec52cb03768814b5758b2e8dc7c9a1f381da
   PurchasesHybridCommon: 55e97b4e090015ed138988e6559def2bd4c50ebe
-  rate_my_app: cbb89973f870601f80f7bad63aba107260cabc5b
+  rate_my_app: 88a3c20b8debef53575c77f496f1567da8bab2b8
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RevenueCat: eb2aa042789d9c99ad5172bd96e28b96286d6ada
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a

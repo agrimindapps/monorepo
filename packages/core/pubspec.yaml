@@ -29,7 +29,7 @@ dependencies:
   hive_flutter: ^1.1.0
   
   # SharedPreferences para cache cross-module
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.4.0
   
   # Conectividade
   connectivity_plus: ^6.1.5
@@ -44,7 +44,7 @@ dependencies:
   path_provider: ^2.1.5
   
   # App Rating
-  rate_my_app: ^2.3.2
+  rate_my_app: 2.2.0
   url_launcher: ^6.3.2
   
   # Local Notifications

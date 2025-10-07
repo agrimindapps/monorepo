@@ -5,6 +5,15 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
 
+// Add top‑level error handling types
+enum PremiumErrorType { network, auth, purchase, unknown }
+
+class PremiumError {
+  final PremiumErrorType type;
+  final String message;
+  const PremiumError({required this.type, required this.message});
+}
+
 class PremiumProvider extends ChangeNotifier {
   final ISubscriptionRepository _subscriptionRepository;
   final IAuthRepository _authRepository;
@@ -13,7 +22,7 @@ class PremiumProvider extends ChangeNotifier {
   SubscriptionEntity? _currentSubscription;
   List<ProductInfo> _availableProducts = [];
   bool _isLoading = false;
-  String? _errorMessage;
+  PremiumError? _error; // New typed error field
   PurchaseOperation? _currentOperation;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
   StreamSubscription<SubscriptionEntity?>? _syncSubscriptionStream;
@@ -31,7 +40,7 @@ class PremiumProvider extends ChangeNotifier {
   SubscriptionEntity? get currentSubscription => _currentSubscription;
   List<ProductInfo> get availableProducts => _availableProducts;
   bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
+  PremiumError? get error => _error;
   bool get isPremium => _currentSubscription?.isActive ?? false;
   bool get isInTrial => _currentSubscription?.isInTrial ?? false;
   bool get canPurchasePremium => !_isAnonymousUser;
@@ -62,7 +71,10 @@ class PremiumProvider extends ChangeNotifier {
               notifyListeners();
             },
             onError: (Object error) {
-              _errorMessage = error.toString();
+              _error = PremiumError(
+                type: PremiumErrorType.unknown,
+                message: error.toString(),
+              );
               notifyListeners();
             },
           );
@@ -73,7 +85,10 @@ class PremiumProvider extends ChangeNotifier {
           notifyListeners();
         },
         onError: (Object error) {
-          _errorMessage = error.toString();
+          _error = PremiumError(
+            type: PremiumErrorType.unknown,
+            message: error.toString(),
+          );
           notifyListeners();
         },
       );
@@ -98,54 +113,44 @@ class PremiumProvider extends ChangeNotifier {
     await _checkCurrentSubscription();
   }
 
-  Future<void> _checkCurrentSubscription() async {
+  // Helper method to run operations with consistent state handling
+  Future<Either<Failure, T>> _runOperation<T>(
+    PurchaseOperation operation,
+    Future<Either<Failure, T>> Function() action,
+  ) async {
     _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = PurchaseOperation.loadProducts;
+    _error = null;
+    _currentOperation = operation;
     notifyListeners();
-    if (_simpleSubscriptionSyncService != null) {
-      final result = await _simpleSubscriptionSyncService
-          .hasActiveSubscriptionForApp('plantis');
 
-      result.fold(
-        (failure) {
-          _errorMessage = failure.message;
-          _isLoading = false;
-          _currentOperation = null;
-          notifyListeners();
-        },
-        (hasSubscription) {
-          _isLoading = false;
-          _currentOperation = null;
-          notifyListeners();
-        },
-      );
-    } else {
-      final result = await _subscriptionRepository.getCurrentSubscription();
+    final result = await action();
 
-      result.fold(
-        (failure) {
-          _errorMessage = failure.message;
-          _isLoading = false;
-          _currentOperation = null;
-          notifyListeners();
-        },
-        (subscription) {
-          _currentSubscription = subscription;
-          _isLoading = false;
-          _currentOperation = null;
-          notifyListeners();
-        },
+    result.fold((failure) {
+      // Map generic failure to typed error (could be refined later)
+      _error = PremiumError(
+        type: PremiumErrorType.unknown,
+        message: failure.message,
       );
-    }
+    }, (_) {});
+
+    _isLoading = false;
+    _currentOperation = null;
+    notifyListeners();
+    return result;
   }
 
+  // Refactor _loadAvailableProducts to use the helper
   Future<void> _loadAvailableProducts() async {
-    final result = await _subscriptionRepository.getPlantisProducts();
+    final result = await _runOperation<List<ProductInfo>>(
+      PurchaseOperation.loadProducts,
+      () => _subscriptionRepository.getPlantisProducts(),
+    );
 
     result.fold(
       (failure) {
-        debugPrint('Erro ao carregar produtos: ${failure.message}');
+        if (kDebugMode) {
+          debugPrint('Erro ao carregar produtos: ${failure.message}');
+        }
       },
       (products) {
         _availableProducts = products;
@@ -154,66 +159,58 @@ class PremiumProvider extends ChangeNotifier {
     );
   }
 
-  Future<bool> purchaseProduct(String productId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = PurchaseOperation.purchase;
-    notifyListeners();
-
-    final result = await _subscriptionRepository.purchaseProduct(
-      productId: productId,
-    );
-
-    return result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-        return false;
-      },
-      (subscription) async {
+  // Refactor _checkCurrentSubscription
+  Future<void> _checkCurrentSubscription() async {
+    if (_simpleSubscriptionSyncService != null) {
+      await _runOperation<bool>(
+        PurchaseOperation.loadProducts,
+        () => _simpleSubscriptionSyncService.hasActiveSubscriptionForApp(
+          'plantis',
+        ),
+      );
+    } else {
+      final result = await _runOperation<SubscriptionEntity?>(
+        PurchaseOperation.loadProducts,
+        () => _subscriptionRepository.getCurrentSubscription(),
+      );
+      result.fold((failure) {}, (subscription) {
         _currentSubscription = subscription;
-
-        _isLoading = false;
-        _currentOperation = null;
         notifyListeners();
-        return true;
-      },
-    );
+      });
+    }
   }
 
-  Future<bool> restorePurchases() async {
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = PurchaseOperation.restore;
-    notifyListeners();
-
-    final result = await _subscriptionRepository.restorePurchases();
-
-    return result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-        return false;
-      },
-      (subscriptions) {
-        if (subscriptions.isNotEmpty) {
-          final activeSubscriptions =
-              subscriptions.where((s) => s.isActive).toList();
-
-          if (activeSubscriptions.isNotEmpty) {
-            _currentSubscription = activeSubscriptions.first;
-          }
-        }
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
-        return true;
-      },
+  // Refactor purchaseProduct
+  Future<bool> purchaseProduct(String productId) async {
+    final result = await _runOperation<SubscriptionEntity>(
+      PurchaseOperation.purchase,
+      () => _subscriptionRepository.purchaseProduct(productId: productId),
     );
+
+    return result.fold((failure) => false, (subscription) async {
+      _currentSubscription = subscription;
+      notifyListeners();
+      return true;
+    });
+  }
+
+  // Refactor restorePurchases
+  Future<bool> restorePurchases() async {
+    final result = await _runOperation<List<SubscriptionEntity>>(
+      PurchaseOperation.restore,
+      () => _subscriptionRepository.restorePurchases(),
+    );
+
+    return result.fold((failure) => false, (subscriptions) {
+      if (subscriptions.isNotEmpty) {
+        final active = subscriptions.where((s) => s.isActive).toList();
+        if (active.isNotEmpty) {
+          _currentSubscription = active.first;
+        }
+      }
+      notifyListeners();
+      return true;
+    });
   }
 
   Future<String?> getManagementUrl() async {
@@ -231,7 +228,7 @@ class PremiumProvider extends ChangeNotifier {
   }
 
   void clearError() {
-    _errorMessage = null;
+    _error = null;
     notifyListeners();
   }
 
@@ -239,6 +236,7 @@ class PremiumProvider extends ChangeNotifier {
     _currentOperation = null;
     notifyListeners();
   }
+
   bool canCreateUnlimitedPlants() => isPremium;
   bool canAccessAdvancedFeatures() => isPremium;
   bool canExportData() => isPremium;

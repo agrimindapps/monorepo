@@ -38,8 +38,4 @@
             <certificates src="user"/>
         </trust-anchors>
     </debug-overrides>
-    
-    <!-- Block all cleartext traffic by default -->
-    <base-config cleartextTrafficPermitted="false" />
-    
 </network-security-config>

@@ -2,12 +2,16 @@ import '../../../infrastructure/services/account_deletion_service.dart';
 import '../../../shared/utils/result.dart';
 import '../base_usecase.dart';
 
-/// Use Case para exclusão de conta seguindo Clean Architecture
-/// Coordena a exclusão através do AccountDeletionService
+/// A use case for account deletion, following the Clean Architecture principles.
+///
+/// This use case coordinates the account deletion process through the [AccountDeletionService].
 class DeleteAccountUseCase
     implements ResultUseCase<AccountDeletionResult, NoParams> {
   final AccountDeletionService _accountDeletionService;
 
+  /// Creates a new instance of [DeleteAccountUseCase].
+  ///
+  /// [_accountDeletionService] The service responsible for handling the account deletion logic.
   const DeleteAccountUseCase({
     required AccountDeletionService accountDeletionService,
   }) : _accountDeletionService = accountDeletionService;
@@ -18,12 +22,16 @@ class DeleteAccountUseCase
   }
 }
 
-/// Use Case para obter preview da exclusão de conta
-/// Permite mostrar ao usuário o que será excluído antes da confirmação
+/// A use case to get a preview of the account deletion.
+///
+/// This allows showing the user what will be deleted before confirming the action.
 class GetAccountDeletionPreviewUseCase
     implements ResultUseCase<Map<String, dynamic>, NoParams> {
   final AccountDeletionService _accountDeletionService;
 
+  /// Creates a new instance of [GetAccountDeletionPreviewUseCase].
+  ///
+  /// [_accountDeletionService] The service responsible for providing the deletion preview.
   const GetAccountDeletionPreviewUseCase({
     required AccountDeletionService accountDeletionService,
   }) : _accountDeletionService = accountDeletionService;

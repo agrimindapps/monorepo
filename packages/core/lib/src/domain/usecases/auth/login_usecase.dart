@@ -7,11 +7,15 @@ import '../../repositories/i_analytics_repository.dart';
 import '../../repositories/i_auth_repository.dart';
 import '../base_usecase.dart';
 
-/// Use case para fazer login com email e senha
+/// A use case for logging in a user with an email and password.
 class LoginUseCase implements UseCase<UserEntity, LoginParams> {
   final IAuthRepository _authRepository;
   final IAnalyticsRepository _analyticsRepository;
 
+  /// Creates a new instance of [LoginUseCase].
+  ///
+  /// [_authRepository] The repository for handling authentication tasks.
+  /// [_analyticsRepository] The repository for logging analytics events.
   LoginUseCase(this._authRepository, this._analyticsRepository);
 
   @override
@@ -62,11 +66,18 @@ class LoginUseCase implements UseCase<UserEntity, LoginParams> {
   }
 }
 
-/// Parâmetros para o LoginUseCase
+/// Parameters for the [LoginUseCase].
 class LoginParams extends Equatable {
+  /// The user's email address.
   final String email;
+
+  /// The user's password.
   final String password;
 
+  /// Creates a new instance of [LoginParams].
+  ///
+  /// [email] The user's email address.
+  /// [password] The user's password.
   const LoginParams({
     required this.email,
     required this.password,

@@ -5,11 +5,15 @@ import '../entities/device_entity.dart';
 import '../repositories/i_device_repository.dart';
 import 'base_usecase.dart';
 
-/// Use case para obter todos os dispositivos de um usuário
-/// Retorna lista de dispositivos ordenada por última atividade
+/// A use case to get all devices for a user.
+///
+/// Returns a list of devices sorted by the last activity time.
 class GetUserDevicesUseCase implements UseCase<List<DeviceEntity>, GetUserDevicesParams> {
   final IDeviceRepository _deviceRepository;
 
+  /// Creates a new instance of [GetUserDevicesUseCase].
+  ///
+  /// [deviceRepository] The repository to fetch device data.
   const GetUserDevicesUseCase(this._deviceRepository);
 
   @override
@@ -42,11 +46,18 @@ class GetUserDevicesUseCase implements UseCase<List<DeviceEntity>, GetUserDevice
   }
 }
 
-/// Parâmetros para GetUserDevicesUseCase
+/// Parameters for the [GetUserDevicesUseCase].
 class GetUserDevicesParams {
+  /// The unique identifier of the user.
   final String userId;
+
+  /// A flag to indicate if only active devices should be returned.
   final bool activeOnly;
 
+  /// Creates a new instance of [GetUserDevicesParams].
+  ///
+  /// [userId] The unique identifier of the user.
+  /// [activeOnly] A flag to indicate if only active devices should be returned.
   const GetUserDevicesParams({
     required this.userId,
     this.activeOnly = false,

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/data/adapters/network_info_adapter.dart';
 import '../../../../core/interfaces/network_info.dart';
+import '../../../plants/domain/repositories/plants_repository.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/repositories/tasks_repository.dart';
 import '../datasources/local/tasks_local_datasource.dart';
@@ -17,12 +18,14 @@ class TasksRepositoryImpl implements TasksRepository {
   final TasksLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
   final IAuthRepository authService;
+  final PlantsRepository plantsRepository;
 
   TasksRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
     required this.authService,
+    required this.plantsRepository,
   });
 
   Future<String?> get _currentUserId async {
@@ -69,18 +72,52 @@ class TasksRepositoryImpl implements TasksRepository {
           ),
         );
       }
+
+      // Get all tasks
       final localTasks = await localDataSource.getTasks();
-      if (localTasks.isNotEmpty) {
+      List<Task> tasksToReturn = localTasks.cast<Task>();
+
+      // Get all plants to filter out tasks from deleted plants
+      final plantsResult = await plantsRepository.getPlants();
+      final activePlantIds = plantsResult.fold(
+        (failure) =>
+            <
+              String
+            >{}, // If we can't get plants, return empty set (no filtering)
+        (plants) =>
+            plants
+                .where((plant) => !plant.isDeleted)
+                .map((plant) => plant.id)
+                .toSet(),
+      );
+
+      // Filter tasks to only include those from active (non-deleted) plants
+      if (activePlantIds.isNotEmpty) {
+        tasksToReturn =
+            tasksToReturn
+                .where((task) => activePlantIds.contains(task.plantId))
+                .toList();
+      }
+
+      if (tasksToReturn.isNotEmpty) {
         if (await networkInfo.isConnected) {
           _syncTasksInBackground(userId);
         }
-        return Right(localTasks.cast<Task>());
+        return Right(tasksToReturn);
       }
+
       if (await networkInfo.isConnected) {
         try {
           final remoteTasks = await remoteDataSource.getTasks(userId);
-          await localDataSource.cacheTasks(remoteTasks);
-          return Right(remoteTasks.cast<Task>());
+          // Also filter remote tasks
+          final filteredRemoteTasks =
+              activePlantIds.isNotEmpty
+                  ? remoteTasks
+                      .where((task) => activePlantIds.contains(task.plantId))
+                      .toList()
+                  : remoteTasks;
+          await localDataSource.cacheTasks(filteredRemoteTasks);
+          return Right(filteredRemoteTasks.cast<Task>());
         } catch (e) {
           if (kDebugMode) {
             print('❌ TasksRepository: Remote fetch failed: $e');
@@ -90,13 +127,27 @@ class TasksRepositoryImpl implements TasksRepository {
           );
         }
       } else {
-        return Right(
-          localTasks.cast<Task>(),
-        ); // Return empty list if offline and no cache
+        return Right(tasksToReturn); // Return filtered local tasks if offline
       }
     } on Exception {
       final localTasks = await localDataSource.getTasks();
-      return Right(localTasks.cast<Task>());
+      // Also filter in exception case
+      final plantsResult = await plantsRepository.getPlants();
+      final activePlantIds = plantsResult.fold(
+        (failure) => <String>{},
+        (plants) =>
+            plants
+                .where((plant) => !plant.isDeleted)
+                .map((plant) => plant.id)
+                .toSet(),
+      );
+      final filteredTasks =
+          activePlantIds.isNotEmpty
+              ? localTasks
+                  .where((task) => activePlantIds.contains(task.plantId))
+                  .toList()
+              : localTasks;
+      return Right(filteredTasks.cast<Task>());
     }
   }
 

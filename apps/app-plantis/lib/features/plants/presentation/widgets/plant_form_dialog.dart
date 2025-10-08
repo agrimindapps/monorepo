@@ -3,8 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/providers/solid_providers.dart';
-import '../../../../core/providers/state/plant_form_state_manager.dart';
+import '../../../../core/providers/state/plant_form_state_notifier.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/plant_details_provider.dart';
 import '../providers/plants_provider.dart';
@@ -54,7 +53,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
     if (_initialized || !mounted) return;
 
     _initialized = true;
-    final formManager = ref.read(solidPlantFormStateManagerProvider);
+    final formManager = ref.read(plantFormStateNotifierProvider.notifier);
 
     if (widget.plantId != null) {
       if (kDebugMode) {
@@ -112,7 +111,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             Expanded(
               child: Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                  final formState = ref.watch(solidPlantFormStateProvider);
+                  final formState = ref.watch(plantFormStateNotifierProvider);
                   
                   if (formState.isLoading) {
                     return _buildLoadingState();
@@ -245,7 +244,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: colorScheme.errorContainer.withAlpha(50),
+                  color: colorScheme.errorContainer.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -268,7 +267,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 const SizedBox(width: 16),
                 FilledButton(
                   onPressed: () {
-                    final formManager = ref.read(solidPlantFormStateManagerProvider);
+                    final formManager = ref.read(plantFormStateNotifierProvider.notifier);
                     formManager.clearError();
                     _initializeFormManager();
                   },
@@ -341,7 +340,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
       ),
       child: Consumer(
         builder: (BuildContext context, WidgetRef ref, Widget? child) {
-          final formState = ref.watch(solidPlantFormStateProvider);
+          final formState = ref.watch(plantFormStateNotifierProvider);
           
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -376,7 +375,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
   }
 
   Future<void> _handleClose() async {
-    final formState = ref.read(solidPlantFormStateProvider);
+    final formState = ref.read(plantFormStateNotifierProvider);
 
     if (formState.hasChanges) {
       final shouldDiscard = await _showDiscardDialog();
@@ -389,7 +388,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
   }
 
   Future<void> _handleSave() async {
-    final formManager = ref.read(solidPlantFormStateManagerProvider);
+    final formManager = ref.read(plantFormStateNotifierProvider.notifier);
 
     try {
       final success = await formManager.savePlant();
@@ -466,7 +465,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             Navigator.of(context).pop(true);
           }
         } else {
-          final formState = ref.read(solidPlantFormStateProvider);
+          final formState = ref.read(plantFormStateNotifierProvider);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

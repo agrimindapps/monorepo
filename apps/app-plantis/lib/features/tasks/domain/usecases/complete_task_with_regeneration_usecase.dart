@@ -4,7 +4,9 @@ import '../../../../core/data/models/planta_config_model.dart';
 import '../../../../core/services/task_generation_service.dart';
 import '../../../plants/domain/repositories/plants_repository.dart';
 import '../entities/task.dart' as task_entity;
+import '../entities/task_history.dart' as task_history_entity;
 import '../repositories/tasks_repository.dart';
+import '../repositories/task_history_repository.dart';
 
 /// Use case para completar uma tarefa e gerar automaticamente a próxima
 ///
@@ -23,11 +25,13 @@ class CompleteTaskWithRegenerationUseCase
   final TasksRepository tasksRepository;
   final PlantsRepository plantsRepository;
   final TaskGenerationService taskGenerationService;
+  final TaskHistoryRepository taskHistoryRepository;
 
   CompleteTaskWithRegenerationUseCase({
     required this.tasksRepository,
     required this.plantsRepository,
     required this.taskGenerationService,
+    required this.taskHistoryRepository,
   });
 
   @override
@@ -85,6 +89,9 @@ class CompleteTaskWithRegenerationUseCase
         (_) => throw Exception(),
         (task) => task,
       );
+
+      // Save to history
+      await _saveToHistory(savedCompletedTask, params.notes);
       task_entity.Task? nextTask;
       if (plant.config != null &&
           _shouldGenerateNextTask(currentTask, plant.config)) {
@@ -243,6 +250,25 @@ class CompleteTaskWithRegenerationUseCase
           (config?.pestInspectionIntervalDays as int?) ?? 7,
       replantarAtivo: true,
       intervaloReplantarDias: 180,
+    );
+  }
+
+  /// Salva o histórico da tarefa concluída
+  Future<void> _saveToHistory(
+    task_entity.Task completedTask,
+    String? notes,
+  ) async {
+    final history = task_history_entity.TaskHistory.fromCompletedTask(
+      completedTask,
+      notes: notes,
+    );
+
+    final result = await taskHistoryRepository.saveHistory(history);
+    // Note: We don't fail the operation if history saving fails
+    // The task completion is the primary operation
+    result.fold(
+      (failure) => print('Warning: Failed to save task history: $failure'),
+      (_) => print('Task history saved successfully'),
     );
   }
 }

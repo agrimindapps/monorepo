@@ -1,10 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/solid_providers.dart';
 import '../../../../core/providers/spaces_providers.dart';
-import '../../../../core/providers/state/plant_form_state_manager.dart'
-    show PlantFormStateManager, PlantFormState;
+import '../../../../core/providers/state/plant_form_state_notifier.dart';
 import '../../../../core/validation/validators.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 import 'space_selector_widget.dart';
@@ -32,7 +30,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   void _setupStateListener() {
     ref.listenManual(
-      solidPlantFormStateProvider,
+      plantFormStateNotifierProvider,
       (previous, next) {
         if (mounted) {
           _syncControllersWithState(next);
@@ -43,7 +41,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   void _updateControllers() {
     if (mounted) {
-      final formState = ref.read(solidPlantFormStateProvider);
+      final formState = ref.read(plantFormStateNotifierProvider);
       _syncControllersWithState(formState);
     }
   }
@@ -91,23 +89,27 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    final formState = ref.watch(solidPlantFormStateProvider);
-    final formManager = ref.read(solidPlantFormStateManagerProvider);
-    
+    final formState = ref.watch(plantFormStateNotifierProvider);
+    final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (formState.isUploadingImages)
           _buildUploadProgress(context)
         else if (formState.imageUrls.isNotEmpty)
-          _buildSingleImage(context, formState, formManager)
+          _buildSingleImage(context, formState, formNotifier)
         else
-          _buildEmptyImageArea(context, formManager),
+          _buildEmptyImageArea(context, formNotifier),
       ],
     );
   }
 
-  Widget _buildSingleImage(BuildContext context, PlantFormState formState, PlantFormStateManager formManager) {
+  Widget _buildSingleImage(
+    BuildContext context,
+    PlantFormState formState,
+    PlantFormStateNotifier formNotifier,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -138,7 +140,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                 ),
               ),
               InkWell(
-                onTap: () => _showRemoveImageDialog(context, formManager, 0),
+                onTap: () => _showRemoveImageDialog(context, formNotifier, 0),
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   child: Icon(
@@ -166,7 +168,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   Widget _buildEmptyImageArea(
     BuildContext context,
-    PlantFormStateManager formManager,
+    PlantFormStateNotifier formNotifier,
   ) {
     final theme = Theme.of(context);
 
@@ -186,7 +188,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         ),
       ),
       child: InkWell(
-        onTap: () => _showImageOptions(context, formManager),
+        onTap: () => _showImageOptions(context, formNotifier),
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -240,7 +242,10 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     );
   }
 
-  void _showImageOptions(BuildContext context, PlantFormStateManager formManager) {
+  void _showImageOptions(
+    BuildContext context,
+    PlantFormStateNotifier formNotifier,
+  ) {
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -277,12 +282,12 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                   Expanded(
                     child: _buildImageOptionButton(
                       context: context,
-                      formManager: formManager,
+                      formNotifier: formNotifier,
                       icon: Icons.camera_alt,
                       label: 'Câmera',
                       onTap: () {
                         Navigator.of(context).pop();
-                        formManager.captureImageFromCamera();
+                        formNotifier.captureImageFromCamera();
                       },
                     ),
                   ),
@@ -290,12 +295,12 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                   Expanded(
                     child: _buildImageOptionButton(
                       context: context,
-                      formManager: formManager,
+                      formNotifier: formNotifier,
                       icon: Icons.photo_library,
                       label: 'Galeria',
                       onTap: () {
                         Navigator.of(context).pop();
-                        formManager.selectImageFromGallery();
+                        formNotifier.selectImageFromGallery();
                       },
                     ),
                   ),
@@ -311,13 +316,13 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   Widget _buildImageOptionButton({
     required BuildContext context,
-    required PlantFormStateManager formManager,
+    required PlantFormStateNotifier formNotifier,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    final formState = ref.read(solidPlantFormStateProvider);
+    final formState = ref.read(plantFormStateNotifierProvider);
     final isDisabled = formState.imageUrls.isNotEmpty || formState.isUploadingImages;
 
     return GestureDetector(
@@ -380,7 +385,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   void _showRemoveImageDialog(
     BuildContext context,
-    PlantFormStateManager formManager,
+    PlantFormStateNotifier formNotifier,
     int index,
   ) {
     showDialog<void>(
@@ -396,7 +401,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               ),
               TextButton(
                 onPressed: () {
-                  formManager.removeImage(index);
+                  formNotifier.removeImage(index);
                   Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
@@ -410,8 +415,8 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }
 
   Widget _buildBasicInfoForm(BuildContext context) {
-    final formState = ref.watch(solidPlantFormStateProvider);
-    final formManager = ref.read(solidPlantFormStateManagerProvider);
+    final formState = ref.watch(plantFormStateNotifierProvider);
+    final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
     final fieldErrors = formState.fieldErrors;
     final theme = Theme.of(context);
 
@@ -425,7 +430,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               isRequired: true,
               errorText: fieldErrors['name'],
               onChanged: (value) {
-                formManager.setName(value);
+                formNotifier.setName(value);
               },
               validator: (value) => _validatePlantName(value),
               prefixIcon: Icon(
@@ -441,7 +446,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               label: 'Espécie',
               hint: 'Ex: Rosa gallica',
               onChanged: (value) {
-                formManager.setSpecies(value);
+                formNotifier.setSpecies(value);
               },
               validator: (value) => _validateSpecies(value),
               prefixIcon: Icon(
@@ -455,7 +460,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             SpaceSelectorWidget(
               selectedSpaceId: formState.spaceId,
               onSpaceChanged:
-                  (spaceId) => _handleSpaceSelection(formManager, spaceId),
+                  (spaceId) => _handleSpaceSelection(formNotifier, spaceId),
               errorText: fieldErrors['space'],
             ),
 
@@ -464,7 +469,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               context: context,
               label: 'Data de plantio',
               value: formState.plantingDate,
-              onChanged: formManager.setPlantingDate,
+              onChanged: formNotifier.setPlantingDate,
               prefixIcon: Icon(
                 Icons.event,
                 color: theme.colorScheme.primary,
@@ -479,7 +484,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               hint: 'Adicione notas sobre a planta...',
               maxLines: 4,
               onChanged: (value) {
-                formManager.setNotes(value);
+                formNotifier.setNotes(value);
               },
               validator: (value) => _validateNotes(value),
               prefixIcon: Icon(
@@ -675,11 +680,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   /// Handles space selection including creating new spaces
   Future<void> _handleSpaceSelection(
-    PlantFormStateManager formManager,
+    PlantFormStateNotifier formNotifier,
     String? value,
   ) async {
     if (value == null) {
-      formManager.setSpaceId(null);
+      formNotifier.setSpaceId(null);
       return;
     }
 
@@ -697,7 +702,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         );
 
         if (existingSpace != null) {
-          formManager.setSpaceId(existingSpace.id);
+          formNotifier.setSpaceId(existingSpace.id);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -723,7 +728,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           );
 
           if (newSpace != null) {
-            formManager.setSpaceId(newSpace.id);
+            formNotifier.setSpaceId(newSpace.id);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -752,7 +757,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         }
       }
     } else {
-      formManager.setSpaceId(value);
+      formNotifier.setSpaceId(value);
     }
   }
 
@@ -774,6 +779,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   /// Build upload progress indicator
   Widget _buildUploadProgress(BuildContext context) {
     final theme = Theme.of(context);
+    final formState = ref.watch(plantFormStateNotifierProvider);
+
+    final currentImage = (formState.uploadingImageIndex ?? 0) + 1;
+    final totalImages = formState.totalImagesToUpload ?? 1;
+    final progress = formState.uploadProgress;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -813,16 +823,27 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Fazendo upload da imagem...',
+                      'Enviando imagem $currentImage de $totalImages',
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     LinearProgressIndicator(
+                      value: progress,
                       borderRadius: BorderRadius.circular(2),
                       backgroundColor:
                           theme.colorScheme.surfaceContainerHighest,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${(progress * 100).toInt()}%',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                      ),
                     ),
                   ],
                 ),

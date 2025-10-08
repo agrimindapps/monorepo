@@ -18,7 +18,8 @@ class SpaceSelectorWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<SpaceSelectorWidget> createState() => _SpaceSelectorWidgetState();
+  ConsumerState<SpaceSelectorWidget> createState() =>
+      _SpaceSelectorWidgetState();
 }
 
 class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
@@ -105,54 +106,56 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
 
             return _buildSpaceDropdown(context, spacesState, theme);
           },
-          loading: () => Container(
-            height: 56,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.5),
-              ),
-              borderRadius: BorderRadius.circular(12),
-              color:
-                  theme.brightness == Brightness.dark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFFFFFFF),
-            ),
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
-          ),
-          error: (error, _) => Container(
-            height: 56,
-            decoration: BoxDecoration(
-              border: Border.all(color: theme.colorScheme.error),
-              borderRadius: BorderRadius.circular(12),
-              color:
-                  theme.brightness == Brightness.dark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFFFFFFF),
-            ),
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error,
-                    color: theme.colorScheme.error,
-                    size: 20,
+          loading:
+              () => Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Erro ao carregar espaços',
-                    style: TextStyle(color: theme.colorScheme.error),
+                  borderRadius: BorderRadius.circular(12),
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(0xFFFFFFFF),
+                ),
+                child: const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+          error:
+              (error, _) => Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  border: Border.all(color: theme.colorScheme.error),
+                  borderRadius: BorderRadius.circular(12),
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? const Color(0xFF2C2C2E)
+                          : const Color(0xFFFFFFFF),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error,
+                        color: theme.colorScheme.error,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Erro ao carregar espaços',
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
         ),
         if (_showCustomSpaceField) ...[
           const SizedBox(height: 12),
@@ -187,7 +190,7 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
       ),
       if (spaces.isNotEmpty)
         const DropdownMenuItem<String?>(
-          value: null,
+          value: 'divider1',
           enabled: false,
           child: Divider(height: 1),
         ),
@@ -199,7 +202,7 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
       ),
       if (spaces.isNotEmpty)
         const DropdownMenuItem<String?>(
-          value: null,
+          value: 'divider2',
           enabled: false,
           child: Divider(height: 1),
         ),

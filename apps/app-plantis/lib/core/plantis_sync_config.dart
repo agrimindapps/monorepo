@@ -4,20 +4,21 @@ import '../features/plants/domain/entities/plant.dart';
 import '../features/plants/domain/entities/space.dart';
 import '../features/tasks/domain/entities/task.dart';
 import 'data/models/comentario_model.dart';
+
 Plant _plantFromFirebaseMap(Map<String, dynamic> map) {
   final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
   return Plant(
-    id: baseFields['id'] as String,
+    id: baseFields['id'] as String? ?? '',
     createdAt: baseFields['createdAt'] as DateTime?,
     updatedAt: baseFields['updatedAt'] as DateTime?,
     lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-    isDirty: baseFields['isDirty'] as bool,
-    isDeleted: baseFields['isDeleted'] as bool,
-    version: baseFields['version'] as int,
+    isDirty: baseFields['isDirty'] as bool? ?? false,
+    isDeleted: baseFields['isDeleted'] as bool? ?? false,
+    version: baseFields['version'] as int? ?? 1,
     userId: baseFields['userId'] as String?,
     moduleName: baseFields['moduleName'] as String?,
-    name: map['name'] as String,
+    name: map['name'] as String? ?? 'Planta sem nome',
     species: map['species'] as String?,
     spaceId: map['space_id'] as String?,
     imageBase64: map['image_base64'] as String?,
@@ -27,7 +28,8 @@ Plant _plantFromFirebaseMap(Map<String, dynamic> map) {
             : const [],
     plantingDate:
         map['planting_date'] != null
-            ? DateTime.parse(map['planting_date'] as String)
+            ? DateTime.tryParse(map['planting_date'] as String) ??
+                DateTime.now()
             : null,
     notes: map['notes'] as String?,
     isFavorited: map['is_favorited'] as bool? ?? false,
@@ -78,16 +80,16 @@ Space _spaceFromFirebaseMap(Map<String, dynamic> map) {
   final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
 
   return Space(
-    id: baseFields['id'] as String,
+    id: baseFields['id'] as String? ?? '',
     createdAt: baseFields['createdAt'] as DateTime?,
     updatedAt: baseFields['updatedAt'] as DateTime?,
     lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-    isDirty: baseFields['isDirty'] as bool,
-    isDeleted: baseFields['isDeleted'] as bool,
-    version: baseFields['version'] as int,
+    isDirty: baseFields['isDirty'] as bool? ?? false,
+    isDeleted: baseFields['isDeleted'] as bool? ?? false,
+    version: baseFields['version'] as int? ?? 1,
     userId: baseFields['userId'] as String?,
     moduleName: baseFields['moduleName'] as String?,
-    name: map['name'] as String,
+    name: map['name'] as String? ?? 'Espaço sem nome',
     description: map['description'] as String?,
     lightCondition: map['light_condition'] as String?,
     humidity: (map['humidity'] as num?)?.toDouble(),
@@ -104,7 +106,9 @@ abstract final class PlantisSyncConfig {
       appName: 'plantis',
       config: AppSyncConfig.simple(
         appName: 'plantis',
-        syncInterval: const Duration(minutes: 15), // OPTIMIZED: Sync otimizado (bateria)
+        syncInterval: const Duration(
+          minutes: 15,
+        ), // OPTIMIZED: Sync otimizado (bateria)
         conflictStrategy: ConflictStrategy.timestamp, // Simples timestamp
       ),
       entities: [
@@ -130,19 +134,24 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) =>
+                  (entity as ComentarioModel).toFirebaseMap(),
         ),
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
         ),
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as SubscriptionEntity).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) =>
+                  (entity as SubscriptionEntity).toFirebaseMap(),
         ),
       ],
     );
@@ -179,19 +188,24 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'dev_comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) =>
+                  (entity as ComentarioModel).toFirebaseMap(),
         ),
         EntitySyncRegistration<UserEntity>.simple(
           entityType: UserEntity,
           collectionName: 'dev_users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
         ),
         EntitySyncRegistration<SubscriptionEntity>.simple(
           entityType: SubscriptionEntity,
           collectionName: 'dev_subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as SubscriptionEntity).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) =>
+                  (entity as SubscriptionEntity).toFirebaseMap(),
         ),
       ],
     );
@@ -240,7 +254,9 @@ abstract final class PlantisSyncConfig {
           entityType: ComentarioModel,
           collectionName: 'comentarios',
           fromMap: ComentarioModel.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as ComentarioModel).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) =>
+                  (entity as ComentarioModel).toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence
           enableRealtime: false, // Sem tempo real para economizar bateria
           syncInterval: const Duration(hours: 12),
@@ -250,7 +266,8 @@ abstract final class PlantisSyncConfig {
           entityType: UserEntity,
           collectionName: 'users',
           fromMap: UserEntity.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) => (entity as UserEntity).toFirebaseMap(),
           conflictStrategy:
               ConflictStrategy.remoteWins, // Remote vence para usuários
           enableRealtime: false, // Sem tempo real para economizar bateria
@@ -263,7 +280,9 @@ abstract final class PlantisSyncConfig {
           entityType: SubscriptionEntity,
           collectionName: 'subscriptions',
           fromMap: SubscriptionEntity.fromFirebaseMap,
-          toMap: (BaseSyncEntity entity) => (entity as SubscriptionEntity).toFirebaseMap(),
+          toMap:
+              (BaseSyncEntity entity) =>
+                  (entity as SubscriptionEntity).toFirebaseMap(),
           conflictStrategy:
               ConflictStrategy
                   .remoteWins, // Remote sempre vence para assinaturas

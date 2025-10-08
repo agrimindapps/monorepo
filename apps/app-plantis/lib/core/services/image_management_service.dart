@@ -211,27 +211,88 @@ class ImageManagementService {
     );
   }
   
-  /// Upload de múltiplas imagens
-  Future<Either<Failure, List<String>>> uploadImages(List<String> base64Images) async {
+  /// Upload de múltiplas imagens com retry e progress tracking
+  Future<Either<Failure, List<String>>> uploadImages(
+    List<String> base64Images, {
+    void Function(int index, double progress)? onProgress,
+  }) async {
     if (base64Images.isEmpty) {
       return const Right([]);
     }
-    
+
     try {
       for (final image in base64Images) {
         if (!_isValidBase64Image(image)) {
           return const Left(ValidationFailure('Uma ou mais imagens são inválidas'));
         }
       }
-      
-      final result = await _imageService.uploadImages(base64Images);
-      
-      return result.fold(
-        (failure) => Left(_mapImageFailure(failure, 'Erro ao enviar imagens')),
-        (imageUrls) => Right(imageUrls),
-      );
+
+      // Converter Base64 para File temporário
+      final tempFiles = <File>[];
+      for (int i = 0; i < base64Images.length; i++) {
+        final base64Image = base64Images[i];
+        final file = await _convertBase64ToFile(base64Image);
+        if (file == null) {
+          return Left(ValidationFailure('Erro ao processar imagem ${i + 1}'));
+        }
+        tempFiles.add(file);
+      }
+
+      // Upload com retry
+      final results = <String>[];
+      for (int i = 0; i < tempFiles.length; i++) {
+        final imageService = ImageService(); // Acesso direto ao ImageService do core
+        final result = await imageService.uploadImageWithRetry(
+          tempFiles[i],
+          folder: 'plants',
+          onProgress: onProgress != null
+            ? (progress) => onProgress(i, progress)
+            : null,
+        );
+
+        result.fold(
+          (error) {
+            // Cleanup dos arquivos temporários em caso de erro
+            for (final tempFile in tempFiles) {
+              if (tempFile.existsSync()) {
+                tempFile.deleteSync();
+              }
+            }
+            throw Exception(error.message);
+          },
+          (uploadResult) => results.add(uploadResult.downloadUrl),
+        );
+      }
+
+      // Cleanup dos arquivos temporários após sucesso
+      for (final tempFile in tempFiles) {
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+      }
+
+      return Right(results);
     } catch (e) {
-      return Left(NetworkFailure('Erro inesperado no upload: $e'));
+      return Left(NetworkFailure('Erro no upload: $e'));
+    }
+  }
+
+  /// Converte Base64 para File temporário
+  Future<File?> _convertBase64ToFile(String base64Image) async {
+    try {
+      // Remove o prefixo data:image/...;base64,
+      final base64Data = base64Image.split(',').last;
+      final bytes = base64Decode(base64Data);
+
+      // Cria arquivo temporário
+      final tempDir = Directory.systemTemp;
+      final tempFile = File('${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+      await tempFile.writeAsBytes(bytes);
+
+      return tempFile;
+    } catch (e) {
+      return null;
     }
   }
   

@@ -240,6 +240,52 @@ class ImageService {
     });
   }
 
+  /// Upload de imagem com retry logic
+  /// Tenta fazer upload com retry automático em caso de falha de rede
+  Future<Result<ImageUploadResult>> uploadImageWithRetry(
+    File imageFile, {
+    String? folder,
+    String? fileName,
+    String? uploadType,
+    void Function(double)? onProgress,
+    int maxRetries = 3,
+    Duration initialDelay = const Duration(seconds: 2),
+  }) async {
+    int attempt = 0;
+    Duration delay = initialDelay;
+    AppError? lastError;
+
+    while (attempt < maxRetries) {
+      final result = await uploadImage(
+        imageFile,
+        folder: folder,
+        fileName: fileName,
+        uploadType: uploadType,
+        onProgress: onProgress,
+      );
+
+      if (result.isSuccess) {
+        return result;
+      }
+
+      lastError = result.error;
+      attempt++;
+
+      if (attempt < maxRetries) {
+        // Exponential backoff: 2s, 4s, 8s
+        await Future.delayed(delay);
+        delay *= 2;
+      }
+    }
+
+    return Result.error(
+      NetworkError(
+        message: 'Upload falhou após $maxRetries tentativas',
+        details: lastError?.message,
+      ),
+    );
+  }
+
   /// Upload de múltiplas imagens
   Future<Result<MultipleImageUploadResult>> uploadMultipleImages(
     List<File> imageFiles, {

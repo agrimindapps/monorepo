@@ -124,7 +124,7 @@ abstract class BaseSyncEntity extends BaseEntity {
     Map<String, dynamic> map,
   ) {
     return {
-      'id': map['id'] as String,
+      'id': map['id'] as String?,
       'createdAt':
           map['created_at'] != null
               ? DateTime.parse(map['created_at'] as String)

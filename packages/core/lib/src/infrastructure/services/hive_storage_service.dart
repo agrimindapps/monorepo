@@ -166,12 +166,21 @@ class HiveStorageService implements ILocalStorageRepository {
       await _ensureInitialized();
       final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
       final values =
-          targetBox.values.map((dynamic value) {
-            if (value is Map && value is! Map<String, dynamic>) {
-              return Map<String, dynamic>.from(value) as T;
-            }
-            return value as T;
-          }).toList();
+          targetBox.values
+              .where((dynamic value) {
+                // Filter out invalid data types
+                if (T == Map<String, dynamic>) {
+                  return value is Map<String, dynamic>;
+                }
+                return true; // For other types, let the cast handle it
+              })
+              .map((dynamic value) {
+                if (value is Map && value is! Map<String, dynamic>) {
+                  return Map<String, dynamic>.from(value) as T;
+                }
+                return value as T;
+              })
+              .toList();
 
       return Right(values);
     } catch (e) {

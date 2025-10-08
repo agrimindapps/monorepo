@@ -4,7 +4,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/plants/domain/usecases/get_plants_usecase.dart';
-import '../../features/plants/presentation/providers/plants_provider.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../features/settings/domain/usecases/sync_settings_usecase.dart';
 import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
@@ -27,7 +26,8 @@ class BackgroundSyncService extends ChangeNotifier {
   SyncUserProfileUseCase? _syncUserProfileUseCase;
   SyncSettingsUseCase? _syncSettingsUseCase;
   AuthStateNotifier? _authStateNotifier;
-  PlantsProvider? _plantsProvider;
+  // PlantsProvider is now managed by Riverpod
+  // PlantsProvider? _plantsProvider;
   TasksProvider? _tasksProvider;
   final StreamController<String> _syncMessageController =
       StreamController<String>.broadcast();
@@ -62,16 +62,6 @@ class BackgroundSyncService extends ChangeNotifier {
         }
       }
       try {
-        _plantsProvider ??= di.sl<PlantsProvider>();
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint(
-            'ℹ️ BackgroundSyncService: PlantsProvider não disponível ainda: $e',
-          );
-        }
-      }
-
-      try {
         _tasksProvider ??= di.sl<TasksProvider>();
       } catch (e) {
         if (kDebugMode) {
@@ -88,6 +78,7 @@ class BackgroundSyncService extends ChangeNotifier {
       }
     }
   }
+
   bool get isSyncInProgress => _isSyncInProgress;
   bool get hasPerformedInitialSync => _hasPerformedInitialSync;
   String get currentSyncMessage => _currentSyncMessage;
@@ -308,16 +299,16 @@ class BackgroundSyncService extends ChangeNotifier {
     try {
       if (_syncSettingsUseCase == null) {
         if (kDebugMode) {
-          debugPrint(
-            '⚠️ BackgroundSync: SyncSettingsUseCase não disponível',
-          );
+          debugPrint('⚠️ BackgroundSync: SyncSettingsUseCase não disponível');
         }
         _operationStatus['settings_data'] = false;
         return;
       }
 
       if (kDebugMode) {
-        debugPrint('⚙️ BackgroundSync: Executando sync REAL das configurações...');
+        debugPrint(
+          '⚙️ BackgroundSync: Executando sync REAL das configurações...',
+        );
       }
       final result = await _syncSettingsUseCase!.call();
 
@@ -477,26 +468,11 @@ class BackgroundSyncService extends ChangeNotifier {
         '📢 BackgroundSync: Notificando providers sobre conclusão da sync...',
       );
     }
-    if (_plantsProvider != null) {
-      if (kDebugMode) {
-        debugPrint(
-          '🌱 BackgroundSync: Notificando PlantsProvider para refresh...',
-        );
-      }
-      Future.microtask(() {
-        try {
-          _plantsProvider?.refreshPlants();
-          if (kDebugMode) {
-            debugPrint('✅ BackgroundSync: PlantsProvider refresh solicitado');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            debugPrint(
-              '❌ BackgroundSync: Erro ao notificar PlantsProvider: $e',
-            );
-          }
-        }
-      });
+    // PlantsProvider is now managed by Riverpod, notification handled via streams
+    if (kDebugMode) {
+      debugPrint(
+        'ℹ️ BackgroundSync: PlantsProvider notification skipped (Riverpod managed)',
+      );
     }
     if (_tasksProvider != null) {
       if (kDebugMode) {

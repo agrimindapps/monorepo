@@ -7,6 +7,7 @@ import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../../services/form_validation_service.dart';
 import '../../services/image_management_service.dart';
+import '../image_providers.dart';
 
 part 'plant_form_state_notifier.g.dart';
 
@@ -15,6 +16,9 @@ class PlantFormState {
   final bool isLoading;
   final bool isSaving;
   final bool isUploadingImages;
+  final double uploadProgress; // 0.0 - 1.0
+  final int? uploadingImageIndex; // Índice da imagem sendo enviada
+  final int? totalImagesToUpload; // Total de imagens a enviar
   final String? errorMessage;
   final Plant? originalPlant;
   final String name;
@@ -50,6 +54,9 @@ class PlantFormState {
     this.isLoading = false,
     this.isSaving = false,
     this.isUploadingImages = false,
+    this.uploadProgress = 0.0,
+    this.uploadingImageIndex,
+    this.totalImagesToUpload,
     this.errorMessage,
     this.originalPlant,
     this.name = '',
@@ -86,6 +93,9 @@ class PlantFormState {
     bool? isLoading,
     bool? isSaving,
     bool? isUploadingImages,
+    double? uploadProgress,
+    int? uploadingImageIndex,
+    int? totalImagesToUpload,
     String? errorMessage,
     Plant? originalPlant,
     String? name,
@@ -118,11 +128,15 @@ class PlantFormState {
     bool? isFormValid,
     bool clearError = false,
     bool clearOriginalPlant = false,
+    bool clearUploadProgress = false,
   }) {
     return PlantFormState(
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
       isUploadingImages: isUploadingImages ?? this.isUploadingImages,
+      uploadProgress: clearUploadProgress ? 0.0 : (uploadProgress ?? this.uploadProgress),
+      uploadingImageIndex: clearUploadProgress ? null : (uploadingImageIndex ?? this.uploadingImageIndex),
+      totalImagesToUpload: clearUploadProgress ? null : (totalImagesToUpload ?? this.totalImagesToUpload),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       originalPlant: clearOriginalPlant
           ? null
@@ -490,6 +504,57 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     state = state.copyWith(isSaving: true, clearError: true);
 
     try {
+      // Se tem imagens Base64 para upload
+      if (state.imageUrls.any((url) => url.startsWith('data:image/'))) {
+        final base64Images = state.imageUrls
+            .where((url) => url.startsWith('data:image/'))
+            .toList();
+
+        state = state.copyWith(
+          isUploadingImages: true,
+          totalImagesToUpload: base64Images.length,
+        );
+
+        final uploadResult = await _imageService.uploadImages(
+          base64Images,
+          onProgress: (index, progress) {
+            state = state.copyWith(
+              uploadProgress: progress,
+              uploadingImageIndex: index,
+            );
+          },
+        );
+
+        final uploadSuccess = uploadResult.fold(
+          (failure) {
+            state = state.copyWith(
+              isSaving: false,
+              isUploadingImages: false,
+              errorMessage: failure.message,
+              clearUploadProgress: true,
+            );
+            return false;
+          },
+          (downloadUrls) {
+            // Substitui Base64 por URLs permanentes
+            final updatedImageUrls = state.imageUrls
+                .where((url) => !url.startsWith('data:image/'))
+                .toList()
+              ..addAll(downloadUrls);
+
+            state = state.copyWith(
+              imageUrls: updatedImageUrls,
+              isUploadingImages: false,
+              clearUploadProgress: true,
+            );
+            return true;
+          },
+        );
+
+        if (!uploadSuccess) return false;
+      }
+
+      // Continua salvando planta
       if (state.isEditMode) {
         return await _updatePlant();
       } else {
@@ -498,7 +563,9 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     } catch (e) {
       state = state.copyWith(
         isSaving: false,
+        isUploadingImages: false,
         errorMessage: 'Erro inesperado: $e',
+        clearUploadProgress: true,
       );
       return false;
     }
@@ -725,14 +792,10 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     state = const PlantFormState();
   }
 }
+// Providers for use cases (GetIt integration)
 @riverpod
 FormValidationService formValidationService(Ref ref) {
   return GetIt.instance<FormValidationService>();
-}
-
-@riverpod
-ImageManagementService imageManagementService(Ref ref) {
-  return GetIt.instance<ImageManagementService>();
 }
 
 @riverpod

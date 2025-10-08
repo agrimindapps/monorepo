@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/solid_providers.dart';
+import '../../../../core/providers/state/plant_form_state_notifier.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
 class PlantFormCareConfig extends ConsumerStatefulWidget {
@@ -84,8 +84,8 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        final formState = ref.watch(solidPlantFormStateProvider);
-        final formManager = ref.read(solidPlantFormStateManagerProvider);
+        final formState = ref.watch(plantFormStateNotifierProvider);
+        final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
         final fieldErrors =
             formState.fieldErrors; // Get validation errors for real-time display
 
@@ -96,13 +96,13 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.water_drop,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableWateringCare ?? false,
-              onToggle: (value) => formManager.setWateringConfig(enabled: value),
+              onToggle: (value) => formNotifier.setWateringConfig(enabled: value),
               interval: _getIntervalText(formState.wateringIntervalDays),
               onIntervalChanged: (interval) {
-                formManager.setWateringConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setWateringConfig(intervalDays: _getIntervalDays(interval));
               },
               lastDate: formState.lastWateringDate,
-              onDateChanged: (date) => formManager.setWateringConfig(lastDate: date),
+              onDateChanged: (date) => formNotifier.setWateringConfig(lastDate: date),
               errorText:
                   fieldErrors['wateringInterval'], // Show validation error
             ),
@@ -113,13 +113,13 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.eco,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableFertilizerCare ?? false,
-              onToggle: (value) => formManager.setFertilizerConfig(enabled: value),
+              onToggle: (value) => formNotifier.setFertilizerConfig(enabled: value),
               interval: _getIntervalText(formState.fertilizingIntervalDays),
               onIntervalChanged: (interval) {
-                formManager.setFertilizerConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setFertilizerConfig(intervalDays: _getIntervalDays(interval));
               },
               lastDate: formState.lastFertilizerDate,
-              onDateChanged: (date) => formManager.setFertilizerConfig(lastDate: date),
+              onDateChanged: (date) => formNotifier.setFertilizerConfig(lastDate: date),
               errorText:
                   fieldErrors['fertilizingInterval'], // Show validation error
             ),
@@ -130,13 +130,13 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.wb_sunny,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableSunlightCare ?? false,
-              onToggle: (value) => formManager.setSunlightConfig(enabled: value),
+              onToggle: (value) => formNotifier.setSunlightConfig(enabled: value),
               interval: _getIntervalText(formState.sunlightIntervalDays),
               onIntervalChanged: (interval) {
-                formManager.setSunlightConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setSunlightConfig(intervalDays: _getIntervalDays(interval));
               },
               lastDate: formState.lastSunlightDate,
-              onDateChanged: (date) => formManager.setSunlightConfig(lastDate: date),
+              onDateChanged: (date) => formNotifier.setSunlightConfig(lastDate: date),
             ),
 
             const SizedBox(height: 20),
@@ -145,13 +145,13 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.bug_report,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enablePestInspection ?? false,
-              onToggle: (value) => formManager.setPestInspectionConfig(enabled: value),
+              onToggle: (value) => formNotifier.setPestInspectionConfig(enabled: value),
               interval: _getIntervalText(formState.pestInspectionIntervalDays),
               onIntervalChanged: (interval) {
-                formManager.setPestInspectionConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setPestInspectionConfig(intervalDays: _getIntervalDays(interval));
               },
               lastDate: formState.lastPestInspectionDate,
-              onDateChanged: (date) => formManager.setPestInspectionConfig(lastDate: date),
+              onDateChanged: (date) => formNotifier.setPestInspectionConfig(lastDate: date),
             ),
 
             const SizedBox(height: 20),
@@ -160,13 +160,13 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.content_cut,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enablePruning ?? false,
-              onToggle: (value) => formManager.setPruningConfig(enabled: value),
+              onToggle: (value) => formNotifier.setPruningConfig(enabled: value),
               interval: _getIntervalText(formState.pruningIntervalDays),
               onIntervalChanged: (interval) {
-                formManager.setPruningConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setPruningConfig(intervalDays: _getIntervalDays(interval));
               },
               lastDate: formState.lastPruningDate,
-              onDateChanged: (date) => formManager.setPruningConfig(lastDate: date),
+              onDateChanged: (date) => formNotifier.setPruningConfig(lastDate: date),
               errorText:
                   fieldErrors['pruningInterval'], // Show validation error
             ),
@@ -177,13 +177,13 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.grass,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableReplanting ?? false,
-              onToggle: (value) => formManager.setReplantingConfig(enabled: value),
+              onToggle: (value) => formNotifier.setReplantingConfig(enabled: value),
               interval: _getIntervalText(formState.replantingIntervalDays),
               onIntervalChanged: (interval) {
-                formManager.setReplantingConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setReplantingConfig(intervalDays: _getIntervalDays(interval));
               },
               lastDate: formState.lastReplantingDate,
-              onDateChanged: (date) => formManager.setReplantingConfig(lastDate: date),
+              onDateChanged: (date) => formNotifier.setReplantingConfig(lastDate: date),
             ),
           ],
         );

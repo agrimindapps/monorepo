@@ -1,8 +1,12 @@
 import 'package:core/core.dart';
 
+import '../../../features/tasks/data/datasources/local/task_history_local_datasource.dart';
 import '../../../features/tasks/data/datasources/local/tasks_local_datasource.dart';
+import '../../../features/tasks/data/datasources/remote/task_history_remote_datasource.dart';
 import '../../../features/tasks/data/datasources/remote/tasks_remote_datasource.dart';
+import '../../../features/tasks/data/repositories/task_history_repository_impl.dart';
 import '../../../features/tasks/data/repositories/tasks_repository_impl.dart';
+import '../../../features/tasks/domain/repositories/task_history_repository.dart';
 import '../../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../../../features/tasks/domain/usecases/add_task_usecase.dart';
 import '../../../features/tasks/domain/usecases/complete_task_usecase.dart';
@@ -38,6 +42,7 @@ class TasksModule {
         tasksRepository: sl(),
         plantsRepository: sl(),
         taskGenerationService: sl(),
+        taskHistoryRepository: sl(),
       ),
     );
     sl.registerLazySingleton<TasksRepository>(
@@ -46,7 +51,22 @@ class TasksModule {
         localDataSource: sl(),
         networkInfo: sl(),
         authService: sl(),
+        plantsRepository: sl(),
       ),
+    );
+    sl.registerLazySingleton<TaskHistoryRepository>(
+      () => TaskHistoryRepositoryImpl(
+        remoteDataSource: sl(),
+        localDataSource: sl(),
+        networkInfo: sl(),
+        authService: sl(),
+      ),
+    );
+    sl.registerLazySingleton<TaskHistoryRemoteDataSource>(
+      () => TaskHistoryRemoteDataSourceImpl(),
+    );
+    sl.registerLazySingleton<TaskHistoryLocalDataSource>(
+      () => TaskHistoryLocalDataSourceImpl(sl<ILocalStorageRepository>()),
     );
     sl.registerLazySingleton<TasksRemoteDataSource>(
       () => TasksRemoteDataSourceImpl(),

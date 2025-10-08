@@ -6,8 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/providers/plants_providers.dart'
     as riverpod_plants;
-import '../../../../core/providers/solid_providers.dart';
-import '../../../../core/providers/state/plant_form_state_manager.dart';
+import '../../../../core/providers/state/plant_form_state_notifier.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
@@ -35,7 +34,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
   void _initializeForm() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final formManager = ref.read(solidPlantFormStateManagerProvider);
+      final formManager = ref.read(plantFormStateNotifierProvider.notifier);
       if (widget.plantId != null) {
         formManager.loadPlant(widget.plantId!);
       } else {
@@ -69,7 +68,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
         actions: [
           Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              final formState = ref.watch(solidPlantFormStateProvider);
+              final formState = ref.watch(plantFormStateNotifierProvider);
               if (formState.isLoading) return const SizedBox.shrink();
 
               return SaveButton(
@@ -88,7 +87,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
       body: ResponsiveLayout(
         child: Consumer(
           builder: (BuildContext context, WidgetRef ref, Widget? child) {
-            final formState = ref.watch(solidPlantFormStateProvider);
+            final formState = ref.watch(plantFormStateNotifierProvider);
             if (formState.isLoading) {
               return Center(
                 child: Column(
@@ -119,7 +118,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
                         ? 'Erro ao carregar dados da planta: ${formState.errorMessage}'
                         : 'Erro ao inicializar formulário: ${formState.errorMessage}',
                 onRetry: () {
-                  final formManager = ref.read(solidPlantFormStateManagerProvider);
+                  final formManager = ref.read(plantFormStateNotifierProvider.notifier);
                   formManager.clearError();
                   if (widget.plantId != null) {
                     formManager.loadPlant(widget.plantId!);
@@ -174,8 +173,8 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
   }
 
   Future<void> _savePlant(BuildContext context) async {
-    final formManager = ref.read(solidPlantFormStateManagerProvider);
-    final formState = ref.read(solidPlantFormStateProvider);
+    final formManager = ref.read(plantFormStateNotifierProvider.notifier);
+    final formState = ref.read(plantFormStateNotifierProvider);
     final plantName = formState.name.trim();
     startSaveLoading(itemName: plantName.isNotEmpty ? plantName : 'planta');
 
@@ -252,7 +251,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
   }
 
   Future<void> _handleBackPressed(BuildContext context) async {
-    final formState = ref.read(solidPlantFormStateProvider);
+    final formState = ref.read(plantFormStateNotifierProvider);
     if (!_hasUnsavedChanges(formState)) {
       if (mounted) context.pop();
       return;

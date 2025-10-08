@@ -22,5 +22,7 @@ class SpacesModule {
         authService: sl(),
       ),
     );
+
+    // Use Cases are registered automatically by injectable
   }
 }

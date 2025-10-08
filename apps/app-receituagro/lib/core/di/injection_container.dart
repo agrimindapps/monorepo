@@ -1,10 +1,14 @@
 import 'dart:async';
+
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
+
 import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/domain/comentarios_service.dart';
+import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
+import '../../features/defensivos/di/defensivos_di.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
@@ -38,6 +42,7 @@ import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
+import '../services/web_local_storage_repository.dart';
 import 'core_package_integration.dart';
 import 'injection.dart' as injectable;
 import 'modules/account_deletion_module.dart';
@@ -46,6 +51,7 @@ import 'repositories_di.dart';
 final sl = core.GetIt.instance;
 
 Future<void> init() async {
+  await core.InjectionContainer.init();
   await injectable.configureDependencies();
   configureAllRepositoriesDependencies();
   sl.registerLazySingleton<core.IAppDataCleaner>(
@@ -66,9 +72,8 @@ Future<void> init() async {
 
   if (!sl.isRegistered<core.NavigationAnalyticsService>()) {
     sl.registerLazySingleton<core.NavigationAnalyticsService>(
-      () => core.NavigationAnalyticsService(
-        sl<core.FirebaseAnalyticsService>(),
-      ),
+      () =>
+          core.NavigationAnalyticsService(sl<core.FirebaseAnalyticsService>()),
     );
   }
 
@@ -93,7 +98,9 @@ Future<void> init() async {
     );
   }
   if (!sl.isRegistered<core.IBoxRegistryService>()) {
-    sl.registerLazySingleton<core.IBoxRegistryService>(() => core.BoxRegistryService());
+    sl.registerLazySingleton<core.IBoxRegistryService>(
+      () => core.BoxRegistryService(),
+    );
   }
   if (!sl.isRegistered<core.HiveStorageService>()) {
     sl.registerLazySingleton<core.HiveStorageService>(
@@ -105,22 +112,24 @@ Future<void> init() async {
       () => core.RevenueCatService(),
     );
   }
-  sl.registerLazySingleton<core.IAppRatingRepository>(() => core.AppRatingService(
-    appStoreId: '6738924932', // ReceitaAgro App Store ID real
-    googlePlayId: 'br.com.agrimind.pragassoja', // Using the correct package ID
-    minDays: 3,
-    minLaunches: 5,
-    remindDays: 7,
-    remindLaunches: 10,
-  ));
-  sl.registerLazySingleton<IAppDataManager>(
-    () => AppDataManager(),
+  sl.registerLazySingleton<core.IAppRatingRepository>(
+    () => core.AppRatingService(
+      appStoreId: '6738924932', // ReceitaAgro App Store ID real
+      googlePlayId:
+          'br.com.agrimind.pragassoja', // Using the correct package ID
+      minDays: 3,
+      minLaunches: 5,
+      remindDays: 7,
+      remindLaunches: 10,
+    ),
   );
+  sl.registerLazySingleton<IAppDataManager>(() => AppDataManager());
   sl.registerLazySingleton<IReceitaAgroNotificationService>(
     () => ReceitaAgroNotificationService(),
   );
   sl.registerLazySingleton<ReceitaAgroNotificationService>(
-    () => sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
+    () =>
+        sl<IReceitaAgroNotificationService>() as ReceitaAgroNotificationService,
   );
   sl.registerLazySingleton<ReceitaAgroFirebaseMessagingService>(
     () => ReceitaAgroFirebaseMessagingService(),
@@ -142,20 +151,31 @@ Future<void> init() async {
       sl.registerLazySingleton<core.ILocalStorageRepository>(
         () => sl<core.HiveStorageService>(),
       );
-      if (kDebugMode) print('✅ ILocalStorageRepository registered successfully');
+      if (kDebugMode)
+        print('✅ ILocalStorageRepository registered successfully');
     } catch (e) {
-      if (kDebugMode) print('⚠️ ILocalStorageRepository registration failed: $e');
+      if (kDebugMode)
+        print('⚠️ ILocalStorageRepository registration failed: $e');
+    }
+  } else if (kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
+    try {
+      sl.registerLazySingleton<core.ILocalStorageRepository>(
+        () => WebLocalStorageRepository(),
+      );
+      if (kDebugMode)
+        print('✅ ILocalStorageRepository (Web) registered successfully');
+    } catch (e) {
+      if (kDebugMode)
+        print('⚠️ ILocalStorageRepository (Web) registration failed: $e');
     }
   } else if (kIsWeb && kDebugMode) {
-    print('⚠️ ILocalStorageRepository skipped on Web platform (Hive limitations)');
+    print('⚠️ ILocalStorageRepository already registered on Web');
   }
   sl.registerLazySingleton<CulturaHiveRepository>(
     () => CulturaHiveRepository(),
   );
 
-  sl.registerLazySingleton<PragasHiveRepository>(
-    () => PragasHiveRepository(),
-  );
+  sl.registerLazySingleton<PragasHiveRepository>(() => PragasHiveRepository());
 
   sl.registerLazySingleton<PragasInfHiveRepository>(
     () => PragasInfHiveRepository(),
@@ -221,9 +241,7 @@ Future<void> init() async {
     () => PremiumHiveRepository(),
   );
   try {
-    sl.registerLazySingleton<IPremiumService>(
-      () => MockPremiumService(),
-    );
+    sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
   } catch (e) {
     if (kDebugMode) print('Premium service registration failed: $e');
   }
@@ -280,40 +298,54 @@ Future<void> init() async {
   sl.registerLazySingleton<GetDiagnosticoFiltersDataUseCase>(
     () => GetDiagnosticoFiltersDataUseCase(sl<IDiagnosticosRepository>()),
   );
+  sl.registerLazySingleton<DefensivosGroupingService>(
+    () => DefensivosGroupingService(),
+  );
   FavoritosDI.registerDependencies();
+  configureDefensivosDependencies();
   initDefensivoDetailsDI();
   PragasDI.configure();
   ComentariosDI.register(sl);
   SettingsDI.register(sl);
   try {
-    sl.registerLazySingleton<ReceitaAgroPremiumService>(
-      () {
-        if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {
-          throw StateError('ReceitaAgroAnalyticsService must be registered before ReceitaAgroPremiumService');
-        }
-        if (!sl.isRegistered<ReceitaAgroCloudFunctionsService>()) {
-          throw StateError('ReceitaAgroCloudFunctionsService must be registered before ReceitaAgroPremiumService');
-        }
-        if (!sl.isRegistered<ReceitaAgroRemoteConfigService>()) {
-          throw StateError('ReceitaAgroRemoteConfigService must be registered before ReceitaAgroPremiumService');
-        }
-        if (!sl.isRegistered<core.ISubscriptionRepository>()) {
-          throw StateError('ISubscriptionRepository must be registered before ReceitaAgroPremiumService');
-        }
-        final service = ReceitaAgroPremiumService(
-          analytics: sl<ReceitaAgroAnalyticsService>(),
-          cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
-          remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
-          subscriptionRepository: sl<core.ISubscriptionRepository>(),
+    sl.registerLazySingleton<ReceitaAgroPremiumService>(() {
+      if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {
+        throw StateError(
+          'ReceitaAgroAnalyticsService must be registered before ReceitaAgroPremiumService',
         );
-        ReceitaAgroPremiumService.setInstance(service);
+      }
+      if (!sl.isRegistered<ReceitaAgroCloudFunctionsService>()) {
+        throw StateError(
+          'ReceitaAgroCloudFunctionsService must be registered before ReceitaAgroPremiumService',
+        );
+      }
+      if (!sl.isRegistered<ReceitaAgroRemoteConfigService>()) {
+        throw StateError(
+          'ReceitaAgroRemoteConfigService must be registered before ReceitaAgroPremiumService',
+        );
+      }
+      if (!sl.isRegistered<core.ISubscriptionRepository>()) {
+        throw StateError(
+          'ISubscriptionRepository must be registered before ReceitaAgroPremiumService',
+        );
+      }
+      final service = ReceitaAgroPremiumService(
+        analytics: sl<ReceitaAgroAnalyticsService>(),
+        cloudFunctions: sl<ReceitaAgroCloudFunctionsService>(),
+        remoteConfig: sl<ReceitaAgroRemoteConfigService>(),
+        subscriptionRepository: sl<core.ISubscriptionRepository>(),
+      );
+      ReceitaAgroPremiumService.setInstance(service);
 
-        return service;
-      },
-    );
-    if (kDebugMode) print('✅ ReceitaAgroPremiumService registered successfully with core ISubscriptionRepository');
+      return service;
+    });
+    if (kDebugMode)
+      print(
+        '✅ ReceitaAgroPremiumService registered successfully with core ISubscriptionRepository',
+      );
   } catch (e) {
-    if (kDebugMode) print('❌ ReceitaAgroPremiumService registration failed: $e');
+    if (kDebugMode)
+      print('❌ ReceitaAgroPremiumService registration failed: $e');
     rethrow;
   }
 }

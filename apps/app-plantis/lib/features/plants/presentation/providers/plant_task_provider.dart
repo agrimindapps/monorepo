@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
@@ -9,8 +10,13 @@ import '../../domain/services/plant_task_generator.dart';
 /// Provider Riverpod para PlantTaskProvider
 ///
 /// Gerencia estado de tarefas das plantas
-final plantTaskProviderProvider = ChangeNotifierProvider<PlantTaskProvider>((ref) {
-  return PlantTaskProvider();
+final plantTaskProviderProvider = ChangeNotifierProvider<PlantTaskProvider>((
+  ref,
+) {
+  return PlantTaskProvider(
+    taskGenerationService: null, // Will use default
+    repository: GetIt.instance<PlantTasksRepository>(),
+  );
 });
 
 class PlantTaskProvider extends ChangeNotifier {

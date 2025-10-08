@@ -70,6 +70,7 @@ class PlantsState {
     final grouped = plantsGroupedBySpaces;
     return grouped.map((spaceId, plants) => MapEntry(spaceId, plants.length));
   }
+
   List<Plant> getPlantsNeedingWater() {
     final now = DateTime.now();
     final threshold = now.add(const Duration(days: 2));
@@ -100,6 +101,7 @@ class PlantsState {
       return false;
     }).toList();
   }
+
   List<Plant> getPlantsNeedingFertilizer() {
     final now = DateTime.now();
     final threshold = now.add(const Duration(days: 2));
@@ -131,6 +133,7 @@ class PlantsState {
       return false;
     }).toList();
   }
+
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     final now = DateTime.now();
 
@@ -157,6 +160,7 @@ class PlantsState {
       }
     }).toList();
   }
+
   bool _checkWaterStatus(Plant plant, DateTime now, int dayThreshold) {
     final config = plant.config;
     if (config == null) return false;
@@ -186,6 +190,7 @@ class PlantsState {
 
     return false;
   }
+
   bool _checkFertilizerStatus(Plant plant, DateTime now, int dayThreshold) {
     final config = plant.config;
     if (config == null) return false;
@@ -216,6 +221,7 @@ class PlantsState {
 
     return false;
   }
+
   bool _isPlantInGoodCondition(Plant plant, DateTime now) {
     final waterGood =
         !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
@@ -233,6 +239,7 @@ class PlantsState {
     return (hasWaterCare ? waterGood : true) &&
         (hasFertilizerCare ? fertilizerGood : true);
   }
+
   List<Plant> getPlantsBySpace(String spaceId) {
     return allPlants.where((plant) => plant.spaceId == spaceId).toList();
   }
@@ -330,16 +337,15 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (_authStateNotifier.isInitialized &&
         _authStateNotifier.currentUser != null) {
       final result = await _getPlantsUseCase.call(const NoParams());
-      return result.fold(
-        (failure) => PlantsState(error: failure.message),
-        (plants) {
-          final sortedPlants = _sortPlants(plants, SortBy.newest);
-          return PlantsState(
-            allPlants: sortedPlants,
-            filteredPlants: sortedPlants,
-          );
-        },
-      );
+      return result.fold((failure) => PlantsState(error: failure.message), (
+        plants,
+      ) {
+        final sortedPlants = _sortPlants(plants, SortBy.newest);
+        return PlantsState(
+          allPlants: sortedPlants,
+          filteredPlants: sortedPlants,
+        );
+      });
     }
     return const PlantsState();
   }
@@ -490,6 +496,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       return false;
     }
   }
+
   Future<void> loadPlants() async {
     if (kDebugMode) {
       print(
@@ -609,6 +616,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       }
     }
   }
+
   Future<Plant?> getPlantById(String id) async {
     final result = await _getPlantByIdUseCase.call(id);
 
@@ -627,6 +635,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
+
   Future<void> searchPlants(String query) async {
     final currentState = state.valueOrNull ?? const PlantsState();
 
@@ -641,6 +650,32 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       return;
     }
 
+    // Prefer local in-memory filtering when we already have plants loaded.
+    // This avoids hitting the search use case (which may query Hive/remote)
+    // on every keypress and matches the expected UX: keep all records in
+    // memory and filter locally.
+    if (currentState.allPlants.isNotEmpty) {
+      state = AsyncData(
+        currentState.copyWith(isSearching: true, searchQuery: query),
+      );
+      final lower = query.toLowerCase();
+      final localResults =
+          currentState.allPlants.where((p) {
+            final name = p.name.toLowerCase();
+            final species = (p.species ?? '').toLowerCase();
+            // Match by name or species; adjust as needed (notes, tags, etc.)
+            return name.contains(lower) || species.contains(lower);
+          }).toList();
+
+      final newState = state.valueOrNull ?? const PlantsState();
+      final sortedResults = _sortPlants(localResults, newState.sortBy);
+      state = AsyncData(
+        newState.copyWith(searchResults: sortedResults, isSearching: false),
+      );
+      return;
+    }
+
+    // Fallback: no local data yet, use the search use case (may query remote)
     state = AsyncData(
       currentState.copyWith(isSearching: true, searchQuery: query),
     );
@@ -666,6 +701,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
+
   Future<bool> addPlant(AddPlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
@@ -701,6 +737,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
+
   Future<bool> updatePlant(UpdatePlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
@@ -745,6 +782,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
+
   Future<bool> deletePlant(String id) async {
     final currentState = state.valueOrNull ?? const PlantsState();
     state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
@@ -785,6 +823,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       },
     );
   }
+
   void setViewMode(ViewMode mode) {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.viewMode != mode) {
@@ -837,13 +876,35 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (currentState.searchQuery.isNotEmpty ||
         currentState.searchResults.isNotEmpty ||
         currentState.isSearching) {
-      state = AsyncData(
-        currentState.copyWith(
-          searchQuery: '',
-          searchResults: [],
-          isSearching: false,
-        ),
-      );
+      // If there are no local plants but we have searchResults (user searched
+      // and results were returned), copy those results to `filteredPlants`
+      // so the UI keeps displaying them while we attempt to load local data.
+      if (currentState.allPlants.isEmpty &&
+          currentState.searchResults.isNotEmpty) {
+        // Promote searchResults into allPlants so the UI shows them as the
+        // canonical in-memory collection. We'll still trigger a background
+        // load to refresh/replace local data when available.
+        state = AsyncData(
+          currentState.copyWith(
+            searchQuery: '',
+            searchResults: [],
+            allPlants: currentState.searchResults,
+            filteredPlants: currentState.searchResults,
+            isSearching: false,
+          ),
+        );
+
+        // fire-and-forget - loadInitialData will replace allPlants when done
+        loadInitialData();
+      } else {
+        state = AsyncData(
+          currentState.copyWith(
+            searchQuery: '',
+            searchResults: [],
+            isSearching: false,
+          ),
+        );
+      }
     }
   }
 
@@ -871,9 +932,11 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       state = AsyncData(currentState.copyWith(clearError: true));
     }
   }
+
   Future<void> loadInitialData() async {
     await loadPlants();
   }
+
   Future<void> refreshPlants() async {
     if (kDebugMode) {
       print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
@@ -894,6 +957,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       );
     }
   }
+
   List<Plant> _sortPlants(List<Plant> plants, SortBy sortBy) {
     final sortedPlants = List<Plant>.from(plants);
 
@@ -1056,6 +1120,7 @@ final updatePlantUseCaseProvider = Provider<UpdatePlantUseCase>((ref) {
 final deletePlantUseCaseProvider = Provider<DeletePlantUseCase>((ref) {
   return GetIt.instance<DeletePlantUseCase>();
 });
+
 enum ViewMode {
   grid,
   list,
@@ -1082,12 +1147,10 @@ final authStateProvider = Provider<IAuthStateProvider>((ref) {
 
 /// Provider for PlantsDataService
 final plantsDataServiceProvider = Provider<PlantsDataService>((ref) {
-  return PlantsDataService.create(
-    authProvider: ref.read(authStateProvider),
-  );
+  return PlantsDataService.create(authProvider: ref.read(authStateProvider));
 });
 
-/// Provider for PlantsFilterService  
+/// Provider for PlantsFilterService
 final plantsFilterServiceProvider = Provider<PlantsFilterService>((ref) {
   return PlantsFilterService();
 });
@@ -1113,7 +1176,7 @@ final plantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
   );
 });
 
-/// Convenience providers for accessing state manager data  
+/// Convenience providers for accessing state manager data
 final plantsStateProvider = Provider((ref) {
   return ref.watch(plantsStateManagerProvider).state;
 });

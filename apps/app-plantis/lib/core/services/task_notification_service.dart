@@ -222,8 +222,8 @@ class TaskNotificationService {
         debugPrint('⚠️ Notifications not enabled, skipping task notification');
         return;
       }
-      final DateTime notificationTime = task.dueDate.subtract(
-        TasksConstants.notificationAdvanceTime,
+      final DateTime notificationTime = await _getScheduledDateInUserTimezone(
+        task,
       );
       if (notificationTime.isBefore(DateTime.now())) {
         debugPrint('⚠️ Notification time has passed, skipping: ${task.title}');
@@ -541,6 +541,46 @@ class TaskNotificationService {
       return AppStrings.multipleTasksScheduled.replaceAll(
         '%TOTAL%',
         '$totalTasks',
+      );
+    }
+  }
+
+  /// Get the scheduled notification date in the user's timezone
+  ///
+  /// This method converts the task due date to the user's actual timezone
+  /// instead of using a hardcoded timezone. This ensures notifications appear
+  /// at the correct local time regardless of the user's location.
+  ///
+  /// Parameters:
+  /// - [task]: The task to get the notification time for
+  ///
+  /// Returns:
+  /// The notification time adjusted for the user's timezone
+  Future<DateTime> _getScheduledDateInUserTimezone(
+    task_entity.Task task,
+  ) async {
+    try {
+      // Convert the task due date to the user's local timezone
+      // task.dueDate is assumed to be in UTC, convert to local time
+      final DateTime localDueDate = task.dueDate.toLocal();
+
+      // Subtract the notification advance time (1 hour before due)
+      final DateTime notificationTime = localDueDate.subtract(
+        TasksConstants.notificationAdvanceTime,
+      );
+
+      debugPrint(
+        '🕐 Task "${task.title}" due at ${task.dueDate} (UTC) -> ${localDueDate} (local) -> notification at $notificationTime',
+      );
+
+      return notificationTime;
+    } catch (e) {
+      debugPrint(
+        '❌ Error converting to local timezone, falling back to direct conversion: $e',
+      );
+      // Fallback to direct conversion if something fails
+      return task.dueDate.toLocal().subtract(
+        TasksConstants.notificationAdvanceTime,
       );
     }
   }

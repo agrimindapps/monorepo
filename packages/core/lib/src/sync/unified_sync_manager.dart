@@ -115,7 +115,6 @@ class UnifiedSyncManager {
     dynamic toMapFunction,
     SyncConfig config,
   ) {
-
     developer.log(
       'Creating sync service for collection: $collectionName',
       name: 'UnifiedSync',
@@ -710,7 +709,8 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, List<T>>> findAll() async {
-    final result = await _repository.findAll() as Either<Failure, List<dynamic>>;
+    final result =
+        await _repository.findAll() as Either<Failure, List<dynamic>>;
     return result.fold(
       (failure) => Left(failure),
       (list) => Right(list.cast<T>()),
@@ -721,7 +721,8 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
   Future<Either<Failure, List<T>>> findWhere(
     Map<String, dynamic> filters,
   ) async {
-    final result = await _repository.findWhere(filters) as Either<Failure, List<dynamic>>;
+    final result =
+        await _repository.findWhere(filters) as Either<Failure, List<dynamic>>;
     return result.fold(
       (failure) => Left(failure),
       (list) => Right(list.cast<T>()),
@@ -729,7 +730,10 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
   }
 
   @override
-  Stream<List<T>> get dataStream => _repository.dataStream as Stream<List<T>>;
+  Stream<List<T>> get dataStream =>
+      (_repository.dataStream as Stream<List<BaseSyncEntity>>).map(
+        (List<BaseSyncEntity> list) => list.cast<T>(),
+      );
 
   Stream<SyncStatus> get statusStream =>
       _repository.syncStatusStream as Stream<SyncStatus>;
@@ -753,13 +757,15 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
   Future<Either<Failure, void>> initialize() async {
     return await _repository.initialize() as Either<Failure, void>;
   }
+
   @override
   Stream<bool> get connectivityStream =>
       _repository.connectivityStream as Stream<bool>;
 
   @override
   Future<Either<Failure, List<String>>> createBatch(List<T> items) async {
-    return await _repository.createBatch(items) as Either<Failure, List<String>>;
+    return await _repository.createBatch(items)
+        as Either<Failure, List<String>>;
   }
 
   @override
@@ -772,7 +778,9 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
     int? limit,
     Duration? since,
   }) async {
-    final result = await _repository.findRecent(limit: limit, since: since) as Either<Failure, List<dynamic>>;
+    final result =
+        await _repository.findRecent(limit: limit, since: since)
+            as Either<Failure, List<dynamic>>;
     return result.fold(
       (failure) => Left(failure),
       (list) => Right(list.cast<T>()),
@@ -785,11 +793,13 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
     List<String>? searchFields,
     int? limit,
   }) async {
-    final result = await _repository.fullTextSearch(
-      query,
-      searchFields: searchFields,
-      limit: limit,
-    ) as Either<Failure, List<dynamic>>;
+    final result =
+        await _repository.fullTextSearch(
+              query,
+              searchFields: searchFields,
+              limit: limit,
+            )
+            as Either<Failure, List<dynamic>>;
     return result.fold(
       (failure) => Left(failure),
       (list) => Right(list.cast<T>()),
@@ -798,7 +808,8 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, List<T>>> getUnsyncedItems() async {
-    final result = await _repository.getUnsyncedItems() as Either<Failure, List<dynamic>>;
+    final result =
+        await _repository.getUnsyncedItems() as Either<Failure, List<dynamic>>;
     return result.fold(
       (failure) => Left(failure),
       (list) => Right(list.cast<T>()),
@@ -807,7 +818,9 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, List<T>>> getConflictedItems() async {
-    final result = await _repository.getConflictedItems() as Either<Failure, List<dynamic>>;
+    final result =
+        await _repository.getConflictedItems()
+            as Either<Failure, List<dynamic>>;
     return result.fold(
       (failure) => Left(failure),
       (list) => Right(list.cast<T>()),
@@ -816,7 +829,8 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, void>> resolveConflict(String id, T resolution) async {
-    return await _repository.resolveConflict(id, resolution) as Either<Failure, void>;
+    return await _repository.resolveConflict(id, resolution)
+        as Either<Failure, void>;
   }
 
   @override

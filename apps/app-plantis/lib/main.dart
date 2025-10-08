@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,11 +9,14 @@ import 'app.dart';
 
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
+import 'core/di/solid_di_factory.dart';
 import 'core/plantis_sync_config.dart';
+import 'core/providers/solid_providers.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_boxes_setup.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
+
 late ICrashlyticsRepository _crashlyticsRepository;
 late IPerformanceRepository _performanceRepository;
 final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -29,12 +32,15 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await PlantisSyncConfig.configure();
   await Hive.initFlutter();
   Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
   Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
   await di.init();
+  SolidDIConfigurator.configure(
+    kDebugMode ? DIMode.development : DIMode.production,
+  );
   await PlantisBoxesSetup.registerPlantisBoxes();
+  await PlantisSyncConfig.configure();
   AppDataInspectorInitializer.initialize();
   final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
@@ -72,9 +78,7 @@ void main() async {
     await _performanceRepository.markFirstFrame();
     runApp(
       ProviderScope(
-        overrides: [
-          plantisSharedPreferencesProvider.overrideWithValue(prefs),
-        ],
+        overrides: [plantisSharedPreferencesProvider.overrideWithValue(prefs)],
         child: const PlantisApp(),
       ),
     );
@@ -145,7 +149,6 @@ Future<void> _initializeFirebaseServices() async {
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 }

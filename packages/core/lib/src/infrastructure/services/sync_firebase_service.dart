@@ -58,6 +58,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   late final FirebaseFirestore _firestore;
   late final FirebaseAuth _auth;
   bool _isInitialized = false;
+  Completer<void>? _initCompleter;
   SyncStatus _currentStatus = SyncStatus.offline;
   String? _currentUserId;
   Timer? _syncTimer;
@@ -73,8 +74,17 @@ class SyncFirebaseService<T extends BaseSyncEntity>
 
   @override
   Future<Either<Failure, void>> initialize() async {
+    if (_isInitialized) return const Right(null);
+
+    // Use completer for thread safety
+    if (_initCompleter != null) {
+      await _initCompleter!.future;
+      return const Right(null);
+    }
+
+    _initCompleter = Completer<void>();
+
     try {
-      if (_isInitialized) return const Right(null);
       _localStorage = getIt<ILocalStorageRepository>();
       _connectivity = ConnectivityService.instance;
       _firestore = FirebaseFirestore.instance;
@@ -94,8 +104,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         name: 'SyncService',
       );
 
+      _initCompleter!.complete();
       return const Right(null);
     } catch (e) {
+      _initCompleter!.completeError(e);
       return Left(CacheFailure('Erro ao inicializar SyncFirebaseService: $e'));
     }
   }
@@ -974,6 +986,12 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       if (!_canSync() || _currentUserId == null) return;
 
+      final collectionPath = 'users/$_currentUserId/$collectionName';
+      developer.log(
+        'Pulling data from Firebase path: $collectionPath',
+        name: 'SyncService',
+      );
+
       final collection = _firestore
           .collection('users')
           .doc(_currentUserId)
@@ -992,6 +1010,8 @@ class SyncFirebaseService<T extends BaseSyncEntity>
       for (final doc in snapshot.docs) {
         try {
           final data = doc.data() as Map<String, dynamic>;
+          // Ensure id is present in the data
+          data['id'] ??= doc.id;
           final remoteItem = fromMap(data);
           await _mergeRemoteItem(remoteItem);
         } catch (e) {
@@ -1006,7 +1026,10 @@ class SyncFirebaseService<T extends BaseSyncEntity>
         await _refreshLocalData();
       }
     } catch (e) {
-      developer.log('Erro ao puxar dados do Firebase: $e', name: 'SyncService');
+      developer.log(
+        'Erro ao puxar dados do Firebase para $collectionName (path: users/$_currentUserId/$collectionName): $e',
+        name: 'SyncService',
+      );
     }
   }
 

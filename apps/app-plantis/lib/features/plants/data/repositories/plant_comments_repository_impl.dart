@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
-import '../../../../core/plantis_sync_config.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
 /// Implementation of PlantCommentsRepository using the unified sync system
@@ -13,11 +12,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
   /// Ensure sync system is properly initialized for comments
   Future<void> _ensureSyncInitialized() async {
-    try {
-      await PlantisSyncConfig.configure();
-    } catch (e) {
-      print('Warning: Failed to initialize sync for comments: $e');
-    }
+    // Sync system removed - no initialization needed
   }
 
   @override

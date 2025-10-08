@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/services/backup_service.dart';
 import '../../../../core/services/plantis_notification_service.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/repositories/i_settings_repository.dart';
@@ -11,7 +10,6 @@ import '../../domain/repositories/i_settings_repository.dart';
 class SettingsProvider extends ChangeNotifier {
   final ISettingsRepository _settingsRepository;
   final PlantisNotificationService _notificationService;
-  final BackupService? _backupService;
   SettingsEntity _settings = SettingsEntity.defaults();
   bool _isLoading = false;
   bool _isInitialized = false;
@@ -21,10 +19,8 @@ class SettingsProvider extends ChangeNotifier {
   SettingsProvider({
     required ISettingsRepository settingsRepository,
     required PlantisNotificationService notificationService,
-    BackupService? backupService,
   }) : _settingsRepository = settingsRepository,
-       _notificationService = notificationService,
-       _backupService = backupService;
+       _notificationService = notificationService;
   SettingsEntity get settings => _settings;
   bool get isLoading => _isLoading;
   bool get isInitialized => _isInitialized;
@@ -251,8 +247,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   /// Aplica mudanças de tema no ThemeProvider
-  void _applyThemeChanges(ThemeSettingsEntity themeSettings) {
-  }
+  void _applyThemeChanges(ThemeSettingsEntity themeSettings) {}
 
   /// Abre configurações do sistema para notificações
   Future<void> openNotificationSettings() async {
@@ -302,12 +297,6 @@ class SettingsProvider extends ChangeNotifier {
 
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
-    final backupService = _backupService;
-    if (backupService == null) {
-      _setError('Serviço de backup não disponível');
-      return;
-    }
-
     try {
       final exportResult = await _settingsRepository.exportSettings();
 

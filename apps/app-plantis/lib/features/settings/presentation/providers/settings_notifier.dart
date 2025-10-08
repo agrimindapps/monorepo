@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/services/backup_service.dart';
 import '../../../../core/services/plantis_notification_service.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/repositories/i_settings_repository.dart';
@@ -48,9 +47,11 @@ class SettingsState {
       isLoading: isLoading ?? this.isLoading,
       isInitialized: isInitialized ?? this.isInitialized,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearSuccess ? null : (successMessage ?? this.successMessage),
+      successMessage:
+          clearSuccess ? null : (successMessage ?? this.successMessage),
     );
   }
+
   NotificationSettingsEntity get notificationSettings => settings.notifications;
   BackupSettingsEntity get backupSettings => settings.backup;
   ThemeSettingsEntity get themeSettings => settings.theme;
@@ -70,30 +71,21 @@ ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
 }
 
 @riverpod
-PlantisNotificationService plantisNotificationService(PlantisNotificationServiceRef ref) {
+PlantisNotificationService plantisNotificationService(
+  PlantisNotificationServiceRef ref,
+) {
   return getIt<PlantisNotificationService>();
-}
-
-@riverpod
-BackupService? backupService(BackupServiceRef ref) {
-  try {
-    return getIt<BackupService>();
-  } catch (e) {
-    return null;
-  }
 }
 
 @riverpod
 class SettingsNotifier extends _$SettingsNotifier {
   late final ISettingsRepository _settingsRepository;
   late final PlantisNotificationService _notificationService;
-  BackupService? _backupService;
 
   @override
   Future<SettingsState> build() async {
     _settingsRepository = ref.read(settingsRepositoryProvider);
     _notificationService = ref.read(plantisNotificationServiceProvider);
-    _backupService = ref.read(backupServiceProvider);
     return await _initialize();
   }
 
@@ -140,9 +132,11 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> _syncWithServices() async {
     try {
       final currentState = state.valueOrNull ?? SettingsState.initial();
-      final hasPermissions = await _notificationService.areNotificationsEnabled();
+      final hasPermissions =
+          await _notificationService.areNotificationsEnabled();
 
-      if (currentState.settings.notifications.permissionsGranted != hasPermissions) {
+      if (currentState.settings.notifications.permissionsGranted !=
+          hasPermissions) {
         await updateNotificationSettings(
           currentState.settings.notifications.copyWith(
             permissionsGranted: hasPermissions,
@@ -241,7 +235,9 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Atualiza configurações específicas de conta
   Future<void> updateAccountSettings(AccountSettingsEntity newSettings) async {
     final currentState = state.valueOrNull ?? SettingsState.initial();
-    final updatedSettings = currentState.settings.copyWith(account: newSettings);
+    final updatedSettings = currentState.settings.copyWith(
+      account: newSettings,
+    );
     await updateSettings(updatedSettings);
   }
 
@@ -345,8 +341,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   /// Aplica mudanças de tema no ThemeProvider
-  void _applyThemeChanges(ThemeSettingsEntity themeSettings) {
-  }
+  void _applyThemeChanges(ThemeSettingsEntity themeSettings) {}
 
   /// Abre configurações do sistema para notificações
   Future<void> openNotificationSettings() async {
@@ -420,16 +415,6 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
-    final backupService = _backupService;
-    if (backupService == null) {
-      state = AsyncValue.data(
-        (state.valueOrNull ?? SettingsState.initial()).copyWith(
-          errorMessage: 'Serviço de backup não disponível',
-        ),
-      );
-      return;
-    }
-
     try {
       final exportResult = await _settingsRepository.exportSettings();
 
@@ -437,7 +422,8 @@ class SettingsNotifier extends _$SettingsNotifier {
         (Failure failure) {
           state = AsyncValue.data(
             (state.valueOrNull ?? SettingsState.initial()).copyWith(
-              errorMessage: 'Erro ao exportar configurações: ${failure.message}',
+              errorMessage:
+                  'Erro ao exportar configurações: ${failure.message}',
             ),
           );
         },
@@ -520,7 +506,9 @@ class SettingsNotifier extends _$SettingsNotifier {
 
 @riverpod
 SettingsEntity settings(SettingsRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.settings,
         loading: () => SettingsEntity.defaults(),
         error: (_, __) => SettingsEntity.defaults(),
@@ -529,7 +517,9 @@ SettingsEntity settings(SettingsRef ref) {
 
 @riverpod
 NotificationSettingsEntity notificationSettings(NotificationSettingsRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.notificationSettings,
         loading: () => NotificationSettingsEntity.defaults(),
         error: (_, __) => NotificationSettingsEntity.defaults(),
@@ -538,7 +528,9 @@ NotificationSettingsEntity notificationSettings(NotificationSettingsRef ref) {
 
 @riverpod
 BackupSettingsEntity backupSettings(BackupSettingsRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.backupSettings,
         loading: () => BackupSettingsEntity.defaults(),
         error: (_, __) => BackupSettingsEntity.defaults(),
@@ -547,7 +539,9 @@ BackupSettingsEntity backupSettings(BackupSettingsRef ref) {
 
 @riverpod
 ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.themeSettings,
         loading: () => ThemeSettingsEntity.defaults(),
         error: (_, __) => ThemeSettingsEntity.defaults(),
@@ -556,7 +550,9 @@ ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
 
 @riverpod
 AccountSettingsEntity accountSettings(AccountSettingsRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.accountSettings,
         loading: () => AccountSettingsEntity.defaults(),
         error: (_, __) => AccountSettingsEntity.defaults(),
@@ -565,7 +561,9 @@ AccountSettingsEntity accountSettings(AccountSettingsRef ref) {
 
 @riverpod
 bool notificationsEnabled(NotificationsEnabledRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.notificationsEnabled,
         loading: () => true,
         error: (_, __) => true,
@@ -574,7 +572,9 @@ bool notificationsEnabled(NotificationsEnabledRef ref) {
 
 @riverpod
 bool isDarkMode(IsDarkModeRef ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.isDarkMode,
         loading: () => false,
         error: (_, __) => false,

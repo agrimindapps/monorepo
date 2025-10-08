@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/services/backup_service.dart';
 import '../../core/services/plantis_notification_service.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
@@ -87,15 +86,12 @@ class SettingsState {
 class SettingsNotifier extends StateNotifier<SettingsState> {
   final ISettingsRepository _settingsRepository;
   final PlantisNotificationService _notificationService;
-  final BackupService? _backupService;
 
   SettingsNotifier({
     required ISettingsRepository settingsRepository,
     required PlantisNotificationService notificationService,
-    BackupService? backupService,
   }) : _settingsRepository = settingsRepository,
        _notificationService = notificationService,
-       _backupService = backupService,
        super(SettingsState.initial());
 
   /// Inicializa o notifier carregando configurações
@@ -337,12 +333,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
-    final backupService = _backupService;
-    if (backupService == null) {
-      state = state.withError('Serviço de backup não disponível');
-      return;
-    }
-
     try {
       final exportResult = await _settingsRepository.exportSettings();
 
@@ -391,8 +381,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   }
 
   /// Aplica efeitos cascata quando configurações mudam
-  void _applyCascadeEffects(SettingsEntity newSettings) {
-  }
+  void _applyCascadeEffects(SettingsEntity newSettings) {}
 }
 
 /// Provider do repositório de configurações (obtido via DI)
@@ -407,22 +396,15 @@ final plantisNotificationServiceProvider = Provider<PlantisNotificationService>(
   },
 );
 
-/// Provider do serviço de backup (obtido via DI, opcional)
-final backupServiceProvider = Provider<BackupService?>((ref) {
-  return null; // Por enquanto opcional
-});
-
 /// Provider principal do SettingsNotifier
 final settingsNotifierProvider =
     StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
       final settingsRepository = ref.watch(settingsRepositoryProvider);
       final notificationService = ref.watch(plantisNotificationServiceProvider);
-      final backupService = ref.watch(backupServiceProvider);
 
       return SettingsNotifier(
         settingsRepository: settingsRepository,
         notificationService: notificationService,
-        backupService: backupService,
       );
     });
 

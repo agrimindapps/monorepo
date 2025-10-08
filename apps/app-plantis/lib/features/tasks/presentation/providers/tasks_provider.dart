@@ -5,9 +5,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/localization/app_strings.dart';
-import '../../../../core/services/offline_sync_queue_service.dart';
-import '../../../../core/services/sync_coordinator_service.dart'
-    hide SyncPriority;
 import '../../../../core/services/task_notification_service.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -40,8 +37,6 @@ class TasksProvider extends ChangeNotifier {
   final CompleteTaskUseCase _completeTaskUseCase;
   final TaskNotificationService _notificationService;
   final AuthStateNotifier _authStateNotifier;
-  final SyncCoordinatorService _syncCoordinator;
-  final OfflineSyncQueueService _offlineQueue;
   StreamSubscription<UserEntity?>? _authSubscription;
 
   TasksProvider({
@@ -50,15 +45,11 @@ class TasksProvider extends ChangeNotifier {
     required CompleteTaskUseCase completeTaskUseCase,
     AuthStateNotifier? authStateNotifier,
     TaskNotificationService? notificationService,
-    SyncCoordinatorService? syncCoordinator,
-    OfflineSyncQueueService? offlineQueue,
   }) : _getTasksUseCase = getTasksUseCase,
        _addTaskUseCase = addTaskUseCase,
        _completeTaskUseCase = completeTaskUseCase,
        _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance,
-       _notificationService = notificationService ?? TaskNotificationService(),
-       _syncCoordinator = syncCoordinator ?? SyncCoordinatorService.instance,
-       _offlineQueue = offlineQueue ?? OfflineSyncQueueService.instance {
+       _notificationService = notificationService ?? TaskNotificationService() {
     _initializeNotificationService();
     _initializeAuthListener();
   }
@@ -94,8 +85,6 @@ class TasksProvider extends ChangeNotifier {
   int get overdueTasks => _state.overdueTasks;
   int get todayTasks => _state.todayTasks;
   int get upcomingTasksCount => _state.upcomingTasksCount;
-  bool get hasPendingOfflineOperations => _offlineQueue.hasPendingOperations;
-  int get pendingOfflineOperationsCount => _offlineQueue.pendingOperationsCount;
 
   /// Updates the provider state and notifies listeners only if the state changed
   ///
@@ -388,23 +377,11 @@ class TasksProvider extends ChangeNotifier {
   /// Throws:
   /// - [SyncThrottledException] if called too frequently (handled internally)
   ///
-  /// Example:
-  /// ```dart
-  /// await loadTasks(); // Will update state with loaded tasks
-  /// ```
   Future<void> loadTasks() async {
     debugPrint('🔄 TasksProvider: Starting load tasks...');
 
     try {
-      await _syncCoordinator.executeSyncOperation(
-        operationType: TaskSyncOperations.loadTasks,
-        priority: SyncPriority.high.index,
-        minimumInterval:
-            TasksConstants.syncMinimumInterval, // Throttle rapid calls
-        operation: () => _loadTasksOperation(),
-      );
-    } on SyncThrottledException catch (e) {
-      debugPrint('⚠️ Load tasks throttled: ${e.message}');
+      await _loadTasksOperation();
     } catch (e) {
       debugPrint('❌ TasksProvider: Load tasks failed: $e');
       _updateState(
@@ -510,25 +487,9 @@ class TasksProvider extends ChangeNotifier {
   /// - [task]: The task entity to add (will be assigned to current user)
   ///
   /// Returns:
-  /// - `true` if the task was successfully added (including optimistic updates)
-  /// - `false` if there was an error that prevented task creation
-  ///
-  /// Example:
-  /// ```dart
-  /// final success = await addTask(newTask);
-  /// if (success) {
-  ///   // Task added successfully
-  /// } else {
-  ///   // Handle error (message will be in state.errorMessage)
-  /// }
-  /// ```
   Future<bool> addTask(task_entity.Task task) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: TaskSyncOperations.addTask,
-        priority: SyncPriority.critical.index, // User-initiated operation
-        operation: () => _addTaskOperation(task),
-      );
+      return await _addTaskOperation(task);
     } catch (e) {
       _updateState(
         _state.copyWith(errorMessage: AppStrings.errorSyncingNewTask),
@@ -587,14 +548,6 @@ class TasksProvider extends ChangeNotifier {
                 clearError: true,
               ),
             );
-            final queuedOperation = QueuedOperation(
-              id: optimisticTask.id,
-              type: OfflineTaskOperations.addTask,
-              data: optimisticTask.toFirebaseMap(),
-              createdAt: DateTime.now(),
-            );
-
-            _offlineQueue.queueOperation(queuedOperation);
 
             _completeGlobalOperation(TaskLoadingOperation.addingTask);
             return true; // Return success for optimistic update
@@ -664,22 +617,9 @@ class TasksProvider extends ChangeNotifier {
   ///
   /// Example:
   /// ```dart
-  /// try {
-  ///   final success = await completeTask('task_123', notes: 'Watered all plants');
-  ///   if (success) {
-  ///     // Task completed successfully
-  ///   }
-  /// } on UnauthorizedAccessException {
-  ///   // Handle unauthorized access
-  /// }
-  /// ```
   Future<bool> completeTask(String taskId, {String? notes}) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: TaskSyncOperations.completeTask,
-        priority: SyncPriority.critical.index, // User-initiated operation
-        operation: () => _completeTaskOperation(taskId, notes),
-      );
+      return await _completeTaskOperation(taskId, notes);
     } catch (e) {
       _updateState(
         _state.copyWith(errorMessage: AppStrings.errorSyncingTaskCompletion),
@@ -731,18 +671,7 @@ class TasksProvider extends ChangeNotifier {
                 clearError: true,
               ),
             );
-            final queuedOperation = QueuedOperation(
-              id: taskId,
-              type: OfflineTaskOperations.completeTask,
-              data: {
-                'taskId': taskId,
-                'notes': notes,
-                'completedAt': DateTime.now().toIso8601String(),
-              },
-              createdAt: DateTime.now(),
-            );
 
-            _offlineQueue.queueOperation(queuedOperation);
             _notificationService.cancelTaskNotifications(taskId);
             _notificationService.rescheduleTaskNotifications(updatedTasks);
 
@@ -1246,9 +1175,6 @@ class TasksProvider extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _authSubscription?.cancel();
-    _syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks);
-    _syncCoordinator.cancelOperations(TaskSyncOperations.addTask);
-    _syncCoordinator.cancelOperations(TaskSyncOperations.completeTask);
 
     super.dispose();
   }

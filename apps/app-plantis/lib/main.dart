@@ -10,12 +10,10 @@ import 'app.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/di/solid_di_factory.dart';
-import 'core/plantis_sync_config.dart';
 import 'core/providers/solid_providers.dart';
 import 'core/services/hive_schema_manager.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_boxes_setup.dart';
-import 'features/development/services/app_data_inspector_initializer.dart';
 import 'firebase_options.dart';
 
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -45,8 +43,6 @@ void main() async {
     kDebugMode ? DIMode.development : DIMode.production,
   );
   await PlantisBoxesSetup.registerPlantisBoxes();
-  await PlantisSyncConfig.configure();
-  AppDataInspectorInitializer.initialize();
   final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
   final notificationService = PlantisNotificationService();

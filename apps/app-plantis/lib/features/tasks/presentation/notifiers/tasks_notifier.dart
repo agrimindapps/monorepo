@@ -6,9 +6,6 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
-import '../../../../core/services/offline_sync_queue_service.dart';
-import '../../../../core/services/sync_coordinator_service.dart'
-    hide SyncPriority;
 import '../../../../core/services/task_notification_service.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -45,8 +42,6 @@ class TasksNotifier extends _$TasksNotifier {
   late final CompleteTaskUseCase _completeTaskUseCase;
   late final TaskNotificationService _notificationService;
   late final AuthStateNotifier _authStateNotifier;
-  late final SyncCoordinatorService _syncCoordinator;
-  late final OfflineSyncQueueService _offlineQueue;
   StreamSubscription<UserEntity?>? _authSubscription;
 
   @override
@@ -56,15 +51,10 @@ class TasksNotifier extends _$TasksNotifier {
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
     _notificationService = TaskNotificationService();
     _authStateNotifier = AuthStateNotifier.instance;
-    _syncCoordinator = SyncCoordinatorService.instance;
-    _offlineQueue = OfflineSyncQueueService.instance;
     await _initializeNotificationService();
     _initializeAuthListener();
     ref.onDispose(() {
       _authSubscription?.cancel();
-      _syncCoordinator.cancelOperations(TaskSyncOperations.loadTasks);
-      _syncCoordinator.cancelOperations(TaskSyncOperations.addTask);
-      _syncCoordinator.cancelOperations(TaskSyncOperations.completeTask);
     });
     return await _loadTasksInternal();
   }
@@ -78,7 +68,9 @@ class TasksNotifier extends _$TasksNotifier {
 
       return result.fold(
         (failure) {
-          debugPrint('❌ TasksNotifier: Failed to load initial tasks: ${failure.message}');
+          debugPrint(
+            '❌ TasksNotifier: Failed to load initial tasks: ${failure.message}',
+          );
           return TasksState.error(failure.userMessage);
         },
         (tasks) {
@@ -261,14 +253,7 @@ class TasksNotifier extends _$TasksNotifier {
     debugPrint('🔄 TasksNotifier: Starting load tasks...');
 
     try {
-      await _syncCoordinator.executeSyncOperation(
-        operationType: TaskSyncOperations.loadTasks,
-        priority: SyncPriority.high.index,
-        minimumInterval: TasksConstants.syncMinimumInterval,
-        operation: () => _loadTasksOperation(),
-      );
-    } on SyncThrottledException catch (e) {
-      debugPrint('⚠️ Load tasks throttled: ${e.message}');
+      await _loadTasksOperation();
     } catch (e) {
       debugPrint('❌ TasksNotifier: Load tasks failed: $e');
       _updateState(
@@ -289,7 +274,9 @@ class TasksNotifier extends _$TasksNotifier {
         TaskLoadingOperation.loadingTasks,
         message: AppStrings.loadingTasks,
       );
-      _updateState((current) => current.copyWith(isLoading: true, clearError: true));
+      _updateState(
+        (current) => current.copyWith(isLoading: true, clearError: true),
+      );
     } else {
       _startGlobalOperation(
         TaskLoadingOperation.syncing,
@@ -360,14 +347,11 @@ class TasksNotifier extends _$TasksNotifier {
   /// - `false` if there was an error that prevented task creation
   Future<bool> addTask(task_entity.Task task) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: TaskSyncOperations.addTask,
-        priority: SyncPriority.critical.index,
-        operation: () => _addTaskOperation(task),
-      );
+      return await _addTaskOperation(task);
     } catch (e) {
       _updateState(
-        (current) => current.copyWith(errorMessage: AppStrings.errorSyncingNewTask),
+        (current) =>
+            current.copyWith(errorMessage: AppStrings.errorSyncingNewTask),
       );
       return false;
     }
@@ -406,8 +390,9 @@ class TasksNotifier extends _$TasksNotifier {
               isDirty: true,
             );
             final currentState = state.valueOrNull ?? TasksState.initial();
-            final updatedTasks = List<task_entity.Task>.from(currentState.allTasks)
-              ..add(optimisticTask);
+            final updatedTasks = List<task_entity.Task>.from(
+              currentState.allTasks,
+            )..add(optimisticTask);
             final filteredTasks = _applyFiltersToTasks(
               updatedTasks,
               currentState.currentFilter,
@@ -424,14 +409,6 @@ class TasksNotifier extends _$TasksNotifier {
                 clearError: true,
               ),
             );
-            final queuedOperation = QueuedOperation(
-              id: optimisticTask.id,
-              type: OfflineTaskOperations.addTask,
-              data: optimisticTask.toFirebaseMap(),
-              createdAt: DateTime.now(),
-            );
-
-            _offlineQueue.queueOperation(queuedOperation);
 
             _completeGlobalOperation(TaskLoadingOperation.addingTask);
             return true; // Return success for optimistic update
@@ -445,8 +422,9 @@ class TasksNotifier extends _$TasksNotifier {
         },
         (addedTask) {
           final currentState = state.valueOrNull ?? TasksState.initial();
-          final updatedTasks = List<task_entity.Task>.from(currentState.allTasks)
-            ..add(addedTask);
+          final updatedTasks = List<task_entity.Task>.from(
+            currentState.allTasks,
+          )..add(addedTask);
           final filteredTasks = _applyFiltersToTasks(
             updatedTasks,
             currentState.currentFilter,
@@ -471,7 +449,9 @@ class TasksNotifier extends _$TasksNotifier {
     } catch (e) {
       _completeGlobalOperation(TaskLoadingOperation.addingTask);
       _updateState(
-        (current) => current.copyWith(errorMessage: AppStrings.unexpectedErrorAddingTask),
+        (current) => current.copyWith(
+          errorMessage: AppStrings.unexpectedErrorAddingTask,
+        ),
       );
       rethrow;
     }
@@ -487,14 +467,12 @@ class TasksNotifier extends _$TasksNotifier {
   /// - [UnauthorizedAccessException] if user doesn't own the task
   Future<bool> completeTask(String taskId, {String? notes}) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: TaskSyncOperations.completeTask,
-        priority: SyncPriority.critical.index,
-        operation: () => _completeTaskOperation(taskId, notes),
-      );
+      return await _completeTaskOperation(taskId, notes);
     } catch (e) {
       _updateState(
-        (current) => current.copyWith(errorMessage: AppStrings.errorSyncingTaskCompletion),
+        (current) => current.copyWith(
+          errorMessage: AppStrings.errorSyncingTaskCompletion,
+        ),
       );
       return false;
     }
@@ -523,9 +501,10 @@ class TasksNotifier extends _$TasksNotifier {
               completionNotes: notes,
             );
             final currentState = state.valueOrNull ?? TasksState.initial();
-            final updatedTasks = currentState.allTasks.map((t) {
-              return t.id == taskId ? completedTask : t;
-            }).toList();
+            final updatedTasks =
+                currentState.allTasks.map((t) {
+                  return t.id == taskId ? completedTask : t;
+                }).toList();
 
             final filteredTasks = _applyFiltersToTasks(
               updatedTasks,
@@ -543,18 +522,7 @@ class TasksNotifier extends _$TasksNotifier {
                 clearError: true,
               ),
             );
-            final queuedOperation = QueuedOperation(
-              id: taskId,
-              type: OfflineTaskOperations.completeTask,
-              data: {
-                'taskId': taskId,
-                'notes': notes,
-                'completedAt': DateTime.now().toIso8601String(),
-              },
-              createdAt: DateTime.now(),
-            );
 
-            _offlineQueue.queueOperation(queuedOperation);
             _notificationService.cancelTaskNotifications(taskId);
             _notificationService.rescheduleTaskNotifications(updatedTasks);
 
@@ -570,9 +538,10 @@ class TasksNotifier extends _$TasksNotifier {
         },
         (completedTask) {
           final currentState = state.valueOrNull ?? TasksState.initial();
-          final updatedTasks = currentState.allTasks.map((t) {
-            return t.id == taskId ? completedTask : t;
-          }).toList();
+          final updatedTasks =
+              currentState.allTasks.map((t) {
+                return t.id == taskId ? completedTask : t;
+              }).toList();
 
           final filteredTasks = _applyFiltersToTasks(
             updatedTasks,
@@ -604,7 +573,9 @@ class TasksNotifier extends _$TasksNotifier {
     } catch (e) {
       _completeTaskLoadingOperation(taskId);
       _updateState(
-        (current) => current.copyWith(errorMessage: AppStrings.unexpectedErrorCompletingTask),
+        (current) => current.copyWith(
+          errorMessage: AppStrings.unexpectedErrorCompletingTask,
+        ),
       );
       rethrow;
     }
@@ -638,7 +609,8 @@ class TasksNotifier extends _$TasksNotifier {
   void setFilter(TasksFilterType filter, {String? plantId}) {
     final currentState = state.valueOrNull ?? TasksState.initial();
 
-    if (currentState.currentFilter != filter || currentState.selectedPlantId != plantId) {
+    if (currentState.currentFilter != filter ||
+        currentState.selectedPlantId != plantId) {
       final filteredTasks = _applyFiltersToTasks(
         currentState.allTasks,
         filter,
@@ -724,13 +696,14 @@ class TasksNotifier extends _$TasksNotifier {
       case TasksFilterType.all:
         break;
       case TasksFilterType.today:
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.isDueToday &&
-                  t.status == task_entity.TaskStatus.pending,
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.isDueToday &&
+                      t.status == task_entity.TaskStatus.pending,
+                )
+                .toList();
         break;
       case TasksFilterType.overdue:
         tasks = tasks.where((t) => t.isOverdue).toList();
@@ -738,29 +711,32 @@ class TasksNotifier extends _$TasksNotifier {
       case TasksFilterType.upcoming:
         final now = DateTime.now();
         final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.status == task_entity.TaskStatus.pending &&
-                  t.dueDate.isAfter(now) &&
-                  t.dueDate.isBefore(nextWeek),
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now) &&
+                      t.dueDate.isBefore(nextWeek),
+                )
+                .toList();
         break;
       case TasksFilterType.allFuture:
         final now = DateTime.now();
-        tasks = tasks
-            .where(
-              (t) =>
-                  t.status == task_entity.TaskStatus.pending &&
-                  t.dueDate.isAfter(now),
-            )
-            .toList();
+        tasks =
+            tasks
+                .where(
+                  (t) =>
+                      t.status == task_entity.TaskStatus.pending &&
+                      t.dueDate.isAfter(now),
+                )
+                .toList();
         break;
       case TasksFilterType.completed:
-        tasks = tasks
-            .where((t) => t.status == task_entity.TaskStatus.completed)
-            .toList();
+        tasks =
+            tasks
+                .where((t) => t.status == task_entity.TaskStatus.completed)
+                .toList();
         break;
       case TasksFilterType.byPlant:
         if (selectedPlantId != null) {
@@ -769,28 +745,38 @@ class TasksNotifier extends _$TasksNotifier {
         break;
     }
     if (selectedTaskTypes.isNotEmpty) {
-      tasks = tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
+      tasks =
+          tasks.where((task) => selectedTaskTypes.contains(task.type)).toList();
     }
     if (selectedPriorities.isNotEmpty) {
-      tasks = tasks
-          .where((task) => selectedPriorities.contains(task.priority))
-          .toList();
+      tasks =
+          tasks
+              .where((task) => selectedPriorities.contains(task.priority))
+              .toList();
     }
     if (searchQuery.isNotEmpty) {
-      tasks = tasks.where((task) {
-        return task.title.toLowerCase().contains(searchQuery) ||
-            (task.description?.toLowerCase().contains(searchQuery) ?? false);
-      }).toList();
+      tasks =
+          tasks.where((task) {
+            return task.title.toLowerCase().contains(searchQuery) ||
+                (task.description?.toLowerCase().contains(searchQuery) ??
+                    false);
+          }).toList();
     }
     tasks.sort((a, b) {
       if (a.status != b.status) {
         if (a.status == task_entity.TaskStatus.pending) return -1;
         if (b.status == task_entity.TaskStatus.pending) return 1;
       }
-      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(a.priority);
-      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(b.priority);
+      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        a.priority,
+      );
+      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        b.priority,
+      );
       if (aPriorityIndex != bPriorityIndex) {
-        return bPriorityIndex.compareTo(aPriorityIndex); // Higher priority first
+        return bPriorityIndex.compareTo(
+          aPriorityIndex,
+        ); // Higher priority first
       }
       return a.dueDate.compareTo(b.dueDate);
     });
@@ -851,8 +837,7 @@ class TasksNotifier extends _$TasksNotifier {
   Future<int> getScheduledNotificationsCount() async {
     return await _notificationService.getScheduledNotificationsCount();
   }
-  bool get hasPendingOfflineOperations => _offlineQueue.hasPendingOperations;
-  int get pendingOfflineOperationsCount => _offlineQueue.pendingOperationsCount;
+
   List<task_entity.Task> get highPriorityTasks {
     final currentState = state.valueOrNull ?? TasksState.initial();
     return currentState.filteredTasks

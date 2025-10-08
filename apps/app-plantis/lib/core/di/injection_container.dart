@@ -35,7 +35,6 @@ import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../../features/settings/data/datasources/settings_local_datasource.dart';
 import '../../features/settings/data/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
-import '../../features/settings/presentation/providers/backup_settings_provider.dart';
 import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
@@ -44,19 +43,10 @@ import '../config/security_config.dart';
 import '../constants/app_constants.dart';
 import '../data/adapters/network_info_adapter.dart';
 import '../data/adapters/plantis_image_service_adapter.dart';
-import '../data/adapters/plantis_storage_adapter.dart';
-import '../data/repositories/backup_repository.dart';
 import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
 import '../providers/background_sync_provider.dart';
 import '../providers/sync_status_provider.dart';
-import '../services/backup_audit_service.dart';
-import '../services/backup_data_transformer_service.dart';
-import '../services/backup_restore_service.dart';
-import '../services/backup_scheduler.dart';
-import '../services/backup_service.dart';
-import '../services/backup_service_refactored.dart';
-import '../services/backup_validation_service.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/interfaces/i_notification_permission_manager.dart';
 import '../services/interfaces/i_notification_schedule_manager.dart';
@@ -79,7 +69,6 @@ final sl = GetIt.instance;
 Future<void> init() async {
   await _initExternal();
   _initCoreServices();
-  _registerBackupServices();
   await injectable.configureDependencies();
   _initAuth();
   _initAccount();
@@ -91,7 +80,6 @@ Future<void> init() async {
   _initComments();
   _initPremium();
   _initSettings();
-  _initBackup(); // Remaining backup config (schedulers, providers)
   _initDataExport();
   SyncDIModule.init(sl);
   _initAppServices();
@@ -134,12 +122,6 @@ void _initCoreServices() {
     () => EnhancedEncryptedStorageService(
       secureStorage: sl<EnhancedSecureStorageService>(),
       appIdentifier: AppConstants.appId,
-    ),
-  );
-  sl.registerLazySingleton<PlantisStorageAdapter>(
-    () => PlantisStorageAdapter(
-      secureStorage: sl<EnhancedSecureStorageService>(),
-      encryptedStorage: sl<EnhancedEncryptedStorageService>(),
     ),
   );
   sl.registerLazySingleton<SecureStorageService>(
@@ -342,87 +324,12 @@ void _initSettings() {
     () => SettingsProvider(
       settingsRepository: sl<ISettingsRepository>(),
       notificationService: sl<PlantisNotificationService>(),
-      backupService: sl<BackupService>(),
     )..initialize(), // Auto-initialize for better UX
   );
   sl.registerFactory(
     () => NotificationsSettingsProvider(
       notificationService: sl<PlantisNotificationService>(),
       prefs: sl<SharedPreferences>(),
-    ),
-  );
-}
-
-/// Register backup services BEFORE Injectable (required by BackupServiceRefactored)
-void _registerBackupServices() {
-  sl.registerLazySingleton<BackupValidationService>(
-    () => const BackupValidationService(),
-  );
-
-  sl.registerLazySingleton<BackupDataTransformerService>(
-    () => const BackupDataTransformerService(),
-  );
-
-  sl.registerLazySingleton<BackupAuditService>(
-    () => BackupAuditService(storageService: sl<SecureStorageService>()),
-  );
-}
-
-void _initBackup() {
-  sl.registerLazySingleton<IBackupRepository>(
-    () => BackupRepository(
-      storage: sl<FirebaseStorage>(),
-      authRepository: sl<IAuthRepository>(),
-    ),
-  );
-  sl.registerLazySingleton<BackupRestoreService>(
-    () => BackupRestoreService(
-      plantsRepository: sl(),
-      spacesRepository: sl(),
-      tasksRepository: sl(),
-      storageService: sl<SecureStorageService>(),
-      validationService: sl<BackupValidationService>(),
-      transformerService: sl<BackupDataTransformerService>(),
-      auditService: sl<BackupAuditService>(),
-    ),
-  );
-  sl.registerSingleton<BackupServiceRefactored>(
-    BackupServiceRefactored(
-      backupRepository: sl<IBackupRepository>(),
-      validationService: sl<BackupValidationService>(),
-      transformerService: sl<BackupDataTransformerService>(),
-      restoreService: sl<BackupRestoreService>(),
-      auditService: sl<BackupAuditService>(),
-      storageService: sl<SecureStorageService>(),
-    ),
-  );
-  sl.registerSingleton<BackupService>(
-    BackupService(
-      backupRepository: sl<IBackupRepository>(),
-      validationService: sl<BackupValidationService>(),
-      transformerService: sl<BackupDataTransformerService>(),
-      restoreService: sl<BackupRestoreService>(),
-      auditService: sl<BackupAuditService>(),
-      storageService: sl<SecureStorageService>(),
-      plantsRepository: sl(),
-      spacesRepository: sl(),
-      tasksRepository: sl(),
-    ),
-  );
-  sl.registerSingleton<BackupScheduler>(
-    BackupScheduler(
-      backupService: sl<BackupService>(),
-      subscriptionRepository: sl<ISubscriptionRepository>(),
-      connectivity: sl<Connectivity>(),
-    ),
-  );
-  sl.registerSingleton<BackupSchedulerManager>(
-    BackupSchedulerManager(sl<BackupScheduler>()),
-  );
-  sl.registerFactory(
-    () => BackupSettingsProvider(
-      backupService: sl<BackupService>(),
-      connectivity: sl<Connectivity>(),
     ),
   );
 }

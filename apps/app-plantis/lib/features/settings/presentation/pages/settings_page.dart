@@ -10,7 +10,6 @@ import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
-import '../../../development/presentation/pages/database_inspector_page.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -75,10 +74,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                         const SizedBox(height: 8),
                         _buildAboutSection(context, appTheme),
                         const SizedBox(height: 8),
-                        if (kDebugMode) ...[
-                          _buildDevelopmentSection(context, appTheme),
-                          const SizedBox(height: 8),
-                        ],
 
                         const SizedBox(height: 24),
                       ],
@@ -337,31 +332,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             title: 'Enviar Feedback',
             subtitle: 'Nos ajude a melhorar o app',
             onTap: () => _showAboutDialog(context),
-          ),
-        ]),
-      ],
-    );
-  }
-
-  Widget _buildDevelopmentSection(BuildContext context, ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader(context, 'Desenvolvimento'),
-        _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.storage,
-            title: 'Inspetor de Dados',
-            subtitle: 'Visualizar e gerenciar dados locais',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (context) => const DataInspectorPage(),
-                ),
-              );
-            },
           ),
         ]),
       ],

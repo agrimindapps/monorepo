@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart' as flutter_widgets;
 
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/providers/plants_providers.dart';
-import '../../../../core/validation/validators.dart';
 import '../../../plants/domain/entities/plant.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart';
@@ -442,7 +441,15 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
             hintText: AppStrings.taskTitleHint,
             border: OutlineInputBorder(),
           ),
-          validator: Validators.taskTitle,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Título da tarefa é obrigatório';
+            }
+            if (value.length < 3) {
+              return 'Título deve ter pelo menos 3 caracteres';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -474,7 +481,12 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
             hintText: AppStrings.taskDescriptionHint,
             border: OutlineInputBorder(),
           ),
-          validator: Validators.taskDescription,
+          validator: (value) {
+            if (value != null && value.length > 500) {
+              return 'Descrição deve ter no máximo 500 caracteres';
+            }
+            return null;
+          },
           maxLines: TasksConstants.taskDescriptionMaxLines,
           maxLength: TasksConstants.taskDescriptionMaxLength,
         ),

@@ -18,6 +18,13 @@ import 'plant_info_section.dart';
 import 'plant_notes_section.dart';
 import 'plant_tasks_section.dart';
 
+/// Constantes para o PlantDetailsView
+class _PlantDetailsConstants {
+  // Cores para estados de loading e erro
+  static const Color lightBackgroundColor = Color(0xFFFFFFFF);
+  static const Color darkCardColor = Color(0xFF2C2C2E);
+}
+
 /// Main widget for the plant details screen
 ///
 /// This widget is responsible only for the visual structure and coordination
@@ -84,8 +91,11 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         onNavigateToImages: (plantId) {},
         onNavigateToSchedule: (plantId) {},
         onShowSnackBar: _showSnackBar,
-        onShowSnackBarWithColor: (message, type, {Color? backgroundColor}) =>
-            _showSnackBarWithColor(message, backgroundColor: backgroundColor),
+        onShowSnackBarWithColor:
+            (message, type, {Color? backgroundColor}) => _showSnackBarWithColor(
+              message,
+              backgroundColor: backgroundColor,
+            ),
         onShowDialog: _onShowDialog,
         onShowBottomSheet: _onShowBottomSheet,
         onPlantDeleted: _syncPlantDeletion,
@@ -185,10 +195,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor:
-          theme.brightness == Brightness.dark
-              ? const Color(0xFF1C1C1E)
-              : theme.colorScheme.surface,
+      backgroundColor: PlantisColors.getPageBackgroundColor(context),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -307,8 +314,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+                ? _PlantDetailsConstants.darkCardColor
+                : _PlantDetailsConstants.lightBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -344,8 +351,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+                ? _PlantDetailsConstants.darkCardColor
+                : _PlantDetailsConstants.lightBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -385,10 +392,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor:
-          theme.brightness == Brightness.dark
-              ? const Color(0xFF1C1C1E)
-              : theme.colorScheme.surface,
+      backgroundColor: PlantisColors.getPageBackgroundColor(context),
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
@@ -745,7 +749,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       try {
         ref.read(plantsProviderProvider).refreshPlants();
         if (kDebugMode) {
-          print('✅ _syncPlantDeletion: Refresh requested for plantId: $plantId');
+          print(
+            '✅ _syncPlantDeletion: Refresh requested for plantId: $plantId',
+          );
         }
       } catch (e) {
         if (kDebugMode) {
@@ -788,7 +794,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     final theme = Theme.of(context);
 
     return AlertDialog(
-      backgroundColor: const Color(0xFFFFFFFF), // Branco puro
+      backgroundColor: _PlantDetailsConstants.lightBackgroundColor,
       title: const Text('Excluir planta'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -802,19 +808,25 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
+              color: PlantisColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              border: Border.all(
+                color: PlantisColors.error.withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.warning_outlined, color: Colors.red, size: 20),
+                const Icon(
+                  Icons.warning_outlined,
+                  color: PlantisColors.error,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Esta ação não pode ser desfeita.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.red,
+                      color: PlantisColors.error,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -836,7 +848,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                 Navigator.of(context).pop(); // Fechar diálogo primeiro
                 await _controller?.deletePlant(plant.id);
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: TextButton.styleFrom(foregroundColor: PlantisColors.error),
               child: const Text('Excluir'),
             );
           },
@@ -852,7 +864,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         backgroundColor = Theme.of(context).colorScheme.error;
         break;
       case 'success':
-        backgroundColor = Colors.green;
+        backgroundColor = PlantisColors.success;
         break;
       default:
         backgroundColor = null;
@@ -951,7 +963,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       onBackPressed: () => _controller?.goBack(),
       actions: [
         PopupMenuButton<String>(
-          color: const Color(0xFFFFFFFF), // Fundo branco puro
+          color: _PlantDetailsConstants.lightBackgroundColor,
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -974,8 +986,14 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                 const PopupMenuItem(
                   value: 'delete',
                   child: ListTile(
-                    leading: Icon(Icons.delete_outline, color: Colors.red),
-                    title: Text('Excluir', style: TextStyle(color: Colors.red)),
+                    leading: Icon(
+                      Icons.delete_outline,
+                      color: PlantisColors.error,
+                    ),
+                    title: Text(
+                      'Excluir',
+                      style: TextStyle(color: PlantisColors.error),
+                    ),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
@@ -1042,8 +1060,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+                ? _PlantDetailsConstants.darkCardColor
+                : _PlantDetailsConstants.lightBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -1162,10 +1180,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor:
-          theme.brightness == Brightness.dark
-              ? const Color(0xFF1C1C1E)
-              : theme.colorScheme.surface,
+      backgroundColor: PlantisColors.getPageBackgroundColor(context),
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,

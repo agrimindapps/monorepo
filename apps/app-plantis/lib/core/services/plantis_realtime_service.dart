@@ -4,8 +4,6 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../plantis_sync_config.dart';
-
 /// Serviço para gerenciar sincronização em tempo real do Plantis
 /// com otimizações de performance e bateria
 class PlantisRealtimeService with WidgetsBindingObserver {
@@ -50,8 +48,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     if (_isRealtimeActive) return;
 
     try {
-      await PlantisSyncConfig.configure();
-
       _isRealtimeActive = true;
       _realtimeStatusController.add(true);
 
@@ -68,8 +64,6 @@ class PlantisRealtimeService with WidgetsBindingObserver {
     if (!_isRealtimeActive) return;
 
     try {
-      await PlantisSyncConfig.configure();
-
       _isRealtimeActive = false;
       _realtimeStatusController.add(false);
 

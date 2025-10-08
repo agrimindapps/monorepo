@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/providers/spaces_providers.dart';
 import '../../../../core/providers/state/plant_form_state_notifier.dart';
-import '../../../../core/validation/validators.dart';
 import '../../domain/usecases/spaces_usecases.dart';
 import 'space_selector_widget.dart';
 
@@ -29,14 +28,11 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }
 
   void _setupStateListener() {
-    ref.listenManual(
-      plantFormStateNotifierProvider,
-      (previous, next) {
-        if (mounted) {
-          _syncControllersWithState(next);
-        }
-      },
-    );
+    ref.listenManual(plantFormStateNotifierProvider, (previous, next) {
+      if (mounted) {
+        _syncControllersWithState(next);
+      }
+    });
   }
 
   void _updateControllers() {
@@ -59,7 +55,10 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }
 
   /// Atualiza controller preservando posição do cursor
-  void _updateControllerSafely(TextEditingController controller, String newValue) {
+  void _updateControllerSafely(
+    TextEditingController controller,
+    String newValue,
+  ) {
     final selection = controller.selection;
     controller.text = newValue;
     if (selection.isValid && selection.baseOffset <= newValue.length) {
@@ -323,7 +322,8 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   }) {
     final theme = Theme.of(context);
     final formState = ref.read(plantFormStateNotifierProvider);
-    final isDisabled = formState.imageUrls.isNotEmpty || formState.isUploadingImages;
+    final isDisabled =
+        formState.imageUrls.isNotEmpty || formState.isUploadingImages;
 
     return GestureDetector(
       onTap: isDisabled ? null : onTap,
@@ -423,76 +423,76 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-            _buildTextField(
-              controller: _nameController,
-              label: 'Nome da planta',
-              hint: 'Ex: Minha Rosa Vermelha',
-              isRequired: true,
-              errorText: fieldErrors['name'],
-              onChanged: (value) {
-                formNotifier.setName(value);
-              },
-              validator: (value) => _validatePlantName(value),
-              prefixIcon: Icon(
-                Icons.local_florist,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-            ),
+        _buildTextField(
+          controller: _nameController,
+          label: 'Nome da planta',
+          hint: 'Ex: Minha Rosa Vermelha',
+          isRequired: true,
+          errorText: fieldErrors['name'],
+          onChanged: (value) {
+            formNotifier.setName(value);
+          },
+          validator: (value) => _validatePlantName(value),
+          prefixIcon: Icon(
+            Icons.local_florist,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+        ),
 
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _speciesController,
-              label: 'Espécie',
-              hint: 'Ex: Rosa gallica',
-              onChanged: (value) {
-                formNotifier.setSpecies(value);
-              },
-              validator: (value) => _validateSpecies(value),
-              prefixIcon: Icon(
-                Icons.science,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-            ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          controller: _speciesController,
+          label: 'Espécie',
+          hint: 'Ex: Rosa gallica',
+          onChanged: (value) {
+            formNotifier.setSpecies(value);
+          },
+          validator: (value) => _validateSpecies(value),
+          prefixIcon: Icon(
+            Icons.science,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+        ),
 
-            const SizedBox(height: 12),
-            SpaceSelectorWidget(
-              selectedSpaceId: formState.spaceId,
-              onSpaceChanged:
-                  (spaceId) => _handleSpaceSelection(formNotifier, spaceId),
-              errorText: fieldErrors['space'],
-            ),
+        const SizedBox(height: 12),
+        SpaceSelectorWidget(
+          selectedSpaceId: formState.spaceId,
+          onSpaceChanged:
+              (spaceId) => _handleSpaceSelection(formNotifier, spaceId),
+          errorText: fieldErrors['space'],
+        ),
 
-            const SizedBox(height: 12),
-            _buildDateField(
-              context: context,
-              label: 'Data de plantio',
-              value: formState.plantingDate,
-              onChanged: formNotifier.setPlantingDate,
-              prefixIcon: Icon(
-                Icons.event,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-            ),
+        const SizedBox(height: 12),
+        _buildDateField(
+          context: context,
+          label: 'Data de plantio',
+          value: formState.plantingDate,
+          onChanged: formNotifier.setPlantingDate,
+          prefixIcon: Icon(
+            Icons.event,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+        ),
 
-            const SizedBox(height: 12),
-            _buildTextField(
-              controller: _notesController,
-              label: 'Observações',
-              hint: 'Adicione notas sobre a planta...',
-              maxLines: 4,
-              onChanged: (value) {
-                formNotifier.setNotes(value);
-              },
-              validator: (value) => _validateNotes(value),
-              prefixIcon: Icon(
-                Icons.note,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-            ),
+        const SizedBox(height: 12),
+        _buildTextField(
+          controller: _notesController,
+          label: 'Observações',
+          hint: 'Adicione notas sobre a planta...',
+          maxLines: 4,
+          onChanged: (value) {
+            formNotifier.setNotes(value);
+          },
+          validator: (value) => _validateNotes(value),
+          prefixIcon: Icon(
+            Icons.note,
+            color: theme.colorScheme.primary,
+            size: 20,
+          ),
+        ),
       ],
     );
   }
@@ -763,17 +763,32 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
   /// Validates plant name using centralized validator
   String? _validatePlantName(String? value) {
-    return Validators.plantName(value);
+    if (value == null || value.isEmpty) {
+      return 'Nome da planta é obrigatório';
+    }
+    if (value.length < 2) {
+      return 'Nome deve ter pelo menos 2 caracteres';
+    }
+    if (value.length > 100) {
+      return 'Nome deve ter no máximo 100 caracteres';
+    }
+    return null;
   }
 
   /// Validates plant species using centralized validator
   String? _validateSpecies(String? value) {
-    return Validators.plantSpecies(value);
+    if (value != null && value.length > 100) {
+      return 'Espécie deve ter no máximo 100 caracteres';
+    }
+    return null;
   }
 
   /// Validates notes using centralized validator
   String? _validateNotes(String? value) {
-    return Validators.plantNotes(value);
+    if (value != null && value.length > 1000) {
+      return 'Notas devem ter no máximo 1000 caracteres';
+    }
+    return null;
   }
 
   /// Build upload progress indicator
@@ -842,7 +857,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                     Text(
                       '${(progress * 100).toInt()}%',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodySmall?.color?.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],

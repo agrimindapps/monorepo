@@ -11,8 +11,6 @@ import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../features/tasks/presentation/providers/tasks_state.dart';
 import '../auth/auth_state_notifier.dart';
 import '../localization/app_strings.dart';
-import '../services/offline_sync_queue_service.dart' as offline_queue;
-import '../services/sync_coordinator_service.dart' hide SyncPriority;
 import '../services/task_notification_service.dart'
     hide NotificationPermissionStatus;
 import '../services/task_notification_service.dart' as notification_service;
@@ -24,8 +22,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   late final CompleteTaskUseCase _completeTaskUseCase;
   late final TaskNotificationService _notificationService;
   late final AuthStateNotifier _authStateNotifier;
-  late final SyncCoordinatorService _syncCoordinator;
-  late final offline_queue.OfflineSyncQueueService _offlineQueue;
   StreamSubscription<UserEntity?>? _authSubscription;
 
   @override
@@ -35,10 +31,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
     _notificationService = ref.read(taskNotificationServiceProvider);
     _authStateNotifier = AuthStateNotifier.instance;
-    _syncCoordinator = SyncCoordinatorService.instance;
-    _syncCoordinator.initialize();
-    _offlineQueue = offline_queue.OfflineSyncQueueService.instance;
-    await _offlineQueue.initialize();
     await _initializeNotificationService();
     _initializeAuthListener();
     ref.onDispose(() {
@@ -109,14 +101,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
     debugPrint('🔄 TasksProvider: Starting load tasks...');
 
     try {
-      await _syncCoordinator.executeSyncOperation(
-        operationType: TaskSyncOperations.loadTasks.name,
-        priority: SyncPriority.high.index,
-        minimumInterval: TasksConstants.syncMinimumInterval,
-        operation: () => _loadTasksOperation(),
-      );
-    } on SyncThrottledException catch (e) {
-      debugPrint('⚠️ Load tasks throttled: ${e.message}');
+      await _loadTasksOperation();
     } catch (e) {
       debugPrint('❌ TasksProvider: Load tasks failed: $e');
       final currentState = state.valueOrNull ?? TasksState.initial();
@@ -240,11 +225,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   /// Adds a new task with offline support and user validation
   Future<bool> addTask(task_entity.Task task) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: TaskSyncOperations.addTask.name,
-        priority: SyncPriority.critical.index,
-        operation: () => _addTaskOperation(task),
-      );
+      return await _addTaskOperation(task);
     } catch (e) {
       final currentState = state.valueOrNull ?? TasksState.initial();
       state = AsyncData(
@@ -320,16 +301,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
                 clearOperationMessage: true,
               ),
             );
-            final queuedOperation = offline_queue.QueuedOperation(
-              id: optimisticTask.id,
-              type: OfflineTaskOperations.addTask.name,
-              data: optimisticTask.toFirebaseMap(),
-              createdAt: DateTime.now(),
-              maxRetries: 3,
-              retryCount: 0,
-            );
-
-            _offlineQueue.queueOperation(queuedOperation);
 
             return true; // Return success for optimistic update
           } else {
@@ -394,11 +365,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   /// Completes a task with offline support and ownership validation
   Future<bool> completeTask(String taskId, {String? notes}) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: TaskSyncOperations.completeTask.name,
-        priority: SyncPriority.critical.index,
-        operation: () => _completeTaskOperation(taskId, notes),
-      );
+      return await _completeTaskOperation(taskId, notes);
     } catch (e) {
       final currentState = state.valueOrNull ?? TasksState.initial();
       state = AsyncData(
@@ -472,20 +439,6 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
                 clearOperationMessage: true,
               ),
             );
-            final queuedOperation = offline_queue.QueuedOperation(
-              id: taskId,
-              type: OfflineTaskOperations.completeTask.name,
-              data: {
-                'taskId': taskId,
-                'notes': notes,
-                'completedAt': DateTime.now().toIso8601String(),
-              },
-              createdAt: DateTime.now(),
-              maxRetries: 3,
-              retryCount: 0,
-            );
-
-            _offlineQueue.queueOperation(queuedOperation);
             _notificationService.cancelTaskNotifications(taskId);
             _notificationService.rescheduleTaskNotifications(updatedTasks);
 
@@ -866,11 +819,7 @@ class TasksNotifier extends AsyncNotifier<TasksState> {
   /// Undo task completion - marks a completed task as incomplete
   Future<bool> undoTaskCompletion(String taskId) async {
     try {
-      return await _syncCoordinator.executeSyncOperation<bool>(
-        operationType: 'undoTaskCompletion',
-        priority: SyncPriority.critical.index,
-        operation: () => _undoTaskCompletionOperation(taskId),
-      );
+      return await _undoTaskCompletionOperation(taskId);
     } catch (e) {
       final currentState = state.valueOrNull ?? TasksState.initial();
       state = AsyncData(
@@ -1050,13 +999,6 @@ final overdueTasksProvider = Provider<int>((ref) {
     data: (TasksState state) => state.overdueTasks,
     orElse: () => 0,
   );
-});
-final hasPendingOfflineOperationsProvider = Provider<bool>((ref) {
-  return offline_queue.OfflineSyncQueueService.instance.hasPendingOperations;
-});
-
-final pendingOfflineOperationsCountProvider = Provider<int>((ref) {
-  return offline_queue.OfflineSyncQueueService.instance.pendingOperationsCount;
 });
 final getTasksUseCaseProvider = Provider<GetTasksUseCase>((ref) {
   return GetIt.instance<GetTasksUseCase>();

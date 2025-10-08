@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 
 import '../../features/tasks/domain/entities/task.dart' as task_entity;
 import '../data/models/planta_config_model.dart';
-import '../utils/task_schedule_calculator.dart';
 
 /// Serviço central para geração automática de tarefas baseado na configuração das plantas
 class TaskGenerationService {
@@ -166,12 +165,7 @@ class TaskGenerationService {
     if (intervalDays <= 0) {
       throw ArgumentError('Intervalo deve ser maior que zero');
     }
-    return TaskScheduleCalculator.calculateNextDate(
-      baseDate: baseDate,
-      intervalDays: intervalDays,
-      careType: careType ?? 'agua',
-      skipWeekends: false, // Configurable in future
-    );
+    return baseDate.add(Duration(days: intervalDays));
   }
 
   /// Valida se uma tarefa pode ser gerada para determinada configuração
@@ -250,28 +244,21 @@ class TaskGenerationService {
 
   /// Sugere intervalo otimizado para um tipo de cuidado
   int suggestOptimalInterval(String careType, {DateTime? currentDate}) {
-    return TaskScheduleCalculator.suggestOptimalInterval(
-      careType: careType,
-      currentDate: currentDate,
-    );
+    // Intervalos padrão por tipo de cuidado
+    const Map<String, int> defaultIntervals = {
+      'agua': 3,
+      'adubo': 30,
+      'banho_sol': 7,
+      'inspecao_pragas': 14,
+      'poda': 60,
+      'troca_substrato': 180,
+    };
+    return defaultIntervals[careType] ?? 7;
   }
 
   /// Valida se um intervalo é adequado para um tipo de cuidado
   bool isValidIntervalForCareType(int intervalDays, String careType) {
-    return TaskScheduleCalculator.isValidInterval(intervalDays, careType);
-  }
-
-  /// Obtém estatísticas de frequência para um tipo de cuidado
-  TaskFrequencyStats getFrequencyStats({
-    required int intervalDays,
-    required String careType,
-    int periodDays = 30,
-  }) {
-    return TaskScheduleCalculator.calculateFrequencyStats(
-      intervalDays: intervalDays,
-      careType: careType,
-      periodDays: periodDays,
-    );
+    return intervalDays > 0 && intervalDays <= 365;
   }
 
   /// Calcula múltiplas datas futuras para preview
@@ -281,12 +268,13 @@ class TaskGenerationService {
     required String careType,
     int count = 5,
   }) {
-    return TaskScheduleCalculator.calculateMultipleDates(
-      baseDate: baseDate,
-      intervalDays: intervalDays,
-      careType: careType,
-      count: count,
-    );
+    final List<DateTime> dates = [];
+    DateTime currentDate = baseDate;
+    for (int i = 0; i < count; i++) {
+      currentDate = currentDate.add(Duration(days: intervalDays));
+      dates.add(currentDate);
+    }
+    return dates;
   }
 
   /// Maps TaskType enum to care type string

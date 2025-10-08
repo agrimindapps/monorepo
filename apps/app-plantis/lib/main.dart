@@ -12,6 +12,7 @@ import 'core/di/modules/sync_module.dart';
 import 'core/di/solid_di_factory.dart';
 import 'core/plantis_sync_config.dart';
 import 'core/providers/solid_providers.dart';
+import 'core/services/hive_schema_manager.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_boxes_setup.dart';
 import 'features/development/services/app_data_inspector_initializer.dart';
@@ -35,6 +36,10 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
   Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
+
+  // Run schema migrations
+  await HiveSchemaManager.migrate();
+
   await di.init();
   SolidDIConfigurator.configure(
     kDebugMode ? DIMode.development : DIMode.production,

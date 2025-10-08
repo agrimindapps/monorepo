@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../models/plant_model.dart';
 
 abstract class PlantsRemoteDatasource {
@@ -110,6 +112,41 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     } catch (e) {
       throw ServerFailure(
         'Erro inesperado ao atualizar planta: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Batch sync multiple plants for better performance
+  Future<void> batchSyncPlants(List<PlantModel> plants, String userId) async {
+    if (plants.isEmpty) return;
+
+    try {
+      const batchSize = 50; // Firebase batch size limit
+      final collection = _getPlantsCollection(userId);
+
+      for (int i = 0; i < plants.length; i += batchSize) {
+        final batch = plants.skip(i).take(batchSize).toList();
+        final writeBatch = FirebaseFirestore.instance.batch();
+
+        for (final plant in batch) {
+          final plantData = plant.toJson();
+          plantData.remove('id'); // Remove ID from data
+
+          final docRef = collection.doc(plant.id);
+          writeBatch.set(docRef, plantData, SetOptions(merge: true));
+        }
+
+        await writeBatch.commit();
+
+        if (kDebugMode) {
+          print('✅ Batch sync: ${batch.length} plants committed');
+        }
+      }
+    } on FirebaseException catch (e) {
+      throw ServerFailure('Erro no batch sync de plantas: ${e.message}');
+    } catch (e) {
+      throw ServerFailure(
+        'Erro inesperado no batch sync de plantas: ${e.toString()}',
       );
     }
   }

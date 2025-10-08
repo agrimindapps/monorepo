@@ -61,7 +61,7 @@ final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
   final filterService = ref.read(plantsFilterServiceProvider);
   final careCalculator = ref.read(plantsCareCalculatorProvider);
   final authProvider = ref.read(authStateServiceProvider);
-  
+
   return factory.createPlantsStateManager(
     dataService: dataService,
     filterService: filterService,
@@ -73,16 +73,17 @@ final solidPlantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
 /// Provider para PlantFormStateManager (SOLID-compliant)
 /// Usa ChangeNotifierProvider.autoDispose para observar mudanças no estado
 /// autoDispose garante que dispose() é chamado quando não há mais listeners
-final solidPlantFormStateManagerProvider = ChangeNotifierProvider.autoDispose<PlantFormStateManager>((ref) {
-  final factory = ref.read(solidDIFactoryProvider);
-  final validationService = ref.read(formValidationServiceProvider);
-  final imageService = ref.read(imageManagementServiceProvider);
+final solidPlantFormStateManagerProvider =
+    ChangeNotifierProvider.autoDispose<PlantFormStateManager>((ref) {
+      final factory = ref.read(solidDIFactoryProvider);
+      final validationService = ref.read(formValidationServiceProvider);
+      final imageService = ref.read(imageManagementServiceProvider);
 
-  return factory.createPlantFormStateManager(
-    validationService: validationService,
-    imageService: imageService,
-  );
-});
+      return factory.createPlantFormStateManager(
+        validationService: validationService,
+        imageService: imageService,
+      );
+    });
 
 /// === CONVENIENCE PROVIDERS ===
 
@@ -96,6 +97,12 @@ final solidPlantsStateProvider = Provider((ref) {
 final solidPlantsListProvider = Provider((ref) {
   final state = ref.watch(solidPlantsStateProvider);
   return state.filteredPlants;
+});
+
+/// === SYNC SERVICES ===
+
+final plantisSyncServiceProvider = Provider<PlantisSyncService>((ref) {
+  return GetIt.instance<PlantisSyncService>();
 });
 
 /// Provider para loading state (SOLID)
@@ -151,16 +158,19 @@ final solidPlantFormCanSaveProvider = Provider((ref) {
 /// === UTILITY PROVIDERS ===
 
 /// Provider para image list info
-final solidImageListInfoProvider = Provider.family<ImageListInfo, List<String>>((ref, images) {
-  final imageService = ref.read(imageManagementServiceProvider);
-  return imageService.getImageListInfo(images);
-});
+final solidImageListInfoProvider = Provider.family<ImageListInfo, List<String>>(
+  (ref, images) {
+    final imageService = ref.read(imageManagementServiceProvider);
+    return imageService.getImageListInfo(images);
+  },
+);
 
 /// Provider para image validation
-final solidImageValidationProvider = Provider.family<ImageListValidation, List<String>>((ref, images) {
-  final imageService = ref.read(imageManagementServiceProvider);
-  return imageService.validateImageList(images);
-});
+final solidImageValidationProvider =
+    Provider.family<ImageListValidation, List<String>>((ref, images) {
+      final imageService = ref.read(imageManagementServiceProvider);
+      return imageService.validateImageList(images);
+    });
 
 /// === INITIALIZATION PROVIDER ===
 
@@ -168,13 +178,13 @@ final solidImageValidationProvider = Provider.family<ImageListValidation, List<S
 final solidDIInitializationProvider = Provider<bool>((ref) {
   final factory = ref.read(solidDIFactoryProvider);
   const isDevelopment = kDebugMode;
-  
+
   if (isDevelopment) {
     SolidDIConfigurator.configure(DIMode.development);
   } else {
     SolidDIConfigurator.configure(DIMode.production);
   }
-  
+
   return factory.areSolidDependenciesRegistered();
 });
 
@@ -184,7 +194,7 @@ final solidDIInitializationProvider = Provider<bool>((ref) {
 /// Provider que expõe interface compatível com o antigo PlantsProvider
 final migrationPlantsProvider = Provider((ref) {
   ref.watch(solidDIInitializationProvider);
-  
+
   final solidState = ref.watch(solidPlantsStateProvider);
   return MigrationPlantsAdapter(
     allPlants: solidState.allPlants,
@@ -198,7 +208,7 @@ final migrationPlantsProvider = Provider((ref) {
 /// Provider que expõe interface compatível com o antigo PlantFormProvider
 final migrationPlantFormProvider = Provider((ref) {
   ref.watch(solidDIInitializationProvider);
-  
+
   final solidState = ref.watch(solidPlantFormStateProvider);
   return MigrationPlantFormAdapter(
     name: solidState.name,
@@ -224,7 +234,7 @@ class MigrationPlantsAdapter {
   final bool isLoading;
   final String? error;
   final dynamic selectedPlant;
-  
+
   const MigrationPlantsAdapter({
     required this.allPlants,
     required this.filteredPlants,
@@ -232,7 +242,7 @@ class MigrationPlantsAdapter {
     required this.error,
     required this.selectedPlant,
   });
-  
+
   bool get isEmpty => allPlants.isEmpty;
   bool get hasError => error != null;
   int get plantsCount => allPlants.length;
@@ -251,7 +261,7 @@ class MigrationPlantFormAdapter {
   final bool isFormValid;
   final bool hasChanges;
   final bool canSave;
-  
+
   const MigrationPlantFormAdapter({
     required this.name,
     required this.species,
@@ -265,7 +275,7 @@ class MigrationPlantFormAdapter {
     required this.hasChanges,
     required this.canSave,
   });
-  
+
   bool get hasError => errorMessage != null;
   bool get isEditMode => false; // Simplificado para compatibilidade
 }

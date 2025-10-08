@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
 import '../../interfaces/network_info.dart';
+import '../../services/connectivity_state_manager.dart';
 
 /// Adapter que implementa a interface NetworkInfo existente usando ConnectivityService
 /// do core package, mantendo 100% backward compatibility enquanto disponibiliza
@@ -23,6 +24,8 @@ import '../../interfaces/network_info.dart';
 /// - 🚀 Future\<bool\> get isStable (connection stability check)
 class NetworkInfoAdapter implements NetworkInfo {
   final ConnectivityService _connectivityService;
+  final ConnectivityStateManager _connectivityStateManager =
+      ConnectivityStateManager();
   late final StreamController<bool> _fallbackController;
   bool _isInitialized = false;
   bool _lastKnownConnectionState = false;
@@ -35,6 +38,9 @@ class NetworkInfoAdapter implements NetworkInfo {
   /// Initialization em background para não bloquear a criação do adapter
   Future<void> _initializeAsync() async {
     try {
+      // Load saved connectivity state
+      _lastKnownConnectionState = await _connectivityStateManager.loadState();
+
       await _connectivityService.initialize();
       _isInitialized = true;
       final initialState = await _connectivityService.isOnline();
@@ -44,7 +50,7 @@ class NetworkInfoAdapter implements NetworkInfo {
             'NetworkInfoAdapter: Failed to get initial state: ${failure.message}',
             name: 'NetworkAdapter',
           );
-          _lastKnownConnectionState = false;
+          // Keep saved state as fallback
         },
         (isOnline) {
           _lastKnownConnectionState = isOnline;
@@ -56,6 +62,9 @@ class NetworkInfoAdapter implements NetworkInfo {
         'NetworkInfoAdapter initialized successfully',
         name: 'NetworkAdapter',
       );
+
+      // Setup connectivity state persistence
+      _setupConnectivityPersistence();
     } catch (e) {
       developer.log(
         'NetworkInfoAdapter: Initialization error: $e',
@@ -63,6 +72,24 @@ class NetworkInfoAdapter implements NetworkInfo {
       );
       _isInitialized = false;
     }
+  }
+
+  /// Setup connectivity state persistence
+  void _setupConnectivityPersistence() {
+    connectivityStream.listen((isOnline) async {
+      try {
+        await _connectivityStateManager.saveState(isOnline);
+        developer.log(
+          'NetworkInfoAdapter: Connectivity state persisted: $isOnline',
+          name: 'NetworkAdapter',
+        );
+      } catch (e) {
+        developer.log(
+          'NetworkInfoAdapter: Failed to persist connectivity state: $e',
+          name: 'NetworkAdapter',
+        );
+      }
+    });
   }
 
   /// [INTERFACE ORIGINAL - PRESERVADA]

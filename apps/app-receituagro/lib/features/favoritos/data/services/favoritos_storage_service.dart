@@ -1,8 +1,11 @@
 import 'dart:developer' as developer;
 
+import '../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/data/repositories/favoritos_hive_repository.dart';
+import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
+import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/services/receituagro_hive_service_stub.dart'; // Stub service for compatibility
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
 
@@ -10,6 +13,12 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 /// Princípio: Single Responsibility - Apenas storage
 class FavoritosStorageService implements IFavoritosStorage {
   final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
+  final FitossanitarioHiveRepository _fitossanitarioRepository =
+      sl<FitossanitarioHiveRepository>();
+  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  final DiagnosticoHiveRepository _diagnosticoRepository =
+      sl<DiagnosticoHiveRepository>();
+  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
   static const Map<String, String> _storageKeys = {
     'defensivo': 'defensivos',
     'praga': 'pragas',
@@ -158,8 +167,7 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       _memoryCache[key] = data;
       _cacheTimestamps[key] = DateTime.now();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override
@@ -167,8 +175,7 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       _memoryCache.remove(key);
       _cacheTimestamps.remove(key);
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override
@@ -180,8 +187,7 @@ class FavoritosCacheService implements IFavoritosCache {
       for (final key in keysToRemove) {
         await remove(key);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override
@@ -189,8 +195,7 @@ class FavoritosCacheService implements IFavoritosCache {
     try {
       _memoryCache.clear();
       _cacheTimestamps.clear();
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override
@@ -211,10 +216,17 @@ class FavoritosCacheService implements IFavoritosCache {
 /// Implementação do resolvedor de dados
 /// Princípio: Single Responsibility - Apenas resolução de dados
 class FavoritosDataResolverService implements IFavoritosDataResolver {
+  final FitossanitarioHiveRepository _fitossanitarioRepository =
+      sl<FitossanitarioHiveRepository>();
+  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  final DiagnosticoHiveRepository _diagnosticoRepository =
+      sl<DiagnosticoHiveRepository>();
+  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+
   @override
   Future<Map<String, dynamic>?> resolveDefensivo(String id) async {
     try {
-      final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(id);
+      final defensivo = await _fitossanitarioRepository.getById(id);
       if (defensivo != null) {
         return {
           'nomeComum': defensivo.nomeComum,
@@ -237,7 +249,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolvePraga(String id) async {
     try {
-      final praga = await ReceitaAgroHiveService.getPragaById(id);
+      final praga = await _pragasRepository.getById(id);
       if (praga != null) {
         return {
           'nomeComum': praga.nomeComum,
@@ -261,7 +273,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveDiagnostico(String id) async {
     try {
-      final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(id);
+      final diagnostico = await _diagnosticoRepository.getByIdOrObjectId(id);
       if (diagnostico != null) {
         return {
           'nomePraga': diagnostico.nomePraga ?? 'Praga não encontrada',
@@ -288,7 +300,7 @@ class FavoritosDataResolverService implements IFavoritosDataResolver {
   @override
   Future<Map<String, dynamic>?> resolveCultura(String id) async {
     try {
-      final cultura = await ReceitaAgroHiveService.getCulturaById(id);
+      final cultura = await _culturaRepository.getById(id);
       if (cultura != null) {
         return {
           'nomeCultura': cultura.cultura,
@@ -389,6 +401,13 @@ class FavoritosEntityFactoryService implements IFavoritosEntityFactory {
 /// Validador para favoritos
 /// Princípio: Single Responsibility - Apenas validação
 class FavoritosValidatorService implements IFavoritosValidator {
+  final FitossanitarioHiveRepository _fitossanitarioRepository =
+      sl<FitossanitarioHiveRepository>();
+  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
+  final DiagnosticoHiveRepository _diagnosticoRepository =
+      sl<DiagnosticoHiveRepository>();
+  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+
   @override
   Future<bool> canAddToFavorites(String tipo, String id) async {
     return isValidTipo(tipo) && isValidId(id) && await exists(tipo, id);
@@ -399,20 +418,18 @@ class FavoritosValidatorService implements IFavoritosValidator {
     try {
       switch (tipo) {
         case TipoFavorito.defensivo:
-          final defensivo = await ReceitaAgroHiveService.getFitossanitarioById(
-            id,
-          );
+          final defensivo = await _fitossanitarioRepository.getById(id);
           return defensivo != null;
         case TipoFavorito.praga:
-          final praga = await ReceitaAgroHiveService.getPragaById(id);
+          final praga = await _pragasRepository.getById(id);
           return praga != null;
         case TipoFavorito.diagnostico:
-          final diagnostico = await ReceitaAgroHiveService.getDiagnosticoById(
+          final diagnostico = await _diagnosticoRepository.getByIdOrObjectId(
             id,
           );
           return diagnostico != null;
         case TipoFavorito.cultura:
-          final cultura = await ReceitaAgroHiveService.getCulturaById(id);
+          final cultura = await _culturaRepository.getById(id);
           return cultura != null;
         default:
           return false;

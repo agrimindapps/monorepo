@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/fitossanitario_hive.dart';
-import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/premium_status_notifier.dart';
@@ -69,6 +68,7 @@ class DetalheDefensivoState {
   DetalheDefensivoState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasError => errorMessage != null;
   bool get hasDefensivo => defensivoData != null;
   bool get hasComentarios => comentarios.isNotEmpty;
@@ -78,7 +78,6 @@ class DetalheDefensivoState {
 /// Princípios: Single Responsibility + Dependency Inversion
 @riverpod
 class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
-  late final FavoritosHiveRepository _favoritosHiveRepository;
   late final FitossanitarioHiveRepository _fitossanitarioRepository;
   late final ComentariosService _comentariosService;
   late final FavoritosRepositorySimplified _favoritosRepository;
@@ -100,18 +99,19 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       await _loadDefensivoData(defensivoName);
-      await Future.wait([
-        _loadFavoritoState(defensivoName),
-        loadComentarios(),
-      ]);
+      await Future.wait([_loadFavoritoState(defensivoName), loadComentarios()]);
 
       final finalState = state.value;
       if (finalState != null) {
-        state = AsyncValue.data(finalState.copyWith(isLoading: false).clearError());
+        state = AsyncValue.data(
+          finalState.copyWith(isLoading: false).clearError(),
+        );
       }
     } catch (e) {
       state = AsyncValue.data(
@@ -132,13 +132,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       throw Exception('Erro ao acessar dados: ${result.error}');
     }
 
-    var defensivos = result.data!.where(
-      (d) => d.nomeComum == defensivoName,
-    );
+    var defensivos = result.data!.where((d) => d.nomeComum == defensivoName);
     if (defensivos.isEmpty) {
-      defensivos = result.data!.where(
-        (d) => d.nomeTecnico == defensivoName,
-      );
+      defensivos = result.data!.where((d) => d.nomeTecnico == defensivoName);
     }
 
     final defensivoData = defensivos.isNotEmpty ? defensivos.first : null;
@@ -147,7 +143,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       throw Exception('Defensivo não encontrado');
     }
 
-    state = AsyncValue.data(currentState.copyWith(defensivoData: defensivoData));
+    state = AsyncValue.data(
+      currentState.copyWith(defensivoData: defensivoData),
+    );
   }
 
   /// Load favorito state using simplified consistent system
@@ -158,15 +156,28 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final itemId = currentState.defensivoData?.idReg ?? defensivoName;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito(
+        'defensivo',
+        itemId,
+      );
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
       try {
-        final isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
-        state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+        final isFavorited = await _favoritosRepository.isFavorito(
+          'defensivo',
+          itemId,
+        );
+        state = AsyncValue.data(
+          currentState.copyWith(isFavorited: isFavorited),
+        );
       } catch (fallbackError) {
-        final isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
-        state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+        final isFavorited = await _favoritosRepository.isFavorito(
+          'defensivo',
+          itemId,
+        );
+        state = AsyncValue.data(
+          currentState.copyWith(isFavorited: isFavorited),
+        );
       }
     }
   }
@@ -204,7 +215,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       return false;
     }
 
-    if (!_comentariosService.canAddComentario(currentState.comentarios.length)) {
+    if (!_comentariosService.canAddComentario(
+      currentState.comentarios.length,
+    )) {
       return false;
     }
 
@@ -224,7 +237,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       await _comentariosService.addComentario(newComment);
 
       final updatedComentarios = [...currentState.comentarios, newComment];
-      state = AsyncValue.data(currentState.copyWith(comentarios: updatedComentarios));
+      state = AsyncValue.data(
+        currentState.copyWith(comentarios: updatedComentarios),
+      );
 
       return true;
     } catch (e) {
@@ -240,8 +255,11 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     try {
       await _comentariosService.deleteComentario(commentId);
 
-      final updatedComentarios = currentState.comentarios.where((c) => c.id != commentId).toList();
-      state = AsyncValue.data(currentState.copyWith(comentarios: updatedComentarios));
+      final updatedComentarios =
+          currentState.comentarios.where((c) => c.id != commentId).toList();
+      state = AsyncValue.data(
+        currentState.copyWith(comentarios: updatedComentarios),
+      );
 
       return true;
     } catch (e) {
@@ -256,16 +274,22 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.defensivoData?.idReg ?? defensivoName;
-    state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
+    state = AsyncValue.data(
+      currentState.copyWith(isFavorited: !wasAlreadyFavorited),
+    );
 
     try {
-      final success = await _favoritosRepository.toggleFavorito('defensivo', itemId);
+      final success = await _favoritosRepository.toggleFavorito(
+        'defensivo',
+        itemId,
+      );
 
       if (!success) {
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,
-            errorMessage: 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+            errorMessage:
+                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
           ),
         );
         return false;
@@ -274,15 +298,17 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       return true;
     } catch (e) {
       try {
-        final success = wasAlreadyFavorited
-            ? await _favoritosRepository.removeFavorito('defensivo', itemId)
-            : await _favoritosRepository.addFavorito('defensivo', itemId);
+        final success =
+            wasAlreadyFavorited
+                ? await _favoritosRepository.removeFavorito('defensivo', itemId)
+                : await _favoritosRepository.addFavorito('defensivo', itemId);
 
         if (!success) {
           state = AsyncValue.data(
             currentState.copyWith(
               isFavorited: wasAlreadyFavorited,
-              errorMessage: 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+              errorMessage:
+                  'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
             ),
           );
           return false;
@@ -293,7 +319,8 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,
-            errorMessage: 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${fallbackError.toString()}',
+            errorMessage:
+                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito: ${fallbackError.toString()}',
           ),
         );
         return false;
@@ -309,14 +336,17 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
     _premiumStatusSubscription?.cancel();
-    _premiumStatusSubscription = PremiumStatusNotifier.instance
+    _premiumStatusSubscription = PremiumStatusNotifier
+        .instance
         .premiumStatusStream
         .listen((isPremiumStatus) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(isPremium: isPremiumStatus));
-      }
-    });
+          final currentState = state.value;
+          if (currentState != null) {
+            state = AsyncValue.data(
+              currentState.copyWith(isPremium: isPremiumStatus),
+            );
+          }
+        });
   }
 
   /// Clear error
@@ -328,11 +358,14 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   }
 
   /// Public getters for external access
-  String getValidationErrorMessage() => _comentariosService.getValidationErrorMessage();
+  String getValidationErrorMessage() =>
+      _comentariosService.getValidationErrorMessage();
 
-  bool canAddComentario(int currentCount) => _comentariosService.canAddComentario(currentCount);
+  bool canAddComentario(int currentCount) =>
+      _comentariosService.canAddComentario(currentCount);
 
-  bool isValidContent(String content) => _comentariosService.isValidContent(content);
+  bool isValidContent(String content) =>
+      _comentariosService.isValidContent(content);
 
   /// Dispose
   void disposeNotifier() {

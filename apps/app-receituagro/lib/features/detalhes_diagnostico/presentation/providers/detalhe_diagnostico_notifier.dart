@@ -5,7 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
-import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/diagnostico_hive_extension.dart';
 import '../../../../core/interfaces/i_premium_service.dart';
@@ -78,6 +77,7 @@ class DetalheDiagnosticoState {
   DetalheDiagnosticoState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasError => errorMessage != null;
   bool get hasDiagnostico => diagnostico != null;
 }
@@ -88,7 +88,6 @@ class DetalheDiagnosticoState {
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final DiagnosticoHiveRepository _hiveRepository;
-  late final FavoritosHiveRepository _favoritosHiveRepository;
   late final IPremiumService _premiumService;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
@@ -110,7 +109,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _diagnosticosRepository.getById(diagnosticoId);
@@ -121,50 +122,57 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         },
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
-            final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(diagnosticoId);
+            final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(
+              diagnosticoId,
+            );
             final diagnosticoData =
                 diagnosticoHive != null
                     ? await diagnosticoHive.toDataMap()
                     : <String, String>{};
 
             state = AsyncValue.data(
-              currentState.copyWith(
-                diagnostico: diagnosticoEntity,
-                diagnosticoHive: diagnosticoHive,
-                diagnosticoData: diagnosticoData,
-                isLoading: false,
-              ).clearError(),
+              currentState
+                  .copyWith(
+                    diagnostico: diagnosticoEntity,
+                    diagnosticoHive: diagnosticoHive,
+                    diagnosticoData: diagnosticoData,
+                    isLoading: false,
+                  )
+                  .clearError(),
             );
           } else {
             final result = await _hiveRepository.getAll();
-            final totalDiagnosticos = result.isSuccess ? result.data!.length : 0;
-            final errorMsg = totalDiagnosticos == 0
-                ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
-                : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.';
+            final totalDiagnosticos =
+                result.isSuccess ? result.data!.length : 0;
+            final errorMsg =
+                totalDiagnosticos == 0
+                    ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
+                    : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.';
 
             state = AsyncValue.data(
-              currentState.copyWith(
-                isLoading: false,
-                errorMessage: errorMsg,
-              ),
+              currentState.copyWith(isLoading: false, errorMessage: errorMsg),
             );
           }
         },
       );
     } catch (e) {
       try {
-        final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(diagnosticoId);
+        final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(
+          diagnosticoId,
+        );
         if (diagnosticoHive != null) {
           final diagnostico = DiagnosticoMapper.fromHive(diagnosticoHive);
           final diagnosticoData = await diagnosticoHive.toDataMap();
 
           state = AsyncValue.data(
-            currentState.copyWith(
-              diagnostico: diagnostico,
-              diagnosticoHive: diagnosticoHive,
-              diagnosticoData: diagnosticoData,
-              isLoading: false,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  diagnostico: diagnostico,
+                  diagnosticoHive: diagnosticoHive,
+                  diagnosticoData: diagnosticoData,
+                  isLoading: false,
+                )
+                .clearError(),
           );
         } else {
           state = AsyncValue.data(
@@ -178,7 +186,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         state = AsyncValue.data(
           currentState.copyWith(
             isLoading: false,
-            errorMessage: 'Erro ao acessar dados locais: $fallbackError. Tente reiniciar o aplicativo ou resincronizar os dados.',
+            errorMessage:
+                'Erro ao acessar dados locais: $fallbackError. Tente reiniciar o aplicativo ou resincronizar os dados.',
           ),
         );
       }
@@ -205,11 +214,13 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         .instance
         .premiumStatusStream
         .listen((isPremium) {
-      final currentState = state.value;
-      if (currentState != null) {
-        state = AsyncValue.data(currentState.copyWith(isPremium: isPremium));
-      }
-    });
+          final currentState = state.value;
+          if (currentState != null) {
+            state = AsyncValue.data(
+              currentState.copyWith(isPremium: isPremium),
+            );
+          }
+        });
   }
 
   /// Load favorito state
@@ -241,7 +252,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return false;
 
     final wasAlreadyFavorited = currentState.isFavorited;
-    state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
+    state = AsyncValue.data(
+      currentState.copyWith(isFavorited: !wasAlreadyFavorited),
+    );
 
     try {
       final success = await _favoritosRepository.toggleFavorito(
@@ -250,7 +263,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       );
 
       if (!success) {
-        state = AsyncValue.data(currentState.copyWith(isFavorited: wasAlreadyFavorited));
+        state = AsyncValue.data(
+          currentState.copyWith(isFavorited: wasAlreadyFavorited),
+        );
         return false;
       }
 
@@ -269,13 +284,17 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                 );
 
         if (!success) {
-          state = AsyncValue.data(currentState.copyWith(isFavorited: wasAlreadyFavorited));
+          state = AsyncValue.data(
+            currentState.copyWith(isFavorited: wasAlreadyFavorited),
+          );
           return false;
         }
 
         return true;
       } catch (fallbackError) {
-        state = AsyncValue.data(currentState.copyWith(isFavorited: wasAlreadyFavorited));
+        state = AsyncValue.data(
+          currentState.copyWith(isFavorited: wasAlreadyFavorited),
+        );
         return false;
       }
     }
@@ -306,19 +325,31 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       buffer.writeln();
     }
     buffer.writeln('⚠️ CLASSIFICAÇÕES');
-    buffer.writeln('• Toxicológica: ${currentState.diagnosticoData['toxico'] ?? 'N/A'}');
-    buffer.writeln('• Ambiental: ${currentState.diagnosticoData['classAmbiental'] ?? 'N/A'}');
-    buffer.writeln('• Agronômica: ${currentState.diagnosticoData['classeAgronomica'] ?? 'N/A'}');
+    buffer.writeln(
+      '• Toxicológica: ${currentState.diagnosticoData['toxico'] ?? 'N/A'}',
+    );
+    buffer.writeln(
+      '• Ambiental: ${currentState.diagnosticoData['classAmbiental'] ?? 'N/A'}',
+    );
+    buffer.writeln(
+      '• Agronômica: ${currentState.diagnosticoData['classeAgronomica'] ?? 'N/A'}',
+    );
     buffer.writeln();
     buffer.writeln('🔧 DETALHES TÉCNICOS');
     if (currentState.diagnosticoData['formulacao']?.isNotEmpty ?? false) {
-      buffer.writeln('• Formulação: ${currentState.diagnosticoData['formulacao']}');
+      buffer.writeln(
+        '• Formulação: ${currentState.diagnosticoData['formulacao']}',
+      );
     }
     if (currentState.diagnosticoData['modoAcao']?.isNotEmpty ?? false) {
-      buffer.writeln('• Modo de Ação: ${currentState.diagnosticoData['modoAcao']}');
+      buffer.writeln(
+        '• Modo de Ação: ${currentState.diagnosticoData['modoAcao']}',
+      );
     }
     if (currentState.diagnosticoData['mapa']?.isNotEmpty ?? false) {
-      buffer.writeln('• Registro MAPA: ${currentState.diagnosticoData['mapa']}');
+      buffer.writeln(
+        '• Registro MAPA: ${currentState.diagnosticoData['mapa']}',
+      );
     }
     buffer.writeln();
     buffer.writeln('💧 INSTRUÇÕES DE APLICAÇÃO');
@@ -326,16 +357,26 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       buffer.writeln('• Dosagem: ${currentState.diagnosticoData['dosagem']}');
     }
     if (currentState.diagnosticoData['vazaoTerrestre']?.isNotEmpty ?? false) {
-      buffer.writeln('• Vazão Terrestre: ${currentState.diagnosticoData['vazaoTerrestre']}');
+      buffer.writeln(
+        '• Vazão Terrestre: ${currentState.diagnosticoData['vazaoTerrestre']}',
+      );
     }
     if (currentState.diagnosticoData['vazaoAerea']?.isNotEmpty ?? false) {
-      buffer.writeln('• Vazão Aérea: ${currentState.diagnosticoData['vazaoAerea']}');
+      buffer.writeln(
+        '• Vazão Aérea: ${currentState.diagnosticoData['vazaoAerea']}',
+      );
     }
-    if (currentState.diagnosticoData['intervaloAplicacao']?.isNotEmpty ?? false) {
-      buffer.writeln('• Intervalo de Aplicação: ${currentState.diagnosticoData['intervaloAplicacao']}');
+    if (currentState.diagnosticoData['intervaloAplicacao']?.isNotEmpty ??
+        false) {
+      buffer.writeln(
+        '• Intervalo de Aplicação: ${currentState.diagnosticoData['intervaloAplicacao']}',
+      );
     }
-    if (currentState.diagnosticoData['intervaloSeguranca']?.isNotEmpty ?? false) {
-      buffer.writeln('• Intervalo de Segurança: ${currentState.diagnosticoData['intervaloSeguranca']}');
+    if (currentState.diagnosticoData['intervaloSeguranca']?.isNotEmpty ??
+        false) {
+      buffer.writeln(
+        '• Intervalo de Segurança: ${currentState.diagnosticoData['intervaloSeguranca']}',
+      );
     }
     buffer.writeln();
     if (currentState.diagnosticoData['tecnologia']?.isNotEmpty ?? false) {

@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/di/injection_container.dart';
@@ -43,17 +42,22 @@ class FavoritosService {
 
   Future<bool> addFavoriteId(String tipo, String id) async {
     if (kDebugMode) {
-      developer.log('Adicionando favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+      developer.log(
+        'Adicionando favorito: tipo=$tipo, id=$id',
+        name: 'FavoritosService',
+      );
     }
 
     try {
       if (!_validator.isValidTipo(tipo)) {
-        if (kDebugMode) developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        if (kDebugMode)
+          developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
       }
 
       if (!await _validator.canAddToFavorites(tipo, id)) {
-        if (kDebugMode) developer.log('Validação falhou', name: 'FavoritosService');
+        if (kDebugMode)
+          developer.log('Validação falhou', name: 'FavoritosService');
         return false;
       }
 
@@ -71,26 +75,41 @@ class FavoritosService {
           await _syncService.syncOperation('create', tipo, id, itemData);
         } catch (e) {
           if (kDebugMode) {
-            developer.log('Erro na sincronização (local OK): $e', name: 'FavoritosService');
+            developer.log(
+              'Erro na sincronização (local OK): $e',
+              name: 'FavoritosService',
+            );
           }
         }
       }
 
       return result;
     } catch (e) {
-      developer.log('Erro ao adicionar favorito: $e', name: 'FavoritosService', error: e);
-      throw FavoritosException('Erro ao adicionar favorito: $e', tipo: tipo, id: id);
+      developer.log(
+        'Erro ao adicionar favorito: $e',
+        name: 'FavoritosService',
+        error: e,
+      );
+      throw FavoritosException(
+        'Erro ao adicionar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
   Future<bool> removeFavoriteId(String tipo, String id) async {
     if (kDebugMode) {
-      developer.log('Removendo favorito: tipo=$tipo, id=$id', name: 'FavoritosService');
+      developer.log(
+        'Removendo favorito: tipo=$tipo, id=$id',
+        name: 'FavoritosService',
+      );
     }
 
     try {
       if (!_validator.isValidTipo(tipo)) {
-        if (kDebugMode) developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
+        if (kDebugMode)
+          developer.log('Tipo inválido: $tipo', name: 'FavoritosService');
         return false;
       }
 
@@ -102,15 +121,26 @@ class FavoritosService {
           await _syncService.syncOperation('delete', tipo, id, null);
         } catch (e) {
           if (kDebugMode) {
-            developer.log('Erro na sincronização de remoção (local OK): $e', name: 'FavoritosService');
+            developer.log(
+              'Erro na sincronização de remoção (local OK): $e',
+              name: 'FavoritosService',
+            );
           }
         }
       }
 
       return result;
     } catch (e) {
-      developer.log('Erro ao remover favorito: $e', name: 'FavoritosService', error: e);
-      throw FavoritosException('Erro ao remover favorito: $e', tipo: tipo, id: id);
+      developer.log(
+        'Erro ao remover favorito: $e',
+        name: 'FavoritosService',
+        error: e,
+      );
+      throw FavoritosException(
+        'Erro ao remover favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -119,7 +149,11 @@ class FavoritosService {
       if (!_validator.isValidTipo(tipo)) return false;
       return await _repository.isFavorito(tipo, id);
     } catch (e) {
-      throw FavoritosException('Erro ao verificar favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao verificar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -147,7 +181,10 @@ class FavoritosService {
 
   Future<Map<String, dynamic>?> resolveItemData(String tipo, String id) async {
     if (kDebugMode) {
-      developer.log('Resolvendo dados: tipo=$tipo, id=$id', name: 'FavoritosService');
+      developer.log(
+        'Resolvendo dados: tipo=$tipo, id=$id',
+        name: 'FavoritosService',
+      );
     }
 
     final cacheKey = 'resolve_${tipo}_$id';
@@ -253,7 +290,10 @@ class FavoritosService {
       await clearAllCache();
       final stats = await getStats();
       if (kDebugMode) {
-        developer.log('Favoritos sincronizados - Stats: $stats', name: 'FavoritosService');
+        developer.log(
+          'Favoritos sincronizados - Stats: $stats',
+          name: 'FavoritosService',
+        );
       }
     } catch (e) {
       throw FavoritosException('Erro ao sincronizar favoritos: $e');

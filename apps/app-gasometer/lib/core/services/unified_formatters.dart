@@ -2,27 +2,33 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'unified_validators.dart';
 
+/// Retorna os formatadores apropriados para o tipo de validação
+List<TextInputFormatter> getUnifiedFormatters(UnifiedValidationType type) {
+  switch (type) {
+    case UnifiedValidationType.currency:
+      return [CurrencyInputFormatter()];
+    case UnifiedValidationType.odometer:
+      return [OdometerInputFormatter()];
+    case UnifiedValidationType.licensePlate:
+      return [LicensePlateInputFormatter()];
+    case UnifiedValidationType.chassi:
+      return [ChassiInputFormatter()];
+    case UnifiedValidationType.renavam:
+      return [RenavamInputFormatter()];
+    case UnifiedValidationType.number:
+      return [FilteringTextInputFormatter.digitsOnly];
+    case UnifiedValidationType.decimal:
+      return [DecimalInputFormatter()];
+    default:
+      return [];
+  }
+}
+
 /// Sistema de formatadores unificado para campos de formulário
 abstract class UnifiedFormatters {
+  @Deprecated('Use getUnifiedFormatters() function instead')
   static List<TextInputFormatter> getFormatters(UnifiedValidationType type) {
-    switch (type) {
-      case UnifiedValidationType.currency:
-        return [CurrencyInputFormatter()];
-      case UnifiedValidationType.odometer:
-        return [OdometerInputFormatter()];
-      case UnifiedValidationType.licensePlate:
-        return [LicensePlateInputFormatter()];
-      case UnifiedValidationType.chassi:
-        return [ChassiInputFormatter()];
-      case UnifiedValidationType.renavam:
-        return [RenavamInputFormatter()];
-      case UnifiedValidationType.number:
-        return [FilteringTextInputFormatter.digitsOnly];
-      case UnifiedValidationType.decimal:
-        return [DecimalInputFormatter()];
-      default:
-        return [];
-    }
+    return getUnifiedFormatters(type);
   }
 }
 
@@ -43,7 +49,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
       locale: 'pt_BR',
       symbol: 'R\$',
     ).format(number / 100);
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
@@ -73,10 +79,10 @@ class OdometerInputFormatter extends TextInputFormatter {
     if (formatted.endsWith(',0')) {
       formatted = formatted.substring(0, formatted.length - 2);
     }
-    
+
     formatted += ' km';
     final cursorPosition = formatted.length - 3;
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: cursorPosition),
@@ -91,12 +97,15 @@ class LicensePlateInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final newText = newValue.text.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
-    
+    final newText = newValue.text.toUpperCase().replaceAll(
+      RegExp(r'[^A-Z0-9]'),
+      '',
+    );
+
     if (newText.length > 7) {
       return oldValue;
     }
-    
+
     String formatted = '';
     for (int i = 0; i < newText.length; i++) {
       if (i == 3) {
@@ -104,7 +113,7 @@ class LicensePlateInputFormatter extends TextInputFormatter {
       }
       formatted += newText[i];
     }
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
@@ -121,11 +130,11 @@ class ChassiInputFormatter extends TextInputFormatter {
   ) {
     final newText = newValue.text.toUpperCase();
     final filteredText = newText.replaceAll(RegExp(r'[^A-HJ-NPR-Z0-9]'), '');
-    
+
     if (filteredText.length > 17) {
       return oldValue;
     }
-    
+
     return TextEditingValue(
       text: filteredText,
       selection: TextSelection.collapsed(offset: filteredText.length),
@@ -141,11 +150,11 @@ class RenavamInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (digitsOnly.length > 11) {
       return oldValue;
     }
-    
+
     return TextEditingValue(
       text: digitsOnly,
       selection: TextSelection.collapsed(offset: digitsOnly.length),
@@ -155,10 +164,9 @@ class RenavamInputFormatter extends TextInputFormatter {
 
 /// Formatador para números decimais com vírgula brasileira
 class DecimalInputFormatter extends TextInputFormatter {
-  
   DecimalInputFormatter({this.decimalPlaces = 2});
   final int decimalPlaces;
-  
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
@@ -177,7 +185,7 @@ class DecimalInputFormatter extends TextInputFormatter {
         return oldValue;
       }
     }
-    
+
     return TextEditingValue(
       text: normalizedText,
       selection: TextSelection.collapsed(offset: normalizedText.length),
@@ -193,24 +201,24 @@ class PhoneInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (digitsOnly.length > 11) {
       return oldValue;
     }
-    
+
     String formatted = '';
     for (int i = 0; i < digitsOnly.length; i++) {
       if (i == 0) {
         formatted += '(';
       } else if (i == 2) {
         formatted += ') ';
-      } else if ((digitsOnly.length == 11 && i == 7) || 
-                 (digitsOnly.length == 10 && i == 6)) {
+      } else if ((digitsOnly.length == 11 && i == 7) ||
+          (digitsOnly.length == 10 && i == 6)) {
         formatted += '-';
       }
       formatted += digitsOnly[i];
     }
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
@@ -226,11 +234,11 @@ class CpfInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (digitsOnly.length > 11) {
       return oldValue;
     }
-    
+
     String formatted = '';
     for (int i = 0; i < digitsOnly.length; i++) {
       if (i == 3 || i == 6) {
@@ -240,7 +248,7 @@ class CpfInputFormatter extends TextInputFormatter {
       }
       formatted += digitsOnly[i];
     }
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
@@ -256,11 +264,11 @@ class CepInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-    
+
     if (digitsOnly.length > 8) {
       return oldValue;
     }
-    
+
     String formatted = '';
     for (int i = 0; i < digitsOnly.length; i++) {
       if (i == 5) {
@@ -268,7 +276,7 @@ class CepInputFormatter extends TextInputFormatter {
       }
       formatted += digitsOnly[i];
     }
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

@@ -14,6 +14,16 @@ import '../../shared/di/injection_container.dart';
 import '../../shared/utils/failure.dart';
 import 'connectivity_service.dart';
 
+// TODO(refactoring): PRIORITY HIGH - This file is 1084 lines and violates SRP
+// Plan: Extract to specialized services (see REFACTORING_PLAN.md)
+// - FirestoreSyncClient (Firestore communication)
+// - SyncConflictResolver (conflict resolution)
+// - SyncQueueManager (queue management)
+// - SyncThrottleService (throttling/rate limiting)
+// - SyncRetryHandler (retry logic)
+// Keep this class as Facade for backward compatibility
+// Estimated effort: 8-10 hours | Risk: High | ROI: High
+
 /// Serviço unificado de sincronização offline-first com Firebase
 /// Implementa padrão Singleton Generic para reutilização por tipo
 class SyncFirebaseService<T extends BaseSyncEntity>

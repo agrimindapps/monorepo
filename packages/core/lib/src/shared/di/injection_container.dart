@@ -20,7 +20,6 @@ import '../../infrastructure/services/firebase_auth_service.dart';
 import '../../infrastructure/services/firebase_crashlytics_service.dart';
 import '../../infrastructure/services/firebase_storage_service.dart';
 import '../../infrastructure/services/hive_storage_service.dart';
-import '../../infrastructure/services/mock_analytics_service.dart';
 import '../../infrastructure/services/revenue_cat_service.dart';
 import '../../shared/config/environment_config.dart';
 import '../../sync/config/sync_feature_flags.dart';
@@ -62,10 +61,7 @@ class InjectionContainer {
         () => FirebaseStorageService(),
       );
       getIt.registerLazySingleton<IAnalyticsRepository>(
-        () =>
-            EnvironmentConfig.isDebugMode
-                ? MockAnalyticsService()
-                : FirebaseAnalyticsService(),
+        () => FirebaseAnalyticsService(),
       );
       if (!kIsWeb) {
         getIt.registerLazySingleton<ILocalStorageRepository>(

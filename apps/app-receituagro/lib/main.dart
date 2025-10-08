@@ -19,6 +19,7 @@ import 'core/services/remote_config_service.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
+import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
 import 'features/navigation/main_navigation_page.dart';
@@ -92,11 +93,8 @@ void main() async {
     }
   }
   if (kDebugMode) {
-    // TODO: Re-enable data inspector initialization
-    // ReceitaAgroDataInspectorInitializer.initialize();
-    DiagnosticoLogger.debug(
-      'Data Inspector initialization skipped (temporarily disabled)',
-    );
+    ReceitaAgroDataInspectorInitializer.initialize();
+    DiagnosticoLogger.debug('Data Inspector initialization completed');
   }
   try {
     DiagnosticoLogger.debug('Forcing sync initialization...');

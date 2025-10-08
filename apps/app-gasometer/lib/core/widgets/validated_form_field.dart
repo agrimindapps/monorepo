@@ -8,12 +8,16 @@ import '../validation/validation_service.dart';
 enum ValidationState {
   /// Campo ainda não foi validado
   initial,
+
   /// Validação em progresso (debounce)
   validating,
+
   /// Campo válido
   valid,
+
   /// Campo inválido
   invalid,
+
   /// Campo válido mas com aviso
   warning,
 }
@@ -39,7 +43,6 @@ enum ValidationType {
 
 /// Widget de campo de formulário com validação robusta e feedback visual
 class ValidatedFormField extends StatefulWidget {
-
   const ValidatedFormField({
     super.key,
     this.controller,
@@ -118,21 +121,20 @@ class ValidatedFormField extends StatefulWidget {
   State<ValidatedFormField> createState() => _ValidatedFormFieldState();
 }
 
-class _ValidatedFormFieldState extends State<ValidatedFormField> 
+class _ValidatedFormFieldState extends State<ValidatedFormField>
     with SingleTickerProviderStateMixin {
   late TextEditingController _controller;
   late ValidationService _validationService;
-  
+
   ValidationState _validationState = ValidationState.initial;
   ValidationResult _lastValidationResult = ValidationResult.success();
   Timer? _debounceTimer;
-  
+
   late AnimationController _iconAnimationController;
   late Animation<double> _iconAnimation;
-  
-  
-  bool get _shouldShowValidationIcon => 
-      widget.showValidationIcon && 
+
+  bool get _shouldShowValidationIcon =>
+      widget.showValidationIcon &&
       _validationState != ValidationState.initial &&
       _controller.text.isNotEmpty;
 
@@ -198,20 +200,21 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
 
   Future<void> _performValidation(String text) async {
     if (!mounted) return;
-    
+
     try {
       ValidationResult result;
       if (widget.customValidator != null) {
         final error = widget.customValidator!(text);
-        result = error != null 
-            ? ValidationResult.error(error)
-            : ValidationResult.success();
+        result =
+            error != null
+                ? ValidationResult.error(error)
+                : ValidationResult.success();
       } else {
         result = _getValidationForType(text);
       }
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _lastValidationResult = result;
         if (!result.isValid) {
@@ -223,16 +226,15 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
         }
       });
       widget.onValidationChanged?.call(result);
-      _iconAnimationController.forward();
-      
+      unawaited(_iconAnimationController.forward());
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _validationState = ValidationState.invalid;
         _lastValidationResult = ValidationResult.error('Erro na validação: $e');
       });
-      
+
       widget.onValidationChanged?.call(_lastValidationResult);
     }
   }
@@ -241,25 +243,28 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
     switch (widget.validationType) {
       case ValidationType.none:
         return ValidationResult.success();
-        
+
       case ValidationType.required:
-        return _validationService.validateRequired(text, widget.label ?? 'Campo');
-        
+        return _validationService.validateRequired(
+          text,
+          widget.label ?? 'Campo',
+        );
+
       case ValidationType.email:
         return _validationService.validateEmail(text);
-        
+
       case ValidationType.phone:
         return _validationService.validatePhone(text);
-        
+
       case ValidationType.money:
         return _validationService.validateMoney(
-          text, 
+          text,
           widget.label ?? 'Valor',
           min: widget.minValue ?? 0.0,
           max: widget.maxValue ?? 999999.99,
           required: widget.required,
         );
-        
+
       case ValidationType.decimal:
         return _validationService.validateDecimal(
           text,
@@ -268,7 +273,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           max: widget.maxValue,
           required: widget.required,
         );
-        
+
       case ValidationType.integer:
         return _validationService.validateInteger(
           text,
@@ -277,16 +282,16 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           max: widget.maxValue?.toInt(),
           required: widget.required,
         );
-        
+
       case ValidationType.licensePlate:
         return _validationService.validateLicensePlate(text);
-        
+
       case ValidationType.chassis:
         return _validationService.validateChassis(text);
-        
+
       case ValidationType.renavam:
         return _validationService.validateRenavam(text);
-        
+
       case ValidationType.odometer:
         return _validationService.validateOdometer(
           text,
@@ -294,17 +299,20 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           initialOdometer: widget.initialOdometer,
           required: widget.required,
         );
-        
+
       case ValidationType.fuelLiters:
         return _validationService.validateFuelLiters(
           text,
           tankCapacity: widget.tankCapacity,
           required: widget.required,
         );
-        
+
       case ValidationType.fuelPrice:
-        return _validationService.validateFuelPrice(text, required: widget.required);
-        
+        return _validationService.validateFuelPrice(
+          text,
+          required: widget.required,
+        );
+
       case ValidationType.length:
         return _validationService.validateLength(
           text,
@@ -312,7 +320,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           minLength: widget.minLength ?? 0,
           maxLength: widget.maxLengthValidation ?? 255,
         );
-        
+
       case ValidationType.custom:
         return ValidationResult.success(); // Será tratado pelo customValidator
     }
@@ -370,17 +378,13 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
 
     return FadeTransition(
       opacity: _iconAnimation,
-      child: Icon(
-        iconData,
-        color: iconColor,
-        size: 16,
-      ),
+      child: Icon(iconData, color: iconColor, size: 16),
     );
   }
 
   Color? _getBorderColor() {
     if (!widget.enabled) return null;
-    
+
     switch (_validationState) {
       case ValidationState.valid:
         return Colors.green;
@@ -407,7 +411,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       final max = widget.maxLength!;
       return '$current/$max caracteres';
     }
-    
+
     return null;
   }
 
@@ -427,7 +431,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
   @override
   Widget build(BuildContext context) {
     final borderColor = _getBorderColor();
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -444,7 +448,8 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
           onEditingComplete: widget.onEditingComplete,
           onFieldSubmitted: widget.onSubmitted,
           onTap: () {
-            if (!widget.validateOnChange && _validationState == ValidationState.invalid) {
+            if (!widget.validateOnChange &&
+                _validationState == ValidationState.invalid) {
               setState(() {
                 _validationState = ValidationState.initial;
                 _lastValidationResult = ValidationResult.success();
@@ -457,98 +462,116 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
               _performValidation(text);
             }
           },
-          validator: (_) => _lastValidationResult.isValid ? null : _lastValidationResult.message,
-          decoration: widget.decoration?.copyWith(
-            labelText: widget.required && widget.label != null 
-                ? '${widget.label} *' 
-                : widget.label,
-            hintText: widget.hint,
-            prefixIcon: widget.prefixIcon != null 
-                ? Icon(widget.prefixIcon) 
-                : null,
-            suffixIcon: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildValidationIcon(),
-                if (widget.suffix != null) ...[
-                  const SizedBox(width: 8),
-                  widget.suffix!,
-                ],
-                const SizedBox(width: 12),
-              ],
-            ),
-            enabledBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor),
-                  )
-                : null,
-            focusedBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor, width: 2),
-                  )
-                : null,
-            helperText: _displayHelperText,
-            helperStyle: TextStyle(color: _helperTextColor),
-            counterText: widget.showCharacterCount && widget.maxLength != null 
-                ? null 
-                : '', // Esconder contador padrão se não queremos
-          ) ?? InputDecoration(
-            labelText: widget.required && widget.label != null 
-                ? '${widget.label} *' 
-                : widget.label,
-            hintText: widget.hint,
-            prefixIcon: widget.prefixIcon != null 
-                ? Icon(widget.prefixIcon) 
-                : null,
-            suffixIcon: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildValidationIcon(),
-                if (widget.suffix != null) ...[
-                  const SizedBox(width: 8),
-                  widget.suffix!,
-                ],
-                const SizedBox(width: 12),
-              ],
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            enabledBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor),
-                  )
-                : OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                  ),
-            focusedBorder: borderColor != null
-                ? OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: borderColor, width: 2),
-                  )
-                : OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outline, width: 2),
-                  ),
-            filled: true,
-            fillColor: Colors.white,
-            helperText: _displayHelperText,
-            helperStyle: TextStyle(color: _helperTextColor),
-            counterText: widget.showCharacterCount && widget.maxLength != null 
-                ? null 
-                : '',
-          ),
+          validator:
+              (_) =>
+                  _lastValidationResult.isValid
+                      ? null
+                      : _lastValidationResult.message,
+          decoration:
+              widget.decoration?.copyWith(
+                labelText:
+                    widget.required && widget.label != null
+                        ? '${widget.label} *'
+                        : widget.label,
+                hintText: widget.hint,
+                prefixIcon:
+                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildValidationIcon(),
+                    if (widget.suffix != null) ...[
+                      const SizedBox(width: 8),
+                      widget.suffix!,
+                    ],
+                    const SizedBox(width: 12),
+                  ],
+                ),
+                enabledBorder:
+                    borderColor != null
+                        ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: borderColor),
+                        )
+                        : null,
+                focusedBorder:
+                    borderColor != null
+                        ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: borderColor, width: 2),
+                        )
+                        : null,
+                helperText: _displayHelperText,
+                helperStyle: TextStyle(color: _helperTextColor),
+                counterText:
+                    widget.showCharacterCount && widget.maxLength != null
+                        ? null
+                        : '', // Esconder contador padrão se não queremos
+              ) ??
+              InputDecoration(
+                labelText:
+                    widget.required && widget.label != null
+                        ? '${widget.label} *'
+                        : widget.label,
+                hintText: widget.hint,
+                prefixIcon:
+                    widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildValidationIcon(),
+                    if (widget.suffix != null) ...[
+                      const SizedBox(width: 8),
+                      widget.suffix!,
+                    ],
+                    const SizedBox(width: 12),
+                  ],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder:
+                    borderColor != null
+                        ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: borderColor),
+                        )
+                        : OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                focusedBorder:
+                    borderColor != null
+                        ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: borderColor, width: 2),
+                        )
+                        : OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 2,
+                          ),
+                        ),
+                filled: true,
+                fillColor: Colors.white,
+                helperText: _displayHelperText,
+                helperStyle: TextStyle(color: _helperTextColor),
+                counterText:
+                    widget.showCharacterCount && widget.maxLength != null
+                        ? null
+                        : '',
+              ),
         ),
         if (_validationState == ValidationState.validating)
           Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: LinearProgressIndicator(
               color: Theme.of(context).colorScheme.onSurface,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor:
+                  Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
       ],
@@ -630,9 +653,7 @@ extension ValidatedFormFieldExtensions on ValidatedFormField {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       currentOdometer: currentOdometer,
       initialOdometer: initialOdometer,
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]'))],
       onChanged: onChanged,
       onValidationChanged: onValidationChanged,
     );
@@ -660,9 +681,7 @@ extension ValidatedFormFieldExtensions on ValidatedFormField {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       minValue: minValue,
       maxValue: maxValue,
-      decoration: const InputDecoration(
-        prefixText: 'R\$ ',
-      ),
+      decoration: const InputDecoration(prefixText: 'R\$ '),
       onChanged: onChanged,
       onValidationChanged: onValidationChanged,
     );

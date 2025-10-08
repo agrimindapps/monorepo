@@ -141,7 +141,6 @@ export 'src/infrastructure/services/http_client_service.dart' hide CacheItem;
 export 'src/infrastructure/services/image_service.dart';
 export 'src/infrastructure/services/local_notification_service.dart';
 export 'src/infrastructure/services/log_repository_service.dart';
-export 'src/infrastructure/services/mock_analytics_service.dart';
 export 'src/infrastructure/services/monorepo_auth_cache.dart';
 export 'src/infrastructure/services/performance_service.dart';
 export 'src/infrastructure/services/profile_image_service.dart';
@@ -199,16 +198,13 @@ export 'src/shared/utils/failure.dart';
 export 'src/shared/utils/result.dart';
 export 'src/shared/utils/subscription_failures.dart';
 export 'src/sync/app_sync_config.dart';
+export 'src/sync/config/sync_app_config.dart';
 export 'src/sync/conflict_resolution/conflict_resolver_factory.dart'
     hide SyncFailure;
 export 'src/sync/entity_sync_registration.dart'
     hide IConflictResolver, SyncPriority;
 export 'src/sync/interfaces/i_sync_service.dart';
-export 'src/sync/services/gasometer_sync_service.dart';
-export 'src/sync/services/plantis_sync_service.dart';
-export 'src/sync/services/receituagro_sync_service.dart';
 export 'src/sync/services/sync_logger.dart' hide LogLevel;
-export 'src/sync/services/taskolist_sync_service.dart';
 export 'src/sync/sync.dart'
     hide NetworkInfo, ConnectionQuality, MigrationResult, LogLevel;
 export 'src/sync/unified_sync_manager.dart';

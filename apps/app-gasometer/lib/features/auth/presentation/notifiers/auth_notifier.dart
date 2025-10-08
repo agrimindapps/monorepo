@@ -34,7 +34,7 @@ part 'auth_notifier.g.dart';
 /// - Auth state persistence
 /// - User data management
 ///
-/// Migrado de StateNotifier para Notifier<AuthState> (Riverpod v2)
+/// Migrado de StateNotifier para Notifier&lt;AuthState&gt; (Riverpod v2)
 @Riverpod(keepAlive: true)
 class Auth extends _$Auth {
   late final GetCurrentUser _getCurrentUser;
@@ -93,6 +93,53 @@ class Auth extends _$Auth {
     }
   }
 
+  Future<void> _handleUserAuthenticated(UserEntity? user) async {
+    if (kDebugMode) {
+      debugPrint('🔐 Usuário obtido: ${user?.id ?? 'null'}');
+    }
+
+    final gasometerUser = _convertFromCoreUser(user);
+
+    if (user != null) {
+      if (kDebugMode) {
+        debugPrint('🔐 Configurando sessão para usuário existente');
+      }
+      await _setupUserSession(gasometerUser);
+
+      state = state.copyWith(
+        currentUser: gasometerUser,
+        isAuthenticated: true,
+        isPremium: gasometerUser?.isPremium ?? false,
+        isAnonymous: gasometerUser?.isAnonymous ?? false,
+        isInitialized: true,
+        status: AuthStatus.authenticated,
+      );
+    } else {
+      final shouldUseAnonymous = await shouldUseAnonymousMode();
+      if (kDebugMode) {
+        debugPrint(
+          '🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=$_isInLoginAttempt)',
+        );
+      }
+
+      state = state.copyWith(isInitialized: true);
+
+      if (shouldUseAnonymous) {
+        if (kDebugMode) {
+          debugPrint('🔐 Iniciando modo anônimo automaticamente');
+        }
+        await signInAnonymously();
+        return;
+      }
+    }
+
+    if (kDebugMode) {
+      debugPrint(
+        '🔐 AuthState inicializado com sucesso. Usuário autenticado: ${state.isAuthenticated}',
+      );
+    }
+  }
+
   Future<void> _initializeAuthState() async {
     if (kDebugMode) {
       debugPrint('🔐 Iniciando inicialização do AuthState...');
@@ -104,64 +151,16 @@ class Auth extends _$Auth {
       }
 
       final result = await _getCurrentUser();
-      result.fold(
-        (failure) {
-          if (kDebugMode) {
-            debugPrint('🔐 Falha ao obter usuário: ${failure.message}');
-          }
-          state = state.copyWith(
-            errorMessage: _mapFailureToMessage(failure),
-            isInitialized: true,
-            status: AuthStatus.error,
-          );
-        },
-        (user) async {
-          if (kDebugMode) {
-            debugPrint('🔐 Usuário obtido: ${user?.id ?? 'null'}');
-          }
-
-          final gasometerUser = _convertFromCoreUser(user);
-
-          if (user != null) {
-            if (kDebugMode) {
-              debugPrint('🔐 Configurando sessão para usuário existente');
-            }
-            await _setupUserSession(gasometerUser);
-
-            state = state.copyWith(
-              currentUser: gasometerUser,
-              isAuthenticated: true,
-              isPremium: gasometerUser?.isPremium ?? false,
-              isAnonymous: gasometerUser?.isAnonymous ?? false,
-              isInitialized: true,
-              status: AuthStatus.authenticated,
-            );
-          } else {
-            final shouldUseAnonymous = await shouldUseAnonymousMode();
-            if (kDebugMode) {
-              debugPrint(
-                '🔐 Usuário nulo. Deve usar anônimo? $shouldUseAnonymous (Platform: web=${_platformService.isWeb}, mobile=${_platformService.isMobile}, isInLoginAttempt=$_isInLoginAttempt)',
-              );
-            }
-
-            state = state.copyWith(isInitialized: true);
-
-            if (shouldUseAnonymous) {
-              if (kDebugMode) {
-                debugPrint('🔐 Iniciando modo anônimo automaticamente');
-              }
-              await signInAnonymously();
-              return;
-            }
-          }
-
-          if (kDebugMode) {
-            debugPrint(
-              '🔐 AuthState inicializado com sucesso. Usuário autenticado: ${state.isAuthenticated}',
-            );
-          }
-        },
-      );
+      await result.fold((failure) {
+        if (kDebugMode) {
+          debugPrint('🔐 Falha ao obter usuário: ${failure.message}');
+        }
+        state = state.copyWith(
+          errorMessage: _mapFailureToMessage(failure),
+          isInitialized: true,
+          status: AuthStatus.error,
+        );
+      }, (user) => _handleUserAuthenticated(user));
       _authStateSubscription = _watchAuthState().listen((result) {
         result.fold(
           (failure) {
@@ -500,20 +499,24 @@ class Auth extends _$Auth {
 
   /// LOGOUT WITH LOADING DIALOG - migrado do AuthProvider
   Future<void> logoutWithLoadingDialog(BuildContext context) async {
+    // Store context reference before any async operations
+    final navigator = Navigator.of(context);
+
     try {
-      showLogoutLoading(
+      await showLogoutLoading(
         context,
         message: 'Saindo...',
         duration: const Duration(seconds: 2),
       );
+
       await logout();
 
       if (kDebugMode) {
         debugPrint('🔐 Logout com loading dialog concluído');
       }
     } catch (e) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+      if (navigator.canPop()) {
+        navigator.pop();
       }
 
       state = state.copyWith(

@@ -132,7 +132,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
       widget.onValidationChanged?.call(result);
       if (result.status != ValidationStatus.initial &&
           result.status != ValidationStatus.validating) {
-        _iconAnimationController.forward();
+        unawaited(_iconAnimationController.forward());
       }
     } catch (e) {
       if (!mounted) return;
@@ -407,6 +407,6 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
   }
 
   List<TextInputFormatter> _getInputFormatters() {
-    return UnifiedFormatters.getFormatters(widget.validationType);
+    return getUnifiedFormatters(widget.validationType);
   }
 }

@@ -32,8 +32,9 @@ class VaccineRepositoryImpl implements VaccineRepository {
   Future<void> _syncToRemote(Future<void> Function() remoteOperation) async {
     try {
       await remoteOperation();
-    } on ServerException {
-    } catch (e) {}
+    } catch (e) {
+      // Remote sync failed, but local operation succeeded - will sync later
+    }
   }
 
   @override

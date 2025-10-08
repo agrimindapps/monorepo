@@ -11,6 +11,15 @@ import '../shared/utils/failure.dart';
 import 'app_sync_config.dart';
 import 'entity_sync_registration.dart';
 
+// TODO(refactoring): PRIORITY MEDIUM - This file is 997 lines and violates SRP
+// Plan: Extract to specialized services (see REFACTORING_PLAN.md)
+// - SyncCoordinator (multi-app coordination)
+// - SyncStateMachine (state management)
+// - OfflineSyncHandler (offline handling)
+// - SyncErrorHandler (error handling)
+// Keep this class as Orchestrator facade
+// Estimated effort: 6-8 hours | Risk: High | ROI: Medium-High
+
 /// Coordena sync de múltiplas entidades across diferentes apps
 class UnifiedSyncManager {
   static final UnifiedSyncManager _instance = UnifiedSyncManager._internal();

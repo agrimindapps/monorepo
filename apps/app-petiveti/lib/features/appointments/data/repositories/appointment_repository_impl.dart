@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/data/repositories/base_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
@@ -10,43 +11,26 @@ import '../datasources/appointment_local_datasource.dart';
 import '../datasources/appointment_remote_datasource.dart';
 import '../models/appointment_model.dart';
 
-class AppointmentRepositoryImpl with LoggableRepositoryMixin implements AppointmentRepository {
+class AppointmentRepositoryImpl extends BaseRepository
+    with LoggableRepositoryMixin
+    implements AppointmentRepository {
   final AppointmentLocalDataSource localDataSource;
   final AppointmentRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
 
   AppointmentRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
-    required this.connectivity,
-  });
+    required Connectivity connectivity,
+  }) : super(connectivity);
 
   @override
   Future<Either<Failure, List<Appointment>>> getAppointments(String animalId) async {
-    try {
-      final connectivityResult = await connectivity.checkConnectivity();
-      final isConnected = !connectivityResult.contains(ConnectivityResult.none);
-
-      if (isConnected) {
-        try {
-          final remoteAppointments = await remoteDataSource.getAppointments(animalId);
-          await localDataSource.cacheAppointments(remoteAppointments);
-          return Right(remoteAppointments.map((model) => model.toEntity()).toList());
-        } catch (e) {
-          final localAppointments = await localDataSource.getAppointments(animalId);
-          return Right(localAppointments.map((model) => model.toEntity()).toList());
-        }
-      } else {
-        final localAppointments = await localDataSource.getAppointments(animalId);
-        return Right(localAppointments.map((model) => model.toEntity()).toList());
-      }
-    } on CacheException catch (e) {
-      return Left(CacheFailure(message: e.message));
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } catch (e) {
-      return Left(ServerFailure(message: 'Unexpected error: $e'));
-    }
+    return executeWithSync<Appointment, AppointmentModel>(
+      remoteOperation: () => remoteDataSource.getAppointments(animalId),
+      localOperation: () => localDataSource.getAppointments(animalId),
+      cacheOperation: (models) => localDataSource.cacheAppointments(models),
+      toEntity: (model) => model.toEntity(),
+    );
   }
 
   @override

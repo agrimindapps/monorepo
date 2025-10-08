@@ -248,10 +248,14 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     String userId,
     DataExportState exportState,
   ) async {
-    HapticFeedback.lightImpact();
+    // Store context references before any async operations
+    final messenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
+
+    await HapticFeedback.lightImpact();
 
     if (!exportState.canExport) {
-      _showLimitMessage(context);
+      _showLimitMessage(messenger);
       return;
     }
 
@@ -266,7 +270,7 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       );
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: const Text('Arquivo JSON exportado com sucesso!'),
             backgroundColor: Colors.green,
@@ -286,10 +290,10 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Erro ao exportar: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: theme.colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -302,23 +306,27 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     String userId,
     DataExportState exportState,
   ) async {
-    HapticFeedback.lightImpact();
+    // Store context references before any async operations
+    final messenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
+
+    await HapticFeedback.lightImpact();
 
     if (!exportState.canExport) {
-      _showLimitMessage(context);
+      _showLimitMessage(messenger);
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
         content: const Text('Exportação CSV em desenvolvimento'),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
+        backgroundColor: theme.colorScheme.secondary,
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  void _showLimitMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
+  void _showLimitMessage(ScaffoldMessengerState messenger) {
+    messenger.showSnackBar(
       const SnackBar(
         content: Text('Você já fez uma exportação nas últimas 24 horas'),
         backgroundColor: Colors.orange,

@@ -346,7 +346,7 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
         if (kDebugMode) {
           debugPrint('📷 ProfileImagePicker: Image selected: ${file.path}');
         }
-        HapticFeedback.lightImpact();
+        await HapticFeedback.lightImpact();
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -384,7 +384,7 @@ class __ProfileImagePickerModalState extends State<_ProfileImagePickerModal> {
       if (kDebugMode) {
         debugPrint('🗑️ ProfileImagePicker: Removing current image');
       }
-      HapticFeedback.lightImpact();
+      await HapticFeedback.lightImpact();
       if (mounted) {
         Navigator.of(context).pop();
       }

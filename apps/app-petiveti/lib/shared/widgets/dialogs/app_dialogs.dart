@@ -402,7 +402,7 @@ class AppDialogs {
   /// - [onConfirm]: Callback for confirm action
   /// - [onCancel]: Optional callback for cancel action
   /// 
-  /// **Returns:** Future<bool> - true if confirmed, false if canceled
+  /// **Returns:** `Future<bool>` - true if confirmed, false if canceled
   static Future<bool> showConfirmation(
     BuildContext context, {
     required String title,
@@ -455,8 +455,8 @@ class AppDialogs {
   /// **Parameters:**
   /// - [context]: BuildContext for dialog display
   /// - [onConfirm]: Callback executed when logout is confirmed
-  /// 
-  /// **Returns:** Future<bool> - true if logout confirmed
+  ///
+  /// **Returns:** `Future<bool>` - true if logout confirmed
   static Future<bool> showLogoutConfirmation(
     BuildContext context, {
     VoidCallback? onConfirm,
@@ -483,8 +483,8 @@ class AppDialogs {
   /// - [itemType]: Type of item for contextual messaging
   /// - [warningMessage]: Optional additional warning message
   /// - [onConfirm]: Callback executed when deletion is confirmed
-  /// 
-  /// **Returns:** Future<bool> - true if deletion confirmed
+  ///
+  /// **Returns:** `Future<bool>` - true if deletion confirmed
   static Future<bool> showDeleteConfirmation(
     BuildContext context, {
     required String itemName,
@@ -610,8 +610,8 @@ class AppDialogs {
   /// - [onSave]: Callback to save changes
   /// - [onDiscard]: Callback to discard changes
   /// - [onCancel]: Callback to cancel navigation
-  /// 
-  /// **Returns:** Future<SaveAction?> - action chosen by user
+  ///
+  /// **Returns:** `Future<SaveAction?>` - action chosen by user
   static Future<SaveAction?> showUnsavedChangesDialog(
     BuildContext context, {
     VoidCallback? onSave,
@@ -678,8 +678,8 @@ class AppDialogs {
   /// - [explanation]: Why the permission is needed
   /// - [onGrantPermission]: Callback to request permission
   /// - [onSkip]: Optional callback to skip permission
-  /// 
-  /// **Returns:** Future<PermissionAction?> - action chosen by user
+  ///
+  /// **Returns:** `Future<PermissionAction?>` - action chosen by user
   static Future<PermissionAction?> showPermissionRequestDialog(
     BuildContext context, {
     required String permissionName,

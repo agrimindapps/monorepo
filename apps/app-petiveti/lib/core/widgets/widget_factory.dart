@@ -261,10 +261,15 @@ class WidgetFactory {
   }
 
   /// Creates a standardized loading widget
-  /// 
-  /// **Deprecated**: Use UIComponents.centeredLoading instead
+  ///
+  /// **Deprecated**: Use WidgetFactory.createEnhancedLoading instead
   /// This method will be removed in future versions.
-  @deprecated
+  @Deprecated(
+    'Use WidgetFactory.createEnhancedLoading(LoadingType.center) instead. '
+    'This method will be removed in v2.0.0. Migration guide: '
+    'Replace createLoadingWidget() with createEnhancedLoading(LoadingType.center, message: "...")'
+  )
+  // TODO(v2.0.0): Remove deprecated createLoadingWidget method
   static Widget createLoadingWidget({
     String? message,
     Color? color,

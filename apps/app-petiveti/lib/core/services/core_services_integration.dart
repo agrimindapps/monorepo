@@ -171,18 +171,131 @@ class CoreServicesIntegration {
 
   /// Integra cache com storage
   Future<void> _setupCacheStorageIntegration() async {
+    developer.log(
+      'Setting up cache-storage integration',
+      name: 'CoreIntegration',
+    );
+
+    try {
+      // TODO: Configure CacheManagementService to use CoreHiveStorageService as backend
+      // This would enable persistent caching across app sessions
+      // Requires extending CacheManagementService to accept storage backend parameter
+
+      // For now, ensure both services are initialized
+      // Future enhancement: Migrate cache data from local service to core service
+
+      developer.log(
+        'Cache-storage integration completed (placeholder)',
+        name: 'CoreIntegration',
+      );
+    } catch (e) {
+      developer.log(
+        'Warning: Cache-storage integration failed: $e',
+        name: 'CoreIntegration',
+      );
+    }
   }
 
   /// Integra sync com cache
   Future<void> _setupSyncCacheIntegration() async {
+    developer.log(
+      'Setting up sync-cache integration',
+      name: 'CoreIntegration',
+    );
+
+    try {
+      // Listen to sync events to invalidate caches when data is synced
+      _syncService.petCareEventStream.listen((event) {
+        _handleSyncEvent(event);
+      });
+
+      developer.log(
+        'Sync-cache integration completed',
+        name: 'CoreIntegration',
+      );
+    } catch (e) {
+      developer.log(
+        'Warning: Sync-cache integration failed: $e',
+        name: 'CoreIntegration',
+      );
+    }
+  }
+
+  /// Handles sync events and invalidates related caches
+  void _handleSyncEvent(PetCareSyncEvent event) {
+    developer.log(
+      'Handling sync event: ${event.runtimeType}',
+      name: 'CoreIntegration',
+    );
+
+    // TODO: Invalidate specific caches based on sync event type
+    // Requires:
+    // 1. Define specific PetCareSyncEvent subtypes (AnimalsSyncCompleted, etc)
+    // 2. Extend CacheManagementService with clearCategory() and clearExpired() methods
+    //
+    // For now, log the event for monitoring
+    developer.log(
+      'Sync event received, cache invalidation pending implementation',
+      name: 'CoreIntegration',
+    );
   }
 
   /// Integra auth cache com preferences
   Future<void> _setupAuthPreferencesIntegration() async {
+    developer.log(
+      'Setting up auth-preferences integration',
+      name: 'CoreIntegration',
+    );
+
+    try {
+      // TODO: Configure auth tokens to use encrypted PreferencesService
+      // This requires:
+      // 1. Extend PreferencesService with secure storage methods (getBool, saveBool, etc)
+      // 2. Migrate auth tokens from SharedPreferences to PreferencesService
+      // 3. Setup MonorepoAuthCache with PreferencesService backend
+      //
+      // PreferencesService is already initialized and available for future use
+
+      developer.log(
+        'Auth-preferences integration completed (placeholder)',
+        name: 'CoreIntegration',
+      );
+    } catch (e) {
+      developer.log(
+        'Warning: Auth-preferences integration failed: $e',
+        name: 'CoreIntegration',
+      );
+    }
   }
 
   /// Integra imagens com cache
   Future<void> _setupImageCacheIntegration() async {
+    developer.log(
+      'Setting up image-cache integration',
+      name: 'CoreIntegration',
+    );
+
+    try {
+      // TODO: Configure OptimizedImageService with cache policies
+      // This requires extending OptimizedImageService with:
+      // - initialize() method with cache configuration
+      // - LRU eviction strategy
+      // - Progressive loading support
+      // - Automatic cleanup on low memory
+      //
+      // For now, ensure the service is available for use
+      // Image optimization will use default settings
+
+      developer.log(
+        'Image-cache integration completed (placeholder)',
+        name: 'CoreIntegration',
+      );
+    } catch (e) {
+      developer.log(
+        'Warning: Image-cache integration failed: $e',
+        name: 'CoreIntegration',
+      );
+    }
   }
 
   /// Verifica se foi inicializado

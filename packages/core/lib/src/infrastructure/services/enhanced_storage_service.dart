@@ -11,6 +11,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/result.dart';
 
+// TODO(refactoring): PRIORITY HIGH - This file is 1146 lines and violates SRP
+// Plan: Extract to specialized services (see REFACTORING_PLAN.md)
+// - StorageCacheManager (memory cache)
+// - StorageEncryptionService (encrypt/decrypt)
+// - StorageCompressionService (compression)
+// - StorageBackupService (backup/restore)
+// - StorageMetricsService (stats)
+// - StorageStrategySelector (storage selection)
+// Keep this class as Facade for backward compatibility
+// Estimated effort: 6-8 hours | Risk: Medium | ROI: High
+
 /// Enhanced Storage Service
 ///
 /// Serviço unificado responsável por armazenar e recuperar dados usando

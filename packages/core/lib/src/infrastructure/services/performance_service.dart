@@ -803,8 +803,10 @@ class PerformanceService implements IPerformanceRepository {
     if (format.toLowerCase() == 'json') {
       return data.toString();
     }
-    
-    throw UnsupportedError('Format $format not supported yet');
+
+    // Only JSON format is currently supported for performance exports
+    // Other formats (CSV, XML) can be added as needed
+    throw UnsupportedError('Format $format not supported - only JSON is available');
   }
 
   @override

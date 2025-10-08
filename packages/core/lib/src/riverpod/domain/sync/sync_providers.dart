@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import '../../../sync/config/sync_app_config.dart';
 
 /// Providers unificados para sincronização e conectividade
 /// Consolidam offline/online sync entre todos os apps do monorepo
@@ -100,7 +101,7 @@ final needsSyncProvider = Provider.family<bool, String>((ref, appId) {
 /// Provider para limitações de sync baseadas em premium
 final syncLimitsProvider = Provider.family<SyncLimits, String>((ref, appId) {
   ref.watch(domainCurrentUserProvider);
-  const isPremium = false; // Temporário até integração ser feita
+  final isPremium = ref.watch(isPremiumProvider);
 
   return SyncLimits.forApp(appId, isPremium);
 });
@@ -367,55 +368,18 @@ class SyncLimits {
     required this.allowLargeFileSync,
   });
 
+  /// Factory constructor using centralized configuration registry
+  /// Apps should register their sync limits at startup via SyncConfigRegistry
   factory SyncLimits.forApp(String appId, bool isPremium) {
-    if (isPremium) {
-      return SyncLimits(
-        appId: appId,
-        isPremium: true,
-        maxOfflineItems: -1, // unlimited
-        maxSyncFrequencyMinutes: 1,
-        allowBackgroundSync: true,
-        allowLargeFileSync: true,
-      );
-    }
-    switch (appId) {
-      case 'gasometer':
-        return const SyncLimits(
-          appId: 'gasometer',
-          isPremium: false,
-          maxOfflineItems: 100,
-          maxSyncFrequencyMinutes: 15,
-          allowBackgroundSync: false,
-          allowLargeFileSync: false,
-        );
-      case 'plantis':
-        return const SyncLimits(
-          appId: 'plantis',
-          isPremium: false,
-          maxOfflineItems: 50,
-          maxSyncFrequencyMinutes: 30,
-          allowBackgroundSync: false,
-          allowLargeFileSync: false,
-        );
-      case 'receituagro':
-        return const SyncLimits(
-          appId: 'receituagro',
-          isPremium: false,
-          maxOfflineItems: 20,
-          maxSyncFrequencyMinutes: 60,
-          allowBackgroundSync: false,
-          allowLargeFileSync: false,
-        );
-      default:
-        return const SyncLimits(
-          appId: 'default',
-          isPremium: false,
-          maxOfflineItems: 50,
-          maxSyncFrequencyMinutes: 30,
-          allowBackgroundSync: false,
-          allowLargeFileSync: false,
-        );
-    }
+    final config = SyncConfigRegistry.getSyncLimits(appId, isPremium);
+    return SyncLimits(
+      appId: config.appId,
+      isPremium: isPremium,
+      maxOfflineItems: config.maxOfflineItems,
+      maxSyncFrequencyMinutes: config.maxSyncFrequencyMinutes,
+      allowBackgroundSync: config.allowBackgroundSync,
+      allowLargeFileSync: config.allowLargeFileSync,
+    );
   }
 
   bool canSync(DateTime? lastSync) {
@@ -444,49 +408,18 @@ class OfflineCapabilities {
     required this.offlineFeatures,
   });
 
+  /// Factory constructor using centralized configuration registry
+  /// Apps should register their offline capabilities at startup via SyncConfigRegistry
   factory OfflineCapabilities.forApp(String appId) {
-    switch (appId) {
-      case 'gasometer':
-        return const OfflineCapabilities(
-          appId: 'gasometer',
-          hasOfflineSupport: true,
-          canCreateOffline: true,
-          canEditOffline: true,
-          canDeleteOffline: true,
-          offlineFeatures: {
-            'fuel_tracking',
-            'expense_tracking',
-            'vehicle_management',
-          },
-        );
-      case 'plantis':
-        return const OfflineCapabilities(
-          appId: 'plantis',
-          hasOfflineSupport: true,
-          canCreateOffline: true,
-          canEditOffline: true,
-          canDeleteOffline: false,
-          offlineFeatures: {'plant_care', 'reminders', 'basic_tracking'},
-        );
-      case 'receituagro':
-        return const OfflineCapabilities(
-          appId: 'receituagro',
-          hasOfflineSupport: false,
-          canCreateOffline: false,
-          canEditOffline: false,
-          canDeleteOffline: false,
-          offlineFeatures: {},
-        );
-      default:
-        return OfflineCapabilities(
-          appId: appId,
-          hasOfflineSupport: false,
-          canCreateOffline: false,
-          canEditOffline: false,
-          canDeleteOffline: false,
-          offlineFeatures: const {},
-        );
-    }
+    final config = SyncConfigRegistry.getOfflineCapabilities(appId);
+    return OfflineCapabilities(
+      appId: config.appId,
+      hasOfflineSupport: config.hasOfflineSupport,
+      canCreateOffline: config.canCreateOffline,
+      canEditOffline: config.canEditOffline,
+      canDeleteOffline: config.canDeleteOffline,
+      offlineFeatures: config.offlineFeatures,
+    );
   }
 
   bool supportsFeature(String feature) => offlineFeatures.contains(feature);
@@ -638,7 +571,11 @@ class ConflictResolution {
 class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
   OfflineSyncStateNotifier() : super(const SyncIdle());
 
-  void _initialize() {}
+  /// Initialize sync operations (placeholder for future implementation)
+  /// Currently no initialization is required
+  void _initialize() {
+    // Reserved for future initialization logic (e.g., loading sync config)
+  }
 
   Future<void> startSync() async {
     if (state is SyncSyncing) return;
@@ -670,7 +607,12 @@ class OfflineSyncStateNotifier extends StateNotifier<OfflineSyncState> {
     await startSync();
   }
 
-  Future<void> clearOfflineData(String appId) async {}
+  /// Clear offline data for a specific app
+  /// TODO: Implement actual data clearing logic with Hive/Storage service
+  Future<void> clearOfflineData(String appId) async {
+    // Placeholder: should clear app-specific offline data from Hive boxes
+    // Implementation depends on app-specific storage structure
+  }
 }
 
 /// Notifier para sincronização por app

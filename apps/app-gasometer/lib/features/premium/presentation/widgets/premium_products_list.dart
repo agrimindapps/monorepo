@@ -9,10 +9,12 @@ class PremiumProductsList extends core.ConsumerStatefulWidget {
   const PremiumProductsList({super.key});
 
   @override
-  core.ConsumerState<PremiumProductsList> createState() => _PremiumProductsListState();
+  core.ConsumerState<PremiumProductsList> createState() =>
+      _PremiumProductsListState();
 }
 
-class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> {
+class _PremiumProductsListState
+    extends core.ConsumerState<PremiumProductsList> {
   @override
   void initState() {
     super.initState();
@@ -120,18 +122,23 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
         }
 
         return Column(
-          children: state.availableProducts.map((product) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildProductCard(context, state, product),
-            );
-          }).toList(),
+          children:
+              state.availableProducts.map((product) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildProductCard(context, state, product),
+                );
+              }).toList(),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text('Erro: $error', style: const TextStyle(color: AppColors.error)),
-      ),
+      error:
+          (error, stack) => Center(
+            child: Text(
+              'Erro: $error',
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
     );
   }
 
@@ -151,13 +158,16 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
           color: isRecommended ? AppColors.primary : AppColors.grey200,
           width: isRecommended ? 2 : 1,
         ),
-        boxShadow: isRecommended ? [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ] : null,
+        boxShadow:
+            isRecommended
+                ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+                : null,
       ),
       child: Stack(
         children: [
@@ -185,7 +195,7 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
                 ),
               ),
             ),
-          
+
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -236,52 +246,55 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 Text(
-                  product.description.isNotEmpty 
-                    ? product.description
-                    : 'Acesso completo a todas as funcionalidades premium',
+                  product.description.isNotEmpty
+                      ? product.description
+                      : 'Acesso completo a todas as funcionalidades premium',
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.grey700,
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: state.isProcessingPurchase
-                      ? null
-                      : () => _onPurchasePressed(context, product),
+                    onPressed:
+                        state.isProcessingPurchase
+                            ? null
+                            : () => _onPurchasePressed(context, product),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isRecommended
-                        ? AppColors.primary
-                        : AppColors.grey700,
+                      backgroundColor:
+                          isRecommended ? AppColors.primary : AppColors.grey700,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: state.isProcessingPurchase
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text(
-                          'Assinar Agora',
-                          style: AppTextStyles.buttonMedium,
-                        ),
+                    child:
+                        state.isProcessingPurchase
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                            : const Text(
+                              'Assinar Agora',
+                              style: AppTextStyles.buttonMedium,
+                            ),
                   ),
                 ),
-                
+
                 if (!isMonthly) ...[
                   const SizedBox(height: 12),
                   Container(
@@ -339,6 +352,9 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
     BuildContext context,
     core.ProductInfo product,
   ) async {
+    // Store context references before async operations
+    final messenger = ScaffoldMessenger.of(context);
+
     final confirmed = await _showPurchaseConfirmation(context, product);
     if (!confirmed) return;
     final notifier = ref.read(premiumNotifierProvider.notifier);
@@ -349,7 +365,7 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
     final state = ref.read(premiumNotifierProvider).valueOrNull;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Premium ativado com sucesso!'),
           backgroundColor: AppColors.success,
@@ -357,7 +373,7 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             state?.errorMessage ?? 'Erro na compra. Tente novamente.',
@@ -374,32 +390,34 @@ class _PremiumProductsListState extends core.ConsumerState<PremiumProductsList> 
     core.ProductInfo product,
   ) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Compra'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Produto: ${product.title}'),
-            Text('Preço: ${product.priceString}'),
-            const SizedBox(height: 16),
-            const Text(
-              'Ao confirmar, você será redirecionado para a loja para completar a compra.',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
-    ) ?? false;
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Confirmar Compra'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Produto: ${product.title}'),
+                    Text('Preço: ${product.priceString}'),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Ao confirmar, você será redirecionado para a loja para completar a compra.',
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancelar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Confirmar'),
+                  ),
+                ],
+              ),
+        ) ??
+        false;
   }
 }

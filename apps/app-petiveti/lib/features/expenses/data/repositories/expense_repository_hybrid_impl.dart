@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/data/repositories/base_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/logging/mixins/loggable_repository_mixin.dart';
@@ -11,28 +12,25 @@ import '../datasources/expense_local_datasource.dart';
 import '../datasources/expense_remote_datasource.dart';
 import '../models/expense_model.dart';
 
-class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements ExpenseRepository {
+class ExpenseRepositoryHybridImpl extends BaseRepository
+    with LoggableRepositoryMixin
+    implements ExpenseRepository {
   final ExpenseLocalDataSource localDataSource;
   final ExpenseRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
 
   ExpenseRepositoryHybridImpl({
     required this.localDataSource,
     required this.remoteDataSource,
-    required this.connectivity,
-  });
-
-  Future<bool> get isConnected async {
-    final result = await connectivity.checkConnectivity();
-    return !result.contains(ConnectivityResult.none);
-  }
+    required Connectivity connectivity,
+  }) : super(connectivity);
 
   @override
   Future<Either<Failure, List<Expense>>> getExpenses(String userId) async {
     try {
       final localExpenses = await localDataSource.getExpenses(userId);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpenses(userId);
           for (final remoteExpense in remoteExpenses) {
@@ -66,8 +64,9 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   Future<Either<Failure, List<Expense>>> getExpensesByAnimal(String animalId) async {
     try {
       final localExpenses = await localDataSource.getExpensesByAnimal(animalId);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpensesByAnimal('default_user', animalId);
           for (final remoteExpense in remoteExpenses) {
@@ -99,8 +98,9 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   Future<Either<Failure, List<Expense>>> getExpensesByDateRange(String userId, DateTime startDate, DateTime endDate) async {
     try {
       final localExpenses = await localDataSource.getExpensesByDateRange(userId, startDate, endDate);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpensesByDateRange(userId, startDate, endDate);
           for (final remoteExpense in remoteExpenses) {
@@ -132,8 +132,9 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   Future<Either<Failure, List<Expense>>> getExpensesByCategory(String userId, ExpenseCategory category) async {
     try {
       final localExpenses = await localDataSource.getExpensesByCategory(userId, category);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteExpenses = await remoteDataSource.getExpensesByCategory(userId, category);
           for (final remoteExpense in remoteExpenses) {
@@ -181,8 +182,9 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
     try {
       final expenseModel = ExpenseModel.fromEntity(expense);
       await localDataSource.addExpense(expenseModel);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteId = await remoteDataSource.addExpense(expenseModel, expense.userId);
           if (remoteId != expenseModel.id) {
@@ -190,9 +192,10 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
             await localDataSource.updateExpense(updatedModel);
           }
         } catch (e) {
+          // Remote add failed, but local succeeded - will sync later
         }
       }
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure(message: 'Erro ao adicionar despesa: ${e.toString()}'));
@@ -204,14 +207,16 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
     try {
       final expenseModel = ExpenseModel.fromEntity(expense);
       await localDataSource.updateExpense(expenseModel);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           await remoteDataSource.updateExpense(expenseModel);
         } catch (e) {
+          // Remote update failed, but local succeeded - will sync later
         }
       }
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure(message: 'Erro ao atualizar despesa: ${e.toString()}'));
@@ -222,14 +227,16 @@ class ExpenseRepositoryHybridImpl with LoggableRepositoryMixin implements Expens
   Future<Either<Failure, void>> deleteExpense(String expenseId) async {
     try {
       await localDataSource.deleteExpense(expenseId);
-      
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           await remoteDataSource.deleteExpense(expenseId);
         } catch (e) {
+          // Remote delete failed, but local succeeded - will sync later
         }
       }
-      
+
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure(message: 'Erro ao deletar despesa: ${e.toString()}'));

@@ -448,8 +448,4 @@ class MedicationDosageProvider with ChangeNotifier {
     return entries.take(limit).map((e) => e.key).toList();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

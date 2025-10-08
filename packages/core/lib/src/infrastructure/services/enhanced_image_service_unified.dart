@@ -13,6 +13,13 @@ import 'package:uuid/uuid.dart';
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/result.dart';
 
+// TODO(refactoring): PRIORITY MEDIUM - This file is 972 lines and may be unused
+// Action: Verify usage across all apps first
+// If not used: Mark @Deprecated and plan removal
+// If used: Refactor similar to enhanced_storage_service
+// Estimated effort: 2h (analysis) + 6-8h (refactoring if needed)
+// Risk: Low (candidate for removal) | ROI: TBD
+
 /// Enhanced Image Service Configuration
 /// Consolidates all image service configurations into one
 class EnhancedImageServiceConfig {

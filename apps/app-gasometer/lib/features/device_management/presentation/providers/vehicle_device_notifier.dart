@@ -153,13 +153,15 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     return VehicleDeviceState.empty;
   }
 
-  /// Carrega dispositivos do usuário
+  /// Carrega dispositivos do usuário (MOCK IMPLEMENTATION)
+  /// TODO: Substituir por implementação real quando DeviceManagementService estiver disponível
   Future<void> loadUserDevices() async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
+      // Mock devices for development - replace with real device management service
       final mockDevices = [
         core.DeviceEntity(
           id: 'device_1',
@@ -199,7 +201,9 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
         isLoading: false,
       );
 
-      debugPrint('🔄 Loaded ${mockDevices.length} mock devices');
+      debugPrint(
+        '🔄 Loaded ${mockDevices.length} mock devices (development mode)',
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

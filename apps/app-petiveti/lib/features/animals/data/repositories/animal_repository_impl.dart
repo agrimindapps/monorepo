@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/data/repositories/base_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/animal.dart';
@@ -9,17 +10,16 @@ import '../datasources/animal_local_datasource.dart';
 import '../datasources/animal_remote_datasource.dart';
 import '../models/animal_model.dart';
 
-class AnimalRepositoryImpl implements AnimalRepository {
+class AnimalRepositoryImpl extends BaseRepository implements AnimalRepository {
   final AnimalLocalDataSource localDataSource;
   final AnimalRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
   String get _currentUserId => 'temp_user_id';
 
   AnimalRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
-    required this.connectivity,
-  });
+    required Connectivity connectivity,
+  }) : super(connectivity);
 
   @override
   Future<Either<Failure, List<Animal>>> getAnimals() async {
@@ -50,16 +50,16 @@ class AnimalRepositoryImpl implements AnimalRepository {
     try {
       final animalModel = AnimalModel.fromEntity(animal);
       await localDataSource.addAnimal(animalModel);
-      final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult.contains(ConnectivityResult.wifi) || 
-          connectivityResult.contains(ConnectivityResult.mobile)) {
+
+      final isConnected = await checkConnectivity();
+      if (isConnected) {
         try {
           await remoteDataSource.addAnimal(animalModel, _currentUserId);
         } catch (e) {
-          print('Remote sync failed, will retry later: $e');
+          // Remote sync failed, but local succeeded - will sync later
         }
       }
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -73,16 +73,16 @@ class AnimalRepositoryImpl implements AnimalRepository {
     try {
       final animalModel = AnimalModel.fromEntity(animal);
       await localDataSource.updateAnimal(animalModel);
-      final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult.contains(ConnectivityResult.wifi) || 
-          connectivityResult.contains(ConnectivityResult.mobile)) {
+
+      final isConnected = await checkConnectivity();
+      if (isConnected) {
         try {
           await remoteDataSource.updateAnimal(animalModel);
         } catch (e) {
-          print('Remote sync failed, will retry later: $e');
+          // Remote sync failed, but local succeeded - will sync later
         }
       }
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -95,16 +95,16 @@ class AnimalRepositoryImpl implements AnimalRepository {
   Future<Either<Failure, void>> deleteAnimal(String id) async {
     try {
       await localDataSource.deleteAnimal(id);
-      final connectivityResult = await connectivity.checkConnectivity();
-      if (connectivityResult.contains(ConnectivityResult.wifi) || 
-          connectivityResult.contains(ConnectivityResult.mobile)) {
+
+      final isConnected = await checkConnectivity();
+      if (isConnected) {
         try {
           await remoteDataSource.deleteAnimal(id);
         } catch (e) {
-          print('Remote sync failed, will retry later: $e');
+          // Remote sync failed, but local succeeded - will sync later
         }
       }
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(message: e.message));
@@ -116,16 +116,16 @@ class AnimalRepositoryImpl implements AnimalRepository {
   @override
   Future<Either<Failure, void>> syncAnimals() async {
     try {
-      final connectivityResult = await connectivity.checkConnectivity();
-      if (!connectivityResult.contains(ConnectivityResult.wifi) && 
-          !connectivityResult.contains(ConnectivityResult.mobile)) {
+      final isConnected = await checkConnectivity();
+      if (!isConnected) {
         return const Left(NetworkFailure(message: 'Sem conexão com internet'));
       }
+
       final remoteAnimals = await remoteDataSource.getAnimals(_currentUserId);
       for (final remoteAnimal in remoteAnimals) {
         await localDataSource.updateAnimal(remoteAnimal);
       }
-      
+
       return const Right(null);
     } on NetworkException catch (e) {
       return Left(NetworkFailure(message: e.message));

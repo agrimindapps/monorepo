@@ -59,13 +59,14 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     setState(() => _isLoading = true);
 
+    // Store context references before async operations
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final authRepository = GetIt.I<AuthRepository>();
       final result = await authRepository.signInWithGoogle();
 
       if (!mounted) return;
-
-      final messenger = ScaffoldMessenger.of(context);
 
       result.fold(
         (failure) {
@@ -85,7 +86,6 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
     } catch (e) {
       if (!mounted) return;
 
-      final messenger = ScaffoldMessenger.of(context);
       messenger.showSnackBar(
         SnackBar(
           content: Text('Erro no login com Google: $e'),
@@ -102,13 +102,14 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
   Future<void> _handleAppleSignIn(BuildContext context) async {
     setState(() => _isLoading = true);
 
+    // Store context references before async operations
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final authRepository = GetIt.I<AuthRepository>();
       final result = await authRepository.signInWithApple();
 
       if (!mounted) return;
-
-      final messenger = ScaffoldMessenger.of(context);
 
       result.fold(
         (failure) {
@@ -128,7 +129,6 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
     } catch (e) {
       if (!mounted) return;
 
-      final messenger = ScaffoldMessenger.of(context);
       messenger.showSnackBar(
         SnackBar(
           content: Text('Erro no login com Apple: $e'),
@@ -145,13 +145,14 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
   Future<void> _handleFacebookSignIn(BuildContext context) async {
     setState(() => _isLoading = true);
 
+    // Store context references before async operations
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       final authRepository = GetIt.I<AuthRepository>();
       final result = await authRepository.signInWithFacebook();
 
       if (!mounted) return;
-
-      final messenger = ScaffoldMessenger.of(context);
 
       result.fold(
         (failure) {
@@ -171,7 +172,6 @@ class _SocialLoginButtonsWidgetState extends State<SocialLoginButtonsWidget> {
     } catch (e) {
       if (!mounted) return;
 
-      final messenger = ScaffoldMessenger.of(context);
       messenger.showSnackBar(
         SnackBar(
           content: Text('Erro no login com Facebook: $e'),

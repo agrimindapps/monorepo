@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 
 /// Serviço para geração de dados de teste realísticos para o GasOMeter
 class DataGeneratorService {
-
   DataGeneratorService._internal();
   static DataGeneratorService? _instance;
   static DataGeneratorService get instance {
@@ -23,14 +22,17 @@ class DataGeneratorService {
       debugPrint('   Veículos: $numberOfVehicles');
       debugPrint('   Meses de histórico: $monthsOfHistory');
     }
-    await Future<void>.delayed(Duration(milliseconds: 500 + _random.nextInt(1500)));
+    await Future<void>.delayed(
+      Duration(milliseconds: 500 + _random.nextInt(1500)),
+    );
 
     final startTime = DateTime.now();
     final fuelRecords = numberOfVehicles * monthsOfHistory * 3;
     final odometerReadings = numberOfVehicles * monthsOfHistory * 4;
     final expenses = numberOfVehicles * monthsOfHistory * 4;
-    final maintenanceRecords = (numberOfVehicles * monthsOfHistory * 0.4).round();
-    
+    final maintenanceRecords =
+        (numberOfVehicles * monthsOfHistory * 0.4).round();
+
     final results = <String, dynamic>{
       'vehicles': numberOfVehicles,
       'fuelRecords': fuelRecords,
@@ -53,8 +55,9 @@ class DataGeneratorService {
       debugPrint('   Tempo: ${results['duration']}ms');
     }
     throw UnimplementedError(
-      'A geração de dados reais ainda não está implementada. '
-      'As entidades precisam ser ajustadas para compatibilidade completa.'
+      'DataGeneratorService: Geração de dados reais ainda não implementada. '
+      'Este serviço atualmente apenas simula estatísticas. '
+      'Para implementação completa, ajustar entidades para compatibilidade com geração de dados realistas.',
     );
   }
 
@@ -74,7 +77,7 @@ class DataGeneratorService {
       debugPrint('🧹 Limpando todos os dados gerados...');
     }
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     if (kDebugMode) {
       debugPrint('✅ Dados limpos com sucesso');
     }

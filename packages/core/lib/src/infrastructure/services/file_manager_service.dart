@@ -10,6 +10,16 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import '../../domain/entities/file_entity.dart' as domain;
 import '../../domain/repositories/i_file_repository.dart';
 
+// TODO(refactoring): PRIORITY LOW - This file is 957 lines and violates SRP
+// Plan: Extract to specialized services (see REFACTORING_PLAN.md)
+// - FileOperationsService (CRUD operations)
+// - DirectoryManager (directory operations)
+// - FileCompressionService (zip/gzip handling)
+// - FileWatcherService (file watching)
+// - FileMetadataService (metadata extraction)
+// Keep this class as Facade for backward compatibility
+// Estimated effort: 6-8 hours | Risk: Medium | ROI: Medium
+
 /// Implementação do serviço de gerenciamento de arquivos
 class FileManagerService implements IFileRepository {
   static final FileManagerService _instance = FileManagerService._internal();
@@ -516,7 +526,8 @@ class FileManagerService implements IFileRepository {
           compressedData = encoder.encode(archive.files.first.content as List<int>);
           break;
         default:
-          throw UnsupportedError('Compression type not supported: $compressionType');
+          // Only ZIP and GZIP compression types are currently supported
+          throw UnsupportedError('Compression type not supported: $compressionType. Supported types: zip, gzip');
       }
       final outputFile = File(destinationPath);
       await outputFile.parent.create(recursive: true);
@@ -557,7 +568,8 @@ class FileManagerService implements IFileRepository {
           await File(outputPath).writeAsBytes(decompressed);
           return domain.FileOperationResult(success: true, path: outputPath);
         default:
-          throw UnsupportedError('Archive format not supported: $extension');
+          // Only ZIP and GZIP archive formats are currently supported
+          throw UnsupportedError('Archive format not supported: $extension. Supported formats: .zip, .gz');
       }
       if (archive.isNotEmpty) {
         await Directory(destinationPath).create(recursive: true);

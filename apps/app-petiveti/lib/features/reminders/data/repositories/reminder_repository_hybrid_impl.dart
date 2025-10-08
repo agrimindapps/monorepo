@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../../core/data/repositories/base_repository.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/reminder.dart';
@@ -9,28 +10,24 @@ import '../datasources/reminder_local_datasource.dart';
 import '../datasources/reminder_remote_datasource.dart';
 import '../models/reminder_model.dart';
 
-class ReminderRepositoryHybridImpl implements ReminderRepository {
+class ReminderRepositoryHybridImpl extends BaseRepository implements ReminderRepository {
   final ReminderLocalDataSource localDataSource;
   final ReminderRemoteDataSource remoteDataSource;
-  final Connectivity connectivity;
 
   ReminderRepositoryHybridImpl({
     required this.localDataSource,
     required this.remoteDataSource,
-    required this.connectivity,
-  });
-
-  Future<bool> get isConnected async {
-    final result = await connectivity.checkConnectivity();
-    return !result.contains(ConnectivityResult.none);
-  }
+    required Connectivity connectivity,
+  }) : super(connectivity);
 
   @override
   Future<Either<Failure, List<Reminder>>> getReminders(String userId) async {
     try {
       final localReminders = await localDataSource.getReminders(userId);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteReminders = await remoteDataSource.getReminders(userId);
           for (final remoteReminder in remoteReminders) {
@@ -75,7 +72,9 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
     try {
       final localReminders = await localDataSource.getTodayReminders(userId);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteReminders = await remoteDataSource.getTodayReminders(userId);
           for (final remoteReminder in remoteReminders) {
@@ -108,7 +107,9 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
     try {
       final localReminders = await localDataSource.getOverdueReminders(userId);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteReminders = await remoteDataSource.getOverdueReminders(userId);
           for (final remoteReminder in remoteReminders) {
@@ -152,7 +153,9 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       final reminderModel = ReminderModel.fromEntity(reminder);
       await localDataSource.addReminder(reminderModel);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           final remoteId = await remoteDataSource.addReminder(reminderModel, reminder.userId);
           if (remoteId != reminderModel.id) {
@@ -160,6 +163,7 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
             await localDataSource.updateReminder(updatedModel);
           }
         } catch (e) {
+          // Remote operation failed, but local succeeded - will sync later
         }
       }
       
@@ -175,10 +179,13 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       final reminderModel = ReminderModel.fromEntity(reminder);
       await localDataSource.updateReminder(reminderModel);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           await remoteDataSource.updateReminder(reminderModel);
         } catch (e) {
+          // Remote operation failed, but local succeeded - will sync later
         }
       }
       
@@ -193,10 +200,13 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
     try {
       await localDataSource.deleteReminder(reminderId);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           await remoteDataSource.deleteReminder(reminderId);
         } catch (e) {
+          // Remote operation failed, but local succeeded - will sync later
         }
       }
       
@@ -220,10 +230,13 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       
       await localDataSource.updateReminder(completedReminder);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           await remoteDataSource.updateReminder(completedReminder);
         } catch (e) {
+          // Remote operation failed, but local succeeded - will sync later
         }
       }
       
@@ -247,10 +260,13 @@ class ReminderRepositoryHybridImpl implements ReminderRepository {
       
       await localDataSource.updateReminder(snoozedReminder);
       
-      if (await isConnected) {
+      final isConnected = await checkConnectivity();
+
+      if (isConnected) {
         try {
           await remoteDataSource.updateReminder(snoozedReminder);
         } catch (e) {
+          // Remote operation failed, but local succeeded - will sync later
         }
       }
       

@@ -16,6 +16,8 @@ import '../../../data_export/presentation/widgets/export_data_section.dart';
 import '../../domain/services/profile_image_service.dart';
 import '../widgets/devices_section_widget.dart';
 import '../widgets/profile_image_picker_widget.dart';
+import '../widgets/profile_info_item.dart';
+import '../widgets/profile_info_row.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -365,16 +367,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow('Tipo', isPremium ? 'Premium' : 'Gratuita'),
+                ProfileInfoRow(label: 'Tipo', value: isPremium ? 'Premium' : 'Gratuita'),
                 if (user?.createdAt != null)
-                  _buildInfoRow(
-                    'Criada em',
-                    _formatDate(user!.createdAt as DateTime),
+                  ProfileInfoRow(
+                    label: 'Criada em',
+                    value: _formatDate(user!.createdAt as DateTime),
                   ),
                 if (user?.lastSignInAt != null)
-                  _buildInfoRow(
-                    'Último acesso',
-                    _formatDate(user!.lastSignInAt as DateTime),
+                  ProfileInfoRow(
+                    label: 'Último acesso',
+                    value: _formatDate(user!.lastSignInAt as DateTime),
                   ),
               ],
             ),
@@ -733,43 +735,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSettingsItem(
     BuildContext context, {
     required IconData icon,
@@ -1032,9 +997,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       debugPrint('📷 ProfilePage: Opening avatar editor');
     }
 
-    HapticFeedback.lightImpact();
+    await HapticFeedback.lightImpact();
 
     await ProfileImagePickerWidget.show(
+      // ignore: use_build_context_synchronously
       context: context,
       hasCurrentImage: hasAvatar,
       onImageSelected: (File imageFile) => _processNewImage(context, imageFile),
@@ -1052,14 +1018,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       final imageService = GetIt.instance<GasometerProfileImageService>();
       final validationResult = imageService.validateImageFile(imageFile);
       if (validationResult.isFailure) {
-        Navigator.of(context).pop(); // Remove loading dialog
-        _showErrorSnackBar(context, validationResult.failure.message);
+          Navigator.of(context).pop(); // Remove loading dialog
+          _showErrorSnackBar(context, validationResult.failure.message);
         return;
       }
       final result = await imageService.processImageToBase64(imageFile);
 
       result.fold(
         (failure) {
+          // ignore: use_build_context_synchronously
           Navigator.of(context).pop(); // Remove loading dialog
           _showErrorSnackBar(context, failure.message);
         },
@@ -1068,15 +1035,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               .read(authProvider.notifier)
               .updateAvatar(base64String);
 
+          // ignore: use_build_context_synchronously
           Navigator.of(context).pop(); // Remove loading dialog
 
           if (success) {
+            // ignore: use_build_context_synchronously
             _showSuccessSnackBar(
+              // ignore: use_build_context_synchronously
               context,
               'Foto do perfil atualizada com sucesso!',
             );
           } else {
             final errorMsg = ref.read(authProvider).errorMessage;
+            // ignore: use_build_context_synchronously
             _showErrorSnackBar(context, errorMsg ?? 'Erro ao atualizar foto');
           }
         },
@@ -1086,10 +1057,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         debugPrint('❌ ProfilePage: Error processing image: $e');
       }
 
+      // ignore: use_build_context_synchronously
       if (Navigator.canPop(context)) {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop(); // Remove loading dialog
       }
 
+      // ignore: use_build_context_synchronously
       _showErrorSnackBar(context, 'Erro inesperado ao processar imagem');
     }
   }
@@ -1102,15 +1076,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       }
       final confirmed = await _showRemoveConfirmationDialog(context);
       if (!confirmed) return;
+      // ignore: use_build_context_synchronously
       _showImageProcessingDialog(context);
       final success = await ref.read(authProvider.notifier).removeAvatar();
 
+      // ignore: use_build_context_synchronously
       Navigator.of(context).pop(); // Remove loading dialog
 
       if (success) {
+        // ignore: use_build_context_synchronously
         _showSuccessSnackBar(context, 'Foto do perfil removida com sucesso!');
       } else {
         final errorMsg = ref.read(authProvider).errorMessage;
+        // ignore: use_build_context_synchronously
         _showErrorSnackBar(context, errorMsg ?? 'Erro ao remover foto');
       }
     } catch (e) {
@@ -1118,10 +1096,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         debugPrint('❌ ProfilePage: Error removing image: $e');
       }
 
+      // ignore: use_build_context_synchronously
       if (Navigator.canPop(context)) {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop(); // Remove loading dialog
       }
 
+      // ignore: use_build_context_synchronously
       _showErrorSnackBar(context, 'Erro inesperado ao remover imagem');
     }
   }
@@ -1276,20 +1257,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildLogoutItem(
-                  context,
-                  Icons.cleaning_services,
-                  'Limpeza de dados locais armazenados',
+                ProfileInfoItem(
+                  icon: Icons.cleaning_services,
+                  text: 'Limpeza de dados locais armazenados',
                 ),
-                _buildLogoutItem(
-                  context,
-                  Icons.sync_disabled,
-                  'Interrupção da sincronização automática',
+                ProfileInfoItem(
+                  icon: Icons.sync_disabled,
+                  text: 'Interrupção da sincronização automática',
                 ),
-                _buildLogoutItem(
-                  context,
-                  Icons.login,
-                  'Necessário fazer login novamente para acessar',
+                ProfileInfoItem(
+                  icon: Icons.login,
+                  text: 'Necessário fazer login novamente para acessar',
                 ),
                 const SizedBox(height: 16),
                 Container(
@@ -1400,29 +1378,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       }
     }
   }
-
-  /// Constrói item de informação sobre logout
-  Widget _buildLogoutItem(BuildContext context, IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Dialog stateful para confirmação de exclusão de conta
 class _AccountDeletionDialog extends StatefulWidget {

@@ -76,11 +76,6 @@ final timestampProvider = StreamProvider<DateTime>((ref) {
   );
 });
 
-/// Provider para UUID generator
-final uuidProvider = Provider<String>((ref) {
-  return DateTime.now().millisecondsSinceEpoch.toString();
-});
-
 /// Provider para mode debug (apenas em desenvolvimento)
 final debugModeProvider = Provider<bool>((ref) {
   bool debugMode = false;

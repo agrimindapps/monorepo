@@ -371,7 +371,10 @@ class FuelRepositoryImpl implements FuelRepository {
       if (await _isConnected() && userId != null) {
         try {
           await remoteDataSource.deleteFuelRecord(userId, id);
-        } catch (e) {}
+        } catch (e) {
+          // Log sync failure but don't fail the operation
+          debugPrint('Failed to sync fuel record deletion to remote: $e');
+        }
       }
 
       return const Right(unit);

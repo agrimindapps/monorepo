@@ -114,6 +114,14 @@ class MedicationModel extends HiveObject {
 
   Map<String, dynamic> toJson() => _$MedicationModelToJson(this);
 
+  static MedicationModel fromMap(Map<String, dynamic> map) {
+    return MedicationModel.fromJson(map);
+  }
+
+  Map<String, dynamic> toMap() {
+    return toJson();
+  }
+
   Medication toEntity() {
     return Medication(
       id: id,

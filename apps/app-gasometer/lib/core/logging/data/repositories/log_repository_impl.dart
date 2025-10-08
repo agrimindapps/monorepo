@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -14,7 +15,6 @@ import '../datasources/log_remote_data_source.dart';
 
 @LazySingleton(as: LogRepository)
 class LogRepositoryImpl implements LogRepository {
-
   LogRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
@@ -33,8 +33,8 @@ class LogRepositoryImpl implements LogRepository {
   Future<Either<Failure, Unit>> saveLog(LogEntry logEntry) async {
     try {
       await localDataSource.saveLog(logEntry);
-      _syncInBackground();
-      
+      unawaited(_syncInBackground());
+
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -47,8 +47,8 @@ class LogRepositoryImpl implements LogRepository {
   Future<Either<Failure, Unit>> saveLogs(List<LogEntry> logEntries) async {
     try {
       await localDataSource.saveLogs(logEntries);
-      _syncInBackground();
-      
+      unawaited(_syncInBackground());
+
       return const Right(unit);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -70,7 +70,9 @@ class LogRepositoryImpl implements LogRepository {
   }
 
   @override
-  Future<Either<Failure, List<LogEntry>>> getLogsByCategory(String category) async {
+  Future<Either<Failure, List<LogEntry>>> getLogsByCategory(
+    String category,
+  ) async {
     try {
       final logs = await localDataSource.getLogsByCategory(category);
       return Right(logs);
@@ -159,7 +161,7 @@ class LogRepositoryImpl implements LogRepository {
       await remoteDataSource.syncLogs(logs);
       final logIds = logs.map((log) => log.id).toList();
       await localDataSource.markLogsAsSynced(logIds);
-      
+
       return const Right(unit);
     } on NetworkException catch (e) {
       return Left(NetworkFailure(e.message));
@@ -219,7 +221,9 @@ class LogRepositoryImpl implements LogRepository {
   }
 
   @override
-  Future<Either<Failure, List<LogEntry>>> getLogsByOperation(String operation) async {
+  Future<Either<Failure, List<LogEntry>>> getLogsByOperation(
+    String operation,
+  ) async {
     try {
       final logs = await localDataSource.getLogsByOperation(operation);
       return Right(logs);
@@ -236,7 +240,7 @@ class LogRepositoryImpl implements LogRepository {
       final logs = await localDataSource.getAllLogs();
       final logsJson = logs.map((log) => log.toJson()).toList();
       final jsonString = const JsonEncoder.withIndent('  ').convert(logsJson);
-      
+
       return Right(jsonString);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -252,22 +256,27 @@ class LogRepositoryImpl implements LogRepository {
       if (!isConnected) return;
 
       final unsyncedLogsResult = await getUnsyncedLogs();
-      unsyncedLogsResult.fold(
-        (failure) => null,
-        (unsyncedLogs) async {
-          if (unsyncedLogs.isNotEmpty) {
-            syncLogsToRemote(unsyncedLogs).then((_) {
-              if (kDebugMode) {
-                print('✅ Logs synced in background: ${unsyncedLogs.length}');
-              }
-            }).catchError((Object error) {
-              if (kDebugMode) {
-                print('❌ Failed to sync logs in background: $error');
-              }
-            });
-          }
-        },
-      );
+      // ignore: unawaited_futures
+      unsyncedLogsResult.fold((failure) => null, (unsyncedLogs) async {
+        if (unsyncedLogs.isNotEmpty) {
+          // ignore: unawaited_futures
+          unawaited(
+            syncLogsToRemote(unsyncedLogs)
+                .then((_) {
+                  if (kDebugMode) {
+                    print(
+                      '✅ Logs synced in background: ${unsyncedLogs.length}',
+                    );
+                  }
+                })
+                .catchError((Object error) {
+                  if (kDebugMode) {
+                    print('❌ Failed to sync logs in background: $error');
+                  }
+                }),
+          );
+        }
+      });
     } catch (e) {
       if (kDebugMode) {
         print('❌ Background sync error: $e');

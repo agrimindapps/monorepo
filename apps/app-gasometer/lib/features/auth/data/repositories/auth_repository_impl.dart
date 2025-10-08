@@ -39,7 +39,9 @@ class AuthRepositoryImpl implements AuthRepository {
         if (cachedUser != null) {
           return Right(cachedUser);
         }
-      } catch (_) {}
+      } catch (cacheError) {
+        debugPrint('Failed to get cached user as fallback: $cacheError');
+      }
 
       return Left(ServerFailure(e.message));
     } on local_exceptions.CacheException catch (e) {

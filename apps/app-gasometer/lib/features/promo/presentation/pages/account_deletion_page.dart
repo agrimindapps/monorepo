@@ -47,6 +47,7 @@ class _AccountDeletionPageState extends ConsumerState<AccountDeletionPage> {
       }
     }
     final confirmed = await showDialog<bool>(
+      // ignore: use_build_context_synchronously
       context: context,
       barrierDismissible: false,
       builder:

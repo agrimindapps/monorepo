@@ -194,7 +194,7 @@ class PremiumFirebaseDataSource {
       if (expiresAtStr != null) {
         final expiresAt = DateTime.parse(expiresAtStr);
         if (DateTime.now().isAfter(expiresAt)) {
-          _firestore.collection('premium_cache').doc(userId).delete();
+          await _firestore.collection('premium_cache').doc(userId).delete();
           return const Right(null);
         }
       }

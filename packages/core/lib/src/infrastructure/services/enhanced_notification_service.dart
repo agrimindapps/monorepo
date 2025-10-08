@@ -488,11 +488,17 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     return results;
   }
 
+  /// Recurring notifications not yet implemented
+  /// Consider using flutter_local_notifications directly for recurring patterns
+  @Deprecated('Feature not implemented - use alternative notification scheduling')
   @override
   Future<bool> scheduleRecurring(RecurringNotificationRequest request) async {
     throw UnimplementedError('Recurring notifications not yet implemented');
   }
 
+  /// Conditional notifications not yet implemented
+  /// Consider implementing custom logic in business layer
+  @Deprecated('Feature not implemented - use alternative notification scheduling')
   @override
   Future<bool> scheduleConditional(
     ConditionalNotificationRequest request,
@@ -500,6 +506,9 @@ class EnhancedNotificationService implements IEnhancedNotificationRepository {
     throw UnimplementedError('Conditional notifications not yet implemented');
   }
 
+  /// Smart reminders not yet implemented
+  /// Consider using scheduled notifications with custom logic
+  @Deprecated('Feature not implemented - use alternative notification scheduling')
   @override
   Future<bool> scheduleSmartReminder(SmartReminderRequest request) async {
     throw UnimplementedError('Smart reminders not yet implemented');

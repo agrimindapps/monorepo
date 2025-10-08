@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../domain/entities/export_request.dart';
+import '../notifiers/data_export_notifier.dart';
 import '../widgets/data_type_selector.dart';
 import '../widgets/export_availability_widget.dart';
 import '../widgets/export_format_selector.dart';
@@ -56,7 +58,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     }
   }
 
-  Future<void> _requestExport() async {
+  Future<void> _requestExport(WidgetRef ref) async {
     if (_selectedDataTypes.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -66,7 +68,12 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
       );
       return;
     }
-    const ExportRequest? request = null;
+
+    final notifier = ref.read(dataExportNotifierProvider.notifier);
+    final request = await notifier.requestExport(
+      dataTypes: _selectedDataTypes,
+      format: _selectedFormat,
+    );
 
     if (request != null && mounted) {
       unawaited(
@@ -141,8 +148,10 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Widget _buildExportTab() {
     return Consumer(
       builder: (context, ref, child) {
-        const isLoading = false;
-        const availabilityResult = null;
+        final dataExportState = ref.watch(dataExportNotifierProvider);
+        final isLoading = dataExportState.value?.isLoading ?? false;
+        final availabilityResult = dataExportState.value?.availabilityResult;
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -232,8 +241,13 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
               const SizedBox(height: 24),
               ExportAvailabilityWidget(
                 requestedDataTypes: _selectedDataTypes,
-                onAvailabilityChecked: () {
-                  // TODO: Handle availability check
+                onAvailabilityChecked: () async {
+                  final notifier = ref.read(
+                    dataExportNotifierProvider.notifier,
+                  );
+                  await notifier.checkExportAvailability(
+                    requestedDataTypes: _selectedDataTypes,
+                  );
                 },
               ),
 
@@ -245,7 +259,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                       _selectedDataTypes.isEmpty ||
                               (availabilityResult?.isAvailable != true)
                           ? null
-                          : _requestExport,
+                          : () => _requestExport(ref),
                   icon: const Icon(Icons.download),
                   label: const Text('Exportar Dados'),
                   style: ElevatedButton.styleFrom(
@@ -270,7 +284,8 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Widget _buildHistoryTab() {
     return Consumer(
       builder: (context, ref, child) {
-        const exportHistory = <ExportRequest>[];
+        final dataExportState = ref.watch(dataExportNotifierProvider);
+        final exportHistory = dataExportState.value?.exportHistory ?? [];
 
         if (exportHistory.isEmpty) {
           return Center(
@@ -311,7 +326,8 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
 
         return RefreshIndicator(
           onRefresh: () async {
-            // TODO: Implement refresh logic
+            final notifier = ref.read(dataExportNotifierProvider.notifier);
+            await notifier.refresh();
           },
           color: PlantisColors.primary,
           child: ListView.builder(
@@ -371,8 +387,26 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 ),
                 if (request.status == ExportRequestStatus.completed) ...[
                   IconButton(
-                    onPressed: () {
-                      // TODO: Implement download
+                    onPressed: () async {
+                      final notifier = ref.read(
+                        dataExportNotifierProvider.notifier,
+                      );
+                      final success = await notifier.downloadExport(request.id);
+                      if (success && mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Download iniciado com sucesso'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      } else if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Erro ao fazer download'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     },
                     icon: const Icon(Icons.download, color: PlantisColors.leaf),
                   ),
@@ -382,7 +416,25 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                     if (value == 'delete') {
                       final confirmed = await _showDeleteConfirmation();
                       if (confirmed) {
-                        // TODO: Implement delete
+                        final notifier = ref.read(
+                          dataExportNotifierProvider.notifier,
+                        );
+                        final success = await notifier.deleteExport(request.id);
+                        if (success && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Exportação deletada com sucesso'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Erro ao deletar exportação'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },

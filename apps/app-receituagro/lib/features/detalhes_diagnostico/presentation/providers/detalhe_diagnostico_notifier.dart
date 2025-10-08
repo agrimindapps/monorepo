@@ -14,7 +14,7 @@ import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../../favoritos/favoritos_di.dart';
-import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
+import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
 
 part 'detalhe_diagnostico_notifier.g.dart';
 
@@ -88,9 +88,9 @@ class DetalheDiagnosticoState {
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final DiagnosticoHiveRepository _hiveRepository;
-  late final FavoritosHiveRepository _favoritosRepository;
+  late final FavoritosHiveRepository _favoritosHiveRepository;
   late final IPremiumService _premiumService;
-  late final FavoritosProviderSimplified _favoritosProvider;
+  late final FavoritosRepositorySimplified _favoritosRepository;
 
   StreamSubscription<bool>? _premiumStatusSubscription;
 
@@ -98,9 +98,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   Future<DetalheDiagnosticoState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
     _hiveRepository = di.sl<DiagnosticoHiveRepository>();
-    _favoritosRepository = di.sl<FavoritosHiveRepository>();
+    _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
     _premiumService = di.sl<IPremiumService>();
-    _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
     _setupPremiumStatusListener();
 
     return DetalheDiagnosticoState.initial();
@@ -219,7 +218,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return;
 
     try {
-      final isFavorited = await _favoritosProvider.isFavorito(
+      final isFavorited = await _favoritosRepository.isFavorito(
         'diagnostico',
         diagnosticoId,
       );
@@ -245,7 +244,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
 
     try {
-      final success = await _favoritosProvider.toggleFavorito(
+      final success = await _favoritosRepository.toggleFavorito(
         'diagnostico',
         diagnosticoId,
       );
@@ -267,7 +266,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                 : await _favoritosRepository.addFavorito(
                   'diagnosticos',
                   diagnosticoId,
-                  itemData,
                 );
 
         if (!success) {

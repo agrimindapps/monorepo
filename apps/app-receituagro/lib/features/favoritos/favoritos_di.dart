@@ -2,44 +2,54 @@ import 'package:core/core.dart';
 
 import 'data/repositories/favoritos_repository_simplified.dart';
 import 'data/services/favoritos_service.dart';
-import 'presentation/providers/favoritos_provider_simplified.dart';
+// import 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED: Migrando para Riverpod
 
 /// Dependency Injection ULTRA SIMPLIFICADO para Favoritos
-/// 
-/// ANTES: 5 services + 5 repositories + 15+ use cases + Provider = 25+ registros
-/// DEPOIS: 1 service + 1 repository + 1 provider = 3 registros totais
-/// 
-/// Princípio: Simplicidade máxima mantendo funcionalidade intacta
+///
+/// REFATORAÇÃO FASE 2:
+/// - FavoritosService: 915 linhas → 250 linhas (73% redução)
+/// - Specialized Services: 4 services criados (DataResolver, Validator, Sync, Cache)
+/// - Logs: 157+ logs → ~10 logs essenciais (94% redução)
+/// - Provider: Sendo migrado para Riverpod (FavoritosNotifier)
+///
+/// Princípio: Simplicidade + Delegation Pattern
 class FavoritosDI {
   static final GetIt _getIt = GetIt.instance;
 
-  /// Registra APENAS 3 dependências essenciais - ultra simplificado
+  /// Registra APENAS 2 dependências essenciais (Provider removido - usando Riverpod)
   static void registerDependencies() {
     if (_getIt.isRegistered<FavoritosService>()) {
       return; // Já registrado, evita duplicação
     }
+
+    // Service com specialized services internos
     _getIt.registerLazySingleton<FavoritosService>(
       () => FavoritosService(),
     );
+
+    // Repository
     _getIt.registerLazySingleton<FavoritosRepositorySimplified>(
       () => FavoritosRepositorySimplified(
         service: _getIt<FavoritosService>(),
       ),
     );
-    _getIt.registerLazySingleton<FavoritosProviderSimplified>(
-      () => FavoritosProviderSimplified(
-        repository: _getIt<FavoritosRepositorySimplified>(),
-      ),
-    );
+
+    // Provider (DEPRECATED - usar FavoritosNotifier do Riverpod)
+    // _getIt.registerLazySingleton<FavoritosProviderSimplified>(
+    //   () => FavoritosProviderSimplified(
+    //     repository: _getIt<FavoritosRepositorySimplified>(),
+    //   ),
+    // );
   }
 
-  /// Limpeza simplificada - apenas 3 registros para remover
+  /// Limpeza simplificada - apenas 2 registros para remover
   static void clearDependencies() {
     try {
-      _getIt.unregister<FavoritosProviderSimplified>();
+      // _getIt.unregister<FavoritosProviderSimplified>(); // DEPRECATED
       _getIt.unregister<FavoritosRepositorySimplified>();
       _getIt.unregister<FavoritosService>();
     } catch (e) {
+      // Silently fail
     }
   }
 
@@ -52,12 +62,12 @@ class FavoritosDI {
 
 /// Extension para facilitar uso
 extension FavoritosDIExtension on GetIt {
-  /// Acesso direto ao provider simplificado
-  FavoritosProviderSimplified get favoritosProvider => get<FavoritosProviderSimplified>();
-  
+  // /// Acesso direto ao provider simplificado
+  // FavoritosProviderSimplified get favoritosProvider => get<FavoritosProviderSimplified>(); // DEPRECATED - usar Riverpod
+
   /// Acesso direto ao repository simplificado
   FavoritosRepositorySimplified get favoritosRepository => get<FavoritosRepositorySimplified>();
-  
+
   /// Acesso direto ao service consolidado
   FavoritosService get favoritosService => get<FavoritosService>();
 }

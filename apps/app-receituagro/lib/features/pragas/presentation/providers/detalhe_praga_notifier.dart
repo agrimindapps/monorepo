@@ -5,7 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/data/models/plantas_inf_hive.dart';
 import '../../../../core/data/models/pragas_hive.dart';
 import '../../../../core/data/models/pragas_inf_hive.dart';
-import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/data/repositories/plantas_inf_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_inf_hive_repository.dart';
@@ -15,7 +14,7 @@ import '../../../../core/services/premium_status_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
-import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
+import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
 
 part 'detalhe_praga_notifier.g.dart';
 
@@ -109,25 +108,23 @@ class DetalhePragaState {
 /// Responsabilidade única: coordenar dados e estado da praga
 @riverpod
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
-  late final FavoritosHiveRepository _favoritosRepository;
+  late final FavoritosRepositorySimplified _favoritosRepository;
   late final PragasHiveRepository _pragasRepository;
   late final PragasInfHiveRepository _pragasInfRepository;
   late final PlantasInfHiveRepository _plantasInfRepository;
   late final IPremiumService _premiumService;
   late final ComentariosService _comentariosService;
-  late final FavoritosProviderSimplified _favoritosProvider;
 
   StreamSubscription<bool>? _premiumStatusSubscription;
 
   @override
   Future<DetalhePragaState> build() async {
-    _favoritosRepository = di.sl<FavoritosHiveRepository>();
+    _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
     _pragasRepository = di.sl<PragasHiveRepository>();
     _pragasInfRepository = di.sl<PragasInfHiveRepository>();
     _plantasInfRepository = di.sl<PlantasInfHiveRepository>();
     _premiumService = di.sl<IPremiumService>();
     _comentariosService = di.sl<ComentariosService>();
-    _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
     _setupPremiumStatusListener();
     ref.onDispose(() {
       _premiumStatusSubscription?.cancel();
@@ -267,7 +264,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
       state = AsyncValue.data(
         currentState.copyWith(
           pragaData: pragaData,
@@ -306,7 +303,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final isFavorited = await _favoritosProvider.isFavorito('praga', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
       state = AsyncValue.data(
         currentState.copyWith(
           pragaData: pragaData,
@@ -486,7 +483,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
 
     try {
-      final success = await _favoritosProvider.toggleFavorito('praga', itemId);
+      final success = await _favoritosRepository.toggleFavorito('praga', itemId);
 
       if (!success) {
         state = AsyncValue.data(
@@ -502,15 +499,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       return true;
     } catch (e) {
       try {
-        final itemData = {
-          'nome': currentState.pragaData?.nomeComum ?? currentState.pragaName,
-          'nomeCientifico': currentState.pragaData?.nomeCientifico ?? currentState.pragaScientificName,
-          'idReg': itemId,
-        };
-
         final success = wasAlreadyFavorited
             ? await _favoritosRepository.removeFavorito('praga', itemId)
-            : await _favoritosRepository.addFavorito('praga', itemId, itemData);
+            : await _favoritosRepository.addFavorito('praga', itemId);
 
         if (!success) {
           state = AsyncValue.data(

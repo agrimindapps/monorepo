@@ -12,7 +12,6 @@ import '../../features/defensivos/di/defensivos_di.dart';
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
-import '../../features/favoritos/domain/favoritos_cache_service.dart';
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/favoritos/favoritos_di.dart';
 import '../../features/pragas/di/pragas_di.dart';
@@ -209,15 +208,6 @@ Future<void> init() async {
     () => FavoritosHiveRepository(),
   );
 
-  sl.registerLazySingleton<FavoritosCacheService>(
-    () => FavoritosCacheService(
-      favoritosRepository: sl<FavoritosHiveRepository>(),
-      fitossanitarioRepository: sl<FitossanitarioHiveRepository>(),
-      pragasRepository: sl<PragasHiveRepository>(),
-      culturaRepository: sl<CulturaHiveRepository>(),
-      integrationService: sl<DiagnosticoIntegrationService>(),
-    ),
-  );
   sl.registerLazySingleton<AgriculturalNavigationExtension>(
     () => AgriculturalNavigationExtension(),
   );

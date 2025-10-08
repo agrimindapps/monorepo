@@ -10,6 +10,8 @@ import '../../features/data_export/data/datasources/local/settings_export_dataso
 import '../../features/data_export/data/repositories/data_export_repository_impl.dart';
 import '../../features/data_export/domain/repositories/data_export_repository.dart';
 import '../../features/data_export/domain/usecases/check_export_availability_usecase.dart';
+import '../../features/data_export/domain/usecases/delete_export_usecase.dart';
+import '../../features/data_export/domain/usecases/download_export_usecase.dart';
 import '../../features/data_export/domain/usecases/get_export_history_usecase.dart';
 import '../../features/data_export/domain/usecases/request_export_usecase.dart';
 import '../../features/data_export/presentation/providers/data_export_provider.dart';
@@ -219,8 +221,7 @@ void _initAuth() {
   sl.registerFactory(() => RegisterProvider());
 }
 
-void _initAccount() {
-}
+void _initAccount() {}
 
 void _initAccountDeletion() {
   AccountDeletionModule.init(sl);
@@ -311,8 +312,7 @@ void _initSpaces() {
   SpacesModule.init(sl);
 }
 
-void _initComments() {
-}
+void _initComments() {}
 
 void _initPremium() {
   sl.registerLazySingleton<ISubscriptionRepository>(() => RevenueCatService());
@@ -483,6 +483,14 @@ void _initDataExport() {
   sl.registerLazySingleton<GetExportHistoryUseCase>(
     () => GetExportHistoryUseCase(sl<DataExportRepository>()),
   );
+
+  sl.registerLazySingleton<DownloadExportUseCase>(
+    () => DownloadExportUseCase(sl<DataExportRepository>()),
+  );
+
+  sl.registerLazySingleton<DeleteExportUseCase>(
+    () => DeleteExportUseCase(sl<DataExportRepository>()),
+  );
   sl.registerFactory<DataExportProvider>(
     () => DataExportProvider(
       checkAvailabilityUseCase: sl<CheckExportAvailabilityUseCase>(),
@@ -513,7 +521,9 @@ class _StubPerformanceRepository implements IPerformanceRepository {
       PerformanceMonitoringState.running;
 
   @override
-  Future<void> setPerformanceThresholds(PerformanceThresholds thresholds) async {}
+  Future<void> setPerformanceThresholds(
+    PerformanceThresholds thresholds,
+  ) async {}
 
   @override
   Stream<double> getFpsStream() => Stream.value(60.0);
@@ -522,7 +532,8 @@ class _StubPerformanceRepository implements IPerformanceRepository {
   Future<double> getCurrentFps() async => 60.0;
 
   @override
-  Future<FpsMetrics> getFpsMetrics({Duration? period}) async => const FpsMetrics(
+  Future<FpsMetrics> getFpsMetrics({Duration? period}) async =>
+      const FpsMetrics(
         currentFps: 60.0,
         averageFps: 60.0,
         minFps: 55.0,
@@ -537,19 +548,12 @@ class _StubPerformanceRepository implements IPerformanceRepository {
 
   @override
   Stream<MemoryUsage> getMemoryStream() => Stream.value(
-        const MemoryUsage(
-          usedMemory: 0,
-          totalMemory: 100,
-          availableMemory: 100,
-        ),
-      );
+    const MemoryUsage(usedMemory: 0, totalMemory: 100, availableMemory: 100),
+  );
 
   @override
-  Future<MemoryUsage> getMemoryUsage() async => const MemoryUsage(
-        usedMemory: 0,
-        totalMemory: 100,
-        availableMemory: 100,
-      );
+  Future<MemoryUsage> getMemoryUsage() async =>
+      const MemoryUsage(usedMemory: 0, totalMemory: 100, availableMemory: 100);
 
   @override
   Future<bool> isMemoryHealthy() async => true;
@@ -567,7 +571,8 @@ class _StubPerformanceRepository implements IPerformanceRepository {
   Future<bool> isCpuHealthy() async => true;
 
   @override
-  Future<AppStartupMetrics> getStartupMetrics() async => const AppStartupMetrics(
+  Future<AppStartupMetrics> getStartupMetrics() async =>
+      const AppStartupMetrics(
         coldStartTime: Duration(seconds: 1),
         warmStartTime: Duration(milliseconds: 500),
         timeToInteractive: Duration(seconds: 2),
@@ -584,11 +589,16 @@ class _StubPerformanceRepository implements IPerformanceRepository {
   Future<void> markAppInteractive() async {}
 
   @override
-  Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {}
+  Future<void> startTrace(
+    String traceName, {
+    Map<String, String>? attributes,
+  }) async {}
 
   @override
-  Future<TraceResult?> stopTrace(String traceName, {Map<String, double>? metrics}) async =>
-      null;
+  Future<TraceResult?> stopTrace(
+    String traceName, {
+    Map<String, double>? metrics,
+  }) async => null;
 
   @override
   Future<Duration> measureOperationTime<T>(
@@ -614,25 +624,36 @@ class _StubPerformanceRepository implements IPerformanceRepository {
   }) async {}
 
   @override
-  Future<void> incrementCounter(String name, {Map<String, String>? tags}) async {}
+  Future<void> incrementCounter(
+    String name, {
+    Map<String, String>? tags,
+  }) async {}
 
   @override
-  Future<void> recordGauge(String name, double value, {Map<String, String>? tags}) async {}
+  Future<void> recordGauge(
+    String name,
+    double value, {
+    Map<String, String>? tags,
+  }) async {}
 
   @override
-  Future<void> recordTiming(String name, Duration duration, {Map<String, String>? tags}) async {}
+  Future<void> recordTiming(
+    String name,
+    Duration duration, {
+    Map<String, String>? tags,
+  }) async {}
 
   @override
   Future<PerformanceMetrics> getCurrentMetrics() async => PerformanceMetrics(
-        fps: 60.0,
-        memoryUsage: const MemoryUsage(
-          usedMemory: 0,
-          totalMemory: 100,
-          availableMemory: 100,
-        ),
-        cpuUsage: 0.0,
-        timestamp: DateTime.now(),
-      );
+    fps: 60.0,
+    memoryUsage: const MemoryUsage(
+      usedMemory: 0,
+      totalMemory: 100,
+      availableMemory: 100,
+    ),
+    cpuUsage: 0.0,
+    timestamp: DateTime.now(),
+  );
 
   @override
   Future<List<PerformanceMetrics>> getPerformanceHistory({

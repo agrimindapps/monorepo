@@ -1297,36 +1297,6 @@ const cactusTemplate = TaskTemplate(
 
 **Estimativa:** 6-8 horas
 
-#### 11. Compartilhamento de Tarefas entre Usuários ❌
-
-**Caso de Uso:** Múltiplos usuários cuidando da mesma planta (ex: família)
-
-**Requisitos:**
-- Tarefas compartilhadas em tempo real
-- Histórico unificado
-- Notificações para todos os usuários
-
-**Estimativa:** 16-20 horas
-
-#### 12. Integração com Calendário do Sistema ❌
-
-**Features:**
-- Exportar tarefas para Google Calendar/iOS Calendar
-- Sincronização bidirecional
-- Atualização automática ao concluir
-
-**Estimativa:** 8-12 horas
-
-#### 13. Gamificação e Streaks ❌
-
-**Elementos:**
-- Streaks de cuidados consecutivos
-- Badges de conquistas
-- Pontos por tarefas concluídas
-- Leaderboard (opcional)
-
-**Estimativa:** 12-16 horas
-
 ---
 
 ## 🔄 Fluxos Críticos
@@ -1610,22 +1580,6 @@ class TaskAnalyticsUseCase {
 
 **Estimativa:** 6-8 horas
 
-#### GAP-008: Compartilhamento de tarefas entre usuários
-
-**Problema:** Famílias não conseguem compartilhar cuidados
-
-**Solução:** Sistema de permissões e tarefas compartilhadas
-
-**Estimativa:** 16-20 horas
-
-#### GAP-009: Integração com calendário do sistema
-
-**Problema:** Tarefas não aparecem no calendário nativo
-
-**Solução:** Export para Google Calendar / iOS Calendar
-
-**Estimativa:** 8-12 horas
-
 ---
 
 ## 💡 Recomendações
@@ -1815,11 +1769,9 @@ void main() {
 **Objetivo:** Aumentar engajamento
 
 - [ ] **[GAP-006]** Analytics de compliance (10h)
-- [ ] **[GAP-013]** Gamificação e streaks (16h)
 - [ ] Dashboard com gráficos (8h)
-- [ ] Badges de conquistas (6h)
 
-**Estimativa Total:** 40 horas (~5 dias úteis)
+**Estimativa Total:** 18 horas (~2 dias úteis)
 
 ### Fase 4: Recursos Avançados (2-3 semanas)
 
@@ -1827,11 +1779,9 @@ void main() {
 **Objetivo:** Diferenciais competitivos
 
 - [ ] **[GAP-007]** Templates predefinidos (8h)
-- [ ] **[GAP-008]** Compartilhamento entre usuários (20h)
-- [ ] **[GAP-009]** Integração com calendário (12h)
 - [ ] AI para sugerir frequências de cuidado (16h)
 
-**Estimativa Total:** 56 horas (~7 dias úteis)
+**Estimativa Total:** 24 horas (~3 dias úteis)
 
 ---
 
@@ -1842,7 +1792,7 @@ void main() {
 #### v1.0 - 07/10/2025
 - ✅ Documento inicial criado
 - ✅ Análise completa da implementação
-- ✅ Identificação de 9 gaps principais
+- ✅ Identificação de 6 gaps principais
 - ✅ Roadmap de 4 fases definido
 - ✅ Recomendações de excelência documentadas
 
@@ -1899,9 +1849,6 @@ void main() {
 #### 🟢 Backlog (Próximo Mês)
 
 7. **[TASK-007]** Templates de tarefas predefinidos
-8. **[TASK-008]** Compartilhamento entre usuários
-9. **[TASK-009]** Integração com calendário
-10. **[TASK-010]** Gamificação completa (streaks, badges, pontos)
 
 ---
 
@@ -1923,7 +1870,6 @@ void main() {
 |---------|-------|------|
 | Taxa de conclusão de tarefas | ~65% | ≥80% |
 | Tarefas criadas por usuário | ~8 | ≥15 |
-| Usuários com streaks ≥7 dias | 0% | ≥30% |
 | Retention de 7 dias | ~55% | ≥70% |
 | NPS (satisfação) | - | ≥8 |
 

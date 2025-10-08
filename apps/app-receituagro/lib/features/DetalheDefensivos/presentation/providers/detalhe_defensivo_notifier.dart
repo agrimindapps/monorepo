@@ -10,7 +10,7 @@ import '../../../../core/services/premium_status_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
-import '../../../favoritos/presentation/providers/favoritos_provider_simplified.dart';
+import '../../../favoritos/data/repositories/favoritos_repository_simplified.dart';
 
 part 'detalhe_defensivo_notifier.g.dart';
 
@@ -78,19 +78,18 @@ class DetalheDefensivoState {
 /// Princípios: Single Responsibility + Dependency Inversion
 @riverpod
 class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
-  late final FavoritosHiveRepository _favoritosRepository;
+  late final FavoritosHiveRepository _favoritosHiveRepository;
   late final FitossanitarioHiveRepository _fitossanitarioRepository;
   late final ComentariosService _comentariosService;
-  late final FavoritosProviderSimplified _favoritosProvider;
+  late final FavoritosRepositorySimplified _favoritosRepository;
 
   StreamSubscription<bool>? _premiumStatusSubscription;
 
   @override
   Future<DetalheDefensivoState> build() async {
-    _favoritosRepository = di.sl<FavoritosHiveRepository>();
+    _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
     _fitossanitarioRepository = di.sl<FitossanitarioHiveRepository>();
     _comentariosService = di.sl<ComentariosService>();
-    _favoritosProvider = FavoritosDI.get<FavoritosProviderSimplified>();
     _setupPremiumStatusListener();
 
     return DetalheDefensivoState.initial();
@@ -159,11 +158,11 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final itemId = currentState.defensivoData?.idReg ?? defensivoName;
 
     try {
-      final isFavorited = await _favoritosProvider.isFavorito('defensivo', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
       state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
     } catch (e) {
       try {
-        final isFavorited = await _favoritosRepository.isFavoritoAsync('defensivo', itemId);
+        final isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
         state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
       } catch (fallbackError) {
         final isFavorited = await _favoritosRepository.isFavorito('defensivo', itemId);
@@ -260,7 +259,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
 
     try {
-      final success = await _favoritosProvider.toggleFavorito('defensivo', itemId);
+      final success = await _favoritosRepository.toggleFavorito('defensivo', itemId);
 
       if (!success) {
         state = AsyncValue.data(
@@ -275,15 +274,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       return true;
     } catch (e) {
       try {
-        final itemData = {
-          'nome': currentState.defensivoData?.nomeComum ?? defensivoName,
-          'fabricante': currentState.defensivoData?.fabricante ?? fabricante,
-          'idReg': itemId,
-        };
-
         final success = wasAlreadyFavorited
             ? await _favoritosRepository.removeFavorito('defensivo', itemId)
-            : await _favoritosRepository.addFavorito('defensivo', itemId, itemData);
+            : await _favoritosRepository.addFavorito('defensivo', itemId);
 
         if (!success) {
           state = AsyncValue.data(

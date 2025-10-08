@@ -1,4 +1,3 @@
-
 export 'data/datasources/local/export_file_generator.dart';
 export 'data/datasources/local/plants_export_datasource.dart';
 export 'data/datasources/local/settings_export_datasource.dart';
@@ -6,6 +5,8 @@ export 'data/repositories/data_export_repository_impl.dart';
 export 'domain/entities/export_request.dart';
 export 'domain/repositories/data_export_repository.dart';
 export 'domain/usecases/check_export_availability_usecase.dart';
+export 'domain/usecases/delete_export_usecase.dart';
+export 'domain/usecases/download_export_usecase.dart';
 export 'domain/usecases/get_export_history_usecase.dart';
 export 'domain/usecases/request_export_usecase.dart';
 export 'presentation/pages/data_export_page.dart';

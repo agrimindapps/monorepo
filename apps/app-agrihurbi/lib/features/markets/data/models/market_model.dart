@@ -4,47 +4,126 @@ import 'package:core/core.dart';
 
 part 'market_model.g.dart';
 
+/// Hive Adapter for MarketType enum
+@HiveType(typeId: 7)
+enum MarketTypeAdapter {
+  @HiveField(0)
+  grains,
+  @HiveField(1)
+  livestock,
+  @HiveField(2)
+  dairy,
+  @HiveField(3)
+  vegetables,
+  @HiveField(4)
+  fruits,
+  @HiveField(5)
+  coffee,
+  @HiveField(6)
+  sugar,
+  @HiveField(7)
+  cotton,
+  @HiveField(8)
+  fertilizer,
+  @HiveField(9)
+  soybean,
+  @HiveField(10)
+  corn,
+  @HiveField(11)
+  beef;
+}
+
+/// Hive Adapter for MarketStatus enum
+@HiveType(typeId: 8)
+enum MarketStatusAdapter {
+  @HiveField(0)
+  open,
+  @HiveField(1)
+  closed,
+  @HiveField(2)
+  suspended,
+  @HiveField(3)
+  preMarket,
+  @HiveField(4)
+  afterMarket;
+}
+
 /// Market Model for Data Layer
 ///
 /// Extends MarketEntity with JSON serialization and Hive persistence
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 5) // Ensure unique typeId across the app
-class MarketModel extends MarketEntity {
+class MarketModel {
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String name;
+  @HiveField(2)
+  final String symbol;
+  @HiveField(3)
+  @JsonKey(
+    fromJson: _marketTypeFromJson,
+    toJson: _marketTypeToJson,
+  )
+  final MarketType type;
+  @HiveField(4)
+  final double currentPrice;
+  @HiveField(5)
+  final double previousPrice;
+  @HiveField(6)
+  final double changePercent;
+  @HiveField(7)
+  final double volume;
+  @HiveField(8)
+  final String currency;
+  @HiveField(9)
+  final String unit;
+  @HiveField(10)
+  final String exchange;
+  @HiveField(11)
+  final DateTime lastUpdated;
+  @HiveField(12)
+  @JsonKey(
+    fromJson: _marketStatusFromJson,
+    toJson: _marketStatusToJson,
+  )
+  final MarketStatus status;
+  @HiveField(13)
+  final List<PriceHistoryModel> history;
+  @HiveField(14)
+  final String? description;
+  @HiveField(15)
+  final String? imageUrl;
+
   const MarketModel({
-    @HiveField(0) required String id,
-    @HiveField(1) required String name,
-    @HiveField(2) required String symbol,
-    @HiveField(3) required MarketType type,
-    @HiveField(4) required double currentPrice,
-    @HiveField(5) required double previousPrice,
-    @HiveField(6) required double changePercent,
-    @HiveField(7) required double volume,
-    @HiveField(8) required String currency,
-    @HiveField(9) required String unit,
-    @HiveField(10) required String exchange,
-    @HiveField(11) required DateTime lastUpdated,
-    @HiveField(12) required MarketStatus status,
-    @HiveField(13) List<PriceHistoryModel> history = const [],
-    @HiveField(14) String? description,
-    @HiveField(15) String? imageUrl,
-  }) : super(
-          id: id,
-          name: name,
-          symbol: symbol,
-          type: type,
-          currentPrice: currentPrice,
-          previousPrice: previousPrice,
-          changePercent: changePercent,
-          volume: volume,
-          currency: currency,
-          unit: unit,
-          exchange: exchange,
-          lastUpdated: lastUpdated,
-          status: status,
-          history: history,
-          description: description,
-          imageUrl: imageUrl,
-        );
+    required this.id,
+    required this.name,
+    required this.symbol,
+    required this.type,
+    required this.currentPrice,
+    required this.previousPrice,
+    required this.changePercent,
+    required this.volume,
+    required this.currency,
+    required this.unit,
+    required this.exchange,
+    required this.lastUpdated,
+    required this.status,
+    this.history = const [],
+    this.description,
+    this.imageUrl,
+  });
+
+  // Enum converters for JSON serialization
+  static MarketType _marketTypeFromJson(String value) =>
+      MarketType.values.firstWhere((e) => e.name == value);
+
+  static String _marketTypeToJson(MarketType type) => type.name;
+
+  static MarketStatus _marketStatusFromJson(String value) =>
+      MarketStatus.values.firstWhere((e) => e.name == value);
+
+  static String _marketStatusToJson(MarketStatus status) => status.name;
 
   /// Create from JSON
   factory MarketModel.fromJson(Map<String, dynamic> json) =>
@@ -80,22 +159,22 @@ class MarketModel extends MarketEntity {
   /// Convert to domain entity
   MarketEntity toEntity() {
     return MarketEntity(
-      id: super.id,
-      name: super.name,
-      symbol: super.symbol,
-      type: super.type,
-      currentPrice: super.currentPrice,
-      previousPrice: super.previousPrice,
-      changePercent: super.changePercent,
-      volume: super.volume,
-      currency: super.currency,
-      unit: super.unit,
-      exchange: super.exchange,
-      lastUpdated: super.lastUpdated,
-      status: super.status,
-      history: super.history.map((h) => (h as PriceHistoryModel).toEntity()).toList(),
-      description: super.description,
-      imageUrl: super.imageUrl,
+      id: id,
+      name: name,
+      symbol: symbol,
+      type: type,
+      currentPrice: currentPrice,
+      previousPrice: previousPrice,
+      changePercent: changePercent,
+      volume: volume,
+      currency: currency,
+      unit: unit,
+      exchange: exchange,
+      lastUpdated: lastUpdated,
+      status: status,
+      history: history.map((h) => h.toEntity()).toList(),
+      description: description,
+      imageUrl: imageUrl,
     );
   }
 
@@ -119,22 +198,22 @@ class MarketModel extends MarketEntity {
     String? imageUrl,
   }) {
     return MarketModel(
-      id: id ?? super.id,
-      name: name ?? super.name,
-      symbol: symbol ?? super.symbol,
-      type: type ?? super.type,
-      currentPrice: currentPrice ?? super.currentPrice,
-      previousPrice: previousPrice ?? super.previousPrice,
-      changePercent: changePercent ?? super.changePercent,
-      volume: volume ?? super.volume,
-      currency: currency ?? super.currency,
-      unit: unit ?? super.unit,
-      exchange: exchange ?? super.exchange,
-      lastUpdated: lastUpdated ?? super.lastUpdated,
-      status: status ?? super.status,
-      history: history ?? super.history.cast<PriceHistoryModel>(),
-      description: description ?? super.description,
-      imageUrl: imageUrl ?? super.imageUrl,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      symbol: symbol ?? this.symbol,
+      type: type ?? this.type,
+      currentPrice: currentPrice ?? this.currentPrice,
+      previousPrice: previousPrice ?? this.previousPrice,
+      changePercent: changePercent ?? this.changePercent,
+      volume: volume ?? this.volume,
+      currency: currency ?? this.currency,
+      unit: unit ?? this.unit,
+      exchange: exchange ?? this.exchange,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      status: status ?? this.status,
+      history: history ?? this.history,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }
@@ -184,13 +263,13 @@ class PriceHistoryModel extends PriceHistory {
   /// Convert to domain entity
   PriceHistory toEntity() {
     return PriceHistory(
-      date: super.date,
-      price: super.price,
-      volume: super.volume,
-      high: super.high,
-      low: super.low,
-      open: super.open,
-      close: super.close,
+      date: date,
+      price: price,
+      volume: volume,
+      high: high,
+      low: low,
+      open: open,
+      close: close,
     );
   }
 }
@@ -198,32 +277,43 @@ class PriceHistoryModel extends PriceHistory {
 /// Market Summary Model
 @JsonSerializable(explicitToJson: true)
 @HiveType(typeId: 16)
-class MarketSummaryModel extends MarketSummary {
+class MarketSummaryModel {
+  @HiveField(0)
+  final String marketName;
+  @HiveField(1)
+  final DateTime lastUpdated;
+  @HiveField(2)
+  final List<MarketModel> topGainers;
+  @HiveField(3)
+  final List<MarketModel> topLosers;
+  @HiveField(4)
+  final List<MarketModel> mostActive;
+  @HiveField(5)
+  final double marketIndex;
+  @HiveField(6)
+  final double marketIndexChange;
+  @HiveField(7)
+  final int totalMarkets;
+  @HiveField(8)
+  final int marketsUp;
+  @HiveField(9)
+  final int marketsDown;
+  @HiveField(10)
+  final int marketsUnchanged;
+
   const MarketSummaryModel({
-    required String marketName,
-    required DateTime lastUpdated,
-    required List<MarketModel> topGainers,
-    required List<MarketModel> topLosers,
-    required List<MarketModel> mostActive,
-    required double marketIndex,
-    required double marketIndexChange,
-    required int totalMarkets,
-    required int marketsUp,
-    required int marketsDown,
-    required int marketsUnchanged,
-  }) : super(
-          marketName: marketName,
-          lastUpdated: lastUpdated,
-          topGainers: topGainers,
-          topLosers: topLosers,
-          mostActive: mostActive,
-          marketIndex: marketIndex,
-          marketIndexChange: marketIndexChange,
-          totalMarkets: totalMarkets,
-          marketsUp: marketsUp,
-          marketsDown: marketsDown,
-          marketsUnchanged: marketsUnchanged,
-        );
+    required this.marketName,
+    required this.lastUpdated,
+    required this.topGainers,
+    required this.topLosers,
+    required this.mostActive,
+    required this.marketIndex,
+    required this.marketIndexChange,
+    required this.totalMarkets,
+    required this.marketsUp,
+    required this.marketsDown,
+    required this.marketsUnchanged,
+  });
 
   /// Create from JSON
   factory MarketSummaryModel.fromJson(Map<String, dynamic> json) =>
@@ -258,17 +348,17 @@ class MarketSummaryModel extends MarketSummary {
   /// Convert to domain entity
   MarketSummary toEntity() {
     return MarketSummary(
-      marketName: super.marketName,
-      lastUpdated: super.lastUpdated,
-      topGainers: super.topGainers.map((m) => (m as MarketModel).toEntity()).toList(),
-      topLosers: super.topLosers.map((m) => (m as MarketModel).toEntity()).toList(),
-      mostActive: super.mostActive.map((m) => (m as MarketModel).toEntity()).toList(),
-      marketIndex: super.marketIndex,
-      marketIndexChange: super.marketIndexChange,
-      totalMarkets: super.totalMarkets,
-      marketsUp: super.marketsUp,
-      marketsDown: super.marketsDown,
-      marketsUnchanged: super.marketsUnchanged,
+      marketName: marketName,
+      lastUpdated: lastUpdated,
+      topGainers: topGainers.map((m) => m.toEntity()).toList(),
+      topLosers: topLosers.map((m) => m.toEntity()).toList(),
+      mostActive: mostActive.map((m) => m.toEntity()).toList(),
+      marketIndex: marketIndex,
+      marketIndexChange: marketIndexChange,
+      totalMarkets: totalMarkets,
+      marketsUp: marketsUp,
+      marketsDown: marketsDown,
+      marketsUnchanged: marketsUnchanged,
     );
   }
 }

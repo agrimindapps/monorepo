@@ -5,6 +5,8 @@ import 'package:core/core.dart' hide getIt;
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
+import '../../domain/usecases/delete_export_usecase.dart';
+import '../../domain/usecases/download_export_usecase.dart';
 import '../../domain/usecases/get_export_history_usecase.dart';
 import '../../domain/usecases/request_export_usecase.dart';
 
@@ -49,6 +51,8 @@ class DataExportNotifier extends _$DataExportNotifier {
   late final CheckExportAvailabilityUseCase _checkAvailabilityUseCase;
   late final RequestExportUseCase _requestExportUseCase;
   late final GetExportHistoryUseCase _getHistoryUseCase;
+  late final DownloadExportUseCase _downloadUseCase;
+  late final DeleteExportUseCase _deleteUseCase;
   late final DataExportRepository _repository;
 
   /// Mock user ID - em produção, pegar do auth service
@@ -56,9 +60,13 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   @override
   Future<DataExportState> build() async {
-    _checkAvailabilityUseCase = ref.read(checkExportAvailabilityUseCaseProvider);
+    _checkAvailabilityUseCase = ref.read(
+      checkExportAvailabilityUseCaseProvider,
+    );
     _requestExportUseCase = ref.read(requestExportUseCaseProvider);
     _getHistoryUseCase = ref.read(getExportHistoryUseCaseProvider);
+    _downloadUseCase = ref.read(downloadExportUseCaseProvider);
+    _deleteUseCase = ref.read(deleteExportUseCaseProvider);
     _repository = ref.read(dataExportRepositoryProvider);
     try {
       final history = await _getHistoryUseCase(_currentUserId);
@@ -80,7 +88,8 @@ class DataExportNotifier extends _$DataExportNotifier {
     );
 
     try {
-      final dataTypes = requestedDataTypes ??
+      final dataTypes =
+          requestedDataTypes ??
           {
             DataType.plants,
             DataType.plantTasks,
@@ -136,10 +145,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       final updatedHistory = [request, ...currentState.exportHistory];
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          exportHistory: updatedHistory,
-          isLoading: false,
-        ),
+        currentState.copyWith(exportHistory: updatedHistory, isLoading: false),
       );
       await _monitorExportProgress(request);
 
@@ -177,9 +183,10 @@ class DataExportNotifier extends _$DataExportNotifier {
             currentProgress: currentState.currentProgress.copyWith(
               percentage: percentage * 100,
               currentTask: task,
-              estimatedTimeRemaining: i < progressSteps.length - 1
-                  ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
-                  : null,
+              estimatedTimeRemaining:
+                  i < progressSteps.length - 1
+                      ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
+                      : null,
             ),
           ),
         );
@@ -278,13 +285,11 @@ class DataExportNotifier extends _$DataExportNotifier {
   /// Download export file
   Future<bool> downloadExport(String exportId) async {
     try {
-      return await _repository.downloadExport(exportId);
+      return await _downloadUseCase(exportId);
     } catch (e) {
       final currentState = state.valueOrNull ?? const DataExportState();
       state = AsyncValue.data(
-        currentState.copyWith(
-          error: 'Erro ao baixar arquivo: ${e.toString()}',
-        ),
+        currentState.copyWith(error: 'Erro ao baixar arquivo: ${e.toString()}'),
       );
       return false;
     }
@@ -293,12 +298,13 @@ class DataExportNotifier extends _$DataExportNotifier {
   /// Delete export request and associated file
   Future<bool> deleteExport(String exportId) async {
     try {
-      final success = await _repository.deleteExport(exportId);
+      final success = await _deleteUseCase(exportId);
       if (success) {
         final currentState = state.valueOrNull ?? const DataExportState();
-        final updatedHistory = currentState.exportHistory
-            .where((req) => req.id != exportId)
-            .toList();
+        final updatedHistory =
+            currentState.exportHistory
+                .where((req) => req.id != exportId)
+                .toList();
 
         state = AsyncValue.data(
           currentState.copyWith(exportHistory: updatedHistory),
@@ -348,8 +354,9 @@ class DataExportNotifier extends _$DataExportNotifier {
       final photos = await _repository.getUserPlantPhotosData(_currentUserId);
       stats[DataType.plantPhotos] = photos.length;
 
-      final comments =
-          await _repository.getUserPlantCommentsData(_currentUserId);
+      final comments = await _repository.getUserPlantCommentsData(
+        _currentUserId,
+      );
       stats[DataType.plantComments] = comments.length;
 
       final customCareCount = plants.where((p) => p.config != null).length;
@@ -371,18 +378,14 @@ class DataExportNotifier extends _$DataExportNotifier {
   void resetProgress() {
     final currentState = state.valueOrNull ?? const DataExportState();
     state = AsyncValue.data(
-      currentState.copyWith(
-        currentProgress: const ExportProgress.initial(),
-      ),
+      currentState.copyWith(currentProgress: const ExportProgress.initial()),
     );
   }
 
   /// Clear availability result
   void clearAvailability() {
     final currentState = state.valueOrNull ?? const DataExportState();
-    state = AsyncValue.data(
-      currentState.copyWith(availabilityResult: null),
-    );
+    state = AsyncValue.data(currentState.copyWith(availabilityResult: null));
   }
 
   /// Refresh all data
@@ -429,6 +432,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     return nextAllowedTime.difference(DateTime.now());
   }
 }
+
 @riverpod
 CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(Ref ref) {
   return GetIt.instance<CheckExportAvailabilityUseCase>();
@@ -442,6 +446,16 @@ RequestExportUseCase requestExportUseCase(Ref ref) {
 @riverpod
 GetExportHistoryUseCase getExportHistoryUseCase(Ref ref) {
   return GetIt.instance<GetExportHistoryUseCase>();
+}
+
+@riverpod
+DownloadExportUseCase downloadExportUseCase(Ref ref) {
+  return GetIt.instance<DownloadExportUseCase>();
+}
+
+@riverpod
+DeleteExportUseCase deleteExportUseCase(Ref ref) {
+  return GetIt.instance<DeleteExportUseCase>();
 }
 
 @riverpod

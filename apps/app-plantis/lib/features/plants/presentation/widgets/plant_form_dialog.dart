@@ -111,16 +111,31 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             Expanded(
               child: Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                  final formState = ref.watch(plantFormStateNotifierProvider);
-                  
-                  if (formState.isLoading) {
+                  final isLoading = ref.watch(
+                    plantFormStateNotifierProvider.select(
+                      (state) => state.isLoading,
+                    ),
+                  );
+                  final hasError = ref.watch(
+                    plantFormStateNotifierProvider.select(
+                      (state) => state.hasError,
+                    ),
+                  );
+                  final errorMessage = ref.watch(
+                    plantFormStateNotifierProvider.select(
+                      (state) => state.errorMessage,
+                    ),
+                  );
+
+                  if (isLoading) {
                     return _buildLoadingState();
                   }
 
-                  if (formState.hasError) {
-                    return _buildErrorState(formState, isEditing);
+                  if (hasError) {
+                    return _buildErrorStateFromFields(errorMessage);
                   }
 
+                  final formState = ref.watch(plantFormStateNotifierProvider);
                   return _buildFormContent(formState);
                 },
               ),
@@ -267,13 +282,52 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 const SizedBox(width: 16),
                 FilledButton(
                   onPressed: () {
-                    final formManager = ref.read(plantFormStateNotifierProvider.notifier);
+                    final formManager = ref.read(
+                      plantFormStateNotifierProvider.notifier,
+                    );
                     formManager.clearError();
                     _initializeFormManager();
                   },
                   child: const Text('Tentar Novamente'),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorStateFromFields(String? errorMessage) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              'Ops! Algo deu errado',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(color: colorScheme.error),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              errorMessage ?? 'Erro desconhecido',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _initializeFormManager(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Tentar Novamente'),
             ),
           ],
         ),
@@ -340,23 +394,26 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
       ),
       child: Consumer(
         builder: (BuildContext context, WidgetRef ref, Widget? child) {
-          final formState = ref.watch(plantFormStateNotifierProvider);
-          
+          final isSaving = ref.watch(
+            plantFormStateNotifierProvider.select((state) => state.isSaving),
+          );
+          final isFormValid = ref.watch(
+            plantFormStateNotifierProvider.select((state) => state.isFormValid),
+          );
+
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: formState.isSaving ? null : () => _handleClose(),
+                onPressed: isSaving ? null : () => _handleClose(),
                 child: const Text('Cancelar'),
               ),
               const SizedBox(width: 16),
               FilledButton(
                 onPressed:
-                    (formState.isFormValid && !formState.isSaving)
-                        ? () => _handleSave()
-                        : null,
+                    (isFormValid && !isSaving) ? () => _handleSave() : null,
                 child:
-                    formState.isSaving
+                    isSaving
                         ? const SizedBox(
                           width: 16,
                           height: 16,
@@ -399,9 +456,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
           try {
             plantsProvider = di.sl<PlantsProvider>();
           } catch (e) {
-            print(
-              'Aviso: Não foi possível atualizar a lista automaticamente',
-            );
+            print('Aviso: Não foi possível atualizar a lista automaticamente');
           }
           if (plantsProvider != null) {
             await plantsProvider.refreshPlants();
@@ -437,7 +492,9 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               }
             } catch (e2) {
               if (kDebugMode) {
-                print('❌ PlantFormDialog._handleSave() - Falha ao atualizar PlantDetailsProvider: $e2');
+                print(
+                  '❌ PlantFormDialog._handleSave() - Falha ao atualizar PlantDetailsProvider: $e2',
+                );
               }
             }
           }

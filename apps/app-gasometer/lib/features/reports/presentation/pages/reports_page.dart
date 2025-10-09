@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
@@ -17,15 +18,30 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            _buildVehicleSelector(context),
-            Expanded(child: _buildContent(context)),
+            if (vehiclesAsync.value?.isNotEmpty ?? false)
+              _buildVehicleSelector(context),
+            Expanded(
+              child: vehiclesAsync.when(
+                data: (vehicles) {
+                  if (vehicles.isEmpty) {
+                    return _buildNoVehiclesState();
+                  }
+                  if (_selectedVehicleId == null) {
+                    return _buildSelectVehicleState();
+                  }
+                  return _buildContent(context);
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => _buildContent(context),
+              ),
+            ),
           ],
         ),
       ),
@@ -106,47 +122,37 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   Widget _buildVehicleSelector(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.directions_car,
-              color: Theme.of(context).primaryColor,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Seletor de veículo será implementado',
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
+      child: EnhancedVehicleSelector(
+        selectedVehicleId: _selectedVehicleId,
+        onVehicleChanged: (vehicleId) {
+          setState(() {
+            _selectedVehicleId = vehicleId;
+          });
+        },
+        hintText: 'Selecione um veículo',
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    if (_selectedVehicleId == null) {
-      return EnhancedEmptyState(
-        title: 'Selecione um veículo',
-        description:
-            'Escolha um veículo para visualizar os relatórios e estatísticas.',
-        icon: Icons.directions_car_outlined,
-        actionLabel: 'Selecionar veículo',
-        onAction: () {},
-      );
-    }
+  Widget _buildNoVehiclesState() {
+    return EnhancedEmptyState(
+      title: 'Nenhum veículo cadastrado',
+      description: 'Cadastre seu primeiro veículo para visualizar relatórios.',
+      icon: Icons.directions_car_outlined,
+      actionLabel: 'Cadastrar veículo',
+      onAction: () => context.push('/vehicles'),
+    );
+  }
 
+  Widget _buildSelectVehicleState() {
+    return const EnhancedEmptyState(
+      title: 'Selecione um veículo',
+      description: 'Escolha um veículo acima para visualizar os relatórios e estatísticas.',
+      icon: Icons.bar_chart_outlined,
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     return _buildReportsContent();
   }
 

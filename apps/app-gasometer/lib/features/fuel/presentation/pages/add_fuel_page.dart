@@ -7,6 +7,7 @@ import '../../../../core/widgets/form_dialog.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../providers/fuel_form_notifier.dart';
 import '../providers/fuel_riverpod_notifier.dart';
+import '../widgets/fuel_form_view.dart';
 
 class AddFuelPage extends ConsumerStatefulWidget {
   
@@ -124,11 +125,9 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage> {
       onConfirm: _submitFormWithRateLimit,
       content: !formState.isInitialized
           ? const Center(child: CircularProgressIndicator())
-          : const Center(
-              child: Text(
-                'FuelFormView precisa ser migrado para Riverpod.\nMigração pendente.',
-                textAlign: TextAlign.center,
-              ),
+          : FuelFormView(
+              vehicleId: vehicleId,
+              onSubmit: _submitFormWithRateLimit,
             ),
     );
   }

@@ -265,6 +265,7 @@ extension UserEntityGasometerExtension on UserEntity {
   /// Converte para formato Firestore (compatibilidade com UserModel.toFirestore)
   Map<String, dynamic> toGasometerFirestore() {
     return {
+      'id': id, // Requerido pelas regras do Firestore
       'email': email,
       'displayName': displayName,
       'photoUrl': photoUrl,

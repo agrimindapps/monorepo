@@ -5,6 +5,7 @@ import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import 'add_maintenance_page.dart';
 
 class MaintenancePage extends ConsumerStatefulWidget {
   const MaintenancePage({super.key});
@@ -19,16 +20,32 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(vehiclesNotifierProvider);
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            _buildVehicleSelector(context),
-            _buildMonthSelector(),
-            Expanded(child: _buildContent(context)),
+            if (vehiclesAsync.value?.isNotEmpty ?? false) ...[
+              _buildVehicleSelector(context),
+              if (_selectedVehicleId != null) _buildMonthSelector(),
+            ],
+            Expanded(
+              child: vehiclesAsync.when(
+                data: (vehicles) {
+                  if (vehicles.isEmpty) {
+                    return _buildNoVehiclesState();
+                  }
+                  if (_selectedVehicleId == null) {
+                    return _buildSelectVehicleState();
+                  }
+                  return _buildContent(context);
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => _buildContent(context),
+              ),
+            ),
           ],
         ),
       ),
@@ -191,9 +208,45 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
+        if (_selectedVehicleId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Selecione um veículo primeiro'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+        showDialog<bool>(
+          context: context,
+          builder: (context) => AddMaintenancePage(vehicleId: _selectedVehicleId),
+        ).then((result) {
+          if (result == true) {
+            // Refresh maintenance list when ready
+            setState(() {});
+          }
+        });
       },
       tooltip: 'Adicionar manutenção',
       child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _buildNoVehiclesState() {
+    return EnhancedEmptyState(
+      title: 'Nenhum veículo cadastrado',
+      description: 'Cadastre seu primeiro veículo para começar a registrar manutenções.',
+      icon: Icons.directions_car_outlined,
+      actionLabel: 'Cadastrar veículo',
+      onAction: () => context.push('/vehicles'),
+    );
+  }
+
+  Widget _buildSelectVehicleState() {
+    return const EnhancedEmptyState(
+      title: 'Selecione um veículo',
+      description: 'Escolha um veículo acima para visualizar suas manutenções.',
+      icon: Icons.build_outlined,
     );
   }
 

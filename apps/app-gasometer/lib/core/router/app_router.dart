@@ -16,6 +16,7 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
 
@@ -43,11 +44,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/add',
                 name: 'add-vehicle',
-                builder: (context, state) => const Scaffold(
-                  body: Center(
-                    child: Text('Add Vehicle Page - Coming Soon'),
-                  ),
-                ),
+                builder: (context, state) => const AddVehiclePage(),
               ),
             ],
           ),

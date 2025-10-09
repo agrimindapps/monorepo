@@ -44,7 +44,7 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.4.6
   hive_generator: ^2.0.1
-  riverpod_generator: ^2.6.1
+  riverpod_generator: 2.4.0
   injectable_generator: any
 
 # The following section is specific to Flutter packages.

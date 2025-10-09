@@ -1208,6 +1208,10 @@ PODS:
     - Firebase/Firestore (= 12.0.0)
     - firebase_core
     - Flutter
+  - cloud_functions (6.0.0):
+    - Firebase/Functions (= 12.0.0)
+    - firebase_core
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -1231,9 +1235,18 @@ PODS:
   - Firebase/Firestore (12.0.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 12.0.0)
+  - Firebase/Functions (12.0.0):
+    - Firebase/CoreOnly
+    - FirebaseFunctions (~> 12.0.0)
+  - Firebase/Messaging (12.0.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 12.0.0)
   - Firebase/Performance (12.0.0):
     - Firebase/CoreOnly
     - FirebasePerformance (~> 12.0.0)
+  - Firebase/RemoteConfig (12.0.0):
+    - Firebase/CoreOnly
+    - FirebaseRemoteConfig (~> 12.0.0)
   - Firebase/Storage (12.0.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 12.0.0)
@@ -1252,8 +1265,16 @@ PODS:
     - Firebase/Crashlytics (= 12.0.0)
     - firebase_core
     - Flutter
+  - firebase_messaging (16.0.0):
+    - Firebase/Messaging (= 12.0.0)
+    - firebase_core
+    - Flutter
   - firebase_performance (0.11.0):
     - Firebase/Performance (= 12.0.0)
+    - firebase_core
+    - Flutter
+  - firebase_remote_config (6.0.0):
+    - Firebase/RemoteConfig (= 12.0.0)
     - firebase_core
     - Flutter
   - firebase_storage (13.0.0):
@@ -1328,11 +1349,29 @@ PODS:
     - gRPC-Core (~> 1.69.0)
     - leveldb-library (~> 1.22)
     - nanopb (~> 3.30910.0)
+  - FirebaseFunctions (12.0.0):
+    - FirebaseAppCheckInterop (~> 12.0.0)
+    - FirebaseAuthInterop (~> 12.0.0)
+    - FirebaseCore (~> 12.0.0)
+    - FirebaseCoreExtension (~> 12.0.0)
+    - FirebaseMessagingInterop (~> 12.0.0)
+    - FirebaseSharedSwift (~> 12.0.0)
+    - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - FirebaseInstallations (12.0.0):
     - FirebaseCore (~> 12.0.0)
     - GoogleUtilities/Environment (~> 8.1)
     - GoogleUtilities/UserDefaults (~> 8.1)
     - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (12.0.0):
+    - FirebaseCore (~> 12.0.0)
+    - FirebaseInstallations (~> 12.0.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
+  - FirebaseMessagingInterop (12.0.0)
   - FirebasePerformance (12.0.0):
     - FirebaseCore (~> 12.0.0)
     - FirebaseInstallations (~> 12.0.0)
@@ -1570,11 +1609,13 @@ PODS:
     - PurchasesHybridCommon (= 16.2.2)
   - PurchasesHybridCommon (16.2.2):
     - RevenueCat (= 5.34.0)
-  - rate_my_app (2.3.2):
+  - rate_my_app (2.2.0):
     - Flutter
     - FlutterMacOS
   - RecaptchaInterop (101.0.0)
   - RevenueCat (5.34.0)
+  - share_plus (0.0.1):
+    - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -1588,13 +1629,16 @@ PODS:
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
+  - cloud_functions (from `.symlinks/plugins/cloud_functions/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
+  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_performance (from `.symlinks/plugins/firebase_performance/ios`)
+  - firebase_remote_config (from `.symlinks/plugins/firebase_remote_config/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_facebook_auth (from `.symlinks/plugins/flutter_facebook_auth/ios`)
@@ -1608,6 +1652,7 @@ DEPENDENCIES:
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - rate_my_app (from `.symlinks/plugins/rate_my_app/darwin`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
@@ -1635,7 +1680,10 @@ SPEC REPOS:
     - FirebaseCrashlytics
     - FirebaseFirestore
     - FirebaseFirestoreInternal
+    - FirebaseFunctions
     - FirebaseInstallations
+    - FirebaseMessaging
+    - FirebaseMessagingInterop
     - FirebasePerformance
     - FirebaseRemoteConfig
     - FirebaseRemoteConfigInterop
@@ -1662,6 +1710,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
+  cloud_functions:
+    :path: ".symlinks/plugins/cloud_functions/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
@@ -1674,8 +1724,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_crashlytics:
     :path: ".symlinks/plugins/firebase_crashlytics/ios"
+  firebase_messaging:
+    :path: ".symlinks/plugins/firebase_messaging/ios"
   firebase_performance:
     :path: ".symlinks/plugins/firebase_performance/ios"
+  firebase_remote_config:
+    :path: ".symlinks/plugins/firebase_remote_config/ios"
   firebase_storage:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
@@ -1702,6 +1756,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/purchases_flutter/ios"
   rate_my_app:
     :path: ".symlinks/plugins/rate_my_app/darwin"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
@@ -1717,6 +1773,7 @@ SPEC CHECKSUMS:
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
   cloud_firestore: e5ab1eac678fd5187ebe0d2d4a9f6355d02fc2dd
+  cloud_functions: d7f10f8524d09841004c30ea10854ba89dd96395
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   FBAEMKit: 9900b2edd99a2d21629a6277e6166f14c6215799
@@ -1728,7 +1785,9 @@ SPEC CHECKSUMS:
   firebase_auth: 4e5ee3c9daf2aa6feec1f3596e2f12daf4b30c09
   firebase_core: c70f903d70ec229c08c2f49aba5a8c1338546d40
   firebase_crashlytics: f5df4d26483758138b386e0db8a704e5b7ba6543
+  firebase_messaging: efa3a73cad64b05131bfe138c139a65e0daebe78
   firebase_performance: 8430265f50cc21b002deca0d872a20a2edbc629a
+  firebase_remote_config: f137e220690596eb50e2724d6c85a14c5c8c092a
   firebase_storage: 65077495e570982849953539c848be97ac568863
   FirebaseABTesting: 2cad22e464cd7ef4589ae29f897bc71ff83ce83b
   FirebaseAnalytics: 6d790cd1b159b4eb61a99948df0934ce505a34f7
@@ -1741,7 +1800,10 @@ SPEC CHECKSUMS:
   FirebaseCrashlytics: db75aa0cab8d00f68406fa247c32fe17ade884d7
   FirebaseFirestore: 64f13d770a1e5a77e667efc5ed5576461f4d7827
   FirebaseFirestoreInternal: 1ba4a8841496a9af788622a97fc45eb7b3b92c5f
+  FirebaseFunctions: a5d47653ed6262ba76d215e3097f105dcabc652c
   FirebaseInstallations: d4c7c958f99c8860d7fcece786314ae790e2f988
+  FirebaseMessaging: af49f8d7c0a3d2a017d9302c80946f45a7777dde
+  FirebaseMessagingInterop: 30024b4793b4876fa1e104e42949eb0273257e38
   FirebasePerformance: 58e48464297c539c0a75c4c3411a5fba442b4553
   FirebaseRemoteConfig: 4cbbe0083474359025e7bb334b9d0cff16b78d3a
   FirebaseRemoteConfigInterop: bfa0ea72ba3dc5af739777296424e46bd6f42613
@@ -1773,9 +1835,10 @@ SPEC CHECKSUMS:
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   purchases_flutter: 0d71a9620d3ba19ffd97f27b66d74ba39ca5d28f
   PurchasesHybridCommon: 62f852419aae7041792217593998f7ac3f8b567d
-  rate_my_app: 32114ed340bfb4be961f4ce59211af3684adb700
+  rate_my_app: cd3e1c44d12f387482698ffaf6ea9bd669a69b94
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   RevenueCat: eb2aa042789d9c99ad5172bd96e28b96286d6ada
+  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sign_in_with_apple: f3bf75217ea4c2c8b91823f225d70230119b8440
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d

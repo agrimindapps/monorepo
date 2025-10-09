@@ -940,18 +940,6 @@ FuelStatistics? fuelStatistics(Ref ref) {
       );
 }
 
-/// Analytics provider for specific vehicle
-@riverpod
-FuelAnalytics? fuelAnalytics(Ref ref, String vehicleId) {
-  return ref
-      .watch(fuelRiverpodProvider)
-      .when(
-        data: (state) => state.analytics[vehicleId],
-        loading: () => null,
-        error: (_, __) => null,
-      );
-}
-
 /// Offline queue providers
 @riverpod
 int fuelPendingCount(Ref ref) {

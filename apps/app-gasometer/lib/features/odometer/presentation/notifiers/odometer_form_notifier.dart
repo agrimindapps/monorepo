@@ -61,13 +61,17 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
     required String userId,
   }) async {
     if (vehicleId.isEmpty) {
-      state = state.copyWith(
-        errorMessage: () => 'Nenhum veículo selecionado',
-      );
+      Future.microtask(() {
+        state = state.copyWith(
+          errorMessage: () => 'Nenhum veículo selecionado',
+        );
+      });
       return;
     }
 
-    state = state.copyWith(isLoading: true);
+    Future.microtask(() {
+      state = state.copyWith(isLoading: true);
+    });
 
     try {
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));

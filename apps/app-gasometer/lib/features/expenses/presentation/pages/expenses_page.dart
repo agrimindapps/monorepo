@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import 'add_expense_page.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -18,14 +20,32 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            _buildVehicleSelector(context),
-            _buildMonthSelector(),
-            Expanded(child: _buildContent(context)),
+            if (vehiclesAsync.value?.isNotEmpty ?? false) ...[
+              _buildVehicleSelector(context),
+              if (_selectedVehicleId != null) _buildMonthSelector(),
+            ],
+            Expanded(
+              child: vehiclesAsync.when(
+                data: (vehicles) {
+                  if (vehicles.isEmpty) {
+                    return _buildNoVehiclesState();
+                  }
+                  if (_selectedVehicleId == null) {
+                    return _buildSelectVehicleState();
+                  }
+                  return _buildContent(context);
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => _buildContent(context),
+              ),
+            ),
           ],
         ),
       ),
@@ -192,9 +212,45 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
+        if (_selectedVehicleId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Selecione um veículo primeiro'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+        showDialog<bool>(
+          context: context,
+          builder: (context) => AddExpensePage(vehicleId: _selectedVehicleId),
+        ).then((result) {
+          if (result == true) {
+            // Refresh expenses list when ready
+            setState(() {});
+          }
+        });
       },
       tooltip: 'Adicionar despesa',
       child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _buildNoVehiclesState() {
+    return EnhancedEmptyState(
+      title: 'Nenhum veículo cadastrado',
+      description: 'Cadastre seu primeiro veículo para começar a registrar despesas.',
+      icon: Icons.directions_car_outlined,
+      actionLabel: 'Cadastrar veículo',
+      onAction: () => context.push('/vehicles'),
+    );
+  }
+
+  Widget _buildSelectVehicleState() {
+    return const EnhancedEmptyState(
+      title: 'Selecione um veículo',
+      description: 'Escolha um veículo acima para visualizar suas despesas.',
+      icon: Icons.attach_money_outlined,
     );
   }
 

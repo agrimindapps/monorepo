@@ -30,5 +30,18 @@ abstract class RegisterModule {
   ConnectivityService get connectivityService => ConnectivityService.instance;
 
   @singleton
+  Connectivity get connectivity => Connectivity();
+
+  @singleton
+  IBoxRegistryService get boxRegistryService => BoxRegistryService();
+
+  @singleton
+  ILocalStorageRepository get localStorageRepository =>
+      HiveStorageService(boxRegistryService);
+
+  @singleton
   IAppRatingRepository get appRatingRepository => AppRatingService();
+
+  @singleton
+  ImageCompressionService get imageCompressionService => ImageCompressionService();
 }

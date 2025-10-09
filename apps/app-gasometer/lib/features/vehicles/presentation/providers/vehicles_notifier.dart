@@ -18,7 +18,9 @@ part 'vehicles_notifier.g.dart';
 
 /// Notifier para gerenciar estado de veículos com AsyncNotifier
 /// Suporta stream watching, offline sync, CRUD completo e derived providers
-@riverpod
+/// keepAlive: true mantém o provider vivo durante toda a sessão do app
+/// pois a lista de veículos é usada em múltiplas páginas (fuel, expenses, maintenance, odometer)
+@Riverpod(keepAlive: true)
 class VehiclesNotifier extends _$VehiclesNotifier {
   StreamSubscription<Either<dynamic, List<VehicleEntity>>>?
   _vehicleSubscription;
@@ -483,28 +485,3 @@ bool hasVehicles(Ref ref) {
   return count > 0;
 }
 
-/// Provider para veículos por tipo
-@riverpod
-List<VehicleEntity> vehiclesByType(Ref ref, VehicleType type) {
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-  final vehicles = vehiclesAsync.when(
-    data: (vehicles) => vehicles,
-    loading: () => <VehicleEntity>[],
-    error: (_, __) => <VehicleEntity>[],
-  );
-  return vehicles.where((v) => v.type == type && v.isActive).toList();
-}
-
-/// Provider para veículos por tipo de combustível
-@riverpod
-List<VehicleEntity> vehiclesByFuelType(Ref ref, FuelType fuelType) {
-  final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
-  final vehicles = vehiclesAsync.when(
-    data: (vehicles) => vehicles,
-    loading: () => <VehicleEntity>[],
-    error: (_, __) => <VehicleEntity>[],
-  );
-  return vehicles
-      .where((v) => v.supportedFuels.contains(fuelType) && v.isActive)
-      .toList();
-}

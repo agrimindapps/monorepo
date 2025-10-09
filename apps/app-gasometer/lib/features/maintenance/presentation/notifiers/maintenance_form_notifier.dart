@@ -111,13 +111,17 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
     required String userId,
   }) async {
     if (vehicleId.isEmpty) {
-      state = state.copyWith(
-        errorMessage: () => 'Nenhum veículo selecionado',
-      );
+      Future.microtask(() {
+        state = state.copyWith(
+          errorMessage: () => 'Nenhum veículo selecionado',
+        );
+      });
       return;
     }
 
-    state = state.copyWith(isLoading: true);
+    Future.microtask(() {
+      state = state.copyWith(isLoading: true);
+    });
 
     try {
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: vehicleId));
@@ -152,7 +156,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
 
   /// Inicializa com manutenção existente para edição
   Future<void> initializeWithMaintenance(MaintenanceEntity maintenance) async {
-    state = state.copyWith(isLoading: true);
+    Future.microtask(() {
+      state = state.copyWith(isLoading: true);
+    });
 
     try {
       final vehicleResult = await _getVehicleById(GetVehicleByIdParams(vehicleId: maintenance.vehicleId));

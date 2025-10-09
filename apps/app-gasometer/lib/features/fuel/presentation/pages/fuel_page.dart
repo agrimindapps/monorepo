@@ -5,8 +5,10 @@ import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../providers/fuel_notifier.dart';
+import 'add_fuel_page.dart';
 
 class FuelPage extends ConsumerStatefulWidget {
   const FuelPage({super.key});
@@ -33,6 +35,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     final isOnline = ref.watch(fuelIsOnlineProvider);
     final pendingCount = ref.watch(fuelPendingCountProvider);
     final isSyncing = ref.watch(fuelIsSyncingProvider);
+    final vehiclesAsync = ref.watch(vehiclesNotifierProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -41,9 +44,28 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             _buildHeader(context),
             if (!isOnline || pendingCount > 0)
               _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
-            _buildVehicleSelector(context),
-            _buildMonthSelector(),
-            Expanded(child: _buildContent(context, fuelState)),
+            if (vehiclesAsync.value?.isNotEmpty ?? false) ...[
+              _buildVehicleSelector(context),
+              if (_selectedVehicleId != null) _buildMonthSelector(),
+            ],
+            Expanded(
+              child: vehiclesAsync.when(
+                data: (vehicles) {
+                  if (vehicles.isEmpty) {
+                    return _buildNoVehiclesState();
+                  }
+                  if (_selectedVehicleId == null) {
+                    return _buildSelectVehicleState();
+                  }
+                  return _buildContent(context, fuelState);
+                },
+                loading: () => const StandardLoadingView(
+                  message: 'Carregando veículos...',
+                  showProgress: true,
+                ),
+                error: (_, __) => _buildContent(context, fuelState),
+              ),
+            ),
           ],
         ),
       ),
@@ -401,9 +423,44 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       onPressed: () {
+        if (_selectedVehicleId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Selecione um veículo primeiro'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+        showDialog<bool>(
+          context: context,
+          builder: (context) => AddFuelPage(vehicleId: _selectedVehicleId),
+        ).then((result) {
+          if (result == true) {
+            ref.read(fuelNotifierProvider.notifier).loadFuelRecords();
+          }
+        });
       },
       tooltip: 'Adicionar abastecimento',
       child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _buildNoVehiclesState() {
+    return EnhancedEmptyState(
+      title: 'Nenhum veículo cadastrado',
+      description: 'Cadastre seu primeiro veículo para começar a registrar abastecimentos.',
+      icon: Icons.directions_car_outlined,
+      actionLabel: 'Cadastrar veículo',
+      onAction: () => context.push('/vehicles'),
+    );
+  }
+
+  Widget _buildSelectVehicleState() {
+    return const EnhancedEmptyState(
+      title: 'Selecione um veículo',
+      description: 'Escolha um veículo acima para visualizar seus abastecimentos.',
+      icon: Icons.local_gas_station_outlined,
     );
   }
 

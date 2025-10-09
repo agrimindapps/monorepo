@@ -251,9 +251,10 @@ class VehicleModel extends BaseSyncModel {
   final double odometroAtual;
   @HiveField(22)
   final String? foto;
-  late final DateTime? _cachedCreatedAt;
-  late final DateTime? _cachedUpdatedAt;
-  late final DateTime? _cachedLastSyncAt;
+
+  DateTime? _cachedCreatedAt;
+  DateTime? _cachedUpdatedAt;
+  DateTime? _cachedLastSyncAt;
 
   @override
   String get collectionName => 'vehicles';
@@ -261,27 +262,27 @@ class VehicleModel extends BaseSyncModel {
   /// Lazy-loaded createdAt com cache
   @override
   DateTime? get createdAt {
-    if (_cachedCreatedAt == null && createdAtMs != null) {
-      _cachedCreatedAt = DateTime.fromMillisecondsSinceEpoch(createdAtMs!);
-    }
+    _cachedCreatedAt ??= createdAtMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!)
+        : null;
     return _cachedCreatedAt;
   }
 
   /// Lazy-loaded updatedAt com cache
   @override
   DateTime? get updatedAt {
-    if (_cachedUpdatedAt == null && updatedAtMs != null) {
-      _cachedUpdatedAt = DateTime.fromMillisecondsSinceEpoch(updatedAtMs!);
-    }
+    _cachedUpdatedAt ??= updatedAtMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!)
+        : null;
     return _cachedUpdatedAt;
   }
 
   /// Lazy-loaded lastSyncAt com cache
   @override
   DateTime? get lastSyncAt {
-    if (_cachedLastSyncAt == null && lastSyncAtMs != null) {
-      _cachedLastSyncAt = DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!);
-    }
+    _cachedLastSyncAt ??= lastSyncAtMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
+        : null;
     return _cachedLastSyncAt;
   }
 

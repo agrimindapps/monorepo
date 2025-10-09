@@ -5,8 +5,8 @@ import '../../../../core/data/models/base_sync_model.dart';
 part 'expense_model.g.dart';
 
 /// Expense (Despesa) model with Firebase sync support
-/// TypeId: 3 - New sequential numbering
-@HiveType(typeId: 3)
+/// TypeId: 13 - Gasometer range (10-19) to avoid conflicts with other apps
+@HiveType(typeId: 13)
 class ExpenseModel extends BaseSyncModel {
 
   ExpenseModel({

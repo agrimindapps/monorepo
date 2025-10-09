@@ -49,7 +49,7 @@ abstract final class GasometerSyncConfig {
         ),
         EntitySyncRegistration<FuelRecordEntity>.simple(
           entityType: FuelRecordEntity,
-          collectionName: 'fuel_records',
+          collectionName: 'fuel',
           fromMap: _fuelRecordFromFirebaseMap,
           toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
         ),
@@ -61,7 +61,7 @@ abstract final class GasometerSyncConfig {
         ),
         EntitySyncRegistration<MaintenanceEntity>.simple(
           entityType: MaintenanceEntity,
-          collectionName: 'maintenance_records',
+          collectionName: 'maintenance',
           fromMap: _maintenanceFromFirebaseMap,
           toMap: (maintenance) => maintenance.toFirebaseMap(),
         ),
@@ -99,7 +99,7 @@ abstract final class GasometerSyncConfig {
 
         EntitySyncRegistration<FuelRecordEntity>.simple(
           entityType: FuelRecordEntity,
-          collectionName: 'dev_fuel_records',
+          collectionName: 'dev_fuel',
           fromMap: _fuelRecordFromFirebaseMap,
           toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
         ),
@@ -113,7 +113,7 @@ abstract final class GasometerSyncConfig {
 
         EntitySyncRegistration<MaintenanceEntity>.simple(
           entityType: MaintenanceEntity,
-          collectionName: 'dev_maintenance_records',
+          collectionName: 'dev_maintenance',
           fromMap: _maintenanceFromFirebaseMap,
           toMap: (maintenance) => maintenance.toFirebaseMap(),
         ),
@@ -157,7 +157,7 @@ abstract final class GasometerSyncConfig {
         ),
         EntitySyncRegistration<FuelRecordEntity>(
           entityType: FuelRecordEntity,
-          collectionName: 'fuel_records',
+          collectionName: 'fuel',
           fromMap: _fuelRecordFromFirebaseMap,
           toMap: (FuelRecordEntity fuelRecord) => fuelRecord.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.manual, // Resolução manual para dados financeiros
@@ -178,7 +178,7 @@ abstract final class GasometerSyncConfig {
 
         EntitySyncRegistration<MaintenanceEntity>(
           entityType: MaintenanceEntity,
-          collectionName: 'maintenance_records',
+          collectionName: 'maintenance',
           fromMap: _maintenanceFromFirebaseMap,
           toMap: (MaintenanceEntity maintenance) => maintenance.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.localWins, // Local sempre vence

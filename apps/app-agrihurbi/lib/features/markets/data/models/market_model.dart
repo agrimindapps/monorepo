@@ -1,4 +1,3 @@
-
 import 'package:app_agrihurbi/features/markets/domain/entities/market_entity.dart';
 import 'package:core/core.dart';
 
@@ -30,7 +29,7 @@ enum MarketTypeAdapter {
   @HiveField(10)
   corn,
   @HiveField(11)
-  beef;
+  beef,
 }
 
 /// Hive Adapter for MarketStatus enum
@@ -45,7 +44,7 @@ enum MarketStatusAdapter {
   @HiveField(3)
   preMarket,
   @HiveField(4)
-  afterMarket;
+  afterMarket,
 }
 
 /// Market Model for Data Layer
@@ -61,10 +60,7 @@ class MarketModel {
   @HiveField(2)
   final String symbol;
   @HiveField(3)
-  @JsonKey(
-    fromJson: _marketTypeFromJson,
-    toJson: _marketTypeToJson,
-  )
+  @JsonKey(fromJson: _marketTypeFromJson, toJson: _marketTypeToJson)
   final MarketType type;
   @HiveField(4)
   final double currentPrice;
@@ -83,10 +79,7 @@ class MarketModel {
   @HiveField(11)
   final DateTime lastUpdated;
   @HiveField(12)
-  @JsonKey(
-    fromJson: _marketStatusFromJson,
-    toJson: _marketStatusToJson,
-  )
+  @JsonKey(fromJson: _marketStatusFromJson, toJson: _marketStatusToJson)
   final MarketStatus status;
   @HiveField(13)
   final List<PriceHistoryModel> history;
@@ -148,9 +141,8 @@ class MarketModel {
       exchange: entity.exchange,
       lastUpdated: entity.lastUpdated,
       status: entity.status,
-      history: entity.history
-          .map((h) => PriceHistoryModel.fromEntity(h))
-          .toList(),
+      history:
+          entity.history.map((h) => PriceHistoryModel.fromEntity(h)).toList(),
       description: entity.description,
       imageUrl: entity.imageUrl,
     );
@@ -216,6 +208,15 @@ class MarketModel {
       imageUrl: imageUrl ?? this.imageUrl,
     );
   }
+
+  /// Check if market is going up (positive change)
+  bool get isUp => changePercent > 0;
+
+  /// Check if market is going down (negative change)
+  bool get isDown => changePercent < 0;
+
+  /// Check if market is stable (no change)
+  bool get isStable => changePercent == 0;
 }
 
 /// Price History Model
@@ -223,22 +224,14 @@ class MarketModel {
 @HiveType(typeId: 6)
 class PriceHistoryModel extends PriceHistory {
   const PriceHistoryModel({
-    @HiveField(0) required DateTime date,
-    @HiveField(1) required double price,
-    @HiveField(2) required double volume,
-    @HiveField(3) required double high,
-    @HiveField(4) required double low,
-    @HiveField(5) required double open,
-    @HiveField(6) required double close,
-  }) : super(
-          date: date,
-          price: price,
-          volume: volume,
-          high: high,
-          low: low,
-          open: open,
-          close: close,
-        );
+    @HiveField(0) required super.date,
+    @HiveField(1) required super.price,
+    @HiveField(2) required super.volume,
+    @HiveField(3) required super.high,
+    @HiveField(4) required super.low,
+    @HiveField(5) required super.open,
+    @HiveField(6) required super.close,
+  });
 
   /// Create from JSON
   factory PriceHistoryModel.fromJson(Map<String, dynamic> json) =>
@@ -327,15 +320,12 @@ class MarketSummaryModel {
     return MarketSummaryModel(
       marketName: entity.marketName,
       lastUpdated: entity.lastUpdated,
-      topGainers: entity.topGainers
-          .map((m) => MarketModel.fromEntity(m))
-          .toList(),
-      topLosers: entity.topLosers
-          .map((m) => MarketModel.fromEntity(m))
-          .toList(),
-      mostActive: entity.mostActive
-          .map((m) => MarketModel.fromEntity(m))
-          .toList(),
+      topGainers:
+          entity.topGainers.map((m) => MarketModel.fromEntity(m)).toList(),
+      topLosers:
+          entity.topLosers.map((m) => MarketModel.fromEntity(m)).toList(),
+      mostActive:
+          entity.mostActive.map((m) => MarketModel.fromEntity(m)).toList(),
       marketIndex: entity.marketIndex,
       marketIndexChange: entity.marketIndexChange,
       totalMarkets: entity.totalMarkets,

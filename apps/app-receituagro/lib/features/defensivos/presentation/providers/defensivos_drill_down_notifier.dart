@@ -28,8 +28,12 @@ class DefensivosDrillDownState {
     this.errorMessage,
   });
 
-  factory DefensivosDrillDownState.initial({String tipoAgrupamento = 'fabricante'}) {
-    final navigationState = DrillDownNavigationState.initial(tipoAgrupamento: tipoAgrupamento);
+  factory DefensivosDrillDownState.initial({
+    String tipoAgrupamento = 'fabricante',
+  }) {
+    final navigationState = DrillDownNavigationState.initial(
+      tipoAgrupamento: tipoAgrupamento,
+    );
     return DefensivosDrillDownState(
       navigationState: navigationState,
       allDefensivos: [],
@@ -64,6 +68,7 @@ class DefensivosDrillDownState {
   DefensivosDrillDownState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasError => errorMessage != null;
   bool get isAtGroupLevel => navigationState.isAtGroupLevel;
   bool get isAtItemLevel => navigationState.isAtItemLevel;
@@ -76,7 +81,9 @@ class DefensivosDrillDownState {
 /// Notifier para gerenciar estado de drill-down de defensivos
 /// Gerencia navegação entre grupos e itens
 /// Integra com DefensivosUnificadoNotifier para dados
-@riverpod
+///
+/// keepAlive: true - Mantém o estado de navegação durante a sessão
+@Riverpod(keepAlive: true)
 class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
   late final DefensivosGroupingService _groupingService;
 
@@ -95,17 +102,21 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final navigationState = DrillDownNavigationState.initial(tipoAgrupamento: tipoAgrupamento);
+    final navigationState = DrillDownNavigationState.initial(
+      tipoAgrupamento: tipoAgrupamento,
+    );
     final groups = _generateGroups(defensivos, tipoAgrupamento);
     final filteredGroups = _applyFilters(groups, navigationState);
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        allDefensivos: defensivos,
-        navigationState: navigationState,
-        groups: groups,
-        filteredGroups: filteredGroups,
-      ).clearError(),
+      currentState
+          .copyWith(
+            allDefensivos: defensivos,
+            navigationState: navigationState,
+            groups: groups,
+            filteredGroups: filteredGroups,
+          )
+          .clearError(),
     );
   }
 
@@ -114,7 +125,9 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final navigationState = currentState.navigationState.drillDownToGroup(group);
+    final navigationState = currentState.navigationState.drillDownToGroup(
+      group,
+    );
     final currentGroupItems = _updateCurrentGroupItems(group, navigationState);
 
     state = AsyncValue.data(
@@ -147,7 +160,9 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final navigationState = currentState.navigationState.updateSearch(searchText);
+    final navigationState = currentState.navigationState.updateSearch(
+      searchText,
+    );
     final filteredGroups = _applyFilters(currentState.groups, navigationState);
 
     state = AsyncValue.data(
@@ -180,7 +195,10 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     if (currentState == null) return;
 
     final navigationState = currentState.navigationState.toggleSort();
-    final filteredGroups = _applySorting(currentState.filteredGroups, navigationState);
+    final filteredGroups = _applySorting(
+      currentState.filteredGroups,
+      navigationState,
+    );
 
     state = AsyncValue.data(
       currentState.copyWith(
@@ -195,11 +213,19 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final groups = _generateGroups(defensivos, currentState.navigationState.tipoAgrupamento);
+    final groups = _generateGroups(
+      defensivos,
+      currentState.navigationState.tipoAgrupamento,
+    );
     final filteredGroups = _applyFilters(groups, currentState.navigationState);
-    final currentGroupItems = currentState.navigationState.isAtItemLevel && currentState.navigationState.currentGroup != null
-        ? _updateCurrentGroupItems(currentState.navigationState.currentGroup!, currentState.navigationState)
-        : <DefensivoEntity>[];
+    final currentGroupItems =
+        currentState.navigationState.isAtItemLevel &&
+                currentState.navigationState.currentGroup != null
+            ? _updateCurrentGroupItems(
+              currentState.navigationState.currentGroup!,
+              currentState.navigationState,
+            )
+            : <DefensivoEntity>[];
 
     state = AsyncValue.data(
       currentState.copyWith(
@@ -273,10 +299,11 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
 
     final group = currentState.groups.firstWhere(
       (g) => g.nome == groupName,
-      orElse: () => DefensivoGroupEntity.empty(
-        tipoAgrupamento: currentState.navigationState.tipoAgrupamento,
-        nomeGrupo: groupName,
-      ),
+      orElse:
+          () => DefensivoGroupEntity.empty(
+            tipoAgrupamento: currentState.navigationState.tipoAgrupamento,
+            nomeGrupo: groupName,
+          ),
     );
 
     if (group.hasItems) {
@@ -302,7 +329,10 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
   }
 
   /// Gera grupos a partir dos defensivos
-  List<DefensivoGroupEntity> _generateGroups(List<DefensivoEntity> defensivos, String tipoAgrupamento) {
+  List<DefensivoGroupEntity> _generateGroups(
+    List<DefensivoEntity> defensivos,
+    String tipoAgrupamento,
+  ) {
     try {
       return _groupingService.agruparDefensivos(
         defensivos: defensivos,
@@ -320,9 +350,10 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
     DrillDownNavigationState navigationState,
   ) {
     try {
-      var filteredGroups = groups.where((group) {
-        return group.nome.length >= 3;
-      }).toList();
+      var filteredGroups =
+          groups.where((group) {
+            return group.nome.length >= 3;
+          }).toList();
 
       if (navigationState.hasSearchFilter) {
         filteredGroups = _groupingService.filtrarGrupos(
@@ -361,21 +392,25 @@ class DefensivosDrillDownNotifier extends _$DefensivosDrillDownNotifier {
   ) {
     try {
       var items = List<DefensivoEntity>.from(currentGroup.itens);
-      items = items.where((item) {
-        return item.displayName.length >= 3;
-      }).toList();
+      items =
+          items.where((item) {
+            return item.displayName.length >= 3;
+          }).toList();
 
       if (navigationState.hasSearchFilter) {
         final filtroLower = navigationState.searchText.toLowerCase();
-        items = items.where((item) {
-          return item.displayName.toLowerCase().contains(filtroLower) ||
-              item.displayIngredient.toLowerCase().contains(filtroLower) ||
-              item.displayFabricante.toLowerCase().contains(filtroLower) ||
-              item.displayClass.toLowerCase().contains(filtroLower);
-        }).toList();
+        items =
+            items.where((item) {
+              return item.displayName.toLowerCase().contains(filtroLower) ||
+                  item.displayIngredient.toLowerCase().contains(filtroLower) ||
+                  item.displayFabricante.toLowerCase().contains(filtroLower) ||
+                  item.displayClass.toLowerCase().contains(filtroLower);
+            }).toList();
       }
       items.sort((a, b) {
-        final comparison = a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
+        final comparison = a.displayName.toLowerCase().compareTo(
+          b.displayName.toLowerCase(),
+        );
         return navigationState.isAscending ? comparison : -comparison;
       });
 

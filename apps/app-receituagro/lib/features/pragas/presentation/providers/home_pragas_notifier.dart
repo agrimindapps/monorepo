@@ -130,7 +130,7 @@ class HomePragasState {
 }
 
 /// Notifier para gerenciamento de estado da página Home de Pragas
-@riverpod
+@Riverpod(keepAlive: true)
 class HomePragasNotifier extends _$HomePragasNotifier {
   late final CulturaHiveRepository _culturaRepository;
 
@@ -173,10 +173,7 @@ class HomePragasNotifier extends _$HomePragasNotifier {
   Future<int> _loadCulturaData() async {
     try {
       final culturasResult = await _culturaRepository.getAll();
-      return culturasResult.fold(
-        (failure) => 0,
-        (culturas) => culturas.length,
-      );
+      return culturasResult.fold((failure) => 0, (culturas) => culturas.length);
     } catch (e) {
       return 0;
     }

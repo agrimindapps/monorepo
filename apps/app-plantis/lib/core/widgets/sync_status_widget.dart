@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../providers/solid_providers.dart';
+import '../services/plantis_sync_service.dart';
 
 /// Widget que exibe o status atual da sincronização
 /// Pode ser usado na AppBar ou em qualquer lugar da UI

@@ -52,7 +52,10 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
   Future<void> _loadInitialData() async {
     try {
       final pragaNotifier = ref.read(detalhePragaNotifierProvider.notifier);
-      final diagnosticosNotifier = ref.read(diagnosticosPragaNotifierProvider.notifier);
+      final diagnosticosNotifier = ref.read(
+        diagnosticosPragaNotifierProvider.notifier,
+      );
+
       if (widget.pragaId != null && widget.pragaId!.isNotEmpty) {
         await pragaNotifier.initializeById(widget.pragaId!);
       } else {
@@ -61,15 +64,18 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
           widget.pragaScientificName,
         );
       }
+
       final pragaState = await ref.read(detalhePragaNotifierProvider.future);
-      if (pragaState.pragaData != null && pragaState.pragaData!.idReg.isNotEmpty) {
+
+      if (pragaState.pragaData != null &&
+          pragaState.pragaData!.idReg.isNotEmpty) {
         await diagnosticosNotifier.loadDiagnosticos(
           pragaState.pragaData!.idReg,
           pragaName: widget.pragaName,
         );
       }
     } catch (e) {
-      debugPrint('❌ Erro ao carregar dados iniciais: $e');
+      // Handle error silently or log appropriately
     }
   }
 
@@ -86,40 +92,40 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
               child: pragaAsyncState.when(
-                data: (state) => Column(
-                  children: [
-                    _buildHeader(state),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          StandardTabBarWidget(
-                            tabController: _tabController,
-                            tabs: StandardTabData.pragaDetailsTabs,
-                          ),
-                          Expanded(
-                            child: TabBarView(
-                              controller: _tabController,
-                              children: [
-                                PragaInfoWidget(
-                                  pragaName: widget.pragaName,
-                                  pragaScientificName: widget.pragaScientificName,
+                data:
+                    (state) => Column(
+                      children: [
+                        _buildHeader(state),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              StandardTabBarWidget(
+                                tabController: _tabController,
+                                tabs: StandardTabData.pragaDetailsTabs,
+                              ),
+                              Expanded(
+                                child: TabBarView(
+                                  controller: _tabController,
+                                  children: [
+                                    PragaInfoWidget(
+                                      pragaName: widget.pragaName,
+                                      pragaScientificName:
+                                          widget.pragaScientificName,
+                                    ),
+                                    DiagnosticosPragaMockupWidget(
+                                      pragaName: widget.pragaName,
+                                    ),
+                                    const ComentariosPragaWidget(),
+                                  ],
                                 ),
-                                DiagnosticosPragaMockupWidget(
-                                  pragaName: widget.pragaName,
-                                ),
-                                const ComentariosPragaWidget(),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text('Erro: $error'),
-                ),
+                error: (error, stack) => Center(child: Text('Erro: $error')),
               ),
             ),
           ),
@@ -140,7 +146,8 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+      onBackPressed:
+          () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
       onRightIconPressed: () => _toggleFavorito(),
     );
   }
@@ -158,9 +165,11 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(state?.isFavorited == true
-                ? 'Adicionado aos favoritos'
-                : 'Removido dos favoritos'),
+            content: Text(
+              state?.isFavorited == true
+                  ? 'Adicionado aos favoritos'
+                  : 'Removido dos favoritos',
+            ),
             backgroundColor: Colors.green,
           ),
         );

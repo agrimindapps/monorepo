@@ -1,5 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+
+import '../../services/receita_agro_sync_service.dart';
 
 /// Módulo de Dependency Injection para sincronização do ReceitaAgro
 /// Integra ReceitaAgroSyncService com UnifiedSyncManager existente
@@ -22,7 +25,9 @@ abstract class SyncDIModule {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ Failed to initialize ReceitaAgro sync service: ${failure.message}');
+            print(
+              '⚠️ Failed to initialize ReceitaAgro sync service: ${failure.message}',
+            );
           }
         },
         (_) {
@@ -129,7 +134,9 @@ abstract class SyncDIModule {
         print('   Failed: ${stats.failedSyncs}');
         print('   Last sync: ${stats.lastSyncTime}');
         print('   Items synced: ${stats.totalItemsSynced}');
-        print('   UnifiedSyncManager: ${stats.metadata['unified_sync_manager']}');
+        print(
+          '   UnifiedSyncManager: ${stats.metadata['unified_sync_manager']}',
+        );
       }
     } catch (e) {
       if (kDebugMode) {

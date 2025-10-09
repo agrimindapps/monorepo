@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+part 'comentario_model.g.dart';
+
 /// Comentario model with Firebase sync support
 /// TypeId: 0 - Sequential numbering
 @HiveType(typeId: 0)
@@ -219,6 +221,7 @@ class ComentarioModel extends BaseSyncEntity {
       plantId: plantId ?? this.plantId,
     );
   }
+
   @override
   ComentarioModel markAsDirty() {
     return copyWith(isDirty: true, updatedAt: DateTime.now());
@@ -256,6 +259,7 @@ class ComentarioModel extends BaseSyncEntity {
       updatedAt: DateTime.now(),
     );
   }
+
   Map<String, dynamic> toJson() => toFirebaseMap();
   factory ComentarioModel.fromJson(Map<String, dynamic> json) =>
       ComentarioModel.fromFirebaseMap(json);

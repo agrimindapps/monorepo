@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
+import '../../services/gasometer_sync_service.dart';
 import '../../../features/fuel/domain/repositories/fuel_repository.dart';
 import '../../../features/maintenance/domain/repositories/maintenance_repository.dart';
 import '../../../features/vehicles/domain/repositories/vehicle_repository.dart';
@@ -29,7 +31,9 @@ abstract class SyncDIModule {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ Failed to initialize Gasometer sync service: ${failure.message}');
+            print(
+              '⚠️ Failed to initialize Gasometer sync service: ${failure.message}',
+            );
           }
         },
         (_) {
@@ -81,7 +85,9 @@ abstract class SyncDIModule {
 
       if (kDebugMode) {
         print('🔄 Starting initial sync for Gasometer...');
-        print('ℹ️ Note: Background sync is currently disabled due to Firestore indices');
+        print(
+          'ℹ️ Note: Background sync is currently disabled due to Firestore indices',
+        );
       }
 
       final result = await syncService.sync();

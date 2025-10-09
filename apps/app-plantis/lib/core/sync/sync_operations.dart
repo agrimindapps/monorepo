@@ -13,9 +13,14 @@ class SyncOperations {
 
   late StreamSubscription<ConnectivityType> _networkSubscription;
   bool _isProcessingSync = false;
+  bool _isInitialized = false;
 
-  SyncOperations(this._syncQueue, this._connectivityService) {
+  SyncOperations(this._syncQueue, this._connectivityService);
+
+  Future<void> initialize() async {
+    if (_isInitialized) return;
     _initializeNetworkListener();
+    _isInitialized = true;
   }
 
   void _initializeNetworkListener() {
@@ -71,6 +76,7 @@ class SyncOperations {
             return 1;
         }
       }
+
       final priorityComparison = getPriority(b).compareTo(getPriority(a));
       return priorityComparison != 0
           ? priorityComparison
@@ -104,11 +110,9 @@ class SyncOperations {
     }
   }
 
-  Future<void> _performUpdate(local.SyncQueueItem item) async {
-  }
+  Future<void> _performUpdate(local.SyncQueueItem item) async {}
 
-  Future<void> _performDelete(local.SyncQueueItem item) async {
-  }
+  Future<void> _performDelete(local.SyncQueueItem item) async {}
 
   void dispose() {
     _networkSubscription.cancel();

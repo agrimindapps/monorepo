@@ -95,17 +95,21 @@ class DiagnosticosPragaState {
   DiagnosticosPragaState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
 
   List<DiagnosticoModel> get filteredDiagnosticos {
     return diagnosticos.where((diagnostic) {
-      bool matchesSearch = searchQuery.isEmpty ||
+      bool matchesSearch =
+          searchQuery.isEmpty ||
           diagnostic.nome.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          diagnostic.ingredienteAtivo.toLowerCase().contains(searchQuery.toLowerCase());
+          diagnostic.ingredienteAtivo.toLowerCase().contains(
+            searchQuery.toLowerCase(),
+          );
 
-      bool matchesCulture = selectedCultura == 'Todas' ||
-          diagnostic.cultura == selectedCultura;
+      bool matchesCulture =
+          selectedCultura == 'Todas' || diagnostic.cultura == selectedCultura;
 
       return matchesSearch && matchesCulture;
     }).toList();
@@ -136,7 +140,7 @@ class DiagnosticosPragaState {
 
 /// Notifier para gerenciar diagnósticos relacionados à praga
 /// Responsabilidade única: filtros e busca de diagnósticos
-@riverpod
+@Riverpod()
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final CulturaHiveRepository _culturaRepository;
@@ -156,9 +160,13 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Carrega diagnósticos para uma praga específica por ID e nome
   Future<void> loadDiagnosticos(String pragaId, {String? pragaName}) async {
     final currentState = state.value;
-    if (currentState == null) return;
+    if (currentState == null) {
+      return;
+    }
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _diagnosticosRepository.getByPraga(pragaId);
@@ -168,7 +176,8 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: 'Erro ao carregar diagnósticos: ${failure.toString()}',
+              errorMessage:
+                  'Erro ao carregar diagnósticos: ${failure.toString()}',
               diagnosticos: [],
             ),
           );
@@ -209,7 +218,9 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
           }
 
           state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, diagnosticos: diagnosticosList).clearError(),
+            currentState
+                .copyWith(isLoading: false, diagnosticos: diagnosticosList)
+                .clearError(),
           );
         },
       );
@@ -231,8 +242,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
       if (culturaData != null && culturaData.cultura.isNotEmpty) {
         return culturaData.cultura;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return 'Não especificado';
   }
 
@@ -243,8 +253,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
       if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
         return pragaData.nomeComum;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return '';
   }
 
@@ -255,8 +264,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
       if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
         return defensivoData.nomeComum;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return '';
   }
 
@@ -265,17 +273,10 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(
-      currentState.copyWith(
-        isLoadingFilters: true,
-      ),
-    );
+    state = AsyncValue.data(currentState.copyWith(isLoadingFilters: true));
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        searchQuery: query,
-        isLoadingFilters: false,
-      ),
+      currentState.copyWith(searchQuery: query, isLoadingFilters: false),
     );
   }
 
@@ -284,17 +285,10 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(
-      currentState.copyWith(
-        isLoadingFilters: true,
-      ),
-    );
+    state = AsyncValue.data(currentState.copyWith(isLoadingFilters: true));
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        selectedCultura: cultura,
-        isLoadingFilters: false,
-      ),
+      currentState.copyWith(selectedCultura: cultura, isLoadingFilters: false),
     );
   }
 
@@ -312,10 +306,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        searchQuery: '',
-        selectedCultura: 'Todas',
-      ),
+      currentState.copyWith(searchQuery: '', selectedCultura: 'Todas'),
     );
   }
 
@@ -332,8 +323,6 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(
-      DiagnosticosPragaState.initial(),
-    );
+    state = AsyncValue.data(DiagnosticosPragaState.initial());
   }
 }

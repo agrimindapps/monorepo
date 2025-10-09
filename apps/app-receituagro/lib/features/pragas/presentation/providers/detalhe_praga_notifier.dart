@@ -98,6 +98,7 @@ class DetalhePragaState {
   DetalhePragaState clearError() {
     return copyWith(errorMessage: null);
   }
+
   bool get hasError => errorMessage != null;
   bool get hasComentarios => comentarios.isNotEmpty;
   bool get hasPragaData => pragaData != null;
@@ -106,7 +107,7 @@ class DetalhePragaState {
 
 /// Notifier para gerenciar estado da página de detalhes da praga
 /// Responsabilidade única: coordenar dados e estado da praga
-@riverpod
+@Riverpod(keepAlive: true)
 class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final FavoritosRepositorySimplified _favoritosRepository;
   late final PragasHiveRepository _pragasRepository;
@@ -160,7 +161,10 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   }
 
   /// Versão assíncrona de initialize que aguarda dados estarem disponíveis
-  Future<void> initializeAsync(String pragaName, String pragaScientificName) async {
+  Future<void> initializeAsync(
+    String pragaName,
+    String pragaScientificName,
+  ) async {
     final currentState = state.value;
     if (currentState == null) return;
 
@@ -193,8 +197,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
   /// Initialize usando ID da praga para melhor precisão
   Future<void> initializeById(String pragaId) async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    // Aguardar o estado inicial ser carregado
+    await state;
+    final currentState = state.requireValue;
 
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
@@ -202,17 +207,12 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       final allPragasResult = await _pragasRepository.getAll();
       PragasHive? pragaData;
 
-      allPragasResult.fold(
-        (failure) {
-          pragaData = null;
-        },
-        (allPragas) {
-          final matchingPragas = allPragas.where(
-            (PragasHive p) => p.idReg == pragaId || p.objectId == pragaId,
-          );
-          pragaData = matchingPragas.isNotEmpty ? matchingPragas.first : null;
-        },
-      );
+      allPragasResult.fold((failure) => pragaData = null, (allPragas) {
+        final matchingPragas = allPragas.where(
+          (PragasHive p) => p.idReg == pragaId || p.objectId == pragaId,
+        );
+        pragaData = matchingPragas.isNotEmpty ? matchingPragas.first : null;
+      });
 
       if (pragaData != null) {
         state = AsyncValue.data(
@@ -256,7 +256,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         pragaData = null;
       },
       (allPragas) {
-        final pragas = allPragas.where((PragasHive p) => p.nomeComum == currentState.pragaName);
+        final pragas = allPragas.where(
+          (PragasHive p) => p.nomeComum == currentState.pragaName,
+        );
         pragaData = pragas.isNotEmpty ? pragas.first : null;
       },
     );
@@ -264,20 +266,20 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito(
+        'praga',
+        itemId,
+      );
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragaData: pragaData,
-          isFavorited: isFavorited,
-        ),
+        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
       );
     } catch (e) {
-      final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito(
+        'praga',
+        itemId,
+      );
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragaData: pragaData,
-          isFavorited: isFavorited,
-        ),
+        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
       );
     }
   }
@@ -295,7 +297,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         pragaData = null;
       },
       (allPragas) {
-        final pragas = allPragas.where((PragasHive p) => p.nomeComum == currentState.pragaName);
+        final pragas = allPragas.where(
+          (PragasHive p) => p.nomeComum == currentState.pragaName,
+        );
         pragaData = pragas.isNotEmpty ? pragas.first : null;
       },
     );
@@ -303,20 +307,20 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final itemId = pragaData?.idReg ?? currentState.pragaName;
 
     try {
-      final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito(
+        'praga',
+        itemId,
+      );
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragaData: pragaData,
-          isFavorited: isFavorited,
-        ),
+        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
       );
     } catch (e) {
-      final isFavorited = await _favoritosRepository.isFavorito('praga', itemId);
+      final isFavorited = await _favoritosRepository.isFavorito(
+        'praga',
+        itemId,
+      );
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragaData: pragaData,
-          isFavorited: isFavorited,
-        ),
+        currentState.copyWith(pragaData: pragaData, isFavorited: isFavorited),
       );
     }
   }
@@ -330,23 +334,23 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       PragasInfHive? pragaInfo;
       PlantasInfHive? plantaInfo;
       if (currentState.pragaData!.tipoPraga == '1') {
-        pragaInfo = await _pragasInfRepository.findByIdReg(currentState.pragaData!.idReg);
-      }
-      else if (currentState.pragaData!.tipoPraga == '3') {
-        plantaInfo = await _plantasInfRepository.findByIdReg(currentState.pragaData!.idReg);
-      }
-      else if (currentState.pragaData!.tipoPraga == '2') {
-        pragaInfo = await _pragasInfRepository.findByIdReg(currentState.pragaData!.idReg);
+        pragaInfo = await _pragasInfRepository.findByIdReg(
+          currentState.pragaData!.idReg,
+        );
+      } else if (currentState.pragaData!.tipoPraga == '3') {
+        plantaInfo = await _plantasInfRepository.findByIdReg(
+          currentState.pragaData!.idReg,
+        );
+      } else if (currentState.pragaData!.tipoPraga == '2') {
+        pragaInfo = await _pragasInfRepository.findByIdReg(
+          currentState.pragaData!.idReg,
+        );
       }
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragaInfo: pragaInfo,
-          plantaInfo: plantaInfo,
-        ),
+        currentState.copyWith(pragaInfo: pragaInfo, plantaInfo: plantaInfo),
       );
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   /// Carrega status premium do usuário
@@ -362,14 +366,17 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   /// Configura listener para mudanças automáticas no status premium
   void _setupPremiumStatusListener() {
     _premiumStatusSubscription?.cancel();
-    _premiumStatusSubscription = PremiumStatusNotifier.instance.premiumStatusStream.listen(
-      (isPremiumStatus) {
-        final currentState = state.value;
-        if (currentState != null) {
-          state = AsyncValue.data(currentState.copyWith(isPremium: isPremiumStatus));
-        }
-      },
-    );
+    _premiumStatusSubscription = PremiumStatusNotifier
+        .instance
+        .premiumStatusStream
+        .listen((isPremiumStatus) {
+          final currentState = state.value;
+          if (currentState != null) {
+            state = AsyncValue.data(
+              currentState.copyWith(isPremium: isPremiumStatus),
+            );
+          }
+        });
   }
 
   /// Carrega comentários da praga
@@ -386,10 +393,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       );
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoadingComments: false,
-          comentarios: comentarios,
-        ).clearError(),
+        currentState
+            .copyWith(isLoadingComments: false, comentarios: comentarios)
+            .clearError(),
       );
     } catch (e) {
       state = AsyncValue.data(
@@ -408,15 +414,20 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
     if (!_comentariosService.isValidContent(content)) {
       state = AsyncValue.data(
-        currentState.copyWith(errorMessage: _comentariosService.getValidationErrorMessage()),
+        currentState.copyWith(
+          errorMessage: _comentariosService.getValidationErrorMessage(),
+        ),
       );
       return false;
     }
 
-    if (!_comentariosService.canAddComentario(currentState.comentarios.length)) {
+    if (!_comentariosService.canAddComentario(
+      currentState.comentarios.length,
+    )) {
       state = AsyncValue.data(
         currentState.copyWith(
-          errorMessage: 'Limite de comentários atingido. Assine o plano premium para mais.',
+          errorMessage:
+              'Limite de comentários atingido. Assine o plano premium para mais.',
         ),
       );
       return false;
@@ -431,7 +442,10 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         ferramenta: 'Pragas - ${currentState.pragaName}',
-        pkIdentificador: currentState.pragaName.toLowerCase().replaceAll(' ', '_'),
+        pkIdentificador: currentState.pragaName.toLowerCase().replaceAll(
+          ' ',
+          '_',
+        ),
         status: true,
       );
 
@@ -459,7 +473,8 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     try {
       await _comentariosService.deleteComentario(commentId);
 
-      final updatedComentarios = currentState.comentarios.where((c) => c.id != commentId).toList();
+      final updatedComentarios =
+          currentState.comentarios.where((c) => c.id != commentId).toList();
 
       state = AsyncValue.data(
         currentState.copyWith(comentarios: updatedComentarios).clearError(),
@@ -480,46 +495,59 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
     final wasAlreadyFavorited = currentState.isFavorited;
     final itemId = currentState.itemId;
-    state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited));
+    state = AsyncValue.data(
+      currentState.copyWith(isFavorited: !wasAlreadyFavorited),
+    );
 
     try {
-      final success = await _favoritosRepository.toggleFavorito('praga', itemId);
+      final success = await _favoritosRepository.toggleFavorito(
+        'praga',
+        itemId,
+      );
 
       if (!success) {
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,
-            errorMessage: 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+            errorMessage:
+                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
           ),
         );
         return false;
       }
 
-      state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError());
+      state = AsyncValue.data(
+        currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError(),
+      );
       return true;
     } catch (e) {
       try {
-        final success = wasAlreadyFavorited
-            ? await _favoritosRepository.removeFavorito('praga', itemId)
-            : await _favoritosRepository.addFavorito('praga', itemId);
+        final success =
+            wasAlreadyFavorited
+                ? await _favoritosRepository.removeFavorito('praga', itemId)
+                : await _favoritosRepository.addFavorito('praga', itemId);
 
         if (!success) {
           state = AsyncValue.data(
             currentState.copyWith(
               isFavorited: wasAlreadyFavorited,
-              errorMessage: 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+              errorMessage:
+                  'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
             ),
           );
           return false;
         }
 
-        state = AsyncValue.data(currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError());
+        state = AsyncValue.data(
+          currentState.copyWith(isFavorited: !wasAlreadyFavorited).clearError(),
+        );
         return true;
       } catch (fallbackError) {
         state = AsyncValue.data(
           currentState.copyWith(
             isFavorited: wasAlreadyFavorited,
-            errorMessage: 'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
+            errorMessage:
+                'Erro ao ${wasAlreadyFavorited ? 'remover' : 'adicionar'} favorito',
           ),
         );
         return false;

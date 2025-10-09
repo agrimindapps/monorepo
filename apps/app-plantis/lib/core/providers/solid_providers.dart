@@ -8,6 +8,7 @@ import '../services/image_management_service.dart';
 import '../services/plants_care_calculator.dart';
 import '../services/plants_data_service.dart';
 import '../services/plants_filter_service.dart';
+import '../services/plantis_sync_service.dart';
 import 'state/plant_form_state_manager.dart';
 import 'state/plants_state_manager.dart';
 

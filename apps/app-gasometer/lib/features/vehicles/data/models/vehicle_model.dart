@@ -7,8 +7,8 @@ import '../../domain/entities/vehicle_entity.dart';
 part 'vehicle_model.g.dart';
 
 /// Vehicle model with Firebase sync support
-/// TypeId: 0 - New sequential numbering
-@HiveType(typeId: 0)
+/// TypeId: 10 - Gasometer range (10-19) to avoid conflicts with other apps
+@HiveType(typeId: 10)
 class VehicleModel extends BaseSyncModel {
   VehicleModel({
     required this.id,

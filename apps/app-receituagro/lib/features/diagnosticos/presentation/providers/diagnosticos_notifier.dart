@@ -283,8 +283,14 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
   /// Busca diagnósticos por defensivo
   Future<void> getDiagnosticosByDefensivo(String idDefensivo, {String? nomeDefensivo}) async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    print('🔍 [DEBUG] getDiagnosticosByDefensivo - idDefensivo: $idDefensivo');
+    print('🔍 [DEBUG] getDiagnosticosByDefensivo - nomeDefensivo: $nomeDefensivo');
+
+    // CORREÇÃO: Aguarda a inicialização do provider
+    await future;
+
+    final currentState = state.requireValue;
+    print('✅ [DEBUG] State inicializado corretamente');
 
     state = AsyncValue.data(
       currentState
@@ -296,19 +302,26 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
+      print('🔍 [DEBUG] Chamando use case _getDiagnosticosByDefensivoUseCase...');
       final result = await _getDiagnosticosByDefensivoUseCase(idDefensivo);
+      print('✅ [DEBUG] Use case retornou resultado');
+
       result.fold(
         (failure) {
+          print('❌ [DEBUG] Failure: ${failure.message}');
+          final updatedState = state.requireValue;
           state = AsyncValue.data(
-            currentState.copyWith(
+            updatedState.copyWith(
               isLoading: false,
               errorMessage: failure.message,
             ),
           );
         },
         (diagnosticos) {
+          print('✅ [DEBUG] Success: ${diagnosticos.length} diagnósticos encontrados');
+          final updatedState = state.requireValue;
           state = AsyncValue.data(
-            currentState.copyWith(
+            updatedState.copyWith(
               isLoading: false,
               diagnosticos: diagnosticos,
             ).clearError(),
@@ -316,8 +329,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
       );
     } catch (e) {
+      print('❌ [DEBUG] Exception: $e');
+      final updatedState = state.requireValue;
       state = AsyncValue.data(
-        currentState.copyWith(
+        updatedState.copyWith(
           isLoading: false,
           errorMessage: e.toString(),
         ),
@@ -327,8 +342,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
   /// Busca diagnósticos por cultura
   Future<void> getDiagnosticosByCultura(String idCultura, {String? nomeCultura}) async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    // CORREÇÃO: Aguarda a inicialização do provider
+    await future;
+
+    final currentState = state.requireValue;
 
     state = AsyncValue.data(
       currentState
@@ -371,8 +388,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
   /// Busca diagnósticos por praga
   Future<void> getDiagnosticosByPraga(String idPraga, {String? nomePraga}) async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    // CORREÇÃO: Aguarda a inicialização do provider
+    await future;
+
+    final currentState = state.requireValue;
 
     state = AsyncValue.data(
       currentState

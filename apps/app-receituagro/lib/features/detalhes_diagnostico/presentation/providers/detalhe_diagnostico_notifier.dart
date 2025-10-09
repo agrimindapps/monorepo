@@ -106,6 +106,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
   /// Load diagnostico data
   Future<void> loadDiagnosticoData(String diagnosticoId) async {
+    print('🔍 [DEBUG] loadDiagnosticoData - Iniciando carregamento para ID: $diagnosticoId');
     final currentState = state.value;
     if (currentState == null) return;
 
@@ -114,21 +115,32 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     );
 
     try {
+      print('🔍 [DEBUG] Buscando diagnóstico no repository...');
       final result = await _diagnosticosRepository.getById(diagnosticoId);
 
       await result.fold(
         (failure) async {
+          print('❌ [DEBUG] Erro no repository: $failure');
           throw Exception('Erro no repository Clean Architecture: $failure');
         },
         (diagnosticoEntity) async {
+          print('✅ [DEBUG] DiagnosticoEntity encontrado: ${diagnosticoEntity != null}');
           if (diagnosticoEntity != null) {
+            print('🔍 [DEBUG] Buscando diagnosticoHive no Hive...');
             final diagnosticoHive = await _hiveRepository.getByIdOrObjectId(
               diagnosticoId,
             );
+            print('✅ [DEBUG] DiagnosticoHive encontrado: ${diagnosticoHive != null}');
+
             final diagnosticoData =
                 diagnosticoHive != null
                     ? await diagnosticoHive.toDataMap()
                     : <String, String>{};
+
+            print('📊 [DEBUG] diagnosticoData keys: ${diagnosticoData.keys.toList()}');
+            print('📊 [DEBUG] diagnosticoData formulacao: ${diagnosticoData['formulacao']}');
+            print('📊 [DEBUG] diagnosticoData modoAcao: ${diagnosticoData['modoAcao']}');
+            print('📊 [DEBUG] diagnosticoData mapa: ${diagnosticoData['mapa']}');
 
             state = AsyncValue.data(
               currentState

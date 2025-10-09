@@ -10,8 +10,10 @@ class DiagnosticoDetalhesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('🎨 [DEBUG] DiagnosticoDetalhesWidget.build');
+    print('📊 [DEBUG] diagnosticoData: $diagnosticoData');
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -35,6 +37,8 @@ class DiagnosticoDetalhesWidget extends StatelessWidget {
       {'label': 'Modo de Ação', 'value': diagnosticoData['modoAcao'] ?? 'N/A', 'icon': Icons.bolt},
       {'label': 'Registro MAPA', 'value': diagnosticoData['mapa'] ?? 'N/A', 'icon': Icons.verified},
     ];
+
+    print('🎨 [DEBUG] diagnosticoItems: $diagnosticoItems');
 
     return Column(
       children: diagnosticoItems.map((item) => _buildInfoCard(

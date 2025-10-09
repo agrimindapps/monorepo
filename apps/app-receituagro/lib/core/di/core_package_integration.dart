@@ -38,9 +38,13 @@ class CorePackageIntegration {
       _sl.registerLazySingleton<core.EnhancedConnectivityService>(
         () => core.EnhancedConnectivityService(),
       );
-      if (kDebugMode) print('✅ Core Package: Enhanced Connectivity Service registered');
+      if (kDebugMode)
+        print('✅ Core Package: Enhanced Connectivity Service registered');
     } catch (e) {
-      if (kDebugMode) print('❌ Core Package: Enhanced Connectivity Service registration failed - $e');
+      if (kDebugMode)
+        print(
+          '❌ Core Package: Enhanced Connectivity Service registration failed - $e',
+        );
     }
   }
 
@@ -51,9 +55,13 @@ class CorePackageIntegration {
       _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
       final initResult = await hiveManager.initialize('receituagro');
       if (!initResult.isError) {
-        if (kDebugMode) print('✅ Core Package: Hive Manager registered and initialized');
+        if (kDebugMode)
+          print('✅ Core Package: Hive Manager registered and initialized');
       } else {
-        if (kDebugMode) print('❌ Core Package: Hive Manager initialization failed - ${initResult.error}');
+        if (kDebugMode)
+          print(
+            '❌ Core Package: Hive Manager initialization failed - ${initResult.error}',
+          );
       }
     } catch (e) {
       if (kDebugMode) print('IHiveManager registration failed: $e');
@@ -72,22 +80,8 @@ class CorePackageIntegration {
     } catch (e) {
       if (kDebugMode) print('IFileRepository registration failed: $e');
     }
-    try {
-      _sl.registerLazySingleton<core.IAuthRepository>(
-        () => core.FirebaseAuthService(
-          googleSignIn: kIsWeb ? null : core.GoogleSignIn(scopes: ['email']),
-        ),
-      );
-    } catch (e) {
-      if (kDebugMode) print('IAuthRepository registration failed: $e');
-    }
-    try {
-      _sl.registerLazySingleton<core.IStorageRepository>(
-        () => core.FirebaseStorageService(),
-      );
-    } catch (e) {
-      if (kDebugMode) print('IStorageRepository registration failed: $e');
-    }
+    // IAuthRepository is already registered by core.InjectionContainer.init()
+    // IStorageRepository is already registered by core.InjectionContainer.init()
   }
 
   /// Register enhanced services from Core Package
@@ -138,13 +132,8 @@ class CorePackageIntegration {
 
   /// Register network and connectivity services
   static Future<void> _registerNetworkAndConnectivity() async {
-    try {
-      _sl.registerLazySingleton<core.EnhancedConnectivityService>(
-        () => core.EnhancedConnectivityService(),
-      );
-    } catch (e) {
-      if (kDebugMode) print('EnhancedConnectivityService registration failed: $e');
-    }
+    // EnhancedConnectivityService is already registered in _registerConnectivityServices()
+    // Skip duplicate registration
     try {
       _sl.registerLazySingleton<core.HttpClientService>(
         () => core.HttpClientService(),
@@ -175,7 +164,10 @@ class CorePackageIntegration {
   /// Register sync and Firebase services
   static Future<void> _registerSyncAndFirebase() async {
     try {
-      if (kDebugMode) print('SelectiveSyncService registration disabled - constructor requires hiveStorage parameter');
+      if (kDebugMode)
+        print(
+          'SelectiveSyncService registration disabled - constructor requires hiveStorage parameter',
+        );
     } catch (e) {
       if (kDebugMode) print('SelectiveSyncService registration failed: $e');
     }
@@ -184,7 +176,10 @@ class CorePackageIntegration {
   /// Register development and debugging tools
   static Future<void> _registerDevelopmentTools() async {
     if (kDebugMode) {
-        if (kDebugMode) print('DatabaseInspectorService registration disabled - constructor may require parameters');
+      if (kDebugMode)
+        print(
+          'DatabaseInspectorService registration disabled - constructor may require parameters',
+        );
     }
   }
 
@@ -203,10 +198,14 @@ class CorePackageIntegration {
       if (_sl.isRegistered<core.ValidationService>()) {
         validationService.initialize(_sl<core.ValidationService>());
       } else {
-        if (kDebugMode) print('Core ValidationService not available for ReceitaAgro Validation initialization');
+        if (kDebugMode)
+          print(
+            'Core ValidationService not available for ReceitaAgro Validation initialization',
+          );
       }
     } catch (e) {
-      if (kDebugMode) print('ReceitaAgro Validation Service initialization failed: $e');
+      if (kDebugMode)
+        print('ReceitaAgro Validation Service initialization failed: $e');
     }
   }
 
@@ -214,22 +213,26 @@ class CorePackageIntegration {
   static Map<String, bool> getIntegrationStatus() {
     final services = {
       'EnhancedLoggingService': _sl.isRegistered<core.EnhancedLoggingService>(),
-      'EnhancedSecurityService': _sl.isRegistered<core.EnhancedSecurityService>(),
+      'EnhancedSecurityService':
+          _sl.isRegistered<core.EnhancedSecurityService>(),
       'SecurityService': _sl.isRegistered<core.SecurityService>(),
       'PerformanceService': _sl.isRegistered<core.IPerformanceRepository>(),
       'ValidationService': _sl.isRegistered<core.ValidationService>(),
-      'EnhancedConnectivityService': _sl.isRegistered<core.EnhancedConnectivityService>(),
+      'EnhancedConnectivityService':
+          _sl.isRegistered<core.EnhancedConnectivityService>(),
       'HttpClientService': _sl.isRegistered<core.HttpClientService>(),
       'EnhancedImageService': _sl.isRegistered<core.EnhancedImageService>(),
       'MonorepoAuthCache': _sl.isRegistered<core.MonorepoAuthCache>(),
       'DatabaseInspectorService': false, // Constructor requires parameters
-      'SelectiveSyncService': false, // Constructor requires hiveStorage parameter
+      'SelectiveSyncService':
+          false, // Constructor requires hiveStorage parameter
       'SyncFirebaseService': false, // Uses factory pattern, not registered
       'EnhancedStorageService': _sl.isRegistered<core.EnhancedStorageService>(),
       'FileManagerService': _sl.isRegistered<core.FileManagerService>(),
-      'ReceitaAgroValidationService': _sl.isRegistered<ReceitaAgroValidationService>(),
+      'ReceitaAgroValidationService':
+          _sl.isRegistered<ReceitaAgroValidationService>(),
     };
-    
+
     return services;
   }
 
@@ -237,17 +240,20 @@ class CorePackageIntegration {
   static Map<String, dynamic> getIntegrationStats() {
     final status = getIntegrationStatus();
     final totalServices = status.length;
-    final integratedServices = status.values.where((integrated) => integrated).length;
-    final integrationPercentage = (integratedServices / totalServices * 100).round();
-    
+    final integratedServices =
+        status.values.where((integrated) => integrated).length;
+    final integrationPercentage =
+        (integratedServices / totalServices * 100).round();
+
     return {
       'total_services': totalServices,
       'integrated_services': integratedServices,
       'integration_percentage': integrationPercentage,
-      'missing_services': status.entries
-          .where((entry) => !entry.value)
-          .map((entry) => entry.key)
-          .toList(),
+      'missing_services':
+          status.entries
+              .where((entry) => !entry.value)
+              .map((entry) => entry.key)
+              .toList(),
     };
   }
 
@@ -255,11 +261,11 @@ class CorePackageIntegration {
   static bool validateCriticalServicesIntegration() {
     final criticalServices = [
       'EnhancedLoggingService',
-      'ValidationService', 
+      'ValidationService',
       'MonorepoAuthCache',
       'EnhancedStorageService',
     ];
-    
+
     final status = getIntegrationStatus();
     return criticalServices.every((service) => status[service] == true);
   }
@@ -268,26 +274,30 @@ class CorePackageIntegration {
   static String generateIntegrationReport() {
     final stats = getIntegrationStats();
     final status = getIntegrationStatus();
-    
+
     final buffer = StringBuffer();
     buffer.writeln('=== RECEITUAGRO CORE PACKAGE INTEGRATION REPORT ===');
-    buffer.writeln('Integration: ${stats['integration_percentage']}% (${stats['integrated_services']}/${stats['total_services']})');
+    buffer.writeln(
+      'Integration: ${stats['integration_percentage']}% (${stats['integrated_services']}/${stats['total_services']})',
+    );
     buffer.writeln('');
-    
+
     buffer.writeln('INTEGRATED SERVICES:');
     status.entries
         .where((entry) => entry.value)
         .forEach((entry) => buffer.writeln('✅ ${entry.key}'));
-    
+
     buffer.writeln('');
     buffer.writeln('MISSING SERVICES:');
     status.entries
         .where((entry) => !entry.value)
         .forEach((entry) => buffer.writeln('❌ ${entry.key}'));
-    
+
     buffer.writeln('');
-    buffer.writeln('CRITICAL SERVICES STATUS: ${validateCriticalServicesIntegration() ? "PASSED" : "FAILED"}');
-    
+    buffer.writeln(
+      'CRITICAL SERVICES STATUS: ${validateCriticalServicesIntegration() ? "PASSED" : "FAILED"}',
+    );
+
     return buffer.toString();
   }
 
@@ -298,40 +308,37 @@ class CorePackageIntegration {
       _sl.registerLazySingleton<core.IHiveManager>(() => hiveManager);
       final initResult = await hiveManager.initialize('receituagro');
       if (!initResult.isError) {
-        if (kDebugMode) print('✅ Core Package: Hive Manager registered and initialized');
+        if (kDebugMode)
+          print('✅ Core Package: Hive Manager registered and initialized');
       } else {
-        if (kDebugMode) print('❌ Core Package: Hive Manager initialization failed - ${initResult.error}');
+        if (kDebugMode)
+          print(
+            '❌ Core Package: Hive Manager initialization failed - ${initResult.error}',
+          );
       }
     } catch (e) {
-      if (kDebugMode) print('❌ Core Package: Hive Manager registration failed - $e');
+      if (kDebugMode)
+        print('❌ Core Package: Hive Manager registration failed - $e');
     }
-    try {
-      _sl.registerLazySingleton<core.IAuthRepository>(
-        () => core.FirebaseAuthService(),
+    // IAuthRepository is already registered by core.InjectionContainer.init()
+    // Skip registration to avoid duplicate registration error
+    if (kDebugMode)
+      print(
+        'ℹ️ Core Package: Firebase Auth Service already registered by core package',
       );
-      if (kDebugMode) print('✅ Core Package: Firebase Auth Service registered');
-    } catch (e) {
-      if (kDebugMode) print('❌ Core Package: Firebase Auth Service registration failed - $e');
-    }
   }
 
   /// Register analytics services from Core Package
   static Future<void> _registerAnalyticsServices() async {
-    try {
-      _sl.registerLazySingleton<core.IAnalyticsRepository>(
-        () => core.FirebaseAnalyticsService(),
+    // IAnalyticsRepository and ICrashlyticsRepository are already registered by core.InjectionContainer.init()
+    // Skip registration to avoid duplicate registration error
+    if (kDebugMode) {
+      print(
+        'ℹ️ Core Package: Firebase Analytics Service already registered by core package',
       );
-      if (kDebugMode) print('✅ Core Package: Firebase Analytics Service registered');
-    } catch (e) {
-      if (kDebugMode) print('❌ Core Package: Firebase Analytics Service registration failed - $e');
-    }
-    try {
-      _sl.registerLazySingleton<core.ICrashlyticsRepository>(
-        () => core.FirebaseCrashlyticsService(),
+      print(
+        'ℹ️ Core Package: Firebase Crashlytics Service already registered by core package',
       );
-      if (kDebugMode) print('✅ Core Package: Firebase Crashlytics Service registered');
-    } catch (e) {
-      if (kDebugMode) print('❌ Core Package: Firebase Crashlytics Service registration failed - $e');
     }
   }
 
@@ -345,7 +352,8 @@ class CorePackageIntegration {
         if (kDebugMode) print('✅ Core Package: Performance Service registered');
       }
     } catch (e) {
-      if (kDebugMode) print('❌ Core Package: Performance Service registration failed - $e');
+      if (kDebugMode)
+        print('❌ Core Package: Performance Service registration failed - $e');
     }
   }
 
@@ -359,10 +367,16 @@ class CorePackageIntegration {
             crashlyticsRepository: _sl<core.ICrashlyticsRepository>(),
           ),
         );
-        if (kDebugMode) print('✅ ReceitaAgro: Analytics Service wrapper registered successfully');
+        if (kDebugMode)
+          print(
+            '✅ ReceitaAgro: Analytics Service wrapper registered successfully',
+          );
       }
     } catch (e) {
-      if (kDebugMode) print('❌ ReceitaAgro: Analytics Service wrapper registration failed - $e');
+      if (kDebugMode)
+        print(
+          '❌ ReceitaAgro: Analytics Service wrapper registration failed - $e',
+        );
       rethrow;
     }
     if (!_sl.isRegistered<AuthNotifier>()) {
@@ -371,11 +385,15 @@ class CorePackageIntegration {
           authRepository: _sl<core.IAuthRepository>(),
           deviceService: _sl<DeviceIdentityService>(),
           analytics: _sl<ReceitaAgroAnalyticsService>(),
-          enhancedAccountDeletionService: _sl<core.EnhancedAccountDeletionService>(),
+          enhancedAccountDeletionService:
+              _sl<core.EnhancedAccountDeletionService>(),
         ),
       );
     }
 
-    if (kDebugMode) print('✅ ReceitaAgro: Auth services registered successfully (Provider + Riverpod)');
+    if (kDebugMode)
+      print(
+        '✅ ReceitaAgro: Auth services registered successfully (Provider + Riverpod)',
+      );
   }
 }

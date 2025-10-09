@@ -5,8 +5,8 @@ import '../../../../core/data/models/base_sync_model.dart';
 part 'maintenance_model.g.dart';
 
 /// Maintenance (Manutenção) model with Firebase sync support
-/// TypeId: 4 - New sequential numbering
-@HiveType(typeId: 4)
+/// TypeId: 14 - Gasometer range (10-19) to avoid conflicts with other apps
+@HiveType(typeId: 14)
 class MaintenanceModel extends BaseSyncModel {
 
   MaintenanceModel({

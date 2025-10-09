@@ -5,8 +5,8 @@ import '../../../../core/data/models/base_sync_model.dart';
 part 'fuel_supply_model.g.dart';
 
 /// Fuel Supply (Abastecimento) model with Firebase sync support
-/// TypeId: 1 - New sequential numbering
-@HiveType(typeId: 1)
+/// TypeId: 11 - Gasometer range (10-19) to avoid conflicts with other apps
+@HiveType(typeId: 11)
 class FuelSupplyModel extends BaseSyncModel {
 
   FuelSupplyModel({

@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Failure;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../core/errors/failures.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 
@@ -321,13 +320,9 @@ enum SyncStatus { starting, inProgress, completed, error }
 
 /// Failure específico para sync
 class SyncFailure extends Failure {
-  final String _message;
-
-  const SyncFailure(this._message);
-
-  @override
-  String get message => _message;
+  const SyncFailure(String message)
+    : super(message: message, code: 'SYNC_ERROR');
 
   @override
-  List<Object> get props => [_message];
+  List<Object?> get props => [message, code];
 }

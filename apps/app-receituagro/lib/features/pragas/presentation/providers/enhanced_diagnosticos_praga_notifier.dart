@@ -111,11 +111,9 @@ class EnhancedDiagnosticosPragaState {
   }
 
   EnhancedDiagnosticosPragaState invalidateGroupingCache() {
-    return copyWith(
-      cachedGrouping: {},
-      lastGroupingUpdate: null,
-    );
+    return copyWith(cachedGrouping: {}, lastGroupingUpdate: null);
   }
+
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
   bool get hasFilters => searchQuery.isNotEmpty || selectedCultura != 'Todas';
@@ -127,19 +125,22 @@ class EnhancedDiagnosticosPragaState {
   List<DiagnosticoEntity> _applyFilters() {
     var filtered = List<DiagnosticoEntity>.from(diagnosticos);
     if (searchQuery.isNotEmpty) {
-      filtered = filtered.where((diag) {
-        final query = searchQuery.toLowerCase();
-        return (diag.nomeDefensivo?.toLowerCase().contains(query) ?? false) ||
-            (diag.nomeCultura?.toLowerCase().contains(query) ?? false) ||
-            (diag.nomePraga?.toLowerCase().contains(query) ?? false) ||
-            diag.idDefensivo.toLowerCase().contains(query);
-      }).toList();
+      filtered =
+          filtered.where((diag) {
+            final query = searchQuery.toLowerCase();
+            return (diag.nomeDefensivo?.toLowerCase().contains(query) ??
+                    false) ||
+                (diag.nomeCultura?.toLowerCase().contains(query) ?? false) ||
+                (diag.nomePraga?.toLowerCase().contains(query) ?? false) ||
+                diag.idDefensivo.toLowerCase().contains(query);
+          }).toList();
     }
     if (selectedCultura != 'Todas') {
-      filtered = filtered.where((diag) {
-        final culturaNome = diag.nomeCultura ?? '';
-        return culturaNome == selectedCultura;
-      }).toList();
+      filtered =
+          filtered.where((diag) {
+            final culturaNome = diag.nomeCultura ?? '';
+            return culturaNome == selectedCultura;
+          }).toList();
     }
 
     return filtered;
@@ -147,7 +148,8 @@ class EnhancedDiagnosticosPragaState {
 
   List<DiagnosticoEntity> get filteredDiagnosticos => _applyFilters();
 
-  Map<String, List<DiagnosticoEntity>> get groupedDiagnosticos => cachedGrouping;
+  Map<String, List<DiagnosticoEntity>> get groupedDiagnosticos =>
+      cachedGrouping;
 
   DiagnosticosStats get stats {
     final grouping = groupedDiagnosticos;
@@ -156,9 +158,13 @@ class EnhancedDiagnosticosPragaState {
       total: totalDiagnosticos,
       filtered: filteredCount,
       groups: grouping.length,
-      avgGroupSize: grouping.isNotEmpty
-          ? grouping.values.map((list) => list.length).reduce((a, b) => a + b) / grouping.length
-          : 0.0,
+      avgGroupSize:
+          grouping.isNotEmpty
+              ? grouping.values
+                      .map((list) => list.length)
+                      .reduce((a, b) => a + b) /
+                  grouping.length
+              : 0.0,
       hasFilters: hasFilters,
       cacheHitRate: 0.0,
     );
@@ -173,8 +179,9 @@ class EnhancedDiagnosticosPragaState {
 
 /// Provider aprimorado para gerenciar diagnósticos relacionados à praga
 /// Utiliza os novos serviços centralizados
-@riverpod
-class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotifier {
+@Riverpod(keepAlive: true)
+class EnhancedDiagnosticosPragaNotifier
+    extends _$EnhancedDiagnosticosPragaNotifier {
   late final IDiagnosticosRepository _repository;
   late final DiagnosticoEntityResolver _resolver;
   late final DiagnosticoGroupingService _groupingService;
@@ -192,9 +199,7 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
 
   /// Inicializa o provider
   Future<void> initialize() async {
-    try {
-    } catch (e) {
-    }
+    try {} catch (e) {}
   }
 
   /// Carrega diagnósticos para uma praga específica por ID
@@ -205,11 +210,13 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
     final pragaName = await _resolver.resolvePragaNome(idPraga: pragaId);
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        isLoading: true,
-        currentPragaId: pragaId,
-        currentPragaName: pragaName,
-      ).clearError(),
+      currentState
+          .copyWith(
+            isLoading: true,
+            currentPragaId: pragaId,
+            currentPragaName: pragaName,
+          )
+          .clearError(),
     );
 
     try {
@@ -220,16 +227,16 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: 'Erro ao carregar diagnósticos: ${failure.toString()}',
+              errorMessage:
+                  'Erro ao carregar diagnósticos: ${failure.toString()}',
             ),
           );
         },
         (entities) async {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              diagnosticos: entities,
-            ).clearError(),
+            currentState
+                .copyWith(isLoading: false, diagnosticos: entities)
+                .clearError(),
           );
           await _updateAvailableCulturas();
         },
@@ -269,28 +276,23 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
 
         for (final id in ids) {
           final result = await _repository.getById(id);
-          result.fold(
-            (failure) => null,
-            (entity) {
-              if (entity != null) filteredResults.add(entity);
-            },
-          );
+          result.fold((failure) => null, (entity) {
+            if (entity != null) filteredResults.add(entity);
+          });
         }
 
         state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            diagnosticos: filteredResults,
-          ).clearError(),
+          currentState
+              .copyWith(isLoading: false, diagnosticos: filteredResults)
+              .clearError(),
         );
         await _updateAvailableCulturas();
         updateSearchQuery(query);
       } else {
         state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            diagnosticos: [],
-          ).clearError(),
+          currentState
+              .copyWith(isLoading: false, diagnosticos: [])
+              .clearError(),
         );
         updateSearchQuery(query);
       }
@@ -310,10 +312,9 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        searchQuery: query,
-        isLoadingFilters: false,
-      ).invalidateGroupingCache(),
+      currentState
+          .copyWith(searchQuery: query, isLoadingFilters: false)
+          .invalidateGroupingCache(),
     );
   }
 
@@ -323,10 +324,9 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        selectedCultura: cultura,
-        isLoadingFilters: false,
-      ).invalidateGroupingCache(),
+      currentState
+          .copyWith(selectedCultura: cultura, isLoadingFilters: false)
+          .invalidateGroupingCache(),
     );
   }
 
@@ -334,7 +334,8 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
   Future<void> updateGroupings() async {
     final currentState = state.value;
     if (currentState == null) return;
-    if (currentState.isGroupingCacheValid() && currentState.cachedGrouping.isNotEmpty) {
+    if (currentState.isGroupingCacheValid() &&
+        currentState.cachedGrouping.isNotEmpty) {
       return;
     }
     final filtered = currentState.filteredDiagnosticos;
@@ -363,7 +364,8 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
         final culturaNome = await _resolver.resolveCulturaNome(
           idCultura: diag.idCultura,
         );
-        if (culturaNome.isNotEmpty && culturaNome != 'Cultura não especificada') {
+        if (culturaNome.isNotEmpty &&
+            culturaNome != 'Cultura não especificada') {
           culturas.add(culturaNome);
         }
       }
@@ -377,9 +379,12 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
   }
 
   /// Valida compatibilidade para um diagnóstico específico
-  Future<CompatibilityValidation?> validateCompatibility(DiagnosticoEntity diagnostico) async {
+  Future<CompatibilityValidation?> validateCompatibility(
+    DiagnosticoEntity diagnostico,
+  ) async {
     final currentState = state.value;
-    if (currentState == null || currentState.currentPragaId?.isNotEmpty != true) return null;
+    if (currentState == null || currentState.currentPragaId?.isNotEmpty != true)
+      return null;
 
     try {
       return await _compatibilityService.validateFullCompatibility(
@@ -409,11 +414,13 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        searchQuery: '',
-        selectedCultura: 'Todas',
-        isLoadingFilters: false,
-      ).invalidateGroupingCache(),
+      currentState
+          .copyWith(
+            searchQuery: '',
+            selectedCultura: 'Todas',
+            isLoadingFilters: false,
+          )
+          .invalidateGroupingCache(),
     );
   }
 
@@ -428,7 +435,8 @@ class EnhancedDiagnosticosPragaNotifier extends _$EnhancedDiagnosticosPragaNotif
   /// Força recarregamento dos dados
   Future<void> refresh() async {
     final currentState = state.value;
-    if (currentState == null || currentState.currentPragaId?.isNotEmpty != true) return;
+    if (currentState == null || currentState.currentPragaId?.isNotEmpty != true)
+      return;
 
     await loadDiagnosticos(currentState.currentPragaId!);
   }

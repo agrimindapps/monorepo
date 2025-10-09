@@ -12,6 +12,7 @@ import '../../logging/services/logging_service.dart';
 import '../../notifications/notification_service.dart';
 import '../../performance/lazy_loader.dart';
 import '../../performance/performance_service.dart' as local_perf;
+import '../../services/mock_analytics_service.dart';
 import '../di_module.dart';
 
 /// Core module responsible for external services and core infrastructure
@@ -35,7 +36,7 @@ class CoreModule implements DIModule {
       getIt.registerLazySingleton<core.IAnalyticsRepository>(
         () =>
             kDebugMode
-                ? core.MockAnalyticsService()
+                ? MockAnalyticsService()
                 : core.FirebaseAnalyticsService(),
       );
 

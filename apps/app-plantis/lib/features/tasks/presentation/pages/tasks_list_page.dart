@@ -106,7 +106,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         margin: const EdgeInsets.only(right: 16),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha:0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(Icons.task_alt, color: Colors.white, size: 24),
@@ -210,9 +210,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                       .read(tasksProvider.notifier)
                       .filterTasks(TasksFilterType.overdue);
                 },
-                selectedColor: Colors.red.withOpacity(0.2),
+                selectedColor: Colors.red.withValues(alpha:0.2),
                 checkmarkColor: Colors.red,
-                backgroundColor: Colors.red.withOpacity(0.1),
+                backgroundColor: Colors.red.withValues(alpha:0.1),
                 side: BorderSide.none,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -266,9 +266,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksProvider.notifier)
                     .filterTasks(TasksFilterType.today);
               },
-              selectedColor: PlantisColors.primary.withOpacity(0.2),
+              selectedColor: PlantisColors.primary.withValues(alpha:0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withOpacity(0.1),
+              backgroundColor: PlantisColors.primary.withValues(alpha:0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
@@ -318,9 +318,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksProvider.notifier)
                     .filterTasks(TasksFilterType.upcoming);
               },
-              selectedColor: PlantisColors.primary.withOpacity(0.2),
+              selectedColor: PlantisColors.primary.withValues(alpha:0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withOpacity(0.1),
+              backgroundColor: PlantisColors.primary.withValues(alpha:0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
@@ -370,9 +370,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                     .read(tasksProvider.notifier)
                     .filterTasks(TasksFilterType.allFuture);
               },
-              selectedColor: PlantisColors.primary.withOpacity(0.2),
+              selectedColor: PlantisColors.primary.withValues(alpha:0.2),
               checkmarkColor: PlantisColors.primary,
-              backgroundColor: PlantisColors.primary.withOpacity(0.1),
+              backgroundColor: PlantisColors.primary.withValues(alpha:0.1),
               side: BorderSide.none,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               labelStyle: TextStyle(
@@ -562,9 +562,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               height: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: PlantisColors.primary.withOpacity(0.1),
+                color: PlantisColors.primary.withValues(alpha:0.1),
                 border: Border.all(
-                  color: PlantisColors.primary.withOpacity(0.3),
+                  color: PlantisColors.primary.withValues(alpha:0.3),
                   width: 1,
                 ),
               ),
@@ -579,7 +579,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
                               Icons.local_florist,
-                              color: PlantisColors.primary.withOpacity(
+                              color: PlantisColors.primary.withValues(alpha:
                                 0.6,
                               ),
                               size: 24,
@@ -588,7 +588,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                         )
                         : Icon(
                           Icons.local_florist,
-                          color: PlantisColors.primary.withOpacity(0.6),
+                          color: PlantisColors.primary.withValues(alpha:0.6),
                           size: 24,
                         ),
               ),
@@ -601,7 +601,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   Text(
                     task.title,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(
+                      color: theme.colorScheme.onSurface.withValues(alpha:
                         isLoading ? 0.6 : 1.0,
                       ),
                       fontSize: 16,
@@ -612,7 +612,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   Text(
                     plantName,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha:0.6),
                       fontSize: 14,
                     ),
                   ),
@@ -794,7 +794,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha:0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

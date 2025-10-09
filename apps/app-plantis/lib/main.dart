@@ -10,10 +10,12 @@ import 'app.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/di/solid_di_factory.dart';
-import 'core/providers/solid_providers.dart';
+import 'core/plantis_sync_config.dart';
 import 'core/services/hive_schema_manager.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'core/storage/plantis_boxes_setup.dart';
+import 'core/sync/sync_operations.dart' as local_sync;
+import 'core/sync/sync_queue.dart' as local_sync;
 import 'firebase_options.dart';
 
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -39,10 +41,24 @@ void main() async {
   await HiveSchemaManager.migrate();
 
   await di.init();
+  // Initialize SyncQueue before other sync services
+  final syncQueue = di.sl<local_sync.SyncQueue>();
+  await syncQueue.initialize();
+  // Initialize SyncOperations after SyncQueue
+  final syncOperations = di.sl<local_sync.SyncOperations>();
+  await syncOperations.initialize();
   SolidDIConfigurator.configure(
     kDebugMode ? DIMode.development : DIMode.production,
   );
   await PlantisBoxesSetup.registerPlantisBoxes();
+
+  // Initialize UnifiedSyncManager with Plantis configuration
+  if (kDebugMode) {
+    await PlantisSyncConfig.configureForDevelopment();
+  } else {
+    await PlantisSyncConfig.configureForProduction();
+  }
+
   final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();
   final notificationService = PlantisNotificationService();

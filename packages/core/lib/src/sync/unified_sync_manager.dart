@@ -112,7 +112,6 @@ class UnifiedSyncManager {
     return _createSyncServiceDynamic(
       registration.collectionName,
       registration.fromMap,
-      registration.toMap,
       registration.toSyncConfig(),
     );
   }
@@ -121,7 +120,6 @@ class UnifiedSyncManager {
   dynamic _createSyncServiceDynamic(
     String collectionName,
     dynamic fromMapFunction,
-    dynamic toMapFunction,
     SyncConfig config,
   ) {
     developer.log(
@@ -133,7 +131,6 @@ class UnifiedSyncManager {
       final service = _createSyncServiceReflection(
         collectionName,
         fromMapFunction,
-        toMapFunction,
         config,
       );
 
@@ -155,13 +152,11 @@ class UnifiedSyncManager {
   dynamic _createSyncServiceReflection(
     String collectionName,
     dynamic fromMapFunction,
-    dynamic toMapFunction,
     SyncConfig config,
   ) {
     final service = _DynamicSyncService(
       collectionName: collectionName,
       fromMapFunction: fromMapFunction,
-      toMapFunction: toMapFunction,
       config: config,
     );
 
@@ -857,7 +852,6 @@ class _RepositoryWrapper<T extends BaseSyncEntity>
 class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
   final String collectionName;
   final dynamic fromMapFunction;
-  final dynamic toMapFunction;
   final SyncConfig config;
 
   late final SyncFirebaseService<BaseSyncEntity> _internalService;
@@ -865,7 +859,6 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
   _DynamicSyncService({
     required this.collectionName,
     required this.fromMapFunction,
-    required this.toMapFunction,
     required this.config,
   }) {
     _internalService = _createGenericService(config);
@@ -892,23 +885,8 @@ class _DynamicSyncService implements ISyncRepository<BaseSyncEntity> {
         try {
           return entity.toFirebaseMap();
         } catch (e) {
-          try {
-            final callable = toMapFunction as dynamic;
-            final result = callable(entity);
-
-            if (result is Map<String, dynamic>) {
-              return result;
-            } else if (result is Map) {
-              return Map<String, dynamic>.from(result);
-            } else {
-              return <String, dynamic>{};
-            }
-          } catch (e2) {
-            developer.log('Error in toMap fallback: $e2', name: 'DynamicSync');
-            return <String, dynamic>{
-              'error': 'Failed to convert entity to map',
-            };
-          }
+          developer.log('Error in toFirebaseMap: $e', name: 'DynamicSync');
+          return <String, dynamic>{'error': 'Failed to convert entity to map'};
         }
       },
       config: config,

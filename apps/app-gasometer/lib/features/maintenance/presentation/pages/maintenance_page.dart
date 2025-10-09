@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 
 class MaintenancePage extends ConsumerStatefulWidget {
@@ -14,6 +15,7 @@ class MaintenancePage extends ConsumerStatefulWidget {
 
 class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   int _currentMonthIndex = DateTime.now().month - 1;
+  String? _selectedVehicleId;
 
   @override
   Widget build(BuildContext context) {
@@ -104,31 +106,15 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   Widget _buildVehicleSelector(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.directions_car,
-              color: Theme.of(context).primaryColor,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Seletor de veículo será implementado',
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-          ],
-        ),
+      child: EnhancedVehicleSelector(
+        selectedVehicleId: _selectedVehicleId,
+        onVehicleChanged: (vehicleId) {
+          setState(() {
+            _selectedVehicleId = vehicleId;
+          });
+          // TODO: Implementar filtro de manutenções por veículo quando o provider estiver pronto
+        },
+        hintText: 'Selecione um veículo',
       ),
     );
   }

@@ -429,6 +429,77 @@ class Plant extends BaseSyncEntity {
     );
   }
 
+  /// Create Plant entity from Firebase map
+  static Plant fromFirebaseMap(Map<String, dynamic> map) {
+    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+
+    return Plant(
+      id: baseFields['id'] as String,
+      createdAt: baseFields['createdAt'] as DateTime?,
+      updatedAt: baseFields['updatedAt'] as DateTime?,
+      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
+      isDirty: baseFields['isDirty'] as bool,
+      isDeleted: baseFields['isDeleted'] as bool,
+      version: baseFields['version'] as int,
+      userId: baseFields['userId'] as String?,
+      moduleName: baseFields['moduleName'] as String?,
+      name: map['name'] as String,
+      species: map['species'] as String?,
+      spaceId: map['space_id'] as String?,
+      imageBase64: map['image_base64'] as String?,
+      imageUrls:
+          map['image_urls'] != null
+              ? List<String>.from(map['image_urls'] as List)
+              : const [],
+      plantingDate:
+          map['planting_date'] != null
+              ? DateTime.parse(map['planting_date'] as String)
+              : null,
+      notes: map['notes'] as String?,
+      isFavorited: map['is_favorited'] as bool? ?? false,
+      config:
+          map['config'] != null
+              ? PlantConfig(
+                wateringIntervalDays:
+                    map['config']['watering_interval_days'] as int?,
+                fertilizingIntervalDays:
+                    map['config']['fertilizing_interval_days'] as int?,
+                pruningIntervalDays:
+                    map['config']['pruning_interval_days'] as int?,
+                sunlightCheckIntervalDays:
+                    map['config']['sunlight_check_interval_days'] as int?,
+                pestInspectionIntervalDays:
+                    map['config']['pest_inspection_interval_days'] as int?,
+                replantingIntervalDays:
+                    map['config']['replanting_interval_days'] as int?,
+                lightRequirement: map['config']['light_requirement'] as String?,
+                waterAmount: map['config']['water_amount'] as String?,
+                soilType: map['config']['soil_type'] as String?,
+                idealTemperature:
+                    (map['config']['ideal_temperature'] as num?)?.toDouble(),
+                idealHumidity:
+                    (map['config']['ideal_humidity'] as num?)?.toDouble(),
+                enableWateringCare:
+                    map['config']['enable_watering_care'] as bool?,
+                lastWateringDate:
+                    map['config']['last_watering_date'] != null
+                        ? DateTime.parse(
+                          map['config']['last_watering_date'] as String,
+                        )
+                        : null,
+                enableFertilizerCare:
+                    map['config']['enable_fertilizer_care'] as bool?,
+                lastFertilizerDate:
+                    map['config']['last_fertilizer_date'] != null
+                        ? DateTime.parse(
+                          map['config']['last_fertilizer_date'] as String,
+                        )
+                        : null,
+              )
+              : null,
+    );
+  }
+
   @override
   List<Object?> get props => [
     ...super.props,
@@ -605,75 +676,4 @@ class PlantConfig extends Equatable {
     enableFertilizerCare,
     lastFertilizerDate,
   ];
-
-  /// Create Plant entity from Firebase map
-  static Plant fromFirebaseMap(Map<String, dynamic> map) {
-    final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
-
-    return Plant(
-      id: baseFields['id'] as String,
-      createdAt: baseFields['createdAt'] as DateTime?,
-      updatedAt: baseFields['updatedAt'] as DateTime?,
-      lastSyncAt: baseFields['lastSyncAt'] as DateTime?,
-      isDirty: baseFields['isDirty'] as bool,
-      isDeleted: baseFields['isDeleted'] as bool,
-      version: baseFields['version'] as int,
-      userId: baseFields['userId'] as String?,
-      moduleName: baseFields['moduleName'] as String?,
-      name: map['name'] as String,
-      species: map['species'] as String?,
-      spaceId: map['space_id'] as String?,
-      imageBase64: map['image_base64'] as String?,
-      imageUrls:
-          map['image_urls'] != null
-              ? List<String>.from(map['image_urls'] as List)
-              : const [],
-      plantingDate:
-          map['planting_date'] != null
-              ? DateTime.parse(map['planting_date'] as String)
-              : null,
-      notes: map['notes'] as String?,
-      isFavorited: map['is_favorited'] as bool? ?? false,
-      config:
-          map['config'] != null
-              ? PlantConfig(
-                wateringIntervalDays:
-                    map['config']['watering_interval_days'] as int?,
-                fertilizingIntervalDays:
-                    map['config']['fertilizing_interval_days'] as int?,
-                pruningIntervalDays:
-                    map['config']['pruning_interval_days'] as int?,
-                sunlightCheckIntervalDays:
-                    map['config']['sunlight_check_interval_days'] as int?,
-                pestInspectionIntervalDays:
-                    map['config']['pest_inspection_interval_days'] as int?,
-                replantingIntervalDays:
-                    map['config']['replanting_interval_days'] as int?,
-                lightRequirement: map['config']['light_requirement'] as String?,
-                waterAmount: map['config']['water_amount'] as String?,
-                soilType: map['config']['soil_type'] as String?,
-                idealTemperature:
-                    (map['config']['ideal_temperature'] as num?)?.toDouble(),
-                idealHumidity:
-                    (map['config']['ideal_humidity'] as num?)?.toDouble(),
-                enableWateringCare:
-                    map['config']['enable_watering_care'] as bool?,
-                lastWateringDate:
-                    map['config']['last_watering_date'] != null
-                        ? DateTime.parse(
-                          map['config']['last_watering_date'] as String,
-                        )
-                        : null,
-                enableFertilizerCare:
-                    map['config']['enable_fertilizer_care'] as bool?,
-                lastFertilizerDate:
-                    map['config']['last_fertilizer_date'] != null
-                        ? DateTime.parse(
-                          map['config']['last_fertilizer_date'] as String,
-                        )
-                        : null,
-              )
-              : null,
-    );
-  }
 }

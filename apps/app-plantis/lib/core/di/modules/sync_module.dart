@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 
+import '../../services/plantis_sync_service.dart';
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../../features/plants/domain/repositories/plant_tasks_repository.dart';
 import '../../../features/plants/domain/repositories/plants_repository.dart';
@@ -30,7 +32,9 @@ abstract class SyncDIModule {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ Failed to initialize Plantis sync service: ${failure.message}');
+            print(
+              '⚠️ Failed to initialize Plantis sync service: ${failure.message}',
+            );
           }
         },
         (_) {

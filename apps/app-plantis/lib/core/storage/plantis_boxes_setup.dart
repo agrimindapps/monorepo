@@ -16,6 +16,7 @@ class PlantisBoxesSetup {
       BoxConfiguration.basic(name: 'plants', appId: 'plantis'),
       BoxConfiguration.basic(name: 'spaces', appId: 'plantis'),
       BoxConfiguration.basic(name: 'tasks', appId: 'plantis'),
+      BoxConfiguration.basic(name: 'comments', appId: 'plantis'),
       BoxConfiguration.basic(name: 'comentarios', appId: 'plantis'),
       BoxConfiguration.basic(name: 'users', appId: 'plantis'),
       BoxConfiguration.basic(name: 'subscriptions', appId: 'plantis'),

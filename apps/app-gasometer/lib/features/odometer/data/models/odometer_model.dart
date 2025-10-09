@@ -5,8 +5,8 @@ import '../../../../core/data/models/base_sync_model.dart';
 part 'odometer_model.g.dart';
 
 /// Odometer model with Firebase sync support
-/// TypeId: 2 - New sequential numbering
-@HiveType(typeId: 2)
+/// TypeId: 12 - Gasometer range (10-19) to avoid conflicts with other apps
+@HiveType(typeId: 12)
 class OdometerModel extends BaseSyncModel {
 
   OdometerModel({

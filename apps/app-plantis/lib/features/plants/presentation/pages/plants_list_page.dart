@@ -68,6 +68,7 @@ class PlantsListPage extends ConsumerStatefulWidget {
 
 class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   final ScrollController _scrollController = ScrollController();
+  bool _hasAttemptedInitialLoad = false;
 
   @override
   void initState() {
@@ -205,6 +206,43 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? _) {
+        // Garante que os dados sejam carregados quando a página é construída
+        final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
+        plantsAsync.when(
+          data: (state) {
+            // Se não há plantas carregadas e não está carregando, força o carregamento
+            if (state.allPlants.isEmpty &&
+                !state.isLoading &&
+                state.error == null &&
+                !_hasAttemptedInitialLoad) {
+              _hasAttemptedInitialLoad = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref
+                    .read(riverpod_plants.plantsProvider.notifier)
+                    .loadInitialData();
+              });
+            }
+          },
+          loading: () {
+            // Já está carregando, não faz nada
+          },
+          error: (_, __) {
+            // Se houve erro e não há plantas, tenta recarregar uma vez
+            final state = plantsAsync.valueOrNull;
+            if (state != null &&
+                state.allPlants.isEmpty &&
+                !state.isLoading &&
+                !_hasAttemptedInitialLoad) {
+              _hasAttemptedInitialLoad = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref
+                    .read(riverpod_plants.plantsProvider.notifier)
+                    .loadInitialData();
+              });
+            }
+          },
+        );
+
         return BasePageScaffold(
           body: ResponsiveLayout(
             child: Column(

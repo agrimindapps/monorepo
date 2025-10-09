@@ -5,6 +5,7 @@ import 'package:core/core.dart' show injectable;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import '../services/gasometer_analytics_service.dart';
+import '../services/mock_analytics_service.dart';
 
 import 'app_error.dart';
 
@@ -360,7 +361,7 @@ extension AppErrorReporting on AppError {
       final reporter = ErrorReporter(
         GasometerAnalyticsService(
           core.EnhancedAnalyticsService(
-            analytics: core.MockAnalyticsService(),
+            analytics: MockAnalyticsService(),
             crashlytics: core.FirebaseCrashlyticsService(),
           ),
         ),

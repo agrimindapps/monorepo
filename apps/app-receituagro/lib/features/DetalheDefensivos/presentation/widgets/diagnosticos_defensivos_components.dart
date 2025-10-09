@@ -993,11 +993,18 @@ class _DiagnosticoDefensivoDialogWidgetState
 
   /// Navega para a página de detalhes do diagnóstico
   void _navigateToDetailedDiagnostic(BuildContext context) {
+    print('🔍 [DEBUG] _navigateToDetailedDiagnostic chamado');
     final diagnosticoId = _getProperty('id');
     final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Não especificado';
     final cultura = _getProperty('cultura') ?? 'Não especificada';
 
+    print('🔍 [DEBUG] diagnosticoId: $diagnosticoId');
+    print('🔍 [DEBUG] nomePraga: $nomePraga');
+    print('🔍 [DEBUG] cultura: $cultura');
+    print('🔍 [DEBUG] defensivoName: ${widget.defensivoName}');
+
     if (diagnosticoId != null) {
+      print('✅ [DEBUG] Navegando para DetalheDiagnosticoPage...');
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder:
@@ -1009,6 +1016,8 @@ class _DiagnosticoDefensivoDialogWidgetState
               ),
         ),
       );
+    } else {
+      print('❌ [DEBUG] diagnosticoId é null - não navegando');
     }
   }
 

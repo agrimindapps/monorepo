@@ -86,12 +86,18 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           debugPrint('Nome do defensivo: ${defensivoData.nomeComum}');
           debugPrint('Fabricante: ${defensivoData.fabricante}');
 
+          print('🔍 [DEBUG] Chamando getDiagnosticosByDefensivo...');
+          print('🔍 [DEBUG] defensivoIdReg: $defensivoIdReg');
+          print('🔍 [DEBUG] nomeDefensivo: ${defensivoData.nomeComum}');
+
           await ref
               .read(diagnosticosNotifierProvider.notifier)
               .getDiagnosticosByDefensivo(
                 defensivoIdReg,
                 nomeDefensivo: defensivoData.nomeComum,
               );
+
+          print('✅ [DEBUG] getDiagnosticosByDefensivo concluído');
           await _recordDefensivoAccess(defensivoData);
 
           final endTime = DateTime.now();

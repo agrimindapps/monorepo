@@ -292,7 +292,7 @@ Future<void> init() async {
     () => DefensivosGroupingService(),
   );
   FavoritosDI.registerDependencies();
-  configureDefensivosDependencies();
+  // configureDefensivosDependencies(); // Already called in configureAllRepositoriesDependencies()
   initDefensivoDetailsDI();
   PragasDI.configure();
   ComentariosDI.register(sl);

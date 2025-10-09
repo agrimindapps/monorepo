@@ -537,6 +537,16 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
               '⚠️ PlantsProvider: Dados locais não disponíveis: ${_getErrorMessage(failure)}',
             );
           }
+          // Se falhar ao carregar dados locais, desativa loading e mostra lista vazia
+          // O sync em background tentará buscar dados remotos
+          final currentState = state.valueOrNull ?? const PlantsState();
+          state = AsyncData(
+            currentState.copyWith(
+              isLoading: false,
+              allPlants: [],
+              filteredPlants: [],
+            ),
+          );
         },
         (plants) {
           if (kDebugMode) {
@@ -551,6 +561,15 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       if (kDebugMode) {
         print('❌ PlantsProvider: Erro ao carregar dados locais: $e');
       }
+      // Em caso de exceção, desativa loading e mostra lista vazia
+      final currentState = state.valueOrNull ?? const PlantsState();
+      state = AsyncData(
+        currentState.copyWith(
+          isLoading: false,
+          allPlants: [],
+          filteredPlants: [],
+        ),
+      );
     }
   }
 

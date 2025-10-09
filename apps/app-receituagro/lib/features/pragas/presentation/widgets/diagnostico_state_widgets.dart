@@ -48,11 +48,7 @@ class DiagnosticoErrorWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red.shade300,
-              ),
+              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
               const SizedBox(height: 16),
               Text(
                 'Erro ao carregar diagnósticos',
@@ -93,47 +89,50 @@ class DiagnosticoEmptyWidget extends ConsumerWidget {
 
     return RepaintBoundary(
       child: state.when(
-        data: (data) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  data.diagnosticos.isEmpty
-                      ? Icons.bug_report_outlined
-                      : Icons.search_off,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+        data:
+            (data) => Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      data.diagnosticos.isEmpty
+                          ? Icons.bug_report_outlined
+                          : Icons.search_off,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      data.diagnosticos.isEmpty
+                          ? 'Nenhum diagnóstico disponível'
+                          : 'Nenhum diagnóstico encontrado',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      data.diagnosticos.isEmpty
+                          ? 'Esta praga ainda não possui diagnósticos cadastrados ou os dados estão sendo carregados'
+                          : 'Tente ajustar os filtros de pesquisa',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    if (data.diagnosticos.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: () {
+                          ref
+                              .read(diagnosticosPragaNotifierProvider.notifier)
+                              .clearFilters();
+                        },
+                        child: const Text('Limpar Filtros'),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  data.diagnosticos.isEmpty
-                      ? 'Nenhum diagnóstico disponível'
-                      : 'Nenhum diagnóstico encontrado',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  data.diagnosticos.isEmpty
-                      ? 'Esta praga ainda não possui diagnósticos cadastrados ou os dados estão sendo carregados'
-                      : 'Tente ajustar os filtros de pesquisa',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                if (data.diagnosticos.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  OutlinedButton(
-                    onPressed: () {
-                      ref.read(diagnosticosPragaNotifierProvider.notifier).clearFilters();
-                    },
-                    child: const Text('Limpar Filtros'),
-                  ),
-                ],
-              ],
+              ),
             ),
-          ),
-        ),
         loading: () => const SizedBox.shrink(),
         error: (error, _) => const SizedBox.shrink(),
       ),
@@ -164,10 +163,11 @@ class DiagnosticoStateManager extends ConsumerWidget {
         return builder(data.filteredDiagnosticos);
       },
       loading: () => const DiagnosticoLoadingWidget(),
-      error: (error, _) => DiagnosticoErrorWidget(
-        errorMessage: error.toString(),
-        onRetry: onRetry,
-      ),
+      error:
+          (error, _) => DiagnosticoErrorWidget(
+            errorMessage: error.toString(),
+            onRetry: onRetry,
+          ),
     );
   }
 }

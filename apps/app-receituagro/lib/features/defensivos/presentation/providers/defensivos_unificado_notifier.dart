@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -76,7 +77,8 @@ class DefensivosUnificadoState {
     return DefensivosUnificadoState(
       defensivos: defensivos ?? this.defensivos,
       defensivosFiltrados: defensivosFiltrados ?? this.defensivosFiltrados,
-      defensivosSelecionados: defensivosSelecionados ?? this.defensivosSelecionados,
+      defensivosSelecionados:
+          defensivosSelecionados ?? this.defensivosSelecionados,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
       tipoAgrupamento: tipoAgrupamento ?? this.tipoAgrupamento,
@@ -84,7 +86,8 @@ class DefensivosUnificadoState {
       ordenacao: ordenacao ?? this.ordenacao,
       filtroToxicidade: filtroToxicidade ?? this.filtroToxicidade,
       filtroTipo: filtroTipo ?? this.filtroTipo,
-      apenasComercializados: apenasComercializados ?? this.apenasComercializados,
+      apenasComercializados:
+          apenasComercializados ?? this.apenasComercializados,
       apenasElegiveis: apenasElegiveis ?? this.apenasElegiveis,
       modoComparacao: modoComparacao ?? this.modoComparacao,
     );
@@ -100,7 +103,10 @@ class DefensivosUnificadoState {
 /// Notifier unificado para gerenciar defensivos
 /// Consolida funcionalidades de defensivos individuais e agrupados
 /// Segue arquitetura SOLID e Clean Architecture
-@riverpod
+///
+/// keepAlive: true - Mantém o estado vivo durante toda a sessão do app
+/// para evitar recarregamento desnecessário dos 3148+ defensivos
+@Riverpod(keepAlive: true)
 class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
   late final GetDefensivosAgrupadosUseCase _getDefensivosAgrupadosUseCase;
   late final GetDefensivosCompletosUseCase _getDefensivosCompletosUseCase;
@@ -108,11 +114,33 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
 
   @override
   Future<DefensivosUnificadoState> build() async {
+    debugPrint('🏗️ [NOTIFIER] Inicializando DefensivosUnificadoNotifier');
     _getDefensivosAgrupadosUseCase = di.sl<GetDefensivosAgrupadosUseCase>();
     _getDefensivosCompletosUseCase = di.sl<GetDefensivosCompletosUseCase>();
     _getDefensivosComFiltrosUseCase = di.sl<GetDefensivosComFiltrosUseCase>();
+    debugPrint('✅ [NOTIFIER] Use cases inicializados');
 
-    return DefensivosUnificadoState.initial();
+    // Carregar defensivos completos automaticamente na inicialização
+    debugPrint('🔄 [NOTIFIER BUILD] Carregando defensivos completos...');
+    final result = await _getDefensivosCompletosUseCase();
+
+    return result.fold(
+      (failure) {
+        debugPrint('❌ [NOTIFIER BUILD] Erro ao carregar: ${failure.message}');
+        return DefensivosUnificadoState.initial().copyWith(
+          errorMessage: 'Erro ao carregar defensivos: ${failure.message}',
+        );
+      },
+      (defensivos) {
+        debugPrint(
+          '✅ [NOTIFIER BUILD] ${defensivos.length} defensivos carregados',
+        );
+        return DefensivosUnificadoState.initial().copyWith(
+          defensivos: defensivos,
+          defensivosFiltrados: defensivos,
+        );
+      },
+    );
   }
 
   /// Carrega defensivos agrupados por tipo
@@ -120,56 +148,110 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     required String tipoAgrupamento,
     String? filtroTexto,
   }) async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    // Com keepAlive, o estado sempre existe após o build
+    // Aguardamos o estado estar disponível se ainda estiver carregando
+    final currentState = await future;
+
+    debugPrint(
+      '🔄 [NOTIFIER AGRUPADOS] Estado atual tem ${currentState.defensivos.length} defensivos',
+    );
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        isLoading: true,
-        tipoAgrupamento: tipoAgrupamento,
-        filtroTexto: filtroTexto ?? '',
-      ).clearError(),
-    );
-
-    final result = await _getDefensivosAgrupadosUseCase(
-      tipoAgrupamento: tipoAgrupamento,
-      filtroTexto: filtroTexto,
-    );
-
-    result.fold(
-      (failure) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            errorMessage: 'Erro ao carregar defensivos: ${failure.message}',
-          ),
-        );
-      },
-      (defensivos) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            defensivos: defensivos,
-            defensivosFiltrados: defensivos,
+      currentState
+          .copyWith(
+            isLoading: true,
             tipoAgrupamento: tipoAgrupamento,
             filtroTexto: filtroTexto ?? '',
-          ).clearError(),
-        );
-      },
+          )
+          .clearError(),
     );
+
+    debugPrint(
+      '🔄 [NOTIFIER AGRUPADOS] Iniciando carregamento de defensivos agrupados - tipo: $tipoAgrupamento, filtro: $filtroTexto',
+    );
+    debugPrint(
+      '🔄 [NOTIFIER AGRUPADOS] Use case disponível: $_getDefensivosAgrupadosUseCase',
+    );
+
+    try {
+      final result = await _getDefensivosAgrupadosUseCase(
+        tipoAgrupamento: tipoAgrupamento,
+        filtroTexto: filtroTexto,
+      );
+      debugPrint(
+        '🔄 [NOTIFIER AGRUPADOS] Resultado do use case recebido: $result',
+      );
+
+      result.fold(
+        (failure) {
+          debugPrint(
+            '❌ [NOTIFIER AGRUPADOS] Erro ao carregar defensivos: ${failure.message}',
+          );
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isLoading: false,
+              errorMessage: 'Erro ao carregar defensivos: ${failure.message}',
+            ),
+          );
+        },
+        (defensivos) {
+          debugPrint(
+            '✅ [NOTIFIER AGRUPADOS] Defensivos retornados do use case: ${defensivos.length} itens',
+          );
+          state = AsyncValue.data(
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  defensivos: defensivos,
+                  defensivosFiltrados: defensivos,
+                  tipoAgrupamento: tipoAgrupamento,
+                  filtroTexto: filtroTexto ?? '',
+                )
+                .clearError(),
+          );
+          debugPrint(
+            '📊 [NOTIFIER AGRUPADOS] Estado atualizado - defensivos: ${state.value?.defensivos.length}, filtrados: ${state.value?.defensivosFiltrados.length}',
+          );
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ [NOTIFIER AGRUPADOS] Exceção durante carregamento: $e');
+      state = AsyncValue.data(
+        currentState.copyWith(
+          isLoading: false,
+          errorMessage: 'Erro ao carregar defensivos: ${e.toString()}',
+        ),
+      );
+    }
   }
 
   /// Carrega defensivos completos para comparação
+  /// Se os dados já foram carregados no build(), apenas retorna
   Future<void> carregarDefensivosCompletos() async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    final currentState = await future;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    // Se já tem dados carregados, não recarrega
+    if (currentState.defensivos.isNotEmpty) {
+      debugPrint(
+        '✅ [NOTIFIER] Defensivos já carregados (${currentState.defensivos.length} itens), pulando recarregamento',
+      );
+      return;
+    }
 
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
+
+    debugPrint(
+      '🔄 [NOTIFIER] Carregando defensivos completos pela primeira vez...',
+    );
     final result = await _getDefensivosCompletosUseCase();
 
     result.fold(
       (failure) {
+        debugPrint(
+          '❌ [NOTIFIER] Erro ao carregar defensivos: ${failure.message}',
+        );
         state = AsyncValue.data(
           currentState.copyWith(
             isLoading: false,
@@ -178,13 +260,24 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
         );
       },
       (defensivos) {
-        final filtrados = _aplicarFiltrosLocais(defensivos, currentState.filtroTexto);
+        debugPrint(
+          '✅ [NOTIFIER] Defensivos carregados com sucesso: ${defensivos.length} itens',
+        );
+        final filtrados = _aplicarFiltrosLocais(
+          defensivos,
+          currentState.filtroTexto,
+        );
+        debugPrint(
+          '📊 [NOTIFIER] Após filtros locais: ${filtrados.length} itens',
+        );
         state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            defensivos: defensivos,
-            defensivosFiltrados: filtrados,
-          ).clearError(),
+          currentState
+              .copyWith(
+                isLoading: false,
+                defensivos: defensivos,
+                defensivosFiltrados: filtrados,
+              )
+              .clearError(),
         );
       },
     );
@@ -195,7 +288,9 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     final result = await _getDefensivosComFiltrosUseCase(
       ordenacao: currentState.ordenacao,
@@ -216,10 +311,9 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
       },
       (defensivos) {
         state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            defensivosFiltrados: defensivos,
-          ).clearError(),
+          currentState
+              .copyWith(isLoading: false, defensivosFiltrados: defensivos)
+              .clearError(),
         );
       },
     );
@@ -245,7 +339,8 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
       changed = true;
     }
 
-    if (filtroToxicidade != null && filtroToxicidade != currentState.filtroToxicidade) {
+    if (filtroToxicidade != null &&
+        filtroToxicidade != currentState.filtroToxicidade) {
       newState = newState.copyWith(filtroToxicidade: filtroToxicidade);
       changed = true;
     }
@@ -255,12 +350,16 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
       changed = true;
     }
 
-    if (apenasComercializados != null && apenasComercializados != currentState.apenasComercializados) {
-      newState = newState.copyWith(apenasComercializados: apenasComercializados);
+    if (apenasComercializados != null &&
+        apenasComercializados != currentState.apenasComercializados) {
+      newState = newState.copyWith(
+        apenasComercializados: apenasComercializados,
+      );
       changed = true;
     }
 
-    if (apenasElegiveis != null && apenasElegiveis != currentState.apenasElegiveis) {
+    if (apenasElegiveis != null &&
+        apenasElegiveis != currentState.apenasElegiveis) {
       newState = newState.copyWith(apenasElegiveis: apenasElegiveis);
       changed = true;
     }
@@ -301,7 +400,10 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     if (currentState == null) return;
 
     final modoComparacao = !currentState.modoComparacao;
-    final defensivosSelecionados = modoComparacao ? currentState.defensivosSelecionados : <DefensivoEntity>[];
+    final defensivosSelecionados =
+        modoComparacao
+            ? currentState.defensivosSelecionados
+            : <DefensivoEntity>[];
 
     state = AsyncValue.data(
       currentState.copyWith(
@@ -316,7 +418,9 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final selecionados = List<DefensivoEntity>.from(currentState.defensivosSelecionados);
+    final selecionados = List<DefensivoEntity>.from(
+      currentState.defensivosSelecionados,
+    );
 
     if (selecionados.contains(defensivo)) {
       selecionados.remove(defensivo);
@@ -324,7 +428,9 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
       selecionados.add(defensivo);
     }
 
-    state = AsyncValue.data(currentState.copyWith(defensivosSelecionados: selecionados));
+    state = AsyncValue.data(
+      currentState.copyWith(defensivosSelecionados: selecionados),
+    );
   }
 
   /// Limpa seleção de defensivos
@@ -345,25 +451,33 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     } else {
       return carregarDefensivosAgrupados(
         tipoAgrupamento: currentState.tipoAgrupamento,
-        filtroTexto: currentState.filtroTexto.isNotEmpty ? currentState.filtroTexto : null,
+        filtroTexto:
+            currentState.filtroTexto.isNotEmpty
+                ? currentState.filtroTexto
+                : null,
       );
     }
   }
 
   /// Aplica filtros localmente (mais rápido para mudanças simples)
-  List<DefensivoEntity> _aplicarFiltrosLocais(List<DefensivoEntity> defensivos, String filtroTexto) {
+  List<DefensivoEntity> _aplicarFiltrosLocais(
+    List<DefensivoEntity> defensivos,
+    String filtroTexto,
+  ) {
     var filtrados = List<DefensivoEntity>.from(defensivos);
-    filtrados = filtrados.where((d) {
-      return d.displayName.length >= 3;
-    }).toList();
+    filtrados =
+        filtrados.where((d) {
+          return d.displayName.length >= 3;
+        }).toList();
     if (filtroTexto.isNotEmpty) {
-      filtrados = filtrados.where((d) {
-        final texto = filtroTexto.toLowerCase();
-        return d.displayName.toLowerCase().contains(texto) ||
-            d.displayIngredient.toLowerCase().contains(texto) ||
-            d.displayFabricante.toLowerCase().contains(texto) ||
-            d.displayClass.toLowerCase().contains(texto);
-      }).toList();
+      filtrados =
+          filtrados.where((d) {
+            final texto = filtroTexto.toLowerCase();
+            return d.displayName.toLowerCase().contains(texto) ||
+                d.displayIngredient.toLowerCase().contains(texto) ||
+                d.displayFabricante.toLowerCase().contains(texto) ||
+                d.displayClass.toLowerCase().contains(texto);
+          }).toList();
     }
 
     return filtrados;

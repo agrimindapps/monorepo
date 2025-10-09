@@ -67,6 +67,7 @@ class PragasState {
   PragasState clearSelection() {
     return copyWith(selectedPraga: null);
   }
+
   List<PragaEntity> get insetos => pragas.where((p) => p.isInseto).toList();
   List<PragaEntity> get doencas => pragas.where((p) => p.isDoenca).toList();
   List<PragaEntity> get plantas => pragas.where((p) => p.isPlanta).toList();
@@ -84,17 +85,11 @@ class PragasState {
 }
 
 /// Estados específicos para UI
-enum PragasViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-  empty,
-}
+enum PragasViewState { initial, loading, loaded, error, empty }
 
 /// Notifier para gerenciar estado das pragas (Presentation Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
-@riverpod
+@Riverpod(keepAlive: true)
 class PragasNotifier extends _$PragasNotifier {
   late final GetPragasUseCase _getPragasUseCase;
   late final GetPragasByTipoUseCase _getPragasByTipoUseCase;
@@ -161,39 +156,35 @@ class PragasNotifier extends _$PragasNotifier {
         final historicPragas = <PragaEntity>[];
         final allPragasResult = await _getPragasUseCase.execute();
 
-        return allPragasResult.fold(
-          (failure) => <PragaEntity>[],
-          (allPragas) {
-            for (final historyItem in historyItems.take(10)) {
-              final praga = allPragas.firstWhere(
-                (p) => p.idReg == historyItem.id || p.nomeComum == historyItem.name,
-                orElse: () => const PragaEntity(
-                  idReg: '',
-                  nomeComum: '',
-                  nomeCientifico: '',
-                  tipoPraga: '1',
-                ),
-              );
-
-              if (praga.idReg.isNotEmpty) {
-                historicPragas.add(praga);
-              }
-            }
-
-            return RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
-              historicPragas,
-              allPragas,
-              RandomSelectionService.selectRandomPragas,
-              count: 10,
+        return allPragasResult.fold((failure) => <PragaEntity>[], (allPragas) {
+          for (final historyItem in historyItems.take(10)) {
+            final praga = allPragas.firstWhere(
+              (p) =>
+                  p.idReg == historyItem.id || p.nomeComum == historyItem.name,
+              orElse:
+                  () => const PragaEntity(
+                    idReg: '',
+                    nomeComum: '',
+                    nomeCientifico: '',
+                    tipoPraga: '1',
+                  ),
             );
-          },
-        );
+
+            if (praga.idReg.isNotEmpty) {
+              historicPragas.add(praga);
+            }
+          }
+
+          return RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
+            historicPragas,
+            allPragas,
+            RandomSelectionService.selectRandomPragas,
+            count: 10,
+          );
+        });
       } else {
         final result = await _getRecentPragasUseCase.execute();
-        return result.fold(
-          (failure) => <PragaEntity>[],
-          (pragas) => pragas,
-        );
+        return result.fold((failure) => <PragaEntity>[], (pragas) => pragas);
       }
     } catch (e) {
       return <PragaEntity>[];
@@ -209,7 +200,10 @@ class PragasNotifier extends _$PragasNotifier {
           final allPragasResult = await _getPragasUseCase.execute();
           return allPragasResult.fold(
             (failure) => <PragaEntity>[],
-            (allPragas) => RandomSelectionService.selectSuggestedPragas(allPragas, count: limit),
+            (allPragas) => RandomSelectionService.selectSuggestedPragas(
+              allPragas,
+              count: limit,
+            ),
           );
         },
         (pragas) async {
@@ -217,7 +211,10 @@ class PragasNotifier extends _$PragasNotifier {
             final allPragasResult = await _getPragasUseCase.execute();
             return allPragasResult.fold(
               (failure) => <PragaEntity>[],
-              (allPragas) => RandomSelectionService.selectSuggestedPragas(allPragas, count: limit),
+              (allPragas) => RandomSelectionService.selectSuggestedPragas(
+                allPragas,
+                count: limit,
+              ),
             );
           }
           return pragas;
@@ -232,10 +229,7 @@ class PragasNotifier extends _$PragasNotifier {
   Future<PragasStats?> _loadStatsData() async {
     try {
       final result = await _getPragasStatsUseCase.execute();
-      return result.fold(
-        (failure) => null,
-        (stats) => stats,
-      );
+      return result.fold((failure) => null, (stats) => stats);
     } catch (e) {
       return null;
     }
@@ -246,7 +240,9 @@ class PragasNotifier extends _$PragasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       await Future.wait([
@@ -269,7 +265,9 @@ class PragasNotifier extends _$PragasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _getPragasUseCase.execute();
@@ -285,7 +283,9 @@ class PragasNotifier extends _$PragasNotifier {
         (pragas) {
           pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
           state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
+            currentState
+                .copyWith(isLoading: false, pragas: pragas)
+                .clearError(),
           );
         },
       );
@@ -301,7 +301,9 @@ class PragasNotifier extends _$PragasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _getPragasByTipoUseCase.execute(tipo);
@@ -317,7 +319,9 @@ class PragasNotifier extends _$PragasNotifier {
         (pragas) {
           pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
           state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
+            currentState
+                .copyWith(isLoading: false, pragas: pragas)
+                .clearError(),
           );
         },
       );
@@ -333,7 +337,9 @@ class PragasNotifier extends _$PragasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _getPragaByIdUseCase.execute(id);
@@ -348,7 +354,9 @@ class PragasNotifier extends _$PragasNotifier {
         },
         (praga) async {
           state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, selectedPraga: praga).clearError(),
+            currentState
+                .copyWith(isLoading: false, selectedPraga: praga)
+                .clearError(),
           );
           await loadRecentPragas();
         },
@@ -365,7 +373,9 @@ class PragasNotifier extends _$PragasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _getPragasByCulturaUseCase.execute(culturaId);
@@ -381,7 +391,9 @@ class PragasNotifier extends _$PragasNotifier {
         (pragas) {
           pragas.sort((a, b) => a.nomeComum.compareTo(b.nomeComum));
           state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
+            currentState
+                .copyWith(isLoading: false, pragas: pragas)
+                .clearError(),
           );
         },
       );
@@ -403,7 +415,9 @@ class PragasNotifier extends _$PragasNotifier {
       return;
     }
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _searchPragasUseCase.execute(trimmedTerm);
@@ -418,7 +432,9 @@ class PragasNotifier extends _$PragasNotifier {
         },
         (pragas) {
           state = AsyncValue.data(
-            currentState.copyWith(isLoading: false, pragas: pragas).clearError(),
+            currentState
+                .copyWith(isLoading: false, pragas: pragas)
+                .clearError(),
           );
         },
       );
@@ -440,34 +456,38 @@ class PragasNotifier extends _$PragasNotifier {
       if (historyItems.isNotEmpty) {
         final historicPragas = <PragaEntity>[];
         final allPragasResult = await _getPragasUseCase.execute();
-        allPragasResult.fold(
-          (failure) => throw Exception(failure.message),
-          (allPragas) {
-            for (final historyItem in historyItems.take(10)) {
-              final praga = allPragas.firstWhere(
-                (p) => p.idReg == historyItem.id || p.nomeComum == historyItem.name,
-                orElse: () => const PragaEntity(
-                  idReg: '',
-                  nomeComum: '',
-                  nomeCientifico: '',
-                  tipoPraga: '1',
-                ),
-              );
-
-              if (praga.idReg.isNotEmpty) {
-                historicPragas.add(praga);
-              }
-            }
-            final recentPragas = RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
-              historicPragas,
-              allPragas,
-              RandomSelectionService.selectRandomPragas,
-              count: 10,
+        allPragasResult.fold((failure) => throw Exception(failure.message), (
+          allPragas,
+        ) {
+          for (final historyItem in historyItems.take(10)) {
+            final praga = allPragas.firstWhere(
+              (p) =>
+                  p.idReg == historyItem.id || p.nomeComum == historyItem.name,
+              orElse:
+                  () => const PragaEntity(
+                    idReg: '',
+                    nomeComum: '',
+                    nomeCientifico: '',
+                    tipoPraga: '1',
+                  ),
             );
 
-            state = AsyncValue.data(currentState.copyWith(recentPragas: recentPragas));
-          },
-        );
+            if (praga.idReg.isNotEmpty) {
+              historicPragas.add(praga);
+            }
+          }
+          final recentPragas =
+              RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
+                historicPragas,
+                allPragas,
+                RandomSelectionService.selectRandomPragas,
+                count: 10,
+              );
+
+          state = AsyncValue.data(
+            currentState.copyWith(recentPragas: recentPragas),
+          );
+        });
       } else {
         final result = await _getRecentPragasUseCase.execute();
         result.fold(
@@ -477,12 +497,16 @@ class PragasNotifier extends _$PragasNotifier {
             );
           },
           (pragas) {
-            state = AsyncValue.data(currentState.copyWith(recentPragas: pragas));
+            state = AsyncValue.data(
+              currentState.copyWith(recentPragas: pragas),
+            );
           },
         );
       }
     } catch (e) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: e.toString()));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: e.toString()),
+      );
     }
   }
 
@@ -494,41 +518,47 @@ class PragasNotifier extends _$PragasNotifier {
     try {
       try {
         final result = await _getSuggestedPragasUseCase.execute(limit: limit);
-        await result.fold(
-          (failure) async => throw Exception(failure.message),
-          (pragas) async {
-            if (pragas.isEmpty) {
-              final allPragasResult = await _getPragasUseCase.execute();
-              allPragasResult.fold(
-                (failure) => throw Exception(failure.message),
-                (allPragas) {
-                  final suggested = RandomSelectionService.selectSuggestedPragas(
-                    allPragas,
-                    count: limit,
-                  );
-                  state = AsyncValue.data(currentState.copyWith(suggestedPragas: suggested));
-                },
-              );
-            } else {
-              state = AsyncValue.data(currentState.copyWith(suggestedPragas: pragas));
-            }
-          },
-        );
+        await result.fold((failure) async => throw Exception(failure.message), (
+          pragas,
+        ) async {
+          if (pragas.isEmpty) {
+            final allPragasResult = await _getPragasUseCase.execute();
+            allPragasResult.fold(
+              (failure) => throw Exception(failure.message),
+              (allPragas) {
+                final suggested = RandomSelectionService.selectSuggestedPragas(
+                  allPragas,
+                  count: limit,
+                );
+                state = AsyncValue.data(
+                  currentState.copyWith(suggestedPragas: suggested),
+                );
+              },
+            );
+          } else {
+            state = AsyncValue.data(
+              currentState.copyWith(suggestedPragas: pragas),
+            );
+          }
+        });
       } catch (e) {
         final allPragasResult = await _getPragasUseCase.execute();
-        allPragasResult.fold(
-          (failure) => throw Exception(failure.message),
-          (allPragas) {
-            final suggested = RandomSelectionService.selectSuggestedPragas(
-              allPragas,
-              count: limit,
-            );
-            state = AsyncValue.data(currentState.copyWith(suggestedPragas: suggested));
-          },
-        );
+        allPragasResult.fold((failure) => throw Exception(failure.message), (
+          allPragas,
+        ) {
+          final suggested = RandomSelectionService.selectSuggestedPragas(
+            allPragas,
+            count: limit,
+          );
+          state = AsyncValue.data(
+            currentState.copyWith(suggestedPragas: suggested),
+          );
+        });
       }
     } catch (e) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: e.toString()));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: e.toString()),
+      );
     }
   }
 
@@ -541,14 +571,18 @@ class PragasNotifier extends _$PragasNotifier {
       final result = await _getPragasStatsUseCase.execute();
       result.fold(
         (failure) {
-          state = AsyncValue.data(currentState.copyWith(errorMessage: failure.message));
+          state = AsyncValue.data(
+            currentState.copyWith(errorMessage: failure.message),
+          );
         },
         (stats) {
           state = AsyncValue.data(currentState.copyWith(stats: stats));
         },
       );
     } catch (e) {
-      state = AsyncValue.data(currentState.copyWith(errorMessage: e.toString()));
+      state = AsyncValue.data(
+        currentState.copyWith(errorMessage: e.toString()),
+      );
     }
   }
 

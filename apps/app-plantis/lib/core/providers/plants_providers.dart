@@ -259,19 +259,30 @@ class PlantsState {
     bool clearError = false,
     bool clearSelectedPlant = false,
   }) {
+    final newAllPlants = allPlants ?? this.allPlants;
+    final newSearchQuery = searchQuery ?? this.searchQuery;
+    final newFilterBySpace = filterBySpace ?? this.filterBySpace;
+
+    // Se filteredPlants não foi fornecido explicitamente e não há filtros ativos,
+    // então filteredPlants deve ser igual a allPlants
+    final newFilteredPlants = filteredPlants ??
+        (allPlants != null && newSearchQuery.isEmpty && newFilterBySpace == null
+            ? newAllPlants
+            : this.filteredPlants);
+
     return PlantsState(
-      allPlants: allPlants ?? this.allPlants,
-      filteredPlants: filteredPlants ?? this.filteredPlants,
+      allPlants: newAllPlants,
+      filteredPlants: newFilteredPlants,
       selectedPlant:
           clearSelectedPlant ? null : (selectedPlant ?? this.selectedPlant),
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
       error: clearError ? null : (error ?? this.error),
-      searchQuery: searchQuery ?? this.searchQuery,
+      searchQuery: newSearchQuery,
       searchResults: searchResults ?? this.searchResults,
       viewMode: viewMode ?? this.viewMode,
       sortBy: sortBy ?? this.sortBy,
-      filterBySpace: filterBySpace ?? this.filterBySpace,
+      filterBySpace: newFilterBySpace,
     );
   }
 
@@ -617,6 +628,15 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       currentState.searchQuery,
     );
 
+    if (kDebugMode) {
+      print('🔄 PlantsProvider._updatePlantsData:');
+      print('  - Input plants: ${plants.length}');
+      print('  - Sorted plants: ${sortedPlants.length}');
+      print('  - Filtered plants: ${filteredPlants.length}');
+      print('  - Current filterBySpace: ${currentState.filterBySpace}');
+      print('  - Current searchQuery: "${currentState.searchQuery}"');
+    }
+
     state = AsyncData(
       currentState.copyWith(
         allPlants: sortedPlants,
@@ -895,6 +915,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     if (currentState.searchQuery.isNotEmpty ||
         currentState.searchResults.isNotEmpty ||
         currentState.isSearching) {
+
+      if (kDebugMode) {
+        print('🧹 PlantsProvider.clearSearch():');
+        print('  - Clearing searchQuery: "${currentState.searchQuery}"');
+        print('  - Clearing searchResults: ${currentState.searchResults.length} plantas');
+        print('  - Current allPlants: ${currentState.allPlants.length}');
+      }
+
       // If there are no local plants but we have searchResults (user searched
       // and results were returned), copy those results to `filteredPlants`
       // so the UI keeps displaying them while we attempt to load local data.
@@ -916,13 +944,25 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
         // fire-and-forget - loadInitialData will replace allPlants when done
         loadInitialData();
       } else {
+        // Reaplica filtros para garantir que filteredPlants está sincronizado
+        final filteredPlants = _applyFilters(
+          currentState.allPlants,
+          currentState.filterBySpace,
+          '', // searchQuery vazio
+        );
+
         state = AsyncData(
           currentState.copyWith(
             searchQuery: '',
             searchResults: [],
+            filteredPlants: filteredPlants,
             isSearching: false,
           ),
         );
+
+        if (kDebugMode) {
+          print('✅ PlantsProvider.clearSearch() - filteredPlants atualizado: ${filteredPlants.length}');
+        }
       }
     }
   }
@@ -1013,12 +1053,21 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     String? filterBySpace,
     String searchQuery,
   ) {
+    // Se não há filtros ativos, retorna a lista completa
+    if (filterBySpace == null && searchQuery.isEmpty) {
+      return List.from(plants);
+    }
+
     List<Plant> filtered = List.from(plants);
 
+    // Aplica filtro de espaço se ativo
     if (filterBySpace != null) {
       filtered =
           filtered.where((plant) => plant.spaceId == filterBySpace).toList();
     }
+
+    // Nota: searchQuery é tratado separadamente em searchPlants()
+    // e armazenado em searchResults, não em filteredPlants
 
     return filtered;
   }

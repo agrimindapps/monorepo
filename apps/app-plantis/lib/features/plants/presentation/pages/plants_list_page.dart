@@ -442,6 +442,14 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
 
         return plantsAsync.when(
           data: (plantsState) {
+            // DEBUG: Log state to identify the issue
+            debugPrint('🔍 PlantsListPage Debug:');
+            debugPrint('  - allPlants: ${plantsState.allPlants.length}');
+            debugPrint('  - filteredPlants: ${plantsState.filteredPlants.length}');
+            debugPrint('  - searchResults: ${plantsState.searchResults.length}');
+            debugPrint('  - searchQuery: "${plantsState.searchQuery}"');
+            debugPrint('  - filterBySpace: ${plantsState.filterBySpace}');
+
             final displayData = PlantsDisplayData(
               plants:
                   plantsState.searchQuery.isNotEmpty
@@ -452,6 +460,9 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
               isSearching: plantsState.searchQuery.isNotEmpty,
               searchQuery: plantsState.searchQuery,
             );
+
+            debugPrint('  - displayData.plants: ${displayData.plants.length}');
+
             if (displayData.plants.isEmpty) {
               return EmptyPlantsWidget(
                 isSearching: displayData.isSearching,

@@ -53,11 +53,7 @@ void main() async {
   await PlantisBoxesSetup.registerPlantisBoxes();
 
   // Initialize UnifiedSyncManager with Plantis configuration
-  if (kDebugMode) {
-    await PlantisSyncConfig.configureForDevelopment();
-  } else {
-    await PlantisSyncConfig.configureForProduction();
-  }
+  await PlantisSyncConfig.configure();
 
   final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
   await simpleSubscriptionSyncService.initialize();

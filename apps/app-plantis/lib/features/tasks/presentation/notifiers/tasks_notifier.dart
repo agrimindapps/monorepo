@@ -553,6 +553,14 @@ class TasksNotifier extends _$TasksNotifier {
           );
 
           _completeTaskLoadingOperation(taskId);
+
+          if (kDebugMode) {
+            print('✅ TasksNotifier.completeTask - Task completed successfully');
+            print('   taskId: $taskId');
+            print('   updatedTasks.length: ${updatedTasks.length}');
+            print('   filteredTasks.length: ${filteredTasks.length}');
+          }
+
           _updateState(
             (current) => current.copyWith(
               allTasks: updatedTasks,
@@ -560,6 +568,11 @@ class TasksNotifier extends _$TasksNotifier {
               clearError: true,
             ),
           );
+
+          if (kDebugMode) {
+            print('🔄 TasksNotifier.completeTask - State updated, notifying listeners');
+          }
+
           _notificationService.cancelTaskNotifications(taskId);
           _notificationService.rescheduleTaskNotifications(updatedTasks);
 

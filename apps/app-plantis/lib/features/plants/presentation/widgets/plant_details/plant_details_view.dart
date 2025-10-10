@@ -82,8 +82,17 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
 
   void _initializeController() {
     try {
+      if (kDebugMode) {
+        print('🔧 PlantDetailsView._initializeController - plantId: ${widget.plantId}');
+      }
+
       final provider = ref.read(plantDetailsProviderProvider);
       final taskProvider = ref.read(plantTaskProviderProvider);
+
+      if (kDebugMode) {
+        print('✅ PlantDetailsView._initializeController - Providers loaded');
+      }
+
       _controller = PlantDetailsController(
         provider: provider,
         onBack: _onBack,
@@ -100,9 +109,22 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         onShowBottomSheet: _onShowBottomSheet,
         onPlantDeleted: _syncPlantDeletion,
       );
+
+      if (kDebugMode) {
+        print('✅ PlantDetailsView._initializeController - Controller created');
+      }
+
       _controller!.loadPlant(widget.plantId);
       _initializeTasksIfNeeded(taskProvider);
-    } catch (e) {
+
+      if (kDebugMode) {
+        print('✅ PlantDetailsView._initializeController - Initialization complete');
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('💥 PlantDetailsView._initializeController - Error: $e');
+        print('Stack trace: $stackTrace');
+      }
       debugPrint('Error initializing PlantDetailsView: $e');
     }
   }

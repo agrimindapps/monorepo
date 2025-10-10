@@ -57,10 +57,28 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
       for (final key in hiveBox.keys) {
         try {
-          final plantJson = hiveBox.get(key) as String?;
-          if (plantJson != null) {
-            final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-            final plant = PlantModel.fromJson(plantData);
+          final plantData = hiveBox.get(key);
+          if (plantData != null) {
+            Map<String, dynamic> plantJson;
+
+            // Support both String (new format) and Map (old format)
+            if (plantData is String) {
+              plantJson = jsonDecode(plantData) as Map<String, dynamic>;
+            } else if (plantData is Map) {
+              plantJson = Map<String, dynamic>.from(plantData);
+
+              // Migrate old format to new format
+              if (kDebugMode) {
+                debugPrint('🔄 Migrating plant $key from Map to JSON String format');
+              }
+              final jsonString = jsonEncode(plantJson);
+              await hiveBox.put(key, jsonString);
+            } else {
+              debugPrint('⚠️ Unknown plant data format for key $key: ${plantData.runtimeType}');
+              continue;
+            }
+
+            final plant = PlantModel.fromJson(plantJson);
             if (!plant.isDeleted) {
               plants.add(plant);
             }
@@ -97,15 +115,33 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<Plant?> getPlantById(String id) async {
     try {
       final hiveBox = await box;
-      final plantJson = hiveBox.get(id) as String?;
+      final plantData = hiveBox.get(id);
 
-      if (plantJson == null) {
+      if (plantData == null) {
         return null;
       }
 
       try {
-        final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-        final plant = PlantModel.fromJson(plantData);
+        Map<String, dynamic> plantJson;
+
+        // Support both String (new format) and Map (old format)
+        if (plantData is String) {
+          plantJson = jsonDecode(plantData) as Map<String, dynamic>;
+        } else if (plantData is Map) {
+          plantJson = Map<String, dynamic>.from(plantData);
+
+          // Migrate old format to new format
+          if (kDebugMode) {
+            debugPrint('🔄 Migrating plant $id from Map to JSON String format');
+          }
+          final jsonString = jsonEncode(plantJson);
+          await hiveBox.put(id, jsonString);
+        } else {
+          debugPrint('⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}');
+          return null;
+        }
+
+        final plant = PlantModel.fromJson(plantJson);
 
         return plant.isDeleted ? null : plant;
       } catch (corruptionError) {
@@ -194,10 +230,21 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   Future<void> deletePlant(String id) async {
     try {
       final hiveBox = await box;
-      final plantJson = hiveBox.get(id) as String?;
-      if (plantJson != null) {
-        final plantData = jsonDecode(plantJson) as Map<String, dynamic>;
-        final plant = PlantModel.fromJson(plantData);
+      final plantData = hiveBox.get(id);
+      if (plantData != null) {
+        Map<String, dynamic> plantJson;
+
+        // Support both String (new format) and Map (old format)
+        if (plantData is String) {
+          plantJson = jsonDecode(plantData) as Map<String, dynamic>;
+        } else if (plantData is Map) {
+          plantJson = Map<String, dynamic>.from(plantData);
+        } else {
+          debugPrint('⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}');
+          return;
+        }
+
+        final plant = PlantModel.fromJson(plantJson);
         final deletedPlant = plant.copyWith(
           isDeleted: true,
           updatedAt: DateTime.now(),

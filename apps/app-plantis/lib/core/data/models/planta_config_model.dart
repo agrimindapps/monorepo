@@ -397,6 +397,14 @@ class PlantaConfigModel extends BaseSyncModel {
     int intervaloReplantarDias = 365; // default
 
     try {
+      print('🔍 PlantaConfigModel.fromPlantConfig - Converting PlantConfig:');
+      print('   wateringIntervalDays: ${plantConfig.wateringIntervalDays}');
+      print('   fertilizingIntervalDays: ${plantConfig.fertilizingIntervalDays}');
+      print('   pruningIntervalDays: ${plantConfig.pruningIntervalDays}');
+      print('   sunlightCheckIntervalDays: ${plantConfig.sunlightCheckIntervalDays}');
+      print('   pestInspectionIntervalDays: ${plantConfig.pestInspectionIntervalDays}');
+      print('   replantingIntervalDays: ${plantConfig.replantingIntervalDays}');
+
       final enableWateringCare = plantConfig.enableWateringCare;
       if (enableWateringCare is bool) {
         aguaAtiva = enableWateringCare;
@@ -445,6 +453,14 @@ class PlantaConfigModel extends BaseSyncModel {
         replantarAtivo = true;
         intervaloReplantarDias = replantingInterval;
       }
+
+      print('🔍 PlantaConfigModel.fromPlantConfig - After conversion:');
+      print('   aguaAtiva: $aguaAtiva ($intervaloRegaDias dias)');
+      print('   aduboAtivo: $aduboAtivo ($intervaloAdubacaoDias dias)');
+      print('   podaAtiva: $podaAtiva ($intervaloPodaDias dias)');
+      print('   banhoSolAtivo: $banhoSolAtivo ($intervaloBanhoSolDias dias)');
+      print('   inspecaoPragasAtiva: $inspecaoPragasAtiva ($intervaloInspecaoPragasDias dias)');
+      print('   replantarAtivo: $replantarAtivo ($intervaloReplantarDias dias)');
     } catch (e) {
       print('Warning: Error converting PlantConfig to PlantaConfigModel: $e');
     }

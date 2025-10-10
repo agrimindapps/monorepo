@@ -64,6 +64,7 @@ class PlantDetailsController {
   /// controller.loadPlant('plant-123');
   /// ```
   void loadPlant(String plantId) {
+    debugPrint('🚀 PlantDetailsController.loadPlant - plantId: $plantId');
     provider.loadPlant(plantId);
   }
 
@@ -110,6 +111,7 @@ class PlantDetailsController {
   /// controller.editPlant(selectedPlant);
   /// ```
   void editPlant(Plant plant) {
+    debugPrint('🔧 PlantDetailsController.editPlant - plantId: ${plant.id}, plantName: ${plant.name}');
     onNavigateToEdit?.call(plant.id);
   }
 

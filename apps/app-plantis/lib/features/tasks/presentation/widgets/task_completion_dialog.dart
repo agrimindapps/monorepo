@@ -415,7 +415,8 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   }
 
   void _handleConfirm() {
-    if (!_formKey.currentState!.validate()) {
+    // Validate form if it exists (safe check)
+    if (_formKey.currentState != null && !_formKey.currentState!.validate()) {
       return;
     }
 

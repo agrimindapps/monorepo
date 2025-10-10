@@ -143,36 +143,19 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (userId == null) {
         return const Right([]);
       }
-      if (kIsWeb) {
-        if (kDebugMode) {
-          print('🌐 PlantsRepository (Web): Using UnifiedSyncManager');
-        }
 
-        final result = await UnifiedSyncManager.instance.findAll<Plant>(
-          'plantis',
-        );
-
-        return result.fold((failure) => Left(failure), (plants) {
-          final activePlants =
-              plants.where((p) => !p.isDeleted).toList()..sort(
-                (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
-                  a.createdAt ?? DateTime.now(),
-                ),
-              );
-
-          if (kDebugMode) {
-            print(
-              '✅ PlantsRepository (Web): Loaded ${activePlants.length} plants',
-            );
-          }
-
-          return Right(activePlants);
-        });
-      }
+      // Use local datasource for both web and native
+      // UnifiedSyncManager is not being populated correctly in web mode
       final localPlants = await localDatasource.getPlants();
+
+      if (kDebugMode) {
+        print('📱 PlantsRepository.getPlants - Loaded ${localPlants.length} plants from local datasource');
+      }
+
       if (await networkInfo.isConnected) {
         _syncPlantsInBackground(userId);
       }
+
       return Right(localPlants);
     } on CacheFailure catch (e) {
       if (kDebugMode) {
@@ -230,22 +213,55 @@ class PlantsRepositoryImpl implements PlantsRepository {
   @override
   Future<Either<Failure, Plant>> getPlantById(String id) async {
     try {
+      if (kDebugMode) {
+        print('📥 PlantsRepositoryImpl.getPlantById - id: $id');
+      }
+
       final userId = await _currentUserId;
       if (userId == null) {
+        if (kDebugMode) {
+          print('❌ PlantsRepositoryImpl.getPlantById - User not authenticated');
+        }
         return const Left(ServerFailure('Usuário não autenticado'));
       }
+
+      if (kDebugMode) {
+        print('👤 PlantsRepositoryImpl.getPlantById - userId: $userId');
+      }
+
       final localPlant = await localDatasource.getPlantById(id);
+
+      if (kDebugMode) {
+        print(
+          '💾 PlantsRepositoryImpl.getPlantById - localPlant: ${localPlant != null ? localPlant.name : 'null'}',
+        );
+      }
+
       if (await networkInfo.isConnected) {
         _syncSinglePlantInBackground(id, userId);
       }
+
       if (localPlant != null) {
+        if (kDebugMode) {
+          print('✅ PlantsRepositoryImpl.getPlantById - Returning plant: ${localPlant.name}');
+        }
         return Right(localPlant);
       } else {
+        if (kDebugMode) {
+          print('❌ PlantsRepositoryImpl.getPlantById - Plant not found in local datasource');
+        }
         return const Left(NotFoundFailure('Planta não encontrada'));
       }
     } on CacheFailure catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsRepositoryImpl.getPlantById - CacheFailure: $e');
+      }
       return Left(e);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('💥 PlantsRepositoryImpl.getPlantById - Exception: $e');
+        print('Stack trace: $stackTrace');
+      }
       return Left(
         UnknownFailure('Erro inesperado ao buscar planta: ${e.toString()}'),
       );

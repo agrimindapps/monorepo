@@ -51,7 +51,17 @@ class PlantDetailsProvider extends ChangeNotifier {
   }
 
   Future<void> _loadPlant(String plantId, {required bool forceReload}) async {
-    if (!forceReload && _plant?.id == plantId && !hasError) return;
+    if (kDebugMode) {
+      print('🔍 PlantDetailsProvider._loadPlant - plantId: $plantId, forceReload: $forceReload');
+    }
+
+    if (!forceReload && _plant?.id == plantId && !hasError) {
+      if (kDebugMode) {
+        print('✅ PlantDetailsProvider._loadPlant - Returning early (already loaded)');
+      }
+      return;
+    }
+
     final shouldShowLoading = _plant?.id != plantId || forceReload;
 
     if (shouldShowLoading) {
@@ -60,18 +70,37 @@ class PlantDetailsProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    final result = await getPlantByIdUseCase(plantId);
+    if (kDebugMode) {
+      print('📡 PlantDetailsProvider._loadPlant - Calling getPlantByIdUseCase...');
+    }
 
-    result.fold(
-      (failure) {
-        _errorMessage = _getErrorMessage(failure);
-        _plant = null;
-      },
-      (plant) {
-        _plant = plant;
-        _errorMessage = null;
-      },
-    );
+    try {
+      final result = await getPlantByIdUseCase(plantId);
+
+      result.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('❌ PlantDetailsProvider._loadPlant - Failure: $failure');
+          }
+          _errorMessage = _getErrorMessage(failure);
+          _plant = null;
+        },
+        (plant) {
+          if (kDebugMode) {
+            print('✅ PlantDetailsProvider._loadPlant - Success: ${plant.name}');
+          }
+          _plant = plant;
+          _errorMessage = null;
+        },
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('💥 PlantDetailsProvider._loadPlant - Exception: $e');
+        print('Stack trace: $stackTrace');
+      }
+      _errorMessage = 'Erro inesperado: $e';
+      _plant = null;
+    }
 
     if (shouldShowLoading) {
       _isLoading = false;
@@ -167,13 +196,13 @@ class PlantDetailsProvider extends ChangeNotifier {
 
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case NotFoundFailure:
+      case const (NotFoundFailure):
         return 'Planta não encontrada';
-      case NetworkFailure:
+      case const (NetworkFailure):
         return 'Sem conexão com a internet';
-      case ServerFailure:
+      case const (ServerFailure):
         return 'Erro no servidor. Tente novamente.';
-      case CacheFailure:
+      case const (CacheFailure):
         return 'Erro local. Verifique o armazenamento.';
       default:
         return 'Erro inesperado. Tente novamente.';

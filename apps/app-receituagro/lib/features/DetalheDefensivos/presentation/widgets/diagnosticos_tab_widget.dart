@@ -73,25 +73,18 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   /// Constrói lista de diagnósticos agrupados por cultura
   Widget _buildDiagnosticsList(List<dynamic> diagnosticos) {
-    print('🎨 [DEBUG] _buildDiagnosticsList - Total de diagnósticos: ${diagnosticos.length}');
     return FutureBuilder<Map<String, List<dynamic>>>(
       future: _groupDiagnosticsByCulture(diagnosticos),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          print('⏳ [DEBUG] FutureBuilder aguardando agrupamento...');
           return const Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError) {
-          print('❌ [DEBUG] Erro no FutureBuilder: ${snapshot.error}');
           return Center(child: Text('Erro: ${snapshot.error}'));
         }
 
         final groupedDiagnostics = snapshot.data ?? {};
-        print('📊 [DEBUG] Diagnósticos agrupados: ${groupedDiagnostics.length} culturas');
-        groupedDiagnostics.forEach((cultura, items) {
-          print('   - $cultura: ${items.length} itens');
-        });
 
         return Column(
           mainAxisSize: MainAxisSize.min,

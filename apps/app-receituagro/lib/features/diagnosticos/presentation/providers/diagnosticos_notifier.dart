@@ -314,8 +314,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             currentState.copyWith(
               isLoading: false,
               filteredDiagnosticos: diagnosticos,
-              // Se allDiagnosticos está vazio, usa os dados filtrados como base
-              allDiagnosticos: currentState.allDiagnosticos.isEmpty ? diagnosticos : null,
+              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+              allDiagnosticos: diagnosticos,
             ).clearError(),
           );
         },
@@ -332,15 +332,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
   /// Busca diagnósticos por defensivo
   Future<void> getDiagnosticosByDefensivo(String idDefensivo, {String? nomeDefensivo}) async {
-    print('🔍 [DEBUG] getDiagnosticosByDefensivo - idDefensivo: $idDefensivo');
-    print('🔍 [DEBUG] getDiagnosticosByDefensivo - nomeDefensivo: $nomeDefensivo');
-
     // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
     final currentState = state.requireValue;
-    print('✅ [DEBUG] State inicializado corretamente');
-    print('📊 [DEBUG] allDiagnosticos atual: ${currentState.allDiagnosticos.length}');
 
     state = AsyncValue.data(
       currentState
@@ -352,13 +347,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      print('🔍 [DEBUG] Chamando use case _getDiagnosticosByDefensivoUseCase...');
       final result = await _getDiagnosticosByDefensivoUseCase(idDefensivo);
-      print('✅ [DEBUG] Use case retornou resultado');
 
       result.fold(
         (failure) {
-          print('❌ [DEBUG] Failure: ${failure.message}');
           final updatedState = state.requireValue;
           state = AsyncValue.data(
             updatedState.copyWith(
@@ -368,27 +360,21 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           );
         },
         (diagnosticos) {
-          print('✅ [DEBUG] Success: ${diagnosticos.length} diagnósticos encontrados');
           final updatedState = state.requireValue;
 
           // CORREÇÃO: Atualiza filteredDiagnosticos com os resultados filtrados por defensivo
-          // e mantém allDiagnosticos se já foi carregado anteriormente
+          // IMPORTANTE: SEMPRE atualiza allDiagnosticos para garantir que o getter funcione
           state = AsyncValue.data(
             updatedState.copyWith(
               isLoading: false,
               filteredDiagnosticos: diagnosticos,
-              // Se allDiagnosticos está vazio, usa os dados filtrados como base
-              allDiagnosticos: updatedState.allDiagnosticos.isEmpty ? diagnosticos : null,
+              // CORREÇÃO: Sempre atualiza allDiagnosticos (não passa null)
+              allDiagnosticos: diagnosticos,
             ).clearError(),
           );
-
-          print('📊 [DEBUG] Após atualização:');
-          print('  - allDiagnosticos: ${state.requireValue.allDiagnosticos.length}');
-          print('  - filteredDiagnosticos: ${state.requireValue.filteredDiagnosticos.length}');
         },
       );
     } catch (e) {
-      print('❌ [DEBUG] Exception: $e');
       final updatedState = state.requireValue;
       state = AsyncValue.data(
         updatedState.copyWith(
@@ -431,8 +417,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             currentState.copyWith(
               isLoading: false,
               filteredDiagnosticos: diagnosticos,
-              // Se allDiagnosticos está vazio, usa os dados filtrados como base
-              allDiagnosticos: currentState.allDiagnosticos.isEmpty ? diagnosticos : null,
+              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+              allDiagnosticos: diagnosticos,
             ).clearError(),
           );
         },
@@ -479,8 +465,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             currentState.copyWith(
               isLoading: false,
               filteredDiagnosticos: diagnosticos,
-              // Se allDiagnosticos está vazio, usa os dados filtrados como base
-              allDiagnosticos: currentState.allDiagnosticos.isEmpty ? diagnosticos : null,
+              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+              allDiagnosticos: diagnosticos,
             ).clearError(),
           );
         },
@@ -523,8 +509,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             currentState.copyWith(
               isLoading: false,
               filteredDiagnosticos: diagnosticos,
-              // Se allDiagnosticos está vazio, usa os dados filtrados como base
-              allDiagnosticos: currentState.allDiagnosticos.isEmpty ? diagnosticos : null,
+              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+              allDiagnosticos: diagnosticos,
             ).clearError(),
           );
         },
@@ -544,12 +530,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    print('🔍 [DEBUG] searchByPattern - pattern: "$pattern"');
-    print('📊 [DEBUG] allDiagnosticos disponíveis: ${currentState.allDiagnosticos.length}');
-
     // Se a busca está vazia, limpa os resultados e volta para allDiagnosticos
     if (pattern.trim().isEmpty) {
-      print('🧹 [DEBUG] Pattern vazio - limpando busca');
       state = AsyncValue.data(
         currentState.copyWith(
           searchQuery: '',
@@ -570,7 +552,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     try {
       // CORREÇÃO: Busca primeiro localmente em allDiagnosticos se disponível
       if (currentState.allDiagnosticos.isNotEmpty) {
-        print('🔍 [DEBUG] Buscando localmente em allDiagnosticos...');
         final lowerPattern = pattern.toLowerCase();
         final localResults = currentState.allDiagnosticos.where((diag) {
           final nomeDefensivo = diag.nomeDefensivo?.toLowerCase() ?? '';
@@ -581,7 +562,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
                  nomePraga.contains(lowerPattern);
         }).toList();
 
-        print('✅ [DEBUG] Encontrados ${localResults.length} resultados localmente');
         state = AsyncValue.data(
           currentState.copyWith(
             searchQuery: pattern,
@@ -593,11 +573,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
       }
 
       // Fallback: busca remota se não há dados locais
-      print('🔍 [DEBUG] Buscando remotamente via use case...');
       final result = await _searchDiagnosticosByPatternUseCase(pattern);
       result.fold(
         (failure) {
-          print('❌ [DEBUG] Failure: ${failure.message}');
           state = AsyncValue.data(
             currentState.copyWith(
               searchQuery: pattern,
@@ -607,7 +585,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           );
         },
         (diagnosticos) {
-          print('✅ [DEBUG] Success: ${diagnosticos.length} resultados remotos');
           state = AsyncValue.data(
             currentState.copyWith(
               searchQuery: pattern,
@@ -618,7 +595,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
       );
     } catch (e) {
-      print('❌ [DEBUG] Exception: $e');
       state = AsyncValue.data(
         currentState.copyWith(
           searchQuery: pattern,
@@ -811,8 +787,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    print('🧹 [DEBUG] clearFilters - allDiagnosticos: ${currentState.allDiagnosticos.length}');
-
     // CORREÇÃO: Não recarrega do banco, apenas reseta para allDiagnosticos
     state = AsyncValue.data(
       currentState.clearContext().copyWith(
@@ -822,8 +796,6 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         // filteredDiagnosticos será auto-sincronizado com allDiagnosticos via copyWith()
       ),
     );
-
-    print('✅ [DEBUG] Filtros limpos - filteredDiagnosticos: ${state.requireValue.filteredDiagnosticos.length}');
   }
 
   /// Limpa erro

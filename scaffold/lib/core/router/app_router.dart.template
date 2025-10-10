@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../features/example/presentation/pages/examples_list_page.dart';
+import '../../features/example/presentation/pages/example_details_page.dart';
+import '../config/app_constants.dart.template';
+
+/// Application router configuration using GoRouter
+/// Provides type-safe navigation with route parameters
+class AppRouter {
+  AppRouter._();
+
+  static final GoRouter router = GoRouter(
+    debugLogDiagnostics: true,
+    initialLocation: AppConstants.homeRoute,
+    routes: [
+      GoRoute(
+        path: AppConstants.homeRoute,
+        name: 'home',
+        builder: (context, state) => const ExamplesListPage(),
+      ),
+      GoRoute(
+        path: AppConstants.exampleRoute,
+        name: 'examples',
+        builder: (context, state) => const ExamplesListPage(),
+      ),
+      GoRoute(
+        path: AppConstants.exampleDetailRoute,
+        name: 'example-detail',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ExampleDetailsPage(id: id);
+        },
+      ),
+      // TODO: Add your routes here
+      // GoRoute(
+      //   path: '/settings',
+      //   name: 'settings',
+      //   builder: (context, state) => const SettingsPage(),
+      // ),
+    ],
+    errorBuilder: (context, state) => _ErrorPage(error: state.error),
+    // Optional: Add redirect logic for auth
+    // redirect: (context, state) {
+    //   final isLoggedIn = false; // Check auth state
+    //   final isLoggingIn = state.matchedLocation == '/login';
+    //
+    //   if (!isLoggedIn && !isLoggingIn) {
+    //     return '/login';
+    //   }
+    //   if (isLoggedIn && isLoggingIn) {
+    //     return '/';
+    //   }
+    //   return null;
+    // },
+  );
+}
+
+/// Error page displayed when route is not found
+class _ErrorPage extends StatelessWidget {
+  const _ErrorPage({required this.error});
+
+  final Exception? error;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Erro'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              error?.toString() ?? 'Página não encontrada',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => context.go('/'),
+              child: const Text('Voltar para Início'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,84 @@
+name: {{APP_NAME}}
+description: {{APP_DESCRIPTION}}
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.7.2 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Core Package - Shared services (Firebase, Riverpod, Hive, GetIt, Injectable, dartz, equatable)
+  core:
+    path: ../../packages/core
+
+  # State Management (Riverpod with code generation)
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Dependency Injection
+  get_it: ^8.0.2
+  injectable: ^2.6.2
+
+  # Functional Programming
+  dartz: ^0.10.1
+
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.5
+
+  # Firebase
+  cloud_firestore: ^5.7.1
+  firebase_auth: ^5.3.4
+  firebase_storage: ^12.3.8
+  firebase_analytics: ^11.3.12
+
+  # Navigation
+  go_router: ^14.6.2
+
+  # Utils
+  uuid: ^4.5.1
+  equatable: ^2.0.7
+  intl: ^0.19.0
+  shared_preferences: ^2.3.3
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code Generation
+  build_runner: ^2.4.6
+  hive_generator: ^2.0.1
+  riverpod_generator: ^2.6.1
+  injectable_generator: ^2.6.2
+
+  # Testing
+  mocktail: ^1.0.4
+
+  # Linting
+  custom_lint: ^0.6.0
+  riverpod_lint: ^2.6.1
+
+flutter:
+  uses-material-design: true
+
+  # TODO: Add your assets here
+  # assets:
+  #   - assets/images/
+  #   - assets/icons/
+
+  # TODO: Add custom fonts if needed
+  # fonts:
+  #   - family: YourFont
+  #     fonts:
+  #       - asset: assets/fonts/YourFont-Regular.ttf
+  #       - asset: assets/fonts/YourFont-Bold.ttf
+  #         weight: 700

@@ -31,7 +31,6 @@ import '../../sync/interfaces/i_cache_manager.dart';
 import '../../sync/interfaces/i_network_monitor.dart';
 import '../../sync/interfaces/i_sync_orchestrator.dart';
 import '../services/dio_service.dart';
-import '../services/uuid_service.dart';
 
 /// Global service locator instance
 final GetIt getIt = GetIt.instance;
@@ -75,7 +74,6 @@ class InjectionContainer {
       getIt.registerLazySingleton<ISubscriptionRepository>(
         () => RevenueCatService(),
       );
-      getIt.registerLazySingleton<UuidService>(() => UuidService());
       getIt.registerLazySingleton<DioService>(() => DioService());
       getIt.registerLazySingleton<LicenseRepository>(
         () => LicenseLocalStorage(),

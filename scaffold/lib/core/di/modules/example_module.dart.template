@@ -1,0 +1,27 @@
+import 'package:injectable/injectable.dart';
+import '../../../features/example/data/datasources/local/example_local_datasource.dart';
+import '../../../features/example/data/datasources/remote/example_remote_datasource.dart';
+import '../../../features/example/data/repositories/example_repository_impl.dart';
+import '../../../features/example/domain/repositories/example_repository.dart';
+
+/// Dependency injection module for Example feature
+/// Registers all dependencies for the example feature
+@module
+abstract class ExampleModule {
+  // Repository binding
+  @LazySingleton(as: ExampleRepository)
+  ExampleRepositoryImpl exampleRepository(
+    ExampleLocalDataSource localDataSource,
+    ExampleRemoteDataSource remoteDataSource,
+  ) {
+    return ExampleRepositoryImpl(
+      localDataSource: localDataSource,
+      remoteDataSource: remoteDataSource,
+    );
+  }
+
+  // You can add more complex bindings here if needed
+  // Example:
+  // @lazySingleton
+  // ExampleCache exampleCache() => ExampleCacheImpl();
+}

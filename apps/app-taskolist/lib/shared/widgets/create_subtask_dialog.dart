@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/subtask_providers.dart';
@@ -80,9 +80,8 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
           );
         }
       } else {
-        const uuid = Uuid();
         final newSubtask = TaskEntity(
-          id: uuid.v4(),
+          id: FirebaseFirestore.instance.collection('_').doc().id,
           title: _titleController.text.trim(),
           description:
               _descriptionController.text.trim().isEmpty

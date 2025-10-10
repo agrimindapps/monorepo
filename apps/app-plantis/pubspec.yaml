@@ -24,7 +24,6 @@ dependencies:
 
   hive: any
   injectable: any
-  uuid: any
   dartz: any
   path_provider: any
   url_launcher: any

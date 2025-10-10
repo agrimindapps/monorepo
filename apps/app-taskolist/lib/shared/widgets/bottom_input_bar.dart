@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/tasks/domain/task_entity.dart';
@@ -46,7 +46,7 @@ class _BottomInputBarState extends ConsumerState<BottomInputBar> {
 
     try {
       final newTask = TaskEntity(
-        id: const Uuid().v4(),
+        id: FirebaseFirestore.instance.collection('_').doc().id,
         title: title,
         listId: 'default',
         createdById: ref

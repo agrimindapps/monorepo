@@ -1,35 +1,22 @@
-import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Simple UUID generator for the app
-/// Generates a pseudo-UUID compatible with our needs
+/// Firebase Firestore ID generator for the app
+/// Uses Firebase's native ID generation for consistency across the platform
 class UuidGenerator {
-  static final Random _random = Random();
-  
-  /// Generates a UUID-like string
-  /// Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+  /// Generates a Firebase Firestore document ID
+  /// Uses Firebase's native ID generation which is optimized for distributed systems
   static String generate() {
-    return '${_generateGroup(8)}-${_generateGroup(4)}-4${_generateGroup(3)}-${_generateVariant()}${_generateGroup(3)}-${_generateGroup(12)}';
+    return FirebaseFirestore.instance.collection('_').doc().id;
   }
-  
-  /// Generates a simple short ID (8 characters)
+
+  /// Generates a simple Firebase Firestore ID (alias for generate)
   static String generateShort() {
-    return _generateGroup(8);
+    return FirebaseFirestore.instance.collection('_').doc().id;
   }
-  
-  /// Generates a timestamp-based ID
+
+  /// Generates a Firebase Firestore ID (alias for generate)
+  /// Maintained for backward compatibility
   static String generateTimestamp() {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final randomSuffix = _generateGroup(4);
-    return '$timestamp-$randomSuffix';
-  }
-  
-  static String _generateGroup(int length) {
-    const chars = '0123456789abcdef';
-    return List.generate(length, (index) => chars[_random.nextInt(16)]).join();
-  }
-  
-  static String _generateVariant() {
-    const variants = ['8', '9', 'a', 'b'];
-    return variants[_random.nextInt(4)];
+    return FirebaseFirestore.instance.collection('_').doc().id;
   }
 }

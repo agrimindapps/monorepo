@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
-import 'package:uuid/uuid.dart';
 
 part 'log_entry.g.dart';
 
@@ -18,7 +18,7 @@ class LogEntry extends HiveObject {
     this.duration,
     this.synced = false,
     String? id,
-  }) : id = id ?? const Uuid().v4();
+  }) : id = id ?? FirebaseFirestore.instance.collection('_').doc().id;
 
   /// Factory para log de início de operação
   factory LogEntry.operationStart({

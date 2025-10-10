@@ -1,14 +1,12 @@
-import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 
 class SampleData {
-  static const uuid = Uuid();
-
   static List<TaskEntity> getSampleTasks() {
     return [
       TaskEntity(
-        id: uuid.v4(),
+        id: FirebaseFirestore.instance.collection('_').doc().id,
         title: 'Implementar autenticação',
         description: 'Criar sistema de login e registro com Firebase Auth',
         listId: 'default',
@@ -23,7 +21,7 @@ class SampleData {
         notes: 'Lembrar de configurar variáveis de ambiente\nVerificar documentação do Firebase\nTeste com diferentes dispositivos',
       ),
       TaskEntity(
-        id: uuid.v4(),
+        id: FirebaseFirestore.instance.collection('_').doc().id,
         title: 'Configurar CI/CD',
         description: 'Configurar pipeline de deploy automático',
         listId: 'default',
@@ -38,7 +36,7 @@ class SampleData {
         dueDate: DateTime.now().add(const Duration(days: 3)),
       ),
       TaskEntity(
-        id: uuid.v4(),
+        id: FirebaseFirestore.instance.collection('_').doc().id,
         title: 'Revisar documentação',
         description: 'Atualizar README e documentação da API',
         listId: 'default',
@@ -52,7 +50,7 @@ class SampleData {
         tags: const ['documentação'],
       ),
       TaskEntity(
-        id: uuid.v4(),
+        id: FirebaseFirestore.instance.collection('_').doc().id,
         title: 'Testes unitários',
         description: 'Criar testes para use cases e repositories',
         listId: 'default',

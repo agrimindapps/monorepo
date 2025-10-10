@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../core/di/injection.dart' as di;
 import '../../domain/create_task.dart';
@@ -271,10 +271,9 @@ Future<String> createTaskWithId(
   TaskCreationData taskData,
 ) async {
   final createTask = ref.watch(createTaskUseCaseProvider);
-  const uuid = Uuid();
 
   final task = TaskEntity(
-    id: uuid.v4(),
+    id: FirebaseFirestore.instance.collection('_').doc().id,
     title: taskData.title,
     description: taskData.description,
     listId: taskData.listId,

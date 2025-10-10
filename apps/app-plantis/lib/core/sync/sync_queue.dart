@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' show HiveInterface, Box, singleton;
-import 'package:uuid/uuid.dart';
 
 import '../data/models/sync_queue_item.dart';
 
@@ -27,7 +27,7 @@ class SyncQueue {
     required Map<String, dynamic> data,
   }) {
     final queueItem = SyncQueueItem(
-      id: const Uuid().v4(),
+      id: FirebaseFirestore.instance.collection('_').doc().id,
       modelType: modelType,
       operation: operation,
       data: data,

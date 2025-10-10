@@ -25,7 +25,6 @@ dependencies:
   shared_preferences: any
   firebase_crashlytics: any
   dartz: any
-  uuid: any
   image: any
   image_picker: any
   permission_handler: any

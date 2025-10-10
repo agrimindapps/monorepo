@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' hide getIt;
-import 'package:uuid/uuid.dart';
 
 import '../../../../core/di/injection.dart' as di;
 import '../../domain/create_task.dart';
@@ -40,10 +40,9 @@ final createTaskProvider = FutureProvider.family<String, TaskCreationData>((
   taskData,
 ) async {
   final createTask = di.getIt<CreateTask>();
-  const uuid = Uuid();
 
   final task = TaskEntity(
-    id: uuid.v4(),
+    id: FirebaseFirestore.instance.collection('_').doc().id,
     title: taskData.title,
     description: taskData.description,
     listId: taskData.listId,

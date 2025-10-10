@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_providers.dart';
@@ -36,12 +36,11 @@ class _CreateTaskDialogState extends ConsumerState<CreateTaskDialog> {
       }
 
       try {
-        const uuid = Uuid();
         await ref
             .read(taskNotifierProvider.notifier)
             .createTask(
               TaskEntity(
-                id: uuid.v4(),
+                id: FirebaseFirestore.instance.collection('_').doc().id,
                 title: _titleController.text,
                 description:
                     _descriptionController.text.isEmpty

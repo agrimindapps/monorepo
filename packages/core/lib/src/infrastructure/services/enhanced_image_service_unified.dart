@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/result.dart';
@@ -432,7 +432,7 @@ class EnhancedImageServiceUnified {
           folder ?? _config.folders[uploadType] ?? _config.defaultFolder;
       final String uniqueFileName =
           fileName ??
-          '${const Uuid().v4()}.${path.extension(imageFile.path).substring(1)}';
+          '${_generateFirebaseId()}.${path.extension(imageFile.path).substring(1)}';
       final storageRef = _storage
           .ref()
           .child(uploadFolder)
@@ -712,6 +712,12 @@ class EnhancedImageServiceUnified {
     _preloadTimer?.cancel();
     _progressController.close();
     debugPrint('🔌 EnhancedImageServiceUnified disposed');
+  }
+
+  /// Generate unique ID using Firebase Firestore
+  /// Replaces UUID with Firebase native IDs
+  String _generateFirebaseId() {
+    return FirebaseFirestore.instance.collection('_').doc().id;
   }
 
   Future<Result<File>> _optimizeImageIfNeeded(File imageFile) async {

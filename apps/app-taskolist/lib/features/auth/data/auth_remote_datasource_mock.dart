@@ -1,13 +1,12 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
 import 'auth_remote_datasource.dart';
 import 'user_model.dart';
 
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
-  static const uuid = Uuid();
   UserModel? _currentUser;
   final StreamController<UserModel?> _authStateController =
       StreamController<UserModel?>.broadcast();
@@ -26,7 +25,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
       throw Exception('Senha deve ter pelo menos 6 caracteres');
     }
     final user = UserModel(
-      id: uuid.v4(),
+      id: FirebaseFirestore.instance.collection('_').doc().id,
       name: email.split('@').first, // Nome do email
       email: email,
       createdAt: DateTime.now(),
@@ -58,7 +57,7 @@ class AuthRemoteDataSourceMock implements AuthRemoteDataSource {
       throw Exception('Email inválido');
     }
     final user = UserModel(
-      id: uuid.v4(),
+      id: FirebaseFirestore.instance.collection('_').doc().id,
       name: name,
       email: email,
       createdAt: DateTime.now(),

@@ -19,7 +19,6 @@ dependencies:
   get_it: any
   injectable: any
   dartz: any
-  uuid: any
   riverpod_annotation: any
   json_annotation: any
 dev_dependencies:

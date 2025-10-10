@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/result.dart';
@@ -97,17 +97,17 @@ class MultipleImageUploadResult {
 class ImageService {
   final ImagePicker _picker;
   final FirebaseStorage _storage;
-  final Uuid _uuid;
+  final FirebaseFirestore _firestore;
   final ImageServiceConfig config;
 
   ImageService({
     ImagePicker? picker,
     FirebaseStorage? storage,
-    Uuid? uuid,
+    FirebaseFirestore? firestore,
     this.config = const ImageServiceConfig(),
   }) : _picker = picker ?? ImagePicker(),
        _storage = storage ?? FirebaseStorage.instance,
-       _uuid = uuid ?? const Uuid();
+       _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Selecionar imagem da galeria
   Future<Result<File>> pickImageFromGallery() async {
@@ -209,7 +209,7 @@ class ImageService {
       }
       final targetFolder = _determineFolder(folder, uploadType);
       final finalFileName =
-          fileName ?? '${_uuid.v4()}${_getFileExtension(imageFile.path)}';
+          fileName ?? '${_generateFirebaseId()}${_getFileExtension(imageFile.path)}';
       final Reference storageRef = _storage.ref().child(
         '$targetFolder/$finalFileName',
       );
@@ -429,6 +429,12 @@ class ImageService {
     }
 
     return config.defaultFolder;
+  }
+
+  /// Gerar ID único usando Firebase Firestore
+  /// Substitui o uso de UUID por IDs nativos do Firebase
+  String _generateFirebaseId() {
+    return _firestore.collection('_').doc().id;
   }
 
   /// Comprimir imagem (placeholder para implementação futura)

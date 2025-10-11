@@ -219,6 +219,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
   @override
   Future<DiagnosticosState> build() async {
+    debugPrint('');
+    debugPrint('🏗️ ═══════════════════════════════════════════════════════════');
+    debugPrint('🏗️ [DiagnosticosNotifier] build() CALLED - Provider sendo reconstruído!');
+    debugPrint('🏗️ ═══════════════════════════════════════════════════════════');
+    debugPrint('');
+
     _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
     _getDiagnosticoByIdUseCase = di.sl<GetDiagnosticoByIdUseCase>();
     _getRecomendacoesUseCase = di.sl<GetRecomendacoesUseCase>();
@@ -235,6 +241,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     _getDiagnosticoFiltersDataUseCase =
         di.sl<GetDiagnosticoFiltersDataUseCase>();
 
+    debugPrint('🏗️ [DiagnosticosNotifier] build() retornando DiagnosticosState.initial()');
     return DiagnosticosState.initial();
   }
 

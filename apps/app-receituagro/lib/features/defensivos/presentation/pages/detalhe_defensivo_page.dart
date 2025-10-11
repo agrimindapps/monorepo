@@ -86,18 +86,29 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           debugPrint('Nome do defensivo: ${defensivoData.nomeComum}');
           debugPrint('Fabricante: ${defensivoData.fabricante}');
 
-          print('🔍 [DEBUG] Chamando getDiagnosticosByDefensivo...');
-          print('🔍 [DEBUG] defensivoIdReg: $defensivoIdReg');
-          print('🔍 [DEBUG] nomeDefensivo: ${defensivoData.nomeComum}');
+          debugPrint('🔍 [DETALHE_DEFENSIVO_PAGE] Chamando getDiagnosticosByDefensivo...');
+          debugPrint('🔍 [DETALHE_DEFENSIVO_PAGE] defensivoIdReg: $defensivoIdReg');
+          debugPrint('🔍 [DETALHE_DEFENSIVO_PAGE] nomeDefensivo: ${defensivoData.nomeComum}');
 
-          await ref
-              .read(diagnosticosNotifierProvider.notifier)
-              .getDiagnosticosByDefensivo(
-                defensivoIdReg,
-                nomeDefensivo: defensivoData.nomeComum,
-              );
+          final notifier = ref.read(diagnosticosNotifierProvider.notifier);
+          debugPrint('🔍 [DETALHE_DEFENSIVO_PAGE] Notifier obtido: ${notifier.runtimeType}');
 
-          print('✅ [DEBUG] getDiagnosticosByDefensivo concluído');
+          await notifier.getDiagnosticosByDefensivo(
+            defensivoIdReg,
+            nomeDefensivo: defensivoData.nomeComum,
+          );
+
+          debugPrint('✅ [DETALHE_DEFENSIVO_PAGE] getDiagnosticosByDefensivo concluído');
+
+          // Verificar estado após chamada
+          final stateAfter = ref.read(diagnosticosNotifierProvider);
+          stateAfter.whenData((stateData) {
+            debugPrint('📊 [DETALHE_DEFENSIVO_PAGE] Estado após chamada:');
+            debugPrint('   - allDiagnosticos: ${stateData.allDiagnosticos.length}');
+            debugPrint('   - filteredDiagnosticos: ${stateData.filteredDiagnosticos.length}');
+            debugPrint('   - contextoDefensivo: ${stateData.contextoDefensivo}');
+            debugPrint('   - diagnosticos (getter): ${stateData.diagnosticos.length}');
+          });
           await _recordDefensivoAccess(defensivoData);
 
           final endTime = DateTime.now();

@@ -380,9 +380,15 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     String idDefensivo, {
     String? nomeDefensivo,
   }) async {
-    debugPrint('[DiagnosticosNotifier] 🎯 getDiagnosticosByDefensivo INICIADO');
+    debugPrint('');
+    debugPrint('╔═══════════════════════════════════════════════════════════╗');
+    debugPrint('║ [DiagnosticosNotifier] getDiagnosticosByDefensivo CHAMADO ║');
+    debugPrint('╚═══════════════════════════════════════════════════════════╝');
+    debugPrint('[DiagnosticosNotifier] 🎯 INICIADO');
     debugPrint('[DiagnosticosNotifier] idDefensivo: $idDefensivo');
     debugPrint('[DiagnosticosNotifier] nomeDefensivo: $nomeDefensivo');
+    debugPrint('[DiagnosticosNotifier] state.hasValue: ${state.hasValue}');
+    debugPrint('[DiagnosticosNotifier] state.isLoading: ${state.isLoading}');
 
     // CORREÇÃO: Aguarda a inicialização do provider
     await future;

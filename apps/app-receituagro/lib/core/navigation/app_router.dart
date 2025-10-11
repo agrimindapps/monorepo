@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../features/DetalheDefensivos/detalhe_defensivo_page.dart';
+import '../../features/defensivos/presentation/pages/detalhe_defensivo_page.dart';
 import '../../features/culturas/lista_culturas_page.dart';
 import '../../features/defensivos/home_defensivos_page.dart';
 import '../../features/defensivos/presentation/pages/defensivos_unificado_page.dart';

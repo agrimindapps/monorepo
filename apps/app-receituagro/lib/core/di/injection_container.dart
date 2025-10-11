@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
-import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
+// ❌ REMOVIDO: import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
-import '../../features/defensivos/di/defensivos_di.dart';
+// ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
 import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
 import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
 import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
@@ -293,7 +293,7 @@ Future<void> init() async {
   );
   FavoritosDI.registerDependencies();
   // configureDefensivosDependencies(); // Already called in configureAllRepositoriesDependencies()
-  initDefensivoDetailsDI();
+  // ❌ REMOVIDO: initDefensivoDetailsDI(); // Feature consolidada em defensivos/
   PragasDI.configure();
   ComentariosDI.register(sl);
   SettingsDI.register(sl);

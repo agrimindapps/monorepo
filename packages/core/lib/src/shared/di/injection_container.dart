@@ -21,7 +21,6 @@ import '../../infrastructure/services/firebase_crashlytics_service.dart';
 import '../../infrastructure/services/firebase_storage_service.dart';
 import '../../infrastructure/services/hive_storage_service.dart';
 import '../../infrastructure/services/revenue_cat_service.dart';
-import '../../shared/config/environment_config.dart';
 import '../../sync/config/sync_feature_flags.dart';
 import '../../sync/factories/sync_service_factory.dart';
 import '../../sync/implementations/cache_manager_impl.dart';

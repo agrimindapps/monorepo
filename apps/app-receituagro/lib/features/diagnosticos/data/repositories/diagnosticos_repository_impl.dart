@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:core/core.dart';
 
 import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
@@ -62,7 +64,17 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String idDefensivo,
   ) async {
     try {
+      developer.log(
+        '🔍 getByDefensivo (Repository) - ID do defensivo: $idDefensivo',
+        name: 'DiagnosticosRepository',
+      );
+
       final diagnosticosHive = await _hiveRepository.findByDefensivo(idDefensivo);
+
+      developer.log(
+        '✅ getByDefensivo (Repository) - ${diagnosticosHive.length} registros Hive encontrados',
+        name: 'DiagnosticosRepository',
+      );
 
       final entities = diagnosticosHive
           .map<DiagnosticoEntity>(
@@ -70,8 +82,19 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
           )
           .toList();
 
+      developer.log(
+        '✅ getByDefensivo (Repository) - ${entities.length} entities mapeadas, retornando Right()',
+        name: 'DiagnosticosRepository',
+      );
+
       return Right(entities);
-    } catch (e) {
+    } catch (e, stack) {
+      developer.log(
+        '❌ getByDefensivo (Repository) - Erro: $e',
+        name: 'DiagnosticosRepository',
+        error: e,
+        stackTrace: stack,
+      );
       return Left(
         CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'),
       );

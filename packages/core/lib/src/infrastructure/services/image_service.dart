@@ -273,7 +273,7 @@ class ImageService {
 
       if (attempt < maxRetries) {
         // Exponential backoff: 2s, 4s, 8s
-        await Future.delayed(delay);
+        await Future<void>.delayed(delay);
         delay *= 2;
       }
     }

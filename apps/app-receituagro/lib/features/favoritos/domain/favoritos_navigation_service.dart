@@ -5,7 +5,7 @@ import '../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../core/services/diagnostico_integration_service.dart';
 import '../../../core/services/receituagro_navigation_service.dart';
-import '../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
+import '../../diagnosticos/presentation/pages/detalhe_diagnostico_page.dart';
 import '../data/favorito_defensivo_model.dart';
 import '../data/favorito_diagnostico_model.dart';
 import '../data/favorito_praga_model.dart';

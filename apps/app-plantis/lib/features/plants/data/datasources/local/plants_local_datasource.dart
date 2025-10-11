@@ -69,12 +69,16 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
               // Migrate old format to new format
               if (kDebugMode) {
-                debugPrint('🔄 Migrating plant $key from Map to JSON String format');
+                debugPrint(
+                  '🔄 Migrating plant $key from Map to JSON String format',
+                );
               }
               final jsonString = jsonEncode(plantJson);
               await hiveBox.put(key, jsonString);
             } else {
-              debugPrint('⚠️ Unknown plant data format for key $key: ${plantData.runtimeType}');
+              debugPrint(
+                '⚠️ Unknown plant data format for key $key: ${plantData.runtimeType}',
+              );
               continue;
             }
 
@@ -137,7 +141,9 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
           final jsonString = jsonEncode(plantJson);
           await hiveBox.put(id, jsonString);
         } else {
-          debugPrint('⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}');
+          debugPrint(
+            '⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}',
+          );
           return null;
         }
 
@@ -240,7 +246,9 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         } else if (plantData is Map) {
           plantJson = Map<String, dynamic>.from(plantData);
         } else {
-          debugPrint('⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}');
+          debugPrint(
+            '⚠️ Unknown plant data format for ID $id: ${plantData.runtimeType}',
+          );
           return;
         }
 

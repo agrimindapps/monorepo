@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
@@ -9,8 +10,10 @@ part 'diagnosticos_notifier.g.dart';
 /// Diagnosticos state
 class DiagnosticosState {
   // CORREÇÃO: Separação de listas para evitar conflito entre dados completos e filtros
-  final List<DiagnosticoEntity> allDiagnosticos; // Dados completos sempre em memória
-  final List<DiagnosticoEntity> filteredDiagnosticos; // Dados filtrados ou completos
+  final List<DiagnosticoEntity>
+  allDiagnosticos; // Dados completos sempre em memória
+  final List<DiagnosticoEntity>
+  filteredDiagnosticos; // Dados filtrados ou completos
   final List<DiagnosticoEntity> searchResults; // Resultados de busca de texto
   final String searchQuery; // Query de busca atual
 
@@ -60,10 +63,40 @@ class DiagnosticosState {
 
   // BACKWARD COMPATIBILITY: getter para código legado que usa 'diagnosticos'
   List<DiagnosticoEntity> get diagnosticos {
-    if (searchQuery.isNotEmpty) return searchResults;
-    if (contextoDefensivo != null || contextoCultura != null || contextoPraga != null) {
+    debugPrint('[DiagnosticosState.getter] 📊 Getter diagnosticos chamado');
+    debugPrint('[DiagnosticosState.getter] searchQuery: "$searchQuery"');
+    debugPrint(
+      '[DiagnosticosState.getter] contextoDefensivo: $contextoDefensivo',
+    );
+    debugPrint('[DiagnosticosState.getter] contextoCultura: $contextoCultura');
+    debugPrint('[DiagnosticosState.getter] contextoPraga: $contextoPraga');
+    debugPrint(
+      '[DiagnosticosState.getter] filteredDiagnosticos.length: ${filteredDiagnosticos.length}',
+    );
+    debugPrint(
+      '[DiagnosticosState.getter] allDiagnosticos.length: ${allDiagnosticos.length}',
+    );
+    debugPrint(
+      '[DiagnosticosState.getter] searchResults.length: ${searchResults.length}',
+    );
+
+    if (searchQuery.isNotEmpty) {
+      debugPrint(
+        '[DiagnosticosState.getter] ➡️ Retornando searchResults (${searchResults.length})',
+      );
+      return searchResults;
+    }
+    if (contextoDefensivo != null ||
+        contextoCultura != null ||
+        contextoPraga != null) {
+      debugPrint(
+        '[DiagnosticosState.getter] ➡️ Retornando filteredDiagnosticos (${filteredDiagnosticos.length})',
+      );
       return filteredDiagnosticos;
     }
+    debugPrint(
+      '[DiagnosticosState.getter] ➡️ Retornando allDiagnosticos (${allDiagnosticos.length})',
+    );
     return allDiagnosticos;
   }
 
@@ -85,18 +118,23 @@ class DiagnosticosState {
   }) {
     final newAllDiagnosticos = allDiagnosticos ?? this.allDiagnosticos;
     final newSearchQuery = searchQuery ?? this.searchQuery;
-    final newContextoCultura = clearContext ? null : (contextoCultura ?? this.contextoCultura);
-    final newContextoPraga = clearContext ? null : (contextoPraga ?? this.contextoPraga);
-    final newContextoDefensivo = clearContext ? null : (contextoDefensivo ?? this.contextoDefensivo);
+    final newContextoCultura =
+        clearContext ? null : (contextoCultura ?? this.contextoCultura);
+    final newContextoPraga =
+        clearContext ? null : (contextoPraga ?? this.contextoPraga);
+    final newContextoDefensivo =
+        clearContext ? null : (contextoDefensivo ?? this.contextoDefensivo);
 
     // LÓGICA INTELIGENTE: Se filteredDiagnosticos não foi fornecido e não há filtros/contextos ativos,
     // então filteredDiagnosticos deve ser igual a allDiagnosticos
-    final hasActiveFilters = newSearchQuery.isNotEmpty ||
-                            newContextoCultura != null ||
-                            newContextoPraga != null ||
-                            newContextoDefensivo != null;
+    final hasActiveFilters =
+        newSearchQuery.isNotEmpty ||
+        newContextoCultura != null ||
+        newContextoPraga != null ||
+        newContextoDefensivo != null;
 
-    final newFilteredDiagnosticos = filteredDiagnosticos ??
+    final newFilteredDiagnosticos =
+        filteredDiagnosticos ??
         (allDiagnosticos != null && !hasActiveFilters
             ? newAllDiagnosticos
             : this.filteredDiagnosticos);
@@ -123,15 +161,15 @@ class DiagnosticosState {
   }
 
   DiagnosticosState clearContext() {
-    return copyWith(
-      clearContext: true,
-      searchQuery: '',
-      searchResults: [],
-    );
+    return copyWith(clearContext: true, searchQuery: '', searchResults: []);
   }
+
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
-  bool get hasContext => contextoCultura != null || contextoPraga != null || contextoDefensivo != null;
+  bool get hasContext =>
+      contextoCultura != null ||
+      contextoPraga != null ||
+      contextoDefensivo != null;
 
   DiagnosticosViewState get viewState {
     if (isLoading) return DiagnosticosViewState.loading;
@@ -139,6 +177,7 @@ class DiagnosticosState {
     if (diagnosticos.isEmpty) return DiagnosticosViewState.empty;
     return DiagnosticosViewState.loaded;
   }
+
   String get searchSummary {
     if (hasContext) {
       final parts = <String>[];
@@ -157,13 +196,7 @@ class DiagnosticosState {
 }
 
 /// Estados da view de diagnósticos
-enum DiagnosticosViewState {
-  initial,
-  loading,
-  loaded,
-  empty,
-  error,
-}
+enum DiagnosticosViewState { initial, loading, loaded, empty, error }
 
 /// Notifier para gerenciar estado dos diagnósticos (Presentation Layer)
 /// Especializado em recomendações defensivo-cultura-praga
@@ -172,13 +205,16 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
   late final GetDiagnosticoByIdUseCase _getDiagnosticoByIdUseCase;
   late final GetRecomendacoesUseCase _getRecomendacoesUseCase;
-  late final GetDiagnosticosByDefensivoUseCase _getDiagnosticosByDefensivoUseCase;
+  late final GetDiagnosticosByDefensivoUseCase
+  _getDiagnosticosByDefensivoUseCase;
   late final GetDiagnosticosByCulturaUseCase _getDiagnosticosByCulturaUseCase;
   late final GetDiagnosticosByPragaUseCase _getDiagnosticosByPragaUseCase;
-  late final SearchDiagnosticosWithFiltersUseCase _searchDiagnosticosWithFiltersUseCase;
+  late final SearchDiagnosticosWithFiltersUseCase
+  _searchDiagnosticosWithFiltersUseCase;
   late final GetDiagnosticoStatsUseCase _getDiagnosticoStatsUseCase;
   late final ValidateCompatibilidadeUseCase _validateCompatibilidadeUseCase;
-  late final SearchDiagnosticosByPatternUseCase _searchDiagnosticosByPatternUseCase;
+  late final SearchDiagnosticosByPatternUseCase
+  _searchDiagnosticosByPatternUseCase;
   late final GetDiagnosticoFiltersDataUseCase _getDiagnosticoFiltersDataUseCase;
 
   @override
@@ -186,14 +222,18 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
     _getDiagnosticoByIdUseCase = di.sl<GetDiagnosticoByIdUseCase>();
     _getRecomendacoesUseCase = di.sl<GetRecomendacoesUseCase>();
-    _getDiagnosticosByDefensivoUseCase = di.sl<GetDiagnosticosByDefensivoUseCase>();
+    _getDiagnosticosByDefensivoUseCase =
+        di.sl<GetDiagnosticosByDefensivoUseCase>();
     _getDiagnosticosByCulturaUseCase = di.sl<GetDiagnosticosByCulturaUseCase>();
     _getDiagnosticosByPragaUseCase = di.sl<GetDiagnosticosByPragaUseCase>();
-    _searchDiagnosticosWithFiltersUseCase = di.sl<SearchDiagnosticosWithFiltersUseCase>();
+    _searchDiagnosticosWithFiltersUseCase =
+        di.sl<SearchDiagnosticosWithFiltersUseCase>();
     _getDiagnosticoStatsUseCase = di.sl<GetDiagnosticoStatsUseCase>();
     _validateCompatibilidadeUseCase = di.sl<ValidateCompatibilidadeUseCase>();
-    _searchDiagnosticosByPatternUseCase = di.sl<SearchDiagnosticosByPatternUseCase>();
-    _getDiagnosticoFiltersDataUseCase = di.sl<GetDiagnosticoFiltersDataUseCase>();
+    _searchDiagnosticosByPatternUseCase =
+        di.sl<SearchDiagnosticosByPatternUseCase>();
+    _getDiagnosticoFiltersDataUseCase =
+        di.sl<GetDiagnosticoFiltersDataUseCase>();
 
     return DiagnosticosState.initial();
   }
@@ -203,13 +243,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
-      await Future.wait([
-        _loadStats(),
-        _loadFiltersData(),
-      ]);
+      await Future.wait([_loadStats(), _loadFiltersData()]);
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(
@@ -226,13 +265,18 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     if (currentState == null) return;
 
     if (offset == null || offset == 0) {
-      state = AsyncValue.data(currentState.clearContext().copyWith(isLoading: true).clearError());
+      state = AsyncValue.data(
+        currentState.clearContext().copyWith(isLoading: true).clearError(),
+      );
     } else {
       state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
     }
 
     try {
-      final result = await _getDiagnosticosUseCase(limit: limit, offset: offset);
+      final result = await _getDiagnosticosUseCase(
+        limit: limit,
+        offset: offset,
+      );
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -253,12 +297,14 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
           // CORREÇÃO: loadAllDiagnosticos atualiza tanto allDiagnosticos quanto filteredDiagnosticos
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              isLoadingMore: false,
-              allDiagnosticos: updatedList,
-              filteredDiagnosticos: updatedList,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  isLoadingMore: false,
+                  allDiagnosticos: updatedList,
+                  filteredDiagnosticos: updatedList,
+                )
+                .clearError(),
           );
         },
       );
@@ -311,31 +357,40 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
         (diagnosticos) {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              filteredDiagnosticos: diagnosticos,
-              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
-              allDiagnosticos: diagnosticos,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  filteredDiagnosticos: diagnosticos,
+                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+                  allDiagnosticos: diagnosticos,
+                )
+                .clearError(),
           );
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
 
   /// Busca diagnósticos por defensivo
-  Future<void> getDiagnosticosByDefensivo(String idDefensivo, {String? nomeDefensivo}) async {
+  Future<void> getDiagnosticosByDefensivo(
+    String idDefensivo, {
+    String? nomeDefensivo,
+  }) async {
+    debugPrint('[DiagnosticosNotifier] 🎯 getDiagnosticosByDefensivo INICIADO');
+    debugPrint('[DiagnosticosNotifier] idDefensivo: $idDefensivo');
+    debugPrint('[DiagnosticosNotifier] nomeDefensivo: $nomeDefensivo');
+
     // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
     final currentState = state.requireValue;
+    debugPrint(
+      '[DiagnosticosNotifier] Estado atual antes: filteredDiagnosticos=${currentState.filteredDiagnosticos.length}',
+    );
 
     state = AsyncValue.data(
       currentState
@@ -345,12 +400,16 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           )
           .clearError(),
     );
+    debugPrint('[DiagnosticosNotifier] ⏳ isLoading=true, iniciando busca...');
 
     try {
       final result = await _getDiagnosticosByDefensivoUseCase(idDefensivo);
 
       result.fold(
         (failure) {
+          debugPrint(
+            '[DiagnosticosNotifier] ❌ ERRO no use case: ${failure.message}',
+          );
           final updatedState = state.requireValue;
           state = AsyncValue.data(
             updatedState.copyWith(
@@ -360,33 +419,55 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           );
         },
         (diagnosticos) {
+          debugPrint(
+            '[DiagnosticosNotifier] ✅ Use case retornou ${diagnosticos.length} diagnósticos',
+          );
+
           final updatedState = state.requireValue;
 
           // CORREÇÃO: Atualiza filteredDiagnosticos com os resultados filtrados por defensivo
           // IMPORTANTE: SEMPRE atualiza allDiagnosticos para garantir que o getter funcione
+          // CRÍTICO: MANTÉM o contextoDefensivo que foi definido no início do método
           state = AsyncValue.data(
-            updatedState.copyWith(
-              isLoading: false,
-              filteredDiagnosticos: diagnosticos,
-              // CORREÇÃO: Sempre atualiza allDiagnosticos (não passa null)
-              allDiagnosticos: diagnosticos,
-            ).clearError(),
+            updatedState
+                .copyWith(
+                  isLoading: false,
+                  filteredDiagnosticos: diagnosticos,
+                  // CORREÇÃO: Sempre atualiza allDiagnosticos (não passa null)
+                  allDiagnosticos: diagnosticos,
+                  // CRÍTICO: Reforça o contextoDefensivo para garantir que não seja perdido
+                  contextoDefensivo: nomeDefensivo ?? idDefensivo,
+                )
+                .clearError(),
           );
+
+          debugPrint('[DiagnosticosNotifier] 🎯 ESTADO ATUALIZADO!');
+          debugPrint(
+            '[DiagnosticosNotifier] filteredDiagnosticos: ${diagnosticos.length}',
+          );
+          debugPrint(
+            '[DiagnosticosNotifier] allDiagnosticos: ${diagnosticos.length}',
+          );
+          debugPrint('[DiagnosticosNotifier] contextoDefensivo: ${nomeDefensivo ?? idDefensivo}');
+          debugPrint('[DiagnosticosNotifier] isLoading: false');
+          debugPrint('[DiagnosticosNotifier] errorMessage: null');
         },
       );
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('[DiagnosticosNotifier] ❌ EXCEÇÃO: $e');
+      debugPrint('[DiagnosticosNotifier] Stack: $stack');
       final updatedState = state.requireValue;
       state = AsyncValue.data(
-        updatedState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        updatedState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
 
   /// Busca diagnósticos por cultura
-  Future<void> getDiagnosticosByCultura(String idCultura, {String? nomeCultura}) async {
+  Future<void> getDiagnosticosByCultura(
+    String idCultura, {
+    String? nomeCultura,
+  }) async {
     // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
@@ -394,10 +475,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
     state = AsyncValue.data(
       currentState
-          .copyWith(
-            contextoCultura: nomeCultura ?? idCultura,
-            isLoading: true,
-          )
+          .copyWith(contextoCultura: nomeCultura ?? idCultura, isLoading: true)
           .clearError(),
     );
 
@@ -414,27 +492,29 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
         (diagnosticos) {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              filteredDiagnosticos: diagnosticos,
-              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
-              allDiagnosticos: diagnosticos,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  filteredDiagnosticos: diagnosticos,
+                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+                  allDiagnosticos: diagnosticos,
+                )
+                .clearError(),
           );
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
 
   /// Busca diagnósticos por praga
-  Future<void> getDiagnosticosByPraga(String idPraga, {String? nomePraga}) async {
+  Future<void> getDiagnosticosByPraga(
+    String idPraga, {
+    String? nomePraga,
+  }) async {
     // CORREÇÃO: Aguarda a inicialização do provider
     await future;
 
@@ -442,10 +522,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
     state = AsyncValue.data(
       currentState
-          .copyWith(
-            contextoPraga: nomePraga ?? idPraga,
-            isLoading: true,
-          )
+          .copyWith(contextoPraga: nomePraga ?? idPraga, isLoading: true)
           .clearError(),
     );
 
@@ -462,21 +539,20 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
         (diagnosticos) {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              filteredDiagnosticos: diagnosticos,
-              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
-              allDiagnosticos: diagnosticos,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  filteredDiagnosticos: diagnosticos,
+                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+                  allDiagnosticos: diagnosticos,
+                )
+                .clearError(),
           );
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
@@ -487,10 +563,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.clearContext().copyWith(
-            currentFilters: filters,
-            isLoading: true,
-          ).clearError(),
+      currentState
+          .clearContext()
+          .copyWith(currentFilters: filters, isLoading: true)
+          .clearError(),
     );
 
     try {
@@ -506,21 +582,20 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
         (diagnosticos) {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              filteredDiagnosticos: diagnosticos,
-              // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
-              allDiagnosticos: diagnosticos,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  filteredDiagnosticos: diagnosticos,
+                  // CORREÇÃO: Sempre atualiza allDiagnosticos quando há contexto
+                  allDiagnosticos: diagnosticos,
+                )
+                .clearError(),
           );
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
@@ -543,31 +618,34 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     }
 
     state = AsyncValue.data(
-      currentState.clearContext().copyWith(
-        searchQuery: pattern,
-        isLoading: true,
-      ).clearError(),
+      currentState
+          .clearContext()
+          .copyWith(searchQuery: pattern, isLoading: true)
+          .clearError(),
     );
 
     try {
       // CORREÇÃO: Busca primeiro localmente em allDiagnosticos se disponível
       if (currentState.allDiagnosticos.isNotEmpty) {
         final lowerPattern = pattern.toLowerCase();
-        final localResults = currentState.allDiagnosticos.where((diag) {
-          final nomeDefensivo = diag.nomeDefensivo?.toLowerCase() ?? '';
-          final nomeCultura = diag.nomeCultura?.toLowerCase() ?? '';
-          final nomePraga = diag.nomePraga?.toLowerCase() ?? '';
-          return nomeDefensivo.contains(lowerPattern) ||
-                 nomeCultura.contains(lowerPattern) ||
-                 nomePraga.contains(lowerPattern);
-        }).toList();
+        final localResults =
+            currentState.allDiagnosticos.where((diag) {
+              final nomeDefensivo = diag.nomeDefensivo?.toLowerCase() ?? '';
+              final nomeCultura = diag.nomeCultura?.toLowerCase() ?? '';
+              final nomePraga = diag.nomePraga?.toLowerCase() ?? '';
+              return nomeDefensivo.contains(lowerPattern) ||
+                  nomeCultura.contains(lowerPattern) ||
+                  nomePraga.contains(lowerPattern);
+            }).toList();
 
         state = AsyncValue.data(
-          currentState.copyWith(
-            searchQuery: pattern,
-            searchResults: localResults,
-            isLoading: false,
-          ).clearError(),
+          currentState
+              .copyWith(
+                searchQuery: pattern,
+                searchResults: localResults,
+                isLoading: false,
+              )
+              .clearError(),
         );
         return;
       }
@@ -586,11 +664,13 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
         (diagnosticos) {
           state = AsyncValue.data(
-            currentState.copyWith(
-              searchQuery: pattern,
-              searchResults: diagnosticos,
-              isLoading: false,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  searchQuery: pattern,
+                  searchResults: diagnosticos,
+                  isLoading: false,
+                )
+                .clearError(),
           );
         },
       );
@@ -609,18 +689,15 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   Future<DiagnosticoEntity?> getDiagnosticoById(String id) async {
     try {
       final result = await _getDiagnosticoByIdUseCase(id);
-      return result.fold(
-        (failure) {
-          final currentState = state.value;
-          if (currentState != null) {
-            state = AsyncValue.data(
-              currentState.copyWith(errorMessage: failure.message),
-            );
-          }
-          return null;
-        },
-        (diagnostico) => diagnostico,
-      );
+      return result.fold((failure) {
+        final currentState = state.value;
+        if (currentState != null) {
+          state = AsyncValue.data(
+            currentState.copyWith(errorMessage: failure.message),
+          );
+        }
+        return null;
+      }, (diagnostico) => diagnostico);
     } catch (e) {
       final currentState = state.value;
       if (currentState != null) {
@@ -644,18 +721,15 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         idCultura: idCultura,
         idPraga: idPraga,
       );
-      return result.fold(
-        (failure) {
-          final currentState = state.value;
-          if (currentState != null) {
-            state = AsyncValue.data(
-              currentState.copyWith(errorMessage: failure.message),
-            );
-          }
-          return false;
-        },
-        (isCompatible) => isCompatible,
-      );
+      return result.fold((failure) {
+        final currentState = state.value;
+        if (currentState != null) {
+          state = AsyncValue.data(
+            currentState.copyWith(errorMessage: failure.message),
+          );
+        }
+        return false;
+      }, (isCompatible) => isCompatible);
     } catch (e) {
       final currentState = state.value;
       if (currentState != null) {
@@ -672,9 +746,13 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final filtered = currentState.filteredDiagnosticos
-        .where((DiagnosticoEntity d) => d.aplicacao.tiposDisponiveis.contains(tipo))
-        .toList();
+    final filtered =
+        currentState.filteredDiagnosticos
+            .where(
+              (DiagnosticoEntity d) =>
+                  d.aplicacao.tiposDisponiveis.contains(tipo),
+            )
+            .toList();
 
     state = AsyncValue.data(
       currentState.copyWith(filteredDiagnosticos: filtered),
@@ -686,9 +764,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final filtered = currentState.filteredDiagnosticos
-        .where((DiagnosticoEntity d) => d.completude == completude)
-        .toList();
+    final filtered =
+        currentState.filteredDiagnosticos
+            .where((DiagnosticoEntity d) => d.completude == completude)
+            .toList();
 
     state = AsyncValue.data(
       currentState.copyWith(filteredDiagnosticos: filtered),
@@ -698,14 +777,19 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   /// Ordena diagnósticos por dosagem
   void sortByDosagem({bool ascending = true}) {
     final currentState = state.value;
-    if (currentState == null || currentState.filteredDiagnosticos.isEmpty) return;
+    if (currentState == null || currentState.filteredDiagnosticos.isEmpty)
+      return;
 
-    final sortedDiagnosticos = List<DiagnosticoEntity>.from(currentState.filteredDiagnosticos);
+    final sortedDiagnosticos = List<DiagnosticoEntity>.from(
+      currentState.filteredDiagnosticos,
+    );
     sortedDiagnosticos.sort((a, b) {
       final dosageA = a.dosagem.dosageAverage;
       final dosageB = b.dosagem.dosageAverage;
 
-      return ascending ? dosageA.compareTo(dosageB) : dosageB.compareTo(dosageA);
+      return ascending
+          ? dosageA.compareTo(dosageB)
+          : dosageB.compareTo(dosageA);
     });
 
     state = AsyncValue.data(
@@ -716,9 +800,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   /// Ordena diagnósticos por completude
   void sortByCompletude() {
     final currentState = state.value;
-    if (currentState == null || currentState.filteredDiagnosticos.isEmpty) return;
+    if (currentState == null || currentState.filteredDiagnosticos.isEmpty)
+      return;
 
-    final sortedDiagnosticos = List<DiagnosticoEntity>.from(currentState.filteredDiagnosticos);
+    final sortedDiagnosticos = List<DiagnosticoEntity>.from(
+      currentState.filteredDiagnosticos,
+    );
     sortedDiagnosticos.sort((a, b) {
       final scoreA = a.completude.index;
       final scoreB = b.completude.index;
@@ -744,9 +831,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           );
         },
         (stats) {
-          state = AsyncValue.data(
-            currentState.copyWith(stats: stats),
-          );
+          state = AsyncValue.data(currentState.copyWith(stats: stats));
         },
       );
     } catch (e) {

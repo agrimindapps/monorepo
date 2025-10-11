@@ -36,8 +36,26 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
 
   /// Busca diagnósticos por defensivo
   Future<List<DiagnosticoHive>> findByDefensivo(String fkIdDefensivo) async {
+    developer.log(
+      '🔍 findByDefensivo - Buscando diagnósticos para defensivo: $fkIdDefensivo',
+      name: 'DiagnosticoRepository',
+    );
+
     final result = await findBy((item) => item.fkIdDefensivo == fkIdDefensivo);
-    return result.isSuccess ? result.data! : [];
+
+    if (result.isSuccess) {
+      developer.log(
+        '✅ findByDefensivo - Encontrados ${result.data!.length} diagnósticos',
+        name: 'DiagnosticoRepository',
+      );
+      return result.data!;
+    } else {
+      developer.log(
+        '❌ findByDefensivo - Erro: ${result.error?.message}',
+        name: 'DiagnosticoRepository',
+      );
+      return [];
+    }
   }
 
   /// Busca diagnósticos por cultura
@@ -71,14 +89,58 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
     String? culturaId,
     String? pragaId,
   }) async {
+    developer.log(
+      '🔍 findByMultipleCriteria - Critérios: defensivo=$defensivoId, cultura=$culturaId, praga=$pragaId',
+      name: 'DiagnosticoRepository',
+    );
+
+    // Primeiro, vamos ver quantos itens existem no total
+    final allResult = await getAll();
+    if (allResult.isSuccess) {
+      developer.log(
+        '📊 Total de diagnósticos na base: ${allResult.data!.length}',
+        name: 'DiagnosticoRepository',
+      );
+    }
+
     final result = await findBy((item) {
-      if (defensivoId != null && item.fkIdDefensivo != defensivoId)
+      if (defensivoId != null && item.fkIdDefensivo != defensivoId) {
         return false;
-      if (culturaId != null && item.fkIdCultura != culturaId) return false;
-      if (pragaId != null && item.fkIdPraga != pragaId) return false;
+      }
+      if (culturaId != null && item.fkIdCultura != culturaId) {
+        return false;
+      }
+      if (pragaId != null && item.fkIdPraga != pragaId) {
+        return false;
+      }
       return true;
     });
-    return result.isSuccess ? result.data! : [];
+
+    if (result.isSuccess) {
+      developer.log(
+        '✅ findByMultipleCriteria - Encontrados ${result.data!.length} diagnósticos',
+        name: 'DiagnosticoRepository',
+      );
+
+      // Log dos primeiros 3 resultados para debug
+      if (result.data!.isNotEmpty) {
+        final sample = result.data!.take(3);
+        for (final diag in sample) {
+          developer.log(
+            '  → Diagnóstico: idReg=${diag.idReg}, defensivo=${diag.fkIdDefensivo}, cultura=${diag.fkIdCultura}, praga=${diag.fkIdPraga}',
+            name: 'DiagnosticoRepository',
+          );
+        }
+      }
+
+      return result.data!;
+    } else {
+      developer.log(
+        '❌ findByMultipleCriteria - Erro: ${result.error?.message}',
+        name: 'DiagnosticoRepository',
+      );
+      return [];
+    }
   }
 
   /// Carrega dados do JSON para o repositório

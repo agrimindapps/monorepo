@@ -1,8 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../DetalheDefensivos/detalhe_defensivo_page.dart';
-import '../../../detalhes_diagnostico/presentation/pages/detalhe_diagnostico_page.dart';
+import '../../../defensivos/presentation/pages/detalhe_defensivo_page.dart';
+import '../../../diagnosticos/presentation/pages/detalhe_diagnostico_page.dart';
 import '../providers/diagnosticos_praga_notifier.dart';
 
 /// Widget responsável pelo modal de detalhes do diagnóstico

@@ -195,6 +195,7 @@ class RevenueCatService implements ISubscriptionRepository {
         return const Left(SubscriptionPaymentFailure.productUnavailable());
       }
 
+      // ignore: deprecated_member_use
       final purchaseResult = await Purchases.purchasePackage(targetPackage);
 
       if (purchaseResult.customerInfo.activeSubscriptions.isEmpty) {

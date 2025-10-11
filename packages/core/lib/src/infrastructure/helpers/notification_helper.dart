@@ -212,7 +212,7 @@ class NotificationHelper {
 
   /// Converte cor em formato Flutter para int
   static int colorToInt(Color color) {
-    return color.value;
+    return color.toARGB32();
   }
 
   /// Converte int para cor Flutter

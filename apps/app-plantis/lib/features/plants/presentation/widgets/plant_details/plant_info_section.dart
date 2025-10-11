@@ -1,21 +1,25 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../providers/plant_details_provider.dart';
+import '../../providers/plants_notifier.dart';
 import '../../../domain/entities/plant.dart';
+import '../../../domain/usecases/update_plant_usecase.dart';
 
 /// Widget responsável por exibir as informações básicas da planta
-class PlantInfoSection extends StatelessWidget {
+class PlantInfoSection extends ConsumerWidget {
   final Plant plant;
 
   const PlantInfoSection({super.key, required this.plant});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildBasicInfo(context),
         const SizedBox(height: 24),
-        _buildNotesCard(context),
+        _buildNotesCard(context, ref),
       ],
     );
   }
@@ -170,7 +174,7 @@ class PlantInfoSection extends StatelessWidget {
     );
   }
 
-  Widget _buildNotesCard(BuildContext context) {
+  Widget _buildNotesCard(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Column(
@@ -204,25 +208,156 @@ class PlantInfoSection extends StatelessWidget {
               ),
             ],
           ),
-          child: Text(
-            plant.notes?.isNotEmpty == true
-                ? plant.notes!
-                : 'Nenhuma observação registrada para esta planta.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color:
-                  plant.notes?.isNotEmpty == true
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurfaceVariant,
-              height: 1.5,
-              fontStyle:
-                  plant.notes?.isNotEmpty == true
-                      ? FontStyle.normal
-                      : FontStyle.italic,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header com ícone de edição
+              Row(
+                children: [
+                  Icon(
+                    Icons.notes_outlined,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      plant.notes?.isNotEmpty == true
+                          ? 'Notas da planta'
+                          : 'Adicionar notas',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                    onPressed: () => _showEditNotesDialog(context, ref),
+                    tooltip: 'Editar observações',
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Conteúdo das notas
+              Text(
+                plant.notes?.isNotEmpty == true
+                    ? plant.notes!
+                    : 'Nenhuma observação registrada para esta planta.',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color:
+                      plant.notes?.isNotEmpty == true
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                  fontStyle:
+                      plant.notes?.isNotEmpty == true
+                          ? FontStyle.normal
+                          : FontStyle.italic,
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  void _showEditNotesDialog(BuildContext context, WidgetRef ref) {
+    final notesController = TextEditingController(text: plant.notes ?? '');
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.edit_note, size: 24),
+            SizedBox(width: 12),
+            Text('Editar Observações'),
+          ],
+        ),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: TextField(
+            controller: notesController,
+            maxLines: 5,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Digite suas observações sobre a planta...',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.all(16),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newNotes = notesController.text.trim();
+
+              // Cria os parâmetros de atualização
+              final updateParams = UpdatePlantParams(
+                id: plant.id,
+                name: plant.name,
+                species: plant.species,
+                spaceId: plant.spaceId,
+                imageUrls: plant.imageUrls,
+                plantingDate: plant.plantingDate,
+                notes: newNotes.isEmpty ? null : newNotes,
+                config: plant.config,
+                isFavorited: plant.isFavorited,
+              );
+
+              // Chama o provider para atualizar
+              final notifier = ref.read(plantsNotifierProvider.notifier);
+              final success = await notifier.updatePlant(updateParams);
+
+              if (dialogContext.mounted) {
+                Navigator.of(dialogContext).pop();
+
+                // Atualiza o provider de detalhes para refletir as mudanças
+                if (success) {
+                  ref.read(plantDetailsProviderProvider).loadPlant(plant.id);
+                }
+
+                // Mostra feedback
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Observações atualizadas com sucesso'),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Erro ao atualizar observações'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    ).then((_) {
+      // Dispose do controller após o dialog fechar
+      notesController.dispose();
+    });
   }
 
   String _getLightRequirementText(String? lightRequirement) {

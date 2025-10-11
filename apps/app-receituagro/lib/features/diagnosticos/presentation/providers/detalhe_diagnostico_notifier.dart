@@ -84,7 +84,10 @@ class DetalheDiagnosticoState {
 
 /// Notifier para gerenciar estado de Detalhe Diagnóstico (Presentation Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
-@riverpod
+///
+/// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
+/// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
+@Riverpod(keepAlive: true)
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final DiagnosticoHiveRepository _hiveRepository;

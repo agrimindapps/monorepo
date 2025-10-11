@@ -878,15 +878,24 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // CORREÇÃO: Não recarrega do banco, apenas reseta para allDiagnosticos
+    debugPrint('[DiagnosticosNotifier] 🧹 clearFilters chamado');
+    debugPrint('[DiagnosticosNotifier] contextoDefensivo atual: ${currentState.contextoDefensivo}');
+
+    // CORREÇÃO CRÍTICA: Não limpar contextos de navegação (defensivo/cultura/praga)
+    // Apenas limpar filtros de busca
+    // Isso previne perda de contexto quando o usuário interage com filtros na UI
     state = AsyncValue.data(
-      currentState.clearContext().copyWith(
+      currentState.copyWith(
         currentFilters: const DiagnosticoSearchFilters(),
         searchQuery: '',
         searchResults: [],
-        // filteredDiagnosticos será auto-sincronizado com allDiagnosticos via copyWith()
+        // NÃO chamar clearContext() - preserva contextoDefensivo/contextoCultura/contextoPraga
+        // filteredDiagnosticos permanece com os dados do contexto atual
       ),
     );
+
+    debugPrint('[DiagnosticosNotifier] ✅ Filtros limpos, contexto preservado');
+    debugPrint('[DiagnosticosNotifier] contextoDefensivo após: ${state.value?.contextoDefensivo}');
   }
 
   /// Limpa erro

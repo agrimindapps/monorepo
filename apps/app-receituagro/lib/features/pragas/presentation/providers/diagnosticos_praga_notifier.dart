@@ -220,9 +220,24 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
             );
           }
 
+          // CORREÇÃO: Extrair culturas únicas dos diagnósticos carregados
+          // ao invés de usar lista hard-coded
+          final culturasUnicas = diagnosticosList
+              .map((d) => d.cultura)
+              .where((c) => c.isNotEmpty && c != 'Não especificado')
+              .toSet()
+              .toList()
+            ..sort();
+
+          final culturasComTodas = ['Todas', ...culturasUnicas];
+
           state = AsyncValue.data(
             currentState
-                .copyWith(isLoading: false, diagnosticos: diagnosticosList)
+                .copyWith(
+                  isLoading: false,
+                  diagnosticos: diagnosticosList,
+                  culturas: culturasComTodas, // Atualiza com culturas dinâmicas
+                )
                 .clearError(),
           );
         },

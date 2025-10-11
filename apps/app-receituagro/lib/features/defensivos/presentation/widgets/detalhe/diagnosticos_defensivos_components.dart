@@ -63,8 +63,19 @@ class _DiagnosticoDefensivoFilterWidgetState
     return RepaintBoundary(
       child: diagnosticosAsync.when(
         data: (diagnosticosState) {
-          final availableCulturas =
-              diagnosticosState.filtersData?.culturas ?? ['Todas'];
+          // CORREÇÃO: Extrair culturas únicas dos diagnósticos carregados
+          // ao invés de depender de filtersData que pode não estar carregado
+          final culturasFromDiagnosticos = diagnosticosState.allDiagnosticos
+              .map((d) => d.nomeCultura)
+              .where((cultura) => cultura != null && cultura.isNotEmpty)
+              .toSet()
+              .toList()
+            ..sort();
+
+          final availableCulturas = culturasFromDiagnosticos.isEmpty
+              ? ['Todas']
+              : ['Todas', ...culturasFromDiagnosticos];
+
           final selectedCultura =
               diagnosticosState.currentFilters.idCultura ?? 'Todas';
 

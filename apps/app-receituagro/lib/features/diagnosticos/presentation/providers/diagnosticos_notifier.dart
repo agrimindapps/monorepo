@@ -200,7 +200,10 @@ enum DiagnosticosViewState { initial, loading, loaded, empty, error }
 
 /// Notifier para gerenciar estado dos diagnósticos (Presentation Layer)
 /// Especializado em recomendações defensivo-cultura-praga
-@riverpod
+///
+/// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
+/// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
+@Riverpod(keepAlive: true)
 class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
   late final GetDiagnosticoByIdUseCase _getDiagnosticoByIdUseCase;

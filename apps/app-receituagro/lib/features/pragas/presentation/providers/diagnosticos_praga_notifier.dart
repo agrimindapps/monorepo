@@ -140,7 +140,10 @@ class DiagnosticosPragaState {
 
 /// Notifier para gerenciar diagnósticos relacionados à praga
 /// Responsabilidade única: filtros e busca de diagnósticos
-@Riverpod()
+///
+/// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
+/// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
+@Riverpod(keepAlive: true)
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final CulturaHiveRepository _culturaRepository;

@@ -1,24 +1,22 @@
 import 'dart:async';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:core/core.dart' hide Consumer, FormState;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
-import '../../../../core/widgets/loading_overlay.dart';
-import '../../utils/auth_validators.dart';
+import '../widgets/auth_background_widgets.dart';
+import '../widgets/auth_branding_widgets.dart';
+import '../widgets/auth_form_widgets.dart';
 import '../widgets/device_validation_overlay.dart';
 import '../widgets/forgot_password_dialog.dart';
+
 const String _kRememberedEmailKey = 'remembered_email';
 const String _kRememberMeKey = 'remember_me';
+
 class AuthLoadingState {
   final bool isLoading;
   final String? currentOperation;
@@ -306,6 +304,90 @@ class _AuthPageState extends ConsumerState<AuthPage>
     );
   }
 
+  /// Exibe o dialog com os Termos de Serviço
+  void _showTermsOfService() {
+    showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Termos de Serviço'),
+            content: const SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Última atualização: Janeiro 2025\n\n'
+                    '1. ACEITAÇÃO DOS TERMOS\n'
+                    'Ao usar o Inside Garden, você concorda com estes termos.\n\n'
+                    '2. DESCRIÇÃO DO SERVIÇO\n'
+                    'O Inside Garden é um aplicativo para cuidado e gerenciamento de plantas.\n\n'
+                    '3. RESPONSABILIDADES DO USUÁRIO\n'
+                    '• Fornecer informações precisas\n'
+                    '• Usar o serviço de forma apropriada\n'
+                    '• Manter a segurança da sua conta\n\n'
+                    '4. PRIVACIDADE\n'
+                    'Seus dados são protegidos conforme nossa Política de Privacidade.\n\n'
+                    '5. MODIFICAÇÕES\n'
+                    'Podemos atualizar estes termos. Você será notificado sobre mudanças importantes.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  /// Exibe o dialog com a Política de Privacidade
+  void _showPrivacyPolicy() {
+    showDialog<void>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Política de Privacidade'),
+            content: const SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Última atualização: Janeiro 2025\n\n'
+                    '1. INFORMAÇÕES QUE COLETAMOS\n'
+                    '• Dados de conta (email, nome)\n'
+                    '• Informações sobre suas plantas\n'
+                    '• Dados de uso do aplicativo\n\n'
+                    '2. COMO USAMOS SUAS INFORMAÇÕES\n'
+                    '• Para fornecer e melhorar nossos serviços\n'
+                    '• Para personalizar sua experiência\n'
+                    '• Para enviar notificações de cuidados\n\n'
+                    '3. COMPARTILHAMENTO DE DADOS\n'
+                    'Não vendemos ou compartilhamos seus dados pessoais com terceiros.\n\n'
+                    '4. SEGURANÇA\n'
+                    'Utilizamos medidas de segurança para proteger suas informações.\n\n'
+                    '5. SEUS DIREITOS\n'
+                    'Você pode acessar, corrigir ou excluir seus dados a qualquer momento.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Fechar'),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -341,25 +423,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
 
   /// Modern background with plant-themed gradient and animations
   Widget _buildModernBackground({required Widget child}) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.primaryLight,
-            Color(0xFF2ECC71), // Fresh plant green
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          _buildPlantBackgroundPattern(),
-          _buildFloatingPlantElements(),
-          child,
-        ],
-      ),
+    return ModernBackground(
+      animation: _backgroundAnimation,
+      primaryColor: PlantisColors.primary,
+      child: child,
     );
   }
 
@@ -410,7 +477,13 @@ class _AuthPageState extends ConsumerState<AuthPage>
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        Expanded(flex: 5, child: _buildPlantBrandingSide()),
+        Expanded(
+          flex: 5,
+          child: PlantBrandingSide(
+            logoAnimation: _logoAnimation,
+            backgroundAnimation: _backgroundAnimation,
+          ),
+        ),
         Expanded(
           flex: 4,
           child: FadeTransition(
@@ -454,10 +527,10 @@ class _AuthPageState extends ConsumerState<AuthPage>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!isKeyboardVisible) ...[
-                    _buildMobileBranding(),
+                    MobileBranding(logoAnimation: _logoAnimation),
                     const SizedBox(height: 16),
                   ] else ...[
-                    _buildCompactBranding(),
+                    const CompactBranding(),
                     const SizedBox(height: 12),
                   ],
                   Flexible(child: _buildAuthContent()),
@@ -467,202 +540,6 @@ class _AuthPageState extends ConsumerState<AuthPage>
           },
         ),
       ),
-    );
-  }
-
-  /// Plant-themed branding sidebar for desktop
-  Widget _buildPlantBrandingSide() {
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(24),
-        bottomLeft: Radius.circular(24),
-      ),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              PlantisColors.primary,
-              PlantisColors.primaryLight,
-              Color(0xFF27AE60),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ScaleTransition(
-                scale: _logoAnimation,
-                child: _buildModernLogo(isWhite: true, size: 40),
-              ),
-              const SizedBox(height: 40),
-              const Text(
-                'Inside Garden',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: -1,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: 60,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Transforme seu lar em um jardim inteligente. Cuidado personalizado para cada planta.',
-                style: TextStyle(
-                  fontSize: 16,
-                  height: 1.6,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(height: 40),
-              Expanded(
-                child: Center(
-                  child: AnimatedBuilder(
-                    animation: _backgroundAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale:
-                            1.0 +
-                            (0.1 *
-                                math.sin(
-                                  _backgroundAnimation.value * 2 * math.pi,
-                                )),
-                        child: Container(
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.eco,
-                            color: Colors.white,
-                            size: 120,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.security_rounded,
-                    color: Colors.white70,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Cuidado seguro e personalizado',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Mobile branding with compact design
-  Widget _buildMobileBranding() {
-    return ScaleTransition(
-      scale: _logoAnimation,
-      child: _buildModernLogo(
-        isWhite: false,
-        size: 32,
-        color: PlantisColors.primary,
-      ),
-    );
-  }
-
-  /// Compact branding for when keyboard is visible
-  Widget _buildCompactBranding() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: PlantisColors.primary.withValues(alpha: 0.1),
-            border: Border.all(
-              color: PlantisColors.primary.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
-          ),
-          child: const Icon(Icons.eco, color: PlantisColors.primary, size: 20),
-        ),
-        const SizedBox(width: 12),
-        const Text(
-          'Inside Garden',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: PlantisColors.primary,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Enhanced logo component
-  Widget _buildModernLogo({
-    required bool isWhite,
-    required double size,
-    Color? color,
-  }) {
-    final logoColor = isWhite ? Colors.white : (color ?? PlantisColors.primary);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: logoColor.withValues(alpha: 0.1),
-            border: Border.all(
-              color: logoColor.withValues(alpha: 0.3),
-              width: 2,
-            ),
-          ),
-          child: Icon(Icons.eco, color: logoColor, size: size),
-        ),
-        const SizedBox(width: 12),
-        Text(
-          'Inside Garden',
-          style: TextStyle(
-            fontSize: size * 0.8,
-            fontWeight: FontWeight.w700,
-            color: logoColor,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ],
     );
   }
 
@@ -782,954 +659,80 @@ class _AuthPageState extends ConsumerState<AuthPage>
 
   /// Login form with enhanced fields
   Widget _buildLoginTab() {
-    return Form(
-      key: _loginFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AccessibleTextField(
-            controller: _loginEmailController,
-            focusNode: _emailFocusNode,
-            nextFocusNode: _passwordFocusNode,
-            labelText: 'E-mail',
-            hintText: 'Digite seu email',
-            semanticLabel: 'Campo de e-mail para login',
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            autocomplete: AutofillHints.email,
-            isRequired: true,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor, insira seu email';
-              }
-              if (!AuthValidators.isValidEmail(value)) {
-                return 'Por favor, insira um email válido';
-              }
-              return null;
-            },
-            prefixIcon: const Icon(Icons.email_outlined),
-          ),
-          const SizedBox(height: 16),
-          AccessibleTextField(
-            controller: _loginPasswordController,
-            focusNode: _passwordFocusNode,
-            labelText: 'Senha',
-            hintText: 'Digite sua senha',
-            semanticLabel: 'Campo de senha para login',
-            obscureText: _obscureLoginPassword,
-            textInputAction: TextInputAction.done,
-            autocomplete: AutofillHints.password,
-            isRequired: true,
-            validator: (value) {
-              return AuthValidators.validatePassword(
-                value ?? '',
-                isRegistration: false,
-              );
-            },
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: _buildPasswordVisibilityToggle(
-              isObscured: _obscureLoginPassword,
-              onToggle: (value) {
-                setState(() {
-                  _obscureLoginPassword = value;
-                });
-              },
-              fieldName: 'senha',
-              fieldSemanticName: 'password',
-            ),
-            onSubmitted: (value) {
-              _loginButtonFocusNode?.requestFocus();
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildRememberAndForgotSection(),
-          const SizedBox(height: 20),
-          _buildErrorMessage(),
-          _buildAccessibleLoginButton(),
-          const SizedBox(height: 16),
-          _buildSocialLoginSection(),
-
-          const SizedBox(height: 16),
-          _buildAnonymousLoginSection(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRememberAndForgotSection() {
-    return AnimatedBuilder(
-      animation: _fadeInAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _slideAnimation.value * 0.2),
-          child: FadeTransition(
-            opacity: _fadeInAnimation,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _rememberMe = !_rememberMe;
-                      });
-                      _saveRememberedCredentials();
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color:
-                                  _rememberMe
-                                      ? PlantisColors.primary
-                                      : Colors.transparent,
-                              border: Border.all(
-                                color:
-                                    _rememberMe
-                                        ? PlantisColors.primary
-                                        : Colors.grey.shade400,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child:
-                                _rememberMe
-                                    ? const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 14,
-                                    )
-                                    : null,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Lembrar-me',
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _showForgotPasswordDialog,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Esqueceu a senha?',
-                    style: TextStyle(
-                      color: PlantisColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildErrorMessage() {
-    return riverpod.Consumer(
-      builder: (context, ref, child) {
-        final authState = ref.watch(authProvider);
-
-        return authState.when(
-          data: (state) {
-            if (state.errorMessage != null) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade50,
-                  border: Border.all(color: Colors.red.shade200),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline_rounded,
-                      color: Colors.red.shade600,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        state.errorMessage!,
-                        style: TextStyle(
-                          color: Colors.red.shade700,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LoginForm(
+          formKey: _loginFormKey,
+          emailController: _loginEmailController,
+          passwordController: _loginPasswordController,
+          obscurePassword: _obscureLoginPassword,
+          rememberMe: _rememberMe,
+          emailFocusNode: _emailFocusNode,
+          passwordFocusNode: _passwordFocusNode,
+          loginButtonFocusNode: _loginButtonFocusNode,
+          onObscurePasswordChanged: (value) {
+            setState(() {
+              _obscureLoginPassword = value;
+            });
           },
-          loading: () => const SizedBox.shrink(),
-          error: (error, _) => const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-
-  Widget _buildAccessibleLoginButton() {
-    return riverpod.Consumer(
-      builder: (context, ref, child) {
-        final authState = ref.watch(authProvider);
-
-        return authState.when(
-          data: (state) {
-            final isAnonymousLoading =
-                state.currentOperation == AuthOperation.anonymous;
-            return AccessibleButton(
-              focusNode: _loginButtonFocusNode,
-              onPressed:
-                  (state.isLoading || isAnonymousLoading) ? null : _handleLogin,
-              semanticLabel: AccessibilityTokens.getSemanticLabel(
-                'login_button',
-                'Fazer login',
-              ),
-              tooltip: 'Entrar com suas credenciais',
-              backgroundColor:
-                  (state.isLoading || isAnonymousLoading)
-                      ? Colors.grey.shade400
-                      : PlantisColors.primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(
-                double.infinity,
-                AccessibilityTokens.largeTouchTargetSize,
-              ),
-              hapticPattern: 'medium',
-              child:
-                  state.isLoading
-                      ? Semantics(
-                        label: AccessibilityTokens.getSemanticLabel(
-                          'loading',
-                          'Fazendo login',
-                        ),
-                        liveRegion: true,
-                        child: const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        ),
-                      )
-                      : Text(
-                        'Entrar',
-                        style: TextStyle(
-                          fontSize: AccessibilityTokens.getAccessibleFontSize(
-                            context,
-                            18,
-                          ),
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
+          onRememberMeChanged: (value) {
+            setState(() {
+              _rememberMe = value;
+            });
+            _saveRememberedCredentials();
+          },
+          onLogin: _handleLogin,
+          onForgotPassword: () {
+            showDialog<void>(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const ForgotPasswordDialog(),
             );
           },
-          loading: () => const CircularProgressIndicator(),
-          error: (error, _) => const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-
-  Widget _buildSocialLoginSection() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: Container(height: 1, color: Colors.grey.shade300)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'ou continue com',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Expanded(child: Container(height: 1, color: Colors.grey.shade300)),
-          ],
         ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildGasOMeterStyleSocialButton(
-              'G',
-              Colors.red.shade600,
-              _showSocialLoginDialog,
-            ),
-            _buildGasOMeterStyleSocialButton(
-              null,
-              Colors.black,
-              _showSocialLoginDialog,
-              icon: Icons.apple,
-            ),
-            _buildGasOMeterStyleSocialButton(
-              null,
-              Colors.blue.shade600,
-              _showSocialLoginDialog,
-              icon: Icons.apps, // Microsoft icon
-            ),
-          ],
+        const SizedBox(height: 16),
+        SocialLoginSection(
+          onGoogleLogin: _showSocialLoginDialog,
+          onAppleLogin: _showSocialLoginDialog,
+          onMicrosoftLogin: _showSocialLoginDialog,
         ),
-        const SizedBox(height: 12),
-        Text(
-          '* Opções de login social estarão disponíveis em breve',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 11,
-            fontStyle: FontStyle.italic,
-          ),
+        const SizedBox(height: 16),
+        AnonymousLoginSection(
+          onAnonymousLogin: _showAnonymousLoginDialog,
         ),
       ],
-    );
-  }
-
-  Widget _buildAnonymousLoginSection() {
-    return riverpod.Consumer(
-      builder: (context, ref, child) {
-        final authState = ref.watch(authProvider);
-
-        return authState.when(
-          data: (state) {
-            return Container(
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300, width: 1),
-              ),
-              child: OutlinedButton(
-                onPressed: state.isLoading ? null : _showAnonymousLoginDialog,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: PlantisColors.primary,
-                  side: BorderSide.none,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child:
-                    state.isLoading
-                        ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              PlantisColors.primary,
-                            ),
-                          ),
-                        )
-                        : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.person_outline_rounded,
-                              size: 18,
-                              color: PlantisColors.primary,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Continuar sem conta',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: PlantisColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-              ),
-            );
-          },
-          loading: () => const CircularProgressIndicator(),
-          error: (error, _) => const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-
-  Widget _buildGasOMeterStyleSocialButton(
-    String? text,
-    Color color,
-    VoidCallback onPressed, {
-    IconData? icon,
-  }) {
-    return Expanded(
-      child: Container(
-        height: 48,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300, width: 1),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(8),
-            child: Center(
-              child:
-                  icon != null
-                      ? Icon(icon, color: color, size: 20)
-                      : Text(
-                        text!,
-                        style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 
   /// Register form with enhanced fields
   Widget _buildRegisterTab() {
-    return Form(
-      key: _registerFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          AccessibleTextField(
-            controller: _registerNameController,
-            focusNode: _registerNameFocusNode,
-            nextFocusNode: _registerEmailFocusNode,
-            labelText: 'Nome completo',
-            hintText: 'Digite seu nome completo',
-            semanticLabel: 'Campo de nome para cadastro',
-            textInputAction: TextInputAction.next,
-            isRequired: true,
-            validator: (value) {
-              return AuthValidators.validateName(value ?? '');
-            },
-            prefixIcon: const Icon(Icons.person_outline),
-          ),
-          const SizedBox(height: 16),
-          AccessibleTextField(
-            controller: _registerEmailController,
-            focusNode: _registerEmailFocusNode,
-            nextFocusNode: _registerPasswordFocusNode,
-            labelText: 'E-mail',
-            hintText: 'Digite seu email',
-            semanticLabel: 'Campo de e-mail para cadastro',
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            autocomplete: AutofillHints.email,
-            isRequired: true,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor, insira seu email';
-              }
-              if (!AuthValidators.isValidEmail(value)) {
-                return 'Por favor, insira um email válido';
-              }
-              return null;
-            },
-            prefixIcon: const Icon(Icons.email_outlined),
-          ),
-          const SizedBox(height: 16),
-          AccessibleTextField(
-            controller: _registerPasswordController,
-            focusNode: _registerPasswordFocusNode,
-            nextFocusNode: _registerConfirmPasswordFocusNode,
-            labelText: 'Senha',
-            hintText: 'Mínimo 8 caracteres',
-            semanticLabel: 'Campo de senha para cadastro',
-            obscureText: _obscureRegisterPassword,
-            textInputAction: TextInputAction.next,
-            autocomplete: AutofillHints.newPassword,
-            isRequired: true,
-            validator: (value) {
-              return AuthValidators.validatePassword(
-                value ?? '',
-                isRegistration: true,
-              );
-            },
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: _buildPasswordVisibilityToggle(
-              isObscured: _obscureRegisterPassword,
-              onToggle: (value) {
-                setState(() {
-                  _obscureRegisterPassword = value;
-                });
-              },
-              fieldName: 'senha',
-              fieldSemanticName: 'register_password',
-            ),
-          ),
-          const SizedBox(height: 16),
-          AccessibleTextField(
-            controller: _registerConfirmPasswordController,
-            focusNode: _registerConfirmPasswordFocusNode,
-            labelText: 'Confirmar senha',
-            hintText: 'Digite a senha novamente',
-            semanticLabel: 'Campo de confirmação de senha',
-            obscureText: _obscureRegisterConfirmPassword,
-            textInputAction: TextInputAction.done,
-            isRequired: true,
-            validator: (value) {
-              return AuthValidators.validatePasswordConfirmation(
-                _registerPasswordController.text,
-                value ?? '',
-              );
-            },
-            prefixIcon: const Icon(Icons.lock_outline),
-            suffixIcon: _buildPasswordVisibilityToggle(
-              isObscured: _obscureRegisterConfirmPassword,
-              onToggle: (value) {
-                setState(() {
-                  _obscureRegisterConfirmPassword = value;
-                });
-              },
-              fieldName: 'confirmação de senha',
-              fieldSemanticName: 'register_confirm_password',
-            ),
-            onSubmitted: (value) {
-              _registerButtonFocusNode?.requestFocus();
-            },
-          ),
-          const SizedBox(height: 20),
-          _buildErrorMessage(),
-          _buildAccessibleRegisterButton(),
-          const SizedBox(height: 16),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-                height: 1.4,
-              ),
-              children: [
-                const TextSpan(
-                  text: 'Ao criar uma conta, você concorda com nossos\n',
-                ),
-                TextSpan(
-                  text: 'Termos de Serviço',
-                  style: TextStyle(
-                    color: Colors.blue.shade600,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  recognizer:
-                      TapGestureRecognizer()
-                        ..onTap = () => _showTermsOfService(),
-                ),
-                const TextSpan(text: ' e '),
-                TextSpan(
-                  text: 'Política de Privacidade',
-                  style: TextStyle(
-                    color: Colors.blue.shade600,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  recognizer:
-                      TapGestureRecognizer()
-                        ..onTap = () => _showPrivacyPolicy(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAccessibleRegisterButton() {
-    return riverpod.Consumer(
-      builder: (context, ref, child) {
-        final authState = ref.watch(authProvider);
-
-        return authState.when(
-          data: (state) {
-            return AccessibleButton(
-              focusNode: _registerButtonFocusNode,
-              onPressed: state.isLoading ? null : _handleRegister,
-              semanticLabel: AccessibilityTokens.getSemanticLabel(
-                'register_button',
-                'Criar conta',
-              ),
-              tooltip: 'Criar nova conta',
-              backgroundColor:
-                  state.isLoading
-                      ? Colors.grey.shade400
-                      : PlantisColors.primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(
-                double.infinity,
-                AccessibilityTokens.largeTouchTargetSize,
-              ),
-              hapticPattern: 'medium',
-              child:
-                  state.isLoading
-                      ? Semantics(
-                        label: AccessibilityTokens.getSemanticLabel(
-                          'loading',
-                          'Criando conta',
-                        ),
-                        liveRegion: true,
-                        child: const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        ),
-                      )
-                      : Text(
-                        'Criar Conta',
-                        style: TextStyle(
-                          fontSize: AccessibilityTokens.getAccessibleFontSize(
-                            context,
-                            18,
-                          ),
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-            );
-          },
-          loading: () => const CircularProgressIndicator(),
-          error: (error, _) => const SizedBox.shrink(),
-        );
+    return RegisterForm(
+      formKey: _registerFormKey,
+      nameController: _registerNameController,
+      emailController: _registerEmailController,
+      passwordController: _registerPasswordController,
+      confirmPasswordController: _registerConfirmPasswordController,
+      obscurePassword: _obscureRegisterPassword,
+      obscureConfirmPassword: _obscureRegisterConfirmPassword,
+      nameFocusNode: _registerNameFocusNode,
+      emailFocusNode: _registerEmailFocusNode,
+      passwordFocusNode: _registerPasswordFocusNode,
+      confirmPasswordFocusNode: _registerConfirmPasswordFocusNode,
+      registerButtonFocusNode: _registerButtonFocusNode,
+      onObscurePasswordChanged: (value) {
+        setState(() {
+          _obscureRegisterPassword = value;
+        });
       },
-    );
-  }
-
-  /// Exibe o dialog para reset de senha
-  void _showForgotPasswordDialog() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const ForgotPasswordDialog(),
-    );
-  }
-
-  /// Exibe o dialog com os Termos de Serviço
-  void _showTermsOfService() {
-    showDialog<void>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Termos de Serviço'),
-            content: const SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Última atualização: Janeiro 2025\n\n'
-                    '1. ACEITAÇÃO DOS TERMOS\n'
-                    'Ao usar o Inside Garden, você concorda com estes termos.\n\n'
-                    '2. DESCRIÇÃO DO SERVIÇO\n'
-                    'O Inside Garden é um aplicativo para cuidado e gerenciamento de plantas.\n\n'
-                    '3. RESPONSABILIDADES DO USUÁRIO\n'
-                    '• Fornecer informações precisas\n'
-                    '• Usar o serviço de forma apropriada\n'
-                    '• Manter a segurança da sua conta\n\n'
-                    '4. PRIVACIDADE\n'
-                    'Seus dados são protegidos conforme nossa Política de Privacidade.\n\n'
-                    '5. MODIFICAÇÕES\n'
-                    'Podemos atualizar estes termos. Você será notificado sobre mudanças importantes.',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// Exibe o dialog com a Política de Privacidade
-  void _showPrivacyPolicy() {
-    showDialog<void>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Política de Privacidade'),
-            content: const SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Última atualização: Janeiro 2025\n\n'
-                    '1. INFORMAÇÕES QUE COLETAMOS\n'
-                    '• Dados de conta (email, nome)\n'
-                    '• Informações sobre suas plantas\n'
-                    '• Dados de uso do aplicativo\n\n'
-                    '2. COMO USAMOS SUAS INFORMAÇÕES\n'
-                    '• Para fornecer e melhorar nossos serviços\n'
-                    '• Para personalizar sua experiência\n'
-                    '• Para enviar notificações de cuidados\n\n'
-                    '3. COMPARTILHAMENTO DE DADOS\n'
-                    'Não vendemos ou compartilhamos seus dados pessoais com terceiros.\n\n'
-                    '4. SEGURANÇA\n'
-                    'Utilizamos medidas de segurança para proteger suas informações.\n\n'
-                    '5. SEUS DIREITOS\n'
-                    'Você pode acessar, corrigir ou excluir seus dados a qualquer momento.',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// Enhanced background pattern with plant motifs
-  Widget _buildPlantBackgroundPattern() {
-    return AnimatedBuilder(
-      animation: _backgroundAnimation,
-      builder: (context, child) {
-        return Positioned.fill(
-          child: CustomPaint(
-            painter: PlantBackgroundPatternPainter(
-              animation: _backgroundAnimation.value,
-              primaryColor: PlantisColors.primary,
-            ),
-          ),
-        );
+      onObscureConfirmPasswordChanged: (value) {
+        setState(() {
+          _obscureRegisterConfirmPassword = value;
+        });
       },
+      onRegister: _handleRegister,
+      onTermsOfService: _showTermsOfService,
+      onPrivacyPolicy: _showPrivacyPolicy,
     );
   }
-
-  /// Floating plant elements with enhanced animations
-  Widget _buildFloatingPlantElements() {
-    return Stack(
-      children: [
-        Positioned(
-          top: 80,
-          right: 40,
-          child: AnimatedBuilder(
-            animation: _backgroundController,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _backgroundAnimation.value * 2 * math.pi * 0.5,
-                child: Transform.translate(
-                  offset: Offset(
-                    10 * math.sin(_backgroundAnimation.value * 2 * math.pi),
-                    5 * math.cos(_backgroundAnimation.value * 2 * math.pi),
-                  ),
-                  child: Icon(
-                    Icons.eco,
-                    color: Colors.white.withValues(alpha: 0.12),
-                    size: 45,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        Positioned(
-          bottom: 120,
-          left: 30,
-          child: AnimatedBuilder(
-            animation: _backgroundController,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: -_backgroundAnimation.value * 1.3 * math.pi,
-                child: Transform.scale(
-                  scale:
-                      1.0 +
-                      (0.1 *
-                          math.sin(_backgroundAnimation.value * 3 * math.pi)),
-                  child: Icon(
-                    Icons.local_florist,
-                    color: Colors.white.withValues(alpha: 0.1),
-                    size: 38,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        Positioned(
-          top: 200,
-          left: 60,
-          child: AnimatedBuilder(
-            animation: _backgroundController,
-            builder: (context, child) {
-              return Transform.translate(
-                offset: Offset(
-                  15 * math.sin(_backgroundAnimation.value * 1.5 * math.pi),
-                  8 * math.cos(_backgroundAnimation.value * 1.8 * math.pi),
-                ),
-                child: Icon(
-                  Icons.grain,
-                  color: Colors.white.withValues(alpha: 0.08),
-                  size: 28,
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Enhanced plant-themed background painter
-class PlantBackgroundPatternPainter extends CustomPainter {
-  final double animation;
-  final Color primaryColor;
-
-  PlantBackgroundPatternPainter({
-    required this.animation,
-    required this.primaryColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final basePaint =
-        Paint()
-          ..color = primaryColor.withValues(alpha: 0.03)
-          ..style = PaintingStyle.fill;
-    for (int i = 0; i < 6; i++) {
-      final x =
-          (size.width * (i + 1) / 7) + (40 * math.sin(animation * 1.5 + i));
-      final y =
-          (size.height * (i + 1) / 8) + (25 * math.cos(animation * 1.2 + i));
-      final radius = 15 + (8 * math.sin(animation * 2.5 + i));
-
-      canvas.drawCircle(Offset(x, y), radius, basePaint);
-    }
-    final linePaint =
-        Paint()
-          ..color = primaryColor.withValues(alpha: 0.04)
-          ..strokeWidth = 2
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
-
-    for (int i = 0; i < 4; i++) {
-      final path = Path();
-      final startX = size.width * (i + 1) / 5;
-      final startY = size.height * 0.2 + (100 * math.sin(animation + i));
-
-      path.moveTo(startX, startY);
-      path.quadraticBezierTo(
-        startX + 30 + (20 * math.cos(animation * 0.8 + i)),
-        startY + 40 + (15 * math.sin(animation * 0.6 + i)),
-        startX + 10 + (25 * math.sin(animation * 0.5 + i)),
-        startY + 80 + (20 * math.cos(animation * 0.7 + i)),
-      );
-
-      canvas.drawPath(path, linePaint);
-    }
-    final dotPaint =
-        Paint()
-          ..color = primaryColor.withValues(alpha: 0.02)
-          ..style = PaintingStyle.fill;
-
-    for (int i = 0; i < size.width; i += 60) {
-      for (int j = 0; j < size.height; j += 60) {
-        final offsetX = 10 * math.sin(animation * 0.3 + i * 0.01);
-        final offsetY = 8 * math.cos(animation * 0.4 + j * 0.01);
-        canvas.drawCircle(
-          Offset(i.toDouble() + offsetX, j.toDouble() + offsetY),
-          2.5,
-          dotPaint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(PlantBackgroundPatternPainter oldDelegate) {
-    return oldDelegate.animation != animation;
-  }
-}
-
-Widget _buildPasswordVisibilityToggle({
-  required bool isObscured,
-  required ValueChanged<bool> onToggle,
-  required String fieldName,
-  required String fieldSemanticName,
-}) {
-  return Semantics(
-    label: isObscured
-        ? AccessibilityTokens.getSemanticLabel(
-            'show_$fieldSemanticName',
-            'Mostrar $fieldName',
-          )
-        : AccessibilityTokens.getSemanticLabel(
-            'hide_$fieldSemanticName',
-            'Ocultar $fieldName',
-          ),
-    button: true,
-    child: IconButton(
-      icon: Icon(
-        isObscured
-            ? Icons.visibility_outlined
-            : Icons.visibility_off_outlined,
-        color: PlantisColors.primary.withValues(alpha: 0.7),
-        size: 22,
-      ),
-      onPressed: () {
-        AccessibilityTokens.performHapticFeedback('light');
-        onToggle(!isObscured);
-        final message =
-            !isObscured ? '$fieldName ocultada' : '$fieldName visível';
-        SemanticsService.announce(message, ui.TextDirection.ltr);
-      },
-    ),
-  );
 }

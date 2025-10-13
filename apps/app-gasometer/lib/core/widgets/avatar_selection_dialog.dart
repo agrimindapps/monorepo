@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../features/auth/presentation/notifiers/auth_notifier.dart';
+import '../../features/auth/presentation/notifiers/profile_notifier.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../services/avatar_service.dart';
 
@@ -216,8 +216,8 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
     if (_previewResult?.base64Data == null) return;
 
     try {
-      final authNotifier = ref.read(authProvider.notifier);
-      final success = await authNotifier.updateAvatar(_previewResult!.base64Data!);
+      final profileNotifier = ref.read(profileProvider.notifier);
+      final success = await profileNotifier.updateAvatar(_previewResult!.base64Data!);
 
       if (success) {
         if (mounted) {
@@ -239,8 +239,8 @@ class _AvatarSelectionDialogState extends ConsumerState<AvatarSelectionDialog> {
 
   Future<void> _removeAvatar() async {
     try {
-      final authNotifier = ref.read(authProvider.notifier);
-      final success = await authNotifier.removeAvatar();
+      final profileNotifier = ref.read(profileProvider.notifier);
+      final success = await profileNotifier.removeAvatar();
 
       if (success) {
         if (mounted) {

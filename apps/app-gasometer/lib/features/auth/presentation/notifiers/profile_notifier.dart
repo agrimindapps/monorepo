@@ -52,8 +52,8 @@ class Profile extends _$Profile {
       UpdateProfileParams(displayName: displayName, photoUrl: photoUrl),
     );
 
-    result.fold(
-      (failure) {
+    await result.fold(
+      (failure) async {
         state = state.copyWith(
           errorMessage: _mapFailureToMessage(failure),
           isLoading: false,

@@ -54,7 +54,6 @@ class Auth extends _$Auth {
   late final GasometerAnalyticsService _analytics;
   late final PlatformService _platformService;
   late final AuthRateLimiter _rateLimiter;
-  late final AuthLocalDataSource _authLocalDataSource;
   late final EnhancedAccountDeletionService _enhancedDeletionService;
   final MonorepoAuthCache _monorepoAuthCache = MonorepoAuthCache();
 
@@ -73,7 +72,6 @@ class Auth extends _$Auth {
     _analytics = sl<GasometerAnalyticsService>();
     _platformService = sl<PlatformService>();
     _rateLimiter = sl<AuthRateLimiter>();
-    _authLocalDataSource = sl<AuthLocalDataSource>();
     _enhancedDeletionService = sl<EnhancedAccountDeletionService>();
     _initializeAuthState();
     _initializeMonorepoAuthCache();

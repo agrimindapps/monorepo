@@ -1,26 +1,23 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-
 import '../../domain/entities/user_entity.dart';
-
-part 'profile_state.freezed.dart';
 
 /// ProfileState - State para gerenciamento de perfil do usuário
 ///
 /// Separado do AuthState para aplicar SRP
-@freezed
-class ProfileState with _$ProfileState {
-  const factory ProfileState({
-    UserEntity? currentUser,
-    @Default(false) bool isLoading,
-    @Default(false) bool hasError,
-    String? errorMessage,
-  }) = _ProfileState;
+class ProfileState {
+  const ProfileState({
+    this.currentUser,
+    this.isLoading = false,
+    this.hasError = false,
+    this.errorMessage,
+  });
 
-  const factory ProfileState.initial() = _ProfileStateInitial;
-}
+  const ProfileState.initial() : this();
 
-/// Extension para facilitar copyWith com clear flags
-extension ProfileStateX on ProfileState {
+  final UserEntity? currentUser;
+  final bool isLoading;
+  final bool hasError;
+  final String? errorMessage;
+
   ProfileState copyWith({
     UserEntity? currentUser,
     bool? isLoading,
@@ -35,4 +32,25 @@ extension ProfileStateX on ProfileState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProfileState &&
+          runtimeType == other.runtimeType &&
+          currentUser == other.currentUser &&
+          isLoading == other.isLoading &&
+          hasError == other.hasError &&
+          errorMessage == other.errorMessage;
+
+  @override
+  int get hashCode =>
+      currentUser.hashCode ^
+      isLoading.hashCode ^
+      hasError.hashCode ^
+      errorMessage.hashCode;
+
+  @override
+  String toString() =>
+      'ProfileState(user: ${currentUser?.id}, isLoading: $isLoading, hasError: $hasError)';
 }

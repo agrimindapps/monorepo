@@ -19,9 +19,18 @@ import '../../shared/utils/result.dart';
 // If used: Refactor similar to enhanced_storage_service
 // Estimated effort: 2h (analysis) + 6-8h (refactoring if needed)
 // Risk: Low (candidate for removal) | ROI: TBD
+//
+// AUDIT RESULT (2025-10-13): NOT USED in any app - Marked as @Deprecated
+// Removal planned for: 2 releases from now
 
 /// Enhanced Image Service Configuration
 /// Consolidates all image service configurations into one
+///
+/// {@category Deprecated}
+@Deprecated(
+  'This service is not being used in any app and will be removed in future releases. '
+  'Use individual image services instead (ImageSelectionService, ImageCacheService, etc.).',
+)
 class EnhancedImageServiceConfig {
   final int maxWidth;
   final int maxHeight;
@@ -216,6 +225,12 @@ enum ImageLoadStatus { queued, loading, cached, completed, failed }
 /// - EnhancedImageService: Caching + Compression + Optimization
 /// - OptimizedImageService: LRU cache + Memory management
 /// - ImagePreloaderService: Queue-based preloading + Priority system
+///
+/// {@category Deprecated}
+@Deprecated(
+  'This service is not being used in any app and will be removed in future releases. '
+  'Use individual image services instead.',
+)
 class EnhancedImageServiceUnified {
   final ImagePicker _picker;
   final FirebaseStorage _storage;

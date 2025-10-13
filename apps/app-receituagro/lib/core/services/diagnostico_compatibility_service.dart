@@ -103,7 +103,7 @@ class DiagnosticoCompatibilityService {
         idPraga: idPraga,
       );
     }
-    final diagnosticosResult = await _diagnosticosRepository.getByTriplaCombinacao(
+    final diagnosticosResult = await _diagnosticosRepository.queryByTriplaCombinacao(
       idDefensivo: idDefensivo,
       idCultura: idCultura,
       idPraga: idPraga,
@@ -286,16 +286,22 @@ class DiagnosticoCompatibilityService {
     final alternatives = <String>[];
 
     try {
-      final alternativesResult = await _diagnosticosRepository.getRecomendacoesPara(
+      // Use queryByTriplaCombinacao with only cultura and praga
+      final alternativesResult = await _diagnosticosRepository.queryByTriplaCombinacao(
         idCultura: idCultura,
         idPraga: idPraga,
-        limit: 5,
       );
 
       alternativesResult.fold(
         (failure) => debugPrint('Erro ao buscar alternativas: $failure'),
         (diagnosticos) {
-          for (final diag in diagnosticos) {
+          // Sort by completeness and take top 5
+          final sorted = List<DiagnosticoEntity>.from(diagnosticos)
+            ..sort((a, b) => b.completude.index.compareTo(a.completude.index));
+
+          final limited = sorted.take(5).toList();
+
+          for (final diag in limited) {
             if (diag.nomeDefensivo?.isNotEmpty == true) {
               alternatives.add(
                 'Considere usar ${diag.nomeDefensivo} com dosagem ${diag.dosagem.displayDosagem}');
@@ -336,7 +342,7 @@ class DiagnosticoCompatibilityService {
     required String unit,
   }) async {
     try {
-      final diagnosticosResult = await _diagnosticosRepository.getByTriplaCombinacao(
+      final diagnosticosResult = await _diagnosticosRepository.queryByTriplaCombinacao(
         idDefensivo: idDefensivo,
         idCultura: idCultura,
         idPraga: idPraga,

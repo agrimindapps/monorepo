@@ -9,6 +9,7 @@ import '../mappers/defensivo_mapper.dart';
 /// Implementação do repositório de defensivos
 /// Segue padrões Clean Architecture + Either pattern para error handling
 /// TEMPORARY: Using FitossanitarioHiveRepository instead of FitossanitarioCoreRepository
+@LazySingleton(as: IDefensivosRepository)
 class DefensivosRepositoryImpl implements IDefensivosRepository {
   final FitossanitarioHiveRepository _repository;
 

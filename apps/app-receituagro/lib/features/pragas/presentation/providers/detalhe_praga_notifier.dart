@@ -116,8 +116,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final IPremiumService _premiumService;
   late final ComentariosService _comentariosService;
 
-  StreamSubscription<bool>? _premiumStatusSubscription;
-
   @override
   Future<DetalhePragaState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
@@ -127,9 +125,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     _premiumService = di.sl<IPremiumService>();
     _comentariosService = di.sl<ComentariosService>();
     _setupPremiumStatusListener();
-    ref.onDispose(() {
-      _premiumStatusSubscription?.cancel();
-    });
 
     return DetalhePragaState.initial();
   }
@@ -365,18 +360,14 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
   /// Configura listener para mudanças automáticas no status premium
   void _setupPremiumStatusListener() {
-    _premiumStatusSubscription?.cancel();
-    _premiumStatusSubscription = PremiumStatusNotifier
-        .instance
-        .premiumStatusStream
-        .listen((isPremiumStatus) {
-          final currentState = state.value;
-          if (currentState != null) {
-            state = AsyncValue.data(
-              currentState.copyWith(isPremium: isPremiumStatus),
-            );
-          }
-        });
+    ref.listen(premiumStatusNotifierProvider, (previous, next) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(
+          currentState.copyWith(isPremium: next.isPremium),
+        );
+      }
+    });
   }
 
   /// Carrega comentários da praga

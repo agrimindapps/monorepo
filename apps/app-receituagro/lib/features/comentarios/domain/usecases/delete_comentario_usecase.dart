@@ -1,8 +1,11 @@
+import 'package:core/core.dart';
+
 import '../entities/comentario_entity.dart';
 import '../repositories/i_comentarios_repository.dart';
 
 /// Use case for deleting comentarios with business logic.
 /// Handles soft delete and business rules around comment deletion.
+@injectable
 class DeleteComentarioUseCase {
   final IComentariosRepository _repository;
 

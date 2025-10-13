@@ -5,6 +5,7 @@ import '../repositories/i_pragas_repository.dart';
 
 /// Use Case para buscar pragas (Domain Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
+@injectable
 class GetPragasUseCase {
   final IPragasRepository _repository;
 
@@ -20,6 +21,7 @@ class GetPragasUseCase {
 }
 
 /// Use Case para buscar pragas por tipo
+@injectable
 class GetPragasByTipoUseCase {
   final IPragasRepository _repository;
 
@@ -36,6 +38,7 @@ class GetPragasByTipoUseCase {
 }
 
 /// Use Case para buscar praga por ID
+@injectable
 class GetPragaByIdUseCase {
   final IPragasRepository _repository;
   final IPragasHistoryRepository _historyRepository;
@@ -66,6 +69,7 @@ class GetPragaByIdUseCase {
 }
 
 /// Use Case para buscar pragas por cultura
+@injectable
 class GetPragasByCulturaUseCase {
   final IPragasRepository _repository;
 
@@ -82,6 +86,7 @@ class GetPragasByCulturaUseCase {
 }
 
 /// Use Case para pesquisar pragas por nome
+@injectable
 class SearchPragasUseCase {
   final IPragasRepository _repository;
 
@@ -98,6 +103,7 @@ class SearchPragasUseCase {
 }
 
 /// Use Case para obter pragas recentes
+@injectable
 class GetRecentPragasUseCase {
   final IPragasHistoryRepository _historyRepository;
 
@@ -111,6 +117,7 @@ class GetRecentPragasUseCase {
 }
 
 /// Use Case para obter pragas sugeridas
+@injectable
 class GetSuggestedPragasUseCase {
   final IPragasHistoryRepository _historyRepository;
 
@@ -124,6 +131,7 @@ class GetSuggestedPragasUseCase {
 }
 
 /// Use Case para obter estatísticas de pragas
+@injectable
 class GetPragasStatsUseCase {
   final IPragasRepository _repository;
 

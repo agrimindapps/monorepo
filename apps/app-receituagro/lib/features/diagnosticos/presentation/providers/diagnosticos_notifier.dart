@@ -3,6 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/diagnostico_entity.dart';
+import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
+import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
+import '../../domain/services/search/i_diagnosticos_search_service.dart';
+import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
 
 part 'diagnosticos_notifier.g.dart';
@@ -203,22 +207,25 @@ enum DiagnosticosViewState { initial, loading, loaded, empty, error }
 ///
 /// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
+///
+/// REFACTORING: Migrated to use Specialized Services (SOLID principles)
+/// - DiagnosticosFilterService: filtering operations
+/// - DiagnosticosSearchService: search operations
+/// - DiagnosticosMetadataService: metadata extraction
+/// - DiagnosticosStatsService: analytics and statistics
 @Riverpod(keepAlive: true)
 class DiagnosticosNotifier extends _$DiagnosticosNotifier {
+  // ========== Specialized Services (New Architecture) ==========
+  late final IDiagnosticosFilterService _filterService;
+  late final IDiagnosticosSearchService _searchService;
+  late final IDiagnosticosMetadataService _metadataService;
+  late final IDiagnosticosStatsService _statsService;
+
+  // ========== Use Cases (Kept for backward compatibility) ==========
   late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
   late final GetDiagnosticoByIdUseCase _getDiagnosticoByIdUseCase;
   late final GetRecomendacoesUseCase _getRecomendacoesUseCase;
-  late final GetDiagnosticosByDefensivoUseCase
-  _getDiagnosticosByDefensivoUseCase;
-  late final GetDiagnosticosByCulturaUseCase _getDiagnosticosByCulturaUseCase;
-  late final GetDiagnosticosByPragaUseCase _getDiagnosticosByPragaUseCase;
-  late final SearchDiagnosticosWithFiltersUseCase
-  _searchDiagnosticosWithFiltersUseCase;
-  late final GetDiagnosticoStatsUseCase _getDiagnosticoStatsUseCase;
   late final ValidateCompatibilidadeUseCase _validateCompatibilidadeUseCase;
-  late final SearchDiagnosticosByPatternUseCase
-  _searchDiagnosticosByPatternUseCase;
-  late final GetDiagnosticoFiltersDataUseCase _getDiagnosticoFiltersDataUseCase;
 
   @override
   Future<DiagnosticosState> build() async {
@@ -228,21 +235,17 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     debugPrint('🏗️ ═══════════════════════════════════════════════════════════');
     debugPrint('');
 
+    // ========== Inject Specialized Services (New Architecture) ==========
+    _filterService = di.sl<IDiagnosticosFilterService>();
+    _searchService = di.sl<IDiagnosticosSearchService>();
+    _metadataService = di.sl<IDiagnosticosMetadataService>();
+    _statsService = di.sl<IDiagnosticosStatsService>();
+
+    // ========== Inject Use Cases (Kept for backward compatibility) ==========
     _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
     _getDiagnosticoByIdUseCase = di.sl<GetDiagnosticoByIdUseCase>();
     _getRecomendacoesUseCase = di.sl<GetRecomendacoesUseCase>();
-    _getDiagnosticosByDefensivoUseCase =
-        di.sl<GetDiagnosticosByDefensivoUseCase>();
-    _getDiagnosticosByCulturaUseCase = di.sl<GetDiagnosticosByCulturaUseCase>();
-    _getDiagnosticosByPragaUseCase = di.sl<GetDiagnosticosByPragaUseCase>();
-    _searchDiagnosticosWithFiltersUseCase =
-        di.sl<SearchDiagnosticosWithFiltersUseCase>();
-    _getDiagnosticoStatsUseCase = di.sl<GetDiagnosticoStatsUseCase>();
     _validateCompatibilidadeUseCase = di.sl<ValidateCompatibilidadeUseCase>();
-    _searchDiagnosticosByPatternUseCase =
-        di.sl<SearchDiagnosticosByPatternUseCase>();
-    _getDiagnosticoFiltersDataUseCase =
-        di.sl<GetDiagnosticoFiltersDataUseCase>();
 
     debugPrint('🏗️ [DiagnosticosNotifier] build() retornando DiagnosticosState.initial()');
     return DiagnosticosState.initial();
@@ -386,6 +389,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca diagnósticos por defensivo
+  /// REFACTORED: Now uses DiagnosticosFilterService
   Future<void> getDiagnosticosByDefensivo(
     String idDefensivo, {
     String? nomeDefensivo,
@@ -419,12 +423,13 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     debugPrint('[DiagnosticosNotifier] ⏳ isLoading=true, iniciando busca...');
 
     try {
-      final result = await _getDiagnosticosByDefensivoUseCase(idDefensivo);
+      // REFACTORED: Use DiagnosticosFilterService instead of use case
+      final result = await _filterService.filterByDefensivo(idDefensivo);
 
       result.fold(
         (failure) {
           debugPrint(
-            '[DiagnosticosNotifier] ❌ ERRO no use case: ${failure.message}',
+            '[DiagnosticosNotifier] ❌ ERRO no service: ${failure.message}',
           );
           final updatedState = state.requireValue;
           state = AsyncValue.data(
@@ -436,7 +441,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         },
         (diagnosticos) {
           debugPrint(
-            '[DiagnosticosNotifier] ✅ Use case retornou ${diagnosticos.length} diagnósticos',
+            '[DiagnosticosNotifier] ✅ Service retornou ${diagnosticos.length} diagnósticos',
           );
 
           final updatedState = state.requireValue;
@@ -480,6 +485,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca diagnósticos por cultura
+  /// REFACTORED: Now uses DiagnosticosFilterService
   Future<void> getDiagnosticosByCultura(
     String idCultura, {
     String? nomeCultura,
@@ -496,7 +502,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      final result = await _getDiagnosticosByCulturaUseCase(idCultura);
+      // REFACTORED: Use DiagnosticosFilterService instead of use case
+      final result = await _filterService.filterByCultura(idCultura);
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -527,6 +534,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca diagnósticos por praga
+  /// REFACTORED: Now uses DiagnosticosFilterService
   Future<void> getDiagnosticosByPraga(
     String idPraga, {
     String? nomePraga,
@@ -543,7 +551,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      final result = await _getDiagnosticosByPragaUseCase(idPraga);
+      // REFACTORED: Use DiagnosticosFilterService instead of use case
+      final result = await _filterService.filterByPraga(idPraga);
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -574,6 +583,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca com filtros
+  /// REFACTORED: Now uses DiagnosticosSearchService
   Future<void> searchWithFilters(DiagnosticoSearchFilters filters) async {
     final currentState = state.value;
     if (currentState == null) return;
@@ -586,7 +596,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     );
 
     try {
-      final result = await _searchDiagnosticosWithFiltersUseCase(filters);
+      // REFACTORED: Use DiagnosticosSearchService instead of use case
+      final result = await _searchService.searchWithFilters(filters);
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -648,6 +659,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Busca por padrão geral
+  /// REFACTORED: Now uses DiagnosticosSearchService (client-side optimization)
   Future<void> searchByPattern(String pattern) async {
     final currentState = state.value;
     if (currentState == null) return;
@@ -677,15 +689,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           : currentState.allDiagnosticos;
 
       if (diagnosticosParaBusca.isNotEmpty) {
-        final lowerPattern = pattern.toLowerCase();
-        final localResults = diagnosticosParaBusca.where((diag) {
-          final nomeDefensivo = diag.nomeDefensivo?.toLowerCase() ?? '';
-          final nomeCultura = diag.nomeCultura?.toLowerCase() ?? '';
-          final nomePraga = diag.nomePraga?.toLowerCase() ?? '';
-          return nomeDefensivo.contains(lowerPattern) ||
-              nomeCultura.contains(lowerPattern) ||
-              nomePraga.contains(lowerPattern);
-        }).toList();
+        // REFACTORED: Use client-side search from DiagnosticosSearchService
+        final localResults =
+            _searchService.searchInList(diagnosticosParaBusca, pattern);
 
         state = AsyncValue.data(
           currentState
@@ -700,7 +706,8 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
       }
 
       // Fallback: busca remota se não há dados locais
-      final result = await _searchDiagnosticosByPatternUseCase(pattern);
+      // REFACTORED: Use DiagnosticosSearchService instead of use case
+      final result = await _searchService.searchByPattern(pattern);
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -791,17 +798,16 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Filtra diagnósticos carregados por tipo de aplicação
+  /// REFACTORED: Now uses DiagnosticosFilterService (client-side)
   void filterByTipoAplicacao(TipoAplicacao tipo) {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final filtered =
-        currentState.filteredDiagnosticos
-            .where(
-              (DiagnosticoEntity d) =>
-                  d.aplicacao.tiposDisponiveis.contains(tipo),
-            )
-            .toList();
+    // REFACTORED: Use client-side filter from DiagnosticosFilterService
+    final filtered = _filterService.filterListByTipoAplicacao(
+      currentState.filteredDiagnosticos,
+      tipo,
+    );
 
     state = AsyncValue.data(
       currentState.copyWith(filteredDiagnosticos: filtered),
@@ -809,14 +815,16 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Filtra diagnósticos carregados por completude
+  /// REFACTORED: Now uses DiagnosticosFilterService (client-side)
   void filterByCompletude(DiagnosticoCompletude completude) {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final filtered =
-        currentState.filteredDiagnosticos
-            .where((DiagnosticoEntity d) => d.completude == completude)
-            .toList();
+    // REFACTORED: Use client-side filter from DiagnosticosFilterService
+    final filtered = _filterService.filterListByCompletude(
+      currentState.filteredDiagnosticos,
+      completude,
+    );
 
     state = AsyncValue.data(
       currentState.copyWith(filteredDiagnosticos: filtered),
@@ -869,12 +877,14 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Carrega estatísticas
+  /// REFACTORED: Now uses DiagnosticosStatsService
   Future<void> _loadStats() async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
-      final result = await _getDiagnosticoStatsUseCase();
+      // REFACTORED: Use DiagnosticosStatsService instead of use case
+      final result = await _statsService.getStatistics();
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -893,12 +903,14 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   }
 
   /// Carrega dados para filtros
+  /// REFACTORED: Now uses DiagnosticosMetadataService
   Future<void> _loadFiltersData() async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
-      final result = await _getDiagnosticoFiltersDataUseCase();
+      // REFACTORED: Use DiagnosticosMetadataService instead of use case
+      final result = await _metadataService.getFiltersData();
       result.fold(
         (failure) {
           state = AsyncValue.data(

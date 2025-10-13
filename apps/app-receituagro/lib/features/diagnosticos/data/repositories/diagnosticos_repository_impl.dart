@@ -7,6 +7,16 @@ import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/repositories/i_diagnosticos_repository.dart';
 import '../mappers/diagnostico_mapper.dart';
 
+/// Implementation of diagnosticos repository (Data Layer)
+///
+/// REFACTORED: Simplified to CRUD + Basic Queries only (Phase 4 - God Object Refactoring)
+/// - Removed 16 specialized methods now handled by services
+/// - Kept only 7 essential methods (2 CRUD + 5 basic queries)
+/// - Follows Single Responsibility Principle (SOLID)
+///
+/// This repository is now focused solely on data access,
+/// leaving business logic to specialized services.
+@LazySingleton(as: IDiagnosticosRepository)
 class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   final DiagnosticoHiveRepository _hiveRepository;
 
@@ -59,20 +69,22 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     }
   }
 
+  // ========== Basic Query Operations ==========
+
   @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByDefensivo(
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByDefensivo(
     String idDefensivo,
   ) async {
     try {
       developer.log(
-        '🔍 getByDefensivo (Repository) - ID do defensivo: $idDefensivo',
+        '🔍 queryByDefensivo (Repository) - ID do defensivo: $idDefensivo',
         name: 'DiagnosticosRepository',
       );
 
       final diagnosticosHive = await _hiveRepository.findByDefensivo(idDefensivo);
 
       developer.log(
-        '✅ getByDefensivo (Repository) - ${diagnosticosHive.length} registros Hive encontrados',
+        '✅ queryByDefensivo (Repository) - ${diagnosticosHive.length} registros Hive encontrados',
         name: 'DiagnosticosRepository',
       );
 
@@ -83,14 +95,14 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
           .toList();
 
       developer.log(
-        '✅ getByDefensivo (Repository) - ${entities.length} entities mapeadas, retornando Right()',
+        '✅ queryByDefensivo (Repository) - ${entities.length} entities mapeadas, retornando Right()',
         name: 'DiagnosticosRepository',
       );
 
       return Right(entities);
     } catch (e, stack) {
       developer.log(
-        '❌ getByDefensivo (Repository) - Erro: $e',
+        '❌ queryByDefensivo (Repository) - Erro: $e',
         name: 'DiagnosticosRepository',
         error: e,
         stackTrace: stack,
@@ -102,7 +114,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }
 
   @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByCultura(
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByCultura(
     String idCultura,
   ) async {
     try {
@@ -120,7 +132,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }
 
   @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByPraga(
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByPraga(
     String idPraga,
   ) async {
     try {
@@ -138,7 +150,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }
 
   @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByTriplaCombinacao({
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByTriplaCombinacao({
     String? idDefensivo,
     String? idCultura,
     String? idPraga,
@@ -164,379 +176,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   }
 
   @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByTipoAplicacao(
-    TipoAplicacao tipo,
-  ) async {
-    try {
-      final allResult = await getAll();
-      return allResult.fold((failure) => Left(failure), (diagnosticos) {
-        final filtered =
-            diagnosticos
-                .where((d) => d.aplicacao.tiposDisponiveis.contains(tipo))
-                .toList();
-        return Right(filtered);
-      });
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao buscar por tipo aplicação: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByCompletude(
-    DiagnosticoCompletude completude,
-  ) async {
-    try {
-      final allResult = await getAll();
-      return allResult.fold((failure) => Left(failure), (diagnosticos) {
-        final filtered =
-            diagnosticos.where((d) => d.completude == completude).toList();
-        return Right(filtered);
-      });
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao buscar por completude: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getByFaixaDosagem({
-    required double dosagemMinima,
-    required double dosagemMaxima,
-  }) async {
-    try {
-      final allResult = await getAll();
-      return allResult.fold((failure) => Left(failure), (diagnosticos) {
-        final filtered =
-            diagnosticos.where((d) {
-              final dosageAvg = d.dosagem.dosageAverage;
-              return dosageAvg >= dosagemMinima && dosageAvg <= dosagemMaxima;
-            }).toList();
-        return Right(filtered);
-      });
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao buscar por faixa dosagem: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchWithFilters(
-    DiagnosticoSearchFilters filters,
-  ) async {
-    try {
-      var diagnosticos = <DiagnosticoEntity>[];
-
-      if (filters.idDefensivo != null ||
-          filters.idCultura != null ||
-          filters.idPraga != null) {
-        final combinationResult = await getByTriplaCombinacao(
-          idDefensivo: filters.idDefensivo,
-          idCultura: filters.idCultura,
-          idPraga: filters.idPraga,
-        );
-        if (combinationResult.isLeft()) return combinationResult;
-        diagnosticos = combinationResult.fold((l) => [], (r) => r);
-      } else {
-        final allResult = await getAll();
-        if (allResult.isLeft()) return allResult;
-        diagnosticos = allResult.fold((l) => [], (r) => r);
-      }
-
-      if (filters.tipoAplicacao != null) {
-        diagnosticos =
-            diagnosticos
-                .where(
-                  (d) => d.aplicacao.tiposDisponiveis.contains(
-                    filters.tipoAplicacao,
-                  ),
-                )
-                .toList();
-      }
-
-      if (filters.completude != null) {
-        diagnosticos =
-            diagnosticos
-                .where((d) => d.completude == filters.completude)
-                .toList();
-      }
-
-      if (filters.dosagemMinima != null && filters.dosagemMaxima != null) {
-        diagnosticos =
-            diagnosticos.where((d) {
-              final dosageAvg = d.dosagem.dosageAverage;
-              return dosageAvg >= filters.dosagemMinima! &&
-                  dosageAvg <= filters.dosagemMaxima!;
-            }).toList();
-      }
-
-      if (filters.limit != null) {
-        diagnosticos = diagnosticos.take(filters.limit!).toList();
-      }
-
-      return Right(diagnosticos);
-    } catch (e) {
-      return Left(CacheFailure('Erro na busca com filtros: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getSimilarDiagnosticos(
-    String diagnosticoId, {
-    int limit = 5,
-  }) async {
-    try {
-      final originalResult = await getById(diagnosticoId);
-      if (originalResult.isLeft()) {
-        return const Left(CacheFailure('Diagnóstico original não encontrado'));
-      }
-
-      final original = originalResult.fold((l) => null, (r) => r);
-      if (original == null) {
-        return const Right(<DiagnosticoEntity>[]);
-      }
-
-      final similarByDefensivoResult = await getByDefensivo(
-        original.idDefensivo,
-      );
-      if (similarByDefensivoResult.isLeft()) return similarByDefensivoResult;
-
-      final similarByPragaResult = await getByPraga(original.idPraga);
-      if (similarByPragaResult.isLeft()) return similarByPragaResult;
-
-      final similarDefensivo = similarByDefensivoResult.fold(
-        (l) => <DiagnosticoEntity>[],
-        (r) => r,
-      );
-      final similarPraga = similarByPragaResult.fold(
-        (l) => <DiagnosticoEntity>[],
-        (r) => r,
-      );
-
-      final similar = <DiagnosticoEntity>[];
-      similar.addAll(similarDefensivo.where((d) => d.id != diagnosticoId));
-      similar.addAll(
-        similarPraga.where(
-          (d) => d.id != diagnosticoId && !similar.any((s) => s.id == d.id),
-        ),
-      );
-
-      return Right(similar.take(limit).toList());
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao buscar diagnósticos similares: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> getRecomendacoesPara({
-    required String idCultura,
-    required String idPraga,
-    int limit = 10,
-  }) async {
-    try {
-      final result = await getByTriplaCombinacao(
-        idCultura: idCultura,
-        idPraga: idPraga,
-      );
-
-      return result.fold((failure) => Left(failure), (diagnosticos) {
-        diagnosticos.sort(
-          (a, b) => b.completude.index.compareTo(a.completude.index),
-        );
-        return Right(diagnosticos.take(limit).toList());
-      });
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao buscar recomendações: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, DiagnosticosStats>> getStatistics() async {
-    try {
-      final result = await _hiveRepository.getAll();
-      if (result.isError) {
-        return Left(CacheFailure('Erro ao obter estatísticas: ${result.error?.message}'));
-      }
-
-      final allDiagnosticos = result.data!;
-      final stats = {
-        'totalDiagnosticos': allDiagnosticos.length,
-        'uniqueCulturas':
-            allDiagnosticos.map((d) => d.fkIdCultura).toSet().length,
-        'uniqueDefensivos':
-            allDiagnosticos.map((d) => d.fkIdDefensivo).toSet().length,
-        'uniquePragas': allDiagnosticos.map((d) => d.fkIdPraga).toSet().length,
-      };
-      final statsEntity = DiagnosticoMapper.statsFromHiveStats(stats);
-      return Right(statsEntity);
-    } catch (e) {
-      return Left(CacheFailure('Erro ao obter estatísticas: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoPopular>>> getPopularDiagnosticos({
-    int limit = 10,
-  }) async {
-    try {
-      final statsResult = await getStatistics();
-      return statsResult.fold(
-        (failure) => Left(failure),
-        (stats) => Right(stats.topDiagnosticos.take(limit).toList()),
-      );
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao buscar diagnósticos populares: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, bool>> exists(String id) async {
-    try {
-      final result = await getById(id);
-      return result.fold(
-        (failure) => Left(failure),
-        (diagnostico) => Right(diagnostico != null),
-      );
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao verificar existência: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, int>> countByFilters(
-    DiagnosticoSearchFilters filters,
-  ) async {
-    try {
-      final result = await searchWithFilters(filters);
-      return result.fold(
-        (failure) => Left(failure),
-        (diagnosticos) => Right(diagnosticos.length),
-      );
-    } catch (e) {
-      return Left(CacheFailure('Erro ao contar por filtros: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<String>>> getAllDefensivos() async {
-    try {
-      final result = await getAll();
-      return result.fold((failure) => Left(failure), (diagnosticos) {
-        final defensivos =
-            diagnosticos
-                .map((d) => d.nomeDefensivo)
-                .where((nome) => nome?.isNotEmpty == true)
-                .cast<String>()
-                .toSet()
-                .toList()
-              ..sort();
-        return Right(defensivos);
-      });
-    } catch (e) {
-      return Left(CacheFailure('Erro ao obter defensivos: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<String>>> getAllCulturas() async {
-    try {
-      final result = await getAll();
-      return result.fold((failure) => Left(failure), (diagnosticos) {
-        final culturas =
-            diagnosticos
-                .map((d) => d.nomeCultura)
-                .where((nome) => nome?.isNotEmpty == true)
-                .cast<String>()
-                .toSet()
-                .toList()
-              ..sort();
-        return Right(culturas);
-      });
-    } catch (e) {
-      return Left(CacheFailure('Erro ao obter culturas: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<String>>> getAllPragas() async {
-    try {
-      final result = await getAll();
-      return result.fold((failure) => Left(failure), (diagnosticos) {
-        final pragas =
-            diagnosticos
-                .map((d) => d.nomePraga)
-                .where((nome) => nome?.isNotEmpty == true)
-                .cast<String>()
-                .toSet()
-                .toList()
-              ..sort();
-        return Right(pragas);
-      });
-    } catch (e) {
-      return Left(CacheFailure('Erro ao obter pragas: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, bool>> validarCompatibilidade({
-    required String idDefensivo,
-    required String idCultura,
-    required String idPraga,
-  }) async {
-    try {
-      final result = await getByTriplaCombinacao(
-        idDefensivo: idDefensivo,
-        idCultura: idCultura,
-        idPraga: idPraga,
-      );
-
-      return result.fold(
-        (failure) => Left(failure),
-        (diagnosticos) => Right(diagnosticos.isNotEmpty),
-      );
-    } catch (e) {
-      return Left(
-        ValidationFailure(
-          'Erro na validação de compatibilidade: ${e.toString()}',
-        ),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<String>>> getUnidadesMedida() async {
-    try {
-      final result = await getAll();
-      return result.fold((failure) => Left(failure), (diagnosticos) {
-        final unidades =
-            diagnosticos
-                .map((d) => d.dosagem.unidade)
-                .where((unidade) => unidade.isNotEmpty)
-                .toSet()
-                .toList()
-              ..sort();
-        return Right(unidades);
-      });
-    } catch (e) {
-      return Left(
-        CacheFailure('Erro ao obter unidades de medida: ${e.toString()}'),
-      );
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DiagnosticoEntity>>> searchByPattern(
+  Future<Either<Failure, List<DiagnosticoEntity>>> queryByPattern(
     String pattern,
   ) async {
     try {

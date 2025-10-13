@@ -4,6 +4,7 @@ import '../repositories/i_favoritos_repository.dart';
 
 /// Use Case para adicionar um defensivo aos favoritos
 /// Segue padrão `Either<Failure, Success>` do core package
+@injectable
 class AddFavoritoDefensivoUseCase {
   final IFavoritosDefensivosRepository _repository;
   final IFavoritosValidator _validator;

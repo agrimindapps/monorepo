@@ -1,41 +1,30 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../services/premium_status_notifier.dart';
 
-/// Stub mixin for PremiumStatusListener - removed service
-/// This stub provides the same interface for compatibility
+/// Stub mixin for PremiumStatusListener - deprecated
+/// DEPRECATED: Use ConsumerStatefulWidget with Riverpod instead
+/// This stub provides basic compatibility but does not function
+@Deprecated('Use ConsumerStatefulWidget with Riverpod premiumStatusNotifierProvider instead')
 mixin PremiumStatusListener<T extends StatefulWidget> on State<T> {
-  StreamSubscription<bool>? _premiumStatusSubscription;
   bool _isPremium = false;
-  
+
   bool get isPremium => _isPremium;
-  
+
   @override
   void initState() {
     super.initState();
-    _initializePremiumListener();
+    // Stub - no longer functional
+    // Migrate to Riverpod: ConsumerStatefulWidget + ref.watch(premiumStatusNotifierProvider)
   }
-  
-  void _initializePremiumListener() {
-    _isPremium = PremiumStatusNotifier.instance.isPremium;
-    _premiumStatusSubscription = PremiumStatusNotifier.instance.premiumStatusStream
-        .listen((isPremium) {
-      if (mounted) {
-        setState(() {
-          _isPremium = isPremium;
-        });
-        onPremiumStatusChanged(isPremium);
-      }
-    });
-  }
-  
+
   /// Override this method to handle premium status changes
+  /// DEPRECATED: Use ref.listen with Riverpod instead
   void onPremiumStatusChanged(bool isPremium) {
+    // Stub for compatibility
   }
-  
+
   @override
   void dispose() {
-    _premiumStatusSubscription?.cancel();
     super.dispose();
   }
 }

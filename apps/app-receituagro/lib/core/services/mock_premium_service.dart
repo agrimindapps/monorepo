@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+
 import '../interfaces/i_premium_service.dart';
 
 /// Mock implementation of IPremiumService for development and testing
-class MockPremiumService extends ChangeNotifier implements IPremiumService {
+class MockPremiumService implements IPremiumService {
   PremiumStatus _status = const PremiumStatus(isActive: false);
   final StreamController<bool> _statusController = StreamController<bool>.broadcast();
 
@@ -62,9 +62,9 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   @override
   Future<void> refreshPremiumStatus() async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    notifyListeners();
     _statusController.add(_status.isActive);
   }
+
   @override
   bool canUseFeature(String featureName) {
     if (_status.isActive) return true;
@@ -112,6 +112,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
       'export_data',
     ];
   }
+
   @override
   Future<bool> isTrialAvailable() async {
     await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -121,7 +122,7 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
   @override
   Future<bool> startTrial() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     if (await isTrialAvailable()) {
       _status = PremiumStatus(
         isActive: true,
@@ -129,46 +130,43 @@ class MockPremiumService extends ChangeNotifier implements IPremiumService {
         expiryDate: DateTime.now().add(const Duration(days: 7)),
         planType: 'Trial',
       );
-      
-      notifyListeners();
+
       _statusController.add(true);
       return true;
     }
     return false;
   }
+
   @override
   Future<void> generateTestSubscription() async {
     await Future<void>.delayed(const Duration(milliseconds: 500));
-    
+
     _status = PremiumStatus(
       isActive: true,
       isTestSubscription: true,
       expiryDate: DateTime.now().add(const Duration(days: 30)),
       planType: 'Test Premium',
     );
-    
-    notifyListeners();
+
     _statusController.add(true);
   }
 
   @override
   Future<void> removeTestSubscription() async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
-    
+
     if (_status.isTestSubscription) {
       _status = const PremiumStatus(isActive: false);
-      notifyListeners();
       _statusController.add(false);
     }
   }
-  @override
-  Future<void> navigateToPremium() async {
-    if (kDebugMode) print('Navigate to premium page');
-  }
 
   @override
+  Future<void> navigateToPremium() async {
+    // Mock navigation - no-op in mock
+  }
+
   void dispose() {
     _statusController.close();
-    super.dispose();
   }
 }

@@ -4,6 +4,7 @@ import '../repositories/i_favoritos_repository.dart';
 
 /// Use Case para remover um defensivo dos favoritos
 /// Segue padrão `Either<Failure, Success>` do core package
+@injectable
 class RemoveFavoritoDefensivoUseCase {
   final IFavoritosDefensivosRepository _repository;
   final IFavoritosValidator _validator;

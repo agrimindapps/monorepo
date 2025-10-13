@@ -1,9 +1,12 @@
+import 'package:core/core.dart';
+
 import '../entities/user_settings_entity.dart';
 import '../exceptions/settings_exceptions.dart';
 import '../repositories/i_user_settings_repository.dart';
 
 /// Use case for updating user settings with business validation.
 /// Handles business rules, validation, and side effects of settings changes.
+@injectable
 class UpdateUserSettingsUseCase {
   final IUserSettingsRepository _repository;
 

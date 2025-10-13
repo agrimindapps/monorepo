@@ -9,9 +9,7 @@ import '../../features/comentarios/di/comentarios_di.dart';
 import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
-import '../../features/diagnosticos/data/repositories/diagnosticos_repository_impl.dart';
-import '../../features/diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
-import '../../features/diagnosticos/domain/usecases/get_diagnosticos_usecase.dart';
+// ✅ Diagnosticos imports removed - now managed by Injectable
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/favoritos/favoritos_di.dart';
 import '../../features/pragas/di/pragas_di.dart';
@@ -242,52 +240,7 @@ Future<void> init() async {
       premiumService: sl<IPremiumService>(),
     ),
   );
-  sl.registerLazySingleton<IDiagnosticosRepository>(
-    () => DiagnosticosRepositoryImpl(sl<DiagnosticoHiveRepository>()),
-  );
-  sl.registerLazySingleton<GetDiagnosticosUseCase>(
-    () => GetDiagnosticosUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDiagnosticoByIdUseCase>(
-    () => GetDiagnosticoByIdUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetRecomendacoesUseCase>(
-    () => GetRecomendacoesUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDiagnosticosByDefensivoUseCase>(
-    () => GetDiagnosticosByDefensivoUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDiagnosticosByCulturaUseCase>(
-    () => GetDiagnosticosByCulturaUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDiagnosticosByPragaUseCase>(
-    () => GetDiagnosticosByPragaUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDiagnosticosWithFiltersUseCase>(
-    () => SearchDiagnosticosWithFiltersUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDiagnosticoStatsUseCase>(
-    () => GetDiagnosticoStatsUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<ValidateCompatibilidadeUseCase>(
-    () => ValidateCompatibilidadeUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<SearchDiagnosticosByPatternUseCase>(
-    () => SearchDiagnosticosByPatternUseCase(sl<IDiagnosticosRepository>()),
-  );
-
-  sl.registerLazySingleton<GetDiagnosticoFiltersDataUseCase>(
-    () => GetDiagnosticoFiltersDataUseCase(sl<IDiagnosticosRepository>()),
-  );
+  // ✅ IDiagnosticosRepository and all use cases now managed by Injectable (@LazySingleton, @injectable)
   sl.registerLazySingleton<DefensivosGroupingService>(
     () => DefensivosGroupingService(),
   );

@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 import '../../constants/comentarios_design_tokens.dart';
 import '../entities/comentario_entity.dart';
 import '../repositories/i_comentarios_repository.dart';
@@ -84,6 +86,7 @@ import '../repositories/i_comentarios_repository.dart';
 /// );
 /// await useCase.call(generalComment);
 /// ```
+@injectable
 class AddComentarioUseCase {
   final IComentariosRepository _repository;
 

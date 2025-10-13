@@ -1,58 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-/// Interface for theme management following SOLID principles
-abstract class IThemeService extends ChangeNotifier {
-  /// Current theme mode (light/dark)
-  ThemeMode get themeMode;
-  
+part 'theme_service.g.dart';
+
+/// Theme Notifier using Riverpod
+@riverpod
+class ThemeNotifier extends _$ThemeNotifier {
+  @override
+  ThemeMode build() {
+    // Default theme is system
+    return ThemeMode.system;
+  }
+
   /// Whether the current theme is dark
-  bool get isDark;
-  
-  /// Toggle between light and dark theme
-  void toggleTheme();
-  
-  /// Set specific theme mode
-  void setTheme(ThemeMode mode);
-  
-  /// Get current theme icon
-  IconData get themeIcon;
-}
-
-/// Mock implementation for development and testing
-class MockThemeService extends ChangeNotifier implements IThemeService {
-  ThemeMode _themeMode = ThemeMode.system;
-  
-  @override
-  ThemeMode get themeMode => _themeMode;
-  
-  @override
   bool get isDark {
-    switch (_themeMode) {
+    switch (state) {
       case ThemeMode.dark:
         return true;
       case ThemeMode.light:
         return false;
       case ThemeMode.system:
-        return false;
+        return false; // Default to light if system
     }
   }
-  
-  @override
+
+  /// Toggle between light and dark theme
   void toggleTheme() {
-    _themeMode = isDark ? ThemeMode.light : ThemeMode.dark;
-    notifyListeners();
+    state = isDark ? ThemeMode.light : ThemeMode.dark;
   }
-  
-  @override
+
+  /// Set specific theme mode
   void setTheme(ThemeMode mode) {
-    if (_themeMode != mode) {
-      _themeMode = mode;
-      notifyListeners();
+    if (state != mode) {
+      state = mode;
     }
   }
-  
-  @override
+
+  /// Get current theme icon
   IconData get themeIcon {
     return isDark ? Icons.light_mode : Icons.dark_mode;
+  }
+}
+
+/// Derived provider for theme icon
+@riverpod
+IconData themeIcon(ThemeIconRef ref) {
+  final themeMode = ref.watch(themeNotifierProvider);
+
+  switch (themeMode) {
+    case ThemeMode.dark:
+      return Icons.light_mode;
+    case ThemeMode.light:
+      return Icons.dark_mode;
+    case ThemeMode.system:
+      return Icons.brightness_auto;
+  }
+}
+
+/// Derived provider for isDark check
+@riverpod
+bool isDarkTheme(IsDarkThemeRef ref) {
+  final themeMode = ref.watch(themeNotifierProvider);
+
+  switch (themeMode) {
+    case ThemeMode.dark:
+      return true;
+    case ThemeMode.light:
+      return false;
+    case ThemeMode.system:
+      return false; // Default to light if system
   }
 }

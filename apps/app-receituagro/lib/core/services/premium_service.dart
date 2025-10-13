@@ -112,7 +112,10 @@ class PremiumStatus {
 /// ReceitaAgro Premium Service
 /// Handles subscription management, premium features, and RevenueCat integration
 /// Now uses core ISubscriptionRepository instead of direct purchases_flutter calls
-class ReceitaAgroPremiumService extends ChangeNotifier {
+/// Migrated to work with Riverpod - state managed externally
+class ReceitaAgroPremiumService {
+  /// Callback for state changes (replaces notifyListeners)
+  void Function()? onStateChanged;
   final ReceitaAgroAnalyticsService _analytics;
   final ReceitaAgroCloudFunctionsService _cloudFunctions;
   final ReceitaAgroRemoteConfigService _remoteConfig;
@@ -468,7 +471,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       _syncSubscriptionWithCloudFunctions(subscription);
     } else {
       _status = PremiumStatus.free();
-      notifyListeners();
+      onStateChanged?.call();
     }
   }
 
@@ -485,7 +488,7 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
       _status = PremiumStatus.free();
     }
 
-    notifyListeners();
+    onStateChanged?.call();
   }
 
   /// Sync subscription with cloud functions
@@ -511,21 +514,21 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
   void _setLoading(bool loading) {
     if (_isLoading != loading) {
       _isLoading = loading;
-      notifyListeners();
+      onStateChanged?.call();
     }
   }
 
   /// Set error
   void _setError(String error) {
     _lastError = error;
-    notifyListeners();
+    onStateChanged?.call();
   }
 
   /// Clear error
   void _clearError() {
     if (_lastError != null) {
       _lastError = null;
-      notifyListeners();
+      onStateChanged?.call();
     }
   }
 
@@ -560,7 +563,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
     };
   }
 
-  @override
   void dispose() {
     if (_isDisposed) return;
 
@@ -588,8 +590,6 @@ class ReceitaAgroPremiumService extends ChangeNotifier {
         name: 'PremiumService',
       );
     }
-
-    super.dispose();
   }
 }
 

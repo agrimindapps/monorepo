@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../constants/comentarios_design_tokens.dart';
 import '../data/comentario_edit_state.dart';
@@ -8,192 +9,186 @@ import '../data/comentario_model.dart';
 import '../data/comentarios_state.dart';
 import '../domain/comentarios_service.dart';
 
-class ComentariosController extends ChangeNotifier {
-  final ComentariosService _service;
-  final TextEditingController searchController = TextEditingController();
-  
+part 'comentarios_controller.g.dart';
+
+/// Comentarios Notifier - UI State Management with Riverpod
+@riverpod
+class ComentariosNotifier extends _$ComentariosNotifier {
   Timer? _debounceTimer;
-  bool _isDisposed = false;
-  
-  ComentariosState _state = const ComentariosState();
-  ComentariosState get state => _state;
+  String? _pkIdentificador;
+  String? _ferramenta;
 
-  String? pkIdentificador;
-  String? ferramenta;
+  @override
+  ComentariosState build() {
+    // Auto-load on first access
+    Future.microtask(() => _loadComentarios());
 
-  ComentariosController({required ComentariosService service}) : _service = service {
-    _initializeController();
+    // Cleanup on dispose
+    ref.onDispose(() {
+      _debounceTimer?.cancel();
+    });
+
+    return const ComentariosState();
   }
 
-  void _initializeController() {
-    searchController.addListener(_onSearchChanged);
-    loadComentarios();
-  }
-
-  void _updateState(ComentariosState newState) {
-    if (_isDisposed) return;
-    _state = newState;
-    notifyListeners();
-  }
-
+  /// Set filters and reload if changed
   void setFilters({String? pkIdentificador, String? ferramenta}) {
-    final needsReload = this.pkIdentificador != pkIdentificador ||
-        this.ferramenta != ferramenta;
+    final needsReload = _pkIdentificador != pkIdentificador || _ferramenta != ferramenta;
 
-    this.pkIdentificador = pkIdentificador;
-    this.ferramenta = ferramenta;
+    _pkIdentificador = pkIdentificador;
+    _ferramenta = ferramenta;
 
     if (needsReload) {
-      loadComentarios();
+      _loadComentarios();
     }
   }
 
-  Future<void> loadComentarios() async {
-    if (_isDisposed) return;
-
-    _updateState(_state.copyWith(isLoading: true, error: null));
+  /// Load comentarios from service
+  Future<void> _loadComentarios() async {
+    state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final comentarios = await _service.getAllComentarios(
-        pkIdentificador: pkIdentificador,
+      final service = ref.read(comentariosServiceProvider);
+      final comentarios = await service.getAllComentarios(
+        pkIdentificador: _pkIdentificador,
       );
 
-      final maxComentarios = _service.getMaxComentarios();
+      final maxComentarios = service.getMaxComentarios();
       final quantComentarios = comentarios.length;
 
-      final comentariosFiltrados = _service.filterComentarios(
+      final comentariosFiltrados = service.filterComentarios(
         comentarios,
-        _state.searchText,
-        pkIdentificador: pkIdentificador,
-        ferramenta: ferramenta,
+        state.searchText,
+        pkIdentificador: _pkIdentificador,
+        ferramenta: _ferramenta,
       );
 
-
-      _updateState(_state.copyWith(
+      state = state.copyWith(
         comentarios: comentarios,
         comentariosFiltrados: comentariosFiltrados,
         quantComentarios: quantComentarios,
         maxComentarios: maxComentarios,
         isLoading: false,
         error: null,
-      ));
+      );
     } catch (e) {
-      if (!_isDisposed) {
-        _updateState(_state.copyWith(
-          isLoading: false,
-          error: 'Erro ao carregar comentários: $e',
-        ));
-      }
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Erro ao carregar comentários: $e',
+      );
     }
   }
 
-  void _onSearchChanged() {
-    if (_isDisposed) return;
+  /// Public method to reload comentarios
+  Future<void> loadComentarios() async {
+    await _loadComentarios();
+  }
 
-    final searchText = searchController.text;
-
+  /// Handle search text changes with debounce
+  void onSearchChanged(String searchText) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(ComentariosDesignTokens.debounceDelay, () {
-      if (_isDisposed) return;
-
-      final filteredComentarios = _service.filterComentarios(
-        _state.comentarios,
+      final service = ref.read(comentariosServiceProvider);
+      final filteredComentarios = service.filterComentarios(
+        state.comentarios,
         searchText,
-        pkIdentificador: pkIdentificador,
-        ferramenta: ferramenta,
+        pkIdentificador: _pkIdentificador,
+        ferramenta: _ferramenta,
       );
 
-      _updateState(_state.copyWith(
+      state = state.copyWith(
         searchText: searchText,
         comentariosFiltrados: filteredComentarios,
-      ));
+      );
     });
   }
 
+  /// Clear search
   void clearSearch() {
-    searchController.clear();
+    onSearchChanged('');
   }
 
+  /// Add new comentario
   Future<void> addComentario(String conteudo) async {
-    if (_isDisposed) return;
+    final service = ref.read(comentariosServiceProvider);
 
-    if (!_service.isValidContent(conteudo)) {
-      _showErrorMessage(_service.getValidationErrorMessage());
+    if (!service.isValidContent(conteudo)) {
+      _showErrorMessage(service.getValidationErrorMessage());
       return;
     }
 
-    if (!_service.canAddComentario(_state.quantComentarios)) {
+    if (!service.canAddComentario(state.quantComentarios)) {
       _showErrorMessage('Limite de comentários atingido');
       return;
     }
 
     final comentario = ComentarioModel(
-      id: _service.generateId(),
-      idReg: _service.generateIdReg(),
+      id: service.generateId(),
+      idReg: service.generateIdReg(),
       titulo: '',
       conteudo: conteudo,
-      ferramenta: ferramenta ?? 'Comentário direto',
-      pkIdentificador: pkIdentificador ?? '',
+      ferramenta: _ferramenta ?? 'Comentário direto',
+      pkIdentificador: _pkIdentificador ?? '',
       status: true,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
     try {
-      await _service.addComentario(comentario);
-      await loadComentarios();
+      await service.addComentario(comentario);
+      await _loadComentarios();
       _showSuccessMessage(ComentariosDesignTokens.commentSavedMessage);
     } catch (e) {
       _showErrorMessage('${ComentariosDesignTokens.saveErrorMessage}: $e');
     }
   }
 
+  /// Start editing a comentario
   void startEditingComentario(ComentarioModel comentario) {
-    if (_isDisposed) return;
-
-    final newEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
+    final newEditStates = Map<String, ComentarioEditState>.from(state.editStates);
     newEditStates[comentario.id] = ComentarioEditState(
       comentarioId: comentario.id,
       isEditing: true,
       currentContent: comentario.conteudo,
     );
 
-    _updateState(_state.copyWith(editStates: newEditStates));
+    state = state.copyWith(editStates: newEditStates);
   }
 
+  /// Stop editing a comentario
   void stopEditingComentario(String comentarioId) {
-    if (_isDisposed) return;
-
-    final newEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
+    final newEditStates = Map<String, ComentarioEditState>.from(state.editStates);
     newEditStates.remove(comentarioId);
 
-    _updateState(_state.copyWith(editStates: newEditStates));
+    state = state.copyWith(editStates: newEditStates);
   }
 
+  /// Update editing content
   void updateEditingContent(String comentarioId, String content) {
-    if (_isDisposed) return;
-
-    final currentEditState = _state.editStates[comentarioId];
+    final currentEditState = state.editStates[comentarioId];
     if (currentEditState == null || !currentEditState.isEditing) return;
 
-    final newEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
+    final newEditStates = Map<String, ComentarioEditState>.from(state.editStates);
     newEditStates[comentarioId] = currentEditState.copyWith(currentContent: content);
 
-    _updateState(_state.copyWith(editStates: newEditStates));
+    state = state.copyWith(editStates: newEditStates);
   }
 
+  /// Update comentario
   Future<void> updateComentario(ComentarioModel comentario, String newContent) async {
-    if (_isDisposed) return;
+    final service = ref.read(comentariosServiceProvider);
 
-    if (!_service.isValidContent(newContent)) {
-      _showErrorMessage(_service.getValidationErrorMessage());
+    if (!service.isValidContent(newContent)) {
+      _showErrorMessage(service.getValidationErrorMessage());
       return;
     }
-    final newEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
+
+    // Set saving state
+    final newEditStates = Map<String, ComentarioEditState>.from(state.editStates);
     final currentEditState = newEditStates[comentario.id];
     if (currentEditState != null) {
       newEditStates[comentario.id] = currentEditState.copyWith(isSaving: true);
-      _updateState(_state.copyWith(editStates: newEditStates));
+      state = state.copyWith(editStates: newEditStates);
     }
 
     try {
@@ -202,47 +197,41 @@ class ComentariosController extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      await _service.updateComentario(updatedComentario);
-      await loadComentarios();
+      await service.updateComentario(updatedComentario);
+      await _loadComentarios();
       stopEditingComentario(comentario.id);
       _showSuccessMessage(ComentariosDesignTokens.commentUpdatedMessage);
     } catch (e) {
-      final errorEditStates = Map<String, ComentarioEditState>.from(_state.editStates);
+      // Clear saving state on error
+      final errorEditStates = Map<String, ComentarioEditState>.from(state.editStates);
       final errorEditState = errorEditStates[comentario.id];
       if (errorEditState != null) {
         errorEditStates[comentario.id] = errorEditState.copyWith(isSaving: false);
-        _updateState(_state.copyWith(editStates: errorEditStates));
+        state = state.copyWith(editStates: errorEditStates);
       }
       _showErrorMessage('${ComentariosDesignTokens.updateErrorMessage}: $e');
     }
   }
 
+  /// Delete comentario
   Future<void> deleteComentario(ComentarioModel comentario) async {
-    if (_isDisposed) return;
-
     try {
-      await _service.deleteComentario(comentario.id);
-      await loadComentarios();
+      final service = ref.read(comentariosServiceProvider);
+      await service.deleteComentario(comentario.id);
+      await _loadComentarios();
       _showSuccessMessage(ComentariosDesignTokens.commentDeletedMessage);
     } catch (e) {
       _showErrorMessage('${ComentariosDesignTokens.deleteErrorMessage}: $e');
     }
   }
 
-  void _showErrorMessage(String message) {
-    debugPrint('Error: $message');
-  }
-
-  void _showSuccessMessage(String message) {
-    debugPrint('Success: $message');
-  }
-
+  /// Get header subtitle
   String getHeaderSubtitle() {
-    if (_state.isLoading) {
+    if (state.isLoading) {
       return ComentariosDesignTokens.loadingMessage;
     }
 
-    final total = _state.comentarios.length;
+    final total = state.comentarios.length;
     if (total > 0) {
       return '$total comentários';
     }
@@ -250,11 +239,30 @@ class ComentariosController extends ChangeNotifier {
     return 'Suas anotações pessoais';
   }
 
-  @override
-  void dispose() {
-    _isDisposed = true;
-    _debounceTimer?.cancel();
-    searchController.dispose();
-    super.dispose();
+  void _showErrorMessage(String message) {
+    debugPrint('Error: $message');
+    // TODO: Show snackbar or dialog if context available
   }
+
+  void _showSuccessMessage(String message) {
+    debugPrint('Success: $message');
+    // TODO: Show snackbar if context available
+  }
+}
+
+/// Derived provider for header subtitle
+@riverpod
+String comentariosHeaderSubtitle(ComentariosHeaderSubtitleRef ref) {
+  final state = ref.watch(comentariosNotifierProvider);
+
+  if (state.isLoading) {
+    return ComentariosDesignTokens.loadingMessage;
+  }
+
+  final total = state.comentarios.length;
+  if (total > 0) {
+    return '$total comentários';
+  }
+
+  return 'Suas anotações pessoais';
 }

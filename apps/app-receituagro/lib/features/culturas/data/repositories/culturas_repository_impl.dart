@@ -7,6 +7,7 @@ import '../mappers/cultura_mapper.dart';
 
 /// Implementação do repositório de culturas
 /// Segue padrões Clean Architecture + Either pattern para error handling
+@LazySingleton(as: ICulturasRepository)
 class CulturasRepositoryImpl implements ICulturasRepository {
   final CulturaHiveRepository _hiveRepository;
 

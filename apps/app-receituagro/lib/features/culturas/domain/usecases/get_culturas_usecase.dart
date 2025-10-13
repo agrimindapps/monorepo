@@ -4,6 +4,7 @@ import '../repositories/i_culturas_repository.dart';
 
 /// Use case para buscar todas as culturas
 /// Implementa lógica de negócio específica para listagem de culturas
+@injectable
 class GetCulturasUseCase implements UseCase<List<CulturaEntity>, NoParams> {
   final ICulturasRepository repository;
 
@@ -16,6 +17,7 @@ class GetCulturasUseCase implements UseCase<List<CulturaEntity>, NoParams> {
 }
 
 /// Use case para buscar culturas por grupo
+@injectable
 class GetCulturasByGrupoUseCase implements UseCase<List<CulturaEntity>, String> {
   final ICulturasRepository repository;
 
@@ -28,6 +30,7 @@ class GetCulturasByGrupoUseCase implements UseCase<List<CulturaEntity>, String> 
 }
 
 /// Use case para pesquisar culturas
+@injectable
 class SearchCulturasUseCase implements UseCase<List<CulturaEntity>, String> {
   final ICulturasRepository repository;
 
@@ -43,6 +46,7 @@ class SearchCulturasUseCase implements UseCase<List<CulturaEntity>, String> {
 }
 
 /// Use case para buscar grupos de culturas
+@injectable
 class GetGruposCulturasUseCase implements UseCase<List<String>, NoParams> {
   final ICulturasRepository repository;
 

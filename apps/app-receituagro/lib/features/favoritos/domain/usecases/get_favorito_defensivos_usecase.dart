@@ -5,6 +5,7 @@ import '../repositories/i_favoritos_repository.dart';
 
 /// Use Case para obter lista de defensivos favoritos
 /// Segue padrão `Either<Failure, Success>` do core package
+@injectable
 class GetFavoritoDefensivosUseCase {
   final IFavoritosDefensivosRepository _repository;
 

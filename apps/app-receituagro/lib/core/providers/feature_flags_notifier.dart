@@ -70,9 +70,13 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
   Future<FeatureFlagsState> build() async {
     _remoteConfig = ReceitaAgroRemoteConfigService.instance;
     _premiumService = ReceitaAgroPremiumService.instance;
+
+    // Setup callback for premium status changes
+    _premiumService.onStateChanged = _onPremiumStatusChanged;
+
     ref.onDispose(() {
       _refreshTimer?.cancel();
-      _premiumService.removeListener(_onPremiumStatusChanged);
+      _premiumService.onStateChanged = null;
     });
 
     try {
@@ -83,7 +87,6 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
       }
       final initialCache = _calculateCommonFlags();
       _setupPeriodicRefresh();
-      _premiumService.addListener(_onPremiumStatusChanged);
 
       if (EnvironmentConfig.enableLogging) {
         developer.log(

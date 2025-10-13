@@ -2,199 +2,169 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/remote_config_service.dart';
 
-/// Provider for Remote Config state management
-/// Follows Provider pattern used throughout ReceitaAgro app
-class RemoteConfigProvider extends ChangeNotifier {
-  final ReceitaAgroRemoteConfigService _remoteConfigService;
-  
-  bool _isInitialized = false;
-  bool _isLoading = false;
-  String? _lastError;
-  DateTime? _lastUpdated;
+part 'remote_config_provider.g.dart';
+
+/// Remote Config State
+class RemoteConfigState {
+  final bool isInitialized;
+  final bool isLoading;
+  final String? lastError;
+  final DateTime? lastUpdated;
+  final Map<ReceitaAgroFeatureFlag, bool> featureFlags;
+  final Map<ReceitaAgroConfigKey, dynamic> configurations;
+
+  const RemoteConfigState({
+    this.isInitialized = false,
+    this.isLoading = false,
+    this.lastError,
+    this.lastUpdated,
+    this.featureFlags = const {},
+    this.configurations = const {},
+  });
+
+  RemoteConfigState copyWith({
+    bool? isInitialized,
+    bool? isLoading,
+    String? lastError,
+    DateTime? lastUpdated,
+    Map<ReceitaAgroFeatureFlag, bool>? featureFlags,
+    Map<ReceitaAgroConfigKey, dynamic>? configurations,
+  }) {
+    return RemoteConfigState(
+      isInitialized: isInitialized ?? this.isInitialized,
+      isLoading: isLoading ?? this.isLoading,
+      lastError: lastError ?? this.lastError,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      featureFlags: featureFlags ?? this.featureFlags,
+      configurations: configurations ?? this.configurations,
+    );
+  }
+}
+
+/// Remote Config Service Provider
+@riverpod
+ReceitaAgroRemoteConfigService remoteConfigService(RemoteConfigServiceRef ref) {
+  return ReceitaAgroRemoteConfigService.instance;
+}
+
+/// Remote Config Notifier
+@riverpod
+class RemoteConfigNotifier extends _$RemoteConfigNotifier {
   Timer? _refreshTimer;
-  final Map<ReceitaAgroFeatureFlag, bool> _featureFlags = {};
-  final Map<ReceitaAgroConfigKey, dynamic> _configurations = {};
 
-  RemoteConfigProvider({
-    ReceitaAgroRemoteConfigService? remoteConfigService,
-  }) : _remoteConfigService = remoteConfigService ?? ReceitaAgroRemoteConfigService.instance;
-  bool get isInitialized => _isInitialized;
-  bool get isLoading => _isLoading;
-  String? get lastError => _lastError;
-  DateTime? get lastUpdated => _lastUpdated;
+  @override
+  RemoteConfigState build() {
+    // Auto-initialize on first access
+    _initialize();
 
-  /// Initialize Remote Config Provider
-  Future<void> initialize() async {
-    if (_isInitialized) return;
+    // Cleanup timer on dispose
+    ref.onDispose(() {
+      _refreshTimer?.cancel();
+    });
 
-    _setLoading(true);
-    _clearError();
+    return const RemoteConfigState();
+  }
+
+  /// Initialize Remote Config
+  Future<void> _initialize() async {
+    if (state.isInitialized) return;
+
+    state = state.copyWith(isLoading: true, lastError: null);
 
     try {
-      await _remoteConfigService.initialize();
+      final service = ref.read(remoteConfigServiceProvider);
+      await service.initialize();
       await _loadAllValues();
       _setupAutoRefresh();
-      
-      _isInitialized = true;
-      _lastUpdated = DateTime.now();
+
+      state = state.copyWith(
+        isInitialized: true,
+        lastUpdated: DateTime.now(),
+        isLoading: false,
+      );
 
       if (EnvironmentConfig.enableLogging) {
         developer.log(
-          '✅ RemoteConfigProvider initialized successfully',
-          name: 'RemoteConfigProvider',
+          '✅ RemoteConfigNotifier initialized successfully',
+          name: 'RemoteConfigNotifier',
         );
       }
     } catch (e, stackTrace) {
-      _setError('Failed to initialize Remote Config: $e');
-      
+      state = state.copyWith(
+        lastError: 'Failed to initialize Remote Config: $e',
+        isLoading: false,
+      );
+
       if (EnvironmentConfig.enableAnalytics) {
+        // Analytics tracking if needed
       }
-      
+
       developer.log(
-        '❌ RemoteConfigProvider initialization failed: $e',
-        name: 'RemoteConfigProvider',
+        '❌ RemoteConfigNotifier initialization failed: $e',
+        name: 'RemoteConfigNotifier',
         error: e,
         stackTrace: stackTrace,
       );
-    } finally {
-      _setLoading(false);
     }
   }
 
   /// Refresh Remote Config values
   Future<void> refresh() async {
-    if (!_isInitialized) {
-      await initialize();
+    if (!state.isInitialized) {
+      await _initialize();
       return;
     }
 
-    _setLoading(true);
-    _clearError();
+    state = state.copyWith(isLoading: true, lastError: null);
 
     try {
-      final updated = await _remoteConfigService.fetchAndActivate();
-      
+      final service = ref.read(remoteConfigServiceProvider);
+      final updated = await service.fetchAndActivate();
+
       if (updated) {
         await _loadAllValues();
-        _lastUpdated = DateTime.now();
-        
+        state = state.copyWith(
+          lastUpdated: DateTime.now(),
+          isLoading: false,
+        );
+
         if (EnvironmentConfig.enableLogging) {
           developer.log(
             '🔄 Remote Config values refreshed',
-            name: 'RemoteConfigProvider',
+            name: 'RemoteConfigNotifier',
           );
         }
+      } else {
+        state = state.copyWith(isLoading: false);
       }
     } catch (e) {
-      _setError('Failed to refresh Remote Config: $e');
-      
+      state = state.copyWith(
+        lastError: 'Failed to refresh Remote Config: $e',
+        isLoading: false,
+      );
+
       developer.log(
-        '⚠️ RemoteConfigProvider refresh failed: $e',
-        name: 'RemoteConfigProvider',
+        '⚠️ RemoteConfigNotifier refresh failed: $e',
+        name: 'RemoteConfigNotifier',
         error: e,
       );
-    } finally {
-      _setLoading(false);
     }
   }
-
-  /// Check if a feature is enabled
-  bool isFeatureEnabled(ReceitaAgroFeatureFlag feature) {
-    if (!_isInitialized) {
-      return _featureFlags[feature] ?? _remoteConfigService.isFeatureEnabled(feature);
-    }
-    
-    return _featureFlags[feature] ?? false;
-  }
-
-  /// Get string configuration value
-  String getStringConfig(ReceitaAgroConfigKey key) {
-    if (!_isInitialized) {
-      return _remoteConfigService.getStringConfig(key);
-    }
-    
-    return _configurations[key]?.toString() ?? '';
-  }
-
-  /// Get int configuration value
-  int getIntConfig(ReceitaAgroConfigKey key) {
-    if (!_isInitialized) {
-      return _remoteConfigService.getIntConfig(key);
-    }
-    
-    final value = _configurations[key];
-    if (value is int) return value;
-    if (value is String) return int.tryParse(value) ?? 0;
-    return 0;
-  }
-
-  /// Get double configuration value
-  double getDoubleConfig(ReceitaAgroConfigKey key) {
-    if (!_isInitialized) {
-      return _remoteConfigService.getDoubleConfig(key);
-    }
-    
-    final value = _configurations[key];
-    if (value is double) return value;
-    if (value is String) return double.tryParse(value) ?? 0.0;
-    if (value is int) return value.toDouble();
-    return 0.0;
-  }
-
-  /// Get JSON configuration value
-  Map<String, dynamic> getJsonConfig(ReceitaAgroConfigKey key) {
-    if (!_isInitialized) {
-      return _remoteConfigService.getJsonConfig(key);
-    }
-    
-    final value = _configurations[key];
-    if (value is Map<String, dynamic>) return value;
-    return {};
-  }
-
-  /// Get supported languages
-  List<String> getSupportedLanguages() {
-    return _remoteConfigService.getSupportedLanguages();
-  }
-
-  /// Get theme configuration
-  Map<String, dynamic> getThemeConfiguration() {
-    return getJsonConfig(ReceitaAgroConfigKey.themeConfiguration);
-  }
-
-  /// Premium feature helpers
-  bool get isPremiumEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enablePremiumFeatures);
-  bool get isAdvancedDiagnosticsEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableAdvancedDiagnostics);
-  bool get isOfflineModeEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableOfflineMode);
-
-  /// Performance feature helpers
-  bool get isImageOptimizationEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableImageOptimization);
-  bool get isDataCachingEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableDataCaching);
-  bool get isPreloadContentEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enablePreloadContent);
-
-  /// Analytics feature helpers
-  bool get isDetailedAnalyticsEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableDetailedAnalytics);
-  bool get isPerformanceMonitoringEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enablePerformanceMonitoring);
-
-  /// Business logic helpers
-  bool get isSubscriptionValidationEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableSubscriptionValidation);
-  bool get isDeviceManagementEnabled => isFeatureEnabled(ReceitaAgroFeatureFlag.enableDeviceManagement);
-
-  /// Configuration helpers
-  int get maxDevicesPerSubscription => getIntConfig(ReceitaAgroConfigKey.maxDevicesPerSubscription);
-  int get subscriptionGracePeriodHours => getIntConfig(ReceitaAgroConfigKey.subscriptionGracePeriodHours);
-  double get imageQualityLevel => getDoubleConfig(ReceitaAgroConfigKey.imageQualityLevel);
-  int get maxCacheSize => getIntConfig(ReceitaAgroConfigKey.maxCacheSize);
 
   /// Load all values from Remote Config service
   Future<void> _loadAllValues() async {
+    final service = ref.read(remoteConfigServiceProvider);
+    final featureFlags = <ReceitaAgroFeatureFlag, bool>{};
+    final configurations = <ReceitaAgroConfigKey, dynamic>{};
+
     for (final feature in ReceitaAgroFeatureFlag.values) {
-      _featureFlags[feature] = _remoteConfigService.isFeatureEnabled(feature);
+      featureFlags[feature] = service.isFeatureEnabled(feature);
     }
+
     for (final config in ReceitaAgroConfigKey.values) {
       switch (config) {
         case ReceitaAgroConfigKey.maxDevicesPerSubscription:
@@ -205,24 +175,30 @@ class RemoteConfigProvider extends ChangeNotifier {
         case ReceitaAgroConfigKey.analyticsEventBatchSize:
         case ReceitaAgroConfigKey.analyticsFlushInterval:
         case ReceitaAgroConfigKey.onboardingStepsCount:
-          _configurations[config] = _remoteConfigService.getIntConfig(config);
+          configurations[config] = service.getIntConfig(config);
           break;
         case ReceitaAgroConfigKey.imageQualityLevel:
-          _configurations[config] = _remoteConfigService.getDoubleConfig(config);
+          configurations[config] = service.getDoubleConfig(config);
           break;
         case ReceitaAgroConfigKey.themeConfiguration:
-          _configurations[config] = _remoteConfigService.getJsonConfig(config);
+          configurations[config] = service.getJsonConfig(config);
           break;
         default:
-          _configurations[config] = _remoteConfigService.getStringConfig(config);
+          configurations[config] = service.getStringConfig(config);
           break;
       }
     }
+
+    state = state.copyWith(
+      featureFlags: featureFlags,
+      configurations: configurations,
+    );
   }
 
   /// Setup auto-refresh timer
   void _setupAutoRefresh() {
-    if (!EnvironmentConfig.isDebugMode && !isFeatureEnabled(ReceitaAgroFeatureFlag.enableDetailedAnalytics)) {
+    if (!EnvironmentConfig.isDebugMode &&
+        !state.featureFlags[ReceitaAgroFeatureFlag.enableDetailedAnalytics]!) {
       return;
     }
 
@@ -232,46 +208,173 @@ class RemoteConfigProvider extends ChangeNotifier {
       (_) => refresh(),
     );
   }
+}
 
-  /// Set loading state
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
-    }
+/// Feature Flag Providers (Derived state)
+@riverpod
+bool isFeatureEnabled(IsFeatureEnabledRef ref, ReceitaAgroFeatureFlag feature) {
+  final state = ref.watch(remoteConfigNotifierProvider);
+
+  if (!state.isInitialized) {
+    return ref.read(remoteConfigServiceProvider).isFeatureEnabled(feature);
   }
 
-  /// Set error state
-  void _setError(String error) {
-    _lastError = error;
-    notifyListeners();
+  return state.featureFlags[feature] ?? false;
+}
+
+/// Configuration Providers (Derived state)
+@riverpod
+String getStringConfig(GetStringConfigRef ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigNotifierProvider);
+
+  if (!state.isInitialized) {
+    return ref.read(remoteConfigServiceProvider).getStringConfig(key);
   }
 
-  /// Clear error state
-  void _clearError() {
-    if (_lastError != null) {
-      _lastError = null;
-      notifyListeners();
-    }
+  return state.configurations[key]?.toString() ?? '';
+}
+
+@riverpod
+int getIntConfig(GetIntConfigRef ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigNotifierProvider);
+
+  if (!state.isInitialized) {
+    return ref.read(remoteConfigServiceProvider).getIntConfig(key);
   }
 
-  /// Get debug information
-  Map<String, dynamic> getDebugInfo() {
-    if (!EnvironmentConfig.enableLogging) return {};
-    
-    return {
-      'isInitialized': _isInitialized,
-      'isLoading': _isLoading,
-      'lastError': _lastError,
-      'lastUpdated': _lastUpdated?.toIso8601String(),
-      'featureFlags': _featureFlags.map((key, value) => MapEntry(key.key, value)),
-      'configurations': _configurations.map((key, value) => MapEntry(key.key, value)),
-    };
+  final value = state.configurations[key];
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
+@riverpod
+double getDoubleConfig(GetDoubleConfigRef ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigNotifierProvider);
+
+  if (!state.isInitialized) {
+    return ref.read(remoteConfigServiceProvider).getDoubleConfig(key);
   }
 
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
+  final value = state.configurations[key];
+  if (value is double) return value;
+  if (value is String) return double.tryParse(value) ?? 0.0;
+  if (value is int) return value.toDouble();
+  return 0.0;
+}
+
+@riverpod
+Map<String, dynamic> getJsonConfig(GetJsonConfigRef ref, ReceitaAgroConfigKey key) {
+  final state = ref.watch(remoteConfigNotifierProvider);
+
+  if (!state.isInitialized) {
+    return ref.read(remoteConfigServiceProvider).getJsonConfig(key);
   }
+
+  final value = state.configurations[key];
+  if (value is Map<String, dynamic>) return value;
+  return {};
+}
+
+/// Helper Providers
+@riverpod
+List<String> supportedLanguages(SupportedLanguagesRef ref) {
+  return ref.read(remoteConfigServiceProvider).getSupportedLanguages();
+}
+
+@riverpod
+Map<String, dynamic> themeConfiguration(ThemeConfigurationRef ref) {
+  return ref.watch(getJsonConfigProvider(ReceitaAgroConfigKey.themeConfiguration));
+}
+
+/// Premium feature helpers
+@riverpod
+bool isPremiumEnabled(IsPremiumEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enablePremiumFeatures));
+}
+
+@riverpod
+bool isAdvancedDiagnosticsEnabled(IsAdvancedDiagnosticsEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableAdvancedDiagnostics));
+}
+
+@riverpod
+bool isOfflineModeEnabled(IsOfflineModeEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableOfflineMode));
+}
+
+/// Performance feature helpers
+@riverpod
+bool isImageOptimizationEnabled(IsImageOptimizationEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableImageOptimization));
+}
+
+@riverpod
+bool isDataCachingEnabled(IsDataCachingEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableDataCaching));
+}
+
+@riverpod
+bool isPreloadContentEnabled(IsPreloadContentEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enablePreloadContent));
+}
+
+/// Analytics feature helpers
+@riverpod
+bool isDetailedAnalyticsEnabled(IsDetailedAnalyticsEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableDetailedAnalytics));
+}
+
+@riverpod
+bool isPerformanceMonitoringEnabled(IsPerformanceMonitoringEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enablePerformanceMonitoring));
+}
+
+/// Business logic helpers
+@riverpod
+bool isSubscriptionValidationEnabled(IsSubscriptionValidationEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableSubscriptionValidation));
+}
+
+@riverpod
+bool isDeviceManagementEnabled(IsDeviceManagementEnabledRef ref) {
+  return ref.watch(isFeatureEnabledProvider(ReceitaAgroFeatureFlag.enableDeviceManagement));
+}
+
+/// Configuration helpers
+@riverpod
+int maxDevicesPerSubscription(MaxDevicesPerSubscriptionRef ref) {
+  return ref.watch(getIntConfigProvider(ReceitaAgroConfigKey.maxDevicesPerSubscription));
+}
+
+@riverpod
+int subscriptionGracePeriodHours(SubscriptionGracePeriodHoursRef ref) {
+  return ref.watch(getIntConfigProvider(ReceitaAgroConfigKey.subscriptionGracePeriodHours));
+}
+
+@riverpod
+double imageQualityLevel(ImageQualityLevelRef ref) {
+  return ref.watch(getDoubleConfigProvider(ReceitaAgroConfigKey.imageQualityLevel));
+}
+
+@riverpod
+int maxCacheSize(MaxCacheSizeRef ref) {
+  return ref.watch(getIntConfigProvider(ReceitaAgroConfigKey.maxCacheSize));
+}
+
+/// Debug information provider
+@riverpod
+Map<String, dynamic> remoteConfigDebugInfo(RemoteConfigDebugInfoRef ref) {
+  if (!EnvironmentConfig.enableLogging) return {};
+
+  final state = ref.watch(remoteConfigNotifierProvider);
+
+  return {
+    'isInitialized': state.isInitialized,
+    'isLoading': state.isLoading,
+    'lastError': state.lastError,
+    'lastUpdated': state.lastUpdated?.toIso8601String(),
+    'featureFlags': state.featureFlags.map((key, value) => MapEntry(key.key, value)),
+    'configurations': state.configurations.map((key, value) => MapEntry(key.key, value)),
+  };
 }

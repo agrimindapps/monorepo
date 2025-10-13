@@ -7,6 +7,7 @@ import '../../domain/repositories/profile_repository.dart';
 
 /// Implementação do ProfileRepository para ReceitaAgro
 /// Utiliza o ProfileImageService do core package
+/// NOTE: Cannot use @injectable due to function type dependency
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileImageService _profileImageService;
   final ReceitaAgroAuthState? Function() _getAuthState;

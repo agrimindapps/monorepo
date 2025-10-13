@@ -85,8 +85,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   late final ComentariosService _comentariosService;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
-  StreamSubscription<bool>? _premiumStatusSubscription;
-
   @override
   Future<DetalheDefensivoState> build() async {
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
@@ -338,18 +336,14 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
-    _premiumStatusSubscription?.cancel();
-    _premiumStatusSubscription = PremiumStatusNotifier
-        .instance
-        .premiumStatusStream
-        .listen((isPremiumStatus) {
-          final currentState = state.value;
-          if (currentState != null) {
-            state = AsyncValue.data(
-              currentState.copyWith(isPremium: isPremiumStatus),
-            );
-          }
-        });
+    ref.listen(premiumStatusNotifierProvider, (previous, next) {
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(
+          currentState.copyWith(isPremium: next.isPremium),
+        );
+      }
+    });
   }
 
   /// Clear error
@@ -369,9 +363,4 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   bool isValidContent(String content) =>
       _comentariosService.isValidContent(content);
-
-  /// Dispose
-  void disposeNotifier() {
-    _premiumStatusSubscription?.cancel();
-  }
 }

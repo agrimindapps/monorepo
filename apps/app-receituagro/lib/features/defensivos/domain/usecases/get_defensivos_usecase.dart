@@ -3,6 +3,7 @@ import '../entities/defensivo_entity.dart';
 import '../repositories/i_defensivos_repository.dart';
 
 /// Use case para buscar todos os defensivos
+@injectable
 class GetDefensivosUseCase implements UseCase<List<DefensivoEntity>, NoParams> {
   final IDefensivosRepository repository;
 
@@ -15,6 +16,7 @@ class GetDefensivosUseCase implements UseCase<List<DefensivoEntity>, NoParams> {
 }
 
 /// Use case para buscar defensivos por classe
+@injectable
 class GetDefensivosByClasseUseCase implements UseCase<List<DefensivoEntity>, String> {
   final IDefensivosRepository repository;
 
@@ -27,6 +29,7 @@ class GetDefensivosByClasseUseCase implements UseCase<List<DefensivoEntity>, Str
 }
 
 /// Use case para pesquisar defensivos
+@injectable
 class SearchDefensivosUseCase implements UseCase<List<DefensivoEntity>, String> {
   final IDefensivosRepository repository;
 
@@ -42,6 +45,7 @@ class SearchDefensivosUseCase implements UseCase<List<DefensivoEntity>, String> 
 }
 
 /// Use case para buscar defensivos recentes
+@injectable
 class GetDefensivosRecentesUseCase implements UseCase<List<DefensivoEntity>, int?> {
   final IDefensivosRepository repository;
 
@@ -54,6 +58,7 @@ class GetDefensivosRecentesUseCase implements UseCase<List<DefensivoEntity>, int
 }
 
 /// Use case para buscar estatísticas dos defensivos
+@injectable
 class GetDefensivosStatsUseCase implements UseCase<Map<String, int>, NoParams> {
   final IDefensivosRepository repository;
 
@@ -66,6 +71,7 @@ class GetDefensivosStatsUseCase implements UseCase<Map<String, int>, NoParams> {
 }
 
 /// Use case para buscar classes agronômicas
+@injectable
 class GetClassesAgronomicasUseCase implements UseCase<List<String>, NoParams> {
   final IDefensivosRepository repository;
 
@@ -78,6 +84,7 @@ class GetClassesAgronomicasUseCase implements UseCase<List<String>, NoParams> {
 }
 
 /// Use case para buscar fabricantes
+@injectable
 class GetFabricantesUseCase implements UseCase<List<String>, NoParams> {
   final IDefensivosRepository repository;
 

@@ -7,6 +7,7 @@ import '../../domain/repositories/i_comentarios_repository.dart';
 
 /// Implementation of IComentariosRepository using Hive local storage.
 /// This is the data layer implementation that handles actual data persistence.
+@LazySingleton(as: IComentariosRepository)
 class ComentariosRepositoryImpl implements IComentariosRepository {
   final ComentariosHiveRepository _hiveRepository;
 

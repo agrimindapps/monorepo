@@ -95,19 +95,12 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IPremiumService _premiumService;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
-  StreamSubscription<bool>? _premiumStatusSubscription;
-
   @override
   Future<DetalheDiagnosticoState> build() async {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
     _hiveRepository = di.sl<DiagnosticoHiveRepository>();
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
     _premiumService = di.sl<IPremiumService>();
-
-    // Gerenciar lifecycle do subscription
-    ref.onDispose(() {
-      _premiumStatusSubscription?.cancel();
-    });
 
     // Setup listener APÓS o estado inicial ser retornado
     Future.microtask(() => _setupPremiumStatusListener());
@@ -232,18 +225,14 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
-    _premiumStatusSubscription?.cancel();
-    _premiumStatusSubscription = PremiumStatusNotifier
-        .instance
-        .premiumStatusStream
-        .listen((isPremium) {
-          // Usar whenData para garantir que o estado está pronto
-          state.whenData((currentState) {
-            state = AsyncValue.data(
-              currentState.copyWith(isPremium: isPremium),
-            );
-          });
-        });
+    ref.listen(premiumStatusNotifierProvider, (previous, next) {
+      // Usar whenData para garantir que o estado está pronto
+      state.whenData((currentState) {
+        state = AsyncValue.data(
+          currentState.copyWith(isPremium: next.isPremium),
+        );
+      });
+    });
   }
 
   /// Load favorito state
@@ -435,10 +424,5 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(currentState.clearError());
-  }
-
-  /// Dispose
-  void disposeNotifier() {
-    _premiumStatusSubscription?.cancel();
   }
 }

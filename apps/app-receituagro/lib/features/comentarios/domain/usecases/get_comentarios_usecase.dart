@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 import '../entities/comentario_entity.dart';
 import '../repositories/i_comentarios_repository.dart';
 
@@ -33,11 +35,12 @@ import '../repositories/i_comentarios_repository.dart';
 /// - **Global View**: All user comments across all agricultural content
 /// 
 /// ## Performance Considerations:
-/// 
+///
 /// - Sorting performed in memory after database retrieval
 /// - Search relevance calculated on-demand for flexibility
 /// - Repository layer handles database-specific optimizations
 /// - Consistent sorting prevents UI flickering and confusion
+@injectable
 class GetComentariosUseCase {
   final IComentariosRepository _repository;
 

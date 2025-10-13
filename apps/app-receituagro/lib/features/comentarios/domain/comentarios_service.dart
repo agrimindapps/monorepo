@@ -1,12 +1,14 @@
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/interfaces/i_premium_service.dart';
 import '../../../features/comentarios/data/comentario_model.dart';
 import '../constants/comentarios_design_tokens.dart';
 import '../domain/entities/comentario_sync_entity.dart';
+
+part 'comentarios_service.g.dart';
 
 abstract class IComentariosRepository {
   Future<List<ComentarioModel>> getAllComentarios();
@@ -15,15 +17,17 @@ abstract class IComentariosRepository {
   Future<void> deleteComentario(String id);
 }
 
-class ComentariosService extends ChangeNotifier {
+/// Comentarios Service - Business Logic Layer
+/// Does not manage state (no ChangeNotifier/Riverpod), just business operations
+class ComentariosService {
   final IComentariosRepository? _repository;
   final IPremiumService? _premiumService;
 
   ComentariosService({
     IComentariosRepository? repository,
     IPremiumService? premiumService,
-  }) : _repository = repository,
-       _premiumService = premiumService;
+  })  : _repository = repository,
+        _premiumService = premiumService;
 
   Future<List<ComentarioModel>> getAllComentarios({String? pkIdentificador}) async {
     try {
@@ -34,7 +38,7 @@ class ComentariosService extends ChangeNotifier {
             .where((element) => element.pkIdentificador == pkIdentificador)
             .toList();
       }
-      
+
       return comentarios;
     } catch (e) {
       debugPrint('Error getting comentarios: $e');
@@ -77,17 +81,19 @@ class ComentariosService extends ChangeNotifier {
       await _repository?.deleteComentario(id);
       print('✅ COMENTARIO_SERVICE: Comentário removido localmente com sucesso');
       print('🔄 COMENTARIO_SERVICE: Iniciando sincronização de deleção...');
-      await _queueSyncOperation('delete', ComentarioModel(
-        id: id,
-        idReg: '',
-        titulo: '',
-        conteudo: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        ferramenta: '',
-        pkIdentificador: '',
-        status: false,
-      ));
+      await _queueSyncOperation(
+          'delete',
+          ComentarioModel(
+            id: id,
+            idReg: '',
+            titulo: '',
+            conteudo: '',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            ferramenta: '',
+            pkIdentificador: '',
+            status: false,
+          ));
     } catch (e) {
       print('❌ COMENTARIO_SERVICE: Error deleting comentario: $e');
       rethrow;
@@ -110,14 +116,14 @@ class ComentariosService extends ChangeNotifier {
 
         if (!contentMatch && !toolMatch) return false;
       }
-      if (pkIdentificador != null && 
-          pkIdentificador.isNotEmpty && 
+      if (pkIdentificador != null &&
+          pkIdentificador.isNotEmpty &&
           comentario.pkIdentificador != pkIdentificador) {
         return false;
       }
 
-      if (ferramenta != null && 
-          ferramenta.isNotEmpty && 
+      if (ferramenta != null &&
+          ferramenta.isNotEmpty &&
           comentario.ferramenta != ferramenta) {
         return false;
       }
@@ -185,7 +191,7 @@ class ComentariosService extends ChangeNotifier {
         print('❌ COMENTARIO_SERVICE: ID do comentário inválido - pulando sincronização');
         return;
       }
-      
+
       print('📄 COMENTARIO_SERVICE: Dados do comentário válidos - id=${comentario.id}, titulo="${comentario.titulo}", ferramenta=${comentario.ferramenta}');
       print('🔄 COMENTARIO_SERVICE: Criando entidade de sincronização...');
       final syncEntity = ComentarioSyncEntity(
@@ -204,7 +210,8 @@ class ComentariosService extends ChangeNotifier {
       print('🚀 COMENTARIO_SERVICE: Executando operação de sync - $operation');
       if (operation == 'create') {
         print('🆕 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.create<ComentarioSyncEntity>()...');
-        final result = await core.UnifiedSyncManager.instance.create<ComentarioSyncEntity>('receituagro', syncEntity);
+        final result =
+            await core.UnifiedSyncManager.instance.create<ComentarioSyncEntity>('receituagro', syncEntity);
         result.fold(
           (core.Failure failure) {
             print('❌ COMENTARIO_SERVICE: Erro na sincronização de comentário (create): ${failure.message}');
@@ -215,7 +222,8 @@ class ComentariosService extends ChangeNotifier {
         );
       } else if (operation == 'delete') {
         print('🗜 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.delete<ComentarioSyncEntity>()...');
-        final result = await core.UnifiedSyncManager.instance.delete<ComentarioSyncEntity>('receituagro', syncEntity.id);
+        final result =
+            await core.UnifiedSyncManager.instance.delete<ComentarioSyncEntity>('receituagro', syncEntity.id);
         result.fold(
           (core.Failure failure) {
             print('❌ COMENTARIO_SERVICE: Erro na sincronização de comentário (delete): ${failure.message}');
@@ -226,7 +234,8 @@ class ComentariosService extends ChangeNotifier {
         );
       } else {
         print('🔄 COMENTARIO_SERVICE: Chamando UnifiedSyncManager.update<ComentarioSyncEntity>()...');
-        final result = await core.UnifiedSyncManager.instance.update<ComentarioSyncEntity>('receituagro', syncEntity.id, syncEntity);
+        final result = await core.UnifiedSyncManager.instance
+            .update<ComentarioSyncEntity>('receituagro', syncEntity.id, syncEntity);
         result.fold(
           (core.Failure failure) {
             print('❌ COMENTARIO_SERVICE: Erro na sincronização de comentário (update): ${failure.message}');
@@ -236,11 +245,21 @@ class ComentariosService extends ChangeNotifier {
           },
         );
       }
-      
+
       print('✨ COMENTARIO_SERVICE: Operação de sync $operation finalizada para comentario_id=${comentario.id}');
-      
     } catch (e) {
       print('❌ COMENTARIO_SERVICE: Erro ao sincronizar comentário: $e');
     }
   }
+}
+
+/// Riverpod Provider for ComentariosService
+/// Note: Dependencies will be injected later when we migrate premium services
+@riverpod
+ComentariosService comentariosService(ComentariosServiceRef ref) {
+  // TODO: Inject repository and premium service once migrated
+  return ComentariosService(
+    repository: null, // Will be injected via DI
+    premiumService: null, // Will be injected after premium migration
+  );
 }

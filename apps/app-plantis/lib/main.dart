@@ -65,27 +65,25 @@ void main() async {
   await _initializeFirebaseServices();
   final prefs = await SharedPreferences.getInstance();
   if (EnvironmentConfig.enableAnalytics) {
-    unawaited(
-      runZonedGuarded<Future<void>>(
-        () async {
-          await _performanceRepository.markFirstFrame();
-          runApp(
-            ProviderScope(
-              overrides: [
-                plantisSharedPreferencesProvider.overrideWithValue(prefs),
-              ],
-              child: const PlantisApp(),
-            ),
-          );
-        },
-        (error, stack) {
-          _crashlyticsRepository.recordError(
-            exception: error,
-            stackTrace: stack,
-            fatal: true,
-          );
-        },
-      ),
+    runZonedGuarded<Future<void>>(
+      () async {
+        await _performanceRepository.markFirstFrame();
+        runApp(
+          ProviderScope(
+            overrides: [
+              plantisSharedPreferencesProvider.overrideWithValue(prefs),
+            ],
+            child: const PlantisApp(),
+          ),
+        );
+      },
+      (error, stack) {
+        _crashlyticsRepository.recordError(
+          exception: error,
+          stackTrace: stack,
+          fatal: true,
+        );
+      },
     );
   } else {
     await _performanceRepository.markFirstFrame();

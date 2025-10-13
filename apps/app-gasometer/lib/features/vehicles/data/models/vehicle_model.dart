@@ -252,39 +252,26 @@ class VehicleModel extends BaseSyncModel {
   @HiveField(22)
   final String? foto;
 
-  DateTime? _cachedCreatedAt;
-  DateTime? _cachedUpdatedAt;
-  DateTime? _cachedLastSyncAt;
-
   @override
   String get collectionName => 'vehicles';
 
-  /// Lazy-loaded createdAt com cache
+  /// Compute createdAt from milliseconds
   @override
-  DateTime? get createdAt {
-    _cachedCreatedAt ??= createdAtMs != null
-        ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!)
-        : null;
-    return _cachedCreatedAt;
-  }
+  DateTime? get createdAt => createdAtMs != null
+      ? DateTime.fromMillisecondsSinceEpoch(createdAtMs!)
+      : null;
 
-  /// Lazy-loaded updatedAt com cache
+  /// Compute updatedAt from milliseconds
   @override
-  DateTime? get updatedAt {
-    _cachedUpdatedAt ??= updatedAtMs != null
-        ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!)
-        : null;
-    return _cachedUpdatedAt;
-  }
+  DateTime? get updatedAt => updatedAtMs != null
+      ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs!)
+      : null;
 
-  /// Lazy-loaded lastSyncAt com cache
+  /// Compute lastSyncAt from milliseconds
   @override
-  DateTime? get lastSyncAt {
-    _cachedLastSyncAt ??= lastSyncAtMs != null
-        ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
-        : null;
-    return _cachedLastSyncAt;
-  }
+  DateTime? get lastSyncAt => lastSyncAtMs != null
+      ? DateTime.fromMillisecondsSinceEpoch(lastSyncAtMs!)
+      : null;
 
   /// Convert to Hive map
   @override

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/colors.dart';
 
 class PlantsErrorWidget extends StatelessWidget {
   final String error;

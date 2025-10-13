@@ -11,10 +11,11 @@ import '../../../features/plants/domain/repositories/spaces_repository.dart';
 /// Implementação do serviço de sincronização para o Plantis
 /// Implementa ISyncService para integrar com o sistema de sync do core
 class PlantisSyncService implements ISyncService {
-  final PlantsRepository _plantsRepository;
-  final SpacesRepository _spacesRepository;
-  final PlantTasksRepository _plantTasksRepository;
-  final PlantCommentsRepository _plantCommentsRepository;
+  // TODO: Remove if confirmed unused - repositories not currently used in sync methods
+  // final PlantsRepository _plantsRepository;
+  // final SpacesRepository _spacesRepository;
+  // final PlantTasksRepository _plantTasksRepository;
+  // final PlantCommentsRepository _plantCommentsRepository;
 
   final _statusController = StreamController<SyncServiceStatus>.broadcast();
   final _progressController = StreamController<ServiceProgress>.broadcast();
@@ -28,10 +29,7 @@ class PlantisSyncService implements ISyncService {
     required SpacesRepository spacesRepository,
     required PlantTasksRepository plantTasksRepository,
     required PlantCommentsRepository plantCommentsRepository,
-  }) : _plantsRepository = plantsRepository,
-       _spacesRepository = spacesRepository,
-       _plantTasksRepository = plantTasksRepository,
-       _plantCommentsRepository = plantCommentsRepository;
+  }); // TODO: Initialize fields when repositories are used in sync methods
 
   @override
   String get serviceId => 'plantis';
@@ -83,7 +81,6 @@ class PlantisSyncService implements ISyncService {
       return Left(ServerFailure('Service not ready for sync'));
     }
 
-    final startTime = DateTime.now();
     _updateStatus(SyncServiceStatus.syncing);
 
     try {
@@ -168,7 +165,6 @@ class PlantisSyncService implements ISyncService {
         ),
       );
 
-      final duration = DateTime.now().difference(startTime);
       _updateStatus(SyncServiceStatus.completed);
 
       return Right(
@@ -176,11 +172,10 @@ class PlantisSyncService implements ISyncService {
           success: totalFailed == 0,
           itemsSynced: totalSynced,
           itemsFailed: totalFailed,
-          duration: duration,
+          duration: Duration.zero,
         ),
       );
     } catch (e) {
-      final duration = DateTime.now().difference(startTime);
       _updateStatus(SyncServiceStatus.failed);
 
       return Left(ServerFailure('Sync failed: $e'));
@@ -281,7 +276,7 @@ class PlantisSyncService implements ISyncService {
   }
 
   /// Método legado para compatibilidade - será removido em versões futuras
-  void startConnectivityMonitoring(Stream connectivityStream) {
+  void startConnectivityMonitoring(Stream<dynamic> connectivityStream) {
     _connectivitySubscription?.cancel();
     _connectivitySubscription = connectivityStream.listen((event) {
       // Implementar lógica de monitoramento de conectividade se necessário

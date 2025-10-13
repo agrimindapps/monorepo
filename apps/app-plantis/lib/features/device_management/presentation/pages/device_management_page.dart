@@ -387,14 +387,13 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
     final result = await notifier.validateCurrentDevice();
 
     if (result != null && !result.isValid) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message ?? 'Falha na validação'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message ?? 'Falha na validação'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:injectable/injectable.dart';
 
 /// Sistema centralizado de feedback visual para operações async
 /// Trabalha em conjunto com ContextualLoadingManager para feedback completo
-class FeedbackSystem {
-  static final Map<String, FeedbackController> _activeControllers = {};
-  static final List<VoidCallback> _listeners = [];
+@lazySingleton
+class FeedbackService {
+  final Map<String, FeedbackController> _activeControllers = {};
+  final List<VoidCallback> _listeners = [];
 
   /// Mostra feedback de sucesso com animação
-  static void showSuccess({
+  void showSuccess({
     required BuildContext context,
     required String message,
     String? semanticLabel,
@@ -37,7 +39,7 @@ class FeedbackSystem {
   }
 
   /// Mostra feedback de erro com opções de recovery
-  static void showError({
+  void showError({
     required BuildContext context,
     required String message,
     String? semanticLabel,
@@ -69,7 +71,7 @@ class FeedbackSystem {
   }
 
   /// Mostra feedback de progresso com barra ou porcentagem
-  static FeedbackController showProgress({
+  FeedbackController showProgress({
     required BuildContext context,
     required String message,
     String? semanticLabel,
@@ -96,7 +98,7 @@ class FeedbackSystem {
   }
 
   /// Atualiza progresso de um feedback ativo
-  static void updateProgress(
+  void updateProgress(
     String key, {
     required double progress,
     String? message,
@@ -108,7 +110,7 @@ class FeedbackSystem {
   }
 
   /// Completa progresso com sucesso
-  static void completeProgress(
+  void completeProgress(
     String key, {
     String? successMessage,
     bool includeHaptic = true,
@@ -123,7 +125,7 @@ class FeedbackSystem {
   }
 
   /// Falha progresso com erro
-  static void failProgress(
+  void failProgress(
     String key, {
     String? errorMessage,
     bool includeHaptic = true,
@@ -138,7 +140,7 @@ class FeedbackSystem {
   }
 
   /// Remove feedback específico
-  static void dismiss(String key) {
+  void dismiss(String key) {
     final controller = _activeControllers[key];
     if (controller != null) {
       controller.dismiss();
@@ -148,7 +150,7 @@ class FeedbackSystem {
   }
 
   /// Remove todos os feedbacks
-  static void dismissAll() {
+  void dismissAll() {
     for (final controller in _activeControllers.values) {
       controller.dismiss();
     }
@@ -156,7 +158,7 @@ class FeedbackSystem {
     _notifyListeners();
   }
 
-  static void _showFeedback(
+  void _showFeedback(
     BuildContext context,
     FeedbackController controller,
   ) {
@@ -178,27 +180,27 @@ class FeedbackSystem {
   }
 
   /// Adiciona listener para mudanças
-  static void addListener(VoidCallback listener) {
+  void addListener(VoidCallback listener) {
     _listeners.add(listener);
   }
 
   /// Remove listener
-  static void removeListener(VoidCallback listener) {
+  void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
   }
 
-  static void _notifyListeners() {
+  void _notifyListeners() {
     for (final listener in _listeners) {
       listener();
     }
   }
 
   /// Obtém feedbacks ativos
-  static Map<String, FeedbackController> get activeFeedbacks =>
+  Map<String, FeedbackController> get activeFeedbacks =>
       Map.unmodifiable(_activeControllers);
 
   /// Limpa recursos
-  static void dispose() {
+  void dispose() {
     for (final controller in _activeControllers.values) {
       controller.dispose();
     }
@@ -286,6 +288,7 @@ class FeedbackController extends ChangeNotifier {
 
 /// Widget que escuta e exibe feedbacks
 class FeedbackListener extends StatefulWidget {
+  final FeedbackService feedbackService;
   final Widget child;
   final bool showOverlay;
   final Alignment alignment;
@@ -293,6 +296,7 @@ class FeedbackListener extends StatefulWidget {
 
   const FeedbackListener({
     super.key,
+    required this.feedbackService,
     required this.child,
     this.showOverlay = true,
     this.alignment = Alignment.topCenter,
@@ -307,12 +311,12 @@ class _FeedbackListenerState extends State<FeedbackListener> {
   @override
   void initState() {
     super.initState();
-    FeedbackSystem.addListener(_onFeedbackChanged);
+    widget.feedbackService.addListener(_onFeedbackChanged);
   }
 
   @override
   void dispose() {
-    FeedbackSystem.removeListener(_onFeedbackChanged);
+    widget.feedbackService.removeListener(_onFeedbackChanged);
     super.dispose();
   }
 
@@ -331,7 +335,7 @@ class _FeedbackListenerState extends State<FeedbackListener> {
     return Stack(
       children: [
         widget.child,
-        ...FeedbackSystem.activeFeedbacks.entries.map(
+        ...widget.feedbackService.activeFeedbacks.entries.map(
           (entry) => Positioned.fill(
             child: Align(
               alignment: widget.alignment,
@@ -339,7 +343,7 @@ class _FeedbackListenerState extends State<FeedbackListener> {
                 padding: widget.padding,
                 child: FeedbackWidget(
                   controller: entry.value,
-                  onDismiss: () => FeedbackSystem.dismiss(entry.key),
+                  onDismiss: () => widget.feedbackService.dismiss(entry.key),
                 ),
               ),
             ),

@@ -1,15 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:injectable/injectable.dart';
 
+import '../../../core/di/injection.dart';
 import 'animated_feedback.dart';
 import 'haptic_service.dart';
 
-/// Sistema de confirmação com feedback visual e háptico
+/// Serviço de confirmação com feedback visual e háptico
 /// Para ações críticas que precisam de confirmação do usuário
-class ConfirmationSystem {
+@injectable
+class ConfirmationService {
+  final HapticService _hapticService;
+
+  ConfirmationService(this._hapticService);
+
   /// Mostra dialog de confirmação simples
-  static Future<bool> showConfirmation({
+  Future<bool> showConfirmation({
     required BuildContext context,
     required String title,
     required String message,
@@ -20,9 +27,10 @@ class ConfirmationSystem {
     bool includeHaptic = true,
   }) async {
     if (includeHaptic) {
-      await HapticService.medium();
+      await _hapticService.medium();
     }
 
+    if (!context.mounted) return false;
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -41,7 +49,7 @@ class ConfirmationSystem {
   }
 
   /// Mostra dialog de confirmação destrutiva (deletar, etc.)
-  static Future<bool> showDestructiveConfirmation({
+  Future<bool> showDestructiveConfirmation({
     required BuildContext context,
     required String title,
     required String message,
@@ -52,9 +60,10 @@ class ConfirmationSystem {
     bool includeHaptic = true,
   }) async {
     if (includeHaptic) {
-      await HapticService.heavy();
+      await _hapticService.heavy();
     }
 
+    if (!context.mounted) return false;
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -73,7 +82,7 @@ class ConfirmationSystem {
   }
 
   /// Mostra dialog de confirmação com input
-  static Future<String?> showInputConfirmation({
+  Future<String?> showInputConfirmation({
     required BuildContext context,
     required String title,
     required String message,
@@ -87,9 +96,10 @@ class ConfirmationSystem {
     bool includeHaptic = true,
   }) async {
     if (includeHaptic) {
-      await HapticService.medium();
+      await _hapticService.medium();
     }
 
+    if (!context.mounted) return null;
     final result = await showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -111,7 +121,7 @@ class ConfirmationSystem {
   }
 
   /// Mostra dialog de confirmação com checklist
-  static Future<List<String>?> showChecklistConfirmation({
+  Future<List<String>?> showChecklistConfirmation({
     required BuildContext context,
     required String title,
     required String message,
@@ -123,9 +133,10 @@ class ConfirmationSystem {
     bool includeHaptic = true,
   }) async {
     if (includeHaptic) {
-      await HapticService.medium();
+      await _hapticService.medium();
     }
 
+    if (!context.mounted) return null;
     final result = await showDialog<List<String>>(
       context: context,
       barrierDismissible: false,
@@ -145,7 +156,7 @@ class ConfirmationSystem {
   }
 
   /// Mostra bottom sheet de confirmação
-  static Future<bool> showBottomSheetConfirmation({
+  Future<bool> showBottomSheetConfirmation({
     required BuildContext context,
     required String title,
     required String message,
@@ -156,9 +167,10 @@ class ConfirmationSystem {
     bool includeHaptic = true,
   }) async {
     if (includeHaptic) {
-      await HapticService.light();
+      await _hapticService.light();
     }
 
+    if (!context.mounted) return false;
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -268,7 +280,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
               actions: [
                 TextButton(
                   onPressed: () {
-                    HapticService.light();
+                    getIt<HapticService>().light();
                     Navigator.of(context).pop(false);
                   },
                   style: TextButton.styleFrom(
@@ -278,7 +290,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    HapticService.selection();
+                    getIt<HapticService>().selection();
                     Navigator.of(context).pop(true);
                   },
                   style: ElevatedButton.styleFrom(
@@ -390,14 +402,14 @@ class _DestructiveConfirmationDialogState
       setState(() {
         _firstConfirmation = true;
       });
-      HapticService.warning();
+      getIt<HapticService>().warning();
       _shakeController.forward().then((_) {
         _shakeController.reset();
       });
       return;
     }
 
-    HapticService.heavy();
+    getIt<HapticService>().heavy();
     Navigator.of(context).pop(true);
   }
 
@@ -468,7 +480,7 @@ class _DestructiveConfirmationDialogState
         actions: [
           TextButton(
             onPressed: () {
-              HapticService.light();
+              getIt<HapticService>().light();
               Navigator.of(context).pop(false);
             },
             style: TextButton.styleFrom(
@@ -548,10 +560,10 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
 
   void _handleConfirm() {
     if (_formKey.currentState?.validate() ?? false) {
-      HapticService.selection();
+      getIt<HapticService>().selection();
       Navigator.of(context).pop(_controller.text.trim());
     } else {
-      HapticService.warning();
+      getIt<HapticService>().warning();
     }
   }
 
@@ -617,7 +629,7 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            HapticService.light();
+            getIt<HapticService>().light();
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -683,7 +695,7 @@ class _ChecklistConfirmationDialogState
 
   void _handleConfirm() {
     if (_canConfirm) {
-      HapticService.selection();
+      getIt<HapticService>().selection();
       final selectedItems = <String>[];
       for (int i = 0; i < widget.items.length; i++) {
         if (_checkedItems[i]) {
@@ -692,7 +704,7 @@ class _ChecklistConfirmationDialogState
       }
       Navigator.of(context).pop(selectedItems);
     } else {
-      HapticService.warning();
+      getIt<HapticService>().warning();
     }
   }
 
@@ -744,7 +756,7 @@ class _ChecklistConfirmationDialogState
                   setState(() {
                     _checkedItems[index] = value ?? false;
                   });
-                  HapticService.selection();
+                  getIt<HapticService>().selection();
                 },
                 title: Text(item.title),
                 subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
@@ -758,7 +770,7 @@ class _ChecklistConfirmationDialogState
       actions: [
         TextButton(
           onPressed: () {
-            HapticService.light();
+            getIt<HapticService>().light();
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -862,7 +874,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      HapticService.light();
+                      getIt<HapticService>().light();
                       Navigator.of(context).pop(false);
                     },
                     style: OutlinedButton.styleFrom(
@@ -877,7 +889,7 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      HapticService.selection();
+                      getIt<HapticService>().selection();
                       Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(
@@ -955,7 +967,7 @@ class ConfirmationColors {
 /// Contextos pré-definidos para confirmações
 class ConfirmationContexts {
   static Future<bool> deletePlant(BuildContext context, String plantName) {
-    return ConfirmationSystem.showDestructiveConfirmation(
+    return getIt<ConfirmationService>().showDestructiveConfirmation(
       context: context,
       title: 'Deletar planta',
       message:
@@ -967,7 +979,7 @@ class ConfirmationContexts {
     );
   }
   static Future<bool> deleteTask(BuildContext context, String taskName) {
-    return ConfirmationSystem.showConfirmation(
+    return getIt<ConfirmationService>().showConfirmation(
       context: context,
       title: 'Deletar tarefa',
       message: 'Deseja remover a tarefa "$taskName"?',
@@ -977,7 +989,7 @@ class ConfirmationContexts {
     );
   }
   static Future<bool> logout(BuildContext context) {
-    return ConfirmationSystem.showBottomSheetConfirmation(
+    return getIt<ConfirmationService>().showBottomSheetConfirmation(
       context: context,
       title: 'Fazer logout',
       message:
@@ -989,7 +1001,7 @@ class ConfirmationContexts {
     );
   }
   static Future<bool> resetData(BuildContext context) {
-    return ConfirmationSystem.showDestructiveConfirmation(
+    return getIt<ConfirmationService>().showDestructiveConfirmation(
       context: context,
       title: 'Resetar dados',
       message:
@@ -1001,7 +1013,7 @@ class ConfirmationContexts {
     );
   }
   static Future<bool> cancelPremium(BuildContext context) {
-    return ConfirmationSystem.showConfirmation(
+    return getIt<ConfirmationService>().showConfirmation(
       context: context,
       title: 'Cancelar Premium',
       message:
@@ -1013,7 +1025,7 @@ class ConfirmationContexts {
     );
   }
   static Future<bool> restoreBackup(BuildContext context) {
-    return ConfirmationSystem.showConfirmation(
+    return getIt<ConfirmationService>().showConfirmation(
       context: context,
       title: 'Restaurar backup',
       message:
@@ -1025,7 +1037,7 @@ class ConfirmationContexts {
     );
   }
   static Future<bool> createBackup(BuildContext context) {
-    return ConfirmationSystem.showConfirmation(
+    return getIt<ConfirmationService>().showConfirmation(
       context: context,
       title: 'Criar backup',
       message: 'Salvar uma cópia de segurança dos seus dados na nuvem?',
@@ -1035,7 +1047,7 @@ class ConfirmationContexts {
     );
   }
   static Future<String?> plantName(BuildContext context, {String? current}) {
-    return ConfirmationSystem.showInputConfirmation(
+    return getIt<ConfirmationService>().showInputConfirmation(
       context: context,
       title: 'Nome da planta',
       message: 'Como você gostaria de chamar sua planta?',
@@ -1051,7 +1063,7 @@ class ConfirmationContexts {
     );
   }
   static Future<List<String>?> backupOptions(BuildContext context) {
-    return ConfirmationSystem.showChecklistConfirmation(
+    return getIt<ConfirmationService>().showChecklistConfirmation(
       context: context,
       title: 'Opções de backup',
       message: 'Selecione os dados que deseja incluir no backup:',

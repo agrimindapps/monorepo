@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/di/injection.dart';
 import 'feedback_system.dart';
 import 'haptic_service.dart';
 import 'toast_service.dart';
@@ -22,7 +23,7 @@ class ProgressTracker {
     bool includeHaptic = true,
   }) {
     if (includeHaptic) {
-      HapticContexts.uploadStart();
+      getIt<HapticService>().uploadStart();
     }
 
     final operation = ProgressOperation(
@@ -56,7 +57,7 @@ class ProgressTracker {
       );
 
       if (includeHaptic) {
-        HapticContexts.uploadProgress();
+        getIt<HapticService>().uploadProgress();
       }
 
       _notifyListeners();
@@ -75,11 +76,11 @@ class ProgressTracker {
       operation._complete(successMessage);
 
       if (includeHaptic) {
-        HapticContexts.uploadComplete();
+        getIt<HapticService>().uploadComplete();
       }
 
       if (showToast && operation.context != null) {
-        ToastService.showSuccess(
+        getIt<ToastService>().showSuccess(
           context: operation.context!,
           message: successMessage ?? 'Operação concluída!',
           icon: Icons.check_circle,
@@ -105,11 +106,11 @@ class ProgressTracker {
       operation._fail(errorMessage);
 
       if (includeHaptic) {
-        HapticContexts.uploadError();
+        getIt<HapticService>().uploadError();
       }
 
       if (showToast && operation.context != null) {
-        ToastService.showError(
+        getIt<ToastService>().showError(
           context: operation.context!,
           message: errorMessage,
           actionLabel: onRetry != null ? 'Tentar novamente' : null,
@@ -150,11 +151,11 @@ class ProgressTracker {
       operation._cancel();
 
       if (includeHaptic) {
-        HapticService.selection();
+        getIt<HapticService>().selection();
       }
 
       if (showToast && operation.context != null) {
-        ToastService.showInfo(
+        getIt<ToastService>().showInfo(
           context: operation.context!,
           message: 'Operação cancelada',
           icon: Icons.cancel,

@@ -2,7 +2,7 @@ import 'package:core/core.dart' show Equatable;
 
 /// Base class for all application errors
 /// Provides consistent error handling across the entire app
-abstract class AppError extends Equatable {
+abstract class AppError extends Equatable implements Exception {
   const AppError({
     required this.message,
     this.technicalDetails,

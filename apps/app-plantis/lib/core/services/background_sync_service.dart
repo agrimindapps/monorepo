@@ -10,7 +10,6 @@ import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../auth/auth_state_notifier.dart';
 import '../di/injection_container.dart' as di;
-import '../services/connectivity_state_manager.dart';
 import '../sync/background_sync_status.dart';
 
 /// Dedicated service for background synchronization operations
@@ -22,8 +21,9 @@ class BackgroundSyncService extends ChangeNotifier {
   String _currentSyncMessage = 'Inicializando sincronização...';
   BackgroundSyncStatus _syncStatus = BackgroundSyncStatus.idle;
   final Map<String, bool> _operationStatus = {};
-  final ConnectivityStateManager _connectivityStateManager =
-      ConnectivityStateManager();
+  // TODO: Remove if confirmed unused - currently not referenced in class
+  // final ConnectivityStateManager _connectivityStateManager =
+  //     ConnectivityStateManager();
   GetPlantsUseCase? _getPlantsUseCase;
   GetTasksUseCase? _getTasksUseCase;
   SyncUserProfileUseCase? _syncUserProfileUseCase;

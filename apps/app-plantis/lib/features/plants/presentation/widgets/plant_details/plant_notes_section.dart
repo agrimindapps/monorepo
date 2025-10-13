@@ -456,15 +456,14 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                         .updateComment(comment.id, newText);
 
                     if (success) {
-                      if (mounted) Navigator.of(context).pop();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Observação atualizada'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
+                      if (!context.mounted) return;
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Observação atualizada'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
                     }
                   } else {
                     Navigator.of(context).pop();
@@ -498,15 +497,14 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                       await ref.read(commentsProvider.notifier).deleteComment(comment.id);
 
                   if (success) {
-                    if (mounted) Navigator.of(context).pop();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Observação excluída'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Observação excluída'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
                   }
                 },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),

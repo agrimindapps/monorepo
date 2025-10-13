@@ -149,7 +149,6 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
     return Consumer(
       builder: (context, ref, child) {
         final dataExportState = ref.watch(dataExportNotifierProvider);
-        final isLoading = dataExportState.value?.isLoading ?? false;
         final availabilityResult = dataExportState.value?.availabilityResult;
 
         return SingleChildScrollView(
@@ -163,15 +162,15 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      PlantisColors.primary.withOpacity(0.12),
-                      PlantisColors.leaf.withOpacity(0.12),
+                      PlantisColors.primary.withValues(alpha: 0.12),
+                      PlantisColors.leaf.withValues(alpha: 0.12),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: PlantisColors.primary.withOpacity(0.24),
+                    color: PlantisColors.primary.withValues(alpha: 0.24),
                   ),
                 ),
                 child: Column(
@@ -182,7 +181,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: PlantisColors.primary.withOpacity(0.2),
+                            color: PlantisColors.primary.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -209,7 +208,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                       'De acordo com a Lei Geral de Proteção de Dados, você tem o direito de exportar seus dados pessoais em formato estruturado e de uso comum.',
                       style: TextStyle(
                         fontSize: 14,
-                        color: PlantisColors.primary.withOpacity(0.7),
+                        color: PlantisColors.primary.withValues(alpha: 0.7),
                         height: 1.4,
                       ),
                     ),
@@ -296,7 +295,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: PlantisColors.primary.withOpacity(0.12),
+                    color: PlantisColors.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -360,7 +359,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(statusIcon, color: statusColor, size: 20),
@@ -478,7 +477,7 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.08),
+                  color: Colors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(

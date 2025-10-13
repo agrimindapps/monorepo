@@ -218,6 +218,8 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
         _focusNode.dispose();
       }
     } catch (e) {
+      // Silently handle focus node disposal errors (common in web race conditions)
+      // This is intentionally empty as focus node errors during disposal are non-critical
     }
     super.dispose();
   }

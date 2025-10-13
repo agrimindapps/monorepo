@@ -1,15 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:injectable/injectable.dart';
 
 /// Serviço centralizado para feedback háptico
 /// Gerencia vibrações e feedback tátil para melhorar UX
+@lazySingleton
 class HapticService {
-  static bool _isEnabled = true;
-  static bool _isInitialized = false;
+  bool _isEnabled = true;
+  bool _isInitialized = false;
 
   /// Inicializa o serviço de haptic feedback
-  static Future<void> initialize() async {
+  Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
@@ -28,16 +30,16 @@ class HapticService {
   }
 
   /// Habilita ou desabilita feedback háptico globalmente
-  static void setEnabled(bool enabled) {
+  void setEnabled(bool enabled) {
     _isEnabled = enabled;
   }
 
   /// Verifica se haptic feedback está habilitado
-  static bool get isEnabled => _isEnabled && _isInitialized;
+  bool get isEnabled => _isEnabled && _isInitialized;
 
   /// Feedback leve - para interações básicas
   /// Usado em: toques em botões, navegação, seleção
-  static Future<void> light() async {
+  Future<void> light() async {
     if (!isEnabled) return;
 
     try {
@@ -51,7 +53,7 @@ class HapticService {
 
   /// Feedback médio - para ações importantes
   /// Usado em: completar tarefas, salvar dados, confirmações
-  static Future<void> medium() async {
+  Future<void> medium() async {
     if (!isEnabled) return;
 
     try {
@@ -65,7 +67,7 @@ class HapticService {
 
   /// Feedback pesado - para ações críticas
   /// Usado em: erros, alertas, ações destrutivas
-  static Future<void> heavy() async {
+  Future<void> heavy() async {
     if (!isEnabled) return;
 
     try {
@@ -79,7 +81,7 @@ class HapticService {
 
   /// Feedback de seleção - para mudanças de estado
   /// Usado em: toggles, sliders, seleções em lista
-  static Future<void> selection() async {
+  Future<void> selection() async {
     if (!isEnabled) return;
 
     try {
@@ -93,7 +95,7 @@ class HapticService {
 
   /// Feedback de vibração longa - para notificações importantes
   /// Usado em: notificações push, alertas críticos
-  static Future<void> vibrate() async {
+  Future<void> vibrate() async {
     if (!isEnabled) return;
 
     try {
@@ -107,7 +109,7 @@ class HapticService {
 
   /// Padrão de sucesso - sequência de feedback para sucesso
   /// Usado em: operações completadas com sucesso
-  static Future<void> success() async {
+  Future<void> success() async {
     if (!isEnabled) return;
 
     await medium();
@@ -117,7 +119,7 @@ class HapticService {
 
   /// Padrão de erro - sequência de feedback para erro
   /// Usado em: erros críticos, falhas em operações
-  static Future<void> error() async {
+  Future<void> error() async {
     if (!isEnabled) return;
 
     await heavy();
@@ -127,7 +129,7 @@ class HapticService {
 
   /// Padrão de warning - feedback para avisos
   /// Usado em: validações, campos obrigatórios
-  static Future<void> warning() async {
+  Future<void> warning() async {
     if (!isEnabled) return;
 
     await medium();
@@ -139,7 +141,7 @@ class HapticService {
 
   /// Padrão de progresso - feedback para atualizações de progresso
   /// Usado em: uploads, downloads, processamento
-  static Future<void> progress() async {
+  Future<void> progress() async {
     if (!isEnabled) return;
 
     await light();
@@ -147,7 +149,7 @@ class HapticService {
 
   /// Padrão de completar tarefa - feedback especializado para tarefas
   /// Usado em: marcar tarefas como concluídas
-  static Future<void> taskComplete() async {
+  Future<void> taskComplete() async {
     if (!isEnabled) return;
 
     await medium();
@@ -159,7 +161,7 @@ class HapticService {
 
   /// Padrão de salvar planta - feedback para salvar plantas
   /// Usado em: adicionar ou editar plantas
-  static Future<void> plantSave() async {
+  Future<void> plantSave() async {
     if (!isEnabled) return;
 
     await selection();
@@ -169,7 +171,7 @@ class HapticService {
 
   /// Padrão de compra premium - feedback para transações
   /// Usado em: compras, upgrades, assinaturas
-  static Future<void> purchase() async {
+  Future<void> purchase() async {
     if (!isEnabled) return;
 
     await heavy();
@@ -181,7 +183,7 @@ class HapticService {
 
   /// Padrão de sync - feedback para sincronização
   /// Usado em: backup, restore, sync de dados
-  static Future<void> sync() async {
+  Future<void> sync() async {
     if (!isEnabled) return;
 
     await selection();
@@ -191,7 +193,7 @@ class HapticService {
 
   /// Padrão de navegação - feedback para mudanças de tela
   /// Usado em: navegação entre páginas, abrir modals
-  static Future<void> navigation() async {
+  Future<void> navigation() async {
     if (!isEnabled) return;
 
     await light();
@@ -199,7 +201,7 @@ class HapticService {
 
   /// Padrão de auth - feedback para autenticação
   /// Usado em: login, logout, biometria
-  static Future<void> auth() async {
+  Future<void> auth() async {
     if (!isEnabled) return;
 
     await medium();
@@ -208,7 +210,7 @@ class HapticService {
   }
 
   /// Padrão personalizado com delays customizados
-  static Future<void> custom({
+  Future<void> custom({
     required List<HapticType> pattern,
     int delayBetween = 100,
   }) async {
@@ -222,7 +224,7 @@ class HapticService {
     }
   }
 
-  static Future<void> _executeHapticType(HapticType type) async {
+  Future<void> _executeHapticType(HapticType type) async {
     switch (type) {
       case HapticType.light:
         await light();
@@ -241,53 +243,54 @@ class HapticService {
         break;
     }
   }
+
+  // Contextos pré-definidos (merged from HapticContexts)
+  Future<void> buttonTap() => light();
+  Future<void> cardTap() => selection();
+  Future<void> swipe() => light();
+  Future<void> pageChange() => navigation();
+  Future<void> openModal() => medium();
+  Future<void> closeModal() => light();
+  Future<void> completeTask() => taskComplete();
+  Future<void> addTask() => selection();
+  Future<void> deleteTask() => heavy();
+  Future<void> addPlant() => plantSave();
+  Future<void> editPlant() => plantSave();
+  Future<void> deletePlant() => error();
+  Future<void> waterPlant() => medium();
+  Future<void> purchaseSuccess() => purchase();
+  Future<void> purchaseError() => error();
+  Future<void> restorePurchase() => success();
+  Future<void> saveSettings() => selection();
+  Future<void> syncData() => sync();
+  Future<void> backupComplete() => success();
+  Future<void> backupError() => error();
+  Future<void> loginSuccess() => auth();
+  Future<void> loginError() => error();
+  Future<void> biometricSuccess() => auth();
+  Future<void> biometricError() => warning();
+  Future<void> uploadStart() => light();
+  Future<void> uploadProgress() => progress();
+  Future<void> uploadComplete() => success();
+  Future<void> uploadError() => error();
+  Future<void> validationError() => warning();
+  Future<void> requiredField() => warning();
+  Future<void> formSubmit() => medium();
+  Future<void> notificationReceived() => vibrate();
+  Future<void> reminderAlert() => medium();
 }
 
 /// Tipos de haptic feedback disponíveis
 enum HapticType { light, medium, heavy, selection, vibrate }
 
-/// Contextos pré-definidos para haptic feedback
-class HapticContexts {
-  static Future<void> buttonTap() => HapticService.light();
-  static Future<void> cardTap() => HapticService.selection();
-  static Future<void> swipe() => HapticService.light();
-  static Future<void> pageChange() => HapticService.navigation();
-  static Future<void> openModal() => HapticService.medium();
-  static Future<void> closeModal() => HapticService.light();
-  static Future<void> completeTask() => HapticService.taskComplete();
-  static Future<void> addTask() => HapticService.selection();
-  static Future<void> deleteTask() => HapticService.heavy();
-  static Future<void> addPlant() => HapticService.plantSave();
-  static Future<void> editPlant() => HapticService.plantSave();
-  static Future<void> deletePlant() => HapticService.error();
-  static Future<void> waterPlant() => HapticService.medium();
-  static Future<void> purchaseSuccess() => HapticService.purchase();
-  static Future<void> purchaseError() => HapticService.error();
-  static Future<void> restorePurchase() => HapticService.success();
-  static Future<void> saveSettings() => HapticService.selection();
-  static Future<void> syncData() => HapticService.sync();
-  static Future<void> backupComplete() => HapticService.success();
-  static Future<void> backupError() => HapticService.error();
-  static Future<void> loginSuccess() => HapticService.auth();
-  static Future<void> loginError() => HapticService.error();
-  static Future<void> biometricSuccess() => HapticService.auth();
-  static Future<void> biometricError() => HapticService.warning();
-  static Future<void> uploadStart() => HapticService.light();
-  static Future<void> uploadProgress() => HapticService.progress();
-  static Future<void> uploadComplete() => HapticService.success();
-  static Future<void> uploadError() => HapticService.error();
-  static Future<void> validationError() => HapticService.warning();
-  static Future<void> requiredField() => HapticService.warning();
-  static Future<void> formSubmit() => HapticService.medium();
-  static Future<void> notificationReceived() => HapticService.vibrate();
-  static Future<void> reminderAlert() => HapticService.medium();
-}
-
 /// Mixin para facilitar uso de haptic feedback em widgets
+/// Requer HapticService como dependência injetada
 mixin HapticFeedbackMixin {
+  HapticService get hapticService;
+
   /// Executa haptic feedback se habilitado
   Future<void> performHaptic(Future<void> Function() hapticFunction) async {
-    if (HapticService.isEnabled) {
+    if (hapticService.isEnabled) {
       await hapticFunction();
     }
   }
@@ -296,40 +299,43 @@ mixin HapticFeedbackMixin {
   Future<void> performContextualHaptic(String context) async {
     switch (context) {
       case 'button_tap':
-        await HapticContexts.buttonTap();
+        await hapticService.buttonTap();
         break;
       case 'task_complete':
-        await HapticContexts.completeTask();
+        await hapticService.completeTask();
         break;
       case 'plant_save':
-        await HapticContexts.addPlant();
+        await hapticService.addPlant();
         break;
       case 'premium_purchase':
-        await HapticContexts.purchaseSuccess();
+        await hapticService.purchaseSuccess();
         break;
       case 'error':
-        await HapticService.error();
+        await hapticService.error();
         break;
       case 'success':
-        await HapticService.success();
+        await hapticService.success();
         break;
       default:
-        await HapticService.light();
+        await hapticService.light();
     }
   }
 }
 
 /// Widget que adiciona haptic feedback automaticamente
+/// Requer HapticService como dependência injetada via GetIt
 class HapticWrapper extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final String? hapticContext;
   final HapticType hapticType;
   final bool enabled;
+  final HapticService hapticService;
 
   const HapticWrapper({
     super.key,
     required this.child,
+    required this.hapticService,
     this.onTap,
     this.hapticContext,
     this.hapticType = HapticType.light,
@@ -349,7 +355,7 @@ class HapticWrapper extends StatelessWidget {
                 if (hapticContext != null) {
                   await _executeContextualHaptic();
                 } else {
-                  await HapticService._executeHapticType(hapticType);
+                  await hapticService._executeHapticType(hapticType);
                 }
                 onTap?.call();
               }
@@ -361,25 +367,25 @@ class HapticWrapper extends StatelessWidget {
   Future<void> _executeContextualHaptic() async {
     switch (hapticContext) {
       case 'button':
-        await HapticContexts.buttonTap();
+        await hapticService.buttonTap();
         break;
       case 'card':
-        await HapticContexts.cardTap();
+        await hapticService.cardTap();
         break;
       case 'task_complete':
-        await HapticContexts.completeTask();
+        await hapticService.completeTask();
         break;
       case 'plant_save':
-        await HapticContexts.addPlant();
+        await hapticService.addPlant();
         break;
       case 'purchase':
-        await HapticContexts.purchaseSuccess();
+        await hapticService.purchaseSuccess();
         break;
       case 'navigation':
-        await HapticContexts.pageChange();
+        await hapticService.pageChange();
         break;
       default:
-        await HapticService.light();
+        await hapticService.light();
     }
   }
 }

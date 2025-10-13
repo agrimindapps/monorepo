@@ -45,7 +45,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       return result.fold(
         (failure) {
           final error = _mapFailureToError(failure);
-          throw error as Object;
+          throw error;
         },
         (vehicles) {
           _logInfo('Loaded ${vehicles.length} vehicles successfully');
@@ -117,7 +117,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       return result.fold(
         (failure) {
           final error = _mapFailureToError(failure);
-          throw error as Object;
+          throw error;
         },
         (added) {
           _logInfo('Vehicle added successfully: ${added.id}');
@@ -151,7 +151,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       return result.fold(
         (failure) {
           final error = _mapFailureToError(failure);
-          throw error as Object;
+          throw error;
         },
         (updated) {
           _logInfo('Vehicle updated successfully: ${updated.id}');
@@ -189,7 +189,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       return result.fold(
         (failure) {
           final error = _mapFailureToError(failure);
-          throw error as Object;
+          throw error;
         },
         (_) {
           _logInfo('Vehicle deleted successfully: $vehicleId');
@@ -226,7 +226,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
         return result.fold(
           (failure) {
             final error = _mapFailureToError(failure);
-            throw error as Object;
+            throw error;
           },
           (vehicle) {
             _logInfo('Vehicle found: ${vehicle.id}');
@@ -263,7 +263,7 @@ class VehiclesNotifier extends _$VehiclesNotifier {
         return result.fold(
           (failure) {
             final error = _mapFailureToError(failure);
-            throw error as Object;
+            throw error;
           },
           (vehicles) {
             _logInfo('Found ${vehicles.length} vehicles matching query');

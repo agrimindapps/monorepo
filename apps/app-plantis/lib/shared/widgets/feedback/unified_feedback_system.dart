@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/di/injection.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'confirmation_system.dart';
 import 'feedback_system.dart';
@@ -15,7 +16,7 @@ class UnifiedFeedbackSystem {
   /// Inicializa todos os sistemas de feedback
   static Future<void> initialize() async {
     if (_isInitialized) return;
-    await HapticService.initialize();
+    await getIt<HapticService>().initialize();
 
     _isInitialized = true;
   }
@@ -45,24 +46,24 @@ class UnifiedFeedbackSystem {
     );
 
     if (includeHaptic) {
-      await HapticService.light();
+      await getIt<HapticService>().light();
     }
 
     try {
       final result = await operation();
       ContextualLoadingManager.stopLoading(operationKey);
       if (includeHaptic) {
-        await HapticService.success();
+        await getIt<HapticService>().success();
       }
 
       if (showToast && context.mounted) {
-        ToastService.showSuccess(
+        getIt<ToastService>().showSuccess(
           context: context,
           message: successMessage ?? 'Operação concluída com sucesso!',
         );
       }
       if (context.mounted) {
-        FeedbackSystem.showSuccess(
+        getIt<FeedbackService>().showSuccess(
           context: context,
           message: successMessage ?? 'Sucesso!',
           animation: successAnimation,
@@ -74,13 +75,13 @@ class UnifiedFeedbackSystem {
     } catch (error) {
       ContextualLoadingManager.stopLoading(operationKey);
       if (includeHaptic) {
-        await HapticService.error();
+        await getIt<HapticService>().error();
       }
 
       final errorMsg = errorMessage ?? 'Erro na operação: ${error.toString()}';
 
       if (showToast && context.mounted) {
-        ToastService.showError(
+        getIt<ToastService>().showError(
           context: context,
           message: errorMsg,
           actionLabel: 'Tentar novamente',
@@ -90,7 +91,7 @@ class UnifiedFeedbackSystem {
       }
 
       if (context.mounted) {
-        FeedbackSystem.showError(
+        getIt<FeedbackService>().showError(
           context: context,
           message: errorMsg,
           animation: ErrorAnimationType.shake,
@@ -288,7 +289,7 @@ class UnifiedFeedbackSystem {
     ConfirmationType type = ConfirmationType.info,
     IconData? icon,
   }) async {
-    return ConfirmationSystem.showConfirmation(
+    return getIt<ConfirmationService>().showConfirmation(
       context: context,
       title: title,
       message: message,
@@ -307,7 +308,7 @@ class UnifiedFeedbackSystem {
     String confirmLabel = 'Deletar',
     bool requireDouble = false,
   }) async {
-    return ConfirmationSystem.showDestructiveConfirmation(
+    return getIt<ConfirmationService>().showDestructiveConfirmation(
       context: context,
       title: title,
       message: message,
@@ -318,7 +319,7 @@ class UnifiedFeedbackSystem {
 
   /// Toast de sucesso rápido
   static void successToast(BuildContext context, String message) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: message,
       includeHaptic: true,
@@ -331,7 +332,7 @@ class UnifiedFeedbackSystem {
     String message, {
     VoidCallback? onRetry,
   }) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: message,
       actionLabel: onRetry != null ? 'Tentar novamente' : null,
@@ -342,12 +343,12 @@ class UnifiedFeedbackSystem {
 
   /// Toast de info
   static void infoToast(BuildContext context, String message) {
-    ToastService.showInfo(context: context, message: message);
+    getIt<ToastService>().showInfo(context: context, message: message);
   }
 
   /// Toast de warning
   static void warningToast(BuildContext context, String message) {
-    ToastService.showWarning(
+    getIt<ToastService>().showWarning(
       context: context,
       message: message,
       includeHaptic: true,
@@ -355,51 +356,52 @@ class UnifiedFeedbackSystem {
   }
 
   /// Haptic para ações básicas
-  static Future<void> lightHaptic() => HapticService.light();
+  static Future<void> lightHaptic() => getIt<HapticService>().light();
 
   /// Haptic para ações importantes
-  static Future<void> mediumHaptic() => HapticService.medium();
+  static Future<void> mediumHaptic() => getIt<HapticService>().medium();
 
   /// Haptic para ações críticas
-  static Future<void> heavyHaptic() => HapticService.heavy();
+  static Future<void> heavyHaptic() => getIt<HapticService>().heavy();
 
   /// Haptic contextual
   static Future<void> contextualHaptic(String context) async {
+    final hapticService = getIt<HapticService>();
     switch (context) {
       case 'task_complete':
-        await HapticContexts.completeTask();
+        await hapticService.completeTask();
         break;
       case 'plant_save':
-        await HapticContexts.addPlant();
+        await hapticService.addPlant();
         break;
       case 'premium_purchase':
-        await HapticContexts.purchaseSuccess();
+        await hapticService.purchaseSuccess();
         break;
       case 'error':
-        await HapticService.error();
+        await hapticService.error();
         break;
       case 'success':
-        await HapticService.success();
+        await hapticService.success();
         break;
       default:
-        await HapticService.light();
+        await hapticService.light();
     }
   }
 
   /// Limpa todos os sistemas de feedback
   static void dispose() {
-    FeedbackSystem.dispose();
+    getIt<FeedbackService>().dispose();
     ContextualLoadingManager.dispose();
     ProgressTracker.clearAll();
-    ToastService.dismissAll();
+    getIt<ToastService>().dismissAll();
   }
 
   /// Para todas as operações ativas
   static void stopAll() {
-    FeedbackSystem.dismissAll();
+    getIt<FeedbackService>().dismissAll();
     ContextualLoadingManager.stopAllLoadings();
     ProgressTracker.clearAll();
-    ToastService.dismissAll();
+    getIt<ToastService>().dismissAll();
   }
 }
 
@@ -443,6 +445,7 @@ class _UnifiedFeedbackProviderState extends State<UnifiedFeedbackProvider> {
     child = ContextualLoadingListener(child: child);
     if (widget.enableFeedbackOverlay) {
       child = FeedbackListener(
+        feedbackService: getIt<FeedbackService>(),
         alignment: widget.feedbackAlignment,
         child: child,
       );

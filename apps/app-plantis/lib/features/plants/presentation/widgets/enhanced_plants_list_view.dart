@@ -165,14 +165,13 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
                 onPressed: () async {
                   Navigator.of(context).pop();
                   await _plantsProvider.deletePlant(plant.id);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${plant.name} foi removida'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${plant.name} foi removida'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,

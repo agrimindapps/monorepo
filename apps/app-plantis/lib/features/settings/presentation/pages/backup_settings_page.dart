@@ -32,14 +32,7 @@ class BackupSettingsPage extends ConsumerWidget {
         ),
       ),
       body: ResponsiveLayout(
-        child: () {
-          const isPremium = false;
-
-          if (!isPremium) {
-            return _buildPremiumRequired(context, theme);
-          }
-          return const SizedBox.shrink();
-        }(),
+        child: _buildPremiumRequired(context, theme),
       ),
     );
   }

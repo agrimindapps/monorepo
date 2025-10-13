@@ -10,7 +10,9 @@ enum AuthStatus {
 
 /// Estado completo de autenticação - Riverpod v2
 ///
-/// Migrado para Riverpod v2 com @riverpod pattern
+/// REFATORADO para aplicar SRP:
+/// - Campos de sync movidos para SyncState (sync_notifier.dart)
+/// - Foco apenas em autenticação core
 class AuthState {
   const AuthState({
     this.currentUser,
@@ -21,8 +23,6 @@ class AuthState {
     this.isAnonymous = false,
     this.status = AuthStatus.unauthenticated,
     this.isInitialized = false,
-    this.isSyncing = false,
-    this.syncMessage = 'Sincronizando dados automotivos...',
   });
 
   const AuthState.initial() : this();
@@ -35,8 +35,6 @@ class AuthState {
   final bool isAnonymous;
   final AuthStatus status;
   final bool isInitialized;
-  final bool isSyncing;
-  final String syncMessage;
 
   AuthState copyWith({
     UserEntity? currentUser,
@@ -47,8 +45,6 @@ class AuthState {
     bool? isAnonymous,
     AuthStatus? status,
     bool? isInitialized,
-    bool? isSyncing,
-    String? syncMessage,
     bool clearError = false,
     bool clearUser = false,
   }) {
@@ -61,14 +57,12 @@ class AuthState {
       isAnonymous: isAnonymous ?? this.isAnonymous,
       status: status ?? this.status,
       isInitialized: isInitialized ?? this.isInitialized,
-      isSyncing: isSyncing ?? this.isSyncing,
-      syncMessage: syncMessage ?? this.syncMessage,
     );
   }
+
   String? get userDisplayName => currentUser?.displayName;
   String? get userEmail => currentUser?.email;
   String get userId => currentUser?.id ?? '';
-  bool get isSyncInProgress => isSyncing; // Alias para compatibilidade
 
   @override
   bool operator ==(Object other) =>
@@ -82,8 +76,7 @@ class AuthState {
           isPremium == other.isPremium &&
           isAnonymous == other.isAnonymous &&
           status == other.status &&
-          isInitialized == other.isInitialized &&
-          isSyncing == other.isSyncing;
+          isInitialized == other.isInitialized;
 
   @override
   int get hashCode =>
@@ -94,8 +87,7 @@ class AuthState {
       isPremium.hashCode ^
       isAnonymous.hashCode ^
       status.hashCode ^
-      isInitialized.hashCode ^
-      isSyncing.hashCode;
+      isInitialized.hashCode;
 
   @override
   String toString() =>

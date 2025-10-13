@@ -659,7 +659,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     try {
       final appRatingService = di.sl<IAppRatingRepository>();
       final success = await appRatingService.showRatingDialog(context: context);
-      if (!mounted) return;
+      if (!context.mounted) return;
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -670,7 +670,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         );
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erro inesperado: $e'),

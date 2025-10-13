@@ -40,12 +40,14 @@ class ProfileController {
 
       result.fold(
         (failure) {
+          if (!context.mounted) return;
           Navigator.of(context).pop(); // Remove loading dialog
           UiFeedbackService.showErrorSnackBar(context, failure.message);
         },
         (base64String) async {
           final success = await _accountService.updateAvatar(ref, base64String);
 
+          if (!context.mounted) return;
           Navigator.of(context).pop(); // Remove loading dialog
 
           if (success) {
@@ -63,6 +65,7 @@ class ProfileController {
         },
       );
     } catch (e) {
+      if (!context.mounted) return;
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop(); // Remove loading dialog
       }
@@ -78,11 +81,12 @@ class ProfileController {
     try {
       final confirmed =
           await UiFeedbackService.showRemoveImageConfirmationDialog(context);
-      if (!confirmed) return;
+      if (!confirmed || !context.mounted) return;
 
       UiFeedbackService.showImageProcessingDialog(context);
       final success = await _accountService.removeAvatar(ref);
 
+      if (!context.mounted) return;
       Navigator.of(context).pop(); // Remove loading dialog
 
       if (success) {
@@ -98,6 +102,7 @@ class ProfileController {
         );
       }
     } catch (e) {
+      if (!context.mounted) return;
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop(); // Remove loading dialog
       }
@@ -117,6 +122,7 @@ class ProfileController {
   ) async {
     await HapticFeedback.lightImpact();
 
+    if (!context.mounted) return;
     await ProfileImagePickerWidget.show(
       context: context,
       hasCurrentImage: hasAvatar,

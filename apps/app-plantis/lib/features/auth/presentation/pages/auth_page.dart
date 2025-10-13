@@ -1720,7 +1720,7 @@ Widget _buildPasswordVisibilityToggle({
         isObscured
             ? Icons.visibility_outlined
             : Icons.visibility_off_outlined,
-        color: PlantisColors.primary.withOpacity(0.7),
+        color: PlantisColors.primary.withValues(alpha: 0.7),
         size: 22,
       ),
       onPressed: () {

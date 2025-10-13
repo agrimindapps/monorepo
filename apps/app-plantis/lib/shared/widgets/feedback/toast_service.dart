@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:injectable/injectable.dart';
+import '../../../core/di/injection.dart';
 import 'haptic_service.dart';
 
 /// Serviço de toast messages contextuais e não intrusivas
 /// Complementa o FeedbackSystem para mensagens rápidas
+@lazySingleton
 class ToastService {
-  static OverlayEntry? _currentToast;
-  static final List<ToastController> _toastQueue = [];
-  static bool _isShowingToast = false;
+  final HapticService _hapticService;
+
+  OverlayEntry? _currentToast;
+  final List<ToastController> _toastQueue = [];
+  bool _isShowingToast = false;
+
+  ToastService(this._hapticService);
 
   /// Mostra toast de sucesso
-  static void showSuccess({
+  void showSuccess({
     required BuildContext context,
     required String message,
     String? description,
@@ -19,7 +26,7 @@ class ToastService {
     VoidCallback? onTap,
   }) {
     if (includeHaptic) {
-      HapticContexts.buttonTap();
+      _hapticService.buttonTap();
     }
 
     final controller = ToastController(
@@ -35,7 +42,7 @@ class ToastService {
   }
 
   /// Mostra toast de erro
-  static void showError({
+  void showError({
     required BuildContext context,
     required String message,
     String? description,
@@ -46,7 +53,7 @@ class ToastService {
     VoidCallback? onAction,
   }) {
     if (includeHaptic) {
-      HapticService.warning();
+      _hapticService.warning();
     }
 
     final controller = ToastController(
@@ -63,7 +70,7 @@ class ToastService {
   }
 
   /// Mostra toast de informação
-  static void showInfo({
+  void showInfo({
     required BuildContext context,
     required String message,
     String? description,
@@ -73,7 +80,7 @@ class ToastService {
     VoidCallback? onTap,
   }) {
     if (includeHaptic) {
-      HapticService.light();
+      _hapticService.light();
     }
 
     final controller = ToastController(
@@ -89,7 +96,7 @@ class ToastService {
   }
 
   /// Mostra toast de warning
-  static void showWarning({
+  void showWarning({
     required BuildContext context,
     required String message,
     String? description,
@@ -100,7 +107,7 @@ class ToastService {
     VoidCallback? onAction,
   }) {
     if (includeHaptic) {
-      HapticService.warning();
+      _hapticService.warning();
     }
 
     final controller = ToastController(
@@ -117,7 +124,7 @@ class ToastService {
   }
 
   /// Mostra toast customizado
-  static void showCustom({
+  void showCustom({
     required BuildContext context,
     required String message,
     String? description,
@@ -131,7 +138,7 @@ class ToastService {
     VoidCallback? onAction,
   }) {
     if (includeHaptic) {
-      HapticService.light();
+      _hapticService.light();
     }
 
     final controller = ToastController(
@@ -151,7 +158,7 @@ class ToastService {
   }
 
   /// Remove o toast atual
-  static void dismiss() {
+  void dismiss() {
     if (_currentToast != null) {
       _currentToast!.remove();
       _currentToast = null;
@@ -161,12 +168,12 @@ class ToastService {
   }
 
   /// Remove todos os toasts
-  static void dismissAll() {
+  void dismissAll() {
     dismiss();
     _toastQueue.clear();
   }
 
-  static void _showToast(BuildContext context, ToastController controller) {
+  void _showToast(BuildContext context, ToastController controller) {
     if (_isShowingToast) {
       _toastQueue.add(controller);
       return;
@@ -175,7 +182,7 @@ class ToastService {
     _displayToast(context, controller);
   }
 
-  static void _displayToast(BuildContext context, ToastController controller) {
+  void _displayToast(BuildContext context, ToastController controller) {
     _isShowingToast = true;
 
     final overlay = Overlay.of(context);
@@ -198,7 +205,7 @@ class ToastService {
     });
   }
 
-  static void _processQueue() {
+  void _processQueue() {
     if (_toastQueue.isNotEmpty && !_isShowingToast) {
       _toastQueue.removeAt(0);
     }
@@ -480,7 +487,7 @@ enum ToastType { success, error, warning, info, custom }
 /// Contextos pré-definidos para toasts
 class ToastContexts {
   static void taskCompleted(BuildContext context, String taskName) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Tarefa concluída!',
       description: '$taskName foi marcada como concluída',
@@ -489,7 +496,7 @@ class ToastContexts {
   }
 
   static void taskCreated(BuildContext context, String taskName) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Tarefa criada!',
       description: 'Nova tarefa: $taskName',
@@ -498,7 +505,7 @@ class ToastContexts {
   }
 
   static void taskError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro na tarefa',
       description: error,
@@ -508,7 +515,7 @@ class ToastContexts {
     );
   }
   static void plantSaved(BuildContext context, String plantName) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Planta salva!',
       description: '$plantName foi adicionada com sucesso',
@@ -517,7 +524,7 @@ class ToastContexts {
   }
 
   static void plantUpdated(BuildContext context, String plantName) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Planta atualizada!',
       description: 'Informações de $plantName foram salvas',
@@ -526,7 +533,7 @@ class ToastContexts {
   }
 
   static void plantDeleted(BuildContext context, String plantName) {
-    ToastService.showInfo(
+    getIt<ToastService>().showInfo(
       context: context,
       message: 'Planta removida',
       description: '$plantName foi removida da sua coleção',
@@ -535,7 +542,7 @@ class ToastContexts {
   }
 
   static void plantWatered(BuildContext context, String plantName) {
-    ToastService.showInfo(
+    getIt<ToastService>().showInfo(
       context: context,
       message: 'Planta regada!',
       description: '$plantName foi regada hoje',
@@ -543,7 +550,7 @@ class ToastContexts {
     );
   }
   static void purchaseSuccess(BuildContext context) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Premium ativado!',
       description: 'Você agora tem acesso a todos os recursos',
@@ -552,7 +559,7 @@ class ToastContexts {
   }
 
   static void purchaseError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro na compra',
       description: error,
@@ -563,7 +570,7 @@ class ToastContexts {
   }
 
   static void purchaseRestored(BuildContext context) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Compras restauradas!',
       description: 'Seus recursos premium foram restaurados',
@@ -571,7 +578,7 @@ class ToastContexts {
     );
   }
   static void loginSuccess(BuildContext context, String userName) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Bem-vindo!',
       description: 'Login realizado com sucesso',
@@ -580,7 +587,7 @@ class ToastContexts {
   }
 
   static void loginError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro no login',
       description: error,
@@ -589,7 +596,7 @@ class ToastContexts {
   }
 
   static void logoutSuccess(BuildContext context) {
-    ToastService.showInfo(
+    getIt<ToastService>().showInfo(
       context: context,
       message: 'Logout realizado',
       description: 'Você foi desconectado com sucesso',
@@ -597,7 +604,7 @@ class ToastContexts {
     );
   }
   static void syncSuccess(BuildContext context) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Sincronização completa!',
       description: 'Seus dados foram sincronizados',
@@ -606,7 +613,7 @@ class ToastContexts {
   }
 
   static void syncError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro na sincronização',
       description: error,
@@ -617,7 +624,7 @@ class ToastContexts {
   }
 
   static void backupComplete(BuildContext context) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Backup realizado!',
       description: 'Seus dados foram salvos com segurança',
@@ -626,7 +633,7 @@ class ToastContexts {
   }
 
   static void backupError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro no backup',
       description: error,
@@ -634,7 +641,7 @@ class ToastContexts {
     );
   }
   static void uploadComplete(BuildContext context, String fileName) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Upload concluído!',
       description: '$fileName foi enviado com sucesso',
@@ -643,7 +650,7 @@ class ToastContexts {
   }
 
   static void uploadError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro no upload',
       description: error,
@@ -651,7 +658,7 @@ class ToastContexts {
     );
   }
   static void connectionLost(BuildContext context) {
-    ToastService.showWarning(
+    getIt<ToastService>().showWarning(
       context: context,
       message: 'Conexão perdida',
       description: 'Verifique sua conexão com a internet',
@@ -661,7 +668,7 @@ class ToastContexts {
   }
 
   static void connectionRestored(BuildContext context) {
-    ToastService.showInfo(
+    getIt<ToastService>().showInfo(
       context: context,
       message: 'Conexão restaurada',
       description: 'Você está online novamente',
@@ -669,7 +676,7 @@ class ToastContexts {
     );
   }
   static void validationError(BuildContext context, String field) {
-    ToastService.showWarning(
+    getIt<ToastService>().showWarning(
       context: context,
       message: 'Campo obrigatório',
       description: 'Por favor, preencha: $field',
@@ -678,7 +685,7 @@ class ToastContexts {
   }
 
   static void formSaved(BuildContext context) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Formulário salvo!',
       description: 'Suas informações foram salvas',
@@ -686,7 +693,7 @@ class ToastContexts {
     );
   }
   static void settingsSaved(BuildContext context) {
-    ToastService.showSuccess(
+    getIt<ToastService>().showSuccess(
       context: context,
       message: 'Configurações salvas!',
       description: 'Suas preferências foram atualizadas',
@@ -695,7 +702,7 @@ class ToastContexts {
   }
 
   static void settingsError(BuildContext context, String error) {
-    ToastService.showError(
+    getIt<ToastService>().showError(
       context: context,
       message: 'Erro nas configurações',
       description: error,

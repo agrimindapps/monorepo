@@ -125,8 +125,18 @@ class _SearchFieldMockupState extends State<_SearchFieldMockup> {
   @override
   void didUpdateWidget(_SearchFieldMockup oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text) {
+    // CORREÇÃO: Só atualiza o controller se o texto vier de fora E for diferente
+    // do que o usuário está digitando (para não resetar cursor durante digitação)
+    if (oldWidget.text != widget.text && _controller.text != widget.text) {
+      // Preserva posição do cursor
+      final currentSelection = _controller.selection;
       _controller.text = widget.text;
+
+      // Restaura cursor se ainda estiver dentro do texto
+      if (currentSelection.isValid &&
+          currentSelection.start <= widget.text.length) {
+        _controller.selection = currentSelection;
+      }
     }
   }
 
@@ -166,7 +176,8 @@ class _SearchFieldMockupState extends State<_SearchFieldMockup> {
             size: 20,
           ),
           border: InputBorder.none,
-          contentPadding: DiagnosticoMockupTokens.filterPadding,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          isDense: true,
         ),
       ),
     );

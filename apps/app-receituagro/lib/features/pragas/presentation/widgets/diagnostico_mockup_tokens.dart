@@ -154,10 +154,10 @@ class DiagnosticoMockupTokens {
   
   /// Ícone de pesquisa nos filtros
   static const IconData searchIcon = Icons.search;
-  
-  /// Ícone do dropdown dos filtros
-  static const IconData dropdownIcon = Icons.calendar_today;
-  
+
+  /// Ícone do dropdown dos filtros (agricultura)
+  static const IconData dropdownIcon = Icons.agriculture;
+
   /// Ícone premium (alerta)
   static const IconData premiumIcon = Icons.warning;
   

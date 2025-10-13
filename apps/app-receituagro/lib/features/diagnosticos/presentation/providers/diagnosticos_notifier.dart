@@ -616,43 +616,76 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     }
   }
 
-  /// Busca por padrão geral
-  Future<void> searchByPattern(String pattern) async {
+  /// Filtra diagnósticos por cultura (client-side)
+  void filterByCultura(String? culturaNome) {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // Se a busca está vazia, limpa os resultados e volta para allDiagnosticos
-    if (pattern.trim().isEmpty) {
+    if (culturaNome == null || culturaNome == 'Todas') {
+      // Restaurar todos os diagnósticos do contexto atual
       state = AsyncValue.data(
         currentState.copyWith(
-          searchQuery: '',
-          searchResults: [],
-          clearContext: true,
+          contextoCultura: null,
+          filteredDiagnosticos: currentState.allDiagnosticos,
         ),
       );
       return;
     }
 
+    // Filtrar localmente por cultura
+    final filtered = currentState.allDiagnosticos.where((diag) {
+      final nomeCulturaLower = diag.nomeCultura?.toLowerCase() ?? '';
+      final culturaNomeLower = culturaNome.toLowerCase();
+      return nomeCulturaLower == culturaNomeLower;
+    }).toList();
+
     state = AsyncValue.data(
-      currentState
-          .clearContext()
-          .copyWith(searchQuery: pattern, isLoading: true)
-          .clearError(),
+      currentState.copyWith(
+        contextoCultura: culturaNome,
+        filteredDiagnosticos: filtered,
+      ),
+    );
+  }
+
+  /// Busca por padrão geral
+  Future<void> searchByPattern(String pattern) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    // Se a busca está vazia, limpa os resultados e volta para filteredDiagnosticos
+    if (pattern.trim().isEmpty) {
+      state = AsyncValue.data(
+        currentState.copyWith(
+          searchQuery: '',
+          searchResults: [],
+          // NÃO limpa contexto - preserva filtro de defensivo/cultura/praga
+        ),
+      );
+      return;
+    }
+
+    // NÃO usa clearContext() - preserva contexto de defensivo/cultura/praga
+    state = AsyncValue.data(
+      currentState.copyWith(searchQuery: pattern, isLoading: true).clearError(),
     );
 
     try {
-      // CORREÇÃO: Busca primeiro localmente em allDiagnosticos se disponível
-      if (currentState.allDiagnosticos.isNotEmpty) {
+      // CORREÇÃO: Busca localmente em filteredDiagnosticos (que contém o contexto)
+      // ao invés de allDiagnosticos
+      final diagnosticosParaBusca = currentState.filteredDiagnosticos.isNotEmpty
+          ? currentState.filteredDiagnosticos
+          : currentState.allDiagnosticos;
+
+      if (diagnosticosParaBusca.isNotEmpty) {
         final lowerPattern = pattern.toLowerCase();
-        final localResults =
-            currentState.allDiagnosticos.where((diag) {
-              final nomeDefensivo = diag.nomeDefensivo?.toLowerCase() ?? '';
-              final nomeCultura = diag.nomeCultura?.toLowerCase() ?? '';
-              final nomePraga = diag.nomePraga?.toLowerCase() ?? '';
-              return nomeDefensivo.contains(lowerPattern) ||
-                  nomeCultura.contains(lowerPattern) ||
-                  nomePraga.contains(lowerPattern);
-            }).toList();
+        final localResults = diagnosticosParaBusca.where((diag) {
+          final nomeDefensivo = diag.nomeDefensivo?.toLowerCase() ?? '';
+          final nomeCultura = diag.nomeCultura?.toLowerCase() ?? '';
+          final nomePraga = diag.nomePraga?.toLowerCase() ?? '';
+          return nomeDefensivo.contains(lowerPattern) ||
+              nomeCultura.contains(lowerPattern) ||
+              nomePraga.contains(lowerPattern);
+        }).toList();
 
         state = AsyncValue.data(
           currentState
@@ -793,8 +826,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   /// Ordena diagnósticos por dosagem
   void sortByDosagem({bool ascending = true}) {
     final currentState = state.value;
-    if (currentState == null || currentState.filteredDiagnosticos.isEmpty)
+    if (currentState == null || currentState.filteredDiagnosticos.isEmpty) {
       return;
+    }
 
     final sortedDiagnosticos = List<DiagnosticoEntity>.from(
       currentState.filteredDiagnosticos,
@@ -816,8 +850,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   /// Ordena diagnósticos por completude
   void sortByCompletude() {
     final currentState = state.value;
-    if (currentState == null || currentState.filteredDiagnosticos.isEmpty)
+    if (currentState == null || currentState.filteredDiagnosticos.isEmpty) {
       return;
+    }
 
     final sortedDiagnosticos = List<DiagnosticoEntity>.from(
       currentState.filteredDiagnosticos,

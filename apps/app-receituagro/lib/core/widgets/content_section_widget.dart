@@ -78,10 +78,7 @@ class ContentSectionWidget extends StatelessWidget {
                 size: 20,
               ),
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 32,
-                minHeight: 32,
-              ),
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),
         ],
       ),
@@ -167,50 +164,53 @@ class ContentListItemWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: theme.brightness == Brightness.dark
-              ? Colors.white.withValues(alpha: 0.1)
-              : theme.colorScheme.surface.withValues(alpha: 0.03),
+          color:
+              theme.brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : theme.colorScheme.surface.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-            leading ?? _buildDefaultIcon(theme),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
+              leading ?? _buildDefaultIcon(theme),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (category != null && category!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    _buildCategoryTag(theme),
+                    if (category != null && category!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      _buildCategoryTag(theme),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
           ),
         ),
       ),
@@ -225,11 +225,7 @@ class ContentListItemWidget extends StatelessWidget {
         color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        icon ?? Icons.eco,
-        color: const Color(0xFF4CAF50),
-        size: 20,
-      ),
+      child: Icon(icon ?? Icons.eco, color: const Color(0xFF4CAF50), size: 20),
     );
   }
 

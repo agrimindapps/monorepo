@@ -9,7 +9,6 @@ import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
 import '../../../../../core/widgets/praga_image_widget.dart';
-import '../../../../diagnosticos/presentation/pages/detalhe_diagnostico_page.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 
 /// Componentes modulares para exibição de diagnósticos em páginas de defensivos
@@ -25,7 +24,9 @@ import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.da
 /// - Dropdown de seleção de cultura
 /// - Layout responsivo e design consistente
 class DiagnosticoDefensivoFilterWidget extends ConsumerStatefulWidget {
-  const DiagnosticoDefensivoFilterWidget({super.key});
+  final List<String>? availableCulturas;
+
+  const DiagnosticoDefensivoFilterWidget({super.key, this.availableCulturas});
 
   @override
   ConsumerState<DiagnosticoDefensivoFilterWidget> createState() =>
@@ -63,21 +64,36 @@ class _DiagnosticoDefensivoFilterWidgetState
     return RepaintBoundary(
       child: diagnosticosAsync.when(
         data: (diagnosticosState) {
-          // CORREÇÃO: Extrair culturas únicas dos diagnósticos carregados
-          // ao invés de depender de filtersData que pode não estar carregado
-          final culturasFromDiagnosticos = diagnosticosState.allDiagnosticos
-              .map((d) => d.nomeCultura)
-              .where((cultura) => cultura != null && cultura.isNotEmpty)
-              .toSet()
-              .toList()
-            ..sort();
+          // Usa culturas passadas ou extrai dos diagnósticos como fallback
+          final List<String> availableCulturas;
+          if (widget.availableCulturas != null &&
+              widget.availableCulturas!.isNotEmpty) {
+            // Usa culturas resolvidas do agrupamento (inclui resolução via repositório)
+            availableCulturas = ['Todas', ...widget.availableCulturas!];
+          } else {
+            // Fallback: extrai diretamente dos diagnósticos (pode não ter todas)
+            final diagnosticosParaCulturas =
+                diagnosticosState.searchQuery.isNotEmpty
+                    ? diagnosticosState.searchResults
+                    : diagnosticosState.filteredDiagnosticos;
 
-          final availableCulturas = culturasFromDiagnosticos.isEmpty
-              ? ['Todas']
-              : ['Todas', ...culturasFromDiagnosticos];
+            final culturasFromDiagnosticos =
+                diagnosticosParaCulturas
+                    .map((d) => d.nomeCultura)
+                    .where((cultura) => cultura != null && cultura.isNotEmpty)
+                    .cast<String>()
+                    .toSet()
+                    .toList()
+                  ..sort();
 
-          final selectedCultura =
-              diagnosticosState.currentFilters.idCultura ?? 'Todas';
+            availableCulturas =
+                culturasFromDiagnosticos.isEmpty
+                    ? ['Todas']
+                    : ['Todas', ...culturasFromDiagnosticos];
+          }
+
+          // CORREÇÃO: Usar contexto ou default para selectedCultura
+          final selectedCultura = diagnosticosState.contextoCultura ?? 'Todas';
 
           return Container(
             padding: const EdgeInsets.all(SpacingTokens.sm),
@@ -88,6 +104,7 @@ class _DiagnosticoDefensivoFilterWidgetState
                   child: _SearchField(
                     focusNode: _searchFocusNode,
                     onChanged: (query) {
+                      // CORREÇÃO: Usar searchByPattern que já existe e funciona
                       ref
                           .read(diagnosticosNotifierProvider.notifier)
                           .searchByPattern(query);
@@ -102,17 +119,17 @@ class _DiagnosticoDefensivoFilterWidgetState
                       value: selectedCultura,
                       cultures: availableCulturas,
                       onChanged: (cultura) {
+                        // CORREÇÃO: Filtrar localmente ao invés de recarregar
                         if (cultura == 'Todas') {
+                          // Limpar apenas o contexto de cultura, mantendo defensivo
                           ref
                               .read(diagnosticosNotifierProvider.notifier)
-                              .clearFilters();
+                              .filterByCultura(null);
                         } else {
+                          // Filtrar localmente pela cultura selecionada
                           ref
                               .read(diagnosticosNotifierProvider.notifier)
-                              .getDiagnosticosByCultura(
-                                cultura,
-                                nomeCultura: cultura,
-                              );
+                              .filterByCultura(cultura);
                         }
                       },
                     ),
@@ -138,11 +155,30 @@ class _DiagnosticoDefensivoFilterWidgetState
 }
 
 /// Campo de busca personalizado
-class _SearchField extends StatelessWidget {
+class _SearchField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
 
   const _SearchField({required this.onChanged, required this.focusNode});
+
+  @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,10 +195,11 @@ class _SearchField extends StatelessWidget {
         ),
       ),
       child: TextField(
-        focusNode: focusNode,
-        onChanged: onChanged,
+        controller: _controller,
+        focusNode: widget.focusNode,
+        onChanged: widget.onChanged,
         decoration: const InputDecoration(
-          hintText: 'Pesquisar diagnósticos...',
+          hintText: 'Localizar',
           border: InputBorder.none,
           prefixIcon: Icon(Icons.search),
         ),
@@ -207,14 +244,15 @@ class _CultureDropdown extends StatelessWidget {
         isExpanded: true,
         underline: const SizedBox(),
         icon: Icon(
-          Icons.keyboard_arrow_down,
-          color: theme.colorScheme.onSurfaceVariant,
+          Icons.agriculture,
+          color: theme.colorScheme.primary,
+          size: 20,
         ),
         items: [
           DropdownMenuItem<String>(
             value: 'Todas',
             child: Text(
-              'Todas as culturas',
+              'Todas',
               style: TextStyle(
                 fontSize: 16,
                 color: theme.colorScheme.onSurface,
@@ -273,11 +311,17 @@ class DiagnosticoDefensivoStateManager extends ConsumerWidget {
           );
         }
 
-        if (diagnosticosState.diagnosticos.isEmpty) {
+        // CORREÇÃO: Usar searchResults quando há busca ativa, senão usar filteredDiagnosticos
+        final diagnosticosParaExibir =
+            diagnosticosState.searchQuery.isNotEmpty
+                ? diagnosticosState.searchResults
+                : diagnosticosState.filteredDiagnosticos;
+
+        if (diagnosticosParaExibir.isEmpty) {
           return DiagnosticoDefensivoEmptyWidget(defensivoName: defensivoName);
         }
 
-        return builder(diagnosticosState.diagnosticos);
+        return builder(diagnosticosParaExibir);
       },
       loading: () => const DiagnosticoDefensivoLoadingWidget(),
       error:
@@ -568,11 +612,15 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
 class DiagnosticoDefensivoListItemWidget extends StatefulWidget {
   final dynamic diagnostico;
   final VoidCallback onTap;
+  final bool isDense;
+  final bool hasElevation;
 
   const DiagnosticoDefensivoListItemWidget({
     super.key,
     required this.diagnostico,
     required this.onTap,
+    this.isDense = false,
+    this.hasElevation = true,
   });
 
   @override
@@ -623,41 +671,124 @@ class _DiagnosticoDefensivoListItemWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
-          padding: const EdgeInsets.all(SpacingTokens.md),
-          decoration: _buildCardDecoration(context),
-          child: Row(
-            children: [
-              _buildAvatar(context),
-              const SizedBox(width: SpacingTokens.lg),
-              Expanded(child: _buildContent(context)),
-              _buildTrailingActions(context),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Decoração do card do item
-  BoxDecoration _buildCardDecoration(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BoxDecoration(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: theme.shadowColor.withValues(alpha: 0.1),
-          spreadRadius: 1,
-          blurRadius: 4,
-          offset: const Offset(0, 2),
+    // Prepara dados do conteúdo
+    String nomeComumPraga = 'Praga não identificada';
+    String nomeCientificoPraga = '';
+    String dosagemFormatada = '';
+
+    if (widget.diagnostico is DiagnosticoHive) {
+      final diagnosticoHive = widget.diagnostico as DiagnosticoHive;
+      nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
+    } else {
+      final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
+      if (nomePragaModel != null &&
+          nomePragaModel.isNotEmpty &&
+          nomePragaModel != 'Não especificado') {
+        nomeComumPraga = nomePragaModel;
+      } else if (_pragaData != null) {
+        final nomeComumCompleto = _pragaData!.nomeComum;
+        if (nomeComumCompleto.contains(',')) {
+          nomeComumPraga = nomeComumCompleto.split(',').first.trim();
+        } else if (nomeComumCompleto.contains(';')) {
+          nomeComumPraga = nomeComumCompleto.split(';').first.trim();
+        } else {
+          nomeComumPraga = nomeComumCompleto;
+        }
+      }
+    }
+
+    if (_pragaData != null) {
+      nomeCientificoPraga = _pragaData!.nomeCientifico;
+    }
+
+    final dosagemEntity = _getProperty('dosagem');
+    if (dosagemEntity != null) {
+      dosagemFormatada = dosagemEntity.toString();
+    }
+
+    return RepaintBoundary(
+      child: Container(
+        margin:
+            widget.isDense
+                ? const EdgeInsets.symmetric(horizontal: 8)
+                : const EdgeInsets.symmetric(horizontal: SpacingTokens.sm),
+        decoration:
+            widget.hasElevation
+                ? BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withValues(alpha: 0.1),
+                      spreadRadius: 1,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                )
+                : null,
+        child: ListTile(
+          onTap: widget.onTap,
+          dense: widget.isDense,
+          contentPadding:
+              widget.isDense
+                  ? const EdgeInsets.symmetric(
+                    horizontal: SpacingTokens.md,
+                    vertical: SpacingTokens.xs,
+                  )
+                  : const EdgeInsets.all(SpacingTokens.md),
+          leading: _buildAvatar(context),
+          title: Text(
+            nomeComumPraga,
+            style: TextStyle(
+              fontSize: widget.isDense ? 15 : 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (nomeCientificoPraga.isNotEmpty) ...[
+                SizedBox(height: widget.isDense ? 2 : SpacingTokens.xs),
+                Text(
+                  nomeCientificoPraga,
+                  style: TextStyle(
+                    fontSize: widget.isDense ? 13 : 14,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              if (dosagemFormatada.isNotEmpty) ...[
+                SizedBox(height: widget.isDense ? 2 : SpacingTokens.xs),
+                Text(
+                  dosagemFormatada,
+                  style: TextStyle(
+                    fontSize: widget.isDense ? 11 : 12,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: widget.isDense ? 14 : 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          shape:
+              widget.hasElevation
+                  ? RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  )
+                  : null,
         ),
-      ],
+      ),
     );
   }
 
@@ -734,90 +865,6 @@ class _DiagnosticoDefensivoListItemWidgetState
     );
   }
 
-  /// Conteúdo principal com informações do diagnóstico
-  Widget _buildContent(BuildContext context) {
-    final theme = Theme.of(context);
-    String nomeComumPraga = 'Praga não identificada';
-    String nomeCientificoPraga = '';
-    if (widget.diagnostico is DiagnosticoHive) {
-      final diagnosticoHive = widget.diagnostico as DiagnosticoHive;
-      nomeComumPraga = diagnosticoHive.nomePraga ?? 'Praga não identificada';
-    } else {
-      final nomePragaModel = _getProperty('nomePraga') ?? _getProperty('grupo');
-      if (nomePragaModel != null &&
-          nomePragaModel.isNotEmpty &&
-          nomePragaModel != 'Não especificado') {
-        nomeComumPraga = nomePragaModel;
-      } else if (_pragaData != null) {
-        final nomeComumCompleto = _pragaData!.nomeComum;
-        if (nomeComumCompleto.contains(',')) {
-          nomeComumPraga = nomeComumCompleto.split(',').first.trim();
-        } else if (nomeComumCompleto.contains(';')) {
-          nomeComumPraga = nomeComumCompleto.split(';').first.trim();
-        } else {
-          nomeComumPraga = nomeComumCompleto;
-        }
-      }
-    }
-    if (_pragaData != null) {
-      nomeCientificoPraga = _pragaData!.nomeCientifico;
-    }
-    final dosagemEntity = _getProperty('dosagem');
-    String dosagemFormatada = '';
-
-    if (dosagemEntity != null) {
-      dosagemFormatada = dosagemEntity.toString();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          nomeComumPraga,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        if (nomeCientificoPraga.isNotEmpty) ...[
-          const SizedBox(height: SpacingTokens.xs),
-          Text(
-            nomeCientificoPraga,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              fontStyle: FontStyle.italic,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-        if (dosagemFormatada.isNotEmpty) ...[
-          const SizedBox(height: SpacingTokens.xs),
-          Text(
-            dosagemFormatada,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  /// Ações do lado direito do item
-  Widget _buildTrailingActions(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Icon(
-      Icons.arrow_forward_ios,
-      size: 16,
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-  }
-
   /// Helper para extrair propriedades com fallbacks
   String? _getProperty(String primaryKey, [String? fallbackKey]) {
     try {
@@ -834,7 +881,9 @@ class _DiagnosticoDefensivoListItemWidgetState
           if (fallback != null) return fallback.toString();
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      // Ignore extraction errors
+    }
     return null;
   }
 
@@ -1015,17 +1064,17 @@ class _DiagnosticoDefensivoDialogWidgetState
     print('🔍 [DEBUG] defensivoName: ${widget.defensivoName}');
 
     if (diagnosticoId != null) {
-      print('✅ [DEBUG] Navegando para DetalheDiagnosticoPage...');
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder:
-              (context) => DetalheDiagnosticoPage(
-                diagnosticoId: diagnosticoId,
-                nomeDefensivo: widget.defensivoName,
-                nomePraga: nomePraga,
-                cultura: cultura,
-              ),
-        ),
+      print(
+        '✅ [DEBUG] Navegando para DetalheDiagnosticoPage via rota nomeada...',
+      );
+      Navigator.of(context).pushNamed(
+        '/detalhe-diagnostico',
+        arguments: {
+          'diagnosticoId': diagnosticoId,
+          'nomeDefensivo': widget.defensivoName,
+          'nomePraga': nomePraga,
+          'cultura': cultura,
+        },
       );
     } else {
       print('❌ [DEBUG] diagnosticoId é null - não navegando');

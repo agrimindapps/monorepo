@@ -163,7 +163,8 @@ class DosagemEntity {
 
   @override
   String toString() {
-    return 'DosagemEntity{$displayDosagem}';
+    // Retorna apenas o valor formatado sem o prefixo da classe
+    return displayDosagem;
   }
 }
 

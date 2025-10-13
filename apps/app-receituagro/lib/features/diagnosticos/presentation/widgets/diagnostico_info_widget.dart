@@ -31,7 +31,7 @@ class DiagnosticoInfoWidget extends StatelessWidget {
 
   Widget _buildImageSection(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -64,7 +64,7 @@ class DiagnosticoInfoWidget extends StatelessWidget {
                 builder: (context, constraints) {
                   final availableWidth = constraints.maxWidth - 40;
                   final imageHeight = availableWidth * 0.56;
-                  
+
                   return PragaImageWidget(
                     nomeCientifico: nomePraga,
                     width: double.infinity,
@@ -115,7 +115,7 @@ class DiagnosticoInfoWidget extends StatelessWidget {
 
   Widget _buildGeneralInfoSection(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -135,25 +135,51 @@ class DiagnosticoInfoWidget extends StatelessWidget {
 
   Widget _buildInfoCards(BuildContext context) {
     final infoItems = [
-      {'label': 'Ingrediente Ativo', 'value': diagnosticoData['ingredienteAtivo'] ?? 'N/A', 'icon': Icons.science},
-      {'label': 'Classificação Toxicológica', 'value': diagnosticoData['toxico'] ?? 'N/A', 'icon': Icons.warning},
-      {'label': 'Classificação Ambiental', 'value': diagnosticoData['classAmbiental'] ?? 'N/A', 'icon': Icons.eco},
-      {'label': 'Classe Agronômica', 'value': diagnosticoData['classeAgronomica'] ?? 'N/A', 'icon': Icons.agriculture},
+      {
+        'label': 'Ingrediente Ativo',
+        'value': diagnosticoData['ingredienteAtivo'] ?? 'N/A',
+        'icon': Icons.science,
+      },
+      {
+        'label': 'Classificação Toxicológica',
+        'value': diagnosticoData['classificacaoToxicologica'] ?? 'N/A',
+        'icon': Icons.warning,
+      },
+      {
+        'label': 'Classificação Ambiental',
+        'value': diagnosticoData['classificacaoAmbiental'] ?? 'N/A',
+        'icon': Icons.eco,
+      },
+      {
+        'label': 'Classe Agronômica',
+        'value': diagnosticoData['classeAgronomica'] ?? 'N/A',
+        'icon': Icons.agriculture,
+      },
     ];
 
     return Column(
-      children: infoItems.map((item) => _buildInfoCard(
-        context,
-        item['label'] as String,
-        item['value'] as String,
-        item['icon'] as IconData,
-      )).toList(),
+      children:
+          infoItems
+              .map(
+                (item) => _buildInfoCard(
+                  context,
+                  item['label'] as String,
+                  item['value'] as String,
+                  item['icon'] as IconData,
+                ),
+              )
+              .toList(),
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildInfoCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(8.0),
@@ -177,11 +203,7 @@ class DiagnosticoInfoWidget extends StatelessWidget {
               color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: theme.colorScheme.primary,
-              size: 20,
-            ),
+            child: Icon(icon, color: theme.colorScheme.primary, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(

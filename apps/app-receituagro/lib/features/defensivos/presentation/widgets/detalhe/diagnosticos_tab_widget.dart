@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/data/repositories/cultura_hive_repository.dart';
+import '../../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../../core/di/injection_container.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
 import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
@@ -34,11 +35,32 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final diagnosticosAsync = ref.watch(diagnosticosNotifierProvider);
+
     return RepaintBoundary(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const DiagnosticoDefensivoFilterWidget(),
+          // Passa culturas disponíveis do agrupamento para o filtro
+          diagnosticosAsync.when(
+            data: (state) {
+              return FutureBuilder<Map<String, List<dynamic>>>(
+                future: _groupDiagnosticsByCulture(
+                  state.searchQuery.isNotEmpty
+                      ? state.searchResults
+                      : state.filteredDiagnosticos,
+                ),
+                builder: (context, snapshot) {
+                  final culturas = snapshot.data?.keys.toList() ?? [];
+                  return DiagnosticoDefensivoFilterWidget(
+                    availableCulturas: culturas,
+                  );
+                },
+              );
+            },
+            loading: () => const DiagnosticoDefensivoFilterWidget(),
+            error: (_, __) => const DiagnosticoDefensivoFilterWidget(),
+          ),
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.only(
@@ -86,10 +108,20 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
         final groupedDiagnostics = snapshot.data ?? {};
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildGroupedWidgets(groupedDiagnostics),
+        // Usa FutureBuilder aninhado para ordenação assíncrona
+        return FutureBuilder<Widget>(
+          future: _buildGroupedWidgets(groupedDiagnostics),
+          builder: (context, widgetSnapshot) {
+            if (widgetSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (widgetSnapshot.hasError) {
+              return Center(child: Text('Erro ao ordenar: ${widgetSnapshot.error}'));
+            }
+
+            return widgetSnapshot.data ?? const SizedBox.shrink();
+          },
         );
       },
     );
@@ -153,43 +185,172 @@ class DiagnosticosTabWidget extends ConsumerWidget {
     }
   }
 
-  /// Constrói widgets agrupados por cultura
-  List<Widget> _buildGroupedWidgets(
-    Map<String, List<dynamic>> groupedDiagnostics,
-  ) {
-    final List<Widget> widgets = [];
+  /// Constrói widgets agrupados por cultura usando ListView.separated
+  Future<Widget> _buildGroupedWidgets(Map<String, List<dynamic>> groupedDiagnostics) async {
+    // Ordena culturas alfabeticamente
+    final culturasOrdenadas = groupedDiagnostics.keys.toList()..sort();
 
-    groupedDiagnostics.forEach((cultura, diagnostics) {
-      widgets.add(
-        DiagnosticoDefensivoCultureSectionWidget(
-          cultura: cultura,
-          diagnosticCount: diagnostics.length,
-          diagnosticos: diagnostics,
+    // Cria lista flat com headers e itens para ListView.separated
+    final List<_DiagnosticoListItem> flatList = [];
+
+    for (final cultura in culturasOrdenadas) {
+      final diagnostics = groupedDiagnostics[cultura]!;
+
+      // Ordena diagnósticos por nome comum da praga usando ordenação assíncrona
+      // Precisamos buscar os nomes das pragas do repositório para ordenar corretamente
+      final diagnosticsComNomes = <MapEntry<dynamic, String>>[];
+      final pragaRepository = sl<PragasHiveRepository>();
+
+      for (final diagnostic in diagnostics) {
+        String nomePraga = '';
+
+        if (diagnostic is Map<String, dynamic>) {
+          nomePraga = (diagnostic['nomePraga'] ?? diagnostic['grupo'] ?? '').toString();
+        } else {
+          try {
+            nomePraga = diagnostic.nomePraga?.toString() ?? diagnostic.grupo?.toString() ?? '';
+          } catch (e) {
+            nomePraga = '';
+          }
+        }
+
+        // Se nomePraga estiver vazio ou for "Não especificado", busca do repositório
+        if (nomePraga.isEmpty || nomePraga == 'Não especificado') {
+          String? fkIdPraga;
+          if (diagnostic is Map<String, dynamic>) {
+            fkIdPraga = diagnostic['fkIdPraga']?.toString();
+          } else {
+            try {
+              fkIdPraga = diagnostic.fkIdPraga?.toString();
+            } catch (e) {
+              // ignore
+            }
+          }
+
+          if (fkIdPraga != null && fkIdPraga.isNotEmpty) {
+            final pragaData = await pragaRepository.getById(fkIdPraga);
+            if (pragaData != null) {
+              final nomeComum = pragaData.nomeComum;
+              // Extrai primeiro nome se houver vírgula ou ponto-e-vírgula
+              if (nomeComum.contains(',')) {
+                nomePraga = nomeComum.split(',').first.trim();
+              } else if (nomeComum.contains(';')) {
+                nomePraga = nomeComum.split(';').first.trim();
+              } else {
+                nomePraga = nomeComum;
+              }
+            }
+          }
+        }
+
+        diagnosticsComNomes.add(MapEntry(diagnostic, nomePraga));
+      }
+
+      // Ordena por nome
+      diagnosticsComNomes.sort((a, b) =>
+        a.value.toLowerCase().trim().compareTo(b.value.toLowerCase().trim())
+      );
+
+      // Extrai apenas os diagnósticos ordenados
+      final diagnosticsOrdenados = diagnosticsComNomes.map((e) => e.key).toList();
+
+      // Adiciona header da cultura
+      flatList.add(
+        _DiagnosticoListItem.header(
+          cultura,
+          diagnosticsOrdenados.length,
+          diagnosticsOrdenados,
         ),
       );
-      widgets.add(SpacingTokens.gapLG);
-      for (int i = 0; i < diagnostics.length; i++) {
-        final diagnostic = diagnostics[i];
-        widgets.add(
-          Builder(
-            builder:
-                (context) => DiagnosticoDefensivoListItemWidget(
-                  diagnostico: diagnostic,
-                  onTap: () => _showDiagnosticoDialog(context, diagnostic),
-                ),
-          ),
-        );
-        if (i < diagnostics.length - 1) {
-          widgets.add(SpacingTokens.gapMD);
-        }
+
+      // Adiciona todos os diagnósticos dessa cultura (já ordenados)
+      for (final diagnostic in diagnosticsOrdenados) {
+        flatList.add(_DiagnosticoListItem.diagnostic(diagnostic));
       }
-      widgets.add(SpacingTokens.gapXL);
-    });
-    return widgets;
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: flatList.length,
+      separatorBuilder: (context, index) {
+        final currentItem = flatList[index];
+        final nextItem =
+            index + 1 < flatList.length ? flatList[index + 1] : null;
+
+        // Espaçamento após header
+        if (currentItem.isHeader) {
+          return const SizedBox(height: 8);
+        }
+
+        // Espaçamento maior antes do próximo header
+        if (nextItem != null && nextItem.isHeader) {
+          return const SizedBox(height: 16);
+        }
+
+        // Divider entre cards
+        return const Divider(height: 1, thickness: 1);
+      },
+      itemBuilder: (context, index) {
+        final item = flatList[index];
+
+        if (item.isHeader) {
+          return DiagnosticoDefensivoCultureSectionWidget(
+            cultura: item.cultura!,
+            diagnosticCount: item.count!,
+            diagnosticos: item.diagnosticos!,
+          );
+        }
+
+        return Builder(
+          builder:
+              (context) => DiagnosticoDefensivoListItemWidget(
+                diagnostico: item.diagnostic!,
+                onTap: () => _showDiagnosticoDialog(context, item.diagnostic!),
+                isDense: true,
+                hasElevation: false,
+              ),
+        );
+      },
+    );
   }
 
   /// Mostra modal de detalhes do diagnóstico
   void _showDiagnosticoDialog(BuildContext context, dynamic diagnostico) {
     DiagnosticoDefensivoDialogWidget.show(context, diagnostico, defensivoName);
+  }
+}
+
+/// Helper class para representar items na lista flat (headers ou diagnósticos)
+class _DiagnosticoListItem {
+  final bool isHeader;
+  final String? cultura;
+  final int? count;
+  final List<dynamic>? diagnosticos;
+  final dynamic diagnostic;
+
+  _DiagnosticoListItem._({
+    required this.isHeader,
+    this.cultura,
+    this.count,
+    this.diagnosticos,
+    this.diagnostic,
+  });
+
+  factory _DiagnosticoListItem.header(
+    String cultura,
+    int count,
+    List<dynamic> diagnosticos,
+  ) {
+    return _DiagnosticoListItem._(
+      isHeader: true,
+      cultura: cultura,
+      count: count,
+      diagnosticos: diagnosticos,
+    );
+  }
+
+  factory _DiagnosticoListItem.diagnostic(dynamic diagnostic) {
+    return _DiagnosticoListItem._(isHeader: false, diagnostic: diagnostic);
   }
 }

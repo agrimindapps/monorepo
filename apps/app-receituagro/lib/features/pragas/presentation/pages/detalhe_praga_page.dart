@@ -38,8 +38,25 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Validação: redireciona para página principal se parâmetros inválidos
+      if (_hasInvalidParameters()) {
+        _redirectToHome();
+        return;
+      }
       _loadInitialData();
     });
+  }
+
+  /// Verifica se os parâmetros são inválidos (null, undefined, vazios)
+  bool _hasInvalidParameters() {
+    return widget.pragaName.isEmpty || widget.pragaScientificName.isEmpty;
+  }
+
+  /// Redireciona para a página principal
+  void _redirectToHome() {
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
   }
 
   @override

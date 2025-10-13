@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -136,10 +137,19 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
               diagnosticoId,
             );
 
+            // Extensão DiagnosticoHiveExtension já busca dados do defensivo internamente
             final diagnosticoData =
                 diagnosticoHive != null
                     ? await diagnosticoHive.toDataMap()
                     : <String, String>{};
+
+            // Debug logs
+            debugPrint('🔍 [DetalheDiagnosticoNotifier] diagnosticoData carregado:');
+            debugPrint('  - Keys: ${diagnosticoData.keys.toList()}');
+            debugPrint('  - ingredienteAtivo: ${diagnosticoData['ingredienteAtivo']}');
+            debugPrint('  - classificacaoToxicologica: ${diagnosticoData['classificacaoToxicologica']}');
+            debugPrint('  - formulacao: ${diagnosticoData['formulacao']}');
+            debugPrint('  - modoAcao: ${diagnosticoData['modoAcao']}');
 
             state = AsyncValue.data(
               currentState
@@ -173,6 +183,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         );
         if (diagnosticoHive != null) {
           final diagnostico = DiagnosticoMapper.fromHive(diagnosticoHive);
+
+          // Extensão DiagnosticoHiveExtension já busca dados do defensivo internamente
           final diagnosticoData = await diagnosticoHive.toDataMap();
 
           state = AsyncValue.data(

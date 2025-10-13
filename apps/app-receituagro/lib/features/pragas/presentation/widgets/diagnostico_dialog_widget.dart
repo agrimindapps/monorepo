@@ -67,22 +67,41 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(24, 24, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              diagnostico.nome,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  diagnostico.nome,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                icon: Icon(
+                  Icons.close,
+                  size: 24,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                splashRadius: 20,
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.close, color: theme.colorScheme.onSurfaceVariant),
-            onPressed: () => Navigator.of(context).pop(),
+          const SizedBox(height: 8),
+          Text(
+            'Ingrediente Ativo: ${diagnostico.ingredienteAtivo}',
+            style: TextStyle(
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -91,65 +110,36 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
 
   /// Conteúdo principal do modal
   Widget _buildContent(BuildContext context) {
-    final theme = Theme.of(context);
-
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Text(
-              'Ingrediente Ativo: ${diagnostico.ingredienteAtivo}',
-              style: TextStyle(
-                fontSize: 14,
-                fontStyle: FontStyle.italic,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+          const SizedBox(height: 16),
+          _DiagnosticoInfoRow(
+            label: 'Dosagem',
+            value: diagnostico.dosagem,
+            icon: Icons.medical_services,
+            isPremium: true,
           ),
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.3,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                _DiagnosticoInfoRow(
-                  label: 'Dosagem',
-                  value: diagnostico.dosagem,
-                  icon: Icons.medication,
-                  isPremium: true,
-                ),
-                const SizedBox(height: 16),
-                const _DiagnosticoInfoRow(
-                  label: 'Aplicação Terrestre',
-                  value: '••• L/ha',
-                  icon: Icons.agriculture,
-                  isPremium: false,
-                ),
-                const SizedBox(height: 16),
-                const _DiagnosticoInfoRow(
-                  label: 'Aplicação Aérea',
-                  value: '••• L/ha',
-                  icon: Icons.flight,
-                  isPremium: false,
-                ),
-                const SizedBox(height: 16),
-                const _DiagnosticoInfoRow(
-                  label: 'Intervalo de Aplicação',
-                  value: '••• dias',
-                  icon: Icons.schedule,
-                  isPremium: false,
-                ),
-              ],
-            ),
+          const _DiagnosticoInfoRow(
+            label: 'Aplicação Terrestre',
+            value: '••• L/ha',
+            icon: Icons.agriculture,
+            isPremium: true,
           ),
-          const SizedBox(height: 20),
+          const _DiagnosticoInfoRow(
+            label: 'Aplicação Aérea',
+            value: '••• L/ha',
+            icon: Icons.flight,
+            isPremium: true,
+          ),
+          const _DiagnosticoInfoRow(
+            label: 'Intervalo de Aplicação',
+            value: '••• dias',
+            icon: Icons.schedule,
+            isPremium: true,
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -157,12 +147,12 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
 
   /// Ações do modal (botões defensivo e diagnóstico)
   Widget _buildActions(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return Container(
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
           Expanded(child: _DefensivoButton(diagnostico: diagnostico, ref: ref)),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: _DiagnosticoButton(
               diagnostico: diagnostico,
@@ -193,70 +183,75 @@ class _DiagnosticoInfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
           ),
-          child: Icon(
-            icon,
-            color: theme.colorScheme.onSurfaceVariant,
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurfaceVariant,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isPremium ? FontWeight.w600 : FontWeight.w300,
-                  color:
-                      isPremium
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.6,
-                          ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        if (!isPremium) ...[
-          const SizedBox(width: 8),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.diamond, size: 12, color: Colors.amber.shade600),
-              const SizedBox(width: 4),
-              Text(
-                'Premium',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.amber.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
+          if (isPremium) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade100,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.shade300),
               ),
-            ],
-          ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.diamond, size: 12, color: Colors.amber.shade700),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Premium',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amber.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -270,6 +265,8 @@ class _DefensivoButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
     return OutlinedButton(
       onPressed: () {
         const fabricante = 'Fabricante Desconhecido';
@@ -289,10 +286,20 @@ class _DefensivoButton extends ConsumerWidget {
         }
       },
       style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        side: BorderSide(color: theme.colorScheme.outline),
       ),
-      child: const Text('Defensivo'),
+      child: Text(
+        'Defensivo',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface,
+        ),
+      ),
     );
   }
 }
@@ -330,12 +337,18 @@ class _DiagnosticoButton extends ConsumerWidget {
         }
       },
       style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 0,
       ),
-      child: const Text('Diagnóstico'),
+      child: const Text(
+        'Diagnóstico',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }

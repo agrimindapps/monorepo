@@ -14,7 +14,7 @@ import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
-import '../../../defensivos/domain/entities/defensivo_details_entity.dart';
+import '../../domain/entities/defensivo_details_entity.dart';
 import '../providers/detalhe_defensivo_notifier.dart';
 import '../widgets/detalhe/comentarios_tab_widget.dart';
 import '../widgets/detalhe/defensivo_info_cards_widget.dart';
@@ -52,8 +52,25 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_handleTabChange);
     Future.microtask(() {
+      // Validação: redireciona para página principal se parâmetros inválidos
+      if (_hasInvalidParameters()) {
+        _redirectToHome();
+        return;
+      }
       _loadData();
     });
+  }
+
+  /// Verifica se os parâmetros são inválidos (null, undefined, vazios)
+  bool _hasInvalidParameters() {
+    return widget.defensivoName.isEmpty || widget.fabricante.isEmpty;
+  }
+
+  /// Redireciona para a página principal
+  void _redirectToHome() {
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
   }
 
   void _handleTabChange() {

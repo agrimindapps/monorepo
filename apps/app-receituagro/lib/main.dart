@@ -7,6 +7,7 @@ import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/di/receituagro_data_setup.dart';
 import 'core/navigation/app_router.dart' as app_router;
+import 'core/navigation/widgets/navigation_shell.dart';
 import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/culturas_data_loader.dart';
@@ -22,7 +23,6 @@ import 'core/utils/diagnostico_logger.dart';
 import 'core/utils/receita_agro_data_inspector_initializer.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_service.dart';
-import 'features/navigation/main_navigation_page.dart';
 import 'firebase_options.dart';
 
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -293,7 +293,8 @@ class ReceitaAgroApp extends ConsumerWidget {
       theme: ReceitaAgroTheme.lightTheme,
       darkTheme: ReceitaAgroTheme.darkTheme,
       themeMode: themeMode,
-      home: const MainNavigationPage(),
+      builder: (context, child) => NavigationShell(child: child),
+      initialRoute: '/home-defensivos',
       onGenerateRoute: app_router.AppRouter.generateRoute,
       navigatorKey: NavigationService.navigatorKey,
       debugShowCheckedModeBanner: false,

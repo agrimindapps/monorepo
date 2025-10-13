@@ -23,20 +23,24 @@ class CulturaSectionMockupWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return RepaintBoundary(
       child: Container(
         width: double.infinity,
-        margin: DiagnosticoMockupTokens.sectionMargin,
-        padding: DiagnosticoMockupTokens.sectionPadding,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: DiagnosticoMockupTokens.sectionBackground,
-          borderRadius: BorderRadius.circular(
-            DiagnosticoMockupTokens.sectionBorderRadius,
+          color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
           children: [
-            Expanded(child: _buildText()),
+            Expanded(child: _buildText(theme)),
+            _buildBadge(theme),
           ],
         ),
       ),
@@ -44,17 +48,36 @@ class CulturaSectionMockupWidget extends StatelessWidget {
   }
 
 
-  /// Texto da cultura com contador
-  Widget _buildText() {
-    final diagnosticoText = diagnosticoCount == 1 
-        ? '1 diagnóstico'
-        : '$diagnosticoCount diagnósticos';
-    
+  /// Texto da cultura
+  Widget _buildText(ThemeData theme) {
     return Text(
-      '$cultura ($diagnosticoText)',
-      style: DiagnosticoMockupTokens.sectionTitleStyle,
+      cultura,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  /// Badge com contador de diagnósticos
+  Widget _buildBadge(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '$diagnosticoCount',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onPrimary,
+        ),
+      ),
     );
   }
 }
@@ -80,22 +103,27 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     Widget child = Container(
       width: double.infinity,
-      margin: DiagnosticoMockupTokens.sectionMargin,
-      padding: DiagnosticoMockupTokens.sectionPadding,
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: DiagnosticoMockupTokens.sectionBackground,
-        borderRadius: BorderRadius.circular(
-          DiagnosticoMockupTokens.sectionBorderRadius,
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
         children: [
-          Expanded(child: _buildText()),
+          Expanded(child: _buildText(theme)),
           if (trailing != null) ...[
             const SizedBox(width: 8),
             trailing!,
+          ] else ...[
+            _buildBadge(theme),
           ],
           if (isCollapsible) ...[
             const SizedBox(width: 8),
@@ -111,9 +139,7 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(
-              DiagnosticoMockupTokens.sectionBorderRadius,
-            ),
+            borderRadius: BorderRadius.circular(12),
             child: child,
           ),
         ),
@@ -124,17 +150,36 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
   }
 
 
-  /// Texto da cultura com contador
-  Widget _buildText() {
-    final diagnosticoText = diagnosticoCount == 1 
-        ? '1 diagnóstico'
-        : '$diagnosticoCount diagnósticos';
-    
+  /// Texto da cultura
+  Widget _buildText(ThemeData theme) {
     return Text(
-      '$cultura ($diagnosticoText)',
-      style: DiagnosticoMockupTokens.sectionTitleStyle,
+      cultura,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  /// Badge com contador de diagnósticos
+  Widget _buildBadge(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '$diagnosticoCount',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onPrimary,
+        ),
+      ),
     );
   }
 

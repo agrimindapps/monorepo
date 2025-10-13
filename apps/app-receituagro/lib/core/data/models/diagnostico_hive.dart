@@ -160,6 +160,10 @@ class DiagnosticoHive extends HiveObject {
   String get situacao => 'Ativo'; // Situação padrão
   String get tipo => 'Diagnóstico'; // Tipo padrão
 
+  // Nota: O método toDataMap() foi movido para DiagnosticoHiveExtension
+  // para prover resolução dinâmica de dados relacionados (defensivo, cultura, praga).
+  // Ver: core/extensions/diagnostico_hive_extension.dart
+
   @override
   String toString() {
     return 'DiagnosticoHive{objectId: $objectId, nomeDefensivo: $nomeDefensivo, nomePraga: $nomePraga}';

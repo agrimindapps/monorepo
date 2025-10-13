@@ -264,12 +264,19 @@ extension DiagnosticoHiveExtension on DiagnosticoHive {
       'epocaAplicacao': displayEpocaAplicacao,
       'ingredienteAtivo': ingredienteAtivo,
       'toxico': toxico,
+      'classificacaoToxicologica': toxico, // Alias para compatibilidade com widgets
       'formulacao': formulacao,
       'modoAcao': modoAcao,
       'intervaloSeguranca': 'Consulte a bula do produto',
       'classAmbiental': 'Consulte a bula do produto',
+      'classificacaoAmbiental': 'Consulte a bula do produto', // Alias para compatibilidade
       'classeAgronomica': 'Consulte a bula do produto',
       'mapa': 'Consulte o registro MAPA',
+      'numeroAplicacoes': maxAplicacaoT ?? 'N/A', // Para instruções de aplicação
+      'intervaloAplicacoes': intervalo ?? 'N/A',
+      'volumeCalda': minAplicacaoA != null && maxAplicacaoA != null
+          ? '$minAplicacaoA - $maxAplicacaoA $umA'
+          : 'N/A',
       'tecnologia':
           'Aplicar conforme recomendações técnicas. Consulte um engenheiro agrônomo.',
     };

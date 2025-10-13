@@ -31,45 +31,58 @@ class DiagnosticoMockupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return RepaintBoundary(
       child: Container(
-        margin: DiagnosticoMockupTokens.cardMargin,
-        child: Material(
-          color: DiagnosticoMockupTokens.cardBackground,
-          borderRadius: BorderRadius.circular(
-            DiagnosticoMockupTokens.cardBorderRadius,
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        // Sem boxShadow para visual plano como na página de defensivos
+        child: ListTile(
+          onTap: onTap,
+          dense: true, // Modo denso
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 0.0,
           ),
-          elevation: 0, // Usaremos box shadow customizado
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(
-              DiagnosticoMockupTokens.cardBorderRadius,
+          leading: _buildIcon(),
+          title: Text(
+            diagnostico.nome,
+            style: TextStyle(
+              fontSize: 15, // Fonte ligeiramente menor
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
             ),
-            child: Container(
-              constraints: const BoxConstraints(
-                minHeight: DiagnosticoMockupTokens.cardHeight,
-              ),
-              padding: DiagnosticoMockupTokens.cardPadding,
-              decoration: BoxDecoration(
-                color: DiagnosticoMockupTokens.getCardBackgroundColor(context),
-                borderRadius: BorderRadius.circular(
-                  DiagnosticoMockupTokens.cardBorderRadius,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 2),
+              Text(
+                diagnostico.ingredienteAtivo,
+                style: TextStyle(
+                  fontSize: 13, // Fonte menor
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-                boxShadow: DiagnosticoMockupTokens.getCardShadow(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              child: Row(
-                children: [
-                  _buildIcon(),
-                  const SizedBox(
-                      width: DiagnosticoMockupTokens.cardInternalSpacing),
-                  Expanded(child: _buildContent(context)),
-                  const SizedBox(
-                      width: DiagnosticoMockupTokens.cardInternalSpacing),
-                  _buildTrailing(),
-                ],
+              const SizedBox(height: 2),
+              Text(
+                _getDosageText(),
+                style: TextStyle(
+                  fontSize: 11, // Fonte menor
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.primary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
+            ],
           ),
+          trailing: _buildTrailing(),
         ),
       ),
     );
@@ -89,42 +102,6 @@ class DiagnosticoMockupCard extends StatelessWidget {
         color: Colors.white,
         size: 20,
       ),
-    );
-  }
-
-  /// Conteúdo principal: nome, ingrediente ativo e dosagem
-  Widget _buildContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          diagnostico.nome,
-          style: DiagnosticoMockupTokens.cardProductNameStyle.copyWith(
-            color: DiagnosticoMockupTokens.getTextColor(context),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 1),
-        Text(
-          diagnostico.ingredienteAtivo,
-          style: DiagnosticoMockupTokens.cardIngredientStyle.copyWith(
-            color: DiagnosticoMockupTokens.getTextColor(context, isSecondary: true),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 1),
-        Text(
-          _getDosageText(),
-          style: DiagnosticoMockupTokens.cardDosageStyle.copyWith(
-            color: DiagnosticoMockupTokens.getTextColor(context, isSecondary: true),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
     );
   }
 
@@ -204,10 +181,7 @@ mixin DiagnosticoMockupCardFactory {
     required DiagnosticoModel diagnostico,
     required VoidCallback onTap,
   }) {
-    return DiagnosticoMockupCardPremium(
-      diagnostico: diagnostico,
-      onTap: onTap,
-    );
+    return DiagnosticoMockupCardPremium(diagnostico: diagnostico, onTap: onTap);
   }
 
   /// Cria card com estado premium explícito

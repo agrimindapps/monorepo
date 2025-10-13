@@ -31,11 +31,32 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Validação: redireciona para página principal se parâmetros inválidos
+      if (_hasInvalidParameters()) {
+        _redirectToHome();
+        return;
+      }
+
       final notifier = ref.read(detalheDiagnosticoNotifierProvider.notifier);
       await notifier.loadDiagnosticoData(widget.diagnosticoId);
       await notifier.loadFavoritoState(widget.diagnosticoId);
       await notifier.loadPremiumStatus();
     });
+  }
+
+  /// Verifica se os parâmetros são inválidos (null, undefined, vazios)
+  bool _hasInvalidParameters() {
+    return widget.diagnosticoId.isEmpty ||
+           widget.nomeDefensivo.isEmpty ||
+           widget.nomePraga.isEmpty ||
+           widget.cultura.isEmpty;
+  }
+
+  /// Redireciona para a página principal
+  void _redirectToHome() {
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
   }
 
   @override

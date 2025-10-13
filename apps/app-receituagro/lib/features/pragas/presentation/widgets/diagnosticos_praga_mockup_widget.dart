@@ -106,11 +106,7 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
   ) {
     final groupedDiagnostics = _groupDiagnosticsByCulture(diagnosticos);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _buildGroupedMockupWidgets(groupedDiagnostics, context),
-    );
+    return _buildGroupedMockupWidgets(groupedDiagnostics, context);
   }
 
   /// Agrupa diagnósticos por cultura
@@ -126,39 +122,74 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
     return grouped;
   }
 
-  /// Constrói widgets agrupados usando componentes mockup
-  List<Widget> _buildGroupedMockupWidgets(
+  /// Constrói widgets agrupados usando ListView.separated
+  Widget _buildGroupedMockupWidgets(
     Map<String, List<DiagnosticoModel>> groupedDiagnostics,
     BuildContext context,
   ) {
-    final List<Widget> widgets = [];
+    // Ordena culturas alfabeticamente
+    final culturasOrdenadas = groupedDiagnostics.keys.toList()..sort();
 
-    groupedDiagnostics.forEach((cultura, diagnostics) {
-      widgets.add(
-        CulturaSectionMockupFactory.basic(
-          cultura: cultura,
-          diagnosticoCount: diagnostics.length,
-        ),
-      );
-      widgets.add(
-        const SizedBox(height: DiagnosticoMockupTokens.sectionToCardSpacing),
-      );
-      for (int i = 0; i < diagnostics.length; i++) {
-        final diagnostic = diagnostics[i];
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: DiagnosticoMockupCardFactory.create(
-              diagnostico: diagnostic,
-              onTap: () => _showDiagnosticoDialog(context, diagnostic),
-            ),
+    // Cria lista flat com headers e itens para ListView.separated
+    final List<_ListItem> flatList = [];
+
+    for (final cultura in culturasOrdenadas) {
+      final diagnostics = groupedDiagnostics[cultura]!;
+
+      // Ordena diagnósticos por nome do defensivo
+      final diagnosticsOrdenados = List<DiagnosticoModel>.from(diagnostics)
+        ..sort((a, b) => a.nome.toLowerCase().compareTo(b.nome.toLowerCase()));
+
+      // Adiciona header da cultura
+      flatList.add(_ListItem.header(cultura, diagnosticsOrdenados.length));
+
+      // Adiciona todos os diagnósticos dessa cultura (já ordenados)
+      for (final diagnostic in diagnosticsOrdenados) {
+        flatList.add(_ListItem.diagnostic(diagnostic));
+      }
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: flatList.length,
+      separatorBuilder: (context, index) {
+        final currentItem = flatList[index];
+        final nextItem =
+            index + 1 < flatList.length ? flatList[index + 1] : null;
+
+        // Espaçamento após header
+        if (currentItem.isHeader) {
+          return const SizedBox(height: 8);
+        }
+
+        // Espaçamento maior antes do próximo header
+        if (nextItem != null && nextItem.isHeader) {
+          return const SizedBox(height: 16);
+        }
+
+        // Divider entre cards (igual à página de defensivos)
+        return const Divider(height: 1, thickness: 1);
+      },
+      itemBuilder: (context, index) {
+        final item = flatList[index];
+
+        if (item.isHeader) {
+          return CulturaSectionMockupFactory.basic(
+            cultura: item.cultura!,
+            diagnosticoCount: item.count!,
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: DiagnosticoMockupCardFactory.create(
+            diagnostico: item.diagnostic!,
+            onTap: () => _showDiagnosticoDialog(context, item.diagnostic!),
           ),
         );
-      }
-      widgets.add(const SizedBox(height: 24));
-    });
-
-    return widgets;
+      },
+    );
   }
 
   /// Mostra modal de detalhes do diagnóstico (mantém funcionalidade original)
@@ -288,5 +319,28 @@ class _DiagnosticosPragaMockupDebugWidgetState
           }),
       child: Container(height: 4, color: Colors.transparent),
     );
+  }
+}
+
+/// Helper class para representar items na lista flat (headers ou diagnósticos)
+class _ListItem {
+  final bool isHeader;
+  final String? cultura;
+  final int? count;
+  final DiagnosticoModel? diagnostic;
+
+  _ListItem._({
+    required this.isHeader,
+    this.cultura,
+    this.count,
+    this.diagnostic,
+  });
+
+  factory _ListItem.header(String cultura, int count) {
+    return _ListItem._(isHeader: true, cultura: cultura, count: count);
+  }
+
+  factory _ListItem.diagnostic(DiagnosticoModel diagnostic) {
+    return _ListItem._(isHeader: false, diagnostic: diagnostic);
   }
 }

@@ -15,7 +15,20 @@ class DiagnosticosStatsService implements IDiagnosticosStatsService {
 
   @override
   Future<Either<Failure, DiagnosticosStats>> getStatistics() async {
-    return _repository.getStatistics();
+    final result = await _repository.getStatistics();
+    return result.fold(
+      (failure) => Left(failure),
+      (stats) => Right(DiagnosticosStats(
+        total: stats['total'] as int,
+        completos: 0, // TODO: Calculate from data
+        parciais: 0, // TODO: Calculate from data
+        incompletos: 0, // TODO: Calculate from data
+        porDefensivo: {}, // TODO: Calculate from data
+        porCultura: {}, // TODO: Calculate from data
+        porPraga: {}, // TODO: Calculate from data
+        topDiagnosticos: [], // TODO: Calculate from data
+      )),
+    );
   }
 
   @override
@@ -34,7 +47,18 @@ class DiagnosticosStatsService implements IDiagnosticosStatsService {
       );
     }
 
-    return _repository.getPopularDiagnosticos(limit: limit);
+    final result = await _repository.getPopularDiagnosticos(limit: limit);
+    return result.fold(
+      (failure) => Left(failure),
+      (diagnosticos) => Right(
+        diagnosticos.map((d) => DiagnosticoPopular(
+          defensivo: d.nomeDefensivo ?? d.idDefensivo,
+          cultura: d.nomeCultura ?? d.idCultura,
+          praga: d.nomePraga ?? d.idPraga,
+          count: 0, // Not tracked in current implementation
+        )).toList(),
+      ),
+    );
   }
 
   @override
@@ -61,7 +85,11 @@ class DiagnosticosStatsService implements IDiagnosticosStatsService {
       }
     }
 
-    return _repository.countByFilters(filters);
+    return _repository.countByFilters(
+      defensivo: filters.idDefensivo,
+      cultura: filters.idCultura,
+      praga: filters.idPraga,
+    );
   }
 
   // ========== Client-side stats methods ==========

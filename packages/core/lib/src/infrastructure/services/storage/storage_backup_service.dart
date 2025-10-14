@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+import '../../../shared/utils/app_error.dart';
 import '../../../shared/utils/result.dart';
 
 /// Serviço de backup e restore para storage
@@ -274,19 +275,29 @@ class BackupInfo {
 }
 
 /// Erro de backup
-class StorageBackupError implements Exception {
-  final String message;
-  final String code;
-  final String? details;
-  final StackTrace? stackTrace;
-
+class StorageBackupError extends AppError {
   StorageBackupError({
-    required this.message,
-    required this.code,
-    this.details,
-    this.stackTrace,
-  });
+    required super.message,
+    required super.code,
+    super.details,
+    super.stackTrace,
+  }) : super(category: ErrorCategory.storage);
 
   @override
-  String toString() => 'StorageBackupError($code): $message';
+  StorageBackupError copyWith({
+    String? message,
+    String? code,
+    String? details,
+    StackTrace? stackTrace,
+    DateTime? timestamp,
+    ErrorSeverity? severity,
+    ErrorCategory? category,
+  }) {
+    return StorageBackupError(
+      message: message ?? this.message,
+      code: code ?? this.code,
+      details: details ?? this.details,
+      stackTrace: stackTrace ?? this.stackTrace,
+    );
+  }
 }

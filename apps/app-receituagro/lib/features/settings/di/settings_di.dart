@@ -1,24 +1,21 @@
 import 'package:core/core.dart';
 
-import '../data/repositories/user_settings_repository_impl.dart';
-import '../domain/repositories/i_user_settings_repository.dart';
-import '../domain/usecases/get_user_settings_usecase.dart';
-import '../domain/usecases/update_user_settings_usecase.dart';
+// ❌ REMOVIDO: user_settings_repository_impl.dart (via @LazySingleton)
+// ❌ REMOVIDO: i_user_settings_repository.dart (via @LazySingleton)
+// ❌ REMOVIDO: get_user_settings_usecase.dart (via @injectable)
+// ❌ REMOVIDO: update_user_settings_usecase.dart (via @injectable)
 
 /// Dependency Injection setup for Settings module following Clean Architecture.
-/// Registers all dependencies required for the settings feature.
+///
+/// ⚠️ IMPORTANTE: IUserSettingsRepository e use cases agora via @LazySingleton/@injectable
+/// Registra apenas ProfileImageService (não tem @injectable)
 abstract class SettingsDI {
   static void register(GetIt getIt) {
-    getIt.registerLazySingleton<IUserSettingsRepository>(
-      () => UserSettingsRepositoryImpl(),
-    );
-    getIt.registerFactory<GetUserSettingsUseCase>(
-      () => GetUserSettingsUseCase(getIt<IUserSettingsRepository>()),
-    );
+    // ❌ REMOVIDO: IUserSettingsRepository (via @LazySingleton)
+    // ❌ REMOVIDO: GetUserSettingsUseCase (via @injectable)
+    // ❌ REMOVIDO: UpdateUserSettingsUseCase (via @injectable)
 
-    getIt.registerFactory<UpdateUserSettingsUseCase>(
-      () => UpdateUserSettingsUseCase(getIt<IUserSettingsRepository>()),
-    );
+    // ✅ ProfileImageService ainda precisa de registro manual (sem @injectable)
     getIt.registerLazySingleton<ProfileImageService>(
       () => ProfileImageServiceFactory.createDefault(),
     );
@@ -27,17 +24,9 @@ abstract class SettingsDI {
 
   /// Unregister all dependencies (useful for testing)
   static void unregister(GetIt getIt) {
-    if (getIt.isRegistered<UpdateUserSettingsUseCase>()) {
-      getIt.unregister<UpdateUserSettingsUseCase>();
-    }
-
-    if (getIt.isRegistered<GetUserSettingsUseCase>()) {
-      getIt.unregister<GetUserSettingsUseCase>();
-    }
-
-    if (getIt.isRegistered<IUserSettingsRepository>()) {
-      getIt.unregister<IUserSettingsRepository>();
-    }
+    // ❌ REMOVIDO: UpdateUserSettingsUseCase (via @injectable)
+    // ❌ REMOVIDO: GetUserSettingsUseCase (via @injectable)
+    // ❌ REMOVIDO: IUserSettingsRepository (via @LazySingleton)
 
     // ProfileRepository now managed by Riverpod
 

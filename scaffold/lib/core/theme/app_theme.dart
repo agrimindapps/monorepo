@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'color_schemes.dart';
+
 import '../config/app_spacing.dart';
+import 'color_schemes.dart';
 
 /// Application theme configuration
 /// Provides light and dark themes with consistent styling
@@ -22,8 +23,9 @@ class AppTheme {
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         elevation: 2,
+      ).copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
         ),
@@ -72,17 +74,18 @@ class AppTheme {
       ),
 
       // Dialog Theme
-      dialogTheme: DialogTheme(
+      dialogTheme: const DialogThemeData().copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusModal),
         ),
       ),
 
       // Bottom Sheet Theme
-      bottomSheetTheme: BottomSheetThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.borderRadiusModal),
+      bottomSheetTheme: const BottomSheetThemeData().copyWith(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(AppSpacing.borderRadiusModal),
+            topRight: Radius.circular(AppSpacing.borderRadiusModal),
           ),
         ),
       ),
@@ -112,8 +115,9 @@ class AppTheme {
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         elevation: 2,
+      ).copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusCard),
         ),
@@ -162,17 +166,18 @@ class AppTheme {
       ),
 
       // Dialog Theme
-      dialogTheme: DialogTheme(
+      dialogTheme: const DialogThemeData().copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusModal),
         ),
       ),
 
       // Bottom Sheet Theme
-      bottomSheetTheme: BottomSheetThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.borderRadiusModal),
+      bottomSheetTheme: const BottomSheetThemeData().copyWith(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(AppSpacing.borderRadiusModal),
+            topRight: Radius.circular(AppSpacing.borderRadiusModal),
           ),
         ),
       ),

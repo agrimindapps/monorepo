@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/account/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
+import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/data_export/presentation/pages/data_export_page.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/home/pages/landing_page.dart';
@@ -144,14 +145,29 @@ class AppRouter {
         GoRoute(
           path: login,
           name: 'login',
-          builder:
-              (context, state) => const AuthPage(initialTab: 0), // Login tab
+          builder: (context, state) {
+            // Web: usa página de login simplificada (sem cadastro)
+            // Mobile/Desktop App: usa página completa (com login e cadastro)
+            return kIsWeb
+                ? const WebLoginPage()
+                : const AuthPage(initialTab: 0); // Login tab
+          },
         ),
         GoRoute(
           path: register,
           name: 'register',
-          builder:
-              (context, state) => const AuthPage(initialTab: 1), // Register tab
+          builder: (context, state) {
+            // Web: redireciona para login (cadastro não disponível)
+            // Mobile/Desktop App: mostra aba de registro
+            if (kIsWeb) {
+              // Redirect to login on web
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.go(login);
+              });
+              return const SizedBox.shrink();
+            }
+            return const AuthPage(initialTab: 1); // Register tab
+          },
         ),
         ShellRoute(
           builder:

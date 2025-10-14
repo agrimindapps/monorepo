@@ -45,5 +45,37 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Permissions for App Plantis -->
+	<key>NSCameraUsageDescription</key>
+	<string>O App Plantis precisa acessar a câmera para fotografar suas plantas e adicionar imagens ao cadastro.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>O App Plantis precisa acessar sua galeria de fotos para anexar imagens das plantas.</string>
+
+	<!-- Network permissions -->
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_dartobservatory._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>O App Plantis precisa acessar a rede local para sincronização de dados e debugging durante o desenvolvimento.</string>
+
+	<!-- Background modes for notifications and data sync -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+
+	<!-- Google Mobile Ads -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 </dict>
 </plist>

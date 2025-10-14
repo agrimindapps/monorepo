@@ -12,6 +12,7 @@ import '../../features/pragas/presentation/pages/detalhe_praga_page.dart';
 import '../../features/pragas/presentation/pages/home_pragas_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart';
+import 'widgets/navigation_shell.dart';
 
 /// Classe responsável por gerenciar o roteamento da aplicação
 /// Implementa padrão Clean Architecture para navegação
@@ -20,6 +21,7 @@ abstract final class AppRouter {
   const AppRouter._();
 
   /// Helper para criar rotas com metadata (showBottomNav)
+  /// ⚠️ IMPORTANTE: Envolve páginas com NavigationShell para bottom nav persistente
   static Route<T> _buildRoute<T>({
     required Widget page,
     required RouteSettings settings,
@@ -33,7 +35,8 @@ abstract final class AppRouter {
     };
 
     return MaterialPageRoute<T>(
-      builder: (_) => page,
+      // ✅ Envolve com NavigationShell para bottom nav persistente
+      builder: (_) => NavigationShell(child: page),
       settings: RouteSettings(
         name: settings.name,
         arguments: combinedArgs,

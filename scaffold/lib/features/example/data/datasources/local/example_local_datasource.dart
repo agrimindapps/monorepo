@@ -1,11 +1,10 @@
-import 'package:injectable/injectable.dart';
 import 'package:hive/hive.dart';
-import '../../models/example_model.dart';
+
 import '../../../../../core/config/app_config.dart.template';
+import '../../models/example_model.dart';
 
 /// Local data source for examples using Hive
 /// Handles all local storage operations
-@injectable
 class ExampleLocalDataSource {
   ExampleLocalDataSource();
 
@@ -85,7 +84,7 @@ class ExampleLocalDataSource {
   /// Save multiple examples (batch operation)
   Future<void> saveAll(List<ExampleModel> models) async {
     try {
-      final entries = {for (var model in models) model.id: model};
+      final entries = {for (final model in models) model.id: model};
       await _box.putAll(entries);
     } catch (e) {
       throw Exception('Failed to save examples to local storage: $e');

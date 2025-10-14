@@ -16,17 +16,29 @@ class DiagnosticosMetadataService implements IDiagnosticosMetadataService {
 
   @override
   Future<Either<Failure, List<String>>> getAllDefensivos() async {
-    return _repository.getAllDefensivos();
+    final result = await _repository.getAllDefensivos();
+    return result.fold(
+      (failure) => Left(failure),
+      (maps) => Right(maps.map((m) => m['id'] as String).toList()),
+    );
   }
 
   @override
   Future<Either<Failure, List<String>>> getAllCulturas() async {
-    return _repository.getAllCulturas();
+    final result = await _repository.getAllCulturas();
+    return result.fold(
+      (failure) => Left(failure),
+      (maps) => Right(maps.map((m) => m['id'] as String).toList()),
+    );
   }
 
   @override
   Future<Either<Failure, List<String>>> getAllPragas() async {
-    return _repository.getAllPragas();
+    final result = await _repository.getAllPragas();
+    return result.fold(
+      (failure) => Left(failure),
+      (maps) => Right(maps.map((m) => m['id'] as String).toList()),
+    );
   }
 
   @override

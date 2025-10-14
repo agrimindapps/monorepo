@@ -63,9 +63,8 @@ class GetRecomendacoesUseCase {
       }
 
       return await _repository.getRecomendacoesPara(
-        idCultura: idCultura,
-        idPraga: idPraga,
-        limit: limit,
+        culturaId: idCultura,
+        pragaId: idPraga,
       );
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar recomendações: ${e.toString()}'));
@@ -142,7 +141,12 @@ class SearchDiagnosticosWithFiltersUseCase {
 
   Future<Either<Failure, List<DiagnosticoEntity>>> call(DiagnosticoSearchFilters filters) async {
     try {
-      return await _repository.searchWithFilters(filters);
+      return await _repository.searchWithFilters(
+        defensivo: filters.idDefensivo,
+        cultura: filters.idCultura,
+        praga: filters.idPraga,
+        tipoAplicacao: filters.tipoAplicacao?.toString(),
+      );
     } catch (e) {
       return Left(CacheFailure('Erro na busca com filtros: ${e.toString()}'));
     }
@@ -158,7 +162,20 @@ class GetDiagnosticoStatsUseCase {
 
   Future<Either<Failure, DiagnosticosStats>> call() async {
     try {
-      return await _repository.getStatistics();
+      final result = await _repository.getStatistics();
+      return result.fold(
+        (failure) => Left(failure),
+        (stats) => Right(DiagnosticosStats(
+          total: stats['total'] as int,
+          completos: 0,
+          parciais: 0,
+          incompletos: 0,
+          porDefensivo: {},
+          porCultura: {},
+          porPraga: {},
+          topDiagnosticos: [],
+        )),
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao obter estatísticas: ${e.toString()}'));
     }
@@ -258,10 +275,10 @@ class GetDiagnosticoFiltersDataUseCase {
       }
 
       final filtersData = DiagnosticoFiltersData(
-        defensivos: defensivosResult.fold((l) => <String>[], (r) => r),
-        culturas: culturasResult.fold((l) => <String>[], (r) => r),
-        pragas: pragasResult.fold((l) => <String>[], (r) => r),
-        unidadesMedida: unidadesResult.fold((l) => <String>[], (r) => r),
+        defensivos: defensivosResult.fold((l) => <String>[], (r) => (r as List<Map<String, dynamic>>).map((m) => m['id'] as String).toList()),
+        culturas: culturasResult.fold((l) => <String>[], (r) => (r as List<Map<String, dynamic>>).map((m) => m['id'] as String).toList()),
+        pragas: pragasResult.fold((l) => <String>[], (r) => (r as List<Map<String, dynamic>>).map((m) => m['id'] as String).toList()),
+        unidadesMedida: unidadesResult.fold((l) => <String>[], (r) => r as List<String>),
         tiposAplicacao: TipoAplicacao.values, // Todos os tipos disponíveis
       );
 

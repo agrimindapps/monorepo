@@ -14,5 +14,6 @@ export '../providers/auth_providers.dart';
 export 'auth_notifier.dart';
 export 'login_form_notifier.dart';
 export 'login_form_state.dart';
+export 'profile_notifier.dart';
 export 'social_login_notifier.dart';
 export 'social_login_state.dart';

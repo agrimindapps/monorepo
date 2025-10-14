@@ -343,7 +343,7 @@ class EnhancedStorageService {
     }
 
     try {
-      if (_memoryCache.containsKey(key)) {
+      if (_cacheManager.contains(key)) {
         return Result.success(true);
       }
       final storageChecks = [
@@ -390,7 +390,7 @@ class EnhancedStorageService {
       final Set<String> allKeys = {};
 
       if (storageType == null || storageType == StorageType.memory) {
-        allKeys.addAll(_memoryCache.keys);
+        allKeys.addAll(_cacheManager.keys);
       }
 
       if (storageType == null || storageType == StorageType.hive) {
@@ -451,8 +451,7 @@ class EnhancedStorageService {
 
     try {
       if (storageType == null || storageType == StorageType.memory) {
-        _memoryCache.clear();
-        _memoryCacheSize = 0;
+        _cacheManager.clear();
       }
 
       if (storageType == null || storageType == StorageType.hive) {
@@ -513,8 +512,9 @@ class EnhancedStorageService {
 
     try {
       final stats = StorageStats();
-      stats.memoryCacheItems = _memoryCache.length;
-      stats.memoryCacheSize = _memoryCacheSize;
+      final cacheStats = _cacheManager.getStats();
+      stats.memoryCacheItems = cacheStats.items;
+      stats.memoryCacheSize = cacheStats.sizeInBytes;
       for (final entry in _hiveBoxes.entries) {
         final box = entry.value;
         stats.hiveBoxes[entry.key] = {'items': box.length, 'path': box.path};
@@ -533,11 +533,12 @@ class EnhancedStorageService {
         stats.fileStorageItems = fileCount;
         stats.fileStorageSize = totalSize;
       }
-      stats.readOperations = _readOperations;
-      stats.writeOperations = _writeOperations;
-      stats.cacheHits = _cacheHits;
-      stats.cacheMisses = _cacheMisses;
-      stats.cacheHitRatio = _cacheHits / (_cacheHits + _cacheMisses);
+      final metrics = _metricsService.getMetrics();
+      stats.readOperations = metrics.readOperations;
+      stats.writeOperations = metrics.writeOperations;
+      stats.cacheHits = metrics.cacheHits;
+      stats.cacheMisses = metrics.cacheMisses;
+      stats.cacheHitRatio = metrics.cacheHitRatio;
 
       return Result.success(stats);
     } catch (e, stackTrace) {
@@ -678,23 +679,6 @@ class EnhancedStorageService {
     }
   }
 
-  StorageType _determineStorageType<T>(T value, bool encrypt) {
-    if (encrypt) return StorageType.secureStorage;
-
-    if (value is String && value.length < 1000) {
-      return StorageType.sharedPreferences;
-    }
-
-    if (value is int || value is double || value is bool) {
-      return StorageType.sharedPreferences;
-    }
-
-    if (value is Uint8List || (value is String && value.length > 10000)) {
-      return StorageType.file;
-    }
-
-    return StorageType.hive;
-  }
 
   Future<dynamic> _processValue<T>(T value, bool encrypt, bool compress) async {
     dynamic processedValue = value;
@@ -741,7 +725,7 @@ class EnhancedStorageService {
       case StorageType.file:
         return _storeInFile(key, value);
       case StorageType.memory:
-        _addToMemoryCache(key, value, ttl);
+        _cacheManager.add(key, value, ttl);
         return Result.success(null);
     }
   }
@@ -761,7 +745,7 @@ class EnhancedStorageService {
       case StorageType.file:
         return _retrieveFromFile<T>(key);
       case StorageType.memory:
-        final value = _getFromMemoryCache<T>(key);
+        final value = _cacheManager.get<T>(key);
         return Result.success(value);
     }
   }
@@ -918,74 +902,6 @@ class EnhancedStorageService {
     }
   }
 
-  bool _shouldCacheInMemory(String key, dynamic value) {
-    if (_memoryCacheSize >= _maxMemoryCacheSize) return false;
-
-    if (value == null) return false;
-
-    int valueSize = 0;
-    if (value is String) {
-      valueSize = value.length * 2; // Aproximação para UTF-16
-    } else if (value is Uint8List) {
-      valueSize = value.length;
-    } else {
-      valueSize = value.toString().length * 2;
-    }
-
-    return valueSize < 1024 * 1024; // Máximo 1MB por item
-  }
-
-  void _addToMemoryCache(String key, dynamic value, Duration? ttl) {
-    final item = _CacheItem(value: value, timestamp: DateTime.now(), ttl: ttl);
-    final existing = _memoryCache[key];
-    if (existing != null) {
-      _memoryCacheSize -= existing.size;
-    }
-
-    _memoryCache[key] = item;
-    _memoryCacheSize += item.size;
-    _cleanupMemoryCache();
-  }
-
-  T? _getFromMemoryCache<T>(String key) {
-    final item = _memoryCache[key];
-    if (item == null) return null;
-    if (item.isExpired) {
-      _memoryCache.remove(key);
-      _memoryCacheSize -= item.size;
-      return null;
-    }
-
-    return item.value as T?;
-  }
-
-  void _cleanupMemoryCache() {
-    final expiredKeys =
-        _memoryCache.entries
-            .where((entry) => entry.value.isExpired)
-            .map((entry) => entry.key)
-            .toList();
-
-    for (final key in expiredKeys) {
-      final item = _memoryCache.remove(key);
-      if (item != null) {
-        _memoryCacheSize -= item.size;
-      }
-    }
-    while (_memoryCacheSize > _maxMemoryCacheSize && _memoryCache.isNotEmpty) {
-      final oldestKey =
-          _memoryCache.entries
-              .reduce(
-                (a, b) => a.value.timestamp.isBefore(b.value.timestamp) ? a : b,
-              )
-              .key;
-
-      final item = _memoryCache.remove(oldestKey);
-      if (item != null) {
-        _memoryCacheSize -= item.size;
-      }
-    }
-  }
 
   Future<Result<bool>> _existsInHive(String key, String category) async {
     final box = _hiveBoxes[category];
@@ -1070,41 +986,6 @@ class EnhancedStorageService {
     }
   }
 
-  Future<void> _createBackup(
-    String key,
-    dynamic value,
-    StorageType type,
-  ) async {
-    try {
-      final backupKey = '${type.name}_$key';
-      final backupFile = File(path.join(_backupDir.path, '$backupKey.backup'));
-
-      final backupData = {
-        'key': key,
-        'value': value,
-        'type': type.name,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      };
-
-      await backupFile.writeAsString(jsonEncode(backupData));
-    } catch (e) {
-      debugPrint('Warning: Falha ao criar backup para $key: $e');
-    }
-  }
-
-  Future<void> _removeBackup(String key) async {
-    try {
-      if (await _backupDir.exists()) {
-        await for (final file in _backupDir.list()) {
-          if (file is File && file.path.contains(key)) {
-            await file.delete();
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Warning: Falha ao remover backup para $key: $e');
-    }
-  }
 
   /// Dispose - limpa recursos
   Future<void> dispose() async {
@@ -1112,8 +993,7 @@ class EnhancedStorageService {
       await box.close();
     }
     _hiveBoxes.clear();
-    _memoryCache.clear();
-    _memoryCacheSize = 0;
+    _cacheManager.clear();
     _initialized = false;
   }
 }
@@ -1140,30 +1020,6 @@ enum StorageType {
 
   /// Sistema de arquivos (grandes volumes)
   file,
-}
-
-/// Item do cache em memória
-class _CacheItem {
-  final dynamic value;
-  final DateTime timestamp;
-  final Duration? ttl;
-
-  _CacheItem({required this.value, required this.timestamp, this.ttl});
-
-  bool get isExpired {
-    if (ttl == null) return false;
-    return DateTime.now().difference(timestamp) > ttl!;
-  }
-
-  int get size {
-    if (value is String) {
-      return (value as String).length * 2;
-    } else if (value is Uint8List) {
-      return (value as Uint8List).length;
-    } else {
-      return value.toString().length * 2;
-    }
-  }
 }
 
 /// Estatísticas agregadas do serviço de storage.

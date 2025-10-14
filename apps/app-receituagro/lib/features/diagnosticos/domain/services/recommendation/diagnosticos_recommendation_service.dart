@@ -48,9 +48,8 @@ class DiagnosticosRecommendationService
 
     // Delegate to repository
     return _repository.getRecomendacoesPara(
-      idCultura: idCultura,
-      idPraga: idPraga,
-      limit: limit,
+      culturaId: idCultura,
+      pragaId: idPraga,
     );
   }
 

@@ -46,7 +46,12 @@ class DiagnosticosSearchService implements IDiagnosticosSearchService {
       }
     }
 
-    return _repository.searchWithFilters(filters);
+    return _repository.searchWithFilters(
+      defensivo: filters.idDefensivo,
+      cultura: filters.idCultura,
+      praga: filters.idPraga,
+      tipoAplicacao: filters.tipoAplicacao?.toString(),
+    );
   }
 
   @override
@@ -94,7 +99,7 @@ class DiagnosticosSearchService implements IDiagnosticosSearchService {
       );
     }
 
-    return _repository.getSimilarDiagnosticos(diagnosticoId, limit: limit);
+    return _repository.getSimilarDiagnosticos(diagnosticoId);
   }
 
   // ========== Client-side search methods ==========

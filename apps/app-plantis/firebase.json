@@ -1,4 +1,23 @@
 {
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "default": {
+          "projectId": "plantis-72458"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "plantis-72458"
+        }
+      },
+      "android": {
+        "default": {
+          "projectId": "plantis-72458"
+        }
+      }
+    }
+  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"

@@ -2,16 +2,22 @@ import 'package:core/core.dart';
 
 import '../data/datasources/device_local_datasource.dart';
 import '../data/datasources/device_remote_datasource.dart';
-import '../data/repositories/device_repository_impl.dart';
+// ❌ REMOVIDO: device_repository_impl.dart (registrado via @LazySingleton)
 
 /// Dependency Injection para Device Management
 /// Configura todos os serviços necessários para gerenciamento de dispositivos
+///
+/// ⚠️ IMPORTANTE: Separado em 2 métodos para evitar conflitos com Injectable:
+/// 1. registerDataSources() - chamado ANTES do Injectable
+/// 2. registerUseCasesAndServices() - chamado DEPOIS do Injectable
 class DeviceManagementDI {
-  static bool _isRegistered = false;
+  static bool _dataSourcesRegistered = false;
+  static bool _useCasesRegistered = false;
 
-  /// Registra todas as dependências de device management
-  static Future<void> registerDependencies(GetIt sl) async {
-    if (_isRegistered) return;
+  /// Registra APENAS os datasources (chamado ANTES do Injectable)
+  static Future<void> registerDataSources(GetIt sl) async {
+    if (_dataSourcesRegistered) return;
+
     sl.registerLazySingleton<DeviceLocalDataSource>(
       () => DeviceLocalDataSourceImpl(
         localStorage: sl<ILocalStorageRepository>(),
@@ -31,13 +37,15 @@ class DeviceManagementDI {
         }
       },
     );
-    sl.registerLazySingleton<IDeviceRepository>(
-      () => DeviceRepositoryImpl(
-        localDataSource: sl<DeviceLocalDataSource>(),
-        remoteDataSource: sl<DeviceRemoteDataSource>(),
-        connectivityService: sl<ConnectivityService>(),
-      ),
-    );
+
+    _dataSourcesRegistered = true;
+  }
+
+  /// Registra use cases e services (chamado DEPOIS do Injectable)
+  /// ⚠️ IDeviceRepository já registrado via @LazySingleton - NÃO registrar aqui!
+  static Future<void> registerUseCasesAndServices(GetIt sl) async {
+    if (_useCasesRegistered) return;
+
     sl.registerLazySingleton<GetUserDevicesUseCase>(
       () => GetUserDevicesUseCase(
         sl<IDeviceRepository>(),
@@ -84,12 +92,19 @@ class DeviceManagementDI {
       print(stackTrace);
     }
 
-    _isRegistered = true;
+    _useCasesRegistered = true;
+  }
+
+  /// Método legado (mantido para compatibilidade) - usa os novos métodos
+  @Deprecated('Use registerDataSources() e registerUseCasesAndServices() separadamente')
+  static Future<void> registerDependencies(GetIt sl) async {
+    await registerDataSources(sl);
+    await registerUseCasesAndServices(sl);
   }
 
   /// Remove todas as dependências registradas (para testes)
   static Future<void> unregisterDependencies(GetIt sl) async {
-    if (!_isRegistered) return;
+    if (!_dataSourcesRegistered && !_useCasesRegistered) return;
     if (sl.isRegistered<DeviceManagementService>()) {
       await sl.unregister<DeviceManagementService>();
     }
@@ -118,15 +133,17 @@ class DeviceManagementDI {
       await sl.unregister<DeviceLocalDataSource>();
     }
 
-    _isRegistered = false;
+    _dataSourcesRegistered = false;
+    _useCasesRegistered = false;
   }
 
   /// Verifica se as dependências estão registradas
-  static bool get isRegistered => _isRegistered;
+  static bool get isRegistered => _dataSourcesRegistered && _useCasesRegistered;
 
   /// Força re-registro das dependências (útil para testes)
   static Future<void> resetAndRegister(GetIt sl) async {
     await unregisterDependencies(sl);
-    await registerDependencies(sl);
+    await registerDataSources(sl);
+    await registerUseCasesAndServices(sl);
   }
 }

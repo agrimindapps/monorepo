@@ -5,14 +5,14 @@ import 'package:flutter/foundation.dart';
 
 // ❌ REMOVIDO: import '../../features/DetalheDefensivos/di/defensivo_details_di.dart';
 import '../../features/analytics/analytics_service.dart';
-import '../../features/comentarios/di/comentarios_di.dart';
+// ❌ REMOVIDO: import '../../features/comentarios/di/comentarios_di.dart'; (via @LazySingleton)
 import '../../features/comentarios/domain/comentarios_service.dart';
 import '../../features/defensivos/data/services/defensivos_grouping_service.dart';
 // ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; // Unused after consolidation
 // ✅ Diagnosticos imports removed - now managed by Injectable
 import '../../features/favoritos/domain/favoritos_navigation_service.dart';
 import '../../features/favoritos/favoritos_di.dart';
-import '../../features/pragas/di/pragas_di.dart';
+// ❌ REMOVIDO: import '../../features/pragas/di/pragas_di.dart'; (via @LazySingleton)
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
 import '../data/repositories/comentarios_hive_repository.dart';
@@ -49,6 +49,12 @@ final sl = core.GetIt.instance;
 
 Future<void> init() async {
   await core.InjectionContainer.init();
+
+  // ⚠️ IMPORTANTE: Registrar datasources e services SEM @injectable ANTES do Injectable
+  // O Injectable precisa deles para criar repositories via @LazySingleton
+  await DeviceManagementDI.registerDataSources(sl);
+  FavoritosDI.registerServices(); // ⚠️ Registra apenas FavoritosService (sem @injectable)
+
   await injectable.configureDependencies();
   configureAllRepositoriesDependencies();
   sl.registerLazySingleton<core.IAppDataCleaner>(
@@ -60,7 +66,9 @@ Future<void> init() async {
       () => core.FirebaseDeviceService(),
     );
   }
-  await DeviceManagementDI.registerDependencies(sl);
+
+  // ✅ Registrar apenas use cases e services (IDeviceRepository já registrado via @LazySingleton)
+  await DeviceManagementDI.registerUseCasesAndServices(sl);
   if (!sl.isRegistered<core.NavigationConfigurationService>()) {
     sl.registerLazySingleton<core.NavigationConfigurationService>(
       () => core.NavigationConfigurationService(),
@@ -244,12 +252,13 @@ Future<void> init() async {
   sl.registerLazySingleton<DefensivosGroupingService>(
     () => DefensivosGroupingService(),
   );
-  FavoritosDI.registerDependencies();
+  // ❌ REMOVIDO: FavoritosDI.registerDependencies(); // Duplica FavoritosRepositorySimplified (@LazySingleton)
+  // ✅ FavoritosService agora registrado via FavoritosDI.registerServices() ANTES do Injectable
   // configureDefensivosDependencies(); // Already called in configureAllRepositoriesDependencies()
   // ❌ REMOVIDO: initDefensivoDetailsDI(); // Feature consolidada em defensivos/
-  PragasDI.configure();
-  ComentariosDI.register(sl);
-  SettingsDI.register(sl);
+  // ❌ REMOVIDO: PragasDI.configure(); // IPragasRepository e use cases agora gerenciados via @LazySingleton/@injectable
+  // ❌ REMOVIDO: ComentariosDI.register(sl); // IComentariosRepository e use cases agora via @LazySingleton/@injectable
+  SettingsDI.register(sl); // ⚠️ Ainda registra manualmente (sem @LazySingleton)
   try {
     sl.registerLazySingleton<ReceitaAgroPremiumService>(() {
       if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {

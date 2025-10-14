@@ -223,7 +223,7 @@ class EnhancedDiagnosticosPragaNotifier
       final result = await _repository.queryByPraga(pragaId);
 
       await result.fold(
-        (Failure failure) async {
+        (failure) async {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
@@ -266,8 +266,8 @@ class EnhancedDiagnosticosPragaNotifier
     try {
       final diagnosticos = await _repository.queryByPattern(query);
       final diagnosticosHive = diagnosticos.fold(
-        (Failure failure) => <DiagnosticoEntity>[],
-        (List<DiagnosticoEntity> data) => data,
+        (failure) => <DiagnosticoEntity>[],
+        (data) => data,
       );
 
       if (diagnosticosHive.isNotEmpty) {

@@ -86,7 +86,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   void _initializeController() {
     try {
       if (kDebugMode) {
-        print('🔧 PlantDetailsView._initializeController - plantId: ${widget.plantId}');
+        print(
+          '🔧 PlantDetailsView._initializeController - plantId: ${widget.plantId}',
+        );
       }
 
       final provider = ref.read(plantDetailsProviderProvider);
@@ -121,7 +123,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       _initializeTasksIfNeeded(taskProvider);
 
       if (kDebugMode) {
-        print('✅ PlantDetailsView._initializeController - Initialization complete');
+        print(
+          '✅ PlantDetailsView._initializeController - Initialization complete',
+        );
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
@@ -181,13 +185,18 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             final plant = details.plant;
 
             if (details.isLoading && plant == null) {
-              return const PlantDetailsLoadingState();
+              return PlantDetailsLoadingState(
+                context: context,
+                onBack: () => Navigator.of(context).pop(),
+              );
             }
 
             if (details.hasError && plant == null) {
               return PlantDetailsErrorState(
                 errorMessage: details.errorMessage,
                 onRetry: () => _controller?.refresh(widget.plantId),
+                onBack: () => Navigator.of(context).pop(),
+                plantId: widget.plantId,
               );
             }
 
@@ -195,13 +204,16 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               return PlantDetailsErrorState(
                 errorMessage: 'Planta não encontrada.',
                 onRetry: () => _controller?.refresh(widget.plantId),
+                onBack: () => Navigator.of(context).pop(),
+                plantId: widget.plantId,
               );
             }
 
             if (!_isPlantDataValid(plant)) {
               return PlantDetailsInvalidDataState(
+                context: context,
                 plant: plant,
-                onEditPlant: () => _controller?.editPlant(plant),
+                onEdit: () => _controller?.editPlant(plant),
               );
             }
 
@@ -477,9 +489,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             ),
             child: Column(
               children: [
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xs),
                 _buildTabBar(context),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.xs),
                 Expanded(
                   child: DecoratedBox(
                     decoration: const BoxDecoration(
@@ -715,5 +727,4 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     if (plant.displayName.trim().isEmpty) return false;
     return true; // Allow plants with minimal data to be displayed
   }
-
 }

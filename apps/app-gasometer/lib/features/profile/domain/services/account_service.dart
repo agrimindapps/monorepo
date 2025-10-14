@@ -26,12 +26,12 @@ class AccountServiceImpl implements AccountService {
 
   @override
   Future<bool> removeAvatar(WidgetRef ref) async {
-    return await ref.read(authProvider.notifier).removeAvatar();
+    return await ref.read(profileProvider.notifier).removeAvatar();
   }
 
   @override
   Future<bool> updateAvatar(WidgetRef ref, String base64Image) async {
-    return await ref.read(authProvider.notifier).updateAvatar(base64Image);
+    return await ref.read(profileProvider.notifier).updateAvatar(base64Image);
   }
 
   @override

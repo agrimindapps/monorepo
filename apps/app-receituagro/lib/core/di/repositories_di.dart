@@ -1,15 +1,18 @@
 import 'package:core/core.dart';
 import '../../features/busca_avancada/di/busca_di.dart';
-import '../../features/culturas/di/culturas_di.dart';
-import '../../features/defensivos/di/defensivos_di.dart';
+// ❌ REMOVIDO: import '../../features/culturas/di/culturas_di.dart'; (duplicado via Injectable)
+// ❌ REMOVIDO: import '../../features/defensivos/di/defensivos_di.dart'; (duplicado via Injectable)
 
 /// Configuração centralizada de todos os repositories
 /// Segue padrão Clean Architecture + GetIt para DI
-/// 
+///
 /// Esta função deve ser chamada no main.dart após inicialização do core
+///
+/// ⚠️ NOTA: Culturas e Defensivos agora são gerenciados via Injectable (@LazySingleton)
+/// Apenas Busca precisa de registro manual (por enquanto)
 void configureAllRepositoriesDependencies() {
-  configureCulturasDependencies();
-  configureDefensivosDependencies();
+  // ❌ REMOVIDO: configureCulturasDependencies(); (duplicado - registrado via @LazySingleton)
+  // ❌ REMOVIDO: configureDefensivosDependencies(); (duplicado - registrado via @LazySingleton)
   configureBuscaDependencies();
 }
 

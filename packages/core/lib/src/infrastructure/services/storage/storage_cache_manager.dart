@@ -74,6 +74,9 @@ class StorageCacheManager {
     _memoryCacheSize = 0;
   }
 
+  /// Retorna todas as chaves do cache
+  Iterable<String> get keys => _memoryCache.keys;
+
   /// Verifica se deve cachear em memória baseado no tamanho
   bool shouldCache(dynamic value) {
     if (_memoryCacheSize >= _maxMemoryCacheSize) return false;
@@ -162,6 +165,12 @@ class CacheStats {
   final int hits;
   final int misses;
   final double hitRatio;
+
+  /// Alias para size (número de itens)
+  int get items => size;
+
+  /// Alias para sizeBytes
+  int get sizeInBytes => sizeBytes;
 
   CacheStats({
     required this.size,

@@ -80,4 +80,77 @@ abstract class IDiagnosticosRepository {
   Future<Either<Failure, List<DiagnosticoEntity>>> queryByPattern(
     String pattern,
   );
+
+  // ========== Metadata Operations ==========
+  /// Needed by DiagnosticosMetadataService
+
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAllDefensivos();
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAllCulturas();
+  Future<Either<Failure, List<Map<String, dynamic>>>> getAllPragas();
+  Future<Either<Failure, List<String>>> getUnidadesMedida();
+
+  // ========== Recommendation Operations ==========
+  /// Needed by DiagnosticosRecommendationService
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> getRecomendacoesPara({
+    required String culturaId,
+    required String pragaId,
+  });
+
+  // ========== Search Operations ==========
+  /// Needed by DiagnosticosSearchService
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> searchWithFilters({
+    String? defensivo,
+    String? cultura,
+    String? praga,
+    String? tipoAplicacao,
+  });
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> getSimilarDiagnosticos(
+    String idDiagnostico,
+  );
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> searchByPattern(
+    String pattern,
+  );
+
+  // ========== Statistics Operations ==========
+  /// Needed by DiagnosticosStatsService
+
+  Future<Either<Failure, Map<String, dynamic>>> getStatistics();
+  Future<Either<Failure, List<DiagnosticoEntity>>> getPopularDiagnosticos({
+    int limit = 10,
+  });
+
+  Future<Either<Failure, int>> countByFilters({
+    String? defensivo,
+    String? cultura,
+    String? praga,
+  });
+
+  // ========== Validation Operations ==========
+  /// Needed by DiagnosticosValidationService
+
+  Future<Either<Failure, bool>> exists(String id);
+  Future<Either<Failure, bool>> validarCompatibilidade({
+    required String idDefensivo,
+    required String idCultura,
+    required String idPraga,
+  });
+
+  // ========== Legacy Methods ==========
+  /// These are called by usecases that haven't been refactored yet
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> getByDefensivo(
+    String defensivoId,
+  );
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> getByCultura(
+    String culturaId,
+  );
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> getByPraga(
+    String pragaId,
+  );
 }

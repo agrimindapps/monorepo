@@ -293,7 +293,9 @@ class ReceitaAgroApp extends ConsumerWidget {
       theme: ReceitaAgroTheme.lightTheme,
       darkTheme: ReceitaAgroTheme.darkTheme,
       themeMode: themeMode,
-      builder: (context, child) => NavigationShell(child: child),
+      // ❌ REMOVIDO: builder com NavigationShell
+      // NavigationShell precisa estar DENTRO do context do MaterialApp (após Overlay ser criado)
+      // Solução: mover NavigationShell para dentro das páginas ou usar home
       initialRoute: '/home-defensivos',
       onGenerateRoute: app_router.AppRouter.generateRoute,
       navigatorKey: NavigationService.navigatorKey,

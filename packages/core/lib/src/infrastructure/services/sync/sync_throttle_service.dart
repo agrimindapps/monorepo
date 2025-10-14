@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 /// Serviço de throttling para sincronização
 ///
 /// Responsabilidades:
@@ -54,7 +56,6 @@ class SyncThrottleService {
 
     // Restart timer if running
     if (_syncTimer != null && _syncTimer!.isActive) {
-      final callback = () {}; // Store callback
       stopAutoSync();
       // Note: Would need to store callback to properly restart
       // For now, requires manual restart via startAutoSync()

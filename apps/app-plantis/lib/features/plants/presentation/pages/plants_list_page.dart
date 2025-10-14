@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SortBy;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart';

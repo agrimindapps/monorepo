@@ -1,6 +1,6 @@
 import 'package:core/core.dart';
 
-import 'data/repositories/favoritos_repository_simplified.dart';
+// ❌ REMOVIDO: favoritos_repository_simplified.dart (registrado via @LazySingleton)
 import 'data/services/favoritos_service.dart';
 // import 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED: Migrando para Riverpod
 
@@ -12,27 +12,32 @@ import 'data/services/favoritos_service.dart';
 /// - Logs: 157+ logs → ~10 logs essenciais (94% redução)
 /// - Provider: Sendo migrado para Riverpod (FavoritosNotifier)
 ///
+/// ⚠️ IMPORTANTE: Separado em 2 métodos para evitar conflitos com Injectable:
+/// 1. registerServices() - chamado ANTES do Injectable (apenas FavoritosService)
+/// 2. IFavoritosRepository - gerenciado via @LazySingleton (Injectable)
+///
 /// Princípio: Simplicidade + Delegation Pattern
 class FavoritosDI {
   static final GetIt _getIt = GetIt.instance;
+  static bool _servicesRegistered = false;
 
-  /// Registra APENAS 2 dependências essenciais (Provider removido - usando Riverpod)
-  static void registerDependencies() {
-    if (_getIt.isRegistered<FavoritosService>()) {
-      return; // Já registrado, evita duplicação
-    }
+  /// Registra APENAS FavoritosService (chamado ANTES do Injectable)
+  /// ⚠️ FavoritosRepositorySimplified é registrado via @LazySingleton (Injectable)
+  static void registerServices() {
+    if (_servicesRegistered) return;
 
-    // Service com specialized services internos
+    // Service com specialized services internos (não tem @injectable)
     _getIt.registerLazySingleton<FavoritosService>(
       () => FavoritosService(),
     );
 
-    // Repository
-    _getIt.registerLazySingleton<FavoritosRepositorySimplified>(
-      () => FavoritosRepositorySimplified(
-        service: _getIt<FavoritosService>(),
-      ),
-    );
+    _servicesRegistered = true;
+  }
+
+  /// Método legado (mantido para compatibilidade) - agora só registra services
+  @Deprecated('Use registerServices() - Repository agora via @LazySingleton')
+  static void registerDependencies() {
+    registerServices();
 
     // Provider (DEPRECATED - usar FavoritosNotifier do Riverpod)
     // _getIt.registerLazySingleton<FavoritosProviderSimplified>(
@@ -42,12 +47,15 @@ class FavoritosDI {
     // );
   }
 
-  /// Limpeza simplificada - apenas 2 registros para remover
+  /// Limpeza simplificada - apenas FavoritosService (FavoritosRepositorySimplified via @LazySingleton)
   static void clearDependencies() {
     try {
       // _getIt.unregister<FavoritosProviderSimplified>(); // DEPRECATED
-      _getIt.unregister<FavoritosRepositorySimplified>();
-      _getIt.unregister<FavoritosService>();
+      // ❌ REMOVIDO: FavoritosRepositorySimplified (gerenciado via @LazySingleton)
+      if (_servicesRegistered) {
+        _getIt.unregister<FavoritosService>();
+        _servicesRegistered = false;
+      }
     } catch (e) {
       // Silently fail
     }
@@ -65,8 +73,8 @@ extension FavoritosDIExtension on GetIt {
   // /// Acesso direto ao provider simplificado
   // FavoritosProviderSimplified get favoritosProvider => get<FavoritosProviderSimplified>(); // DEPRECATED - usar Riverpod
 
-  /// Acesso direto ao repository simplificado
-  FavoritosRepositorySimplified get favoritosRepository => get<FavoritosRepositorySimplified>();
+  // ❌ REMOVIDO: FavoritosRepositorySimplified (usar GetIt.instance.get<IFavoritosRepository>() diretamente)
+  // FavoritosRepositorySimplified é gerenciado via @LazySingleton (Injectable)
 
   /// Acesso direto ao service consolidado
   FavoritosService get favoritosService => get<FavoritosService>();

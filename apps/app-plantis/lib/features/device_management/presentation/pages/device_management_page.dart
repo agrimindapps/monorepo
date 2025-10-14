@@ -1,5 +1,5 @@
 import 'package:core/core.dart'
-    hide deviceManagementProvider, DeviceManagementState;
+    hide deviceManagementNotifierProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -35,7 +35,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
 
   @override
   Widget build(BuildContext context) {
-    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+    final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -138,7 +138,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
               icon: Icon(Icons.close, color: Colors.red.shade600, size: 18),
               onPressed:
                   () =>
-                      ref.read(deviceManagementProvider.notifier).clearError(),
+                      ref.read(deviceManagementNotifierProvider.notifier).clearError(),
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
             ),
@@ -176,7 +176,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
               onPressed:
                   () =>
                       ref
-                          .read(deviceManagementProvider.notifier)
+                          .read(deviceManagementNotifierProvider.notifier)
                           .clearSuccess(),
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,
@@ -336,7 +336,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   }
 
   Widget? _buildFloatingActionButton(BuildContext context) {
-    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+    final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
 
     return deviceManagementAsync.when(
       data: (deviceState) {
@@ -368,7 +368,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   Future<void> _handleMenuAction(BuildContext context, String action) async {
     switch (action) {
       case 'refresh':
-        await ref.read(deviceManagementProvider.notifier).refresh();
+        await ref.read(deviceManagementNotifierProvider.notifier).refresh();
         break;
 
       case 'revoke_all':
@@ -382,7 +382,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   }
 
   Future<void> _validateCurrentDevice(BuildContext context) async {
-    final notifier = ref.read(deviceManagementProvider.notifier);
+    final notifier = ref.read(deviceManagementNotifierProvider.notifier);
 
     final result = await notifier.validateCurrentDevice();
 
@@ -398,7 +398,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   }
 
   Future<void> _showRevokeAllDialog(BuildContext context) async {
-    final deviceState = ref.read(deviceManagementProvider).valueOrNull;
+    final deviceState = ref.read(deviceManagementNotifierProvider).valueOrNull;
     if (deviceState == null) return;
 
     final confirmed = await showDialog<bool>(
@@ -430,7 +430,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
 
     if (confirmed == true && mounted) {
       await ref
-          .read(deviceManagementProvider.notifier)
+          .read(deviceManagementNotifierProvider.notifier)
           .revokeAllOtherDevices(
             reason: 'Logout remoto via interface de gerenciamento',
           );

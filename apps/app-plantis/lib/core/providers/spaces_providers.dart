@@ -1,8 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/domain/entities/space.dart';
 import '../../features/plants/domain/usecases/spaces_usecases.dart';
+
+part 'spaces_providers.g.dart';
 
 /// Immutable state for Spaces feature
 @immutable
@@ -68,7 +71,8 @@ class SpacesState {
 }
 
 /// Riverpod AsyncNotifier for Spaces management
-class SpacesNotifier extends AsyncNotifier<SpacesState> {
+@riverpod
+class SpacesNotifier extends _$SpacesNotifier {
   late final GetSpacesUseCase _getSpacesUseCase;
   late final GetSpaceByIdUseCase _getSpaceByIdUseCase;
   late final AddSpaceUseCase _addSpaceUseCase;
@@ -82,6 +86,13 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
     _addSpaceUseCase = ref.read(addSpaceUseCaseProvider);
     _updateSpaceUseCase = ref.read(updateSpaceUseCaseProvider);
     _deleteSpaceUseCase = ref.read(deleteSpaceUseCaseProvider);
+
+    ref.onDispose(() {
+      if (kDebugMode) {
+        print('🧹 SpacesNotifier disposed');
+      }
+    });
+
     return _loadSpacesOperation();
   }
 
@@ -255,25 +266,28 @@ class SpacesNotifier extends AsyncNotifier<SpacesState> {
     }
   }
 }
-final spacesProvider = AsyncNotifierProvider<SpacesNotifier, SpacesState>(() {
-  return SpacesNotifier();
-});
-final getSpacesUseCaseProvider = Provider<GetSpacesUseCase>((ref) {
+
+@riverpod
+GetSpacesUseCase getSpacesUseCase(GetSpacesUseCaseRef ref) {
   return GetIt.instance<GetSpacesUseCase>();
-});
+}
 
-final getSpaceByIdUseCaseProvider = Provider<GetSpaceByIdUseCase>((ref) {
+@riverpod
+GetSpaceByIdUseCase getSpaceByIdUseCase(GetSpaceByIdUseCaseRef ref) {
   return GetIt.instance<GetSpaceByIdUseCase>();
-});
+}
 
-final addSpaceUseCaseProvider = Provider<AddSpaceUseCase>((ref) {
+@riverpod
+AddSpaceUseCase addSpaceUseCase(AddSpaceUseCaseRef ref) {
   return GetIt.instance<AddSpaceUseCase>();
-});
+}
 
-final updateSpaceUseCaseProvider = Provider<UpdateSpaceUseCase>((ref) {
+@riverpod
+UpdateSpaceUseCase updateSpaceUseCase(UpdateSpaceUseCaseRef ref) {
   return GetIt.instance<UpdateSpaceUseCase>();
-});
+}
 
-final deleteSpaceUseCaseProvider = Provider<DeleteSpaceUseCase>((ref) {
+@riverpod
+DeleteSpaceUseCase deleteSpaceUseCase(DeleteSpaceUseCaseRef ref) {
   return GetIt.instance<DeleteSpaceUseCase>();
-});
+}

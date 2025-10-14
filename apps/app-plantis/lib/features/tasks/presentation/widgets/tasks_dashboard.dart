@@ -11,7 +11,7 @@ class TasksDashboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
 
     return tasksAsync.maybeWhen(
       data: (tasksState) {

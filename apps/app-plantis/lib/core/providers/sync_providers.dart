@@ -1,35 +1,24 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-/// State class for sync status
-class SyncState {
-  final bool isSyncing;
-  final String? lastSyncMessage;
-  final DateTime? lastSyncTime;
-  final String? error;
+part 'sync_providers.freezed.dart';
+part 'sync_providers.g.dart';
 
-  const SyncState({
-    this.isSyncing = false,
-    this.lastSyncMessage,
-    this.lastSyncTime,
-    this.error,
-  });
-
-  SyncState copyWith({
-    bool? isSyncing,
+/// State class for sync status with freezed immutability
+@freezed
+class SyncState with _$SyncState {
+  const factory SyncState({
+    @Default(false) bool isSyncing,
     String? lastSyncMessage,
     DateTime? lastSyncTime,
     String? error,
-    bool clearError = false,
-  }) {
-    return SyncState(
-      isSyncing: isSyncing ?? this.isSyncing,
-      lastSyncMessage: lastSyncMessage ?? this.lastSyncMessage,
-      lastSyncTime: lastSyncTime ?? this.lastSyncTime,
-      error: clearError ? null : (error ?? this.error),
-    );
-  }
+  }) = _SyncState;
 
+  const SyncState._();
+
+  /// Returns a user-friendly status message
   String get statusMessage {
     if (isSyncing) {
       return lastSyncMessage ?? 'Sincronizando...';
@@ -53,9 +42,13 @@ class SyncState {
   }
 }
 
-/// Notifier for sync operations
-class SyncNotifier extends StateNotifier<SyncState> {
-  SyncNotifier() : super(const SyncState());
+/// Riverpod notifier for sync operations
+@riverpod
+class Sync extends _$Sync {
+  @override
+  SyncState build() {
+    return const SyncState();
+  }
 
   /// Triggers manual sync for the plantis app
   Future<void> triggerManualSync() async {
@@ -64,7 +57,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
     state = state.copyWith(
       isSyncing: true,
       lastSyncMessage: 'Iniciando sincronização...',
-      clearError: true,
+      error: null,
     );
 
     try {
@@ -85,7 +78,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
             isSyncing: false,
             lastSyncTime: DateTime.now(),
             lastSyncMessage: 'Sincronização completa',
-            clearError: true,
+            error: null,
           );
         },
       );
@@ -105,20 +98,14 @@ class SyncNotifier extends StateNotifier<SyncState> {
       isSyncing: isSyncing ?? state.isSyncing,
       lastSyncMessage: message ?? state.lastSyncMessage,
       error: error,
-      lastSyncTime:
-          (isSyncing == false && error == null)
-              ? DateTime.now()
-              : state.lastSyncTime,
+      lastSyncTime: (isSyncing == false && error == null)
+          ? DateTime.now()
+          : state.lastSyncTime,
     );
   }
 
   /// Clears any error state
   void clearError() {
-    state = state.copyWith(clearError: true);
+    state = state.copyWith(error: null);
   }
 }
-
-/// Provider for sync state management
-final syncProvider = StateNotifierProvider<SyncNotifier, SyncState>((ref) {
-  return SyncNotifier();
-});

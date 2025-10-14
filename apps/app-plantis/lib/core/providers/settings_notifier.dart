@@ -1,101 +1,48 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/plantis_notification_service.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
+import 'settings_state.dart';
 
-/// Estado das configurações para Riverpod StateNotifier
-@immutable
-class SettingsState {
-  final SettingsEntity settings;
-  final bool isLoading;
-  final bool isInitialized;
-  final String? errorMessage;
-  final String? successMessage;
+part 'settings_notifier.g.dart';
 
-  const SettingsState({
-    required this.settings,
-    this.isLoading = false,
-    this.isInitialized = false,
-    this.errorMessage,
-    this.successMessage,
-  });
-
-  /// Estado inicial padrão
-  factory SettingsState.initial() {
-    return SettingsState(settings: SettingsEntity.defaults());
-  }
-
-  /// Cria uma cópia com alterações
-  SettingsState copyWith({
-    SettingsEntity? settings,
-    bool? isLoading,
-    bool? isInitialized,
-    String? errorMessage,
-    String? successMessage,
-  }) {
-    return SettingsState(
-      settings: settings ?? this.settings,
-      isLoading: isLoading ?? this.isLoading,
-      isInitialized: isInitialized ?? this.isInitialized,
-      errorMessage: errorMessage,
-      successMessage: successMessage,
-    );
-  }
-
-  /// Remove mensagens
-  SettingsState clearMessages() {
-    return copyWith(errorMessage: null, successMessage: null);
-  }
-
-  /// Define estado de erro
-  SettingsState withError(String error) {
-    return copyWith(errorMessage: error, successMessage: null);
-  }
-
-  /// Define estado de sucesso
-  SettingsState withSuccess(String success) {
-    return copyWith(successMessage: success, errorMessage: null);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is SettingsState &&
-        other.settings == settings &&
-        other.isLoading == isLoading &&
-        other.isInitialized == isInitialized &&
-        other.errorMessage == errorMessage &&
-        other.successMessage == successMessage;
-  }
-
-  @override
-  int get hashCode {
-    return settings.hashCode ^
-        isLoading.hashCode ^
-        isInitialized.hashCode ^
-        errorMessage.hashCode ^
-        successMessage.hashCode;
-  }
+/// Provider do repositório de configurações (obtido via DI)
+@riverpod
+ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
+  return GetIt.instance<ISettingsRepository>();
 }
 
-/// StateNotifier para gerenciar todas as configurações do app
-class SettingsNotifier extends StateNotifier<SettingsState> {
-  final ISettingsRepository _settingsRepository;
-  final PlantisNotificationService _notificationService;
+/// Provider do serviço de notificações
+@riverpod
+PlantisNotificationService plantisNotificationService(
+  PlantisNotificationServiceRef ref,
+) {
+  return PlantisNotificationService();
+}
 
-  SettingsNotifier({
-    required ISettingsRepository settingsRepository,
-    required PlantisNotificationService notificationService,
-  }) : _settingsRepository = settingsRepository,
-       _notificationService = notificationService,
-       super(SettingsState.initial());
+/// Notifier principal para gerenciar configurações com @riverpod
+@riverpod
+class Settings extends _$Settings {
+  late final ISettingsRepository _repository;
+  late final PlantisNotificationService _notificationService;
+
+  @override
+  SettingsState build() {
+    _repository = ref.watch(settingsRepositoryProvider);
+    _notificationService = ref.watch(plantisNotificationServiceProvider);
+
+    // Inicializa automaticamente
+    _initialize();
+
+    return SettingsState.initial();
+  }
 
   /// Inicializa o notifier carregando configurações
-  Future<void> initialize() async {
+  Future<void> _initialize() async {
     if (state.isInitialized) return;
 
     state = state.copyWith(isLoading: true).clearMessages();
@@ -113,13 +60,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   /// Carrega configurações do repositório
   Future<void> _loadSettings() async {
-    final result = await _settingsRepository.loadSettings();
+    final result = await _repository.loadSettings();
 
-    result.fold((Failure failure) => throw Exception(failure.message), (
-      SettingsEntity settings,
-    ) {
-      state = state.copyWith(settings: settings);
-    });
+    result.fold(
+      (Failure failure) => throw Exception(failure.message),
+      (SettingsEntity settings) {
+        state = state.copyWith(settings: settings);
+      },
+    );
   }
 
   /// Sincroniza com services externos
@@ -159,16 +107,17 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(isLoading: true).clearMessages();
 
     try {
-      final result = await _settingsRepository.saveSettings(newSettings);
+      final result = await _repository.saveSettings(newSettings);
 
-      result.fold((Failure failure) => throw Exception(failure.message), (
-        void _,
-      ) {
-        state = state
-            .copyWith(settings: newSettings, isLoading: false)
-            .withSuccess('Configurações salvas com sucesso');
-        _applyCascadeEffects(newSettings);
-      });
+      result.fold(
+        (Failure failure) => throw Exception(failure.message),
+        (void _) {
+          state = state
+              .copyWith(settings: newSettings, isLoading: false)
+              .withSuccess('Configurações salvas com sucesso');
+          _applyCascadeEffects(newSettings);
+        },
+      );
     } catch (e) {
       state = state
           .copyWith(isLoading: false)
@@ -334,13 +283,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   /// Cria backup manual das configurações
   Future<void> createConfigurationBackup() async {
     try {
-      final exportResult = await _settingsRepository.exportSettings();
+      final exportResult = await _repository.exportSettings();
 
-      exportResult.fold((Failure failure) => throw Exception(failure.message), (
-        Map<String, dynamic> data,
-      ) {
-        state = state.withSuccess('Configurações incluídas no próximo backup');
-      });
+      exportResult.fold(
+        (Failure failure) => throw Exception(failure.message),
+        (Map<String, dynamic> data) {
+          state = state.withSuccess('Configurações incluídas no próximo backup');
+        },
+      );
     } catch (e) {
       state = state.withError('Erro ao preparar backup: $e');
     }
@@ -351,17 +301,18 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(isLoading: true).clearMessages();
 
     try {
-      final result = await _settingsRepository.resetToDefaults();
+      final result = await _repository.resetToDefaults();
 
-      result.fold((Failure failure) => throw Exception(failure.message), (
-        void _,
-      ) async {
-        final newSettings = SettingsEntity.defaults();
-        state = state
-            .copyWith(settings: newSettings, isLoading: false)
-            .withSuccess('Configurações resetadas com sucesso');
-        _syncWithServices();
-      });
+      result.fold(
+        (Failure failure) => throw Exception(failure.message),
+        (void _) async {
+          final newSettings = SettingsEntity.defaults();
+          state = state
+              .copyWith(settings: newSettings, isLoading: false)
+              .withSuccess('Configurações resetadas com sucesso');
+          _syncWithServices();
+        },
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false).withError('Erro inesperado: $e');
     }
@@ -381,107 +332,102 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   }
 
   /// Aplica efeitos cascata quando configurações mudam
-  void _applyCascadeEffects(SettingsEntity newSettings) {}
+  void _applyCascadeEffects(SettingsEntity newSettings) {
+    // Implementar efeitos cascata se necessário
+  }
 }
 
-/// Provider do repositório de configurações (obtido via DI)
-final settingsRepositoryProvider = Provider<ISettingsRepository>((ref) {
-  return GetIt.instance<ISettingsRepository>();
-});
-
-/// Provider do serviço de notificações (obtido via DI)
-final plantisNotificationServiceProvider = Provider<PlantisNotificationService>(
-  (ref) {
-    return PlantisNotificationService();
-  },
-);
-
-/// Provider principal do SettingsNotifier
-final settingsNotifierProvider =
-    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
-      final settingsRepository = ref.watch(settingsRepositoryProvider);
-      final notificationService = ref.watch(plantisNotificationServiceProvider);
-
-      return SettingsNotifier(
-        settingsRepository: settingsRepository,
-        notificationService: notificationService,
-      );
-    });
+// ============================================================================
+// DERIVED STATE PROVIDERS (Computed values)
+// ============================================================================
 
 /// Provider para SettingsEntity atual
-final settingsProvider = Provider<SettingsEntity>((ref) {
-  return ref.watch(settingsNotifierProvider).settings;
-});
+@riverpod
+SettingsEntity currentSettings(CurrentSettingsRef ref) {
+  return ref.watch(settingsProvider).settings;
+}
 
 /// Provider para estado de carregamento
-final settingsLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(settingsNotifierProvider).isLoading;
-});
+@riverpod
+bool settingsLoading(SettingsLoadingRef ref) {
+  return ref.watch(settingsProvider).isLoading;
+}
 
 /// Provider para verificar se está inicializado
-final settingsInitializedProvider = Provider<bool>((ref) {
-  return ref.watch(settingsNotifierProvider).isInitialized;
-});
+@riverpod
+bool settingsInitialized(SettingsInitializedRef ref) {
+  return ref.watch(settingsProvider).isInitialized;
+}
 
 /// Provider para mensagem de erro
-final settingsErrorProvider = Provider<String?>((ref) {
-  return ref.watch(settingsNotifierProvider).errorMessage;
-});
+@riverpod
+String? settingsError(SettingsErrorRef ref) {
+  return ref.watch(settingsProvider).errorMessage;
+}
 
 /// Provider para mensagem de sucesso
-final settingsSuccessProvider = Provider<String?>((ref) {
-  return ref.watch(settingsNotifierProvider).successMessage;
-});
+@riverpod
+String? settingsSuccess(SettingsSuccessRef ref) {
+  return ref.watch(settingsProvider).successMessage;
+}
 
 /// Provider para configurações de notificação
-final notificationSettingsProvider = Provider<NotificationSettingsEntity>((
-  ref,
-) {
-  return ref.watch(settingsProvider).notifications;
-});
+@riverpod
+NotificationSettingsEntity notificationSettings(NotificationSettingsRef ref) {
+  return ref.watch(currentSettingsProvider).notifications;
+}
 
 /// Provider para configurações de backup
-final backupSettingsProvider = Provider<BackupSettingsEntity>((ref) {
-  return ref.watch(settingsProvider).backup;
-});
+@riverpod
+BackupSettingsEntity backupSettings(BackupSettingsRef ref) {
+  return ref.watch(currentSettingsProvider).backup;
+}
 
 /// Provider para configurações de tema
-final themeSettingsProvider = Provider<ThemeSettingsEntity>((ref) {
-  return ref.watch(settingsProvider).theme;
-});
+@riverpod
+ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
+  return ref.watch(currentSettingsProvider).theme;
+}
 
 /// Provider para configurações de conta
-final accountSettingsProvider = Provider<AccountSettingsEntity>((ref) {
-  return ref.watch(settingsProvider).account;
-});
+@riverpod
+AccountSettingsEntity accountSettings(AccountSettingsRef ref) {
+  return ref.watch(currentSettingsProvider).account;
+}
 
 /// Provider para configurações do app
-final appSettingsProvider = Provider<AppSettingsEntity>((ref) {
-  return ref.watch(settingsProvider).app;
-});
+@riverpod
+AppSettingsEntity appSettings(AppSettingsRef ref) {
+  return ref.watch(currentSettingsProvider).app;
+}
 
 /// Provider para verificar se tem permissões de notificação
-final hasNotificationPermissionsProvider = Provider<bool>((ref) {
+@riverpod
+bool hasNotificationPermissions(HasNotificationPermissionsRef ref) {
   return ref.watch(notificationSettingsProvider).permissionsGranted;
-});
+}
 
 /// Provider para verificar se está em modo escuro
-final isDarkModeProvider = Provider<bool>((ref) {
+@riverpod
+bool isDarkMode(IsDarkModeRef ref) {
   return ref.watch(themeSettingsProvider).isDarkMode;
-});
+}
 
 /// Provider para verificar se notificações estão habilitadas
-final notificationsEnabledProvider = Provider<bool>((ref) {
+@riverpod
+bool notificationsEnabled(NotificationsEnabledRef ref) {
   return ref.watch(notificationSettingsProvider).taskRemindersEnabled;
-});
+}
 
 /// Provider para verificar se é plataforma web
-final isWebPlatformProvider = Provider<bool>((ref) {
+@riverpod
+bool isWebPlatform(IsWebPlatformRef ref) {
   return kIsWeb;
-});
+}
 
 /// Provider para texto de status das notificações
-final notificationStatusTextProvider = Provider<String>((ref) {
+@riverpod
+String notificationStatusText(NotificationStatusTextRef ref) {
   final isWeb = ref.watch(isWebPlatformProvider);
   final hasPermissions = ref.watch(hasNotificationPermissionsProvider);
 
@@ -492,10 +438,11 @@ final notificationStatusTextProvider = Provider<String>((ref) {
     return 'Notificações desabilitadas. Habilite nas configurações do dispositivo.';
   }
   return 'Notificações habilitadas para este aplicativo';
-});
+}
 
 /// Provider para cor de status das notificações
-final notificationStatusColorProvider = Provider<Color>((ref) {
+@riverpod
+Color notificationStatusColor(NotificationStatusColorRef ref) {
   final isWeb = ref.watch(isWebPlatformProvider);
   final hasPermissions = ref.watch(hasNotificationPermissionsProvider);
 
@@ -503,10 +450,11 @@ final notificationStatusColorProvider = Provider<Color>((ref) {
     return Colors.grey;
   }
   return hasPermissions ? Colors.green : Colors.red;
-});
+}
 
 /// Provider para ícone de status das notificações
-final notificationStatusIconProvider = Provider<IconData>((ref) {
+@riverpod
+IconData notificationStatusIcon(NotificationStatusIconRef ref) {
   final isWeb = ref.watch(isWebPlatformProvider);
   final hasPermissions = ref.watch(hasNotificationPermissionsProvider);
 
@@ -514,10 +462,11 @@ final notificationStatusIconProvider = Provider<IconData>((ref) {
     return Icons.web;
   }
   return hasPermissions ? Icons.notifications_active : Icons.notifications_off;
-});
+}
 
 /// Provider para subtitle do tema
-final themeSubtitleProvider = Provider<String>((ref) {
+@riverpod
+String themeSubtitle(ThemeSubtitleRef ref) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.isDarkMode) {
@@ -527,4 +476,4 @@ final themeSubtitleProvider = Provider<String>((ref) {
   } else {
     return 'Seguir sistema';
   }
-});
+}

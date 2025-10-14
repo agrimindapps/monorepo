@@ -11,12 +11,15 @@ import 'package:core/core.dart'
         DeviceValidationResult;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/device_management/data/models/device_model.dart';
 import '../../features/device_management/domain/usecases/get_device_statistics_usecase.dart';
 import '../../features/device_management/domain/usecases/get_user_devices_usecase.dart';
 import '../../features/device_management/domain/usecases/revoke_device_usecase.dart';
 import '../../features/device_management/domain/usecases/validate_device_usecase.dart';
+
+part 'device_management_providers.g.dart';
 
 /// Immutable state for Device Management
 @immutable
@@ -143,7 +146,8 @@ class DeviceManagementState {
 }
 
 /// Riverpod AsyncNotifier for Device Management
-class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
+@riverpod
+class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   late final GetUserDevicesUseCase _getUserDevicesUseCase;
   late final ValidateDeviceUseCase _validateDeviceUseCase;
   late final RevokeDeviceUseCase _revokeDeviceUseCase;
@@ -157,6 +161,13 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
     _revokeDeviceUseCase = GetIt.instance<RevokeDeviceUseCase>();
     _revokeAllOtherDevicesUseCase = GetIt.instance<RevokeAllOtherDevicesUseCase>();
     _getDeviceStatisticsUseCase = GetIt.instance<GetDeviceStatisticsUseCase>();
+
+    ref.onDispose(() {
+      if (kDebugMode) {
+        debugPrint('🧹 DeviceManagementNotifier disposed');
+      }
+    });
+
     return _initializeDeviceManagement();
   }
 
@@ -443,7 +454,3 @@ class DeviceManagementNotifier extends AsyncNotifier<DeviceManagementState> {
     state = AsyncValue.data(DeviceManagementState.initial());
   }
 }
-final deviceManagementProvider =
-    AsyncNotifierProvider<DeviceManagementNotifier, DeviceManagementState>(() {
-  return DeviceManagementNotifier();
-});

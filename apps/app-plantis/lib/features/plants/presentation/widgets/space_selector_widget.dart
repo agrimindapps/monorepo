@@ -32,14 +32,14 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     super.initState();
     _selectedSpaceId = widget.selectedSpaceId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final spacesAsync = ref.read(spacesProvider);
+      final spacesAsync = ref.read(spacesNotifierProvider);
       final isEmpty = spacesAsync.maybeWhen(
         data: (state) => state.allSpaces.isEmpty,
         orElse: () => true,
       );
 
       if (isEmpty) {
-        ref.read(spacesProvider.notifier).loadSpaces();
+        ref.read(spacesNotifierProvider.notifier).loadSpaces();
       }
     });
   }
@@ -53,7 +53,7 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final spacesAsync = ref.watch(spacesProvider);
+    final spacesAsync = ref.watch(spacesNotifierProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,97 +1,130 @@
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../domain/entities/register_data.dart';
 
-class RegisterProvider extends ChangeNotifier {
-  RegisterData _registerData = const RegisterData();
-  String? _errorMessage;
-  bool _isLoading = false;
+part 'register_provider.freezed.dart';
+part 'register_provider.g.dart';
 
-  RegisterData get registerData => _registerData;
-  String? get errorMessage => _errorMessage;
-  bool get isLoading => _isLoading;
-  int get currentStep => _registerData.currentStep;
+@freezed
+class RegisterState with _$RegisterState {
+  const factory RegisterState({
+    @Default(RegisterData()) RegisterData registerData,
+    String? errorMessage,
+    @Default(false) bool isLoading,
+  }) = _RegisterState;
 
-  /// Updates name field
+  const RegisterState._();
+
+  int get currentStep => registerData.currentStep;
+  double get progress {
+    switch (registerData.currentStep) {
+      case 0:
+        return 0.33; // Initial step
+      case 1:
+        return 0.66; // Personal info step
+      case 2:
+        return 1.0; // Password step
+      default:
+        return 0.0;
+    }
+  }
+
+  List<bool> get progressSteps {
+    return [
+      registerData.currentStep >= 0, // Step 1 - Initial
+      registerData.currentStep >= 1, // Step 2 - Personal Info
+      registerData.currentStep >= 2, // Step 3 - Password
+    ];
+  }
+}
+
+@riverpod
+class RegisterNotifier extends _$RegisterNotifier {
+  @override
+  RegisterState build() {
+    return const RegisterState();
+  }
+
   void updateName(String name) {
-    _registerData = _registerData.copyWith(name: name);
-    _clearError();
-    notifyListeners();
+    state = state.copyWith(
+      registerData: state.registerData.copyWith(name: name),
+      errorMessage: null,
+    );
   }
 
-  /// Updates email field
   void updateEmail(String email) {
-    _registerData = _registerData.copyWith(email: email);
-    _clearError();
-    notifyListeners();
+    state = state.copyWith(
+      registerData: state.registerData.copyWith(email: email),
+      errorMessage: null,
+    );
   }
 
-  /// Updates password field
   void updatePassword(String password) {
-    _registerData = _registerData.copyWith(password: password);
-    _clearError();
-    notifyListeners();
+    state = state.copyWith(
+      registerData: state.registerData.copyWith(password: password),
+      errorMessage: null,
+    );
   }
 
-  /// Updates confirm password field
   void updateConfirmPassword(String confirmPassword) {
-    _registerData = _registerData.copyWith(confirmPassword: confirmPassword);
-    _clearError();
-    notifyListeners();
+    state = state.copyWith(
+      registerData: state.registerData.copyWith(confirmPassword: confirmPassword),
+      errorMessage: null,
+    );
   }
 
-  /// Moves to next step in registration flow
   void nextStep() {
     if (_canProceedToNextStep()) {
-      _registerData = _registerData.copyWith(
-        currentStep: _registerData.currentStep + 1,
+      state = state.copyWith(
+        registerData: state.registerData.copyWith(
+          currentStep: state.registerData.currentStep + 1,
+        ),
+        errorMessage: null,
       );
-      _clearError();
-      notifyListeners();
     }
   }
 
-  /// Moves to previous step in registration flow
   void previousStep() {
-    if (_registerData.currentStep > 0) {
-      _registerData = _registerData.copyWith(
-        currentStep: _registerData.currentStep - 1,
+    if (state.registerData.currentStep > 0) {
+      state = state.copyWith(
+        registerData: state.registerData.copyWith(
+          currentStep: state.registerData.currentStep - 1,
+        ),
+        errorMessage: null,
       );
-      _clearError();
-      notifyListeners();
     }
   }
 
-  /// Goes to specific step
   void goToStep(int step) {
     if (step >= 0 && step <= 2) {
-      _registerData = _registerData.copyWith(currentStep: step);
-      _clearError();
-      notifyListeners();
+      state = state.copyWith(
+        registerData: state.registerData.copyWith(currentStep: step),
+        errorMessage: null,
+      );
     }
   }
 
-  /// Validates current step data and returns true if can proceed
   bool _canProceedToNextStep() {
-    switch (_registerData.currentStep) {
+    switch (state.registerData.currentStep) {
       case 0: // Initial step
         return true;
       case 1: // Personal info step
-        return _registerData.isPersonalInfoValid;
+        return state.registerData.isPersonalInfoValid;
       case 2: // Password step
-        return _registerData.isPasswordValid;
+        return state.registerData.isPasswordValid;
       default:
         return false;
     }
   }
 
-  /// Validates personal info step
   bool validatePersonalInfo() {
-    _clearError();
+    state = state.copyWith(errorMessage: null);
 
-    final nameError = _registerData.validateName();
-    final emailError = _registerData.validateEmail();
+    final nameError = state.registerData.validateName();
+    final emailError = state.registerData.validateEmail();
 
     if (nameError != null) {
       _setError(nameError);
@@ -106,12 +139,11 @@ class RegisterProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Validates password step
   bool validatePassword() {
-    _clearError();
+    state = state.copyWith(errorMessage: null);
 
-    final passwordError = _registerData.validatePassword();
-    final confirmPasswordError = _registerData.validateConfirmPassword();
+    final passwordError = state.registerData.validatePassword();
+    final confirmPasswordError = state.registerData.validateConfirmPassword();
 
     if (passwordError != null) {
       _setError(passwordError);
@@ -126,20 +158,18 @@ class RegisterProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Checks if email already exists (placeholder for real implementation)
   Future<bool> checkEmailExists(String email) async {
     try {
-      _isLoading = true;
-      notifyListeners();
+      state = state.copyWith(isLoading: true);
+
       await Future<void>.delayed(const Duration(milliseconds: 500));
       final exists = email.toLowerCase() == 'test@test.com';
 
-      _isLoading = false;
-      notifyListeners();
+      state = state.copyWith(isLoading: false);
 
       return exists;
     } catch (e) {
-      _isLoading = false;
+      state = state.copyWith(isLoading: false);
       _setError('Erro ao verificar email. Tente novamente.');
       if (kDebugMode) {
         debugPrint(
@@ -150,12 +180,11 @@ class RegisterProvider extends ChangeNotifier {
     }
   }
 
-  /// Validates and proceeds to next step for personal info
   Future<bool> validateAndProceedPersonalInfo() async {
     if (!validatePersonalInfo()) {
       return false;
     }
-    final emailExists = await checkEmailExists(_registerData.email);
+    final emailExists = await checkEmailExists(state.registerData.email);
     if (emailExists) {
       _setError('Este email já possui uma conta.');
       return false;
@@ -165,7 +194,6 @@ class RegisterProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Validates and proceeds to registration completion
   bool validateAndProceedPassword() {
     if (!validatePassword()) {
       return false;
@@ -175,64 +203,15 @@ class RegisterProvider extends ChangeNotifier {
     return true;
   }
 
-  /// Resets all registration data
   void reset() {
-    _registerData = const RegisterData();
-    _errorMessage = null;
-    _isLoading = false;
-    notifyListeners();
+    state = const RegisterState();
   }
 
-  /// Clears current error
-  void _clearError() {
-    if (_errorMessage != null) {
-      _errorMessage = null;
-    }
-  }
-
-  /// Sets error message
-  void _setError(String error) {
-    _errorMessage = error;
-    notifyListeners();
-  }
-
-  /// Clears error (public method)
   void clearError() {
-    _clearError();
-    notifyListeners();
+    state = state.copyWith(errorMessage: null);
   }
 
-  /// Gets progress as percentage (0.0 to 1.0)
-  double get progress {
-    switch (_registerData.currentStep) {
-      case 0:
-        return 0.33; // Initial step
-      case 1:
-        return 0.66; // Personal info step
-      case 2:
-        return 1.0; // Password step
-      default:
-        return 0.0;
-    }
-  }
-
-  /// Gets progress step indicators
-  List<bool> get progressSteps {
-    return [
-      _registerData.currentStep >= 0, // Step 1 - Initial
-      _registerData.currentStep >= 1, // Step 2 - Personal Info
-      _registerData.currentStep >= 2, // Step 3 - Password
-    ];
-  }
-
-  /// Debug method to print current state (sanitized for security)
-  @override
-  String toString() {
-    final sanitizedData =
-        'RegisterProvider(step: ${_registerData.currentStep}, '
-        'hasName: ${_registerData.name.isNotEmpty}, '
-        'hasEmail: ${_registerData.email.isNotEmpty}, '
-        'hasError: ${_errorMessage != null})';
-    return DataSanitizationService.sanitizeForLogging(sanitizedData);
+  void _setError(String error) {
+    state = state.copyWith(errorMessage: error);
   }
 }

@@ -112,7 +112,7 @@ class TasksNotifier extends _$TasksNotifier {
           TasksState.initial().copyWith(
             allTasks: <task_entity.Task>[],
             filteredTasks: <task_entity.Task>[],
-            clearError: true,
+            errorMessage: null,
           ),
         );
       }
@@ -203,7 +203,7 @@ class TasksNotifier extends _$TasksNotifier {
 
       return current.copyWith(
         individualTaskOperations: updatedOperations,
-        clearOperationMessage: true,
+        currentOperationMessage: null,
       );
     });
   }
@@ -236,7 +236,7 @@ class TasksNotifier extends _$TasksNotifier {
 
       return current.copyWith(
         activeOperations: updatedOperations,
-        clearOperationMessage: updatedOperations.isEmpty,
+        currentOperationMessage: updatedOperations.isEmpty ? null : current.currentOperationMessage,
       );
     });
   }
@@ -275,14 +275,14 @@ class TasksNotifier extends _$TasksNotifier {
         message: AppStrings.loadingTasks,
       );
       _updateState(
-        (current) => current.copyWith(isLoading: true, clearError: true),
+        (current) => current.copyWith(isLoading: true, errorMessage: null),
       );
     } else {
       _startGlobalOperation(
         TaskLoadingOperation.syncing,
         message: AppStrings.synchronizing,
       );
-      _updateState((current) => current.copyWith(clearError: true));
+      _updateState((current) => current.copyWith(errorMessage: null));
     }
 
     try {
@@ -319,7 +319,7 @@ class TasksNotifier extends _$TasksNotifier {
               allTasks: tasks,
               filteredTasks: filteredTasks,
               isLoading: false,
-              clearError: true,
+              errorMessage: null,
             ),
           );
           _notificationService.checkOverdueTasks(tasks);
@@ -362,7 +362,7 @@ class TasksNotifier extends _$TasksNotifier {
       TaskLoadingOperation.addingTask,
       message: AppStrings.addingTask,
     );
-    _updateState((current) => current.copyWith(clearError: true));
+    _updateState((current) => current.copyWith(errorMessage: null));
 
     try {
       final currentUser = _authStateNotifier.currentUser;
@@ -406,7 +406,7 @@ class TasksNotifier extends _$TasksNotifier {
               (current) => current.copyWith(
                 allTasks: updatedTasks,
                 filteredTasks: filteredTasks,
-                clearError: true,
+                errorMessage: null,
               ),
             );
 
@@ -439,7 +439,7 @@ class TasksNotifier extends _$TasksNotifier {
             (current) => current.copyWith(
               allTasks: updatedTasks,
               filteredTasks: filteredTasks,
-              clearError: true,
+              errorMessage: null,
             ),
           );
           _notificationService.scheduleTaskNotification(addedTask);
@@ -480,7 +480,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   Future<bool> _completeTaskOperation(String taskId, String? notes) async {
     _startTaskOperation(taskId, message: AppStrings.completingTask);
-    _updateState((current) => current.copyWith(clearError: true));
+    _updateState((current) => current.copyWith(errorMessage: null));
 
     try {
       final task = _getTaskWithOwnershipValidation(taskId);
@@ -519,7 +519,7 @@ class TasksNotifier extends _$TasksNotifier {
               (current) => current.copyWith(
                 allTasks: updatedTasks,
                 filteredTasks: filteredTasks,
-                clearError: true,
+                errorMessage: null,
               ),
             );
 
@@ -565,7 +565,7 @@ class TasksNotifier extends _$TasksNotifier {
             (current) => current.copyWith(
               allTasks: updatedTasks,
               filteredTasks: filteredTasks,
-              clearError: true,
+              errorMessage: null,
             ),
           );
 
@@ -687,7 +687,7 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Clears the current error state
   void clearError() {
-    _updateState((current) => current.copyWith(clearError: true));
+    _updateState((current) => current.copyWith(errorMessage: null));
   }
 
   /// Sets filtering to show tasks for a specific plant

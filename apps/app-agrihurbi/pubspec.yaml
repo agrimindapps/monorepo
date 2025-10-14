@@ -25,6 +25,7 @@ dependencies:
   riverpod_annotation: any
   dartz: any
   flutter_riverpod: any
+  freezed_annotation: any
   go_router: any
   intl: any
   cloud_firestore: any
@@ -35,6 +36,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.4.6
+  freezed: any
   hive_generator: ^2.0.1
   riverpod_generator: any
   injectable_generator: any

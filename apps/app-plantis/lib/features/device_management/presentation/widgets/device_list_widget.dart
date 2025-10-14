@@ -1,5 +1,5 @@
 import 'package:core/core.dart'
-    hide deviceManagementProvider, DeviceManagementState;
+    hide deviceManagementNotifierProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -13,7 +13,7 @@ class DeviceListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+    final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
 
     return deviceManagementAsync.when(
       data: (deviceState) {
@@ -23,7 +23,7 @@ class DeviceListWidget extends ConsumerWidget {
 
         return RefreshIndicator(
           onRefresh:
-              () => ref.read(deviceManagementProvider.notifier).refresh(),
+              () => ref.read(deviceManagementNotifierProvider.notifier).refresh(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -235,7 +235,7 @@ class DeviceListWidget extends ConsumerWidget {
 
     if (confirmed == true && context.mounted) {
       final success = await ref
-          .read(deviceManagementProvider.notifier)
+          .read(deviceManagementNotifierProvider.notifier)
           .revokeDevice(
             device.uuid,
             reason: 'Revogado manualmente via interface',
@@ -408,7 +408,7 @@ class _DeviceDetailsSheet extends ConsumerWidget {
 
                     const SizedBox(height: 24),
                     ref
-                        .watch(deviceManagementProvider)
+                        .watch(deviceManagementNotifierProvider)
                         .when(
                           data: (deviceState) {
                             if (deviceState.currentDevice?.uuid ==

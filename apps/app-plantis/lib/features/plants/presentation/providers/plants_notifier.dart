@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide getIt, SortBy;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/plant.dart';
@@ -13,98 +14,18 @@ import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
+import 'plants_state.dart';
+
 export '../../domain/services/plants_care_service.dart' show CareStatus;
 export '../../domain/services/plants_sort_service.dart' show SortBy, ViewMode;
+export 'plants_state.dart';
 
 part 'plants_notifier.g.dart';
 
-/// State for Plants feature
-class PlantsState {
-  final List<Plant> plants;
-  final Plant? selectedPlant;
-  final bool isLoading;
-  final bool isSearching;
-  final String? error;
-  final String searchQuery;
-  final List<Plant> searchResults;
-  final ViewMode viewMode;
-  final SortBy sortBy;
-  final String? filterBySpace;
-
-  const PlantsState({
-    this.plants = const [],
-    this.selectedPlant,
-    this.isLoading = false,
-    this.isSearching = false,
-    this.error,
-    this.searchQuery = '',
-    this.searchResults = const [],
-    this.viewMode = ViewMode.grid,
-    this.sortBy = SortBy.newest,
-    this.filterBySpace,
-  });
-
-  PlantsState copyWith({
-    List<Plant>? plants,
-    Plant? selectedPlant,
-    bool? clearSelectedPlant,
-    bool? isLoading,
-    bool? isSearching,
-    String? error,
-    bool? clearError,
-    String? searchQuery,
-    List<Plant>? searchResults,
-    ViewMode? viewMode,
-    SortBy? sortBy,
-    String? filterBySpace,
-    bool? clearFilterBySpace,
-  }) {
-    return PlantsState(
-      plants: plants ?? this.plants,
-      selectedPlant: clearSelectedPlant == true ? null : (selectedPlant ?? this.selectedPlant),
-      isLoading: isLoading ?? this.isLoading,
-      isSearching: isSearching ?? this.isSearching,
-      error: clearError == true ? null : (error ?? this.error),
-      searchQuery: searchQuery ?? this.searchQuery,
-      searchResults: searchResults ?? this.searchResults,
-      viewMode: viewMode ?? this.viewMode,
-      sortBy: sortBy ?? this.sortBy,
-      filterBySpace: clearFilterBySpace == true ? null : (filterBySpace ?? this.filterBySpace),
-    );
-  }
-
-  /// Groups plants by spaces for grouped view
-  Map<String?, List<Plant>> get plantsGroupedBySpaces {
-    final plantsToGroup = searchQuery.isNotEmpty ? searchResults : plants;
-    final filterService = PlantsFilterService();
-    return filterService.groupPlantsBySpaces(plantsToGroup);
-  }
-
-  /// Gets the count of plants in each space
-  Map<String?, int> get plantCountsBySpace {
-    final plantsToGroup = searchQuery.isNotEmpty ? searchResults : plants;
-    final filterService = PlantsFilterService();
-    return filterService.getPlantCountsBySpace(plantsToGroup);
-  }
-
-  /// Check if current view is grouped by spaces
-  bool get isGroupedBySpaces {
-    final sortService = PlantsSortService();
-    return sortService.isGroupedView(viewMode);
-  }
-
-  /// Get plants count
-  int get plantsCount {
-    final crudService = PlantsCrudService(
-      getPlantsUseCase: GetIt.instance<GetPlantsUseCase>(),
-      getPlantByIdUseCase: GetIt.instance<GetPlantByIdUseCase>(),
-      addPlantUseCase: GetIt.instance<AddPlantUseCase>(),
-      updatePlantUseCase: GetIt.instance<UpdatePlantUseCase>(),
-      deletePlantUseCase: GetIt.instance<DeletePlantUseCase>(),
-    );
-    return crudService.getPlantCount(plants);
-  }
-}
+// MIGRATION COMPATIBILITY: Alias for old provider name
+// TODO: Update all references to use plantsNotifierProvider instead
+@Deprecated('Use plantsNotifierProvider instead')
+final plantsProviderProvider = plantsNotifierProvider;
 
 /// Plants Notifier refactored with specialized services
 /// Now follows Single Responsibility Principle using Facade pattern
@@ -165,8 +86,8 @@ class PlantsNotifier extends _$PlantsNotifier {
         );
         state = state.copyWith(
           plants: [],
-          clearSelectedPlant: true,
-          clearError: true,
+          selectedPlant: null,
+          error: null,
         );
       }
     });
@@ -330,7 +251,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         state = state.copyWith(isLoading: true);
       }
 
-      state = state.copyWith(clearError: true);
+      state = state.copyWith(error: null);
 
       final localResult = await _crudService.getAllPlants();
 
@@ -373,7 +294,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     state = state.copyWith(
       plants: _applyFilters(sorted),
-      clearError: true,
+      error: null,
       isLoading: false,
     );
   }
@@ -424,7 +345,7 @@ class PlantsNotifier extends _$PlantsNotifier {
     );
   }
   Future<bool> addPlant(AddPlantParams params) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(isLoading: true, error: null);
 
     final result = await _crudService.addPlant(params);
 
@@ -449,7 +370,7 @@ class PlantsNotifier extends _$PlantsNotifier {
     return success;
   }
   Future<bool> updatePlant(UpdatePlantParams params) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(isLoading: true, error: null);
 
     final result = await _crudService.updatePlant(params);
 
@@ -480,7 +401,7 @@ class PlantsNotifier extends _$PlantsNotifier {
     return success;
   }
   Future<bool> deletePlant(String id) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(isLoading: true, error: null);
 
     final result = await _crudService.deletePlant(id);
 
@@ -496,7 +417,8 @@ class PlantsNotifier extends _$PlantsNotifier {
         state = state.copyWith(
           plants: _applyFilters(state.plants.where((p) => p.id != id).toList()),
           searchResults: state.searchResults.where((p) => p.id != id).toList(),
-          clearSelectedPlant: state.selectedPlant?.id == id,
+          selectedPlant:
+              state.selectedPlant?.id == id ? null : state.selectedPlant,
           isLoading: false,
         );
         return true;
@@ -526,7 +448,6 @@ class PlantsNotifier extends _$PlantsNotifier {
     if (state.filterBySpace != spaceId) {
       state = state.copyWith(
         filterBySpace: spaceId,
-        clearFilterBySpace: spaceId == null,
         plants: _applyFilters(state.plants),
       );
     }
@@ -548,11 +469,12 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
   void clearSelectedPlant() {
     if (state.selectedPlant != null) {
-      state = state.copyWith(clearSelectedPlant: true);
+      state = state.copyWith(selectedPlant: null);
     }
   }
+
   void clearError() {
-    state = state.copyWith(clearError: true);
+    state = state.copyWith(error: null);
   }
   List<Plant> getPlantsBySpace(String spaceId) {
     return state.plants.where((plant) => plant.spaceId == spaceId).toList();
@@ -577,6 +499,24 @@ class PlantsNotifier extends _$PlantsNotifier {
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     return _careService.getPlantsByCareStatus(state.plants, status);
   }
+
+  /// Groups plants by spaces for grouped view
+  Map<String?, List<Plant>> getPlantsGroupedBySpaces() {
+    final plantsToGroup =
+        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
+    return _filterService.groupPlantsBySpaces(plantsToGroup);
+  }
+
+  /// Gets the count of plants in each space
+  Map<String?, int> getPlantCountsBySpace() {
+    final plantsToGroup =
+        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
+    return _filterService.getPlantCountsBySpace(plantsToGroup);
+  }
+
+  /// Get total plants count
+  int get plantsCount => _crudService.getPlantCount(state.plants);
+
   List<Plant> _applyFilters(List<Plant> plants) {
     List<Plant> filtered = List.from(plants);
 

@@ -75,7 +75,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(TasksConstants.searchDebounceDelay, () {
       if (mounted) {
-        ref.read(tasksProvider.notifier).searchTasks(_searchController.text);
+        ref.read(tasksNotifierProvider.notifier).searchTasks(_searchController.text);
       }
     });
   }
@@ -85,7 +85,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
       _showSearchBar = !_showSearchBar;
       if (!_showSearchBar) {
         _searchController.clear();
-        ref.read(tasksProvider.notifier).searchTasks('');
+        ref.read(tasksNotifierProvider.notifier).searchTasks('');
       }
     });
   }
@@ -128,7 +128,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
     final primaryFilter =
         _activeFilters.isNotEmpty ? _activeFilters.first : TasksFilterType.all;
 
-    ref.read(tasksProvider.notifier).setAdvancedFilters(
+    ref.read(tasksNotifierProvider.notifier).setAdvancedFilters(
       filter: primaryFilter,
       plantId: _selectedPlantFilter,
       taskTypes: _activeTaskTypes,
@@ -144,7 +144,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
       _activePriorities.clear();
       _selectedPlantFilter = null;
     });
-    ref.read(tasksProvider.notifier).setAdvancedFilters(
+    ref.read(tasksNotifierProvider.notifier).setAdvancedFilters(
       filter: TasksFilterType.all,
       plantId: null,
       taskTypes: const [],
@@ -229,7 +229,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
                       children: [
                         Builder(
                           builder: (context) {
-                            final tasksAsync = ref.watch(tasksProvider);
+                            final tasksAsync = ref.watch(tasksNotifierProvider);
                             return tasksAsync.maybeWhen(
                               data: (tasksState) {
                                 return Row(
@@ -279,7 +279,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
   }
 
   Widget _buildTitleRow(ThemeData theme) {
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
     return tasksAsync.maybeWhen(
       data: (tasksState) {
         return Row(
@@ -476,7 +476,7 @@ class _TasksAppBarState extends ConsumerState<TasksAppBar> {
   }
 
   void _handleFilterChange(TasksFilterType filter) {
-    ref.read(tasksProvider.notifier).setFilter(filter);
+    ref.read(tasksNotifierProvider.notifier).setFilter(filter);
     widget.onFilterChanged?.call(filter);
   }
 }

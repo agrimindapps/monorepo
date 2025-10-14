@@ -14,7 +14,12 @@ import '../interfaces/i_auth_state_provider.dart';
 import '../services/plants_care_calculator.dart';
 import '../services/plants_data_service.dart';
 import '../services/plants_filter_service.dart';
-import 'state/plants_state_manager.dart' hide ViewMode;
+
+part 'plants_providers.g.dart';
+
+// ============================================================================
+// STATE MODEL - Manual (custom methods not compatible with @freezed)
+// ============================================================================
 
 /// Plants State model for Riverpod state management
 class PlantsState {
@@ -43,6 +48,8 @@ class PlantsState {
     this.sortBy = SortBy.newest,
     this.filterBySpace,
   });
+
+  // Custom getters
   bool get isEmpty => allPlants.isEmpty;
   bool get hasError => error != null;
   bool get isGroupedBySpaces => viewMode == ViewMode.groupedBySpaces;
@@ -256,33 +263,19 @@ class PlantsState {
     ViewMode? viewMode,
     SortBy? sortBy,
     String? filterBySpace,
-    bool clearError = false,
-    bool clearSelectedPlant = false,
   }) {
-    final newAllPlants = allPlants ?? this.allPlants;
-    final newSearchQuery = searchQuery ?? this.searchQuery;
-    final newFilterBySpace = filterBySpace ?? this.filterBySpace;
-
-    // Se filteredPlants não foi fornecido explicitamente e não há filtros ativos,
-    // então filteredPlants deve ser igual a allPlants
-    final newFilteredPlants = filteredPlants ??
-        (allPlants != null && newSearchQuery.isEmpty && newFilterBySpace == null
-            ? newAllPlants
-            : this.filteredPlants);
-
     return PlantsState(
-      allPlants: newAllPlants,
-      filteredPlants: newFilteredPlants,
-      selectedPlant:
-          clearSelectedPlant ? null : (selectedPlant ?? this.selectedPlant),
+      allPlants: allPlants ?? this.allPlants,
+      filteredPlants: filteredPlants ?? this.filteredPlants,
+      selectedPlant: selectedPlant ?? this.selectedPlant,
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
-      error: clearError ? null : (error ?? this.error),
-      searchQuery: newSearchQuery,
+      error: error ?? this.error,
+      searchQuery: searchQuery ?? this.searchQuery,
       searchResults: searchResults ?? this.searchResults,
       viewMode: viewMode ?? this.viewMode,
       sortBy: sortBy ?? this.sortBy,
-      filterBySpace: newFilterBySpace,
+      filterBySpace: filterBySpace ?? this.filterBySpace,
     );
   }
 
@@ -318,8 +311,96 @@ class PlantsState {
       filterBySpace.hashCode;
 }
 
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum ViewMode {
+  grid,
+  list,
+  groupedBySpaces,
+  groupedBySpacesGrid,
+  groupedBySpacesList,
+}
+
+enum SortBy { newest, oldest, name, species }
+
+enum CareStatus {
+  needsWater,
+  soonWater,
+  needsFertilizer,
+  soonFertilizer,
+  good,
+  unknown,
+}
+
+// ============================================================================
+// USE CASE PROVIDERS (GetIt wrappers)
+// ============================================================================
+
+@riverpod
+GetPlantsUseCase getPlantsUseCase(GetPlantsUseCaseRef ref) {
+  return GetIt.instance<GetPlantsUseCase>();
+}
+
+@riverpod
+GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
+  return GetIt.instance<GetPlantByIdUseCase>();
+}
+
+@riverpod
+SearchPlantsUseCase searchPlantsUseCase(SearchPlantsUseCaseRef ref) {
+  return GetIt.instance<SearchPlantsUseCase>();
+}
+
+@riverpod
+AddPlantUseCase addPlantUseCase(AddPlantUseCaseRef ref) {
+  return GetIt.instance<AddPlantUseCase>();
+}
+
+@riverpod
+UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
+  return GetIt.instance<UpdatePlantUseCase>();
+}
+
+@riverpod
+DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
+  return GetIt.instance<DeletePlantUseCase>();
+}
+
+// ============================================================================
+// SPECIALIZED SERVICES PROVIDERS (SOLID pattern)
+// ============================================================================
+
+@riverpod
+IAuthStateProvider authStateProvider(AuthStateProviderRef ref) {
+  return AuthStateProviderAdapter.instance();
+}
+
+@riverpod
+PlantsDataService plantsDataService(PlantsDataServiceRef ref) {
+  return PlantsDataService.create(
+    authProvider: ref.watch(authStateProviderProvider),
+  );
+}
+
+@riverpod
+PlantsFilterService plantsFilterService(PlantsFilterServiceRef ref) {
+  return PlantsFilterService();
+}
+
+@riverpod
+PlantsCareCalculator plantsCareCalculator(PlantsCareCalculatorRef ref) {
+  return PlantsCareCalculator();
+}
+
+// ============================================================================
+// MAIN PLANTS NOTIFIER - @riverpod AsyncNotifier
+// ============================================================================
+
 /// Plants Notifier that handles all plant operations with real-time sync
-class PlantsNotifier extends AsyncNotifier<PlantsState> {
+@riverpod
+class PlantsNotifier extends _$PlantsNotifier {
   late final GetPlantsUseCase _getPlantsUseCase;
   late final GetPlantByIdUseCase _getPlantByIdUseCase;
   late final SearchPlantsUseCase _searchPlantsUseCase;
@@ -332,6 +413,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
   @override
   Future<PlantsState> build() async {
+    // Initialize use cases
     _getPlantsUseCase = ref.read(getPlantsUseCaseProvider);
     _getPlantByIdUseCase = ref.read(getPlantByIdUseCaseProvider);
     _searchPlantsUseCase = ref.read(searchPlantsUseCaseProvider);
@@ -339,25 +421,33 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     _updatePlantUseCase = ref.read(updatePlantUseCaseProvider);
     _deletePlantUseCase = ref.read(deletePlantUseCaseProvider);
     _authStateNotifier = AuthStateNotifier.instance;
+
+    // Setup listeners
     _initializeAuthListener();
     _initializeRealtimeDataStream();
+
+    // Cleanup on dispose
     ref.onDispose(() {
       _authSubscription?.cancel();
       _realtimeDataSubscription?.cancel();
     });
+
+    // Load initial data if authenticated
     if (_authStateNotifier.isInitialized &&
         _authStateNotifier.currentUser != null) {
       final result = await _getPlantsUseCase.call(const NoParams());
-      return result.fold((failure) => PlantsState(error: failure.message), (
-        plants,
-      ) {
-        final sortedPlants = _sortPlants(plants, SortBy.newest);
-        return PlantsState(
-          allPlants: sortedPlants,
-          filteredPlants: sortedPlants,
-        );
-      });
+      return result.fold(
+        (failure) => PlantsState(error: failure.message),
+        (plants) {
+          final sortedPlants = _sortPlants(plants, SortBy.newest);
+          return PlantsState(
+            allPlants: sortedPlants,
+            filteredPlants: sortedPlants,
+          );
+        },
+      );
     }
+
     return const PlantsState();
   }
 
@@ -372,8 +462,8 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
           currentState.copyWith(
             allPlants: [],
             filteredPlants: [],
-            clearSelectedPlant: true,
-            clearError: true,
+            selectedPlant: null,
+            error: null,
           ),
         );
       }
@@ -508,6 +598,10 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
     }
   }
 
+  // ============================================================================
+  // PUBLIC METHODS
+  // ============================================================================
+
   Future<void> loadPlants() async {
     if (kDebugMode) {
       print(
@@ -536,7 +630,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       final shouldShowLoading = currentState.allPlants.isEmpty;
       if (shouldShowLoading) {
         state = AsyncData(
-          currentState.copyWith(isLoading: true, clearError: true),
+          currentState.copyWith(isLoading: true, error: null),
         );
       }
       final localResult = await _getPlantsUseCase.call(const NoParams());
@@ -642,7 +736,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
         allPlants: sortedPlants,
         filteredPlants: filteredPlants,
         isLoading: false,
-        clearError: true,
+        error: null,
       ),
     );
 
@@ -743,7 +837,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
   Future<bool> addPlant(AddPlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
+    state = AsyncData(currentState.copyWith(isLoading: true, error: null));
 
     final result = await _addPlantUseCase.call(params);
 
@@ -769,7 +863,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
             allPlants: updatedPlants,
             filteredPlants: filteredPlants,
             isLoading: false,
-            clearError: true,
+            error: null,
           ),
         );
         return true;
@@ -779,7 +873,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
   Future<bool> updatePlant(UpdatePlantParams params) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
+    state = AsyncData(currentState.copyWith(isLoading: true, error: null));
 
     final result = await _updatePlantUseCase.call(params);
 
@@ -814,7 +908,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
                     ? updatedPlant
                     : newState.selectedPlant,
             isLoading: false,
-            clearError: true,
+            error: null,
           ),
         );
         return true;
@@ -824,7 +918,7 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
 
   Future<bool> deletePlant(String id) async {
     final currentState = state.valueOrNull ?? const PlantsState();
-    state = AsyncData(currentState.copyWith(isLoading: true, clearError: true));
+    state = AsyncData(currentState.copyWith(isLoading: true, error: null));
 
     final result = await _deletePlantUseCase.call(id);
 
@@ -853,9 +947,10 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
             allPlants: updatedPlants,
             filteredPlants: filteredPlants,
             searchResults: updatedSearchResults,
-            clearSelectedPlant: newState.selectedPlant?.id == id,
+            selectedPlant:
+                newState.selectedPlant?.id == id ? null : newState.selectedPlant,
             isLoading: false,
-            clearError: true,
+            error: null,
           ),
         );
         return true;
@@ -981,14 +1076,14 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   void clearSelectedPlant() {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.selectedPlant != null) {
-      state = AsyncData(currentState.copyWith(clearSelectedPlant: true));
+      state = AsyncData(currentState.copyWith(selectedPlant: null));
     }
   }
 
   void clearError() {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.hasError) {
-      state = AsyncData(currentState.copyWith(clearError: true));
+      state = AsyncData(currentState.copyWith(error: null));
     }
   }
 
@@ -1016,6 +1111,10 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
       );
     }
   }
+
+  // ============================================================================
+  // PRIVATE HELPERS
+  // ============================================================================
 
   List<Plant> _sortPlants(List<Plant> plants, SortBy sortBy) {
     final sortedPlants = List<Plant>.from(plants);
@@ -1128,145 +1227,44 @@ class PlantsNotifier extends AsyncNotifier<PlantsState> {
   }
 }
 
-/// Main Plants provider using standard Riverpod
-final plantsProvider = AsyncNotifierProvider<PlantsNotifier, PlantsState>(() {
-  return PlantsNotifier();
-});
-final allPlantsProvider = Provider<List<Plant>>((ref) {
-  final plantsState = ref.watch(plantsProvider);
-  return plantsState.maybeWhen(
-    data: (PlantsState state) => state.allPlants,
-    orElse: () => <Plant>[],
-  );
-});
+// ============================================================================
+// DERIVED PROVIDERS - Convenience accessors
+// ============================================================================
 
-final filteredPlantsProvider = Provider<List<Plant>>((ref) {
-  final plantsState = ref.watch(plantsProvider);
-  return plantsState.maybeWhen(
-    data: (PlantsState state) => state.filteredPlants,
-    orElse: () => <Plant>[],
+@riverpod
+List<Plant> allPlants(AllPlantsRef ref) {
+  final plantsAsync = ref.watch(plantsNotifierProvider);
+  return plantsAsync.maybeWhen(
+    data: (state) => state.allPlants,
+    orElse: () => [],
   );
-});
+}
 
-final plantsIsLoadingProvider = Provider<bool>((ref) {
-  final plantsState = ref.watch(plantsProvider);
-  return plantsState.maybeWhen(
-    data: (PlantsState state) => state.isLoading,
+@riverpod
+List<Plant> filteredPlants(FilteredPlantsRef ref) {
+  final plantsAsync = ref.watch(plantsNotifierProvider);
+  return plantsAsync.maybeWhen(
+    data: (state) => state.filteredPlants,
+    orElse: () => [],
+  );
+}
+
+@riverpod
+bool plantsIsLoading(PlantsIsLoadingRef ref) {
+  final plantsAsync = ref.watch(plantsNotifierProvider);
+  return plantsAsync.maybeWhen(
+    data: (state) => state.isLoading,
     loading: () => true,
     orElse: () => false,
   );
-});
+}
 
-final plantsErrorProvider = Provider<String?>((ref) {
-  final plantsState = ref.watch(plantsProvider);
-  return plantsState.maybeWhen(
-    data: (PlantsState state) => state.error,
-    error: (Object error, _) => error.toString(),
+@riverpod
+String? plantsError(PlantsErrorRef ref) {
+  final plantsAsync = ref.watch(plantsNotifierProvider);
+  return plantsAsync.maybeWhen(
+    data: (state) => state.error,
+    error: (error, _) => error.toString(),
     orElse: () => null,
   );
-});
-final getPlantsUseCaseProvider = Provider<GetPlantsUseCase>((ref) {
-  return GetIt.instance<GetPlantsUseCase>();
-});
-
-final getPlantByIdUseCaseProvider = Provider<GetPlantByIdUseCase>((ref) {
-  return GetIt.instance<GetPlantByIdUseCase>();
-});
-
-final searchPlantsUseCaseProvider = Provider<SearchPlantsUseCase>((ref) {
-  return GetIt.instance<SearchPlantsUseCase>();
-});
-
-final addPlantUseCaseProvider = Provider<AddPlantUseCase>((ref) {
-  return GetIt.instance<AddPlantUseCase>();
-});
-
-final updatePlantUseCaseProvider = Provider<UpdatePlantUseCase>((ref) {
-  return GetIt.instance<UpdatePlantUseCase>();
-});
-
-final deletePlantUseCaseProvider = Provider<DeletePlantUseCase>((ref) {
-  return GetIt.instance<DeletePlantUseCase>();
-});
-
-enum ViewMode {
-  grid,
-  list,
-  groupedBySpaces,
-  groupedBySpacesGrid,
-  groupedBySpacesList,
 }
-
-enum SortBy { newest, oldest, name, species }
-
-enum CareStatus {
-  needsWater,
-  soonWater,
-  needsFertilizer,
-  soonFertilizer,
-  good,
-  unknown,
-}
-
-/// Provider for AuthStateProvider interface
-final authStateProvider = Provider<IAuthStateProvider>((ref) {
-  return AuthStateProviderAdapter.instance();
-});
-
-/// Provider for PlantsDataService
-final plantsDataServiceProvider = Provider<PlantsDataService>((ref) {
-  return PlantsDataService.create(authProvider: ref.read(authStateProvider));
-});
-
-/// Provider for PlantsFilterService
-final plantsFilterServiceProvider = Provider<PlantsFilterService>((ref) {
-  return PlantsFilterService();
-});
-
-/// Provider for PlantsCareCalculator
-final plantsCareCalculatorProvider = Provider<PlantsCareCalculator>((ref) {
-  return PlantsCareCalculator();
-});
-
-/// SOLID Services Providers (Simplified approach for compatibility)
-final _solidPlantsDataService = PlantsDataService.create();
-final _solidPlantsFilterService = PlantsFilterService();
-final _solidPlantsCareCalculator = PlantsCareCalculator();
-final _solidAuthStateProvider = AuthStateProviderAdapter.instance();
-
-/// Provider for PlantsStateManager (new SOLID-compliant state manager)
-final plantsStateManagerProvider = Provider<PlantsStateManager>((ref) {
-  return PlantsStateManager(
-    dataService: _solidPlantsDataService,
-    filterService: _solidPlantsFilterService,
-    careCalculator: _solidPlantsCareCalculator,
-    authProvider: _solidAuthStateProvider,
-  );
-});
-
-/// Convenience providers for accessing state manager data
-final plantsStateProvider = Provider((ref) {
-  return ref.watch(plantsStateManagerProvider).state;
-});
-
-final plantsListProvider = Provider((ref) {
-  final state = ref.watch(plantsStateProvider);
-  return state.filteredPlants;
-});
-
-final plantsLoadingProvider = Provider((ref) {
-  final state = ref.watch(plantsStateProvider);
-  return state.isLoading;
-});
-
-/// Provider for care statistics
-final plantsCareStatisticsProvider = Provider((ref) {
-  final stateManager = ref.watch(plantsStateManagerProvider);
-  return stateManager.getCareStatistics();
-});
-
-/// Provider for plants needing water soon
-final plantsNeedingWaterProvider = Provider((ref) {
-  final stateManager = ref.watch(plantsStateManagerProvider);
-  return stateManager.getPlantsNeedingWaterSoon(2); // Next 2 days
-});

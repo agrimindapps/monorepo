@@ -24,7 +24,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(commentsProvider.notifier).loadComments(widget.plant.id);
+        ref.read(commentsNotifierProvider.notifier).loadComments(widget.plant.id);
       }
     });
   }
@@ -37,7 +37,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
 
   @override
   Widget build(BuildContext context) {
-    final commentsState = ref.watch(commentsProvider);
+    final commentsState = ref.watch(commentsNotifierProvider);
 
     return commentsState.when(
       data: (state) {
@@ -356,7 +356,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
 
     try {
       final success =
-          await ref.read(commentsProvider.notifier).addComment(widget.plant.id, text);
+          await ref.read(commentsNotifierProvider.notifier).addComment(widget.plant.id, text);
 
       if (kDebugMode) {
         print('   Result: ${success ? "✅ Sucesso" : "❌ Falhou"}');
@@ -375,7 +375,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
         }
       } else {
         if (mounted) {
-          final commentsState = ref.read(commentsProvider).valueOrNull;
+          final commentsState = ref.read(commentsNotifierProvider).valueOrNull;
           final errorMsg = commentsState?.errorMessage ?? 'Erro desconhecido ao adicionar observação';
 
           if (kDebugMode) {
@@ -452,7 +452,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                   final newText = editController.text.trim();
                   if (newText.isNotEmpty && newText != comment.conteudo) {
                     final success = await ref
-                        .read(commentsProvider.notifier)
+                        .read(commentsNotifierProvider.notifier)
                         .updateComment(comment.id, newText);
 
                     if (success) {
@@ -494,7 +494,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
               TextButton(
                 onPressed: () async {
                   final success =
-                      await ref.read(commentsProvider.notifier).deleteComment(comment.id);
+                      await ref.read(commentsNotifierProvider.notifier).deleteComment(comment.id);
 
                   if (success) {
                     if (!context.mounted) return;
@@ -607,7 +607,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
           ),
           TextButton(
-            onPressed: () => ref.read(commentsProvider.notifier).clearError(),
+            onPressed: () => ref.read(commentsNotifierProvider.notifier).clearError(),
             child: const Text('OK'),
           ),
         ],

@@ -1,12 +1,17 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/data/repositories/plant_comments_repository_impl.dart';
 import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../data/models/comentario_model.dart';
-final plantCommentsRepositoryProvider = Provider<PlantCommentsRepository>((ref) {
+
+part 'comments_providers.g.dart';
+
+@riverpod
+PlantCommentsRepository plantCommentsRepository(PlantCommentsRepositoryRef ref) {
   return PlantCommentsRepositoryImpl();
-});
+}
 @immutable
 class CommentsState {
   final List<ComentarioModel> comments;
@@ -50,12 +55,20 @@ class CommentsState {
 }
 
 /// Comments Notifier for managing plant comments
-class CommentsNotifier extends AutoDisposeAsyncNotifier<CommentsState> {
+@riverpod
+class CommentsNotifier extends _$CommentsNotifier {
   late final PlantCommentsRepository _repository;
 
   @override
   Future<CommentsState> build() async {
     _repository = ref.read(plantCommentsRepositoryProvider);
+
+    ref.onDispose(() {
+      if (kDebugMode) {
+        print('🧹 CommentsNotifier disposed');
+      }
+    });
+
     return CommentsState.initial();
   }
 
@@ -294,40 +307,35 @@ class CommentsNotifier extends AutoDisposeAsyncNotifier<CommentsState> {
   }
 }
 
-/// Global provider for comments management
-final commentsProvider =
-    AutoDisposeAsyncNotifierProvider<CommentsNotifier, CommentsState>(
-  CommentsNotifier.new,
-);
-
 /// Provider for comments for a specific plant (family modifier for better performance)
-final plantCommentsProvider =
-    Provider.autoDispose.family<AsyncValue<List<ComentarioModel>>, String>(
-  (ref, plantId) {
-    final commentsState = ref.watch(commentsProvider);
+@riverpod
+AsyncValue<List<ComentarioModel>> plantComments(
+  PlantCommentsRef ref,
+  String plantId,
+) {
+  final commentsState = ref.watch(commentsNotifierProvider);
 
-    return commentsState.when(
-      data: (state) {
-        if (state.currentPlantId != plantId && !state.isLoading) {
-          Future.microtask(() {
-            ref.read(commentsProvider.notifier).loadComments(plantId);
-          });
-          return const AsyncLoading();
-        }
-        if (state.currentPlantId == plantId) {
-          if (state.errorMessage != null) {
-            return AsyncError(
-              Exception(state.errorMessage),
-              StackTrace.current,
-            );
-          }
-          return AsyncData(state.comments);
-        }
-
+  return commentsState.when(
+    data: (state) {
+      if (state.currentPlantId != plantId && !state.isLoading) {
+        Future.microtask(() {
+          ref.read(commentsNotifierProvider.notifier).loadComments(plantId);
+        });
         return const AsyncLoading();
-      },
-      loading: () => const AsyncLoading(),
-      error: (error, stack) => AsyncError(error, stack),
-    );
-  },
-);
+      }
+      if (state.currentPlantId == plantId) {
+        if (state.errorMessage != null) {
+          return AsyncError(
+            Exception(state.errorMessage),
+            StackTrace.current,
+          );
+        }
+        return AsyncData(state.comments);
+      }
+
+      return const AsyncLoading();
+    },
+    loading: () => const AsyncLoading(),
+    error: (error, stack) => AsyncError(error, stack),
+  );
+}

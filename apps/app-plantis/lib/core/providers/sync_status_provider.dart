@@ -1,111 +1,159 @@
 import 'dart:async';
 
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/models/sync_queue_item.dart' as local;
 import '../sync/sync_queue.dart' as local;
 
-enum SyncState {
+part 'sync_status_provider.freezed.dart';
+part 'sync_status_provider.g.dart';
+
+/// Enum representing sync state
+enum SyncStatusState {
   idle, // No sync operations
   syncing, // Currently syncing
   offline, // No network connection
   error, // Sync encountered an error
 }
 
-class SyncStatusProvider with ChangeNotifier {
-  final ConnectivityService _connectivityService;
-  final local.SyncQueue _syncQueue;
-  StreamSubscription<ConnectivityType>? _networkSubscription;
-  StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
+/// State class for sync status with freezed immutability
+@freezed
+class SyncStatusModel with _$SyncStatusModel {
+  const factory SyncStatusModel({
+    @Default(SyncStatusState.idle) SyncStatusState currentState,
+    @Default([]) List<local.SyncQueueItem> pendingItems,
+  }) = _SyncStatusModel;
 
-  SyncState _currentState = SyncState.idle;
-  SyncState get currentState => _currentState;
+  const SyncStatusModel._();
 
-  List<local.SyncQueueItem> _pendingItems = [];
-  List<local.SyncQueueItem> get pendingItems => _pendingItems;
+  /// Convenience getter for pending items count
+  int get pendingItemsCount => pendingItems.length;
 
-  int get pendingItemsCount => _pendingItems.length;
-
-  SyncStatusProvider(this._connectivityService, this._syncQueue) {
-    _initializeListeners();
-  }
-
-  void _initializeListeners() {
-    _networkSubscription = _connectivityService.networkStatusStream.listen((
-      status,
-    ) {
-      switch (status) {
-        case ConnectivityType.offline:
-        case ConnectivityType.none:
-          _updateSyncState(SyncState.offline);
-          break;
-        case ConnectivityType.mobile:
-        case ConnectivityType.wifi:
-        case ConnectivityType.online:
-        case ConnectivityType.ethernet:
-        case ConnectivityType.vpn:
-        case ConnectivityType.other:
-        case ConnectivityType.bluetooth:
-          _updateSyncState(SyncState.idle);
-          break;
-      }
-    });
-    _queueSubscription = _syncQueue.queueStream.listen((items) {
-      _pendingItems = items;
-
-      if (items.isEmpty) {
-        _updateSyncState(SyncState.idle);
-      } else {
-        _updateSyncState(SyncState.syncing);
-      }
-    });
-  }
-
-  void _updateSyncState(SyncState newState) {
-    if (_currentState != newState) {
-      _currentState = newState;
-      notifyListeners();
-    }
-  }
-  Future<void> checkSyncStatus() async {
-    final networkStatusResult =
-        await _connectivityService.getCurrentNetworkStatus();
-
-    networkStatusResult.fold((failure) => _updateSyncState(SyncState.error), (
-      networkStatus,
-    ) {
-      if (networkStatus == ConnectivityType.offline ||
-          networkStatus == ConnectivityType.none) {
-        _updateSyncState(SyncState.offline);
-      } else {
-        final pendingItems = _syncQueue.getPendingItems();
-
-        if (pendingItems.isEmpty) {
-          _updateSyncState(SyncState.idle);
-        } else {
-          _updateSyncState(SyncState.syncing);
-        }
-      }
-    });
-  }
+  /// Human-readable status message
   String get statusMessage {
-    switch (_currentState) {
-      case SyncState.idle:
+    switch (currentState) {
+      case SyncStatusState.idle:
         return 'Synced';
-      case SyncState.syncing:
-        return 'Syncing (${_pendingItems.length} items)';
-      case SyncState.offline:
+      case SyncStatusState.syncing:
+        return 'Syncing (${pendingItems.length} items)';
+      case SyncStatusState.offline:
         return 'Offline - Changes saved locally';
-      case SyncState.error:
+      case SyncStatusState.error:
         return 'Sync Error';
     }
   }
+}
+
+// =============================================================================
+// DEPENDENCY PROVIDERS
+// =============================================================================
+
+/// Provider for ConnectivityService
+@riverpod
+ConnectivityService syncConnectivityService(SyncConnectivityServiceRef ref) {
+  return GetIt.instance<ConnectivityService>();
+}
+
+/// Provider for SyncQueue
+@riverpod
+local.SyncQueue syncQueue(SyncQueueRef ref) {
+  return GetIt.instance<local.SyncQueue>();
+}
+
+// =============================================================================
+// MAIN SYNC STATUS NOTIFIER
+// =============================================================================
+
+/// Riverpod notifier for sync status state management
+@riverpod
+class SyncStatusNotifier extends _$SyncStatusNotifier {
+  StreamSubscription<ConnectivityType>? _networkSubscription;
+  StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
 
   @override
-  void dispose() {
-    _networkSubscription?.cancel();
-    _queueSubscription?.cancel();
-    super.dispose();
+  SyncStatusModel build() {
+    _initializeListeners();
+
+    // Cleanup on dispose
+    ref.onDispose(() {
+      _networkSubscription?.cancel();
+      _queueSubscription?.cancel();
+    });
+
+    return const SyncStatusModel();
+  }
+
+  /// Initializes network and queue listeners
+  void _initializeListeners() {
+    final connectivityService = ref.read(syncConnectivityServiceProvider);
+    final queue = ref.read(syncQueueProvider);
+
+    // Listen to network changes
+    _networkSubscription = connectivityService.networkStatusStream.listen(
+      (status) {
+        switch (status) {
+          case ConnectivityType.offline:
+          case ConnectivityType.none:
+            _updateSyncState(SyncStatusState.offline);
+            break;
+          case ConnectivityType.mobile:
+          case ConnectivityType.wifi:
+          case ConnectivityType.online:
+          case ConnectivityType.ethernet:
+          case ConnectivityType.vpn:
+          case ConnectivityType.other:
+          case ConnectivityType.bluetooth:
+            _updateSyncState(SyncStatusState.idle);
+            break;
+        }
+      },
+    );
+
+    // Listen to queue changes
+    _queueSubscription = queue.queueStream.listen((items) {
+      state = state.copyWith(pendingItems: items);
+
+      if (items.isEmpty) {
+        _updateSyncState(SyncStatusState.idle);
+      } else {
+        _updateSyncState(SyncStatusState.syncing);
+      }
+    });
+  }
+
+  /// Updates sync state if different from current
+  void _updateSyncState(SyncStatusState newState) {
+    if (state.currentState != newState) {
+      state = state.copyWith(currentState: newState);
+    }
+  }
+
+  /// Manually checks current sync status
+  Future<void> checkSyncStatus() async {
+    final connectivityService = ref.read(syncConnectivityServiceProvider);
+    final queue = ref.read(syncQueueProvider);
+
+    final networkStatusResult =
+        await connectivityService.getCurrentNetworkStatus();
+
+    networkStatusResult.fold(
+      (failure) => _updateSyncState(SyncStatusState.error),
+      (networkStatus) {
+        if (networkStatus == ConnectivityType.offline ||
+            networkStatus == ConnectivityType.none) {
+          _updateSyncState(SyncStatusState.offline);
+        } else {
+          final pendingItems = queue.getPendingItems();
+
+          if (pendingItems.isEmpty) {
+            _updateSyncState(SyncStatusState.idle);
+          } else {
+            _updateSyncState(SyncStatusState.syncing);
+          }
+        }
+      },
+    );
   }
 }

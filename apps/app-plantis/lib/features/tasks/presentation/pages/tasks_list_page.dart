@@ -53,8 +53,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      ref.read(tasksProvider.notifier).loadTasks();
-      ref.read(tasksProvider.notifier).filterTasks(TasksFilterType.today);
+      ref.read(tasksNotifierProvider.notifier).loadTasks();
+      ref.read(tasksNotifierProvider.notifier).filterTasks(TasksFilterType.today);
     });
   }
 
@@ -94,7 +94,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
     final tasksCount = tasksAsync.maybeWhen(
       data: (state) => state.allTasks.length,
       orElse: () => 0,
@@ -115,11 +115,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   }
 
   Widget _buildTasksAsyncContent() {
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
     return tasksAsync.when(
       data: (tasksState) {
         return RefreshIndicator(
-          onRefresh: () => ref.read(tasksProvider.notifier).loadTasks(),
+          onRefresh: () => ref.read(tasksNotifierProvider.notifier).loadTasks(),
           child: Stack(
             children: [
               _buildTasksList(tasksState),
@@ -152,7 +152,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref.read(tasksProvider.notifier).loadTasks(),
+              onPressed: () => ref.read(tasksNotifierProvider.notifier).loadTasks(),
               child: const Text('Tentar novamente'),
             ),
           ],
@@ -162,7 +162,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   }
 
   Widget _buildSimpleFilters(BuildContext context) {
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
     return tasksAsync.when(
       data: (TasksState tasksState) => _buildFiltersContent(tasksState, ref),
       loading: () => const SizedBox.shrink(),
@@ -207,7 +207,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 selected: tasksState.currentFilter == TasksFilterType.overdue,
                 onSelected: (selected) {
                   ref
-                      .read(tasksProvider.notifier)
+                      .read(tasksNotifierProvider.notifier)
                       .filterTasks(TasksFilterType.overdue);
                 },
                 selectedColor: Colors.red.withValues(alpha:0.2),
@@ -263,7 +263,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               selected: tasksState.currentFilter == TasksFilterType.today,
               onSelected: (selected) {
                 ref
-                    .read(tasksProvider.notifier)
+                    .read(tasksNotifierProvider.notifier)
                     .filterTasks(TasksFilterType.today);
               },
               selectedColor: PlantisColors.primary.withValues(alpha:0.2),
@@ -315,7 +315,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               selected: tasksState.currentFilter == TasksFilterType.upcoming,
               onSelected: (selected) {
                 ref
-                    .read(tasksProvider.notifier)
+                    .read(tasksNotifierProvider.notifier)
                     .filterTasks(TasksFilterType.upcoming);
               },
               selectedColor: PlantisColors.primary.withValues(alpha:0.2),
@@ -367,7 +367,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               selected: tasksState.currentFilter == TasksFilterType.allFuture,
               onSelected: (selected) {
                 ref
-                    .read(tasksProvider.notifier)
+                    .read(tasksNotifierProvider.notifier)
                     .filterTasks(TasksFilterType.allFuture);
               },
               selectedColor: PlantisColors.primary.withValues(alpha:0.2),
@@ -487,14 +487,14 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildTaskCard(task_entity.Task task) {
     final theme = Theme.of(context);
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
     final isLoading = tasksAsync.maybeWhen(
       data:
           (TasksState state) =>
               state.individualTaskOperations.containsKey(task.id),
       orElse: () => false,
     );
-    final plantsAsync = ref.watch(plantsProvider);
+    final plantsAsync = ref.watch(plantsNotifierProvider);
     String plantName = 'Carregando...';
     String? plantImageUrl;
 
@@ -682,7 +682,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
     if (result != null && context.mounted) {
       try {
-        await ref.read(tasksProvider.notifier).completeTask(task.id);
+        await ref.read(tasksNotifierProvider.notifier).completeTask(task.id);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -738,7 +738,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
   Widget _buildViewAllButton() {
     final theme = Theme.of(context);
-    final tasksAsync = ref.watch(tasksProvider);
+    final tasksAsync = ref.watch(tasksNotifierProvider);
     final remainingTasks = tasksAsync.maybeWhen(
       data:
           (TasksState state) =>
@@ -759,7 +759,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
         child: ElevatedButton.icon(
           onPressed: () {
             ref
-                .read(tasksProvider.notifier)
+                .read(tasksNotifierProvider.notifier)
                 .filterTasks(TasksFilterType.allFuture);
           },
           icon: const Icon(Icons.calendar_month),

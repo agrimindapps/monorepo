@@ -6,7 +6,7 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/plant.dart';
 import '../providers/plant_task_provider.dart';
 import '../providers/plants_notifier.dart';
-import '../providers/plants_provider.dart';
+import '../providers/plants_notifier.dart';
 import 'empty_plants_widget.dart';
 import 'enhanced_plant_card.dart';
 import 'enhanced_plants_app_bar.dart';

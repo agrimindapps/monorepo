@@ -7,7 +7,7 @@ import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/fuel_record_entity.dart';
-import '../providers/fuel_notifier.dart';
+import '../providers/fuel_riverpod_notifier.dart';
 import 'add_fuel_page.dart';
 
 class FuelPage extends ConsumerStatefulWidget {
@@ -25,13 +25,13 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(fuelNotifierProvider.notifier).loadFuelRecords();
+      ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final fuelState = ref.watch(fuelNotifierProvider);
+    final fuelStateAsync = ref.watch(fuelRiverpodProvider);
     final isOnline = ref.watch(fuelIsOnlineProvider);
     final pendingCount = ref.watch(fuelPendingCountProvider);
     final isSyncing = ref.watch(fuelIsSyncingProvider);
@@ -57,13 +57,36 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   if (_selectedVehicleId == null) {
                     return _buildSelectVehicleState();
                   }
-                  return _buildContent(context, fuelState);
+                  return fuelStateAsync.when(
+                    data: (fuelState) => _buildContent(context, fuelState),
+                    loading: () => const StandardLoadingView(
+                      message: 'Carregando abastecimentos...',
+                      showProgress: true,
+                    ),
+                    error: (error, stack) => EnhancedEmptyState(
+                      title: 'Erro ao carregar',
+                      description: error.toString(),
+                      icon: Icons.error_outline,
+                      actionLabel: 'Tentar novamente',
+                      onAction: () {
+                        ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
+                      },
+                    ),
+                  );
                 },
                 loading: () => const StandardLoadingView(
                   message: 'Carregando veículos...',
                   showProgress: true,
                 ),
-                error: (_, __) => _buildContent(context, fuelState),
+                error: (error, _) => EnhancedEmptyState(
+                  title: 'Erro ao carregar veículos',
+                  description: error.toString(),
+                  icon: Icons.error_outline,
+                  actionLabel: 'Tentar novamente',
+                  onAction: () {
+                    ref.read(vehiclesNotifierProvider.notifier).refresh();
+                  },
+                ),
               ),
             ),
           ],
@@ -117,7 +140,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           if (isOnline && pendingCount > 0 && !isSyncing)
             TextButton(
               onPressed: () {
-                ref.read(fuelNotifierProvider.notifier).syncPendingRecords();
+                ref.read(fuelRiverpodProvider.notifier).syncPendingRecords();
               },
               child: const Text('Sincronizar'),
             ),
@@ -214,9 +237,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           });
           // Filtrar abastecimentos por veículo
           if (vehicleId != null) {
-            ref.read(fuelNotifierProvider.notifier).filterByVehicle(vehicleId);
+            ref.read(fuelRiverpodProvider.notifier).filterByVehicle(vehicleId);
           } else {
-            ref.read(fuelNotifierProvider.notifier).clearVehicleFilter();
+            ref.read(fuelRiverpodProvider.notifier).clearVehicleFilter();
           }
         },
         hintText: 'Selecione um veículo',
@@ -296,7 +319,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         icon: Icons.error_outline,
         actionLabel: 'Tentar novamente',
         onAction: () {
-          ref.read(fuelNotifierProvider.notifier).loadFuelRecords();
+          ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
         },
       );
     }
@@ -317,7 +340,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                 : 'Adicionar abastecimento',
         onAction: () {
           if (fuelState.hasActiveFilters) {
-            ref.read(fuelNotifierProvider.notifier).clearAllFilters();
+            ref.read(fuelRiverpodProvider.notifier).clearAllFilters();
           } else {
           }
         },
@@ -330,7 +353,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
   Widget _buildFuelRecordsList(List<FuelRecordEntity> records) {
     return RefreshIndicator(
       onRefresh: () async {
-        await ref.read(fuelNotifierProvider.notifier).loadFuelRecords();
+        await ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -437,7 +460,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           builder: (context) => AddFuelPage(vehicleId: _selectedVehicleId),
         ).then((result) {
           if (result == true) {
-            ref.read(fuelNotifierProvider.notifier).loadFuelRecords();
+            ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
           }
         });
       },

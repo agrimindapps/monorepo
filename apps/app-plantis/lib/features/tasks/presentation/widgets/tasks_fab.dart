@@ -39,7 +39,7 @@ class TasksFab extends ConsumerWidget {
     );
 
     try {
-      final success = await ref.read(tasksProvider.notifier).addTask(task);
+      final success = await ref.read(tasksNotifierProvider.notifier).addTask(task);
       if (!context.mounted) return;
 
       if (success) {

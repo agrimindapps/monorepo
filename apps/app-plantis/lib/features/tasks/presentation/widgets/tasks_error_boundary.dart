@@ -240,7 +240,7 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
       if (widget.onRetry != null) {
         widget.onRetry!();
       } else {
-        final tasksNotifier = ref.read(tasksProvider.notifier);
+        final tasksNotifier = ref.read(tasksNotifierProvider.notifier);
         tasksNotifier.clearError(); // Clear any existing errors
         tasksNotifier.loadTasks();
       }
@@ -269,7 +269,7 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
       _errorDetails = null;
     });
     try {
-      final tasksNotifier = ref.read(tasksProvider.notifier);
+      final tasksNotifier = ref.read(tasksNotifierProvider.notifier);
       tasksNotifier.clearError();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {

@@ -4,4 +4,4 @@
 library;
 
 export 'fuel_form_notifier.dart';
-export 'fuel_notifier.dart';
+export 'fuel_riverpod_notifier.dart';

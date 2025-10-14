@@ -1,84 +1,155 @@
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/error_adapter.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/repositories/plants_repository.dart';
 
-class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
-  final PlantsRepository _plantsRepository;
+part 'plants_list_provider.freezed.dart';
+part 'plants_list_provider.g.dart';
 
-  PlantsListProvider({required PlantsRepository plantsRepository})
-    : _plantsRepository = plantsRepository;
+@freezed
+class PlantsListState with _$PlantsListState {
+  const factory PlantsListState({
+    @Default([]) List<Plant> plants,
+    @Default([]) List<Plant> filteredPlants,
+    @Default(false) bool isLoading,
+    @Default('') String searchQuery,
+    String? errorMessage,
+  }) = _PlantsListState;
 
-  List<Plant> _plants = [];
-  List<Plant> _filteredPlants = [];
-  bool _isLoading = false;
-  String _searchQuery = '';
-  List<Plant> get plants =>
-      _filteredPlants.isEmpty && _searchQuery.isEmpty
-          ? _plants
-          : _filteredPlants;
-  bool get isLoading => _isLoading;
-  String get searchQuery => _searchQuery;
-  bool get hasPlants => _plants.isNotEmpty;
-  bool get isEmpty => _plants.isEmpty && !_isLoading;
-  int get plantsCount => _plants.length;
-  String? get errorMessage => lastError?.message;
+  const PlantsListState._();
+
+  List<Plant> get displayPlants =>
+      filteredPlants.isEmpty && searchQuery.isEmpty ? plants : filteredPlants;
+
+  bool get hasPlants => plants.isNotEmpty;
+  bool get isEmpty => plants.isEmpty && !isLoading;
+  int get plantsCount => plants.length;
+}
+
+@riverpod
+class PlantsListNotifier extends _$PlantsListNotifier {
+  late final PlantsRepository _plantsRepository;
+
+  @override
+  PlantsListState build(PlantsRepository plantsRepository) {
+    _plantsRepository = plantsRepository;
+    return const PlantsListState();
+  }
+
   Future<void> loadPlants() async {
-    _setLoading(true);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final plants = await handleEitherOperation(
-      () => _plantsRepository.getPlants(),
-    );
+    try {
+      final result = await _plantsRepository.getPlants();
 
-    if (plants != null) {
-      _plants = plants;
-      _applySearch(); // Reapply current search if any
+      result.fold(
+        (failure) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+        },
+        (plants) {
+          state = state.copyWith(
+            plants: plants,
+            isLoading: false,
+            errorMessage: null,
+          );
+          _applySearch();
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro inesperado: $e',
+      );
     }
-
-    _setLoading(false);
   }
 
   Future<void> addPlant(Plant plant) async {
-    final addedPlant = await handleEitherOperation(
-      () => _plantsRepository.addPlant(plant),
-    );
+    state = state.copyWith(errorMessage: null);
 
-    if (addedPlant != null) {
-      _plants.add(addedPlant);
-      _applySearch(); // Reapply search to include new plant if it matches
+    try {
+      final result = await _plantsRepository.addPlant(plant);
+
+      result.fold(
+        (failure) {
+          state = state.copyWith(errorMessage: failure.message);
+        },
+        (addedPlant) {
+          state = state.copyWith(
+            plants: [...state.plants, addedPlant],
+            errorMessage: null,
+          );
+          _applySearch();
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao adicionar planta: $e');
     }
   }
 
   Future<void> updatePlant(Plant plant) async {
-    final updatedPlant = await handleEitherOperation(
-      () => _plantsRepository.updatePlant(plant),
-    );
+    state = state.copyWith(errorMessage: null);
 
-    if (updatedPlant != null) {
-      final index = _plants.indexWhere((p) => p.id == updatedPlant.id);
-      if (index != -1) {
-        _plants[index] = updatedPlant;
-        _applySearch(); // Reapply search after update
-      }
+    try {
+      final result = await _plantsRepository.updatePlant(plant);
+
+      result.fold(
+        (failure) {
+          state = state.copyWith(errorMessage: failure.message);
+        },
+        (updatedPlant) {
+          final updatedPlants = state.plants.map((p) {
+            return p.id == updatedPlant.id ? updatedPlant : p;
+          }).toList();
+
+          state = state.copyWith(
+            plants: updatedPlants,
+            errorMessage: null,
+          );
+          _applySearch();
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao atualizar planta: $e');
     }
   }
 
   Future<void> deletePlant(String id) async {
-    await handleEitherOperation(() => _plantsRepository.deletePlant(id));
-    _plants.removeWhere((plant) => plant.id == id);
-    _filteredPlants.removeWhere((plant) => plant.id == id);
-    notifyListeners();
+    state = state.copyWith(errorMessage: null);
+
+    try {
+      final result = await _plantsRepository.deletePlant(id);
+
+      result.fold(
+        (failure) {
+          state = state.copyWith(errorMessage: failure.message);
+        },
+        (_) {
+          state = state.copyWith(
+            plants: state.plants.where((plant) => plant.id != id).toList(),
+            filteredPlants:
+                state.filteredPlants.where((plant) => plant.id != id).toList(),
+            errorMessage: null,
+          );
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao deletar planta: $e');
+    }
   }
+
   void searchPlants(String query) {
-    _searchQuery = query.trim().toLowerCase();
+    state = state.copyWith(searchQuery: query.trim().toLowerCase());
     _applySearch();
   }
 
   void clearSearch() {
-    _searchQuery = '';
-    _filteredPlants.clear();
-    notifyListeners();
+    state = state.copyWith(searchQuery: '', filteredPlants: []);
   }
 
   Future<void> performRemoteSearch(String query) async {
@@ -87,48 +158,55 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
       return;
     }
 
-    _setLoading(true);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final searchResults = await handleEitherOperation(
-      () => _plantsRepository.searchPlants(query),
-    );
+    try {
+      final result = await _plantsRepository.searchPlants(query);
 
-    if (searchResults != null) {
-      _searchQuery = query.trim().toLowerCase();
-      _filteredPlants = searchResults;
+      result.fold(
+        (failure) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+        },
+        (searchResults) {
+          state = state.copyWith(
+            searchQuery: query.trim().toLowerCase(),
+            filteredPlants: searchResults,
+            isLoading: false,
+            errorMessage: null,
+          );
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro na busca: $e',
+      );
     }
-
-    _setLoading(false);
   }
+
   List<Plant> getPlantsBySpace(String spaceId) {
-    final plantsToFilter =
-        _filteredPlants.isEmpty && _searchQuery.isEmpty
-            ? _plants
-            : _filteredPlants;
-    return plantsToFilter.where((plant) => plant.spaceId == spaceId).toList();
+    return state.displayPlants
+        .where((plant) => plant.spaceId == spaceId)
+        .toList();
   }
 
   List<Plant> getPlantsWithImages() {
-    final plantsToFilter =
-        _filteredPlants.isEmpty && _searchQuery.isEmpty
-            ? _plants
-            : _filteredPlants;
-    return plantsToFilter.where((plant) => plant.hasImage).toList();
+    return state.displayPlants.where((plant) => plant.hasImage).toList();
   }
 
   List<Plant> getRecentPlants({int days = 7}) {
     final cutoffDate = DateTime.now().subtract(Duration(days: days));
-    final plantsToFilter =
-        _filteredPlants.isEmpty && _searchQuery.isEmpty
-            ? _plants
-            : _filteredPlants;
-    return plantsToFilter
+    return state.displayPlants
         .where((plant) => plant.createdAt?.isAfter(cutoffDate) ?? false)
         .toList();
   }
+
   Plant? getPlantById(String id) {
     try {
-      return _plants.firstWhere((plant) => plant.id == id);
+      return state.plants.firstWhere((plant) => plant.id == id);
     } catch (e) {
       return null;
     }
@@ -137,28 +215,22 @@ class PlantsListProvider extends ChangeNotifier with ErrorHandlingMixin {
   void refresh() {
     loadPlants();
   }
+
   void _applySearch() {
-    if (_searchQuery.isEmpty) {
-      _filteredPlants.clear();
+    if (state.searchQuery.isEmpty) {
+      state = state.copyWith(filteredPlants: []);
     } else {
-      _filteredPlants =
-          _plants.where((plant) {
-            final name = plant.name.toLowerCase();
-            final species = plant.species?.toLowerCase() ?? '';
-            final notes = plant.notes?.toLowerCase() ?? '';
+      final filtered = state.plants.where((plant) {
+        final name = plant.name.toLowerCase();
+        final species = plant.species?.toLowerCase() ?? '';
+        final notes = plant.notes?.toLowerCase() ?? '';
 
-            return name.contains(_searchQuery) ||
-                species.contains(_searchQuery) ||
-                notes.contains(_searchQuery);
-          }).toList();
-    }
-    notifyListeners();
-  }
+        return name.contains(state.searchQuery) ||
+            species.contains(state.searchQuery) ||
+            notes.contains(state.searchQuery);
+      }).toList();
 
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
+      state = state.copyWith(filteredPlants: filtered);
     }
   }
 }

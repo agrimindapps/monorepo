@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 
 import '../../../../features/animals/domain/entities/animal.dart';
-import '../../../../features/animals/presentation/providers/animals_provider.dart';
+import '../../../../features/animals/presentation/notifiers/animals_notifier.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_provider.dart';
@@ -42,7 +42,7 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
     super.initState();
     _initializeForm();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(animalsProvider.notifier).loadAnimals();
+      ref.read(animalsNotifierProvider.notifier).loadAnimals();
     });
   }
 
@@ -75,7 +75,7 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsProvider);
+    final animalsState = ref.watch(animalsNotifierProvider);
     
     return Scaffold(
       appBar: AppBar(
@@ -94,7 +94,7 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
                       Text('Erro ao carregar animais: ${animalsState.error}'),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => ref.read(animalsProvider.notifier).loadAnimals(),
+                        onPressed: () => ref.read(animalsNotifierProvider.notifier).loadAnimals(),
                         child: const Text('Tentar novamente'),
                       ),
                     ],

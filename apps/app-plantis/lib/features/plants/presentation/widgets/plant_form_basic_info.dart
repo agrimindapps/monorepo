@@ -693,9 +693,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
       if (spaceName.trim().isEmpty) return;
 
       try {
-        final spacesNotifier = ref.read(spacesProvider.notifier);
+        final spacesNotifier = ref.read(spacesNotifierProvider.notifier);
         await spacesNotifier.loadSpaces(); // Garantir que temos a lista atual
-        final spacesState = ref.read(spacesProvider);
+        final spacesState = ref.read(spacesNotifierProvider);
         final existingSpace = spacesState.maybeWhen(
           data: (state) => state.findSpaceByName(spaceName),
           orElse: () => null,
@@ -721,7 +721,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
 
         if (success && mounted) {
           await spacesNotifier.loadSpaces();
-          final updatedState = ref.read(spacesProvider);
+          final updatedState = ref.read(spacesNotifierProvider);
           final newSpace = updatedState.maybeWhen(
             data: (state) => state.findSpaceByName(spaceName),
             orElse: () => null,

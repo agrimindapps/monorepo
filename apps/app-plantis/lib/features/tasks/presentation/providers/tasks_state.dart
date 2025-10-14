@@ -1,7 +1,9 @@
-import 'package:core/core.dart' show Equatable;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
+
+part 'tasks_state.freezed.dart';
 
 /// Enumeration defining all available task filter types
 ///
@@ -70,8 +72,8 @@ enum TaskLoadingOperation {
 /// all task-related data and computed properties in a single, cohesive state object.
 ///
 /// Key features:
-/// - **Immutability**: All properties are final, preventing accidental mutations
-/// - **Equality**: Implements Equatable for efficient change detection
+/// - **Immutability**: All properties are final with @freezed code generation
+/// - **Equality**: Automatic equality implementation via @freezed
 /// - **Computed Properties**: Provides calculated values like statistics and filtered lists
 /// - **Granular Loading**: Tracks multiple concurrent operations independently
 /// - **Type Safety**: Uses strong typing throughout for reliability
@@ -90,81 +92,30 @@ enum TaskLoadingOperation {
 ///   isLoading: false,
 /// );
 /// ```
-class TasksState extends Equatable {
-  final List<task_entity.Task> allTasks;
-  final List<task_entity.Task> filteredTasks;
-  final bool isLoading;
-  final String? errorMessage;
-  final TasksFilterType currentFilter;
-  final String? selectedPlantId;
-  final String searchQuery;
-  final List<task_entity.TaskType> selectedTaskTypes;
-  final List<task_entity.TaskPriority> selectedPriorities;
-  final Map<String, bool> individualTaskOperations; // taskId -> isLoading
-  final Set<TaskLoadingOperation> activeOperations;
-  final String? currentOperationMessage;
+@freezed
+class TasksState with _$TasksState {
+  const TasksState._(); // Private constructor for custom getters
 
-  const TasksState({
-    this.allTasks = const [],
-    this.filteredTasks = const [],
-    this.isLoading = false,
-    this.errorMessage,
-    this.currentFilter = TasksFilterType.all,
-    this.selectedPlantId,
-    this.searchQuery = '',
-    this.selectedTaskTypes = const [],
-    this.selectedPriorities = const [],
-    this.individualTaskOperations = const {},
-    this.activeOperations = const {},
-    this.currentOperationMessage,
-  });
-
-  /// Creates a copy of this state with some values changed
-  TasksState copyWith({
-    List<task_entity.Task>? allTasks,
-    List<task_entity.Task>? filteredTasks,
-    bool? isLoading,
+  const factory TasksState({
+    @Default([]) List<task_entity.Task> allTasks,
+    @Default([]) List<task_entity.Task> filteredTasks,
+    @Default(false) bool isLoading,
     String? errorMessage,
-    TasksFilterType? currentFilter,
+    @Default(TasksFilterType.all) TasksFilterType currentFilter,
     String? selectedPlantId,
-    String? searchQuery,
-    List<task_entity.TaskType>? selectedTaskTypes,
-    List<task_entity.TaskPriority>? selectedPriorities,
-    Map<String, bool>? individualTaskOperations,
-    Set<TaskLoadingOperation>? activeOperations,
+    @Default('') String searchQuery,
+    @Default([]) List<task_entity.TaskType> selectedTaskTypes,
+    @Default([]) List<task_entity.TaskPriority> selectedPriorities,
+    @Default({}) Map<String, bool> individualTaskOperations,
+    @Default({}) Set<TaskLoadingOperation> activeOperations,
     String? currentOperationMessage,
-    bool clearError = false,
-    bool clearOperationMessage = false,
-  }) {
-    return TasksState(
-      allTasks: allTasks ?? this.allTasks,
-      filteredTasks: filteredTasks ?? this.filteredTasks,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
-      currentFilter: currentFilter ?? this.currentFilter,
-      selectedPlantId: selectedPlantId ?? this.selectedPlantId,
-      searchQuery: searchQuery ?? this.searchQuery,
-      selectedTaskTypes: selectedTaskTypes ?? this.selectedTaskTypes,
-      selectedPriorities: selectedPriorities ?? this.selectedPriorities,
-      individualTaskOperations:
-          individualTaskOperations ?? this.individualTaskOperations,
-      activeOperations: activeOperations ?? this.activeOperations,
-      currentOperationMessage:
-          clearOperationMessage
-              ? null
-              : currentOperationMessage ?? this.currentOperationMessage,
-    );
-  }
+  }) = _TasksState;
 
   /// Factory constructor for the initial state
-  factory TasksState.initial() {
-    return const TasksState();
-  }
+  factory TasksState.initial() => const TasksState();
 
   /// Factory constructor for loading state
-  factory TasksState.loading() {
-    return const TasksState(isLoading: true);
-  }
+  factory TasksState.loading() => const TasksState(isLoading: true);
 
   /// Factory constructor for error state
   factory TasksState.error(String message, {TasksState? previousState}) {
@@ -173,28 +124,51 @@ class TasksState extends Equatable {
     }
     return TasksState(errorMessage: message);
   }
+
+  // ==================== Computed Properties ====================
+
+  /// Returns true if there's an error message
   bool get hasError => errorMessage != null;
+
+  /// Returns true if filtered tasks are empty and not loading
   bool get isEmpty => filteredTasks.isEmpty && !isLoading;
+
+  /// Checks if a specific task operation is loading
   bool isTaskOperationLoading(String taskId) =>
       individualTaskOperations[taskId] ?? false;
+
+  /// Returns true if there are any active operations
   bool get hasActiveOperations => activeOperations.isNotEmpty;
+
+  /// Checks if a specific operation is active
   bool isOperationActive(TaskLoadingOperation operation) =>
       activeOperations.contains(operation);
+
+  /// Returns true if refreshing operation is active
   bool get isRefreshing => isOperationActive(TaskLoadingOperation.refreshing);
+
+  /// Returns true if adding task operation is active
   bool get isAddingTask => isOperationActive(TaskLoadingOperation.addingTask);
+
+  /// Returns true if syncing operation is active
   bool get isSyncing => isOperationActive(TaskLoadingOperation.syncing);
 
-  /// Task statistics
+  // ==================== Task Statistics ====================
+
+  /// Total number of tasks
   int get totalTasks => allTasks.length;
 
+  /// Number of completed tasks
   int get completedTasks =>
       allTasks
           .where((t) => t.status == task_entity.TaskStatus.completed)
           .length;
 
+  /// Number of pending tasks
   int get pendingTasks =>
       allTasks.where((t) => t.status == task_entity.TaskStatus.pending).length;
 
+  /// Number of overdue tasks
   int get overdueTasks =>
       allTasks
           .where(
@@ -202,6 +176,7 @@ class TasksState extends Equatable {
           )
           .length;
 
+  /// Number of tasks due today
   int get todayTasks =>
       allTasks
           .where(
@@ -209,6 +184,7 @@ class TasksState extends Equatable {
           )
           .length;
 
+  /// Number of upcoming tasks (within next 15 days)
   int get upcomingTasksCount {
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
@@ -237,6 +213,8 @@ class TasksState extends Equatable {
         )
         .length;
   }
+
+  // ==================== Filtered Task Lists ====================
 
   /// Get tasks filtered by plant ID
   List<task_entity.Task> getTasksForPlant(String plantId) {
@@ -281,31 +259,34 @@ class TasksState extends Equatable {
           .where((t) => t.status == task_entity.TaskStatus.completed)
           .toList();
 
-  @override
-  List<Object?> get props => [
-    allTasks,
-    filteredTasks,
-    isLoading,
-    errorMessage,
-    currentFilter,
-    selectedPlantId,
-    searchQuery,
-    selectedTaskTypes,
-    selectedPriorities,
-    individualTaskOperations,
-    activeOperations,
-    currentOperationMessage,
-  ];
+  /// Get high priority tasks (high and urgent)
+  List<task_entity.Task> get highPriorityTasks =>
+      filteredTasks
+          .where(
+            (t) =>
+                t.priority == task_entity.TaskPriority.high ||
+                t.priority == task_entity.TaskPriority.urgent,
+          )
+          .toList();
 
-  @override
-  String toString() {
-    return 'TasksState('
-        'totalTasks: $totalTasks, '
-        'pendingTasks: $pendingTasks, '
-        'completedTasks: $completedTasks, '
-        'isLoading: $isLoading, '
-        'hasError: $hasError, '
-        'filter: $currentFilter'
-        ')';
-  }
+  /// Get medium priority tasks
+  List<task_entity.Task> get mediumPriorityTasks =>
+      filteredTasks
+          .where((t) => t.priority == task_entity.TaskPriority.medium)
+          .toList();
+
+  /// Get low priority tasks
+  List<task_entity.Task> get lowPriorityTasks =>
+      filteredTasks
+          .where((t) => t.priority == task_entity.TaskPriority.low)
+          .toList();
+
+  // ==================== Custom CopyWith Extensions ====================
+
+  /// CopyWith helper for clearing error message
+  TasksState copyWithClearError() => copyWith(errorMessage: null);
+
+  /// CopyWith helper for clearing operation message
+  TasksState copyWithClearOperationMessage() =>
+      copyWith(currentOperationMessage: null);
 }

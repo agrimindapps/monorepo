@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../features/animals/domain/entities/animal.dart';
 import '../../../../features/animals/domain/entities/animal_enums.dart';
-import '../../../../features/animals/presentation/providers/animals_provider.dart';
+import '../../../../features/animals/presentation/notifiers/animals_notifier.dart';
 
 /// **Animal Selector Field Component**
 ///
@@ -71,14 +71,14 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
     super.initState();
     if (widget.autoLoad) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(animalsProvider.notifier).loadAnimals();
+        ref.read(animalsNotifierProvider.notifier).loadAnimals();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final animalsState = ref.watch(animalsProvider);
+    final animalsState = ref.watch(animalsNotifierProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +143,7 @@ class _AnimalSelectorFieldState extends ConsumerState<AnimalSelectorField> {
         subtitle: Text(error),
         trailing: IconButton(
           icon: const Icon(Icons.refresh),
-          onPressed: () => ref.read(animalsProvider.notifier).loadAnimals(),
+          onPressed: () => ref.read(animalsNotifierProvider.notifier).loadAnimals(),
           tooltip: 'Tentar novamente',
         ),
       ),

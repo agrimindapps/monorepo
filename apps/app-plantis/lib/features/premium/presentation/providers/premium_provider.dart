@@ -2,8 +2,13 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/widgets/loading_overlay.dart';
+
+part 'premium_provider.freezed.dart';
+part 'premium_provider.g.dart';
 
 // Add top‑level error handling types
 enum PremiumErrorType { network, auth, purchase, unknown }
@@ -14,93 +19,101 @@ class PremiumError {
   const PremiumError({required this.type, required this.message});
 }
 
-class PremiumProvider extends ChangeNotifier {
-  final ISubscriptionRepository _subscriptionRepository;
-  final IAuthRepository _authRepository;
-  final SimpleSubscriptionSyncService? _simpleSubscriptionSyncService;
+/// State for Premium/Subscription
+@freezed
+class PremiumState with _$PremiumState {
+  const factory PremiumState({
+    SubscriptionEntity? currentSubscription,
+    @Default([]) List<ProductInfo> availableProducts,
+    @Default(false) bool isLoading,
+    PremiumError? error,
+    PurchaseOperation? currentOperation,
+  }) = _PremiumState;
 
-  SubscriptionEntity? _currentSubscription;
-  List<ProductInfo> _availableProducts = [];
-  bool _isLoading = false;
-  PremiumError? _error; // New typed error field
-  PurchaseOperation? _currentOperation;
-  StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
-  StreamSubscription<SubscriptionEntity?>? _syncSubscriptionStream;
-  StreamSubscription<UserEntity?>? _authStream;
+  const PremiumState._();
 
-  PremiumProvider({
-    required ISubscriptionRepository subscriptionRepository,
-    required IAuthRepository authRepository,
-    SimpleSubscriptionSyncService? simpleSubscriptionSyncService,
-  }) : _subscriptionRepository = subscriptionRepository,
-       _authRepository = authRepository,
-       _simpleSubscriptionSyncService = simpleSubscriptionSyncService {
-    _initialize();
-  }
-  SubscriptionEntity? get currentSubscription => _currentSubscription;
-  List<ProductInfo> get availableProducts => _availableProducts;
-  bool get isLoading => _isLoading;
-  PremiumError? get error => _error;
-  bool get isPremium => _currentSubscription?.isActive ?? false;
-  bool get isInTrial => _currentSubscription?.isInTrial ?? false;
-  bool get canPurchasePremium => !_isAnonymousUser;
-  PurchaseOperation? get currentOperation => _currentOperation;
-
-  bool get _isAnonymousUser {
-    return false; // Simplificado por agora - pode ser expandido depois
-  }
+  bool get isPremium => currentSubscription?.isActive ?? false;
+  bool get isInTrial => currentSubscription?.isInTrial ?? false;
+  bool get canPurchasePremium => true; // Simplificado
 
   String get subscriptionStatus {
-    if (_currentSubscription == null) return 'Gratuito';
-    if (_currentSubscription!.isActive) {
-      if (_currentSubscription!.isInTrial) return 'Trial';
+    if (currentSubscription == null) return 'Gratuito';
+    if (currentSubscription!.isActive) {
+      if (currentSubscription!.isInTrial) return 'Trial';
       return 'Premium';
     }
     return 'Expirado';
   }
 
-  DateTime? get expirationDate => _currentSubscription?.expirationDate;
+  DateTime? get expirationDate => currentSubscription?.expirationDate;
+}
+
+/// Provider for managing Premium subscription functionality
+@riverpod
+class PremiumNotifier extends _$PremiumNotifier {
+  ISubscriptionRepository get _subscriptionRepository =>
+      ref.read(subscriptionRepositoryProvider);
+  IAuthRepository get _authRepository => ref.read(authRepositoryProvider);
+  SimpleSubscriptionSyncService? get _simpleSubscriptionSyncService =>
+      ref.read(simpleSubscriptionSyncServiceProvider);
+
+  StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
+  StreamSubscription<SubscriptionEntity?>? _syncSubscriptionStream;
+  StreamSubscription<UserEntity?>? _authStream;
+
+  @override
+  PremiumState build() {
+    ref.onDispose(() {
+      _subscriptionStream?.cancel();
+      _syncSubscriptionStream?.cancel();
+      _authStream?.cancel();
+    });
+
+    _initialize();
+
+    return const PremiumState();
+  }
 
   void _initialize() {
     if (_simpleSubscriptionSyncService != null) {
-      _syncSubscriptionStream = _simpleSubscriptionSyncService
-          .subscriptionStatus
-          .listen(
-            (subscription) {
-              _currentSubscription = subscription;
-              notifyListeners();
-            },
-            onError: (Object error) {
-              _error = PremiumError(
-                type: PremiumErrorType.unknown,
-                message: error.toString(),
-              );
-              notifyListeners();
-            },
+      _syncSubscriptionStream =
+          _simpleSubscriptionSyncService!.subscriptionStatus.listen(
+        (subscription) {
+          state = state.copyWith(currentSubscription: subscription);
+        },
+        onError: (Object error) {
+          state = state.copyWith(
+            error: PremiumError(
+              type: PremiumErrorType.unknown,
+              message: error.toString(),
+            ),
           );
+        },
+      );
     } else {
       _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
         (subscription) async {
-          _currentSubscription = subscription;
-          notifyListeners();
+          state = state.copyWith(currentSubscription: subscription);
         },
         onError: (Object error) {
-          _error = PremiumError(
-            type: PremiumErrorType.unknown,
-            message: error.toString(),
+          state = state.copyWith(
+            error: PremiumError(
+              type: PremiumErrorType.unknown,
+              message: error.toString(),
+            ),
           );
-          notifyListeners();
         },
       );
     }
+
     _authStream = _authRepository.currentUser.listen((user) {
       if (user != null) {
         _syncUserSubscription(user.id);
       } else {
-        _currentSubscription = null;
-        notifyListeners();
+        state = state.copyWith(currentSubscription: null);
       }
     });
+
     _loadAvailableProducts();
     _checkCurrentSubscription();
   }
@@ -118,24 +131,25 @@ class PremiumProvider extends ChangeNotifier {
     PurchaseOperation operation,
     Future<Either<Failure, T>> Function() action,
   ) async {
-    _isLoading = true;
-    _error = null;
-    _currentOperation = operation;
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      currentOperation: operation,
+    );
 
     final result = await action();
 
     result.fold((failure) {
-      // Map generic failure to typed error (could be refined later)
-      _error = PremiumError(
-        type: PremiumErrorType.unknown,
-        message: failure.message,
+      state = state.copyWith(
+        error: PremiumError(
+          type: PremiumErrorType.unknown,
+          message: failure.message,
+        ),
       );
     }, (_) {});
 
-    _isLoading = false;
-    _currentOperation = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: false, currentOperation: null);
+
     return result;
   }
 
@@ -153,8 +167,7 @@ class PremiumProvider extends ChangeNotifier {
         }
       },
       (products) {
-        _availableProducts = products;
-        notifyListeners();
+        state = state.copyWith(availableProducts: products);
       },
     );
   }
@@ -164,7 +177,7 @@ class PremiumProvider extends ChangeNotifier {
     if (_simpleSubscriptionSyncService != null) {
       await _runOperation<bool>(
         PurchaseOperation.loadProducts,
-        () => _simpleSubscriptionSyncService.hasActiveSubscriptionForApp(
+        () => _simpleSubscriptionSyncService!.hasActiveSubscriptionForApp(
           'plantis',
         ),
       );
@@ -174,8 +187,7 @@ class PremiumProvider extends ChangeNotifier {
         () => _subscriptionRepository.getCurrentSubscription(),
       );
       result.fold((failure) {}, (subscription) {
-        _currentSubscription = subscription;
-        notifyListeners();
+        state = state.copyWith(currentSubscription: subscription);
       });
     }
   }
@@ -188,8 +200,7 @@ class PremiumProvider extends ChangeNotifier {
     );
 
     return result.fold((failure) => false, (subscription) async {
-      _currentSubscription = subscription;
-      notifyListeners();
+      state = state.copyWith(currentSubscription: subscription);
       return true;
     });
   }
@@ -205,10 +216,9 @@ class PremiumProvider extends ChangeNotifier {
       if (subscriptions.isNotEmpty) {
         final active = subscriptions.where((s) => s.isActive).toList();
         if (active.isNotEmpty) {
-          _currentSubscription = active.first;
+          state = state.copyWith(currentSubscription: active.first);
         }
       }
-      notifyListeners();
       return true;
     });
   }
@@ -228,23 +238,22 @@ class PremiumProvider extends ChangeNotifier {
   }
 
   void clearError() {
-    _error = null;
-    notifyListeners();
+    state = state.copyWith(error: null);
   }
 
   void clearCurrentOperation() {
-    _currentOperation = null;
-    notifyListeners();
+    state = state.copyWith(currentOperation: null);
   }
 
-  bool canCreateUnlimitedPlants() => isPremium;
-  bool canAccessAdvancedFeatures() => isPremium;
-  bool canExportData() => isPremium;
-  bool canUseCustomReminders() => isPremium;
-  bool canAccessPremiumThemes() => isPremium;
-  bool canBackupToCloud() => isPremium;
+  bool canCreateUnlimitedPlants() => state.isPremium;
+  bool canAccessAdvancedFeatures() => state.isPremium;
+  bool canExportData() => state.isPremium;
+  bool canUseCustomReminders() => state.isPremium;
+  bool canAccessPremiumThemes() => state.isPremium;
+  bool canBackupToCloud() => state.isPremium;
+
   bool hasFeature(String featureId) {
-    if (!isPremium) return false;
+    if (!state.isPremium) return false;
     const premiumFeatures = [
       'unlimited_plants',
       'advanced_reminders',
@@ -258,22 +267,24 @@ class PremiumProvider extends ChangeNotifier {
 
     return premiumFeatures.contains(featureId);
   }
+}
 
-  @override
-  void dispose() {
-    _subscriptionStream?.cancel();
-    _subscriptionStream = null;
+// Dependency providers (to be defined in DI setup)
+@riverpod
+ISubscriptionRepository subscriptionRepository(
+  SubscriptionRepositoryRef ref,
+) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-    _syncSubscriptionStream?.cancel();
-    _syncSubscriptionStream = null;
+@riverpod
+IAuthRepository authRepository(AuthRepositoryRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-    _authStream?.cancel();
-    _authStream = null;
-
-    if (kDebugMode) {
-      debugPrint('[PremiumProvider] Disposed successfully');
-    }
-
-    super.dispose();
-  }
+@riverpod
+SimpleSubscriptionSyncService? simpleSubscriptionSyncService(
+  SimpleSubscriptionSyncServiceRef ref,
+) {
+  throw UnimplementedError('Define in DI setup');
 }

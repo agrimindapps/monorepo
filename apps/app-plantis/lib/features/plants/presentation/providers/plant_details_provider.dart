@@ -1,40 +1,47 @@
-import 'package:core/core.dart' hide getIt;
-import 'package:flutter/foundation.dart';
+import 'package:core/core.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 
-/// Provider Riverpod para PlantDetailsProvider
-final plantDetailsProviderProvider = ChangeNotifierProvider<PlantDetailsProvider>((ref) {
-  return PlantDetailsProvider(
-    getPlantByIdUseCase: getIt<GetPlantByIdUseCase>(),
-    deletePlantUseCase: getIt<DeletePlantUseCase>(),
-    updatePlantUseCase: getIt<UpdatePlantUseCase>(),
-  );
-});
+part 'plant_details_provider.freezed.dart';
+part 'plant_details_provider.g.dart';
 
-class PlantDetailsProvider extends ChangeNotifier {
-  final GetPlantByIdUseCase getPlantByIdUseCase;
-  final DeletePlantUseCase deletePlantUseCase;
-  final UpdatePlantUseCase updatePlantUseCase;
+/// State for Plant Details
+@freezed
+class PlantDetailsState with _$PlantDetailsState {
+  const factory PlantDetailsState({
+    Plant? plant,
+    @Default(false) bool isLoading,
+    String? errorMessage,
+  }) = _PlantDetailsState;
 
-  PlantDetailsProvider({
-    required this.getPlantByIdUseCase,
-    required this.deletePlantUseCase,
-    required this.updatePlantUseCase,
-  });
+  const PlantDetailsState._();
 
-  Plant? _plant;
-  bool _isLoading = false;
-  String? _errorMessage;
+  bool get hasError => errorMessage != null;
+}
 
-  Plant? get plant => _plant;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  bool get hasError => _errorMessage != null;
+/// Provider for managing individual plant details
+@riverpod
+class PlantDetailsNotifier extends _$PlantDetailsNotifier {
+  GetPlantByIdUseCase get _getPlantByIdUseCase =>
+      ref.read(getPlantByIdUseCaseProvider);
+  DeletePlantUseCase get _deletePlantUseCase =>
+      ref.read(deletePlantUseCaseProvider);
+  UpdatePlantUseCase get _updatePlantUseCase =>
+      ref.read(updatePlantUseCaseProvider);
+
+  @override
+  PlantDetailsState build() {
+    ref.onDispose(() {
+      // Cleanup resources if needed
+    });
+
+    return const PlantDetailsState();
+  }
 
   Future<void> loadPlant(String plantId) async {
     await _loadPlant(plantId, forceReload: false);
@@ -42,100 +49,77 @@ class PlantDetailsProvider extends ChangeNotifier {
 
   /// Force reload the plant data, bypassing cache
   Future<void> reloadPlant(String plantId) async {
-    if (kDebugMode) {
-      print(
-        '🔄 PlantDetailsProvider.reloadPlant() - Forçando reload para plantId: $plantId',
-      );
-    }
     await _loadPlant(plantId, forceReload: true);
   }
 
   Future<void> _loadPlant(String plantId, {required bool forceReload}) async {
-    if (kDebugMode) {
-      print('🔍 PlantDetailsProvider._loadPlant - plantId: $plantId, forceReload: $forceReload');
-    }
-
-    if (!forceReload && _plant?.id == plantId && !hasError) {
-      if (kDebugMode) {
-        print('✅ PlantDetailsProvider._loadPlant - Returning early (already loaded)');
-      }
+    if (!forceReload &&
+        state.plant?.id == plantId &&
+        !state.hasError) {
       return;
     }
 
-    final shouldShowLoading = _plant?.id != plantId || forceReload;
+    final shouldShowLoading = state.plant?.id != plantId || forceReload;
 
     if (shouldShowLoading) {
-      _isLoading = true;
+      state = state.copyWith(isLoading: true);
     }
-    _errorMessage = null;
-    notifyListeners();
-
-    if (kDebugMode) {
-      print('📡 PlantDetailsProvider._loadPlant - Calling getPlantByIdUseCase...');
-    }
+    state = state.copyWith(errorMessage: null);
 
     try {
-      final result = await getPlantByIdUseCase(plantId);
+      final result = await _getPlantByIdUseCase(plantId);
 
       result.fold(
         (failure) {
-          if (kDebugMode) {
-            print('❌ PlantDetailsProvider._loadPlant - Failure: $failure');
-          }
-          _errorMessage = _getErrorMessage(failure);
-          _plant = null;
+          state = state.copyWith(
+            errorMessage: _getErrorMessage(failure),
+            plant: null,
+            isLoading: false,
+          );
         },
         (plant) {
-          if (kDebugMode) {
-            print('✅ PlantDetailsProvider._loadPlant - Success: ${plant.name}');
-          }
-          _plant = plant;
-          _errorMessage = null;
+          state = state.copyWith(
+            plant: plant,
+            errorMessage: null,
+            isLoading: false,
+          );
         },
       );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('💥 PlantDetailsProvider._loadPlant - Exception: $e');
-        print('Stack trace: $stackTrace');
-      }
-      _errorMessage = 'Erro inesperado: $e';
-      _plant = null;
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        plant: null,
+        isLoading: false,
+      );
     }
-
-    if (shouldShowLoading) {
-      _isLoading = false;
-    }
-    notifyListeners();
   }
 
   Future<bool> deletePlant() async {
-    if (_plant == null) return false;
+    if (state.plant == null) return false;
 
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final result = await deletePlantUseCase(_plant!.id);
+    final result = await _deletePlantUseCase(state.plant!.id);
 
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = _getErrorMessage(failure);
+        state = state.copyWith(
+          errorMessage: _getErrorMessage(failure),
+          isLoading: false,
+        );
       },
       (_) {
         success = true;
+        state = state.copyWith(isLoading: false);
       },
     );
-
-    _isLoading = false;
-    notifyListeners();
 
     return success;
   }
 
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(errorMessage: null);
   }
 
   /// Clears the loading state
@@ -143,20 +127,17 @@ class PlantDetailsProvider extends ChangeNotifier {
   /// This method ensures that any pending loading state is cleared,
   /// particularly useful when operations are cancelled or interrupted.
   void clearLoadingState() {
-    _isLoading = false;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: false, errorMessage: null);
   }
 
   Future<void> toggleFavorite(String plantId) async {
-    if (_plant == null || _plant!.id != plantId) return;
+    if (state.plant == null || state.plant!.id != plantId) return;
 
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final updatedPlant = _plant!.copyWith(isFavorited: !_plant!.isFavorited);
+      final updatedPlant =
+          state.plant!.copyWith(isFavorited: !state.plant!.isFavorited);
 
       final params = UpdatePlantParams(
         id: plantId,
@@ -171,22 +152,28 @@ class PlantDetailsProvider extends ChangeNotifier {
         isFavorited: updatedPlant.isFavorited,
       );
 
-      final result = await updatePlantUseCase(params);
+      final result = await _updatePlantUseCase(params);
 
       result.fold(
         (failure) {
-          _errorMessage = _getErrorMessage(failure);
+          state = state.copyWith(
+            errorMessage: _getErrorMessage(failure),
+            isLoading: false,
+          );
         },
         (plant) {
-          _plant = plant;
-          _errorMessage = null;
+          state = state.copyWith(
+            plant: plant,
+            errorMessage: null,
+            isLoading: false,
+          );
         },
       );
     } catch (e) {
-      _errorMessage = 'Erro inesperado ao alterar favorito: $e';
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado ao alterar favorito: $e',
+        isLoading: false,
+      );
     }
   }
 
@@ -208,4 +195,20 @@ class PlantDetailsProvider extends ChangeNotifier {
         return 'Erro inesperado. Tente novamente.';
     }
   }
+}
+
+// Dependency providers (to be defined in DI setup)
+@riverpod
+GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
+
+@riverpod
+DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
+
+@riverpod
+UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
 }

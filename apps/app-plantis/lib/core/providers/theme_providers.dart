@@ -1,71 +1,40 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/settings/domain/entities/settings_entity.dart';
 
-/// Estado do tema para Riverpod StateNotifier
-/// Usa ThemeSettingsEntity existente como base do estado
-@immutable
-class ThemeState {
-  final ThemeSettingsEntity settings;
-  final bool isLoading;
-  final String? errorMessage;
+part 'theme_providers.freezed.dart';
+part 'theme_providers.g.dart';
 
-  const ThemeState({
-    required this.settings,
-    this.isLoading = false,
-    this.errorMessage,
-  });
+/// State class for theme with freezed immutability
+@freezed
+class ThemeState with _$ThemeState {
+  const factory ThemeState({
+    required ThemeSettingsEntity settings,
+    @Default(false) bool isLoading,
+    String? errorMessage,
+  }) = _ThemeState;
+
+  const ThemeState._();
 
   /// Configuração inicial padrão
   factory ThemeState.initial() {
     return ThemeState(settings: ThemeSettingsEntity.defaults());
   }
-
-  /// Cria uma cópia com alterações
-  ThemeState copyWith({
-    ThemeSettingsEntity? settings,
-    bool? isLoading,
-    String? errorMessage,
-  }) {
-    return ThemeState(
-      settings: settings ?? this.settings,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
-    );
-  }
-
-  /// Remove erro
-  ThemeState clearError() {
-    return copyWith(errorMessage: null);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is ThemeState &&
-        other.settings == settings &&
-        other.isLoading == isLoading &&
-        other.errorMessage == errorMessage;
-  }
-
-  @override
-  int get hashCode =>
-      settings.hashCode ^ isLoading.hashCode ^ errorMessage.hashCode;
-
-  @override
-  String toString() =>
-      'ThemeState(settings: $settings, isLoading: $isLoading, errorMessage: $errorMessage)';
 }
 
-/// StateNotifier para gerenciar o tema usando SharedPreferences
-class ThemeNotifier extends StateNotifier<ThemeState> {
+/// Riverpod notifier for theme management using SharedPreferences
+@riverpod
+class Theme extends _$Theme {
   static const String _themeKey = 'theme_mode_plantis';
   static const String _followSystemKey = 'follow_system_theme_plantis';
 
-  ThemeNotifier() : super(ThemeState.initial()) {
+  @override
+  ThemeState build() {
     _loadTheme();
+    return ThemeState.initial();
   }
 
   /// Carrega o tema das preferências
@@ -179,7 +148,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   /// Limpa erro
   void clearError() {
     if (state.errorMessage != null) {
-      state = state.clearError();
+      state = state.copyWith(errorMessage: null);
     }
   }
 
@@ -189,53 +158,55 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   }
 }
 
-/// Provider principal do ThemeNotifier
-final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((
-  ref,
-) {
-  return ThemeNotifier();
-});
+// =============================================================================
+// DERIVED PROVIDERS
+// =============================================================================
 
 /// Provider para o ThemeSettingsEntity atual
-final themeSettingsProvider = Provider<ThemeSettingsEntity>((ref) {
-  return ref.watch(themeNotifierProvider).settings;
-});
+@riverpod
+ThemeSettingsEntity themeSettings(ThemeSettingsRef ref) {
+  return ref.watch(themeProvider).settings;
+}
 
 /// Provider para o ThemeMode do Flutter
-final themeProvider = Provider<ThemeMode>((ref) {
+@riverpod
+ThemeMode themeMode(ThemeModeRef ref) {
   return ref.watch(themeSettingsProvider).themeMode;
-});
+}
 
 /// Provider para verificar se está carregando
-final themeLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(themeNotifierProvider).isLoading;
-});
+@riverpod
+bool themeLoading(ThemeLoadingRef ref) {
+  return ref.watch(themeProvider).isLoading;
+}
 
 /// Provider para mensagem de erro
-final themeErrorProvider = Provider<String?>((ref) {
-  return ref.watch(themeNotifierProvider).errorMessage;
-});
+@riverpod
+String? themeError(ThemeErrorRef ref) {
+  return ref.watch(themeProvider).errorMessage;
+}
 
 /// Provider para verificar se é modo escuro (Plantis específico)
-final plantisIsDarkModeProvider = Provider<bool>((ref) {
+@riverpod
+bool plantisIsDarkMode(PlantisIsDarkModeRef ref) {
   return ref.watch(themeSettingsProvider).isDarkMode;
-});
+}
 
 /// Provider para verificar se é modo claro (Plantis específico)
-final plantisIsLightModeProvider = Provider<bool>((ref) {
+@riverpod
+bool plantisIsLightMode(PlantisIsLightModeRef ref) {
   return ref.watch(themeSettingsProvider).isLightMode;
-});
+}
 
 /// Provider para verificar se segue o sistema (Plantis específico)
-final plantisFollowSystemThemeProvider = Provider<bool>((ref) {
+@riverpod
+bool plantisFollowSystemTheme(PlantisFollowSystemThemeRef ref) {
   return ref.watch(themeSettingsProvider).followSystemTheme;
-});
+}
 
 /// Provider auxiliar para verificar se está no modo escuro considerando o contexto
-final contextAwareDarkModeProvider = Provider.family<bool, BuildContext>((
-  ref,
-  context,
-) {
+@riverpod
+bool contextAwareDarkMode(ContextAwareDarkModeRef ref, BuildContext context) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.themeMode == ThemeMode.system) {
@@ -243,10 +214,11 @@ final contextAwareDarkModeProvider = Provider.family<bool, BuildContext>((
   }
 
   return themeSettings.isDarkMode;
-});
+}
 
 /// Provider para o texto de status do tema
-final themeStatusTextProvider = Provider<String>((ref) {
+@riverpod
+String themeStatusText(ThemeStatusTextRef ref) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.isDarkMode) {
@@ -256,10 +228,11 @@ final themeStatusTextProvider = Provider<String>((ref) {
   } else {
     return 'Seguir sistema';
   }
-});
+}
 
 /// Provider para ícone do tema atual
-final themeIconProvider = Provider<IconData>((ref) {
+@riverpod
+IconData themeIcon(ThemeIconRef ref) {
   final themeSettings = ref.watch(themeSettingsProvider);
 
   if (themeSettings.isDarkMode) {
@@ -269,4 +242,4 @@ final themeIconProvider = Provider<IconData>((ref) {
   } else {
     return Icons.settings_brightness;
   }
-});
+}

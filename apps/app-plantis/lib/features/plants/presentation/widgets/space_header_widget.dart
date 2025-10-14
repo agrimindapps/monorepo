@@ -189,8 +189,8 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
     }
 
     try {
-      final spacesNotifier = ref.read(spacesProvider.notifier);
-      final spacesState = ref.read(spacesProvider);
+      final spacesNotifier = ref.read(spacesNotifierProvider.notifier);
+      final spacesState = ref.read(spacesNotifierProvider);
       final existingSpace = spacesState.maybeWhen(
         data: (state) => state.findSpaceByName(newName),
         orElse: () => null,

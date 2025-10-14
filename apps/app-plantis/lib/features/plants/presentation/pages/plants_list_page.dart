@@ -96,7 +96,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
     //         if (authState.hasValue &&
     //             authState.value!.isAuthenticated &&
     //             !authState.value!.isAnonymous) {
-    //           ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
+    //           ref.read(riverpod_plants.plantsNotifierProvider.notifier).refreshPlants();
     //         }
     //       }
     //     });
@@ -113,23 +113,23 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   }
 
   Future<void> _onRefresh() async {
-    await ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants();
+    await ref.read(riverpod_plants.plantsNotifierProvider.notifier).refreshPlants();
   }
 
   void _onSearchChanged(String query) {
     if (query.trim().isEmpty) {
-      ref.read(riverpod_plants.plantsProvider.notifier).clearSearch();
+      ref.read(riverpod_plants.plantsNotifierProvider.notifier).clearSearch();
     } else {
-      ref.read(riverpod_plants.plantsProvider.notifier).searchPlants(query);
+      ref.read(riverpod_plants.plantsNotifierProvider.notifier).searchPlants(query);
     }
   }
 
   void _onViewModeChanged(ViewMode mode) {
-    ref.read(riverpod_plants.plantsProvider.notifier).setViewMode(mode);
+    ref.read(riverpod_plants.plantsNotifierProvider.notifier).setViewMode(mode);
   }
 
   void _onSortChanged(SortBy sort) {
-    ref.read(riverpod_plants.plantsProvider.notifier).setSortBy(sort);
+    ref.read(riverpod_plants.plantsNotifierProvider.notifier).setSortBy(sort);
   }
 
   void _showSortOptions(BuildContext context) {
@@ -138,7 +138,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
       builder:
           (context) => Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? _) {
-              final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
+              final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
               return plantsAsync.when(
                 data:
                     (state) => Container(
@@ -207,7 +207,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? _) {
         // Garante que os dados sejam carregados quando a página é construída
-        final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
+        final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
         plantsAsync.when(
           data: (state) {
             // Se não há plantas carregadas e não está carregando, força o carregamento
@@ -218,7 +218,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
               _hasAttemptedInitialLoad = true;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 ref
-                    .read(riverpod_plants.plantsProvider.notifier)
+                    .read(riverpod_plants.plantsNotifierProvider.notifier)
                     .loadInitialData();
               });
             }
@@ -236,7 +236,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
               _hasAttemptedInitialLoad = true;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 ref
-                    .read(riverpod_plants.plantsProvider.notifier)
+                    .read(riverpod_plants.plantsNotifierProvider.notifier)
                     .loadInitialData();
               });
             }
@@ -255,7 +255,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
                     Widget? child,
                   ) {
                     final plantsState = ref.watch(
-                      riverpod_plants.plantsProvider,
+                      riverpod_plants.plantsNotifierProvider,
                     );
                     final appBarData = plantsState.when(
                       data:
@@ -302,7 +302,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   Widget _buildHeaderWithSyncIndicator(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? _) {
-        final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
+        final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
 
         return plantsAsync.when(
           data:
@@ -361,7 +361,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
                   onTap:
                       () =>
                           ref
-                              .read(riverpod_plants.plantsProvider.notifier)
+                              .read(riverpod_plants.plantsNotifierProvider.notifier)
                               .refreshPlants(),
                   child: Container(
                     margin: const EdgeInsets.only(right: 16),
@@ -389,7 +389,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   Widget _buildOptimizedPlantsContent() {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        final plantsState = ref.watch(riverpod_plants.plantsProvider);
+        final plantsState = ref.watch(riverpod_plants.plantsNotifierProvider);
 
         return plantsState.when(
           loading: () => const PlantsLoadingWidget(),
@@ -399,7 +399,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
                 onRetry:
                     () =>
                         ref
-                            .read(riverpod_plants.plantsProvider.notifier)
+                            .read(riverpod_plants.plantsNotifierProvider.notifier)
                             .loadInitialData(),
               ),
           data: (state) {
@@ -422,7 +422,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
                 onRetry:
                     () =>
                         ref
-                            .read(riverpod_plants.plantsProvider.notifier)
+                            .read(riverpod_plants.plantsNotifierProvider.notifier)
                             .loadInitialData(),
               );
             }
@@ -438,7 +438,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   Widget _buildPlantsContent() {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
+        final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
 
         return plantsAsync.when(
           data: (plantsState) {
@@ -491,7 +491,7 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
       case ViewMode.groupedBySpacesList:
         return Consumer(
           builder: (BuildContext context, WidgetRef ref, Widget? child) {
-            final plantsAsync = ref.watch(riverpod_plants.plantsProvider);
+            final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
             return plantsAsync.when(
               data: (plantsState) {
                 final useGridLayout =

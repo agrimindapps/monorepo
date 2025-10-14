@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/analytics_provider.dart';
 import '../../../../core/providers/background_sync_provider.dart';
 import '../../../../core/services/data_sanitization_service.dart';
-import '../../../../core/widgets/loading_overlay.dart';
 import '../../../device_management/data/models/device_model.dart';
 import '../../../device_management/domain/usecases/revoke_device_usecase.dart'
     as device_revocation;
@@ -16,35 +17,59 @@ import '../../../device_management/domain/usecases/validate_device_usecase.dart'
     as device_validation;
 import '../../domain/usecases/reset_password_usecase.dart';
 
-class AuthProvider extends ChangeNotifier {
-  final LoginUseCase _loginUseCase;
-  final LogoutUseCase _logoutUseCase;
-  final IAuthRepository _authRepository;
-  final ISubscriptionRepository? _subscriptionRepository;
-  final AuthStateNotifier _authStateNotifier;
-  final ResetPasswordUseCase _resetPasswordUseCase;
-  final BackgroundSyncProvider? _backgroundSyncProvider;
-  final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
-  final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
-  final EnhancedAccountDeletionService _enhancedDeletionService;
+part 'auth_provider.freezed.dart';
+part 'auth_provider.g.dart';
 
-  UserEntity? _currentUser;
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool _isInitialized = false;
-  bool _isPremium = false;
-  AuthOperation? _currentOperation;
+@freezed
+class AuthState with _$AuthState {
+  const factory AuthState({
+    UserEntity? currentUser,
+    @Default(false) bool isLoading,
+    String? errorMessage,
+    @Default(false) bool isInitialized,
+    @Default(false) bool isPremium,
+    AuthOperation? currentOperation,
+    @Default(false) bool isValidatingDevice,
+    String? deviceValidationError,
+    @Default(false) bool deviceLimitExceeded,
+    @Default(false) bool isSyncInProgress,
+    @Default(false) bool hasPerformedInitialSync,
+    @Default('Sincronizando dados...') String syncMessage,
+  }) = _AuthState;
+
+  const AuthState._();
+
+  bool get isAuthenticated => currentUser != null;
+  bool get isAnonymous => currentUser?.provider.name == 'anonymous';
+}
+
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  final LoginUseCase _loginUseCase = di.sl<LoginUseCase>();
+  final LogoutUseCase _logoutUseCase = di.sl<LogoutUseCase>();
+  final IAuthRepository _authRepository = di.sl<IAuthRepository>();
+  final ISubscriptionRepository? _subscriptionRepository =
+      di.sl<ISubscriptionRepository>();
+  final AuthStateNotifier _authStateNotifier = AuthStateNotifier.instance;
+  final ResetPasswordUseCase _resetPasswordUseCase =
+      di.sl<ResetPasswordUseCase>();
+  final BackgroundSyncProvider? _backgroundSyncProvider =
+      di.sl<BackgroundSyncProvider>();
+  final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase =
+      di.sl<device_validation.ValidateDeviceUseCase>();
+  final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase =
+      di.sl<device_revocation.RevokeDeviceUseCase>();
+  final EnhancedAccountDeletionService _enhancedDeletionService =
+      di.sl<EnhancedAccountDeletionService>();
+
   StreamSubscription<UserEntity?>? _userSubscription;
   StreamSubscription<SubscriptionEntity?>? _subscriptionStream;
-  bool _isValidatingDevice = false;
-  String? _deviceValidationError;
-  bool _deviceLimitExceeded = false;
 
   AnalyticsProvider? get _analytics {
     try {
       return di.sl<AnalyticsProvider>();
     } catch (e) {
-      return null; // Analytics não disponível
+      return null;
     }
   }
 
@@ -52,133 +77,109 @@ class AuthProvider extends ChangeNotifier {
     try {
       return _backgroundSyncProvider ?? di.sl<BackgroundSyncProvider>();
     } catch (e) {
-      return null; // BackgroundSync não disponível
+      return null;
     }
   }
 
-  AuthProvider({
-    required LoginUseCase loginUseCase,
-    required LogoutUseCase logoutUseCase,
-    required IAuthRepository authRepository,
-    required ResetPasswordUseCase resetPasswordUseCase,
-    required EnhancedAccountDeletionService enhancedAccountDeletionService,
-    ISubscriptionRepository? subscriptionRepository,
-    AuthStateNotifier? authStateNotifier,
-    BackgroundSyncProvider? backgroundSyncProvider,
-    device_validation.ValidateDeviceUseCase? validateDeviceUseCase,
-    device_revocation.RevokeDeviceUseCase? revokeDeviceUseCase,
-  }) : _loginUseCase = loginUseCase,
-       _logoutUseCase = logoutUseCase,
-       _authRepository = authRepository,
-       _subscriptionRepository = subscriptionRepository,
-       _authStateNotifier = authStateNotifier ?? AuthStateNotifier.instance,
-       _resetPasswordUseCase = resetPasswordUseCase,
-       _backgroundSyncProvider = backgroundSyncProvider,
-       _validateDeviceUseCase = validateDeviceUseCase,
-       _revokeDeviceUseCase = revokeDeviceUseCase,
-       _enhancedDeletionService = enhancedAccountDeletionService {
-    _initializeAuthState();
-  }
+  @override
+  AuthState build() {
+    ref.onDispose(() {
+      _userSubscription?.cancel();
+      _subscriptionStream?.cancel();
+    });
 
-  UserEntity? get currentUser => _currentUser;
-  bool get isLoading => _isLoading;
-  bool get isAuthenticated => _currentUser != null;
-  bool get isInitialized => _isInitialized;
-  String? get errorMessage => _errorMessage;
-  bool get isPremium => _isPremium;
-  AuthOperation? get currentOperation => _currentOperation;
-  bool get isValidatingDevice => _isValidatingDevice;
-  String? get deviceValidationError => _deviceValidationError;
-  bool get deviceLimitExceeded => _deviceLimitExceeded;
-  bool get isSyncInProgress => _syncProvider?.isSyncInProgress ?? false;
-  bool get hasPerformedInitialSync =>
-      _syncProvider?.hasPerformedInitialSync ?? false;
-  String get syncMessage =>
-      _syncProvider?.currentSyncMessage ?? 'Sincronizando dados...';
+    _initializeAuthState();
+
+    return const AuthState();
+  }
 
   void _initializeAuthState() {
     _userSubscription = _authRepository.currentUser.listen(
       (user) async {
-        _currentUser = user;
-        if (user == null && await shouldUseAnonymousMode()) {
+        if (user == null && await _shouldUseAnonymousMode()) {
           if (kDebugMode) {
             debugPrint(
-              '🔄 AuthProvider: Iniciando modo anônimo, aguardando login...',
+              '🔄 AuthNotifier: Iniciando modo anônimo, aguardando login...',
             );
           }
           await signInAnonymously();
-          return; // O signInAnonymously vai disparar este listener novamente
+          return;
         }
         await _completeAuthInitialization(user);
       },
       onError: (Object error) {
-        _errorMessage = error.toString();
-        _isInitialized = true;
+        state = state.copyWith(
+          errorMessage: error.toString(),
+          isInitialized: true,
+        );
         _authStateNotifier.updateInitializationStatus(true);
         if (kDebugMode) {
           debugPrint(
             'Auth error: ${DataSanitizationService.sanitizeForLogging(error.toString())}',
           );
         }
-        notifyListeners();
       },
     );
+
     if (_subscriptionRepository != null) {
-      _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
-        subscription,
-      ) {
-        _isPremium = subscription?.isActive ?? false;
-        _authStateNotifier.updatePremiumStatus(_isPremium);
-        notifyListeners();
-      });
+      _subscriptionStream = _subscriptionRepository!.subscriptionStatus.listen(
+        (subscription) {
+          final isPremium = subscription?.isActive ?? false;
+          state = state.copyWith(isPremium: isPremium);
+          _authStateNotifier.updatePremiumStatus(isPremium);
+        },
+      );
     }
   }
 
-  /// CRITICAL FIX: Complete auth initialization only after all operations are stable
   Future<void> _completeAuthInitialization(UserEntity? user) async {
     try {
       _authStateNotifier.updateUser(user);
-      if (user != null && !isAnonymous && _subscriptionRepository != null) {
+
+      if (user != null &&
+          !state.isAnonymous &&
+          _subscriptionRepository != null) {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
         _triggerBackgroundSyncIfNeeded(user.id);
       } else {
-        _isPremium = false;
+        state = state.copyWith(isPremium: false);
         _authStateNotifier.updatePremiumStatus(false);
       }
+
       if (kDebugMode) {
         debugPrint(
-          '✅ AuthProvider: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: $_isPremium',
+          '✅ AuthNotifier: Initialization complete - User: ${user?.id ?? "anonymous"}, Premium: ${state.isPremium}',
         );
       }
 
-      _isInitialized = true;
+      state = state.copyWith(currentUser: user, isInitialized: true);
       _authStateNotifier.updateInitializationStatus(true);
-      notifyListeners();
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('❌ AuthProvider: Error during initialization: $e');
+        debugPrint('❌ AuthNotifier: Error during initialization: $e');
       }
-      _errorMessage = 'Erro na inicialização da autenticação: $e';
-      _isInitialized = true; // Still set to true to avoid infinite loading
+      state = state.copyWith(
+        errorMessage: 'Erro na inicialização da autenticação: $e',
+        isInitialized: true,
+      );
       _authStateNotifier.updateInitializationStatus(true);
-      notifyListeners();
     }
   }
 
   Future<void> _syncUserWithRevenueCat(String userId) async {
     if (_subscriptionRepository == null) return;
 
-    await _subscriptionRepository.setUser(
+    await _subscriptionRepository!.setUser(
       userId: userId,
-      attributes: {'app': 'plantis', 'email': _currentUser?.email ?? ''},
+      attributes: {'app': 'plantis', 'email': state.currentUser?.email ?? ''},
     );
   }
 
   Future<void> _checkPremiumStatus() async {
     if (_subscriptionRepository == null) return;
 
-    final result = await _subscriptionRepository.hasPlantisSubscription();
+    final result = await _subscriptionRepository!.hasPlantisSubscription();
     result.fold(
       (failure) {
         if (kDebugMode) {
@@ -186,28 +187,22 @@ class AuthProvider extends ChangeNotifier {
             'Erro verificar premium: ${DataSanitizationService.sanitizeForLogging(failure.message)}',
           );
         }
-        _isPremium = false;
+        state = state.copyWith(isPremium: false);
         _authStateNotifier.updatePremiumStatus(false);
       },
       (hasPremium) {
-        _isPremium = hasPremium;
+        state = state.copyWith(isPremium: hasPremium);
         _authStateNotifier.updatePremiumStatus(hasPremium);
       },
     );
   }
 
-  @override
-  void dispose() {
-    _userSubscription?.cancel();
-    _subscriptionStream?.cancel();
-    super.dispose();
-  }
-
   Future<void> login(String email, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = AuthOperation.signIn;
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentOperation: AuthOperation.signIn,
+    );
 
     final result = await _loginUseCase(
       LoginParams(email: email, password: password),
@@ -215,31 +210,33 @@ class AuthProvider extends ChangeNotifier {
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+          currentOperation: null,
+        );
       },
       (user) {
-        _currentUser = user;
-        _isLoading = false;
-        _currentOperation = null;
+        state = state.copyWith(
+          currentUser: user,
+          isLoading: false,
+          currentOperation: null,
+        );
         _authStateNotifier.updateUser(user);
         _analytics?.logLogin('email');
-
-        notifyListeners();
       },
     );
   }
 
-  /// Non-blocking login that triggers background sync and device validation
   Future<void> loginAndNavigate(String email, String password) async {
     try {
       await login(email, password);
-      if (isAuthenticated && !isAnonymous && _errorMessage == null) {
+      if (state.isAuthenticated &&
+          !state.isAnonymous &&
+          state.errorMessage == null) {
         await _validateDeviceAfterLogin();
-        if (!_deviceLimitExceeded) {
-          _triggerBackgroundSyncIfNeeded(_currentUser!.id);
+        if (!state.deviceLimitExceeded) {
+          _triggerBackgroundSyncIfNeeded(state.currentUser!.id);
         }
       }
     } catch (e) {
@@ -249,7 +246,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Validates device after successful login
   Future<void> _validateDeviceAfterLogin() async {
     if (_validateDeviceUseCase == null) {
       if (kDebugMode) {
@@ -258,26 +254,28 @@ class AuthProvider extends ChangeNotifier {
       return;
     }
 
-    _isValidatingDevice = true;
-    _deviceValidationError = null;
-    _deviceLimitExceeded = false;
-    notifyListeners();
+    state = state.copyWith(
+      isValidatingDevice: true,
+      deviceValidationError: null,
+      deviceLimitExceeded: false,
+    );
 
     try {
       if (kDebugMode) {
         debugPrint('🔐 Validando dispositivo após login...');
       }
 
-      final result = await _validateDeviceUseCase();
+      final result = await _validateDeviceUseCase!();
 
       result.fold(
         (failure) {
           if (kDebugMode) {
             debugPrint('❌ Device validation falhou: ${failure.message}');
           }
-          _deviceValidationError = failure.message;
+          state = state.copyWith(deviceValidationError: failure.message);
+
           if (failure.code == 'DEVICE_LIMIT_EXCEEDED') {
-            _deviceLimitExceeded = true;
+            state = state.copyWith(deviceLimitExceeded: true);
             _handleDeviceLimitExceeded();
           }
         },
@@ -292,9 +290,12 @@ class AuthProvider extends ChangeNotifier {
                 '⚠️ Device validation falhou: ${validationResult.message}',
               );
             }
-            _deviceValidationError = validationResult.message;
+            state = state.copyWith(
+              deviceValidationError: validationResult.message,
+            );
+
             if (validationResult.status == DeviceValidationStatus.exceeded) {
-              _deviceLimitExceeded = true;
+              state = state.copyWith(deviceLimitExceeded: true);
               _handleDeviceLimitExceeded();
             }
           }
@@ -304,14 +305,14 @@ class AuthProvider extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('❌ Erro inesperado na validação do dispositivo: $e');
       }
-      _deviceValidationError = 'Erro na validação do dispositivo';
+      state = state.copyWith(
+        deviceValidationError: 'Erro na validação do dispositivo',
+      );
     } finally {
-      _isValidatingDevice = false;
-      notifyListeners();
+      state = state.copyWith(isValidatingDevice: false);
     }
   }
 
-  /// Handle device limit exceeded - force logout
   Future<void> _handleDeviceLimitExceeded() async {
     if (kDebugMode) {
       debugPrint(
@@ -319,17 +320,17 @@ class AuthProvider extends ChangeNotifier {
       );
     }
     await _analytics?.logEvent('device_limit_exceeded', {
-      'user_id': _currentUser?.id ?? 'unknown',
-      'device_count': 3, // Limite fixo
+      'user_id': state.currentUser?.id ?? 'unknown',
+      'device_count': 3,
     });
+
     Future.delayed(const Duration(milliseconds: 1500), () {
-      if (_deviceLimitExceeded) {
+      if (state.deviceLimitExceeded) {
         logout();
       }
     });
   }
 
-  /// Triggers background sync without blocking UI
   void _triggerBackgroundSyncIfNeeded(String userId) {
     if (_syncProvider == null) {
       if (kDebugMode) {
@@ -337,61 +338,61 @@ class AuthProvider extends ChangeNotifier {
       }
       return;
     }
+
     Future.delayed(const Duration(milliseconds: 100), () {
-      if (isAuthenticated && !isAnonymous) {
+      if (state.isAuthenticated && !state.isAnonymous) {
         _syncProvider!.startBackgroundSync(userId: userId, isInitialSync: true);
       }
     });
   }
 
-  /// Legacy method - replaced by BackgroundSyncService
-
-  /// Cancela sincronização em andamento
   void cancelSync() {
     _syncProvider?.cancelSync();
   }
 
-  /// Retry da sincronização
   Future<void> retrySyncAfterLogin() async {
-    if (!isAuthenticated || _currentUser == null) return;
-
-    await _syncProvider?.retrySync(_currentUser!.id);
+    if (!state.isAuthenticated || state.currentUser == null) return;
+    await _syncProvider?.retrySync(state.currentUser!.id);
   }
 
   Future<void> logout() async {
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = AuthOperation.logout;
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentOperation: AuthOperation.logout,
+    );
+
     await _performDeviceCleanupOnLogout();
     final result = await _logoutUseCase();
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+          currentOperation: null,
+        );
       },
       (_) {
-        _currentUser = null;
-        _isLoading = false;
-        _currentOperation = null;
+        state = state.copyWith(
+          currentUser: null,
+          isLoading: false,
+          currentOperation: null,
+        );
         _syncProvider?.resetSyncState();
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
         _analytics?.logLogout();
-
-        notifyListeners();
       },
     );
   }
 
   Future<void> register(String email, String password, String name) async {
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = AuthOperation.signUp;
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentOperation: AuthOperation.signUp,
+    );
 
     final result = await _authRepository.signUpWithEmailAndPassword(
       email: email,
@@ -401,45 +402,48 @@ class AuthProvider extends ChangeNotifier {
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+          currentOperation: null,
+        );
       },
       (user) {
-        _currentUser = user;
-        _isLoading = false;
-        _currentOperation = null;
+        state = state.copyWith(
+          currentUser: user,
+          isLoading: false,
+          currentOperation: null,
+        );
         _authStateNotifier.updateUser(user);
-
-        notifyListeners();
       },
     );
   }
 
   Future<void> signInAnonymously() async {
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = AuthOperation.anonymous;
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentOperation: AuthOperation.anonymous,
+    );
 
     final result = await _authRepository.signInAnonymously();
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        _isLoading = false;
-        _currentOperation = null;
-        notifyListeners();
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+          currentOperation: null,
+        );
       },
       (user) {
-        _currentUser = user;
-        _isLoading = false;
-        _currentOperation = null;
+        state = state.copyWith(
+          currentUser: user,
+          isLoading: false,
+          currentOperation: null,
+        );
         _authStateNotifier.updateUser(user);
         _saveAnonymousPreference();
-
-        notifyListeners();
       },
     );
   }
@@ -457,7 +461,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> shouldUseAnonymousMode() async {
+  Future<bool> _shouldUseAnonymousMode() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool('use_anonymous_mode') ?? false;
@@ -466,24 +470,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  bool get isAnonymous => _currentUser?.provider.name == 'anonymous';
-
   Future<void> initializeAnonymousIfNeeded() async {
-    if (!isAuthenticated && await shouldUseAnonymousMode()) {
+    if (!state.isAuthenticated && await _shouldUseAnonymousMode()) {
       await signInAnonymously();
     }
   }
 
-  /// Inicia sincronização automática em background (não bloqueia UI)
   Future<void> startAutoSyncIfNeeded() async {
-    if (!isAuthenticated || isAnonymous || _currentUser == null) {
+    if (!state.isAuthenticated ||
+        state.isAnonymous ||
+        state.currentUser == null) {
       if (kDebugMode) {
         debugPrint('🔄 Auto-sync pulado - usuário anônimo ou não autenticado');
       }
       return;
     }
 
-    if (_syncProvider?.shouldStartInitialSync(_currentUser!.id) == true) {
+    if (_syncProvider?.shouldStartInitialSync(state.currentUser!.id) == true) {
       if (kDebugMode) {
         debugPrint(
           '🔄 Iniciando auto-sync em background para usuário não anônimo',
@@ -491,7 +494,7 @@ class AuthProvider extends ChangeNotifier {
       }
 
       await _syncProvider?.startBackgroundSync(
-        userId: _currentUser!.id,
+        userId: state.currentUser!.id,
         isInitialSync: true,
       );
     } else {
@@ -502,58 +505,41 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(errorMessage: null);
   }
 
   void clearCurrentOperation() {
-    _currentOperation = null;
-    notifyListeners();
+    state = state.copyWith(currentOperation: null);
   }
 
-  /// Clear device validation errors
   void clearDeviceValidationError() {
-    _deviceValidationError = null;
-    _deviceLimitExceeded = false;
-    notifyListeners();
+    state = state.copyWith(
+      deviceValidationError: null,
+      deviceLimitExceeded: false,
+    );
   }
 
-  /// Solicita reset de senha via email
-  ///
-  /// [email] - Email do usuário para receber o link de reset
-  ///
-  /// Returns:
-  /// - true: Email enviado com sucesso
-  /// - false: Erro no envio (verificar errorMessage)
   Future<bool> resetPassword(String email) async {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(errorMessage: null);
 
     final result = await _resetPasswordUseCase(email);
 
     return result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        notifyListeners();
+        state = state.copyWith(errorMessage: failure.message);
         return false;
       },
       (_) {
         _analytics?.logEvent('password_reset_requested', {'method': 'email'});
-
         return true;
       },
     );
   }
 
-  /// Realiza cleanup do dispositivo atual durante logout
-  //  /
-  /// autorizados no Firestore, garantindo que ele não possa ser usado
-  /// novamente sem nova validação.
-  ///
-  /// IMPORTANTE: Falhas neste processo NÃO devem bloquear o logout,
-  /// mas devem ser logadas para auditoria de segurança.
   Future<void> _performDeviceCleanupOnLogout() async {
-    if (_revokeDeviceUseCase == null || _currentUser == null || isAnonymous) {
+    if (_revokeDeviceUseCase == null ||
+        state.currentUser == null ||
+        state.isAnonymous) {
       if (kDebugMode) {
         debugPrint(
           '⚠️ Device cleanup: Skipped (missing dependencies or anonymous user)',
@@ -566,6 +552,7 @@ class AuthProvider extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('🧹 Device cleanup: Starting device revocation on logout');
       }
+
       final currentDevice = await DeviceModel.fromCurrentDevice();
       if (currentDevice == null) {
         if (kDebugMode) {
@@ -573,12 +560,13 @@ class AuthProvider extends ChangeNotifier {
             '⚠️ Device cleanup: Skipping device revocation (unsupported platform)',
           );
         }
-        return; // Sair sem erro se plataforma não suportada
+        return;
       }
-      final revokeResult = await _revokeDeviceUseCase(
+
+      final revokeResult = await _revokeDeviceUseCase!(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
-          preventSelfRevoke: false, // Permitir revogação própria no logout
+          preventSelfRevoke: false,
           reason: 'User logout',
         ),
       );
@@ -594,7 +582,7 @@ class AuthProvider extends ChangeNotifier {
             'context': 'logout',
             'error': failure.message,
             'device_uuid': currentDevice.uuid,
-            'user_id': _currentUser!.id,
+            'user_id': state.currentUser!.id,
           });
         },
         (_) {
@@ -604,7 +592,7 @@ class AuthProvider extends ChangeNotifier {
           _analytics?.logEvent('device_cleanup_success', {
             'context': 'logout',
             'device_uuid': currentDevice.uuid,
-            'user_id': _currentUser!.id,
+            'user_id': state.currentUser!.id,
           });
         },
       );
@@ -617,53 +605,40 @@ class AuthProvider extends ChangeNotifier {
       _analytics?.logEvent('device_cleanup_error', {
         'context': 'logout',
         'error': e.toString(),
-        'user_id': _currentUser?.id ?? 'unknown',
+        'user_id': state.currentUser?.id ?? 'unknown',
       });
     }
   }
 
-  /// Exclui permanentemente a conta do usuário
-  ///
-  /// 1. Re-autenticação do usuário para confirmar identidade
-  /// 2. Exclusão de todos os dados pessoais do Firestore
-  /// 3. Cancelamento de assinaturas ativas (RevenueCat)
-  /// 4. Limpeza de dados locais (SharedPreferences, cache)
-  /// 5. Exclusão da conta do Firebase Auth
-  ///
-  /// [password] - Senha atual para re-autenticação (obrigatório)
-  /// [downloadData] - Se deve fazer backup dos dados antes da exclusão
-  ///
-  /// Returns:
-  /// - true: Conta excluída com sucesso
-  /// - false: Erro na exclusão (verificar errorMessage)
   Future<bool> deleteAccount({
     required String password,
     bool downloadData = false,
   }) async {
-    if (_currentUser == null) {
-      _errorMessage = 'Nenhum usuário autenticado';
-      notifyListeners();
+    if (state.currentUser == null) {
+      state = state.copyWith(errorMessage: 'Nenhum usuário autenticado');
       return false;
     }
 
-    _isLoading = true;
-    _errorMessage = null;
-    _currentOperation = AuthOperation.deleteAccount;
-    notifyListeners();
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentOperation: AuthOperation.deleteAccount,
+    );
 
     try {
       final result = await _enhancedDeletionService.deleteAccount(
         password: password,
-        userId: _currentUser!.id,
-        isAnonymous: isAnonymous,
+        userId: state.currentUser!.id,
+        isAnonymous: state.isAnonymous,
       );
 
       return result.fold(
         (error) {
-          _errorMessage = error.message;
-          _isLoading = false;
-          _currentOperation = null;
-          notifyListeners();
+          state = state.copyWith(
+            errorMessage: error.message,
+            isLoading: false,
+            currentOperation: null,
+          );
           return false;
         },
         (deletionResult) {
@@ -671,34 +646,35 @@ class AuthProvider extends ChangeNotifier {
             _performPostDeletionCleanup();
             return true;
           } else {
-            _errorMessage = deletionResult.userMessage;
-            _isLoading = false;
-            _currentOperation = null;
-            notifyListeners();
+            state = state.copyWith(
+              errorMessage: deletionResult.userMessage,
+              isLoading: false,
+              currentOperation: null,
+            );
             return false;
           }
         },
       );
     } catch (e) {
-      _errorMessage = 'Erro inesperado: $e';
-      _isLoading = false;
-      _currentOperation = null;
-      notifyListeners();
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoading: false,
+        currentOperation: null,
+      );
       return false;
     }
   }
 
-  /// Realiza cleanup do estado da aplicação após exclusão bem-sucedida
-  Future<void> _performPostDeletionCleanup() async {
-    _currentUser = null;
-    _isPremium = false;
-    _isLoading = false;
-    _errorMessage = null;
-    _currentOperation = null;
+  void _performPostDeletionCleanup() {
+    state = state.copyWith(
+      currentUser: null,
+      isPremium: false,
+      isLoading: false,
+      errorMessage: null,
+      currentOperation: null,
+    );
     _syncProvider?.resetSyncState();
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
-
-    notifyListeners();
   }
 }

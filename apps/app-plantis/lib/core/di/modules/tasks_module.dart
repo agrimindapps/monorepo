@@ -14,18 +14,12 @@ import '../../../features/tasks/domain/usecases/complete_task_with_regeneration_
 import '../../../features/tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/get_tasks_usecase.dart';
 import '../../../features/tasks/domain/usecases/update_task_usecase.dart';
-import '../../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../../services/task_generation_service.dart';
 
 class TasksModule {
   static void init(GetIt sl) {
-    sl.registerFactory(
-      () => TasksProvider(
-        getTasksUseCase: sl(),
-        addTaskUseCase: sl(),
-        completeTaskUseCase: sl(),
-      ),
-    );
+    // TasksProvider agora usa Riverpod @riverpod (tasks_notifier.dart)
+    // Não precisa mais de registro no GetIt
     sl.registerLazySingleton(() => TaskGenerationService());
     sl.registerLazySingleton(() => GetTasksUseCase(sl()));
     sl.registerLazySingleton(() => AddTaskUseCase(sl()));

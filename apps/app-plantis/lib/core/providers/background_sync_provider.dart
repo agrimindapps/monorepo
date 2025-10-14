@@ -1,54 +1,99 @@
 import 'dart:async';
 
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/background_sync_service.dart';
 import '../sync/background_sync_status.dart';
 
-/// Provider for managing background synchronization state in the UI
-/// Bridges between BackgroundSyncService and UI components
-@singleton
-class BackgroundSyncProvider extends ChangeNotifier {
-  final BackgroundSyncService _backgroundSyncService;
+part 'background_sync_provider.g.dart';
 
+/// Dependency provider for BackgroundSyncService
+@riverpod
+BackgroundSyncService backgroundSyncService(BackgroundSyncServiceRef ref) {
+  return GetIt.instance<BackgroundSyncService>();
+}
+
+/// State class for background sync
+class BackgroundSyncState {
+  final bool isSyncInProgress;
+  final bool hasPerformedInitialSync;
+  final String currentSyncMessage;
+  final BackgroundSyncStatus syncStatus;
+  final Map<String, bool> operationStatus;
+
+  const BackgroundSyncState({
+    this.isSyncInProgress = false,
+    this.hasPerformedInitialSync = false,
+    this.currentSyncMessage = '',
+    this.syncStatus = BackgroundSyncStatus.idle,
+    this.operationStatus = const {},
+  });
+
+  BackgroundSyncState copyWith({
+    bool? isSyncInProgress,
+    bool? hasPerformedInitialSync,
+    String? currentSyncMessage,
+    BackgroundSyncStatus? syncStatus,
+    Map<String, bool>? operationStatus,
+  }) {
+    return BackgroundSyncState(
+      isSyncInProgress: isSyncInProgress ?? this.isSyncInProgress,
+      hasPerformedInitialSync: hasPerformedInitialSync ?? this.hasPerformedInitialSync,
+      currentSyncMessage: currentSyncMessage ?? this.currentSyncMessage,
+      syncStatus: syncStatus ?? this.syncStatus,
+      operationStatus: operationStatus ?? this.operationStatus,
+    );
+  }
+}
+
+/// Riverpod notifier for managing background synchronization state
+@riverpod
+class BackgroundSync extends _$BackgroundSync {
   StreamSubscription<String>? _messageSubscription;
   StreamSubscription<bool>? _progressSubscription;
   StreamSubscription<BackgroundSyncStatus>? _statusSubscription;
 
-  BackgroundSyncProvider(this._backgroundSyncService) {
+  @override
+  BackgroundSyncState build() {
+    final service = ref.watch(backgroundSyncServiceProvider);
+
+    // Setup listeners on first build
     _listenToSyncUpdates();
+
+    // Cleanup on dispose
+    ref.onDispose(() {
+      _messageSubscription?.cancel();
+      _progressSubscription?.cancel();
+      _statusSubscription?.cancel();
+    });
+
+    return BackgroundSyncState(
+      isSyncInProgress: service.isSyncInProgress,
+      hasPerformedInitialSync: service.hasPerformedInitialSync,
+      currentSyncMessage: service.currentSyncMessage,
+      syncStatus: service.syncStatus,
+      operationStatus: service.getOperationStatus(),
+    );
   }
-  bool get isSyncInProgress => _backgroundSyncService.isSyncInProgress;
-  bool get hasPerformedInitialSync =>
-      _backgroundSyncService.hasPerformedInitialSync;
-  String get currentSyncMessage => _backgroundSyncService.currentSyncMessage;
-  BackgroundSyncStatus get syncStatus => _backgroundSyncService.syncStatus;
-  Stream<BackgroundSyncStatus> get syncStatusStream =>
-      _backgroundSyncService.syncStatusStream;
-  Stream<String> get syncMessageStream =>
-      _backgroundSyncService.syncMessageStream;
-  Stream<bool> get syncProgressStream =>
-      _backgroundSyncService.syncProgressStream;
 
-  /// Listen to sync service updates and propagate to UI
+  /// Listen to sync service updates and propagate to state
   void _listenToSyncUpdates() {
-    _messageSubscription = _backgroundSyncService.syncMessageStream.listen((
-      message,
-    ) {
-      notifyListeners();
+    final service = ref.read(backgroundSyncServiceProvider);
+
+    _messageSubscription = service.syncMessageStream.listen((message) {
+      state = state.copyWith(currentSyncMessage: message);
     });
 
-    _progressSubscription = _backgroundSyncService.syncProgressStream.listen((
-      inProgress,
-    ) {
-      notifyListeners();
+    _progressSubscription = service.syncProgressStream.listen((inProgress) {
+      state = state.copyWith(isSyncInProgress: inProgress);
     });
 
-    _statusSubscription = _backgroundSyncService.syncStatusStream.listen((
-      status,
-    ) {
-      notifyListeners();
+    _statusSubscription = service.syncStatusStream.listen((status) {
+      state = state.copyWith(
+        syncStatus: status,
+        operationStatus: service.getOperationStatus(),
+      );
     });
   }
 
@@ -57,20 +102,39 @@ class BackgroundSyncProvider extends ChangeNotifier {
     required String userId,
     bool isInitialSync = false,
   }) async {
-    await _backgroundSyncService.startBackgroundSync(
+    final service = ref.read(backgroundSyncServiceProvider);
+    await service.startBackgroundSync(
       userId: userId,
       isInitialSync: isInitialSync,
+    );
+
+    // Update state after sync starts
+    state = state.copyWith(
+      isSyncInProgress: service.isSyncInProgress,
+      hasPerformedInitialSync: service.hasPerformedInitialSync,
     );
   }
 
   /// Cancels ongoing sync
   void cancelSync() {
-    _backgroundSyncService.cancelSync();
+    final service = ref.read(backgroundSyncServiceProvider);
+    service.cancelSync();
+
+    state = state.copyWith(
+      isSyncInProgress: service.isSyncInProgress,
+      syncStatus: service.syncStatus,
+    );
   }
 
   /// Retries failed sync
   Future<void> retrySync(String userId) async {
-    await _backgroundSyncService.retrySync(userId);
+    final service = ref.read(backgroundSyncServiceProvider);
+    await service.retrySync(userId);
+
+    state = state.copyWith(
+      isSyncInProgress: service.isSyncInProgress,
+      syncStatus: service.syncStatus,
+    );
   }
 
   /// Syncs specific data type
@@ -78,87 +142,121 @@ class BackgroundSyncProvider extends ChangeNotifier {
     required String userId,
     required String dataType,
   }) async {
-    await _backgroundSyncService.syncSpecificData(
+    final service = ref.read(backgroundSyncServiceProvider);
+    await service.syncSpecificData(
       userId: userId,
       dataType: dataType,
     );
-  }
 
-  /// Gets detailed operation status
-  Map<String, bool> getOperationStatus() {
-    return _backgroundSyncService.getOperationStatus();
-  }
-
-  /// Checks if specific operation was successful
-  bool isOperationSuccessful(String operation) {
-    return _backgroundSyncService.isOperationSuccessful(operation);
+    state = state.copyWith(
+      isSyncInProgress: service.isSyncInProgress,
+      operationStatus: service.getOperationStatus(),
+    );
   }
 
   /// Resets sync state (useful for logout)
   void resetSyncState() {
-    _backgroundSyncService.resetSyncState();
-  }
+    final service = ref.read(backgroundSyncServiceProvider);
+    service.resetSyncState();
 
-  /// Helper method to check if sync is needed
-  bool shouldStartInitialSync(String? userId) {
-    return userId != null &&
-        userId.isNotEmpty &&
-        !hasPerformedInitialSync &&
-        !isSyncInProgress;
+    state = BackgroundSyncState(); // Reset to initial state
   }
+}
 
-  /// Helper method to get sync progress percentage
-  double getSyncProgress() {
-    final operations = getOperationStatus();
-    if (operations.isEmpty) return 0.0;
+// =============================================================================
+// COMPUTED/DERIVED PROVIDERS
+// =============================================================================
 
-    final completedCount =
-        operations.values.where((completed) => completed).length;
-    return completedCount / operations.length;
+/// Helper provider to check if sync is needed
+@riverpod
+bool shouldStartInitialSync(ShouldStartInitialSyncRef ref, String? userId) {
+  final syncState = ref.watch(backgroundSyncProvider);
+
+  return userId != null &&
+      userId.isNotEmpty &&
+      !syncState.hasPerformedInitialSync &&
+      !syncState.isSyncInProgress;
+}
+
+/// Helper provider to get sync progress percentage
+@riverpod
+double syncProgress(SyncProgressRef ref) {
+  final syncState = ref.watch(backgroundSyncProvider);
+  final operations = syncState.operationStatus;
+
+  if (operations.isEmpty) return 0.0;
+
+  final completedCount = operations.values.where((completed) => completed).length;
+  return completedCount / operations.length;
+}
+
+/// Helper provider to get human-readable sync status
+@riverpod
+String syncStatusMessage(SyncStatusMessageRef ref) {
+  final syncState = ref.watch(backgroundSyncProvider);
+
+  switch (syncState.syncStatus) {
+    case BackgroundSyncStatus.idle:
+      return 'Pronto para sincronizar';
+    case BackgroundSyncStatus.syncing:
+      return syncState.currentSyncMessage;
+    case BackgroundSyncStatus.completed:
+      return 'Sincronização concluída';
+    case BackgroundSyncStatus.error:
+      return 'Erro na sincronização';
+    case BackgroundSyncStatus.cancelled:
+      return 'Sincronização cancelada';
   }
+}
 
-  /// Helper method to get human-readable sync status
-  String getSyncStatusMessage() {
-    switch (syncStatus) {
-      case BackgroundSyncStatus.idle:
-        return 'Pronto para sincronizar';
-      case BackgroundSyncStatus.syncing:
-        return currentSyncMessage;
-      case BackgroundSyncStatus.completed:
-        return 'Sincronização concluída';
-      case BackgroundSyncStatus.error:
-        return 'Erro na sincronização';
-      case BackgroundSyncStatus.cancelled:
-        return 'Sincronização cancelada';
-    }
-  }
+/// Helper provider to determine if sync indicator should be shown
+@riverpod
+bool shouldShowSyncIndicator(ShouldShowSyncIndicatorRef ref) {
+  final syncState = ref.watch(backgroundSyncProvider);
+  return syncState.isSyncInProgress ||
+         syncState.syncStatus == BackgroundSyncStatus.error;
+}
 
-  /// Helper method to determine if sync indicator should be shown
-  bool shouldShowSyncIndicator() {
-    return isSyncInProgress || syncStatus == BackgroundSyncStatus.error;
-  }
+/// Helper provider to determine sync indicator color
+@riverpod
+String syncIndicatorColor(SyncIndicatorColorRef ref) {
+  final syncState = ref.watch(backgroundSyncProvider);
 
-  /// Helper method to determine sync indicator color
-  String getSyncIndicatorColor() {
-    switch (syncStatus) {
-      case BackgroundSyncStatus.syncing:
-        return 'blue';
-      case BackgroundSyncStatus.completed:
-        return 'green';
-      case BackgroundSyncStatus.error:
-        return 'red';
-      case BackgroundSyncStatus.cancelled:
-        return 'orange';
-      case BackgroundSyncStatus.idle:
-        return 'grey';
-    }
+  switch (syncState.syncStatus) {
+    case BackgroundSyncStatus.syncing:
+      return 'blue';
+    case BackgroundSyncStatus.completed:
+      return 'green';
+    case BackgroundSyncStatus.error:
+      return 'red';
+    case BackgroundSyncStatus.cancelled:
+      return 'orange';
+    case BackgroundSyncStatus.idle:
+      return 'grey';
   }
+}
 
-  @override
-  void dispose() {
-    _messageSubscription?.cancel();
-    _progressSubscription?.cancel();
-    _statusSubscription?.cancel();
-    super.dispose();
-  }
+// =============================================================================
+// STREAM PROVIDERS (for direct stream access)
+// =============================================================================
+
+/// Stream provider for sync status changes
+@riverpod
+Stream<BackgroundSyncStatus> syncStatusStream(SyncStatusStreamRef ref) {
+  final service = ref.watch(backgroundSyncServiceProvider);
+  return service.syncStatusStream;
+}
+
+/// Stream provider for sync messages
+@riverpod
+Stream<String> syncMessageStream(SyncMessageStreamRef ref) {
+  final service = ref.watch(backgroundSyncServiceProvider);
+  return service.syncMessageStream;
+}
+
+/// Stream provider for sync progress
+@riverpod
+Stream<bool> syncProgressStream(SyncProgressStreamRef ref) {
+  final service = ref.watch(backgroundSyncServiceProvider);
+  return service.syncProgressStream;
 }

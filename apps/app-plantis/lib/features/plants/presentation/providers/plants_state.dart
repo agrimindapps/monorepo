@@ -1,151 +1,89 @@
-import 'package:core/core.dart' show Equatable;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../domain/entities/plant.dart';
+import '../../domain/services/plants_sort_service.dart';
 
-/// View modes for plants display
-enum ViewMode { grid, list }
+part 'plants_state.freezed.dart';
 
-/// Sort options for plants
-enum SortBy { newest, oldest, alphabetical, lastModified }
+/// Immutable state for Plants feature
+/// Contains all UI state needed for plants management
+@freezed
+class PlantsState with _$PlantsState {
+  const PlantsState._();
 
-/// Immutable state class for PlantsProvider
-/// This provides better performance by avoiding unnecessary rebuilds
-/// and makes state management more predictable
-class PlantsState extends Equatable {
-  final List<Plant> plants;
-  final Plant? selectedPlant;
-  final bool isLoading;
-  final bool isSearching;
-  final String? error;
-  final String searchQuery;
-  final List<Plant> searchResults;
-  final ViewMode viewMode;
-  final SortBy sortBy;
-  final String? filterBySpace;
+  const factory PlantsState({
+    /// All plants loaded from repository
+    @Default([]) List<Plant> plants,
 
-  const PlantsState({
-    this.plants = const [],
-    this.selectedPlant,
-    this.isLoading = false,
-    this.isSearching = false,
-    this.error,
-    this.searchQuery = '',
-    this.searchResults = const [],
-    this.viewMode = ViewMode.grid,
-    this.sortBy = SortBy.newest,
-    this.filterBySpace,
-  });
-
-  /// Creates a copy of this state with some values changed
-  PlantsState copyWith({
-    List<Plant>? plants,
+    /// Currently selected plant (for detail view)
     Plant? selectedPlant,
-    bool? isLoading,
-    bool? isSearching,
+
+    /// Loading state (initial load)
+    @Default(false) bool isLoading,
+
+    /// Search operation loading state
+    @Default(false) bool isSearching,
+
+    /// Error message (null if no error)
     String? error,
-    String? searchQuery,
-    List<Plant>? searchResults,
-    ViewMode? viewMode,
-    SortBy? sortBy,
+
+    /// Current search query
+    @Default('') String searchQuery,
+
+    /// Search results
+    @Default([]) List<Plant> searchResults,
+
+    /// Current view mode (grid, list, grouped)
+    @Default(ViewMode.grid) ViewMode viewMode,
+
+    /// Current sort criteria
+    @Default(SortBy.newest) SortBy sortBy,
+
+    /// Filter by space ID (null = show all)
     String? filterBySpace,
-    bool clearError = false,
-    bool clearSelectedPlant = false,
-  }) {
-    return PlantsState(
-      plants: plants ?? this.plants,
-      selectedPlant:
-          clearSelectedPlant ? null : selectedPlant ?? this.selectedPlant,
-      isLoading: isLoading ?? this.isLoading,
-      isSearching: isSearching ?? this.isSearching,
-      error: clearError ? null : error ?? this.error,
-      searchQuery: searchQuery ?? this.searchQuery,
-      searchResults: searchResults ?? this.searchResults,
-      viewMode: viewMode ?? this.viewMode,
-      sortBy: sortBy ?? this.sortBy,
-      filterBySpace: filterBySpace ?? this.filterBySpace,
-    );
-  }
+  }) = _PlantsState;
 
-  /// Factory constructor for the initial state
-  factory PlantsState.initial() {
-    return const PlantsState();
-  }
+  /// Initial state factory
+  factory PlantsState.initial() => const PlantsState();
 
-  /// Factory constructor for loading state
-  factory PlantsState.loading() {
-    return const PlantsState(isLoading: true);
-  }
+  // Computed properties
 
-  /// Factory constructor for error state
-  factory PlantsState.error(String message, {PlantsState? previousState}) {
-    if (previousState != null) {
-      return previousState.copyWith(isLoading: false, error: message);
-    }
-    return PlantsState(error: message);
-  }
+  /// Total count of plants
+  int get plantsCount => plants.length;
+
+  /// Has error
   bool get hasError => error != null;
+
+  /// Is searching
+  bool get hasSearchQuery => searchQuery.isNotEmpty;
+
+  /// Search results count
+  int get searchResultsCount => searchResults.length;
+
+  /// Has selected plant
+  bool get hasSelectedPlant => selectedPlant != null;
+
+  /// Is empty
   bool get isEmpty => plants.isEmpty && !isLoading;
+
+  /// Has plants
   bool get hasPlants => plants.isNotEmpty;
+
+  /// Has search results
   bool get hasSearchResults => searchResults.isNotEmpty;
+
+  /// Is search empty
   bool get isSearchEmpty => searchQuery.isNotEmpty && searchResults.isEmpty;
 
-  /// Plants count
-  int get plantsCount => plants.length;
+  /// Is grouped view mode
+  bool get isGroupedBySpaces =>
+      viewMode == ViewMode.groupedBySpaces ||
+      viewMode == ViewMode.groupedBySpacesGrid ||
+      viewMode == ViewMode.groupedBySpacesList;
 
   /// Filtered plants based on current space filter
   List<Plant> get filteredPlants {
     if (filterBySpace == null) return plants;
     return plants.where((plant) => plant.spaceId == filterBySpace).toList();
-  }
-
-  /// Get plants by status
-  List<Plant> getPlantsNeedingWater() {
-    return plants.where((plant) {
-      if (plant.config?.enableWateringCare != true) return false;
-      if (plant.config?.lastWateringDate == null) return true;
-
-      final daysSinceLastWatering =
-          DateTime.now().difference(plant.config!.lastWateringDate!).inDays;
-
-      return daysSinceLastWatering >= (plant.config?.wateringIntervalDays ?? 7);
-    }).toList();
-  }
-
-  List<Plant> getPlantsNeedingFertilizer() {
-    return plants.where((plant) {
-      if (plant.config?.enableFertilizerCare != true) return false;
-      if (plant.config?.lastFertilizerDate == null) return true;
-
-      final daysSinceLastFertilizer =
-          DateTime.now().difference(plant.config!.lastFertilizerDate!).inDays;
-
-      return daysSinceLastFertilizer >=
-          (plant.config?.fertilizingIntervalDays ?? 30);
-    }).toList();
-  }
-
-  @override
-  List<Object?> get props => [
-    plants,
-    selectedPlant,
-    isLoading,
-    isSearching,
-    error,
-    searchQuery,
-    searchResults,
-    viewMode,
-    sortBy,
-    filterBySpace,
-  ];
-
-  @override
-  String toString() {
-    return 'PlantsState('
-        'plantsCount: $plantsCount, '
-        'isLoading: $isLoading, '
-        'hasError: $hasError, '
-        'viewMode: $viewMode, '
-        'sortBy: $sortBy'
-        ')';
   }
 }

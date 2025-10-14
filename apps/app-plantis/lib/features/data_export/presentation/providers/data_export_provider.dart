@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
@@ -6,33 +7,49 @@ import '../../domain/usecases/check_export_availability_usecase.dart';
 import '../../domain/usecases/get_export_history_usecase.dart';
 import '../../domain/usecases/request_export_usecase.dart';
 
+part 'data_export_provider.freezed.dart';
+part 'data_export_provider.g.dart';
+
+/// State for Data Export feature
+@freezed
+class DataExportState with _$DataExportState {
+  const factory DataExportState({
+    @Default([]) List<ExportRequest> exportHistory,
+    @Default(ExportProgress.initial()) ExportProgress currentProgress,
+    ExportAvailabilityResult? availabilityResult,
+    @Default(false) bool isLoading,
+    String? error,
+  }) = _DataExportState;
+
+  const DataExportState._();
+
+  bool get hasError => error != null;
+  bool get canRequestExport => !isLoading;
+}
+
 /// Provider for managing LGPD data export functionality in Plantis
-class DataExportProvider extends ChangeNotifier {
-  final CheckExportAvailabilityUseCase _checkAvailabilityUseCase;
-  final RequestExportUseCase _requestExportUseCase;
-  final GetExportHistoryUseCase _getHistoryUseCase;
-  final DataExportRepository _repository;
+@riverpod
+class DataExportNotifier extends _$DataExportNotifier {
+  CheckExportAvailabilityUseCase get _checkAvailabilityUseCase =>
+      ref.read(checkExportAvailabilityUseCaseProvider);
+  RequestExportUseCase get _requestExportUseCase =>
+      ref.read(requestExportUseCaseProvider);
+  GetExportHistoryUseCase get _getHistoryUseCase =>
+      ref.read(getExportHistoryUseCaseProvider);
+  DataExportRepository get _repository =>
+      ref.read(dataExportRepositoryProvider);
 
-  ExportProgress _currentProgress = const ExportProgress.initial();
-  ExportAvailabilityResult? _availabilityResult;
-  List<ExportRequest> _exportHistory = [];
-  bool _isLoading = false;
-  String? _error;
+  @override
+  DataExportState build() {
+    ref.onDispose(() {
+      // Cleanup resources if needed
+    });
 
-  DataExportProvider({
-    required CheckExportAvailabilityUseCase checkAvailabilityUseCase,
-    required RequestExportUseCase requestExportUseCase,
-    required GetExportHistoryUseCase getHistoryUseCase,
-    required DataExportRepository repository,
-  }) : _checkAvailabilityUseCase = checkAvailabilityUseCase,
-       _requestExportUseCase = requestExportUseCase,
-       _getHistoryUseCase = getHistoryUseCase,
-       _repository = repository;
-  ExportProgress get currentProgress => _currentProgress;
-  ExportAvailabilityResult? get availabilityResult => _availabilityResult;
-  List<ExportRequest> get exportHistory => _exportHistory;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
+    // Initialize by loading export history
+    initialize();
+
+    return const DataExportState();
+  }
 
   /// Get current user ID (mock for demonstration)
   String get _currentUserId {
@@ -57,8 +74,7 @@ class DataExportProvider extends ChangeNotifier {
 
     try {
       final userId = _currentUserId;
-      final dataTypes =
-          requestedDataTypes ??
+      final dataTypes = requestedDataTypes ??
           {
             DataType.plants,
             DataType.plantTasks,
@@ -68,19 +84,23 @@ class DataExportProvider extends ChangeNotifier {
             DataType.settings,
           };
 
-      _availabilityResult = await _checkAvailabilityUseCase(
+      final result = await _checkAvailabilityUseCase(
         userId: userId,
         requestedDataTypes: dataTypes,
       );
 
-      notifyListeners();
+      state = state.copyWith(
+        availabilityResult: result,
+        isLoading: false,
+      );
     } catch (e) {
       _setError('Erro ao verificar disponibilidade: ${e.toString()}');
-      _availabilityResult = const ExportAvailabilityResult.unavailable(
-        reason: 'Erro interno do sistema',
+      state = state.copyWith(
+        availabilityResult: const ExportAvailabilityResult.unavailable(
+          reason: 'Erro interno do sistema',
+        ),
+        isLoading: false,
       );
-    } finally {
-      _setLoading(false);
     }
   }
 
@@ -100,15 +120,20 @@ class DataExportProvider extends ChangeNotifier {
         dataTypes: dataTypes,
         format: format,
       );
-      _exportHistory.insert(0, request);
+
+      final updatedHistory = [request, ...state.exportHistory];
+      state = state.copyWith(
+        exportHistory: updatedHistory,
+        isLoading: false,
+      );
+
       await _monitorExportProgress(request);
 
       return request;
     } catch (e) {
       _setError('Erro ao solicitar exportação: ${e.toString()}');
-      return null;
-    } finally {
       _setLoading(false);
+      return null;
     }
   }
 
@@ -128,16 +153,18 @@ class DataExportProvider extends ChangeNotifier {
       for (int i = 0; i < progressSteps.length; i++) {
         final (percentage, task) = progressSteps[i];
 
-        _currentProgress = _currentProgress.copyWith(
-          percentage: percentage * 100,
-          currentTask: task,
-          estimatedTimeRemaining:
-              i < progressSteps.length - 1
-                  ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
-                  : null,
+        state = state.copyWith(
+          currentProgress: state.currentProgress.copyWith(
+            percentage: percentage * 100,
+            currentTask: task,
+            estimatedTimeRemaining: i < progressSteps.length - 1
+                ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
+                : null,
+          ),
         );
-        notifyListeners();
+
         await Future<void>.delayed(const Duration(seconds: 3));
+
         final updatedHistory = await _getHistoryUseCase(_currentUserId);
         final updatedRequest = updatedHistory.firstWhere(
           (r) => r.id == request.id,
@@ -145,40 +172,46 @@ class DataExportProvider extends ChangeNotifier {
         );
 
         if (updatedRequest.status == ExportRequestStatus.failed) {
-          _currentProgress = ExportProgress.error(
-            updatedRequest.errorMessage ?? 'Erro desconhecido',
+          state = state.copyWith(
+            currentProgress: ExportProgress.error(
+              updatedRequest.errorMessage ?? 'Erro desconhecido',
+            ),
           );
           _updateRequestInHistory(updatedRequest);
-          notifyListeners();
           return;
         }
 
         if (updatedRequest.status == ExportRequestStatus.completed) {
-          _currentProgress = const ExportProgress.completed();
+          state = state.copyWith(
+            currentProgress: const ExportProgress.completed(),
+          );
           _updateRequestInHistory(updatedRequest);
-          notifyListeners();
           return;
         }
       }
-      _currentProgress = const ExportProgress.completed();
-      notifyListeners();
-    } catch (e) {
-      _currentProgress = ExportProgress.error(
-        'Erro durante monitoramento: ${e.toString()}',
+
+      state = state.copyWith(
+        currentProgress: const ExportProgress.completed(),
       );
-      notifyListeners();
+    } catch (e) {
+      state = state.copyWith(
+        currentProgress: ExportProgress.error(
+          'Erro durante monitoramento: ${e.toString()}',
+        ),
+      );
     }
   }
 
   /// Update request in history
   void _updateRequestInHistory(ExportRequest updatedRequest) {
-    final index = _exportHistory.indexWhere(
-      (req) => req.id == updatedRequest.id,
-    );
-    if (index != -1) {
-      _exportHistory[index] = updatedRequest;
-      notifyListeners();
-    }
+    final updatedHistory = state.exportHistory.map((req) {
+      if (req.id == updatedRequest.id) {
+        return updatedRequest;
+      }
+      return req;
+    }).toList();
+
+    state = state.copyWith(exportHistory: updatedHistory);
   }
 
   /// Load export history for user
@@ -188,11 +221,13 @@ class DataExportProvider extends ChangeNotifier {
 
     try {
       final userId = _currentUserId;
-      _exportHistory = await _getHistoryUseCase(userId);
-      notifyListeners();
+      final history = await _getHistoryUseCase(userId);
+      state = state.copyWith(
+        exportHistory: history,
+        isLoading: false,
+      );
     } catch (e) {
       _setError('Erro ao carregar histórico: ${e.toString()}');
-    } finally {
       _setLoading(false);
     }
   }
@@ -212,8 +247,9 @@ class DataExportProvider extends ChangeNotifier {
     try {
       final success = await _repository.deleteExport(exportId);
       if (success) {
-        _exportHistory.removeWhere((req) => req.id == exportId);
-        notifyListeners();
+        final updatedHistory =
+            state.exportHistory.where((req) => req.id != exportId).toList();
+        state = state.copyWith(exportHistory: updatedHistory);
       }
       return success;
     } catch (e) {
@@ -257,8 +293,10 @@ class DataExportProvider extends ChangeNotifier {
 
       final comments = await _repository.getUserPlantCommentsData(userId);
       stats[DataType.plantComments] = comments.length;
+
       final customCareCount = plants.where((p) => p.config != null).length;
       stats[DataType.customCare] = customCareCount;
+
       final reminderCount = tasks.where((t) => t.status != 'completed').length;
       stats[DataType.reminders] = reminderCount;
 
@@ -273,14 +311,14 @@ class DataExportProvider extends ChangeNotifier {
 
   /// Reset current progress
   void resetProgress() {
-    _currentProgress = const ExportProgress.initial();
-    notifyListeners();
+    state = state.copyWith(
+      currentProgress: const ExportProgress.initial(),
+    );
   }
 
   /// Clear availability result
   void clearAvailability() {
-    _availabilityResult = null;
-    notifyListeners();
+    state = state.copyWith(availabilityResult: null);
   }
 
   /// Refresh all data
@@ -289,10 +327,10 @@ class DataExportProvider extends ChangeNotifier {
   }
 
   /// Check if user can request new export (rate limiting)
-  bool canRequestExport() {
+  bool canRequestExportNow() {
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
 
-    final recentRequest = _exportHistory.where(
+    final recentRequest = state.exportHistory.where(
       (request) => request.requestDate.isAfter(oneHourAgo),
     );
 
@@ -301,10 +339,10 @@ class DataExportProvider extends ChangeNotifier {
 
   /// Get time until next export is allowed
   Duration? getTimeUntilNextExportAllowed() {
-    if (canRequestExport()) return null;
+    if (canRequestExportNow()) return null;
 
     final oneHourAgo = DateTime.now().subtract(const Duration(hours: 1));
-    final mostRecentRequest = _exportHistory
+    final mostRecentRequest = state.exportHistory
         .where((request) => request.requestDate.isAfter(oneHourAgo))
         .fold<ExportRequest?>(
           null,
@@ -321,22 +359,41 @@ class DataExportProvider extends ChangeNotifier {
     );
     return nextAllowedTime.difference(DateTime.now());
   }
+
   void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
+    state = state.copyWith(isLoading: loading);
   }
 
   void _setError(String error) {
-    _error = error;
-    notifyListeners();
+    state = state.copyWith(error: error);
   }
 
   void _clearError() {
-    _error = null;
+    state = state.copyWith(error: null);
   }
+}
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+// Dependency providers (to be defined in DI setup)
+@riverpod
+CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(
+  CheckExportAvailabilityUseCaseRef ref,
+) {
+  throw UnimplementedError('Define in DI setup');
+}
+
+@riverpod
+RequestExportUseCase requestExportUseCase(RequestExportUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
+
+@riverpod
+GetExportHistoryUseCase getExportHistoryUseCase(
+  GetExportHistoryUseCaseRef ref,
+) {
+  throw UnimplementedError('Define in DI setup');
+}
+
+@riverpod
+DataExportRepository dataExportRepository(DataExportRepositoryRef ref) {
+  throw UnimplementedError('Define in DI setup');
 }

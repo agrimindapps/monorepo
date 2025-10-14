@@ -1,225 +1,508 @@
-import 'package:core/core.dart' hide getIt;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../constants/app_constants.dart';
+import 'analytics_state.dart';
 
 part 'analytics_notifier.g.dart';
 
-/// Enhanced Analytics Provider for App-Plantis (Riverpod version)
-/// Wrapper around EnhancedAnalyticsService from core package
-/// Maintains backward compatibility while leveraging enhanced features
-///
-/// Note: This is a stateless wrapper, so we use a simple provider instead of AsyncNotifier
+/// Provider do repositório de analytics (obtido via DI)
 @riverpod
-AnalyticsProvider analyticsProviderInstance(Ref ref) {
-  final analyticsRepository = ref.watch<IAnalyticsRepository>(analyticsRepositoryProvider);
-  final crashlyticsRepository = ref.watch<ICrashlyticsRepository>(crashlyticsRepositoryProvider);
-
-  return AnalyticsProvider(
-    analyticsRepository: analyticsRepository,
-    crashlyticsRepository: crashlyticsRepository,
-  );
+IAnalyticsRepository analyticsRepository(AnalyticsRepositoryRef ref) {
+  return GetIt.instance<IAnalyticsRepository>();
 }
 
-/// Enhanced Analytics Provider for App-Plantis
-/// Now uses the Enhanced Analytics Service from core package
-/// Maintains backward compatibility while leveraging enhanced features
-class AnalyticsProvider {
-  final EnhancedAnalyticsService _enhancedService;
+/// Provider do repositório de crashlytics (obtido via DI)
+@riverpod
+ICrashlyticsRepository crashlyticsRepository(CrashlyticsRepositoryRef ref) {
+  return GetIt.instance<ICrashlyticsRepository>();
+}
 
-  AnalyticsProvider({
-    required IAnalyticsRepository analyticsRepository,
-    required ICrashlyticsRepository crashlyticsRepository,
-  }) : _enhancedService = EnhancedAnalyticsService(
-          analytics: analyticsRepository,
-          crashlytics: crashlyticsRepository,
-          config: AnalyticsConfig.forApp(
-            appId: AppConstants.appId,
-            version: AppConstants.defaultVersion,
-            enableAnalytics: EnvironmentConfig.enableAnalytics,
-            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
-          ),
-        );
+/// Notifier principal para gerenciar analytics com @riverpod
+@riverpod
+class Analytics extends _$Analytics {
+  late final EnhancedAnalyticsService _enhancedService;
 
-  /// Direct access to enhanced service for advanced features
-  EnhancedAnalyticsService get enhancedService => _enhancedService;
+  @override
+  PlantisAnalyticsState build() {
+    final analyticsRepo = ref.watch(analyticsRepositoryProvider);
+    final crashlyticsRepo = ref.watch(crashlyticsRepositoryProvider);
 
-  /// Logs screen view with enhanced error handling
-  Future<void> logScreenView(String screenName) async {
-    await _enhancedService.setCurrentScreen(screenName);
-    await _enhancedService.logEvent('screen_view', {'screen_name': screenName});
+    _enhancedService = EnhancedAnalyticsService(
+      analytics: analyticsRepo,
+      crashlytics: crashlyticsRepo,
+      config: AnalyticsConfig.forApp(
+        appId: AppConstants.appId,
+        version: AppConstants.defaultVersion,
+        enableAnalytics: EnvironmentConfig.enableAnalytics,
+        enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
+      ),
+    );
+
+    return PlantisAnalyticsState.initial().copyWith(isInitialized: true);
   }
 
-  /// Logs custom event with enhanced error handling
+  /// Direct access to enhanced service para funcionalidades avançadas
+  EnhancedAnalyticsService get enhancedService => _enhancedService;
+
+  /// Logs screen view com tratamento de erro aprimorado
+  Future<void> logScreenView(String screenName) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.setCurrentScreen(screenName);
+      await _enhancedService.logEvent('screen_view', {
+        'screen_name': screenName,
+      });
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao registrar tela: $e');
+    }
+  }
+
+  /// Logs custom event com tratamento de erro aprimorado
   Future<void> logEvent(
     String eventName,
     Map<String, dynamic>? parameters,
   ) async {
-    await _enhancedService.logEvent(eventName, parameters);
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logEvent(eventName, parameters);
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao registrar evento: $e');
+    }
   }
 
-  /// Sets user ID in both analytics and crashlytics
+  /// Define user ID em analytics e crashlytics
   Future<void> setUserId(String userId) async {
-    await _enhancedService.setUser(userId: userId);
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.setUser(userId: userId);
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao definir usuário: $e');
+    }
   }
 
-  /// Sets user properties
+  /// Define propriedades do usuário
   Future<void> setUserProperty(String name, String value) async {
-    await _enhancedService.setUser(
-      userId: 'current_user',
-      properties: {name: value},
-    );
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.setUser(
+        userId: 'current_user',
+        properties: {name: value},
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao definir propriedade: $e');
+    }
   }
 
-  /// Records error with enhanced reporting
+  /// Registra erro com reporte aprimorado
   Future<void> recordError(
     dynamic error,
     StackTrace? stackTrace, {
     String? reason,
   }) async {
-    await _enhancedService.recordError(
-      error,
-      stackTrace,
-      reason: reason,
-      logAsAnalyticsEvent: true,
-    );
+    try {
+      await _enhancedService.recordError(
+        error,
+        stackTrace,
+        reason: reason,
+        logAsAnalyticsEvent: true,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro ao registrar erro: $e');
+    }
   }
 
   Future<void> logLogin(String method) async {
-    await _enhancedService.logAuthEvent(
-      'login',
-      parameters: {'method': method},
-    );
+    await logEvent('login', {'method': method});
   }
 
   Future<void> logSignUp(String method) async {
-    await _enhancedService.logAuthEvent(
-      'signup',
-      parameters: {'method': method},
-    );
+    await logEvent('signup', {'method': method});
   }
 
   Future<void> logLogout() async {
-    await _enhancedService.logAuthEvent('logout');
+    await logEvent('logout', null);
   }
 
   Future<void> logAppOpen() async {
-    await _enhancedService.logEvent('app_open', {});
-  }
-
-  Future<void> logAppClose() async {
-    await _enhancedService.logEvent('app_close', {});
+    await logEvent('app_open', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
+    });
   }
 
   Future<void> logAppBackground() async {
-    await _enhancedService.logEvent('app_background', {});
-  }
-
-  Future<void> logAppForeground() async {
-    await _enhancedService.logEvent('app_foreground', {});
-  }
-
-  Future<void> logPlantAdded(String plantId, String plantName) async {
-    await _enhancedService.logEvent('plant_added', {
-      'plant_id': plantId,
-      'plant_name': plantName,
-    });
-  }
-
-  Future<void> logPlantUpdated(String plantId) async {
-    await _enhancedService.logEvent('plant_updated', {
-      'plant_id': plantId,
-    });
-  }
-
-  Future<void> logPlantDeleted(String plantId) async {
-    await _enhancedService.logEvent('plant_deleted', {
-      'plant_id': plantId,
-    });
-  }
-
-  Future<void> logPlantWatered(String plantId) async {
-    await _enhancedService.logEvent('plant_watered', {
-      'plant_id': plantId,
-    });
-  }
-
-  Future<void> logPlantFertilized(String plantId) async {
-    await _enhancedService.logEvent('plant_fertilized', {
-      'plant_id': plantId,
-    });
-  }
-
-  Future<void> logPremiumPurchase(String productId, double price) async {
-    await _enhancedService.logEvent('premium_purchase', {
-      'product_id': productId,
-      'price': price,
-    });
-  }
-
-  Future<void> logPremiumFeatureUsed(String featureName) async {
-    await _enhancedService.logEvent('premium_feature_used', {
-      'feature_name': featureName,
-    });
-  }
-
-  Future<void> logSyncStarted() async {
-    await _enhancedService.logEvent('sync_started', {});
-  }
-
-  Future<void> logSyncCompleted(int itemsSynced) async {
-    await _enhancedService.logEvent('sync_completed', {
-      'items_synced': itemsSynced,
-    });
-  }
-
-  Future<void> logSyncFailed(String reason) async {
-    await _enhancedService.logEvent('sync_failed', {
-      'reason': reason,
-    });
-  }
-
-  Future<void> logNavigationEvent(String from, String to) async {
-    await _enhancedService.logEvent('navigation', {
-      'from': from,
-      'to': to,
+    await logEvent('app_background', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
     });
   }
 
   Future<void> logFeatureUsed(String featureName) async {
-    await _enhancedService.logEvent('feature_used', {
-      'feature_name': featureName,
+    await logEvent('feature_used', {'feature': featureName});
+  }
+
+  Future<void> logPlantCreated({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.plantCreated,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar criação de planta: $e',
+      );
+    }
+  }
+
+  Future<void> logPlantDeleted({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.plantDeleted,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar exclusão de planta: $e',
+      );
+    }
+  }
+
+  Future<void> logPlantUpdated({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.plantUpdated,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar atualização de planta: $e',
+      );
+    }
+  }
+
+  Future<void> logTaskCompleted(
+    String taskType, {
+    Map<String, dynamic>? additionalData,
+  }) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.taskCompleted,
+        additionalParameters: {
+          'task_type': taskType,
+          if (additionalData != null) ...additionalData,
+        },
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar conclusão de tarefa: $e',
+      );
+    }
+  }
+
+  Future<void> logTaskCreated({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.taskCreated,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar criação de tarefa: $e',
+      );
+    }
+  }
+
+  Future<void> logSpaceCreated({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.spaceCreated,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar criação de espaço: $e',
+      );
+    }
+  }
+
+  Future<void> logSpaceDeleted({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.spaceDeleted,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar exclusão de espaço: $e',
+      );
+    }
+  }
+
+  Future<void> logPremiumFeatureAttempted(
+    String featureName, {
+    Map<String, dynamic>? additionalData,
+  }) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.premiumFeatureAttempted,
+        additionalParameters: {
+          'feature': featureName,
+          if (additionalData != null) ...additionalData,
+        },
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage:
+            'Erro ao registrar tentativa de funcionalidade premium: $e',
+      );
+    }
+  }
+
+  Future<void> logCareLogAdded({Map<String, dynamic>? additionalData}) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.careLogAdded,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar log de cuidado: $e',
+      );
+    }
+  }
+
+  Future<void> logPlantPhotoAdded({
+    Map<String, dynamic>? additionalData,
+  }) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logAppSpecificEvent(
+        PlantisEvent.plantPhotoAdded,
+        additionalParameters: additionalData,
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar adição de foto: $e',
+      );
+    }
+  }
+
+  Future<void> logSubscriptionPurchased(String productId, double price) async {
+    if (!state.isAnalyticsEnabled) return;
+
+    try {
+      await _enhancedService.logPurchaseEvent(
+        productId: productId,
+        value: price,
+        currency: 'USD',
+        additionalParameters: {'subscription_type': 'premium'},
+      );
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro ao registrar compra de assinatura: $e',
+      );
+    }
+  }
+
+  Future<void> logTrialStarted() async {
+    await logEvent('trial_started', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
+      'trial_type': 'premium',
     });
   }
 
-  Future<void> logButtonPressed(String buttonName) async {
-    await _enhancedService.logEvent('button_pressed', {
-      'button_name': buttonName,
+  Future<void> logTrialEnded(String reason) async {
+    await logEvent('trial_ended', {'app': 'plantis', 'reason': reason});
+  }
+
+  Future<void> logSearch(String query, int resultCount) async {
+    await logEvent('search', {
+      'query': query,
+      'result_count': resultCount,
+      'category': 'plants',
     });
   }
 
-  Future<void> logPerformanceMetric(String metricName, double value) async {
-    await _enhancedService.logEvent('performance_metric', {
-      'metric_name': metricName,
-      'value': value,
+  Future<void> logContentViewed(String contentType, String contentId) async {
+    await logEvent('content_viewed', {
+      'content_type': contentType,
+      'content_id': contentId,
     });
   }
 
-  Future<void> logCriticalError(String errorType, String message) async {
-    await _enhancedService.recordError(
-      Exception(message),
-      StackTrace.current,
-      reason: errorType,
-      logAsAnalyticsEvent: true,
-    );
+  Future<void> logUserEngagement(String action, int durationSeconds) async {
+    await logEvent('user_engagement', {
+      'action': action,
+      'duration_seconds': durationSeconds,
+      'engagement_time_msec': durationSeconds * 1000,
+    });
+  }
+
+  Future<void> logSessionStart() async {
+    await logEvent('session_start', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+  Future<void> logSessionEnd(int durationSeconds) async {
+    await logEvent('session_end', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
+      'duration_seconds': durationSeconds,
+    });
+  }
+
+  Future<void> testCrash() async {
+    try {
+      await _enhancedService.testCrash();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro no teste de crash: $e');
+    }
+  }
+
+  Future<void> testAnalyticsEvent() async {
+    try {
+      await _enhancedService.testAnalyticsEvent();
+      state = state.clearError();
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Erro no teste de analytics: $e');
+    }
+  }
+
+  /// Registra evento de desenvolvimento para depuração
+  Future<void> logDevelopmentEvent(
+    String event,
+    Map<String, dynamic>? data,
+  ) async {
+    if (kDebugMode && state.isAnalyticsEnabled) {
+      await logEvent('dev_$event', {
+        'is_development': true,
+        if (data != null) ...data,
+      });
+    }
+  }
+
+  /// Limpa mensagem de erro
+  void clearError() {
+    if (state.errorMessage != null) {
+      state = state.clearError();
+    }
+  }
+
+  /// Atualiza se analytics está habilitado
+  void updateAnalyticsEnabled(bool enabled) {
+    state = state.copyWith(isAnalyticsEnabled: enabled);
   }
 }
+
+// ============================================================================
+// DERIVED STATE PROVIDERS (Computed values)
+// ============================================================================
+
+/// Provider para verificar se analytics está inicializado
 @riverpod
-IAnalyticsRepository analyticsRepository(Ref ref) {
-  return GetIt.instance<IAnalyticsRepository>();
+bool analyticsInitialized(AnalyticsInitializedRef ref) {
+  return ref.watch(analyticsProvider).isInitialized;
 }
 
+/// Provider para verificar se analytics está habilitado
 @riverpod
-ICrashlyticsRepository crashlyticsRepository(Ref ref) {
-  return GetIt.instance<ICrashlyticsRepository>();
+bool analyticsEnabled(AnalyticsEnabledRef ref) {
+  return ref.watch(analyticsProvider).isAnalyticsEnabled;
+}
+
+/// Provider para mensagem de erro do analytics
+@riverpod
+String? analyticsError(AnalyticsErrorRef ref) {
+  return ref.watch(analyticsProvider).errorMessage;
+}
+
+/// Provider para verificar se está em modo debug
+@riverpod
+bool isDebugMode(IsDebugModeRef ref) {
+  return kDebugMode;
+}
+
+/// Provider para acesso direto ao Analytics para métodos específicos
+@riverpod
+Analytics analyticsService(AnalyticsServiceRef ref) {
+  return ref.watch(analyticsProvider.notifier);
+}
+
+/// Provider para verificar se deve mostrar configurações de analytics
+@riverpod
+bool shouldShowAnalyticsSettings(ShouldShowAnalyticsSettingsRef ref) {
+  final isDebug = ref.watch(isDebugModeProvider);
+  final isEnabled = ref.watch(analyticsEnabledProvider);
+  return isDebug || isEnabled;
+}
+
+/// Provider para status text do analytics
+@riverpod
+String analyticsStatusText(AnalyticsStatusTextRef ref) {
+  final isEnabled = ref.watch(analyticsEnabledProvider);
+  final isDebug = ref.watch(isDebugModeProvider);
+
+  if (!isEnabled) {
+    return 'Analytics desabilitado';
+  }
+
+  if (isDebug) {
+    return 'Analytics habilitado (modo debug)';
+  }
+
+  return 'Analytics habilitado';
+}
+
+/// Provider para ícone do status de analytics
+@riverpod
+IconData analyticsStatusIcon(AnalyticsStatusIconRef ref) {
+  final isEnabled = ref.watch(analyticsEnabledProvider);
+  final hasError = ref.watch(analyticsErrorProvider) != null;
+
+  if (hasError) {
+    return Icons.error;
+  }
+
+  return isEnabled ? Icons.analytics : Icons.analytics_outlined;
 }

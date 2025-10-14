@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide deviceManagementProvider, DeviceManagementState;
+import 'package:core/core.dart' hide deviceManagementNotifierProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -10,7 +10,7 @@ class DeviceActionsWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+    final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
 
     return deviceManagementAsync.when(
       data: (deviceState) => Container(
@@ -44,7 +44,7 @@ class DeviceActionsWidget extends ConsumerWidget {
                     color: Colors.green,
                     enabled: true,
                     loading: false,
-                    onTap: () => ref.read(deviceManagementProvider.notifier).refresh(),
+                    onTap: () => ref.read(deviceManagementNotifierProvider.notifier).refresh(),
                   ),
                 ),
               ],
@@ -261,7 +261,7 @@ class DeviceActionsWidget extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final notifier = ref.read(deviceManagementProvider.notifier);
+    final notifier = ref.read(deviceManagementNotifierProvider.notifier);
     final result = await notifier.validateCurrentDevice();
 
     if (result != null && !result.isValid && context.mounted) {
@@ -358,7 +358,7 @@ class DeviceActionsWidget extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final result = await ref.read(deviceManagementProvider.notifier).revokeAllOtherDevices(
+      final result = await ref.read(deviceManagementNotifierProvider.notifier).revokeAllOtherDevices(
             reason: 'Logout remoto via ações rápidas',
           );
 

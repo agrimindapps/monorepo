@@ -13,6 +13,8 @@ import 'package:core/core.dart'
         RevokeAllOtherDevicesParams;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../data/models/device_model.dart';
@@ -21,65 +23,110 @@ import '../../domain/usecases/get_user_devices_usecase.dart';
 import '../../domain/usecases/revoke_device_usecase.dart';
 import '../../domain/usecases/validate_device_usecase.dart';
 
-/// Provider para gerenciar estado de dispositivos no app-plantis
-/// Segue padrão Provider usado no app com estado reativo
-class DeviceManagementProvider extends ChangeNotifier {
-  final GetUserDevicesUseCase _getUserDevicesUseCase;
-  final ValidateDeviceUseCase _validateDeviceUseCase;
-  final RevokeDeviceUseCase _revokeDeviceUseCase;
-  final RevokeAllOtherDevicesUseCase _revokeAllOtherDevicesUseCase;
-  final GetDeviceStatisticsUseCase _getDeviceStatisticsUseCase;
-  final AuthStateNotifier _authStateNotifier;
-  List<DeviceModel> _devices = [];
-  DeviceModel? _currentDevice;
-  DeviceStatisticsModel? _statistics;
-  bool _isLoading = false;
-  bool _isInitialized = false;
-  String? _errorMessage;
-  String? _successMessage;
-  bool _isValidating = false;
-  bool _isRevoking = false;
-  String? _revokingDeviceUuid;
-  StreamSubscription<UserEntity?>? _userSubscription;
+part 'device_management_provider.freezed.dart';
+part 'device_management_provider.g.dart';
 
-  DeviceManagementProvider({
-    required GetUserDevicesUseCase getUserDevicesUseCase,
-    required ValidateDeviceUseCase validateDeviceUseCase,
-    required RevokeDeviceUseCase revokeDeviceUseCase,
-    required RevokeAllOtherDevicesUseCase revokeAllOtherDevicesUseCase,
-    required GetDeviceStatisticsUseCase getDeviceStatisticsUseCase,
-    required AuthStateNotifier authStateNotifier,
-  }) : _getUserDevicesUseCase = getUserDevicesUseCase,
-       _validateDeviceUseCase = validateDeviceUseCase,
-       _revokeDeviceUseCase = revokeDeviceUseCase,
-       _revokeAllOtherDevicesUseCase = revokeAllOtherDevicesUseCase,
-       _getDeviceStatisticsUseCase = getDeviceStatisticsUseCase,
-       _authStateNotifier = authStateNotifier {
-    _initializeProvider();
-  }
-  List<DeviceModel> get devices => List.unmodifiable(_devices);
-  DeviceModel? get currentDevice => _currentDevice;
-  DeviceStatisticsModel? get statistics => _statistics;
-  bool get isLoading => _isLoading;
-  bool get isInitialized => _isInitialized;
-  String? get errorMessage => _errorMessage;
-  String? get successMessage => _successMessage;
-  bool get isValidating => _isValidating;
-  bool get isRevoking => _isRevoking;
-  String? get revokingDeviceUuid => _revokingDeviceUuid;
+/// State for Device Management
+@freezed
+class DeviceManagementState with _$DeviceManagementState {
+  const factory DeviceManagementState({
+    @Default([]) List<DeviceModel> devices,
+    DeviceModel? currentDevice,
+    DeviceStatisticsModel? statistics,
+    @Default(false) bool isLoading,
+    @Default(false) bool isInitialized,
+    String? errorMessage,
+    String? successMessage,
+    @Default(false) bool isValidating,
+    @Default(false) bool isRevoking,
+    String? revokingDeviceUuid,
+  }) = _DeviceManagementState;
+
+  const DeviceManagementState._();
+
   List<DeviceModel> get activeDevices =>
-      _devices.where((d) => d.isActive).toList();
+      devices.where((d) => d.isActive).toList();
+
   List<DeviceModel> get inactiveDevices =>
-      _devices.where((d) => !d.isActive).toList();
+      devices.where((d) => !d.isActive).toList();
+
   int get activeDeviceCount => activeDevices.length;
-  int get totalDeviceCount => _devices.length;
-  bool get hasDevices => _devices.isNotEmpty;
-  bool get canAddMoreDevices => activeDeviceCount < 3; // Limite padrão
-  bool get isCurrentDeviceIdentified => _currentDevice != null;
+  int get totalDeviceCount => devices.length;
+  bool get hasDevices => devices.isNotEmpty;
+  bool get canAddMoreDevices => activeDeviceCount < 3;
+  bool get isCurrentDeviceIdentified => currentDevice != null;
+
   String get deviceSummary {
     if (!hasDevices) return 'Nenhum dispositivo registrado';
     if (activeDeviceCount == 1) return '1 dispositivo ativo';
     return '$activeDeviceCount dispositivos ativos';
+  }
+
+  String get statusText {
+    if (!isInitialized) return 'Carregando...';
+    if (!hasDevices) return 'Nenhum dispositivo registrado';
+
+    final active = activeDeviceCount;
+    final total = totalDeviceCount;
+
+    if (active == total) {
+      return active == 1
+          ? '1 dispositivo ativo'
+          : '$active dispositivos ativos';
+    } else {
+      return '$active de $total dispositivos ativos';
+    }
+  }
+
+  Color get statusColor {
+    if (!hasDevices) return Colors.grey;
+    if (activeDeviceCount == totalDeviceCount) return Colors.green;
+    return Colors.orange;
+  }
+
+  IconData get statusIcon {
+    if (!hasDevices) return Icons.devices_other;
+    if (activeDeviceCount == totalDeviceCount) return Icons.verified;
+    return Icons.warning;
+  }
+
+  String get deviceLimitText {
+    return '$activeDeviceCount/3 dispositivos';
+  }
+
+  bool get isNearDeviceLimit => activeDeviceCount >= 2;
+  bool get hasReachedDeviceLimit => activeDeviceCount >= 3;
+}
+
+/// Provider para gerenciar estado de dispositivos no app-plantis
+@riverpod
+class DeviceManagementNotifier extends _$DeviceManagementNotifier {
+  GetUserDevicesUseCase get _getUserDevicesUseCase =>
+      ref.read(getUserDevicesUseCaseProvider);
+  ValidateDeviceUseCase get _validateDeviceUseCase =>
+      ref.read(validateDeviceUseCaseProvider);
+  RevokeDeviceUseCase get _revokeDeviceUseCase =>
+      ref.read(revokeDeviceUseCaseProvider);
+  RevokeAllOtherDevicesUseCase get _revokeAllOtherDevicesUseCase =>
+      ref.read(revokeAllOtherDevicesUseCaseProvider);
+  GetDeviceStatisticsUseCase get _getDeviceStatisticsUseCase =>
+      ref.read(getDeviceStatisticsUseCaseProvider);
+  AuthStateNotifier get _authStateNotifier => ref.read(authStateNotifierProvider);
+
+  StreamSubscription<UserEntity?>? _userSubscription;
+
+  @override
+  DeviceManagementState build() {
+    ref.onDispose(() {
+      if (kDebugMode) {
+        debugPrint('♻️ DeviceProvider: Disposing');
+      }
+      _userSubscription?.cancel();
+    });
+
+    _initializeProvider();
+
+    return const DeviceManagementState();
   }
 
   /// Inicializa o provider
@@ -87,7 +134,9 @@ class DeviceManagementProvider extends ChangeNotifier {
     if (kDebugMode) {
       debugPrint('🔐 DeviceProvider: Initializing');
     }
+
     _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
+
     if (_authStateNotifier.isAuthenticated) {
       _initializeDeviceManagement();
     }
@@ -104,7 +153,7 @@ class DeviceManagementProvider extends ChangeNotifier {
 
   /// Inicializa gerenciamento de dispositivos
   Future<void> _initializeDeviceManagement() async {
-    if (_isInitialized) return;
+    if (state.isInitialized) return;
 
     _setLoading(true);
     _clearMessages();
@@ -113,7 +162,7 @@ class DeviceManagementProvider extends ChangeNotifier {
       await _identifyCurrentDevice();
       await _loadDevices(showLoading: false);
 
-      _isInitialized = true;
+      state = state.copyWith(isInitialized: true);
 
       if (kDebugMode) {
         debugPrint('✅ DeviceProvider: Initialized successfully');
@@ -132,8 +181,8 @@ class DeviceManagementProvider extends ChangeNotifier {
         debugPrint('🔐 DeviceProvider: Identifying current device');
       }
 
-      _currentDevice = await DeviceModel.fromCurrentDevice();
-      if (_currentDevice == null) {
+      final currentDevice = await DeviceModel.fromCurrentDevice();
+      if (currentDevice == null) {
         if (kDebugMode) {
           debugPrint(
             '🚫 DeviceProvider: Current platform not supported for device management',
@@ -142,9 +191,11 @@ class DeviceManagementProvider extends ChangeNotifier {
         return;
       }
 
+      state = state.copyWith(currentDevice: currentDevice);
+
       if (kDebugMode) {
         debugPrint(
-          '📱 DeviceProvider: Current device identified: ${_currentDevice!.name}',
+          '📱 DeviceProvider: Current device identified: ${currentDevice.name}',
         );
       }
     } catch (e) {
@@ -186,8 +237,9 @@ class DeviceManagementProvider extends ChangeNotifier {
           _setError('Erro ao carregar dispositivos: ${failure.message}');
         },
         (devices) {
-          _devices =
+          final deviceModels =
               devices.map((entity) => DeviceModel.fromEntity(entity)).toList();
+          state = state.copyWith(devices: deviceModels);
           _clearError();
 
           if (kDebugMode) {
@@ -204,18 +256,17 @@ class DeviceManagementProvider extends ChangeNotifier {
 
   /// Valida dispositivo atual
   Future<DeviceValidationResult?> validateCurrentDevice() async {
-    if (_isValidating) return null;
+    if (state.isValidating) return null;
 
-    _isValidating = true;
+    state = state.copyWith(isValidating: true);
     _clearMessages();
-    notifyListeners();
 
     try {
       if (kDebugMode) {
         debugPrint('🔐 DeviceProvider: Validating current device');
       }
 
-      if (_currentDevice == null) {
+      if (state.currentDevice == null) {
         _setError('Nenhum dispositivo atual identificado');
         return null;
       }
@@ -226,7 +277,7 @@ class DeviceManagementProvider extends ChangeNotifier {
         return null;
       }
 
-      final params = ValidateDeviceParams(device: _currentDevice);
+      final params = ValidateDeviceParams(device: state.currentDevice);
 
       final result = await _validateDeviceUseCase(params);
 
@@ -252,23 +303,20 @@ class DeviceManagementProvider extends ChangeNotifier {
       _setError('Erro inesperado na validação: $e');
       return null;
     } finally {
-      _isValidating = false;
-      notifyListeners();
+      state = state.copyWith(isValidating: false);
     }
   }
 
   /// Revoga um dispositivo específico
   Future<bool> revokeDevice(String deviceUuid, {String? reason}) async {
-    if (_isRevoking) return false;
-    if (_currentDevice?.uuid == deviceUuid) {
+    if (state.isRevoking) return false;
+    if (state.currentDevice?.uuid == deviceUuid) {
       _setError('Não é possível revogar o dispositivo atual');
       return false;
     }
 
-    _isRevoking = true;
-    _revokingDeviceUuid = deviceUuid;
+    state = state.copyWith(isRevoking: true, revokingDeviceUuid: deviceUuid);
     _clearMessages();
-    notifyListeners();
 
     try {
       if (kDebugMode) {
@@ -292,7 +340,9 @@ class DeviceManagementProvider extends ChangeNotifier {
         },
         (_) {
           _setSuccess('Dispositivo revogado com sucesso');
-          _devices.removeWhere((d) => d.uuid == deviceUuid);
+          final updatedDevices =
+              state.devices.where((d) => d.uuid != deviceUuid).toList();
+          state = state.copyWith(devices: updatedDevices);
           _loadDevices(showLoading: false);
 
           if (kDebugMode) {
@@ -306,19 +356,16 @@ class DeviceManagementProvider extends ChangeNotifier {
       _setError('Erro inesperado ao revogar dispositivo: $e');
       return false;
     } finally {
-      _isRevoking = false;
-      _revokingDeviceUuid = null;
-      notifyListeners();
+      state = state.copyWith(isRevoking: false, revokingDeviceUuid: null);
     }
   }
 
   /// Revoga todos os outros dispositivos exceto o atual
   Future<bool> revokeAllOtherDevices({String? reason}) async {
-    if (_isRevoking) return false;
+    if (state.isRevoking) return false;
 
-    _isRevoking = true;
+    state = state.copyWith(isRevoking: true);
     _clearMessages();
-    notifyListeners();
 
     try {
       if (kDebugMode) {
@@ -331,13 +378,13 @@ class DeviceManagementProvider extends ChangeNotifier {
         return false;
       }
 
-      if (_currentDevice?.uuid == null) {
+      if (state.currentDevice?.uuid == null) {
         _setError('Dispositivo atual não identificado');
         return false;
       }
 
       final params = RevokeAllOtherDevicesParams(
-        currentDeviceUuid: _currentDevice!.uuid,
+        currentDeviceUuid: state.currentDevice!.uuid,
       );
 
       final result = await _revokeAllOtherDevicesUseCase(params);
@@ -362,8 +409,7 @@ class DeviceManagementProvider extends ChangeNotifier {
       _setError('Erro inesperado ao revogar outros dispositivos: $e');
       return false;
     } finally {
-      _isRevoking = false;
-      notifyListeners();
+      state = state.copyWith(isRevoking: false);
     }
   }
 
@@ -375,7 +421,7 @@ class DeviceManagementProvider extends ChangeNotifier {
   /// Obtém dispositivo por UUID
   DeviceModel? getDeviceByUuid(String uuid) {
     try {
-      return _devices.firstWhere((device) => device.uuid == uuid);
+      return state.devices.firstWhere((device) => device.uuid == uuid);
     } catch (e) {
       return null;
     }
@@ -383,7 +429,7 @@ class DeviceManagementProvider extends ChangeNotifier {
 
   /// Verifica se dispositivo está sendo revogado
   bool isDeviceBeingRevoked(String uuid) {
-    return _isRevoking && _revokingDeviceUuid == uuid;
+    return state.isRevoking && state.revokingDeviceUuid == uuid;
   }
 
   /// Limpa mensagens de erro/sucesso
@@ -393,7 +439,7 @@ class DeviceManagementProvider extends ChangeNotifier {
 
   /// Carrega estatísticas de dispositivos
   Future<void> loadStatistics({bool refresh = false}) async {
-    if (_isLoading) return;
+    if (state.isLoading) return;
 
     try {
       _setLoading(true);
@@ -423,8 +469,7 @@ class DeviceManagementProvider extends ChangeNotifier {
           if (kDebugMode) {
             debugPrint('✅ DeviceProvider: Statistics loaded successfully');
           }
-          _statistics = statistics;
-          notifyListeners();
+          state = state.copyWith(statistics: statistics);
         },
       );
     } catch (e) {
@@ -445,103 +490,65 @@ class DeviceManagementProvider extends ChangeNotifier {
       debugPrint('🔄 DeviceProvider: Resetting state');
     }
 
-    _devices = [];
-    _currentDevice = null;
-    _statistics = null;
-    _isLoading = false;
-    _isInitialized = false;
-    _isValidating = false;
-    _isRevoking = false;
-    _revokingDeviceUuid = null;
-    _clearMessages();
-    notifyListeners();
+    state = const DeviceManagementState();
   }
 
   void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
+    if (state.isLoading != loading) {
+      state = state.copyWith(isLoading: loading);
     }
   }
 
   void _setError(String error) {
-    _errorMessage = error;
-    _successMessage = null;
-    notifyListeners();
+    state = state.copyWith(errorMessage: error, successMessage: null);
   }
 
   void _setSuccess(String success) {
-    _successMessage = success;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(successMessage: success, errorMessage: null);
   }
 
   void _clearError() {
-    if (_errorMessage != null) {
-      _errorMessage = null;
-      notifyListeners();
+    if (state.errorMessage != null) {
+      state = state.copyWith(errorMessage: null);
     }
   }
 
   void _clearMessages() {
-    bool shouldNotify = _errorMessage != null || _successMessage != null;
-    _errorMessage = null;
-    _successMessage = null;
-    if (shouldNotify) notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    if (kDebugMode) {
-      debugPrint('♻️ DeviceProvider: Disposing');
-    }
-
-    _userSubscription?.cancel();
-    super.dispose();
+    state = state.copyWith(errorMessage: null, successMessage: null);
   }
 }
 
-/// Extensions para helpers de texto e formatação
-extension DeviceManagementProviderExtensions on DeviceManagementProvider {
-  /// Texto de status dos dispositivos
-  String get statusText {
-    if (!isInitialized) return 'Carregando...';
-    if (!hasDevices) return 'Nenhum dispositivo registrado';
+// Dependency providers (to be defined in DI setup)
+@riverpod
+GetUserDevicesUseCase getUserDevicesUseCase(GetUserDevicesUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-    final active = activeDeviceCount;
-    final total = totalDeviceCount;
+@riverpod
+ValidateDeviceUseCase validateDeviceUseCase(ValidateDeviceUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-    if (active == total) {
-      return active == 1
-          ? '1 dispositivo ativo'
-          : '$active dispositivos ativos';
-    } else {
-      return '$active de $total dispositivos ativos';
-    }
-  }
+@riverpod
+RevokeDeviceUseCase revokeDeviceUseCase(RevokeDeviceUseCaseRef ref) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-  /// Cor do status para UI
-  Color get statusColor {
-    if (!hasDevices) return Colors.grey;
-    if (activeDeviceCount == totalDeviceCount) return Colors.green;
-    return Colors.orange;
-  }
+@riverpod
+RevokeAllOtherDevicesUseCase revokeAllOtherDevicesUseCase(
+  RevokeAllOtherDevicesUseCaseRef ref,
+) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-  /// Ícone do status
-  IconData get statusIcon {
-    if (!hasDevices) return Icons.devices_other;
-    if (activeDeviceCount == totalDeviceCount) return Icons.verified;
-    return Icons.warning;
-  }
+@riverpod
+GetDeviceStatisticsUseCase getDeviceStatisticsUseCase(
+  GetDeviceStatisticsUseCaseRef ref,
+) {
+  throw UnimplementedError('Define in DI setup');
+}
 
-  /// Texto de limite de dispositivos
-  String get deviceLimitText {
-    return '$activeDeviceCount/3 dispositivos';
-  }
-
-  /// Se está próximo do limite
-  bool get isNearDeviceLimit => activeDeviceCount >= 2;
-
-  /// Se atingiu o limite
-  bool get hasReachedDeviceLimit => activeDeviceCount >= 3;
+@riverpod
+AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
+  throw UnimplementedError('Define in DI setup');
 }

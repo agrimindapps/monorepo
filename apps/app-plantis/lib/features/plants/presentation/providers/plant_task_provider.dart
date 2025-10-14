@@ -1,43 +1,49 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get_it/get_it.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
 import '../../domain/repositories/plant_tasks_repository.dart';
 import '../../domain/services/plant_task_generator.dart';
 
-/// Provider Riverpod para PlantTaskProvider
-///
-/// Gerencia estado de tarefas das plantas
-final plantTaskProviderProvider = ChangeNotifierProvider<PlantTaskProvider>((
-  ref,
-) {
-  return PlantTaskProvider(
-    taskGenerationService: null, // Will use default
-    repository: GetIt.instance<PlantTasksRepository>(),
-  );
-});
+part 'plant_task_provider.freezed.dart';
+part 'plant_task_provider.g.dart';
 
-class PlantTaskProvider extends ChangeNotifier {
-  final PlantTaskGenerator _taskGenerationService;
-  final PlantTasksRepository? _repository;
+/// State for Plant Tasks
+@freezed
+class PlantTaskState with _$PlantTaskState {
+  const factory PlantTaskState({
+    @Default({}) Map<String, List<PlantTask>> plantTasks,
+    @Default(false) bool isLoading,
+    String? errorMessage,
+  }) = _PlantTaskState;
 
-  PlantTaskProvider({
-    PlantTaskGenerator? taskGenerationService,
-    PlantTasksRepository? repository,
-  }) : _taskGenerationService = taskGenerationService ?? PlantTaskGenerator(),
-       _repository = repository;
-  final Map<String, List<PlantTask>> _plantTasks = {};
-  bool _isLoading = false;
-  String? _errorMessage;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  bool get hasError => _errorMessage != null;
+  const PlantTaskState._();
+
+  bool get hasError => errorMessage != null;
+}
+
+/// Provider Riverpod para gerenciar tarefas das plantas
+@riverpod
+class PlantTaskNotifier extends _$PlantTaskNotifier {
+  PlantTaskGenerator get _taskGenerationService =>
+      ref.read(plantTaskGeneratorProvider);
+  PlantTasksRepository? get _repository =>
+      ref.read(plantTasksRepositoryProvider);
+
+  @override
+  PlantTaskState build() {
+    ref.onDispose(() {
+      // Cleanup resources if needed
+    });
+
+    return const PlantTaskState();
+  }
 
   /// Gets all tasks for a specific plant
   List<PlantTask> getTasksForPlant(String plantId) {
-    return _plantTasks[plantId] ?? [];
+    return state.plantTasks[plantId] ?? [];
   }
 
   /// Loads tasks for a plant from repository
@@ -51,19 +57,20 @@ class PlantTaskProvider extends ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       if (kDebugMode) {
         print('📥 PlantTaskProvider: Carregando tasks para planta $plantId');
       }
 
-      final result = await _repository.getPlantTasksByPlantId(plantId);
+      final result = await _repository!.getPlantTasksByPlantId(plantId);
       result.fold(
         (failure) {
-          _errorMessage = 'Erro ao carregar tarefas: ${failure.message}';
+          state = state.copyWith(
+            errorMessage: 'Erro ao carregar tarefas: ${failure.message}',
+            isLoading: false,
+          );
           if (kDebugMode) {
             print(
               '❌ PlantTaskProvider: Erro ao carregar tasks: ${failure.message}',
@@ -71,7 +78,12 @@ class PlantTaskProvider extends ChangeNotifier {
           }
         },
         (tasks) {
-          _plantTasks[plantId] = tasks;
+          final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+          updatedTasks[plantId] = tasks;
+          state = state.copyWith(
+            plantTasks: updatedTasks,
+            isLoading: false,
+          );
           if (kDebugMode) {
             print(
               '✅ PlantTaskProvider: ${tasks.length} tasks carregadas para planta $plantId',
@@ -80,13 +92,13 @@ class PlantTaskProvider extends ChangeNotifier {
         },
       );
     } catch (e) {
-      _errorMessage = 'Erro inesperado ao carregar tarefas: $e';
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado ao carregar tarefas: $e',
+        isLoading: false,
+      );
       if (kDebugMode) {
         print('❌ PlantTaskProvider: Erro inesperado: $e');
       }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -126,9 +138,7 @@ class PlantTaskProvider extends ChangeNotifier {
 
   /// Generates tasks for a plant based on its configuration
   Future<void> generateTasksForPlant(Plant plant) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       if (kDebugMode) {
@@ -136,6 +146,7 @@ class PlantTaskProvider extends ChangeNotifier {
       }
 
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
+
       if (_repository != null && tasks.isNotEmpty) {
         if (kDebugMode) {
           print(
@@ -143,10 +154,13 @@ class PlantTaskProvider extends ChangeNotifier {
           );
         }
 
-        final result = await _repository.addPlantTasks(tasks);
+        final result = await _repository!.addPlantTasks(tasks);
         result.fold(
           (failure) {
-            _errorMessage = 'Erro ao salvar tarefas: ${failure.message}';
+            state = state.copyWith(
+              errorMessage: 'Erro ao salvar tarefas: ${failure.message}',
+              isLoading: false,
+            );
             if (kDebugMode) {
               print(
                 '❌ PlantTaskProvider: Erro ao persistir tasks: ${failure.message}',
@@ -154,7 +168,12 @@ class PlantTaskProvider extends ChangeNotifier {
             }
           },
           (savedTasks) {
-            _plantTasks[plant.id] = savedTasks;
+            final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+            updatedTasks[plant.id] = savedTasks;
+            state = state.copyWith(
+              plantTasks: updatedTasks,
+              isLoading: false,
+            );
             if (kDebugMode) {
               print(
                 '✅ PlantTaskProvider: ${savedTasks.length} tasks persistidas com sucesso',
@@ -163,34 +182,39 @@ class PlantTaskProvider extends ChangeNotifier {
           },
         );
       } else {
-        _plantTasks[plant.id] = tasks;
+        final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+        updatedTasks[plant.id] = tasks;
+        state = state.copyWith(
+          plantTasks: updatedTasks,
+          isLoading: false,
+        );
         if (kDebugMode) {
           print(
             '⚠️ PlantTaskProvider: Repository não disponível, tasks mantidas em memória',
           );
         }
       }
+
       await _updateTaskStatuses(plant.id);
     } catch (e) {
-      _errorMessage = 'Erro ao gerar tarefas: $e';
+      state = state.copyWith(
+        errorMessage: 'Erro ao gerar tarefas: $e',
+        isLoading: false,
+      );
       if (kDebugMode) {
         print('❌ PlantTaskProvider: Erro ao gerar tasks: $e');
       }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
   /// Toggles task completion status
   Future<void> toggleTaskCompletion(String plantId, String taskId) async {
     try {
-      final tasks = getTasksForPlant(plantId);
+      final tasks = List<PlantTask>.from(getTasksForPlant(plantId));
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        _errorMessage = 'Tarefa não encontrada';
-        notifyListeners();
+        state = state.copyWith(errorMessage: 'Tarefa não encontrada');
         return;
       }
 
@@ -203,61 +227,68 @@ class PlantTaskProvider extends ChangeNotifier {
         );
         tasks[taskIndex] = pendingTask;
         if (_repository != null) {
-          await _repository.updatePlantTask(pendingTask);
+          await _repository!.updatePlantTask(pendingTask);
         }
       } else {
         final completedTask = task.markAsCompleted();
         tasks[taskIndex] = completedTask;
         if (_repository != null) {
-          await _repository.updatePlantTask(completedTask);
+          await _repository!.updatePlantTask(completedTask);
         }
+
         final nextTask = _taskGenerationService.generateNextTask(
           completedTask,
           completionDate: DateTime.now(),
         );
         tasks.add(nextTask);
         if (_repository != null) {
-          await _repository.addPlantTask(nextTask);
+          await _repository!.addPlantTask(nextTask);
         }
       }
 
-      _plantTasks[plantId] = tasks;
+      final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+      updatedTasks[plantId] = tasks;
+      state = state.copyWith(plantTasks: updatedTasks);
+
       await _updateTaskStatuses(plantId);
     } catch (e) {
-      _errorMessage = 'Erro ao alterar status da tarefa: $e';
+      state = state.copyWith(
+        errorMessage: 'Erro ao alterar status da tarefa: $e',
+      );
       if (kDebugMode) {
         print('❌ PlantTaskProvider: Erro ao alterar status: $e');
       }
-      notifyListeners();
     }
   }
 
   /// Marks a task as completed and generates the next occurrence
   Future<void> completeTask(String plantId, String taskId) async {
     try {
-      final tasks = getTasksForPlant(plantId);
+      final tasks = List<PlantTask>.from(getTasksForPlant(plantId));
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        _errorMessage = 'Tarefa não encontrada';
-        notifyListeners();
+        state = state.copyWith(errorMessage: 'Tarefa não encontrada');
         return;
       }
 
       final task = tasks[taskIndex];
       final completedTask = task.markAsCompleted();
       tasks[taskIndex] = completedTask;
+
       final nextTask = _taskGenerationService.generateNextTask(
         completedTask,
         completionDate: DateTime.now(),
       );
       tasks.add(nextTask);
 
-      _plantTasks[plantId] = tasks;
+      final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+      updatedTasks[plantId] = tasks;
+      state = state.copyWith(plantTasks: updatedTasks);
+
       await _updateTaskStatuses(plantId);
     } catch (e) {
-      _errorMessage = 'Erro ao completar tarefa: $e';
-      notifyListeners();
+      state = state.copyWith(errorMessage: 'Erro ao completar tarefa: $e');
     }
   }
 
@@ -269,12 +300,11 @@ class PlantTaskProvider extends ChangeNotifier {
     String? notes,
   }) async {
     try {
-      final tasks = getTasksForPlant(plantId);
+      final tasks = List<PlantTask>.from(getTasksForPlant(plantId));
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        _errorMessage = 'Tarefa não encontrada';
-        notifyListeners();
+        state = state.copyWith(errorMessage: 'Tarefa não encontrada');
         return;
       }
 
@@ -284,19 +314,25 @@ class PlantTaskProvider extends ChangeNotifier {
         completedDate: completionDate,
       );
       tasks[taskIndex] = completedTask;
+
       if (_repository != null) {
-        await _repository.updatePlantTask(completedTask);
-      }
-      final nextTask = _taskGenerationService.generateNextTask(
-        completedTask,
-        completionDate: completionDate, // ✅ Usa data real fornecida
-      );
-      tasks.add(nextTask);
-      if (_repository != null) {
-        await _repository.addPlantTask(nextTask);
+        await _repository!.updatePlantTask(completedTask);
       }
 
-      _plantTasks[plantId] = tasks;
+      final nextTask = _taskGenerationService.generateNextTask(
+        completedTask,
+        completionDate: completionDate,
+      );
+      tasks.add(nextTask);
+
+      if (_repository != null) {
+        await _repository!.addPlantTask(nextTask);
+      }
+
+      final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+      updatedTasks[plantId] = tasks;
+      state = state.copyWith(plantTasks: updatedTasks);
+
       await _updateTaskStatuses(plantId);
 
       if (kDebugMode) {
@@ -305,33 +341,33 @@ class PlantTaskProvider extends ChangeNotifier {
         );
       }
     } catch (e) {
-      _errorMessage = 'Erro ao completar tarefa: $e';
+      state = state.copyWith(errorMessage: 'Erro ao completar tarefa: $e');
       if (kDebugMode) {
         print('❌ PlantTaskProvider: Erro ao completar tarefa com data: $e');
       }
-      notifyListeners();
     }
   }
 
   /// Deletes a task
   Future<void> deleteTask(String plantId, String taskId) async {
     try {
-      final tasks = getTasksForPlant(plantId);
+      final tasks = List<PlantTask>.from(getTasksForPlant(plantId));
       final taskIndex = tasks.indexWhere((t) => t.id == taskId);
 
       if (taskIndex == -1) {
-        _errorMessage = 'Tarefa não encontrada';
-        notifyListeners();
+        state = state.copyWith(errorMessage: 'Tarefa não encontrada');
         return;
       }
 
       tasks.removeAt(taskIndex);
-      _plantTasks[plantId] = tasks;
+
+      final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+      updatedTasks[plantId] = tasks;
+      state = state.copyWith(plantTasks: updatedTasks);
 
       await _updateTaskStatuses(plantId);
     } catch (e) {
-      _errorMessage = 'Erro ao deletar tarefa: $e';
-      notifyListeners();
+      state = state.copyWith(errorMessage: 'Erro ao deletar tarefa: $e');
     }
   }
 
@@ -339,8 +375,10 @@ class PlantTaskProvider extends ChangeNotifier {
   Future<void> _updateTaskStatuses(String plantId) async {
     final tasks = getTasksForPlant(plantId);
     final updatedTasks = _taskGenerationService.updateTaskStatuses(tasks);
-    _plantTasks[plantId] = updatedTasks;
-    notifyListeners();
+
+    final updatedTasksMap = Map<String, List<PlantTask>>.from(state.plantTasks);
+    updatedTasksMap[plantId] = updatedTasks;
+    state = state.copyWith(plantTasks: updatedTasksMap);
   }
 
   /// Refreshes tasks for a plant (regenerates based on current config)
@@ -350,12 +388,12 @@ class PlantTaskProvider extends ChangeNotifier {
 
   /// Gets all tasks for all plants (for dashboard/overview)
   Map<String, List<PlantTask>> get allPlantTasks =>
-      Map.unmodifiable(_plantTasks);
+      Map.unmodifiable(state.plantTasks);
 
   /// Gets all upcoming tasks across all plants
   List<PlantTask> getAllUpcomingTasks() {
     final allTasks = <PlantTask>[];
-    for (final tasks in _plantTasks.values) {
+    for (final tasks in state.plantTasks.values) {
       allTasks.addAll(_taskGenerationService.getUpcomingTasks(tasks));
     }
     return allTasks..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
@@ -364,7 +402,7 @@ class PlantTaskProvider extends ChangeNotifier {
   /// Gets all overdue tasks across all plants
   List<PlantTask> getAllOverdueTasks() {
     final allTasks = <PlantTask>[];
-    for (final tasks in _plantTasks.values) {
+    for (final tasks in state.plantTasks.values) {
       allTasks.addAll(_taskGenerationService.getOverdueTasks(tasks));
     }
     return allTasks..sort((a, b) => a.scheduledDate.compareTo(b.scheduledDate));
@@ -372,15 +410,14 @@ class PlantTaskProvider extends ChangeNotifier {
 
   /// Clears error message
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(errorMessage: null);
   }
 
   /// Removes all tasks for a plant (when plant is deleted)
   Future<void> removeTasksForPlant(String plantId) async {
     try {
       if (_repository != null) {
-        await _repository.deletePlantTasksByPlantId(plantId);
+        await _repository!.deletePlantTasksByPlantId(plantId);
         if (kDebugMode) {
           print(
             '✅ PlantTaskProvider: Tasks da planta $plantId removidas da persistência',
@@ -388,14 +425,16 @@ class PlantTaskProvider extends ChangeNotifier {
         }
       }
 
-      _plantTasks.remove(plantId);
-      notifyListeners();
+      final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+      updatedTasks.remove(plantId);
+      state = state.copyWith(plantTasks: updatedTasks);
     } catch (e) {
-      _errorMessage = 'Erro ao remover tarefas da planta: $e';
+      state = state.copyWith(
+        errorMessage: 'Erro ao remover tarefas da planta: $e',
+      );
       if (kDebugMode) {
         print('❌ PlantTaskProvider: Erro ao remover tasks da planta: $e');
       }
-      notifyListeners();
     }
   }
 
@@ -405,20 +444,24 @@ class PlantTaskProvider extends ChangeNotifier {
   /// para evitar tarefas órfãs/duplicadas
   Future<void> updateTasksForPlantConfig(Plant plant) async {
     try {
-      _isLoading = true;
-      notifyListeners();
+      state = state.copyWith(isLoading: true);
+
       if (_repository != null) {
         if (kDebugMode) {
           print(
             '🗑️ PlantTaskProvider: Deletando tarefas antigas da planta ${plant.id} antes de regenerar',
           );
         }
-        await _repository.deletePlantTasksByPlantId(plant.id);
+        await _repository!.deletePlantTasksByPlantId(plant.id);
         if (kDebugMode) {
           print('✅ PlantTaskProvider: Tarefas antigas deletadas (soft delete)');
         }
       }
-      _plantTasks.remove(plant.id);
+
+      final updatedTasks = Map<String, List<PlantTask>>.from(state.plantTasks);
+      updatedTasks.remove(plant.id);
+      state = state.copyWith(plantTasks: updatedTasks);
+
       await generateTasksForPlant(plant);
 
       if (kDebugMode) {
@@ -427,13 +470,24 @@ class PlantTaskProvider extends ChangeNotifier {
         );
       }
     } catch (e) {
-      _errorMessage = 'Erro ao atualizar tarefas da planta: $e';
+      state = state.copyWith(
+        errorMessage: 'Erro ao atualizar tarefas da planta: $e',
+        isLoading: false,
+      );
       if (kDebugMode) {
         print('❌ PlantTaskProvider: Erro ao atualizar tarefas: $e');
       }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
+}
+
+// Dependency providers (to be defined in DI setup)
+@riverpod
+PlantTaskGenerator plantTaskGenerator(PlantTaskGeneratorRef ref) {
+  return PlantTaskGenerator();
+}
+
+@riverpod
+PlantTasksRepository? plantTasksRepository(PlantTasksRepositoryRef ref) {
+  throw UnimplementedError('Define in DI setup');
 }

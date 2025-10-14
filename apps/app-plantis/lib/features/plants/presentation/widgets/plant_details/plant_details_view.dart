@@ -10,7 +10,7 @@ import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
 import '../../providers/plant_task_provider.dart';
-import '../../providers/plants_provider.dart';
+import '../../providers/plants_notifier.dart';
 import '../plant_form_dialog.dart';
 import 'plant_care_section.dart';
 import 'plant_details_controller.dart';

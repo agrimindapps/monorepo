@@ -6,7 +6,7 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/state/plant_form_state_notifier.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/plant_details_provider.dart';
-import '../providers/plants_provider.dart';
+import '../providers/plants_notifier.dart';
 import 'plant_form_basic_info.dart';
 import 'plant_form_care_config.dart';
 

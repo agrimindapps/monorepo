@@ -31,21 +31,21 @@ class _PlantsGroupedBySpacesViewState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final spacesAsync = ref.read(spacesProvider);
+      final spacesAsync = ref.read(spacesNotifierProvider);
       final isEmpty = spacesAsync.maybeWhen(
         data: (state) => state.allSpaces.isEmpty,
         orElse: () => true,
       );
 
       if (isEmpty) {
-        ref.read(spacesProvider.notifier).loadSpaces();
+        ref.read(spacesNotifierProvider.notifier).loadSpaces();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final spacesAsync = ref.watch(spacesProvider);
+    final spacesAsync = ref.watch(spacesNotifierProvider);
 
     return ListView.builder(
       controller: widget.scrollController,
@@ -90,7 +90,7 @@ class _PlantsGroupedBySpacesViewState
           spaceName: spaceName,
           plantCount: plants.length,
           onEdit: () {
-            ref.read(plantsProvider.notifier).refreshPlants();
+            ref.read(plantsNotifierProvider.notifier).refreshPlants();
           },
         ),
 

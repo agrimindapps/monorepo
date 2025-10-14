@@ -1,5 +1,7 @@
 import 'package:core/core.dart'
     show HiveType, JsonSerializable, HiveObject, HiveField;
+import 'package:hive/hive.dart';
+
 
 import '../../domain/entities/appointment.dart';
 

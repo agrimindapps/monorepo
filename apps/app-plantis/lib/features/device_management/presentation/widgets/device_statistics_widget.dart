@@ -1,5 +1,5 @@
 import 'package:core/core.dart'
-    hide deviceManagementProvider, DeviceManagementState;
+    hide deviceManagementNotifierProvider, DeviceManagementState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
@@ -21,13 +21,13 @@ class _DeviceStatisticsWidgetState
   void initState() {
     super.initState();
     Future.microtask(
-      () => ref.read(deviceManagementProvider.notifier).loadStatistics(),
+      () => ref.read(deviceManagementNotifierProvider.notifier).loadStatistics(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceManagementAsync = ref.watch(deviceManagementProvider);
+    final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
 
     return deviceManagementAsync.when(
       data: (deviceState) {
@@ -40,7 +40,7 @@ class _DeviceStatisticsWidgetState
         return RefreshIndicator(
           onRefresh:
               () => ref
-                  .read(deviceManagementProvider.notifier)
+                  .read(deviceManagementNotifierProvider.notifier)
                   .loadStatistics(refresh: true),
           child: ListView(
             padding: const EdgeInsets.all(16),

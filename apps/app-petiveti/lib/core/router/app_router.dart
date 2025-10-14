@@ -8,7 +8,7 @@ import '../../features/appointments/presentation/widgets/add_appointment_form.da
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
-import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/notifiers/auth_notifier.dart';
 import '../../features/calculators/presentation/pages/anesthesia_page.dart';
 import '../../features/calculators/presentation/pages/animal_age_page.dart';
 import '../../features/calculators/presentation/pages/body_condition_page.dart';
@@ -49,7 +49,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null; // Permitir acesso à splash sempre
       }
       try {
-        final authState = ref.read(authProvider);
+        final authState = ref.read(authNotifierProvider);
         final isAuthenticated = authState.isAuthenticated;
         final isOnAuthPage = state.matchedLocation.startsWith('/login') || 
                              state.matchedLocation.startsWith('/register');

@@ -4,8 +4,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.7.2 <4.0.0"
-  flutter: ">=3.10.0"
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: 3.35.0
 
 dependencies:
   flutter:
@@ -30,8 +30,8 @@ dev_dependencies:
   riverpod_generator: any
   injectable_generator: any
   json_serializable: any
-  custom_lint: ^0.7.0
-  riverpod_lint: ^2.6.2
+  custom_lint: ^0.6.4
+  riverpod_lint: ^2.3.10
   
 flutter:
   uses-material-design: true

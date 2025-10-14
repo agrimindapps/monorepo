@@ -10,8 +10,8 @@ packages:
 command:
   bootstrap:
     environment:
-      sdk: ">=3.7.2 <4.0.0"
-      flutter: "3.29.2"
+      sdk: ">=3.9.0 <4.0.0"
+      flutter: "3.35.0"
     hooks:
       post: |
         echo "🔧 Bootstrap concluído!"

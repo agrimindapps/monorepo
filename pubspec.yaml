@@ -3,7 +3,7 @@ description: Monorepo contendo apps Plantis (plantas domésticas) e ReceitaAgro 
 
 environment:
   sdk: ">=2.18.0 <4.0.0"
-  flutter: ">=3.3.0"
+  flutter: ">=3.35.0"
 
 dev_dependencies:
   flutter_test:

@@ -1,11 +1,11 @@
 # FVM Configuration - Flutter Monorepo
 
-Este documento explica como o monorepo está configurado para usar Flutter Version Manager (FVM) com Flutter 3.29.2.
+Este documento explica como o monorepo está configurado para usar Flutter Version Manager (FVM) com Flutter 3.35.0.
 
 ## 📋 Status da Configuração
 
 ✅ **FVM instalado globalmente**  
-✅ **Flutter 3.29.2 instalado via FVM**  
+✅ **Flutter 3.35.0 instalado via FVM**  
 ✅ **Configurado para monorepo root**  
 ✅ **Configurado para todos os apps:**
 - app-gasometer
@@ -15,7 +15,7 @@ Este documento explica como o monorepo está configurado para usar Flutter Versi
 - app_agrihurbi
 - app_taskolist
 
-✅ **Melos atualizado para usar Flutter 3.29.2**  
+✅ **Melos atualizado para usar Flutter 3.35.0**  
 ✅ **.gitignore configurado para FVM**
 
 ## 🚀 Como Usar

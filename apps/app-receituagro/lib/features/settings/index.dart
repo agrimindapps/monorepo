@@ -1,6 +1,6 @@
 export 'constants/settings_design_tokens.dart';
 export 'data/repositories/user_settings_repository_impl.dart';
-export 'data/settings_state.dart';
+export 'presentation/providers/settings_state.dart';
 export 'di/settings_di.dart';
 export 'domain/device_service.dart';
 export 'domain/entities/user_settings_entity.dart';

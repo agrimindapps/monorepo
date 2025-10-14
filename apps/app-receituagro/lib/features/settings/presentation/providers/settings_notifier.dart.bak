@@ -16,6 +16,97 @@ import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
 
+/// Settings state
+class SettingsState {
+  final UserSettingsEntity? settings;
+  final bool isLoading;
+  final String? error;
+  final String currentUserId;
+  final bool isPremiumUser;
+  final DeviceEntity? currentDevice;
+  final List<DeviceEntity> connectedDevices;
+
+  const SettingsState({
+    this.settings,
+    required this.isLoading,
+    this.error,
+    required this.currentUserId,
+    required this.isPremiumUser,
+    this.currentDevice,
+    required this.connectedDevices,
+  });
+
+  factory SettingsState.initial() {
+    return const SettingsState(
+      settings: null,
+      isLoading: false,
+      error: null,
+      currentUserId: '',
+      isPremiumUser: false,
+      currentDevice: null,
+      connectedDevices: [],
+    );
+  }
+
+  SettingsState copyWith({
+    UserSettingsEntity? settings,
+    bool? isLoading,
+    String? error,
+    String? currentUserId,
+    bool? isPremiumUser,
+    DeviceEntity? currentDevice,
+    List<DeviceEntity>? connectedDevices,
+  }) {
+    return SettingsState(
+      settings: settings ?? this.settings,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+      currentUserId: currentUserId ?? this.currentUserId,
+      isPremiumUser: isPremiumUser ?? this.isPremiumUser,
+      currentDevice: currentDevice ?? this.currentDevice,
+      connectedDevices: connectedDevices ?? this.connectedDevices,
+    );
+  }
+
+  SettingsState clearError() {
+    return copyWith(error: null);
+  }
+  bool get isDarkTheme => settings?.isDarkTheme ?? false;
+  bool get notificationsEnabled => settings?.notificationsEnabled ?? true;
+  bool get soundEnabled => settings?.soundEnabled ?? true;
+  String get language => settings?.language ?? 'pt-BR';
+  bool get isDevelopmentMode => settings?.isDevelopmentMode ?? false;
+  bool get speechToTextEnabled => settings?.speechToTextEnabled ?? false;
+  bool get analyticsEnabled => settings?.analyticsEnabled ?? true;
+  bool get hasSettings => settings != null;
+
+  /// Converts DeviceEntity to DeviceInfo for UI compatibility
+  DeviceInfo _convertToDeviceInfo(DeviceEntity entity) {
+    return DeviceInfo(
+      uuid: entity.uuid,
+      name: entity.name,
+      model: entity.model,
+      platform: entity.platform,
+      systemVersion: entity.systemVersion,
+      appVersion: entity.appVersion,
+      buildNumber: entity.buildNumber,
+      identifier: entity.id,
+      isPhysicalDevice: entity.isPhysicalDevice,
+      manufacturer: entity.manufacturer,
+      firstLoginAt: entity.firstLoginAt,
+      lastActiveAt: entity.lastActiveAt,
+      isActive: entity.isActive,
+    );
+  }
+
+  /// Current device as DeviceInfo for UI compatibility
+  DeviceInfo? get currentDeviceInfo =>
+      currentDevice != null ? _convertToDeviceInfo(currentDevice!) : null;
+
+  /// Connected devices as DeviceInfo list for UI compatibility
+  List<DeviceInfo> get connectedDevicesInfo =>
+      connectedDevices.map((device) => _convertToDeviceInfo(device)).toList();
+}
 
 /// Settings notifier for user settings management
 @riverpod

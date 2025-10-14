@@ -5,6 +5,38 @@ import 'package:core/core.dart';
 import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../domain/repositories/profile_repository.dart';
 
+/// Conversão de Result<T> para Either<Failure, T>
+Either<Failure, T> _resultToEither<T>(Result<T> result) {
+  if (result.isError) {
+    return Left(ServerFailure(result.error!.message));
+  }
+  return Right(result.data as T);
+}
+
+/// Conversão de Result<void> para Either<Failure, Unit>
+Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
+  if (result.isError) {
+    return Left(ServerFailure(result.error!.message));
+  }
+  return const Right(unit);
+}
+
+/// Conversão async de Result<T> para Either<Failure, T>
+Future<Either<Failure, T>> _resultToEitherAsync<T>(
+  Future<Result<T>> futureResult,
+) async {
+  final result = await futureResult;
+  return _resultToEither(result);
+}
+
+/// Conversão async de Result<void> para Either<Failure, Unit>
+Future<Either<Failure, Unit>> _resultToEitherUnitAsync(
+  Future<Result<void>> futureResult,
+) async {
+  final result = await futureResult;
+  return _resultToEitherUnit(result);
+}
+
 /// Implementação do ProfileRepository para ReceitaAgro
 /// Utiliza o ProfileImageService do core package
 /// NOTE: Cannot use @injectable due to function type dependency
@@ -19,29 +51,37 @@ class ProfileRepositoryImpl implements ProfileRepository {
        _getAuthState = getAuthState;
 
   @override
-  Future<Result<ProfileImageResult>> uploadProfileImage(
+  Future<Either<Failure, ProfileImageResult>> uploadProfileImage(
     File imageFile, {
     void Function(double)? onProgress,
   }) async {
-    return await _profileImageService.uploadProfileImage(
-      imageFile,
-      onProgress: onProgress,
+    return _resultToEitherAsync(
+      _profileImageService.uploadProfileImage(
+        imageFile,
+        onProgress: onProgress,
+      ),
     );
   }
 
   @override
-  Future<Result<void>> deleteProfileImage() async {
-    return await _profileImageService.deleteProfileImage();
+  Future<Either<Failure, Unit>> deleteProfileImage() async {
+    return _resultToEitherUnitAsync(
+      _profileImageService.deleteProfileImage(),
+    );
   }
 
   @override
-  Future<Result<File>> pickImageFromGallery() async {
-    return await _profileImageService.pickImageFromGallery();
+  Future<Either<Failure, File>> pickImageFromGallery() async {
+    return _resultToEitherAsync(
+      _profileImageService.pickImageFromGallery(),
+    );
   }
 
   @override
-  Future<Result<File>> pickImageFromCamera() async {
-    return await _profileImageService.pickImageFromCamera();
+  Future<Either<Failure, File>> pickImageFromCamera() async {
+    return _resultToEitherAsync(
+      _profileImageService.pickImageFromCamera(),
+    );
   }
 
   @override
@@ -64,13 +104,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Result<void> validateProfileImage(File imageFile) {
-    return _profileImageService.validateProfileImage(imageFile);
+  Either<Failure, Unit> validateProfileImage(File imageFile) {
+    return _resultToEitherUnit(
+      _profileImageService.validateProfileImage(imageFile),
+    );
   }
 
   @override
-  Future<Result<void>> updateAuthPhotoUrl(String photoUrl) async {
-    return await _profileImageService.updateAuthPhotoUrl(photoUrl);
+  Future<Either<Failure, Unit>> updateAuthPhotoUrl(String photoUrl) async {
+    return _resultToEitherUnitAsync(
+      _profileImageService.updateAuthPhotoUrl(photoUrl),
+    );
   }
 
   @override

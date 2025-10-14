@@ -8,6 +8,7 @@ import '../../domain/usecases/get_pragas_usecase.dart';
 import 'pragas_state.dart';
 
 part 'pragas_notifier.g.dart';
+enum PragasViewState { initial, loading, loaded, error, empty }
 
 /// Notifier para gerenciar estado das pragas (Presentation Layer)
 /// Princípios: Single Responsibility + Dependency Inversion

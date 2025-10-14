@@ -10,6 +10,7 @@ import 'domain/entities/praga_entity.dart';
 import 'domain/usecases/get_pragas_usecase.dart';
 import 'presentation/pages/detalhe_praga_page.dart';
 import 'presentation/providers/pragas_notifier.dart';
+import 'presentation/providers/pragas_state.dart';
 import 'widgets/praga_card_widget.dart';
 import 'widgets/praga_search_field_widget.dart';
 import 'widgets/pragas_empty_state_widget.dart';

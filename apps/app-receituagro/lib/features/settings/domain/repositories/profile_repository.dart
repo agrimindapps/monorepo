@@ -5,19 +5,19 @@ import 'package:core/core.dart';
 /// Repository interface para operações de perfil de usuário
 abstract class ProfileRepository {
   /// Upload de imagem de perfil
-  Future<Result<ProfileImageResult>> uploadProfileImage(
+  Future<Either<Failure, ProfileImageResult>> uploadProfileImage(
     File imageFile, {
     void Function(double)? onProgress,
   });
 
   /// Deletar imagem de perfil atual
-  Future<Result<void>> deleteProfileImage();
+  Future<Either<Failure, Unit>> deleteProfileImage();
 
   /// Selecionar imagem da galeria
-  Future<Result<File>> pickImageFromGallery();
+  Future<Either<Failure, File>> pickImageFromGallery();
 
   /// Capturar imagem da câmera
-  Future<Result<File>> pickImageFromCamera();
+  Future<Either<Failure, File>> pickImageFromCamera();
 
   /// Obter URL da imagem de perfil atual
   String? getCurrentProfileImageUrl();
@@ -29,10 +29,10 @@ abstract class ProfileRepository {
   String getUserInitials();
 
   /// Validar imagem de perfil
-  Result<void> validateProfileImage(File imageFile);
+  Either<Failure, Unit> validateProfileImage(File imageFile);
 
   /// Atualizar apenas photoURL no Firebase Auth
-  Future<Result<void>> updateAuthPhotoUrl(String photoUrl);
+  Future<Either<Failure, Unit>> updateAuthPhotoUrl(String photoUrl);
 
   /// Obter configuração atual
   ProfileImageConfig get config;

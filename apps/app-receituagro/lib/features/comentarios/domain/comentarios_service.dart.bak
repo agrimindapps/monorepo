@@ -41,6 +41,7 @@ class ComentariosService {
 
       return comentarios;
     } catch (e) {
+      debugPrint('Error getting comentarios: $e');
       return [];
     }
   }

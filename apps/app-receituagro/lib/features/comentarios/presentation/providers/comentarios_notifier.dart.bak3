@@ -72,7 +72,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     state = AsyncValue.data(
       currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.loadingData, true),
         isLoading: true,
       ).clearError(),
     );
@@ -84,7 +84,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       state = AsyncValue.data(
         currentState.copyWith(
           comentarios: comentarios,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.loadingData, false),
           isLoading: false,
         ).clearError(),
       );
@@ -102,7 +102,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     state = AsyncValue.data(
       currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.loadingData, true),
         isLoading: true,
       ).clearError(),
     );
@@ -115,7 +115,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
         currentState.copyWith(
           comentarios: comentarios,
           selectedContext: pkIdentificador,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.loadingData, false),
           isLoading: false,
         ).clearError(),
       );
@@ -135,7 +135,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     state = AsyncValue.data(
       currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.loadingData, true),
         isLoading: true,
       ).clearError(),
     );
@@ -148,7 +148,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
         currentState.copyWith(
           comentarios: comentarios,
           selectedTool: ferramenta,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.loadingData, false),
           isLoading: false,
         ).clearError(),
       );
@@ -172,7 +172,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     state = AsyncValue.data(
       currentState.copyWith(
         isOperating: true,
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.adding, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.adding, true),
       ).clearError(),
     );
 
@@ -185,7 +185,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
         currentState.copyWith(
           comentarios: updatedComentarios,
           isOperating: false,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.adding, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.adding, false),
         ).clearError(),
       );
 
@@ -210,7 +210,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     state = AsyncValue.data(
       currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.syncing, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.syncing, true),
       ),
     );
 
@@ -221,7 +221,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       state = AsyncValue.data(
         currentState.copyWith(
           comentarios: freshData,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.syncing, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.syncing, false),
         ),
       );
 
@@ -231,7 +231,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       if (finalState != null) {
         state = AsyncValue.data(
           finalState.copyWith(
-            loadingStates: finalState.loadingStates.copyWithType(LoadingType.syncing, false),
+            loadingStates: finalState.loadingStates.copyWith(LoadingType.syncing, false),
           ),
         );
       }
@@ -249,7 +249,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     state = AsyncValue.data(
       currentState.copyWith(
         isOperating: true,
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.deleting, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.deleting, true),
       ).clearError(),
     );
 
@@ -262,7 +262,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
         currentState.copyWith(
           comentarios: updatedComentarios,
           isOperating: false,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.deleting, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.deleting, false),
         ).clearError(),
       );
 
@@ -284,7 +284,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     state = AsyncValue.data(
       currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.searching, true),
+        loadingStates: currentState.loadingStates.copyWith(LoadingType.searching, true),
         isLoading: true,
         searchQuery: query,
       ).clearError(),
@@ -302,7 +302,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       state = AsyncValue.data(
         currentState.copyWith(
           comentarios: comentarios,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.searching, false),
+          loadingStates: currentState.loadingStates.copyWith(LoadingType.searching, false),
           isLoading: false,
         ).clearError(),
       );
@@ -396,7 +396,7 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     if (currentState == null) return;
     final currentFilterHash = _generateFilterHash(currentState);
     if (_lastFilterHash == currentFilterHash && _cachedFilteredResults != null) {
-      state = AsyncValue.data(currentState.copyWith(filteredComentarios: _cachedFilteredResults!));
+      state = AsyncValue.data(currentState.copyWith(filteredComentarios: _cachedFilteredResults));
       return;
     }
     List<ComentarioEntity> filtered = currentState.comentarios;

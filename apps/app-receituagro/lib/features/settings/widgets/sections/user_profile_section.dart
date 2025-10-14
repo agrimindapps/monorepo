@@ -6,6 +6,7 @@ import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_notifier.dart';
+import '../../presentation/providers/settings_state.dart';
 import '../items/sync_status_item.dart';
 import '../shared/settings_list_tile.dart';
 

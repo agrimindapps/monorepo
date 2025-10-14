@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/device_identity_service.dart';
 import '../../presentation/providers/settings_notifier.dart';
+import '../../presentation/providers/settings_state.dart';
 
 /// Device Management Section for Settings Page
 ///

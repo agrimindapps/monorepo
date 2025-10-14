@@ -16,6 +16,7 @@ import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
 
+}
 
 /// Settings notifier for user settings management
 @riverpod

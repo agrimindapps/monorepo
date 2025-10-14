@@ -158,7 +158,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   Future<bool> _pickAndUpload(
-    Future<Result<File>> Function() pickFunction,
+    Future<Either<Failure, File>> Function() pickFunction,
   ) async {
     final currentState = state.value;
     if (currentState == null) return false;
@@ -177,69 +177,80 @@ class ProfileNotifier extends _$ProfileNotifier {
 
       final pickResult = await pickFunction();
 
-      if (pickResult.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isPickingImage: false,
-            errorMessage: pickResult.error!.message,
-          ),
-        );
-        return false;
-      }
+      return pickResult.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isPickingImage: false,
+              errorMessage: failure.message,
+            ),
+          );
+          return false;
+        },
+        (imageFile) async {
+          final validationResult = _profileRepository.validateProfileImage(
+            imageFile,
+          );
 
-      final imageFile = pickResult.data!;
-      final validationResult = _profileRepository.validateProfileImage(
-        imageFile,
+          return validationResult.fold(
+            (failure) {
+              state = AsyncValue.data(
+                currentState.copyWith(
+                  isPickingImage: false,
+                  errorMessage: failure.message,
+                ),
+              );
+              return false;
+            },
+            (_) async {
+              state = AsyncValue.data(
+                currentState.copyWith(
+                  isPickingImage: false,
+                  isUploading: true,
+                  uploadProgress: 0.0,
+                ),
+              );
+
+              final uploadResult = await _profileRepository.uploadProfileImage(
+                imageFile,
+                onProgress: _updateProgress,
+              );
+
+              return uploadResult.fold(
+                (failure) {
+                  state = AsyncValue.data(
+                    currentState.copyWith(
+                      isUploading: false,
+                      errorMessage: failure.message,
+                    ),
+                  );
+                  return false;
+                },
+                (profileImageResult) async {
+                  final updatedState = await _refreshState();
+                  state = AsyncValue.data(
+                    updatedState
+                        .copyWith(
+                          isUploading: false,
+                          uploadProgress: 1.0,
+                          lastUploadResult: profileImageResult,
+                        )
+                        .clearError(),
+                  );
+
+                  if (kDebugMode) {
+                    print(
+                      '✅ ProfileNotifier: Upload bem-sucedido - ${profileImageResult.downloadUrl}',
+                    );
+                  }
+
+                  return true;
+                },
+              );
+            },
+          );
+        },
       );
-      if (validationResult.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isPickingImage: false,
-            errorMessage: validationResult.error!.message,
-          ),
-        );
-        return false;
-      }
-      state = AsyncValue.data(
-        currentState.copyWith(
-          isPickingImage: false,
-          isUploading: true,
-          uploadProgress: 0.0,
-        ),
-      );
-
-      final uploadResult = await _profileRepository.uploadProfileImage(
-        imageFile,
-        onProgress: _updateProgress,
-      );
-
-      if (uploadResult.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isUploading: false,
-            errorMessage: uploadResult.error!.message,
-          ),
-        );
-        return false;
-      }
-      final updatedState = await _refreshState();
-      state = AsyncValue.data(
-        updatedState
-            .copyWith(
-              isUploading: false,
-              uploadProgress: 1.0,
-              lastUploadResult: uploadResult.data,
-            )
-            .clearError(),
-      );
-
-      if (kDebugMode) {
-        print(
-          '✅ ProfileNotifier: Upload bem-sucedido - ${uploadResult.data?.downloadUrl}',
-        );
-      }
-
-      return true;
     } catch (e) {
       if (kDebugMode) {
         print('❌ ProfileNotifier: Erro no upload - $e');
@@ -276,41 +287,50 @@ class ProfileNotifier extends _$ProfileNotifier {
       final validationResult = _profileRepository.validateProfileImage(
         imageFile,
       );
-      if (validationResult.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isUploading: false,
-            errorMessage: validationResult.error!.message,
-          ),
-        );
-        return false;
-      }
-      final uploadResult = await _profileRepository.uploadProfileImage(
-        imageFile,
-        onProgress: _updateProgress,
-      );
 
-      if (uploadResult.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isUploading: false,
-            errorMessage: uploadResult.error!.message,
-          ),
-        );
-        return false;
-      }
-      final updatedState = await _refreshState();
-      state = AsyncValue.data(
-        updatedState
-            .copyWith(
+      return validationResult.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(
               isUploading: false,
-              uploadProgress: 1.0,
-              lastUploadResult: uploadResult.data,
-            )
-            .clearError(),
-      );
+              errorMessage: failure.message,
+            ),
+          );
+          return false;
+        },
+        (_) async {
+          final uploadResult = await _profileRepository.uploadProfileImage(
+            imageFile,
+            onProgress: _updateProgress,
+          );
 
-      return true;
+          return uploadResult.fold(
+            (failure) {
+              state = AsyncValue.data(
+                currentState.copyWith(
+                  isUploading: false,
+                  errorMessage: failure.message,
+                ),
+              );
+              return false;
+            },
+            (profileImageResult) async {
+              final updatedState = await _refreshState();
+              state = AsyncValue.data(
+                updatedState
+                    .copyWith(
+                      isUploading: false,
+                      uploadProgress: 1.0,
+                      lastUploadResult: profileImageResult,
+                    )
+                    .clearError(),
+              );
+
+              return true;
+            },
+          );
+        },
+      );
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(
@@ -350,27 +370,31 @@ class ProfileNotifier extends _$ProfileNotifier {
 
       final result = await _profileRepository.deleteProfileImage();
 
-      if (result.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isUploading: false,
-            errorMessage: result.error!.message,
-          ),
-        );
-        return false;
-      }
-      final updatedState = await _refreshState();
-      state = AsyncValue.data(
-        updatedState
-            .copyWith(isUploading: false, lastUploadResult: null)
-            .clearError(),
+      return result.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isUploading: false,
+              errorMessage: failure.message,
+            ),
+          );
+          return false;
+        },
+        (_) async {
+          final updatedState = await _refreshState();
+          state = AsyncValue.data(
+            updatedState
+                .copyWith(isUploading: false, lastUploadResult: null)
+                .clearError(),
+          );
+
+          if (kDebugMode) {
+            print('✅ ProfileNotifier: Imagem deletada com sucesso');
+          }
+
+          return true;
+        },
       );
-
-      if (kDebugMode) {
-        print('✅ ProfileNotifier: Imagem deletada com sucesso');
-      }
-
-      return true;
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(
@@ -401,21 +425,25 @@ class ProfileNotifier extends _$ProfileNotifier {
 
       final result = await _profileRepository.updateAuthPhotoUrl(photoUrl);
 
-      if (result.isError) {
-        state = AsyncValue.data(
-          currentState.copyWith(
-            isUploading: false,
-            errorMessage: result.error!.message,
-          ),
-        );
-        return false;
-      }
-      final updatedState = await _refreshState();
-      state = AsyncValue.data(
-        updatedState.copyWith(isUploading: false).clearError(),
-      );
+      return result.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isUploading: false,
+              errorMessage: failure.message,
+            ),
+          );
+          return false;
+        },
+        (_) async {
+          final updatedState = await _refreshState();
+          state = AsyncValue.data(
+            updatedState.copyWith(isUploading: false).clearError(),
+          );
 
-      return true;
+          return true;
+        },
+      );
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(
@@ -428,7 +456,7 @@ class ProfileNotifier extends _$ProfileNotifier {
   }
 
   /// Validar imagem sem fazer upload
-  Result<void> validateImage(File imageFile) {
+  Either<Failure, Unit> validateImage(File imageFile) {
     return _profileRepository.validateProfileImage(imageFile);
   }
 

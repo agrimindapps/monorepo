@@ -9,6 +9,85 @@ import 'pragas_state.dart';
 
 part 'pragas_notifier.g.dart';
 
+/// Pragas state
+class PragasState {
+  final List<PragaEntity> pragas;
+  final List<PragaEntity> recentPragas;
+  final List<PragaEntity> suggestedPragas;
+  final PragaEntity? selectedPraga;
+  final PragasStats? stats;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const PragasState({
+    required this.pragas,
+    required this.recentPragas,
+    required this.suggestedPragas,
+    this.selectedPraga,
+    this.stats,
+    required this.isLoading,
+    this.errorMessage,
+  });
+
+  factory PragasState.initial() {
+    return const PragasState(
+      pragas: [],
+      recentPragas: [],
+      suggestedPragas: [],
+      selectedPraga: null,
+      stats: null,
+      isLoading: false,
+      errorMessage: null,
+    );
+  }
+
+  PragasState copyWith({
+    List<PragaEntity>? pragas,
+    List<PragaEntity>? recentPragas,
+    List<PragaEntity>? suggestedPragas,
+    PragaEntity? selectedPraga,
+    PragasStats? stats,
+    bool? isLoading,
+    String? errorMessage,
+  }) {
+    return PragasState(
+      pragas: pragas ?? this.pragas,
+      recentPragas: recentPragas ?? this.recentPragas,
+      suggestedPragas: suggestedPragas ?? this.suggestedPragas,
+      selectedPraga: selectedPraga ?? this.selectedPraga,
+      stats: stats ?? this.stats,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage ?? this.errorMessage,
+    );
+  }
+
+  PragasState clearError() {
+    return copyWith(errorMessage: null);
+  }
+
+  PragasState clearSelection() {
+    return copyWith(selectedPraga: null);
+  }
+
+  List<PragaEntity> get insetos => pragas.where((p) => p.isInseto).toList();
+  List<PragaEntity> get doencas => pragas.where((p) => p.isDoenca).toList();
+  List<PragaEntity> get plantas => pragas.where((p) => p.isPlanta).toList();
+  bool get hasData => pragas.isNotEmpty;
+  bool get hasRecentPragas => recentPragas.isNotEmpty;
+  bool get hasSuggestedPragas => suggestedPragas.isNotEmpty;
+  bool get hasSelectedPraga => selectedPraga != null;
+
+  PragasViewState get viewState {
+    if (isLoading) return PragasViewState.loading;
+    if (errorMessage != null) return PragasViewState.error;
+    if (pragas.isEmpty) return PragasViewState.empty;
+    return PragasViewState.loaded;
+  }
+}
+
+/// Estados específicos para UI
+enum PragasViewState { initial, loading, loaded, error, empty }
+
 /// Notifier para gerenciar estado das pragas (Presentation Layer)
 /// Princípios: Single Responsibility + Dependency Inversion
 @Riverpod(keepAlive: true)

@@ -1,10 +1,12 @@
 import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_culturas_usecase.dart';
 import 'culturas_state.dart';
 
 part 'culturas_notifier.g.dart';
+}
 
 /// Notifier para gerenciar estado das culturas
 /// Segue padrões Clean Architecture + Riverpod

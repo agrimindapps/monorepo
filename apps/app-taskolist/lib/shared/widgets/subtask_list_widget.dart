@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/subtask_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 import 'create_subtask_dialog.dart';
 
 class SubtaskListWidget extends ConsumerWidget {
@@ -94,7 +94,7 @@ class SubtaskListWidget extends ConsumerWidget {
                               updatedAt: DateTime.now(),
                             );
                             ref
-                                .read(subtaskNotifierProvider.notifier)
+                                .read(taskNotifierProvider.notifier)
                                 .updateSubtask(updatedSubtask);
                           },
                         ),
@@ -213,7 +213,7 @@ class SubtaskListWidget extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       try {
         await ref
-            .read(subtaskNotifierProvider.notifier)
+            .read(taskNotifierProvider.notifier)
             .deleteSubtask(subtask.id);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

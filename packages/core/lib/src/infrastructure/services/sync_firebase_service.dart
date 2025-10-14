@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/base_sync_entity.dart';
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_local_storage_repository.dart';
 import '../../domain/repositories/i_sync_repository.dart';
 import '../../shared/di/injection_container.dart';
@@ -28,7 +29,7 @@ import 'connectivity_service.dart';
 /// Implementa padrão Singleton Generic para reutilização por tipo
 class SyncFirebaseService<T extends BaseSyncEntity>
     with SyncEntityMixin
-    implements ISyncRepository<T> {
+    implements ISyncRepository<T>, IDisposableService {
   static final Map<String, SyncFirebaseService> _instances = {};
 
   /// Factory constructor para Singleton por coleção
@@ -68,6 +69,7 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   late final FirebaseFirestore _firestore;
   late final FirebaseAuth _auth;
   bool _isInitialized = false;
+  bool _isDisposed = false;
   Completer<void>? _initCompleter;
   SyncStatus _currentStatus = SyncStatus.offline;
   String? _currentUserId;
@@ -1044,25 +1046,61 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }
 
   /// Cleanup dos recursos
+  @override
   Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
     try {
       _syncTimer?.cancel();
+    } catch (e) {
+      developer.log('Error canceling sync timer: $e', name: 'SyncService');
+    }
+
+    try {
       await _connectivitySubscription?.cancel();
-      await _authSubscription?.cancel();
-      await _firestoreSubscription?.cancel();
-      await _dataController.close();
-      await _statusController.close();
-
-      _isInitialized = false;
-
-      developer.log('SyncFirebaseService<$T> disposed', name: 'SyncService');
     } catch (e) {
       developer.log(
-        'Erro ao fazer dispose do SyncFirebaseService: $e',
+        'Error canceling connectivity subscription: $e',
         name: 'SyncService',
       );
     }
+
+    try {
+      await _authSubscription?.cancel();
+    } catch (e) {
+      developer.log('Error canceling auth subscription: $e', name: 'SyncService');
+    }
+
+    try {
+      await _firestoreSubscription?.cancel();
+    } catch (e) {
+      developer.log(
+        'Error canceling firestore subscription: $e',
+        name: 'SyncService',
+      );
+    }
+
+    try {
+      await _dataController.close();
+    } catch (e) {
+      developer.log('Error closing data controller: $e', name: 'SyncService');
+    }
+
+    try {
+      await _statusController.close();
+    } catch (e) {
+      developer.log('Error closing status controller: $e', name: 'SyncService');
+    }
+
+    _isInitialized = false;
+    _localData.clear();
+
+    developer.log('SyncFirebaseService<$T> disposed', name: 'SyncService');
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }
 
 /// Extensions para facilitar o uso

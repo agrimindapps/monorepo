@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path_helper;
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 import '../../domain/entities/file_entity.dart' as domain;
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_file_repository.dart';
 
 // TODO(refactoring): PRIORITY LOW - This file is 957 lines and violates SRP
@@ -21,11 +22,13 @@ import '../../domain/repositories/i_file_repository.dart';
 // Estimated effort: 6-8 hours | Risk: Medium | ROI: Medium
 
 /// Implementação do serviço de gerenciamento de arquivos
-class FileManagerService implements IFileRepository {
+class FileManagerService implements IFileRepository, IDisposableService {
   static final FileManagerService _instance = FileManagerService._internal();
   /// Obtém a instância singleton do FileManagerService
   factory FileManagerService() => _instance;
   FileManagerService._internal();
+
+  bool _isDisposed = false;
 
   @override
   Future<bool> exists(String path) async {
@@ -964,4 +967,15 @@ class FileManagerService implements IFileRepository {
       }
     }
   }
+
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+    // FileManagerService é stateless, não possui recursos que precisam ser liberados
+    debugPrint('FileManagerService disposed');
+  }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }

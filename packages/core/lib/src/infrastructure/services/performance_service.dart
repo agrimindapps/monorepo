@@ -9,14 +9,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../domain/entities/performance_entity.dart';
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_performance_repository.dart';
 
 /// Implementação do serviço de monitoramento de performance
-class PerformanceService implements IPerformanceRepository {
+class PerformanceService implements IPerformanceRepository, IDisposableService {
   static final PerformanceService _instance = PerformanceService._internal();
   /// Obtém a instância singleton do PerformanceService
   factory PerformanceService() => _instance;
   PerformanceService._internal();
+
+  bool _isDisposed = false;
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   final FirebasePerformance _firebasePerformance = FirebasePerformance.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
@@ -80,16 +83,57 @@ class PerformanceService implements IPerformanceRepository {
   Future<bool> stopPerformanceTracking() async {
     try {
       _state = PerformanceMonitoringState.stopped;
+
+      // Cancel timers
       _fpsTimer?.cancel();
+      _fpsTimer = null;
       _memoryTimer?.cancel();
+      _memoryTimer = null;
       _cpuTimer?.cancel();
+      _cpuTimer = null;
       _metricsCollectionTimer?.cancel();
-      await _fpsController.close();
-      await _memoryController.close();
-      await _cpuController.close();
-      await _alertsController.close();
+      _metricsCollectionTimer = null;
+
+      // Close stream controllers with error handling
+      if (!_fpsController.isClosed) {
+        try {
+          await _fpsController.close();
+        } catch (e) {
+          debugPrint('Error closing FPS controller: $e');
+        }
+      }
+
+      if (!_memoryController.isClosed) {
+        try {
+          await _memoryController.close();
+        } catch (e) {
+          debugPrint('Error closing memory controller: $e');
+        }
+      }
+
+      if (!_cpuController.isClosed) {
+        try {
+          await _cpuController.close();
+        } catch (e) {
+          debugPrint('Error closing CPU controller: $e');
+        }
+      }
+
+      if (!_alertsController.isClosed) {
+        try {
+          await _alertsController.close();
+        } catch (e) {
+          debugPrint('Error closing alerts controller: $e');
+        }
+      }
+
+      // Stop active traces
       for (final traceName in _activeTraces.keys.toList()) {
-        await stopTrace(traceName);
+        try {
+          await stopTrace(traceName);
+        } catch (e) {
+          debugPrint('Error stopping trace $traceName: $e');
+        }
       }
 
       debugPrint('🛑 Performance tracking stopped');
@@ -881,4 +925,26 @@ class PerformanceService implements IPerformanceRepository {
     _performanceHistory.clear();
     _completedTraces.clear();
   }
+
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    await stopPerformanceTracking();
+
+    // Clear all data
+    _fpsHistory.clear();
+    _frameTimes.clear();
+    _memoryHistory.clear();
+    _performanceHistory.clear();
+    _completedTraces.clear();
+    _activeTraces.clear();
+    _firebaseTraces.clear();
+
+    debugPrint('PerformanceService disposed');
+  }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }

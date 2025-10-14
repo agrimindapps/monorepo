@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/task_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 import '../providers/auth_providers.dart';
 
 class CreateTaskDialog extends ConsumerStatefulWidget {

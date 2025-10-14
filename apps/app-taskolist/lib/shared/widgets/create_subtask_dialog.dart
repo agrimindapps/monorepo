@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/subtask_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 import '../providers/auth_providers.dart';
 
 class CreateSubtaskDialog extends ConsumerStatefulWidget {
@@ -70,7 +70,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         );
 
         await ref
-            .read(subtaskNotifierProvider.notifier)
+            .read(taskNotifierProvider.notifier)
             .updateSubtask(updatedSubtask);
 
         if (mounted) {
@@ -95,7 +95,7 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
         );
 
         await ref
-            .read(subtaskNotifierProvider.notifier)
+            .read(taskNotifierProvider.notifier)
             .createSubtask(newSubtask);
 
         if (mounted) {

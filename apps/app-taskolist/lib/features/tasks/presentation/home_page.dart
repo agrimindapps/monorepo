@@ -10,7 +10,7 @@ import '../../../shared/widgets/premium_banner.dart';
 import '../../../shared/widgets/task_detail_drawer.dart';
 import '../../../shared/widgets/task_list_widget.dart';
 import '../domain/task_entity.dart';
-import 'providers/task_providers.dart';
+import 'providers/task_notifier.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -81,7 +81,7 @@ class _HomePageState extends ConsumerState<HomePage>
   Future<void> _loadSampleDataIfEmpty() async {
     try {
       const tasksRequest = GetTasksRequest();
-      final tasks = await ref.read(getTasksProvider(tasksRequest).future);
+      final tasks = await ref.read(getTasksFutureProvider(tasksRequest).future);
       if (tasks.isEmpty) {
         final sampleTasks = SampleData.getSampleTasks();
         for (final task in sampleTasks) {

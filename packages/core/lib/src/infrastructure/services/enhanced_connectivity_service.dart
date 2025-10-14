@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/result.dart';
 
@@ -18,7 +19,8 @@ import '../../shared/utils/result.dart';
 /// - Cache de status de conectividade
 /// - Métricas de rede (latência, velocidade)
 /// - Notificações de mudança de status
-class EnhancedConnectivityService {
+class EnhancedConnectivityService implements IDisposableService {
+  bool _isDisposed = false;
   static const String _defaultPingHost = '8.8.8.8';
   static const int _defaultPingPort = 53;
   static const Duration _defaultTimeout = Duration(seconds: 5);
@@ -495,14 +497,46 @@ class EnhancedConnectivityService {
   }
 
   /// Dispose - limpa recursos
+  @override
   Future<void> dispose() async {
-    await _connectivitySubscription?.cancel();
-    _qualityCheckTimer?.cancel();
-    _retryTimer?.cancel();
-    
-    await _statusController.close();
-    await _qualityController.close();
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    try {
+      await _connectivitySubscription?.cancel();
+    } catch (e) {
+      debugPrint('Error canceling connectivity subscription: $e');
+    }
+
+    try {
+      _qualityCheckTimer?.cancel();
+    } catch (e) {
+      debugPrint('Error canceling quality timer: $e');
+    }
+
+    try {
+      _retryTimer?.cancel();
+    } catch (e) {
+      debugPrint('Error canceling retry timer: $e');
+    }
+
+    try {
+      await _statusController.close();
+    } catch (e) {
+      debugPrint('Error closing status controller: $e');
+    }
+
+    try {
+      await _qualityController.close();
+    } catch (e) {
+      debugPrint('Error closing quality controller: $e');
+    }
+
+    _metrics.clear();
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }
 
 /// Status de conectividade

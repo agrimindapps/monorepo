@@ -4,11 +4,12 @@ import 'dart:developer' as developer;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_sync_repository.dart';
 import '../../shared/utils/failure.dart';
 
 /// Serviço de conectividade usando connectivity_plus
-class ConnectivityService implements IConnectivityRepository {
+class ConnectivityService implements IConnectivityRepository, IDisposableService {
   static ConnectivityService? _instance;
   static ConnectivityService get instance =>
       _instance ??= ConnectivityService._();
@@ -21,6 +22,7 @@ class ConnectivityService implements IConnectivityRepository {
       StreamController<bool>.broadcast();
 
   bool _isInitialized = false;
+  bool _isDisposed = false;
   bool _isOnline = false;
 
   @override
@@ -268,20 +270,36 @@ class ConnectivityService implements IConnectivityRepository {
   }
 
   /// Cleanup dos recursos
+  @override
   Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
     try {
       await _connectivitySubscription?.cancel();
-      await _connectivityController.close();
-      _isInitialized = false;
-
-      developer.log('ConnectivityService disposed', name: 'Connectivity');
     } catch (e) {
       developer.log(
-        'Erro ao fazer dispose do ConnectivityService: $e',
+        'Error canceling connectivity subscription: $e',
         name: 'Connectivity',
       );
     }
+
+    try {
+      await _connectivityController.close();
+    } catch (e) {
+      developer.log(
+        'Error closing connectivity controller: $e',
+        name: 'Connectivity',
+      );
+    }
+
+    _isInitialized = false;
+
+    developer.log('ConnectivityService disposed', name: 'Connectivity');
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 
   /// Obtém status atual como string legível
   String get currentStatusString {

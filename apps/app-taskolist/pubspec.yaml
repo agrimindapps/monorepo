@@ -21,6 +21,7 @@ dependencies:
   dartz: any
   riverpod_annotation: any
   json_annotation: any
+  flutter_riverpod: ^2.6.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -29,6 +30,8 @@ dev_dependencies:
   riverpod_generator: any
   injectable_generator: any
   json_serializable: any
+  custom_lint: ^0.7.0
+  riverpod_lint: ^2.6.2
   
 flutter:
   uses-material-design: true

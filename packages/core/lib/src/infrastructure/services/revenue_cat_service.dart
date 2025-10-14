@@ -6,16 +6,20 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../domain/entities/subscription_entity.dart' as core_entities;
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../domain/repositories/i_subscription_repository.dart';
 import '../../shared/config/environment_config.dart';
 import '../../shared/utils/failure.dart';
 import '../../shared/utils/subscription_failures.dart';
 
 /// Implementação concreta do repositório de assinaturas usando RevenueCat
-/// 
+///
 /// Serviço responsável por gerenciar assinaturas através da plataforma RevenueCat.
 /// Suporta múltiplas apps do monorepo com configuração específica por aplicativo.
-class RevenueCatService implements ISubscriptionRepository {
+///
+/// Implements [IDisposableService] to ensure proper cleanup of StreamControllers
+/// and RevenueCat listeners when the service is no longer needed.
+class RevenueCatService implements ISubscriptionRepository, IDisposableService {
   final StreamController<core_entities.SubscriptionEntity?> _subscriptionController =
       StreamController<core_entities.SubscriptionEntity?>.broadcast();
 
@@ -533,8 +537,12 @@ class RevenueCatService implements ISubscriptionRepository {
 
   /// Limpa recursos do serviço
   ///
-  /// Deve ser chamado quando o serviço não for mais utilizado para evitar memory leaks
-  void dispose() {
+  /// Implementa [IDisposableService.dispose] para cleanup adequado.
+  /// Deve ser chamado quando o serviço não for mais utilizado para evitar memory leaks.
+  ///
+  /// Called automatically by [InjectionContainer] on app lifecycle events.
+  @override
+  Future<void> dispose() async {
     if (_isDisposed) return;
 
     _isDisposed = true;
@@ -547,10 +555,21 @@ class RevenueCatService implements ISubscriptionRepository {
         debugPrint('[RevenueCat] Error removing listener: $e');
       }
     }
-    _subscriptionController.close();
+
+    // Close StreamController
+    try {
+      await _subscriptionController.close();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[RevenueCat] Error closing subscription controller: $e');
+      }
+    }
 
     if (kDebugMode) {
       debugPrint('[RevenueCat] Service disposed successfully');
     }
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }

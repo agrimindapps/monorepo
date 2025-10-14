@@ -4,6 +4,46 @@ import 'failure.dart';
 
 /// Pattern Result para encapsular sucesso e erro de forma type-safe
 /// Substitui o Either<Failure, Success> por uma implementação mais simples e específica
+///
+/// {@category Deprecated}
+/// **DEPRECATED**: Use Either<Failure, T> instead (from dartz package).
+///
+/// Motivo: Either<Failure, T> é o padrão estabelecido no monorepo (66+ arquivos).
+/// Result<T> foi criado antes da padronização e causa inconsistência.
+///
+/// Migração:
+/// ```dart
+/// // Antes:
+/// Future<Result<User>> getUser() async {
+///   try {
+///     final user = await api.getUser();
+///     return Result.success(user);
+///   } catch (e) {
+///     return Result.error(AppError.unknown(e.toString()));
+///   }
+/// }
+///
+/// // Depois:
+/// Future<Either<Failure, User>> getUser() async {
+///   try {
+///     final user = await api.getUser();
+///     return Right(user);
+///   } catch (e) {
+///     return Left(ServerFailure(e.toString()));
+///   }
+/// }
+/// ```
+///
+/// Conversão temporária (para migração gradual):
+/// ```dart
+/// final result = await oldService.getData(); // Returns Result<T>
+/// final either = result.toEither(); // Convert to Either<Failure, T>
+/// ```
+@Deprecated(
+  'Use Either<Failure, T> from dartz package instead. '
+  'Result<T> will be removed in v2.0.0. '
+  'See migration guide in class documentation.',
+)
 sealed class Result<T> {
   const Result();
 

@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../domain/entities/base_sync_entity.dart';
+import '../domain/interfaces/i_disposable_service.dart';
 import '../domain/repositories/i_sync_repository.dart';
 import '../infrastructure/services/sync_firebase_service.dart';
 import '../shared/utils/failure.dart';
@@ -21,7 +22,7 @@ import 'entity_sync_registration.dart';
 // Estimated effort: 6-8 hours | Risk: High | ROI: Medium-High
 
 /// Coordena sync de múltiplas entidades across diferentes apps
-class UnifiedSyncManager {
+class UnifiedSyncManager implements IDisposableService {
   static final UnifiedSyncManager _instance = UnifiedSyncManager._internal();
   static UnifiedSyncManager get instance => _instance;
 
@@ -40,6 +41,7 @@ class UnifiedSyncManager {
       StreamController<AppSyncEvent>.broadcast();
   StreamSubscription<User?>? _authSubscription;
   final Map<String, Timer> _syncTimers = {};
+  bool _isDisposed = false;
 
   /// Inicializa o sync manager para um app específico
   Future<Either<Failure, void>> initializeApp({
@@ -609,23 +611,63 @@ class UnifiedSyncManager {
   }
 
   /// Cleanup de recursos
+  @override
   Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
     try {
+      // Cancel all sync timers
       for (final timer in _syncTimers.values) {
-        timer.cancel();
+        try {
+          timer.cancel();
+        } catch (e) {
+          developer.log('Error canceling timer: $e', name: 'UnifiedSync');
+        }
       }
       _syncTimers.clear();
-      await _authSubscription?.cancel();
-      await _globalStatusController.close();
-      await _eventController.close();
+
+      // Cancel auth subscription
+      try {
+        await _authSubscription?.cancel();
+      } catch (e) {
+        developer.log(
+          'Error canceling auth subscription: $e',
+          name: 'UnifiedSync',
+        );
+      }
+
+      // Close stream controllers
+      try {
+        await _globalStatusController.close();
+      } catch (e) {
+        developer.log(
+          'Error closing global status controller: $e',
+          name: 'UnifiedSync',
+        );
+      }
+
+      try {
+        await _eventController.close();
+      } catch (e) {
+        developer.log('Error closing event controller: $e', name: 'UnifiedSync');
+      }
+
+      // Dispose all repositories
       for (final repositories in _syncRepositories.values) {
         for (final repository in repositories.values) {
-          final repo = repository as dynamic;
-          if (repo is SyncFirebaseService) {
-            await repo.dispose();
+          try {
+            final repo = repository as dynamic;
+            if (repo is SyncFirebaseService) {
+              await repo.dispose();
+            }
+          } catch (e) {
+            developer.log('Error disposing repository: $e', name: 'UnifiedSync');
           }
         }
       }
+
+      // Clear all data structures
       _appConfigs.clear();
       _entityRegistrations.clear();
       _syncRepositories.clear();
@@ -638,8 +680,12 @@ class UnifiedSyncManager {
         'Error disposing UnifiedSyncManager: $e',
         name: 'UnifiedSync',
       );
+      // Don't rethrow - disposal should be best-effort
     }
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }
 
 /// Evento de sincronização

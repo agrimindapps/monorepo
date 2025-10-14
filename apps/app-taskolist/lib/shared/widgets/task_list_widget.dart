@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/enums/task_filter.dart';
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/task_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 
 class TaskListWidget extends ConsumerWidget {
   final void Function(TaskEntity)? onTaskTap;

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/task_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 import '../providers/auth_providers.dart';
 
 class BottomInputBar extends ConsumerStatefulWidget {

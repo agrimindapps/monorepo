@@ -5,7 +5,7 @@ import '../../core/enums/task_filter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/task_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 import '../providers/auth_providers.dart';
 
 class FilterSidePanel extends ConsumerStatefulWidget {
@@ -74,7 +74,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
   void _loadAvailableTags() {
     const tasksRequest = GetTasksRequest();
     ref
-        .read(getTasksProvider(tasksRequest).future)
+        .read(getTasksFutureProvider(tasksRequest).future)
         .then((tasks) {
           final tagsSet = <String>{};
           for (final task in tasks) {
@@ -314,7 +314,7 @@ class _FilterSidePanelState extends ConsumerState<FilterSidePanel>
       child: Consumer(
         builder: (context, WidgetRef ref, child) {
           return FutureBuilder<List<TaskEntity>>(
-            future: ref.read(getTasksProvider(const GetTasksRequest()).future),
+            future: ref.read(getTasksFutureProvider(const GetTasksRequest()).future),
             builder: (context, snapshot) {
               final tasks = snapshot.data ?? <TaskEntity>[];
               final pendingCount =

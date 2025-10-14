@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/navigation_service.dart';
 import '../../../shared/widgets/subtask_list_widget.dart';
 import '../domain/task_entity.dart';
-import 'providers/task_providers.dart';
+import 'providers/task_notifier.dart';
 
 class TaskDetailPage extends ConsumerStatefulWidget {
   final TaskEntity task;

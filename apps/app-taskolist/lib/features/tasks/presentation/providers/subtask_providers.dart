@@ -1,22 +1,6 @@
-import 'package:core/core.dart' hide getIt;
-
-import '../../../../core/di/injection.dart' as di;
-import '../../domain/get_subtasks.dart';
-import '../../domain/task_entity.dart';
-import 'task_providers.dart';
-final subtasksProvider = FutureProvider.family<List<TaskEntity>, String>((
-  ref,
-  parentTaskId,
-) async {
-  final getSubtasks = di.getIt<GetSubtasks>();
-
-  final result = await getSubtasks(
-    GetSubtasksParams(parentTaskId: parentTaskId),
-  );
-
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (subtasks) => subtasks,
-  );
-});
-final subtaskNotifierProvider = taskNotifierProvider;
+// This file is now obsolete - subtask functionality is integrated into task_notifier.dart
+// All subtask providers are available in task_notifier.dart:
+// - subtasks(parentTaskId) - for fetching subtasks
+// - taskNotifierProvider - for creating/updating/deleting subtasks
+//
+// Import 'task_notifier.dart' instead of this file

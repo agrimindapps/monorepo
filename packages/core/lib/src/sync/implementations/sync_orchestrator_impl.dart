@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:dartz/dartz.dart';
 
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../shared/utils/failure.dart';
 import '../interfaces/i_cache_manager.dart';
 import '../interfaces/i_network_monitor.dart';
@@ -11,7 +12,7 @@ import '../interfaces/i_sync_service.dart';
 
 /// Implementação do orchestrador de sincronização
 /// Substitui o UnifiedSyncManager monolítico seguindo SOLID principles
-class SyncOrchestratorImpl implements ISyncOrchestrator {
+class SyncOrchestratorImpl implements ISyncOrchestrator, IDisposableService {
   final ICacheManager _cacheManager;
   final INetworkMonitor _networkMonitor;
   final Map<String, ISyncService> _services = {};
@@ -21,6 +22,7 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
       StreamController<SyncProgress>.broadcast();
   final StreamController<SyncEvent> _eventController =
       StreamController<SyncEvent>.broadcast();
+  StreamSubscription<bool>? _networkSubscription;
   bool _isDisposed = false;
   bool _isSyncingAll = false;
 
@@ -342,7 +344,14 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
     _isDisposed = true;
 
     developer.log('Disposing sync orchestrator', name: 'SyncOrchestrator');
-    await stopAllSync();
+
+    try {
+      await stopAllSync();
+    } catch (e) {
+      developer.log('Error stopping all sync: $e', name: 'SyncOrchestrator');
+    }
+
+    // Dispose all registered services
     for (final service in _services.values) {
       try {
         await service.dispose();
@@ -353,18 +362,58 @@ class SyncOrchestratorImpl implements ISyncOrchestrator {
         );
       }
     }
+
+    // Cancel all timers
     for (final timer in _serviceTimers.values) {
-      timer?.cancel();
+      try {
+        timer?.cancel();
+      } catch (e) {
+        developer.log('Error canceling timer: $e', name: 'SyncOrchestrator');
+      }
     }
-    await _progressController.close();
-    await _eventController.close();
+
+    // Cancel network subscription
+    try {
+      await _networkSubscription?.cancel();
+    } catch (e) {
+      developer.log(
+        'Error canceling network subscription: $e',
+        name: 'SyncOrchestrator',
+      );
+    }
+
+    // Close stream controllers
+    try {
+      await _progressController.close();
+    } catch (e) {
+      developer.log(
+        'Error closing progress controller: $e',
+        name: 'SyncOrchestrator',
+      );
+    }
+
+    try {
+      await _eventController.close();
+    } catch (e) {
+      developer.log(
+        'Error closing event controller: $e',
+        name: 'SyncOrchestrator',
+      );
+    }
+
+    // Clear all data structures
     _services.clear();
     _serviceStatuses.clear();
     _serviceTimers.clear();
+
+    developer.log('Sync orchestrator disposed', name: 'SyncOrchestrator');
   }
 
+  @override
+  bool get isDisposed => _isDisposed;
+
   void _setupNetworkListener() {
-    _networkMonitor.connectivityStream.listen(
+    _networkSubscription = _networkMonitor.connectivityStream.listen(
       (isConnected) {
         if (isConnected) {
           developer.log(

@@ -4,12 +4,13 @@ import 'dart:developer' as developer;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../shared/utils/failure.dart';
 import '../interfaces/i_network_monitor.dart';
 
 /// Implementação básica do monitor de rede para sincronização
 /// Separada do UnifiedSyncManager seguindo Single Responsibility Principle
-class NetworkMonitorImpl implements INetworkMonitor {
+class NetworkMonitorImpl implements INetworkMonitor, IDisposableService {
   final Connectivity _connectivity = Connectivity();
   final StreamController<bool> _connectivityController =
       StreamController<bool>.broadcast();
@@ -204,15 +205,50 @@ class NetworkMonitorImpl implements INetworkMonitor {
 
     _isDisposed = true;
 
-    await _connectivitySubscription?.cancel();
-    _qualityCheckTimer?.cancel();
+    try {
+      await _connectivitySubscription?.cancel();
+    } catch (e) {
+      developer.log(
+        'Error canceling connectivity subscription: $e',
+        name: 'NetworkMonitor',
+      );
+    }
 
-    await _connectivityController.close();
-    await _qualityController.close();
-    await _eventController.close();
+    try {
+      _qualityCheckTimer?.cancel();
+    } catch (e) {
+      developer.log('Error canceling quality timer: $e', name: 'NetworkMonitor');
+    }
+
+    try {
+      await _connectivityController.close();
+    } catch (e) {
+      developer.log(
+        'Error closing connectivity controller: $e',
+        name: 'NetworkMonitor',
+      );
+    }
+
+    try {
+      await _qualityController.close();
+    } catch (e) {
+      developer.log(
+        'Error closing quality controller: $e',
+        name: 'NetworkMonitor',
+      );
+    }
+
+    try {
+      await _eventController.close();
+    } catch (e) {
+      developer.log('Error closing event controller: $e', name: 'NetworkMonitor');
+    }
 
     developer.log('Network monitor disposed', name: 'NetworkMonitor');
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 
   bool _isConnectedFromResults(List<ConnectivityResult> results) {
     return results.isNotEmpty &&

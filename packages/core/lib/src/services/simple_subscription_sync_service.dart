@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../domain/entities/subscription_entity.dart';
+import '../domain/interfaces/i_disposable_service.dart';
 import '../domain/repositories/i_local_storage_repository.dart';
 import '../domain/repositories/i_subscription_repository.dart';
 import '../shared/utils/failure.dart';
@@ -15,7 +16,7 @@ import '../shared/utils/failure.dart';
 /// - Cache local básico
 /// - Verificação por app específico
 /// - Interface limpa para os apps
-class SimpleSubscriptionSyncService {
+class SimpleSubscriptionSyncService implements IDisposableService {
   final ISubscriptionRepository _subscriptionRepository;
   final ILocalStorageRepository _localStorage;
 
@@ -31,6 +32,9 @@ class SimpleSubscriptionSyncService {
 
   /// Flag para indicar se está sincronizando
   bool _isSyncing = false;
+
+  /// Flag para indicar se foi disposed
+  bool _isDisposed = false;
 
   /// Key para storage local
   static const String _storageKey = 'cached_subscription';
@@ -77,10 +81,36 @@ class SimpleSubscriptionSyncService {
   }
 
   /// Dispose do serviço
-  void dispose() {
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    // Cancel timer
     _periodicSyncTimer?.cancel();
-    _subscriptionStreamController.close();
+    _periodicSyncTimer = null;
+
+    // Close stream controller with error handling
+    try {
+      if (!_subscriptionStreamController.isClosed) {
+        await _subscriptionStreamController.close();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error closing subscription stream controller: $e');
+      }
+    }
+
+    // Clear cache
+    _cachedSubscription = null;
+
+    if (kDebugMode) {
+      print('📱 SimpleSubscriptionSyncService: Disposed');
+    }
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 
   /// Força sincronização completa
   Future<Either<Failure, SubscriptionEntity?>> forceSync() async {

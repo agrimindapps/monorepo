@@ -4,12 +4,13 @@ import 'dart:developer' as developer;
 
 import 'package:dartz/dartz.dart';
 
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../shared/utils/failure.dart';
 import '../interfaces/i_cache_manager.dart';
 
 /// Implementação do gerenciador de cache para sincronização
 /// Separada do UnifiedSyncManager seguindo Single Responsibility Principle
-class CacheManagerImpl implements ICacheManager {
+class CacheManagerImpl implements ICacheManager, IDisposableService {
   final Map<String, _CacheEntry> _cache = {};
   final StreamController<CacheEvent> _eventController =
       StreamController<CacheEvent>.broadcast();
@@ -355,12 +356,29 @@ class CacheManagerImpl implements ICacheManager {
 
     _isDisposed = true;
 
-    _cleanupTimer?.cancel();
-    _cache.clear();
-    await _eventController.close();
+    try {
+      _cleanupTimer?.cancel();
+    } catch (e) {
+      developer.log('Error canceling cleanup timer: $e', name: 'CacheManager');
+    }
+
+    try {
+      _cache.clear();
+    } catch (e) {
+      developer.log('Error clearing cache: $e', name: 'CacheManager');
+    }
+
+    try {
+      await _eventController.close();
+    } catch (e) {
+      developer.log('Error closing event controller: $e', name: 'CacheManager');
+    }
 
     developer.log('Cache manager disposed', name: 'CacheManager');
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 
   void _setupAutoCleanup() {
     _cleanupTimer = Timer.periodic(_cleanupStrategy.cleanupInterval, (timer) {

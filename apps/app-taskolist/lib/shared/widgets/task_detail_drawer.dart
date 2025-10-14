@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/presentation/providers/task_providers.dart';
+import '../../features/tasks/presentation/providers/task_notifier.dart';
 import 'notes_expansion_dialog.dart';
 import 'subtask_list_widget.dart';
 import 'task_comments_section.dart';

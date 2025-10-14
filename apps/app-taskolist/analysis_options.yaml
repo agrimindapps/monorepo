@@ -13,6 +13,8 @@ analyzer:
   exclude:
     # Excluir arquivos específicos do app
     - "lib/firebase_options.dart"
+  plugins:
+    - custom_lint
     
 linter:
   rules:

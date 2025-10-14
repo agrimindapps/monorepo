@@ -5,12 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/log_entry.dart';
+import '../../domain/interfaces/i_disposable_service.dart';
 import '../../shared/enums/log_level.dart';
 
 /// Sistema completo de captura, armazenamento e visualização de logs
 /// Implementa logging com múltiplos níveis, persistência local, filtragem avançada
 /// e capacidades de exportação, ideal para debug e monitoramento de aplicações
-class LogRepositoryService {
+class LogRepositoryService implements IDisposableService {
   static LogRepositoryService? _instance;
   static const String _prefsKey = 'app_logs';
   static const int _maxLogs = 10000;
@@ -19,6 +20,8 @@ class LogRepositoryService {
   final List<LogEntry> _logs = [];
   final StreamController<LogEntry> _logStreamController =
       StreamController<LogEntry>.broadcast();
+
+  bool _isDisposed = false;
 
   LogRepositoryService._internal();
 
@@ -291,9 +294,27 @@ class LogRepositoryService {
   }
 
   /// Finaliza o serviço
-  void dispose() {
-    _logStreamController.close();
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    try {
+      await _logStreamController.close();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error closing log stream controller: $e');
+      }
+    }
+
+    _logs.clear();
+    if (kDebugMode) {
+      print('LogRepositoryService disposed');
+    }
   }
+
+  @override
+  bool get isDisposed => _isDisposed;
 }
 
 /// Instância global do serviço de logs

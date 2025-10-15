@@ -27,7 +27,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       return AppThemeMode.fromPersistenceValue(themeValue);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao carregar tema: $e');
+        debugPrint('Erro ao carregar tema: $e');
       }
       return AppThemeMode.system;
     }
@@ -40,7 +40,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       await box.put(_themeKey, themeMode.persistenceValue);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao salvar tema: $e');
+        debugPrint('Erro ao salvar tema: $e');
       }
     }
   }
@@ -52,7 +52,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       return box.get(_firstLaunchKey, defaultValue: true) as bool? ?? true;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao verificar primeiro launch: $e');
+        debugPrint('Erro ao verificar primeiro launch: $e');
       }
       return true;
     }
@@ -65,7 +65,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       await box.put(_firstLaunchKey, isFirstLaunch);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao salvar primeiro launch: $e');
+        debugPrint('Erro ao salvar primeiro launch: $e');
       }
     }
   }
@@ -75,7 +75,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       await box.clear();
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao limpar preferências: $e');
+        debugPrint('Erro ao limpar preferências: $e');
       }
     }
   }
@@ -85,7 +85,7 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
       _box = null;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao fechar box de preferências: $e');
+        debugPrint('Erro ao fechar box de preferências: $e');
       }
     }
   }

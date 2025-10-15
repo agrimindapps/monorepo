@@ -39,7 +39,7 @@ class ThemeNotifier extends _$ThemeNotifier {
       return ThemeState(themeMode: themeMode);
     } catch (error) {
       if (kDebugMode) {
-        print('Error loading theme: $error');
+        debugPrint('Error loading theme: $error');
       }
       return const ThemeState(themeMode: AppThemeMode.system);
     }

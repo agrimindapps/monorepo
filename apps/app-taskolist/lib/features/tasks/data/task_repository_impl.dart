@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/errors/failures.dart' as local_failures;
 import '../../../core/utils/typedef.dart';
@@ -80,6 +81,8 @@ class TaskRepositoryImpl implements TaskRepository {
           await _localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks);
         } catch (e) {
+          // Remote fetch failed, fallback to local cache
+          debugPrint('⚠️ TaskRepository.getTasks: Failed to fetch from remote, using local cache: $e');
         }
       }
       final localTasks = await _localDataSource.getTasks(
@@ -260,6 +263,8 @@ class TaskRepositoryImpl implements TaskRepository {
           await _localDataSource.cacheTasks(remoteTasks);
           return Right(remoteTasks);
         } catch (e) {
+          // Remote fetch failed, fallback to local cache
+          debugPrint('⚠️ TaskRepository.getSubtasks: Failed to fetch from remote, using local cache: $e');
         }
       }
       final allTasks = await _localDataSource.getTasks();

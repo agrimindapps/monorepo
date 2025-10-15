@@ -32,7 +32,7 @@ class OperationLock {
         final elapsed = DateTime.now().difference(lockTimestamp);
         if (elapsed > effectiveTimeout) {
           if (kDebugMode) {
-            print('Warning: Lock $key expired after $elapsed');
+            debugPrint('Warning: Lock $key expired after $elapsed');
           }
           _releaseLock(key);
           break;
@@ -171,10 +171,10 @@ class OperationLock {
         keysToRemove.add(key);
       }
     });
-    
+
     for (final key in keysToRemove) {
       if (kDebugMode) {
-        print('Cleaning up expired lock: $key');
+        debugPrint('Cleaning up expired lock: $key');
       }
       _releaseLock(key);
     }

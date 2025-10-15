@@ -23,7 +23,7 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
       state = AsyncValue.data(themeMode);
     } catch (error, stackTrace) {
       if (kDebugMode) {
-        print('Erro ao carregar tema: $error');
+        debugPrint('Erro ao carregar tema: $error');
       }
       state = AsyncValue.error(error, stackTrace);
       state = const AsyncValue.data(AppThemeMode.system);
@@ -35,7 +35,7 @@ class ThemeNotifier extends StateNotifier<AsyncValue<AppThemeMode>> {
       await _preferencesDataSource.setThemeMode(themeMode);
     } catch (error, stackTrace) {
       if (kDebugMode) {
-        print('Erro ao salvar tema: $error');
+        debugPrint('Erro ao salvar tema: $error');
       }
       state = AsyncValue.error(error, stackTrace);
     }

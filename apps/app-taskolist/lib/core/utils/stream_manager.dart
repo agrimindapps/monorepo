@@ -201,9 +201,9 @@ class StreamManager {
     await clearSubscriptions();
     await clearControllers();
     clearTimers();
-    
+
     if (kDebugMode) {
-      print('StreamManager disposed - cleaned up ${stats['total']} resources');
+      debugPrint('StreamManager disposed - cleaned up ${stats['total']} resources');
     }
   }
 

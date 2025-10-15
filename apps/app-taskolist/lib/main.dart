@@ -45,19 +45,19 @@ void main() async {
     };
   }
   try {
-    print('🔐 MAIN: Initializing account deletion module...');
+    debugPrint('🔐 MAIN: Initializing account deletion module...');
     AccountDeletionModule.init(getIt);
-    print('✅ MAIN: Account deletion module initialized successfully');
+    debugPrint('✅ MAIN: Account deletion module initialized successfully');
   } catch (e) {
-    print('❌ MAIN: Account deletion initialization failed: $e');
+    debugPrint('❌ MAIN: Account deletion initialization failed: $e');
   }
   try {
-    print('🔄 MAIN: Forcing Taskolist sync initialization...');
+    debugPrint('🔄 MAIN: Forcing Taskolist sync initialization...');
     TaskolistSyncDIModule.init();
     await TaskolistSyncDIModule.initializeSyncService();
-    print('✅ MAIN: Taskolist sync initialization completed successfully');
+    debugPrint('✅ MAIN: Taskolist sync initialization completed successfully');
   } catch (e) {
-    print('❌ MAIN: Sync initialization failed: $e');
+    debugPrint('❌ MAIN: Sync initialization failed: $e');
   }
   await _initializeFirebaseServices();
   final providerContainer = ProviderContainer();

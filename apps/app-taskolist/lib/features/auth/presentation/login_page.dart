@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:core/core.dart' hide FormState;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -120,7 +121,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   Future<void> _handleAnonymousLogin() async {
-    print('🔄 Iniciando login anônimo...');
+    debugPrint('🔄 Iniciando login anônimo...');
     setState(() {
       _isLoading = true;
       _isAnonymousLoading = true;
@@ -128,11 +129,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
     HapticFeedback.lightImpact();
 
     try {
-      print('🔄 Chamando signInAnonymously...');
+      debugPrint('🔄 Chamando signInAnonymously...');
       await ref.read(authNotifierProvider.notifier).signInAnonymously();
-      print('✅ Login anônimo concluído com sucesso');
+      debugPrint('✅ Login anônimo concluído com sucesso');
     } catch (e) {
-      print('❌ Erro no login anônimo: $e');
+      debugPrint('❌ Erro no login anônimo: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -554,7 +555,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   /// Navega para a HomePage principal
   void _navigateToHomePage() {
-    print('🚀 Navegando para HomePage...');
+    debugPrint('🚀 Navegando para HomePage...');
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<dynamic>(
         pageBuilder:
@@ -573,10 +574,10 @@ class _LoginPageState extends ConsumerState<LoginPage>
   @override
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<dynamic>>(authNotifierProvider, (previous, next) {
-      print('🔄 Auth listener: Estado mudou');
+      debugPrint('🔄 Auth listener: Estado mudou');
       next.when(
         data: (user) {
-          print('✅ Auth listener: Usuário autenticado: ${user?.id}');
+          debugPrint('✅ Auth listener: Usuário autenticado: ${user?.id}');
           if (user != null && mounted) {
             setState(() {
               _isLoading = false;
@@ -591,11 +592,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
           }
         },
         loading: () {
-          print('🔄 Auth listener: Estado de loading');
+          debugPrint('🔄 Auth listener: Estado de loading');
           setState(() => _isLoading = true);
         },
         error: (error, stackTrace) {
-          print('❌ Auth listener: Erro na autenticação: $error');
+          debugPrint('❌ Auth listener: Erro na autenticação: $error');
           setState(() => _isLoading = false);
           _showAnimatedSnackBar(
             message: _getErrorMessage(error),

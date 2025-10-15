@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide getIt;
 
@@ -214,19 +215,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
   }
 
   Future<void> signInAnonymously() async {
-    print('🔄 AuthNotifier: Iniciando signInAnonymously...');
+    debugPrint('🔄 AuthNotifier: Iniciando signInAnonymously...');
     state = const AsyncValue.loading();
 
     final result = await _authService.signInAnonymously();
 
     result.fold(
       (failure) {
-        print('❌ AuthNotifier: Erro no login anônimo: $failure');
+        debugPrint('❌ AuthNotifier: Erro no login anônimo: $failure');
         state = AsyncValue.error(failure, StackTrace.current);
         throw Exception(failure.message); // Propagar o erro para quem chamou
       },
       (user) {
-        print('✅ AuthNotifier: Login anônimo bem-sucedido: ${user.id}');
+        debugPrint('✅ AuthNotifier: Login anônimo bem-sucedido: ${user.id}');
         state = AsyncValue.data(user);
       },
     );
@@ -280,14 +281,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<core.UserEntity?>> {
 
       result.fold(
         (failure) {
-          print('❌ Erro na sincronização pós-login: ${failure.message}');
+          debugPrint('❌ Erro na sincronização pós-login: ${failure.message}');
         },
         (_) {
           _hasPerformedInitialSync = true;
         },
       );
     } catch (e) {
-      print('❌ Erro durante sincronização: $e');
+      debugPrint('❌ Erro durante sincronização: $e');
     } finally {
       _isSyncInProgress = false;
     }

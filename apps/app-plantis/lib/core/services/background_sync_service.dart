@@ -7,7 +7,6 @@ import '../../features/plants/domain/usecases/get_plants_usecase.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
 import '../../features/settings/domain/usecases/sync_settings_usecase.dart';
 import '../../features/tasks/domain/usecases/get_tasks_usecase.dart';
-import '../../features/tasks/presentation/providers/tasks_provider.dart';
 import '../auth/auth_state_notifier.dart';
 import '../di/injection_container.dart' as di;
 import '../sync/background_sync_status.dart';
@@ -31,7 +30,8 @@ class BackgroundSyncService extends ChangeNotifier {
   AuthStateNotifier? _authStateNotifier;
   // PlantsProvider is now managed by Riverpod
   // PlantsProvider? _plantsProvider;
-  TasksProvider? _tasksProvider;
+  // TasksProvider is now managed by Riverpod
+  // TasksProvider? _tasksProvider;
   final StreamController<String> _syncMessageController =
       StreamController<String>.broadcast();
   final StreamController<bool> _syncProgressController =
@@ -64,15 +64,16 @@ class BackgroundSyncService extends ChangeNotifier {
           );
         }
       }
-      try {
-        _tasksProvider ??= di.sl<TasksProvider>();
-      } catch (e) {
-        if (kDebugMode) {
-          debugPrint(
-            'ℹ️ BackgroundSyncService: TasksProvider não disponível ainda: $e',
-          );
-        }
-      }
+      // TODO: TasksProvider is now managed by Riverpod - remove this dependency injection
+      // try {
+      //   _tasksProvider ??= di.sl<TasksProvider>();
+      // } catch (e) {
+      //   if (kDebugMode) {
+      //     debugPrint(
+      //       'ℹ️ BackgroundSyncService: TasksProvider não disponível ainda: $e',
+      //     );
+      //   }
+      // }
     } catch (e) {
       if (kDebugMode) {
         debugPrint(
@@ -477,25 +478,29 @@ class BackgroundSyncService extends ChangeNotifier {
         'ℹ️ BackgroundSync: PlantsProvider notification skipped (Riverpod managed)',
       );
     }
-    if (_tasksProvider != null) {
-      if (kDebugMode) {
-        debugPrint(
-          '📅 BackgroundSync: Notificando TasksProvider para refresh...',
-        );
-      }
-      Future.microtask(() {
-        try {
-          _tasksProvider?.refresh();
-          if (kDebugMode) {
-            debugPrint('✅ BackgroundSync: TasksProvider refresh solicitado');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            debugPrint('❌ BackgroundSync: Erro ao notificar TasksProvider: $e');
-          }
-        }
-      });
+    // TODO: TasksProvider is now managed by Riverpod - implement refresh via Riverpod
+    if (kDebugMode) {
+      debugPrint('ℹ️ BackgroundSync: TasksProvider refresh skipped (Riverpod managed)');
     }
+    // if (_tasksProvider != null) {
+    //   if (kDebugMode) {
+    //     debugPrint(
+    //       '📅 BackgroundSync: Notificando TasksProvider para refresh...',
+    //     );
+    //   }
+    //   Future.microtask(() {
+    //     try {
+    //       _tasksProvider?.refresh();
+    //       if (kDebugMode) {
+    //         debugPrint('✅ BackgroundSync: TasksProvider refresh solicitado');
+    //       }
+    //     } catch (e) {
+    //       if (kDebugMode) {
+    //         debugPrint('❌ BackgroundSync: Erro ao notificar TasksProvider: $e');
+    //       }
+    //     }
+    //   });
+    // }
   }
 
   @override

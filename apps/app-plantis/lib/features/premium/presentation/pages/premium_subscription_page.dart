@@ -9,10 +9,11 @@ import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
 import '../widgets/subscription_plans_widget.dart';
 
-/// Riverpod Provider for PremiumProvider using DI
-final premiumProviderRiverpod = ChangeNotifierProvider<PremiumProvider>((ref) {
-  return sl<PremiumProvider>();
-});
+/// Riverpod Provider alias - PremiumProvider is now managed by Riverpod
+/// Use PremiumProvider (which maps to premiumNotifierProvider) directly
+// final premiumProviderRiverpod = ChangeNotifierProvider<PremiumProvider>((ref) {
+//   return sl<PremiumProvider>();
+// });
 
 /// Página de subscription premium para Plantis - Inspirada no ReceitaAgro
 ///

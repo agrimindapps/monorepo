@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/analytics_provider.dart';
-import '../../../../core/providers/background_sync_provider.dart';
 import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../core/widgets/loading_overlay.dart';
 import '../../../device_management/data/models/device_model.dart';
 import '../../../device_management/domain/usecases/revoke_device_usecase.dart'
     as device_revocation;
@@ -53,8 +52,6 @@ class AuthNotifier extends _$AuthNotifier {
   final AuthStateNotifier _authStateNotifier = AuthStateNotifier.instance;
   final ResetPasswordUseCase _resetPasswordUseCase =
       di.sl<ResetPasswordUseCase>();
-  final BackgroundSyncProvider? _backgroundSyncProvider =
-      di.sl<BackgroundSyncProvider>();
   final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase =
       di.sl<device_validation.ValidateDeviceUseCase>();
   final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase =
@@ -68,14 +65,6 @@ class AuthNotifier extends _$AuthNotifier {
   AnalyticsProvider? get _analytics {
     try {
       return di.sl<AnalyticsProvider>();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  BackgroundSyncProvider? get _syncProvider {
-    try {
-      return _backgroundSyncProvider ?? di.sl<BackgroundSyncProvider>();
     } catch (e) {
       return null;
     }
@@ -332,27 +321,33 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   void _triggerBackgroundSyncIfNeeded(String userId) {
-    if (_syncProvider == null) {
-      if (kDebugMode) {
-        debugPrint('⚠️ BackgroundSyncProvider não disponível');
-      }
-      return;
+    // TODO: Reimplementar usando backgroundSyncProvider do Riverpod
+    if (kDebugMode) {
+      debugPrint('ℹ️ Background sync trigger - migrar para Riverpod provider');
     }
-
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (state.isAuthenticated && !state.isAnonymous) {
-        _syncProvider!.startBackgroundSync(userId: userId, isInitialSync: true);
-      }
-    });
+    // if (_syncProvider == null) {
+    //   if (kDebugMode) {
+    //     debugPrint('⚠️ BackgroundSyncProvider não disponível');
+    //   }
+    //   return;
+    // }
+    //
+    // Future.delayed(const Duration(milliseconds: 100), () {
+    //   if (state.isAuthenticated && !state.isAnonymous) {
+    //     _syncProvider!.startBackgroundSync(userId: userId, isInitialSync: true);
+    //   }
+    // });
   }
 
   void cancelSync() {
-    _syncProvider?.cancelSync();
+    // TODO: Implementar usando backgroundSyncProvider
+    // _syncProvider?.cancelSync();
   }
 
   Future<void> retrySyncAfterLogin() async {
     if (!state.isAuthenticated || state.currentUser == null) return;
-    await _syncProvider?.retrySync(state.currentUser!.id);
+    // TODO: Implementar usando backgroundSyncProvider
+    // await _syncProvider?.retrySync(state.currentUser!.id);
   }
 
   Future<void> logout() async {
@@ -379,7 +374,8 @@ class AuthNotifier extends _$AuthNotifier {
           isLoading: false,
           currentOperation: null,
         );
-        _syncProvider?.resetSyncState();
+        // TODO: Reset sync state usando backgroundSyncProvider
+        // _syncProvider?.resetSyncState();
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
         _analytics?.logLogout();
@@ -486,22 +482,26 @@ class AuthNotifier extends _$AuthNotifier {
       return;
     }
 
-    if (_syncProvider?.shouldStartInitialSync(state.currentUser!.id) == true) {
-      if (kDebugMode) {
-        debugPrint(
-          '🔄 Iniciando auto-sync em background para usuário não anônimo',
-        );
-      }
-
-      await _syncProvider?.startBackgroundSync(
-        userId: state.currentUser!.id,
-        isInitialSync: true,
-      );
-    } else {
-      if (kDebugMode) {
-        debugPrint('🔄 Auto-sync já realizado ou em progresso');
-      }
+    // TODO: Reimplementar usando backgroundSyncProvider do Riverpod
+    if (kDebugMode) {
+      debugPrint('🔄 Auto-sync - migrar para Riverpod provider');
     }
+    // if (_syncProvider?.shouldStartInitialSync(state.currentUser!.id) == true) {
+    //   if (kDebugMode) {
+    //     debugPrint(
+    //       '🔄 Iniciando auto-sync em background para usuário não anônimo',
+    //     );
+    //   }
+    //
+    //   await _syncProvider?.startBackgroundSync(
+    //     userId: state.currentUser!.id,
+    //     isInitialSync: true,
+    //   );
+    // } else {
+    //   if (kDebugMode) {
+    //     debugPrint('🔄 Auto-sync já realizado ou em progresso');
+    //   }
+    // }
   }
 
   void clearError() {
@@ -673,7 +673,8 @@ class AuthNotifier extends _$AuthNotifier {
       errorMessage: null,
       currentOperation: null,
     );
-    _syncProvider?.resetSyncState();
+    // TODO: Reset sync state usando backgroundSyncProvider
+    // _syncProvider?.resetSyncState();
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
   }

@@ -913,3 +913,12 @@ CompleteTaskUseCase completeTaskUseCase(Ref ref) {
 TasksRepository tasksRepository(Ref ref) {
   return getIt<TasksRepository>();
 }
+
+/// Extension on TasksNotifier for backwards compatibility
+extension TasksNotifierCompat on TasksNotifier {
+  /// Alias for setFilter - for backwards compatibility
+  /// Use setFilter instead in new code
+  void filterTasks(TasksFilterType filter, {String? plantId}) {
+    setFilter(filter, plantId: plantId);
+  }
+}

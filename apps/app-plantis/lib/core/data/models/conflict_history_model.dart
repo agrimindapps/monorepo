@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'base_sync_model.dart';
 
+part 'conflict_history_model.g.dart';
+
 @HiveType(typeId: 10)
 // ignore: must_be_immutable
 class ConflictHistoryModel extends BaseSyncModel {

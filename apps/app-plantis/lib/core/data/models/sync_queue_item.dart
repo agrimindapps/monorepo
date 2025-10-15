@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+part 'sync_queue_item.g.dart';
+
 enum SyncOperationType { create, update, delete }
 
 @HiveType(typeId: 100)

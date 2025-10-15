@@ -491,3 +491,8 @@ PlantTaskGenerator plantTaskGenerator(PlantTaskGeneratorRef ref) {
 PlantTasksRepository? plantTasksRepository(PlantTasksRepositoryRef ref) {
   throw UnimplementedError('Define in DI setup');
 }
+
+/// Type alias for backwards compatibility with existing code
+/// Use PlantTaskNotifier instead in new code for type annotations
+/// Use plantTaskNotifierProvider for accessing the provider
+typedef PlantTaskProvider = PlantTaskNotifier;

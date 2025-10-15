@@ -288,3 +288,8 @@ SimpleSubscriptionSyncService? simpleSubscriptionSyncService(
 ) {
   throw UnimplementedError('Define in DI setup');
 }
+
+/// Type alias for backwards compatibility with existing code
+/// Use PremiumNotifier instead in new code for type annotations
+/// Use premiumNotifierProvider for accessing the provider
+typedef PremiumProvider = PremiumNotifier;

@@ -212,3 +212,7 @@ DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
 UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
   throw UnimplementedError('Define in DI setup');
 }
+
+/// Alias for backwards compatibility with existing code
+/// Use plantDetailsNotifierProvider instead in new code
+final plantDetailsProviderProvider = plantDetailsNotifierProvider;

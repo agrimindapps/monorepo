@@ -327,7 +327,7 @@ class PlantInfoSection extends ConsumerWidget {
 
                 // Atualiza o provider de detalhes para refletir as mudanças
                 if (success) {
-                  ref.read(plantDetailsProviderProvider).loadPlant(plant.id);
+                  ref.read(plantDetailsNotifierProvider.notifier).loadPlant(plant.id);
                 }
 
                 // Mostra feedback

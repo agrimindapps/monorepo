@@ -381,14 +381,10 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
 
       if (mounted) {
         if (success) {
-          PlantsProvider? plantsProvider;
           try {
-            plantsProvider = di.sl<PlantsProvider>();
+            ref.read(plantsNotifierProvider.notifier).refreshPlants();
           } catch (e) {
             print('Aviso: Não foi possível atualizar a lista automaticamente');
-          }
-          if (plantsProvider != null) {
-            await plantsProvider.refreshPlants();
           }
           if (widget.plantId != null && mounted) {
             if (kDebugMode) {

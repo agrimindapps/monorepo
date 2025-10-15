@@ -5,6 +5,12 @@ import '../../domain/entities/task.dart' as task_entity;
 
 part 'tasks_state.freezed.dart';
 
+// Type aliases for Freezed compatibility
+typedef Task = task_entity.Task;
+typedef TaskType = task_entity.TaskType;
+typedef TaskPriority = task_entity.TaskPriority;
+typedef TaskStatus = task_entity.TaskStatus;
+
 /// Enumeration defining all available task filter types
 ///
 /// This enum provides predefined filter categories for organizing and displaying tasks.
@@ -161,16 +167,21 @@ class TasksState with _$TasksState {
   /// Number of completed tasks
   int get completedTasks =>
       allTasks
+          .whereType<task_entity.Task>()
           .where((t) => t.status == task_entity.TaskStatus.completed)
           .length;
 
   /// Number of pending tasks
   int get pendingTasks =>
-      allTasks.where((t) => t.status == task_entity.TaskStatus.pending).length;
+      allTasks
+          .whereType<task_entity.Task>()
+          .where((t) => t.status == task_entity.TaskStatus.pending)
+          .length;
 
   /// Number of overdue tasks
   int get overdueTasks =>
       allTasks
+          .whereType<task_entity.Task>()
           .where(
             (t) => t.isOverdue && t.status == task_entity.TaskStatus.pending,
           )
@@ -179,6 +190,7 @@ class TasksState with _$TasksState {
   /// Number of tasks due today
   int get todayTasks =>
       allTasks
+          .whereType<task_entity.Task>()
           .where(
             (t) => t.isDueToday && t.status == task_entity.TaskStatus.pending,
           )
@@ -191,6 +203,7 @@ class TasksState with _$TasksState {
     final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
 
     return allTasks
+        .whereType<task_entity.Task>()
         .where(
           (t) =>
               t.status == task_entity.TaskStatus.pending &&
@@ -206,6 +219,7 @@ class TasksState with _$TasksState {
     final today = DateTime(now.year, now.month, now.day);
 
     return allTasks
+        .whereType<task_entity.Task>()
         .where(
           (t) =>
               t.status == task_entity.TaskStatus.pending &&
@@ -218,12 +232,16 @@ class TasksState with _$TasksState {
 
   /// Get tasks filtered by plant ID
   List<task_entity.Task> getTasksForPlant(String plantId) {
-    return allTasks.where((task) => task.plantId == plantId).toList();
+    return allTasks
+        .whereType<task_entity.Task>()
+        .where((task) => task.plantId == plantId)
+        .toList();
   }
 
   /// Get overdue tasks list
   List<task_entity.Task> get overdueTasksList =>
       allTasks
+          .whereType<task_entity.Task>()
           .where(
             (t) => t.isOverdue && t.status == task_entity.TaskStatus.pending,
           )
@@ -232,6 +250,7 @@ class TasksState with _$TasksState {
   /// Get today's tasks
   List<task_entity.Task> get todayTasksList =>
       allTasks
+          .whereType<task_entity.Task>()
           .where(
             (t) => t.isDueToday && t.status == task_entity.TaskStatus.pending,
           )
@@ -244,6 +263,7 @@ class TasksState with _$TasksState {
     final nextWeek = now.add(TasksConstants.upcomingTasksDuration);
 
     return allTasks
+        .whereType<task_entity.Task>()
         .where(
           (t) =>
               t.status == task_entity.TaskStatus.pending &&
@@ -256,12 +276,14 @@ class TasksState with _$TasksState {
   /// Get completed tasks
   List<task_entity.Task> get completedTasksList =>
       allTasks
+          .whereType<task_entity.Task>()
           .where((t) => t.status == task_entity.TaskStatus.completed)
           .toList();
 
   /// Get high priority tasks (high and urgent)
   List<task_entity.Task> get highPriorityTasks =>
       filteredTasks
+          .whereType<task_entity.Task>()
           .where(
             (t) =>
                 t.priority == task_entity.TaskPriority.high ||
@@ -272,12 +294,14 @@ class TasksState with _$TasksState {
   /// Get medium priority tasks
   List<task_entity.Task> get mediumPriorityTasks =>
       filteredTasks
+          .whereType<task_entity.Task>()
           .where((t) => t.priority == task_entity.TaskPriority.medium)
           .toList();
 
   /// Get low priority tasks
   List<task_entity.Task> get lowPriorityTasks =>
       filteredTasks
+          .whereType<task_entity.Task>()
           .where((t) => t.priority == task_entity.TaskPriority.low)
           .toList();
 

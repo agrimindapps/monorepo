@@ -11,7 +11,7 @@ import '../widgets/subscription_plans_widget.dart';
 
 /// Riverpod Provider alias - PremiumProvider is now managed by Riverpod
 /// Use PremiumProvider (which maps to premiumNotifierProvider) directly
-// final premiumProviderRiverpod = ChangeNotifierProvider<PremiumProvider>((ref) {
+// final premiumNotifierProvider = ChangeNotifierProvider<PremiumProvider>((ref) {
 //   return sl<PremiumProvider>();
 // });
 
@@ -49,9 +49,9 @@ class _PremiumSubscriptionPageState
 
   @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(premiumProviderRiverpod);
+    final premiumState = ref.watch(premiumNotifierProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showMessages(context, provider);
+      _showMessages(context, premiumState);
     });
 
     return Scaffold(
@@ -74,11 +74,11 @@ class _PremiumSubscriptionPageState
               _buildHeader(context),
               Expanded(
                 child:
-                    provider.isLoading
+                    premiumState.isLoading
                         ? _buildLoadingView()
-                        : provider.isPremium
-                        ? _buildActiveSubscriptionView(provider)
-                        : _buildPlansView(provider),
+                        : premiumState.isPremium
+                        ? _buildActiveSubscriptionView(premiumState)
+                        : _buildPlansView(premiumState),
               ),
             ],
           ),
@@ -121,7 +121,7 @@ class _PremiumSubscriptionPageState
   }
 
   /// View para usuários com subscription ativa
-  Widget _buildActiveSubscriptionView(PremiumProvider provider) {
+  Widget _buildActiveSubscriptionView(PremiumState premiumState) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -130,17 +130,16 @@ class _PremiumSubscriptionPageState
           _buildPremiumStatusCard(),
 
           const SizedBox(height: 32),
-          PlantisSubscriptionBenefitsWidget(
-            provider: provider,
+          const PlantisSubscriptionBenefitsWidget(
             showModernStyle: false,
           ),
 
           const SizedBox(height: 32),
           PlantisPaymentActionsWidget(
             isPremium: true,
-            isLoading: provider.isLoading,
+            isLoading: premiumState.isLoading,
             showSubscriptionManagement: true,
-            onManageSubscription: () => _manageSubscription(provider),
+            onManageSubscription: () => _manageSubscription(premiumState),
           ),
 
           const SizedBox(height: 20),
@@ -150,7 +149,7 @@ class _PremiumSubscriptionPageState
   }
 
   /// View para seleção de planos (usuário sem subscription)
-  Widget _buildPlansView(PremiumProvider provider) {
+  Widget _buildPlansView(PremiumState premiumState) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -172,7 +171,7 @@ class _PremiumSubscriptionPageState
 
           const SizedBox(height: 32),
           PlantisSubscriptionPlansWidget(
-            availableProducts: provider.availableProducts,
+            availableProducts: premiumState.availableProducts,
             selectedPlanId: _selectedPlanId,
             onPlanSelected: (planId) {
               setState(() {
@@ -182,8 +181,7 @@ class _PremiumSubscriptionPageState
           ),
 
           const SizedBox(height: 40),
-          PlantisSubscriptionBenefitsWidget(
-            provider: provider,
+          const PlantisSubscriptionBenefitsWidget(
             showModernStyle: true,
           ),
 
@@ -191,11 +189,11 @@ class _PremiumSubscriptionPageState
           PlantisPaymentActionsWidget(
             selectedPlanId: _selectedPlanId,
             isPremium: false,
-            isLoading: provider.isLoading,
+            isLoading: premiumState.isLoading,
             showPurchaseButton: true,
             showFooterLinks: true,
-            onPurchase: () => _purchaseSelectedPlan(provider),
-            onRestore: () => _restorePurchases(provider),
+            onPurchase: () => _purchaseSelectedPlan(premiumState),
+            onRestore: () => _restorePurchases(premiumState),
             onPrivacyPolicy: () => _openPrivacyPolicy(),
             onTermsOfService: () => _openTermsOfService(),
           ),
@@ -255,7 +253,7 @@ class _PremiumSubscriptionPageState
   }
 
   /// Compra o plano selecionado
-  Future<void> _purchaseSelectedPlan(PremiumProvider provider) async {
+  Future<void> _purchaseSelectedPlan(PremiumState premiumState) async {
     if (_selectedPlanId == null) return;
 
     startContextualLoading(
@@ -265,7 +263,8 @@ class _PremiumSubscriptionPageState
     );
 
     try {
-      final success = await provider.purchaseProduct(_selectedPlanId!);
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final success = await notifier.purchaseProduct(_selectedPlanId!);
 
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
@@ -282,7 +281,7 @@ class _PremiumSubscriptionPageState
   }
 
   /// Restaura compras anteriores
-  Future<void> _restorePurchases(PremiumProvider provider) async {
+  Future<void> _restorePurchases(PremiumState premiumState) async {
     startContextualLoading(
       LoadingContexts.premium,
       message: 'Restaurando compras...',
@@ -290,12 +289,13 @@ class _PremiumSubscriptionPageState
     );
 
     try {
-      final success = await provider.restorePurchases();
+      final notifier = ref.read(premiumNotifierProvider.notifier);
+      final success = await notifier.restorePurchases();
 
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
 
-        if (success && provider.isPremium) {
+        if (success && premiumState.isPremium) {
           _showSuccessSnackBar('Compras restauradas com sucesso!');
         } else if (success) {
           _showInfoSnackBar('Nenhuma compra anterior encontrada.');
@@ -309,7 +309,7 @@ class _PremiumSubscriptionPageState
   }
 
   /// Abre gerenciamento de assinatura
-  Future<void> _manageSubscription(PremiumProvider provider) async {
+  Future<void> _manageSubscription(PremiumState premiumState) async {
     _showInfoSnackBar('Redirecionando para gerenciamento...');
   }
 
@@ -325,10 +325,10 @@ class _PremiumSubscriptionPageState
 
   /// Exibe mensagens de erro, sucesso ou informação
   // Update error handling to use the new PremiumError type
-  void _showMessages(BuildContext context, PremiumProvider provider) {
-    if (provider.error != null) {
-      _showErrorSnackBar(provider.error!.message);
-      provider.clearError();
+  void _showMessages(BuildContext context, PremiumState premiumState) {
+    if (premiumState.error != null) {
+      _showErrorSnackBar(premiumState.error!.message);
+      ref.read(premiumNotifierProvider.notifier).clearError();
     }
   }
 

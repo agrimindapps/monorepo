@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SyncQueue, SyncQueueItem;
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../data/models/sync_queue_item.dart' as local;
-import '../sync/sync_queue.dart' as local;
+import '../data/models/sync_queue_item.dart';
+import '../sync/sync_queue.dart';
 
 part 'sync_status_provider.freezed.dart';
 part 'sync_status_provider.g.dart';
@@ -23,7 +22,7 @@ enum SyncStatusState {
 class SyncStatusModel with _$SyncStatusModel {
   const factory SyncStatusModel({
     @Default(SyncStatusState.idle) SyncStatusState currentState,
-    @Default([]) List<local.SyncQueueItem> pendingItems,
+    @Default([]) List<SyncQueueItem> pendingItems,
   }) = _SyncStatusModel;
 
   const SyncStatusModel._();
@@ -58,8 +57,8 @@ ConnectivityService syncConnectivityService(SyncConnectivityServiceRef ref) {
 
 /// Provider for SyncQueue
 @riverpod
-local.SyncQueue syncQueue(SyncQueueRef ref) {
-  return GetIt.instance<local.SyncQueue>();
+SyncQueue syncQueue(SyncQueueRef ref) {
+  return GetIt.instance<SyncQueue>();
 }
 
 // =============================================================================
@@ -70,7 +69,7 @@ local.SyncQueue syncQueue(SyncQueueRef ref) {
 @riverpod
 class SyncStatusNotifier extends _$SyncStatusNotifier {
   StreamSubscription<ConnectivityType>? _networkSubscription;
-  StreamSubscription<List<local.SyncQueueItem>>? _queueSubscription;
+  StreamSubscription<List<SyncQueueItem>>? _queueSubscription;
 
   @override
   SyncStatusModel build() {
@@ -112,10 +111,11 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
     );
 
     // Listen to queue changes
-    _queueSubscription = queue.queueStream.listen((items) {
-      state = state.copyWith(pendingItems: items);
+    _queueSubscription = queue.queueStream.listen((List<SyncQueueItem> items) {
+      final typedItems = items.whereType<SyncQueueItem>().toList();
+      state = state.copyWith(pendingItems: typedItems);
 
-      if (items.isEmpty) {
+      if (typedItems.isEmpty) {
         _updateSyncState(SyncStatusState.idle);
       } else {
         _updateSyncState(SyncStatusState.syncing);

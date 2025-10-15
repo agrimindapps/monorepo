@@ -158,7 +158,9 @@ class TasksNotifier extends _$TasksNotifier {
   /// - [UnauthorizedAccessException] if user doesn't own the task
   task_entity.Task _getTaskWithOwnershipValidation(String taskId) {
     final currentState = state.valueOrNull ?? TasksState.initial();
-    final task = currentState.allTasks.firstWhere(
+    final task = currentState.allTasks
+        .whereType<task_entity.Task>()
+        .firstWhere(
       (t) => t.id == taskId,
       orElse: () => throw Exception('Task not found: $taskId'),
     );
@@ -502,9 +504,12 @@ class TasksNotifier extends _$TasksNotifier {
             );
             final currentState = state.valueOrNull ?? TasksState.initial();
             final updatedTasks =
-                currentState.allTasks.map((t) {
-                  return t.id == taskId ? completedTask : t;
-                }).toList();
+                currentState.allTasks.whereType<task_entity.Task>().map((t) {
+              if (t.id == taskId) {
+                return completedTask;
+              }
+              return t;
+            }).toList();
 
             final filteredTasks = _applyFiltersToTasks(
               updatedTasks,
@@ -539,9 +544,12 @@ class TasksNotifier extends _$TasksNotifier {
         (completedTask) {
           final currentState = state.valueOrNull ?? TasksState.initial();
           final updatedTasks =
-              currentState.allTasks.map((t) {
-                return t.id == taskId ? completedTask : t;
-              }).toList();
+              currentState.allTasks.whereType<task_entity.Task>().map((t) {
+            if (t.id == taskId) {
+              return completedTask;
+            }
+            return t;
+          }).toList();
 
           final filteredTasks = _applyFiltersToTasks(
             updatedTasks,
@@ -854,6 +862,7 @@ class TasksNotifier extends _$TasksNotifier {
   List<task_entity.Task> get highPriorityTasks {
     final currentState = state.valueOrNull ?? TasksState.initial();
     return currentState.filteredTasks
+        .whereType<task_entity.Task>()
         .where(
           (t) =>
               t.priority == task_entity.TaskPriority.high ||
@@ -865,6 +874,7 @@ class TasksNotifier extends _$TasksNotifier {
   List<task_entity.Task> get mediumPriorityTasks {
     final currentState = state.valueOrNull ?? TasksState.initial();
     return currentState.filteredTasks
+        .whereType<task_entity.Task>()
         .where((t) => t.priority == task_entity.TaskPriority.medium)
         .toList();
   }
@@ -872,6 +882,7 @@ class TasksNotifier extends _$TasksNotifier {
   List<task_entity.Task> get lowPriorityTasks {
     final currentState = state.valueOrNull ?? TasksState.initial();
     return currentState.filteredTasks
+        .whereType<task_entity.Task>()
         .where((t) => t.priority == task_entity.TaskPriority.low)
         .toList();
   }

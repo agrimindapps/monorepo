@@ -151,6 +151,15 @@ class UnexpectedFailure extends UnknownFailure {
   });
 }
 
+/// Falha de limite atingido (free tier)
+class LimitReachedFailure extends Failure {
+  const LimitReachedFailure(
+    String message, {
+    super.code,
+    super.details,
+  }) : super(message: message);
+}
+
 /// Extensions para facilitar o uso
 extension FailureExtension on Failure {
   /// Retorna true se é uma falha de rede

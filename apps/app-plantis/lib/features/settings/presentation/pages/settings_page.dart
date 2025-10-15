@@ -44,7 +44,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     actions: [
                       Consumer(
                         builder: (context, ref, _) {
-                          final themeMode = ref.watch(theme.themeProvider);
+                          final themeMode = ref.watch(theme.themeModeProvider);
                           return Semantics(
                             label: 'Alterar tema',
                             hint:
@@ -68,7 +68,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                         const SizedBox(height: 8),
                         _buildPremiumSectionCard(context, appTheme),
                         const SizedBox(height: 8),
-                        _buildConfigSection(context, appTheme, settingsState),
+                        settingsState.when(
+                          data: (settings) => _buildConfigSection(context, appTheme, settings),
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (error, _) => Center(child: Text('Erro: $error')),
+                        ),
                         const SizedBox(height: 8),
                         _buildSupportSection(context, appTheme),
                         const SizedBox(height: 8),
@@ -854,12 +858,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     String subtitle,
     IconData icon,
   ) {
-    final currentThemeMode = ref.watch(theme.themeProvider);
+    final currentThemeMode = ref.watch(theme.themeModeProvider);
     final isSelected = currentThemeMode == mode;
 
     return InkWell(
       onTap: () {
-        ref.read(theme.themeNotifierProvider.notifier).setThemeMode(mode);
+        ref.read(theme.themeProvider.notifier).setThemeMode(mode);
         Navigator.of(context).pop();
       },
       borderRadius: BorderRadius.circular(12),

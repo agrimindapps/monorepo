@@ -122,9 +122,9 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
   Future<void> _loadPlants() async {
     setState(() => _isLoadingPlants = true);
 
-    await ref.read(plantsProvider.notifier).refreshPlants();
+    await ref.read(plantsNotifierProvider.notifier).refreshPlants();
 
-    final plantsAsync = ref.read(plantsProvider);
+    final plantsAsync = ref.read(plantsNotifierProvider);
     final plants = plantsAsync.maybeWhen(
       data: (state) => state.allPlants,
       orElse: () => <Plant>[],

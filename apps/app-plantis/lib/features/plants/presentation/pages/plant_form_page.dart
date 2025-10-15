@@ -202,7 +202,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
   void _handleSaveSuccess() {
     if (!mounted) return;
 
-    unawaited(ref.read(riverpod_plants.plantsProvider.notifier).refreshPlants());
+    unawaited(ref.read(riverpod_plants.plantsNotifierProvider.notifier).refreshPlants());
     if (kDebugMode) {
       print('✅ PlantFormPage: Plant list refresh triggered.');
     }

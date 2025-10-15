@@ -21,27 +21,25 @@ import 'plants_loading_widget.dart';
 /// I - Segregación de interfaces: Interfaces específicas para cada responsabilidad
 /// D - Inversión de dependencias: Depende de abstracciones
 
-class EnhancedPlantsListView extends StatefulWidget {
+class EnhancedPlantsListView extends ConsumerStatefulWidget {
   const EnhancedPlantsListView({super.key});
 
   @override
-  State<EnhancedPlantsListView> createState() => _EnhancedPlantsListViewState();
+  ConsumerState<EnhancedPlantsListView> createState() => _EnhancedPlantsListViewState();
 }
 
-class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
+class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
     with WidgetsBindingObserver
     implements
         ISearchDelegate,
         IViewModeDelegate,
         IPlantCardActions,
         ITaskDataProvider {
-  late PlantsProvider _plantsProvider;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _plantsProvider = di.sl<PlantsProvider>();
     WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,25 +58,26 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      _plantsProvider.refreshPlants();
+      ref.read(plantsNotifierProvider.notifier).refreshPlants();
     }
   }
   @override
   void onSearchChanged(String query) {
+    final notifier = ref.read(plantsNotifierProvider.notifier);
     if (query.trim().isEmpty) {
-      _plantsProvider.clearSearch();
+      notifier.clearSearch();
     } else {
-      _plantsProvider.searchPlants(query);
+      notifier.searchPlants(query);
     }
   }
 
   @override
   void onClearSearch() {
-    _plantsProvider.clearSearch();
+    ref.read(plantsNotifierProvider.notifier).clearSearch();
   }
   @override
   void onViewModeChanged(AppBarViewMode mode) {
-    _plantsProvider.setViewMode(
+    ref.read(plantsNotifierProvider.notifier).setViewMode(
       mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
     );
   }
@@ -130,11 +129,12 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
   }
 
   Future<void> _loadInitialData() async {
-    await _plantsProvider.loadPlants();
+    await ref.read(plantsNotifierProvider.notifier).loadPlants();
   }
 
   Future<void> _onRefresh() async {
-    _plantsProvider.clearError();
+    final notifier = ref.read(plantsNotifierProvider.notifier);
+    notifier.clearError();
     await _loadInitialData();
   }
 
@@ -164,7 +164,7 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
               ElevatedButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
-                  await _plantsProvider.deletePlant(plant.id);
+                  await ref.read(plantsNotifierProvider.notifier).deletePlant(plant.id);
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -184,6 +184,62 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
     );
   }
 
+  Widget _buildAppBar() {
+    final state = ref.watch(plantsNotifierProvider);
+
+    return EnhancedPlantsAppBar(
+      plantsCount: state.plants.length,
+      searchQuery: state.searchQuery,
+      viewMode:
+          state.viewMode == ViewMode.grid
+              ? AppBarViewMode.grid
+              : AppBarViewMode.list,
+      searchDelegate: this,
+      viewModeDelegate: this,
+      showSearchBar: true,
+    );
+  }
+
+  Widget _buildContent() {
+    final state = ref.watch(plantsNotifierProvider);
+
+    if (state.isLoading && state.plants.isEmpty) {
+      return const PlantsLoadingWidget();
+    }
+
+    if (state.error != null && state.plants.isEmpty) {
+      return PlantsErrorWidget(
+        error: state.error!,
+        onRetry: _loadInitialData,
+      );
+    }
+
+    final plantsToShow =
+        state.searchQuery.isNotEmpty
+            ? state.searchResults
+            : state.plants;
+
+    if (plantsToShow.isEmpty) {
+      return EmptyPlantsWidget(
+        isSearching: state.searchQuery.isNotEmpty,
+        searchQuery: state.searchQuery,
+        onClearSearch: onClearSearch,
+        onAddPlant: _showAddPlantModal,
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: _EnhancedPlantsContent(
+        plants: plantsToShow,
+        viewMode: state.viewMode,
+        scrollController: _scrollController,
+        actions: this,
+        taskProvider: this,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -193,61 +249,8 @@ class _EnhancedPlantsListViewState extends State<EnhancedPlantsListView>
         body: SafeArea(
           child: Column(
             children: [
-              Consumer(
-                builder: (context, ref, child) {
-                  final state = ref.watch(plantsNotifierProvider);
-
-                  return EnhancedPlantsAppBar(
-                    plantsCount: state.plants.length,
-                    searchQuery: state.searchQuery,
-                    viewMode:
-                        state.viewMode == ViewMode.grid
-                            ? AppBarViewMode.grid
-                            : AppBarViewMode.list,
-                    searchDelegate: this,
-                    viewModeDelegate: this,
-                    showSearchBar: true,
-                  );
-                },
-              ),
-              Expanded(
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final state = ref.watch(plantsNotifierProvider);
-                    if (state.isLoading && state.plants.isEmpty) {
-                      return const PlantsLoadingWidget();
-                    }
-                    if (state.error != null && state.plants.isEmpty) {
-                      return PlantsErrorWidget(
-                        error: state.error!,
-                        onRetry: _loadInitialData,
-                      );
-                    }
-                    final plantsToShow =
-                        state.searchQuery.isNotEmpty
-                            ? state.searchResults
-                            : state.plants;
-                    if (plantsToShow.isEmpty) {
-                      return EmptyPlantsWidget(
-                        isSearching: state.searchQuery.isNotEmpty,
-                        searchQuery: state.searchQuery,
-                        onClearSearch: onClearSearch,
-                        onAddPlant: _showAddPlantModal,
-                      );
-                    }
-                    return RefreshIndicator(
-                      onRefresh: _onRefresh,
-                      child: _EnhancedPlantsContent(
-                        plants: plantsToShow,
-                        viewMode: state.viewMode,
-                        scrollController: _scrollController,
-                        actions: this,
-                        taskProvider: this,
-                      ),
-                    );
-                  },
-                ),
-              ),
+              _buildAppBar(),
+              Expanded(child: _buildContent()),
             ],
           ),
         ),

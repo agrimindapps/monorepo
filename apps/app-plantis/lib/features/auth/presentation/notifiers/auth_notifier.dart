@@ -90,7 +90,7 @@ class AuthNotifier extends _$AuthNotifier {
   late final ISubscriptionRepository? _subscriptionRepository;
   late final AuthStateNotifier _authStateNotifier;
   late final ResetPasswordUseCase _resetPasswordUseCase;
-  late final BackgroundSyncProvider? _backgroundSyncProvider;
+  late final BackgroundSync? _backgroundSyncNotifier;
   late final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
   late final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
   late final EnhancedAccountDeletionService _enhancedDeletionService;
@@ -107,7 +107,7 @@ class AuthNotifier extends _$AuthNotifier {
     _subscriptionRepository = ref.read(subscriptionRepositoryProvider);
     _authStateNotifier = AuthStateNotifier.instance;
     _resetPasswordUseCase = ref.read(resetPasswordUseCaseProvider);
-    _backgroundSyncProvider = ref.read(backgroundSyncProviderProvider);
+    _backgroundSyncNotifier = ref.read(backgroundSyncNotifierProvider);
     _validateDeviceUseCase = ref.read(validateDeviceUseCaseProvider);
     _revokeDeviceUseCase = ref.read(revokeDeviceUseCaseProvider);
     _enhancedDeletionService = ref.read(enhancedAccountDeletionServiceProvider);
@@ -428,7 +428,7 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Triggers background sync without blocking UI
   void _triggerBackgroundSyncIfNeeded(String userId) {
-    if (_backgroundSyncProvider == null) {
+    if (_backgroundSyncNotifier == null) {
       if (kDebugMode) {
         debugPrint('⚠️ BackgroundSyncProvider não disponível');
       }
@@ -438,7 +438,7 @@ class AuthNotifier extends _$AuthNotifier {
     final currentState = state.valueOrNull ?? const AuthState();
     unawaited(Future.delayed(const Duration(milliseconds: 100), () {
       if (currentState.isAuthenticated && !currentState.isAnonymous) {
-        _backgroundSyncProvider.startBackgroundSync(
+        _backgroundSyncNotifier!.startBackgroundSync(
           userId: userId,
           isInitialSync: true,
         );
@@ -448,7 +448,7 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Cancel ongoing sync
   void cancelSync() {
-    _backgroundSyncProvider?.cancelSync();
+    _backgroundSyncNotifier?.cancelSync();
   }
 
   /// Retry sync after login
@@ -458,7 +458,7 @@ class AuthNotifier extends _$AuthNotifier {
       return;
     }
 
-    await _backgroundSyncProvider?.retrySync(currentState.currentUser!.id);
+    await _backgroundSyncNotifier?.retrySync(currentState.currentUser!.id);
   }
 
   /// Logout
@@ -493,7 +493,7 @@ class AuthNotifier extends _$AuthNotifier {
                 currentOperation: null,
               ),
         );
-        _backgroundSyncProvider?.resetSyncState();
+        _backgroundSyncNotifier?.resetSyncState();
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
         _analytics?.logLogout();
@@ -625,17 +625,19 @@ class AuthNotifier extends _$AuthNotifier {
       return;
     }
 
-    if (_backgroundSyncProvider?.shouldStartInitialSync(
-          currentState.currentUser!.id,
-        ) ==
-        true) {
+    // Check if sync is needed using the shouldStartInitialSync provider
+    final shouldSync = ref.read(
+      shouldStartInitialSyncProvider(currentState.currentUser!.id),
+    );
+
+    if (shouldSync) {
       if (kDebugMode) {
         debugPrint(
           '🔄 Iniciando auto-sync em background para usuário não anônimo',
         );
       }
 
-      await _backgroundSyncProvider?.startBackgroundSync(
+      await _backgroundSyncNotifier?.startBackgroundSync(
         userId: currentState.currentUser!.id,
         isInitialSync: true,
       );
@@ -849,18 +851,27 @@ class AuthNotifier extends _$AuthNotifier {
             currentOperation: null,
           ),
     );
-    _backgroundSyncProvider?.resetSyncState();
+    _backgroundSyncNotifier?.resetSyncState();
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
   }
-  bool get isSyncInProgress =>
-      _backgroundSyncProvider?.isSyncInProgress ?? false;
+  bool get isSyncInProgress {
+    if (_backgroundSyncNotifier == null) return false;
+    final syncState = ref.read(backgroundSyncProvider);
+    return syncState.isSyncInProgress;
+  }
 
-  bool get hasPerformedInitialSync =>
-      _backgroundSyncProvider?.hasPerformedInitialSync ?? false;
+  bool get hasPerformedInitialSync {
+    if (_backgroundSyncNotifier == null) return false;
+    final syncState = ref.read(backgroundSyncProvider);
+    return syncState.hasPerformedInitialSync;
+  }
 
-  String get syncMessage =>
-      _backgroundSyncProvider?.currentSyncMessage ?? 'Sincronizando dados...';
+  String get syncMessage {
+    if (_backgroundSyncNotifier == null) return 'Sincronizando dados...';
+    final syncState = ref.read(backgroundSyncProvider);
+    return syncState.currentSyncMessage;
+  }
 }
 
 @riverpod
@@ -916,9 +927,10 @@ EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
 }
 
 @riverpod
-BackgroundSyncProvider? backgroundSyncProvider(Ref ref) {
+BackgroundSync? backgroundSyncNotifier(Ref ref) {
   try {
-    return GetIt.instance<BackgroundSyncProvider>();
+    // Return the notifier instance from Riverpod
+    return ref.read(backgroundSyncProvider.notifier);
   } catch (e) {
     return null;
   }

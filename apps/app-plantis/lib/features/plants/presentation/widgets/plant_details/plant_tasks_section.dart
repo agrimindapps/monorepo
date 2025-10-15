@@ -24,9 +24,10 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
 
   @override
   Widget build(BuildContext context) {
-    final taskProvider = ref.watch(plantTaskProviderProvider);
+    final taskState = ref.watch(plantTaskNotifierProvider);
+    final taskProvider = ref.read(plantTaskNotifierProvider.notifier);
 
-    if (taskProvider.isLoading) {
+    if (taskState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 

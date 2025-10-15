@@ -197,22 +197,42 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
   }
 }
 
-// Dependency providers (to be defined in DI setup)
+// Dependency providers using GetIt
 @riverpod
 GetPlantByIdUseCase getPlantByIdUseCase(GetPlantByIdUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<GetPlantByIdUseCase>();
 }
 
 @riverpod
 DeletePlantUseCase deletePlantUseCase(DeletePlantUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<DeletePlantUseCase>();
 }
 
 @riverpod
 UpdatePlantUseCase updatePlantUseCase(UpdatePlantUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<UpdatePlantUseCase>();
 }
 
 /// Alias for backwards compatibility with existing code
 /// Use plantDetailsNotifierProvider instead in new code
 final plantDetailsProviderProvider = plantDetailsNotifierProvider;
+
+/// Compatibility wrapper class for PlantDetailsController
+/// This class wraps the Riverpod notifier to provide a compatible interface
+/// with the old Provider-based PlantDetailsController
+class PlantDetailsProvider {
+  final PlantDetailsNotifier _notifier;
+  final PlantDetailsState _state;
+
+  PlantDetailsProvider(this._notifier, this._state);
+
+  Plant? get plant => _state.plant;
+  bool get isLoading => _state.isLoading;
+  String? get errorMessage => _state.errorMessage;
+  bool get hasError => _state.hasError;
+
+  Future<void> loadPlant(String plantId) => _notifier.loadPlant(plantId);
+  Future<void> reloadPlant(String plantId) => _notifier.reloadPlant(plantId);
+  Future<bool> deletePlant() => _notifier.deletePlant();
+  void clearError() => _notifier.clearError();
+}

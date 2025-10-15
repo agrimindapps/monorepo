@@ -91,8 +91,10 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         );
       }
 
-      final provider = ref.read(plantDetailsProviderProvider);
-      final taskProvider = ref.read(plantTaskProviderProvider);
+      final notifier = ref.read(plantDetailsNotifierProvider.notifier);
+      final state = ref.read(plantDetailsNotifierProvider);
+      final provider = PlantDetailsProvider(notifier, state);
+      final taskProvider = ref.read(plantTaskNotifierProvider.notifier);
 
       if (kDebugMode) {
         print('✅ PlantDetailsView._initializeController - Providers loaded');
@@ -146,11 +148,12 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     if (!mounted) return;
     final result = await PlantFormDialog.show(context, plantId: plantId);
     if (result == true && mounted) {
-      final provider = ref.read(plantDetailsProviderProvider);
-      await provider.reloadPlant(plantId);
+      final notifier = ref.read(plantDetailsNotifierProvider.notifier);
+      await notifier.reloadPlant(plantId);
       if (kDebugMode) {
+        final state = ref.read(plantDetailsNotifierProvider);
         print(
-          '✅ PlantDetailsView - Plant reloaded after edit: ${provider.plant?.name}',
+          '✅ PlantDetailsView - Plant reloaded after edit: ${state.plant?.name}',
         );
       }
     }
@@ -175,13 +178,13 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
 
   @override
   Widget build(BuildContext context) {
-    final plantDetailsProvider = ref.watch(plantDetailsProviderProvider);
+    final plantDetailsState = ref.watch(plantDetailsNotifierProvider);
 
     return BasePageScaffold(
       body: ResponsiveLayout(
         child: Builder(
           builder: (context) {
-            final details = plantDetailsProvider;
+            final details = plantDetailsState;
             final plant = details.plant;
 
             if (details.isLoading && plant == null) {
@@ -244,11 +247,11 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       try {
-        final provider = ref.read(plantDetailsProviderProvider);
-        if (provider.plant != null) {
+        final state = ref.read(plantDetailsNotifierProvider);
+        if (state.plant != null) {
           final tasks = taskProvider.getTasksForPlant(widget.plantId);
           if (tasks.isEmpty) {
-            taskProvider.generateTasksForPlant(provider.plant!);
+            taskProvider.generateTasksForPlant(state.plant!);
           }
         }
       } catch (e) {
@@ -316,7 +319,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       try {
-        ref.read(plantsProviderProvider).refreshPlants();
+        ref.read(plantsNotifierProvider.notifier).refreshPlants();
         if (kDebugMode) {
           print(
             '✅ _syncPlantDeletion: Refresh requested for plantId: $plantId',
@@ -336,7 +339,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     Future.delayed(const Duration(milliseconds: 200), () {
       if (!mounted) return;
       try {
-        ref.read(plantsProviderProvider).refreshPlants();
+        ref.read(plantsNotifierProvider.notifier).refreshPlants();
         if (kDebugMode) {
           print('✅ _notifyListScreenUpdate: Plants list refresh requested.');
         }

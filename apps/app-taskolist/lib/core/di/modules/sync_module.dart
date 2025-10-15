@@ -18,12 +18,12 @@ abstract class TaskolistSyncDIModule {
     try {
       // TaskManagerSyncService já está inicializado no construtor
       if (kDebugMode) {
-        print('✅ TaskManagerSyncService initialized successfully');
+        debugPrint('✅ TaskManagerSyncService initialized successfully');
       }
       _setupConnectivityMonitoring();
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error initializing TaskManagerSyncService: $e');
+        debugPrint('❌ Error initializing TaskManagerSyncService: $e');
       }
     }
   }
@@ -33,13 +33,13 @@ abstract class TaskolistSyncDIModule {
     try {
       // TaskManagerSyncService já tem monitoramento interno
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ Connectivity monitoring already integrated in TaskManagerSyncService',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ Failed to setup connectivity monitoring: $e');
+        debugPrint('⚠️ Failed to setup connectivity monitoring: $e');
       }
     }
   }
@@ -54,14 +54,14 @@ abstract class TaskolistSyncDIModule {
       // Vamos verificar se está sincronizando
       if (syncService.isSyncing) {
         if (kDebugMode) {
-          print('ℹ️ Skipping initial sync - service is already syncing');
+          debugPrint('ℹ️ Skipping initial sync - service is already syncing');
         }
         return;
       }
 
       if (kDebugMode) {
-        print('🔄 Starting initial sync for Taskolist...');
-        print('ℹ️ Premium-only sync with 5min auto-sync interval');
+        debugPrint('🔄 Starting initial sync for Taskolist...');
+        debugPrint('ℹ️ Premium-only sync with 5min auto-sync interval');
       }
 
       // Precisamos obter o userId e isPremium de algum lugar
@@ -71,7 +71,7 @@ abstract class TaskolistSyncDIModule {
 
       if (currentUser == null) {
         if (kDebugMode) {
-          print('ℹ️ Skipping sync - no user logged in');
+          debugPrint('ℹ️ Skipping sync - no user logged in');
         }
         return;
       }
@@ -84,18 +84,18 @@ abstract class TaskolistSyncDIModule {
       result.fold(
         (Failure failure) {
           if (kDebugMode) {
-            print('⚠️ Initial sync failed: ${failure.message}');
+            debugPrint('⚠️ Initial sync failed: ${failure.message}');
           }
         },
         (_) {
           if (kDebugMode) {
-            print('✅ Initial sync completed successfully');
+            debugPrint('✅ Initial sync completed successfully');
           }
         },
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error during initial sync: $e');
+        debugPrint('❌ Error during initial sync: $e');
       }
     }
   }
@@ -109,11 +109,11 @@ abstract class TaskolistSyncDIModule {
       syncService.dispose();
 
       if (kDebugMode) {
-        print('✅ Sync service disposed successfully');
+        debugPrint('✅ Sync service disposed successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error disposing sync service: $e');
+        debugPrint('❌ Error disposing sync service: $e');
       }
     }
   }
@@ -126,15 +126,15 @@ abstract class TaskolistSyncDIModule {
       final syncService = local_di.getIt<TaskManagerSyncService>();
 
       if (kDebugMode) {
-        print('📊 TaskManagerSyncService Statistics:');
-        print('   Auto-sync enabled: ✅ (5min intervals)');
-        print('   Currently syncing: ${syncService.isSyncing}');
-        print('   Premium-only sync: ✅');
+        debugPrint('📊 TaskManagerSyncService Statistics:');
+        debugPrint('   Auto-sync enabled: ✅ (5min intervals)');
+        debugPrint('   Currently syncing: ${syncService.isSyncing}');
+        debugPrint('   Premium-only sync: ✅');
         // Outras estatísticas não estão disponíveis no TaskManagerSyncService atual
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error getting sync statistics: $e');
+        debugPrint('❌ Error getting sync statistics: $e');
       }
     }
   }
@@ -150,7 +150,7 @@ abstract class TaskolistSyncDIModule {
 
       if (currentUser == null) {
         if (kDebugMode) {
-          print('ℹ️ Skipping tasks sync - no user logged in');
+          debugPrint('ℹ️ Skipping tasks sync - no user logged in');
         }
         return;
       }
@@ -163,18 +163,18 @@ abstract class TaskolistSyncDIModule {
       result.fold(
         (Failure failure) {
           if (kDebugMode) {
-            print('⚠️ Tasks sync failed: ${failure.message}');
+            debugPrint('⚠️ Tasks sync failed: ${failure.message}');
           }
         },
         (_) {
           if (kDebugMode) {
-            print('✅ Tasks sync completed');
+            debugPrint('✅ Tasks sync completed');
           }
         },
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error syncing tasks: $e');
+        debugPrint('❌ Error syncing tasks: $e');
       }
     }
   }
@@ -190,7 +190,7 @@ abstract class TaskolistSyncDIModule {
 
       if (currentUser == null) {
         if (kDebugMode) {
-          print('ℹ️ Skipping projects sync - no user logged in');
+          debugPrint('ℹ️ Skipping projects sync - no user logged in');
         }
         return;
       }
@@ -203,18 +203,18 @@ abstract class TaskolistSyncDIModule {
       result.fold(
         (Failure failure) {
           if (kDebugMode) {
-            print('⚠️ Projects sync failed: ${failure.message}');
+            debugPrint('⚠️ Projects sync failed: ${failure.message}');
           }
         },
         (_) {
           if (kDebugMode) {
-            print('✅ Projects sync completed');
+            debugPrint('✅ Projects sync completed');
           }
         },
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error syncing projects: $e');
+        debugPrint('❌ Error syncing projects: $e');
       }
     }
   }

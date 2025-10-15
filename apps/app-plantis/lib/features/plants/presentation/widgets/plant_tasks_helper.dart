@@ -22,6 +22,7 @@ class PlantTasksHelper {
       final tasksState = tasksAsync.value!;
       final plantTasks =
           tasksState.allTasks
+              .whereType<task_entity.Task>()
               .where((task) => task.plantId == plantId)
               .toList();
       final pendingTasks =
@@ -45,11 +46,12 @@ class PlantTasksHelper {
       final tasksState = tasksAsync.value!;
       final overdueTasks =
           tasksState.allTasks
+              .whereType<task_entity.Task>()
               .where(
                 (task) =>
-                    task.plantId == plantId &&
-                    task.status == task_entity.TaskStatus.pending &&
-                    task.isOverdue,
+                  task.plantId == plantId &&
+                  task.status == task_entity.TaskStatus.pending &&
+                  task.isOverdue,
               )
               .length;
 

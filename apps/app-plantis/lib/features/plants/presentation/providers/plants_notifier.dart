@@ -22,11 +22,6 @@ export 'plants_state.dart';
 
 part 'plants_notifier.g.dart';
 
-// MIGRATION COMPATIBILITY: Alias for old provider name
-// TODO: Update all references to use plantsNotifierProvider instead
-@Deprecated('Use plantsNotifierProvider instead')
-final plantsProviderProvider = plantsNotifierProvider;
-
 /// Plants Notifier refactored with specialized services
 /// Now follows Single Responsibility Principle using Facade pattern
 ///

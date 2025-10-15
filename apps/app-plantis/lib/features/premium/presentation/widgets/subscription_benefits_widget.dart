@@ -9,18 +9,15 @@ import '../providers/premium_provider.dart';
 /// - Listar recursos premium específicos para plantas
 /// - Dois estilos: moderno (marketing) e card (subscription ativa)
 /// - Icons temáticos de plantas
-/// - Integração com provider para lista de recursos
 ///
 /// Estilos:
 /// - Modern: Para marketing/conversão (fundo transparente)
 /// - Card: Para usuários ativos (background card)
 class PlantisSubscriptionBenefitsWidget extends StatelessWidget {
-  final PremiumProvider provider;
   final bool showModernStyle;
 
   const PlantisSubscriptionBenefitsWidget({
     super.key,
-    required this.provider,
     this.showModernStyle = false,
   });
 

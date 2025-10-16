@@ -1,0 +1,29 @@
+{
+  "name": "br.com.agrimind.pragasdasoja",
+  "displayName": "receituagro",
+  "version": "1.0.0",
+  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "author": "Apache Cordova Team",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "cordova-android": "^10.1.2",
+    "cordova-plugin-purchase": "^10.6.1"
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-purchase": {
+        "BILLING_KEY": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjR5jKR5gEW+zDlCFRi9ZYzzex0iUydzc7IBJSs9w4xtyu6qnldA+Doe5/2DH/dzbDIQxqZz2Bx/O3/8MMnIq2A7R0gwL6XlBISpEFXPg1zOxE/T4tkGSAeYYHSJ25LGmQeb0+FoyVcOyIi9Q1wZP8bm/17/RVRuRX/jau3yPcd66WpwMfnmo9xANhxAEQk+eUa19k3jXzI1GqB9PuxpipRS6LvUOKtTw6r82bpfLClpjHKc0AjimQ2a4AiuW+a7XKVAbYdvuFxwFSNg0qyT3U5acxtXHIHtHZjg8yi9ZTKDxkEaYmRcJVOvrg78CVjv+EO1rkAZttHyrKwBtg2tjnQIDAQAB"
+      }
+    },
+    "platforms": [
+      "android"
+    ]
+  }
+}

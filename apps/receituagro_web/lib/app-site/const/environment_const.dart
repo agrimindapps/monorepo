@@ -1,4 +1,6 @@
-import 'package:get/get.dart';
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../services/info_device_service.dart';
 
@@ -26,30 +28,32 @@ class Environment {
   ];
 
   void initialize() {
+    final bool isAndroid = !kIsWeb && Platform.isAndroid;
+
     if (InfoDeviceService().isProduction.value) {
-      admobBanner = GetPlatform.isAndroid
+      admobBanner = isAndroid
           ? prod['admobBanner-android']
           : prod['admobBanner-ios'];
-      onOpenApp = GetPlatform.isAndroid
+      onOpenApp = isAndroid
           ? prod['onOpenApp-android']
           : prod['onOpenApp-ios'];
-      admobPremiado = GetPlatform.isAndroid
+      admobPremiado = isAndroid
           ? prod['admobPremiado-android']
           : prod['admobPremiado-ios'];
-      altAdmobBanner = GetPlatform.isAndroid
+      altAdmobBanner = isAndroid
           ? prod['altAdmobBanner-android']
           : prod['altAdmobBanner-ios'];
     } else {
-      admobBanner = GetPlatform.isAndroid
+      admobBanner = isAndroid
           ? hml['admobBanner-android']
           : hml['admobBanner-ios'];
-      onOpenApp = GetPlatform.isAndroid
+      onOpenApp = isAndroid
           ? hml['onOpenApp-android']
           : hml['onOpenApp-ios'];
-      admobPremiado = GetPlatform.isAndroid
+      admobPremiado = isAndroid
           ? hml['admobPremiado-android']
           : hml['admobPremiado-ios'];
-      altAdmobBanner = GetPlatform.isAndroid
+      altAdmobBanner = isAndroid
           ? hml['altAdmobBanner-android']
           : hml['altAdmobBanner-ios'];
     }

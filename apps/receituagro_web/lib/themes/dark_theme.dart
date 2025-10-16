@@ -193,7 +193,7 @@ ThemeData darkTheme = ThemeData(
   bottomSheetTheme: const BottomSheetThemeData(
     backgroundColor: Color.fromRGBO(23, 25, 27, 1),
   ),
-  bottomAppBarTheme: const BottomAppBarTheme(
+  bottomAppBarTheme: const BottomAppBarThemeData(
     color: Color.fromRGBO(23, 25, 27, 1),
   ),
   primaryTextTheme: const TextTheme(

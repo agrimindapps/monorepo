@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'diagnostico_mockup_tokens.dart';
 
 /// Widget que replica EXATAMENTE o design da seção de cultura do mockup IMG_3186.PNG
-/// 
+///
 /// Layout do mockup analisado:
 /// - Container com background cinza claro
 /// - Ícone verde de folha (🌿)
 /// - Texto "Cultura (X diagnóstico/s)" em negrito
 /// - Padding e margins específicos
-/// 
+///
 /// Responsabilidade única: renderizar cabeçalho de agrupamento por cultura
 class CulturaSectionMockupWidget extends StatelessWidget {
   final String cultura;
@@ -28,7 +28,7 @@ class CulturaSectionMockupWidget extends StatelessWidget {
     return RepaintBoundary(
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 0),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
@@ -46,7 +46,6 @@ class CulturaSectionMockupWidget extends StatelessWidget {
       ),
     );
   }
-
 
   /// Texto da cultura
   Widget _buildText(ThemeData theme) {
@@ -148,7 +147,6 @@ class CulturaSectionMockupExpanded extends StatelessWidget {
 
     return RepaintBoundary(child: child);
   }
-
 
   /// Texto da cultura
   Widget _buildText(ThemeData theme) {

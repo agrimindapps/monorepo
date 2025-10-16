@@ -410,8 +410,19 @@ class _DefensivosUnificadoPageState
 
   /// Constrói lista de grupos
   Widget _buildGroupsList(DefensivosDrillDownState drillDown) {
+    // Aplica ordenação aos grupos
+    final gruposOrdenados = List<DefensivoGroupEntity>.from(
+      drillDown.filteredGroups,
+    );
+    gruposOrdenados.sort((a, b) {
+      final comparison = a.nome.toLowerCase().compareTo(
+        b.nome.toLowerCase(),
+      );
+      return _isAscending ? comparison : -comparison;
+    });
+
     return DefensivosGroupListWidget(
-      grupos: drillDown.filteredGroups,
+      grupos: gruposOrdenados,
       onGroupTap: _onGroupTap,
       onClearFilters: _clearSearch,
       searchText: _searchText,
@@ -423,8 +434,19 @@ class _DefensivosUnificadoPageState
     DefensivosDrillDownState drillDown,
     DefensivosUnificadoState state,
   ) {
+    // Aplica ordenação aos items do drill-down
+    final defensivosOrdenados = List<DefensivoEntity>.from(
+      drillDown.currentGroupItems,
+    );
+    defensivosOrdenados.sort((a, b) {
+      final comparison = a.displayName.toLowerCase().compareTo(
+        b.displayName.toLowerCase(),
+      );
+      return _isAscending ? comparison : -comparison;
+    });
+
     return DefensivosListWidget(
-      defensivos: drillDown.currentGroupItems,
+      defensivos: defensivosOrdenados,
       modoComparacao: state.modoComparacao,
       defensivosSelecionados: state.defensivosSelecionados,
       onTap: _navegarParaDetalhes,

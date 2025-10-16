@@ -111,7 +111,14 @@ class _DiagnosticoDefensivoDialogWidgetState
           case 'periodoAplicacao':
             return widget.diagnostico.periodoAplicacao?.toString();
           case 'id':
-            return widget.diagnostico.id?.toString();
+            // Tenta múltiplas variações de ID
+            return widget.diagnostico.id?.toString() ??
+                   widget.diagnostico.idReg?.toString() ??
+                   widget.diagnostico.objectId?.toString();
+          case 'idReg':
+            return widget.diagnostico.idReg?.toString();
+          case 'objectId':
+            return widget.diagnostico.objectId?.toString();
           case 'aplicacaoTerrestre':
             return widget.diagnostico.aplicacaoTerrestre?.toString();
           case 'aplicacaoAerea':
@@ -144,20 +151,32 @@ class _DiagnosticoDefensivoDialogWidgetState
 
   /// Navega para a página de detalhes do diagnóstico
   void _navigateToDetailedDiagnostic(BuildContext context) {
-    final diagnosticoId = _getProperty('id');
+    // Tenta múltiplas variações de ID
+    final diagnosticoId = _getProperty('id') ??
+                          _getProperty('idReg') ??
+                          _getProperty('objectId');
+
+    final nomeDefensivo = _getProperty('nomeDefensivo', 'nome') ?? widget.defensivoName;
     final nomePraga = _getProperty('nomePraga', 'grupo') ?? 'Não especificado';
     final cultura = _getProperty('cultura') ?? 'Não especificada';
 
-    if (diagnosticoId != null) {
+    if (diagnosticoId != null && diagnosticoId.isNotEmpty) {
       Navigator.of(context).pushNamed(
         '/detalhe-diagnostico',
         arguments: {
           'diagnosticoId': diagnosticoId,
-          'nomeDefensivo': widget.defensivoName,
+          'nomeDefensivo': nomeDefensivo,
           'nomePraga': nomePraga,
           'cultura': cultura,
         },
       );
+    } else {
+      // Debug log para ajudar a identificar o problema
+      debugPrint('❌ [DiagnosticoDefensivoDialog] ID do diagnóstico não encontrado');
+      debugPrint('   diagnostico type: ${widget.diagnostico.runtimeType}');
+      if (widget.diagnostico is Map) {
+        debugPrint('   keys: ${(widget.diagnostico as Map).keys.toList()}');
+      }
     }
   }
 

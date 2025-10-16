@@ -1,7 +1,8 @@
 import 'package:core/core.dart';
 
-// ❌ REMOVIDO: favoritos_repository_simplified.dart (registrado via @LazySingleton)
+import 'data/repositories/favoritos_repository_simplified.dart';
 import 'data/services/favoritos_service.dart';
+import 'domain/repositories/i_favoritos_repository.dart';
 // import 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED: Migrando para Riverpod
 
 /// Dependency Injection ULTRA SIMPLIFICADO para Favoritos
@@ -32,6 +33,16 @@ class FavoritosDI {
     );
 
     _servicesRegistered = true;
+  }
+
+  /// Registra FavoritosRepositorySimplified como classe concreta (chamado DEPOIS do Injectable)
+  /// ⚠️ IFavoritosRepository já foi registrado via @LazySingleton pelo Injectable
+  static void registerRepository() {
+    if (!_getIt.isRegistered<FavoritosRepositorySimplified>()) {
+      // Registra a classe concreta usando a mesma instância registrada como interface
+      final repository = _getIt<IFavoritosRepository>() as FavoritosRepositorySimplified;
+      _getIt.registerLazySingleton<FavoritosRepositorySimplified>(() => repository);
+    }
   }
 
   /// Método legado (mantido para compatibilidade) - agora só registra services

@@ -5,15 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
-import 'core/di/receituagro_data_setup.dart';
 import 'core/navigation/app_router.dart' as app_router;
-import 'core/navigation/widgets/navigation_shell.dart';
 import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
-import 'core/services/culturas_data_loader.dart';
-import 'core/services/diagnosticos_data_loader.dart';
 import 'core/services/firebase_messaging_service.dart';
 import 'core/services/premium_service.dart';
+import 'core/services/prioritized_data_loader.dart';
 import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
 import 'core/services/remote_config_service.dart';
@@ -157,38 +154,28 @@ void main() async {
       DiagnosticoLogger.serviceInit('AppDataManager', 'Hive pronto');
     },
   );
+  // 🚀 CARREGAMENTO PRIORIZADO DE DADOS
+  // Fase 1: Dados prioritários (bloqueante) - Culturas, Pragas, Fitossanitários
   try {
     DiagnosticoLogger.debug(
-      'Iniciando ReceitaAgroDataSetup após AppDataManager...',
+      '🚀 [PHASE 1] Carregando dados prioritários (culturas, pragas, fitossanitários)...',
     );
-    await ReceitaAgroDataSetup.initialize();
-    DiagnosticoLogger.debug('ReceitaAgroDataSetup concluído com sucesso');
-    DiagnosticoLogger.debug(
-      'Verificando status dos diagnósticos após setup...',
-    );
-    final diagnosticosStats = await DiagnosticosDataLoader.getStats();
-    DiagnosticoLogger.dataOperation(
-      'Diagnósticos Stats',
-      diagnosticosStats.toString(),
-    );
-    if (diagnosticosStats['total_diagnosticos'] == 0) {
+    await PrioritizedDataLoader.loadPriorityData();
+
+    final isPriorityReady = await PrioritizedDataLoader.isPriorityDataReady();
+    if (isPriorityReady) {
       DiagnosticoLogger.debug(
-        'Nenhum diagnóstico encontrado, forçando carregamento...',
+        '✅ [PHASE 1] Dados prioritários carregados - app pronto para iniciar',
       );
-      try {
-        await DiagnosticosDataLoader.forceReload();
-        final newStats = await DiagnosticosDataLoader.getStats();
-        DiagnosticoLogger.dataOperation(
-          'Diagnósticos após reload forçado',
-          newStats.toString(),
-        );
-      } catch (reloadError) {
-        DiagnosticoLogger.debug('Erro no reload forçado', reloadError);
-      }
+    } else {
+      DiagnosticoLogger.warning(
+        '⚠️ [PHASE 1] Dados prioritários não carregados completamente',
+        null,
+      );
     }
   } catch (e) {
     DiagnosticoLogger.warning(
-      'ReceitaAgroDataSetup falhou, mas AppDataManager já carregou os dados',
+      '❌ [PHASE 1] Erro ao carregar dados prioritários',
       e,
     );
     DiagnosticoLogger.debug('Stack trace do erro: ${StackTrace.current}');
@@ -196,17 +183,22 @@ void main() async {
       await _crashlyticsRepository.recordError(
         exception: e,
         stackTrace: StackTrace.current,
-        reason: 'ReceitaAgroDataSetup failed but AppDataManager succeeded',
+        reason: 'Priority data loading failed',
         fatal: false,
       );
     }
   }
-  DiagnosticoLogger.debug('Carregando dados de culturas...');
-  await CulturasDataLoader.loadCulturasData();
-  DiagnosticoLogger.debug('Dados de culturas carregados com sucesso.');
   if (!kIsWeb) {
     await _performanceRepository.markFirstFrame();
   }
+
+  // 🔄 FASE 2: Dados secundários (não-bloqueante) - Diagnósticos em background
+  // Inicia carregamento mas NÃO aguarda - app já pode iniciar
+  DiagnosticoLogger.debug(
+    '⏳ [PHASE 2] Iniciando carregamento em background (diagnósticos)...',
+  );
+  PrioritizedDataLoader.loadBackgroundData();
+
   runApp(const ProviderScope(child: ReceitaAgroApp()));
 }
 

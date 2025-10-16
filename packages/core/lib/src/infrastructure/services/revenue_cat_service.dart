@@ -51,14 +51,27 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
         _isInitialized = true;
         return;
       }
-      final apiKey = EnvironmentConfig.getApiKey('REVENUE_CAT_API_KEY');
 
-      if (apiKey.isEmpty) {
-        throw PlatformException(
-          code: 'MISSING_API_KEY',
-          message: 'RevenueCat API key not configured. Please set REVENUE_CAT_API_KEY in environment.',
-        );
+      // Determina a API Key baseada na plataforma
+      String apiKey;
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        apiKey = 'appl_QXSaVxUhpIkHBdHyBHAGvjxTxTR'; // iOS API Key
+        debugPrint('[RevenueCat] Usando API Key do iOS');
+      } else if (defaultTargetPlatform == TargetPlatform.android) {
+        apiKey = 'goog_JYcfxEUeRnReVEdsLkShLQnzCmf'; // Android API Key
+        debugPrint('[RevenueCat] Usando API Key do Android');
+      } else {
+        // Fallback para variável de ambiente se não for iOS nem Android
+        apiKey = EnvironmentConfig.getApiKey('REVENUE_CAT_API_KEY');
+        if (apiKey.isEmpty) {
+          throw PlatformException(
+            code: 'MISSING_API_KEY',
+            message: 'RevenueCat API key not configured. Please set REVENUE_CAT_API_KEY in environment.',
+          );
+        }
       }
+
+      debugPrint('[RevenueCat] Configurando SDK...');
 
       await Purchases.setLogLevel(
         EnvironmentConfig.isDebugMode ? LogLevel.debug : LogLevel.info,
@@ -69,9 +82,10 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
       Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
 
       _isInitialized = true;
+      debugPrint('[RevenueCat] SDK configurado com sucesso');
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('[RevenueCat] Initialization error: ${e.runtimeType}');
+        debugPrint('[RevenueCat] Initialization error: $e');
       }
     }
   }
@@ -152,14 +166,26 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
     required List<String> productIds,
   }) async {
     try {
+      debugPrint('🔍 [RevenueCat] Buscando produtos: ${productIds.join(", ")}');
+
       await _ensureInitialized();
-      
+      debugPrint('✅ [RevenueCat] SDK inicializado');
+
       final offerings = await Purchases.getOfferings();
+      debugPrint('📦 [RevenueCat] ${offerings.all.length} offering(s) disponível(is)');
+
       final products = <ProductInfo>[];
+      int totalPackages = 0;
 
       for (final offering in offerings.all.values) {
+        debugPrint('   🏷️  Offering: ${offering.identifier}');
         for (final package in offering.availablePackages) {
-          if (productIds.contains(package.storeProduct.identifier)) {
+          totalPackages++;
+          final identifier = package.storeProduct.identifier;
+          debugPrint('      - Package: $identifier (${package.storeProduct.priceString})');
+
+          if (productIds.contains(identifier)) {
+            debugPrint('         ✓ MATCH! Adicionando produto');
             final productInfo = _mapStoreProductToProductInfo(
               package.storeProduct,
             );
@@ -168,10 +194,22 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
         }
       }
 
+      debugPrint('📊 [RevenueCat] Resumo:');
+      debugPrint('   - Total packages verificados: $totalPackages');
+      debugPrint('   - Produtos encontrados: ${products.length}');
+
+      if (products.isEmpty) {
+        debugPrint('⚠️ [RevenueCat] ATENÇÃO: Nenhum produto encontrado!');
+        debugPrint('   Produtos procurados: ${productIds.join(", ")}');
+        debugPrint('   Verifique se os product IDs estão corretos no RevenueCat Dashboard');
+      }
+
       return Right(products);
     } on PlatformException catch (e) {
+      debugPrint('❌ [RevenueCat] PlatformException: ${e.code} - ${e.message}');
       return Left(RevenueCatFailure(_mapRevenueCatError(e)));
     } catch (e) {
+      debugPrint('❌ [RevenueCat] Erro inesperado: $e');
       return Left(RevenueCatFailure('Erro ao obter produtos: $e'));
     }
   }
@@ -352,8 +390,9 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
   @override
   Future<Either<Failure, List<ProductInfo>>> getReceitaAgroProducts() async {
     return getAvailableProducts(productIds: [
-      EnvironmentConfig.getProductId('receituagro_monthly'),
-      EnvironmentConfig.getProductId('receituagro_yearly'),
+      'receituagro_ass_mensal2',    // Plano mensal
+      'receituagro_ass_semestral',  // Plano semestral
+      'receituagro_ass_anual',      // Plano anual
     ]);
   }
 

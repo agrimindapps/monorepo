@@ -14,7 +14,9 @@ import 'favoritos_validator_service.dart';
 /// Service consolidado para Favoritos com Specialized Services
 /// Reduzido de 915 linhas para ~250 linhas usando delegation pattern
 class FavoritosService {
-  final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
+  // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
+  late final FavoritosHiveRepository _repository;
+  bool _repositoryInitialized = false;
 
   // Specialized Services
   late final FavoritosDataResolverService _dataResolver;
@@ -29,11 +31,20 @@ class FavoritosService {
     _cache = FavoritosCacheServiceInline();
   }
 
+  // Getter lazy para repository (inicializado na primeira vez que é acessado)
+  FavoritosHiveRepository get repo {
+    if (!_repositoryInitialized) {
+      _repository = sl<FavoritosHiveRepository>();
+      _repositoryInitialized = true;
+    }
+    return _repository;
+  }
+
   // ========== STORAGE/CRUD OPERATIONS ==========
 
   Future<List<String>> getFavoriteIds(String tipo) async {
     try {
-      final favoritos = await _repository.getFavoritosByTipoAsync(tipo);
+      final favoritos = await repo.getFavoritosByTipoAsync(tipo);
       return favoritos.map((f) => f.itemId).toList();
     } catch (e) {
       throw FavoritosException('Erro ao buscar IDs favoritos: $e', tipo: tipo);
@@ -67,7 +78,7 @@ class FavoritosService {
         'adicionadoEm': DateTime.now().toIso8601String(),
       };
 
-      final result = await _repository.addFavorito(tipo, id, itemData);
+      final result = await repo.addFavorito(tipo, id, itemData);
 
       if (result) {
         await _cache.clearForTipo(tipo);
@@ -113,7 +124,7 @@ class FavoritosService {
         return false;
       }
 
-      final result = await _repository.removeFavorito(tipo, id);
+      final result = await repo.removeFavorito(tipo, id);
 
       if (result) {
         await _cache.clearForTipo(tipo);
@@ -147,7 +158,7 @@ class FavoritosService {
   Future<bool> isFavoriteId(String tipo, String id) async {
     try {
       if (!_validator.isValidTipo(tipo)) return false;
-      return await _repository.isFavorito(tipo, id);
+      return await repo.isFavorito(tipo, id);
     } catch (e) {
       throw FavoritosException(
         'Erro ao verificar favorito: $e',
@@ -160,7 +171,7 @@ class FavoritosService {
   Future<void> clearFavorites(String tipo) async {
     try {
       if (!_validator.isValidTipo(tipo)) return;
-      await _repository.clearFavoritosByTipo(tipo);
+      await repo.clearFavoritosByTipo(tipo);
       await _cache.clearForTipo(tipo);
     } catch (e) {
       throw FavoritosException('Erro ao limpar favoritos: $e', tipo: tipo);
@@ -267,7 +278,7 @@ class FavoritosService {
 
   Future<FavoritosStats> getStats() async {
     try {
-      final stats = await _repository.getFavoritosStats();
+      final stats = await repo.getFavoritosStats();
       return FavoritosStats(
         totalDefensivos: stats['defensivos'] ?? 0,
         totalPragas: stats['pragas'] ?? 0,

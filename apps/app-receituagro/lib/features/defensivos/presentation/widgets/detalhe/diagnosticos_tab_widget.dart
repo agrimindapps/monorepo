@@ -117,7 +117,9 @@ class DiagnosticosTabWidget extends ConsumerWidget {
             }
 
             if (widgetSnapshot.hasError) {
-              return Center(child: Text('Erro ao ordenar: ${widgetSnapshot.error}'));
+              return Center(
+                child: Text('Erro ao ordenar: ${widgetSnapshot.error}'),
+              );
             }
 
             return widgetSnapshot.data ?? const SizedBox.shrink();
@@ -186,7 +188,9 @@ class DiagnosticosTabWidget extends ConsumerWidget {
   }
 
   /// Constrói widgets agrupados por cultura usando ListView.separated
-  Future<Widget> _buildGroupedWidgets(Map<String, List<dynamic>> groupedDiagnostics) async {
+  Future<Widget> _buildGroupedWidgets(
+    Map<String, List<dynamic>> groupedDiagnostics,
+  ) async {
     // Ordena culturas alfabeticamente
     final culturasOrdenadas = groupedDiagnostics.keys.toList()..sort();
 
@@ -205,10 +209,14 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         String nomePraga = '';
 
         if (diagnostic is Map<String, dynamic>) {
-          nomePraga = (diagnostic['nomePraga'] ?? diagnostic['grupo'] ?? '').toString();
+          nomePraga = (diagnostic['nomePraga'] ?? diagnostic['grupo'] ?? '')
+              .toString();
         } else {
           try {
-            nomePraga = diagnostic.nomePraga?.toString() ?? diagnostic.grupo?.toString() ?? '';
+            nomePraga =
+                diagnostic.nomePraga?.toString() ??
+                diagnostic.grupo?.toString() ??
+                '';
           } catch (e) {
             nomePraga = '';
           }
@@ -247,12 +255,16 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       }
 
       // Ordena por nome
-      diagnosticsComNomes.sort((a, b) =>
-        a.value.toLowerCase().trim().compareTo(b.value.toLowerCase().trim())
+      diagnosticsComNomes.sort(
+        (a, b) => a.value.toLowerCase().trim().compareTo(
+          b.value.toLowerCase().trim(),
+        ),
       );
 
       // Extrai apenas os diagnósticos ordenados
-      final diagnosticsOrdenados = diagnosticsComNomes.map((e) => e.key).toList();
+      final diagnosticsOrdenados = diagnosticsComNomes
+          .map((e) => e.key)
+          .toList();
 
       // Adiciona header da cultura
       flatList.add(
@@ -275,17 +287,18 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       itemCount: flatList.length,
       separatorBuilder: (context, index) {
         final currentItem = flatList[index];
-        final nextItem =
-            index + 1 < flatList.length ? flatList[index + 1] : null;
+        final nextItem = index + 1 < flatList.length
+            ? flatList[index + 1]
+            : null;
 
         // Espaçamento após header
         if (currentItem.isHeader) {
-          return const SizedBox(height: 8);
+          return const SizedBox(height: 2);
         }
 
         // Espaçamento maior antes do próximo header
         if (nextItem != null && nextItem.isHeader) {
-          return const SizedBox(height: 16);
+          return const SizedBox(height: 2);
         }
 
         // Divider entre cards
@@ -303,13 +316,12 @@ class DiagnosticosTabWidget extends ConsumerWidget {
         }
 
         return Builder(
-          builder:
-              (context) => DiagnosticoDefensivoListItemWidget(
-                diagnostico: item.diagnostic!,
-                onTap: () => _showDiagnosticoDialog(context, item.diagnostic!),
-                isDense: true,
-                hasElevation: false,
-              ),
+          builder: (context) => DiagnosticoDefensivoListItemWidget(
+            diagnostico: item.diagnostic!,
+            onTap: () => _showDiagnosticoDialog(context, item.diagnostic!),
+            isDense: true,
+            hasElevation: false,
+          ),
         );
       },
     );

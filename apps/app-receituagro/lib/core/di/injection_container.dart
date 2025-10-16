@@ -53,9 +53,10 @@ Future<void> init() async {
   // ⚠️ IMPORTANTE: Registrar datasources e services SEM @injectable ANTES do Injectable
   // O Injectable precisa deles para criar repositories via @LazySingleton
   await DeviceManagementDI.registerDataSources(sl);
-  FavoritosDI.registerServices(); // ⚠️ Registra apenas FavoritosService (sem @injectable)
+  FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritosHiveRepository no construtor)
 
   await injectable.configureDependencies();
+  FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
   configureAllRepositoriesDependencies();
   sl.registerLazySingleton<core.IAppDataCleaner>(
     () => ReceitaAgroDataCleaner(),

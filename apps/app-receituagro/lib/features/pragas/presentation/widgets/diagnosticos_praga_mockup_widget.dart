@@ -31,30 +31,29 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return RepaintBoundary(
       child: Card(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildFiltersMockup(ref),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  top: SpacingTokens.xs,
-                  bottom: SpacingTokens.bottomNavSpace,
-                ),
-                child: DiagnosticoStateManager(
-                  builder:
-                      (diagnosticos) => Builder(
-                        builder:
-                            (context) => _buildDiagnosticsMockupList(
-                              diagnosticos,
-                              context,
-                            ),
-                      ),
-                  onRetry: () => _retryLoadDiagnostics(context, ref),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildFiltersMockup(ref),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(
+                    top: SpacingTokens.xs,
+                    bottom: SpacingTokens.bottomNavSpace,
+                  ),
+                  child: DiagnosticoStateManager(
+                    builder: (diagnosticos) => Builder(
+                      builder: (context) =>
+                          _buildDiagnosticsMockupList(diagnosticos, context),
+                    ),
+                    onRetry: () => _retryLoadDiagnostics(context, ref),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -65,22 +64,21 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
     final state = ref.watch(diagnosticosPragaNotifierProvider);
 
     return state.when(
-      data:
-          (data) => FiltersMockupWidget(
-            searchText: data.searchQuery,
-            selectedFilter: data.selectedCultura,
-            onSearchChanged: (value) {
-              ref
-                  .read(diagnosticosPragaNotifierProvider.notifier)
-                  .updateSearchQuery(value);
-            },
-            onFilterChanged: (value) {
-              ref
-                  .read(diagnosticosPragaNotifierProvider.notifier)
-                  .updateSelectedCultura(value);
-            },
-            filterOptions: data.culturas,
-          ),
+      data: (data) => FiltersMockupWidget(
+        searchText: data.searchQuery,
+        selectedFilter: data.selectedCultura,
+        onSearchChanged: (value) {
+          ref
+              .read(diagnosticosPragaNotifierProvider.notifier)
+              .updateSearchQuery(value);
+        },
+        onFilterChanged: (value) {
+          ref
+              .read(diagnosticosPragaNotifierProvider.notifier)
+              .updateSelectedCultura(value);
+        },
+        filterOptions: data.culturas,
+      ),
       loading: () => const SizedBox(height: 48),
       error: (error, _) => const SizedBox(height: 48),
     );
@@ -155,8 +153,9 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
       itemCount: flatList.length,
       separatorBuilder: (context, index) {
         final currentItem = flatList[index];
-        final nextItem =
-            index + 1 < flatList.length ? flatList[index + 1] : null;
+        final nextItem = index + 1 < flatList.length
+            ? flatList[index + 1]
+            : null;
 
         // Espaçamento após header
         if (currentItem.isHeader) {
@@ -182,7 +181,7 @@ class DiagnosticosPragaMockupWidget extends ConsumerWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           child: DiagnosticoMockupCardFactory.create(
             diagnostico: item.diagnostic!,
             onTap: () => _showDiagnosticoDialog(context, item.diagnostic!),
@@ -223,16 +222,15 @@ class _DiagnosticosPragaTransitionWidgetState
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: DiagnosticoMockupTokens.filterAnimationDuration,
-      child:
-          widget.useMockupLayout
-              ? DiagnosticosPragaMockupWidget(
-                key: const ValueKey('mockup'),
-                pragaName: widget.pragaName,
-              )
-              : DiagnosticosPragaMockupWidget(
-                key: const ValueKey('original'),
-                pragaName: widget.pragaName,
-              ),
+      child: widget.useMockupLayout
+          ? DiagnosticosPragaMockupWidget(
+              key: const ValueKey('mockup'),
+              pragaName: widget.pragaName,
+            )
+          : DiagnosticosPragaMockupWidget(
+              key: const ValueKey('original'),
+              pragaName: widget.pragaName,
+            ),
     );
   }
 }
@@ -278,32 +276,30 @@ class _DiagnosticosPragaMockupDebugWidgetState
         final state = ref.watch(diagnosticosPragaNotifierProvider);
 
         return state.when(
-          data:
-              (data) => Container(
-                color: Colors.yellow.shade100,
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          data: (data) => Container(
+            color: Colors.yellow.shade100,
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('DEBUG: Diagnósticos Mockup'),
+                Text('Total: ${data.diagnosticos.length}'),
+                Text('Filtrados: ${data.filteredDiagnosticos.length}'),
+                Text('Culturas: ${data.groupedDiagnosticos.keys.length}'),
+                Row(
                   children: [
-                    const Text('DEBUG: Diagnósticos Mockup'),
-                    Text('Total: ${data.diagnosticos.length}'),
-                    Text('Filtrados: ${data.filteredDiagnosticos.length}'),
-                    Text('Culturas: ${data.groupedDiagnosticos.keys.length}'),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _useMockupLayout,
-                          onChanged:
-                              (value) => setState(() {
-                                _useMockupLayout = value ?? true;
-                              }),
-                        ),
-                        const Text('Layout Mockup'),
-                      ],
+                    Checkbox(
+                      value: _useMockupLayout,
+                      onChanged: (value) => setState(() {
+                        _useMockupLayout = value ?? true;
+                      }),
                     ),
+                    const Text('Layout Mockup'),
                   ],
                 ),
-              ),
+              ],
+            ),
+          ),
           loading: () => const SizedBox.shrink(),
           error: (error, _) => const SizedBox.shrink(),
         );
@@ -313,10 +309,9 @@ class _DiagnosticosPragaMockupDebugWidgetState
 
   Widget _buildDebugToggle() {
     return GestureDetector(
-      onLongPress:
-          () => setState(() {
-            _showDebugInfo = !_showDebugInfo;
-          }),
+      onLongPress: () => setState(() {
+        _showDebugInfo = !_showDebugInfo;
+      }),
       child: Container(height: 4, color: Colors.transparent),
     );
   }

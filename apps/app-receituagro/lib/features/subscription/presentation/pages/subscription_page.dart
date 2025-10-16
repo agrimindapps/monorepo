@@ -157,47 +157,45 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   /// View para seleção de planos (usuário sem subscription)
   Widget _buildPlansView() {
-    return const Expanded(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Tenha acesso ilimitado\na todos os recursos',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w400,
-                  height: 1.3,
-                ),
+    return const SingleChildScrollView(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          SizedBox(height: 20),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Tenha acesso ilimitado\na todos os recursos',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.w400,
+                height: 1.3,
               ),
             ),
+          ),
 
-            SizedBox(height: 24),
-            SubscriptionPlansWidget(),
+          SizedBox(height: 24),
+          SubscriptionPlansWidget(),
 
-            SizedBox(height: 24),
-            SubscriptionBenefitsWidget(
-              showModernStyle: true, // Estilo moderno para marketing
-            ),
+          SizedBox(height: 24),
+          SubscriptionBenefitsWidget(
+            showModernStyle: true, // Estilo moderno para marketing
+          ),
 
-            SizedBox(height: 32),
-            PaymentActionsWidget(
-              showPurchaseButton: true,
-            ),
+          SizedBox(height: 32),
+          PaymentActionsWidget(
+            showPurchaseButton: true,
+          ),
 
-            SizedBox(height: 16),
-            PaymentActionsWidget(
-              showFooterLinks: true,
-            ),
+          SizedBox(height: 16),
+          PaymentActionsWidget(
+            showFooterLinks: true,
+          ),
 
-            SizedBox(height: 24),
-          ],
-        ),
+          SizedBox(height: 24),
+        ],
       ),
     );
   }

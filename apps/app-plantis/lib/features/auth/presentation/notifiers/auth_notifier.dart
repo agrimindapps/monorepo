@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/providers/analytics_provider.dart';
-import '../../../../core/providers/background_sync_provider.dart';
+import '../../../../core/providers/background_sync_notifier.dart';
+import '../../../../core/providers/background_sync_provider.dart'
+    show BackgroundSync, backgroundSyncProvider, shouldStartInitialSyncProvider;
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../../../device_management/data/models/device_model.dart';
@@ -66,6 +68,7 @@ class AuthState {
       deviceLimitExceeded: deviceLimitExceeded ?? this.deviceLimitExceeded,
     );
   }
+
   AuthState withoutUser() {
     return AuthState(
       currentUser: null,
@@ -107,7 +110,9 @@ class AuthNotifier extends _$AuthNotifier {
     _subscriptionRepository = ref.read(subscriptionRepositoryProvider);
     _authStateNotifier = AuthStateNotifier.instance;
     _resetPasswordUseCase = ref.read(resetPasswordUseCaseProvider);
-    _backgroundSyncNotifier = ref.read(backgroundSyncNotifierProvider);
+    _backgroundSyncNotifier = ref.read(
+      backgroundSyncNotifierProvider as ProviderListenable<BackgroundSync?>,
+    );
     _validateDeviceUseCase = ref.read(validateDeviceUseCaseProvider);
     _revokeDeviceUseCase = ref.read(revokeDeviceUseCaseProvider);
     _enhancedDeletionService = ref.read(enhancedAccountDeletionServiceProvider);
@@ -129,9 +134,7 @@ class AuthNotifier extends _$AuthNotifier {
           await signInAnonymously();
           return;
         }
-        state = AsyncValue.data(
-          currentState.copyWith(currentUser: user),
-        );
+        state = AsyncValue.data(currentState.copyWith(currentUser: user));
         await _completeAuthInitialization(user);
       },
       onError: (Object error) {
@@ -152,14 +155,13 @@ class AuthNotifier extends _$AuthNotifier {
       },
     );
     if (_subscriptionRepository != null) {
-      _subscriptionStream =
-          _subscriptionRepository.subscriptionStatus.listen((subscription) {
+      _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
+        subscription,
+      ) {
         final isPremium = subscription?.isActive ?? false;
         final currentState = state.valueOrNull ?? const AuthState();
 
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: isPremium),
-        );
+        state = AsyncValue.data(currentState.copyWith(isPremium: isPremium));
 
         _authStateNotifier.updatePremiumStatus(isPremium);
       });
@@ -182,9 +184,7 @@ class AuthNotifier extends _$AuthNotifier {
         await _checkPremiumStatus();
         _triggerBackgroundSyncIfNeeded(user.id);
       } else {
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: false),
-        );
+        state = AsyncValue.data(currentState.copyWith(isPremium: false));
         _authStateNotifier.updatePremiumStatus(false);
       }
 
@@ -194,9 +194,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
       }
 
-      state = AsyncValue.data(
-        currentState.copyWith(isInitialized: true),
-      );
+      state = AsyncValue.data(currentState.copyWith(isInitialized: true));
       _authStateNotifier.updateInitializationStatus(true);
     } catch (e) {
       if (kDebugMode) {
@@ -241,15 +239,11 @@ class AuthNotifier extends _$AuthNotifier {
             'Erro verificar premium: ${DataSanitizationService.sanitizeForLogging(failure.message)}',
           );
         }
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: false),
-        );
+        state = AsyncValue.data(currentState.copyWith(isPremium: false));
         _authStateNotifier.updatePremiumStatus(false);
       },
       (hasPremium) {
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: hasPremium),
-        );
+        state = AsyncValue.data(currentState.copyWith(isPremium: hasPremium));
         _authStateNotifier.updatePremiumStatus(hasPremium);
       },
     );
@@ -399,9 +393,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
     } finally {
       final newState = state.valueOrNull ?? const AuthState();
-      state = AsyncValue.data(
-        newState.copyWith(isValidatingDevice: false),
-      );
+      state = AsyncValue.data(newState.copyWith(isValidatingDevice: false));
     }
   }
 
@@ -418,12 +410,14 @@ class AuthNotifier extends _$AuthNotifier {
       'user_id': currentState.currentUser?.id ?? 'unknown',
       'device_count': 3,
     });
-    unawaited(Future.delayed(const Duration(milliseconds: 1500), () {
-      final newState = state.valueOrNull ?? const AuthState();
-      if (newState.deviceLimitExceeded) {
-        logout();
-      }
-    }));
+    unawaited(
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        final newState = state.valueOrNull ?? const AuthState();
+        if (newState.deviceLimitExceeded) {
+          logout();
+        }
+      }),
+    );
   }
 
   /// Triggers background sync without blocking UI
@@ -436,14 +430,16 @@ class AuthNotifier extends _$AuthNotifier {
     }
 
     final currentState = state.valueOrNull ?? const AuthState();
-    unawaited(Future.delayed(const Duration(milliseconds: 100), () {
-      if (currentState.isAuthenticated && !currentState.isAnonymous) {
-        _backgroundSyncNotifier!.startBackgroundSync(
-          userId: userId,
-          isInitialSync: true,
-        );
-      }
-    }));
+    unawaited(
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (currentState.isAuthenticated && !currentState.isAnonymous) {
+          _backgroundSyncNotifier!.startBackgroundSync(
+            userId: userId,
+            isInitialSync: true,
+          );
+        }
+      }),
+    );
   }
 
   /// Cancel ongoing sync
@@ -489,9 +485,9 @@ class AuthNotifier extends _$AuthNotifier {
         final newState = state.valueOrNull ?? const AuthState();
         state = AsyncValue.data(
           newState.withoutUser().copyWith(
-                isLoading: false,
-                currentOperation: null,
-              ),
+            isLoading: false,
+            currentOperation: null,
+          ),
         );
         _backgroundSyncNotifier?.resetSyncState();
         _authStateNotifier.updateUser(null);
@@ -760,12 +756,14 @@ class AuthNotifier extends _$AuthNotifier {
           '❌ Device cleanup: Unexpected error during logout cleanup - $e',
         );
       }
-      unawaited(_analytics?.logEvent('device_cleanup_error', {
-            'context': 'logout',
-            'error': e.toString(),
-            'user_id': currentState.currentUser?.id ?? 'unknown',
-          }) ??
-          Future.value());
+      unawaited(
+        _analytics?.logEvent('device_cleanup_error', {
+              'context': 'logout',
+              'error': e.toString(),
+              'user_id': currentState.currentUser?.id ?? 'unknown',
+            }) ??
+            Future.value(),
+      );
     }
   }
 
@@ -846,15 +844,16 @@ class AuthNotifier extends _$AuthNotifier {
 
     state = AsyncValue.data(
       currentState.withoutUser().copyWith(
-            isLoading: false,
-            errorMessage: null,
-            currentOperation: null,
-          ),
+        isLoading: false,
+        errorMessage: null,
+        currentOperation: null,
+      ),
     );
     _backgroundSyncNotifier?.resetSyncState();
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
   }
+
   bool get isSyncInProgress {
     if (_backgroundSyncNotifier == null) return false;
     final syncState = ref.read(backgroundSyncProvider);

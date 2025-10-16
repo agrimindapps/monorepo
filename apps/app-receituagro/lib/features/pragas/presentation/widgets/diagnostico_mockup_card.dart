@@ -35,13 +35,13 @@ class DiagnosticoMockupCard extends StatelessWidget {
 
     return RepaintBoundary(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 0),
         // Sem boxShadow para visual plano como na página de defensivos
         child: ListTile(
           onTap: onTap,
           dense: true, // Modo denso
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
+            horizontal: 8.0,
             vertical: 0.0,
           ),
           leading: _buildIcon(),
@@ -110,12 +110,6 @@ class DiagnosticoMockupCard extends StatelessWidget {
     return const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          DiagnosticoMockupTokens.premiumIcon,
-          color: DiagnosticoMockupTokens.premiumWarning,
-          size: DiagnosticoMockupTokens.premiumIconSize,
-        ),
-        SizedBox(width: 8),
         Icon(
           DiagnosticoMockupTokens.chevronIcon,
           color: DiagnosticoMockupTokens.chevronColor,

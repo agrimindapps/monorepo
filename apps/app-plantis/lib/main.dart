@@ -143,8 +143,9 @@ Future<void> _initializeFirebaseServices() async {
       'app_initialized',
       parameters: {
         'platform': 'mobile',
-        'environment':
-            EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+        'environment': EnvironmentConfig.enableAnalytics
+            ? 'production'
+            : 'development',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       },
     );

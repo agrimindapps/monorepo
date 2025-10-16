@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/usecases/get_available_products.dart';
@@ -164,10 +165,24 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
 
   /// Carrega os produtos disponíveis para compra
   Future<List<ProductInfo>> _loadAvailableProducts() async {
+    debugPrint('🛒 [SubscriptionNotifier] Iniciando carregamento de produtos...');
+
     final result = await _getAvailableProductsUseCase(const NoParams());
+
     return result.fold(
-      (failure) => [],
-      (products) => products,
+      (failure) {
+        debugPrint('❌ [SubscriptionNotifier] Erro ao carregar produtos: ${failure.message}');
+        return [];
+      },
+      (products) {
+        debugPrint('✅ [SubscriptionNotifier] ${products.length} produto(s) carregado(s):');
+        for (final product in products) {
+          debugPrint('   📦 ${product.productId}: ${product.priceString}');
+          debugPrint('      - Título: ${product.title}');
+          debugPrint('      - Descrição: ${product.description}');
+        }
+        return products;
+      },
     );
   }
 
@@ -218,10 +233,19 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     if (currentState == null) return;
 
     try {
+      // Mapeia o plano selecionado para o product ID correto
       final selectedProduct = currentState.availableProducts.firstWhere(
-        (product) => currentState.selectedPlan == 'yearly'
-            ? product.subscriptionPeriod?.contains('year') == true
-            : product.subscriptionPeriod?.contains('month') == true,
+        (product) {
+          final planType = currentState.selectedPlan;
+          if (planType == 'yearly') {
+            return product.productId.contains('anual');
+          } else if (planType == 'monthly') {
+            return product.productId.contains('mensal');
+          } else if (planType == 'semiannual') {
+            return product.productId.contains('semestral');
+          }
+          return false;
+        },
         orElse: () => currentState.availableProducts.isNotEmpty
             ? currentState.availableProducts.first
             : throw Exception('Nenhum produto disponível'),

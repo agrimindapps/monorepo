@@ -225,7 +225,7 @@ class CultureDropdown extends StatelessWidget {
         isExpanded: true,
         underline: const SizedBox(),
         icon: Icon(
-          Icons.agriculture,
+          Icons.eco,
           color: theme.colorScheme.primary,
           size: 20,
         ),

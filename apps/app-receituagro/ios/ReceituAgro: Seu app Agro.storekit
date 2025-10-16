@@ -1,0 +1,135 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "3353A651",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "967785485",
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_developerTeamID" : "EQ49UUE2EY",
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 782274157.80880296,
+    "_locale" : "en_US",
+    "_renewalBillingIssuesEnabled" : false,
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "20472579",
+      "localizations" : [
+
+      ],
+      "name" : "Assinaturas Receituagro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "7.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "1427421997",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso a conteúdo exclusivo a assinantes",
+              "displayName" : "Assinatura Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "receituagro_ass_anual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Assinatura Anual",
+          "subscriptionGroupID" : "20472579",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "0.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1427417155",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso a conteúdo exclusivo a assinantes",
+              "displayName" : "Assinatura Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "receituagro_ass_mensal2",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Assinatura Mensal",
+          "subscriptionGroupID" : "20472579",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "3.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "1427418244",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Acesso a conteúdo exclusivo a assinantes",
+              "displayName" : "Assinatura Semestral",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "receituagro_ass_semestral",
+          "recurringSubscriptionPeriod" : "P6M",
+          "referenceName" : "Assinatura Semestral",
+          "subscriptionGroupID" : "20472579",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

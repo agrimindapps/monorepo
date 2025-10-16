@@ -1,0 +1,142 @@
+{
+  "identifier" : "ReceituagroStoreKit",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "pt_BR",
+    "_storefront" : "BRA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptions" : [
+    {
+      "adHocOffers" : [
+
+      ],
+      "codeOffers" : [
+
+      ],
+      "displayPrice" : "R$ 10,90",
+      "familyShareable" : false,
+      "groupNumber" : 1,
+      "internalID" : "receituagro_mensal",
+      "introductoryOffer" : null,
+      "localizations" : [
+        {
+          "description" : "Acesso premium mensal ao ReceitaAgro",
+          "displayName" : "ReceitaAgro Premium Mensal",
+          "locale" : "pt_BR"
+        }
+      ],
+      "productID" : "receituagro_ass_mensal2",
+      "recurringSubscriptionPeriod" : "P1M",
+      "referenceName" : "ReceitaAgro Mensal",
+      "subscriptionGroupID" : "receituagro_premium",
+      "type" : "RecurringSubscription"
+    },
+    {
+      "adHocOffers" : [
+
+      ],
+      "codeOffers" : [
+
+      ],
+      "displayPrice" : "R$ 54,90",
+      "familyShareable" : false,
+      "groupNumber" : 1,
+      "internalID" : "receituagro_semestral",
+      "introductoryOffer" : null,
+      "localizations" : [
+        {
+          "description" : "Acesso premium semestral ao ReceitaAgro",
+          "displayName" : "ReceitaAgro Premium Semestral",
+          "locale" : "pt_BR"
+        }
+      ],
+      "productID" : "receituagro_ass_semestral",
+      "recurringSubscriptionPeriod" : "P6M",
+      "referenceName" : "ReceitaAgro Semestral",
+      "subscriptionGroupID" : "receituagro_premium",
+      "type" : "RecurringSubscription"
+    },
+    {
+      "adHocOffers" : [
+
+      ],
+      "codeOffers" : [
+
+      ],
+      "displayPrice" : "R$ 100,90",
+      "familyShareable" : false,
+      "groupNumber" : 1,
+      "internalID" : "receituagro_anual",
+      "introductoryOffer" : null,
+      "localizations" : [
+        {
+          "description" : "Acesso premium anual ao ReceitaAgro - Melhor valor!",
+          "displayName" : "ReceitaAgro Premium Anual",
+          "locale" : "pt_BR"
+        }
+      ],
+      "productID" : "receituagro_ass_anual",
+      "recurringSubscriptionPeriod" : "P1Y",
+      "referenceName" : "ReceitaAgro Anual",
+      "subscriptionGroupID" : "receituagro_premium",
+      "type" : "RecurringSubscription"
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

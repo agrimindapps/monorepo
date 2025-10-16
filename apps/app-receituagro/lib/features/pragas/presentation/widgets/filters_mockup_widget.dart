@@ -4,14 +4,14 @@ import 'diagnostico_mockup_tokens.dart';
 
 /// Widget que replica EXATAMENTE o design dos filtros do mockup IMG_3186.PNG
 /// com melhorias visuais aplicadas baseadas no detalhe de defensivos
-/// 
+///
 /// Layout do mockup analisado:
 /// - Row com 2 campos flexíveis com comportamento responsivo
 /// - Campo esquerdo: "Localizar" com ícone lupa verde e focus behavior
 /// - Campo direito: "Todas" com ícone calendário verde (oculta quando search tem foco)
 /// - Background branco, bordas sutis com tema consciente
 /// - Border radius específico e shadows melhoradas
-/// 
+///
 /// Responsabilidade única: renderizar filtros superiores pixel-perfect com UX melhorada
 class FiltersMockupWidget extends StatefulWidget {
   final String searchText;
@@ -60,14 +60,16 @@ class _FiltersMockupWidgetState extends State<FiltersMockupWidget> {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
         child: Row(
           children: [
             AnimatedContainer(
               duration: DiagnosticoMockupTokens.focusAnimationDuration,
-              width: _isSearchFocused 
-                ? MediaQuery.of(context).size.width - 64 // Largura total menos padding
-                : (MediaQuery.of(context).size.width - 76) / 2, // Metade da largura menos padding e spacing
+              width: _isSearchFocused
+                  ? MediaQuery.of(context).size.width -
+                        64 // Largura total menos padding
+                  : (MediaQuery.of(context).size.width - 28) /
+                        2, // Metade da largura menos padding e spacing
               child: _SearchFieldMockup(
                 text: widget.searchText,
                 onChanged: widget.onSearchChanged,
@@ -79,7 +81,7 @@ class _FiltersMockupWidgetState extends State<FiltersMockupWidget> {
               width: _isSearchFocused ? 0 : 12, // Espaçamento animado
               child: _isSearchFocused ? null : const SizedBox(width: 12),
             ),
-            
+
             if (!_isSearchFocused)
               AnimatedContainer(
                 duration: DiagnosticoMockupTokens.focusAnimationDuration,
@@ -176,7 +178,10 @@ class _SearchFieldMockupState extends State<_SearchFieldMockup> {
             size: 20,
           ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 14.0,
+          ),
           isDense: true,
         ),
       ),
@@ -184,7 +189,7 @@ class _SearchFieldMockupState extends State<_SearchFieldMockup> {
   }
 }
 
-/// Dropdown "Todas" exatamente como no mockup  
+/// Dropdown "Todas" exatamente como no mockup
 class _FilterDropdownMockup extends StatelessWidget {
   final String value;
   final List<String> options;
@@ -249,22 +254,20 @@ class _FilterDropdownMockup extends StatelessWidget {
 class FiltersMockupProviderWrapper extends StatelessWidget {
   final Widget Function(
     String searchText,
-    String selectedFilter, 
+    String selectedFilter,
     ValueChanged<String> onSearchChanged,
     ValueChanged<String> onFilterChanged,
     List<String> filterOptions,
-  ) builder;
+  )
+  builder;
 
-  const FiltersMockupProviderWrapper({
-    super.key,
-    required this.builder,
-  });
+  const FiltersMockupProviderWrapper({super.key, required this.builder});
 
   @override
   Widget build(BuildContext context) {
     return builder(
       '', // searchText
-      'Todas', // selectedFilter  
+      'Todas', // selectedFilter
       (value) {}, // onSearchChanged
       (value) {}, // onFilterChanged
       ['Todas', 'Arroz', 'Braquiária', 'Cana-de-açúcar'], // filterOptions
@@ -294,15 +297,22 @@ class FiltersMockupFactory {
   /// Cria filtros com provider wrapper
   static Widget withProvider() {
     return FiltersMockupProviderWrapper(
-      builder: (searchText, selectedFilter, onSearchChanged, onFilterChanged, filterOptions) {
-        return FiltersMockupWidget(
-          searchText: searchText,
-          selectedFilter: selectedFilter,
-          onSearchChanged: onSearchChanged,
-          onFilterChanged: onFilterChanged,
-          filterOptions: filterOptions,
-        );
-      },
+      builder:
+          (
+            searchText,
+            selectedFilter,
+            onSearchChanged,
+            onFilterChanged,
+            filterOptions,
+          ) {
+            return FiltersMockupWidget(
+              searchText: searchText,
+              selectedFilter: selectedFilter,
+              onSearchChanged: onSearchChanged,
+              onFilterChanged: onFilterChanged,
+              filterOptions: filterOptions,
+            );
+          },
     );
   }
 

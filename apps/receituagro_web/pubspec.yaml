@@ -61,13 +61,14 @@ dependencies:
   flutter_localization: ^0.3.3
   flutter_localizations:
     sdk: flutter
+  get: ^4.7.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
   flutter_lints: ^5.0.0
-  custom_lint: ^0.6.7
+  custom_lint: ^0.7.6
   riverpod_lint: ^2.3.13
 
   # Code Generation

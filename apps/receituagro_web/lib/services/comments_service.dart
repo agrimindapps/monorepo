@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../themes/manager.dart';
 
@@ -12,23 +12,16 @@ class FeedBackService {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     Map<String, String> deviceData;
 
-    if (GetPlatform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    if (kIsWeb) {
+      WebBrowserInfo webInfo = await deviceInfo.webBrowserInfo;
       deviceData = {
-        'platform': 'Android',
-        'brand': androidInfo.brand,
-        'model': androidInfo.model,
-        'version': androidInfo.version.release,
-      };
-    } else if (GetPlatform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      deviceData = {
-        'platform': 'iOS',
-        'brand': iosInfo.systemName,
-        'model': iosInfo.utsname.machine,
-        'version': iosInfo.systemVersion,
+        'platform': 'Web',
+        'brand': webInfo.browserName.name,
+        'model': webInfo.platform ?? 'Unknown',
+        'version': webInfo.appVersion ?? 'Unknown',
       };
     } else {
+      // Fallback para outras plataformas (caso necessário no futuro)
       deviceData = {
         'platform': 'Unknown',
         'brand': 'Unknown',

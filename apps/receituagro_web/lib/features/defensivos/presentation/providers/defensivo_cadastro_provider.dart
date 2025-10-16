@@ -156,11 +156,9 @@ class DefensivoCadastro extends _$DefensivoCadastro {
     try {
       final isUpdate = state.defensivo!.id.isNotEmpty;
 
-      final useCase = isUpdate
-          ? ref.read(updateDefensivoUseCaseProvider)
-          : ref.read(createDefensivoUseCaseProvider);
-
-      final result = await useCase(state.defensivo!);
+      final result = isUpdate
+          ? await ref.read(updateDefensivoUseCaseProvider).call(state.defensivo!)
+          : await ref.read(createDefensivoUseCaseProvider).call(state.defensivo!);
 
       return result.fold(
         (failure) {

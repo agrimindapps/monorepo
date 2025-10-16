@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../app-site/const/environment_const.dart';
@@ -12,7 +12,7 @@ class InfoDeviceService {
 
   InfoDeviceService._internal();
 
-  RxBool isProduction = false.obs;
+  final ValueNotifier<bool> isProduction = ValueNotifier<bool>(false);
 
   Future<void> setProduction() async {
     int patchVersion = await InfoDeviceService.getPatchVersion();

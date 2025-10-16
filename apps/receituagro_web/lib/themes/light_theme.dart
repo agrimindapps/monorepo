@@ -1,6 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 ThemeData lightTheme = ThemeData(
@@ -151,16 +151,12 @@ ThemeData lightTheme = ThemeData(
     ),
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.white,
-      statusBarIconBrightness: GetPlatform.isWeb
+      statusBarIconBrightness: kIsWeb
           ? Brightness.light
-          : GetPlatform.isAndroid
-              ? Brightness.light
-              : Brightness.dark,
-      statusBarBrightness: GetPlatform.isWeb
+          : Brightness.light,
+      statusBarBrightness: kIsWeb
           ? Brightness.light
-          : GetPlatform.isAndroid
-              ? Brightness.light
-              : Brightness.dark,
+          : Brightness.light,
       systemNavigationBarIconBrightness: Brightness.dark,
       systemNavigationBarDividerColor: Colors.grey.shade100,
       systemNavigationBarColor: Colors.grey.shade100,

@@ -1,6 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 ThemeData darkTheme = ThemeData(
   useMaterial3: true,
@@ -147,16 +147,12 @@ ThemeData darkTheme = ThemeData(
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: const Color.fromRGBO(
           29, 29, 37, 1), // Barra de status escura consistente
-      statusBarIconBrightness: GetPlatform.isWeb
+      statusBarIconBrightness: kIsWeb
           ? Brightness.light
-          : GetPlatform.isAndroid
-              ? Brightness.light
-              : Brightness.dark,
-      statusBarBrightness: GetPlatform.isWeb
+          : Brightness.light,
+      statusBarBrightness: kIsWeb
           ? Brightness.light
-          : GetPlatform.isAndroid
-              ? Brightness.light
-              : Brightness.dark,
+          : Brightness.light,
       systemNavigationBarColor: const Color.fromRGBO(38, 41, 46, 1),
       systemNavigationBarDividerColor:
           Colors.transparent, // Divisor transparente para consistência

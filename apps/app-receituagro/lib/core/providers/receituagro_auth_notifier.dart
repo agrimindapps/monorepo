@@ -65,6 +65,7 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
   late final DeviceIdentityService _deviceService;
   late final ReceitaAgroAnalyticsService _analytics;
   late final EnhancedAccountDeletionService _enhancedDeletionService;
+  late final ISubscriptionRepository _subscriptionRepository;
 
   @override
   Stream<ReceitaAgroAuthState> build() async* {
@@ -72,6 +73,7 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
     _deviceService = di.sl<DeviceIdentityService>();
     _analytics = di.sl<ReceitaAgroAnalyticsService>();
     _enhancedDeletionService = di.sl<EnhancedAccountDeletionService>();
+    _subscriptionRepository = di.sl<ISubscriptionRepository>();
     yield ReceitaAgroAuthState.initial();
     await for (final user in _authRepository.currentUser) {
       final previousState = state.value ?? ReceitaAgroAuthState.initial();
@@ -82,6 +84,7 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
         if (previousUser?.id != user.id) {
           _analytics.trackLogin(user.provider.toString());
           if (!user.isAnonymous) {
+            await _syncSubscriptionUser(user);
             await _handleDeviceLogin(user);
             await _triggerPostAuthSync(user, previousUser);
           }
@@ -566,6 +569,38 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
         return AnalyticsUserType.registered;
       case UserType.premium:
         return AnalyticsUserType.premium;
+    }
+  }
+
+  /// Sincroniza usuário com RevenueCat para vincular assinatura ao Firebase UID
+  /// Isso permite recuperar assinatura em qualquer dispositivo ao fazer login
+  Future<void> _syncSubscriptionUser(UserEntity user) async {
+    try {
+      if (kDebugMode) print('🔄 Auth Notifier: Vinculando assinatura ao usuário ${user.id}');
+
+      final result = await _subscriptionRepository.setUser(
+        userId: user.id,
+        attributes: {
+          'email': user.email,
+          'displayName': user.displayName,
+        },
+      );
+
+      result.fold(
+        (failure) {
+          if (kDebugMode) print('⚠️ Auth Notifier: Falha ao vincular assinatura - ${failure.message}');
+          _analytics.trackError('subscription_user_sync_error', failure.message);
+        },
+        (_) {
+          if (kDebugMode) print('✅ Auth Notifier: Assinatura vinculada ao usuário Firebase');
+          _analytics.trackEvent('subscription_user_synced', parameters: {
+            'user_id': user.id,
+          });
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) print('❌ Auth Notifier: Erro ao vincular assinatura: $e');
+      _analytics.trackError('subscription_user_sync_exception', e.toString());
     }
   }
 

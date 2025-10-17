@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/premium_feature_card.dart';
 import '../../../comentarios/data/comentario_model.dart';
-import '../../../comentarios/views/widgets/premium_upgrade_widget.dart';
 import '../providers/detalhe_praga_notifier.dart';
 
 /// Widget responsável por exibir comentários da praga
@@ -74,8 +74,12 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
 
   /// Constrói card de restrição premium
   Widget _buildPremiumRestrictionCard() {
-    return PremiumUpgradeWidget.noPermission(
-      onUpgrade: () {
+    return PremiumFeatureCard(
+      title: 'Comentários Premium',
+      description: 'Salve suas observações sobre esta praga. Recurso exclusivo para assinantes.',
+      buttonText: 'Desbloquear Agora',
+      useRocketIcon: true,
+      onUpgradePressed: () {
         Navigator.pushNamed(context, '/subscription');
       },
     );

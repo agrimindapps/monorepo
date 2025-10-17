@@ -121,6 +121,13 @@ class PremiumNotifier extends _$PremiumNotifier {
       PremiumStatus status = PremiumStatus.free();
       if (currentSubscription != null) {
         status = _createPremiumStatusFromEntity(currentSubscription);
+      } else {
+        // Se não há assinatura no cache local, tenta restaurar automaticamente
+        developer.log(
+          '🔄 No cached subscription found, attempting auto-restore...',
+          name: 'PremiumNotifier',
+        );
+        unawaited(_attemptAutoRestore());
       }
 
       if (EnvironmentConfig.enableLogging) {
@@ -496,6 +503,82 @@ class PremiumNotifier extends _$PremiumNotifier {
         name: 'PremiumNotifier',
         error: e,
       );
+    }
+  }
+
+  /// Attempt automatic restore on initialization (background operation)
+  /// Called when no cached subscription is found
+  Future<void> _attemptAutoRestore() async {
+    try {
+      developer.log(
+        '🔄 Starting automatic restore purchases...',
+        name: 'PremiumNotifier',
+      );
+
+      final result = await _subscriptionRepository.restorePurchases();
+
+      await result.fold(
+        (failure) async {
+          developer.log(
+            '⚠️ Auto-restore failed: ${failure.message}',
+            name: 'PremiumNotifier',
+          );
+        },
+        (subscriptions) async {
+          if (subscriptions.isNotEmpty) {
+            final activeSubscription = subscriptions.firstWhere(
+              (sub) => sub.isActive,
+              orElse: () => subscriptions.first,
+            );
+
+            if (activeSubscription.isActive) {
+              developer.log(
+                '✅ Auto-restore successful: Found active subscription (${activeSubscription.productId})',
+                name: 'PremiumNotifier',
+              );
+
+              // Update state with restored subscription
+              final currentState = state.value;
+              if (currentState != null) {
+                final newStatus = _createPremiumStatusFromEntity(activeSubscription);
+                await _syncSubscriptionWithCloudFunctions(activeSubscription);
+
+                state = AsyncValue.data(
+                  currentState.copyWith(
+                    currentSubscription: activeSubscription,
+                    status: newStatus,
+                  ),
+                );
+
+                await _analytics.logEvent(
+                  ReceitaAgroAnalyticsEvent.subscriptionViewed.eventName,
+                  {
+                    'action': 'auto_restore',
+                    'product_id': activeSubscription.productId,
+                  },
+                );
+              }
+            } else {
+              developer.log(
+                'ℹ️ Auto-restore: No active subscriptions found',
+                name: 'PremiumNotifier',
+              );
+            }
+          } else {
+            developer.log(
+              'ℹ️ Auto-restore: No subscriptions to restore',
+              name: 'PremiumNotifier',
+            );
+          }
+        },
+      );
+    } catch (e) {
+      developer.log(
+        '⚠️ Auto-restore error: $e',
+        name: 'PremiumNotifier',
+        error: e,
+      );
+      // Não lança erro - auto-restore é uma operação silenciosa
     }
   }
 }

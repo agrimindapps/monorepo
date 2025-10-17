@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../../core/widgets/premium_feature_card.dart';
 import '../../providers/detalhe_defensivo_notifier.dart';
 
 /// Widget para tab de comentários com restrição premium
@@ -258,37 +259,12 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
   }
 
   Widget _buildFreeContent() {
-    return Center(
-      child: Card(
-        color: Colors.orange.shade50,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.diamond, size: 48, color: Colors.orange),
-              const SizedBox(height: 16),
-              Text(
-                'Comentários Premium',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Acesse comentários da comunidade e compartilhe suas experiências',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                },
-                child: const Text('Upgrade para Premium'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return PremiumFeatureCard(
+      title: 'Comentários Premium',
+      description: 'Acesse comentários da comunidade e compartilhe suas experiências',
+      onUpgradePressed: () {
+        // TODO: Navigate to subscription page
+      },
     );
   }
 

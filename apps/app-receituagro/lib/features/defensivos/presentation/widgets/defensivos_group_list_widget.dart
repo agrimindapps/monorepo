@@ -56,8 +56,8 @@ class DefensivosGroupListWidget extends StatelessWidget {
             return RepaintBoundary(
               child: ContentListItemWidget(
                 title: grupo.displayName,
-                subtitle: _buildSubtitle(grupo),
-                category: _buildCategory(grupo),
+                subtitle: '', // Removido - segunda linha agora vazia
+                category: _buildCategory(grupo), // Terceira linha: mostra o count
                 icon: _getGroupIcon(grupo.tipoAgrupamento),
                 iconColor: _getGroupIconColor(grupo.tipoAgrupamento),
                 trailing: _buildTrailing(context, grupo),
@@ -70,34 +70,10 @@ class DefensivosGroupListWidget extends StatelessWidget {
     );
   }
 
-  /// Constrói o subtitle do grupo
-  String _buildSubtitle(DefensivoGroupEntity grupo) {
-    if (grupo.displayDescricao.isNotEmpty) {
-      return grupo.displayDescricao;
-    }
-    return grupo.displayCount;
-  }
-
-  /// Constrói a categoria do grupo
+  /// Constrói a categoria do grupo - agora mostra o count de itens
   String? _buildCategory(DefensivoGroupEntity grupo) {
-    switch (grupo.tipoAgrupamento.toLowerCase()) {
-      case 'fabricante':
-      case 'fabricantes':
-        return 'Por Fabricante';
-      case 'modo_acao':
-      case 'modoacao':
-        return 'Por Modo de Ação';
-      case 'classe':
-      case 'classe_agronomica':
-        return 'Por Classe Agronômica';
-      case 'categoria':
-        return 'Por Categoria';
-      case 'toxico':
-      case 'toxicidade':
-        return 'Por Toxicidade';
-      default:
-        return 'Agrupamento';
-    }
+    // Mostra o count de itens ao invés do tipo de agrupamento
+    return grupo.displayCount;
   }
 
   /// Obtém ícone para o tipo de agrupamento

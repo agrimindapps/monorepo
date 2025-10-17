@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/premium_notifier.dart';
 import '../../core/widgets/modern_header_widget.dart';
+import '../../core/widgets/premium_feature_card.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'domain/entities/comentario_entity.dart';
 import 'presentation/providers/comentarios_notifier.dart';
-import 'views/widgets/premium_upgrade_widget.dart';
 import 'widgets/index.dart';
 
 /// Comentários Page - Refatorada com módulos especializados
@@ -173,9 +173,12 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
         final isPremium = premiumAsync.value?.isPremium ?? false;
 
         if (!isPremium) {
-          return PremiumUpgradeWidget.noPermission(
-            onUpgrade: () {
-              // Navigate to subscription page
+          return PremiumFeatureCard(
+            title: 'Comentários Premium',
+            description: 'Salve suas anotações pessoais sobre pragas, doenças e defensivos. Recurso exclusivo para assinantes.',
+            buttonText: 'Desbloquear Agora',
+            useRocketIcon: true,
+            onUpgradePressed: () {
               Navigator.pushNamed(context, '/subscription');
             },
           );

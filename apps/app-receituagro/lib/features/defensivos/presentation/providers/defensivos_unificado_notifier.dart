@@ -459,6 +459,31 @@ class DefensivosUnificadoNotifier extends _$DefensivosUnificadoNotifier {
     }
   }
 
+  /// Aplica busca/filtro de texto aos defensivos
+  /// Método público para ser chamado quando o usuário digita na busca
+  void aplicarFiltroTexto(String filtroTexto) {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    debugPrint('🔍 [NOTIFIER] Aplicando filtro de texto: "$filtroTexto"');
+
+    final filtrados = _aplicarFiltrosLocais(
+      currentState.defensivos,
+      filtroTexto,
+    );
+
+    debugPrint(
+      '✅ [NOTIFIER] Filtro aplicado - ${filtrados.length} de ${currentState.defensivos.length} defensivos',
+    );
+
+    state = AsyncValue.data(
+      currentState.copyWith(
+        filtroTexto: filtroTexto,
+        defensivosFiltrados: filtrados,
+      ),
+    );
+  }
+
   /// Aplica filtros localmente (mais rápido para mudanças simples)
   List<DefensivoEntity> _aplicarFiltrosLocais(
     List<DefensivoEntity> defensivos,

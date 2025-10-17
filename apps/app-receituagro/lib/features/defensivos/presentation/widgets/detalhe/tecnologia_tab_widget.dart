@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Widget para tab de tecnologia com seções expandíveis
-/// Responsabilidade única: exibir informações técnicas detalhadas
-class TecnologiaTabWidget extends StatelessWidget {
+import '../../../../../core/widgets/premium_feature_card.dart';
+import '../../providers/detalhe_defensivo_notifier.dart';
+
+/// Widget para tab de tecnologia com restrição premium
+/// Migrated to Riverpod - uses ConsumerWidget
+class TecnologiaTabWidget extends ConsumerWidget {
   final String defensivoName;
 
   const TecnologiaTabWidget({
@@ -11,7 +15,17 @@ class TecnologiaTabWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(detalheDefensivoNotifierProvider);
+
+    return state.when(
+      data: (data) => data.isPremium ? _buildPremiumContent(context) : _buildFreeContent(context),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Erro ao carregar tecnologia')),
+    );
+  }
+
+  Widget _buildPremiumContent(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -68,6 +82,16 @@ class TecnologiaTabWidget extends StatelessWidget {
           const SizedBox(height: 80), // Espaço para bottom navigation
         ],
       ),
+    );
+  }
+
+  Widget _buildFreeContent(BuildContext context) {
+    return PremiumFeatureCard(
+      title: 'Tecnologia Premium',
+      description: 'Acesse informações técnicas detalhadas sobre tecnologia, embalagens, manejo integrado e muito mais',
+      onUpgradePressed: () {
+        // TODO: Navigate to subscription page
+      },
     );
   }
 

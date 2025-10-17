@@ -100,8 +100,10 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
+    // Reset state to prevent showing cached data from previous defensivo
+    // This fixes the bug where favorite button shows previous state
     state = AsyncValue.data(
-      currentState.copyWith(isLoading: true).clearError(),
+      DetalheDefensivoState.initial().copyWith(isLoading: true),
     );
 
     try {

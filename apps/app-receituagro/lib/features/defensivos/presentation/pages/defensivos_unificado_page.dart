@@ -71,6 +71,11 @@ class _DefensivosUnificadoPageState
       ref
           .read(defensivosDrillDownNotifierProvider.notifier)
           .updateSearchFilter(_searchText);
+    } else {
+      // Apply text filter to unified notifier for regular list mode
+      ref
+          .read(defensivosUnificadoNotifierProvider.notifier)
+          .aplicarFiltroTexto(_searchText);
     }
   }
 
@@ -83,6 +88,11 @@ class _DefensivosUnificadoPageState
       ref
           .read(defensivosDrillDownNotifierProvider.notifier)
           .clearSearchFilter();
+    } else {
+      // Clear text filter in unified notifier for regular list mode
+      ref
+          .read(defensivosUnificadoNotifierProvider.notifier)
+          .aplicarFiltroTexto('');
     }
   }
 
@@ -320,6 +330,7 @@ class _DefensivosUnificadoPageState
                         .read(defensivosUnificadoNotifierProvider.notifier)
                         .limparFiltros(),
             hasActiveSearch: _searchText.isNotEmpty,
+            viewMode: _viewMode,
           ),
         ),
       ],
@@ -458,6 +469,7 @@ class _DefensivosUnificadoPageState
               : null,
       onClearFilters: _clearSearch,
       hasActiveSearch: _searchText.isNotEmpty,
+      viewMode: _viewMode,
     );
   }
 

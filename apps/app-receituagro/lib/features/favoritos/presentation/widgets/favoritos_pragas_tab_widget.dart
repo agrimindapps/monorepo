@@ -1,13 +1,14 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/premium_notifier.dart';
 import '../../../../core/services/receituagro_navigation_service.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../notifiers/favoritos_notifier.dart';
 
 /// Widget especializado para aba de Pragas favoritas
-/// Gerencia listagem e ações específicas para pragas
+/// Gerencia listagem e ações específicas para pragas + verificação premium
 class FavoritosPragasTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
@@ -19,6 +20,13 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final favoritosState = ref.watch(favoritosNotifierProvider);
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final isPremium = premiumAsync.value?.isPremium ?? false;
+
+    if (!isPremium) {
+      return _buildPremiumRequiredCard(context);
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return _buildTabContent(
@@ -327,6 +335,84 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
       pragaName: praga.nomeComum,
       pragaId: praga.id, // Use ID for better precision
       pragaScientificName: praga.nomeCientifico,
+    );
+  }
+
+  Widget _buildPremiumRequiredCard(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF3E0),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFFFFB74D),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.diamond,
+              size: 48,
+              color: Color(0xFFFF9800),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Pragas Favoritas não disponíveis',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFE65100),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Este recurso está disponível apenas para assinantes do app.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFFBF360C),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/subscription');
+                },
+                icon: const Icon(
+                  Icons.rocket_launch,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                label: const Text(
+                  'Desbloquear Agora',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF9800),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

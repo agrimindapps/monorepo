@@ -9,8 +9,7 @@ import '../../../../core/data/repositories/plantas_inf_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_inf_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/interfaces/i_premium_service.dart';
-import '../../../../core/services/premium_status_notifier.dart';
+import '../../../../core/providers/premium_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
@@ -113,7 +112,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
   late final PragasHiveRepository _pragasRepository;
   late final PragasInfHiveRepository _pragasInfRepository;
   late final PlantasInfHiveRepository _plantasInfRepository;
-  late final IPremiumService _premiumService;
   late final ComentariosService _comentariosService;
 
   @override
@@ -122,7 +120,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     _pragasRepository = di.sl<PragasHiveRepository>();
     _pragasInfRepository = di.sl<PragasInfHiveRepository>();
     _plantasInfRepository = di.sl<PlantasInfHiveRepository>();
-    _premiumService = di.sl<IPremiumService>();
     _comentariosService = di.sl<ComentariosService>();
     _setupPremiumStatusListener();
 
@@ -353,19 +350,22 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
+    final premiumState = ref.read(premiumNotifierProvider).value;
     state = AsyncValue.data(
-      currentState.copyWith(isPremium: _premiumService.isPremium),
+      currentState.copyWith(isPremium: premiumState?.isPremium ?? false),
     );
   }
 
   /// Configura listener para mudanças automáticas no status premium
   void _setupPremiumStatusListener() {
-    ref.listen(premiumStatusNotifierProvider, (previous, next) {
+    ref.listen(premiumNotifierProvider, (previous, next) {
       final currentState = state.value;
       if (currentState != null) {
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: next.isPremium),
-        );
+        next.whenData((premiumState) {
+          state = AsyncValue.data(
+            currentState.copyWith(isPremium: premiumState.isPremium),
+          );
+        });
       }
     });
   }
@@ -561,6 +561,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
 
   /// Navega para tela premium
   void navigateToPremium() {
-    _premiumService.navigateToPremium();
+    // Navigation handled by widget layer
   }
 }

@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/providers/premium_notifier.dart';
 import '../../domain/usecases/get_available_products.dart';
 import '../../domain/usecases/get_user_premium_status.dart';
 import '../../domain/usecases/manage_subscription.dart';
@@ -69,7 +70,12 @@ class SubscriptionState {
   }
 
   SubscriptionState clearMessages() {
-    return copyWith(
+    return SubscriptionState(
+      isLoading: isLoading,
+      hasActiveSubscription: hasActiveSubscription,
+      availableProducts: availableProducts,
+      currentSubscription: currentSubscription,
+      selectedPlan: selectedPlan,
       errorMessage: null,
       successMessage: null,
       infoMessage: null,
@@ -215,6 +221,15 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
             ),
           );
           await loadSubscriptionData();
+
+          // Force PremiumNotifier to refresh
+          try {
+            ref.invalidate(premiumNotifierProvider);
+          } catch (e) {
+            if (kDebugMode) {
+              print('Warning: Could not invalidate PremiumNotifier: $e');
+            }
+          }
         },
       );
     } catch (e) {
@@ -289,6 +304,15 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
               ),
             );
             await loadSubscriptionData();
+
+            // Force PremiumNotifier to refresh
+            try {
+              ref.invalidate(premiumNotifierProvider);
+            } catch (e) {
+              if (kDebugMode) {
+                print('Warning: Could not invalidate PremiumNotifier: $e');
+              }
+            }
           } else {
             state = AsyncValue.data(
               currentState.copyWith(
@@ -420,10 +444,11 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
               'currencyCode': product.currencyCode,
               'period': product.subscriptionPeriod ?? 'month',
               'features': <String>[
-                'Acesso completo ao banco de dados',
-                'Diagnóstico avançado',
-                'Suporte prioritário',
-                'Sincronização cross-platform',
+                'Acesso a dosagens, aplicação aérea e terrestre',
+                'Ferramenta de comentários e sincronização',
+                'Informações de tecnologia de aplicação do defensivo',
+                'Informações de diagnóstico',
+                'Compartilhamento de diagnóstico',
               ],
               'hasTrialPeriod': false,
               'trialPeriodDays': 7,

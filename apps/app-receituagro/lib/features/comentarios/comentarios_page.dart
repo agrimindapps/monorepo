@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/di/injection_container.dart' as di;
-import '../../core/interfaces/i_premium_service.dart';
+import '../../core/providers/premium_notifier.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'domain/entities/comentario_entity.dart';
@@ -169,12 +168,16 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
     return Consumer(
       builder: (context, ref, child) {
         final comentariosAsync = ref.watch(comentariosNotifierProvider);
-        final premiumService = di.sl<IPremiumService>();
-        final isPremium = premiumService.isPremium;
+        final premiumAsync = ref.watch(premiumNotifierProvider);
+
+        final isPremium = premiumAsync.value?.isPremium ?? false;
 
         if (!isPremium) {
           return PremiumUpgradeWidget.noPermission(
-            onUpgrade: () => premiumService.navigateToPremium(),
+            onUpgrade: () {
+              // Navigate to subscription page
+              Navigator.pushNamed(context, '/subscription');
+            },
           );
         }
 
@@ -227,8 +230,9 @@ class _ComentariosPageContentState extends ConsumerState<_ComentariosPageContent
     return Consumer(
       builder: (context, ref, child) {
         final comentariosAsync = ref.watch(comentariosNotifierProvider);
-        final premiumService = di.sl<IPremiumService>();
-        final isPremium = premiumService.isPremium;
+        final premiumAsync = ref.watch(premiumNotifierProvider);
+
+        final isPremium = premiumAsync.value?.isPremium ?? false;
 
         return FloatingActionButton(
           onPressed: () {

@@ -8,8 +8,7 @@ import '../../../../core/data/models/diagnostico_hive.dart';
 import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/diagnostico_hive_extension.dart';
-import '../../../../core/interfaces/i_premium_service.dart';
-import '../../../../core/services/premium_status_notifier.dart';
+import '../../../../core/providers/premium_notifier.dart';
 import '../../../diagnosticos/data/mappers/diagnostico_mapper.dart';
 import '../../../diagnosticos/domain/entities/diagnostico_entity.dart';
 import '../../../diagnosticos/domain/repositories/i_diagnosticos_repository.dart';
@@ -92,7 +91,6 @@ class DetalheDiagnosticoState {
 class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   late final IDiagnosticosRepository _diagnosticosRepository;
   late final DiagnosticoHiveRepository _hiveRepository;
-  late final IPremiumService _premiumService;
   late final FavoritosRepositorySimplified _favoritosRepository;
 
   @override
@@ -100,7 +98,6 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     _diagnosticosRepository = di.sl<IDiagnosticosRepository>();
     _hiveRepository = di.sl<DiagnosticoHiveRepository>();
     _favoritosRepository = FavoritosDI.get<FavoritosRepositorySimplified>();
-    _premiumService = di.sl<IPremiumService>();
 
     // Setup listener APÓS o estado inicial ser retornado
     Future.microtask(() => _setupPremiumStatusListener());
@@ -154,6 +151,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                   )
                   .clearError(),
             );
+
+            // Load premium status after loading data
+            await loadPremiumStatus();
           } else {
             final result = await _hiveRepository.getAll();
             final totalDiagnosticos =
@@ -190,6 +190,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                 )
                 .clearError(),
           );
+
+          // Load premium status after fallback loading
+          await loadPremiumStatus();
         } else {
           state = AsyncValue.data(
             currentState.copyWith(
@@ -216,8 +219,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     if (currentState == null) return;
 
     try {
-      final premium = await _premiumService.isPremiumUser();
-      state = AsyncValue.data(currentState.copyWith(isPremium: premium));
+      final premiumState = ref.read(premiumNotifierProvider).value;
+      state = AsyncValue.data(currentState.copyWith(isPremium: premiumState?.isPremium ?? false));
     } catch (e) {
       state = AsyncValue.data(currentState.copyWith(isPremium: false));
     }
@@ -225,12 +228,14 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
-    ref.listen(premiumStatusNotifierProvider, (previous, next) {
+    ref.listen(premiumNotifierProvider, (previous, next) {
       // Usar whenData para garantir que o estado está pronto
       state.whenData((currentState) {
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: next.isPremium),
-        );
+        next.whenData((premiumState) {
+          state = AsyncValue.data(
+            currentState.copyWith(isPremium: premiumState.isPremium),
+          );
+        });
       });
     });
   }

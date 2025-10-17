@@ -56,11 +56,13 @@ class PaymentActionsWidget extends ConsumerWidget {
       child: ElevatedButton(
         onPressed: isLoading
             ? null
-            : () => ref.read(subscriptionNotifierProvider.notifier).purchaseSelectedPlan(),
+            : () => ref
+                  .read(subscriptionNotifierProvider.notifier)
+                  .purchaseSelectedPlan(),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF1B4332),  // Dark green text
-          padding: const EdgeInsets.symmetric(vertical: 22),
+          foregroundColor: const Color(0xFF1B4332), // Dark green text
+          padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
@@ -78,10 +80,7 @@ class PaymentActionsWidget extends ConsumerWidget {
               )
             : const Text(
                 'Obter Acesso Completo',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
       ),
     );
@@ -94,11 +93,15 @@ class PaymentActionsWidget extends ConsumerWidget {
       child: ElevatedButton.icon(
         onPressed: isLoading
             ? null
-            : () => ref.read(subscriptionNotifierProvider.notifier).openManagementUrl(),
+            : () => ref
+                  .read(subscriptionNotifierProvider.notifier)
+                  .openManagementUrl(),
         icon: const Icon(Icons.settings),
         label: const Text('Gerenciar Assinatura'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF388E3C),  // Medium green for management
+          backgroundColor: const Color(
+            0xFF388E3C,
+          ), // Medium green for management
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
@@ -119,7 +122,9 @@ class PaymentActionsWidget extends ConsumerWidget {
           Expanded(
             child: _buildFooterLink(
               'Termos de Uso',
-              () => ref.read(subscriptionNotifierProvider.notifier).openTermsOfUse(),
+              () => ref
+                  .read(subscriptionNotifierProvider.notifier)
+                  .openTermsOfUse(),
               isLoading,
             ),
           ),
@@ -127,7 +132,9 @@ class PaymentActionsWidget extends ConsumerWidget {
           Expanded(
             child: _buildFooterLink(
               'Política de Privacidade',
-              () => ref.read(subscriptionNotifierProvider.notifier).openPrivacyPolicy(),
+              () => ref
+                  .read(subscriptionNotifierProvider.notifier)
+                  .openPrivacyPolicy(),
               isLoading,
             ),
           ),
@@ -135,7 +142,9 @@ class PaymentActionsWidget extends ConsumerWidget {
           Expanded(
             child: _buildFooterLink(
               'Restaurar',
-              () => ref.read(subscriptionNotifierProvider.notifier).restorePurchases(),
+              () => ref
+                  .read(subscriptionNotifierProvider.notifier)
+                  .restorePurchases(),
               isLoading,
             ),
           ),

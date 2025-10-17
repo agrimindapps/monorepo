@@ -1,8 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart';
-import '../../../../core/interfaces/i_premium_service.dart';
+import '../../../../core/providers/premium_notifier.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../notifiers/favoritos_notifier.dart';
 
@@ -19,9 +18,9 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final favoritosState = ref.watch(favoritosNotifierProvider);
-    final premiumService = sl<IPremiumService>();
-    final isPremium = premiumService.isPremium;
-    
+    final premiumAsync = ref.watch(premiumNotifierProvider);
+    final isPremium = premiumAsync.value?.isPremium ?? false;
+
     if (!isPremium) {
       return _buildPremiumRequiredCard(context);
     }
@@ -300,8 +299,8 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  final premiumService = sl<IPremiumService>();
-                  premiumService.navigateToPremium();
+                  // Navigate to subscription page
+                  Navigator.pushNamed(context, '/subscription');
                 },
                 icon: const Icon(
                   Icons.rocket_launch,

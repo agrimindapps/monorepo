@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
-import '../../../../core/services/premium_status_notifier.dart';
+import '../../../../core/providers/premium_notifier.dart';
 import '../../../comentarios/data/comentario_model.dart';
 import '../../../comentarios/domain/comentarios_service.dart';
 import '../../../favoritos/favoritos_di.dart';
@@ -106,7 +106,11 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     try {
       await _loadDefensivoData(defensivoName);
-      await Future.wait([_loadFavoritoState(defensivoName), loadComentarios()]);
+      await Future.wait([
+        _loadFavoritoState(defensivoName),
+        loadComentarios(),
+        _loadPremiumStatus(),
+      ]);
 
       final finalState = state.value;
       if (finalState != null) {
@@ -334,14 +338,27 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     await initializeData(defensivoName, fabricante);
   }
 
+  /// Load premium status
+  Future<void> _loadPremiumStatus() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final premiumState = ref.read(premiumNotifierProvider).value;
+    state = AsyncValue.data(
+      currentState.copyWith(isPremium: premiumState?.isPremium ?? false),
+    );
+  }
+
   /// Setup premium status listener
   void _setupPremiumStatusListener() {
-    ref.listen(premiumStatusNotifierProvider, (previous, next) {
+    ref.listen(premiumNotifierProvider, (previous, next) {
       final currentState = state.value;
       if (currentState != null) {
-        state = AsyncValue.data(
-          currentState.copyWith(isPremium: next.isPremium),
-        );
+        next.whenData((premiumState) {
+          state = AsyncValue.data(
+            currentState.copyWith(isPremium: premiumState.isPremium),
+          );
+        });
       }
     });
   }

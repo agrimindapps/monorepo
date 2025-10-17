@@ -58,10 +58,11 @@ class ComentariosNotifier extends _$ComentariosNotifier {
         await initialize();
       }
     } catch (e) {
-      _handleError(e, context: 'ensureDataLoaded', metadata: {
-        'contextParam': context,
-        'toolParam': tool,
-      });
+      _handleError(
+        e,
+        context: 'ensureDataLoaded',
+        metadata: {'contextParam': context, 'toolParam': tool},
+      );
     }
   }
 
@@ -71,10 +72,15 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, true),
-        isLoading: true,
-      ).clearError(),
+      currentState
+          .copyWith(
+            loadingStates: currentState.loadingStates.copyWithType(
+              LoadingType.loadingData,
+              true,
+            ),
+            isLoading: true,
+          )
+          .clearError(),
     );
 
     try {
@@ -82,11 +88,16 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       _clearFilterCache();
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          comentarios: comentarios,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, false),
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              comentarios: comentarios,
+              loadingStates: currentState.loadingStates.copyWithType(
+                LoadingType.loadingData,
+                false,
+              ),
+              isLoading: false,
+            )
+            .clearError(),
       );
 
       _applyFilters(immediate: true);
@@ -101,30 +112,44 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, true),
-        isLoading: true,
-      ).clearError(),
+      currentState
+          .copyWith(
+            loadingStates: currentState.loadingStates.copyWithType(
+              LoadingType.loadingData,
+              true,
+            ),
+            isLoading: true,
+          )
+          .clearError(),
     );
 
     try {
-      final comentarios = await _getComentariosUseCase.getByContext(pkIdentificador);
+      final comentarios = await _getComentariosUseCase.getByContext(
+        pkIdentificador,
+      );
       _clearFilterCache();
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          comentarios: comentarios,
-          selectedContext: pkIdentificador,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, false),
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              comentarios: comentarios,
+              selectedContext: pkIdentificador,
+              loadingStates: currentState.loadingStates.copyWithType(
+                LoadingType.loadingData,
+                false,
+              ),
+              isLoading: false,
+            )
+            .clearError(),
       );
 
       _applyFilters(immediate: true);
     } catch (e) {
-      _handleError(e, context: 'loadComentariosByContext', metadata: {
-        'pkIdentificador': pkIdentificador,
-      });
+      _handleError(
+        e,
+        context: 'loadComentariosByContext',
+        metadata: {'pkIdentificador': pkIdentificador},
+      );
     }
   }
 
@@ -134,10 +159,15 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, true),
-        isLoading: true,
-      ).clearError(),
+      currentState
+          .copyWith(
+            loadingStates: currentState.loadingStates.copyWithType(
+              LoadingType.loadingData,
+              true,
+            ),
+            isLoading: true,
+          )
+          .clearError(),
     );
 
     try {
@@ -145,19 +175,26 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       _clearFilterCache();
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          comentarios: comentarios,
-          selectedTool: ferramenta,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.loadingData, false),
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              comentarios: comentarios,
+              selectedTool: ferramenta,
+              loadingStates: currentState.loadingStates.copyWithType(
+                LoadingType.loadingData,
+                false,
+              ),
+              isLoading: false,
+            )
+            .clearError(),
       );
 
       _applyFilters(immediate: true);
     } catch (e) {
-      _handleError(e, context: 'loadComentariosByTool', metadata: {
-        'ferramenta': ferramenta,
-      });
+      _handleError(
+        e,
+        context: 'loadComentariosByTool',
+        metadata: {'ferramenta': ferramenta},
+      );
     }
   }
 
@@ -170,10 +207,15 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     }
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        isOperating: true,
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.adding, true),
-      ).clearError(),
+      currentState
+          .copyWith(
+            isOperating: true,
+            loadingStates: currentState.loadingStates.copyWithType(
+              LoadingType.adding,
+              true,
+            ),
+          )
+          .clearError(),
     );
 
     try {
@@ -182,11 +224,16 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       _clearFilterCache();
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          comentarios: updatedComentarios,
-          isOperating: false,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.adding, false),
-        ).clearError(),
+        currentState
+            .copyWith(
+              comentarios: updatedComentarios,
+              isOperating: false,
+              loadingStates: currentState.loadingStates.copyWithType(
+                LoadingType.adding,
+                false,
+              ),
+            )
+            .clearError(),
       );
 
       _applyFilters(immediate: true);
@@ -194,11 +241,15 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
       return true;
     } catch (e) {
-      _handleError(e, context: 'addComentario', metadata: {
-        'comentarioId': comentario.id,
-        'titulo': comentario.titulo,
-        'ferramenta': comentario.ferramenta,
-      });
+      _handleError(
+        e,
+        context: 'addComentario',
+        metadata: {
+          'comentarioId': comentario.id,
+          'titulo': comentario.titulo,
+          'ferramenta': comentario.ferramenta,
+        },
+      );
       return false;
     }
   }
@@ -210,7 +261,10 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
     state = AsyncValue.data(
       currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.syncing, true),
+        loadingStates: currentState.loadingStates.copyWithType(
+          LoadingType.syncing,
+          true,
+        ),
       ),
     );
 
@@ -221,7 +275,10 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       state = AsyncValue.data(
         currentState.copyWith(
           comentarios: freshData,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.syncing, false),
+          loadingStates: currentState.loadingStates.copyWithType(
+            LoadingType.syncing,
+            false,
+          ),
         ),
       );
 
@@ -231,7 +288,10 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       if (finalState != null) {
         state = AsyncValue.data(
           finalState.copyWith(
-            loadingStates: finalState.loadingStates.copyWithType(LoadingType.syncing, false),
+            loadingStates: finalState.loadingStates.copyWithType(
+              LoadingType.syncing,
+              false,
+            ),
           ),
         );
       }
@@ -247,32 +307,46 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     }
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        isOperating: true,
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.deleting, true),
-      ).clearError(),
+      currentState
+          .copyWith(
+            isOperating: true,
+            loadingStates: currentState.loadingStates.copyWithType(
+              LoadingType.deleting,
+              true,
+            ),
+          )
+          .clearError(),
     );
 
     try {
       await _deleteComentarioUseCase(id);
-      final updatedComentarios = currentState.comentarios.where((c) => c.id != id).toList();
+      final updatedComentarios = currentState.comentarios
+          .where((c) => c.id != id)
+          .toList();
       _clearFilterCache();
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          comentarios: updatedComentarios,
-          isOperating: false,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.deleting, false),
-        ).clearError(),
+        currentState
+            .copyWith(
+              comentarios: updatedComentarios,
+              isOperating: false,
+              loadingStates: currentState.loadingStates.copyWithType(
+                LoadingType.deleting,
+                false,
+              ),
+            )
+            .clearError(),
       );
 
       _applyFilters(immediate: true);
 
       return true;
     } catch (e) {
-      _handleError(e, context: 'deleteComentario', metadata: {
-        'comentarioId': id,
-      });
+      _handleError(
+        e,
+        context: 'deleteComentario',
+        metadata: {'comentarioId': id},
+      );
       return false;
     }
   }
@@ -283,11 +357,16 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(
-      currentState.copyWith(
-        loadingStates: currentState.loadingStates.copyWithType(LoadingType.searching, true),
-        isLoading: true,
-        searchQuery: query,
-      ).clearError(),
+      currentState
+          .copyWith(
+            loadingStates: currentState.loadingStates.copyWithType(
+              LoadingType.searching,
+              true,
+            ),
+            isLoading: true,
+            searchQuery: query,
+          )
+          .clearError(),
     );
 
     try {
@@ -300,18 +379,25 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       _clearFilterCache();
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          comentarios: comentarios,
-          loadingStates: currentState.loadingStates.copyWithType(LoadingType.searching, false),
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              comentarios: comentarios,
+              loadingStates: currentState.loadingStates.copyWithType(
+                LoadingType.searching,
+                false,
+              ),
+              isLoading: false,
+            )
+            .clearError(),
       );
 
       _applyFilters(immediate: true);
     } catch (e) {
-      _handleError(e, context: 'searchComentarios', metadata: {
-        'searchQuery': query,
-      });
+      _handleError(
+        e,
+        context: 'searchComentarios',
+        metadata: {'searchQuery': query},
+      );
     }
   }
 
@@ -353,7 +439,8 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final hasChanges = currentState.selectedFilter != 'all' ||
+    final hasChanges =
+        currentState.selectedFilter != 'all' ||
         currentState.selectedTool != null ||
         currentState.selectedContext != null ||
         currentState.searchQuery.isNotEmpty;
@@ -395,16 +482,23 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
     final currentFilterHash = _generateFilterHash(currentState);
-    if (_lastFilterHash == currentFilterHash && _cachedFilteredResults != null) {
-      state = AsyncValue.data(currentState.copyWith(filteredComentarios: _cachedFilteredResults!));
+    if (_lastFilterHash == currentFilterHash &&
+        _cachedFilteredResults != null) {
+      state = AsyncValue.data(
+        currentState.copyWith(filteredComentarios: _cachedFilteredResults!),
+      );
       return;
     }
     List<ComentarioEntity> filtered = currentState.comentarios;
     if (currentState.selectedFilter != 'all') {
-      filtered = filtered.where((c) => c.ageCategory == currentState.selectedFilter).toList();
+      filtered = filtered
+          .where((c) => c.ageCategory == currentState.selectedFilter)
+          .toList();
     }
     if (currentState.selectedTool != null) {
-      filtered = filtered.where((c) => c.ferramenta == currentState.selectedTool).toList();
+      filtered = filtered
+          .where((c) => c.ferramenta == currentState.selectedTool)
+          .toList();
     }
     if (currentState.searchQuery.isNotEmpty) {
       final query = currentState.searchQuery.toLowerCase();
@@ -413,7 +507,9 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     _cachedFilteredResults = filtered;
     _lastFilterHash = currentFilterHash;
 
-    state = AsyncValue.data(currentState.copyWith(filteredComentarios: filtered));
+    state = AsyncValue.data(
+      currentState.copyWith(filteredComentarios: filtered),
+    );
   }
 
   /// Generate a hash for current filter state to enable caching
@@ -422,12 +518,21 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   }
 
   /// Perform optimized search with early termination and better string matching
-  List<ComentarioEntity> _performOptimizedSearch(List<ComentarioEntity> items, String query) {
+  List<ComentarioEntity> _performOptimizedSearch(
+    List<ComentarioEntity> items,
+    String query,
+  ) {
     if (query.isEmpty) return items;
-    final searchTerms = query.split(' ').where((term) => term.isNotEmpty).map((term) => term.toLowerCase()).toList();
+    final searchTerms = query
+        .split(' ')
+        .where((term) => term.isNotEmpty)
+        .map((term) => term.toLowerCase())
+        .toList();
 
     return items.where((comentario) {
-      final searchableText = '${comentario.titulo} ${comentario.conteudo} ${comentario.ferramenta}'.toLowerCase();
+      final searchableText =
+          '${comentario.titulo} ${comentario.conteudo} ${comentario.ferramenta}'
+              .toLowerCase();
       return searchTerms.every((term) => searchableText.contains(term));
     }).toList();
   }

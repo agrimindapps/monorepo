@@ -52,29 +52,36 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
                     if (data.errorMessage != null) {
                       return DefensivosErrorState(
                         onRetry: () {
-                          ref.read(homeDefensivosNotifierProvider.notifier).clearError();
-                          ref.read(homeDefensivosNotifierProvider.notifier).loadData();
+                          ref
+                              .read(homeDefensivosNotifierProvider.notifier)
+                              .clearError();
+                          ref
+                              .read(homeDefensivosNotifierProvider.notifier)
+                              .loadData();
                         },
                       );
                     }
 
                     return RefreshIndicator(
-                      onRefresh: () => ref.read(homeDefensivosNotifierProvider.notifier).refreshData(),
+                      onRefresh: () => ref
+                          .read(homeDefensivosNotifierProvider.notifier)
+                          .refreshData(),
                       child: CustomScrollView(
                         slivers: [
                           SliverToBoxAdapter(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const SizedBox(height: ReceitaAgroSpacing.sm),
+                                const SizedBox(height: ReceitaAgroSpacing.xs),
                                 DefensivosStatsGrid(
-                                  onCategoryTap: (category) => _navigateToCategory(context, category),
+                                  onCategoryTap: (category) =>
+                                      _navigateToCategory(context, category),
                                 ),
-                                const SizedBox(height: ReceitaAgroSpacing.sm),
+                                const SizedBox(height: ReceitaAgroSpacing.xs),
                                 DefensivosRecentSection(
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
-                                const SizedBox(height: ReceitaAgroSpacing.sm),
+                                const SizedBox(height: ReceitaAgroSpacing.xs),
                                 DefensivosNewItemsSection(
                                   onDefensivoTap: _navigateToDefensivoDetails,
                                 ),
@@ -88,11 +95,16 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
                       ),
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, _) => DefensivosErrorState(
                     onRetry: () {
-                      ref.read(homeDefensivosNotifierProvider.notifier).clearError();
-                      ref.read(homeDefensivosNotifierProvider.notifier).loadData();
+                      ref
+                          .read(homeDefensivosNotifierProvider.notifier)
+                          .clearError();
+                      ref
+                          .read(homeDefensivosNotifierProvider.notifier)
+                          .loadData();
                     },
                   ),
                 ),
@@ -109,7 +121,9 @@ class _HomeDefensivosPageState extends ConsumerState<HomeDefensivosPage> {
     String fabricante,
     FitossanitarioHive defensivo,
   ) {
-    ref.read(homeDefensivosNotifierProvider.notifier).recordDefensivoAccess(defensivo);
+    ref
+        .read(homeDefensivosNotifierProvider.notifier)
+        .recordDefensivoAccess(defensivo);
 
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     navigationService.navigateToDetalheDefensivo(

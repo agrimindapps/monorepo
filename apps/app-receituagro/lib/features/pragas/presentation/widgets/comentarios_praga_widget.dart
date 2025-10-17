@@ -76,7 +76,7 @@ class _ComentariosPragaWidgetState extends ConsumerState<ComentariosPragaWidget>
   Widget _buildPremiumRestrictionCard() {
     return PremiumUpgradeWidget.noPermission(
       onUpgrade: () {
-        ref.read(detalhePragaNotifierProvider.notifier).navigateToPremium();
+        Navigator.pushNamed(context, '/subscription');
       },
     );
   }

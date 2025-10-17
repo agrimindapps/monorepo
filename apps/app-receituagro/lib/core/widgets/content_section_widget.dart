@@ -37,7 +37,7 @@ class ContentSectionWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(theme),
-        const SizedBox(height: ReceitaAgroSpacing.sm),
+        // const SizedBox(height: ReceitaAgroSpacing.sm),
         if (showCard) _buildCardContent(theme) else _buildDirectContent(),
       ],
     );
@@ -164,10 +164,9 @@ class ContentListItemWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color:
-              theme.brightness == Brightness.dark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : theme.colorScheme.surface.withValues(alpha: 0.03),
+          color: theme.brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.1)
+              : theme.colorScheme.surface.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(

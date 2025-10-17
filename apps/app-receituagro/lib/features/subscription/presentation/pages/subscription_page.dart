@@ -41,12 +41,27 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionNotifierProvider);
 
+    // Listen to state changes and show messages only when they change
+    ref.listen<AsyncValue<SubscriptionState>>(
+      subscriptionNotifierProvider,
+      (previous, next) {
+        next.whenData((state) {
+          if (state.errorMessage != null) {
+            _showSnackBar(context, state.errorMessage!, Colors.red);
+            ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+          } else if (state.successMessage != null) {
+            _showSnackBar(context, state.successMessage!, Colors.green);
+            ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+          } else if (state.infoMessage != null) {
+            _showSnackBar(context, state.infoMessage!, Colors.blue);
+            ref.read(subscriptionNotifierProvider.notifier).clearMessages();
+          }
+        });
+      },
+    );
+
     return subscriptionState.when(
       data: (state) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _showMessages(context, state);
-        });
-
         return Scaffold(
           backgroundColor: const Color(0xFF1B4332),
           body: DecoratedBox(
@@ -200,40 +215,18 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     );
   }
 
-  /// Exibe mensagens de erro, sucesso ou informação
-  void _showMessages(BuildContext context, SubscriptionState state) {
-    if (state.errorMessage != null) {
-      _showSnackBar(
-        context,
-        state.errorMessage!,
-        Colors.red,
-      );
-      ref.read(subscriptionNotifierProvider.notifier).clearMessages();
-    } else if (state.successMessage != null) {
-      _showSnackBar(
-        context,
-        state.successMessage!,
-        Colors.green,
-      );
-      ref.read(subscriptionNotifierProvider.notifier).clearMessages();
-    } else if (state.infoMessage != null) {
-      _showSnackBar(
-        context,
-        state.infoMessage!,
-        Colors.blue,
-      );
-      ref.read(subscriptionNotifierProvider.notifier).clearMessages();
-    }
-  }
-
   /// Helper para mostrar snackbars
   void _showSnackBar(
       BuildContext context, String message, Color backgroundColor) {
     if (mounted) {
+      // Clear any existing snackbars to prevent duplicates
+      ScaffoldMessenger.of(context).clearSnackBars();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: backgroundColor,
+          duration: const Duration(seconds: 3),
         ),
       );
     }

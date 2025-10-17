@@ -15,16 +15,15 @@ import '../providers/home_pragas_notifier.dart';
 class HomePragasSuggestionsWidget extends StatefulWidget {
   final HomePragasState state;
 
-  const HomePragasSuggestionsWidget({
-    super.key,
-    required this.state,
-  });
+  const HomePragasSuggestionsWidget({super.key, required this.state});
 
   @override
-  State<HomePragasSuggestionsWidget> createState() => _HomePragasSuggestionsWidgetState();
+  State<HomePragasSuggestionsWidget> createState() =>
+      _HomePragasSuggestionsWidgetState();
 }
 
-class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidget> {
+class _HomePragasSuggestionsWidgetState
+    extends State<HomePragasSuggestionsWidget> {
   final PageController _pageController = PageController(viewportFraction: 0.6);
 
   @override
@@ -45,14 +44,24 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
             horizontal: ReceitaAgroSpacing.horizontalPadding,
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Sugestões',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Sugestões',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ),
               IconButton(
@@ -98,7 +107,11 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     );
   }
 
-  Widget _buildCarouselItem(BuildContext context, Map<String, dynamic> suggestion, int index) {
+  Widget _buildCarouselItem(
+    BuildContext context,
+    Map<String, dynamic> suggestion,
+    int index,
+  ) {
     return Container(
       margin: EdgeInsets.only(
         left: index == 0 ? 0 : ReceitaAgroSpacing.horizontalPadding,
@@ -117,7 +130,10 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     );
   }
 
-  Widget _buildItemBackground(BuildContext context, Map<String, dynamic> suggestion) {
+  Widget _buildItemBackground(
+    BuildContext context,
+    Map<String, dynamic> suggestion,
+  ) {
     final theme = Theme.of(context);
 
     return SizedBox(
@@ -133,7 +149,10 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
           width: double.infinity,
           height: double.infinity,
           decoration: BoxDecoration(
-            color: _getColorForType(suggestion['type'] as String, context).withValues(alpha: 0.8),
+            color: _getColorForType(
+              suggestion['type'] as String,
+              context,
+            ).withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
@@ -157,7 +176,10 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     );
   }
 
-  Widget _buildGradientOverlay(BuildContext context, Map<String, dynamic> suggestion) {
+  Widget _buildGradientOverlay(
+    BuildContext context,
+    Map<String, dynamic> suggestion,
+  ) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -267,11 +289,7 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: Colors.white,
-            size: 14,
-          ),
+          Icon(icon, color: Colors.white, size: 14),
           const SizedBox(width: 4),
           Text(
             suggestion['type'] as String,
@@ -293,7 +311,10 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     );
   }
 
-  Widget _buildTouchLayer(BuildContext context, Map<String, dynamic> suggestion) {
+  Widget _buildTouchLayer(
+    BuildContext context,
+    Map<String, dynamic> suggestion,
+  ) {
     return Positioned.fill(
       child: Material(
         color: Colors.transparent,
@@ -304,7 +325,9 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
             suggestion['scientific'] as String,
             suggestion['id'] as String, // Pass ID for better precision
           ),
-          splashColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+          splashColor: Theme.of(
+            context,
+          ).colorScheme.surface.withValues(alpha: 0.1),
           highlightColor: Colors.transparent,
         ),
       ),
@@ -333,7 +356,9 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
               shape: BoxShape.circle,
               color: widget.state.currentCarouselIndex == entry.key
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  : Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
             ),
           ),
         );
@@ -390,7 +415,12 @@ class _HomePragasSuggestionsWidgetState extends State<HomePragasSuggestionsWidge
     }
   }
 
-  void _navigateToPragaDetails(BuildContext context, String pragaName, String scientificName, String pragaId) {
+  void _navigateToPragaDetails(
+    BuildContext context,
+    String pragaName,
+    String scientificName,
+    String pragaId,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute<void>(

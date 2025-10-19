@@ -1,0 +1,82 @@
+name: termostecnicos
+description: A new Flutter project.
+
+publish_to: 'none'
+
+version: 2024.10.05+20241005
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  # Monorepo shared package
+  core:
+    path: ../../packages/core
+
+  cupertino_icons: ^1.0.8
+  # share_plus: ^10.0.0  # From core
+  # icons_plus: ^5.0.0  # From core
+  # url_launcher: ^6.3.0  # From core
+  # shared_preferences: ^2.3.2  # From core
+  # package_info_plus: ^8.0.2  # From core
+  # firebase_analytics: ^11.3.2  # From core
+  # firebase_core: ^3.5.0  # From core
+  # firebase_crashlytics: ^4.1.2  # From core
+  # firebase_performance: ^0.10.0+7  # From core
+  # google_mobile_ads: ^5.1.0  # From core
+  get: ^4.6.6
+  logger: ^2.4.0
+  flutter_quill: ^11.0.0
+  # hive: ^2.2.3  # From core
+  # hive_flutter: ^1.1.0  # From core
+  # provider: ^6.1.2  # Will be replaced by Riverpod from core
+  flutter_tts: ^4.0.2  # App-specific
+  # cloud_firestore: ^5.4.2  # From core
+  # device_info_plus: ^10.1.2  # From core
+  app_settings: ^5.1.1  # App-specific
+  # carousel_slider: ^5.0.0  # From core
+  # purchases_flutter: ^8.1.1  # From core
+  purchases_ui_flutter: ^9.8.0  # Evaluate: add to core or keep local
+  flutter_localization: ^0.2.1  # App-specific
+  flutter_localizations:
+    sdk: flutter
+  # flutter_staggered_grid_view: ^0.7.0  # From core
+  skeletonizer: ^1.4.2  # Evaluate: replace with Shimmer from core
+  # firebase_auth: ^5.3.4  # From core
+  # connectivity_plus: ^6.1.3  # From core
+  # supabase_flutter: ^2.8.3  # From core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.12
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/database/json/administracao/
+    - assets/database/json/agricultura/
+    - assets/database/json/arquitetura/
+    - assets/database/json/biologia/
+    - assets/database/json/direito/
+    - assets/database/json/economia/
+    - assets/database/json/fisica/
+    - assets/database/json/geografia/
+    - assets/database/json/informatica/
+    - assets/database/json/matematica/
+    - assets/database/json/medicina/
+    - assets/database/json/quimica/
+    - assets/icons_app/
+    - assets/
+    - lib/assets/
+    - lib/assets/icons/
+    - lib/assets/billing/

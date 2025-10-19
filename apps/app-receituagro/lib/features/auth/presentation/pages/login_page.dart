@@ -73,11 +73,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(loginNotifierProvider, (previous, next) {
-      if (next.isAuthenticated && mounted) {
-        _handleAuthSuccess();
-      }
-    });
+    // Listener removido - callback é chamado diretamente pelos formulários
 
     return Scaffold(
       body: AnnotatedRegion<SystemUiOverlayStyle>(

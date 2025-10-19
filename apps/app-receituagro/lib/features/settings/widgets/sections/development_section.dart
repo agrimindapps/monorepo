@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/pages/data_inspector_page.dart';
-import '../../presentation/providers/settings_notifier.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
 
 /// Development tools section (debug mode only)
 /// Provides testing and debugging functionality
-class DevelopmentSection extends ConsumerWidget {
+class DevelopmentSection extends StatelessWidget {
   const DevelopmentSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,162 +23,17 @@ class DevelopmentSection extends ConsumerWidget {
           showIcon: false,
         ),
         SettingsCard(
-          child: Column(
-            children: [
-              SettingsListTile(
-                leadingIcon: Icons.verified_user,
-                iconColor: Colors.green.shade600,
-                backgroundColor: Colors.green.withValues(alpha: 0.1),
-                title: 'Gerar Licença Teste',
-                subtitle: 'Ativa licença premium por 30 dias',
-                onTap: () => _generateTestLicense(context, ref),
-              ),
-              Divider(
-                height: 1,
-                thickness: 0.5,
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              ),
-              SettingsListTile(
-                leadingIcon: Icons.no_accounts,
-                iconColor: Colors.green.shade600,
-                backgroundColor: Colors.green.withValues(alpha: 0.1),
-                title: 'Remover Licença Teste',
-                subtitle: 'Remove licença premium ativa',
-                onTap: () => _removeTestLicense(context, ref),
-              ),
-              Divider(
-                height: 1,
-                thickness: 0.5,
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              ),
-              SettingsListTile(
-                leadingIcon: Icons.storage,
-                iconColor: Colors.green.shade600,
-                backgroundColor: Colors.green.withValues(alpha: 0.1),
-                title: 'Inspetor de Dados',
-                subtitle: 'Visualizar e gerenciar dados locais',
-                onTap: () => _openDataInspector(context),
-              ),
-            ],
+          child: SettingsListTile(
+            leadingIcon: Icons.storage,
+            iconColor: Colors.green.shade600,
+            backgroundColor: Colors.green.withValues(alpha: 0.1),
+            title: 'Inspetor de Dados',
+            subtitle: 'Visualizar e gerenciar dados locais',
+            onTap: () => _openDataInspector(context),
           ),
         ),
       ],
     );
-  }
-
-
-  Future<void> _generateTestLicense(BuildContext context, WidgetRef ref) async {
-    final notifier = ref.read(settingsNotifierProvider.notifier);
-
-    try {
-      final success = await notifier.generateTestLicense();
-
-      if (context.mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SettingsDesignTokens.getSuccessSnackbar(
-              SettingsDesignTokens.testSubscriptionSuccess,
-            ),
-          );
-        } else {
-          final state = ref.read(settingsNotifierProvider);
-          final errorMsg = state.when(
-            data: (data) => data.error ?? SettingsDesignTokens.testSubscriptionError,
-            loading: () => SettingsDesignTokens.testSubscriptionError,
-            error: (e, _) => e.toString(),
-          );
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SettingsDesignTokens.getErrorSnackbar(errorMsg),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getErrorSnackbar('$e'),
-        );
-      }
-    }
-  }
-
-  Future<void> _removeTestLicense(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.warning,
-              color: Theme.of(context).colorScheme.error,
-              size: 32,
-            ),
-            const SizedBox(width: 12),
-            const Text('Remover Licença Teste'),
-          ],
-        ),
-        content: const Text(
-          'Isso irá remover a licença premium de teste. Todas as funcionalidades premium serão desabilitadas. Continuar?',
-          style: TextStyle(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: const Text('Remover'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && context.mounted) {
-      final notifier = ref.read(settingsNotifierProvider.notifier);
-
-      try {
-        final success = await notifier.removeTestLicense();
-
-        if (context.mounted) {
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text(SettingsDesignTokens.testSubscriptionRemoved),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          } else {
-            final state = ref.read(settingsNotifierProvider);
-            final errorMsg = state.when(
-              data: (data) => data.error ?? SettingsDesignTokens.removeSubscriptionError,
-              loading: () => SettingsDesignTokens.removeSubscriptionError,
-              error: (e, _) => e.toString(),
-            );
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SettingsDesignTokens.getErrorSnackbar(errorMsg),
-            );
-          }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SettingsDesignTokens.getErrorSnackbar('$e'),
-          );
-        }
-      }
-    }
   }
 
   Future<void> _openDataInspector(BuildContext context) async {

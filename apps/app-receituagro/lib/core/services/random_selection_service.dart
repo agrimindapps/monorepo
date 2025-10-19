@@ -69,13 +69,59 @@ class RandomSelectionService {
   }) {
     final combined = <T>[];
     combined.addAll(historyItems.take(count ~/ 2));
-    
+
     final remaining = count - combined.length;
     if (remaining > 0) {
       final randomItems = randomSelector(allItems, count: remaining);
       combined.addAll(randomItems);
     }
-    
+
     return combined.take(count).toList();
+  }
+
+  /// Seleciona itens aleatórios excluindo os que já estão no histórico
+  /// Garante que sempre retorne exatamente [count] itens (histórico + aleatórios)
+  static List<T> selectRandomExcluding<T>({
+    required List<T> allItems,
+    required List<T> excludeItems,
+    required int count,
+    required bool Function(T, T) areEqual,
+  }) {
+    if (allItems.isEmpty) return [];
+
+    // Filtrar itens que não estão no histórico
+    final availableItems = allItems.where((item) {
+      return !excludeItems.any((excluded) => areEqual(item, excluded));
+    }).toList();
+
+    if (availableItems.isEmpty) {
+      // Se não há itens disponíveis, retornar aleatórios de todos
+      return selectRandom(allItems, count);
+    }
+
+    // Selecionar aleatoriamente dos itens disponíveis
+    return selectRandom(availableItems, count);
+  }
+
+  /// Completa uma lista de histórico com aleatórios até atingir exatamente [targetCount]
+  static List<T> fillHistoryToCount<T>({
+    required List<T> historyItems,
+    required List<T> allItems,
+    required int targetCount,
+    required bool Function(T, T) areEqual,
+  }) {
+    if (historyItems.length >= targetCount) {
+      return historyItems.take(targetCount).toList();
+    }
+
+    final needed = targetCount - historyItems.length;
+    final randomItems = selectRandomExcluding<T>(
+      allItems: allItems,
+      excludeItems: historyItems,
+      count: needed,
+      areEqual: areEqual,
+    );
+
+    return [...historyItems, ...randomItems];
   }
 }

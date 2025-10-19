@@ -78,10 +78,15 @@
             android:value="2" />
             
         <!-- Security: Disable debugging in production -->
-        <meta-data 
-            android:name="android.debuggable" 
+        <meta-data
+            android:name="android.debuggable"
             android:value="false" />
-            
+
+        <!-- AdMob App ID (Test) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

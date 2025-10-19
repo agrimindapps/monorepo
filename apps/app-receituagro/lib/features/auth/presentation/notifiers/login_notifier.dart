@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../state/login_state.dart';
 
@@ -12,7 +11,6 @@ part 'login_notifier.g.dart';
 /// Manages authentication flows: login, signup, and password recovery
 @riverpod
 class LoginNotifier extends _$LoginNotifier {
-  late final ReceitaAgroAuthNotifier _authNotifier;
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
   late final TextEditingController _nameController;
@@ -20,7 +18,6 @@ class LoginNotifier extends _$LoginNotifier {
 
   @override
   LoginState build() {
-    _authNotifier = di.sl<ReceitaAgroAuthNotifier>();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _nameController = TextEditingController();
@@ -38,6 +35,10 @@ class LoginNotifier extends _$LoginNotifier {
       confirmPasswordController: _confirmPasswordController,
     );
   }
+
+  /// Helper para acessar o auth notifier via Riverpod
+  ReceitaAgroAuthNotifier get _authNotifier =>
+      ref.read(receitaAgroAuthNotifierProvider.notifier);
 
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
@@ -137,8 +138,17 @@ class LoginNotifier extends _$LoginNotifier {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro de validação - $emailError, $passwordError');
       }
+      state = state.copyWith(
+        errorMessage: emailError ?? passwordError,
+      );
       return;
     }
+
+    // Atualiza state para loading
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+    );
 
     try {
       final result = await _authNotifier.signInWithEmailAndPassword(
@@ -149,10 +159,30 @@ class LoginNotifier extends _$LoginNotifier {
       if (kDebugMode) {
         print('✅ LoginNotifier: Login resultado - ${result.isSuccess}');
       }
+
+      // Atualiza state baseado no resultado
+      if (result.isSuccess) {
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: true,
+          clearError: true,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: false,
+          errorMessage: result.errorMessage ?? 'Erro ao fazer login',
+        );
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro no login - $e');
       }
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        errorMessage: 'Erro inesperado ao fazer login',
+      );
     }
   }
 
@@ -175,8 +205,17 @@ class LoginNotifier extends _$LoginNotifier {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro de validação no cadastro');
       }
+      state = state.copyWith(
+        errorMessage: emailError ?? passwordError ?? nameError ?? confirmPasswordError,
+      );
       return;
     }
+
+    // Atualiza state para loading
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+    );
 
     try {
       final result = await _authNotifier.signUpWithEmailAndPassword(
@@ -188,10 +227,30 @@ class LoginNotifier extends _$LoginNotifier {
       if (kDebugMode) {
         print('✅ LoginNotifier: Cadastro resultado - ${result.isSuccess}');
       }
+
+      // Atualiza state baseado no resultado
+      if (result.isSuccess) {
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: true,
+          clearError: true,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          isAuthenticated: false,
+          errorMessage: result.errorMessage ?? 'Erro ao criar conta',
+        );
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro no cadastro - $e');
       }
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: false,
+        errorMessage: 'Erro inesperado ao criar conta',
+      );
     }
   }
 
@@ -208,18 +267,35 @@ class LoginNotifier extends _$LoginNotifier {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro de validação no email de recuperação');
       }
+      state = state.copyWith(
+        errorMessage: emailError,
+      );
       return;
     }
+
+    // Atualiza state para loading
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+    );
 
     try {
       await _authNotifier.sendPasswordResetEmail(email: email);
       if (kDebugMode) {
         print('✅ LoginNotifier: Email de recuperação enviado');
       }
+      state = state.copyWith(
+        isLoading: false,
+        clearError: true,
+      );
     } catch (e) {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro ao enviar email de recuperação - $e');
       }
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao enviar email de recuperação',
+      );
     }
   }
 

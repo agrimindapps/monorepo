@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import '../../core/services/admob_service.dart';
-import '../../core/services/return_service.dart';
 import '../../core/services/tts_service.dart';
 import '../../core/widgets/appbar.dart';
 import '../../core/widgets/search_widget.dart';
@@ -196,8 +195,6 @@ class TermosPageState extends State<TermosPage> {
 
   @override
   Widget build(BuildContext context) {
-    returnScope.setContext(context);
-
     return Scaffold(
       appBar: const CustomAppBar(),
       body: SingleChildScrollView(

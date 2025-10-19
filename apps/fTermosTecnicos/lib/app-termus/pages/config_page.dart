@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/pages/in_app_purchase_page.dart';
 import '../../core/pages/sobre.dart';
 import '../../core/pages/tts_settings_page.dart';
-import '../../core/services/comments_service.dart';
 import '../../core/themes/manager.dart';
 import '../../core/widgets/admob/ads_rewarded_widget.dart';
 import '../../core/widgets/appbar.dart';
@@ -168,8 +167,6 @@ class _ConfigState extends State<ConfigPage> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
-        configOptionFeedback(context),
-        const Divider(height: 0),
         configOptionSobre(context),
       ],
     );

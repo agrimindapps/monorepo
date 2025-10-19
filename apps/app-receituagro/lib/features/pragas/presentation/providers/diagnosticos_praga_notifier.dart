@@ -201,8 +201,11 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
               pragaNome = 'Praga não identificada';
             }
             String defensivoNome = '';
+            String ingredienteAtivo = 'Não especificado';
             if (entity.idDefensivo.isNotEmpty) {
-              defensivoNome = await _resolveDefensivoNome(entity.idDefensivo);
+              final defensivoData = await _resolveDefensivoData(entity.idDefensivo);
+              defensivoNome = defensivoData.$1; // Nome
+              ingredienteAtivo = defensivoData.$2; // Ingrediente ativo
             }
             if (defensivoNome.isEmpty) {
               defensivoNome = 'Defensivo não especificado';
@@ -212,7 +215,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
               DiagnosticoModel(
                 id: entity.id,
                 nome: defensivoNome,
-                ingredienteAtivo: entity.idDefensivo,
+                ingredienteAtivo: ingredienteAtivo, // Agora usa ingrediente ativo real
                 dosagem: entity.dosagem.displayDosagem,
                 cultura: culturaNome,
                 grupo: pragaNome,
@@ -224,11 +227,12 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
           // ao invés de usar lista hard-coded
           final culturasUnicas = diagnosticosList
               .map((d) => d.cultura)
-              .where((c) => c.isNotEmpty && c != 'Não especificado')
+              .where((c) => c.isNotEmpty && c != 'Não especificado' && c != 'Todas')
               .toSet()
               .toList()
             ..sort();
 
+          // Adiciona "Todas" no início, garantindo sem duplicatas
           final culturasComTodas = ['Todas', ...culturasUnicas];
 
           state = AsyncValue.data(
@@ -260,7 +264,9 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
       if (culturaData != null && culturaData.cultura.isNotEmpty) {
         return culturaData.cultura;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Erro ao buscar cultura, retorna valor padrão
+    }
     return 'Não especificado';
   }
 
@@ -271,19 +277,30 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
       if (pragaData != null && pragaData.nomeComum.isNotEmpty) {
         return pragaData.nomeComum;
       }
-    } catch (e) {}
+    } catch (e) {
+      // Erro ao buscar praga, retorna valor padrão
+    }
     return '';
   }
 
-  /// Resolve o nome do defensivo pelo ID usando o repository
-  Future<String> _resolveDefensivoNome(String idDefensivo) async {
+  /// Resolve o nome e ingrediente ativo do defensivo pelo ID
+  /// Retorna (nome, ingredienteAtivo)
+  Future<(String, String)> _resolveDefensivoData(String idDefensivo) async {
     try {
       final defensivoData = await _defensivoRepository.getById(idDefensivo);
-      if (defensivoData != null && defensivoData.nomeComum.isNotEmpty) {
-        return defensivoData.nomeComum;
+      if (defensivoData != null) {
+        final nome = defensivoData.nomeComum.isNotEmpty
+            ? defensivoData.nomeComum
+            : defensivoData.nomeTecnico;
+        final ingrediente = defensivoData.ingredienteAtivo?.isNotEmpty == true
+            ? defensivoData.ingredienteAtivo!
+            : 'Não especificado';
+        return (nome, ingrediente);
       }
-    } catch (e) {}
-    return '';
+    } catch (e) {
+      // Erro ao buscar defensivo, retorna valores padrão
+    }
+    return ('', 'Não especificado');
   }
 
   /// Atualiza query de pesquisa

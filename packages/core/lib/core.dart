@@ -1,6 +1,7 @@
 library;
 
 export 'package:cached_network_image/cached_network_image.dart';
+export 'package:carousel_slider/carousel_slider.dart';
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 export 'package:cloud_functions/cloud_functions.dart' hide Result;
 export 'package:connectivity_plus/connectivity_plus.dart';
@@ -21,6 +22,7 @@ export 'package:go_router/go_router.dart';
 export 'package:google_sign_in/google_sign_in.dart';
 export 'package:hive/hive.dart';
 export 'package:hive_flutter/hive_flutter.dart';
+export 'package:icons_plus/icons_plus.dart';
 export 'package:injectable/injectable.dart' hide Environment, order;
 export 'package:intl/intl.dart';
 export 'package:json_annotation/json_annotation.dart';
@@ -225,7 +227,9 @@ export 'src/sync/services/sync_logger.dart' hide LogLevel;
 export 'src/sync/sync.dart'
     hide NetworkInfo, ConnectionQuality, MigrationResult, LogLevel;
 export 'src/sync/unified_sync_manager.dart';
-export 'src/sync/specialized/sync_coordinator.dart';
-export 'src/sync/specialized/sync_state_machine.dart' hide AppSyncEvent, SyncAction;
 export 'src/sync/specialized/offline_sync_handler.dart';
+export 'src/sync/specialized/sync_coordinator.dart';
 export 'src/sync/specialized/sync_error_handler.dart';
+export 'src/sync/specialized/sync_state_machine.dart' hide AppSyncEvent, SyncAction;
+export 'utils/core_icons.dart';
+export 'widgets/core_carousel_widget.dart';

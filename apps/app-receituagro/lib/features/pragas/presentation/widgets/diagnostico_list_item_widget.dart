@@ -61,9 +61,10 @@ class DiagnosticoListItemWidget extends StatelessWidget {
     );
   }
 
-  /// Ícone representativo do diagnóstico
+  /// Avatar com iniciais do nome do defensivo
   Widget _buildIcon(BuildContext context) {
     final theme = Theme.of(context);
+    final initials = _getInitials(diagnostico.nome);
 
     return Container(
       width: 48,
@@ -72,12 +73,29 @@ class DiagnosticoListItemWidget extends StatelessWidget {
         color: theme.colorScheme.primary,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(
-        Icons.agriculture,
-        color: theme.colorScheme.onPrimary,
-        size: 24,
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            color: theme.colorScheme.onPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
+  }
+
+  /// Extrai iniciais do nome (primeiras letras de até 2 palavras)
+  String _getInitials(String name) {
+    if (name.isEmpty) return '??';
+
+    final words = name.trim().split(' ');
+    if (words.length == 1) {
+      return words[0].substring(0, 1).toUpperCase();
+    }
+
+    return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
   }
 
   /// Conteúdo principal com informações do diagnóstico

@@ -107,7 +107,7 @@ class DefensivoMapper {
       nomeComum: hive.nomeComum,
       classeAgronomica: hive.classeAgronomica,
       fabricante: hive.fabricante,
-      modoAcao: null, // FitossanitarioHive não tem modo de ação
+      modoAcao: hive.modoAcao, // Campo modoAcao existe no FitossanitarioHive
       isActive: hive.status,
       lastUpdated: DateTime.now(),
     );

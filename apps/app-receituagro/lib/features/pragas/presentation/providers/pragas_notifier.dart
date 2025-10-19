@@ -70,26 +70,32 @@ class PragasNotifier extends _$PragasNotifier {
   }
 
   /// Load recent pragas data
+  /// Usa fallback aleatório apenas na primeira vez (quando não há histórico)
   Future<List<PragaEntity>> _loadRecentPragasData() async {
     try {
-      final historyItems = await _historyService.getPragasHistory();
+      final allPragasResult = await _getPragasUseCase.execute();
 
-      if (historyItems.isNotEmpty) {
-        final historicPragas = <PragaEntity>[];
-        final allPragasResult = await _getPragasUseCase.execute();
+      return await allPragasResult.fold(
+        (failure) async => <PragaEntity>[],
+        (allPragas) async {
+          if (allPragas.isEmpty) {
+            return <PragaEntity>[];
+          }
 
-        return allPragasResult.fold((failure) => <PragaEntity>[], (allPragas) {
-          for (final historyItem in historyItems.take(10)) {
+          final historyItems = await _historyService.getPragasHistory();
+          final historicPragas = <PragaEntity>[];
+
+          // Buscar até 7 itens do histórico
+          for (final historyItem in historyItems.take(7)) {
             final praga = allPragas.firstWhere(
-              (p) =>
-                  p.idReg == historyItem.id || p.nomeComum == historyItem.name,
-              orElse:
-                  () => const PragaEntity(
-                    idReg: '',
-                    nomeComum: '',
-                    nomeCientifico: '',
-                    tipoPraga: '1',
-                  ),
+              (p) => p.idReg == historyItem['id'] ||
+                     p.nomeComum == historyItem['nomeComum'],
+              orElse: () => const PragaEntity(
+                idReg: '',
+                nomeComum: '',
+                nomeCientifico: '',
+                tipoPraga: '1',
+              ),
             );
 
             if (praga.idReg.isNotEmpty) {
@@ -97,17 +103,18 @@ class PragasNotifier extends _$PragasNotifier {
             }
           }
 
-          return RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
-            historicPragas,
-            allPragas,
-            RandomSelectionService.selectRandomPragas,
-            count: 10,
+          // SEMPRE retorna exatamente 7 registros
+          // Se histórico < 7, completa com aleatórios excluindo os do histórico
+          final recentPragas = RandomSelectionService.fillHistoryToCount<PragaEntity>(
+            historyItems: historicPragas,
+            allItems: allPragas,
+            targetCount: 7,
+            areEqual: (a, b) => a.idReg == b.idReg,
           );
-        });
-      } else {
-        final result = await _getRecentPragasUseCase.execute();
-        return result.fold((failure) => <PragaEntity>[], (pragas) => pragas);
-      }
+
+          return recentPragas;
+        },
+      );
     } catch (e) {
       return <PragaEntity>[];
     }
@@ -375,56 +382,43 @@ class PragasNotifier extends _$PragasNotifier {
     try {
       final historyItems = await _historyService.getPragasHistory();
 
-      if (historyItems.isNotEmpty) {
-        final historicPragas = <PragaEntity>[];
-        final allPragasResult = await _getPragasUseCase.execute();
-        allPragasResult.fold((failure) => throw Exception(failure.message), (
-          allPragas,
-        ) {
-          for (final historyItem in historyItems.take(10)) {
-            final praga = allPragas.firstWhere(
-              (p) =>
-                  p.idReg == historyItem.id || p.nomeComum == historyItem.name,
-              orElse:
-                  () => const PragaEntity(
-                    idReg: '',
-                    nomeComum: '',
-                    nomeCientifico: '',
-                    tipoPraga: '1',
-                  ),
-            );
-
-            if (praga.idReg.isNotEmpty) {
-              historicPragas.add(praga);
-            }
-          }
-          final recentPragas =
-              RandomSelectionService.combineHistoryWithRandom<PragaEntity>(
-                historicPragas,
-                allPragas,
-                RandomSelectionService.selectRandomPragas,
-                count: 10,
-              );
-
-          state = AsyncValue.data(
-            currentState.copyWith(recentPragas: recentPragas),
+      final historicPragas = <PragaEntity>[];
+      final allPragasResult = await _getPragasUseCase.execute();
+      allPragasResult.fold((failure) => throw Exception(failure.message), (
+        allPragas,
+      ) {
+        // Buscar até 7 itens do histórico
+        for (final historyItem in historyItems.take(7)) {
+          final praga = allPragas.firstWhere(
+            (p) =>
+                p.idReg == historyItem.id || p.nomeComum == historyItem.name,
+            orElse:
+                () => const PragaEntity(
+                  idReg: '',
+                  nomeComum: '',
+                  nomeCientifico: '',
+                  tipoPraga: '1',
+                ),
           );
-        });
-      } else {
-        final result = await _getRecentPragasUseCase.execute();
-        result.fold(
-          (failure) {
-            state = AsyncValue.data(
-              currentState.copyWith(errorMessage: failure.message),
-            );
-          },
-          (pragas) {
-            state = AsyncValue.data(
-              currentState.copyWith(recentPragas: pragas),
-            );
-          },
+
+          if (praga.idReg.isNotEmpty) {
+            historicPragas.add(praga);
+          }
+        }
+
+        // SEMPRE retorna exatamente 7 registros
+        // Se histórico < 7, completa com aleatórios excluindo os do histórico
+        final recentPragas = RandomSelectionService.fillHistoryToCount<PragaEntity>(
+          historyItems: historicPragas,
+          allItems: allPragas,
+          targetCount: 7,
+          areEqual: (a, b) => a.idReg == b.idReg,
         );
-      }
+
+        state = AsyncValue.data(
+          currentState.copyWith(recentPragas: recentPragas),
+        );
+      });
     } catch (e) {
       state = AsyncValue.data(
         currentState.copyWith(errorMessage: e.toString()),

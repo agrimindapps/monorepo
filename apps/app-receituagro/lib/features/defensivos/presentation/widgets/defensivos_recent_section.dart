@@ -48,7 +48,7 @@ class DefensivosRecentSection extends ConsumerWidget {
                   return ContentListItemWidget(
                     title: defensivo.displayName,
                     subtitle: defensivo.displayIngredient,
-                    category: defensivo.displayClass,
+                    category: defensivo.displayIngredient,
                     icon: FontAwesomeIcons.leaf,
                     iconColor: const Color(0xFF4CAF50),
                     onTap:

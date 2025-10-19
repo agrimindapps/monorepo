@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../services/in_app_purchase_service.dart';
-import '../services/return_service.dart';
 import '../services/revenuecat_service.dart';
 
 class SubscriptionScreen extends StatefulWidget {
@@ -185,8 +184,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    returnScope.setContext(context);
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(

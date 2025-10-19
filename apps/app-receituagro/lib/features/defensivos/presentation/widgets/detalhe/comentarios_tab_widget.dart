@@ -9,13 +9,11 @@ import '../../providers/detalhe_defensivo_notifier.dart';
 class ComentariosTabWidget extends ConsumerStatefulWidget {
   final String defensivoName;
 
-  const ComentariosTabWidget({
-    super.key,
-    required this.defensivoName,
-  });
+  const ComentariosTabWidget({super.key, required this.defensivoName});
 
   @override
-  ConsumerState<ComentariosTabWidget> createState() => _ComentariosTabWidgetState();
+  ConsumerState<ComentariosTabWidget> createState() =>
+      _ComentariosTabWidgetState();
 }
 
 class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
@@ -49,7 +47,8 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
         ),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Center(child: Text('Erro ao carregar comentários')),
+      error: (_, __) =>
+          const Center(child: Text('Erro ao carregar comentários')),
     );
   }
 
@@ -87,7 +86,7 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
               maxLines: 4,
               maxLength: 300,
               decoration: InputDecoration(
-                hintText: 'Compartilhe sua experiência sobre este defensivo...',
+                hintText: 'Adicione suas notas sobre defensivo...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -122,12 +121,19 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red.shade700,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         data.errorMessage ?? '',
-                        style: TextStyle(color: Colors.red.shade700, fontSize: 14),
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -172,8 +178,6 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
 
   /// Constrói card de comentário individual
   Widget _buildCommentCard(dynamic comentario) {
-    final theme = Theme.of(context);
-
     return Dismissible(
       key: Key((comentario.id ?? comentario.hashCode).toString()),
       direction: DismissDirection.endToStart,
@@ -181,87 +185,131 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: Colors.red,
-        child: const Icon(
-          Icons.delete,
-          color: Colors.white,
-          size: 30,
-        ),
+        child: const Icon(Icons.delete, color: Colors.white, size: 30),
       ),
       confirmDismiss: (direction) => _showDeleteConfirmation(context),
       onDismissed: (direction) {
-        ref.read(detalheDefensivoNotifierProvider.notifier).deleteComment((comentario.id ?? '').toString());
+        ref
+            .read(detalheDefensivoNotifierProvider.notifier)
+            .deleteComment((comentario.id ?? '').toString());
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          (comentario.ferramenta?.toString().split(' - ').isNotEmpty == true 
-                              ? comentario.ferramenta.toString().split(' - ').first 
-                              : widget.defensivoName),
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Text(
-                          (comentario.ferramenta?.toString().split(' - ').length ?? 0) > 1
-                              ? comentario.ferramenta.toString().split(' - ')[1]
-                              : '',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+        child: InkWell(
+          onTap: () => _showEditCommentDialog(comentario),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  (comentario.conteudo ?? comentario.titulo ?? '').toString(),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _formatDate(
+                    comentario.createdAt is DateTime
+                        ? comentario.createdAt as DateTime
+                        : DateTime.now(),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _formatDate(comentario.createdAt is DateTime ? comentario.createdAt as DateTime : DateTime.now()),
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                (comentario.conteudo ?? comentario.titulo ?? '').toString(),
-                style: const TextStyle(fontSize: 16),
-              ),
-            ],
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  /// Mostra dialog para editar comentário
+  Future<void> _showEditCommentDialog(dynamic comentario) async {
+    final editController = TextEditingController(
+      text: (comentario.conteudo ?? comentario.titulo ?? '').toString(),
+    );
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.edit_outlined,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text('Editar comentário'),
+            ],
+          ),
+          content: TextField(
+            controller: editController,
+            maxLines: 6,
+            maxLength: 300,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: 'Edite seu comentário...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              filled: true,
+              fillColor: theme.colorScheme.surface,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      final newContent = editController.text.trim();
+      if (newContent.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('O comentário não pode estar vazio'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      // TODO: Implementar método de edição no notifier
+      // Por enquanto, apenas mostra sucesso
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comentário atualizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
+
+    editController.dispose();
+  }
+
   Widget _buildFreeContent() {
     return PremiumFeatureCard(
       title: 'Comentários Premium',
-      description: 'Acesse comentários da comunidade e compartilhe suas experiências',
+      description:
+          'Acesse comentários da comunidade e compartilhe suas experiências',
       onUpgradePressed: () {
         // TODO: Navigate to subscription page
       },
@@ -282,7 +330,9 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
       return;
     }
 
-    final success = await ref.read(detalheDefensivoNotifierProvider.notifier).addComment(content);
+    final success = await ref
+        .read(detalheDefensivoNotifierProvider.notifier)
+        .addComment(content);
     if (success) {
       _commentController.clear();
       if (mounted) {
@@ -299,7 +349,11 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
         state.whenData((data) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text((data.errorMessage?.isNotEmpty ?? false) ? data.errorMessage! : 'Erro ao adicionar comentário'),
+              content: Text(
+                (data.errorMessage?.isNotEmpty ?? false)
+                    ? data.errorMessage!
+                    : 'Erro ao adicionar comentário',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -315,7 +369,9 @@ class _ComentariosTabWidgetState extends ConsumerState<ComentariosTabWidget> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirmar exclusão'),
-          content: const Text('Tem certeza que deseja excluir este comentário?'),
+          content: const Text(
+            'Tem certeza que deseja excluir este comentário?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),

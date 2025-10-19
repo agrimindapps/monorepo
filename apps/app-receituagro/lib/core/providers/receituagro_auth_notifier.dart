@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
 import '../di/injection_container.dart' as di;
-import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 
@@ -605,6 +604,17 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
   }
 
   Future<void> _syncUserProfile(UserEntity user, DeviceInfo deviceInfo) async {
+    // TODO: Implementar sincronização de perfil quando a box "users" for configurada
+    // A box Hive "users" precisa ser registrada antes de habilitar esta funcionalidade
+    // Por enquanto, apenas logamos que o perfil foi carregado
+    if (kDebugMode) {
+      print('ℹ️ Auth Notifier: Sincronização de perfil desabilitada temporariamente');
+      print('   User: ${user.displayName} (${user.email})');
+      print('   Device: ${deviceInfo.platform} - ${deviceInfo.uuid}');
+    }
+
+    // Comentado temporariamente até configurar a box Hive users
+    /*
     try {
       if (user.id.isEmpty) {
         if (kDebugMode) print('🔄 Auth Notifier: User ID inválido - pulando sincronização de perfil');
@@ -644,6 +654,7 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
       if (kDebugMode) print('❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e');
       _analytics.trackError('user_profile_sync_error', e.toString());
     }
+    */
   }
 }
 

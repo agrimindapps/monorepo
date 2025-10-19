@@ -41,7 +41,8 @@ class ReceitaAgroTheme {
       backgroundColor: Colors.white,
       selectedItemColor: ReceitaAgroColors.primary,
       unselectedItemColor: Colors.grey.shade600,
-      showUnselectedLabels: true,
+      showUnselectedLabels: false, // Oculta labels dos inativos
+      showSelectedLabels: true,    // Mostra label do ativo
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
@@ -126,7 +127,8 @@ class ReceitaAgroTheme {
       backgroundColor: const Color(0xFF1E1E1E),
       selectedItemColor: ReceitaAgroColors.primaryLight,
       unselectedItemColor: Colors.grey.shade600,
-      showUnselectedLabels: true,
+      showUnselectedLabels: false, // Oculta labels dos inativos
+      showSelectedLabels: true,    // Mostra label do ativo
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),

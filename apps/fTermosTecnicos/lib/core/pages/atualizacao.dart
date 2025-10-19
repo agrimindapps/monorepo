@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../intermediate.dart';
 import '../widgets/appbar.dart';
-import '../services/return_service.dart';
 
 class AtualizacaoPage extends StatefulWidget {
   const AtualizacaoPage({super.key});
@@ -26,8 +25,6 @@ class AtualizacaoPageState extends State<AtualizacaoPage> {
 
   @override
   Widget build(BuildContext context) {
-    returnScope.setContext(context);
-
     return Scaffold(
       key: scaffoldKey,
       appBar: const CustomAppBar(),

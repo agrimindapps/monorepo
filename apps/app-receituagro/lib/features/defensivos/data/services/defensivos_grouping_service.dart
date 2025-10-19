@@ -18,7 +18,8 @@ class DefensivosGroupingService {
     final Map<String, List<DefensivoEntity>> grupos = {};
     final isIngredienteAtivo = _isIngredienteAtivoGrouping(tipoAgrupamento);
     final isModoAcao = _isModoAcaoGrouping(tipoAgrupamento);
-    
+    final isClasseAgronomica = _isClasseAgronomicaGrouping(tipoAgrupamento);
+
     for (final defensivo in defensivosFiltrados) {
       if (isIngredienteAtivo) {
         final ingredientes = _extrairIngredientesAtivos(defensivo);
@@ -31,6 +32,12 @@ class DefensivosGroupingService {
         for (final modo in modosAcao) {
           grupos.putIfAbsent(modo, () => <DefensivoEntity>[]);
           grupos[modo]!.add(defensivo);
+        }
+      } else if (isClasseAgronomica) {
+        final classes = _extrairClassesAgronomicas(defensivo);
+        for (final classe in classes) {
+          grupos.putIfAbsent(classe, () => <DefensivoEntity>[]);
+          grupos[classe]!.add(defensivo);
         }
       } else {
         final chaveGrupo = _obterChaveGrupo(defensivo, tipoAgrupamento);
@@ -259,40 +266,87 @@ class DefensivosGroupingService {
   /// Verifica se o tipo de agrupamento é por modo de ação
   bool _isModoAcaoGrouping(String tipoAgrupamento) {
     final tipo = tipoAgrupamento.toLowerCase();
-    return tipo == 'modo_acao' || 
-           tipo == 'modoacao' || 
+    return tipo == 'modo_acao' ||
+           tipo == 'modoacao' ||
            tipo == 'modoAcao';
   }
 
+  /// Verifica se o tipo de agrupamento é por classe agronômica
+  bool _isClasseAgronomicaGrouping(String tipoAgrupamento) {
+    final tipo = tipoAgrupamento.toLowerCase();
+    return tipo == 'classe' ||
+           tipo == 'classe_agronomica' ||
+           tipo == 'classeagronomica';
+  }
+
   /// Extrai ingredientes ativos individuais separados por "+"
+  /// Normaliza para Title Case para consistência visual
   List<String> _extrairIngredientesAtivos(DefensivoEntity defensivo) {
     final ingredientesText = defensivo.displayIngredient;
-    
+
     if (ingredientesText.isEmpty || ingredientesText == 'Sem ingrediente ativo') {
       return ['Não informado'];
     }
     final ingredientes = ingredientesText
         .split('+')
-        .map((ingrediente) => ingrediente.trim())
+        .map((ingrediente) => _normalizeString(ingrediente))
         .where((ingrediente) => ingrediente.isNotEmpty && ingrediente.length >= 3)
         .toList();
-    
+
     return ingredientes.isEmpty ? ['Não informado'] : ingredientes;
   }
 
   /// Extrai modos de ação individuais separados por vírgula
+  /// Normaliza para Title Case para consistência visual
   List<String> _extrairModosAcao(DefensivoEntity defensivo) {
     final modoAcaoText = defensivo.displayModoAcao;
-    
+
     if (modoAcaoText.isEmpty || modoAcaoText == 'Não especificado') {
       return ['Não especificado'];
     }
     final modosAcao = modoAcaoText
         .split(',')
-        .map((modo) => modo.trim())
+        .map((modo) => _normalizeString(modo))
         .where((modo) => modo.isNotEmpty && modo.length >= 3)
         .toList();
-    
+
     return modosAcao.isEmpty ? ['Não especificado'] : modosAcao;
+  }
+
+  /// Extrai classes agronômicas individuais separadas por vírgula
+  /// Normaliza para Title Case para consistência visual
+  List<String> _extrairClassesAgronomicas(DefensivoEntity defensivo) {
+    final classeText = defensivo.displayClass;
+
+    if (classeText.isEmpty || classeText == 'Não especificado') {
+      return ['Não especificado'];
+    }
+    final classes = classeText
+        .split(',')
+        .map((classe) => _normalizeString(classe))
+        .where((classe) => classe.isNotEmpty && classe.length >= 3)
+        .toList();
+
+    return classes.isEmpty ? ['Não especificado'] : classes;
+  }
+
+  /// Normaliza string: trim + primeira letra maiúscula
+  /// Garante consistência mesmo com variações de capitalização
+  String _normalizeString(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    // Capitaliza primeira letra de cada palavra importante
+    return trimmed
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return word;
+          // Mantém palavras conectoras em lowercase
+          if (['de', 'da', 'do', 'e', 'a', 'o'].contains(word.toLowerCase())) {
+            return word.toLowerCase();
+          }
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 }

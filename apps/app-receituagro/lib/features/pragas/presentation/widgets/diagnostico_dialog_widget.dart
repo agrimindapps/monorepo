@@ -45,18 +45,21 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
     return Dialog(
       backgroundColor: theme.dialogTheme.backgroundColor ?? theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-          maxWidth: MediaQuery.of(context).size.width - 32,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxHeight: double.infinity,
+          maxWidth: 400.0, // Largura máxima de 400px
+          minWidth: 360.0, // Largura mínima de 360px
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(context),
-            Flexible(child: _buildContent(context)),
-            _buildActions(context, ref),
-          ],
+        child: IntrinsicHeight(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHeader(context),
+              Flexible(child: _buildContent(context)),
+              _buildActions(context, ref),
+            ],
+          ),
         ),
       ),
     );
@@ -119,25 +122,25 @@ class DiagnosticoDialogWidget extends ConsumerWidget {
             label: 'Dosagem',
             value: diagnostico.dosagem,
             icon: Icons.medical_services,
-            isPremium: true,
+            isPremium: false, // Removido bloqueio premium
           ),
           const _DiagnosticoInfoRow(
             label: 'Aplicação Terrestre',
-            value: '••• L/ha',
+            value: 'Não disponível',
             icon: Icons.agriculture,
-            isPremium: true,
+            isPremium: false, // Removido bloqueio premium
           ),
           const _DiagnosticoInfoRow(
             label: 'Aplicação Aérea',
-            value: '••• L/ha',
+            value: 'Não disponível',
             icon: Icons.flight,
-            isPremium: true,
+            isPremium: false, // Removido bloqueio premium
           ),
           const _DiagnosticoInfoRow(
             label: 'Intervalo de Aplicação',
-            value: '••• dias',
+            value: 'Não disponível',
             icon: Icons.schedule,
-            isPremium: true,
+            isPremium: false, // Removido bloqueio premium
           ),
           const SizedBox(height: 16),
         ],

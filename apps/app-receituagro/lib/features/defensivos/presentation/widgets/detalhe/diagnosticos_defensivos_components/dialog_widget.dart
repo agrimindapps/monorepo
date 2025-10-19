@@ -415,10 +415,10 @@ class _DiagnosticoDefensivoDialogWidgetState
 
   /// Conteúdo moderno com seções organizadas
   Widget _buildModernContent(BuildContext context) {
-    final dosagem = _getProperty('dosagem')?.toString() ?? '...';
-    final aplicacaoTerrestre = _getProperty('aplicacaoTerrestre') ?? '...';
-    final aplicacaoAerea = _getProperty('aplicacaoAerea') ?? '...';
-    final intervalo = _getProperty('intervaloDias')?.toString() ?? '...';
+    final dosagem = _getProperty('dosagem')?.toString();
+    final aplicacaoTerrestre = _getProperty('aplicacaoTerrestre');
+    final aplicacaoAerea = _getProperty('aplicacaoAerea');
+    final intervalo = _getProperty('intervaloDias')?.toString();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -428,29 +428,37 @@ class _DiagnosticoDefensivoDialogWidgetState
             context,
             icon: Icons.medical_services,
             title: 'Dosagem',
-            value: '$dosagem mg/L',
-            isPremium: true,
+            value: dosagem != null && dosagem.isNotEmpty
+                ? '$dosagem mg/L'
+                : 'Não disponível',
+            isPremium: false,
           ),
           _buildModernInfoItem(
             context,
             icon: Icons.agriculture,
             title: 'Aplicação Terrestre',
-            value: '$aplicacaoTerrestre L/ha',
-            isPremium: true,
+            value: aplicacaoTerrestre != null && aplicacaoTerrestre.isNotEmpty
+                ? '$aplicacaoTerrestre L/ha'
+                : 'Não disponível',
+            isPremium: false,
           ),
           _buildModernInfoItem(
             context,
             icon: Icons.flight,
             title: 'Aplicação Aérea',
-            value: '$aplicacaoAerea L/ha',
-            isPremium: true,
+            value: aplicacaoAerea != null && aplicacaoAerea.isNotEmpty
+                ? '$aplicacaoAerea L/ha'
+                : 'Não disponível',
+            isPremium: false,
           ),
           _buildModernInfoItem(
             context,
             icon: Icons.schedule,
             title: 'Intervalo de Aplicação',
-            value: '$intervalo dias',
-            isPremium: true,
+            value: intervalo != null && intervalo.isNotEmpty
+                ? '$intervalo dias'
+                : 'Não disponível',
+            isPremium: false,
           ),
           const SizedBox(height: 16),
         ],

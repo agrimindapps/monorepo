@@ -390,36 +390,55 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         DecoratedBox(
           decoration: _getCardDecoration(context),
-          child: ListTile(
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.smartphone,
-                color: Colors.grey,
-                size: 20,
-              ),
-            ),
-            title: const Text('Nenhum dispositivo registrado'),
-            subtitle: const Text('Recursos em desenvolvimento'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextButton(
-                  onPressed: () => _showDeviceManagement(context, settingsData),
-                  child: const Text('Gerenciar'),
+          child: Column(
+            children: [
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.smartphone,
+                    color: Colors.grey,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: () {},
-                  child: const Text('Desconectar'),
+                title: const Text('Nenhum dispositivo registrado'),
+                subtitle: const Text('Recursos em desenvolvimento'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showDeviceManagement(context, settingsData),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _showDeviceManagement(context, settingsData),
+                        icon: const Icon(Icons.devices, size: 18),
+                        label: const Text('Gerenciar'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Desconectar'),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],

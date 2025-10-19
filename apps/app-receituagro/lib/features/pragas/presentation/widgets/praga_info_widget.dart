@@ -10,11 +10,13 @@ import '../providers/detalhe_praga_notifier.dart';
 class PragaInfoWidget extends ConsumerWidget {
   final String pragaName;
   final String pragaScientificName;
+  final bool showDividers;
 
   const PragaInfoWidget({
     super.key,
     required this.pragaName,
     required this.pragaScientificName,
+    this.showDividers = false, // Por padrão não mostra dividers
   });
 
   @override
@@ -316,7 +318,7 @@ class PragaInfoWidget extends ConsumerWidget {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6.0),
           child: Column(
@@ -338,10 +340,12 @@ class PragaInfoWidget extends ConsumerWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              Divider(
-                height: 12,
-                color: theme.dividerColor,
-              ),
+              // Divider condicional
+              if (showDividers)
+                Divider(
+                  height: 12,
+                  color: theme.dividerColor,
+                ),
             ],
           ),
         );

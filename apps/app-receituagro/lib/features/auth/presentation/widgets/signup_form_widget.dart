@@ -197,8 +197,19 @@ class SignupFormWidget extends ConsumerWidget {
 
     final loginState = ref.read(loginNotifierProvider);
 
+    if (kDebugMode) {
+      print('🔍 SignupFormWidget: Signup state após auth - isAuthenticated: ${loginState.isAuthenticated}, errorMessage: ${loginState.errorMessage}');
+    }
+
     if (loginState.isAuthenticated && onSignupSuccess != null) {
-      onSignupSuccess!();
+      if (kDebugMode) {
+        print('✅ SignupFormWidget: Chamando onSignupSuccess callback');
+      }
+      // Dar tempo para o stream de auth emitir o novo estado
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      if (context.mounted) {
+        onSignupSuccess!();
+      }
     } else if (loginState.errorMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

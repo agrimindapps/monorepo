@@ -26,7 +26,7 @@ class DiagnosticoMockupCard extends StatelessWidget {
     super.key,
     required this.diagnostico,
     required this.onTap,
-    this.isPremium = true, // Por padrão considera premium para mostrar "•••"
+    this.isPremium = false, // Por padrão mostra dosagem real (sem bloqueio)
   });
 
   @override
@@ -88,8 +88,10 @@ class DiagnosticoMockupCard extends StatelessWidget {
     );
   }
 
-  /// Ícone verde quadrado com símbolo químico exatamente como no mockup
+  /// Avatar com iniciais do nome do defensivo
   Widget _buildIcon() {
+    final initials = _getInitials(diagnostico.nome);
+
     return Container(
       width: DiagnosticoMockupTokens.cardIconSize,
       height: DiagnosticoMockupTokens.cardIconSize,
@@ -97,12 +99,29 @@ class DiagnosticoMockupCard extends StatelessWidget {
         color: DiagnosticoMockupTokens.primaryGreen,
         borderRadius: BorderRadius.circular(8), // Cantos levemente arredondados
       ),
-      child: const Icon(
-        DiagnosticoMockupTokens.cardIcon,
-        color: Colors.white,
-        size: 20,
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
+  }
+
+  /// Extrai iniciais do nome (primeiras letras de até 2 palavras)
+  String _getInitials(String name) {
+    if (name.isEmpty) return '??';
+
+    final words = name.trim().split(' ');
+    if (words.length == 1) {
+      return words[0].substring(0, 1).toUpperCase();
+    }
+
+    return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
   }
 
   /// Área direita com ícone premium e chevron
@@ -146,12 +165,11 @@ class DiagnosticoMockupCardPremium extends StatelessWidget {
     return FutureBuilder<bool>(
       future: _checkPremiumStatus(),
       builder: (context, snapshot) {
-        final isUserPremium = snapshot.data ?? false;
-
+        // Removido bloqueio premium - sempre mostra dosagem
         return DiagnosticoMockupCard(
           diagnostico: diagnostico,
           onTap: onTap,
-          isPremium: !isUserPremium, // Se não é premium, oculta dosagem
+          isPremium: false, // Sempre mostra dosagem (sem bloqueio)
         );
       },
     );

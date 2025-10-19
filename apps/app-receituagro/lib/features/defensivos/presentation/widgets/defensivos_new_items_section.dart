@@ -48,7 +48,7 @@ class DefensivosNewItemsSection extends ConsumerWidget {
                   return ContentListItemWidget(
                     title: defensivo.displayName,
                     subtitle: defensivo.displayIngredient,
-                    category: defensivo.displayClass,
+                    category: defensivo.displayIngredient,
                     icon: FontAwesomeIcons.seedling,
                     iconColor: const Color(0xFF4CAF50),
                     onTap:

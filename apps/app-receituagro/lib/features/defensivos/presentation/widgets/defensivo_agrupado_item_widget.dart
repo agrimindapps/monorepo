@@ -31,7 +31,7 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
   Widget _buildListItem(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       elevation: theme.brightness == Brightness.dark ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -133,18 +133,6 @@ class DefensivoAgrupadoItemWidget extends StatelessWidget {
             fontSize: 15,
             fontWeight: FontWeight.w600,
             color: isDark ? Colors.white : Colors.black87,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          item.hasCount 
-              ? '${item.displayCount} registros'
-              : '0 registros',
-          style: TextStyle(
-            fontSize: 13,
-            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

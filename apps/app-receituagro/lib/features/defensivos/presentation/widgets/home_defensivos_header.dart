@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_icons.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../providers/home_defensivos_notifier.dart';
 
@@ -27,7 +28,7 @@ class HomeDefensivosHeader extends ConsumerWidget {
       data: (data) => ModernHeaderWidget(
         title: 'Defensivos',
         subtitle: data.headerSubtitle,
-        leftIcon: Icons.shield_outlined,
+        leftIcon: AppIcons.defensivosOutlined,
         showBackButton: false,
         showActions: false,
         isDark: isDark,
@@ -35,7 +36,7 @@ class HomeDefensivosHeader extends ConsumerWidget {
       loading: () => ModernHeaderWidget(
         title: 'Defensivos',
         subtitle: 'Carregando...',
-        leftIcon: Icons.shield_outlined,
+        leftIcon: AppIcons.defensivosOutlined,
         showBackButton: false,
         showActions: false,
         isDark: isDark,
@@ -43,7 +44,7 @@ class HomeDefensivosHeader extends ConsumerWidget {
       error: (_, __) => ModernHeaderWidget(
         title: 'Defensivos',
         subtitle: 'Erro ao carregar',
-        leftIcon: Icons.shield_outlined,
+        leftIcon: AppIcons.defensivosOutlined,
         showBackButton: false,
         showActions: false,
         isDark: isDark,

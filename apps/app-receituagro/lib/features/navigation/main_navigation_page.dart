@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_icons.dart';
 import '../comentarios/comentarios_page.dart';
 import '../defensivos/home_defensivos_page.dart';
 import '../favoritos/favoritos_page.dart';
@@ -42,30 +43,51 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       currentIndex: _currentBottomNavIndex,
       onTap: _onBottomNavTap,
       elevation: 8,
+      showSelectedLabels: true,
+      showUnselectedLabels: false,
+      selectedFontSize: 12,
+      unselectedFontSize: 0, // 0 para ocultar completamente
+      iconSize: 24,
+      selectedIconTheme: const IconThemeData(size: 26),
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.shield),
-          activeIcon: Icon(Icons.shield, size: 28),
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Icon(AppIcons.defensivos),
+          ),
+          activeIcon: Icon(AppIcons.defensivos),
           label: 'Defensivos',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bug_report),
-          activeIcon: Icon(Icons.bug_report, size: 28),
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Icon(AppIcons.pragas),
+          ),
+          activeIcon: Icon(AppIcons.pragas),
           label: 'Pragas',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_border),
-          activeIcon: Icon(Icons.favorite, size: 28),
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Icon(AppIcons.favoritos),
+          ),
+          activeIcon: Icon(AppIcons.favoritosFill),
           label: 'Favoritos',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.comment_outlined),
-          activeIcon: Icon(Icons.comment, size: 28),
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Icon(AppIcons.comentarios),
+          ),
+          activeIcon: Icon(AppIcons.comentariosFill),
           label: 'Comentários',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.settings_outlined),
-          activeIcon: Icon(Icons.settings, size: 28),
+          icon: Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Icon(AppIcons.configuracoes),
+          ),
+          activeIcon: Icon(AppIcons.configuracoesFill),
           label: 'Config',
         ),
       ],

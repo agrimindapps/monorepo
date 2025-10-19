@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../intermediate.dart';
 import '../themes/manager.dart';
 import '../widgets/appbar.dart';
-import '../services/return_service.dart';
 
 class SobrePage extends StatefulWidget {
   const SobrePage({super.key});
@@ -57,8 +56,6 @@ class SobrePageState extends State<SobrePage> {
 
   @override
   Widget build(BuildContext context) {
-    returnScope.setContext(context);
-
     return Scaffold(
       key: scaffoldKey,
       // appBar: AppBars(title: 'Sobre'),

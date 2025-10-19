@@ -100,10 +100,14 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // Reset state to prevent showing cached data from previous defensivo
-    // This fixes the bug where favorite button shows previous state
+    // Set loading without resetting other data
+    // Mantém isFavorited para evitar flicker visual
     state = AsyncValue.data(
-      DetalheDefensivoState.initial().copyWith(isLoading: true),
+      currentState.copyWith(
+        isLoading: true,
+        defensivoData: null, // Reset apenas dados do defensivo anterior
+        comentarios: [], // Reset comentários do defensivo anterior
+      ),
     );
 
     try {
@@ -167,24 +171,18 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
         'defensivo',
         itemId,
       );
-      state = AsyncValue.data(currentState.copyWith(isFavorited: isFavorited));
+
+      // Sempre atualiza o estado, mesmo se estiver no mesmo valor
+      // Isso garante que o estado correto seja carregado do repositório
+      final newState = state.value;
+      if (newState != null) {
+        state = AsyncValue.data(newState.copyWith(isFavorited: isFavorited));
+      }
     } catch (e) {
-      try {
-        final isFavorited = await _favoritosRepository.isFavorito(
-          'defensivo',
-          itemId,
-        );
-        state = AsyncValue.data(
-          currentState.copyWith(isFavorited: isFavorited),
-        );
-      } catch (fallbackError) {
-        final isFavorited = await _favoritosRepository.isFavorito(
-          'defensivo',
-          itemId,
-        );
-        state = AsyncValue.data(
-          currentState.copyWith(isFavorited: isFavorited),
-        );
+      // Em caso de erro, assume não favorito
+      final newState = state.value;
+      if (newState != null) {
+        state = AsyncValue.data(newState.copyWith(isFavorited: false));
       }
     }
   }

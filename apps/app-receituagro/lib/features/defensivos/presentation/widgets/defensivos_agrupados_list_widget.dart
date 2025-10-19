@@ -15,6 +15,7 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
   final DefensivosAgrupadosCategory category;
   final ScrollController scrollController;
   final void Function(DefensivoAgrupadoItemModel) onItemTap;
+  final VoidCallback? onClearFilters;
 
   const DefensivosAgrupadosListWidget({
     super.key,
@@ -22,6 +23,7 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
     required this.category,
     required this.scrollController,
     required this.onItemTap,
+    this.onClearFilters,
   });
 
   @override
@@ -85,11 +87,10 @@ class DefensivosAgrupadosListWidget extends StatelessWidget {
   }
 
   Widget _buildListViewMode() {
-    return ListView.separated(
+    return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: 4),
       itemCount: state.defensivosListFiltered.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 1),
       itemBuilder: (context, index) {
         final item = state.defensivosListFiltered[index];
         return RepaintBoundary(

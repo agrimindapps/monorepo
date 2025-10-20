@@ -14,10 +14,10 @@ import 'app-termus/const/environment_const.dart';
 import 'app-termus/const/firebase_consts.dart';
 import 'app-termus/const/revenuecat_const.dart';
 import 'app-termus/hive_models/comentarios_models.dart';
-import 'core/services/admob_service.dart';
-import 'core/services/in_app_purchase_service.dart';
-import 'core/services/revenuecat_service.dart';
-import 'core/themes/manager.dart';
+import 'app-termus/core/services/admob_service.dart';
+import 'app-termus/core/services/in_app_purchase_service.dart';
+import 'app-termus/core/services/revenuecat_service.dart';
+import 'app-termus/core/themes/manager.dart';
 
 void main() async {
   if (GetPlatform.isIOS || GetPlatform.isMacOS) {

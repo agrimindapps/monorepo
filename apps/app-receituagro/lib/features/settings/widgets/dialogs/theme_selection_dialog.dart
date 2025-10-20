@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/theme_notifier.dart';
-import '../../constants/settings_design_tokens.dart';
 
+/// Dialog simplificado de seleção de tema
+/// - Header compacto com X para fechar
+/// - Opções sem descrições
+/// - Sem bordas ao redor
+/// - Layout minimalista
 class ThemeSelectionDialog extends ConsumerWidget {
   const ThemeSelectionDialog({super.key});
 
@@ -17,15 +21,13 @@ class ThemeSelectionDialog extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildDialogHeader(context, theme),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             _buildThemeOptions(context, theme, ref, currentThemeMode),
-            const SizedBox(height: 24),
-            _buildActionButtons(context),
           ],
         ),
       ),
@@ -42,89 +44,64 @@ class ThemeSelectionDialog extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
-            SettingsDesignTokens.paletteIcon,
+            Icons.palette,
             color: theme.colorScheme.primary,
-            size: 24,
+            size: 20,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Tema do Aplicativo',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Escolha a aparência do app',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+          child: Text(
+            'Tema do Aplicativo',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
+        ),
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.close, size: 20),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          visualDensity: VisualDensity.compact,
         ),
       ],
     );
   }
 
   Widget _buildThemeOptions(BuildContext context, ThemeData theme, WidgetRef ref, ThemeMode currentThemeMode) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
+    return Column(
+      children: [
+        _buildThemeOption(
+          context,
+          theme,
+          ref,
+          currentThemeMode,
+          ThemeMode.light,
+          'Tema Claro',
+          Icons.light_mode,
         ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          _buildThemeOption(
-            context,
-            theme,
-            ref,
-            currentThemeMode,
-            ThemeMode.light,
-            'Tema Claro',
-            'Interface sempre clara',
-            Icons.light_mode,
-            isFirst: true,
-          ),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          ),
-          _buildThemeOption(
-            context,
-            theme,
-            ref,
-            currentThemeMode,
-            ThemeMode.dark,
-            'Tema Escuro',
-            'Interface sempre escura',
-            Icons.dark_mode,
-          ),
-          Divider(
-            height: 1,
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          ),
-          _buildThemeOption(
-            context,
-            theme,
-            ref,
-            currentThemeMode,
-            ThemeMode.system,
-            'Automático',
-            'Segue as configurações do sistema',
-            Icons.brightness_auto,
-            isLast: true,
-          ),
-        ],
-      ),
+        const SizedBox(height: 8),
+        _buildThemeOption(
+          context,
+          theme,
+          ref,
+          currentThemeMode,
+          ThemeMode.dark,
+          'Tema Escuro',
+          Icons.dark_mode,
+        ),
+        const SizedBox(height: 8),
+        _buildThemeOption(
+          context,
+          theme,
+          ref,
+          currentThemeMode,
+          ThemeMode.system,
+          'Automático',
+          Icons.brightness_auto,
+        ),
+      ],
     );
   }
 
@@ -135,38 +112,29 @@ class ThemeSelectionDialog extends ConsumerWidget {
     ThemeMode currentThemeMode,
     ThemeMode themeMode,
     String title,
-    String subtitle,
-    IconData icon, {
-    bool isFirst = false,
-    bool isLast = false,
-  }) {
+    IconData icon,
+  ) {
     final isSelected = currentThemeMode == themeMode;
 
     return Semantics(
-      label: '$title. $subtitle',
+      label: title,
       selected: isSelected,
       button: true,
       child: InkWell(
         onTap: () => _onThemeSelected(context, ref, themeMode, title),
-        borderRadius: BorderRadius.vertical(
-          top: isFirst ? const Radius.circular(8) : Radius.zero,
-          bottom: isLast ? const Radius.circular(8) : Radius.zero,
-        ),
+        borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
                 ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
                 : Colors.transparent,
-            borderRadius: BorderRadius.vertical(
-              top: isFirst ? const Radius.circular(8) : Radius.zero,
-              bottom: isLast ? const Radius.circular(8) : Radius.zero,
-            ),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.colorScheme.primary
@@ -178,60 +146,31 @@ class ThemeSelectionDialog extends ConsumerWidget {
                   color: isSelected
                       ? theme.colorScheme.onPrimary
                       : theme.colorScheme.onSurfaceVariant,
-                  size: 20,
+                  size: 18,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
               if (isSelected)
                 Icon(
                   Icons.check,
                   color: theme.colorScheme.primary,
-                  size: 24,
+                  size: 20,
                 ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            'Fechar',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

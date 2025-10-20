@@ -272,7 +272,7 @@ ThemeData lightTheme = ThemeData(
     backgroundColor: Colors.white,
     scrimColor: Colors.black12,
   ),
-  dialogTheme: DialogTheme(
+  dialogTheme: const DialogThemeData(
     backgroundColor: _backgroundColor,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
@@ -281,7 +281,7 @@ ThemeData lightTheme = ThemeData(
       side: const BorderSide(color: _borderColor),
     ),
   ),
-  tabBarTheme: TabBarTheme(
+  tabBarTheme: const TabBarThemeData(
     labelColor: Colors.white,
     unselectedLabelColor: Colors.grey,
     indicatorColor: Colors.black,

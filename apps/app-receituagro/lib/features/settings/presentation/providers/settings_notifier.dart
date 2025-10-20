@@ -414,8 +414,31 @@ class SettingsNotifier extends _$SettingsNotifier {
         );
         return;
       }
+
+      // Fetch devices from service
+      final devicesResult = await _deviceManagementService!.getUserDevices();
+
       DeviceEntity? currentDevice;
       List<DeviceEntity> connectedDevices = [];
+
+      devicesResult.fold(
+        (failure) {
+          debugPrint('❌ Error loading devices: ${failure.message}');
+        },
+        (devices) {
+          connectedDevices = devices;
+          // Find current device (the active one or first device)
+          try {
+            currentDevice = devices.firstWhere(
+              (device) => device.isActive,
+              orElse: () => devices.isNotEmpty ? devices.first : throw Exception('No devices'),
+            );
+            debugPrint('✅ Loaded ${devices.length} devices, current: ${currentDevice?.uuid}');
+          } catch (e) {
+            debugPrint('⚠️  No active device found');
+          }
+        },
+      );
 
       state = AsyncValue.data(
         currentState.copyWith(
@@ -493,7 +516,9 @@ class SettingsNotifier extends _$SettingsNotifier {
       }
 
       state = AsyncValue.data(currentState.copyWith(isLoading: true));
-      final result = Right<Failure, DeviceEntity>(device); // Placeholder
+
+      // Validate device with real service call
+      final result = await _deviceManagementService!.validateDevice(device);
 
       return result.fold(
         (Failure failure) {

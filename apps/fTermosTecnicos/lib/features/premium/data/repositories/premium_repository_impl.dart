@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SubscriptionStatus;
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/subscription_status.dart';

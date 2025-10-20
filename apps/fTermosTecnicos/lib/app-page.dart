@@ -13,6 +13,7 @@ import 'core/theme/theme_providers.dart';
 import 'core/widgets/admob/ads_open_app_widget.dart';
 import 'core/router/app_router.dart';
 import 'const/revenuecat_const.dart';
+import 'features/premium/presentation/providers/premium_providers.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});

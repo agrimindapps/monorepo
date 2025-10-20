@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SubscriptionStatus;
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import '../../../../core/di/di_providers.dart';
 import '../../domain/entities/subscription_status.dart';
 import '../../domain/repositories/premium_repository.dart';
 import '../../domain/usecases/check_subscription_status.dart';

@@ -109,8 +109,8 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   @override
   Future<bool> purchasePackage(Package package) async {
     try {
-      final customerInfo = await Purchases.purchasePackage(package);
-      return customerInfo.entitlements.active.isNotEmpty;
+      final result = await Purchases.purchasePackage(package);
+      return result.customerInfo.entitlements.active.isNotEmpty;
     } catch (e) {
       throw Exception('Failed to purchase package: $e');
     }

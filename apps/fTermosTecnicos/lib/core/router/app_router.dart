@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/termos/presentation/pages/home_page.dart';
 import '../../pages/termos_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
-import '../../features/settings/presentation/pages/tts_settings_page.dart' as settings_tts;
+import '../../features/settings/presentation/pages/tts_settings_page.dart';
 import '../../features/comentarios/presentation/pages/comentarios_page.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../pages/sobre.dart';
@@ -50,7 +50,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/config/tts',
       name: 'tts-settings',
-      builder: (context, state) => const settings_tts.TtsSettingsPage(),
+      builder: (context, state) => const TTSSettingsPage(),
     ),
     GoRoute(
       path: '/sobre',

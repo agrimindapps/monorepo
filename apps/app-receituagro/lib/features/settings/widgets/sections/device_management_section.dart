@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/device_identity_service.dart';
 import '../../presentation/providers/settings_notifier.dart';
 import '../../presentation/providers/settings_state.dart';
+import '../dialogs/device_management_dialog.dart';
 
 /// Device Management Section for Settings Page
 ///
@@ -127,14 +128,22 @@ class DeviceManagementSection extends ConsumerWidget {
 
   /// Open device management dialog
   Future<void> _openDeviceManagementDialog(BuildContext context, WidgetRef ref) async {
-    final Widget? dialog = await Future.microtask(() {
-      return null;
-    });
+    final settingsAsync = ref.read(settingsNotifierProvider);
 
-    if (context.mounted && dialog != null) {
+    // Get current settings state
+    final settingsState = settingsAsync.value;
+    if (settingsState == null) {
+      debugPrint('⚠️  Cannot open dialog: Settings state not available');
+      return;
+    }
+
+    if (context.mounted) {
+      // Import needed: ../dialogs/device_management_dialog.dart
       await showDialog<void>(
         context: context,
-        builder: (context) => dialog,
+        builder: (context) => DeviceManagementDialog(
+          settingsData: settingsState,
+        ),
       );
     }
   }

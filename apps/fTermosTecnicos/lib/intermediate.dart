@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 
-import 'app-termus/const/config_const.dart';
-import 'app-termus/const/environment_const.dart';
-import 'app-termus/const/firebase_consts.dart';
+import 'const/config_const.dart';
+import 'const/environment_const.dart';
+import 'const/firebase_consts.dart';
 
 class GlobalEnvironment {
   GlobalEnvironment._();

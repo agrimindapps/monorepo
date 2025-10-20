@@ -58,7 +58,8 @@ class RevenuecatService extends GetxController {
   static Future<bool> purchasePackage(Package package) async {
     bool success = false;
     try {
-      CustomerInfo purchaserInfo = await Purchases.purchasePackage(package);
+      final result = await Purchases.purchasePackage(package);
+      final CustomerInfo purchaserInfo = result.customerInfo;
 
       // Verifica se a compra foi realizada com sucesso
       if (purchaserInfo

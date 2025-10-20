@@ -50,12 +50,20 @@ dependencies:
   # Navigation (will replace GetX)
   go_router: ^16.2.4
 
-  # Note: Most dependencies come from core package:
-  # - share_plus, url_launcher, shared_preferences
-  # - package_info_plus, firebase_*, google_mobile_ads
-  # - hive, hive_flutter, cloud_firestore, device_info_plus
-  # - carousel_slider, purchases_flutter, flutter_staggered_grid_view
-  # - firebase_auth, connectivity_plus, supabase_flutter
+  # Legacy dependencies (used directly in lib/core files)
+  # TODO: Remove after full migration to Riverpod
+  get: ^4.6.6
+
+  # Dependencies from core but used directly in app code
+  # (Required for direct imports per analyzer)
+  hive: any
+  shared_preferences: any
+  firebase_core: any
+  icons_plus: any
+  url_launcher: any
+  google_mobile_ads: any
+  intl: any
+  purchases_flutter: any
 
 dev_dependencies:
   flutter_test:

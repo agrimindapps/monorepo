@@ -219,7 +219,7 @@ ThemeData lightTheme = ThemeData(
   ),
 
   // Card theme
-  cardTheme: const CardThemeData(
+  cardTheme: CardThemeData(
     color: _backgroundColor,
     surfaceTintColor: _backgroundColor,
     elevation: 0,
@@ -272,7 +272,7 @@ ThemeData lightTheme = ThemeData(
     backgroundColor: Colors.white,
     scrimColor: Colors.black12,
   ),
-  dialogTheme: const DialogThemeData(
+  dialogTheme: DialogThemeData(
     backgroundColor: _backgroundColor,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
@@ -281,7 +281,7 @@ ThemeData lightTheme = ThemeData(
       side: const BorderSide(color: _borderColor),
     ),
   ),
-  tabBarTheme: const TabBarThemeData(
+  tabBarTheme: TabBarThemeData(
     labelColor: Colors.white,
     unselectedLabelColor: Colors.grey,
     indicatorColor: Colors.black,

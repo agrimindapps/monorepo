@@ -5,6 +5,8 @@ import '../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
+import '../../subscription/presentation/providers/subscription_notifier.dart';
+import '../../subscription/presentation/widgets/subscription_progress_widget.dart';
 import '../constants/settings_design_tokens.dart';
 import '../presentation/providers/settings_notifier.dart';
 import '../widgets/dialogs/clear_data_dialog.dart';
@@ -46,7 +48,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return authState.when(
       data: (authData) {
-        final isAuthenticated = authData.isAuthenticated && !authData.isAnonymous;
+        final isAuthenticated =
+            authData.isAuthenticated && !authData.isAnonymous;
         final user = authData.currentUser;
         if (!_settingsInitialized && isAuthenticated && user?.id != null) {
           _settingsInitialized = true;
@@ -57,59 +60,66 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             });
           }
         }
-        debugPrint('🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}');
+        debugPrint(
+          '🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}',
+        );
 
         return Scaffold(
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: ResponsiveContentWrapper(
                 child: Column(
                   children: [
                     ModernHeaderWidget(
-                      title: isAuthenticated 
+                      title: isAuthenticated
                           ? _getUserDisplayTitle(user)
                           : 'Perfil do Visitante',
-                      subtitle: isAuthenticated 
+                      subtitle: isAuthenticated
                           ? 'Gerencie sua conta e configurações'
                           : 'Entre em sua conta para recursos completos',
                       leftIcon: Icons.person,
                       showBackButton: true,
                       isDark: isDark,
                     ),
-                    
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: 12),
                     Expanded(
                       child: settingsState.when(
                         data: (settingsData) => SingleChildScrollView(
-                          padding: const EdgeInsets.all(8),
                           child: Column(
                             children: [
                               _buildUserSection(context, authData),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 8),
+                              if (isAuthenticated) ...[
+                                _buildSubscriptionSection(context),
+                                const SizedBox(height: 8),
+                              ],
                               if (isAuthenticated) ...[
                                 _buildAccountInfoSection(context, authData),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                               ],
                               if (isAuthenticated) ...[
                                 _buildDevicesSection(context, settingsData),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                               ],
                               if (isAuthenticated) ...[
                                 _buildDataSyncSection(context, authData),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                               ],
                               if (isAuthenticated) ...[
                                 _buildUserActionsSection(context, authData),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 8),
                               ],
 
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (error, _) => Center(child: Text('Erro: $error')),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (error, _) =>
+                            Center(child: Text('Erro: $error')),
                       ),
                     ),
                   ],
@@ -119,12 +129,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         );
       },
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, _) => Scaffold(
-        body: Center(child: Text('Erro: $error')),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, _) => Scaffold(body: Center(child: Text('Erro: $error'))),
     );
   }
 
@@ -135,7 +142,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final bool isAnonBool = authData?.isAnonymous == true;
     final isAuthenticated = isAuthBool && !isAnonBool;
     final user = authData?.currentUser;
-    
+
     return Container(
       decoration: _getCardDecoration(context),
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -143,22 +150,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         onTap: !isAuthenticated ? () => _navigateToLoginPage(context) : null,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isAuthenticated 
-                        ? SettingsDesignTokens.primaryColor 
+                    color: isAuthenticated
+                        ? SettingsDesignTokens.primaryColor
                         : Colors.grey.shade400,
                     width: 3,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: isAuthenticated 
-                          ? SettingsDesignTokens.primaryColor.withValues(alpha: 0.3)
+                      color: isAuthenticated
+                          ? SettingsDesignTokens.primaryColor.withValues(
+                              alpha: 0.3,
+                            )
                           : Colors.grey.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
@@ -167,8 +176,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 child: CircleAvatar(
                   radius: 32,
-                  backgroundColor: isAuthenticated 
-                      ? SettingsDesignTokens.primaryColor 
+                  backgroundColor: isAuthenticated
+                      ? SettingsDesignTokens.primaryColor
                       : Colors.grey.shade400,
                   child: Text(
                     _getInitials(_getUserDisplayTitle(user)),
@@ -202,48 +211,40 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: 4),
                     Text(
                       isAuthenticated
-                          ? ((user?.email is String) ? (user?.email as String) : 'email@usuario.com')
+                          ? ((user?.email is String)
+                                ? (user?.email as String)
+                                : 'email@usuario.com')
                           : 'Faça login para acessar recursos completos',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     if (isAuthenticated && user?.createdAt != null) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade100.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.access_time,
-                              color: Colors.green.shade700,
-                              size: 14,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green.shade600,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _getMemberSince(user?.createdAt),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _getMemberSince(user?.createdAt),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.green.shade700,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ],
                 ),
               ),
               if (!isAuthenticated)
-                Icon(
-                  Icons.login,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                Icon(Icons.login, color: theme.colorScheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -251,28 +252,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-
-
-
-
   /// Obter iniciais do nome
   String _getInitials(String name) {
     if (name.isEmpty) return '?';
     final words = name.split(' ');
     if (words.length == 1) return words[0].substring(0, 1).toUpperCase();
-    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'.toUpperCase();
+    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'
+        .toUpperCase();
   }
 
   /// Obter título para exibição do usuário
   String _getUserDisplayTitle(dynamic user) {
     final displayName = user?.displayName;
-    if (displayName != null && displayName is String && displayName.isNotEmpty) {
+    if (displayName != null &&
+        displayName is String &&
+        displayName.isNotEmpty) {
       return displayName;
     }
     final email = user?.email;
     return (email is String ? email : null) ?? 'Usuário';
   }
-
 
   /// Mostrar gerenciamento de dispositivos
   void _showDeviceManagement(BuildContext context, dynamic settingsData) {
@@ -281,10 +280,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (context) => DeviceManagementDialog(settingsData: settingsData),
     );
   }
-
-
-
-
 
   /// Handler para logout
   Future<void> _handleLogout(BuildContext context) async {
@@ -295,13 +290,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         await ref.read(receitaAgroAuthNotifierProvider.notifier).signOut();
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Logout realizado com sucesso!'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Logout realizado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
           );
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao sair: $e'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Erro ao sair: $e'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -314,7 +315,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldClear == true && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Funcionalidade de limpeza em desenvolvimento'), backgroundColor: Colors.orange),
+        const SnackBar(
+          content: Text('Funcionalidade de limpeza em desenvolvimento'),
+          backgroundColor: Colors.orange,
+        ),
       );
     }
   }
@@ -331,22 +335,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldDelete == true && context.mounted) {
       try {
-        final result = await ref.read(receitaAgroAuthNotifierProvider.notifier).deleteAccount();
+        final result = await ref
+            .read(receitaAgroAuthNotifierProvider.notifier)
+            .deleteAccount();
         if (context.mounted) {
           if (result.isSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Conta excluída com sucesso'), backgroundColor: Colors.green),
+              const SnackBar(
+                content: Text('Conta excluída com sucesso'),
+                backgroundColor: Colors.green,
+              ),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Erro: ${result.errorMessage}'), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text('Erro: ${result.errorMessage}'),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao excluir conta: $e'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Erro ao excluir conta: $e'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -357,12 +372,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// VERSÃO ATUALIZADA: Com logs e feedback aprimorado
   void _navigateToLoginPage(BuildContext context) async {
     debugPrint('🚀 ProfilePage: Navigating to LoginPage');
-    
+
     final result = await Navigator.push<bool>(
       context,
-      MaterialPageRoute<bool>(
-        builder: (context) => const LoginPage(),
-      ),
+      MaterialPageRoute<bool>(builder: (context) => const LoginPage()),
     );
     debugPrint('🔙 ProfilePage: Returned from LoginPage with result: $result');
     if (mounted) {
@@ -370,16 +383,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
-
   /// Seção de Dispositivos Conectados
   Widget _buildDevicesSection(BuildContext context, dynamic settingsData) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
           child: Text(
             'Dispositivos Conectados',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -417,7 +429,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () => _showDeviceManagement(context, settingsData),
+                        onPressed: () =>
+                            _showDeviceManagement(context, settingsData),
                         icon: const Icon(Icons.devices, size: 18),
                         label: const Text('Gerenciar'),
                         style: OutlinedButton.styleFrom(
@@ -445,19 +458,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-
-
-
-
-
-
-
-
-
   /// Helper: Decoração de card
   BoxDecoration _getCardDecoration(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return BoxDecoration(
       color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
       borderRadius: BorderRadius.circular(12),
@@ -490,19 +494,120 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
+  /// Seção de assinatura premium
+  Widget _buildSubscriptionSection(BuildContext context) {
+    final theme = Theme.of(context);
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+          child: Text(
+            'Assinatura Premium',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        DecoratedBox(
+          decoration: _getCardDecoration(context),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Consumer(
+              builder: (context, ref, child) {
+                final subscriptionAsync = ref.watch(
+                  subscriptionNotifierProvider,
+                );
 
+                return subscriptionAsync.when(
+                  data: (subscriptionState) {
+                    if (!subscriptionState.hasActiveSubscription ||
+                        subscriptionState.currentSubscription == null) {
+                      return _buildNoPremiumWidget(context);
+                    }
+
+                    final subscription = subscriptionState.currentSubscription;
+                    if (subscription?.expirationDate == null) {
+                      return _buildNoPremiumWidget(context);
+                    }
+
+                    return SubscriptionProgressWidget(
+                      expirationDate: subscription!.expirationDate!,
+                      purchaseDate: subscription.purchaseDate,
+                      isSandbox: subscription.isSandbox,
+                      isCompact: true,
+                    );
+                  },
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  error: (error, stack) => _buildNoPremiumWidget(context),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Widget para quando não tem premium
+  Widget _buildNoPremiumWidget(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.workspace_premium_outlined,
+              color: Colors.grey.shade400,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Assinatura Gratuita',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton.icon(
+          onPressed: () {
+            // Navegar para página de planos
+            Navigator.pushNamed(context, '/subscription');
+          },
+          icon: const Icon(Icons.upgrade, size: 18),
+          label: const Text('Assinar Premium'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4CAF50),
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 40),
+          ),
+        ),
+      ],
+    );
+  }
 
   /// Seção de informações da conta (estilo Plantis)
   Widget _buildAccountInfoSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
     final user = authData.currentUser;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
           child: Text(
             'Informações da Conta',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -519,9 +624,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 _buildInfoRow(context, 'Tipo de Conta', 'Gratuita'),
                 const SizedBox(height: 12),
-                _buildInfoRow(context, 'Criada em', _formatDate(user?.createdAt)),
+                _buildInfoRow(
+                  context,
+                  'Criada em',
+                  _formatDate(user?.createdAt),
+                ),
                 const SizedBox(height: 12),
-                _buildInfoRow(context, 'Último acesso', _formatDate(DateTime.now())),
+                _buildInfoRow(
+                  context,
+                  'Último acesso',
+                  _formatDate(DateTime.now()),
+                ),
               ],
             ),
           ),
@@ -533,12 +646,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Seção de dados e sincronização (estilo Plantis)
   Widget _buildDataSyncSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
           child: Text(
             'Dados e Sincronização',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -588,7 +701,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 title: const Text('Exportar como JSON'),
-                subtitle: const Text('Baixar dados em formato estruturado JSON'),
+                subtitle: const Text(
+                  'Baixar dados em formato estruturado JSON',
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _showExportDataJson(context),
               ),
@@ -621,12 +736,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// Seção de Ações do Usuário (nova seção)
   Widget _buildUserActionsSection(BuildContext context, dynamic authData) {
     final theme = Theme.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
           child: Text(
             'Ações da Conta',
             style: theme.textTheme.titleMedium?.copyWith(
@@ -685,11 +800,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.logout,
-                    color: Colors.red,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.logout, color: Colors.red, size: 20),
                 ),
                 title: const Text('Sair da Conta'),
                 subtitle: const Text('Fazer logout desta conta'),
@@ -737,9 +848,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Container(
@@ -749,7 +858,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: Colors.green.shade50,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.data_object, color: Colors.green, size: 20),
+              child: const Icon(
+                Icons.data_object,
+                color: Colors.green,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             const Text('Exportar como JSON'),
@@ -796,9 +909,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
             Container(
@@ -808,7 +919,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 color: Colors.green.shade50,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(Icons.table_chart, color: Colors.green, size: 20),
+              child: const Icon(
+                Icons.table_chart,
+                color: Colors.green,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             const Text('Exportar como CSV'),
@@ -866,5 +981,4 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
     );
   }
-
 }

@@ -2,8 +2,8 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/models/database.dart';
-import '../../core/services/localstorage_service.dart';
+import '../core/models/database.dart';
+import '../core/services/localstorage_service.dart';
 import '../classes/termo_class.dart';
 
 class TermosTecnicos {

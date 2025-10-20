@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../core/models/database.dart';
+import '../core/models/database.dart';
 import '../hive_models/comentarios_models.dart';
 import '../repository/comentarios_repository.dart';
 

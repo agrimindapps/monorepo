@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
-import '../core/services/admob_service.dart';
-import '../core/services/in_app_purchase_service.dart';
-import '../core/services/revenuecat_service.dart';
-import '../core/themes/manager.dart';
-import '../core/widgets/admob/ads_open_app_widget.dart';
+import 'core/services/admob_service.dart';
+import 'core/services/in_app_purchase_service.dart';
+import 'core/services/revenuecat_service.dart';
+import 'core/themes/manager.dart';
+import 'core/widgets/admob/ads_open_app_widget.dart';
 import 'const/revenuecat_const.dart';
 import 'router.dart';
 

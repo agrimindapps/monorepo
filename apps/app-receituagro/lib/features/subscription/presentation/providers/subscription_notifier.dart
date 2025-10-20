@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/providers/premium_notifier.dart';
 import '../../domain/usecases/get_available_products.dart';
+import '../../domain/usecases/get_current_subscription.dart';
 import '../../domain/usecases/get_user_premium_status.dart';
 import '../../domain/usecases/manage_subscription.dart';
 import '../../domain/usecases/purchase_product.dart';
@@ -96,6 +97,7 @@ class SubscriptionState {
 class SubscriptionNotifier extends _$SubscriptionNotifier {
   late final GetUserPremiumStatusUseCase _getUserPremiumStatusUseCase;
   late final GetAvailableProductsUseCase _getAvailableProductsUseCase;
+  late final GetCurrentSubscriptionUseCase _getCurrentSubscriptionUseCase;
   late final PurchaseProductUseCase _purchaseProductUseCase;
   late final RestorePurchasesUseCase _restorePurchasesUseCase;
   late final RefreshSubscriptionStatusUseCase _refreshSubscriptionStatusUseCase;
@@ -105,6 +107,7 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
   Future<SubscriptionState> build() async {
     _getUserPremiumStatusUseCase = di.sl<GetUserPremiumStatusUseCase>();
     _getAvailableProductsUseCase = di.sl<GetAvailableProductsUseCase>();
+    _getCurrentSubscriptionUseCase = di.sl<GetCurrentSubscriptionUseCase>();
     _purchaseProductUseCase = di.sl<PurchaseProductUseCase>();
     _restorePurchasesUseCase = di.sl<RestorePurchasesUseCase>();
     _refreshSubscriptionStatusUseCase = di.sl<RefreshSubscriptionStatusUseCase>();
@@ -117,12 +120,13 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     try {
       final hasActive = await _checkActiveSubscription();
       final products = await _loadAvailableProducts();
+      final currentSub = await _loadCurrentSubscription();
 
       return SubscriptionState(
         isLoading: false,
         hasActiveSubscription: hasActive,
         availableProducts: products,
-        currentSubscription: null,
+        currentSubscription: currentSub,
         selectedPlan: 'yearly',
       );
     } catch (e) {
@@ -142,12 +146,14 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     try {
       final hasActive = await _checkActiveSubscription();
       final products = await _loadAvailableProducts();
+      final currentSub = await _loadCurrentSubscription();
 
       state = AsyncValue.data(
         currentState.copyWith(
           isLoading: false,
           hasActiveSubscription: hasActive,
           availableProducts: products,
+          currentSubscription: currentSub,
         ),
       );
     } catch (e) {
@@ -166,6 +172,32 @@ class SubscriptionNotifier extends _$SubscriptionNotifier {
     return result.fold(
       (failure) => false,
       (hasActive) => hasActive,
+    );
+  }
+
+  /// Carrega a assinatura atual com todos os detalhes
+  Future<SubscriptionEntity?> _loadCurrentSubscription() async {
+    debugPrint('🔍 [SubscriptionNotifier] Carregando assinatura atual...');
+
+    final result = await _getCurrentSubscriptionUseCase(const NoParams());
+
+    return result.fold(
+      (failure) {
+        debugPrint('❌ [SubscriptionNotifier] Erro ao carregar subscription: ${failure.message}');
+        return null;
+      },
+      (subscription) {
+        if (subscription != null) {
+          debugPrint('✅ [SubscriptionNotifier] Subscription carregada:');
+          debugPrint('   📦 Product ID: ${subscription.productId}');
+          debugPrint('   📅 Expiration: ${subscription.expirationDate}');
+          debugPrint('   🛒 Purchase: ${subscription.purchaseDate}');
+          debugPrint('   ⏱️  Days remaining: ${subscription.daysRemaining}');
+        } else {
+          debugPrint('ℹ️ [SubscriptionNotifier] Nenhuma subscription ativa encontrada');
+        }
+        return subscription;
+      },
     );
   }
 

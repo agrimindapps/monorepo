@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../core/pages/atualizacao.dart';
-import '../core/pages/in_app_purchase_page.dart';
-import '../core/pages/sobre.dart';
-import '../core/pages/tts_settings_page.dart';
+import 'core/pages/atualizacao.dart';
+import 'core/pages/in_app_purchase_page.dart';
+import 'core/pages/sobre.dart';
+import 'core/pages/tts_settings_page.dart';
 import 'pages/config_page.dart';
 import 'pages/comentarios_page.dart';
 import 'pages/home_page.dart';

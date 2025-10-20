@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/receituagro_colors.dart';
 import '../providers/subscription_notifier.dart';
+import 'subscription_progress_widget.dart';
 
 /// Widget responsável pela exibição do status de subscription ativa
 ///
-/// Funcionalidades:
-/// - Card com status premium ativo
-/// - Informações do plano atual
-/// - Data de renovação
-/// - Design celebrativo com gradient verde
-/// - Icon de check circle
+/// VERSÃO REFATORADA - UX/UI Melhorado:
+/// - Header compacto com badge premium (ícone temático agrícola)
+/// - Barra de progresso como elemento PRINCIPAL
+/// - Card de detalhes financeiros (NOVO)
+/// - Remoção de decorações excessivas
 ///
 /// Layout:
-/// - Card com gradient verde
-/// - Icon de sucesso central
-/// - Título celebrativo
-/// - Descrição dos benefícios
-/// - Informações técnicas (plano, renovação)
+/// 1. Header compacto com badges de status
+/// 2. Barra de progresso (elemento principal)
+/// 3. Detalhes financeiros (valor, renovação, método)
 class SubscriptionStatusWidget extends ConsumerWidget {
-  const SubscriptionStatusWidget({
-    super.key,
-  });
+  const SubscriptionStatusWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,40 +26,25 @@ class SubscriptionStatusWidget extends ConsumerWidget {
 
     return subscriptionAsync.when(
       data: (subscriptionState) {
-        final notifier = ref.read(subscriptionNotifierProvider.notifier);
+        final subscription = subscriptionState.currentSubscription;
+        if (subscription == null) return const SizedBox.shrink();
 
-        return Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                colors: [Colors.green.shade400, Colors.green.shade600],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+        return Column(
+          children: [
+            // Header compacto (substituindo card gigante verde)
+            _buildCompactHeader(context, subscription),
+
+            const SizedBox(height: 12),
+
+            // Barra de progresso como elemento PRINCIPAL
+            if (subscription.expirationDate != null)
+              SubscriptionProgressWidget(
+                expirationDate: subscription.expirationDate!,
+                purchaseDate: subscription.purchaseDate,
+                isSandbox: subscription.isSandbox,
+                isCompact: false,
               ),
-            ),
-            child: Column(
-              children: [
-                _buildSuccessIcon(),
-
-                const SizedBox(height: 16),
-                _buildCelebrationTitle(),
-
-                const SizedBox(height: 8),
-                _buildBenefitsDescription(),
-                if (subscriptionState.currentSubscription != null) ...[
-                  const SizedBox(height: 16),
-                  _buildSubscriptionDetails(subscriptionState.currentSubscription, notifier),
-                ],
-              ],
-            ),
-          ),
+          ],
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -70,69 +52,125 @@ class SubscriptionStatusWidget extends ConsumerWidget {
     );
   }
 
-  /// Icon de sucesso centralizado
-  Widget _buildSuccessIcon() {
-    return const Icon(
-      Icons.check_circle,
-      color: Colors.white,
-      size: 48,
-    );
-  }
+  /// Header compacto com badge premium e valor do plano
+  Widget _buildCompactHeader(BuildContext context, dynamic subscription) {
+    final theme = Theme.of(context);
 
-  /// Título celebrativo
-  Widget _buildCelebrationTitle() {
-    return const Text(
-      '🎉 Você é Premium!',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  /// Descrição dos benefícios
-  Widget _buildBenefitsDescription() {
-    return Text(
-      'Aproveite todos os recursos do Pragas Soja',
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.9),
-        fontSize: 16,
-      ),
-    );
-  }
-
-  /// Detalhes da subscription atual
-  Widget _buildSubscriptionDetails(dynamic subscription, SubscriptionNotifier notifier) {
-    if (subscription == null) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Plano: ${subscription.productId}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Ícone agrícola com destaque verde
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: ReceitaAgroColors.primary,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: ReceitaAgroColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.eco, color: Colors.white, size: 24),
             ),
-          ),
-          if (subscription.expirationDate != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Renovação: ${notifier.formatDate(subscription.expirationDate as DateTime)}',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 14,
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Premium Ativo',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Nome do plano + Valor
+                  Row(
+                    children: [
+                      Text(
+                        _formatProductName(
+                          (subscription.productId as String?) ?? 'Premium',
+                        ),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _getPlanPrice(
+                          (subscription.productId as String?) ?? '',
+                        ),
+                        style: const TextStyle(
+                          color: ReceitaAgroColors.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
-        ],
+        ),
       ),
     );
+  }
+
+  /// Formatar nome do produto
+  String _formatProductName(String productId) {
+    final productLower = productId.toLowerCase();
+
+    if (productLower.contains('mensal')) {
+      return 'Plano Mensal';
+    } else if (productLower.contains('semestral')) {
+      return 'Plano Semestral';
+    } else if (productLower.contains('anual')) {
+      return 'Plano Anual';
+    }
+
+    return productId;
+  }
+
+  /// Obter valor do plano formatado
+  String _getPlanPrice(String productId) {
+    final productLower = productId.toLowerCase();
+
+    if (productLower.contains('mensal')) {
+      return 'R\$ 19,90/mês';
+    } else if (productLower.contains('semestral')) {
+      return 'R\$ 99,90/semestre';
+    } else if (productLower.contains('anual')) {
+      return 'R\$ 179,90/ano';
+    }
+
+    return 'Premium';
   }
 }

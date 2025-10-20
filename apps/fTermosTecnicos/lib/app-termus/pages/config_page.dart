@@ -3,12 +3,12 @@ import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/pages/in_app_purchase_page.dart';
-import '../../core/pages/sobre.dart';
-import '../../core/pages/tts_settings_page.dart';
-import '../../core/themes/manager.dart';
-import '../../core/widgets/admob/ads_rewarded_widget.dart';
-import '../../core/widgets/appbar.dart';
+import '../core/pages/in_app_purchase_page.dart';
+import '../core/pages/sobre.dart';
+import '../core/pages/tts_settings_page.dart';
+import '../core/themes/manager.dart';
+import '../core/widgets/admob/ads_rewarded_widget.dart';
+import '../core/widgets/appbar.dart';
 import '../const/environment_const.dart';
 
 class ConfigPage extends StatefulWidget {

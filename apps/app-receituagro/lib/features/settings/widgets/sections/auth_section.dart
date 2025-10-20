@@ -195,15 +195,13 @@ class AuthSection extends ConsumerWidget {
   ) {
     final user = authState.currentUser!;
     final theme = Theme.of(context);
-    final createdDate =
-        user.createdAt != null
-            ? _formatDate(user.createdAt!)
-            : 'Data não disponível';
+    final createdDate = user.createdAt != null
+        ? _formatDate(user.createdAt!)
+        : 'Data não disponível';
 
-    final userInitial =
-        user.displayName.isNotEmpty
-            ? user.displayName[0].toUpperCase()
-            : (user.email.isNotEmpty ? user.email[0].toUpperCase() : '?');
+    final userInitial = user.displayName.isNotEmpty
+        ? user.displayName[0].toUpperCase()
+        : (user.email.isNotEmpty ? user.email[0].toUpperCase() : '?');
 
     return Container(
       decoration: SettingsDesignTokens.getCardDecoration(context),
@@ -217,7 +215,7 @@ class AuthSection extends ConsumerWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              vertical: 20.0,
+              vertical: 12.0,
               horizontal: 16.0,
             ),
             child: Column(
@@ -287,7 +285,7 @@ class AuthSection extends ConsumerWidget {
                             user.displayName.isNotEmpty
                                 ? user.displayName
                                 : user.email,
-                            style: theme.textTheme.titleLarge?.copyWith(
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: theme.colorScheme.onSurface,
                             ),
@@ -299,7 +297,7 @@ class AuthSection extends ConsumerWidget {
                             const SizedBox(height: 2),
                             Text(
                               user.email,
-                              style: theme.textTheme.bodyMedium?.copyWith(
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                               maxLines: 1,
@@ -307,12 +305,13 @@ class AuthSection extends ConsumerWidget {
                             ),
                           ],
 
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           Text(
                             'Membro desde $createdDate',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontStyle: FontStyle.italic,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -359,22 +358,7 @@ class AuthSection extends ConsumerWidget {
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'janeiro',
-      'fevereiro',
-      'março',
-      'abril',
-      'maio',
-      'junho',
-      'julho',
-      'agosto',
-      'setembro',
-      'outubro',
-      'novembro',
-      'dezembro',
-    ];
-
-    return '${date.day} de ${months[date.month - 1]} de ${date.year}';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   Widget _buildErrorSection(BuildContext context, Object error) {

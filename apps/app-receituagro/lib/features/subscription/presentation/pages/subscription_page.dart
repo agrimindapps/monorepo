@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/modern_header_widget.dart';
 import '../providers/subscription_notifier.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
@@ -63,78 +64,42 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     return subscriptionState.when(
       data: (state) {
         return Scaffold(
-          backgroundColor: const Color(0xFF1B4332),
-          body: DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1B4332),  // Deep forest green
-                  Color(0xFF2D5016),  // Rich agricultural green
-                  Color(0xFF40916C),  // Fresh green accent
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                children: [
+                  ModernHeaderWidget(
+                    title: 'Planos',
+                    subtitle: 'Gerencie sua assinatura premium',
+                    leftIcon: Icons.workspace_premium,
+                    isDark: Theme.of(context).brightness == Brightness.dark,
+                    showBackButton: true,
+                    showActions: false,
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: state.isLoading
+                        ? _buildLoadingView()
+                        : state.hasActiveSubscription
+                            ? _buildActiveSubscriptionView()
+                            : _buildPlansView(),
+                  ),
                 ],
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-                child: Column(
-                  children: [
-                    _buildHeader(context),
-                    Expanded(
-                      child: state.isLoading
-                          ? _buildLoadingView()
-                          : state.hasActiveSubscription
-                              ? _buildActiveSubscriptionView()
-                              : _buildPlansView(),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),
         );
       },
       loading: () => Scaffold(
-        backgroundColor: const Color(0xFF1B4332),
         body: _buildLoadingView(),
       ),
       error: (error, stack) => Scaffold(
-        backgroundColor: const Color(0xFF1B4332),
         body: Center(
           child: Text(
             'Erro ao carregar dados: $error',
-            style: const TextStyle(color: Colors.white),
           ),
         ),
-      ),
-    );
-  }
-
-  /// Header padrão com título e botão de fechar
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Planos',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(
-              Icons.close,
-              color: Colors.white,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -151,20 +116,21 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   /// View para usuários com subscription ativa
   Widget _buildActiveSubscriptionView() {
     return const SingleChildScrollView(
-      padding: EdgeInsets.all(8.0),
       child: Column(
         children: [
           SubscriptionStatusWidget(),
 
-          SizedBox(height: 24),
+          SizedBox(height: 12),
           SubscriptionBenefitsWidget(
             showModernStyle: false, // Estilo card para subscription ativa
           ),
 
-          SizedBox(height: 24),
+          SizedBox(height: 12),
           PaymentActionsWidget(
             showSubscriptionManagement: true,
           ),
+
+          SizedBox(height: 16),
         ],
       ),
     );

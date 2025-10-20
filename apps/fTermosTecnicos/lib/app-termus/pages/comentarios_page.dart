@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/widgets/appbar.dart';
+import '../core/widgets/appbar.dart';
 import '../hive_models/comentarios_models.dart';
 import '../repository/comentarios_repository.dart';
 import '../widgets/comentarios_widget.dart';

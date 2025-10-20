@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../subscription/presentation/pages/subscription_page.dart';
+import '../../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_notifier.dart';
 
@@ -146,19 +147,90 @@ class PremiumSection extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          'Todos os recursos premium desbloqueados',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final subscriptionAsync = ref.watch(subscriptionNotifierProvider);
+
+                            return subscriptionAsync.when(
+                              data: (subscriptionState) {
+                                final subscription = subscriptionState.currentSubscription;
+
+                                if (subscription?.expirationDate != null) {
+                                  final daysRemaining = subscription!.daysRemaining ?? 0;
+                                  final expirationDate = subscription.expirationDate!;
+
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.event_available,
+                                            size: 14,
+                                            color: Colors.green.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            _formatDaysRemaining(daysRemaining),
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: Colors.green.shade700,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.update,
+                                            size: 14,
+                                            color: Colors.green.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Renovação: ${_formatDate(expirationDate)}',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: Colors.green.shade700,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                }
+
+                                return Text(
+                                  'Todos os recursos premium desbloqueados',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.green.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                );
+                              },
+                              loading: () => Text(
+                                'Carregando informações...',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.green.shade700,
+                                ),
+                              ),
+                              error: (_, __) => Text(
+                                'Todos os recursos premium desbloqueados',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors.green.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -389,4 +461,28 @@ class PremiumSection extends ConsumerWidget {
     );
   }
 
+  /// Formatar dias restantes
+  String _formatDaysRemaining(int days) {
+    if (days < 0) {
+      return 'Expirado';
+    } else if (days == 0) {
+      return 'Expira hoje';
+    } else if (days == 1) {
+      return '1 dia restante';
+    } else if (days < 30) {
+      return '$days dias restantes';
+    } else if (days < 365) {
+      final months = (days / 30).floor();
+      return '$months ${months == 1 ? 'mês' : 'meses'} restantes';
+    } else {
+      final years = (days / 365).floor();
+      return '$years ${years == 1 ? 'ano' : 'anos'} restantes';
+    }
+  }
+
+  /// Formatar data
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
 }
+

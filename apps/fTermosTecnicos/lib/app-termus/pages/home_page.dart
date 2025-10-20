@@ -3,7 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:core/core.dart';
 
-import '../../core/widgets/appbar.dart';
+import '../core/widgets/appbar.dart';
 import '../const/environment_const.dart' as local_env;
 import '../repository/termos_repository.dart';
 import 'termos_page.dart';

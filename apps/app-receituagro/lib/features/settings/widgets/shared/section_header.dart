@@ -23,26 +23,23 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
-      padding: padding ?? const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: padding ?? const EdgeInsets.fromLTRB(4, 12, 16, 4),
       child: Row(
         children: [
           if (showIcon && icon != null) ...[
-            Icon(
-              icon,
-              size: 20,
-              color: theme.colorScheme.primary,
-            ),
+            Icon(icon, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
           ],
           Expanded(
             child: Text(
               title,
-              style: SettingsDesignTokens.getSectionTitleStyle(context).copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
+              style: SettingsDesignTokens.getSectionTitleStyle(context)
+                  .copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
           if (action != null) action!,

@@ -56,45 +56,40 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Expanded(
                   child: settingsState.when(
                     data: (state) => _buildSettingsContent(),
-                    loading:
-                        () => const Center(child: CircularProgressIndicator()),
-                    error:
-                        (error, _) => Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: theme.colorScheme.error,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Erro ao carregar configurações',
-                                style: theme.textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                error.toString(),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed:
-                                    () =>
-                                        ref
-                                            .read(
-                                              settingsNotifierProvider.notifier,
-                                            )
-                                            .refresh(),
-                                child: const Text('Tentar Novamente'),
-                              ),
-                            ],
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, _) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: theme.colorScheme.error,
                           ),
-                        ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Erro ao carregar configurações',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            error.toString(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () => ref
+                                .read(settingsNotifierProvider.notifier)
+                                .refresh(),
+                            child: const Text('Tentar Novamente'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -107,21 +102,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Widget _buildSettingsContent() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
       children: const [
-        SizedBox(height: 12),
+        SizedBox(height: 8),
         AuthSection(),
-        SizedBox(height: 12),
+        SizedBox(height: 8),
         PremiumSection(),
-        SizedBox(height: 12),
         NotificationsSection(),
-        SizedBox(height: 12),
         FeatureFlagsSection(),
-        SizedBox(height: 12),
         DevelopmentSection(),
-        SizedBox(height: 12),
         SupportSection(),
-        SizedBox(height: 24),
       ],
     );
   }

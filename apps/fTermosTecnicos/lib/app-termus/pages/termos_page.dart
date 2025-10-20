@@ -3,10 +3,10 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 
-import '../../core/services/admob_service.dart';
-import '../../core/services/tts_service.dart';
-import '../../core/widgets/appbar.dart';
-import '../../core/widgets/search_widget.dart';
+import '../core/services/admob_service.dart';
+import '../core/services/tts_service.dart';
+import '../core/widgets/appbar.dart';
+import '../core/widgets/search_widget.dart';
 import '../classes/termo_class.dart';
 import '../repository/comentarios_repository.dart';
 import '../repository/termos_repository.dart';

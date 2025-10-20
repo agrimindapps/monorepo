@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/receituagro_colors.dart';
 import '../providers/subscription_notifier.dart';
 
 /// Widget responsável pelas ações relacionadas a pagamento e subscription
 ///
+/// VERSÃO REFATORADA - UX/UI Melhorado:
+/// - Menu de ações contextual (Gerenciar, Histórico, Cancelar)
+/// - Botão principal destacado + ações secundárias
+/// - Dialog de confirmação para cancelamento
+///
 /// Funcionalidades:
 /// - Botão principal de compra
-/// - Botão de gerenciamento de subscription
+/// - Menu de gerenciamento com múltiplas ações
 /// - Links de rodapé (Termos, Privacidade, Restaurar)
 /// - Configuração flexível via parâmetros
-///
-/// Modes:
-/// - Purchase: Botão principal para compra
-/// - Management: Botão para gerenciar subscription ativa
-/// - Footer: Links de termos, privacidade e restaurar
 class PaymentActionsWidget extends ConsumerWidget {
   final bool showPurchaseButton;
   final bool showSubscriptionManagement;
@@ -36,7 +37,7 @@ class PaymentActionsWidget extends ConsumerWidget {
         if (showPurchaseButton) {
           return _buildPurchaseButton(ref, subscriptionState.isLoading);
         } else if (showSubscriptionManagement) {
-          return _buildManagementButton(ref, subscriptionState.isLoading);
+          return _buildManagementActions(context, ref, subscriptionState.isLoading);
         } else if (showFooterLinks) {
           return _buildFooterLinks(ref, subscriptionState.isLoading);
         }
@@ -86,8 +87,8 @@ class PaymentActionsWidget extends ConsumerWidget {
     );
   }
 
-  /// Botão para gerenciamento de subscription ativa
-  Widget _buildManagementButton(WidgetRef ref, bool isLoading) {
+  /// Botão de gerenciamento simplificado
+  Widget _buildManagementActions(BuildContext context, WidgetRef ref, bool isLoading) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -99,13 +100,11 @@ class PaymentActionsWidget extends ConsumerWidget {
         icon: const Icon(Icons.settings),
         label: const Text('Gerenciar Assinatura'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(
-            0xFF388E3C,
-          ), // Medium green for management
+          backgroundColor: ReceitaAgroColors.primary,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),

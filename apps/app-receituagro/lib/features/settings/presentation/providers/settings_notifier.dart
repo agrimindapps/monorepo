@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/i_premium_service.dart';
 import '../../../../core/providers/feature_flags_notifier.dart';
-import '../../../../core/services/device_identity_service.dart';
 import '../../../../core/services/promotional_notification_manager.dart';
 import '../../../../core/services/receituagro_notification_service.dart';
 import '../../domain/entities/user_settings_entity.dart';

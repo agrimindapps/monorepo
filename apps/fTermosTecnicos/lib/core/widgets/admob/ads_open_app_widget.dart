@@ -1,28 +1,31 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../services/admob_service.dart';
 
-class OpenAppAd extends StatefulWidget {
+class OpenAppAd extends ConsumerStatefulWidget {
   const OpenAppAd({super.key, required this.navigatorKey});
   final GlobalKey<NavigatorState> navigatorKey;
 
   @override
-  State<OpenAppAd> createState() => _OpenAppAdState();
+  ConsumerState<OpenAppAd> createState() => _OpenAppAdState();
 }
 
-class _OpenAppAdState extends State<OpenAppAd> {
+class _OpenAppAdState extends ConsumerState<OpenAppAd> {
   int _timeToClose = 5;
   Timer? _timer;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_timeToClose == 0 || !AdmobRepository().openAdsActive.value) {
+      final openAdsActive = ref.read(openAdsActiveProvider);
+      if (_timeToClose == 0 || !openAdsActive) {
         setState(() {
           _timer?.cancel();
         });
@@ -35,13 +38,21 @@ class _OpenAppAdState extends State<OpenAppAd> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (GetPlatform.isWeb) return const SizedBox.shrink();
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
-    return Obx(
-      () {
-        return AdmobRepository().openAdsActive.value
-            ? Container(
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) return const SizedBox.shrink();
+
+    final openAdsActive = ref.watch(openAdsActiveProvider);
+    final ad = ref.watch(onOpenAppAdProvider);
+    final isLoaded = ref.watch(onOpenAppAdIsLoadedProvider);
+
+    return openAdsActive
+        ? Container(
                 color: Colors.black87,
                 child: Center(
                   child: Column(
@@ -55,7 +66,7 @@ class _OpenAppAdState extends State<OpenAppAd> {
                             ElevatedButton(
                               onPressed: () {
                                 if (_timeToClose == 0) {
-                                  AdmobRepository().setOpenAdsActive(false);
+                                  ref.read(adMobServiceProvider.notifier).setOpenAdsActive(false);
                                 }
                               },
                               child: _timeToClose == 0
@@ -67,7 +78,7 @@ class _OpenAppAdState extends State<OpenAppAd> {
                       ),
                       Padding(
                         padding: EdgeInsets.only(
-                            top: GetPlatform.isAndroid
+                            top: (!kIsWeb && Platform.isAndroid)
                                 ? MediaQuery.of(context).size.height * 0.125
                                 : MediaQuery.of(context).size.height * 0.05),
                         child: Center(
@@ -110,8 +121,7 @@ class _OpenAppAdState extends State<OpenAppAd> {
                                                 5, 0, 0, 5),
                                             child: GestureDetector(
                                               onTap: () async {
-                                                AdmobRepository()
-                                                    .setOpenAdsActive(false);
+                                                ref.read(adMobServiceProvider.notifier).setOpenAdsActive(false);
                                                 widget
                                                     .navigatorKey.currentState!
                                                     .pushNamed('/config');
@@ -147,19 +157,9 @@ class _OpenAppAdState extends State<OpenAppAd> {
                                                             .height *
                                                         0.7,
                                               ),
-                                              child: Obx(() {
-                                                if (AdmobRepository()
-                                                    .onOpenAppAdIsLoaded
-                                                    .value) {
-                                                  return Center(
-                                                      child: AdWidget(
-                                                          ad: AdmobRepository()
-                                                              .onOpenAppAd!));
-                                                } else {
-                                                  return const SizedBox
-                                                      .shrink();
-                                                }
-                                              }),
+                                              child: isLoaded && ad != null
+                                                  ? Center(child: AdWidget(ad: ad))
+                                                  : const SizedBox.shrink(),
                                             ),
                                           ),
                                         ),
@@ -176,8 +176,6 @@ class _OpenAppAdState extends State<OpenAppAd> {
                   ),
                 ),
               )
-            : const SizedBox.shrink();
-      },
-    );
+        : const SizedBox.shrink();
   }
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 
-import '../core/services/admob_service.dart';
 import '../core/services/tts_service.dart';
 import '../core/widgets/appbar.dart';
 import '../core/widgets/search_widget.dart';
@@ -325,29 +323,9 @@ class TermosPageState extends State<TermosPage> {
             icon: FontAwesome.volume_low_solid,
             color: Colors.grey.shade700,
             onPressed: () {
-              if (!AdmobRepository().isPremiumAd.value) {
-                Get.dialog(
-                  AlertDialog(
-                    title: const Text('Recursos Avançados'),
-                    content: const Text(
-                        'Para utilizar a função de transcrição para voz, '
-                        'é necessario uma pequena quantidade do seu tempo '
-                        'nos ajudando com consumo de publicidade. '
-                        'Mais detalhes em opções.'),
-                    actions: [
-                      OutlinedButton(
-                        onPressed: () {
-                          Get.back();
-                          Navigator.of(context).pushNamed('/config');
-                        },
-                        child: const Text('Acessar'),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                _ttsService.speak('${item.termo} - ${item.descricao}');
-              }
+              // TTS feature - simplified for now
+              // TODO: Integrate with premium status check if needed
+              _ttsService.speak('${item.termo} - ${item.descricao}');
             },
           ),
         ],

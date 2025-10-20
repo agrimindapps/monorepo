@@ -61,14 +61,8 @@ class _AppState extends ConsumerState<App> {
   }
 
   void checkPremium() async {
-    bool local = await InAppPurchaseService().checkSignature();
-    if (local != InAppPurchaseService().isPremium.value) {
-      InAppPurchaseService().isPremium.value = local;
-      if (InAppPurchaseService().isPremium.value) {
-        AdmobRepository().openAdsActive.value = false;
-        AdmobRepository().isPremiumAd.value = false;
-      }
-    }
+    // Premium status is now handled by the Premium feature
+    ref.read(premiumStatusNotifierProvider.notifier).refresh();
   }
 
   @override
@@ -103,9 +97,10 @@ class _AppState extends ConsumerState<App> {
       return const SizedBox.shrink();
     }
 
-    if (AdmobRepository().isPremiumAd.value ||
-        InAppPurchaseService().isPremium.value) {
-      AdmobRepository().openAdsActive.value = false;
+    final isPremiumAd = ref.watch(isPremiumAdProvider);
+    final isPremiumUser = ref.watch(isPremiumProvider);
+
+    if (isPremiumAd || isPremiumUser) {
       return const SizedBox.shrink();
     }
 

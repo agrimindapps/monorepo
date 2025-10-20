@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part '../../app-termus/core/models/base_model.g.dart';
+part 'base_model.g.dart';
 
 // Classe Base
 @HiveType(typeId: 0)

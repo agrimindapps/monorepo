@@ -1,5 +1,6 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TtsService {
@@ -26,7 +27,7 @@ class TtsService {
     await _flutterTts.setVolume(volume);
     await _flutterTts.setPitch(pitch);
 
-    if (GetPlatform.isIOS) {
+    if (!kIsWeb && Platform.isIOS) {
       await _flutterTts.setSharedInstance(true);
 
       await _flutterTts.setIosAudioCategory(

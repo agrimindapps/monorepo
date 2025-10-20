@@ -65,7 +65,7 @@ ThemeData darkTheme = ThemeData(
   ),
 
   // Card theme
-  cardTheme: CardTheme(
+  cardTheme: const CardThemeData(
     color: _surfaceColor,
     elevation: 0,
     shape: RoundedRectangleBorder(
@@ -208,7 +208,7 @@ ThemeData darkTheme = ThemeData(
   ),
 
   // Dialog theme
-  dialogTheme: DialogTheme(
+  dialogTheme: const DialogThemeData(
     backgroundColor: _surfaceColor,
     elevation: 0,
     shape: RoundedRectangleBorder(
@@ -318,7 +318,7 @@ ThemeData darkTheme = ThemeData(
   ),
 
   // Add Tab Bar theme
-  tabBarTheme: TabBarTheme(
+  tabBarTheme: const TabBarThemeData(
     labelColor: _textColor,
     unselectedLabelColor: _mutedTextColor,
     indicatorColor: _primaryColor,

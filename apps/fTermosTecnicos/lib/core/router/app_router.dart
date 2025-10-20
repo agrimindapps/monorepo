@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../pages/home_page.dart';
+import '../../features/termos/presentation/pages/home_page.dart';
 import '../../pages/termos_page.dart';
-import '../../pages/config_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/settings/presentation/pages/tts_settings_page.dart' as settings_tts;
 import '../../features/comentarios/presentation/pages/comentarios_page.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../pages/sobre.dart';
 import '../pages/atualizacao.dart';
-import '../pages/tts_settings_page.dart';
 
 /// Global navigator key for app-wide navigation
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -45,12 +45,12 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/config',
       name: 'config',
-      builder: (context, state) => const ConfigPage(),
+      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       path: '/config/tts',
       name: 'tts-settings',
-      builder: (context, state) => const TTsSettingsPage(),
+      builder: (context, state) => const settings_tts.TtsSettingsPage(),
     ),
     GoRoute(
       path: '/sobre',

@@ -1,39 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../services/admob_service.dart';
-import '../../services/in_app_purchase_service.dart';
+import '../../../features/premium/presentation/providers/premium_providers.dart';
 
-class RewardedAdWidget extends StatefulWidget {
+class RewardedAdWidget extends ConsumerStatefulWidget {
   const RewardedAdWidget({super.key, required this.adUnitId});
 
   final String adUnitId;
 
   @override
-  State<RewardedAdWidget> createState() => _RewardedAdWidgetState();
+  ConsumerState<RewardedAdWidget> createState() => _RewardedAdWidgetState();
 }
 
-class _RewardedAdWidgetState extends State<RewardedAdWidget> {
+class _RewardedAdWidgetState extends ConsumerState<RewardedAdWidget> {
   @override
   void initState() {
     super.initState();
-    AdmobRepository().getPremiumAd();
+    // Initialize premium ad check
+    Future.microtask(() {
+      ref.read(adMobServiceProvider.notifier).getPremiumAd();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      enabled: !InAppPurchaseService().isPremium.value,
-      title: const Text('Remover Publicidade'),
-      subtitle: Obx(() {
-        if (InAppPurchaseService().isPremium.value) {
-          return const Text('Você já é um usuário premium.');
-        }
+    final isPremiumUser = ref.watch(isPremiumProvider);
+    final premiumAdHours = ref.watch(premiumAdHoursProvider);
+    final rewardedAdIsLoaded = ref.watch(rewardedAdIsLoadedProvider);
+    final rewardedAd = ref.watch(rewardedAdProvider);
 
-        return Text(AdmobRepository().premiumAdHours.value == 0
-            ? 'Desfrute de uma pausa nos anúncios em troca de alguns segundos do seu tempo.'
-            : 'Você possui ${AdmobRepository().premiumAdHours.value} horas sem anúncios.');
-      }),
+    return ListTile(
+      enabled: !isPremiumUser,
+      title: const Text('Remover Publicidade'),
+      subtitle: isPremiumUser
+          ? const Text('Você já é um usuário premium.')
+          : Text(premiumAdHours == 0
+              ? 'Desfrute de uma pausa nos anúncios em troca de alguns segundos do seu tempo.'
+              : 'Você possui $premiumAdHours horas sem anúncios.'),
       trailing: SizedBox(
           width: 24,
           height: 24,
@@ -47,22 +51,20 @@ class _RewardedAdWidgetState extends State<RewardedAdWidget> {
         top: Radius.circular(0),
       )),
       onTap: () {
-        if (AdmobRepository().rewardedAdIsLoaded.value == false) {
-          // nada
-          if (AdmobRepository().premiumAdHours.value > 0) {
+        if (!rewardedAdIsLoaded) {
+          if (premiumAdHours > 0) {
             _dialogVolteMaisTarde();
           }
         } else {
-          // verificar se foi inicializado
-          if (AdmobRepository().rewardedAd == null) {
+          if (rewardedAd == null) {
             _dialogVolteMaisTarde();
             return;
           }
 
-          AdmobRepository().rewardedAd?.show(
+          rewardedAd.show(
             onUserEarnedReward: (ad, reward) {
               int amount = reward.amount.toInt();
-              AdmobRepository().setPremiumAd(amount);
+              ref.read(adMobServiceProvider.notifier).setPremiumAd(amount);
             },
           );
         }
@@ -92,29 +94,35 @@ class _RewardedAdWidgetState extends State<RewardedAdWidget> {
   }
 }
 
-Widget btnRewardedAd() {
-  return Obx(
-    () {
-      if (InAppPurchaseService().isPremium.value) {
-        return const SizedBox.shrink();
-      }
+class BtnRewardedAd extends ConsumerWidget {
+  const BtnRewardedAd({super.key});
 
-      return !AdmobRepository().isPremiumAd.value
-          ? IconButton(
-              color: Colors.white,
-              icon: const Icon(Icons.local_play_outlined),
-              onPressed: () {
-                if (AdmobRepository().rewardedAdIsLoaded.value == true) {
-                  AdmobRepository().rewardedAd?.show(
-                    onUserEarnedReward: (ad, reward) {
-                      int amount = reward.amount.toInt();
-                      AdmobRepository().setPremiumAd(amount);
-                    },
-                  );
-                }
-              },
-            )
-          : const SizedBox.shrink();
-    },
-  );
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremiumUser = ref.watch(isPremiumProvider);
+    final isPremiumAd = ref.watch(isPremiumAdProvider);
+    final rewardedAdIsLoaded = ref.watch(rewardedAdIsLoadedProvider);
+    final rewardedAd = ref.watch(rewardedAdProvider);
+
+    if (isPremiumUser) {
+      return const SizedBox.shrink();
+    }
+
+    return !isPremiumAd
+        ? IconButton(
+            color: Colors.white,
+            icon: const Icon(Icons.local_play_outlined),
+            onPressed: () {
+              if (rewardedAdIsLoaded && rewardedAd != null) {
+                rewardedAd.show(
+                  onUserEarnedReward: (ad, reward) {
+                    int amount = reward.amount.toInt();
+                    ref.read(adMobServiceProvider.notifier).setPremiumAd(amount);
+                  },
+                );
+              }
+            },
+          )
+        : const SizedBox.shrink();
+  }
 }

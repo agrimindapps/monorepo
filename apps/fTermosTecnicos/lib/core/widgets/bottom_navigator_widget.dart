@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../intermediate.dart';
 import '../services/admob_service.dart';
-import '../services/in_app_purchase_service.dart';
+import '../../features/premium/presentation/providers/premium_providers.dart';
 import 'admob/ads_altbanner_widget.dart';
 import 'admob/ads_banner_widget.dart';
 
-class BottomNavigator extends StatefulWidget {
+class BottomNavigator extends ConsumerStatefulWidget {
   const BottomNavigator({super.key, required this.navigatorKey});
   final GlobalKey<NavigatorState> navigatorKey;
   @override
-  State<BottomNavigator> createState() => _BottomNavigatorState();
+  ConsumerState<BottomNavigator> createState() => _BottomNavigatorState();
 }
 
-class _BottomNavigatorState extends State<BottomNavigator> {
+class _BottomNavigatorState extends ConsumerState<BottomNavigator> {
   int _selectedIndex = 0;
 
   @override
@@ -58,25 +59,25 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   }
 
   Widget _altBanner() {
-    if (GetPlatform.isWeb) {
+    if (kIsWeb) {
       return const SizedBox.shrink();
     }
 
-    return Obx(() {
-      if (AdmobRepository().isPremiumAd.value ||
-          InAppPurchaseService().isPremium.value) {
-        return const SizedBox.shrink();
-      }
+    final isPremiumAd = ref.watch(isPremiumAdProvider);
+    final isPremiumUser = ref.watch(isPremiumProvider);
 
-      if (MediaQuery.of(context).size.height < 750) {
-        return AdBanner(admobId: GlobalEnvironment().admobBanner);
-      } else {
-        return AltBannerAd(
-          admobId: GlobalEnvironment().altAdmobBanner,
-          keywords: GlobalEnvironment().keywordsAds,
-          maxHeight: 95,
-        );
-      }
-    });
+    if (isPremiumAd || isPremiumUser) {
+      return const SizedBox.shrink();
+    }
+
+    if (MediaQuery.of(context).size.height < 750) {
+      return AdBanner(admobId: GlobalEnvironment().admobBanner);
+    } else {
+      return AltBannerAd(
+        admobId: GlobalEnvironment().altAdmobBanner,
+        keywords: GlobalEnvironment().keywordsAds,
+        maxHeight: 95,
+      );
+    }
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../services/admob_service.dart';
 
-class AltBannerAd extends StatefulWidget {
+class AltBannerAd extends ConsumerWidget {
   const AltBannerAd({
     super.key,
     required this.admobId,
@@ -19,28 +19,24 @@ class AltBannerAd extends StatefulWidget {
   final double maxHeight;
 
   @override
-  State<AltBannerAd> createState() => _AltBannerAdState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ad = ref.watch(altBannerAdProvider);
+    final isLoaded = ref.watch(altBannerAdIsLoadedProvider);
 
-class _AltBannerAdState extends State<AltBannerAd> {
-  @override
-  Widget build(BuildContext context) => Align(
-        alignment: Alignment.center,
-        child: Card(
-          elevation: 0,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: widget.maxWidth,
-              maxHeight: widget.maxHeight,
-            ),
-            child: Obx(() {
-              if (AdmobRepository().altBannerAdIsLoaded.value) {
-                return Center(child: AdWidget(ad: AdmobRepository().altBannerAd!));
-              } else {
-                return const SizedBox();
-              }
-            }),
+    return Align(
+      alignment: Alignment.center,
+      child: Card(
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: maxWidth,
+            maxHeight: maxHeight,
           ),
+          child: isLoaded && ad != null
+              ? Center(child: AdWidget(ad: ad))
+              : const SizedBox(),
         ),
-      );
+      ),
+    );
+  }
 }

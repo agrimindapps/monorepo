@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../core/models/database.dart';
 import '../hive_models/comentarios_models.dart';
@@ -66,11 +65,11 @@ class ComentariosCardState extends State<ComentariosCard> {
 
   void _saveComentario() {
     if (_controller.text.trim().length < 5) {
-      Get.snackbar(
-        'Erro',
-        'O comentário deve ter pelo menos 5 caracteres',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('O comentário deve ter pelo menos 5 caracteres'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }

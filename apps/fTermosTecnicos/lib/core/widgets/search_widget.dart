@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SearchTextFieldWidget extends StatelessWidget {
   const SearchTextFieldWidget({
@@ -16,7 +16,7 @@ class SearchTextFieldWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: GetPlatform.isWeb ? 60 : 40,
+      height: kIsWeb ? 60 : 40,
       child: TextFormField(
         controller: controller,
         autofocus: false,

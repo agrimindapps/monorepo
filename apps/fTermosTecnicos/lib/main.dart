@@ -55,8 +55,8 @@ void main() async {
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
     await InAppPurchaseService().checkSignature();
 
-    await AdmobRepository.initialize();
-    AdmobRepository().init();
+    await AdMobService.initialize();
+    // AdMob init() will be called through Riverpod providers when needed
   }
 
   await Firebase.initializeApp(

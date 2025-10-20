@@ -219,7 +219,7 @@ ThemeData lightTheme = ThemeData(
   ),
 
   // Card theme
-  cardTheme: CardTheme(
+  cardTheme: const CardThemeData(
     color: _backgroundColor,
     surfaceTintColor: _backgroundColor,
     elevation: 0,

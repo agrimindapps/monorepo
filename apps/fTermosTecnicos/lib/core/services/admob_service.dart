@@ -1,40 +1,79 @@
-import 'package:get/get.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../intermediate.dart';
 import 'localstorage_service.dart';
 
-class AdmobRepository extends GetxController {
-  static final AdmobRepository _instance = AdmobRepository._internal();
+part 'admob_service.g.dart';
 
-  factory AdmobRepository() {
-    return _instance;
+/// AdMob state model
+class AdMobState {
+  final bool openAdsActive;
+  final bool isPremiumAd;
+  final int premiumAdHours;
+  final bool altBannerAdIsLoaded;
+  final bool onOpenAppAdIsLoaded;
+  final bool rewardedAdIsLoaded;
+  final NativeAd? altBannerAd;
+  final NativeAd? onOpenAppAd;
+  final RewardedAd? rewardedAd;
+
+  const AdMobState({
+    this.openAdsActive = false,
+    this.isPremiumAd = false,
+    this.premiumAdHours = 0,
+    this.altBannerAdIsLoaded = false,
+    this.onOpenAppAdIsLoaded = false,
+    this.rewardedAdIsLoaded = false,
+    this.altBannerAd,
+    this.onOpenAppAd,
+    this.rewardedAd,
+  });
+
+  AdMobState copyWith({
+    bool? openAdsActive,
+    bool? isPremiumAd,
+    int? premiumAdHours,
+    bool? altBannerAdIsLoaded,
+    bool? onOpenAppAdIsLoaded,
+    bool? rewardedAdIsLoaded,
+    NativeAd? altBannerAd,
+    NativeAd? onOpenAppAd,
+    RewardedAd? rewardedAd,
+  }) {
+    return AdMobState(
+      openAdsActive: openAdsActive ?? this.openAdsActive,
+      isPremiumAd: isPremiumAd ?? this.isPremiumAd,
+      premiumAdHours: premiumAdHours ?? this.premiumAdHours,
+      altBannerAdIsLoaded: altBannerAdIsLoaded ?? this.altBannerAdIsLoaded,
+      onOpenAppAdIsLoaded: onOpenAppAdIsLoaded ?? this.onOpenAppAdIsLoaded,
+      rewardedAdIsLoaded: rewardedAdIsLoaded ?? this.rewardedAdIsLoaded,
+      altBannerAd: altBannerAd ?? this.altBannerAd,
+      onOpenAppAd: onOpenAppAd ?? this.onOpenAppAd,
+      rewardedAd: rewardedAd ?? this.rewardedAd,
+    );
   }
+}
 
-  AdmobRepository._internal();
-
+/// AdMob service provider
+@riverpod
+class AdMobService extends _$AdMobService {
   static Future<void> initialize() async {
     await MobileAds.instance.initialize();
   }
 
-  RxBool openAdsActive = false.obs;
-  RxBool isPremiumAd = false.obs;
-  RxInt premiumAdHours = 0.obs;
+  @override
+  AdMobState build() {
+    return const AdMobState();
+  }
 
-  late NativeAd? altBannerAd;
-  RxBool altBannerAdIsLoaded = false.obs;
-
-  late NativeAd? onOpenAppAd;
-  RxBool onOpenAppAdIsLoaded = false.obs;
-
-  late RewardedAd? rewardedAd;
-  RxBool rewardedAdIsLoaded = false.obs;
-
-  init() async {
+  Future<void> init() async {
     if (await checkIsPremiumAd()) {
       return;
     } else {
-      getPremiumAd();
+      await getPremiumAd();
 
       loadNativeAd(
         admobId: GlobalEnvironment().altAdmobBanner,
@@ -56,7 +95,7 @@ class AdmobRepository extends GetxController {
     required String admobId,
     required List<String> keywords,
   }) async {
-    altBannerAd = NativeAd(
+    final ad = NativeAd(
       nativeAdOptions: NativeAdOptions(
         adChoicesPlacement: AdChoicesPlacement.topRightCorner,
         mediaAspectRatio: MediaAspectRatio.unknown,
@@ -68,15 +107,15 @@ class AdmobRepository extends GetxController {
       request: AdRequest(nonPersonalizedAds: false, keywords: keywords),
       listener: NativeAdListener(
         onAdLoaded: (Ad ad) async {
-          altBannerAdIsLoaded.value = true;
+          state = state.copyWith(altBannerAdIsLoaded: true);
 
-          if (premiumAdHours.value > 0) {
+          if (state.premiumAdHours > 0) {
             return;
           }
 
           Future.delayed(const Duration(seconds: 60), () {
             ad.dispose();
-            altBannerAdIsLoaded.value = false;
+            state = state.copyWith(altBannerAdIsLoaded: false);
 
             loadNativeAd(
               admobId: GlobalEnvironment().altAdmobBanner,
@@ -86,7 +125,7 @@ class AdmobRepository extends GetxController {
         },
         onAdFailedToLoad: (Ad ad, LoadAdError error) {
           ad.dispose();
-          altBannerAdIsLoaded.value = false;
+          state = state.copyWith(altBannerAdIsLoaded: false);
         },
         onAdOpened: (Ad ad) => {},
         onAdClosed: (Ad ad) => {},
@@ -96,11 +135,12 @@ class AdmobRepository extends GetxController {
       ),
     );
 
-    altBannerAd?.load();
+    state = state.copyWith(altBannerAd: ad);
+    ad.load();
   }
 
   void onOpenApp({required String admobId, required List<String> keywords}) {
-    onOpenAppAd = NativeAd(
+    final ad = NativeAd(
       nativeAdOptions: NativeAdOptions(
         adChoicesPlacement: AdChoicesPlacement.topRightCorner,
         mediaAspectRatio: MediaAspectRatio.square,
@@ -112,10 +152,11 @@ class AdmobRepository extends GetxController {
       request: AdRequest(nonPersonalizedAds: false, keywords: keywords),
       listener: NativeAdListener(
         onAdLoaded: (Ad ad) {
-          onOpenAppAdIsLoaded.value = true;
+          state = state.copyWith(onOpenAppAdIsLoaded: true);
         },
         onAdFailedToLoad: (Ad ad, LoadAdError error) {
           ad.dispose();
+          state = state.copyWith(onOpenAppAdIsLoaded: false);
         },
       ),
       nativeTemplateStyle: NativeTemplateStyle(
@@ -123,11 +164,12 @@ class AdmobRepository extends GetxController {
       ),
     );
 
-    onOpenAppAd?.load();
+    state = state.copyWith(onOpenAppAd: ad);
+    ad.load();
   }
 
   void createRewardedAd({required String admobId}) {
-    if (premiumAdHours.value > 0) {
+    if (state.premiumAdHours > 0) {
       return;
     }
 
@@ -136,38 +178,37 @@ class AdmobRepository extends GetxController {
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
-          rewardedAd = ad;
-          rewardedAdIsLoaded.value = true;
+          state = state.copyWith(rewardedAd: ad, rewardedAdIsLoaded: true);
         },
-        onAdFailedToLoad: (error) {},
+        onAdFailedToLoad: (error) {
+          state = state.copyWith(rewardedAdIsLoaded: false);
+        },
       ),
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    altBannerAd?.dispose();
-    onOpenAppAd?.dispose();
-    rewardedAd?.dispose();
+  void disposeAds() {
+    state.altBannerAd?.dispose();
+    state.onOpenAppAd?.dispose();
+    state.rewardedAd?.dispose();
   }
 
   void setOpenAdsActive(bool value) {
-    openAdsActive.value = value;
+    state = state.copyWith(openAdsActive: value);
     LocalStorageService().adicionar('openAdsActive', {
       'date': DateTime.now().toString(),
     });
   }
 
   Future<bool> checkOpenAdsActive() async {
-    if (GetPlatform.isWeb) {
-      openAdsActive.value = false;
+    if (kIsWeb) {
+      state = state.copyWith(openAdsActive: false);
       return false;
     }
 
     final data = await LocalStorageService().carregar('openAdsActive');
     if (data.isEmpty) {
-      openAdsActive.value = false;
+      state = state.copyWith(openAdsActive: false);
       String gravar =
           DateTime.now().subtract(const Duration(days: 2)).toString();
       LocalStorageService().adicionar('openAdsActive', {'date': gravar});
@@ -179,28 +220,28 @@ class AdmobRepository extends GetxController {
     final difference = now.difference(date).inHours;
 
     if (difference >= 24) {
-      openAdsActive.value = true;
+      state = state.copyWith(openAdsActive: true);
       return true;
     } else {
-      openAdsActive.value = false;
+      state = state.copyWith(openAdsActive: false);
       return false;
     }
   }
 
-  //função vai receber x horas e deve gravar no localstorage a data atual + x horas
+  /// Sets premium ad hours and saves to local storage
   void setPremiumAd(int hours) {
-    isPremiumAd.value = true;
+    state = state.copyWith(isPremiumAd: true);
     LocalStorageService().adicionar('premiumAd', {
       'date': DateTime.now().add(Duration(hours: hours)).toString(),
     });
     getPremiumAd();
   }
 
-  // valida se o premiumAd está ativo
+  /// Checks if premium ad is active
   Future<bool> checkIsPremiumAd() async {
     final data = await LocalStorageService().carregar('premiumAd');
     if (data.isEmpty) {
-      isPremiumAd.value = false;
+      state = state.copyWith(isPremiumAd: false);
       return false;
     }
 
@@ -209,19 +250,19 @@ class AdmobRepository extends GetxController {
     final difference = now.difference(date).inHours;
 
     if (difference >= 0) {
-      isPremiumAd.value = false;
+      state = state.copyWith(isPremiumAd: false);
       return false;
     } else {
-      isPremiumAd.value = true;
+      state = state.copyWith(isPremiumAd: true);
       return true;
     }
   }
 
-  // retorna na função o tempo restante do premiumAd
+  /// Returns remaining premium ad hours
   Future<void> getPremiumAd() async {
     final data = await LocalStorageService().carregar('premiumAd');
     if (data.isEmpty) {
-      premiumAdHours.value = 0;
+      state = state.copyWith(premiumAdHours: 0);
       return;
     }
 
@@ -230,9 +271,55 @@ class AdmobRepository extends GetxController {
     final difference = now.difference(date).inHours;
 
     if (difference >= 0) {
-      premiumAdHours.value = 0;
+      state = state.copyWith(premiumAdHours: 0);
     } else {
-      premiumAdHours.value = difference.abs();
+      state = state.copyWith(premiumAdHours: difference.abs());
     }
   }
+}
+
+// Convenience providers for backward compatibility
+@riverpod
+NativeAd? altBannerAd(AltBannerAdRef ref) {
+  return ref.watch(adMobServiceProvider).altBannerAd;
+}
+
+@riverpod
+bool altBannerAdIsLoaded(AltBannerAdIsLoadedRef ref) {
+  return ref.watch(adMobServiceProvider).altBannerAdIsLoaded;
+}
+
+@riverpod
+NativeAd? onOpenAppAd(OnOpenAppAdRef ref) {
+  return ref.watch(adMobServiceProvider).onOpenAppAd;
+}
+
+@riverpod
+bool onOpenAppAdIsLoaded(OnOpenAppAdIsLoadedRef ref) {
+  return ref.watch(adMobServiceProvider).onOpenAppAdIsLoaded;
+}
+
+@riverpod
+RewardedAd? rewardedAd(RewardedAdRef ref) {
+  return ref.watch(adMobServiceProvider).rewardedAd;
+}
+
+@riverpod
+bool rewardedAdIsLoaded(RewardedAdIsLoadedRef ref) {
+  return ref.watch(adMobServiceProvider).rewardedAdIsLoaded;
+}
+
+@riverpod
+bool openAdsActive(OpenAdsActiveRef ref) {
+  return ref.watch(adMobServiceProvider).openAdsActive;
+}
+
+@riverpod
+bool isPremiumAd(IsPremiumAdRef ref) {
+  return ref.watch(adMobServiceProvider).isPremiumAd;
+}
+
+@riverpod
+int premiumAdHours(PremiumAdHoursRef ref) {
+  return ref.watch(adMobServiceProvider).premiumAdHours;
 }

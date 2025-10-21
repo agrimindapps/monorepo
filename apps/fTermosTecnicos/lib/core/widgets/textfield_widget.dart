@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-import '../themes/manager.dart';
-
 class VTextField extends StatelessWidget {
   final String? labelText;
   final String? hintText;
@@ -69,7 +67,7 @@ class VTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ThemeManager().isDark.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveKeyboardType = keyboardType ?? TextInputType.text;
 
     final defaultInputFormatters = effectiveKeyboardType ==

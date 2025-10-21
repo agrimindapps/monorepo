@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/tts_service.dart';
-import '../themes/manager.dart';
 import '../widgets/appbar.dart';
 
 class TTsSettingsPage extends StatefulWidget {
@@ -172,7 +171,7 @@ Widget configOptionTSSPage(BuildContext context) {
     subtitle: const Text('Configurações de velocidade e tonalidade de voz'),
     trailing: Icon(
       Icons.arrow_forward_ios,
-      color: ThemeManager().isDark.value
+      color: Theme.of(context).brightness == Brightness.dark
           ? Colors.grey.shade300
           : Colors.grey.shade600,
     ),

@@ -3,7 +3,6 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../intermediate.dart';
-import '../themes/manager.dart';
 import '../widgets/appbar.dart';
 
 class SobrePage extends StatefulWidget {
@@ -183,7 +182,7 @@ Widget configOptionSobre(BuildContext context) {
     ),
     trailing: Icon(
       Icons.arrow_forward_ios,
-      color: ThemeManager().isDark.value
+      color: Theme.of(context).brightness == Brightness.dark
           ? Colors.grey.shade300
           : Colors.grey.shade600,
     ),

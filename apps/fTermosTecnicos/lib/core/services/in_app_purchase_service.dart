@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../intermediate.dart';
 import 'revenuecat_service.dart';
 
-class InAppPurchaseService extends GetxController {
+class InAppPurchaseService {
   static final InAppPurchaseService _singleton =
       InAppPurchaseService._internal();
 
@@ -26,16 +25,17 @@ class InAppPurchaseService extends GetxController {
   List<Map<String, dynamic>> getVantagens() =>
       GlobalEnvironment().inappVantagens;
 
-  RxBool isPremium = false.obs;
-  RxBool interagindoLoja = false.obs;
-  RxMap<String, dynamic> info = {
+  // Replaced Rx with ValueNotifier for Flutter compatibility
+  final ValueNotifier<bool> isPremium = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> interagindoLoja = ValueNotifier<bool>(false);
+  final ValueNotifier<Map<String, dynamic>> info = ValueNotifier<Map<String, dynamic>>({
     'ativo': false,
     'percent': 0.0,
     'daysRemaning': '',
     'descAssinatura': '',
     'fimAssinatura': '',
     'inicioAssinatura': '',
-  }.obs;
+  });
 
   Future<void> init() async {
     isPremium.value = await checkSignature();
@@ -167,18 +167,18 @@ class InAppPurchaseService extends GetxController {
         final mostraDataAssinaturaFinal = DateFormat('dd/MM/yyyy')
             .format(DateTime.fromMillisecondsSinceEpoch(endDate));
 
-        info['inicioAssinatura'] = mostraDataAssinatura;
-        info['fimAssinatura'] = mostraDataAssinaturaFinal;
-        info['descAssinatura'] = '${plan['desc']}';
-        info['daysRemaning'] = daysRemaningDesc;
-        info['percent'] = percent;
-        info['ativo'] = true;
+        final updatedInfo = Map<String, dynamic>.from(info.value);
+        updatedInfo['inicioAssinatura'] = mostraDataAssinatura;
+        updatedInfo['fimAssinatura'] = mostraDataAssinaturaFinal;
+        updatedInfo['descAssinatura'] = '${plan['desc']}';
+        updatedInfo['daysRemaning'] = daysRemaningDesc;
+        updatedInfo['percent'] = percent;
+        updatedInfo['ativo'] = true;
+        info.value = updatedInfo;
       } catch (e) {
         debugPrint('Error checkSignature com assinatura antiga: $e');
         // deleteSignature();
       }
-
-      info = info;
     } else if (dataRevenue != null) {
       Map<String, dynamic> signatureMap = jsonDecode(dataRevenue);
       CustomerInfo signature = CustomerInfo.fromJson(signatureMap);
@@ -203,17 +203,19 @@ class InAppPurchaseService extends GetxController {
                   orElse: () => {},
                 );
 
-            info['inicioAssinatura'] =
+            final updatedInfo = Map<String, dynamic>.from(info.value);
+            updatedInfo['inicioAssinatura'] =
                 DateFormat('dd/MM/yyyy').format(DateTime.parse(endDate));
-            info['fimAssinatura'] = DateFormat('dd/MM/yyyy')
+            updatedInfo['fimAssinatura'] = DateFormat('dd/MM/yyyy')
                 .format(DateTime.fromMillisecondsSinceEpoch(dateEnd));
-            info['descAssinatura'] = '${plan['desc']}';
-            info['daysRemaning'] =
+            updatedInfo['descAssinatura'] = '${plan['desc']}';
+            updatedInfo['daysRemaning'] =
                 '${(dateEnd - dateNow) ~/ 86400000} Dias Restantes';
-            info['percent'] = 100.0;
-            info['ativo'] = true;
+            updatedInfo['percent'] = 100.0;
+            updatedInfo['ativo'] = true;
+            info.value = updatedInfo;
 
-            debugPrint('info: $info');
+            debugPrint('info: ${info.value}');
           }
           // } catch (e) {
           //   debugPrint('Error checkSignature com assinatura nova: $e');

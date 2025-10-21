@@ -2,14 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../intermediate.dart';
 import 'in_app_purchase_service.dart';
 
-class RevenuecatService extends GetxController {
+class RevenuecatService {
   final Store store;
   final String apiKey;
   static RevenuecatService? _instance;

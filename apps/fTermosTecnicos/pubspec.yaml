@@ -48,12 +48,8 @@ dependencies:
   skeletonizer: ^1.4.2
   flutter_staggered_grid_view: ^0.7.0
 
-  # Navigation (will replace GetX)
+  # Navigation
   go_router: ^16.2.4
-
-  # Legacy dependencies (used directly in lib/core files)
-  # TODO: Remove after full migration to Riverpod
-  get: ^4.6.6
 
   # Dependencies from core but used directly in app code
   # (Required for direct imports per analyzer)

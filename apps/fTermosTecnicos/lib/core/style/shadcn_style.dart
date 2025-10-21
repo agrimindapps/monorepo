@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '../themes/manager.dart';
-
 class ShadcnStyle {
-  // Colors
-  static final backgroundColor = ThemeManager().isDark.value
-      ? const Color(0xFF18181B)
-      : const Color(0xFFF7FAFC);
-  static final borderColor = ThemeManager().isDark.value
-      ? const Color(0xFF27272A)
-      : const Color(0xFFE2E8F0);
-  static final textColor = ThemeManager().isDark.value
-      ? const Color(0xFFFFFFFF)
-      : const Color(0xFF0F172A);
+  // Helper method to get colors based on theme
+  static Color backgroundColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF18181B) : const Color(0xFFF7FAFC);
+  }
+
+  static Color borderColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF27272A) : const Color(0xFFE2E8F0);
+  }
+
+  static Color textColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFFFFFFFF) : const Color(0xFF0F172A);
+  }
   static const mutedTextColor = Colors.grey;
   static const focusedBorderColor = Color(0xFF94A3B8);
   static const primaryColor = Color(0xFF020817);

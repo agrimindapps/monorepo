@@ -1,0 +1,180 @@
+Calculadora de Amortização de Empréstimos/Financiamentos:
+
+Para calcular parcelas, juros e saldo devedor de empréstimos
+Sistemas de amortização: SAC, Price (tabela de amortização)
+Visualização do total pago em juros vs principal
+Calculadora de Aposentadoria:
+
+Planejamento financeiro para aposentadoria
+Projeção de quanto economizar mensalmente para atingir um objetivo
+Considerar inflação e expectativa de vida
+Simulador de Investimentos de Renda Fixa:
+
+Comparar diferentes investimentos (CDB, LCI, LCA, Tesouro Direto)
+Calcular rentabilidade líquida após impostos
+Comparação com inflação (rentabilidade real)
+Calculadora de Valor Futuro/Presente:
+
+Converter valores presentes em futuros considerando inflação
+Cálculo do poder de compra ao longo do tempo
+Calculadora de Independência Financeira:
+
+Estimar quando a pessoa poderá viver de rendimentos
+Com base na regra dos 4% ou metodologias similares
+Simulador de Dívidas e Pagamentos:
+
+Analisar quanto tempo levará para quitar uma dívida
+Comparar estratégias (bola de neve da dívida, avalanche da dívida)
+Calculadora de Custo Efetivo Total (CET):
+
+Calcular o custo real de empréstimos incluindo taxas e encargos
+Comparativo entre diferentes ofertas de crédito
+Calculadora de Previdência Privada:
+
+PGBL vs VGBL
+Impacto fiscal de cada modalidade
+Calculadora de Imposto de Renda sobre Investimentos:
+
+Cálculo do IR para diferentes classes de ativos
+Planejamento tributário em investimentos
+Conversor de Moedas com Histórico:
+
+Análise de câmbio com dados históricos
+Projeção de tendências
+Calculadora de Reserva de Emergência:
+
+Quanto guardar baseado nos gastos mensais
+Planejamento para construir a reserva
+Simulador de Orçamento Pessoal/Familiar:
+
+Regra 50-30-20 ou outras metodologias
+Análise visual da distribuição de gastos
+Calculadora de Retorno Real de Investimentos:
+
+Descontar inflação e impostos dos rendimentos nominais
+Comparativo entre diferentes classes de ativos
+Calculadora de Portfólio Otimizado:
+
+Diversificação e alocação de ativos
+Baseado em perfil de risco do investidor
+Simulador de Compra à Vista vs. Parcelado:
+
+Avaliar se vale a pena parcelar ou pagar à vista
+Considerar rendimento do dinheiro aplicado
+Cada uma dessas calculadoras pode seguir o mesmo padrão visual e arquitetura que você usou para a calculadora de juros compostos, mantendo uma experiência consistente para o usuário
+
+
+------------
+
+Calculadoras Mais Simples de Implementar
+
+- Calculadora de Valor Futuro/Presente
+x Campos: valor inicial, taxa de juros, período
+x Cálculo direto usando fórmulas simples de matemática financeira
+x Similar à sua calculadora de juros compostos, mas com menos campos
+
+- Conversor de Moedas
+Campos: valor, moeda de origem, moeda de destino
+Lógica simples de multiplicação por taxa de câmbio
+Pode ser implementado com valores fixos ou API externa
+
+- Calculadora de Reserva de Emergência
+x Campos: despesas mensais, número de meses desejados
+x Cálculo: despesas × número de meses
+x Opcional: campo para adicionar despesas extras
+
+- Calculadora de Compra à Vista vs. Parcelado
+x Campos: valor à vista, valor parcelado, número de parcelas, taxa de juros do investimento
+x Comparação direta entre opções com cálculos simples
+
+- Calculadora de Imposto de Renda sobre Investimentos de Renda Fixa
+Campos: valor investido, prazo, taxa de juros, tipo de investimento (para alíquota)
+Cálculo simples de imposto baseado em alíquotas fixas
+
+Intermediárias
+- Calculadora de Custo Efetivo Total (CET)
+Campos: valor do empréstimo, parcelas, taxas administrativas, seguros
+Requer cálculo mais elaborado para determinar a taxa efetiva
+
+- Simulador de Dívidas e Pagamentos
+Campos: valor da dívida, taxa de juros, valor disponível para pagamento mensal
+Requer cálculos iterativos para determinar o tempo de quitação
+
+- Simulador de Orçamento Pessoal - Regra 50-30-20
+x Campos: renda total, despesas essenciais, despesas não essenciais, investimentos
+x Visualização simples da distribuição ideal versus real
+
+Mais Complexas
+- Calculadora de Amortização de Empréstimos
+Campos similares aos juros compostos, mas exige geração de tabela de amortização
+Necessário implementar dois sistemas (SAC e Price) com visualização detalhada
+
+- Calculadora de Aposentadoria
+Mais campos: idade atual, idade de aposentadoria, expectativa de vida, inflação
+Requer cálculos mais complexos e consideração de múltiplas variáveis
+
+- Calculadora de Independência Financeira
+Muitos campos: despesas mensais, patrimônio atual, aportes mensais, taxa de retorno
+Lógica mais complexa para projeção de cenários
+
+- Calculadora de Portfólio Otimizado
+Maior complexidade: diversos ativos, correlações, histórico de retornos
+Requer algoritmos de otimização mais avançados
+
+
+
+
+
+
+------------------------
+
+1. Simulador de Amortização de Empréstimos/Financiamentos
+Objetivo: Mostrar como funciona a amortização de um empréstimo/financiamento
+Inputs: Valor do empréstimo, taxa de juros, prazo, sistema de amortização (SAC ou Price)
+Outputs: Tabela de amortização mostrando pagamentos mensais, quanto vai para juros e quanto para o principal, saldo devedor após cada parcela
+
+2. Calculadora de Aposentadoria
+Objetivo: Estimar quanto dinheiro será necessário acumular para aposentadoria
+Inputs: Idade atual, idade desejada para aposentar, expectativa de vida, renda mensal desejada na aposentadoria, patrimônio atual, contribuição mensal, retorno esperado dos investimentos
+Outputs: Valor alvo para aposentadoria, déficit ou superávit atual, ajustes necessários na contribuição mensal
+
+3. Simulador de Imposto de Renda sobre Investimentos
+Objetivo: Calcular o impacto dos impostos em diferentes tipos de investimentos
+Inputs: Tipo de investimento (renda fixa, ações, fundos), valor investido, prazo, rentabilidade estimada
+Outputs: Rendimento bruto, imposto devido, rendimento líquido, alíquota efetiva
+
+4. Simulador de Independência Financeira
+Objetivo: Calcular quando o usuário pode atingir independência financeira
+Inputs: Patrimônio atual, despesas mensais, taxa de poupança mensal, retorno esperado dos investimentos
+Outputs: Anos até atingir independência financeira, patrimônio necessário, gráfico de evolução
+
+5. Calculadora de Custo Real de Compras a Crédito
+Objetivo: Mostrar o impacto de compras parceladas no orçamento a longo prazo
+Inputs: Valor da compra, número de parcelas, taxa de juros do cartão/crediário
+Outputs: Valor total pago, quanto foi de juros, valor economizado se investisse o dinheiro em vez de parcelar
+
+6. Comparador de Investimentos
+Objetivo: Comparar diferentes opções de investimentos ao longo do tempo
+Inputs: Valores iniciais, aportes mensais, prazos, rentabilidades estimadas, impostos aplicáveis
+Outputs: Gráfico comparativo, rentabilidade líquida estimada, valor acumulado em cada opção
+
+7. Planejador de Metas Financeiras
+Objetivo: Calcular quanto poupar mensalmente para atingir metas específicas
+Inputs: Valor da meta (carro, casa, viagem), prazo desejado, patrimônio atual dedicado à meta
+Outputs: Valor mensal necessário para poupar, sugestão de investimentos adequados ao prazo
+
+8. Calculadora de Valor Presente de Gastos Futuros
+Objetivo: Mostrar quanto vale hoje um gasto futuro (ex: faculdade do filho daqui a 15 anos)
+Inputs: Valor estimado do gasto futuro, tempo até o evento, inflação estimada
+Outputs: Valor presente necessário, plano de poupança mensal
+
+9. Simulador de Redução de Dívidas
+Objetivo: Criar estratégias para quitar dívidas mais rapidamente
+Inputs: Lista de dívidas (valor, taxa de juros, parcela mínima)
+Outputs: Estratégias de pagamento (bola de neve, avalanche), tempo para quitar todas as dívidas, economia de juros
+
+10. Calculadora de Custo de Vida vs. Salário
+Objetivo: Comparar custo de vida em diferentes cidades ou situações de vida
+Inputs: Salário atual/proposto, despesas essenciais, localização
+Outputs: Análise de poder de compra, proporção ideal entre moradia/transporte/alimentação/lazer
+Estes cálculos ajudariam seus usuários a tomar decisões financeiras mais informadas, complementando as funcionalidades que você já tem implementadas no seu aplicativo.

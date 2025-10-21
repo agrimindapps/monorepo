@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app-page.dart';
+import '../../pages/mobile_page.dart';
+import '../../pages/desktop_page.dart';
 
 // Global navigator key for dialogs, snackbars, etc.
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -13,9 +14,13 @@ final appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const NutriTutiAppPage(),
+      builder: (context, state) {
+        // Use mobile or desktop based on screen width
+        // Note: This will be determined by responsive layout in the widget itself
+        return const MobilePageNutriTuti();
+      },
     ),
-    // TODO: Add all other routes from routes.dart
+    // TODO: Add all other feature routes
   ],
   errorBuilder: (context, state) => Scaffold(
     body: Center(

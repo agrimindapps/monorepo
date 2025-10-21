@@ -330,29 +330,4 @@ class WaterRepositoryImpl implements WaterRepository {
       return Left(CacheFailure('Erro ao buscar sequência atual: $e'));
     }
   }
-
-  /// Internal method to update streak count
-  /// This should be called by use cases when appropriate
-  Future<Either<Failure, int>> _updateStreak(int newStreak) async {
-    try {
-      // 1. Update locally first
-      await _localDataSource.updateStreak(newStreak);
-
-      // 2. Sync to remote if authenticated
-      if (_isAuthenticated) {
-        try {
-          await _remoteDataSource.updateStreak(_currentUserId!, newStreak);
-          _logger.d('Streak updated in Firestore: $newStreak');
-        } catch (e) {
-          _logger.w('Failed to update streak in remote: $e');
-        }
-      }
-
-      return Right(newStreak);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Erro ao atualizar sequência: $e'));
-    }
-  }
 }

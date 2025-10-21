@@ -11,7 +11,7 @@ import 'package:purchases_flutter/purchases_flutter.dart' as purchases;
 
 import 'package:core/core.dart';
 
-import 'app-page.dart';
+import 'app_page.dart';
 import 'const/environment_const.dart';
 import 'const/firebase_consts.dart';
 import 'const/revenuecat_const.dart';

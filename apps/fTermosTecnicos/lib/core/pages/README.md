@@ -1,15 +1,25 @@
-# Legacy Pages
+# Static/Informational Pages
 
-These pages are from the old architecture and need to be migrated or removed:
+These are simple, static pages that don't require full Clean Architecture implementation.
 
-- `sobre.dart` - About page (references deleted ThemeManager)
-- `tts_settings_page.dart` - TTS settings (OLD version, new version in features/settings)
-- `atualizacao.dart` - Update page (references deleted ThemeManager)
+## Active Pages
 
-## Migration Status
+- **sobre.dart** - About page
+  - Shows app information, contact, external links
+  - Simple StatefulWidget with standard Flutter code
+  - No complex state management needed
 
-New versions exist in:
-- `/features/settings/presentation/pages/settings_page.dart` (replaces config_page)
-- `/features/settings/presentation/pages/tts_settings_page.dart` (NEW version)
+- **atualizacao.dart** - Updates/Changelog page
+  - Displays app update history and changelog
+  - Simple StatefulWidget with static content
+  - No complex state management needed
 
-The old pages can be kept for reference but should not be used in production.
+## Status
+
+✅ These pages are **production-ready** and actively used in the app router.
+✅ They use standard Flutter patterns (no GetX).
+✅ Simple informational pages don't need Clean Architecture overhead.
+
+## Note
+
+Not all pages need to follow Clean Architecture. Static/informational pages like these are perfectly fine as simple StatefulWidgets.

@@ -36,9 +36,11 @@ void main() async {
   // Initialize Hive using core package
   await Hive.initFlutter();
 
-  // Register custom adapters
-  // TODO: Add Hive adapters here when created
-  // Hive.registerAdapter(YourModelAdapter());
+  // Register custom adapters for Water feature
+  // Note: Run 'dart run build_runner build' to generate adapters
+  // Hive.registerAdapter(WaterRecordModelAdapter());
+  // Hive.registerAdapter(WaterAchievementModelAdapter());
+  // Hive.registerAdapter(AchievementTypeAdapter());
 
   // Initialize DI
   await configureDependencies();

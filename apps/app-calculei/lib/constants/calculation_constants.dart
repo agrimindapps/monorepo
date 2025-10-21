@@ -149,6 +149,38 @@ class CalculationConstants {
   /// Maximum admission year
   static const int anoMaximoAdmissao = 2100;
 
+  // ========== Unemployment Insurance (Seguro Desemprego) ==========
+
+  /// Minimum installment value (minimum wage)
+  static const double seguroDesempregoValorMinimo = 1412.00;
+
+  /// Maximum installment value
+  static const double seguroDesempregoValorMaximo = 2230.97;
+
+  /// Deadline to request (days from dismissal)
+  static const int seguroDesempregoPrazoRequererDias = 120;
+
+  /// Interval between installments (days)
+  static const int seguroDesempregoIntervaloParcelasDias = 30;
+
+  /// Carency for first time (months)
+  static const int seguroDesempregoCarenciaPrimeiraVez = 12;
+
+  /// Carency for second time (months)
+  static const int seguroDesempregoCarenciaSegundaVez = 9;
+
+  /// Carency for third time or more (months)
+  static const int seguroDesempregoCarenciaTerceiraVez = 6;
+
+  /// Interval between benefits (months)
+  static const int seguroDesempregoCarenciaEntreRecebimentos = 16;
+
+  /// Maximum times received
+  static const int seguroDesempregoMaxVezesRecebidas = 10;
+
+  /// Maximum work months
+  static const int seguroDesempregoMaxTempoTrabalho = 600;
+
   // ========== UI Constants ==========
 
   /// Form field spacing

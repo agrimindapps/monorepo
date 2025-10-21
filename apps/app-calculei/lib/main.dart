@@ -18,6 +18,7 @@ import 'features/overtime_calculator/data/datasources/overtime_local_datasource.
 import 'features/net_salary_calculator/data/datasources/net_salary_local_datasource.dart';
 import 'features/emergency_reserve_calculator/data/datasources/emergency_reserve_local_datasource.dart';
 import 'features/cash_vs_installment_calculator/data/datasources/cash_vs_installment_local_datasource.dart';
+import 'features/unemployment_insurance_calculator/data/datasources/unemployment_insurance_local_datasource.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ void main() async {
   await NetSalaryLocalDataSourceImplExtension.initialize();
   await EmergencyReserveLocalDataSourceImplExtension.initialize();
   await CashVsInstallmentLocalDataSourceImplExtension.initialize();
+  await UnemploymentInsuranceLocalDataSourceImplExtension.initialize();
 
   // Initialize DI
   await configureDependencies();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class DateRangeSelector extends StatefulWidget {
   final Function(int dataInicial, int dataFinal) onChange;
@@ -20,7 +19,6 @@ class DateRangeSelector extends StatefulWidget {
 class _DateRangeSelectorState extends State<DateRangeSelector> {
   late int _dataInicial;
   late int _dataFinal;
-  final _dateFormat = DateFormat('dd/MM/yyyy');
 
   @override
   void initState() {

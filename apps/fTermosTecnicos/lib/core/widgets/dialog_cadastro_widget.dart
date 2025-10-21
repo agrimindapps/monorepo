@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../style/shadcn_style.dart';
-
 class DialogCadastro {
   static Future<bool?> show<T>({
     required BuildContext context,

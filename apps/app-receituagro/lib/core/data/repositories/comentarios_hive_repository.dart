@@ -48,11 +48,12 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
       if (hiveComentario.idReg.isEmpty) {
         hiveComentario.idReg = _generateId();
       }
-      
-      final box = Hive.isBoxOpen('comentarios') 
-          ? Hive.box<ComentarioHive>('comentarios')
-          : await Hive.openBox<ComentarioHive>('comentarios');
-      await box.put(hiveComentario.idReg, hiveComentario);
+
+      // Usa BaseHiveRepository.save() para adicionar através do IHiveManager
+      final result = await save(hiveComentario, key: hiveComentario.idReg);
+      if (result.isError) {
+        throw Exception('Erro ao salvar: ${result.error}');
+      }
     } catch (e) {
       throw Exception('Erro ao adicionar comentário: $e');
     }

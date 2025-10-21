@@ -13,7 +13,9 @@ import 'core/services/premium_service.dart';
 import 'core/services/prioritized_data_loader.dart';
 import 'core/services/promotional_notification_manager.dart';
 import 'core/services/receituagro_notification_service.dart';
+import 'core/services/receituagro_realtime_service.dart';
 import 'core/services/remote_config_service.dart';
+import 'core/storage/receituagro_storage_initializer.dart';
 import 'core/sync/receituagro_sync_config.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
@@ -93,12 +95,41 @@ void main() async {
     ReceitaAgroDataInspectorInitializer.initialize();
     DiagnosticoLogger.debug('Data Inspector initialization completed');
   }
+
+  // 📦 Inicializar HiveBoxes para sync em tempo real
+  try {
+    DiagnosticoLogger.debug('Registering sync HiveBoxes...');
+    final boxRegistry = di.sl<IBoxRegistryService>();
+    final storageResult = await ReceitaAgroStorageInitializer.initialize(boxRegistry);
+
+    storageResult.fold(
+      (failure) {
+        DiagnosticoLogger.debug('Failed to register sync boxes: ${failure.message}');
+      },
+      (_) {
+        DiagnosticoLogger.debug('✅ Sync HiveBoxes registered successfully');
+        if (kDebugMode) {
+          final debugInfo = ReceitaAgroStorageInitializer.getDebugInfo(boxRegistry);
+          debugPrint('📦 Boxes registered: ${debugInfo['registered_boxes']}/${debugInfo['expected_boxes']}');
+          debugPrint('📋 Missing boxes: ${debugInfo['missing_boxes']}');
+        }
+      },
+    );
+  } catch (e) {
+    DiagnosticoLogger.debug('Error registering sync boxes', e);
+  }
+
   try {
     DiagnosticoLogger.debug('Forcing sync initialization...');
     await ReceitaAgroSyncConfig.configure();
     DiagnosticoLogger.debug('Sync initialization completed successfully');
     SyncDIModule.init(di.sl);
     await SyncDIModule.initializeSyncService(di.sl);
+
+    // 🔄 Inicializar serviço de sincronização em tempo real
+    DiagnosticoLogger.debug('Initializing realtime sync service...');
+    await ReceitaAgroRealtimeService.instance.initialize();
+    DiagnosticoLogger.debug('Realtime sync service initialized successfully');
   } catch (e) {
     DiagnosticoLogger.debug('Sync initialization failed', e);
   }

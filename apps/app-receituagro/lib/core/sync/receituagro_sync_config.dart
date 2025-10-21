@@ -53,13 +53,15 @@ Map<String, dynamic> _subscriptionToFirebaseMap(BaseSyncEntity entity) {
 /// Diagnóstico agrícola com favoritos, comentários e dados do usuário
 abstract final class ReceitaAgroSyncConfig {
   /// Configura o sistema de sincronização para o ReceitaAgro
+  /// 🔄 REALTIME SYNC HABILITADO para favoritos e comentários
   static Future<void> configure() async {
     await UnifiedSyncManager.instance.initializeApp(
       appName: 'receituagro',
-      config: AppSyncConfig.simple(
+      config: AppSyncConfig.advanced(
         appName: 'receituagro',
         syncInterval: const Duration(minutes: 2), // Sync mais frequente
         conflictStrategy: ConflictStrategy.timestamp,
+        enableOrchestration: false, // Desabilitado para economizar recursos
       ),
       entities: [
         EntitySyncRegistration<FavoritoSyncEntity>.simple(

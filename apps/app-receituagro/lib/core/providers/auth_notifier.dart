@@ -359,10 +359,13 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
       result.fold(
         (failure) => state = state.copyWith(isLoading: false, errorMessage: failure.message),
-        (_) {
+        (_) async {
+          // 🔐 SEGURANÇA: Limpar dados premium e sensíveis antes de criar novo usuário anônimo
+          await _clearPremiumDataOnLogout();
+
           _analytics.trackLogout('user_action');
           state = state.copyWith(isLoading: false);
-          signInAnonymously();
+          await signInAnonymously();
         },
       );
     } catch (e) {
@@ -571,6 +574,57 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     } catch (e) {
       if (kDebugMode) print('❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e');
       _analytics.trackError('user_profile_sync_error', e.toString());
+    }
+  }
+
+  /// 🔐 SEGURANÇA: Limpa dados premium e sensíveis no logout
+  ///
+  /// Previne vazamento de informações de assinatura para novos usuários
+  /// que usarem o mesmo dispositivo após logout.
+  ///
+  /// Dados limpos:
+  /// - Status premium local (Hive)
+  /// - Favoritos salvos
+  /// - Comentários privados
+  /// - SharedPreferences relacionadas a premium
+  Future<void> _clearPremiumDataOnLogout() async {
+    try {
+      if (kDebugMode) {
+        debugPrint('🧹 Auth Notifier: Limpando dados premium no logout...');
+      }
+
+      final dataCleaner = ReceitaAgroDataCleaner();
+
+      // Limpar categorias sensíveis que contêm dados do usuário
+      final categoriesToClear = ['premium', 'favoritos', 'comentarios'];
+
+      for (final category in categoriesToClear) {
+        try {
+          final result = await dataCleaner.clearCategoryData(category);
+
+          if (kDebugMode) {
+            if (result['success'] == true) {
+              debugPrint('   ✅ Categoria "$category" limpa: ${result['totalRecordsCleared']} registros');
+            } else {
+              debugPrint('   ⚠️ Falha ao limpar categoria "$category": ${result['errors']}');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('   ❌ Erro ao limpar categoria "$category": $e');
+          }
+        }
+      }
+
+      if (kDebugMode) {
+        debugPrint('✅ Auth Notifier: Limpeza de dados premium concluída');
+      }
+    } catch (e) {
+      // Não falha o logout se a limpeza de dados falhar
+      if (kDebugMode) {
+        debugPrint('❌ Auth Notifier: Erro na limpeza de dados premium: $e');
+      }
+      _analytics.trackError('premium_data_cleanup_error', e.toString());
     }
   }
 

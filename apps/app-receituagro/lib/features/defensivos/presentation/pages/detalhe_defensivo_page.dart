@@ -513,19 +513,10 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
     final state = ref.read(detalheDefensivoNotifierProvider);
     state.whenData((data) {
       if (success) {
+        // Feedback tátil silencioso - sem mensagem visual
         unawaited(HapticFeedback.selectionClick());
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data.isFavorited
-                  ? 'Adicionado aos favoritos'
-                  : 'Removido dos favoritos',
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
       } else {
+        // Mostra erro apenas quando falha
         unawaited(HapticFeedback.heavyImpact());
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

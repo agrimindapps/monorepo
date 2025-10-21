@@ -80,7 +80,7 @@ class DefensivosListWidget extends StatelessWidget {
         return RepaintBoundary(
           child: ContentListItemWidget(
             title: defensivo.nome,
-            subtitle: _getSubtitle(defensivo),
+            subtitle: defensivo.displayIngredient,
             category: _getCategory(defensivo),
             icon: FontAwesomeIcons.sprayCan,
             iconColor: const Color(0xFF4CAF50),
@@ -156,7 +156,7 @@ class DefensivosListWidget extends StatelessWidget {
               const SizedBox(height: 4),
               // Subtitle
               Text(
-                _getSubtitle(defensivo),
+                defensivo.displayIngredient,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
@@ -188,16 +188,6 @@ class DefensivosListWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getSubtitle(DefensivoEntity defensivo) {
-    if (defensivo.fabricante?.isNotEmpty == true) {
-      return defensivo.fabricante!;
-    }
-    if (defensivo.ingredienteAtivo.isNotEmpty == true) {
-      return defensivo.ingredienteAtivo;
-    }
-    return 'Defensivo';
   }
 
   String? _getCategory(DefensivoEntity defensivo) {

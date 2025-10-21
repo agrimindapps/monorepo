@@ -179,18 +179,9 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
 
       if (success) {
         FavoritosPage.reloadIfActive();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              state?.isFavorited == true
-                  ? 'Adicionado aos favoritos'
-                  : 'Removido dos favoritos',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // Sem mensagem de sucesso - feedback visual do ícone é suficiente
       } else {
+        // Mostra erro apenas quando falha
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(state?.errorMessage ?? 'Erro ao alterar favorito'),

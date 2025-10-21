@@ -70,27 +70,7 @@ class FavoritosDataResolverService {
           );
 
         case TipoFavorito.diagnostico:
-          return await _resolveGeneric<dynamic>(
-            tipo: tipo,
-            id: id,
-            getRepository: () => GetIt.instance<DiagnosticoHiveRepository>(),
-            matcher: (item) =>
-                item.idReg == id || item.objectId == id,
-            extractor: (item) => {
-              'nomePraga': item.nomePraga ?? 'Praga não encontrada',
-              'nomeDefensivo': item.nomeDefensivo ?? 'Defensivo não encontrado',
-              'cultura': item.nomeCultura ?? 'Cultura não encontrada',
-              'dosagem': '${item.dsMin ?? ''} - ${item.dsMax} ${item.um}',
-              'fabricante': '',
-              'modoAcao': '',
-            },
-            fallbackData: {
-              'nomePraga': 'Diagnóstico $id',
-              'nomeDefensivo': 'Não disponível',
-              'cultura': 'Não disponível',
-              'dosagem': 'Não especificada',
-            },
-          );
+          return await _resolveDiagnosticoWithLookups(id);
 
         case TipoFavorito.cultura:
           return await _resolveGeneric<dynamic>(
@@ -130,6 +110,183 @@ class FavoritosDataResolverService {
       }
       return null;
     }
+  }
+
+  /// Resolve dados de diagnóstico com lookups nas outras HiveBoxes
+  ///
+  /// Busca o diagnóstico pelo ID e faz lookups para obter:
+  /// - Nome do defensivo (via fkIdDefensivo)
+  /// - Nome da praga (via fkIdPraga)
+  /// - Nome da cultura (via fkIdCultura)
+  Future<Map<String, dynamic>?> _resolveDiagnosticoWithLookups(String id) async {
+    if (kDebugMode) {
+      developer.log(
+        'Resolvendo diagnóstico com lookups: id=$id',
+        name: 'DataResolver',
+      );
+    }
+
+    try {
+      // 1. Buscar o diagnóstico
+      final diagRepo = GetIt.instance<DiagnosticoHiveRepository>();
+      final diagResult = await diagRepo.getAll();
+
+      if (diagResult is Result && diagResult.isError) {
+        if (kDebugMode) {
+          developer.log('Erro ao buscar diagnóstico', name: 'DataResolver');
+        }
+        return _getDiagnosticoFallback(id);
+      }
+
+      final diagData = diagResult is Result ? diagResult.data! : diagResult;
+      final diagnostico = (diagData as List).firstWhere(
+        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        orElse: () => throw Exception('Diagnóstico não encontrado'),
+      ) as dynamic;
+
+      // 2. Buscar nome do defensivo se nomeDefensivo estiver vazio
+      String nomeDefensivo = (diagnostico.nomeDefensivo as String?) ?? '';
+      final fkIdDefensivo = (diagnostico.fkIdDefensivo as String?) ?? '';
+      if (nomeDefensivo.isEmpty && fkIdDefensivo.isNotEmpty) {
+        final defensivoData = await _lookupDefensivo(fkIdDefensivo);
+        nomeDefensivo = defensivoData?['nomeComum'] as String? ?? 'Defensivo não encontrado';
+      }
+
+      // 3. Buscar nome da praga se nomePraga estiver vazio
+      String nomePraga = (diagnostico.nomePraga as String?) ?? '';
+      final fkIdPraga = (diagnostico.fkIdPraga as String?) ?? '';
+      if (nomePraga.isEmpty && fkIdPraga.isNotEmpty) {
+        final pragaData = await _lookupPraga(fkIdPraga);
+        nomePraga = pragaData?['nomeComum'] as String? ?? 'Praga não encontrada';
+      }
+
+      // 4. Buscar nome da cultura se nomeCultura estiver vazio
+      String nomeCultura = (diagnostico.nomeCultura as String?) ?? '';
+      final fkIdCultura = (diagnostico.fkIdCultura as String?) ?? '';
+      if (nomeCultura.isEmpty && fkIdCultura.isNotEmpty) {
+        final culturaData = await _lookupCultura(fkIdCultura);
+        nomeCultura = culturaData?['nomeCultura'] as String? ?? 'Cultura não encontrada';
+      }
+
+      // 5. Montar dosagem
+      final dsMin = (diagnostico.dsMin as String?) ?? '0';
+      final dsMax = (diagnostico.dsMax as String?) ?? '0';
+      final um = (diagnostico.um as String?) ?? '';
+      final dosagem = um.isNotEmpty ? '$dsMin - $dsMax $um / 100 Lt' : '$dsMin - $dsMax';
+
+      final result = {
+        'nomeDefensivo': nomeDefensivo,
+        'nomePraga': nomePraga,
+        'cultura': nomeCultura,
+        'dosagem': dosagem,
+      };
+
+      if (kDebugMode) {
+        developer.log(
+          'Diagnóstico resolvido: $result',
+          name: 'DataResolver',
+        );
+      }
+
+      return result;
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log(
+          'Erro ao resolver diagnóstico: $e',
+          name: 'DataResolver',
+          error: e,
+        );
+      }
+      return _getDiagnosticoFallback(id);
+    }
+  }
+
+  /// Lookup de defensivo por ID
+  Future<Map<String, dynamic>?> _lookupDefensivo(String id) async {
+    try {
+      final repo = GetIt.instance<FitossanitarioHiveRepository>();
+      final data = await repo.getAll() as List;
+
+      final item = data.firstWhere(
+        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        orElse: () => null,
+      );
+
+      if (item == null) return null;
+
+      final dynamicItem = item as dynamic;
+      return {
+        'nomeComum': (dynamicItem.nomeComum as String?) ?? '',
+        'ingredienteAtivo': (dynamicItem.ingredienteAtivo as String?) ?? '',
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log('Erro ao buscar defensivo $id: $e', name: 'DataResolver');
+      }
+      return null;
+    }
+  }
+
+  /// Lookup de praga por ID
+  Future<Map<String, dynamic>?> _lookupPraga(String id) async {
+    try {
+      final repo = GetIt.instance<PragasHiveRepository>();
+      final data = await repo.getAll() as List;
+
+      final item = data.firstWhere(
+        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        orElse: () => null,
+      );
+
+      if (item == null) return null;
+
+      final dynamicItem = item as dynamic;
+      return {
+        'nomeComum': (dynamicItem.nomeComum as String?) ?? '',
+        'nomeCientifico': (dynamicItem.nomeCientifico as String?) ?? '',
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log('Erro ao buscar praga $id: $e', name: 'DataResolver');
+      }
+      return null;
+    }
+  }
+
+  /// Lookup de cultura por ID
+  Future<Map<String, dynamic>?> _lookupCultura(String id) async {
+    try {
+      final repo = GetIt.instance<CulturaHiveRepository>();
+      final data = await repo.getAll() as List;
+
+      final item = data.firstWhere(
+        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        orElse: () => null,
+      );
+
+      if (item == null) return null;
+
+      final dynamicItem = item as dynamic;
+      return {
+        'nomeCultura': (dynamicItem.cultura as String?) ?? '',
+        'nomeComum': (dynamicItem.nomeComum as String?) ?? '',
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        developer.log('Erro ao buscar cultura $id: $e', name: 'DataResolver');
+      }
+      return null;
+    }
+  }
+
+  /// Fallback data para diagnóstico
+  Map<String, dynamic> _getDiagnosticoFallback(String id) {
+    return {
+      'nomeDefensivo': 'Defensivo não encontrado',
+      'nomePraga': 'Praga não encontrada',
+      'cultura': 'Cultura não encontrada',
+      'dosagem': 'Não especificada',
+    };
   }
 
   /// Método genérico consolidado - substitui 200+ linhas de código duplicado

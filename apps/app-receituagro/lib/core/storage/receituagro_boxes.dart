@@ -22,7 +22,7 @@ class ReceitaAgroBoxes {
         'contains': ['plantas', 'pragas', 'doencas', 'receitas'],
       },
     ),
-    
+
     BoxConfiguration.basic(
       name: cache,
       appId: 'receituagro',
@@ -33,7 +33,7 @@ class ReceitaAgroBoxes {
         'contains': ['search_cache', 'image_cache'],
       },
     ),
-    
+
     BoxConfiguration.basic(
       name: favoritos,
       appId: 'receituagro',
@@ -44,7 +44,7 @@ class ReceitaAgroBoxes {
         'contains': ['favorite_plantas', 'favorite_receitas'],
       },
     ),
-    
+
     BoxConfiguration.basic(
       name: settings,
       appId: 'receituagro',
@@ -55,7 +55,7 @@ class ReceitaAgroBoxes {
         'contains': ['app_preferences', 'user_settings'],
       },
     ),
-    
+
     BoxConfiguration.basic(
       name: offline,
       appId: 'receituagro',
@@ -64,6 +64,85 @@ class ReceitaAgroBoxes {
       metadata: {
         'description': 'Dados para uso offline',
         'contains': ['sync_data', 'offline_content'],
+      },
+    ),
+
+    // ========================================================================
+    // BOXES PARA SYNC EM TEMPO REAL - UnifiedSyncManager
+    // ========================================================================
+    // IMPORTANTE: Estes nomes devem corresponder aos usados no
+    // UnifiedSyncManager (favoritos, comentarios, user_settings, etc.)
+    // sem prefixo receituagro_
+
+    BoxConfiguration.basic(
+      name: 'favoritos',  // Nome usado pelo UnifiedSyncManager
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      metadata: {
+        'description': 'Favoritos sincronizados (defensivos, pragas, diagnósticos, culturas)',
+        'sync_enabled': true,
+        'realtime': true,
+      },
+    ),
+
+    BoxConfiguration.basic(
+      name: 'comentarios',  // Nome usado pelo UnifiedSyncManager
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      metadata: {
+        'description': 'Comentários do usuário sincronizados',
+        'sync_enabled': true,
+        'realtime': true,
+      },
+    ),
+
+    BoxConfiguration.basic(
+      name: 'user_settings',  // Nome usado pelo UnifiedSyncManager
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      metadata: {
+        'description': 'Configurações do usuário sincronizadas',
+        'sync_enabled': true,
+        'realtime': true,
+      },
+    ),
+
+    BoxConfiguration.basic(
+      name: 'user_history',  // Nome usado pelo UnifiedSyncManager
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      metadata: {
+        'description': 'Histórico de ações do usuário',
+        'sync_enabled': true,
+        'realtime': true,
+      },
+    ),
+
+    BoxConfiguration.basic(
+      name: 'subscriptions',  // Nome usado pelo UnifiedSyncManager
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      metadata: {
+        'description': 'Dados de assinatura premium sincronizados',
+        'sync_enabled': true,
+        'realtime': true,
+      },
+    ),
+
+    BoxConfiguration.basic(
+      name: 'users',  // Nome usado pelo UnifiedSyncManager
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      metadata: {
+        'description': 'Dados do usuário sincronizados',
+        'sync_enabled': true,
+        'realtime': true,
       },
     ),
   ];

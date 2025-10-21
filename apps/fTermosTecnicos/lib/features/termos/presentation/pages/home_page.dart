@@ -4,7 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../../const/environment_const.dart' as local_env;
 import '../../../../core/widgets/appbar.dart';
-import '../../../../pages/termos_page.dart';
+import 'termos_list_page.dart';
 import '../../domain/entities/categoria.dart';
 import '../providers/termos_providers.dart';
 

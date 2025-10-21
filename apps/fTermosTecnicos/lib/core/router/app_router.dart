@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/termos/presentation/pages/home_page.dart';
-import '../../pages/termos_page.dart';
+import '../../features/termos/presentation/pages/termos_list_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/settings/presentation/pages/tts_settings_page.dart';
 import '../../features/comentarios/presentation/pages/comentarios_page.dart';

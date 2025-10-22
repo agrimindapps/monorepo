@@ -15,6 +15,9 @@ class _BoxTrackingInfo {
 /// Helper centralizado para gerenciar abertura e fechamento de Hive boxes de forma segura.
 /// Garante que boxes sejam sempre fechadas após uso, evitando vazamentos de recursos.
 class HiveBoxManager {
+  // Private constructor para classe utilitária (apenas métodos estáticos)
+  HiveBoxManager._();
+
   /// Controle de debug/monitoramento
   static bool _monitoringEnabled = false;
   static final Map<String, _BoxTrackingInfo> _openBoxes = {};
@@ -122,20 +125,33 @@ class HiveBoxManager {
     Future<T> Function(Map<String, Box<dynamic>> boxes) operation,
   ) async {
     final openedBoxes = <String, Box<dynamic>>{};
+    final boxesOpenedByUs = <String>[];
 
     try {
-      // Abrir todas as boxes
+      // Abrir todas as boxes (ou usar já abertas)
       for (final entry in boxConfigs.entries) {
-        openedBoxes[entry.key] = await Hive.openBox(entry.key);
-        _trackBoxOpened(entry.key);
+        final boxName = entry.key;
+
+        // Se box já está aberta, usar instância existente
+        if (Hive.isBoxOpen(boxName)) {
+          openedBoxes[boxName] = Hive.box<dynamic>(boxName);
+        } else {
+          // Se não está aberta, abrir e rastrear para fechar depois
+          openedBoxes[boxName] = await Hive.openBox(boxName);
+          boxesOpenedByUs.add(boxName);
+          _trackBoxOpened(boxName);
+        }
       }
 
       return await operation(openedBoxes);
     } finally {
-      // Fechar todas as boxes em ordem reversa
-      for (final box in openedBoxes.values.toList().reversed) {
-        await box.close();
-        _trackBoxClosed(box.name);
+      // Fechar SOMENTE as boxes que ESTE método abriu
+      for (final boxName in boxesOpenedByUs.reversed) {
+        final box = openedBoxes[boxName];
+        if (box != null && box.isOpen) {
+          await box.close();
+          _trackBoxClosed(boxName);
+        }
       }
     }
   }

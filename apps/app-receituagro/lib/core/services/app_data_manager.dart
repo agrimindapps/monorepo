@@ -10,7 +10,6 @@ import '../data/repositories/plantas_inf_hive_repository.dart';
 import '../data/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_inf_hive_repository.dart';
 import 'data_initialization_service.dart';
-import 'hive_adapter_registry.dart';
 import 'hive_leak_monitor.dart';
 
 /// Interface para o gerenciador de dados da aplicação
@@ -35,6 +34,8 @@ class AppDataManager implements IAppDataManager {
   AppDataManager();
 
   /// Inicializa completamente o sistema de dados com controle automático de versão
+  /// ✅ PADRÃO APP-PLANTIS: Hive.initFlutter() e HiveAdapterRegistry.registerAdapters()
+  /// já foram chamados no main.dart ANTES de ReceitaAgroStorageInitializer
   @override
   Future<Either<Exception, void>> initialize() async {
     if (_isInitialized) {
@@ -43,12 +44,21 @@ class AppDataManager implements IAppDataManager {
 
     try {
       developer.log(
-        'Iniciando inicialização do sistema de dados com controle de versão...',
+        'Iniciando inicialização do sistema de dados...',
         name: 'AppDataManager',
       );
-      await _initializeHive();
-      await HiveAdapterRegistry.registerAdapters();
-      await HiveAdapterRegistry.openBoxes();
+
+      // ✅ Hive.initFlutter() e HiveAdapterRegistry.registerAdapters()
+      // já foram executados no main.dart antes de registrar boxes
+      // Isso garante que adapters estejam disponíveis quando BoxRegistryService
+      // tentar abrir boxes persistentes
+
+      // Iniciar monitoramento de vazamentos de boxes em modo debug
+      assert(() {
+        HiveLeakMonitor.startMonitoring();
+        return true;
+      }());
+
       await _createServices();
       developer.log(
         'Inicializando dados diretamente...',
@@ -77,25 +87,6 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
       return Left(Exception('Falha na inicialização: ${e.toString()}'));
-    }
-  }
-
-  /// Inicializa o Hive com configurações adequadas
-  Future<void> _initializeHive() async {
-    try {
-      developer.log('Inicializando Hive...', name: 'AppDataManager');
-      await Hive.initFlutter();
-
-      // Iniciar monitoramento de vazamentos de boxes em modo debug
-      assert(() {
-        HiveLeakMonitor.startMonitoring();
-        return true;
-      }());
-
-      developer.log('Hive inicializado com sucesso', name: 'AppDataManager');
-    } catch (e) {
-      developer.log('Erro ao inicializar Hive: $e', name: 'AppDataManager');
-      rethrow;
     }
   }
 
@@ -216,6 +207,7 @@ class AppDataManager implements IAppDataManager {
   }
 
   /// Limpa recursos do sistema
+  /// ✅ PADRÃO APP-PLANTIS: BoxRegistryService gerencia fechamento de boxes
   @override
   Future<void> dispose() async {
     try {
@@ -224,7 +216,8 @@ class AppDataManager implements IAppDataManager {
         name: 'AppDataManager',
       );
 
-      await HiveAdapterRegistry.closeBoxes();
+      // ❌ REMOVIDO: await HiveAdapterRegistry.closeBoxes();
+      // ✅ BoxRegistryService gerencia fechamento de boxes
       await Hive.close();
 
       _isInitialized = false;

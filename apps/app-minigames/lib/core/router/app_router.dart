@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:app_minigames/pages/mobile_page.dart';
 import 'package:app_minigames/pages/desktop_page.dart';
+import 'package:app_minigames/features/tower/presentation/pages/tower_page.dart';
+import 'package:app_minigames/features/tictactoe/presentation/pages/tictactoe_page.dart';
+import 'package:app_minigames/features/campo_minado/presentation/pages/campo_minado_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -27,11 +30,19 @@ final appRouter = GoRouter(
         );
       },
     ),
-    // TODO: Add game routes
-    // GoRoute(
-    //   path: '/game-2048',
-    //   builder: (context, state) => const Game2048Page(),
-    // ),
+    // Game routes
+    GoRoute(
+      path: '/tower',
+      builder: (context, state) => const TowerPage(),
+    ),
+    GoRoute(
+      path: '/tictactoe',
+      builder: (context, state) => const TicTacToePage(),
+    ),
+    GoRoute(
+      path: '/campo-minado',
+      builder: (context, state) => const CampoMinadoPage(),
+    ),
   ],
   errorBuilder: (context, state) => Scaffold(
     body: Center(

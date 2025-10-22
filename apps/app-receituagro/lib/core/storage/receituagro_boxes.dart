@@ -3,6 +3,9 @@ import 'package:core/core.dart';
 /// Definições de boxes específicas do app ReceitaAgro
 /// Cada app gerencia suas próprias boxes para evitar contaminação cross-app
 class ReceitaAgroBoxes {
+  // Private constructor para classe utilitária (apenas membros estáticos)
+  ReceitaAgroBoxes._();
+
   static const String receituagro = 'receituagro';
   static const String cache = 'receituagro_cache';
   static const String favoritos = 'receituagro_favoritos';
@@ -73,12 +76,19 @@ class ReceitaAgroBoxes {
     // IMPORTANTE: Estes nomes devem corresponder aos usados no
     // UnifiedSyncManager (favoritos, comentarios, user_settings, etc.)
     // sem prefixo receituagro_
+    //
+    // ⚠️ CRÍTICO: Marcadas como persistent:false porque:
+    // 1. BoxRegistryService abre como Box<dynamic>
+    // 2. HiveManager precisa de Box<T> específico (Box<ComentarioHive>, etc.)
+    // 3. Cast Box<dynamic> → Box<T> é IMPOSSÍVEL em Dart (generics invariantes)
+    // 4. HiveManager abrirá com tipo correto quando BaseHiveRepository precisar
 
     BoxConfiguration.basic(
       name: 'favoritos',  // Nome usado pelo UnifiedSyncManager
       appId: 'receituagro',
     ).copyWith(
       version: 1,
+      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
       metadata: {
         'description': 'Favoritos sincronizados (defensivos, pragas, diagnósticos, culturas)',
         'sync_enabled': true,
@@ -91,6 +101,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
+      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
       metadata: {
         'description': 'Comentários do usuário sincronizados',
         'sync_enabled': true,
@@ -103,6 +114,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
+      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
       metadata: {
         'description': 'Configurações do usuário sincronizadas',
         'sync_enabled': true,
@@ -115,6 +127,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
+      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
       metadata: {
         'description': 'Histórico de ações do usuário',
         'sync_enabled': true,
@@ -127,6 +140,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
+      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
       metadata: {
         'description': 'Dados de assinatura premium sincronizados',
         'sync_enabled': true,
@@ -139,6 +153,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
+      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
       metadata: {
         'description': 'Dados do usuário sincronizados',
         'sync_enabled': true,

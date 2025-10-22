@@ -39,6 +39,7 @@ class BoxRegistryService implements IBoxRegistryService {
   Future<Either<Failure, void>> registerBox(BoxConfiguration config) async {
     try {
       await _ensureInitialized();
+
       if (_boxConfigurations.containsKey(config.name)) {
         return Left(
           CacheFailure(
@@ -46,6 +47,8 @@ class BoxRegistryService implements IBoxRegistryService {
           ),
         );
       }
+
+      // Registrar adapters customizados se necessário
       if (config.customAdapters != null) {
         for (final adapter in config.customAdapters!) {
           if (!Hive.isAdapterRegistered(adapter.typeId)) {
@@ -53,14 +56,41 @@ class BoxRegistryService implements IBoxRegistryService {
           }
         }
       }
+
+      // Adicionar configuração ao registry
       _boxConfigurations[config.name] = config;
+
+      if (kDebugMode) {
+        debugPrint(
+          '📝 [BoxRegistryService.registerBox] Box "${config.name}" registrada (persistent: ${config.persistent}, appId: ${config.appId})',
+        );
+      }
+
+      // Se persistent, abrir automaticamente
       if (config.persistent) {
+        if (kDebugMode) {
+          debugPrint(
+            '🔑 [BoxRegistryService.registerBox] Box "${config.name}" é persistent, abrindo automaticamente...',
+          );
+        }
+
         final boxResult = await _openBox(config);
         if (boxResult.isLeft()) {
+          if (kDebugMode) {
+            debugPrint(
+              '❌ [BoxRegistryService.registerBox] Falha ao abrir box "${config.name}"',
+            );
+          }
           _boxConfigurations.remove(config.name);
           return boxResult.fold(
             (failure) => Left(failure),
             (_) => const Right(null),
+          );
+        }
+
+        if (kDebugMode) {
+          debugPrint(
+            '✅ [BoxRegistryService.registerBox] Box "${config.name}" aberta e pronta para uso',
           );
         }
       }
@@ -75,16 +105,52 @@ class BoxRegistryService implements IBoxRegistryService {
   Future<Either<Failure, Box<dynamic>>> getBox(String boxName) async {
     try {
       await _ensureInitialized();
+
+      // 1. Verificar se box está registrada
       if (!_boxConfigurations.containsKey(boxName)) {
         return Left(CacheFailure('Box "$boxName" não está registrada'));
       }
+
+      // 2. Verificar cache local
       if (_openBoxes.containsKey(boxName)) {
         return Right(_openBoxes[boxName]!);
       }
-      final config = _boxConfigurations[boxName]!;
-      final boxResult = await _openBox(config);
 
-      return boxResult.fold((failure) => Left(failure), (box) => Right(box));
+      // 3. ✅ Verificar se box JÁ está aberta (SEMPRE PRIMEIRO)
+      //    Isso resolve race condition com outros gerenciadores
+      if (Hive.isBoxOpen(boxName)) {
+        final box = Hive.box<dynamic>(boxName);
+        _openBoxes[boxName] = box;
+        return Right(box);
+      }
+
+      // 4. Box não está aberta, verificar se devemos abrir
+      final config = _boxConfigurations[boxName]!;
+
+      if (config.persistent) {
+        // Box persistente, abrir normalmente
+        final boxResult = await _openBox(config);
+        return boxResult.fold(
+          (failure) => Left(failure),
+          (box) => Right(box),
+        );
+      }
+
+      // 5. Box non-persistent e não aberta
+      // ✅ TOLERÂNCIA: Registrar a box mesmo que não esteja aberta
+      // Ela pode ser aberta depois pelo HiveManager ou outros sistemas
+      if (kDebugMode) {
+        debugPrint(
+          '⚠️ [BoxRegistryService.getBox] Box "$boxName" é non-persistent e não está aberta. '
+          'Box será aberta externamente quando necessário.',
+        );
+      }
+      return Left(
+        CacheFailure(
+          'Box "$boxName" está marcada como non-persistent e não foi aberta. '
+          'Abra a box externamente com o tipo correto antes de usá-la.',
+        ),
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao obter box "$boxName": $e'));
     }
@@ -187,11 +253,35 @@ class BoxRegistryService implements IBoxRegistryService {
   }
 
   /// Abre uma box com base na configuração
+  /// IMPORTANTE: Verifica se box já está aberta para evitar conflito de tipos
+  /// (ex: evita reabrir `Box<ComentarioHive>` como `Box<dynamic>`)
   Future<Either<Failure, Box<dynamic>>> _openBox(
     BoxConfiguration config,
   ) async {
     try {
       Box<dynamic> box;
+
+      // 🔍 VERIFICAR SE BOX JÁ ESTÁ ABERTA
+      // Se já está aberta (ex: por HiveAdapterRegistry ou HiveManager),
+      // usar instância existente ao invés de tentar reabrir
+      if (Hive.isBoxOpen(config.name)) {
+        if (kDebugMode) {
+          debugPrint(
+            '♻️ [BoxRegistryService._openBox] Box "${config.name}" já está aberta. '
+            'Usando instância existente para evitar conflito de tipos.',
+          );
+        }
+        box = Hive.box<dynamic>(config.name);
+        _openBoxes[config.name] = box;
+        return Right(box);
+      }
+
+      // Box não está aberta, abrir normalmente
+      if (kDebugMode) {
+        debugPrint(
+          '🔓 [BoxRegistryService._openBox] Abrindo box "${config.name}" (persistent: ${config.persistent})...',
+        );
+      }
 
       if (config.encryption != null) {
         box = await Hive.openBox(
@@ -204,6 +294,13 @@ class BoxRegistryService implements IBoxRegistryService {
       }
 
       _openBoxes[config.name] = box;
+
+      if (kDebugMode) {
+        debugPrint(
+          '✅ [BoxRegistryService._openBox] Box "${config.name}" aberta com sucesso (${box.length} items)',
+        );
+      }
+
       return Right(box);
     } catch (e) {
       return Left(CacheFailure('Erro ao abrir box "${config.name}": $e'));

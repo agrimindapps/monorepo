@@ -64,20 +64,54 @@ class HiveManager implements IHiveManager {
     }
 
     try {
+      // Verificar se já temos no cache interno
       if (_openBoxes.containsKey(boxName)) {
-        final box = _openBoxes[boxName] as Box<T>;
-        return Result.success(box);
+        final cachedBox = _openBoxes[boxName];
+        // Validar tipo do box cacheado
+        if (cachedBox is Box<T>) {
+          return Result.success(cachedBox);
+        } else {
+          debugPrint(
+            'HiveManager: Box "$boxName" cached with wrong type: '
+            '${cachedBox.runtimeType} (expected Box<$T>)',
+          );
+          // Remover do cache e tentar reabrir
+          _openBoxes.remove(boxName);
+        }
       }
+
       final Box<T> box;
       if (Hive.isBoxOpen(boxName)) {
-        box = Hive.box<T>(boxName);
+        // Box já aberto externamente - tentar obter com tipo correto
+        try {
+          box = Hive.box<T>(boxName);
+          debugPrint(
+            'HiveManager: Synchronized externally opened box: $boxName '
+            'as Box<$T> (${box.length} items)',
+          );
+        } catch (typeError) {
+          // Erro de tipo - box foi aberto com tipo incompatível
+          debugPrint(
+            'HiveManager: Type mismatch for box "$boxName". '
+            'Box is already open with a different type. Error: $typeError',
+          );
+          return ResultAdapter.failure(
+            HiveBoxException(
+              'The box "$boxName" is already open and of type Box<dynamic>.',
+              boxName,
+              originalError: typeError,
+            ),
+          );
+        }
       } else {
+        // Box ainda não está aberto, abrir com tipo correto
         box = await Hive.openBox<T>(boxName);
+        debugPrint('HiveManager: Opened box: $boxName (${box.length} items)');
       }
 
+      // Adicionar ao cache interno
       _openBoxes[boxName] = box;
 
-      debugPrint('HiveManager: Opened box: $boxName (${box.length} items)');
       return Result.success(box);
     } catch (e, stackTrace) {
       debugPrint('HiveManager: Failed to open box: $boxName - $e');

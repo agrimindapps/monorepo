@@ -63,6 +63,10 @@ class ComentarioModel {
     };
   }
 
+  // ✅ Aliases para compatibilidade com jsonEncode/jsonDecode (padrão app-plantis)
+  factory ComentarioModel.fromJson(Map<String, dynamic> json) => ComentarioModel.fromMap(json);
+  Map<String, dynamic> toJson() => toMap();
+
   ComentarioModel copyWith({
     String? id,
     String? idReg,

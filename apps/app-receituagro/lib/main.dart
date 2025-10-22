@@ -9,6 +9,7 @@ import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/theme_notifier.dart';
 import 'core/services/app_data_manager.dart';
 import 'core/services/firebase_messaging_service.dart';
+import 'core/services/hive_adapter_registry.dart';
 import 'core/services/premium_service.dart';
 import 'core/services/prioritized_data_loader.dart';
 import 'core/services/promotional_notification_manager.dart';
@@ -41,6 +42,14 @@ void main() async {
   ]);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
+
+  // ✅ PADRÃO APP-PLANTIS: Registrar adapters Hive ANTES de registrar boxes
+  // Isso garante que os adapters estejam disponíveis quando BoxRegistryService
+  // tentar abrir boxes persistentes
+  await Hive.initFlutter();
+  await HiveAdapterRegistry.registerAdapters();
+  DiagnosticoLogger.debug('✅ Hive adapters registrados antes das boxes');
+
   await di.init();
   await _initializeFirebaseServices();
   final auth = FirebaseAuth.instance;
@@ -100,38 +109,31 @@ void main() async {
   try {
     DiagnosticoLogger.debug('Registering sync HiveBoxes...');
     final boxRegistry = di.sl<IBoxRegistryService>();
-    final storageResult = await ReceitaAgroStorageInitializer.initialize(boxRegistry);
+    final storageResult = await ReceitaAgroStorageInitializer.initialize(
+      boxRegistry,
+    );
 
     storageResult.fold(
       (failure) {
-        DiagnosticoLogger.debug('Failed to register sync boxes: ${failure.message}');
+        DiagnosticoLogger.debug(
+          'Failed to register sync boxes: ${failure.message}',
+        );
       },
       (_) {
         DiagnosticoLogger.debug('✅ Sync HiveBoxes registered successfully');
         if (kDebugMode) {
-          final debugInfo = ReceitaAgroStorageInitializer.getDebugInfo(boxRegistry);
-          debugPrint('📦 Boxes registered: ${debugInfo['registered_boxes']}/${debugInfo['expected_boxes']}');
+          final debugInfo = ReceitaAgroStorageInitializer.getDebugInfo(
+            boxRegistry,
+          );
+          debugPrint(
+            '📦 Boxes registered: ${debugInfo['registered_boxes']}/${debugInfo['expected_boxes']}',
+          );
           debugPrint('📋 Missing boxes: ${debugInfo['missing_boxes']}');
         }
       },
     );
   } catch (e) {
     DiagnosticoLogger.debug('Error registering sync boxes', e);
-  }
-
-  try {
-    DiagnosticoLogger.debug('Forcing sync initialization...');
-    await ReceitaAgroSyncConfig.configure();
-    DiagnosticoLogger.debug('Sync initialization completed successfully');
-    SyncDIModule.init(di.sl);
-    await SyncDIModule.initializeSyncService(di.sl);
-
-    // 🔄 Inicializar serviço de sincronização em tempo real
-    DiagnosticoLogger.debug('Initializing realtime sync service...');
-    await ReceitaAgroRealtimeService.instance.initialize();
-    DiagnosticoLogger.debug('Realtime sync service initialized successfully');
-  } catch (e) {
-    DiagnosticoLogger.debug('Sync initialization failed', e);
   }
   if (!kIsWeb) {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -185,6 +187,22 @@ void main() async {
       DiagnosticoLogger.serviceInit('AppDataManager', 'Hive pronto');
     },
   );
+
+  // 🔄 Inicializar Sync DEPOIS que as boxes foram abertas com tipos corretos
+  try {
+    DiagnosticoLogger.debug('Forcing sync initialization...');
+    await ReceitaAgroSyncConfig.configure();
+    DiagnosticoLogger.debug('Sync initialization completed successfully');
+
+    SyncDIModule.init(di.sl);
+    await SyncDIModule.initializeSyncService(di.sl);
+    await ReceitaAgroRealtimeService.instance.initialize();
+
+    DiagnosticoLogger.debug('Realtime sync service initialized successfully');
+  } catch (e) {
+    DiagnosticoLogger.debug('Sync initialization failed', e);
+  }
+
   // 🚀 CARREGAMENTO PRIORIZADO DE DADOS
   // Fase 1: Dados prioritários (bloqueante) - Culturas, Pragas, Fitossanitários
   try {
@@ -281,8 +299,9 @@ Future<void> _initializeFirebaseServices() async {
       'app_initialized',
       parameters: {
         'platform': kIsWeb ? 'web' : 'mobile',
-        'environment':
-            EnvironmentConfig.enableAnalytics ? 'production' : 'development',
+        'environment': EnvironmentConfig.enableAnalytics
+            ? 'production'
+            : 'development',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       },
     );

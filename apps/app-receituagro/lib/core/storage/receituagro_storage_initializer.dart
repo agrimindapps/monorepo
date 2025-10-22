@@ -5,6 +5,8 @@ import 'receituagro_boxes.dart';
 /// Inicializador de storage específico para o app ReceitaAgro
 /// Responsável por registrar todas as boxes necessárias no BoxRegistryService
 class ReceitaAgroStorageInitializer {
+  // Private constructor para classe utilitária (apenas métodos estáticos)
+  ReceitaAgroStorageInitializer._();
   static const String _appId = 'receituagro';
 
   /// Inicializa o storage registrando as boxes específicas do ReceitaAgro
@@ -14,19 +16,37 @@ class ReceitaAgroStorageInitializer {
   ) async {
     try {
       final configurations = ReceitaAgroBoxes.getConfigurations();
+
+      print('🔧 [ReceitaAgroStorage] Iniciando registro de ${configurations.length} boxes...');
+
       for (final config in configurations) {
+        print('🔧 [ReceitaAgroStorage] Registrando box: ${config.name} (persistent: ${config.persistent}, appId: ${config.appId})');
+
         final result = await boxRegistry.registerBox(config);
-        
+
         if (result.isLeft()) {
+          print('❌ [ReceitaAgroStorage] ERRO ao registrar box "${config.name}"');
           return result.fold(
-            (failure) => Left(failure),
+            (failure) {
+              print('❌ [ReceitaAgroStorage] Failure: ${failure.message}');
+              return Left(failure);
+            },
             (_) => const Right(null),
           );
         }
+
+        print('✅ [ReceitaAgroStorage] Box "${config.name}" registrada com sucesso');
       }
+
+      print('✅ [ReceitaAgroStorage] Todas as ${configurations.length} boxes foram registradas!');
+
+      // ✅ REMOVIDO: Abertura manual de boxes de sync
+      // HiveManager abrirá automaticamente com tipo correto quando BaseHiveRepository precisar
+      // Isso elimina race conditions e garante type safety
 
       return const Right(null);
     } catch (e) {
+      print('❌ [ReceitaAgroStorage] Exceção durante inicialização: $e');
       return Left(
         CacheFailure('Erro ao inicializar storage do ReceitaAgro: $e'),
       );

@@ -17,7 +17,7 @@ import 'game_snake/game_snake_page.dart';
 import 'game_soletrando/game_soletrando_page.dart';
 import 'game_sudoku/game_sudoku_page.dart';
 import 'game_tictactoe/game_tictactoe_page.dart';
-import 'game_tower/game_tower_page.dart';
+import '../features/tower/presentation/pages/tower_page.dart';
 
 class MobilePageMain extends StatefulWidget {
   const MobilePageMain({super.key});
@@ -82,7 +82,7 @@ class _MobilePageMainState extends State<MobilePageMain> {
       description: 'Empilhe blocos e construa a torre mais alta possível',
       icon: Icons.architecture,
       color: Colors.amber,
-      page: const TowerStackGame(),
+      page: const TowerPage(),
     ),
     GameInfo(
       title: 'Snake',

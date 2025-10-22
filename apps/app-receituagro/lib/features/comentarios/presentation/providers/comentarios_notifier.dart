@@ -32,7 +32,14 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     _deleteComentarioUseCase = di.sl<DeleteComentarioUseCase>();
     _errorHandler = ErrorHandlerService();
 
-    return ComentariosState.initial();
+    // ✅ CORREÇÃO: Carregar comentários automaticamente no build
+    // Isso garante que a página sempre tenha dados na inicialização
+    final comentarios = await _getComentariosUseCase();
+
+    return ComentariosState.initial().copyWith(
+      comentarios: comentarios,
+      isLoading: false,
+    );
   }
 
   /// Initialize provider and load data

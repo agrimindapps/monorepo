@@ -7,7 +7,7 @@ import '../models/favorito_item_hive.dart';
 class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
   FavoritosHiveRepository() : super(
     hiveManager: GetIt.instance<IHiveManager>(),
-    boxName: 'receituagro_user_favorites',
+    boxName: 'favoritos',  // ✅ CORRIGIDO: Match com ReceitaAgroBoxes e sync config
   );
 
 

@@ -14,16 +14,20 @@ class HiveBoxLoaderService {
   /// Carrega dados de uma HiveBox com estratégia segura: abrir → ler → fechar
   ///
   /// Isso evita erros de "box já aberta" e trata cenários:
-  /// - Box já aberta (usa instância existente)
+  /// - Box já aberta (usa instância existente sem reabrir)
   /// - Box fechada (abre, lê e fecha)
   /// - Erros de leitura individual (pula registro com erro)
   static Future<List<DatabaseRecord>> loadBoxDataSafely(String boxKey) async {
     try {
-      // Tenta acessar box existente primeiro
-      var box = Hive.box<dynamic>(boxKey);
-      final wasAlreadyOpen = box.isOpen;
+      // Verificar se box já está aberta ANTES de tentar abrir
+      final wasAlreadyOpen = Hive.isBoxOpen(boxKey);
 
-      if (!wasAlreadyOpen) {
+      // Se já está aberta, usar instância existente sem especificar tipo
+      // para evitar conflito com boxes tipadas (ex: Box<ComentarioHive>)
+      Box<dynamic> box;
+      if (wasAlreadyOpen) {
+        box = Hive.box<dynamic>(boxKey);
+      } else {
         box = await Hive.openBox<dynamic>(boxKey);
       }
 

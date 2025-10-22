@@ -13,18 +13,23 @@ import '../data/models/pragas_inf_hive.dart';
 import '../data/models/premium_status_hive.dart';
 
 /// Registry centralizado para registro de todos os adapters Hive
-/// Responsável por registrar todos os type adapters necessários
+/// ✅ PADRÃO APP-PLANTIS: Apenas registra adapters, NÃO abre boxes
+/// BoxRegistryService é responsável por abrir/fechar boxes
 class HiveAdapterRegistry {
+  // Private constructor para classe utilitária (apenas métodos estáticos)
+  HiveAdapterRegistry._();
+
   static bool _isRegistered = false;
 
   /// Registra todos os adapters Hive necessários
+  /// ✅ PADRÃO APP-PLANTIS: Hive.initFlutter() já foi chamado no main.dart
   static Future<void> registerAdapters() async {
     if (_isRegistered) {
       return;
     }
 
     try {
-      await Hive.initFlutter();
+      // ✅ Hive.initFlutter() já foi executado no main.dart
       Hive.registerAdapter(CulturaHiveAdapter());
       Hive.registerAdapter(PragasHiveAdapter());
       Hive.registerAdapter(FitossanitarioHiveAdapter());
@@ -46,7 +51,7 @@ class HiveAdapterRegistry {
   /// Verifica se os adapters já foram registrados
   static bool get isRegistered => _isRegistered;
 
-  /// Lista de boxes que serão criadas
+  /// Lista de boxes para referência (não mais usado para abrir boxes)
   static const Map<String, String> boxNames = {
     'culturas': 'receituagro_culturas',
     'pragas': 'receituagro_pragas',
@@ -60,91 +65,7 @@ class HiveAdapterRegistry {
     'favoritos': 'receituagro_user_favorites',
   };
 
-  /// Abre todas as boxes necessárias
-  static Future<void> openBoxes() async {
-    try {
-      await Future.wait([
-        Hive.openBox<CulturaHive>(boxNames['culturas']!),
-        Hive.openBox<PragasHive>(boxNames['pragas']!),
-        Hive.openBox<FitossanitarioHive>(boxNames['fitossanitarios']!),
-        Hive.openBox<DiagnosticoHive>(boxNames['diagnosticos']!),
-        Hive.openBox<FitossanitarioInfoHive>(boxNames['fitossanitarios_info']!),
-        Hive.openBox<PlantasInfHive>(boxNames['plantas_inf']!),
-        Hive.openBox<PragasInfHive>(boxNames['pragas_inf']!),
-        Hive.openBox<PremiumStatusHive>(boxNames['premium_status']!),
-        Hive.openBox<ComentarioHive>(boxNames['comentarios']!),
-        Hive.openBox<FavoritoItemHive>(boxNames['favoritos']!),
-      ]);
-      
-    } catch (e) {
-      throw Exception('Erro ao abrir boxes Hive: $e');
-    }
-  }
-
-  /// Fecha todas as boxes
-  static Future<void> closeBoxes() async {
-    try {
-      await Future.wait([
-        _closeBoxIfOpen(boxNames['culturas']!),
-        _closeBoxIfOpen(boxNames['pragas']!),
-        _closeBoxIfOpen(boxNames['fitossanitarios']!),
-        _closeBoxIfOpen(boxNames['diagnosticos']!),
-        _closeBoxIfOpen(boxNames['fitossanitarios_info']!),
-        _closeBoxIfOpen(boxNames['plantas_inf']!),
-        _closeBoxIfOpen(boxNames['pragas_inf']!),
-        _closeBoxIfOpen(boxNames['premium_status']!),
-        _closeBoxIfOpen(boxNames['comentarios']!),
-        _closeBoxIfOpen(boxNames['favoritos']!),
-      ]);
-      
-    } catch (e) {
-      throw Exception('Erro ao fechar boxes Hive: $e');
-    }
-  }
-
-  /// Helper para fechar box se estiver aberta
-  static Future<void> _closeBoxIfOpen(String boxName) async {
-    if (Hive.isBoxOpen(boxName)) {
-      await Hive.box<dynamic>(boxName).close();
-    }
-  }
-
-  /// Limpa todas as boxes (útil para desenvolvimento)
-  static Future<void> clearAllBoxes() async {
-    try {
-      if (Hive.isBoxOpen(boxNames['culturas']!)) {
-        await Hive.box<CulturaHive>(boxNames['culturas']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['pragas']!)) {
-        await Hive.box<PragasHive>(boxNames['pragas']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['fitossanitarios']!)) {
-        await Hive.box<FitossanitarioHive>(boxNames['fitossanitarios']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['diagnosticos']!)) {
-        await Hive.box<DiagnosticoHive>(boxNames['diagnosticos']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['fitossanitarios_info']!)) {
-        await Hive.box<FitossanitarioInfoHive>(boxNames['fitossanitarios_info']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['plantas_inf']!)) {
-        await Hive.box<PlantasInfHive>(boxNames['plantas_inf']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['pragas_inf']!)) {
-        await Hive.box<PragasInfHive>(boxNames['pragas_inf']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['premium_status']!)) {
-        await Hive.box<PremiumStatusHive>(boxNames['premium_status']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['comentarios']!)) {
-        await Hive.box<ComentarioHive>(boxNames['comentarios']!).clear();
-      }
-      if (Hive.isBoxOpen(boxNames['favoritos']!)) {
-        await Hive.box<FavoritoItemHive>(boxNames['favoritos']!).clear();
-      }
-      
-    } catch (e) {
-      throw Exception('Erro ao limpar boxes Hive: $e');
-    }
-  }
+  // ❌ REMOVIDO: openBoxes() - BoxRegistryService gerencia abertura
+  // ❌ REMOVIDO: closeBoxes() - BoxRegistryService gerencia fechamento
+  // ❌ REMOVIDO: clearAllBoxes() - Use BoxRegistryService para operações de box
 }

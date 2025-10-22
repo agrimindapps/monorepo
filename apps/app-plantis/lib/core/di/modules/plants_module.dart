@@ -13,7 +13,7 @@ abstract class PlantsDIModule {
     );
 
     sl.registerLazySingleton<PlantsRemoteDatasource>(
-      () => PlantsRemoteDatasourceImpl(firestore: sl()),
+      () => PlantsRemoteDatasourceImpl(firestore: sl(), rateLimiter: sl()),
     );
     sl.registerLazySingleton<PlantTasksLocalDatasource>(
       () => PlantTasksLocalDatasourceImpl(),

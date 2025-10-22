@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../const/environment_const.dart' as local_env;
+import '../../../../const/environment_const.dart' as app_env;
 import '../../../../core/services/tts_service.dart';
 import '../../../../core/widgets/appbar.dart';
 import '../../domain/entities/termo.dart';
@@ -12,10 +12,7 @@ import '../providers/termos_providers.dart';
 class TermosPage extends ConsumerStatefulWidget {
   final bool favoritePage;
 
-  const TermosPage({
-    super.key,
-    required this.favoritePage,
-  });
+  const TermosPage({super.key, required this.favoritePage});
 
   @override
   ConsumerState<TermosPage> createState() => _TermosPageState();
@@ -25,8 +22,15 @@ class _TermosPageState extends ConsumerState<TermosPage> {
   final TextEditingController _searchController = TextEditingController();
   final _unfocusNode = FocusNode();
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final _analyticsService = FirebaseAnalyticsService();
-  final _ttsService = TTSService();
+  late final FirebaseAnalyticsService _analyticsService;
+  late final TtsService _ttsService;
+
+  @override
+  void initState() {
+    super.initState();
+    _analyticsService = FirebaseAnalyticsService();
+    _ttsService = TtsService();
+  }
 
   String _searchQuery = '';
 
@@ -40,9 +44,22 @@ class _TermosPageState extends ConsumerState<TermosPage> {
   @override
   Widget build(BuildContext context) {
     // Watch termos based on whether it's favorites page or all termos
-    final termosAsync = widget.favoritePage
-        ? ref.watch(favoritosListProvider)
-        : ref.watch(filteredTermosProvider(_searchQuery));
+    final termosAsync = ref.watch(termosNotifierProvider);
+
+    // Filter based on search query
+    final filteredTermos = termosAsync.whenData((termos) {
+      if (widget.favoritePage) {
+        return termos.where((termo) => termo.favorito).toList();
+      } else if (_searchQuery.isEmpty) {
+        return termos;
+      } else {
+        final lowerQuery = _searchQuery.toLowerCase();
+        return termos.where((termo) {
+          return termo.termo.toLowerCase().contains(lowerQuery) ||
+              termo.descricao.toLowerCase().contains(lowerQuery);
+        }).toList();
+      }
+    });
 
     return Scaffold(
       key: scaffoldKey,
@@ -83,7 +100,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
 
           // Termos list
           Expanded(
-            child: termosAsync.when(
+            child: filteredTermos.when(
               data: (termos) {
                 if (termos.isEmpty) {
                   return Center(
@@ -123,7 +140,11 @@ class _TermosPageState extends ConsumerState<TermosPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Erro ao carregar termos',
@@ -145,40 +166,28 @@ class _TermosPageState extends ConsumerState<TermosPage> {
   }
 
   Widget _buildTermoCard(Termo termo) {
-    final isFavorito = ref.watch(isFavoritoProvider(termo.id));
-
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: ExpansionTile(
         title: Text(
           termo.termo,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         subtitle: termo.categoria.isNotEmpty
             ? Text(
                 termo.categoria,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               )
             : null,
         trailing: IconButton(
           icon: Icon(
-            isFavorito.value ?? false ? Icons.star : Icons.star_border,
-            color: isFavorito.value ?? false ? Colors.amber : null,
+            termo.favorito ? Icons.star : Icons.star_border,
+            color: termo.favorito ? Colors.amber : null,
           ),
           onPressed: () async {
-            await ref
-                .read(toggleFavoritoUseCaseProvider)
-                .call(termo.id);
-            // Refresh favorites if on favorites page
-            if (widget.favoritePage) {
-              ref.invalidate(favoritosListProvider);
-            }
+            await ref.read(toggleFavoritoUseCaseProvider).call(termo.id);
+            // Refresh termos list to update favorite status
+            ref.invalidate(termosNotifierProvider);
           },
         ),
         children: [
@@ -187,10 +196,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  termo.descricao,
-                  style: const TextStyle(fontSize: 14),
-                ),
+                Text(termo.descricao, style: const TextStyle(fontSize: 14)),
                 const SizedBox(height: 16),
                 // Action buttons
                 Row(
@@ -200,9 +206,11 @@ class _TermosPageState extends ConsumerState<TermosPage> {
                     IconButton(
                       icon: const Icon(Icons.volume_up),
                       onPressed: () async {
-                        await _ttsService.speak('${termo.termo}. ${termo.descricao}');
-                        _analyticsService.logEvent(
-                          name: 'tts_termo',
+                        await _ttsService.speak(
+                          '${termo.termo}. ${termo.descricao}',
+                        );
+                        await _analyticsService.logEvent(
+                          'tts_termo',
                           parameters: {'termo_id': termo.id},
                         );
                       },
@@ -226,7 +234,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
                               const SnackBar(content: Text('Copiado!')),
                             );
                             _analyticsService.logEvent(
-                              name: 'copy_termo',
+                              'copy_termo',
                               parameters: {'termo_id': termo.id},
                             );
                           },
@@ -249,7 +257,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
                           },
                           (_) {
                             _analyticsService.logEvent(
-                              name: 'share_termo',
+                              'share_termo',
                               parameters: {'termo_id': termo.id},
                             );
                           },
@@ -258,7 +266,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
                       tooltip: 'Compartilhar',
                     ),
                     // External link button (if applicable)
-                    if (local_env.hasExternalLinks)
+                    if (app_env.Environment.hasExternalLinks)
                       IconButton(
                         icon: const Icon(Icons.open_in_new),
                         onPressed: () async {
@@ -273,7 +281,7 @@ class _TermosPageState extends ConsumerState<TermosPage> {
                             },
                             (_) {
                               _analyticsService.logEvent(
-                                name: 'open_external_termo',
+                                'open_external_termo',
                                 parameters: {'termo_id': termo.id},
                               );
                             },

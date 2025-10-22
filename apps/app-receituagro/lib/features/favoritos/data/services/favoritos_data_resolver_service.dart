@@ -1,14 +1,12 @@
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' show GetIt;
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
-import '../../../../core/errors/failures.dart';
 import '../../domain/entities/favorito_entity.dart';
 
 /// Service especializado para resolver dados de favoritos
@@ -33,8 +31,7 @@ class FavoritosDataResolverService {
             tipo: tipo,
             id: id,
             getRepository: () => GetIt.instance<FitossanitarioHiveRepository>(),
-            matcher: (item) =>
-                item.idReg == id || item.objectId == id,
+            matcher: (item) => item.idReg == id || item.objectId == id,
             extractor: (item) => {
               'nomeComum': item.nomeComum,
               'ingredienteAtivo': item.ingredienteAtivo ?? '',
@@ -54,8 +51,7 @@ class FavoritosDataResolverService {
             tipo: tipo,
             id: id,
             getRepository: () => GetIt.instance<PragasHiveRepository>(),
-            matcher: (item) =>
-                item.idReg == id || item.objectId == id,
+            matcher: (item) => item.idReg == id || item.objectId == id,
             extractor: (item) => {
               'nomeComum': item.nomeComum,
               'nomeCientifico': item.nomeCientifico,
@@ -79,8 +75,7 @@ class FavoritosDataResolverService {
             tipo: tipo,
             id: id,
             getRepository: () => GetIt.instance<CulturaHiveRepository>(),
-            matcher: (item) =>
-                item.idReg == id || item.objectId == id,
+            matcher: (item) => item.idReg == id || item.objectId == id,
             extractor: (item) => {
               'nomeCultura': item.cultura,
               'descricao': item.cultura,
@@ -95,10 +90,7 @@ class FavoritosDataResolverService {
 
         default:
           if (kDebugMode) {
-            developer.log(
-              'Tipo desconhecido: $tipo',
-              name: 'DataResolver',
-            );
+            developer.log('Tipo desconhecido: $tipo', name: 'DataResolver');
           }
           return null;
       }
@@ -120,7 +112,9 @@ class FavoritosDataResolverService {
   /// - Nome do defensivo (via fkIdDefensivo)
   /// - Nome da praga (via fkIdPraga)
   /// - Nome da cultura (via fkIdCultura)
-  Future<Map<String, dynamic>?> _resolveDiagnosticoWithLookups(String id) async {
+  Future<Map<String, dynamic>?> _resolveDiagnosticoWithLookups(
+    String id,
+  ) async {
     if (kDebugMode) {
       developer.log(
         'Resolvendo diagnóstico com lookups: id=$id',
@@ -133,33 +127,45 @@ class FavoritosDataResolverService {
       final diagRepo = GetIt.instance<DiagnosticoHiveRepository>();
       final diagResult = await diagRepo.getAll();
 
-      // Handle both Result<T> (legacy) and direct List responses
-      List<dynamic> diagData;
-      if (diagResult is List) {
-        diagData = diagResult;
-      } else {
-        // Legacy Result<T> handling
-        final resultData = diagResult as dynamic;
-        if (resultData.isError) {
-          if (kDebugMode) {
-            developer.log('Erro ao buscar diagnóstico', name: 'DataResolver');
-          }
+      // Handle Result<T> from dartz - extract data or return fallback
+      late List<dynamic> diagData;
+
+      // Try casting to Result first (dartz Either or Result)
+      final resultDynamic = diagResult as dynamic;
+      if (resultDynamic.isRight != null || resultDynamic.isLeft != null) {
+        // It's a dartz Either/Result - fold it
+        final foldedData =
+            resultDynamic.fold(
+                  (dynamic failure) => <dynamic>[],
+                  (dynamic data) => data as List<dynamic>,
+                )
+                as List<dynamic>;
+        diagData = foldedData;
+        if (diagData.isEmpty) {
           return _getDiagnosticoFallback(id);
         }
-        diagData = resultData.data as List;
+      } else {
+        // Direct list response
+        diagData = diagResult as List<dynamic>;
       }
 
-      final diagnostico = diagData.firstWhere(
-        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
-        orElse: () => throw Exception('Diagnóstico não encontrado'),
-      ) as dynamic;
+      final diagnostico =
+          diagData.firstWhere(
+                (item) =>
+                    (item as dynamic).idReg == id ||
+                    (item as dynamic).objectId == id,
+                orElse: () => throw Exception('Diagnóstico não encontrado'),
+              )
+              as dynamic;
 
       // 2. Buscar nome do defensivo se nomeDefensivo estiver vazio
       String nomeDefensivo = (diagnostico.nomeDefensivo as String?) ?? '';
       final fkIdDefensivo = (diagnostico.fkIdDefensivo as String?) ?? '';
       if (nomeDefensivo.isEmpty && fkIdDefensivo.isNotEmpty) {
         final defensivoData = await _lookupDefensivo(fkIdDefensivo);
-        nomeDefensivo = defensivoData?['nomeComum'] as String? ?? 'Defensivo não encontrado';
+        nomeDefensivo =
+            defensivoData?['nomeComum'] as String? ??
+            'Defensivo não encontrado';
       }
 
       // 3. Buscar nome da praga se nomePraga estiver vazio
@@ -167,7 +173,8 @@ class FavoritosDataResolverService {
       final fkIdPraga = (diagnostico.fkIdPraga as String?) ?? '';
       if (nomePraga.isEmpty && fkIdPraga.isNotEmpty) {
         final pragaData = await _lookupPraga(fkIdPraga);
-        nomePraga = pragaData?['nomeComum'] as String? ?? 'Praga não encontrada';
+        nomePraga =
+            pragaData?['nomeComum'] as String? ?? 'Praga não encontrada';
       }
 
       // 4. Buscar nome da cultura se nomeCultura estiver vazio
@@ -175,14 +182,17 @@ class FavoritosDataResolverService {
       final fkIdCultura = (diagnostico.fkIdCultura as String?) ?? '';
       if (nomeCultura.isEmpty && fkIdCultura.isNotEmpty) {
         final culturaData = await _lookupCultura(fkIdCultura);
-        nomeCultura = culturaData?['nomeCultura'] as String? ?? 'Cultura não encontrada';
+        nomeCultura =
+            culturaData?['nomeCultura'] as String? ?? 'Cultura não encontrada';
       }
 
       // 5. Montar dosagem
       final dsMin = (diagnostico.dsMin as String?) ?? '0';
       final dsMax = (diagnostico.dsMax as String?) ?? '0';
       final um = (diagnostico.um as String?) ?? '';
-      final dosagem = um.isNotEmpty ? '$dsMin - $dsMax $um / 100 Lt' : '$dsMin - $dsMax';
+      final dosagem = um.isNotEmpty
+          ? '$dsMin - $dsMax $um / 100 Lt'
+          : '$dsMin - $dsMax';
 
       final result = {
         'nomeDefensivo': nomeDefensivo,
@@ -192,10 +202,7 @@ class FavoritosDataResolverService {
       };
 
       if (kDebugMode) {
-        developer.log(
-          'Diagnóstico resolvido: $result',
-          name: 'DataResolver',
-        );
+        developer.log('Diagnóstico resolvido: $result', name: 'DataResolver');
       }
 
       return result;
@@ -218,7 +225,8 @@ class FavoritosDataResolverService {
       final data = await repo.getAll() as List;
 
       final item = data.firstWhere(
-        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        (item) =>
+            (item as dynamic).idReg == id || (item as dynamic).objectId == id,
         orElse: () => null,
       );
 
@@ -244,7 +252,8 @@ class FavoritosDataResolverService {
       final data = await repo.getAll() as List;
 
       final item = data.firstWhere(
-        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        (item) =>
+            (item as dynamic).idReg == id || (item as dynamic).objectId == id,
         orElse: () => null,
       );
 
@@ -270,7 +279,8 @@ class FavoritosDataResolverService {
       final data = await repo.getAll() as List;
 
       final item = data.firstWhere(
-        (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
+        (item) =>
+            (item as dynamic).idReg == id || (item as dynamic).objectId == id,
         orElse: () => null,
       );
 
@@ -319,23 +329,25 @@ class FavoritosDataResolverService {
       final repository = getRepository();
       final result = await repository.getAll();
 
-      // Handle both Result<T> (legacy) and direct List responses
-      List<dynamic> data;
-      if (result is List) {
-        data = result;
-      } else {
-        // Legacy Result<T> handling
-        final resultData = result as dynamic;
-        if (resultData.isError) {
-          if (kDebugMode) {
-            developer.log(
-              'Erro ao buscar dados do repositório: ${resultData.error}',
-              name: 'DataResolver',
-            );
-          }
+      // Handle Result<T> from dartz - extract data or return fallback
+      late List<dynamic> data;
+
+      final resultDynamic = result as dynamic;
+      if (resultDynamic.isRight != null || resultDynamic.isLeft != null) {
+        // It's a dartz Either/Result - fold it
+        final foldedData =
+            resultDynamic.fold(
+                  (dynamic failure) => <dynamic>[],
+                  (dynamic listData) => listData as List<dynamic>,
+                )
+                as List<dynamic>;
+        data = foldedData;
+        if (data.isEmpty) {
           return fallbackData;
         }
-        data = resultData.data as List;
+      } else {
+        // Direct list response
+        data = result as List<dynamic>;
       }
 
       final item = data.firstWhere(
@@ -344,10 +356,7 @@ class FavoritosDataResolverService {
       );
 
       if (kDebugMode) {
-        developer.log(
-          'Item encontrado com sucesso',
-          name: 'DataResolver',
-        );
+        developer.log('Item encontrado com sucesso', name: 'DataResolver');
       }
 
       return extractor(item);

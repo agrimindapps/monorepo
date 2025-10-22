@@ -34,7 +34,7 @@ class Environment {
     'plantas',
     'insetos',
     'doenças',
-    'plantas invasoras'
+    'plantas invasoras',
   ];
 
   String linkLojaApple = 'https://apps.apple.com/br/app/nutrituti/id967092996';
@@ -106,4 +106,7 @@ class Environment {
   String supabaseUrl = 'https://fkjakafxqciukoesqvkp.supabase.co';
   String supabaseAnnoKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZramFrYWZ4cWNpdWtvZXNxdmtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc0OTE5ODYsImV4cCI6MjA0MzA2Nzk4Nn0.f8O9na_WhlwGJsX1EXu8E6yu0MKJHsS7dSa0HO8Ic3M';
+
+  /// Whether external links are enabled in this environment
+  static const bool hasExternalLinks = true;
 }

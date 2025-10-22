@@ -1,13 +1,7 @@
 import 'package:core/core.dart';
 
-part 'sync_queue_item.g.dart';
-
 /// Sync operation type
-enum SyncOperationType {
-  create,
-  update,
-  delete,
-}
+enum SyncOperationType { create, update, delete }
 
 /// Item in the sync queue representing a pending operation
 @HiveType(typeId: 109)
@@ -80,7 +74,9 @@ class SyncQueueItem extends HiveObject {
     final backoffMinutes = [1, 5, 15];
     if (retryCount >= backoffMinutes.length) return false;
 
-    final minutesSinceLastRetry = DateTime.now().difference(lastRetryAt!).inMinutes;
+    final minutesSinceLastRetry = DateTime.now()
+        .difference(lastRetryAt!)
+        .inMinutes;
     return minutesSinceLastRetry >= backoffMinutes[retryCount];
   }
 

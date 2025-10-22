@@ -12,7 +12,7 @@ class SpacesModule {
     );
 
     sl.registerLazySingleton<SpacesRemoteDatasource>(
-      () => SpacesRemoteDatasourceImpl(firestore: sl()),
+      () => SpacesRemoteDatasourceImpl(firestore: sl(), rateLimiter: sl()),
     );
     sl.registerLazySingleton<SpacesRepository>(
       () => SpacesRepositoryImpl(

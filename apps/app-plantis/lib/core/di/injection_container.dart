@@ -46,6 +46,7 @@ import '../services/interfaces/i_plant_notification_manager.dart';
 import '../services/interfaces/i_task_notification_manager.dart';
 import '../services/notification_manager.dart';
 import '../services/plantis_notification_service.dart';
+import '../services/rate_limiter_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/task_notification_service.dart';
 import '../services/url_launcher_service.dart';
@@ -129,6 +130,7 @@ void _initCoreServices() {
       remindLaunches: AppConstants.appRatingRemindLaunches,
     ),
   );
+  sl.registerLazySingleton(() => RateLimiterService());
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
   sl.registerLazySingleton(() => NotificationManager());

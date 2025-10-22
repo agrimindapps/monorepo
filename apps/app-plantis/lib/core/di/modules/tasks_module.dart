@@ -63,7 +63,7 @@ class TasksModule {
       () => TaskHistoryLocalDataSourceImpl(sl<ILocalStorageRepository>()),
     );
     sl.registerLazySingleton<TasksRemoteDataSource>(
-      () => TasksRemoteDataSourceImpl(),
+      () => TasksRemoteDataSourceImpl(rateLimiter: sl()),
     );
 
     sl.registerLazySingleton<TasksLocalDataSource>(

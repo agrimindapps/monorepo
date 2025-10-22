@@ -16,31 +16,32 @@ class ShadcnStyle {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return isDark ? const Color(0xFFFFFFFF) : const Color(0xFF0F172A);
   }
+
+  // Static colors
   static const mutedTextColor = Colors.grey;
   static const focusedBorderColor = Color(0xFF94A3B8);
   static const primaryColor = Color(0xFF020817);
+  static const surfaceColor = Color(0xFFF8FAFC);
 
   // Border Radius
   static final borderRadius = BorderRadius.circular(6);
   static final dialogBorderRadius = BorderRadius.circular(8);
 
-  // Text Styles
-  static final titleStyle = TextStyle(
+  // Text Styles - Context-dependent
+  static TextStyle titleStyle(BuildContext context) => TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: textColor,
+    color: textColor(context),
   );
 
-  static final subtitleStyle = TextStyle(
+  static TextStyle subtitleStyle(BuildContext context) => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    color: textColor,
+    color: textColor(context),
   );
 
-  static final inputStyle = TextStyle(
-    fontSize: 14,
-    color: textColor,
-  );
+  static TextStyle inputStyle(BuildContext context) =>
+      TextStyle(fontSize: 14, color: textColor(context));
 
   static const labelStyle = TextStyle(
     color: mutedTextColor,
@@ -48,10 +49,10 @@ class ShadcnStyle {
     fontWeight: FontWeight.w500,
   );
 
-  static final sectionHeaderStyle = TextStyle(
+  static TextStyle sectionHeaderStyle(BuildContext context) => TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w500,
-    color: textColor,
+    color: textColor(context),
   );
 
   static const focusColor = Color(0xFF000000);
@@ -59,6 +60,7 @@ class ShadcnStyle {
   // Input Decoration
   static InputDecoration inputDecoration({
     required String label,
+    required BuildContext context,
     String? hint,
     String? prefix,
     String? suffix,
@@ -86,77 +88,72 @@ class ShadcnStyle {
       suffixIcon: suffixIcon,
       counterText: showCounter ? null : '',
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      // filled: true,
-      // fillColor: backgroundColor,
-      // border: inputBorder,
-      // enabledBorder: inputBorder,
-      // focusedBorder: inputBorderFocused,
-      // errorBorder: inputBorderError,
-      // focusedErrorBorder: inputBorderError,
     );
   }
 
   // Borders
-  static final inputBorder = OutlineInputBorder(
-    borderRadius: borderRadius,
-    borderSide: BorderSide(color: borderColor),
+  static OutlineInputBorder inputBorder(BuildContext context) =>
+      OutlineInputBorder(
+        borderRadius: borderRadius,
+        borderSide: BorderSide(color: borderColor(context)),
+      );
+
+  static const OutlineInputBorder inputBorderFocused = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(6)),
+    borderSide: BorderSide(color: focusedBorderColor, width: 1.5),
   );
 
-  static final inputBorderFocused = OutlineInputBorder(
-    borderRadius: borderRadius,
-    borderSide: const BorderSide(color: focusedBorderColor, width: 1.5),
-  );
-
-  static final inputBorderError = OutlineInputBorder(
-    borderRadius: borderRadius,
-    borderSide: const BorderSide(color: Colors.red, width: 1),
+  static const OutlineInputBorder inputBorderError = OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(6)),
+    borderSide: BorderSide(color: Colors.red, width: 1),
   );
 
   // Button Styles
-  static ButtonStyle textButtonStyle = TextButton.styleFrom(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    shape: RoundedRectangleBorder(
-      borderRadius: borderRadius,
-      side: BorderSide(color: borderColor),
-    ),
-    foregroundColor: textColor,
-  );
+  static ButtonStyle textButtonStyle(BuildContext context) =>
+      TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: borderRadius,
+          side: BorderSide(color: borderColor(context)),
+        ),
+        foregroundColor: textColor(context),
+      );
 
-  static ButtonStyle primaryButtonStyle = TextButton.styleFrom(
-    foregroundColor: Colors.white,
-    backgroundColor: primaryColor,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    shape: RoundedRectangleBorder(
-      borderRadius: borderRadius,
-    ),
-  );
+  static ButtonStyle primaryButtonStyle(BuildContext context) =>
+      TextButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: primaryColor,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(6)),
+        ),
+      );
 
   // Dialog Styles
-  static DialogTheme dialogTheme = DialogTheme(
-    backgroundColor: backgroundColor,
+  static DialogTheme dialogTheme(BuildContext context) => DialogTheme(
+    backgroundColor: backgroundColor(context),
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: dialogBorderRadius,
-      side: BorderSide(color: borderColor),
+      side: BorderSide(color: borderColor(context)),
     ),
   );
 
   // Dialog Container Decoration
-  static BoxDecoration dialogContainerDecoration = BoxDecoration(
-    color: backgroundColor,
-    borderRadius: dialogBorderRadius,
-  );
-
-  static var labelColor;
+  static BoxDecoration dialogContainerDecoration(BuildContext context) =>
+      BoxDecoration(
+        color: backgroundColor(context),
+        borderRadius: dialogBorderRadius,
+      );
 
   // Padding Values
   static EdgeInsets getDialogPadding(bool isSmallScreen) => EdgeInsets.fromLTRB(
-        isSmallScreen ? 12 : 16,
-        isSmallScreen ? 12 : 16,
-        isSmallScreen ? 12 : 16,
-        0,
-      );
+    isSmallScreen ? 12 : 16,
+    isSmallScreen ? 12 : 16,
+    isSmallScreen ? 12 : 16,
+    0,
+  );
 
   static EdgeInsets getDialogInsetPadding(bool isSmallScreen) =>
       EdgeInsets.symmetric(
@@ -173,7 +170,11 @@ class ShadcnStyle {
       );
 
   // Section Header
-  static Widget buildSectionHeader(String title, {IconData? icon}) {
+  static Widget buildSectionHeader(
+    String title, {
+    IconData? icon,
+    BuildContext? context,
+  }) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
       child: Row(
@@ -182,14 +183,27 @@ class ShadcnStyle {
             Icon(icon, size: 16, color: mutedTextColor),
             const SizedBox(width: 8),
           ],
-          Text(title, style: sectionHeaderStyle),
+          Text(
+            title,
+            style: context != null
+                ? sectionHeaderStyle(context)
+                : const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: mutedTextColor,
+                  ),
+          ),
         ],
       ),
     );
   }
 
   // Dialog Title
-  static Widget buildDialogTitle(String title, bool isSmallScreen) {
+  static Widget buildDialogTitle(
+    String title,
+    bool isSmallScreen, {
+    required BuildContext context,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -206,81 +220,82 @@ class ShadcnStyle {
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: titleStyle,
+                  style: titleStyle(context),
                 ),
               ),
             ],
           ),
         ),
-        Divider(color: borderColor),
+        Divider(color: borderColor(context)),
       ],
     );
   }
 
-  static final sliderTheme = SliderThemeData(
+  static SliderThemeData sliderTheme(BuildContext context) => SliderThemeData(
     trackHeight: 8.0,
-    activeTrackColor: textColor, // Changed from primaryColor
-    inactiveTrackColor: borderColor,
-    thumbColor: textColor, // Changed from primaryColor
-    overlayColor: textColor.withOpacity(0.12), // Changed from primaryColor
+    activeTrackColor: textColor(context),
+    inactiveTrackColor: borderColor(context),
+    thumbColor: textColor(context),
+    overlayColor: textColor(context).withOpacity(0.12),
     tickMarkShape: const RoundSliderTickMarkShape(),
-    valueIndicatorColor: textColor, // Changed from primaryColor
+    valueIndicatorColor: textColor(context),
     valueIndicatorTextStyle: TextStyle(
-      color: backgroundColor,
+      color: backgroundColor(context),
       fontSize: 14,
     ),
   );
 
-  static final chartBarColor = textColor.withOpacity(0.9);
-  static final chartLineColor = textColor.withOpacity(0.9);
-  static final chartAreaColor = textColor.withOpacity(0.1);
+  static Color chartBarColor(BuildContext context) =>
+      textColor(context).withOpacity(0.9);
+  static Color chartLineColor(BuildContext context) =>
+      textColor(context).withOpacity(0.9);
+  static Color chartAreaColor(BuildContext context) =>
+      textColor(context).withOpacity(0.1);
 
   // Dropdown Styles
-  static final dropdownDecoration = InputDecoration(
-    labelStyle: TextStyle(color: labelColor),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
-      borderSide: BorderSide(color: borderColor),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
-      borderSide: BorderSide(color: borderColor),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(6),
-      borderSide: const BorderSide(color: focusedBorderColor, width: 1.5),
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    filled: true,
-    fillColor: backgroundColor,
-  );
+  static InputDecoration dropdownDecoration(BuildContext context) =>
+      InputDecoration(
+        labelStyle: labelStyle,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: borderColor(context)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: borderColor(context)),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(6)),
+          borderSide: BorderSide(color: focusedBorderColor, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        filled: true,
+        fillColor: backgroundColor(context),
+      );
 
-  static final segmentedButtonTheme = ButtonStyle(
-    backgroundColor: WidgetStateProperty.resolveWith<Color>(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.selected)) {
-          return textColor;
-        }
-        return backgroundColor;
-      },
-    ),
-    foregroundColor: WidgetStateProperty.resolveWith<Color>(
-      (Set<WidgetState> states) {
-        if (states.contains(WidgetState.selected)) {
-          return backgroundColor;
-        }
-        return textColor;
-      },
-    ),
-    side: WidgetStateProperty.all(
-      BorderSide(color: borderColor),
-    ),
+  static ButtonStyle segmentedButtonTheme(BuildContext context) => ButtonStyle(
+    backgroundColor: WidgetStateProperty.resolveWith<Color>((
+      Set<WidgetState> states,
+    ) {
+      if (states.contains(WidgetState.selected)) {
+        return textColor(context);
+      }
+      return backgroundColor(context);
+    }),
+    foregroundColor: WidgetStateProperty.resolveWith<Color>((
+      Set<WidgetState> states,
+    ) {
+      if (states.contains(WidgetState.selected)) {
+        return backgroundColor(context);
+      }
+      return textColor(context);
+    }),
+    side: WidgetStateProperty.all(BorderSide(color: borderColor(context))),
     padding: WidgetStateProperty.all(
       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     ),
   );
-
-  // static const borderColor = Color(0xFFE2E8F0); // Slate 200
-  // static const focusedBorderColor = Color(0xFF94A3B8); // Slate 400
-  static const surfaceColor = Color(0xFFF8FAFC); // Slate 50
 }

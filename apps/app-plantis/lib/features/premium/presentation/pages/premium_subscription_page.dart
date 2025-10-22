@@ -48,10 +48,7 @@ class _PremiumSubscriptionPageState
 
   @override
   Widget build(BuildContext context) {
-    final premiumState = ref.watch(premiumNotifierProvider);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showMessages(context, premiumState);
-    });
+    final premiumAsyncState = ref.watch(premiumNotifierProvider);
 
     return Scaffold(
       backgroundColor: PlantisColors.primary,
@@ -72,12 +69,25 @@ class _PremiumSubscriptionPageState
             children: [
               _buildHeader(context),
               Expanded(
-                child:
-                    premiumState.isLoading
-                        ? _buildLoadingView()
-                        : premiumState.isPremium
+                child: premiumAsyncState.when(
+                  loading: () => _buildLoadingView(),
+                  error: (error, stackTrace) => Center(
+                    child: Text(
+                      'Erro ao carregar premium\n$error',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  data: (premiumState) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _showMessages(context, premiumState);
+                    });
+
+                    return premiumState.isPremium
                         ? _buildActiveSubscriptionView(premiumState)
-                        : _buildPlansView(premiumState),
+                        : _buildPlansView(premiumState);
+                  },
+                ),
               ),
             ],
           ),
@@ -129,9 +139,7 @@ class _PremiumSubscriptionPageState
           _buildPremiumStatusCard(),
 
           const SizedBox(height: 32),
-          const PlantisSubscriptionBenefitsWidget(
-            showModernStyle: false,
-          ),
+          const PlantisSubscriptionBenefitsWidget(showModernStyle: false),
 
           const SizedBox(height: 32),
           PlantisPaymentActionsWidget(
@@ -180,9 +188,7 @@ class _PremiumSubscriptionPageState
           ),
 
           const SizedBox(height: 40),
-          const PlantisSubscriptionBenefitsWidget(
-            showModernStyle: true,
-          ),
+          const PlantisSubscriptionBenefitsWidget(showModernStyle: true),
 
           const SizedBox(height: 40),
           PlantisPaymentActionsWidget(

@@ -9,156 +9,185 @@ class SyncStatusWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premiumState = ref.watch(premiumNotifierProvider);
+    final premiumAsyncState = ref.watch(premiumNotifierProvider);
 
-    return _buildContent(context, ref, premiumState);
+    return premiumAsyncState.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Erro ao carregar status',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text('Erro: $error'),
+            ],
+          ),
+        ),
+      ),
+      data: (premiumState) => _buildContent(context, ref, premiumState),
+    );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, PremiumState premiumState) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    PremiumState premiumState,
+  ) {
     final premiumProvider = premiumState;
 
     return Card(
-          elevation: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
+                Icon(
+                  premiumProvider.isSyncing
+                      ? Icons.sync
+                      : premiumProvider.hasSyncErrors
+                      ? Icons.sync_problem
+                      : Icons.check_circle,
+                  color: premiumProvider.isSyncing
+                      ? Colors.orange
+                      : premiumProvider.hasSyncErrors
+                      ? Colors.red
+                      : Colors.green,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Status de Sincronização',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                if (premiumProvider.isSyncing)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildStatusItem(
+              'Premium Ativo',
+              premiumProvider.isPremium ? 'Sim' : 'Não',
+              premiumProvider.isPremium ? Colors.green : Colors.grey,
+            ),
+            _buildStatusItem(
+              'Última Sincronização',
+              premiumProvider.lastSyncAt != null
+                  ? _formatDateTime(premiumProvider.lastSyncAt!)
+                  : 'Nunca',
+              Colors.blue,
+            ),
+            _buildStatusItem(
+              'Features Habilitadas',
+              '${premiumProvider.premiumFeaturesEnabled.length}',
+              Colors.purple,
+            ),
+            if (premiumProvider.plantLimits != null)
+              _buildStatusItem(
+                'Limite de Plantas',
+                ref
+                        .read(premiumNotifierProvider.notifier)
+                        .canCreateUnlimitedPlants()
+                    ? 'Ilimitado'
+                    : '${ref.read(premiumNotifierProvider.notifier).getCurrentPlantLimit()}',
+                Colors.teal,
+              ),
+            if (premiumProvider.hasSyncErrors) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      premiumProvider.isSyncing
-                          ? Icons.sync
-                          : premiumProvider.hasSyncErrors
-                          ? Icons.sync_problem
-                          : Icons.check_circle,
-                      color:
-                          premiumProvider.isSyncing
-                              ? Colors.orange
-                              : premiumProvider.hasSyncErrors
-                              ? Colors.red
-                              : Colors.green,
+                    Row(
+                      children: [
+                        Icon(Icons.error, color: Colors.red.shade600, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Erro de Sincronização',
+                          style: TextStyle(
+                            color: Colors.red.shade600,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(height: 4),
                     Text(
-                      'Status de Sincronização',
-                      style: Theme.of(context).textTheme.titleMedium,
+                      premiumProvider.syncErrorMessage ?? 'Erro desconhecido',
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontSize: 11,
+                      ),
                     ),
-                    const Spacer(),
-                    if (premiumProvider.isSyncing)
-                      const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                    if (premiumProvider.syncRetryCount > 0)
+                      Text(
+                        'Tentativas de retry: ${premiumProvider.syncRetryCount}',
+                        style: TextStyle(
+                          color: Colors.red.shade600,
+                          fontSize: 10,
+                        ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                _buildStatusItem(
-                  'Premium Ativo',
-                  premiumProvider.isPremium ? 'Sim' : 'Não',
-                  premiumProvider.isPremium ? Colors.green : Colors.grey,
-                ),
-                _buildStatusItem(
-                  'Última Sincronização',
-                  premiumProvider.lastSyncAt != null
-                      ? _formatDateTime(premiumProvider.lastSyncAt!)
-                      : 'Nunca',
-                  Colors.blue,
-                ),
-                _buildStatusItem(
-                  'Features Habilitadas',
-                  '${premiumProvider.premiumFeaturesEnabled.length}',
-                  Colors.purple,
-                ),
-                if (premiumProvider.plantLimits != null)
-                  _buildStatusItem(
-                    'Limite de Plantas',
-                    ref.read(premiumNotifierProvider.notifier).canCreateUnlimitedPlants()
-                        ? 'Ilimitado'
-                        : '${ref.read(premiumNotifierProvider.notifier).getCurrentPlantLimit()}',
-                    Colors.teal,
+              ),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: premiumProvider.isSyncing
+                        ? null
+                        : () => ref
+                              .read(premiumNotifierProvider.notifier)
+                              .forceSyncSubscription(),
+                    icon: const Icon(Icons.refresh, size: 16),
+                    label: const Text('Sincronizar'),
                   ),
+                ),
                 if (premiumProvider.hasSyncErrors) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.error,
-                              color: Colors.red.shade600,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Erro de Sincronização',
-                              style: TextStyle(
-                                color: Colors.red.shade600,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          premiumProvider.syncErrorMessage ??
-                              'Erro desconhecido',
-                          style: TextStyle(
-                            color: Colors.red.shade700,
-                            fontSize: 11,
-                          ),
-                        ),
-                        if (premiumProvider.syncRetryCount > 0)
-                          Text(
-                            'Tentativas de retry: ${premiumProvider.syncRetryCount}',
-                            style: TextStyle(
-                              color: Colors.red.shade600,
-                              fontSize: 10,
-                            ),
-                          ),
-                      ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => ref
+                          .read(premiumNotifierProvider.notifier)
+                          .clearSyncErrors(),
+                      icon: const Icon(Icons.clear, size: 16),
+                      label: const Text('Limpar Erros'),
                     ),
                   ),
                 ],
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed:
-                            premiumProvider.isSyncing
-                                ? null
-                                : () => ref.read(premiumNotifierProvider.notifier).forceSyncSubscription(),
-                        icon: const Icon(Icons.refresh, size: 16),
-                        label: const Text('Sincronizar'),
-                      ),
-                    ),
-                    if (premiumProvider.hasSyncErrors) ...[
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => ref.read(premiumNotifierProvider.notifier).clearSyncErrors(),
-                          icon: const Icon(Icons.clear, size: 16),
-                          label: const Text('Limpar Erros'),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
               ],
             ),
-          ),
-        );
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildStatusItem(String label, String value, Color color) {
@@ -211,7 +240,6 @@ class SyncDebugWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premiumState = ref.watch(premiumNotifierProvider);
     final debugInfo = ref.read(premiumNotifierProvider.notifier).getDebugInfo();
 
     return ExpansionTile(
@@ -269,54 +297,49 @@ class PremiumFeaturesWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premiumState = ref.watch(premiumNotifierProvider);
     final notifier = ref.read(premiumNotifierProvider.notifier);
-        final features = [
-          _FeatureItem(
-            'Plantas Ilimitadas',
-            'unlimited_plants',
-            notifier.canCreateUnlimitedPlants(),
-          ),
-          _FeatureItem(
-            'Lembretes Avançados',
-            'advanced_reminders',
-            notifier.canUseCustomReminders(),
-          ),
-          _FeatureItem(
-            'Exportar Dados',
-            'export_data',
-            notifier.canExportData(),
-          ),
-          _FeatureItem(
-            'Temas Personalizados',
-            'custom_themes',
-            notifier.canAccessPremiumThemes(),
-          ),
-          _FeatureItem(
-            'Backup na Nuvem',
-            'cloud_backup',
-            notifier.canBackupToCloud(),
-          ),
-          _FeatureItem(
-            'Identificação de Plantas',
-            'plant_identification',
-            notifier.canIdentifyPlants(),
-          ),
-          _FeatureItem(
-            'Diagnóstico de Doenças',
-            'disease_diagnosis',
-            notifier.canDiagnoseDiseases(),
-          ),
-          _FeatureItem(
-            'Notificações Meteorológicas',
-            'weather_based_notifications',
-            notifier.canUseWeatherNotifications(),
-          ),
-          _FeatureItem(
-            'Calendário de Cuidados',
-            'care_calendar',
-            notifier.canUseCareCalendar(),
-          ),
+    final features = [
+      _FeatureItem(
+        'Plantas Ilimitadas',
+        'unlimited_plants',
+        notifier.canCreateUnlimitedPlants(),
+      ),
+      _FeatureItem(
+        'Lembretes Avançados',
+        'advanced_reminders',
+        notifier.canUseCustomReminders(),
+      ),
+      _FeatureItem('Exportar Dados', 'export_data', notifier.canExportData()),
+      _FeatureItem(
+        'Temas Personalizados',
+        'custom_themes',
+        notifier.canAccessPremiumThemes(),
+      ),
+      _FeatureItem(
+        'Backup na Nuvem',
+        'cloud_backup',
+        notifier.canBackupToCloud(),
+      ),
+      _FeatureItem(
+        'Identificação de Plantas',
+        'plant_identification',
+        notifier.canIdentifyPlants(),
+      ),
+      _FeatureItem(
+        'Diagnóstico de Doenças',
+        'disease_diagnosis',
+        notifier.canDiagnoseDiseases(),
+      ),
+      _FeatureItem(
+        'Notificações Meteorológicas',
+        'weather_based_notifications',
+        notifier.canUseWeatherNotifications(),
+      ),
+      _FeatureItem(
+        'Calendário de Cuidados',
+        'care_calendar',
+        notifier.canUseCareCalendar(),
+      ),
     ];
 
     return Card(
@@ -353,8 +376,9 @@ class PremiumFeaturesWidget extends ConsumerWidget {
               feature.name,
               style: TextStyle(
                 color: feature.isEnabled ? Colors.black : Colors.grey,
-                fontWeight:
-                    feature.isEnabled ? FontWeight.w500 : FontWeight.normal,
+                fontWeight: feature.isEnabled
+                    ? FontWeight.w500
+                    : FontWeight.normal,
               ),
             ),
           ),

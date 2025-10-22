@@ -12,6 +12,8 @@ import 'injection_container.dart' as di;
 /// This file centralizes all Core Package service registrations
 /// Following the patterns established in app-gasometer and app-plantis
 class CorePackageIntegration {
+  CorePackageIntegration._(); // Private constructor prevents instantiation
+
   static core.GetIt get _sl => di.sl;
 
   /// Initialize all Core Package services for ReceitaAgro

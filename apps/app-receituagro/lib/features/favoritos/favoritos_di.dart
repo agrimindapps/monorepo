@@ -19,6 +19,8 @@ import 'domain/repositories/i_favoritos_repository.dart';
 ///
 /// Princípio: Simplicidade + Delegation Pattern
 class FavoritosDI {
+  FavoritosDI._(); // Private constructor prevents instantiation
+
   static final GetIt _getIt = GetIt.instance;
   static bool _servicesRegistered = false;
 

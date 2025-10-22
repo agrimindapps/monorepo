@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 /// Design tokens centralizados para funcionalidades Premium
 /// Padroniza mensagens, estilos e comportamentos em todo o app
 class PremiumDesignTokens {
+  PremiumDesignTokens._(); // Private constructor prevents instantiation
+
   // ==================== MENSAGENS ====================
 
   /// Mensagens padrão para bloqueios premium

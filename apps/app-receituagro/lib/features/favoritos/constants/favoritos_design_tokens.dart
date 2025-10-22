@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 class FavoritosDesignTokens {
+  FavoritosDesignTokens._(); // Private constructor prevents instantiation
+
   static const Color defensivosColor = Color(0xFF2E7D32);
   static const Color pragasColor = Color(0xFFD32F2F);
   static const Color diagnosticosColor = Color(0xFF1976D2);

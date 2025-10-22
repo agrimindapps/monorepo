@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 /// Widgets para estados de loading e erro
 /// Responsabilidade única: exibir estados visuais consistentes
 class LoadingErrorWidgets {
-  
+  LoadingErrorWidgets._(); // Private constructor prevents instantiation
+
   /// Widget de loading personalizado
   static Widget buildLoadingState(BuildContext context) {
     final theme = Theme.of(context);

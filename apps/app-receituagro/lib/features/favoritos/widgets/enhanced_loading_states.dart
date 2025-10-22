@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 /// Enhanced loading states specifically designed for favorites
 /// Provides contextual skeleton loaders and smooth transitions
 class FavoritoLoadingStates {
-  
+  FavoritoLoadingStates._(); // Private constructor prevents instantiation
+
   /// Skeleton card para itens de favorito
   static Widget favoritoCardSkeleton({
     required BuildContext context,

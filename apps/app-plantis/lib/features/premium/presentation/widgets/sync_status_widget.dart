@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../notifiers/premium_notifier_improved.dart';
+import '../providers/premium_notifier.dart';
 
 /// Widget que mostra o status de sincronização em tempo real
 class SyncStatusWidget extends ConsumerWidget {
@@ -9,16 +9,12 @@ class SyncStatusWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncValue = ref.watch(premiumImprovedNotifierProvider);
+    final premiumState = ref.watch(premiumNotifierProvider);
 
-    return asyncValue.when(
-      data: (premiumState) => _buildContent(context, ref, premiumState),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Erro: $error')),
-    );
+    return _buildContent(context, ref, premiumState);
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, PremiumImprovedState premiumState) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, PremiumState premiumState) {
     final premiumProvider = premiumState;
 
     return Card(
@@ -78,9 +74,9 @@ class SyncStatusWidget extends ConsumerWidget {
                 if (premiumProvider.plantLimits != null)
                   _buildStatusItem(
                     'Limite de Plantas',
-                    ref.read(premiumImprovedNotifierProvider.notifier).canCreateUnlimitedPlants()
+                    ref.read(premiumNotifierProvider.notifier).canCreateUnlimitedPlants()
                         ? 'Ilimitado'
-                        : '${ref.read(premiumImprovedNotifierProvider.notifier).getCurrentPlantLimit()}',
+                        : '${ref.read(premiumNotifierProvider.notifier).getCurrentPlantLimit()}',
                     Colors.teal,
                   ),
                 if (premiumProvider.hasSyncErrors) ...[
@@ -142,7 +138,7 @@ class SyncStatusWidget extends ConsumerWidget {
                         onPressed:
                             premiumProvider.isSyncing
                                 ? null
-                                : () => ref.read(premiumImprovedNotifierProvider.notifier).forceSyncSubscription(),
+                                : () => ref.read(premiumNotifierProvider.notifier).forceSyncSubscription(),
                         icon: const Icon(Icons.refresh, size: 16),
                         label: const Text('Sincronizar'),
                       ),
@@ -151,7 +147,7 @@ class SyncStatusWidget extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () => ref.read(premiumImprovedNotifierProvider.notifier).clearSyncErrors(),
+                          onPressed: () => ref.read(premiumNotifierProvider.notifier).clearSyncErrors(),
                           icon: const Icon(Icons.clear, size: 16),
                           label: const Text('Limpar Erros'),
                         ),
@@ -215,11 +211,8 @@ class SyncDebugWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncValue = ref.watch(premiumImprovedNotifierProvider);
-
-    return asyncValue.when(
-      data: (premiumState) {
-        final debugInfo = ref.read(premiumImprovedNotifierProvider.notifier).getDebugInfo();
+    final premiumState = ref.watch(premiumNotifierProvider);
+    final debugInfo = ref.read(premiumNotifierProvider.notifier).getDebugInfo();
 
     return ExpansionTile(
       title: const Text('Debug Info'),
@@ -241,10 +234,6 @@ class SyncDebugWidget extends ConsumerWidget {
           ),
         ),
       ],
-    );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Erro: $error')),
     );
   }
 
@@ -280,11 +269,8 @@ class PremiumFeaturesWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncValue = ref.watch(premiumImprovedNotifierProvider);
-
-    return asyncValue.when(
-      data: (premiumState) {
-        final notifier = ref.read(premiumImprovedNotifierProvider.notifier);
+    final premiumState = ref.watch(premiumNotifierProvider);
+    final notifier = ref.read(premiumNotifierProvider.notifier);
         final features = [
           _FeatureItem(
             'Plantas Ilimitadas',
@@ -348,10 +334,6 @@ class PremiumFeaturesWidget extends ConsumerWidget {
           ],
         ),
       ),
-    );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Erro: $error')),
     );
   }
 

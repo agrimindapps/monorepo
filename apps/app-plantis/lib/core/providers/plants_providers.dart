@@ -22,28 +22,29 @@ part 'plants_providers.g.dart';
 // ============================================================================
 
 /// Plants State model for Riverpod state management
+/// Refactored to single source of truth - only stores allPlants
+/// filteredPlants and searchResults are computed from allPlants + filter params
 class PlantsState {
+  /// Single source of truth - all plants loaded from repository
   final List<Plant> allPlants;
-  final List<Plant> filteredPlants;
   final Plant? selectedPlant;
   final bool isLoading;
   final bool isSearching;
   final String? error;
+
+  // Filter parameters (not duplicate state, just criteria)
   final String searchQuery;
-  final List<Plant> searchResults;
   final ViewMode viewMode;
   final SortBy sortBy;
   final String? filterBySpace;
 
   const PlantsState({
     this.allPlants = const [],
-    this.filteredPlants = const [],
     this.selectedPlant,
     this.isLoading = false,
     this.isSearching = false,
     this.error,
     this.searchQuery = '',
-    this.searchResults = const [],
     this.viewMode = ViewMode.grid,
     this.sortBy = SortBy.newest,
     this.filterBySpace,
@@ -54,6 +55,33 @@ class PlantsState {
   bool get hasError => error != null;
   bool get isGroupedBySpaces => viewMode == ViewMode.groupedBySpaces;
   int get plantsCount => allPlants.length;
+
+  /// Computed property - plants filtered by space
+  /// No stored state, computed on-demand from allPlants + filterBySpace
+  List<Plant> get filteredPlants {
+    if (filterBySpace == null) {
+      return List.from(allPlants);
+    }
+    return allPlants.where((plant) => plant.spaceId == filterBySpace).toList();
+  }
+
+  /// Computed property - search results
+  /// No stored state, computed on-demand from allPlants + searchQuery
+  List<Plant> get searchResults {
+    if (searchQuery.isEmpty) {
+      return const [];
+    }
+
+    final lower = searchQuery.toLowerCase();
+    return allPlants.where((plant) {
+      final name = plant.name.toLowerCase();
+      final species = (plant.species ?? '').toLowerCase();
+      final notes = (plant.notes ?? '').toLowerCase();
+      return name.contains(lower) ||
+             species.contains(lower) ||
+             notes.contains(lower);
+    }).toList();
+  }
 
   /// Groups plants by spaces for grouped view
   Map<String?, List<Plant>> get plantsGroupedBySpaces {
@@ -253,26 +281,22 @@ class PlantsState {
 
   PlantsState copyWith({
     List<Plant>? allPlants,
-    List<Plant>? filteredPlants,
     Plant? selectedPlant,
     bool? isLoading,
     bool? isSearching,
     String? error,
     String? searchQuery,
-    List<Plant>? searchResults,
     ViewMode? viewMode,
     SortBy? sortBy,
     String? filterBySpace,
   }) {
     return PlantsState(
       allPlants: allPlants ?? this.allPlants,
-      filteredPlants: filteredPlants ?? this.filteredPlants,
       selectedPlant: selectedPlant ?? this.selectedPlant,
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
       error: error ?? this.error,
       searchQuery: searchQuery ?? this.searchQuery,
-      searchResults: searchResults ?? this.searchResults,
       viewMode: viewMode ?? this.viewMode,
       sortBy: sortBy ?? this.sortBy,
       filterBySpace: filterBySpace ?? this.filterBySpace,
@@ -285,13 +309,11 @@ class PlantsState {
       other is PlantsState &&
           runtimeType == other.runtimeType &&
           allPlants == other.allPlants &&
-          filteredPlants == other.filteredPlants &&
           selectedPlant == other.selectedPlant &&
           isLoading == other.isLoading &&
           isSearching == other.isSearching &&
           error == other.error &&
           searchQuery == other.searchQuery &&
-          searchResults == other.searchResults &&
           viewMode == other.viewMode &&
           sortBy == other.sortBy &&
           filterBySpace == other.filterBySpace;
@@ -299,13 +321,11 @@ class PlantsState {
   @override
   int get hashCode =>
       allPlants.hashCode ^
-      filteredPlants.hashCode ^
       selectedPlant.hashCode ^
       isLoading.hashCode ^
       isSearching.hashCode ^
       error.hashCode ^
       searchQuery.hashCode ^
-      searchResults.hashCode ^
       viewMode.hashCode ^
       sortBy.hashCode ^
       filterBySpace.hashCode;
@@ -442,7 +462,7 @@ class PlantsNotifier extends _$PlantsNotifier {
           final sortedPlants = _sortPlants(plants, SortBy.newest);
           return PlantsState(
             allPlants: sortedPlants,
-            filteredPlants: sortedPlants,
+            // filteredPlants computed automatically via getter
           );
         },
       );
@@ -461,7 +481,6 @@ class PlantsNotifier extends _$PlantsNotifier {
         state = AsyncData(
           currentState.copyWith(
             allPlants: [],
-            filteredPlants: [],
             selectedPlant: null,
             error: null,
           ),
@@ -490,16 +509,11 @@ class PlantsNotifier extends _$PlantsNotifier {
                 domainPlants,
                 currentState.sortBy,
               );
-              final filteredPlants = _applyFilters(
-                sortedPlants,
-                currentState.filterBySpace,
-                currentState.searchQuery,
-              );
 
               state = AsyncData(
                 currentState.copyWith(
                   allPlants: sortedPlants,
-                  filteredPlants: filteredPlants,
+                  // filteredPlants computed automatically from allPlants + filterBySpace
                 ),
               );
             }
@@ -649,7 +663,6 @@ class PlantsNotifier extends _$PlantsNotifier {
             currentState.copyWith(
               isLoading: false,
               allPlants: [],
-              filteredPlants: [],
             ),
           );
         },
@@ -672,7 +685,6 @@ class PlantsNotifier extends _$PlantsNotifier {
         currentState.copyWith(
           isLoading: false,
           allPlants: [],
-          filteredPlants: [],
         ),
       );
     }
@@ -716,17 +728,11 @@ class PlantsNotifier extends _$PlantsNotifier {
   void _updatePlantsData(List<Plant> plants) {
     final currentState = state.valueOrNull ?? const PlantsState();
     final sortedPlants = _sortPlants(plants, currentState.sortBy);
-    final filteredPlants = _applyFilters(
-      sortedPlants,
-      currentState.filterBySpace,
-      currentState.searchQuery,
-    );
 
     if (kDebugMode) {
       print('🔄 PlantsProvider._updatePlantsData:');
       print('  - Input plants: ${plants.length}');
       print('  - Sorted plants: ${sortedPlants.length}');
-      print('  - Filtered plants: ${filteredPlants.length}');
       print('  - Current filterBySpace: ${currentState.filterBySpace}');
       print('  - Current searchQuery: "${currentState.searchQuery}"');
     }
@@ -734,7 +740,6 @@ class PlantsNotifier extends _$PlantsNotifier {
     state = AsyncData(
       currentState.copyWith(
         allPlants: sortedPlants,
-        filteredPlants: filteredPlants,
         isLoading: false,
         error: null,
       ),
@@ -744,6 +749,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       print(
         '✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas',
       );
+      // filteredPlants will be computed automatically via getter
       for (final plant in plants) {
         print('   - ${plant.name} (${plant.id})');
       }
@@ -775,7 +781,6 @@ class PlantsNotifier extends _$PlantsNotifier {
     if (query.trim().isEmpty) {
       state = AsyncData(
         currentState.copyWith(
-          searchResults: [],
           isSearching: false,
           searchQuery: '',
         ),
@@ -784,26 +789,20 @@ class PlantsNotifier extends _$PlantsNotifier {
     }
 
     // Prefer local in-memory filtering when we already have plants loaded.
-    // This avoids hitting the search use case (which may query Hive/remote)
-    // on every keypress and matches the expected UX: keep all records in
-    // memory and filter locally.
+    // searchResults is now computed automatically from allPlants + searchQuery
+    // via the getter, so we just need to set the searchQuery
     if (currentState.allPlants.isNotEmpty) {
       state = AsyncData(
-        currentState.copyWith(isSearching: true, searchQuery: query),
+        currentState.copyWith(
+          isSearching: true,
+          searchQuery: query,
+        ),
       );
-      final lower = query.toLowerCase();
-      final localResults =
-          currentState.allPlants.where((p) {
-            final name = p.name.toLowerCase();
-            final species = (p.species ?? '').toLowerCase();
-            // Match by name or species; adjust as needed (notes, tags, etc.)
-            return name.contains(lower) || species.contains(lower);
-          }).toList();
 
+      // Simulate async search completion
       final newState = state.valueOrNull ?? const PlantsState();
-      final sortedResults = _sortPlants(localResults, newState.sortBy);
       state = AsyncData(
-        newState.copyWith(searchResults: sortedResults, isSearching: false),
+        newState.copyWith(isSearching: false),
       );
       return;
     }
@@ -826,10 +825,13 @@ class PlantsNotifier extends _$PlantsNotifier {
         );
       },
       (results) {
+        // Load results into allPlants so they can be filtered/searched
         final newState = state.valueOrNull ?? const PlantsState();
-        final sortedResults = _sortPlants(results, newState.sortBy);
         state = AsyncData(
-          newState.copyWith(searchResults: sortedResults, isSearching: false),
+          newState.copyWith(
+            allPlants: _sortPlants(results, newState.sortBy),
+            isSearching: false,
+          ),
         );
       },
     );
@@ -852,16 +854,10 @@ class PlantsNotifier extends _$PlantsNotifier {
       (plant) {
         final newState = state.valueOrNull ?? const PlantsState();
         final updatedPlants = [plant, ...newState.allPlants];
-        final filteredPlants = _applyFilters(
-          updatedPlants,
-          newState.filterBySpace,
-          newState.searchQuery,
-        );
 
         state = AsyncData(
           newState.copyWith(
             allPlants: updatedPlants,
-            filteredPlants: filteredPlants,
             isLoading: false,
             error: null,
           ),
@@ -893,16 +889,10 @@ class PlantsNotifier extends _$PlantsNotifier {
             }).toList();
 
         final sortedPlants = _sortPlants(updatedPlants, newState.sortBy);
-        final filteredPlants = _applyFilters(
-          sortedPlants,
-          newState.filterBySpace,
-          newState.searchQuery,
-        );
 
         state = AsyncData(
           newState.copyWith(
             allPlants: sortedPlants,
-            filteredPlants: filteredPlants,
             selectedPlant:
                 newState.selectedPlant?.id == updatedPlant.id
                     ? updatedPlant
@@ -934,19 +924,10 @@ class PlantsNotifier extends _$PlantsNotifier {
         final newState = state.valueOrNull ?? const PlantsState();
         final updatedPlants =
             newState.allPlants.where((plant) => plant.id != id).toList();
-        final updatedSearchResults =
-            newState.searchResults.where((plant) => plant.id != id).toList();
-        final filteredPlants = _applyFilters(
-          updatedPlants,
-          newState.filterBySpace,
-          newState.searchQuery,
-        );
 
         state = AsyncData(
           newState.copyWith(
             allPlants: updatedPlants,
-            filteredPlants: filteredPlants,
-            searchResults: updatedSearchResults,
             selectedPlant:
                 newState.selectedPlant?.id == id ? null : newState.selectedPlant,
             isLoading: false,
@@ -969,18 +950,10 @@ class PlantsNotifier extends _$PlantsNotifier {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.sortBy != sort) {
       final sortedPlants = _sortPlants(currentState.allPlants, sort);
-      final sortedSearchResults = _sortPlants(currentState.searchResults, sort);
-      final filteredPlants = _applyFilters(
-        sortedPlants,
-        currentState.filterBySpace,
-        currentState.searchQuery,
-      );
 
       state = AsyncData(
         currentState.copyWith(
           allPlants: sortedPlants,
-          filteredPlants: filteredPlants,
-          searchResults: sortedSearchResults,
           sortBy: sort,
         ),
       );
@@ -990,16 +963,10 @@ class PlantsNotifier extends _$PlantsNotifier {
   void setSpaceFilter(String? spaceId) {
     final currentState = state.valueOrNull ?? const PlantsState();
     if (currentState.filterBySpace != spaceId) {
-      final filteredPlants = _applyFilters(
-        currentState.allPlants,
-        spaceId,
-        currentState.searchQuery,
-      );
-
       state = AsyncData(
         currentState.copyWith(
           filterBySpace: spaceId,
-          filteredPlants: filteredPlants,
+          // filteredPlants computed automatically from allPlants + filterBySpace
         ),
       );
     }
@@ -1007,19 +974,16 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   void clearSearch() {
     final currentState = state.valueOrNull ?? const PlantsState();
-    if (currentState.searchQuery.isNotEmpty ||
-        currentState.searchResults.isNotEmpty ||
-        currentState.isSearching) {
+    if (currentState.searchQuery.isNotEmpty || currentState.isSearching) {
 
       if (kDebugMode) {
         print('🧹 PlantsProvider.clearSearch():');
         print('  - Clearing searchQuery: "${currentState.searchQuery}"');
-        print('  - Clearing searchResults: ${currentState.searchResults.length} plantas');
         print('  - Current allPlants: ${currentState.allPlants.length}');
       }
 
       // If there are no local plants but we have searchResults (user searched
-      // and results were returned), copy those results to `filteredPlants`
+      // and results were returned), copy those results to allPlants
       // so the UI keeps displaying them while we attempt to load local data.
       if (currentState.allPlants.isEmpty &&
           currentState.searchResults.isNotEmpty) {
@@ -1029,9 +993,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         state = AsyncData(
           currentState.copyWith(
             searchQuery: '',
-            searchResults: [],
             allPlants: currentState.searchResults,
-            filteredPlants: currentState.searchResults,
             isSearching: false,
           ),
         );
@@ -1039,24 +1001,15 @@ class PlantsNotifier extends _$PlantsNotifier {
         // fire-and-forget - loadInitialData will replace allPlants when done
         loadInitialData();
       } else {
-        // Reaplica filtros para garantir que filteredPlants está sincronizado
-        final filteredPlants = _applyFilters(
-          currentState.allPlants,
-          currentState.filterBySpace,
-          '', // searchQuery vazio
-        );
-
         state = AsyncData(
           currentState.copyWith(
             searchQuery: '',
-            searchResults: [],
-            filteredPlants: filteredPlants,
             isSearching: false,
           ),
         );
 
         if (kDebugMode) {
-          print('✅ PlantsProvider.clearSearch() - filteredPlants atualizado: ${filteredPlants.length}');
+          print('✅ PlantsProvider.clearSearch() - searchQuery cleared');
         }
       }
     }
@@ -1147,29 +1100,7 @@ class PlantsNotifier extends _$PlantsNotifier {
     return sortedPlants;
   }
 
-  List<Plant> _applyFilters(
-    List<Plant> plants,
-    String? filterBySpace,
-    String searchQuery,
-  ) {
-    // Se não há filtros ativos, retorna a lista completa
-    if (filterBySpace == null && searchQuery.isEmpty) {
-      return List.from(plants);
-    }
-
-    List<Plant> filtered = List.from(plants);
-
-    // Aplica filtro de espaço se ativo
-    if (filterBySpace != null) {
-      filtered =
-          filtered.where((plant) => plant.spaceId == filterBySpace).toList();
-    }
-
-    // Nota: searchQuery é tratado separadamente em searchPlants()
-    // e armazenado em searchResults, não em filteredPlants
-
-    return filtered;
-  }
+  // _applyFilters removed - filteredPlants now computed via getter from allPlants + filterBySpace
 
   String _getErrorMessage(Failure failure) {
     if (kDebugMode) {

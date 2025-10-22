@@ -232,4 +232,5 @@ export 'src/sync/specialized/sync_coordinator.dart';
 export 'src/sync/specialized/sync_error_handler.dart';
 export 'src/sync/specialized/sync_state_machine.dart' hide AppSyncEvent, SyncAction;
 export 'utils/core_icons.dart';
+export 'utils/random_selection_service.dart';
 export 'widgets/core_carousel_widget.dart';

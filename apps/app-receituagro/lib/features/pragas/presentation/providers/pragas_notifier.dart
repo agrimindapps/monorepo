@@ -1,8 +1,9 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/access_history_service.dart';
-import '../../../../core/services/random_selection_service.dart';
+import '../../../../core/services/receituagro_random_extensions.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/usecases/get_pragas_usecase.dart';
 import 'pragas_state.dart';
@@ -129,7 +130,7 @@ class PragasNotifier extends _$PragasNotifier {
           final allPragasResult = await _getPragasUseCase.execute();
           return allPragasResult.fold(
             (failure) => <PragaEntity>[],
-            (allPragas) => RandomSelectionService.selectSuggestedPragas(
+            (allPragas) => ReceitaAgroRandomExtensions.selectSuggestedPragas(
               allPragas,
               count: limit,
             ),
@@ -140,7 +141,7 @@ class PragasNotifier extends _$PragasNotifier {
             final allPragasResult = await _getPragasUseCase.execute();
             return allPragasResult.fold(
               (failure) => <PragaEntity>[],
-              (allPragas) => RandomSelectionService.selectSuggestedPragas(
+              (allPragas) => ReceitaAgroRandomExtensions.selectSuggestedPragas(
                 allPragas,
                 count: limit,
               ),
@@ -442,7 +443,7 @@ class PragasNotifier extends _$PragasNotifier {
             allPragasResult.fold(
               (failure) => throw Exception(failure.message),
               (allPragas) {
-                final suggested = RandomSelectionService.selectSuggestedPragas(
+                final suggested = ReceitaAgroRandomExtensions.selectSuggestedPragas(
                   allPragas,
                   count: limit,
                 );
@@ -462,7 +463,7 @@ class PragasNotifier extends _$PragasNotifier {
         allPragasResult.fold((failure) => throw Exception(failure.message), (
           allPragas,
         ) {
-          final suggested = RandomSelectionService.selectSuggestedPragas(
+          final suggested = ReceitaAgroRandomExtensions.selectSuggestedPragas(
             allPragas,
             count: limit,
           );

@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/fitossanitario_hive.dart';
@@ -5,7 +6,7 @@ import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/services/access_history_service.dart';
-import '../../../../core/services/random_selection_service.dart';
+import '../../../../core/services/receituagro_random_extensions.dart';
 
 part 'defensivos_history_notifier.g.dart';
 
@@ -87,8 +88,8 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
       final allDefensivos = await _repository.getActiveDefensivos();
       if (allDefensivos.isNotEmpty) {
         return DefensivosHistoryState(
-          recentDefensivos: RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 3),
-          newDefensivos: RandomSelectionService.selectNewDefensivos(allDefensivos, count: 4),
+          recentDefensivos: ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 3),
+          newDefensivos: ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 4),
           isLoading: false,
           errorMessage: 'Erro ao carregar histórico: ${e.toString()}',
         );
@@ -192,12 +193,12 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
       List<FitossanitarioHive> recentDefensivos;
       if (historicDefensivos.isEmpty) {
         print('⚠️ Nenhum histórico de acesso encontrado. Inicializando "Últimos Acessados" com 10 defensivos aleatórios.');
-        recentDefensivos = RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10);
+        recentDefensivos = ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 10);
       } else {
         print('✅ ${historicDefensivos.length} defensivos encontrados no histórico de acesso.');
         recentDefensivos = historicDefensivos;
       }
-      final newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 10);
+      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 10);
 
       return {
         'recent': recentDefensivos,
@@ -208,8 +209,8 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
       if (allDefensivos.isNotEmpty) {
         print('🔄 Usando seleção aleatória como fallback para ambas as listas');
         return {
-          'recent': RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10),
-          'new': RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 10).cast<FitossanitarioHive>(),
+          'recent': ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 10),
+          'new': ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 10),
         };
       } else {
         return {

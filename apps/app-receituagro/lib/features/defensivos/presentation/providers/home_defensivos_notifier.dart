@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/fitossanitario_hive.dart';
@@ -6,7 +7,7 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
 import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
-import '../../../../core/services/random_selection_service.dart';
+import '../../../../core/services/receituagro_random_extensions.dart';
 
 part 'home_defensivos_notifier.g.dart';
 
@@ -251,7 +252,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
         areEqual: (a, b) => a.idReg == b.idReg,
       );
 
-      final newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 7);
+      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7);
 
       return _HistoryData(
         recentDefensivos: recentDefensivos,
@@ -261,10 +262,10 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       // Em caso de erro, usa fallback aleatório para boa experiência inicial
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
-          ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 7)
           : <FitossanitarioHive>[];
       final newDefensivos = allDefensivos.isNotEmpty
-          ? RandomSelectionService.selectNewDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7)
           : <FitossanitarioHive>[];
 
       return _HistoryData(
@@ -365,10 +366,10 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
     } catch (e) {
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
-          ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 7)
           : <FitossanitarioHive>[];
       final newDefensivos = allDefensivos.isNotEmpty
-          ? RandomSelectionService.selectNewDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7)
           : <FitossanitarioHive>[];
 
       state = AsyncValue.data(
@@ -430,7 +431,7 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
         targetCount: 7,
         areEqual: (a, b) => a.idReg == b.idReg,
       );
-      final newDefensivos = RandomSelectionService.selectNewDefensivos(allDefensivos, count: 7);
+      final newDefensivos = ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7);
 
       state = AsyncValue.data(
         currentState.copyWith(
@@ -442,10 +443,10 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
       // Em caso de erro, usa fallback aleatório para boa experiência
       final allDefensivos = await _repository.getActiveDefensivos();
       final recentDefensivos = allDefensivos.isNotEmpty
-          ? RandomSelectionService.selectRandomDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomDefensivos(allDefensivos, count: 7)
           : <FitossanitarioHive>[];
       final newDefensivos = allDefensivos.isNotEmpty
-          ? RandomSelectionService.selectNewDefensivos(allDefensivos, count: 7)
+          ? ReceitaAgroRandomExtensions.selectNewDefensivos(allDefensivos, count: 7)
           : <FitossanitarioHive>[];
 
       state = AsyncValue.data(

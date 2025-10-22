@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../data/models/cultura_hive.dart';
@@ -102,7 +103,7 @@ class DataIntegrityService {
   /// - Cultura (fkIdCultura)
   ///
   /// Retorna um [IntegrityReport] com estatísticas e lista de problemas
-  Future<Result<IntegrityReport>> validateIntegrity() async {
+  Future<Either<Failure, IntegrityReport>> validateIntegrity() async {
     try {
       developer.log(
         'Starting data integrity validation',
@@ -208,16 +209,14 @@ class DataIntegrityService {
         level: 1000,
       );
 
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error during integrity validation: $e'));
     }
   }
 
   /// Valida integridade de um diagnóstico específico
   ///
   /// Retorna lista de mensagens de erro (vazia se tudo OK)
-  Future<Result<List<String>>> validateDiagnostico(
+  Future<Either<Failure, List<String>>> validateDiagnostico(
     DiagnosticoHive diagnostico,
   ) async {
     try {
@@ -289,14 +288,12 @@ class DataIntegrityService {
         level: 1000,
       );
 
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error validating diagnostico: $e'));
     }
   }
 
   /// Obtém estatísticas de integridade resumidas
-  Future<Result<Map<String, dynamic>>> getIntegrityStatistics() async {
+  Future<Either<Failure, Map<String, dynamic>>> getIntegrityStatistics() async {
     final reportResult = await validateIntegrity();
 
     return reportResult.map((report) => {

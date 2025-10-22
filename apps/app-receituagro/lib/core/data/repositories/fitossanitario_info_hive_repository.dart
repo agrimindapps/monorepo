@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../models/fitossanitario_info_hive.dart';
 
@@ -17,21 +18,22 @@ class FitossanitarioInfoHiveRepository extends BaseHiveRepository<Fitossanitario
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Result<void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+  Future<Either<Failure, void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
     try {
       final Map<dynamic, FitossanitarioInfoHive> items = {};
-      
+
       for (final json in jsonData) {
         final fitossanitarioInfo = FitossanitarioInfoHive.fromJson(json);
         items[fitossanitarioInfo.idReg] = fitossanitarioInfo;
       }
-      
-      return await saveAll(items);
+
+      final result = await saveAll(items);
+      if (result.isError) {
+        return Left(CacheFailure(result.error!.message));
+      }
+      return const Right(null);
     } catch (e) {
-      return Result.error(StorageError(
-        message: 'Failed to load from JSON',
-        code: 'LOAD_FROM_JSON_ERROR',
-      ));
+      return Left(CacheFailure('Failed to load from JSON: $e'));
     }
   }
 }

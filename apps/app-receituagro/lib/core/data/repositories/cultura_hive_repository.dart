@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../models/cultura_hive.dart';
 
@@ -31,21 +32,22 @@ class CulturaHiveRepository extends BaseHiveRepository<CulturaHive> {
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Result<void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+  Future<Either<Failure, void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
     try {
       final Map<dynamic, CulturaHive> items = {};
-      
+
       for (final json in jsonData) {
         final cultura = CulturaHive.fromJson(json);
         items[cultura.idReg] = cultura;
       }
-      
-      return await saveAll(items);
+
+      final result = await saveAll(items);
+      if (result.isError) {
+        return Left(CacheFailure(result.error!.message));
+      }
+      return const Right(null);
     } catch (e) {
-      return Result.error(StorageError(
-        message: 'Failed to load from JSON',
-        code: 'LOAD_FROM_JSON_ERROR',
-      ));
+      return Left(CacheFailure('Failed to load from JSON: $e'));
     }
   }
 }

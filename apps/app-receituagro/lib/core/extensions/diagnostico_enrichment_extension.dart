@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../data/models/cultura_hive.dart';
@@ -22,8 +23,8 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
   ///
   /// [hiveManager] - Instância do HiveManager para acesso às boxes
   ///
-  /// Retorna `Result<DiagnosticoWithWarnings>` com dados enriquecidos ou erro
-  Future<Result<DiagnosticoWithWarnings>> enrichWithRelatedData(
+  /// Retorna `Either<Failure, DiagnosticoWithWarnings>` com dados enriquecidos ou erro
+  Future<Either<Failure, DiagnosticoWithWarnings>> enrichWithRelatedData(
     IHiveManager hiveManager,
   ) async {
     try {
@@ -120,16 +121,14 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
         level: 1000,
       );
 
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error enriching diagnostico: $e'));
     }
   }
 
   /// Enriquece apenas com defensivo
   ///
   /// Método otimizado para carregar apenas dados do defensivo
-  Future<Result<DiagnosticoWithWarnings>> enrichWithDefensivo(
+  Future<Either<Failure, DiagnosticoWithWarnings>> enrichWithDefensivo(
     IHiveManager hiveManager,
   ) async {
     try {
@@ -163,14 +162,12 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
 
       return result;
     } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error enriching with defensivo: $e'));
     }
   }
 
   /// Enriquece apenas com praga
-  Future<Result<DiagnosticoWithWarnings>> enrichWithPraga(
+  Future<Either<Failure, DiagnosticoWithWarnings>> enrichWithPraga(
     IHiveManager hiveManager,
   ) async {
     try {
@@ -204,14 +201,12 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
 
       return result;
     } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error enriching with praga: $e'));
     }
   }
 
   /// Enriquece apenas com cultura
-  Future<Result<DiagnosticoWithWarnings>> enrichWithCultura(
+  Future<Either<Failure, DiagnosticoWithWarnings>> enrichWithCultura(
     IHiveManager hiveManager,
   ) async {
     try {
@@ -245,9 +240,7 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
 
       return result;
     } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error enriching with cultura: $e'));
     }
   }
 
@@ -275,8 +268,8 @@ extension DiagnosticoListEnrichmentExtension on List<DiagnosticoHive> {
   /// Otimizado para processar múltiplos diagnósticos de uma vez,
   /// abrindo as boxes uma única vez para todos os registros.
   ///
-  /// Retorna `Result<List<DiagnosticoWithWarnings>>`
-  Future<Result<List<DiagnosticoWithWarnings>>> enrichAllWithRelatedData(
+  /// Retorna `Either<Failure, List<DiagnosticoWithWarnings>>`
+  Future<Either<Failure, List<DiagnosticoWithWarnings>>> enrichAllWithRelatedData(
     IHiveManager hiveManager,
   ) async {
     try {
@@ -368,9 +361,7 @@ extension DiagnosticoListEnrichmentExtension on List<DiagnosticoHive> {
         level: 1000,
       );
 
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Left(UnexpectedFailure('Error enriching diagnostico list: $e'));
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 /// Helper centralizado para gerenciar abertura/fechamento seguro de Hive boxes
@@ -26,8 +27,8 @@ class HiveBoxManager {
   /// [boxName] - Nome da box a ser aberta
   /// [operation] - Operação assíncrona a ser executada com a box
   ///
-  /// Retorna um `Result<R>` com o resultado da operação ou erro
-  static Future<Result<R>> withBox<T, R>({
+  /// Retorna um `Either<Failure, R>` com o resultado da operação ou erro
+  static Future<Either<Failure, R>> withBox<T, R>({
     required IHiveManager hiveManager,
     required String boxName,
     required Future<R> Function(Box<T>) operation,
@@ -54,17 +55,12 @@ class HiveBoxManager {
           name: 'HiveBoxManager.withBox',
           level: 900, // Error level
         );
-        return Result.error(boxResult.error!);
+        return Left(CacheFailure('Failed to open box: $boxName'));
       }
 
       final boxData = boxResult.data;
       if (boxData == null) {
-        return Result.error(
-          StorageError(
-            message: 'Box data is null for: $boxName',
-            code: 'NULL_BOX_DATA',
-          ),
-        );
+        return Left(CacheFailure('Box data is null for: $boxName'));
       }
 
       box = boxData;
@@ -77,7 +73,7 @@ class HiveBoxManager {
         name: 'HiveBoxManager.withBox',
       );
 
-      return Result.success(result);
+      return Right(result);
     } catch (e, stackTrace) {
       developer.log(
         'Error during operation on box: $boxName - $e',
@@ -87,13 +83,7 @@ class HiveBoxManager {
         level: 1000, // Severe error
       );
 
-      return Result.error(
-        StorageError(
-          message: 'Failed to execute operation on box: $boxName - $e',
-          code: 'HIVE_OPERATION_ERROR',
-          stackTrace: stackTrace,
-        ),
-      );
+      return Left(CacheFailure('Failed to execute operation on box: $boxName - $e'));
     } finally {
       // SEMPRE fecha a box se ela não estava aberta antes (evita leak)
       if (box != null && !wasBoxAlreadyOpen) {
@@ -128,7 +118,7 @@ class HiveBoxManager {
   /// [boxNames] - Lista de nomes das boxes a serem abertas
   /// [operation] - Operação assíncrona recebendo Map de boxes (nome -> box)
   ///
-  /// Retorna `Result<R>` com resultado da operação ou erro
+  /// Retorna `Either<Failure, R>` com resultado da operação ou erro
   ///
   /// Exemplo:
   /// ```dart
@@ -142,7 +132,7 @@ class HiveBoxManager {
   ///   },
   /// );
   /// ```
-  static Future<Result<R>> withMultipleBoxes<R>({
+  static Future<Either<Failure, R>> withMultipleBoxes<R>({
     required IHiveManager hiveManager,
     required List<String> boxNames,
     required Future<R> Function(Map<String, Box<dynamic>>) operation,
@@ -168,7 +158,7 @@ class HiveBoxManager {
             name: 'HiveBoxManager.withMultipleBoxes',
             level: 900,
           );
-          return Result.error(boxResult.error!);
+          return Left(CacheFailure('Failed to open box: $boxName'));
         }
 
         boxes[boxName] = boxResult.data!;
@@ -182,7 +172,7 @@ class HiveBoxManager {
         name: 'HiveBoxManager.withMultipleBoxes',
       );
 
-      return Result.success(result);
+      return Right(result);
     } catch (e, stackTrace) {
       developer.log(
         'Error during multi-box operation - $e',
@@ -192,13 +182,7 @@ class HiveBoxManager {
         level: 1000,
       );
 
-      return Result.error(
-        StorageError(
-          message: 'Failed to execute multi-box operation - $e',
-          code: 'HIVE_MULTI_BOX_ERROR',
-          stackTrace: stackTrace,
-        ),
-      );
+      return Left(CacheFailure('Failed to execute multi-box operation - $e'));
     } finally {
       // SEMPRE fecha as boxes que não estavam abertas antes
       // Fecha APENAS boxes que foram abertas com sucesso (estão no Map boxes)
@@ -238,7 +222,7 @@ class HiveBoxManager {
   /// Conveniência: executa operação read-only em uma box
   ///
   /// Idêntico ao withBox, mas semanticamente indica operação de leitura
-  static Future<Result<R>> readBox<T, R>({
+  static Future<Either<Failure, R>> readBox<T, R>({
     required IHiveManager hiveManager,
     required String boxName,
     required Future<R> Function(Box<T>) operation,
@@ -253,7 +237,7 @@ class HiveBoxManager {
   /// Conveniência: executa operação write em uma box
   ///
   /// Idêntico ao withBox, mas semanticamente indica operação de escrita
-  static Future<Result<R>> writeBox<T, R>({
+  static Future<Either<Failure, R>> writeBox<T, R>({
     required IHiveManager hiveManager,
     required String boxName,
     required Future<R> Function(Box<T>) operation,

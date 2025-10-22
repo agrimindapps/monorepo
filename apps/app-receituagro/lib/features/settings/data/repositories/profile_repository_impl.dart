@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
 import '../../../../core/providers/receituagro_auth_notifier.dart';
 import '../../domain/repositories/profile_repository.dart';
 
 /// Conversão de Result<T> para Either<Failure, T>
+/// Bridge function to convert core package Result to Either
+// ignore: deprecated_member_use
 Either<Failure, T> _resultToEither<T>(Result<T> result) {
   if (result.isError) {
     return Left(ServerFailure(result.error!.message));
@@ -14,6 +17,8 @@ Either<Failure, T> _resultToEither<T>(Result<T> result) {
 }
 
 /// Conversão de Result<void> para Either<Failure, Unit>
+/// Bridge function to convert core package Result to Either
+// ignore: deprecated_member_use
 Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
   if (result.isError) {
     return Left(ServerFailure(result.error!.message));
@@ -22,7 +27,9 @@ Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
 }
 
 /// Conversão async de Result<T> para Either<Failure, T>
+/// Bridge function to convert core package Result to Either
 Future<Either<Failure, T>> _resultToEitherAsync<T>(
+  // ignore: deprecated_member_use
   Future<Result<T>> futureResult,
 ) async {
   final result = await futureResult;
@@ -30,7 +37,9 @@ Future<Either<Failure, T>> _resultToEitherAsync<T>(
 }
 
 /// Conversão async de Result<void> para Either<Failure, Unit>
+/// Bridge function to convert core package Result to Either
 Future<Either<Failure, Unit>> _resultToEitherUnitAsync(
+  // ignore: deprecated_member_use
   Future<Result<void>> futureResult,
 ) async {
   final result = await futureResult;

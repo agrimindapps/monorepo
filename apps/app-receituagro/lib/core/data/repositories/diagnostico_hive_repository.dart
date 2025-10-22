@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 import '../models/diagnostico_hive.dart';
 
@@ -144,7 +145,7 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Result<void>> loadFromJson(
+  Future<Either<Failure, void>> loadFromJson(
     List<Map<String, dynamic>> jsonData,
     String version,
   ) async {
@@ -156,47 +157,41 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
         items[diagnostico.idReg] = diagnostico;
       }
 
-      return await saveAll(items);
+      final result = await saveAll(items);
+      if (result.isError) {
+        return Left(CacheFailure(result.error!.message));
+      }
+      return const Right(null);
     } catch (e) {
-      return Result.error(
-        StorageError(
-          message: 'Failed to load from JSON',
-          code: 'LOAD_FROM_JSON_ERROR',
-        ),
-      );
+      return Left(CacheFailure('Failed to load from JSON: $e'));
     }
   }
 
   /// Salva um diagnóstico usando seu `idReg` como chave no box.
-  /// Retorna um Result indicando sucesso ou falha.
-  Future<Result<void>> saveWithIdReg(DiagnosticoHive item) async {
+  /// Retorna um Either indicando sucesso ou falha.
+  Future<Either<Failure, void>> saveWithIdReg(DiagnosticoHive item) async {
     try {
       final key = item.idReg;
       if (key.isEmpty) {
-        return Result.error(
-          StorageError(
-            message: 'Cannot save Diagnostico: idReg is null or empty',
-            code: 'MISSING_IDREG',
-          ),
+        return Left(
+          ValidationFailure('Cannot save Diagnostico: idReg is null or empty'),
         );
       }
 
       // Use BaseHiveRepository.save with explicit key to guarantee consistent keying
       final result = await save(item, key: key);
-      return result;
+      if (result.isError) {
+        return Left(CacheFailure(result.error!.message));
+      }
+      return const Right(null);
     } catch (e) {
-      return Result.error(
-        StorageError(
-          message: 'Error saving Diagnostico: $e',
-          code: 'SAVE_ERROR',
-        ),
-      );
+      return Left(CacheFailure('Error saving Diagnostico: $e'));
     }
   }
 
   /// Salva um diagnóstico validando campos obrigatórios (fkIdDefensivo, fkIdCultura, fkIdPraga).
   /// Emite uma warning (developer.log) se algum campo faltar, mas ainda tenta salvar com idReg.
-  Future<Result<void>> saveSafe(DiagnosticoHive item) async {
+  Future<Either<Failure, void>> saveSafe(DiagnosticoHive item) async {
     try {
       final missing = <String>[];
       if (item.fkIdDefensivo.isEmpty) missing.add('fkIdDefensivo');
@@ -212,9 +207,7 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
 
       return await saveWithIdReg(item);
     } catch (e) {
-      return Result.error(
-        StorageError(message: 'Error in saveSafe: $e', code: 'SAVE_SAFE_ERROR'),
-      );
+      return Left(CacheFailure('Error in saveSafe: $e'));
     }
   }
 }

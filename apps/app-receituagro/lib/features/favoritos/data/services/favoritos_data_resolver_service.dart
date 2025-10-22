@@ -1,12 +1,14 @@
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart' show GetIt, Result;
+import 'package:core/core.dart' show GetIt;
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/data/repositories/diagnostico_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../../../core/data/repositories/pragas_hive_repository.dart';
+import '../../../../core/errors/failures.dart';
 import '../../domain/entities/favorito_entity.dart';
 
 /// Service especializado para resolver dados de favoritos
@@ -131,15 +133,23 @@ class FavoritosDataResolverService {
       final diagRepo = GetIt.instance<DiagnosticoHiveRepository>();
       final diagResult = await diagRepo.getAll();
 
-      if (diagResult is Result && diagResult.isError) {
-        if (kDebugMode) {
-          developer.log('Erro ao buscar diagnóstico', name: 'DataResolver');
+      // Handle both Result<T> (legacy) and direct List responses
+      List<dynamic> diagData;
+      if (diagResult is List) {
+        diagData = diagResult;
+      } else {
+        // Legacy Result<T> handling
+        final resultData = diagResult as dynamic;
+        if (resultData.isError) {
+          if (kDebugMode) {
+            developer.log('Erro ao buscar diagnóstico', name: 'DataResolver');
+          }
+          return _getDiagnosticoFallback(id);
         }
-        return _getDiagnosticoFallback(id);
+        diagData = resultData.data as List;
       }
 
-      final diagData = diagResult is Result ? diagResult.data! : diagResult;
-      final diagnostico = (diagData as List).firstWhere(
+      final diagnostico = diagData.firstWhere(
         (item) => (item as dynamic).idReg == id || (item as dynamic).objectId == id,
         orElse: () => throw Exception('Diagnóstico não encontrado'),
       ) as dynamic;
@@ -309,18 +319,26 @@ class FavoritosDataResolverService {
       final repository = getRepository();
       final result = await repository.getAll();
 
-      if (result is Result && result.isError) {
-        if (kDebugMode) {
-          developer.log(
-            'Erro ao buscar dados do repositório: ${result.error}',
-            name: 'DataResolver',
-          );
+      // Handle both Result<T> (legacy) and direct List responses
+      List<dynamic> data;
+      if (result is List) {
+        data = result;
+      } else {
+        // Legacy Result<T> handling
+        final resultData = result as dynamic;
+        if (resultData.isError) {
+          if (kDebugMode) {
+            developer.log(
+              'Erro ao buscar dados do repositório: ${resultData.error}',
+              name: 'DataResolver',
+            );
+          }
+          return fallbackData;
         }
-        return fallbackData;
+        data = resultData.data as List;
       }
 
-      final data = result is Result ? result.data! : result;
-      final item = (data as List).firstWhere(
+      final item = data.firstWhere(
         matcher,
         orElse: () => throw Exception('Item não encontrado'),
       );

@@ -11,6 +11,7 @@ import '../data/models/plantas_inf_hive.dart';
 import '../data/models/pragas_hive.dart';
 import '../data/models/pragas_inf_hive.dart';
 import '../data/models/premium_status_hive.dart';
+import '../data/models/sync_queue_item.dart';
 
 /// Registry centralizado para registro de todos os adapters Hive
 /// ✅ PADRÃO APP-PLANTIS: Apenas registra adapters, NÃO abre boxes
@@ -40,6 +41,9 @@ class HiveAdapterRegistry {
       Hive.registerAdapter(PremiumStatusHiveAdapter());
       Hive.registerAdapter(ComentarioHiveAdapter());
       Hive.registerAdapter(FavoritoItemHiveAdapter());
+
+      // P1.3 - Sync infrastructure
+      Hive.registerAdapter(SyncQueueItemAdapter());
 
       _isRegistered = true;
 

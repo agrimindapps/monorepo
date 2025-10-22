@@ -77,18 +77,20 @@ class ReceitaAgroBoxes {
     // UnifiedSyncManager (favoritos, comentarios, user_settings, etc.)
     // sem prefixo receituagro_
     //
-    // ⚠️ CRÍTICO: Marcadas como persistent:false porque:
-    // 1. BoxRegistryService abre como Box<dynamic>
-    // 2. HiveManager precisa de Box<T> específico (Box<ComentarioHive>, etc.)
-    // 3. Cast Box<dynamic> → Box<T> é IMPOSSÍVEL em Dart (generics invariantes)
-    // 4. HiveManager abrirá com tipo correto quando BaseHiveRepository precisar
+    // ✅ FIXED (P0.2): Changed persistent:false → persistent:true
+    // RAZÃO: persistent:false causava race conditions (window de 15-30ms)
+    // onde sync tentava acessar boxes antes delas estarem abertas.
+    //
+    // SOLUÇÃO: BoxRegistryService abre como Box<dynamic> automaticamente.
+    // Repositórios que precisam Box<T> específico devem usar HiveManager,
+    // que verifica Hive.isBoxOpen() e faz cast seguro.
 
     BoxConfiguration.basic(
       name: 'favoritos',  // Nome usado pelo UnifiedSyncManager
       appId: 'receituagro',
     ).copyWith(
       version: 1,
-      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
+      persistent: true,  // ✅ FIXED (P0.2): Auto-opened by BoxRegistryService
       metadata: {
         'description': 'Favoritos sincronizados (defensivos, pragas, diagnósticos, culturas)',
         'sync_enabled': true,
@@ -101,7 +103,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
-      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
+      persistent: true,  // ✅ FIXED (P0.2): Auto-opened by BoxRegistryService
       metadata: {
         'description': 'Comentários do usuário sincronizados',
         'sync_enabled': true,
@@ -114,7 +116,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
-      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
+      persistent: true,  // ✅ FIXED (P0.2): Auto-opened by BoxRegistryService
       metadata: {
         'description': 'Configurações do usuário sincronizadas',
         'sync_enabled': true,
@@ -127,7 +129,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
-      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
+      persistent: true,  // ✅ FIXED (P0.2): Auto-opened by BoxRegistryService
       metadata: {
         'description': 'Histórico de ações do usuário',
         'sync_enabled': true,
@@ -140,7 +142,7 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
-      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
+      persistent: true,  // ✅ FIXED (P0.2): Auto-opened by BoxRegistryService
       metadata: {
         'description': 'Dados de assinatura premium sincronizados',
         'sync_enabled': true,
@@ -153,11 +155,28 @@ class ReceitaAgroBoxes {
       appId: 'receituagro',
     ).copyWith(
       version: 1,
-      persistent: false,  // ⚠️ HiveManager abrirá com tipo correto
+      persistent: true,  // ✅ FIXED (P0.2): Auto-opened by BoxRegistryService
       metadata: {
         'description': 'Dados do usuário sincronizados',
         'sync_enabled': true,
         'realtime': true,
+      },
+    ),
+
+    // ========================================================================
+    // SYNC QUEUE BOX - P1.3
+    // ========================================================================
+    // Box para armazenar operações de sync pendentes (offline-first pattern)
+    BoxConfiguration.basic(
+      name: 'syncQueue',
+      appId: 'receituagro',
+    ).copyWith(
+      version: 1,
+      persistent: true,  // IMPORTANTE: Deve ser persistent para sobreviver restarts
+      metadata: {
+        'description': 'Fila de operações de sincronização pendentes',
+        'sync_enabled': false,  // Não sincroniza a fila em si
+        'realtime': false,
       },
     ),
   ];

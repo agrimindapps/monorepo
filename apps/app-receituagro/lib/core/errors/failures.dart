@@ -23,3 +23,9 @@ class NetworkFailure extends Failure {
   const NetworkFailure(String message, {super.code, super.details})
       : super(message: message);
 }
+
+/// Sync failure específico para este app
+class SyncFailure extends Failure {
+  const SyncFailure(String message, {super.code, super.details})
+      : super(message: message);
+}

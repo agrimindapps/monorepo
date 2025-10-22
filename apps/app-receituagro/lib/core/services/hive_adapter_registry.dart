@@ -11,7 +11,7 @@ import '../data/models/plantas_inf_hive.dart';
 import '../data/models/pragas_hive.dart';
 import '../data/models/pragas_inf_hive.dart';
 import '../data/models/premium_status_hive.dart';
-import '../data/models/sync_queue_item.dart';
+// import '../data/models/sync_queue_item.dart'; // TODO: Uncomment after build_runner generates .g.dart
 
 /// Registry centralizado para registro de todos os adapters Hive
 /// ✅ PADRÃO APP-PLANTIS: Apenas registra adapters, NÃO abre boxes
@@ -43,7 +43,8 @@ class HiveAdapterRegistry {
       Hive.registerAdapter(FavoritoItemHiveAdapter());
 
       // P1.3 - Sync infrastructure
-      Hive.registerAdapter(SyncQueueItemAdapter());
+      // TODO: Uncomment after running build_runner (requires Dart SDK ≥3.9.0)
+      // Hive.registerAdapter(SyncQueueItemAdapter());
 
       _isRegistered = true;
 

@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SyncStatus;
 import '../../sync/sync_status.dart';
 
 /// Base sync model for all Hive models in the ReceituAgro app

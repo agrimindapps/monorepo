@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ConflictResolutionStrategy;
 import '../data/models/base_sync_model.dart';
 import '../data/models/comentario_hive.dart';
 import '../data/models/diagnostico_hive.dart';
@@ -58,14 +58,19 @@ class ConflictResolver {
   ) {
     // Para comentários, preferimos local se foi editado mais recentemente
     // mas preservamos informações importantes do remote
+    final isLocalNewer = (local.updatedAt ?? 0) >= (remote.updatedAt ?? 0);
+
     return ComentarioHive(
-      comentarioId: local.comentarioId,
-      culturaId: local.culturaId ?? remote.culturaId,
-      autorNome: local.autorNome ?? remote.autorNome,
-      autorAvatar: local.autorAvatar ?? remote.autorAvatar,
-      comentario: local.comentario.isNotEmpty ? local.comentario : remote.comentario,
-      data: local.data ?? remote.data,
-      isOffline: false, // Após merge, não é mais offline-only
+      objectId: local.objectId ?? remote.objectId,
+      createdAt: local.createdAt ?? remote.createdAt,
+      updatedAt: isLocalNewer ? local.updatedAt : remote.updatedAt,
+      idReg: local.idReg,
+      status: isLocalNewer ? local.status : remote.status,
+      titulo: isLocalNewer && local.titulo.isNotEmpty ? local.titulo : remote.titulo,
+      conteudo: isLocalNewer && local.conteudo.isNotEmpty ? local.conteudo : remote.conteudo,
+      ferramenta: local.ferramenta.isNotEmpty ? local.ferramenta : remote.ferramenta,
+      pkIdentificador: local.pkIdentificador,
+      userId: local.userId.isNotEmpty ? local.userId : remote.userId,
     );
   }
 
@@ -75,25 +80,31 @@ class ConflictResolver {
     DiagnosticoHive remote,
   ) {
     // Para diagnósticos, mesclamos informações preservando dados locais mais recentes
+    final isLocalNewer = local.updatedAt >= remote.updatedAt;
+
     return DiagnosticoHive(
-      diagnosticoId: local.diagnosticoId,
-      culturaId: local.culturaId ?? remote.culturaId,
-      tituloReclamacao: local.tituloReclamacao.isNotEmpty
-          ? local.tituloReclamacao
-          : remote.tituloReclamacao,
-      descricaoReclamacao: local.descricaoReclamacao.isNotEmpty
-          ? local.descricaoReclamacao
-          : remote.descricaoReclamacao,
-      imagensReclamacao: local.imagensReclamacao.isNotEmpty
-          ? local.imagensReclamacao
-          : remote.imagensReclamacao,
-      diagnostico: local.diagnostico ?? remote.diagnostico,
-      recomendacao: local.recomendacao ?? remote.recomendacao,
-      fitossanitariosRecomendados: local.fitossanitariosRecomendados.isNotEmpty
-          ? local.fitossanitariosRecomendados
-          : remote.fitossanitariosRecomendados,
-      data: local.data ?? remote.data,
-      processado: local.processado || remote.processado,
+      objectId: local.objectId,
+      createdAt: local.createdAt,
+      updatedAt: isLocalNewer ? local.updatedAt : remote.updatedAt,
+      idReg: local.idReg,
+      fkIdDefensivo: isLocalNewer ? local.fkIdDefensivo : remote.fkIdDefensivo,
+      nomeDefensivo: local.nomeDefensivo ?? remote.nomeDefensivo,
+      fkIdCultura: isLocalNewer ? local.fkIdCultura : remote.fkIdCultura,
+      nomeCultura: local.nomeCultura ?? remote.nomeCultura,
+      fkIdPraga: isLocalNewer ? local.fkIdPraga : remote.fkIdPraga,
+      nomePraga: local.nomePraga ?? remote.nomePraga,
+      dsMin: local.dsMin ?? remote.dsMin,
+      dsMax: isLocalNewer ? local.dsMax : remote.dsMax,
+      um: isLocalNewer ? local.um : remote.um,
+      minAplicacaoT: local.minAplicacaoT ?? remote.minAplicacaoT,
+      maxAplicacaoT: local.maxAplicacaoT ?? remote.maxAplicacaoT,
+      umT: local.umT ?? remote.umT,
+      minAplicacaoA: local.minAplicacaoA ?? remote.minAplicacaoA,
+      maxAplicacaoA: local.maxAplicacaoA ?? remote.maxAplicacaoA,
+      umA: local.umA ?? remote.umA,
+      intervalo: local.intervalo ?? remote.intervalo,
+      intervalo2: local.intervalo2 ?? remote.intervalo2,
+      epocaAplicacao: local.epocaAplicacao ?? remote.epocaAplicacao,
     );
   }
 

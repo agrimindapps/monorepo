@@ -29,8 +29,8 @@ import '../../features/plants/domain/repositories/spaces_repository.dart';
 import '../../features/settings/data/datasources/settings_local_datasource.dart';
 import '../../features/settings/data/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
-import '../../features/settings/presentation/providers/notifications_settings_provider.dart';
-import '../../features/settings/presentation/providers/settings_provider.dart';
+// Settings providers moved to Riverpod notifiers
+// See: settings_notifier.dart and notifications_settings_notifier.dart
 import '../../features/tasks/domain/repositories/tasks_repository.dart';
 import '../auth/auth_state_notifier.dart';
 import '../config/security_config.dart';
@@ -277,24 +277,17 @@ void _initPremium() {
 }
 
 void _initSettings() {
+  // Datasource & Repository (still needed by Riverpod notifiers)
   sl.registerLazySingleton<SettingsLocalDataSource>(
     () => SettingsLocalDataSource(prefs: sl<SharedPreferences>()),
   );
   sl.registerLazySingleton<ISettingsRepository>(
     () => SettingsRepository(localDataSource: sl<SettingsLocalDataSource>()),
   );
-  sl.registerLazySingleton<SettingsProvider>(
-    () => SettingsProvider(
-      settingsRepository: sl<ISettingsRepository>(),
-      notificationService: sl<PlantisNotificationService>(),
-    )..initialize(), // Auto-initialize for better UX
-  );
-  sl.registerFactory(
-    () => NotificationsSettingsProvider(
-      notificationService: sl<PlantisNotificationService>(),
-      prefs: sl<SharedPreferences>(),
-    ),
-  );
+
+  // Providers migrated to Riverpod notifiers:
+  // - SettingsProvider → settingsNotifierProvider
+  // - NotificationsSettingsProvider → notificationsSettingsNotifierProvider
 }
 
 void _initAppServices() {

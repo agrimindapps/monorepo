@@ -245,19 +245,15 @@ extension DiagnosticoEnrichmentExtension on DiagnosticoHive {
   }
 
   /// Helper para buscar item em uma box pelo ID
+  /// Otimizado para O(1) usando lookup direto pela key do Hive
   T? _findInBox<T>(
     Box<dynamic> box,
     String id,
     String Function(T) idExtractor,
   ) {
-    for (final item in box.values) {
-      if (item is T) {
-        if (idExtractor(item) == id) {
-          return item;
-        }
-      }
-    }
-    return null;
+    // O(1) direct lookup - assumes box keys match idReg
+    final item = box.get(id);
+    return (item is T) ? item : null;
   }
 }
 

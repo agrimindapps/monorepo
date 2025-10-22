@@ -5,10 +5,18 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import '../../../core/utils/hive_box_manager.dart';
 
 import '../../../features/comentarios/data/comentario_model.dart';
+import '../../../features/comentarios/domain/entities/comentario_entity.dart';
+import '../../../features/comentarios/domain/repositories/i_comentarios_repository.dart';
 import '../../../features/favoritos/data/favorito_defensivo_model.dart';
+import '../../../features/favoritos/domain/entities/favorito_entity.dart';
+import '../../../features/favoritos/domain/repositories/i_favoritos_repository.dart';
 import '../models/app_settings_model.dart';
 
 /// Repository para gerenciar dados específicos do usuário com sincronização
+///
+/// Delegation Pattern: Delega operações especializadas para repositórios dedicados
+/// - Favoritos → IFavoritosRepository (FavoritosRepositorySimplified)
+/// - Comentários → IComentariosRepository (ComentariosRepositoryImpl)
 class UserDataRepository {
   static const String _appSettingsBoxName = 'app_settings';
   static const String _subscriptionDataBoxName = 'subscription_data';
@@ -16,8 +24,17 @@ class UserDataRepository {
   // FIXED (P0.3): Inject IHiveManager to use HiveBoxManager pattern
   final IHiveManager _hiveManager;
 
-  UserDataRepository([IHiveManager? hiveManager])
-      : _hiveManager = hiveManager ?? GetIt.instance<IHiveManager>();
+  // Specialized repositories for delegation (Dependency Injection)
+  final IFavoritosRepository _favoritosRepository;
+  final IComentariosRepository _comentariosRepository;
+
+  UserDataRepository({
+    IHiveManager? hiveManager,
+    IFavoritosRepository? favoritosRepository,
+    IComentariosRepository? comentariosRepository,
+  })  : _hiveManager = hiveManager ?? GetIt.instance<IHiveManager>(),
+        _favoritosRepository = favoritosRepository ?? GetIt.instance<IFavoritosRepository>(),
+        _comentariosRepository = comentariosRepository ?? GetIt.instance<IComentariosRepository>();
 
   /// Obtém o userId atual via Firebase Auth (synchronous access)
   String? get currentUserId {
@@ -50,9 +67,10 @@ class UserDataRepository {
         },
       );
 
-      return result.isSuccess
-          ? Right(result.data)
-          : Left(Exception('Error getting app settings: ${result.error}'));
+      return result.fold(
+        (failure) => Left(Exception('Error getting app settings: $failure')),
+        (data) => Right(data),
+      );
     } catch (e) {
       return Left(Exception('Error getting app settings: $e'));
     }
@@ -90,9 +108,10 @@ class UserDataRepository {
         },
       );
 
-      return result.isSuccess
-          ? const Right(null)
-          : Left(Exception('Error saving app settings: ${result.error}'));
+      return result.fold(
+        (failure) => Left(Exception('Error saving app settings: $failure')),
+        (_) => const Right(null),
+      );
     } catch (e) {
       return Left(Exception('Error saving app settings: $e'));
     }
@@ -139,23 +158,23 @@ class UserDataRepository {
         },
       );
 
-      if (result.isError) {
-        return Left(Exception('Error getting subscription data: ${result.error}'));
-      }
+      return result.fold(
+        (failure) => Left(Exception('Error getting subscription data: $failure')),
+        (subscriptionMap) {
+          if (subscriptionMap == null) {
+            return const Right(null);
+          }
 
-      final subscriptionMap = result.data;
-      if (subscriptionMap == null) {
-        return const Right(null);
-      }
-
-      try {
-        final entity = SubscriptionEntity.fromFirebaseMap(
-          Map<String, dynamic>.from(subscriptionMap),
-        );
-        return Right(entity);
-      } catch (e) {
-        return Left(Exception('Error parsing subscription data: $e'));
-      }
+          try {
+            final entity = SubscriptionEntity.fromFirebaseMap(
+              Map<String, dynamic>.from(subscriptionMap),
+            );
+            return Right(entity);
+          } catch (e) {
+            return Left(Exception('Error parsing subscription data: $e'));
+          }
+        },
+      );
     } catch (e) {
       return Left(Exception('Error getting subscription data: $e'));
     }
@@ -194,15 +213,23 @@ class UserDataRepository {
         },
       );
 
-      return result.isSuccess
-          ? const Right(null)
-          : Left(Exception('Error saving subscription data: ${result.error}'));
+      return result.fold(
+        (failure) => Left(Exception('Error saving subscription data: $failure')),
+        (_) => const Right(null),
+      );
     } catch (e) {
       return Left(Exception('Error saving subscription data: $e'));
     }
   }
 
-  /// Obtém favoritos do usuário atual
+  // ========================================================================
+  // FAVORITOS - Delegation to IFavoritosRepository
+  // ========================================================================
+
+  /// Obtém favoritos do usuário atual (APENAS defensivos)
+  ///
+  /// DELEGATION: Delega para IFavoritosRepository.getByTipo('defensivo')
+  /// Converte FavoritoDefensivoEntity → FavoritoDefensivoModel para compatibilidade
   Future<Either<Exception, List<FavoritoDefensivoModel>>> getFavoritos() async {
     try {
       final userId = currentUserId;
@@ -210,13 +237,36 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      return const Right([]);
+      // Delega para FavoritosRepository
+      final favoritos = await _favoritosRepository.getByTipo(TipoFavorito.defensivo);
+
+      // Converte entities para models
+      final models = favoritos
+          .whereType<FavoritoDefensivoEntity>()
+          .map((entity) => FavoritoDefensivoModel(
+                id: int.tryParse(entity.id) ?? 0,
+                idReg: entity.id,
+                line1: entity.line1,
+                line2: entity.line2,
+                nomeComum: entity.nomeComum,
+                ingredienteAtivo: entity.ingredienteAtivo,
+                fabricante: entity.fabricante,
+                dataCriacao: entity.adicionadoEm ?? DateTime.now(),
+                userId: userId,
+                synchronized: false,
+              ))
+          .toList();
+
+      return Right(models);
     } catch (e) {
       return Left(Exception('Error getting favoritos: $e'));
     }
   }
 
   /// Salva favorito para o usuário atual
+  ///
+  /// DELEGATION: Delega para IFavoritosRepository.addFavorito()
+  /// Nota: FavoritoDefensivoModel contém apenas display data, não precisa persistir tudo
   Future<Either<Exception, void>> saveFavorito(
     FavoritoDefensivoModel favorito,
   ) async {
@@ -225,11 +275,17 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-      favorito.copyWith(
-        userId: userId,
-        synchronized: false,
-        updatedAt: DateTime.now(),
-      );
+
+      // Delega para FavoritosRepository (salva apenas o ID)
+      // O repository já cuida de verificar usuário e sincronizar
+      final success = await (_favoritosRepository as dynamic).addFavorito(
+        TipoFavorito.defensivo,
+        favorito.idReg,
+      ) as bool;
+
+      if (success == false) {
+        return Left(Exception('Failed to save favorito'));
+      }
 
       return const Right(null);
     } catch (e) {
@@ -238,11 +294,23 @@ class UserDataRepository {
   }
 
   /// Remove favorito do usuário atual
+  ///
+  /// DELEGATION: Delega para IFavoritosRepository.removeFavorito()
   Future<Either<Exception, void>> removeFavorito(int favoritoId) async {
     try {
       final userId = currentUserId;
       if (userId == null) {
         return Left(Exception('No user logged in'));
+      }
+
+      // Delega para FavoritosRepository
+      final success = await (_favoritosRepository as dynamic).removeFavorito(
+        TipoFavorito.defensivo,
+        favoritoId.toString(),
+      ) as bool;
+
+      if (success == false) {
+        return Left(Exception('Failed to remove favorito'));
       }
 
       return const Right(null);
@@ -251,7 +319,14 @@ class UserDataRepository {
     }
   }
 
+  // ========================================================================
+  // COMENTÁRIOS - Delegation to IComentariosRepository
+  // ========================================================================
+
   /// Obtém comentários do usuário atual
+  ///
+  /// DELEGATION: Delega para IComentariosRepository.getAllComentarios()
+  /// Converte ComentarioEntity → ComentarioModel para compatibilidade
   Future<Either<Exception, List<ComentarioModel>>> getComentarios() async {
     try {
       final userId = currentUserId;
@@ -259,13 +334,33 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
-      return const Right([]);
+      // Delega para ComentariosRepository
+      final entities = await _comentariosRepository.getAllComentarios();
+
+      // Converte entities para models
+      final models = entities.map((entity) => ComentarioModel(
+            id: entity.id,
+            idReg: entity.idReg,
+            titulo: entity.titulo,
+            conteudo: entity.conteudo,
+            ferramenta: entity.ferramenta,
+            pkIdentificador: entity.pkIdentificador,
+            status: entity.status,
+            createdAt: entity.createdAt,
+            updatedAt: entity.updatedAt,
+            userId: userId,
+            synchronized: false,
+          )).toList();
+
+      return Right(models);
     } catch (e) {
       return Left(Exception('Error getting comentarios: $e'));
     }
   }
 
   /// Salva comentário para o usuário atual
+  ///
+  /// DELEGATION: Delega para IComentariosRepository.addComentario()
   Future<Either<Exception, void>> saveComentario(
     ComentarioModel comentario,
   ) async {
@@ -274,12 +369,22 @@ class UserDataRepository {
       if (userId == null) {
         return Left(Exception('No user logged in'));
       }
-      comentario.copyWith(
-        userId: userId,
-        synchronized: false,
-        syncedAt: null,
+
+      // Converte model para entity
+      final entity = ComentarioEntity(
+        id: comentario.id,
+        idReg: comentario.idReg,
+        titulo: comentario.titulo,
+        conteudo: comentario.conteudo,
+        ferramenta: comentario.ferramenta,
+        pkIdentificador: comentario.pkIdentificador,
+        status: comentario.status,
+        createdAt: comentario.createdAt,
         updatedAt: DateTime.now(),
       );
+
+      // Delega para ComentariosRepository
+      await _comentariosRepository.addComentario(entity);
 
       return const Right(null);
     } catch (e) {
@@ -288,6 +393,8 @@ class UserDataRepository {
   }
 
   /// Remove comentário do usuário atual
+  ///
+  /// DELEGATION: Delega para IComentariosRepository.deleteComentario()
   Future<Either<Exception, void>> removeComentario(String comentarioId) async {
     try {
       final userId = currentUserId;
@@ -295,11 +402,18 @@ class UserDataRepository {
         return Left(Exception('No user logged in'));
       }
 
+      // Delega para ComentariosRepository (soft delete)
+      await _comentariosRepository.deleteComentario(comentarioId);
+
       return const Right(null);
     } catch (e) {
       return Left(Exception('Error removing comentario: $e'));
     }
   }
+
+  // ========================================================================
+  // SYNC OPERATIONS
+  // ========================================================================
 
   /// Obtém todos os itens não sincronizados do usuário
   Future<Either<Exception, Map<String, List<dynamic>>>>
@@ -347,6 +461,9 @@ class UserDataRepository {
   }
 
   /// Marca item como sincronizado
+  ///
+  /// Nota: Favoritos e Comentários gerenciam sua própria sincronização
+  /// via FavoritosSyncService e ComentariosSyncService
   Future<Either<Exception, void>> markAsSynchronized({
     required String type,
     required String itemId,
@@ -381,9 +498,11 @@ class UserDataRepository {
           });
 
         case 'favoritos':
+          // Favoritos sincronização é gerenciada por FavoritosSyncService
           return const Right(null);
 
         case 'comentarios':
+          // Comentarios sincronização é gerenciada por ComentariosSyncService
           return const Right(null);
 
         default:
@@ -430,9 +549,10 @@ class UserDataRepository {
         },
       );
 
-      return result.isSuccess
-          ? const Right(null)
-          : Left(Exception('Error clearing user data: ${result.error}'));
+      return result.fold(
+        (failure) => Left(Exception('Error clearing user data: $failure')),
+        (_) => const Right(null),
+      );
     } catch (e) {
       return Left(Exception('Error clearing user data: $e'));
     }
@@ -466,16 +586,35 @@ class UserDataRepository {
               .where((sub) => sub['userId'] == userId)
               .length;
 
-          stats['favoritos'] = 0; // Placeholder
-          stats['comentarios'] = 0; // Placeholder
+          // Delegate to specialized repositories for accurate counts
+          try {
+            final favoritosResult = await getFavoritos();
+            favoritosResult.fold(
+              (error) => stats['favoritos'] = 0,
+              (favoritos) => stats['favoritos'] = favoritos.length,
+            );
+          } catch (_) {
+            stats['favoritos'] = 0;
+          }
+
+          try {
+            final comentariosResult = await getComentarios();
+            comentariosResult.fold(
+              (error) => stats['comentarios'] = 0,
+              (comentarios) => stats['comentarios'] = comentarios.length,
+            );
+          } catch (_) {
+            stats['comentarios'] = 0;
+          }
 
           return stats;
         },
       );
 
-      return result.isSuccess
-          ? Right(result.data!)
-          : Left(Exception('Error getting user data stats: ${result.error}'));
+      return result.fold(
+        (failure) => Left(Exception('Error getting user data stats: $failure')),
+        (stats) => Right(stats),
+      );
     } catch (e) {
       return Left(Exception('Error getting user data stats: $e'));
     }

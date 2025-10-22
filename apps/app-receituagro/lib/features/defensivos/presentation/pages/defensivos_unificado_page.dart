@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/receituagro_loading_widget.dart';
 import '../../data/defensivo_view_mode.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/entities/defensivo_group_entity.dart';
@@ -202,8 +203,9 @@ class _DefensivosUnificadoPageState
                       Expanded(
                         child:
                             state.isLoading
-                                ? const Center(
-                                  child: CircularProgressIndicator(),
+                                ? const ReceitaAgroLoadingWidget(
+                                  message: 'Carregando defensivos...',
+                                  submessage: 'Aguarde um momento',
                                 )
                                 : state.hasError
                                 ? _buildErrorState(state)
@@ -215,7 +217,10 @@ class _DefensivosUnificadoPageState
                     ],
                   );
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const ReceitaAgroLoadingWidget(
+                  message: 'Carregando defensivos...',
+                  submessage: 'Aguarde um momento',
+                ),
                 error: (error, stack) => Center(child: Text('Erro: $error')),
               ),
             ),
@@ -395,7 +400,10 @@ class _DefensivosUnificadoPageState
     return drillDownState.when(
       data: (drillDown) {
         if (drillDown.isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return const ReceitaAgroLoadingWidget(
+            message: 'Carregando grupos...',
+            submessage: 'Aguarde um momento',
+          );
         }
 
         if (drillDown.hasError) {
@@ -414,7 +422,9 @@ class _DefensivosUnificadoPageState
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const ReceitaAgroLoadingWidget(
+        message: 'Carregando grupos...',
+      ),
       error: (error, stack) => _buildDrillDownErrorState(null),
     );
   }

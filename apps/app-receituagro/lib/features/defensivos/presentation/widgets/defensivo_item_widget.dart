@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/data/models/fitossanitario_hive.dart';
 import '../../../../core/extensions/fitossanitario_hive_extension.dart';
+import '../../../../core/theme/receituagro_colors.dart';
 
 class DefensivoItemWidget extends StatelessWidget {
   final FitossanitarioHive defensivo;
@@ -132,7 +133,10 @@ class DefensivoItemWidget extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       defensivo.displayIngredient,
-                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: ReceitaAgroColors.textSecondary(isDark),
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -152,7 +156,7 @@ class DefensivoItemWidget extends StatelessWidget {
                             defensivo.displayClass,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: ReceitaAgroColors.textSecondary(isDark),
                             ),
                           ),
                         ),
@@ -222,10 +226,7 @@ class DefensivoItemWidget extends StatelessWidget {
                       defensivo.idReg,
                       style: TextStyle(
                         fontSize: 9,
-                        color:
-                            isDark
-                                ? Colors.grey.shade400
-                                : Colors.grey.shade600,
+                        color: ReceitaAgroColors.textTertiary(isDark),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -242,10 +243,7 @@ class DefensivoItemWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color:
-                            isDark
-                                ? Colors.grey.shade200
-                                : Colors.grey.shade800,
+                        color: ReceitaAgroColors.textPrimary(isDark),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -255,10 +253,7 @@ class DefensivoItemWidget extends StatelessWidget {
                       defensivo.displayIngredient,
                       style: TextStyle(
                         fontSize: 11,
-                        color:
-                            isDark
-                                ? Colors.grey.shade400
-                                : Colors.grey.shade600,
+                        color: ReceitaAgroColors.textSecondary(isDark),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

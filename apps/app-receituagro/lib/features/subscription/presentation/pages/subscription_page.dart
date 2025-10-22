@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
+import '../../../../core/widgets/receituagro_loading_widget.dart';
 import '../providers/subscription_notifier.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
@@ -106,10 +107,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   /// Loading view centralizado
   Widget _buildLoadingView() {
-    return const Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
-      ),
+    return const ReceitaAgroLoadingWidget(
+      message: 'Carregando informações...',
+      submessage: 'Verificando status da assinatura',
     );
   }
 

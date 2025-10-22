@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
@@ -149,7 +150,14 @@ Future<void> init() async {
         () => core.EnhancedStorageService(),
       );
     } catch (e) {
-      if (kDebugMode) print('EnhancedStorageService registration failed: $e');
+      if (kDebugMode) {
+        developer.log(
+          'EnhancedStorageService registration failed',
+          name: 'InjectionContainer',
+          error: e,
+          level: 1000,
+        );
+      }
     }
   }
   if (!kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
@@ -157,25 +165,51 @@ Future<void> init() async {
       sl.registerLazySingleton<core.ILocalStorageRepository>(
         () => sl<core.HiveStorageService>(),
       );
-      if (kDebugMode)
-        print('✅ ILocalStorageRepository registered successfully');
+      if (kDebugMode) {
+        developer.log(
+          'ILocalStorageRepository registered successfully',
+          name: 'InjectionContainer',
+          level: 500,
+        );
+      }
     } catch (e) {
-      if (kDebugMode)
-        print('⚠️ ILocalStorageRepository registration failed: $e');
+      if (kDebugMode) {
+        developer.log(
+          'ILocalStorageRepository registration failed',
+          name: 'InjectionContainer',
+          error: e,
+          level: 900,
+        );
+      }
     }
   } else if (kIsWeb && !sl.isRegistered<core.ILocalStorageRepository>()) {
     try {
       sl.registerLazySingleton<core.ILocalStorageRepository>(
         () => WebLocalStorageRepository(),
       );
-      if (kDebugMode)
-        print('✅ ILocalStorageRepository (Web) registered successfully');
+      if (kDebugMode) {
+        developer.log(
+          'ILocalStorageRepository (Web) registered successfully',
+          name: 'InjectionContainer',
+          level: 500,
+        );
+      }
     } catch (e) {
-      if (kDebugMode)
-        print('⚠️ ILocalStorageRepository (Web) registration failed: $e');
+      if (kDebugMode) {
+        developer.log(
+          'ILocalStorageRepository (Web) registration failed',
+          name: 'InjectionContainer',
+          error: e,
+          level: 900,
+        );
+      }
     }
   } else if (kIsWeb && kDebugMode) {
-    print('⚠️ ILocalStorageRepository already registered on Web');
+    developer.log(
+      'ILocalStorageRepository already registered on Web',
+      name: 'InjectionContainer',
+      level: 900,
+    );
   }
   sl.registerLazySingleton<CulturaHiveRepository>(
     () => CulturaHiveRepository(),
@@ -240,7 +274,14 @@ Future<void> init() async {
   try {
     sl.registerLazySingleton<IPremiumService>(() => MockPremiumService());
   } catch (e) {
-    if (kDebugMode) print('Premium service registration failed: $e');
+    if (kDebugMode) {
+      developer.log(
+        'Premium service registration failed',
+        name: 'InjectionContainer',
+        error: e,
+        level: 1000,
+      );
+    }
   }
 
   sl.registerLazySingleton<ComentariosService>(
@@ -292,13 +333,22 @@ Future<void> init() async {
 
       return service;
     });
-    if (kDebugMode)
-      print(
-        '✅ ReceitaAgroPremiumService registered successfully with core ISubscriptionRepository',
+    if (kDebugMode) {
+      developer.log(
+        'ReceitaAgroPremiumService registered successfully with core ISubscriptionRepository',
+        name: 'InjectionContainer',
+        level: 500,
       );
+    }
   } catch (e) {
-    if (kDebugMode)
-      print('❌ ReceitaAgroPremiumService registration failed: $e');
+    if (kDebugMode) {
+      developer.log(
+        'ReceitaAgroPremiumService registration failed',
+        name: 'InjectionContainer',
+        error: e,
+        level: 1000,
+      );
+    }
     rethrow;
   }
 }

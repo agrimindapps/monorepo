@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/theme/receituagro_colors.dart';
+import '../../../../core/widgets/receituagro_loading_widget.dart';
 import '../../data/defensivo_view_mode.dart';
 
 class DefensivoSearchFieldWidget extends StatefulWidget {
@@ -151,18 +154,13 @@ class _DefensivoSearchFieldWidgetState extends State<DefensivoSearchFieldWidget>
                             );
                           },
                           child: widget.isSearching
-                              ? SizedBox(
+                              ? ReceitaAgroLoadingIndicator(
                                   key: const ValueKey('loading'),
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      widget.isDark
-                                          ? Colors.green.shade300
-                                          : Colors.green.shade700,
-                                    ),
-                                  ),
+                                  size: 20,
+                                  strokeWidth: 2,
+                                  color: widget.isDark
+                                      ? Colors.green.shade300
+                                      : Colors.green.shade700,
                                 )
                               : AnimatedContainer(
                                   key: const ValueKey('search'),
@@ -188,9 +186,7 @@ class _DefensivoSearchFieldWidgetState extends State<DefensivoSearchFieldWidget>
                             decoration: InputDecoration(
                               hintText: _hintText,
                               hintStyle: TextStyle(
-                                color: widget.isDark
-                                    ? Colors.grey.shade500
-                                    : Colors.grey.shade400,
+                                color: ReceitaAgroColors.textPlaceholder(widget.isDark),
                                 fontSize: 14,
                               ),
                               suffixIcon: widget.controller.text.isNotEmpty
@@ -198,9 +194,7 @@ class _DefensivoSearchFieldWidgetState extends State<DefensivoSearchFieldWidget>
                                       onPressed: widget.onClear,
                                       icon: Icon(
                                         Icons.clear_rounded,
-                                        color: widget.isDark
-                                            ? Colors.grey.shade400
-                                            : Colors.grey.shade500,
+                                        color: ReceitaAgroColors.textSecondary(widget.isDark),
                                         size: 20,
                                       ),
                                     )
@@ -215,9 +209,7 @@ class _DefensivoSearchFieldWidgetState extends State<DefensivoSearchFieldWidget>
                                   const EdgeInsets.symmetric(vertical: 14),
                             ),
                             style: TextStyle(
-                              color: widget.isDark
-                                  ? Colors.grey.shade300
-                                  : Colors.grey.shade800,
+                              color: ReceitaAgroColors.textPrimary(widget.isDark),
                               fontSize: 15,
                             ),
                           ),
@@ -283,7 +275,7 @@ class _DefensivoSearchFieldWidgetState extends State<DefensivoSearchFieldWidget>
           size: 18,
           color: isSelected
               ? (widget.isDark ? Colors.green.shade300 : Colors.green.shade700)
-              : (widget.isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+              : ReceitaAgroColors.textSecondary(widget.isDark),
         ),
       ),
     );

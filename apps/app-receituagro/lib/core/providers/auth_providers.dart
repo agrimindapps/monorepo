@@ -1,51 +1,71 @@
 import 'package:core/core.dart' hide AuthState;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../di/injection_container.dart' as di;
 import 'auth_notifier.dart';
 import 'auth_state.dart' as local;
 
-/// **AUTH PROVIDERS - Riverpod StateNotifierProvider**
+part 'auth_providers.g.dart';
+
+/// **AUTH PROVIDERS - Riverpod Code Generation (@riverpod)**
 ///
-/// Maintains StateNotifierProvider pattern for AuthNotifier compatibility.
-/// AuthNotifier already manages its own state using StateNotifier pattern,
-/// so we don't need code generation here - just expose it via providers.
+/// Migrated from StateNotifierProvider to @riverpod code generation pattern.
+/// AuthNotifier remains unchanged (StateNotifier), but providers use modern syntax.
 ///
 /// ## Migration Notes:
 /// - AuthNotifier remains unchanged (StateNotifier)
-/// - Using StateNotifierProvider directly (no @riverpod needed)
+/// - Providers now use @riverpod code generation
 /// - Computed providers for derived state
-/// - Maintains same API for backward compatibility
+/// - Type-safe, auto-dispose, better performance
+///
+/// ## Architecture:
+/// ```
+/// UI Layer → @riverpod Providers → AuthNotifier (StateNotifier) → AuthRepository
+/// ```
 
 // ============================================================================
 // Auth Notifier Provider
 // ============================================================================
 
-/// StateNotifierProvider for authentication
+/// Authentication notifier provider
 /// Exposes AuthNotifier and its state to consumers
-final authProvider = StateNotifierProvider<AuthNotifier, local.AuthState>((ref) {
+@riverpod
+AuthNotifier authNotifier(AuthNotifierRef ref) {
   return di.sl<AuthNotifier>();
-});
+}
+
+/// Auth state provider (convenience)
+/// Provides direct access to AuthState
+@riverpod
+local.AuthState authState(AuthStateRef ref) {
+  final notifier = ref.watch(authNotifierProvider);
+  return notifier.state;
+}
 
 // ============================================================================
 // Derived Providers (computed from auth state)
 // ============================================================================
 
 /// Computed provider: Current authenticated user
-final currentUserProvider = Provider<UserEntity?>((ref) {
-  return ref.watch(authProvider).currentUser;
-});
+@riverpod
+UserEntity? currentUser(CurrentUserRef ref) {
+  return ref.watch(authStateProvider).currentUser;
+}
 
 /// Computed provider: Authentication status
-final isAuthenticatedProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).isAuthenticated;
-});
+@riverpod
+bool isAuthenticated(IsAuthenticatedRef ref) {
+  return ref.watch(authStateProvider).isAuthenticated;
+}
 
 /// Computed provider: Loading state
-final isLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).isLoading;
-});
+@riverpod
+bool isLoading(IsLoadingRef ref) {
+  return ref.watch(authStateProvider).isLoading;
+}
 
 /// Computed provider: Error message
-final errorMessageProvider = Provider<String?>((ref) {
-  return ref.watch(authProvider).errorMessage;
-});
+@riverpod
+String? errorMessage(ErrorMessageRef ref) {
+  return ref.watch(authStateProvider).errorMessage;
+}

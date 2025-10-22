@@ -37,11 +37,9 @@ class ComentariosRepositoryImpl implements IComentariosRepository {
 
   @override
   Future<ComentarioEntity?> getComentarioById(String id) async {
-    final result = await _hiveRepository.getByKey(id);
-    if (result.isFailure || result.data == null) return null;
+    final model = await _hiveRepository.getComentarioById(id);
+    if (model == null) return null;
 
-    final hiveItem = result.data!;
-    final model = hiveItem.toComentarioModel();
     return _modelToEntity(model);
   }
 

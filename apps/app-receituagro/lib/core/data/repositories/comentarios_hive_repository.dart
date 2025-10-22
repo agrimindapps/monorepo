@@ -7,16 +7,32 @@ import '../../../features/comentarios/domain/comentarios_service.dart';
 import '../../services/device_identity_service.dart';
 import '../models/comentario_hive.dart';
 
-class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
-    implements IComentariosRepository {
+/// Repository for comentarios using Hive storage with dynamic boxes.
+/// ✅ FIXED: Changed from BaseHiveRepository typed to direct dynamic box access.
+/// REASON: Box 'comentarios' is opened as dynamic by BoxRegistryService (persistent:true)
+/// and cannot be reopened with specific types (would cause type mismatch error).
+class ComentariosHiveRepository implements IComentariosRepository {
+  final IHiveManager _hiveManager;
+  final String boxName = 'comentarios';
+  Box<dynamic>? _box;
+
   // Sync service para sincronização com Firebase
   late final ComentariosSyncService _syncService;
 
-  ComentariosHiveRepository() : super(
-    hiveManager: GetIt.instance<IHiveManager>(),
-    boxName: 'comentarios',
-  ) {
+  ComentariosHiveRepository() : _hiveManager = GetIt.instance<IHiveManager>() {
     _syncService = ComentariosSyncService();
+  }
+
+  /// Obtém a box como dynamic (já aberta pelo BoxRegistryService)
+  Future<Box<dynamic>> get box async {
+    if (_box != null && _box!.isOpen) return _box!;
+
+    final result = await _hiveManager.getBox<dynamic>(boxName);
+    if (result.isFailure) {
+      throw Exception('Failed to open Hive box: ${result.error?.message}');
+    }
+    _box = result.data;
+    return _box!;
   }
 
   /// Implementação da interface IComentariosRepository
@@ -24,13 +40,17 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<List<ComentarioModel>> getAllComentarios() async {
     try {
       final userId = await _getCurrentUserId();
-      final result = await getAll();
-      
-      if (result.isError) {
-        throw Exception('Erro ao acessar dados: ${result.error}');
+      final hiveBox = await box;
+
+      final hiveitems = <ComentarioHive>[];
+
+      // Itera sobre todos os valores da box e faz cast para ComentarioHive
+      for (final value in hiveBox.values) {
+        if (value is ComentarioHive) {
+          hiveitems.add(value);
+        }
       }
-      
-      final hiveitems = result.data!;
+
       final userComments = hiveitems
           .where((item) => item.status && item.userId == userId)
           .toList()
@@ -55,10 +75,12 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
         hiveComentario.idReg = _generateId();
       }
 
-      // 1. Salva localmente usando BaseHiveRepository
-      final result = await save(hiveComentario, key: hiveComentario.idReg);
-      if (result.isError) {
-        throw Exception('Erro ao salvar: ${result.error}');
+      // 1. Salva localmente usando Box<dynamic>
+      final hiveBox = await box;
+      await hiveBox.put(hiveComentario.idReg, hiveComentario);
+
+      if (kDebugMode) {
+        debugPrint('✅ [ComentariosRepository] Comentário salvo localmente: ${hiveComentario.idReg}');
       }
 
       // 2. Sincroniza com Firebase (igual aos favoritos)
@@ -89,12 +111,9 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<void> updateComentario(ComentarioModel comentario) async {
     try {
       final userId = await _getCurrentUserId();
-      final result = await getByKey(comentario.idReg);
-      if (result.isError) {
-        throw Exception('Erro ao acessar comentário: ${result.error}');
-      }
+      final hiveBox = await box;
 
-      final existing = result.data;
+      final existing = hiveBox.get(comentario.idReg) as ComentarioHive?;
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
@@ -132,12 +151,9 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<void> deleteComentario(String id) async {
     try {
       final userId = await _getCurrentUserId();
-      final result = await getByKey(id);
-      if (result.isError) {
-        throw Exception('Erro ao acessar comentário: ${result.error}');
-      }
+      final hiveBox = await box;
 
-      final existing = result.data;
+      final existing = hiveBox.get(id) as ComentarioHive?;
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
@@ -171,20 +187,42 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
     }
   }
 
+  /// Busca um comentário por ID
+  Future<ComentarioModel?> getComentarioById(String id) async {
+    try {
+      final hiveBox = await box;
+      final value = hiveBox.get(id);
+
+      if (value == null) return null;
+      if (value is! ComentarioHive) return null;
+
+      final userId = await _getCurrentUserId();
+      if (value.userId != userId) return null;
+      if (!value.status) return null; // Só retorna comentários ativos
+
+      return value.toComentarioModel();
+    } catch (e) {
+      throw Exception('Erro ao buscar comentário por ID: $e');
+    }
+  }
+
   /// Busca comentários por pkIdentificador (contexto específico)
   Future<List<ComentarioModel>> getComentariosByContext(String pkIdentificador) async {
     try {
       final userId = await _getCurrentUserId();
-      final result = await getAll();
-      if (result.isError) {
-        throw Exception('Erro ao acessar dados: ${result.error}');
+      final hiveBox = await box;
+
+      final hiveitems = <ComentarioHive>[];
+      for (final value in hiveBox.values) {
+        if (value is ComentarioHive) {
+          hiveitems.add(value);
+        }
       }
-      final hiveitems = result.data!;
-      
+
       final contextComments = hiveitems
-          .where((item) => 
-              item.status && 
-              item.userId == userId && 
+          .where((item) =>
+              item.status &&
+              item.userId == userId &&
               item.pkIdentificador == pkIdentificador)
           .toList()
         ..sort((a, b) {
@@ -203,16 +241,19 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<List<ComentarioModel>> getComentariosByTool(String ferramenta) async {
     try {
       final userId = await _getCurrentUserId();
-      final result = await getAll();
-      if (result.isError) {
-        throw Exception('Erro ao acessar dados: ${result.error}');
+      final hiveBox = await box;
+
+      final hiveitems = <ComentarioHive>[];
+      for (final value in hiveBox.values) {
+        if (value is ComentarioHive) {
+          hiveitems.add(value);
+        }
       }
-      final hiveitems = result.data!;
-      
+
       final toolComments = hiveitems
-          .where((item) => 
-              item.status && 
-              item.userId == userId && 
+          .where((item) =>
+              item.status &&
+              item.userId == userId &&
               item.ferramenta == ferramenta)
           .toList()
         ..sort((a, b) {
@@ -232,15 +273,19 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
       final cutoffTime = now - (90 * 24 * 60 * 60 * 1000); // 90 dias em ms
-      
-      final result = await getAll();
-      if (result.isError) {
-        throw Exception('Erro ao acessar dados: ${result.error}');
+
+      final hiveBox = await box;
+
+      final hiveitems = <ComentarioHive>[];
+      for (final value in hiveBox.values) {
+        if (value is ComentarioHive) {
+          hiveitems.add(value);
+        }
       }
-      final hiveitems = result.data!;
+
       final oldInactiveComments = hiveitems
-          .where((item) => 
-              !item.status && 
+          .where((item) =>
+              !item.status &&
               (item.updatedAt ?? 0) < cutoffTime)
           .toList();
 
@@ -256,20 +301,23 @@ class ComentariosHiveRepository extends BaseHiveRepository<ComentarioHive>
   Future<Map<String, int>> getUserCommentStats() async {
     try {
       final userId = await _getCurrentUserId();
-      final result = await getAll();
-      if (result.isError) {
-        throw Exception('Erro ao acessar dados: ${result.error}');
+      final hiveBox = await box;
+
+      final hiveitems = <ComentarioHive>[];
+      for (final value in hiveBox.values) {
+        if (value is ComentarioHive) {
+          hiveitems.add(value);
+        }
       }
-      final hiveitems = result.data!;
-      
+
       final userComments = hiveitems
-          .where((item) => item.userId == userId)
+          .where((ComentarioHive item) => item.userId == userId)
           .toList();
 
-      final activeComments = userComments.where((item) => item.status).length;
-      final deletedComments = userComments.where((item) => !item.status).length;
+      final activeComments = userComments.where((ComentarioHive item) => item.status).length;
+      final deletedComments = userComments.where((ComentarioHive item) => !item.status).length;
       final toolCounts = <String, int>{};
-      for (final comment in userComments.where((item) => item.status)) {
+      for (final comment in userComments.where((ComentarioHive item) => item.status)) {
         toolCounts[comment.ferramenta] = (toolCounts[comment.ferramenta] ?? 0) + 1;
       }
 

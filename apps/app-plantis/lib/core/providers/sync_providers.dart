@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'sync_providers.freezed.dart';
 part 'sync_providers.g.dart';

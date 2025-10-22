@@ -222,7 +222,7 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     ];
 
     return DropdownButtonFormField<String?>(
-      value: _selectedSpaceId,
+      initialValue: _selectedSpaceId,
       onChanged: (value) {
         if (value == 'CREATE_NEW') {
           setState(() {

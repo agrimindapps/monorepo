@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/plantis_notification_service.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';

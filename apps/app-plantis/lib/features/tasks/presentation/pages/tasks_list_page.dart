@@ -8,7 +8,6 @@ import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../providers/tasks_state.dart';
 import '../widgets/empty_tasks_widget.dart';
 import '../widgets/task_completion_dialog.dart';
 import '../widgets/tasks_error_boundary.dart';

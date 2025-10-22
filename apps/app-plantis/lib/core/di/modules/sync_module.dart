@@ -1,12 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
 
-import '../../services/plantis_sync_service.dart';
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../../features/plants/domain/repositories/plant_tasks_repository.dart';
 import '../../../features/plants/domain/repositories/plants_repository.dart';
 import '../../../features/plants/domain/repositories/spaces_repository.dart';
+import '../../services/plantis_sync_service.dart';
 
 /// Módulo de Dependency Injection para sincronização do Plantis
 /// Registra o PlantisSyncService do core package

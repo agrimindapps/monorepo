@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../../core/services/rate_limiter_service.dart';
 import '../../models/plant_model.dart';
 
 abstract class PlantsRemoteDatasource {
@@ -16,8 +17,12 @@ abstract class PlantsRemoteDatasource {
 
 class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   final FirebaseFirestore firestore;
+  final RateLimiterService rateLimiter;
 
-  PlantsRemoteDatasourceImpl({required this.firestore});
+  PlantsRemoteDatasourceImpl({
+    required this.firestore,
+    required this.rateLimiter,
+  });
 
   String _getUserPlantsPath(String userId) => 'users/$userId/plants';
 
@@ -28,6 +33,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<List<PlantModel>> getPlants(String userId) async {
     try {
+      await rateLimiter.checkLimit('plants.getPlants');
+
       final snapshot =
           await _getPlantsCollection(
             userId,
@@ -59,6 +66,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<PlantModel> getPlantById(String id, String userId) async {
     try {
+      await rateLimiter.checkLimit('plants.getPlantById');
+
       final doc = await _getPlantsCollection(userId).doc(id).get();
 
       if (!doc.exists) {
@@ -84,6 +93,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<PlantModel> addPlant(PlantModel plant, String userId) async {
     try {
+      await rateLimiter.checkLimit('plants.addPlant');
+
       final plantData = plant.toJson();
       plantData.remove('id'); // Remove ID from data, it will be the document ID
 
@@ -101,6 +112,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<PlantModel> updatePlant(PlantModel plant, String userId) async {
     try {
+      await rateLimiter.checkLimit('plants.updatePlant');
+
       final plantData = plant.toJson();
       plantData.remove('id'); // Remove ID from data
 
@@ -154,6 +167,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<void> deletePlant(String id, String userId) async {
     try {
+      await rateLimiter.checkLimit('plants.deletePlant');
+
       await _getPlantsCollection(userId).doc(id).update({
         'isDeleted': true,
         'updatedAt': Timestamp.now(),
@@ -193,6 +208,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     String userId,
   ) async {
     try {
+      await rateLimiter.checkLimit('plants.getPlantsBySpace');
+
       final snapshot =
           await _getPlantsCollection(userId)
               .where('isDeleted', isEqualTo: false)
@@ -227,6 +244,8 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
   @override
   Future<void> syncPlants(List<PlantModel> plants, String userId) async {
     try {
+      await rateLimiter.checkLimit('plants.syncPlants');
+
       final batch = firestore.batch();
       final collection = _getPlantsCollection(userId);
 

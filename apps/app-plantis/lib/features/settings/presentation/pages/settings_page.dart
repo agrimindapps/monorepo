@@ -107,7 +107,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     final photoUrl = user?.photoUrl?.toString() ?? '';
     final initials = (user?.initials as String?) ?? '...';
     final email = (user?.email as String?) ?? 'Carregando...';
-    final memberSince = 'Membro desde...';
+    const memberSince = 'Membro desde...';
 
     return PlantisCard(
       margin: const EdgeInsets.symmetric(vertical: 4),

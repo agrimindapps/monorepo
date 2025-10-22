@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../providers/premium_provider.dart';

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/presentation/providers/plants_notifier.dart';
 import 'realtime_sync_notifier.dart';

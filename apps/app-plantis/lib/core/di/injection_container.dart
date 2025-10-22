@@ -1,9 +1,6 @@
 import 'package:core/core.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
-// MIGRATED TO RIVERPOD - No longer needed in GetIt
-// import '../../features/auth/presentation/providers/auth_provider.dart' as providers;
-// import '../../features/auth/presentation/providers/register_provider.dart';
 import '../../features/data_export/data/datasources/local/export_file_generator.dart';
 import '../../features/data_export/data/datasources/local/plants_export_datasource.dart';
 import '../../features/data_export/data/datasources/local/settings_export_datasource.dart';
@@ -14,8 +11,6 @@ import '../../features/data_export/domain/usecases/delete_export_usecase.dart';
 import '../../features/data_export/domain/usecases/download_export_usecase.dart';
 import '../../features/data_export/domain/usecases/get_export_history_usecase.dart';
 import '../../features/data_export/domain/usecases/request_export_usecase.dart';
-// MIGRATED TO RIVERPOD:
-// import '../../features/data_export/presentation/providers/data_export_provider.dart';
 import '../../features/device_management/data/datasources/device_local_datasource.dart';
 import '../../features/device_management/data/datasources/device_remote_datasource.dart';
 import '../../features/device_management/data/repositories/device_repository_impl.dart';
@@ -28,13 +23,9 @@ import '../../features/device_management/domain/usecases/revoke_device_usecase.d
 import '../../features/device_management/domain/usecases/update_device_activity_usecase.dart';
 import '../../features/device_management/domain/usecases/validate_device_usecase.dart'
     as local;
-// MIGRATED TO RIVERPOD:
-// import '../../features/device_management/presentation/providers/device_management_provider.dart';
 import '../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../features/plants/domain/repositories/plants_repository.dart';
 import '../../features/plants/domain/repositories/spaces_repository.dart';
-// MIGRATED TO RIVERPOD:
-// import '../../features/premium/presentation/providers/premium_provider.dart';
 import '../../features/settings/data/datasources/settings_local_datasource.dart';
 import '../../features/settings/data/repositories/settings_repository.dart';
 import '../../features/settings/domain/repositories/i_settings_repository.dart';
@@ -48,8 +39,6 @@ import '../data/adapters/network_info_adapter.dart';
 import '../data/adapters/plantis_image_service_adapter.dart';
 import '../interfaces/network_info.dart';
 import '../providers/analytics_provider.dart';
-import '../providers/background_sync_provider.dart';
-import '../providers/sync_status_provider.dart';
 import '../services/data_cleaner_service.dart';
 import '../services/interfaces/i_notification_permission_manager.dart';
 import '../services/interfaces/i_notification_schedule_manager.dart';
@@ -190,24 +179,6 @@ void _initCoreServices() {
 
 void _initAuth() {
   sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier.instance);
-
-  // TODO: MIGRATED TO RIVERPOD - Remove these registrations
-  // AuthProvider and RegisterProvider are now Riverpod providers
-  // accessed via ref.watch(authNotifierProvider) and ref.watch(registerNotifierProvider)
-
-  // sl.registerLazySingleton(
-  //   () => providers.AuthProvider(
-  //     loginUseCase: sl(),
-  //     logoutUseCase: sl(),
-  //     authRepository: sl(),
-  //     resetPasswordUseCase: sl(),
-  //     enhancedAccountDeletionService: sl<EnhancedAccountDeletionService>(),
-  //     subscriptionRepository: sl<ISubscriptionRepository>(),
-  //     validateDeviceUseCase: sl<local.ValidateDeviceUseCase>(),
-  //     revokeDeviceUseCase: sl<local.RevokeDeviceUseCase>(),
-  //   ),
-  // );
-  // sl.registerFactory(() => RegisterProvider());
 }
 
 void _initAccount() {}
@@ -277,9 +248,6 @@ void _initDeviceManagement() {
   sl.registerLazySingleton<UpdateDeviceActivityUseCase>(
     () => UpdateDeviceActivityUseCase(sl<DeviceRepository>()),
   );
-
-  // TODO: MIGRATED TO RIVERPOD - DeviceManagementProvider
-  // Acesse via ref.watch(deviceManagementNotifierProvider)
 }
 
 void _initPlants() {
@@ -304,9 +272,6 @@ void _initPremium() {
       localStorage: sl<ILocalStorageRepository>(),
     ),
   );
-
-  // TODO: MIGRATED TO RIVERPOD - PremiumProvider
-  // Acesse via ref.watch(premiumNotifierProvider)
 }
 
 void _initSettings() {
@@ -338,11 +303,6 @@ void _initAppServices() {
       crashlyticsRepository: sl<ICrashlyticsRepository>(),
     ),
   );
-  // TODO: Remove SyncStatusProvider registration - migrated to Riverpod
-  // Riverpod providers são acessados via ref.watch/ref.read, não via GetIt
-  // sl.registerLazySingleton<SyncStatusProvider>(
-  //   () => SyncStatusProvider(sl(), sl()),
-  // );
   sl.registerLazySingleton<DataCleanerService>(
     () => DataCleanerService(
       plantsRepository: sl(),
@@ -396,9 +356,6 @@ void _initDataExport() {
   sl.registerLazySingleton<DeleteExportUseCase>(
     () => DeleteExportUseCase(sl<DataExportRepository>()),
   );
-
-  // TODO: MIGRATED TO RIVERPOD - DataExportProvider
-  // Acesse via ref.watch(dataExportNotifierProvider)
 }
 
 /// Stub implementation of IPerformanceRepository for development

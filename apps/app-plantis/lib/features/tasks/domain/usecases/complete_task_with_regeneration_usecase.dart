@@ -5,8 +5,8 @@ import '../../../../core/services/task_generation_service.dart';
 import '../../../plants/domain/repositories/plants_repository.dart';
 import '../entities/task.dart' as task_entity;
 import '../entities/task_history.dart' as task_history_entity;
-import '../repositories/tasks_repository.dart';
 import '../repositories/task_history_repository.dart';
+import '../repositories/tasks_repository.dart';
 
 /// Use case para completar uma tarefa e gerar automaticamente a próxima
 ///

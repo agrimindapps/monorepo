@@ -311,9 +311,13 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
     if (formState.plantingDate != null) return true;
     if (formState.imageUrls.isNotEmpty) return true;
     if (formState.enableWateringCare == true ||
-        formState.wateringIntervalDays != null) return true;
+        formState.wateringIntervalDays != null) {
+      return true;
+    }
     if (formState.enableFertilizerCare == true ||
-        formState.fertilizingIntervalDays != null) return true;
+        formState.fertilizingIntervalDays != null) {
+      return true;
+    }
     if (formState.enableSunlightCare == true) return true;
     if (formState.enablePestInspection == true) return true;
     if (formState.enablePruning == true) return true;

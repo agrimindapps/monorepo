@@ -11,7 +11,6 @@ import 'package:core/core.dart'
         DeviceValidationResult;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/device_management/data/models/device_model.dart';
 import '../../features/device_management/domain/usecases/get_device_statistics_usecase.dart';

@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:core/core.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/plantis_realtime_service.dart';
 

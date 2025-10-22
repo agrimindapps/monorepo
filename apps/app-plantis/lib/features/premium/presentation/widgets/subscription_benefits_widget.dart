@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
-import '../providers/premium_provider.dart';
 
 /// Widget responsável pela exibição dos benefícios/recursos premium para Plantis
 ///

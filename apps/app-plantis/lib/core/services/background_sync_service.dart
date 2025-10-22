@@ -20,18 +20,13 @@ class BackgroundSyncService extends ChangeNotifier {
   String _currentSyncMessage = 'Inicializando sincronização...';
   BackgroundSyncStatus _syncStatus = BackgroundSyncStatus.idle;
   final Map<String, bool> _operationStatus = {};
-  // TODO: Remove if confirmed unused - currently not referenced in class
-  // final ConnectivityStateManager _connectivityStateManager =
-  //     ConnectivityStateManager();
+
   GetPlantsUseCase? _getPlantsUseCase;
   GetTasksUseCase? _getTasksUseCase;
   SyncUserProfileUseCase? _syncUserProfileUseCase;
   SyncSettingsUseCase? _syncSettingsUseCase;
   AuthStateNotifier? _authStateNotifier;
-  // PlantsProvider is now managed by Riverpod
-  // PlantsProvider? _plantsProvider;
-  // TasksProvider is now managed by Riverpod
-  // TasksProvider? _tasksProvider;
+
   final StreamController<String> _syncMessageController =
       StreamController<String>.broadcast();
   final StreamController<bool> _syncProgressController =
@@ -64,16 +59,6 @@ class BackgroundSyncService extends ChangeNotifier {
           );
         }
       }
-      // TODO: TasksProvider is now managed by Riverpod - remove this dependency injection
-      // try {
-      //   _tasksProvider ??= di.sl<TasksProvider>();
-      // } catch (e) {
-      //   if (kDebugMode) {
-      //     debugPrint(
-      //       'ℹ️ BackgroundSyncService: TasksProvider não disponível ainda: $e',
-      //     );
-      //   }
-      // }
     } catch (e) {
       if (kDebugMode) {
         debugPrint(
@@ -472,35 +457,11 @@ class BackgroundSyncService extends ChangeNotifier {
         '📢 BackgroundSync: Notificando providers sobre conclusão da sync...',
       );
     }
-    // PlantsProvider is now managed by Riverpod, notification handled via streams
     if (kDebugMode) {
       debugPrint(
-        'ℹ️ BackgroundSync: PlantsProvider notification skipped (Riverpod managed)',
+        'ℹ️ BackgroundSync: Providers managed by Riverpod',
       );
     }
-    // TODO: TasksProvider is now managed by Riverpod - implement refresh via Riverpod
-    if (kDebugMode) {
-      debugPrint('ℹ️ BackgroundSync: TasksProvider refresh skipped (Riverpod managed)');
-    }
-    // if (_tasksProvider != null) {
-    //   if (kDebugMode) {
-    //     debugPrint(
-    //       '📅 BackgroundSync: Notificando TasksProvider para refresh...',
-    //     );
-    //   }
-    //   Future.microtask(() {
-    //     try {
-    //       _tasksProvider?.refresh();
-    //       if (kDebugMode) {
-    //         debugPrint('✅ BackgroundSync: TasksProvider refresh solicitado');
-    //       }
-    //     } catch (e) {
-    //       if (kDebugMode) {
-    //         debugPrint('❌ BackgroundSync: Erro ao notificar TasksProvider: $e');
-    //       }
-    //     }
-    //   });
-    // }
   }
 
   @override

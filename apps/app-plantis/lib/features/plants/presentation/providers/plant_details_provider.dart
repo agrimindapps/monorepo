@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/plant.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';

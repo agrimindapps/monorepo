@@ -570,7 +570,7 @@ class TaskNotificationService {
       );
 
       debugPrint(
-        '🕐 Task "${task.title}" due at ${task.dueDate} (UTC) -> ${localDueDate} (local) -> notification at $notificationTime',
+        '🕐 Task "${task.title}" due at ${task.dueDate} (UTC) -> $localDueDate (local) -> notification at $notificationTime',
       );
 
       return notificationTime;

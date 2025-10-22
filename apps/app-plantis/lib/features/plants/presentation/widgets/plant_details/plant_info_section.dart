@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../providers/plant_details_provider.dart';
-import '../../providers/plants_notifier.dart';
 import '../../../domain/entities/plant.dart';
 import '../../../domain/usecases/update_plant_usecase.dart';
+import '../../providers/plant_details_provider.dart';
+import '../../providers/plants_notifier.dart';
 
 /// Widget responsável por exibir as informações básicas da planta
 class PlantInfoSection extends ConsumerWidget {

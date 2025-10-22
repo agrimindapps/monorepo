@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/domain/entities/space.dart';
 import '../../features/plants/domain/usecases/spaces_usecases.dart';

@@ -257,7 +257,7 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               Switch(
                 value: isEnabled,
                 onChanged: onToggle,
-                activeColor: iconColor,
+                activeThumbColor: iconColor,
                 activeTrackColor: iconColor.withValues(alpha: 0.3),
               ),
             ],

@@ -42,7 +42,7 @@ class PlantBrandingSide extends StatelessWidget {
             children: [
               ScaleTransition(
                 scale: logoAnimation,
-                child: ModernLogo(
+                child: const ModernLogo(
                   isWhite: true,
                   size: 40,
                   color: PlantisColors.primary,

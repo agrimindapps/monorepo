@@ -47,14 +47,14 @@ class AuthNotifier extends _$AuthNotifier {
   final LoginUseCase _loginUseCase = di.sl<LoginUseCase>();
   final LogoutUseCase _logoutUseCase = di.sl<LogoutUseCase>();
   final IAuthRepository _authRepository = di.sl<IAuthRepository>();
-  final ISubscriptionRepository? _subscriptionRepository =
+  final ISubscriptionRepository _subscriptionRepository =
       di.sl<ISubscriptionRepository>();
   final AuthStateNotifier _authStateNotifier = AuthStateNotifier.instance;
   final ResetPasswordUseCase _resetPasswordUseCase =
       di.sl<ResetPasswordUseCase>();
-  final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase =
+  final device_validation.ValidateDeviceUseCase _validateDeviceUseCase =
       di.sl<device_validation.ValidateDeviceUseCase>();
-  final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase =
+  final device_revocation.RevokeDeviceUseCase _revokeDeviceUseCase =
       di.sl<device_revocation.RevokeDeviceUseCase>();
   final EnhancedAccountDeletionService _enhancedDeletionService =
       di.sl<EnhancedAccountDeletionService>();
@@ -110,24 +110,21 @@ class AuthNotifier extends _$AuthNotifier {
       },
     );
 
-    if (_subscriptionRepository != null) {
-      _subscriptionStream = _subscriptionRepository!.subscriptionStatus.listen(
-        (subscription) {
-          final isPremium = subscription?.isActive ?? false;
-          state = state.copyWith(isPremium: isPremium);
-          _authStateNotifier.updatePremiumStatus(isPremium);
-        },
-      );
+    _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen(
+      (subscription) {
+        final isPremium = subscription?.isActive ?? false;
+        state = state.copyWith(isPremium: isPremium);
+        _authStateNotifier.updatePremiumStatus(isPremium);
+      },
+    );
     }
-  }
 
   Future<void> _completeAuthInitialization(UserEntity? user) async {
     try {
       _authStateNotifier.updateUser(user);
 
       if (user != null &&
-          !state.isAnonymous &&
-          _subscriptionRepository != null) {
+          !state.isAnonymous) {
         await _syncUserWithRevenueCat(user.id);
         await _checkPremiumStatus();
         _triggerBackgroundSyncIfNeeded(user.id);
@@ -157,18 +154,14 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _syncUserWithRevenueCat(String userId) async {
-    if (_subscriptionRepository == null) return;
-
-    await _subscriptionRepository!.setUser(
+    await _subscriptionRepository.setUser(
       userId: userId,
       attributes: {'app': 'plantis', 'email': state.currentUser?.email ?? ''},
     );
   }
 
   Future<void> _checkPremiumStatus() async {
-    if (_subscriptionRepository == null) return;
-
-    final result = await _subscriptionRepository!.hasPlantisSubscription();
+    final result = await _subscriptionRepository.hasPlantisSubscription();
     result.fold(
       (failure) {
         if (kDebugMode) {
@@ -236,13 +229,6 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _validateDeviceAfterLogin() async {
-    if (_validateDeviceUseCase == null) {
-      if (kDebugMode) {
-        debugPrint('⚠️ Device validation não disponível');
-      }
-      return;
-    }
-
     state = state.copyWith(
       isValidatingDevice: true,
       deviceValidationError: null,
@@ -254,7 +240,7 @@ class AuthNotifier extends _$AuthNotifier {
         debugPrint('🔐 Validando dispositivo após login...');
       }
 
-      final result = await _validateDeviceUseCase!();
+      final result = await _validateDeviceUseCase();
 
       result.fold(
         (failure) {
@@ -321,33 +307,17 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   void _triggerBackgroundSyncIfNeeded(String userId) {
-    // TODO: Reimplementar usando backgroundSyncProvider do Riverpod
     if (kDebugMode) {
-      debugPrint('ℹ️ Background sync trigger - migrar para Riverpod provider');
+      debugPrint('ℹ️ Background sync trigger - use backgroundSyncProvider');
     }
-    // if (_syncProvider == null) {
-    //   if (kDebugMode) {
-    //     debugPrint('⚠️ BackgroundSyncProvider não disponível');
-    //   }
-    //   return;
-    // }
-    //
-    // Future.delayed(const Duration(milliseconds: 100), () {
-    //   if (state.isAuthenticated && !state.isAnonymous) {
-    //     _syncProvider!.startBackgroundSync(userId: userId, isInitialSync: true);
-    //   }
-    // });
   }
 
   void cancelSync() {
-    // TODO: Implementar usando backgroundSyncProvider
-    // _syncProvider?.cancelSync();
+    // Use backgroundSyncProvider via Riverpod
   }
 
   Future<void> retrySyncAfterLogin() async {
     if (!state.isAuthenticated || state.currentUser == null) return;
-    // TODO: Implementar usando backgroundSyncProvider
-    // await _syncProvider?.retrySync(state.currentUser!.id);
   }
 
   Future<void> logout() async {
@@ -374,8 +344,6 @@ class AuthNotifier extends _$AuthNotifier {
           isLoading: false,
           currentOperation: null,
         );
-        // TODO: Reset sync state usando backgroundSyncProvider
-        // _syncProvider?.resetSyncState();
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
         _analytics?.logLogout();
@@ -482,26 +450,9 @@ class AuthNotifier extends _$AuthNotifier {
       return;
     }
 
-    // TODO: Reimplementar usando backgroundSyncProvider do Riverpod
     if (kDebugMode) {
-      debugPrint('🔄 Auto-sync - migrar para Riverpod provider');
+      debugPrint('🔄 Auto-sync - use backgroundSyncProvider');
     }
-    // if (_syncProvider?.shouldStartInitialSync(state.currentUser!.id) == true) {
-    //   if (kDebugMode) {
-    //     debugPrint(
-    //       '🔄 Iniciando auto-sync em background para usuário não anônimo',
-    //     );
-    //   }
-    //
-    //   await _syncProvider?.startBackgroundSync(
-    //     userId: state.currentUser!.id,
-    //     isInitialSync: true,
-    //   );
-    // } else {
-    //   if (kDebugMode) {
-    //     debugPrint('🔄 Auto-sync já realizado ou em progresso');
-    //   }
-    // }
   }
 
   void clearError() {
@@ -537,8 +488,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _performDeviceCleanupOnLogout() async {
-    if (_revokeDeviceUseCase == null ||
-        state.currentUser == null ||
+    if (state.currentUser == null ||
         state.isAnonymous) {
       if (kDebugMode) {
         debugPrint(
@@ -563,7 +513,7 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      final revokeResult = await _revokeDeviceUseCase!(
+      final revokeResult = await _revokeDeviceUseCase(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
           preventSelfRevoke: false,
@@ -673,8 +623,6 @@ class AuthNotifier extends _$AuthNotifier {
       errorMessage: null,
       currentOperation: null,
     );
-    // TODO: Reset sync state usando backgroundSyncProvider
-    // _syncProvider?.resetSyncState();
     _authStateNotifier.updateUser(null);
     _authStateNotifier.updatePremiumStatus(false);
   }

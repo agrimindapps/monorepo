@@ -159,7 +159,7 @@ class BackgroundSync extends _$BackgroundSync {
     final service = ref.read(backgroundSyncServiceProvider);
     service.resetSyncState();
 
-    state = BackgroundSyncState(); // Reset to initial state
+    state = const BackgroundSyncState(); // Reset to initial state
   }
 }
 

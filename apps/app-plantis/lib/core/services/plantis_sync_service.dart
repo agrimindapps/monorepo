@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
@@ -78,7 +77,7 @@ class PlantisSyncService implements ISyncService {
   @override
   Future<Either<Failure, ServiceSyncResult>> sync() async {
     if (!canSync) {
-      return Left(ServerFailure('Service not ready for sync'));
+      return const Left(ServerFailure('Service not ready for sync'));
     }
 
     _updateStatus(SyncServiceStatus.syncing);

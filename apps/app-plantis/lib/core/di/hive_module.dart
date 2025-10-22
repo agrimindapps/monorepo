@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:injectable/injectable.dart';
 
 import '../data/models/conflict_history_model.dart';
 

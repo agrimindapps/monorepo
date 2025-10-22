@@ -403,7 +403,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
       mainAxisSize: MainAxisSize.min,
       children: [
         // Header
-        Text(
+        const Text(
           'Bem-vindo de volta',
           style: TextStyle(
             fontSize: 24,
@@ -482,13 +482,13 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           ),
           child: Column(
             children: [
-              Icon(
+              const Icon(
                 Icons.info_outline,
                 color: PlantisColors.primary,
                 size: 32,
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Novo por aqui?',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,

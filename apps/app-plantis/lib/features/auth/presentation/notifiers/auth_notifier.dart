@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/providers/analytics_provider.dart';
-import '../../../../core/providers/background_sync_notifier.dart';
 import '../../../../core/providers/background_sync_provider.dart'
     show BackgroundSync, backgroundSyncProvider, shouldStartInitialSyncProvider;
 import '../../../../core/services/data_sanitization_service.dart';
@@ -433,7 +432,7 @@ class AuthNotifier extends _$AuthNotifier {
     unawaited(
       Future.delayed(const Duration(milliseconds: 100), () {
         if (currentState.isAuthenticated && !currentState.isAnonymous) {
-          _backgroundSyncNotifier!.startBackgroundSync(
+          _backgroundSyncNotifier.startBackgroundSync(
             userId: userId,
             isInitialSync: true,
           );

@@ -1,5 +1,5 @@
-import '../../domain/entities/task_history.dart';
 import '../../domain/entities/task.dart' as task_entity;
+import '../../domain/entities/task_history.dart';
 
 class TaskHistoryModel extends TaskHistory {
   const TaskHistoryModel({

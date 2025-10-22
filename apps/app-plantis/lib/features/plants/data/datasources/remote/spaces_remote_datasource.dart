@@ -1,4 +1,6 @@
 import 'package:core/core.dart';
+
+import '../../../../../core/services/rate_limiter_service.dart';
 import '../../models/space_model.dart';
 
 abstract class SpacesRemoteDatasource {
@@ -12,8 +14,12 @@ abstract class SpacesRemoteDatasource {
 
 class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   final FirebaseFirestore firestore;
+  final RateLimiterService rateLimiter;
 
-  SpacesRemoteDatasourceImpl({required this.firestore});
+  SpacesRemoteDatasourceImpl({
+    required this.firestore,
+    required this.rateLimiter,
+  });
 
   String _getUserSpacesPath(String userId) => 'users/$userId/spaces';
 
@@ -24,6 +30,8 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<List<SpaceModel>> getSpaces(String userId) async {
     try {
+      await rateLimiter.checkLimit('spaces.getSpaces');
+
       final snapshot =
           await _getSpacesCollection(userId)
               .where('isDeleted', isEqualTo: false)
@@ -48,6 +56,8 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<SpaceModel> getSpaceById(String id, String userId) async {
     try {
+      await rateLimiter.checkLimit('spaces.getSpaceById');
+
       final doc = await _getSpacesCollection(userId).doc(id).get();
 
       if (!doc.exists) {
@@ -73,6 +83,8 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<SpaceModel> addSpace(SpaceModel space, String userId) async {
     try {
+      await rateLimiter.checkLimit('spaces.addSpace');
+
       final spaceData = space.toJson();
       spaceData.remove('id'); // Remove ID from data, it will be the document ID
 
@@ -90,6 +102,8 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<SpaceModel> updateSpace(SpaceModel space, String userId) async {
     try {
+      await rateLimiter.checkLimit('spaces.updateSpace');
+
       final spaceData = space.toJson();
       spaceData.remove('id'); // Remove ID from data
 
@@ -108,6 +122,8 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<void> deleteSpace(String id, String userId) async {
     try {
+      await rateLimiter.checkLimit('spaces.deleteSpace');
+
       await _getSpacesCollection(userId).doc(id).update({
         'isDeleted': true,
         'updatedAt': Timestamp.now(),
@@ -123,6 +139,8 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
   @override
   Future<void> syncSpaces(List<SpaceModel> spaces, String userId) async {
     try {
+      await rateLimiter.checkLimit('spaces.syncSpaces');
+
       final batch = firestore.batch();
       final collection = _getSpacesCollection(userId);
 

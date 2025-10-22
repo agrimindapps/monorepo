@@ -8,7 +8,6 @@ import '../../../../core/providers/tasks_providers.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../core/utils/task_display_utils.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../providers/tasks_state.dart';
 
 /// Enhanced app bar for tasks with search, filtering, and quick actions
 ///

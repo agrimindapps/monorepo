@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hive/hive.dart';
 
 /// Schema migration manager for Hive boxes
 /// Handles version upgrades and data transformations

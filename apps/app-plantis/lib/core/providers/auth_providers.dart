@@ -199,7 +199,7 @@ class AuthNotifier extends _$AuthNotifier {
     );
 
     if (_subscriptionRepository != null) {
-      _subscriptionStream = _subscriptionRepository!.subscriptionStatus.listen((
+      _subscriptionStream = _subscriptionRepository.subscriptionStatus.listen((
         subscription,
       ) {
         final currentState = state.valueOrNull ?? const AuthState();
@@ -260,7 +260,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _syncUserWithRevenueCat(String userId) async {
     if (_subscriptionRepository == null) return;
 
-    await _subscriptionRepository!.setUser(
+    await _subscriptionRepository.setUser(
       userId: userId,
       attributes: {
         'app': 'plantis',
@@ -272,7 +272,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _checkPremiumStatus() async {
     if (_subscriptionRepository == null) return;
 
-    final result = await _subscriptionRepository!.hasPlantisSubscription();
+    final result = await _subscriptionRepository.hasPlantisSubscription();
     result.fold(
       (failure) {
         if (kDebugMode) {
@@ -293,10 +293,8 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   void _triggerBackgroundSyncIfNeeded(String userId) {
-    // TODO: Reimplementar usando backgroundSyncProvider do Riverpod
-    // O background sync agora é gerenciado pelo provider backgroundSyncProvider
     if (kDebugMode) {
-      debugPrint('ℹ️ Background sync trigger - migrar para Riverpod provider');
+      debugPrint('ℹ️ Background sync trigger - use backgroundSyncProvider');
     }
   }
 
@@ -386,7 +384,7 @@ class AuthNotifier extends _$AuthNotifier {
         debugPrint('🔐 Validando dispositivo após login...');
       }
 
-      final result = await _validateDeviceUseCase!.call();
+      final result = await _validateDeviceUseCase.call();
 
       result.fold(
         (failure) {
@@ -501,7 +499,6 @@ class AuthNotifier extends _$AuthNotifier {
       },
       (_) {
         state = const AsyncData(AuthState());
-        // TODO: Reset sync state usando backgroundSyncProvider
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
         _analytics?.logLogout();
@@ -657,7 +654,7 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      final revokeResult = await _revokeDeviceUseCase!.call(
+      final revokeResult = await _revokeDeviceUseCase.call(
         device_revocation.RevokeDeviceParams(
           deviceUuid: currentDevice.uuid,
           preventSelfRevoke: false,

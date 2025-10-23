@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 // Project imports:
+import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/thirteenth_salary_calculation.dart';
 import '../../domain/repositories/thirteenth_salary_repository.dart';
 import '../datasources/thirteenth_salary_local_datasource.dart';

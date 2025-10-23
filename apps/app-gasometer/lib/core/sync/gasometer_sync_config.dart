@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:core/src/sync/entity_sync_registration.dart' as core_sync;
 
 import '../../features/fuel/data/models/fuel_supply_model.dart';
 import '../../features/fuel/domain/entities/fuel_record_entity.dart';
@@ -7,7 +8,7 @@ import '../../features/maintenance/domain/entities/maintenance_entity.dart';
 import '../../features/vehicles/data/models/vehicle_model.dart';
 import '../../features/vehicles/domain/entities/vehicle_entity.dart';
 import '../services/conflict_audit_service.dart';
-import 'conflict_resolution_strategy.dart';
+import 'conflict_resolution_strategy.dart' as local;
 
 /// Configuração de sincronização específica do app-gasometer
 /// Gerencia sincronização offline-first de veículos, abastecimentos e manutenções
@@ -79,13 +80,8 @@ abstract final class GasometerSyncConfig {
           fromMap: _vehicleFromFirebaseMap,
           toMap: (vehicle) => vehicle.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.version,
-          conflictResolver: (local, remote) {
-            return _resolveVehicleConflict(
-              local as VehicleEntity,
-              remote as VehicleEntity,
-              conflictAuditService,
-            );
-          },
+          // TODO: Implement IConflictResolver<VehicleEntity> and pass as customResolver
+          // customResolver: VehicleConflictResolverAdapter(conflictAuditService),
         ),
 
         // FuelRecord depende de Vehicle
@@ -96,13 +92,8 @@ abstract final class GasometerSyncConfig {
           fromMap: _fuelRecordFromFirebaseMap,
           toMap: (fuelRecord) => fuelRecord.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.timestamp,
-          conflictResolver: (local, remote) {
-            return _resolveFuelSupplyConflict(
-              local as FuelRecordEntity,
-              remote as FuelRecordEntity,
-              conflictAuditService,
-            );
-          },
+          // TODO: Implement IConflictResolver<FuelRecordEntity> and pass as customResolver
+          // customResolver: FuelRecordConflictResolverAdapter(conflictAuditService),
         ),
 
         // Maintenance também depende de Vehicle
@@ -113,13 +104,8 @@ abstract final class GasometerSyncConfig {
           fromMap: _maintenanceFromFirebaseMap,
           toMap: (maintenance) => maintenance.toFirebaseMap(),
           conflictStrategy: ConflictStrategy.timestamp,
-          conflictResolver: (local, remote) {
-            return _resolveMaintenanceConflict(
-              local as MaintenanceEntity,
-              remote as MaintenanceEntity,
-              conflictAuditService,
-            );
-          },
+          // TODO: Implement IConflictResolver<MaintenanceEntity> and pass as customResolver
+          // customResolver: MaintenanceConflictResolverAdapter(conflictAuditService),
         ),
       ],
     );
@@ -127,6 +113,11 @@ abstract final class GasometerSyncConfig {
     loggingService.info('[GasometerSync] Conflict resolution strategy configured');
   }
 
+  // TODO: Implement custom conflict resolvers using IConflictResolver interface
+  // These methods were disabled because EntitySyncRegistration.advanced requires
+  // IConflictResolver<T> objects, not lambda functions
+
+  /*
   /// Resolve conflito de VehicleEntity usando VehicleConflictResolver
   static VehicleEntity _resolveVehicleConflict(
     VehicleEntity localEntity,
@@ -156,7 +147,9 @@ abstract final class GasometerSyncConfig {
     // Retornar entity resolvida
     return resolution.resolvedEntity.toEntity();
   }
+  */
 
+  /*
   /// Resolve conflito de FuelRecordEntity usando FuelSupplyConflictResolver
   static FuelRecordEntity _resolveFuelSupplyConflict(
     FuelRecordEntity localEntity,
@@ -184,7 +177,9 @@ abstract final class GasometerSyncConfig {
     // Retornar entity resolvida
     return _modelToFuelRecord(resolution.resolvedEntity);
   }
+  */
 
+  /*
   /// Resolve conflito de MaintenanceEntity usando MaintenanceConflictResolver
   static MaintenanceEntity _resolveMaintenanceConflict(
     MaintenanceEntity localEntity,
@@ -212,6 +207,7 @@ abstract final class GasometerSyncConfig {
     // Retornar entity resolvida
     return _modelToMaintenance(resolution.resolvedEntity);
   }
+  */
 }
 
 // ============================================================================
@@ -234,6 +230,28 @@ MaintenanceEntity _maintenanceFromFirebaseMap(Map<String, dynamic> map) {
 // Funções de conversão Entity <-> Model (para conflict resolution)
 // ============================================================================
 
+// TODO: These conversion functions are OUTDATED and incompatible with current entities
+// Entity structures have changed significantly:
+//
+// FuelRecordEntity actual fields:
+// - totalPrice (not totalCost)
+// - fullTank (not isFullTank)
+// - NO isActive (uses isDeleted from BaseSyncEntity)
+// - NO metadata field
+// - fuelType is FuelType enum (not int)
+//
+// MaintenanceEntity actual fields:
+// - serviceDate (not date)
+// - type is MaintenanceType enum (not String)
+// - status is MaintenanceStatus enum (required, not isCompleted)
+// - title: String (required)
+// - cost: double (not int)
+// - NO isActive (uses isDeleted from BaseSyncEntity)
+//
+// These functions are commented out to unblock build.
+// They need complete rewrite when conflict resolution is re-enabled.
+
+/*
 /// Converte FuelRecordEntity para FuelSupplyModel
 FuelSupplyModel _fuelRecordToModel(FuelRecordEntity entity) {
   return FuelSupplyModel(
@@ -346,3 +364,4 @@ MaintenanceEntity _modelToMaintenance(MaintenanceModel model) {
     },
   );
 }
+*/

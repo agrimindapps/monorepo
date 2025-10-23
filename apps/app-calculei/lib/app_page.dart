@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/theme_providers.dart';
-import 'pages/desktop_page.dart';
-import 'pages/mobile_page.dart';
 
 /// Main App widget with Riverpod state management
 class App extends ConsumerStatefulWidget {
@@ -43,27 +41,6 @@ class _AppState extends ConsumerState<App> {
       darkTheme: darkThemeData,
       themeMode: themeMode,
       routerConfig: appRouter,
-    );
-  }
-}
-
-/// Legacy responsive layout widget
-/// TODO: Migrate to go_router-based navigation
-class AppCalculates extends StatelessWidget {
-  const AppCalculates({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth > 800) {
-          return const Scaffold(
-            body: DesktopPageMain(),
-          );
-        } else {
-          return const MobilePageMain();
-        }
-      },
     );
   }
 }

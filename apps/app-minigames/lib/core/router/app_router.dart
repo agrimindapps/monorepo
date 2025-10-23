@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:app_minigames/pages/mobile_page.dart';
-import 'package:app_minigames/pages/desktop_page.dart';
+import 'package:app_minigames/features/home/presentation/pages/home_page.dart';
 import 'package:app_minigames/features/tower/presentation/pages/tower_page.dart';
 import 'package:app_minigames/features/tictactoe/presentation/pages/tictactoe_page.dart';
 import 'package:app_minigames/features/campo_minado/presentation/pages/campo_minado_page.dart';
@@ -17,18 +16,7 @@ final appRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) {
-        // Responsive layout - escolhe mobile ou desktop
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth < 600) {
-              return const MobilePageMain();
-            } else {
-              return const DesktopPageMain();
-            }
-          },
-        );
-      },
+      builder: (context, state) => const HomePage(),
     ),
     // Game routes
     GoRoute(

@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/error/exceptions.dart';
 import '../models/unemployment_insurance_calculation_model.dart';
 
 abstract class UnemploymentInsuranceLocalDataSource {

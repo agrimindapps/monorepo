@@ -199,11 +199,7 @@ class ItemMasterRepository implements IItemMasterRepository {
   Future<Either<Failure, bool>> canCreateItemMaster() async {
     try {
       // TODO: Check premium status when RevenueCat is integrated
-      final isPremium = false; // Placeholder
-
-      if (isPremium) {
-        return const Right(true); // Premium has unlimited items
-      }
+      // Premium users should have unlimited items
 
       // Check free tier limit
       final count = _localDataSource.getItemMastersCount();

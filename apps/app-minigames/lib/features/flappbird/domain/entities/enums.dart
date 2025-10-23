@@ -9,6 +9,9 @@ enum FlappyGameStatus {
   /// Check if game is in a running state
   bool get isRunning => this == FlappyGameStatus.playing;
 
+  /// Check if game is playing (alias for isRunning)
+  bool get isPlaying => this == FlappyGameStatus.playing;
+
   /// Check if game is over
   bool get isGameOver => this == FlappyGameStatus.gameOver;
 

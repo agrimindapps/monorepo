@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 
 /// Dialog shown when word is completed or game ends

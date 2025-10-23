@@ -201,15 +201,10 @@ RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
 
 @riverpod
 LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
-  return ref.watch(getItProvider).get<LoadHighScoreUseCase>();
+  return GetIt.instance.get<LoadHighScoreUseCase>();
 }
 
 @riverpod
 SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
-  return ref.watch(getItProvider).get<SaveHighScoreUseCase>();
-}
-
-@riverpod
-GetIt getItProvider(GetItProviderRef ref) {
-  return GetIt.instance;
+  return GetIt.instance.get<SaveHighScoreUseCase>();
 }

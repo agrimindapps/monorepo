@@ -53,11 +53,13 @@ class HighScoreModel extends HighScoreEntity {
     );
   }
 
-  static const HighScoreModel empty = HighScoreModel(
+  // Note: achievedAt cannot be const because DateTime constructor is not const
+  // Use factory method or lazy initialization instead
+  static final HighScoreModel empty = HighScoreModel(
     difficulty: GameDifficulty.medium,
     score: 0,
     moves: 0,
     time: Duration.zero,
-    achievedAt: const Duration(seconds: 0) as DateTime,
+    achievedAt: DateTime(1970), // Unix epoch as default
   );
 }

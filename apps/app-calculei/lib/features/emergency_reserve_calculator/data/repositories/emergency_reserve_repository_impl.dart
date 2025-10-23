@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/emergency_reserve_calculation.dart';
 import '../../domain/repositories/emergency_reserve_repository.dart';
 import '../datasources/emergency_reserve_local_datasource.dart';

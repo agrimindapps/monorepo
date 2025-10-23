@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
 
 // Project imports:
+import '../../../../core/error/exceptions.dart';
 import '../models/thirteenth_salary_calculation_model.dart';
 
 /// Abstract interface for 13th salary local data source

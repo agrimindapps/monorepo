@@ -38,10 +38,10 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   int _highScore = 0;
 
   @override
-  FutureOr<FlappyGameState> build({
-    double screenWidth = 400.0,
-    double screenHeight = 800.0,
-  }) async {
+  FutureOr<FlappyGameState> build() async {
+    // Default screen dimensions (will be updated when page layout is known)
+    const double screenWidth = 400.0;
+    const double screenHeight = 800.0;
     // Inject use cases
     _startGameUseCase = getIt<StartGameUseCase>();
     _flapBirdUseCase = getIt<FlapBirdUseCase>();

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../auth/auth_state_notifier.dart';
+import '../sync/basic_sync_service.dart';
 
 /// Module for third-party dependencies
 /// Register external dependencies that aren't annotated with @injectable
@@ -50,6 +51,10 @@ abstract class CoreServicesModule {
   @lazySingleton
   IEnhancedNotificationRepository get notificationRepository =>
       EnhancedNotificationService();
+
+  /// BasicSyncService for manual sync operations
+  @lazySingleton
+  BasicSyncService get syncService => BasicSyncService.instance;
 
   // Note: ShareService doesn't need core dependencies
   // AnalyticsService, ShareService, and NotificationService are registered

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:app_calculei/app_page.dart';
+import 'package:app_calculei/features/home/presentation/pages/home_page.dart';
+import 'package:app_calculei/features/thirteenth_salary_calculator/presentation/pages/thirteenth_salary_calculator_page.dart';
+import 'package:app_calculei/features/vacation_calculator/presentation/pages/vacation_calculator_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -11,20 +13,23 @@ final appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: [
+    // Home
     GoRoute(
       path: '/',
-      builder: (context, state) => const AppCalculates(),
+      builder: (context, state) => const HomePage(),
     ),
-    // TODO: Add calculator routes
-    // Example:
-    // GoRoute(
-    //   path: '/calc/financeiro/juros-compostos',
-    //   builder: (context, state) => const JurosCompostosPage(),
-    // ),
-    // GoRoute(
-    //   path: '/calc/trabalhistas/salario-liquido',
-    //   builder: (context, state) => const SalarioLiquidoPage(),
-    // ),
+
+    // Implemented calculators
+    GoRoute(
+      path: '/calc/thirteenth-salary',
+      builder: (context, state) => const ThirteenthSalaryCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/calc/vacation',
+      builder: (context, state) => const VacationCalculatorPage(),
+    ),
+
+    // TODO: Add remaining calculator routes
   ],
   errorBuilder: (context, state) => Scaffold(
     appBar: AppBar(

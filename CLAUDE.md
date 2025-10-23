@@ -2,13 +2,14 @@
 
 ## 🏢 Monorepo Structure
 
-### **Apps (7 projects)**
+### **Apps (8 projects)**
 - **app-gasometer**: Vehicle control (Hive + Analytics) - **Migrating to Riverpod**
 - **app-plantis**: Plant care (Notifications + Scheduling) - **Gold Standard 10/10** → **Migrating to Riverpod**
 - **app_taskolist**: Task management (Clean Architecture) - **Migrating to Riverpod**
 - **app-receituagro**: Agricultural diagnostics (Static Data + Hive) - **Migrating to Riverpod**
 - **app-petiveti**: Pet care management - **Migrating to Riverpod**
 - **app_agrihurbi**: Agricultural management - **Standardizing to Riverpod**
+- **app_nebulalist**: Task/list management (Clean Arch + Offline-first) - **✅ Pure Riverpod** (9/10)
 - **receituagro_web**: Web platform - **Migrating to Riverpod**
 
 ### **Packages**
@@ -61,6 +62,38 @@ dart run build_runner watch --delete-conflicting-outputs
 - ✅ README profissional com documentação completa
 
 **Próximo passo**: Migrar para Riverpod mantendo qualidade 10/10
+
+### **app-nebulalist: 9/10 Quality Score** (Pure Riverpod Implementation)
+
+**Métricas:**
+- ✅ 0 erros analyzer
+- ✅ 0 warnings
+- ✅ Clean Architecture completa (3-layer)
+- ✅ Pure Riverpod com code generation (`@riverpod`)
+- ✅ Either<Failure, T> em toda camada de domínio
+- ✅ Offline-first com Hive + Firestore
+- ✅ Repository Pattern (Local + Remote data sources)
+- ✅ 15 use cases implementados
+- ❌ Zero testes (blocker para 10/10)
+
+**Características Especiais:**
+- **Two-tier item system**: ItemMaster (templates) + ListItem (instances)
+- **Best-effort sync**: Local-first, remote sync não-bloqueante
+- **Free tier limits**: 10 lists, item quotas (RevenueCat pending)
+- **GetIt + Injectable** para DI
+- **Ownership verification**: Todas operações verificam userId
+
+**Gaps Identificados:**
+- ❌ Sync service incompleto (`lib/core/sync/` vazio)
+- ❌ Zero testes (Mocktail instalado mas não usado)
+- ⚠️ Premium feature mockado (RevenueCat pending)
+- ⚠️ README minimal
+
+**Próximos Passos:**
+1. Implementar NebulalistSyncService (background sync)
+2. Adicionar testes unitários (use cases priority)
+3. README profissional
+4. Integrar RevenueCat
 
 ---
 

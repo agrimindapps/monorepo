@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/enums.dart';
+import '../../domain/entities/game_state_entity.dart';
 import '../providers/memory_game_notifier.dart';
 import '../widgets/game_stats_widget.dart';
 import '../widgets/memory_grid_widget.dart';

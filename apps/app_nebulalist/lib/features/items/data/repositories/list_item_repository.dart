@@ -224,8 +224,8 @@ class ListItemRepository implements IListItemRepository {
     String itemName,
   ) async {
     try {
-      final items = _localDataSource.getListItems(listId);
-      // This is a simplified check - in production, you'd also check ItemMaster names
+      // TODO: Implement proper item check - this is a placeholder
+      // Should check ItemMaster names in the list
       return const Right(false); // Placeholder
     } catch (e) {
       return Left(CacheFailure('Erro ao verificar item: ${e.toString()}'));

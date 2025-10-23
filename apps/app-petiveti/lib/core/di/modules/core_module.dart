@@ -12,6 +12,7 @@ import '../../logging/services/logging_service.dart';
 import '../../notifications/notification_service.dart';
 import '../../performance/lazy_loader.dart';
 import '../../performance/performance_service.dart' as local_perf;
+import '../../services/auto_sync_service.dart';
 import '../../services/mock_analytics_service.dart';
 import '../di_module.dart';
 
@@ -69,6 +70,11 @@ class CoreModule implements DIModule {
       () => local_perf.PerformanceService(),
     );
     getIt.registerLazySingleton<LazyLoader>(() => LazyLoader());
+
+    // FASE 2: AutoSyncService singleton
+    getIt.registerLazySingleton<AutoSyncService>(
+      () => AutoSyncService.instance,
+    );
   }
 
   Future<void> _registerLoggingServices(GetIt getIt) async {

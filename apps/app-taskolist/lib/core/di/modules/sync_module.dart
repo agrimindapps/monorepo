@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../services/auto_sync_service.dart';
 import '../../sync/taskolist_sync_config.dart';
 import '../../../infrastructure/services/sync_service.dart';
 import '../injection.dart' as local_di;
@@ -39,7 +40,7 @@ abstract class TaskolistSyncDIModule {
       if (kDebugMode) {
         debugPrint('✅ TaskManagerSyncService initialized successfully');
       }
-      _setupConnectivityMonitoring();
+      await _setupConnectivityMonitoring();
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ Error initializing TaskManagerSyncService: $e');
@@ -48,14 +49,32 @@ abstract class TaskolistSyncDIModule {
   }
 
   /// Configura monitoramento de conectividade para auto-sync
-  static void _setupConnectivityMonitoring() {
+  /// Inicializa AutoSyncService para sync automático em tempo real
+  static Future<void> _setupConnectivityMonitoring() async {
     try {
-      // TaskManagerSyncService já tem monitoramento interno
-      if (kDebugMode) {
-        debugPrint(
-          '✅ Connectivity monitoring already integrated in TaskManagerSyncService',
-        );
-      }
+      // Inicializar AutoSyncService (UnifiedSyncManager + ConnectivityService)
+      final autoSyncService = local_di.getIt<AutoSyncService>();
+
+      final result = await autoSyncService.initialize(
+        syncInterval: const Duration(minutes: 5),
+        enablePeriodicSync: true,
+      );
+
+      result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('⚠️ Failed to initialize AutoSyncService: ${failure.message}');
+          }
+        },
+        (_) {
+          if (kDebugMode) {
+            debugPrint('✅ AutoSyncService initialized');
+            debugPrint('   - Real-time connectivity monitoring: ✅');
+            debugPrint('   - Auto-sync on reconnect: ✅ (~2s delay)');
+            debugPrint('   - Periodic sync: ✅ (5min interval)');
+          }
+        },
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('⚠️ Failed to setup connectivity monitoring: $e');

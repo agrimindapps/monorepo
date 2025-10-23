@@ -295,12 +295,7 @@ class ListRepository implements IListRepository {
   Future<Either<Failure, bool>> canCreateList() async {
     try {
       // TODO: Check if user is premium (RevenueCat integration)
-      // For now, assume free tier
-      final isPremium = false;
-
-      if (isPremium) {
-        return const Right(true);
-      }
+      // Premium users should have unlimited lists
 
       // Check free tier limit
       final count = await _localDataSource.getActiveListsCount(_currentUserId);

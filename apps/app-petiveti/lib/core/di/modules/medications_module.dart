@@ -1,8 +1,7 @@
 import 'package:core/core.dart' show GetIt;
 
 import '../../../features/medications/data/datasources/medication_local_datasource.dart';
-import '../../../features/medications/data/datasources/medication_remote_datasource.dart';
-import '../../../features/medications/data/repositories/medication_repository_local_only_impl.dart';
+import '../../../features/medications/data/repositories/medication_repository_impl.dart';
 import '../../../features/medications/domain/repositories/medication_repository.dart';
 import '../../../features/medications/domain/usecases/add_medication.dart';
 import '../../../features/medications/domain/usecases/check_medication_conflicts.dart';
@@ -27,12 +26,9 @@ class MedicationsModule implements DIModule {
       () => MedicationLocalDataSourceImpl(),
     );
 
-    getIt.registerLazySingleton<MedicationRemoteDataSource>(
-      () => MedicationRemoteDataSourceImpl(),
-    );
     getIt.registerLazySingleton<MedicationRepository>(
-      () => MedicationRepositoryLocalOnlyImpl(
-        localDataSource: getIt<MedicationLocalDataSource>(),
+      () => MedicationRepositoryImpl(
+        getIt<MedicationLocalDataSource>(),
       ),
     );
     getIt.registerLazySingleton<GetMedications>(

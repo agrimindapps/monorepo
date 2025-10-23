@@ -304,7 +304,7 @@ class SettingsPage extends ConsumerWidget {
     IconData icon,
   ) {
     // TODO: Integrate with theme provider when implemented
-    final isSelected = false;
+    // TODO: Implement selected state based on current theme mode
 
     return InkWell(
       onTap: () {
@@ -321,10 +321,7 @@ class SettingsPage extends ConsumerWidget {
           children: [
             Icon(
               icon,
-              color:
-                  isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -333,30 +330,20 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color:
-                          isSelected
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).colorScheme.onSurface,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.normal,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],
               ),
             ),
-            if (isSelected)
-              Icon(
-                Icons.check,
-                color: Theme.of(context).primaryColor,
-                size: 20,
-              ),
           ],
         ),
       ),

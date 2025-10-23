@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:app_minigames/pages/game_memory/constants/enums.dart';
+import 'package:app_minigames/features/memory/domain/entities/enums.dart';
 
 /// Service responsável por gerenciar todos os diálogos do jogo da memória
 ///

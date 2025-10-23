@@ -4,7 +4,9 @@ import '../storage/hive_service.dart';
 import 'di_module.dart';
 import 'injection.dart';
 import 'modules/account_deletion_module.dart';
+import 'modules/connectivity_module.dart';
 import 'modules/core_module.dart';
+import 'modules/data_integrity_module.dart';
 import 'modules/sync_module.dart';
 
 /// Modular Dependency Injection Container following SOLID principles
@@ -35,6 +37,8 @@ class ModularInjectionContainer {
       AccountDeletionModule.init(_getIt);
       print('📦 Initializing sync module...');
       SyncDIModule.init(_getIt);
+      print('📦 Initializing data integrity module...');
+      DataIntegrityModule.init(_getIt);
 
       print('✅ GasOMeter dependencies initialized successfully');
     } catch (e, stackTrace) {
@@ -50,6 +54,7 @@ class ModularInjectionContainer {
   static List<DIModule> _createModules() {
     return [
       CoreModule(), // External services and core infrastructure
+      ConnectivityModule(), // Connectivity monitoring services
     ];
   }
 

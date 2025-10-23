@@ -55,6 +55,33 @@ class OdometerRepository
         minutes: 8,
       ), // TTL médio para leituras de odômetro
     );
+    unawaited(_warmupCache());
+  }
+
+  /// Aquece o cache com dados frequentemente acessados
+  Future<void> _warmupCache() async {
+    try {
+      // Pre-load todas as leituras (dataset geralmente pequeno)
+      unawaited(getAllOdometerReadings());
+
+      final recentModels = _box.values
+          .where((model) => !model.isDeleted)
+          .toList()
+        ..sort((a, b) => b.registrationDate.compareTo(a.registrationDate));
+
+      if (recentModels.isNotEmpty) {
+        // Cache últimas 30 leituras individuais
+        final limit = recentModels.length < 30 ? recentModels.length : 30;
+        for (int i = 0; i < limit; i++) {
+          final entity = _modelToEntity(recentModels[i]);
+          cacheEntity(entityCacheKey(entity.id), entity);
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Cache warmup failed (non-critical): $e');
+      }
+    }
   }
 
   /// Saves new odometer reading

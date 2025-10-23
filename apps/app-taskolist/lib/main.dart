@@ -53,7 +53,7 @@ void main() async {
   }
   try {
     debugPrint('🔄 MAIN: Forcing Taskolist sync initialization...');
-    TaskolistSyncDIModule.init();
+    await TaskolistSyncDIModule.init();
     await TaskolistSyncDIModule.initializeSyncService();
     debugPrint('✅ MAIN: Taskolist sync initialization completed successfully');
   } catch (e) {

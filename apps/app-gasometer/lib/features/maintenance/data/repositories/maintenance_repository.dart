@@ -1,16 +1,53 @@
+import 'dart:async';
+
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+
+import '../../../../core/cache/cache_manager.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../models/maintenance_model.dart';
 
-/// Repository para persistência de manutenções usando Hive
-class MaintenanceRepository {
+/// Repository para persistência de manutenções usando Hive com cache strategy
+class MaintenanceRepository with CachedRepository<MaintenanceEntity> {
   static const String _boxName = 'maintenance';
   late Box<MaintenanceModel> _box;
 
   /// Inicializa o repositório
   Future<void> initialize() async {
     _box = await Hive.openBox<MaintenanceModel>(_boxName);
+    initializeCache(
+      maxSize: 100, // Dataset médio/grande - 100 registros em cache
+      defaultTtl: const Duration(minutes: 5), // TTL 5 minutos
+    );
+    unawaited(_warmupCache());
+  }
+
+  /// Aquece o cache com dados frequentemente acessados
+  Future<void> _warmupCache() async {
+    try {
+      // Pre-load últimos 30 registros de manutenções
+      unawaited(getAllMaintenances());
+
+      final recentModels = _box.values
+          .where((model) => !model.isDeleted)
+          .toList()
+        ..sort((a, b) => b.data.compareTo(a.data));
+
+      if (recentModels.isNotEmpty) {
+        final limit = recentModels.length < 30 ? recentModels.length : 30;
+        for (int i = 0; i < limit; i++) {
+          final entity = _modelToEntity(recentModels[i]);
+          cacheEntity(entityCacheKey(entity.id), entity);
+        }
+
+        // Pre-load estatísticas
+        unawaited(getStats());
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Cache warmup failed (non-critical): $e');
+      }
+    }
   }
 
   /// Salva nova manutenção
@@ -20,7 +57,15 @@ class MaintenanceRepository {
     try {
       final model = _entityToModel(maintenance);
       await _box.put(maintenance.id, model);
-      return _modelToEntity(model);
+
+      final entity = _modelToEntity(model);
+      // Cache entity e invalida listas
+      cacheEntity(entityCacheKey(maintenance.id), entity);
+      invalidateListCache('all_maintenances');
+      invalidateListCache(vehicleCacheKey(maintenance.vehicleId, 'maintenances'));
+      invalidateListCache(typeCacheKey(maintenance.type.name, 'maintenances'));
+
+      return entity;
     } catch (e) {
       throw Exception('Erro ao salvar manutenção: $e');
     }
@@ -37,7 +82,15 @@ class MaintenanceRepository {
 
       final model = _entityToModel(maintenance);
       await _box.put(maintenance.id, model);
-      return _modelToEntity(model);
+
+      final entity = _modelToEntity(model);
+      // Cache entity e invalida listas
+      cacheEntity(entityCacheKey(maintenance.id), entity);
+      invalidateListCache('all_maintenances');
+      invalidateListCache(vehicleCacheKey(maintenance.vehicleId, 'maintenances'));
+      invalidateListCache(typeCacheKey(maintenance.type.name, 'maintenances'));
+
+      return entity;
     } catch (e) {
       throw Exception('Erro ao atualizar manutenção: $e');
     }
@@ -46,7 +99,22 @@ class MaintenanceRepository {
   /// Remove manutenção por ID
   Future<bool> deleteMaintenance(String maintenanceId) async {
     try {
+      final maintenanceToDelete = _box.get(maintenanceId);
+
       await _box.delete(maintenanceId);
+
+      // Invalida cache
+      invalidateCache(entityCacheKey(maintenanceId));
+      if (maintenanceToDelete != null) {
+        invalidateListCache('all_maintenances');
+        invalidateListCache(
+          vehicleCacheKey(maintenanceToDelete.veiculoId, 'maintenances'),
+        );
+        invalidateListCache(typeCacheKey(maintenanceToDelete.tipo, 'maintenances'));
+      } else {
+        invalidateListCache('all_maintenances');
+      }
+
       return true;
     } catch (e) {
       throw Exception('Erro ao remover manutenção: $e');
@@ -56,8 +124,19 @@ class MaintenanceRepository {
   /// Busca manutenção por ID
   Future<MaintenanceEntity?> getMaintenanceById(String maintenanceId) async {
     try {
+      final cacheKey = entityCacheKey(maintenanceId);
+      final cached = getCachedEntity(cacheKey);
+      if (cached != null) {
+        return cached;
+      }
+
       final model = _box.get(maintenanceId);
-      return model != null ? _modelToEntity(model) : null;
+      if (model == null) return null;
+
+      final entity = _modelToEntity(model);
+      cacheEntity(cacheKey, entity);
+
+      return entity;
     } catch (e) {
       throw Exception('Erro ao buscar manutenção: $e');
     }
@@ -66,8 +145,17 @@ class MaintenanceRepository {
   /// Carrega todas as manutenções
   Future<List<MaintenanceEntity>> getAllMaintenances() async {
     try {
+      const cacheKey = 'all_maintenances';
+      final cached = getCachedList(cacheKey);
+      if (cached != null) {
+        return cached;
+      }
+
       final models = _box.values.where((model) => !model.isDeleted).toList();
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      cacheList(cacheKey, entities);
+
+      return entities;
     } catch (e) {
       throw Exception('Erro ao carregar manutenções: $e');
     }
@@ -78,13 +166,22 @@ class MaintenanceRepository {
     String vehicleId,
   ) async {
     try {
+      final cacheKey = vehicleCacheKey(vehicleId, 'maintenances');
+      final cached = getCachedList(cacheKey);
+      if (cached != null) {
+        return cached;
+      }
+
       final models =
           _box.values
               .where(
                 (model) => model.veiculoId == vehicleId && !model.isDeleted,
               )
               .toList();
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      cacheList(cacheKey, entities);
+
+      return entities;
     } catch (e) {
       throw Exception('Erro ao carregar manutenções do veículo: $e');
     }
@@ -95,12 +192,21 @@ class MaintenanceRepository {
     MaintenanceType type,
   ) async {
     try {
+      final cacheKey = typeCacheKey(type.name, 'maintenances');
+      final cached = getCachedList(cacheKey);
+      if (cached != null) {
+        return cached;
+      }
+
       final typeString = _typeToString(type);
       final models =
           _box.values
               .where((model) => model.tipo == typeString && !model.isDeleted)
               .toList();
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      cacheList(cacheKey, entities);
+
+      return entities;
     } catch (e) {
       throw Exception('Erro ao carregar manutenções por tipo: $e');
     }
@@ -134,6 +240,13 @@ class MaintenanceRepository {
     DateTime end,
   ) async {
     try {
+      final periodKey =
+          'period_${start.millisecondsSinceEpoch}_${end.millisecondsSinceEpoch}';
+      final cached = getCachedList(periodKey);
+      if (cached != null) {
+        return cached;
+      }
+
       final startMs = start.millisecondsSinceEpoch;
       final endMs = end.millisecondsSinceEpoch;
 
@@ -144,7 +257,10 @@ class MaintenanceRepository {
                 !model.isDeleted;
           }).toList();
 
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      cacheList(periodKey, entities, ttl: const Duration(minutes: 20));
+
+      return entities;
     } catch (e) {
       throw Exception('Erro ao carregar manutenções por período: $e');
     }
@@ -170,6 +286,12 @@ class MaintenanceRepository {
   /// Busca manutenções por texto
   Future<List<MaintenanceEntity>> searchMaintenances(String query) async {
     try {
+      final searchKey = 'search_${query.toLowerCase().replaceAll(' ', '_')}';
+      final cached = getCachedList(searchKey);
+      if (cached != null) {
+        return cached;
+      }
+
       final lowerQuery = query.toLowerCase();
       final models =
           _box.values.where((model) {
@@ -177,7 +299,10 @@ class MaintenanceRepository {
                 model.descricao.toLowerCase().contains(lowerQuery);
           }).toList();
 
-      return models.map((model) => _modelToEntity(model)).toList();
+      final entities = models.map((model) => _modelToEntity(model)).toList();
+      cacheList(searchKey, entities, ttl: const Duration(minutes: 10));
+
+      return entities;
     } catch (e) {
       throw Exception('Erro ao buscar manutenções: $e');
     }
@@ -194,7 +319,7 @@ class MaintenanceRepository {
 
       final totalCost = models.fold<double>(
         0,
-        (sum, model) => sum + model.valor,
+        (acc, model) => acc + model.valor,
       );
 
       return {

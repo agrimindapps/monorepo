@@ -7,8 +7,13 @@ import 'app.dart';
 import 'core/di/injection_container.dart' as di;
 import 'core/di/modules/sync_module.dart';
 import 'core/gasometer_sync_config.dart';
+import 'core/services/auto_sync_service.dart';
+import 'core/services/connectivity_state_manager.dart';
+import 'core/services/connectivity_sync_integration.dart';
 import 'firebase_options.dart';
 late ICrashlyticsRepository _crashlyticsRepository;
+late ConnectivitySyncIntegration _connectivityIntegration;
+late AutoSyncService _autoSyncService;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +53,8 @@ Future<void> main() async {
     }
     await SyncDIModule.initializeSyncService(di.sl);
     await _initializeFirebaseServices();
+    await _initializeConnectivityMonitoring();
+    await _initializeAutoSync();
 
     runApp(const ProviderScope(child: GasOMeterApp()));
   } catch (error) {
@@ -119,3 +126,62 @@ Future<void> _initializeFirebaseServices() async {
     }
   }
 }
+
+/// Initialize connectivity monitoring and sync integration
+Future<void> _initializeConnectivityMonitoring() async {
+  try {
+    debugPrint('🌐 Initializing connectivity monitoring...');
+
+    final connectivityService = di.sl<ConnectivityService>();
+    final stateManager = di.sl<ConnectivityStateManager>();
+
+    _connectivityIntegration = ConnectivitySyncIntegration(
+      connectivityService: connectivityService,
+      stateManager: stateManager,
+    );
+
+    await _connectivityIntegration.initialize();
+
+    debugPrint('✅ Connectivity monitoring initialized successfully');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Error initializing connectivity monitoring: $e');
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Connectivity monitoring initialization failed',
+      );
+    } catch (_) {
+      // Fail silently - app can still work without connectivity monitoring
+    }
+  }
+}
+
+/// Initialize auto-sync service for periodic background sync
+Future<void> _initializeAutoSync() async {
+  try {
+    debugPrint('⏰ Initializing auto-sync service...');
+
+    _autoSyncService = di.sl<AutoSyncService>();
+    await _autoSyncService.initialize();
+
+    // Auto-sync will be started by app lifecycle observer in GasOMeterApp
+    // when app becomes active
+
+    debugPrint('✅ Auto-sync service initialized successfully');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Error initializing auto-sync service: $e');
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Auto-sync service initialization failed',
+      );
+    } catch (_) {
+      // Fail silently - app can still work without auto-sync
+    }
+  }
+}
+
+/// Get auto-sync service instance for lifecycle management
+AutoSyncService get autoSyncService => _autoSyncService;

@@ -83,6 +83,8 @@
   - Suporte offline com Hive
   - Fila inteligente de sincronização
   - Resolução automática de conflitos
+  - **📖 [Documentação Completa de Sincronismo](./docs/SYNC_ARCHITECTURE.md)**
+  - **🚀 [Quick Start Guide](./docs/QUICK_START_SYNC.md)**
 
 ### 🔒 Segurança & Privacidade
 
@@ -210,8 +212,26 @@ dart run custom_lint
 
 ---
 
-## 📞 Suporte
+## 📚 Documentação
 
+### Arquitetura de Sincronismo
+- **[SYNC_ARCHITECTURE.md](./docs/SYNC_ARCHITECTURE.md)** - Documentação completa da arquitetura de sincronização
+  - Componentes principais (UnifiedSyncManager, DataIntegrityService, AutoSyncService)
+  - Fluxos de sincronização (offline → online, multi-device)
+  - Conflict resolution strategies
+  - Error handling e logging
+  - Performance & cache
+  - Testing (168 testes)
+  - Troubleshooting guide
+
+- **[QUICK_START_SYNC.md](./docs/QUICK_START_SYNC.md)** - Guia rápido para desenvolvedores
+  - Setup inicial (5 minutos)
+  - Como usar sincronização em repositories
+  - Operações comuns (sync manual, verificar integridade)
+  - Exemplos práticos
+  - Troubleshooting rápido
+
+### Referências
 - Monorepo: `/CLAUDE.md`
 - Gold Standard: `apps/app-plantis/README.md`
 

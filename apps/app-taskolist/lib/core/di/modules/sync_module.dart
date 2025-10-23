@@ -1,15 +1,34 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../sync/taskolist_sync_config.dart';
 import '../../../infrastructure/services/sync_service.dart';
 import '../injection.dart' as local_di;
 
 /// Módulo de Dependency Injection para sincronização do Taskolist
-/// Integra TaskManagerSyncService existente
+/// Integra UnifiedSyncManager para sincronização offline-first moderna
+/// Mantém compatibilidade com TaskManagerSyncService legado
 abstract class TaskolistSyncDIModule {
-  static void init() {
-    // TaskManagerSyncService já está registrado no sistema de DI principal
-    // Não precisamos registrar novamente aqui
+  /// Inicializa o UnifiedSyncManager com a configuração do Taskolist
+  /// Deve ser chamado durante o bootstrap do app, após configureDependencies()
+  static Future<void> init() async {
+    try {
+      // Configurar UnifiedSyncManager com TaskolistSyncConfig
+      await TaskolistSyncConfig.configure();
+
+      if (kDebugMode) {
+        debugPrint('✅ UnifiedSyncManager configured for Taskolist');
+        debugPrint('   - TaskEntity registered');
+        debugPrint('   - Conflict strategy: Last Write Wins (timestamp-based)');
+        debugPrint('   - Sync interval: 5 minutes');
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('❌ Error configuring UnifiedSyncManager: $e');
+        debugPrint('Stack trace: $stackTrace');
+      }
+      // Não propagar erro - deixar app continuar funcionando
+    }
   }
 
   /// Inicializa o sync service após o app estar pronto

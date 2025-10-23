@@ -6,6 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/services/firebase_firestore_service.dart';
 import '../models/achievement_model.dart';
 import '../models/peso_model.dart';
 import '../repository/peso_repository.dart';
@@ -52,7 +54,7 @@ class PesoState {
 /// Provider for PesoRepository
 @riverpod
 PesoRepository pesoRepository(PesoRepositoryRef ref) {
-  return PesoRepository();
+  return PesoRepository(FirestoreService(FirebaseFirestore.instance));
 }
 
 /// Main Peso Notifier

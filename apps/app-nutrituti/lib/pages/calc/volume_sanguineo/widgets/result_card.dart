@@ -75,7 +75,7 @@ class VolumeSanguineoResultCard extends StatelessWidget {
           _buildResultCard(
             isDark,
             title: 'Tipo de Pessoa',
-            value: controller.model.generoDef['text'],
+            value: controller.model.generoDef['text'] as String,
             color: Colors.red,
             icon: Icons.person_outline,
           ),

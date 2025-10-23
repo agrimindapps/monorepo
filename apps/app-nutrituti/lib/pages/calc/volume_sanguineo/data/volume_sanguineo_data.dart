@@ -75,13 +75,13 @@ class VolumeSanguineoData {
   /// Cria instância a partir de Map
   factory VolumeSanguineoData.fromMap(Map<String, dynamic> map) {
     return VolumeSanguineoData(
-      peso: map['peso']?.toDouble() ?? 0.0,
-      tipoPessoaId: map['tipoPessoaId']?.toInt() ?? 1,
-      tipoPessoaTexto: map['tipoPessoaTexto'] ?? 'Masculino',
-      fatorCalculoMlKg: map['fatorCalculoMlKg']?.toInt() ?? 75,
-      volumeSanguineoLitros: map['volumeSanguineoLitros']?.toDouble(),
+      peso: (map['peso'] as num?)?.toDouble() ?? 0.0,
+      tipoPessoaId: (map['tipoPessoaId'] as num?)?.toInt() ?? 1,
+      tipoPessoaTexto: map['tipoPessoaTexto'] as String? ?? 'Masculino',
+      fatorCalculoMlKg: (map['fatorCalculoMlKg'] as num?)?.toInt() ?? 75,
+      volumeSanguineoLitros: (map['volumeSanguineoLitros'] as num?)?.toDouble(),
       dataCalculo: map['dataCalculo'] != null
-          ? DateTime.parse(map['dataCalculo'])
+          ? DateTime.parse(map['dataCalculo'] as String)
           : null,
     );
   }

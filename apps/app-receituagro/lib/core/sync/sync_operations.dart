@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart';
 import '../data/models/sync_queue_item.dart';
 import 'sync_queue.dart';
 
-@singleton
+/// Handles sync operations with queue management
+/// Note: Not using @singleton because dependencies aren't injectable-annotated
+/// Must be registered manually in injection_container.dart
 class SyncOperations {
   final SyncQueue _syncQueue;
   final ConnectivityService _connectivityService;

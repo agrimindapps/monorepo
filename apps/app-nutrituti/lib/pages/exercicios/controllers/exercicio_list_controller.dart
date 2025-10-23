@@ -95,8 +95,8 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
       final events = _updateEventsMap(registros);
       final achievements = _initAchievements(
         registros,
-        metas['minutosSemanal'] ?? 0.0,
-        metas['caloriasSemanal'] ?? 0.0,
+        (metas['minutosSemanal'] as num?)?.toDouble() ?? 0.0,
+        (metas['caloriasSemanal'] as num?)?.toDouble() ?? 0.0,
         totais['minutos'] ?? 0,
         totais['calorias'] ?? 0,
       );
@@ -104,8 +104,8 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
       return ExercicioListState(
         isLoading: false,
         registros: registros,
-        metaMinutosSemanal: metas['minutosSemanal'] ?? 0.0,
-        metaCaloriasSemanal: metas['caloriasSemanal'] ?? 0.0,
+        metaMinutosSemanal: (metas['minutosSemanal'] as num?)?.toDouble() ?? 0.0,
+        metaCaloriasSemanal: (metas['caloriasSemanal'] as num?)?.toDouble() ?? 0.0,
         totalMinutosSemana: totais['minutos'] ?? 0,
         totalCaloriasSemana: totais['calorias'] ?? 0,
         achievements: achievements,
@@ -461,15 +461,15 @@ class ExercicioListNotifier extends _$ExercicioListNotifier {
 
     final achievements = _initAchievements(
       currentState.registros,
-      metaMinutos,
-      metaCalorias,
+      (metaMinutos as num).toDouble(),
+      (metaCalorias as num).toDouble(),
       currentState.totalMinutosSemana,
       currentState.totalCaloriasSemana,
     );
 
     state = AsyncValue.data(currentState.copyWith(
-      metaMinutosSemanal: metaMinutos,
-      metaCaloriasSemanal: metaCalorias,
+      metaMinutosSemanal: (metaMinutos as num?)?.toDouble(),
+      metaCaloriasSemanal: (metaCalorias as num?)?.toDouble(),
       achievements: achievements,
     ));
 

@@ -27,10 +27,10 @@ class ExercicioModel {
 
   static ExercicioModel fromMap(Map<String, dynamic> map) {
     return ExercicioModel(
-      id: map['id'],
-      nome: map['text'],
-      caloriasMinuto: map['value'].toDouble(),
-      descricao: map['descricao'] ?? '',
+      id: (map['id'] as num).toInt(),
+      nome: map['text'] as String,
+      caloriasMinuto: (map['value'] as num).toDouble(),
+      descricao: map['descricao'] as String? ?? '',
     );
   }
 }

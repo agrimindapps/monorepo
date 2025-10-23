@@ -92,7 +92,7 @@ class CategoriesSectionState extends State<CategoriesSection> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => AlimentosPage(
-                          categoria: categorias[index]['title'],
+                          categoria: categorias[index]['title'] as String? ?? '',
                           onlyFavorites: false,
                         ),
                       ),
@@ -104,13 +104,13 @@ class CategoriesSectionState extends State<CategoriesSection> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          categorias[index]['icon'],
+                          categorias[index]['icon'] as IconData? ?? Icons.category,
                           color: Colors.green,
                           size: 40,
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          categorias[index]['title'],
+                          categorias[index]['title'] as String? ?? '',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -120,7 +120,7 @@ class CategoriesSectionState extends State<CategoriesSection> {
                         if (categorias[index]['description'] != null) ...[
                           const SizedBox(height: 8),
                           Text(
-                            categorias[index]['description'] ?? '',
+                            (categorias[index]['description'] as String?) ?? '',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade600,

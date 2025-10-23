@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/di/injection_container.dart';
 import '../../../core/providers/receituagro_auth_notifier.dart';
+import '../../../core/services/receita_agro_sync_service.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
@@ -965,20 +967,131 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  /// Mostrar feedback de sincronização
-  void _showSyncRefresh(BuildContext context) {
+  /// Executar sincronização real de dados
+  /// ✅ FIXED: Agora usa ReceitaAgroSyncService ao invés de fake feedback
+  Future<void> _showSyncRefresh(BuildContext context) async {
+    // Mostrar loading
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Dados sincronizados com sucesso'),
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            SizedBox(width: 12),
+            Text('Sincronizando dados...'),
           ],
         ),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+        backgroundColor: Colors.blue,
+        duration: Duration(seconds: 30), // Longa duração durante sync
       ),
     );
+
+    try {
+      // Obter o serviço de sincronização
+      final syncService = sl<ReceitaAgroSyncService>();
+
+      // Verificar se pode sincronizar
+      if (!syncService.canSync) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Serviço de sincronização não está pronto'),
+                ],
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Executar sincronização completa
+      final result = await syncService.sync();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+
+        result.fold(
+          // Erro na sincronização
+          (failure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Erro ao sincronizar: ${failure.message}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          },
+          // Sucesso
+          (syncResult) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        syncResult.success
+                            ? 'Sincronizado! ${syncResult.itemsSynced} itens em ${syncResult.duration.inSeconds}s'
+                            : 'Sincronização parcial: ${syncResult.itemsSynced} OK, ${syncResult.itemsFailed} falhas',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: syncResult.success ? Colors.green : Colors.orange,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Erro inesperado: $e',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 }

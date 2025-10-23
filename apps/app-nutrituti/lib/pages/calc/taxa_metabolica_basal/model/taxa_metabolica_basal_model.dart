@@ -38,7 +38,7 @@ class TaxaMetabolicaBasalModel {
       (nivel) => nivel['id'] == nivelAtividadeSelecionado,
       orElse: () => TMBConstants.niveisAtividade[0],
     );
-    return nivelAtividade['fator'];
+    return (nivelAtividade['fator'] as num).toDouble();
   }
 
   void calcular() {

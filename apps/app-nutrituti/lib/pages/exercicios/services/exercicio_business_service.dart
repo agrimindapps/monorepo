@@ -81,8 +81,8 @@ class ExercicioBusinessService {
     try {
       final metas = await _repository.getMetasExercicios();
       return {
-        'minutos': (metas['minutosSemanal'] ?? 0).toDouble(),
-        'calorias': (metas['caloriasSemanal'] ?? 0).toDouble(),
+        'minutos': ((metas['minutosSemanal'] as num?) ?? 0).toDouble(),
+        'calorias': ((metas['caloriasSemanal'] as num?) ?? 0).toDouble(),
       };
     } catch (e) {
       throw Exception('Falha ao carregar metas: $e');

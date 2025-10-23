@@ -35,11 +35,11 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
   void _initializeSubscriptionConfig() {
     try {
       // Inicializar configuração para o nutrituti
-      SubscriptionConfigService.initializeForApp('nutrituti');
-      
+      SubscriptionConfigService.instance.initializeForApp('nutrituti');
+
       // Carregar produtos e vantagens da configuração centralizada
-      _products = SubscriptionConfigService.getCurrentProducts();
-      _advantages = SubscriptionConfigService.getCurrentAdvantages();
+      _products = SubscriptionConfigService.instance.getCurrentProducts();
+      _advantages = SubscriptionConfigService.instance.getCurrentAdvantages();
       
       setState(() {});
     } catch (e) {
@@ -97,7 +97,7 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
                       const SizedBox(height: 24),
                       
                       Text(
-                        SubscriptionConfigService.getCurrentAppName(),
+                        SubscriptionConfigService.instance.getCurrentAppName(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 34,
@@ -729,8 +729,8 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
 
   Widget _buildConfigInfo() {
     final isDark = ThemeManager().isDark.value;
-    final hasValidKeys = SubscriptionConfigService.hasValidApiKeys();
-    final errors = SubscriptionConfigService.getCurrentConfigErrors();
+    final hasValidKeys = SubscriptionConfigService.instance.hasValidApiKeys();
+    final errors = SubscriptionConfigService.instance.getCurrentConfigErrors();
     
     return Card(
       elevation: 4,
@@ -801,7 +801,7 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
   }
 
   Future<void> _purchaseProduct(Map<String, dynamic> product) async {
-    if (!SubscriptionConfigService.hasValidApiKeys()) {
+    if (!SubscriptionConfigService.instance.hasValidApiKeys()) {
       _showError('API keys do RevenueCat não configuradas. Configure as chaves no arquivo subscription_constants.dart');
       return;
     }
@@ -813,21 +813,29 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
       final revenueCatService = RevenuecatService.instance;
       final offering = await revenueCatService.getOfferings();
       
-      if (offering == null || offering.availablePackages.isEmpty) {
+      if (offering == null) {
         _showError('Nenhum produto disponível. Verifique sua conexão.');
         return;
       }
-      
+
+      // Check if availablePackages exists and is not empty
+      final packages = (offering as dynamic).availablePackages;
+      if (packages == null || (packages as List).isEmpty) {
+        _showError('Nenhum pacote disponível. Verifique sua conexão.');
+        return;
+      }
+
       // Encontrar o pacote correspondente ao productId
-      final package = offering.availablePackages.firstWhere(
-        (pkg) => pkg.storeProduct.identifier == product['productId'],
-        orElse: () => offering.availablePackages.first,
-      );
-      
+      final productId = product['productId'] as String? ?? '';
+      if (productId.isEmpty) {
+        _showError('ID do produto inválido.');
+        return;
+      }
+
       // Realizar a compra
-      final success = await revenueCatService.purchasePackage(package);
-      
-      if (success) {
+      final success = await revenueCatService.purchasePackage(productId);
+
+      if (success == true) {
         _showSuccess('Assinatura ativada com sucesso!\nBem-vindo ao NutriTuti Premium!');
         // Atualizar status de assinatura
         await _updateSubscriptionStatus();
@@ -863,7 +871,7 @@ class _NutriTutiPremiumPageState extends State<NutriTutiPremiumPage> {
 
   Future<void> _updateSubscriptionStatus() async {
     try {
-      await InAppPurchaseService().inAppLoadDataSignature();
+      await InAppPurchaseService.instance.inAppLoadDataSignature();
     } catch (e) {
       debugPrint('Erro ao atualizar status de assinatura: $e');
     }

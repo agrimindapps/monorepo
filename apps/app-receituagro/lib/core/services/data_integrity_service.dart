@@ -83,7 +83,8 @@ class IntegrityReport {
 ///
 /// Valida se todas as foreign keys de diagnósticos apontam para
 /// registros existentes nas tabelas relacionadas (defensivos, pragas, culturas)
-@lazySingleton
+/// Note: Not using @lazySingleton because IHiveManager isn't injectable-annotated
+/// Must be registered manually in injection_container.dart
 class DataIntegrityService {
   final IHiveManager _hiveManager;
 

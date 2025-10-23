@@ -76,8 +76,8 @@ class PesoRepository {
       await openBox();
       await _box.put(registro.id, registro);
       await _firestore.createRecord(
-        collection: collectionName,
-        data: registro.toMap(),
+        collectionName,
+        registro.toMap(),
       );
       await getAll(); // Update observable list
     } catch (e) {
@@ -90,9 +90,9 @@ class PesoRepository {
       await openBox();
       await _box.put(registro.id, registro);
       await _firestore.updateRecord(
-        collection: collectionName,
-        recordId: registro.id,
-        data: registro.toMap(),
+        collectionName,
+        registro.id ?? '',
+        registro.toMap(),
       );
       await getAll(); // Update observable list
     } catch (e) {
@@ -106,9 +106,9 @@ class PesoRepository {
       registro.markAsDeleted();
       await _box.put(registro.id, registro);
       await _firestore.updateRecord(
-        collection: collectionName,
-        recordId: registro.id,
-        data: registro.toMap(),
+        collectionName,
+        registro.id ?? '',
+        registro.toMap(),
       );
       await getAll(); // Update observable list
     } catch (e) {

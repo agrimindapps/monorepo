@@ -1,8 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../constants/settings_design_tokens.dart';
-import '../../presentation/providers/settings_notifier.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
@@ -61,22 +61,56 @@ class SupportSection extends ConsumerWidget {
   }
 
   Future<void> _showRateApp(BuildContext context, WidgetRef ref) async {
-    final notifier = ref.read(settingsNotifierProvider.notifier);
-
     try {
-      final success = await notifier.showRateAppDialog(context);
+      // ✅ FIXED: Usar AppRatingService do core package ao invés de placeholder
+      final appRatingService = di.sl<IAppRatingRepository>();
 
-      if (context.mounted && !success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getErrorSnackbar(
-            'Não foi possível abrir a loja de aplicativos',
-          ),
-        );
+      // Verificar se pode mostrar o diálogo
+      final canShow = await appRatingService.canShowRatingDialog();
+
+      if (canShow) {
+        // Mostrar diálogo de avaliação nativo
+        if (!context.mounted) return;
+        final success = await appRatingService.showRatingDialog(context: context);
+
+        if (context.mounted && !success) {
+          // Se não mostrou o diálogo, abrir a loja diretamente
+          final storeOpened = await appRatingService.openAppStore();
+
+          if (!storeOpened && context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SettingsDesignTokens.getErrorSnackbar(
+                'Não foi possível abrir a loja de aplicativos',
+              ),
+            );
+          }
+        }
+      } else {
+        // Já avaliou ou não atingiu os critérios, abrir loja diretamente
+        final storeOpened = await appRatingService.openAppStore();
+
+        if (!storeOpened && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SettingsDesignTokens.getErrorSnackbar(
+              'Não foi possível abrir a loja de aplicativos',
+            ),
+          );
+        } else if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Obrigado por avaliar nosso app!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SettingsDesignTokens.getErrorSnackbar('Erro ao abrir avaliação do app'),
+          SettingsDesignTokens.getErrorSnackbar(
+            'Erro ao abrir avaliação do app: $e',
+          ),
         );
       }
     }

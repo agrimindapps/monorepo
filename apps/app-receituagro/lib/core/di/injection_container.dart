@@ -16,6 +16,7 @@ import '../../features/favoritos/favoritos_di.dart';
 // ❌ REMOVIDO: import '../../features/pragas/di/pragas_di.dart'; (via @LazySingleton)
 import '../../features/settings/di/device_management_di.dart';
 import '../../features/settings/di/settings_di.dart';
+import '../../features/settings/di/tts_module.dart';
 import '../data/repositories/comentarios_hive_repository.dart';
 import '../data/repositories/cultura_hive_repository.dart';
 import '../data/repositories/diagnostico_hive_repository.dart';
@@ -40,7 +41,10 @@ import '../services/receituagro_data_cleaner.dart';
 import '../services/receituagro_navigation_service.dart';
 import '../services/receituagro_notification_service.dart';
 import '../services/remote_config_service.dart';
+import '../services/data_integrity_service.dart';
 import '../services/web_local_storage_repository.dart';
+import '../sync/sync_operations.dart';
+import '../sync/sync_queue.dart';
 import 'core_package_integration.dart';
 import 'injection.dart' as injectable;
 import 'modules/account_deletion_module.dart';
@@ -59,6 +63,33 @@ Future<void> init() async {
   await injectable.configureDependencies();
   FavoritosDI.registerRepository(); // ✅ Registra FavoritosRepositorySimplified como classe concreta
   configureAllRepositoriesDependencies();
+
+  // ✅ FIXED: Registrar serviços que dependem de IHiveManager manualmente
+  // (IHiveManager não é anotado com @injectable no core package)
+  if (!sl.isRegistered<SyncQueue>()) {
+    sl.registerLazySingleton<SyncQueue>(
+      () => SyncQueue(sl<core.IHiveManager>()),
+    );
+  }
+
+  if (!sl.isRegistered<SyncOperations>()) {
+    sl.registerLazySingleton<SyncOperations>(
+      () => SyncOperations(
+        sl<SyncQueue>(),
+        sl<core.ConnectivityService>(),
+      ),
+    );
+  }
+
+  if (!sl.isRegistered<DataIntegrityService>()) {
+    sl.registerLazySingleton<DataIntegrityService>(
+      () => DataIntegrityService(sl<core.IHiveManager>()),
+    );
+  }
+
+  // ℹ️ SyncDIModule.init() é chamado no main.dart após Hive estar pronto
+  // Não registramos aqui para evitar duplicação
+
   sl.registerLazySingleton<core.IAppDataCleaner>(
     () => ReceitaAgroDataCleaner(),
   );
@@ -301,6 +332,7 @@ Future<void> init() async {
   // ❌ REMOVIDO: PragasDI.configure(); // IPragasRepository e use cases agora gerenciados via @LazySingleton/@injectable
   // ❌ REMOVIDO: ComentariosDI.register(sl); // IComentariosRepository e use cases agora via @LazySingleton/@injectable
   SettingsDI.register(sl); // ⚠️ Ainda registra manualmente (sem @LazySingleton)
+  await TTSModule.register(sl); // ✅ TTS feature
   try {
     sl.registerLazySingleton<ReceitaAgroPremiumService>(() {
       if (!sl.isRegistered<ReceitaAgroAnalyticsService>()) {

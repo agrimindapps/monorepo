@@ -1,27 +1,34 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:core/core.dart' show HiveInterface, Box, singleton;
-import '../data/models/sync_queue_item.dart';
+import 'package:core/core.dart' hide SyncQueueItem;
+import '../data/models/sync_queue_item.dart' as models;
 
-@singleton
+/// Sync queue for offline-first operations
+/// ✅ FIXED: Changed from HiveInterface to IHiveManager (current pattern)
+/// Note: Not using @singleton because IHiveManager isn't injectable-annotated
+/// Must be registered manually in injection_container.dart
 class SyncQueue {
-  final HiveInterface _hive;
-  Box<SyncQueueItem>? _syncQueueBox;
+  final IHiveManager _hiveManager;
+  Box<dynamic>? _syncQueueBox;
 
-  final StreamController<List<SyncQueueItem>> _queueController =
-      StreamController<List<SyncQueueItem>>.broadcast();
+  final StreamController<List<models.SyncQueueItem>> _queueController =
+      StreamController<List<models.SyncQueueItem>>.broadcast();
 
-  Stream<List<SyncQueueItem>> get queueStream => _queueController.stream;
+  Stream<List<models.SyncQueueItem>> get queueStream => _queueController.stream;
 
   bool get isInitialized => _syncQueueBox != null;
 
-  SyncQueue(this._hive);
+  SyncQueue(this._hiveManager);
 
   Future<void> initialize() async {
     if (isInitialized) return;
 
     try {
-      _syncQueueBox = await _hive.openBox<SyncQueueItem>('syncQueue');
+      // Use IHiveManager to get box as Box<dynamic> (matches BoxRegistryService pattern)
+      final result = await _hiveManager.getBox<dynamic>('syncQueue');
+      if (result.isFailure) {
+        throw Exception('Failed to open syncQueue box: ${result.error?.message}');
+      }
+      _syncQueueBox = result.data;
       _notifyQueueUpdated();
     } catch (e) {
       throw Exception('Failed to initialize SyncQueue: $e');
@@ -42,8 +49,8 @@ class SyncQueue {
   }) async {
     _ensureInitialized();
 
-    final queueItem = SyncQueueItem(
-      id: FirebaseFirestore.instance.collection('_').doc().id,
+    final queueItem = models.SyncQueueItem(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       modelType: modelType,
       operation: operation,
       data: data,
@@ -53,33 +60,46 @@ class SyncQueue {
     _notifyQueueUpdated();
   }
 
-  /// Get all pending items (not synced and should retry now)
-  List<SyncQueueItem> getPendingItems() {
+  /// Get all items as SyncQueueItem (with type checking)
+  List<models.SyncQueueItem> _getAllSyncItems() {
     _ensureInitialized();
 
-    return _syncQueueBox!.values
+    final items = <models.SyncQueueItem>[];
+    for (final value in _syncQueueBox!.values) {
+      if (value is models.SyncQueueItem) {
+        items.add(value);
+      }
+    }
+    return items;
+  }
+
+  /// Get all pending items (not synced and should retry now)
+  List<models.SyncQueueItem> getPendingItems() {
+    _ensureInitialized();
+
+    return _getAllSyncItems()
         .where((item) => !item.isSynced && item.shouldRetryNow())
         .toList()
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
   }
 
   /// Get all items (including synced)
-  List<SyncQueueItem> getAllItems() {
+  List<models.SyncQueueItem> getAllItems() {
     _ensureInitialized();
-    return _syncQueueBox!.values.toList();
+    return _getAllSyncItems();
   }
 
   /// Get pending count
   int get pendingCount {
     _ensureInitialized();
-    return _syncQueueBox!.values.where((item) => !item.isSynced).length;
+    return _getAllSyncItems().where((item) => !item.isSynced).length;
   }
 
   /// Mark item as successfully synced
   Future<void> markItemAsSynced(String itemId) async {
     _ensureInitialized();
 
-    final item = _syncQueueBox!.values.firstWhere(
+    final item = _getAllSyncItems().firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('Item not found: $itemId'),
     );
@@ -93,7 +113,7 @@ class SyncQueue {
   Future<void> incrementRetryCount(String itemId, {String? errorMessage}) async {
     _ensureInitialized();
 
-    final item = _syncQueueBox!.values.firstWhere(
+    final item = _getAllSyncItems().firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('Item not found: $itemId'),
     );
@@ -111,7 +131,7 @@ class SyncQueue {
   Future<void> clearSyncedItems() async {
     _ensureInitialized();
 
-    final syncedItems = _syncQueueBox!.values.where((item) => item.isSynced).toList();
+    final syncedItems = _getAllSyncItems().where((item) => item.isSynced).toList();
 
     for (var item in syncedItems) {
       await item.delete();
@@ -131,7 +151,7 @@ class SyncQueue {
   Future<void> removeItem(String itemId) async {
     _ensureInitialized();
 
-    final item = _syncQueueBox!.values.firstWhere(
+    final item = _getAllSyncItems().firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('Item not found: $itemId'),
     );
@@ -144,7 +164,7 @@ class SyncQueue {
   Future<void> removeFailedItems() async {
     _ensureInitialized();
 
-    final failedItems = _syncQueueBox!.values
+    final failedItems = _getAllSyncItems()
         .where((item) => item.hasExceededMaxRetries)
         .toList();
 

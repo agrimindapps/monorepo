@@ -1,47 +1,106 @@
-// MIGRADO PARA ESTRUTURA CENTRALIZADA
-// Este arquivo agora usa a configuração centralizada em core/constants/subscription_constants.dart
-
-// Project imports:
-import '../../core/services/subscription_factory_service.dart';
+// CONFIGURAÇÃO DE ASSINATURAS - app-nutrituti
+// Implementação direta (substituindo SubscriptionFactoryService)
 
 const String _appId = 'nutrituti';
 
-// Getters que retornam as configurações da estrutura centralizada
-List<Map<String, dynamic>> get inappProductIds => 
-    SubscriptionFactoryService.getProductsForApp(_appId);
+// Produtos disponíveis
+const List<Map<String, dynamic>> inappProductIds = [
+  {
+    'id': 'br.com.agrimind.nutrituti.monthly',
+    'title': 'Nutrituti Premium - Mensal',
+    'price': 'R\$ 9,90',
+    'type': 'subscription',
+  },
+  {
+    'id': 'br.com.agrimind.nutrituti.yearly',
+    'title': 'Nutrituti Premium - Anual',
+    'price': 'R\$ 99,90',
+    'type': 'subscription',
+  },
+];
 
-String get regexAssinatura => 
-    SubscriptionFactoryService.getRegexPatternForApp(_appId);
+// Regex para identificar produtos de assinatura
+const String regexAssinatura = r'^br\.com\.agrimind\.nutrituti\.(monthly|yearly)$';
 
-List<Map<String, dynamic>> get inappVantagens => 
-    SubscriptionFactoryService.getAdvantagesForApp(_appId);
+// Vantagens do Premium
+const List<Map<String, dynamic>> inappVantagens = [
+  {'icon': '🧮', 'text': 'Calculadoras ilimitadas sem anúncios'},
+  {'icon': '💧', 'text': 'Controle de hidratação avançado'},
+  {'icon': '🏋️', 'text': 'Planos de exercícios personalizados'},
+  {'icon': '🧘', 'text': 'Meditações exclusivas'},
+  {'icon': '📊', 'text': 'Relatórios nutricionais detalhados'},
+  {'icon': '🔔', 'text': 'Lembretes inteligentes'},
+];
 
-Map<String, String> get inappTermosUso => 
-    SubscriptionFactoryService.getTermsForApp(_appId);
+// Termos de uso e privacidade
+const Map<String, String> inappTermosUso = {
+  'terms': 'https://agrimindapps.blogspot.com/2022/08/nutrituti-termos-e-condicoes.html',
+  'privacy': 'https://agrimindapps.blogspot.com/2022/08/nutrituti-politica-de-privacidade.html',
+};
 
-Map<String, dynamic> get infoAssinatura => 
-    SubscriptionFactoryService.getDefaultSubscriptionInfoForApp(_appId);
+// Informações da assinatura
+const Map<String, dynamic> infoAssinatura = {
+  'name': 'Nutrituti Premium',
+  'description': 'Acesso completo a todas as funcionalidades premium do app',
+  'trial_days': 7,
+  'benefits': [
+    'Sem anúncios',
+    'Todas as calculadoras desbloqueadas',
+    'Estatísticas avançadas',
+    'Suporte prioritário',
+  ],
+};
 
-// Getters para as chaves do RevenueCat
-String get entitlementID => 
-    SubscriptionFactoryService.getEntitlementIdForApp(_appId);
+// RevenueCat Keys
+// IMPORTANT: Em produção, estas keys devem vir de variáveis de ambiente
+const String entitlementID = 'premium';
 
-String get appleApiKey => 
-    SubscriptionFactoryService.getAppleApiKeyForApp(_appId);
+// Placeholder keys - SUBSTITUIR por valores reais em produção
+const String appleApiKey = 'appl_nutrituti_placeholder';
+const String googleApiKey = 'goog_nutrituti_placeholder';
 
-String get googleApiKey => 
-    SubscriptionFactoryService.getGoogleApiKeyForApp(_appId);
+// Validações
+bool get isConfigurationValid =>
+    inappProductIds.isNotEmpty &&
+    entitlementID.isNotEmpty &&
+    regexAssinatura.isNotEmpty;
 
-// Métodos de conveniência para validação
-bool get isConfigurationValid => 
-    SubscriptionFactoryService.validateAppConfig(_appId);
+List<String> get configurationErrors {
+  final errors = <String>[];
 
-List<String> get configurationErrors => 
-    SubscriptionFactoryService.getValidationErrors(_appId);
+  if (inappProductIds.isEmpty) {
+    errors.add('Produtos de assinatura não configurados');
+  }
 
-bool get hasValidApiKeys => 
-    SubscriptionFactoryService.hasValidApiKeys(_appId);
+  if (entitlementID.isEmpty) {
+    errors.add('Entitlement ID não configurado');
+  }
+
+  if (regexAssinatura.isEmpty) {
+    errors.add('Regex de validação não configurado');
+  }
+
+  if (!hasValidApiKeys) {
+    errors.add('API Keys do RevenueCat não configuradas corretamente');
+  }
+
+  return errors;
+}
+
+bool get hasValidApiKeys =>
+    appleApiKey.isNotEmpty &&
+    googleApiKey.isNotEmpty &&
+    !appleApiKey.contains('placeholder') &&
+    !googleApiKey.contains('placeholder');
 
 // Método para obter configuração completa como Map (útil para debugging)
-Map<String, dynamic> get fullConfiguration => 
-    SubscriptionFactoryService.getFullConfigAsMap(_appId);
+Map<String, dynamic> get fullConfiguration => {
+  'app_id': _appId,
+  'products': inappProductIds,
+  'regex': regexAssinatura,
+  'advantages': inappVantagens,
+  'terms': inappTermosUso,
+  'info': infoAssinatura,
+  'entitlement': entitlementID,
+  'has_valid_keys': hasValidApiKeys,
+};

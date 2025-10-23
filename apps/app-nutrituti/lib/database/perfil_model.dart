@@ -74,4 +74,28 @@ class PerfilModel extends BaseModel {
   }
 
   Map<String, dynamic> toJson() => toMap();
+
+  PerfilModel copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? nome,
+    DateTime? datanascimento,
+    double? altura,
+    double? peso,
+    int? genero,
+    String? imagePath,
+  }) {
+    return PerfilModel(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      nome: nome ?? this.nome,
+      datanascimento: datanascimento ?? this.datanascimento,
+      altura: altura ?? this.altura,
+      peso: peso ?? this.peso,
+      genero: genero ?? this.genero,
+      imagePath: imagePath ?? this.imagePath,
+    );
+  }
 }

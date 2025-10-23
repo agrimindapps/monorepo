@@ -25,15 +25,16 @@ class ExercicioFormState {
   final bool isFormValid;
   final ExercicioModel? exercicioEditando;
 
-  const ExercicioFormState({
+  ExercicioFormState({
     this.isLoading = false,
     this.selectedCategoria = 'Aeróbico',
     this.exercicioSelecionado,
-    this.exerciciosFiltrados = const [],
+    List<Map<String, dynamic>>? exerciciosFiltrados,
     DateTime? dataRegistro,
     this.isFormValid = false,
     this.exercicioEditando,
-  }) : dataRegistro = dataRegistro ?? const _DefaultDateTime._();
+  })  : exerciciosFiltrados = exerciciosFiltrados ?? const [],
+        dataRegistro = dataRegistro ?? DateTime.now();
 
   ExercicioFormState copyWith({
     bool? isLoading,
@@ -204,7 +205,7 @@ class ExercicioFormNotifier extends _$ExercicioFormNotifier {
   /// Handle exercicio selection
   void onExercicioSelected(Map<String, dynamic>? exercicio) {
     if (exercicio != null) {
-      nomeController.text = exercicio['text'] ?? '';
+      nomeController.text = (exercicio['text'] as String?) ?? '';
 
       state = state.copyWith(
         exercicioSelecionado: exercicio,
@@ -222,7 +223,7 @@ class ExercicioFormNotifier extends _$ExercicioFormNotifier {
       try {
         int duracao = int.parse(duracaoController.text);
         double valorPorMinuto =
-            exercicioSelecionado['value']?.toDouble() ?? 0.0;
+            (exercicioSelecionado['value'] as num?)?.toDouble() ?? 0.0;
         int calorias = (duracao * valorPorMinuto).round();
         caloriasController.text = calorias.toString();
       } catch (e) {

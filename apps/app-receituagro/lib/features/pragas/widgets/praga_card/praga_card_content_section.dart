@@ -33,6 +33,12 @@ class PragaCardContentSection extends StatelessWidget {
 
   /// Conteúdo para modo lista (vertical stack)
   Widget _buildListContent() {
+    final nomesSecundarios = properties.praga.nomesSecundarios;
+    final hasNomesSecundarios = nomesSecundarios.isNotEmpty;
+    final nomesSecundariosText = hasNomesSecundarios
+        ? nomesSecundarios.map((n) => n.trim()).join(', ')
+        : '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -47,8 +53,22 @@ class PragaCardContentSection extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        
-        const SizedBox(height: 4),
+
+        if (hasNomesSecundarios) ...[
+          const SizedBox(height: 2),
+          Text(
+            nomesSecundariosText,
+            style: TextStyle(
+              fontSize: 11,
+              color: PragaCardHelpers.getTextColor(properties.isDarkMode, isSecondary: true),
+              height: 1.2,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+
+        const SizedBox(height: 2),
         if (properties.praga.nomeCientifico.isNotEmpty)
           Text(
             properties.praga.nomeCientifico,
@@ -66,6 +86,12 @@ class PragaCardContentSection extends StatelessWidget {
 
   /// Conteúdo para modo grid (texto embaixo da imagem)
   Widget _buildGridContent() {
+    final nomesSecundarios = properties.praga.nomesSecundarios;
+    final hasNomesSecundarios = nomesSecundarios.isNotEmpty;
+    final nomesSecundariosText = hasNomesSecundarios
+        ? nomesSecundarios.map((n) => n.trim()).join(', ')
+        : '';
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Column(
@@ -82,8 +108,22 @@ class PragaCardContentSection extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          
-          const SizedBox(height: 4),
+
+          if (hasNomesSecundarios) ...[
+            const SizedBox(height: 2),
+            Text(
+              nomesSecundariosText,
+              style: TextStyle(
+                fontSize: 10,
+                color: PragaCardHelpers.getTextColor(properties.isDarkMode, isSecondary: true),
+                height: 1.2,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+
+          const SizedBox(height: 2),
           if (properties.praga.nomeCientifico.isNotEmpty)
             Text(
               properties.praga.nomeCientifico,

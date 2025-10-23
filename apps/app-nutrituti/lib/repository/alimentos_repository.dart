@@ -150,7 +150,8 @@ class AlimentosRepository {
   }
 
   Future<bool> setFavorito(String id) async {
-    return await localStorage.setFavorite('favoritos', id);
+    await localStorage.setFavorite('favoritos', id, true);
+    return true;
   }
 
   Future<bool> validFavorito(String id) async {
@@ -166,7 +167,7 @@ class AlimentosRepository {
 
     String text = '${selectItem['descricao']} $sliderValue Gr\n\n';
     for (var x = 0; x < propriedades.length; x++) {
-      Map<String, dynamic> item = propriedades[x];
+      Map<String, dynamic> item = propriedades[x] as Map<String, dynamic>;
       text += '${item['text']}: ${selectItem[item['value']]} ${item['med']}\n';
     }
 

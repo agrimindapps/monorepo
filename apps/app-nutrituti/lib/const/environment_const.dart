@@ -41,31 +41,31 @@ class AppEnvironment {
   void initialize() {
     if (InfoDeviceService().isProduction.value) {
       admobBanner = Platform.isAndroid
-          ? prod['admobBanner-android']
-          : prod['admobBanner-ios'];
+          ? prod['admobBanner-android'] as String
+          : prod['admobBanner-ios'] as String;
       onOpenApp = Platform.isAndroid
-          ? prod['onOpenApp-android']
-          : prod['onOpenApp-ios'];
+          ? prod['onOpenApp-android'] as String
+          : prod['onOpenApp-ios'] as String;
       admobPremiado = Platform.isAndroid
-          ? prod['admobPremiado-android']
-          : prod['admobPremiado-ios'];
+          ? prod['admobPremiado-android'] as String
+          : prod['admobPremiado-ios'] as String;
       altAdmobBanner = Platform.isAndroid
-          ? prod['altAdmobBanner-android']
-          : prod['altAdmobBanner-ios'];
+          ? prod['altAdmobBanner-android'] as String
+          : prod['altAdmobBanner-ios'] as String;
     } else {
       // Homologação
       admobBanner = Platform.isAndroid
-          ? hml['admobBanner-android']
-          : hml['admobBanner-ios'];
+          ? hml['admobBanner-android'] as String
+          : hml['admobBanner-ios'] as String;
       onOpenApp = Platform.isAndroid
-          ? hml['onOpenApp-android']
-          : hml['onOpenApp-ios'];
+          ? hml['onOpenApp-android'] as String
+          : hml['onOpenApp-ios'] as String;
       admobPremiado = Platform.isAndroid
-          ? hml['admobPremiado-android']
-          : hml['admobPremiado-ios'];
+          ? hml['admobPremiado-android'] as String
+          : hml['admobPremiado-ios'] as String;
       altAdmobBanner = Platform.isAndroid
-          ? hml['altAdmobBanner-android']
-          : hml['altAdmobBanner-ios'];
+          ? hml['altAdmobBanner-android'] as String
+          : hml['altAdmobBanner-ios'] as String;
     }
   }
 

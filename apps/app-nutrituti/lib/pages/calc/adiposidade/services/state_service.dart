@@ -421,10 +421,10 @@ class AdiposidadeStateService extends ChangeNotifier {
   /// Restaura estado do backup
   void restoreState(Map<String, dynamic> backup) {
     _updateState(_state.copyWith(
-      quadrilState: FieldState.withValue(backup['quadril'] ?? ''),
-      alturaState: FieldState.withValue(backup['altura'] ?? ''),
-      idadeState: FieldState.withValue(backup['idade'] ?? ''),
-      generoSelecionado: backup['genero'] ?? 1,
+      quadrilState: FieldState.withValue(backup['quadril'] as String? ?? ''),
+      alturaState: FieldState.withValue(backup['altura'] as String? ?? ''),
+      idadeState: FieldState.withValue(backup['idade'] as String? ?? ''),
+      generoSelecionado: (backup['genero'] as num?)?.toInt() ?? 1,
       appState: AdiposidadeAppState.inputting,
     ));
   }

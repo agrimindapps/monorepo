@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../constants/settings_design_tokens.dart';
 import '../../presentation/providers/settings_notifier.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
@@ -29,14 +28,13 @@ class NotificationsSection extends ConsumerWidget {
               leadingIcon: Icons.notifications_active,
               title: 'Notificações push',
               subtitle: 'Receber notificações do app',
-              trailing: Switch(
+              trailing: Switch.adaptive(
                 value: state.notificationsEnabled,
                 onChanged: (bool value) async {
                   await ref
                       .read(settingsNotifierProvider.notifier)
                       .setNotificationsEnabled(value);
                 },
-                activeColor: SettingsDesignTokens.primaryColor,
               ),
               onTap: () async {
                 await ref

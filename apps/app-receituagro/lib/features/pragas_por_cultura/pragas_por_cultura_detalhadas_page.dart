@@ -11,8 +11,8 @@ import 'widgets/cultura_selector_widget.dart';
 import 'widgets/defensivos_bottom_sheet.dart';
 import 'widgets/estatisticas_cultura_widget.dart';
 import 'widgets/filtros_ordenacao_dialog.dart';
+import 'widgets/praga_por_cultura_card_widget.dart';
 import 'widgets/pragas_cultura_state_handler.dart';
-import 'widgets/pragas_list_view.dart';
 
 /// Página que mostra pragas agrupadas por cultura
 /// Integra dados de PragasHive + CulturaHive + DiagnosticoHive + FitossanitarioHive
@@ -75,9 +75,18 @@ class _PragasPorCulturaDetalhadasPageState
       final result = await _culturaRepo.getAll();
       if (result.isSuccess) {
         final culturas = result.data!;
-        _culturas =
-            culturas.map((c) => {'id': c.idReg, 'nome': c.cultura}).toList()
-              ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
+
+        // ✅ FIXED: Remover culturas duplicadas por ID antes de criar o mapa
+        // Problema: DropdownButton não permite valores duplicados
+        final culturasUnicas = <String, Map<String, String>>{};
+        for (final cultura in culturas) {
+          if (!culturasUnicas.containsKey(cultura.idReg)) {
+            culturasUnicas[cultura.idReg] = {'id': cultura.idReg, 'nome': cultura.cultura};
+          }
+        }
+
+        _culturas = culturasUnicas.values.toList()
+          ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
         if (_culturaIdSelecionada != null) {
           final cultura = _culturas.firstWhere(
             (c) => c['id'] == _culturaIdSelecionada,
@@ -437,6 +446,7 @@ class _PragasPorCulturaDetalhadasPageState
   }
 
   /// Constrói o conteúdo de cada tab
+  /// ✅ FIXED: Removido CustomScrollView aninhado que causava erro de semantics
   Widget _buildTabContent(List<PragaPorCultura> pragasList, String tipoNome) {
     if (pragasList.isEmpty) {
       return Center(
@@ -477,10 +487,11 @@ class _PragasPorCulturaDetalhadasPageState
       );
     }
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Container(
+    // ✅ Usar SingleChildScrollView ao invés de CustomScrollView aninhado
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -529,13 +540,38 @@ class _PragasPorCulturaDetalhadasPageState
               ],
             ),
           ),
+          // ✅ Lista de pragas diretamente sem SliverListView
+          _buildPragasList(pragasList),
+        ],
+      ),
+    );
+  }
+
+  /// Constrói a lista de pragas como um widget normal (não sliver)
+  Widget _buildPragasList(List<PragaPorCultura> pragasList) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: pragasList.length,
+      itemBuilder: (context, index) {
+        final pragaPorCultura = pragasList[index];
+        // Retorna o mesmo widget que PragasListView usa internamente
+        return _buildPragaCard(pragaPorCultura);
+      },
+    );
+  }
+
+  /// Constrói o card de uma praga usando o widget padrão com RepaintBoundary
+  Widget _buildPragaCard(PragaPorCultura pragaPorCultura) {
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: PragaPorCulturaCardWidget(
+          pragaPorCultura: pragaPorCultura,
+          onTap: () => _navegarParaDetalhes(pragaPorCultura),
+          onVerDefensivos: () => _verDefensivosDaPraga(pragaPorCultura),
         ),
-        PragasListView(
-          pragasPorCultura: pragasList,
-          onPragaTap: _navegarParaDetalhes,
-          onVerDefensivos: _verDefensivosDaPraga,
-        ),
-      ],
+      ),
     );
   }
 

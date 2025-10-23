@@ -21,4 +21,14 @@ class FirestoreService {
 
   /// Get Firestore instance
   FirebaseFirestore get instance => _firestore;
+
+  /// Create a new record in a collection
+  Future<void> createRecord(String collectionPath, Map<String, dynamic> data) async {
+    await _firestore.collection(collectionPath).add(data);
+  }
+
+  /// Update an existing record
+  Future<void> updateRecord(String collectionPath, String docId, Map<String, dynamic> data) async {
+    await _firestore.collection(collectionPath).doc(docId).update(data);
+  }
 }

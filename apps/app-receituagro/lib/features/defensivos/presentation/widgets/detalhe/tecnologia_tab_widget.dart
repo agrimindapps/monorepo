@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/widgets/premium_feature_card.dart';
+import '../../../../../core/widgets/tts_button.dart';
 import '../../providers/detalhe_defensivo_notifier.dart';
 
 /// Widget para tab de tecnologia com restrição premium
@@ -165,18 +166,11 @@ class TecnologiaTabWidget extends ConsumerWidget {
                       width: 1,
                     ),
                   ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.volume_up,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Lendo: $title')),
-                      );
-                    },
-                    tooltip: 'Ouvir texto',
+                  child: TTSButton(
+                    text: content,
+                    title: title,
+                    iconSize: 18,
+                    iconColor: Colors.white,
                   ),
                 ),
               ],

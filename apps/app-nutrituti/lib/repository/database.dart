@@ -27,9 +27,9 @@ class DatabaseRepository {
     List<Map<String, dynamic>> itens = [];
 
     for (final filename in filenames) {
-      final jsonString = await rootBundle.loadString(filename['file']);
+      final jsonString = await rootBundle.loadString(filename['file'] as String);
       final jsonMap = jsonDecode(jsonString);
-      itens = List<Map<String, dynamic>>.from(jsonMap);
+      itens = List<Map<String, dynamic>>.from(jsonMap as Iterable);
       contents.addAll(itens);
     }
 
@@ -38,7 +38,7 @@ class DatabaseRepository {
 
   Future<Map<String, dynamic>> get(String table, dynamic value) async {
     final List<dynamic> data = await loadJsonFiles(table);
-    return data.firstWhere((item) => item['IdReg'] == value);
+    return data.firstWhere((item) => item['IdReg'] == value) as Map<String, dynamic>;
   }
 
   Future<List<dynamic>> getAll(String table) async {
@@ -66,10 +66,10 @@ class DatabaseRepository {
       //     'O parâmetro "ArrayList" não pode ser nulo ou vazio.');
     }
 
-    arrayList.sort((a, b) => a[field].compareTo(b[field]));
+    arrayList.sort((a, b) => (a[field] as int).compareTo(b[field] as int));
 
     if (field2 != null && field2.isNotEmpty) {
-      arrayList.sort((a, b) => a[field2].compareTo(b[field2]));
+      arrayList.sort((a, b) => (a[field2] as int).compareTo(b[field2] as int));
     }
 
     if (distinct) {
@@ -103,13 +103,13 @@ class DatabaseRepository {
 
   Future<void> saveRegistryLastAccess(String varStorage, String id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<dynamic> recuperado = jsonDecode(prefs.getString(varStorage) ?? '[]');
+    List<dynamic> recuperado = jsonDecode(prefs.getString(varStorage) ?? '[]') as List<dynamic>;
     int contMax = recuperado.length < 9 ? recuperado.length : 9;
     bool decision = false;
 
     if (prefs.containsKey(varStorage)) {
       for (int x = 0; x < contMax; x++) {
-        Map<String, dynamic> item = recuperado[x];
+        Map<String, dynamic> item = recuperado[x] as Map<String, dynamic>;
         if (item['IdReg'] == id) {
           decision = true;
           break;

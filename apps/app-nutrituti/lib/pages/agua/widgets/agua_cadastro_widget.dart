@@ -39,8 +39,8 @@ class _AguaCadastroWidgetState extends State<AguaCadastroWidget> {
     _registro = widget.registro ??
         BeberAgua(
           id: DatabaseRepository.generateIdReg(),
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-          updatedAt: DateTime.now().millisecondsSinceEpoch,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
           dataRegistro: DateTime.now().millisecondsSinceEpoch,
           quantidade: 0,
           fkIdPerfil: '',

@@ -47,8 +47,8 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
     } else {
       _localPerfil = PerfilModel(
         id: DatabaseRepository.generateIdReg(),
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        updatedAt: DateTime.now().millisecondsSinceEpoch,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
         nome: '',
         datanascimento: DateTime.now(),
         altura: 0.0,
@@ -118,7 +118,7 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _localPerfil.nome = value;
+                      _localPerfil = _localPerfil.copyWith(nome: value);
                     },
                   ),
                   const SizedBox(height: 10),
@@ -137,7 +137,7 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       );
                       if (pickedDate != null) {
                         setState(() {
-                          _localPerfil.datanascimento = pickedDate;
+                          _localPerfil = _localPerfil.copyWith(datanascimento: pickedDate);
                         });
                       }
                     },
@@ -160,7 +160,7 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _localPerfil.altura = double.parse(value!);
+                      _localPerfil = _localPerfil.copyWith(altura: double.parse(value!));
                     },
                   ),
                   const SizedBox(height: 10),
@@ -175,7 +175,7 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                       return null;
                     },
                     onSaved: (value) {
-                      _localPerfil.peso = double.parse(value!);
+                      _localPerfil = _localPerfil.copyWith(peso: double.parse(value!));
                     },
                   ),
                   const SizedBox(height: 10),
@@ -188,7 +188,7 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                     ],
                     onChanged: (value) {
                       setState(() {
-                        _localPerfil.genero = value;
+                        _localPerfil = _localPerfil.copyWith(genero: value);
                       });
                     },
                     validator: (value) {

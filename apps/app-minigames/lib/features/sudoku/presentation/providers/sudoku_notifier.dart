@@ -233,7 +233,10 @@ class SudokuGame extends _$SudokuGame {
       (failure) {
         state = state.copyWith(errorMessage: failure.message);
       },
-      ((position, value)) {
+      (hint) {
+        final position = hint.$1;
+        final value = hint.$2;
+
         // Place hint value
         final placeResult = _placeNumberUseCase(
           grid: state.grid,

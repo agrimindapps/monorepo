@@ -17,6 +17,9 @@ class PesoModel extends BaseModel {
   @HiveField(9)
   String fkIdPerfil;
 
+  @HiveField(10)
+  bool isDeleted;
+
   PesoModel({
     required super.id,
     required super.createdAt,
@@ -24,25 +27,45 @@ class PesoModel extends BaseModel {
     required this.dataRegistro,
     required this.peso,
     required this.fkIdPerfil,
+    this.isDeleted = false,
   });
 
   @override
   Map<String, dynamic> toMap() {
-    return super.toMap()..addAll({
+    final baseMap = <String, dynamic>{
+      'id': id,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+    };
+    return baseMap..addAll({
       'dataRegistro': dataRegistro,
       'peso': peso,
       'fkIdPerfil': fkIdPerfil,
+      'isDeleted': isDeleted,
     });
   }
 
   factory PesoModel.fromMap(Map<String, dynamic> map) {
     return PesoModel(
-      id: map['id'] ?? '',
-      createdAt: map['createdAt'] ?? 0,
-      updatedAt: map['updatedAt'] ?? 0,
-      dataRegistro: map['dataRegistro'] ?? 0,
-      peso: map['peso']?.toDouble() ?? 0.0,
-      fkIdPerfil: map['fkIdPerfil'] ?? '',
+      id: map['id'] as String? ?? '',
+      createdAt: map['createdAt'] as DateTime?,
+      updatedAt: map['updatedAt'] as DateTime?,
+      dataRegistro: (map['dataRegistro'] as num?)?.toInt() ?? 0,
+      peso: (map['peso'] as num?)?.toDouble() ?? 0.0,
+      fkIdPerfil: map['fkIdPerfil'] as String? ?? '',
+      isDeleted: map['isDeleted'] as bool? ?? false,
+    );
+  }
+
+  PesoModel markAsDeleted() {
+    return PesoModel(
+      id: id,
+      createdAt: createdAt,
+      updatedAt: DateTime.now(),
+      dataRegistro: dataRegistro,
+      peso: peso,
+      fkIdPerfil: fkIdPerfil,
+      isDeleted: true,
     );
   }
 

@@ -19,7 +19,7 @@ class SubscriptionPage extends ConsumerStatefulWidget {
 }
 
 class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
-  final InAppPurchaseService _purchaseService = InAppPurchaseService();
+  final InAppPurchaseService _purchaseService = InAppPurchaseService.instance;
   RevenuecatService? _revenuecatService;
   bool _isLoading = true;
   bool _isPurchasing = false;
@@ -35,7 +35,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   void _initializeSubscriptionConfig() {
     try {
       // Inicializar configuração para o nutrituti
-      SubscriptionConfigService.initializeForApp('nutrituti');
+      SubscriptionConfigService.instance.initializeForApp('nutrituti');
     } catch (e) {
       debugPrint('Erro ao inicializar configuração: $e');
     }
@@ -43,12 +43,8 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   Future<void> _initializeServices() async {
     try {
-      // TODO: Get API key from environment configuration
-      // For now, initialize with placeholder
-      _revenuecatService = RevenuecatService(
-        store: Store.appStore,
-        apiKey: '', // Will need to be configured
-      );
+      // Use RevenuecatService singleton instance
+      _revenuecatService = RevenuecatService.instance;
 
       await _revenuecatService!.configureSDK();
       await _loadOfferings();
@@ -64,7 +60,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   Future<void> _loadOfferings() async {
     try {
-      final offering = await _revenuecatService?.getOfferings();
+      final offering = await _revenuecatService?.getOfferings() as Offering?;
       setState(() {
         _currentOffering = offering;
       });
@@ -81,7 +77,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     });
 
     try {
-      final success = await _revenuecatService?.purchasePackage(package);
+      final success = await _revenuecatService?.purchasePackage(package.identifier);
 
       if (success == true) {
         if (mounted) {
@@ -274,7 +270,6 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   Widget _buildBenefitsSection() {
     final theme = Theme.of(context);
-    final benefits = _purchaseService.getVantagens();
 
     return Card(
       elevation: 2,
@@ -292,39 +287,53 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
               ),
             ),
             const SizedBox(height: 16),
-            if (benefits.isNotEmpty) ...[
-              ...benefits.map((benefit) => _buildBenefitItem(
-                    benefit['titulo'] ?? '',
-                    benefit['descricao'] ?? '',
-                    benefit['icone'] ?? 'star',
-                  )),
-            ] else ...[
-              _buildBenefitItem(
-                'Planos Alimentares Personalizados',
-                'Receba planos de refeições customizados para seus objetivos',
-                'restaurant_menu',
-              ),
-              _buildBenefitItem(
-                'Análises Nutricionais Detalhadas',
-                'Acompanhe macros e micros com precisão profissional',
-                'analytics',
-              ),
-              _buildBenefitItem(
-                'Receitas Exclusivas',
-                'Acesso a mais de 1000 receitas saudáveis e saborosas',
-                'book',
-              ),
-              _buildBenefitItem(
-                'Sincronização Ilimitada',
-                'Seus dados sempre seguros e sincronizados',
-                'sync',
-              ),
-              _buildBenefitItem(
-                'Sem Anúncios',
-                'Experiência premium sem interrupções',
-                'block',
-              ),
-            ],
+            // Using FutureBuilder for async benefits
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _purchaseService.getVantagens(),
+              builder: (context, snapshot) {
+                final benefits = snapshot.data ?? [];
+                if (benefits.isNotEmpty) {
+                  return Column(
+                    children: benefits.map((benefit) => _buildBenefitItem(
+                      benefit['titulo'] as String? ?? '',
+                      benefit['descricao'] as String? ?? '',
+                      benefit['icone'] as String? ?? 'star',
+                    )).toList(),
+                  );
+                }
+
+                // Default benefits
+                return Column(
+                  children: [
+                    _buildBenefitItem(
+                      'Planos Alimentares Personalizados',
+                      'Receba planos de refeições customizados para seus objetivos',
+                      'restaurant_menu',
+                    ),
+                    _buildBenefitItem(
+                      'Análises Nutricionais Detalhadas',
+                      'Acompanhe macros e micros com precisão profissional',
+                      'analytics',
+                    ),
+                    _buildBenefitItem(
+                      'Receitas Exclusivas',
+                      'Acesso a mais de 1000 receitas saudáveis e saborosas',
+                      'book',
+                    ),
+                    _buildBenefitItem(
+                      'Sincronização Ilimitada',
+                      'Seus dados sempre seguros e sincronizados',
+                      'sync',
+                    ),
+                    _buildBenefitItem(
+                      'Sem Anúncios',
+                      'Experiência premium sem interrupções',
+                      'block',
+                    ),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -618,8 +627,6 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   Widget _buildTermsSection() {
-    final termsData = _purchaseService.getTermosUso();
-
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -665,24 +672,30 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
               ],
             ),
             const SizedBox(height: 16),
-            if (termsData.isNotEmpty && termsData['texto'] != null)
-              Text(
-                termsData['texto'],
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              )
-            else
-              const Text(
-                'A assinatura será renovada automaticamente ao final de cada período. Cancele a qualquer momento nas configurações da sua conta. Os pagamentos serão processados através da loja de aplicativos.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
+            FutureBuilder<String>(
+              future: _purchaseService.getTermosUso(),
+              builder: (context, snapshot) {
+                final termsText = snapshot.data ?? '';
+                if (termsText.isNotEmpty) {
+                  return Text(
+                    termsText,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  );
+                }
+                return const Text(
+                  'A assinatura será renovada automaticamente ao final de cada período. Cancele a qualquer momento nas configurações da sua conta. Os pagamentos serão processados através da loja de aplicativos.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                );
+              },
+            ),
           ],
         ),
       ),

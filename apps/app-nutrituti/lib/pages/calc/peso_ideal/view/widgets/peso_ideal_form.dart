@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 // Project imports:
 import '../../../../../../core/style/shadcn_style.dart';
 import '../../../../../../core/themes/manager.dart';
+import '../../../../../../core/utils/decimal_input_formatter.dart';
 import '../../../../../../core/widgets/textfield_widget.dart';
 import '../../controller/peso_ideal_controller.dart';
 

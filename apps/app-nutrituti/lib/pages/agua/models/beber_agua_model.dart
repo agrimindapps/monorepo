@@ -28,21 +28,32 @@ class BeberAgua extends BaseModel {
 
   @override
   Map<String, dynamic> toMap() {
-    return super.toMap()..addAll({
+    return {
+      'id': id,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'dataRegistro': dataRegistro,
       'quantidade': quantidade,
       'fkIdPerfil': fkIdPerfil,
-    });
+    };
   }
 
   factory BeberAgua.fromMap(Map<String, dynamic> map) {
     return BeberAgua(
-      id: map['id'] ?? '',
-      createdAt: map['createdAt'] ?? 0,
-      updatedAt: map['updatedAt'] ?? 0,
-      dataRegistro: map['dataRegistro'] ?? 0,
-      quantidade: map['quantidade']?.toDouble() ?? 0.0,
-      fkIdPerfil: map['fkIdPerfil'] ?? '',
+      id: map['id'] as String? ?? '',
+      createdAt: map['createdAt'] != null
+          ? (map['createdAt'] is DateTime
+              ? map['createdAt'] as DateTime
+              : DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int))
+          : null,
+      updatedAt: map['updatedAt'] != null
+          ? (map['updatedAt'] is DateTime
+              ? map['updatedAt'] as DateTime
+              : DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int))
+          : null,
+      dataRegistro: (map['dataRegistro'] as num?)?.toInt() ?? 0,
+      quantidade: (map['quantidade'] as num?)?.toDouble() ?? 0.0,
+      fkIdPerfil: map['fkIdPerfil'] as String? ?? '',
     );
   }
 

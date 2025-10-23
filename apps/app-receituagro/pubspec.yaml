@@ -32,6 +32,8 @@ dependencies:
   package_info_plus: any
   share_plus: any
   collection: any
+  url_launcher: any
+  flutter_tts: ^4.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -205,6 +205,26 @@ void main() async {
     await ReceitaAgroRealtimeService.instance.initialize();
 
     DiagnosticoLogger.debug('Realtime sync service initialized successfully');
+
+    // ✅ FIXED: Executar sync inicial automático se usuário estiver autenticado (não anônimo)
+    final currentUser = auth.currentUser;
+    if (currentUser != null && !currentUser.isAnonymous) {
+      DiagnosticoLogger.debug(
+        '🔄 User authenticated (${currentUser.email}) - starting initial sync...',
+      );
+      // Fire and forget - não bloqueamos a inicialização do app
+      unawaited(
+        SyncDIModule.performInitialSync(di.sl).then((_) {
+          DiagnosticoLogger.debug('✅ Initial sync completed in background');
+        }).catchError((Object e) {
+          DiagnosticoLogger.warning('⚠️ Initial sync failed (non-blocking)', e);
+        }),
+      );
+    } else {
+      DiagnosticoLogger.debug(
+        'ℹ️ User is anonymous - skipping initial sync',
+      );
+    }
   } catch (e) {
     DiagnosticoLogger.debug('Sync initialization failed', e);
   }

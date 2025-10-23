@@ -111,7 +111,7 @@ class ConfigPage extends ConsumerWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-            child: configOptionInAppPurchase(context),
+            child: configOptionInAppPurchase(),
           ),
         ),
         const Divider(height: 0),
@@ -119,9 +119,9 @@ class ConfigPage extends ConsumerWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-            child: RewardedAdWidget(adUnitId: AppEnvironment.admobPremiado),
+          child: const Padding(
+            padding: EdgeInsets.fromLTRB(0, 0, 0, 8),
+            child: RewardedAdWidget(),
           ),
         ),
       ],
@@ -251,5 +251,36 @@ class ConfigPage extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  // TODO: Implement In-App Purchase configuration option
+  Widget configOptionInAppPurchase() {
+    return Builder(
+      builder: (context) => ListTile(
+        leading: const Icon(Icons.shopping_cart),
+        title: const Text('Compras no App'),
+        subtitle: const Text('Gerenciar assinaturas e compras'),
+        trailing: const Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const InAppPurchasePage(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// TODO: Implement RewardedAdWidget
+class RewardedAdWidget extends StatelessWidget {
+  const RewardedAdWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Stub implementation - will be replaced with actual ad widget
+    return const SizedBox.shrink();
   }
 }

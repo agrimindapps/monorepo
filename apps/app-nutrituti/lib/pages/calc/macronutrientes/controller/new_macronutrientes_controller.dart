@@ -170,9 +170,9 @@ class MacronutrientesController extends ChangeNotifier {
     model.proteinasController.text = distribuicao['protein'].toString();
     model.gordurasController.text = distribuicao['fat'].toString();
 
-    model.carboidratosPorcentagem = distribuicao['carbs'];
-    model.proteinasPorcentagem = distribuicao['protein'];
-    model.gordurasPorcentagem = distribuicao['fat'];
+    model.carboidratosPorcentagem = (distribuicao['carbs'] as num).toInt();
+    model.proteinasPorcentagem = (distribuicao['protein'] as num).toInt();
+    model.gordurasPorcentagem = (distribuicao['fat'] as num).toInt();
 
     // Notificar listeners que o estado foi alterado
     notifyListeners();

@@ -25,7 +25,9 @@ void main() {
       expect(result.isRight(), true);
       result.fold(
         (_) => fail('Should not return failure'),
-        ((position, value)) {
+        (hint) {
+          final position = hint.$1;
+          final value = hint.$2;
           expect(position.isValid, true);
           expect(value >= 1 && value <= 9, true);
         },
@@ -68,7 +70,9 @@ void main() {
       expect(result.isRight(), true);
       result.fold(
         (_) => fail('Should not return failure'),
-        ((position, value)) {
+        (hint) {
+          final position = hint.$1;
+          final value = hint.$2;
           // Should suggest position (0, 8) with value 9
           if (position.row == 0 && position.col == 8) {
             expect(value, 9); // Only valid value for this position
@@ -149,7 +153,9 @@ void main() {
       // Assert
       result.fold(
         (_) {}, // May fail if no valid moves
-        ((position, value)) {
+        (hint) {
+          final position = hint.$1;
+          final value = hint.$2;
           // If hint is in row 0, value should not be 5
           if (position.row == 0) {
             expect(value, isNot(5));

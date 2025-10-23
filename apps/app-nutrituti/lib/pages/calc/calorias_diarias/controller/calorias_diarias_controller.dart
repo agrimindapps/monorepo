@@ -47,7 +47,7 @@ class CaloriasDiariasController extends ChangeNotifier {
   void setGenero(int id) {
     final genero = generos.firstWhere((g) => g['id'] == id);
     model.generoSelecionado = id;
-    model.generoText = genero['text'];
+    model.generoText = genero['text'] as String; // FASE 0.7: Type cast
     model.generoData = genero;
     notifyListeners();
   }
@@ -55,8 +55,8 @@ class CaloriasDiariasController extends ChangeNotifier {
   void setAtividade(int id) {
     final atividade = atividades.firstWhere((a) => a['id'] == id);
     model.atividadeSelecionada = id;
-    model.atividadeText = atividade['text'];
-    model.atividadeFator = atividade['value'];
+    model.atividadeText = atividade['text'] as String; // FASE 0.7: Type cast
+    model.atividadeFator = atividade['value'] as double; // FASE 0.7: Type cast
     notifyListeners();
   }
 
@@ -114,10 +114,11 @@ class CaloriasDiariasController extends ChangeNotifier {
       int idade,
       double altura,
       double peso) {
-    final t1 = (generoDef['KIdade'] * idade);
-    final t2 = (generoDef['KAltura'] * altura * 100);
-    final t3 = (generoDef['KQuilos'] * peso);
-    final t4 = (generoDef['fator'] + t3 + t2 - t1) * atividadeDef['value'];
+    // FASE 0.7: Type casts para resolver analyzer errors
+    final t1 = ((generoDef['KIdade'] as num) * idade);
+    final t2 = ((generoDef['KAltura'] as num) * altura * 100);
+    final t3 = ((generoDef['KQuilos'] as num) * peso);
+    final t4 = ((generoDef['fator'] as num) + t3 + t2 - t1) * (atividadeDef['value'] as num);
     return t4.round();
   }
 

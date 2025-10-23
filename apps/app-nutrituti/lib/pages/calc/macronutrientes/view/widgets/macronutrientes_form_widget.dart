@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:provider/provider.dart';
@@ -41,13 +42,13 @@ class MacronutrientesFormWidget extends StatelessWidget {
     return VTextField(
       labelText: 'Calorias Diárias (kcal)',
       hintText: 'Ex: 2000',
-      focusNode: model.focusCalorias,
-      txEditController: model.caloriasDiariasController,
+      focusNode: model.focusCalorias as FocusNode?,
+      txEditController: model.caloriasDiariasController as TextEditingController?,
       prefixIcon: Icon(
         Icons.local_fire_department_outlined,
         color: isDark ? Colors.orange.shade300 : Colors.orange,
       ),
-      inputFormatters: [model.caloriasmask],
+      inputFormatters: [model.caloriasmask as TextInputFormatter],
       showClearButton: true,
     );
   }

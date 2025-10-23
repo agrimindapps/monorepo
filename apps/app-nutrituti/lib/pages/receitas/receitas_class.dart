@@ -37,10 +37,10 @@ class ReceitaFit {
       nome: json['nome'] as String,
       descricao: json['descricao'] as String,
       ingredientes: (json['ingredientes'] as List<dynamic>)
-          .map((ingrediente) => Ingrediente.fromJson(ingrediente))
+          .map((ingrediente) => Ingrediente.fromJson(ingrediente as Map<String, dynamic>))
           .toList(),
       modoPreparo: (json['modoPreparo'] as List<dynamic>)
-          .map((passo) => Passo.fromJson(passo))
+          .map((passo) => Passo.fromJson(passo as Map<String, dynamic>))
           .toList(),
       tempoPreparo: json['tempoPreparo'] as String,
       tempoCozinho: json['tempoCozinho'] as String,

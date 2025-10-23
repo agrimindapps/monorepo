@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/spacing_tokens.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
+import '../../../../core/widgets/tts_button.dart';
 import '../providers/detalhe_praga_notifier.dart';
 
 /// Widget responsável por exibir informações da praga
@@ -63,50 +64,47 @@ class PragaInfoWidget extends ConsumerWidget {
   /// Seções de informação para insetos/doenças (usa PragasInfo)
   List<Widget> _buildInsectoInfoSections(dynamic data) {
     final pragaInfo = data.pragaInfo;
-    
+
+    final descricao = (pragaInfo?.descrisao ?? 'Informação não disponível') as String;
+    final sintomas = (pragaInfo?.sintomas ?? 'Informação não disponível') as String;
+    final bioecologia = (pragaInfo?.bioecologia ?? 'Informação não disponível') as String;
+    final controle = (pragaInfo?.controle ?? 'Informação não disponível') as String;
+
     return [
       _buildInfoSection(
         'Descrição',
         Icons.bug_report,
         [
-          _buildInfoItem(
-            'Informações Gerais',
-            (pragaInfo?.descrisao ?? 'Informação não disponível') as String,
-          ),
+          _buildInfoItem('Informações Gerais', descricao),
         ],
+        sectionContent: 'Descrição: $descricao',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
         'Sintomas',
         Icons.warning,
         [
-          _buildInfoItem(
-            'Danos Causados',
-            (pragaInfo?.sintomas ?? 'Informação não disponível') as String,
-          ),
+          _buildInfoItem('Danos Causados', sintomas),
         ],
+        sectionContent: 'Sintomas: $sintomas',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
         'Bioecologia',
         Icons.science,
         [
-          _buildInfoItem(
-            'Características Biológicas',
-            (pragaInfo?.bioecologia ?? 'Informação não disponível') as String,
-          ),
+          _buildInfoItem('Características Biológicas', bioecologia),
         ],
+        sectionContent: 'Bioecologia: $bioecologia',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
         'Controle',
         Icons.shield,
         [
-          _buildInfoItem(
-            'Métodos de Controle',
-            (pragaInfo?.controle ?? 'Informação não disponível') as String,
-          ),
+          _buildInfoItem('Métodos de Controle', controle),
         ],
+        sectionContent: 'Controle: $controle',
       ),
     ];
   }
@@ -115,46 +113,64 @@ class PragaInfoWidget extends ConsumerWidget {
   List<Widget> _buildPlantaInfoSections(dynamic data) {
     final plantaInfo = data.plantaInfo;
 
+    final ciclo = (plantaInfo?.ciclo ?? '-') as String;
+    final reproducao = (plantaInfo?.reproducao ?? '-') as String;
+    final habitat = (plantaInfo?.habitat ?? '-') as String;
+    final adaptacoes = (plantaInfo?.adaptacoes ?? '-') as String;
+    final altura = (plantaInfo?.altura ?? '-') as String;
+    final inflorescencia = (plantaInfo?.inflorescencia ?? '-') as String;
+    final filotaxia = (plantaInfo?.filotaxia ?? '-') as String;
+    final formaLimbo = (plantaInfo?.formaLimbo ?? '-') as String;
+    final superficie = (plantaInfo?.superficie ?? '-') as String;
+    final consistencia = (plantaInfo?.consistencia ?? '-') as String;
+    final nervacao = (plantaInfo?.nervacao ?? '-') as String;
+    final nervacaoComprimento = (plantaInfo?.nervacaoComprimento ?? '-') as String;
+    final tipologiaFruto = (plantaInfo?.tipologiaFruto ?? '-') as String;
+
     return [
       _buildInfoSection(
         'Informações da Planta',
         Icons.eco,
         [
-          _buildInfoItem('Ciclo', (plantaInfo?.ciclo ?? '-') as String),
-          _buildInfoItem('Reprodução', (plantaInfo?.reproducao ?? '-') as String),
-          _buildInfoItem('Habitat', (plantaInfo?.habitat ?? '-') as String),
-          _buildInfoItem('Adaptações', (plantaInfo?.adaptacoes ?? '-') as String),
-          _buildInfoItem('Altura', (plantaInfo?.altura ?? '-') as String),
+          _buildInfoItem('Ciclo', ciclo),
+          _buildInfoItem('Reprodução', reproducao),
+          _buildInfoItem('Habitat', habitat),
+          _buildInfoItem('Adaptações', adaptacoes),
+          _buildInfoItem('Altura', altura),
         ],
+        sectionContent: 'Informações da Planta: Ciclo: $ciclo. Reprodução: $reproducao. Habitat: $habitat. Adaptações: $adaptacoes. Altura: $altura',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
         'Informações das Flores',
         Icons.local_florist,
         [
-          _buildInfoItem('Inflorescência', (plantaInfo?.inflorescencia ?? '-') as String),
+          _buildInfoItem('Inflorescência', inflorescencia),
         ],
+        sectionContent: 'Informações das Flores: Inflorescência: $inflorescencia',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
         'Informações das Folhas',
         Icons.park,
         [
-          _buildInfoItem('Filotaxia', (plantaInfo?.filotaxia ?? '-') as String),
-          _buildInfoItem('Forma do Limbo', (plantaInfo?.formaLimbo ?? '-') as String),
-          _buildInfoItem('Superfície', (plantaInfo?.superficie ?? '-') as String),
-          _buildInfoItem('Consistência', (plantaInfo?.consistencia ?? '-') as String),
-          _buildInfoItem('Nervação', (plantaInfo?.nervacao ?? '-') as String),
-          _buildInfoItem('Comprimento da Nervação', (plantaInfo?.nervacaoComprimento ?? '-') as String),
+          _buildInfoItem('Filotaxia', filotaxia),
+          _buildInfoItem('Forma do Limbo', formaLimbo),
+          _buildInfoItem('Superfície', superficie),
+          _buildInfoItem('Consistência', consistencia),
+          _buildInfoItem('Nervação', nervacao),
+          _buildInfoItem('Comprimento da Nervação', nervacaoComprimento),
         ],
+        sectionContent: 'Informações das Folhas: Filotaxia: $filotaxia. Forma do Limbo: $formaLimbo. Superfície: $superficie. Consistência: $consistencia. Nervação: $nervacao. Comprimento da Nervação: $nervacaoComprimento',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
         'Fruto',
         null,
         [
-          _buildInfoItem('Fruto', (plantaInfo?.tipologiaFruto ?? '-') as String),
+          _buildInfoItem('Fruto', tipologiaFruto),
         ],
+        sectionContent: 'Fruto: $tipologiaFruto',
       ),
     ];
   }
@@ -241,11 +257,11 @@ class PragaInfoWidget extends ConsumerWidget {
   }
 
   /// Constrói seção de informações
-  Widget _buildInfoSection(String title, IconData? icon, List<Widget> items) {
+  Widget _buildInfoSection(String title, IconData? icon, List<Widget> items, {String? sectionContent}) {
     return Builder(
       builder: (context) {
         final theme = Theme.of(context);
-        
+
         return Container(
           padding: const EdgeInsets.symmetric(
             horizontal: SpacingTokens.md,
@@ -293,15 +309,12 @@ class PragaInfoWidget extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.volume_up,
-                      color: theme.colorScheme.primary,
-                      size: 20,
+                  if (sectionContent != null)
+                    TTSButton(
+                      text: sectionContent,
+                      title: title,
+                      iconSize: 20,
                     ),
-                    onPressed: () {
-                    },
-                  ),
                 ],
               ),
               const SizedBox(height: 10),

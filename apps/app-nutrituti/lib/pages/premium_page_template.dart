@@ -130,8 +130,11 @@ class ExemploIntegracao extends ConsumerWidget {
               leading: Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
-                  gradient: AppThemeConfig.forNutrituti().headerGradient,
+                decoration: const BoxDecoration(
+                  // TODO: Implement AppThemeConfig.forNutrituti().headerGradient
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -184,50 +187,41 @@ class ExemploIntegracao extends ConsumerWidget {
   }
 }
 
+// TODO: Implement AppThemeConfig with proper properties
 // Exemplo de customização completa de tema para nutrituti
 class NutritutiCustomTheme {
-  static AppThemeConfig get customTheme {
-    return AppThemeConfig.forNutrituti().copyWith(
-      // Cores personalizadas
-      primaryColor: const Color(0xFF0288D1), // Azul água
-      secondaryColor: const Color(0xFF4FC3F7), // Azul claro
-      premiumColor: const Color(0xFFFFB300), // Âmbar para premium
+  static const Color primaryColor = Color(0xFF0288D1); // Azul água
+  static const Color secondaryColor = Color(0xFF4FC3F7); // Azul claro
+  static const Color premiumColor = Color(0xFFFFB300); // Âmbar para premium
 
-      // Ajustar gradientes
-      headerGradient: const LinearGradient(
-        colors: [Color(0xFFFFB300), Color(0xFFFF8F00)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      primaryGradient: const LinearGradient(
-        colors: [Color(0xFF0288D1), Color(0xFF4FC3F7)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
+  static const LinearGradient headerGradient = LinearGradient(
+    colors: [Color(0xFFFFB300), Color(0xFFFF8F00)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
-      // Ajustar tipografia
-      titleFontSize: 28.0,
-      subtitleFontSize: 18.0,
-      borderRadius: 20.0,
-    );
-  }
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF0288D1), Color(0xFF4FC3F7)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const double titleFontSize = 28.0;
+  static const double subtitleFontSize = 18.0;
+  static const double borderRadius = 20.0;
 }
 
+// TODO: Implement PremiumTemplateBuilder and PremiumSettings
 // Exemplo de uso com tema customizado
 class NutritutiPremiumPageWithCustomTheme extends ConsumerWidget {
   const NutritutiPremiumPageWithCustomTheme({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PremiumTemplateBuilder.buildPremiumPage(
-      appId: 'nutrituti',
-      customTheme: NutritutiCustomTheme.customTheme,
-      settings: const PremiumSettings(
-        enableDebugInfo: false,
-        showRestoreButton: true,
-        showTermsLink: true,
-        enableHapticFeedback: true,
-        autoSelectRecommendedPlan: true,
+    // TODO: Implement when PremiumTemplateBuilder is available
+    return const Scaffold(
+      body: Center(
+        child: Text('Premium Page - Template Builder not yet implemented'),
       ),
     );
   }

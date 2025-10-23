@@ -33,13 +33,13 @@ class MeditacaoStatsModel {
   // Construir a partir de um Map (do SharedPreferences)
   factory MeditacaoStatsModel.fromMap(Map<String, dynamic> map) {
     return MeditacaoStatsModel(
-      totalMinutos: map['totalMinutos'] ?? 0,
-      totalSessoes: map['totalSessoes'] ?? 0,
-      sequenciaAtual: map['sequenciaAtual'] ?? 0,
-      maiorSequencia: map['maiorSequencia'] ?? 0,
-      tiposUsados: Set<String>.from(map['tiposUsados'] ?? []),
+      totalMinutos: (map['totalMinutos'] as num?)?.toInt() ?? 0,
+      totalSessoes: (map['totalSessoes'] as num?)?.toInt() ?? 0,
+      sequenciaAtual: (map['sequenciaAtual'] as num?)?.toInt() ?? 0,
+      maiorSequencia: (map['maiorSequencia'] as num?)?.toInt() ?? 0,
+      tiposUsados: Set<String>.from(map['tiposUsados'] as Iterable? ?? []),
       ultimaSessao: map['ultimaSessao'] != null
-          ? DateTime.parse(map['ultimaSessao'])
+          ? DateTime.parse(map['ultimaSessao'] as String)
           : null,
     );
   }

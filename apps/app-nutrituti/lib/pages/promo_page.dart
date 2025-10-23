@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import '../../core/services/firebase_analytics_service.dart';
+import '../../core/services/ganalytics_service.dart';
 import '../const/environment_const.dart';
 import '../repository/alimentos_repository.dart';
 import '../widgets/appbar.dart';
@@ -124,13 +125,13 @@ class CategoriasState extends State<CategoriasPage> {
                   title: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
                     child: Icon(
-                      item['icon'],
+                      item['icon'] as IconData? ?? Icons.category,
                       color: Colors.grey,
                       size: 28,
                     ),
                   ),
                   subtitle: Text(
-                    item['title'],
+                    item['title'] as String? ?? '',
                     style: const TextStyle(fontSize: 15),
                     textAlign: TextAlign.center,
                   ),
@@ -138,7 +139,7 @@ class CategoriasState extends State<CategoriasPage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => AlimentosPage(
-                          categoria: item['title'],
+                          categoria: item['title'] as String? ?? '',
                           onlyFavorites: false,
                         ),
                       ),
@@ -161,7 +162,7 @@ class CategoriasState extends State<CategoriasPage> {
         if (await canLaunchUrl(url)) {
           await launchUrl(url, mode: LaunchMode.externalApplication);
         } else {
-          throw 'Could not launch $url';
+          debugPrint('Could not launch $url');
         }
       },
     );
@@ -274,14 +275,14 @@ class CategoriasState extends State<CategoriasPage> {
               Uri url = Uri.parse(AppEnvironment().linkLojaGoogle);
               if (await canLaunchUrl(url)) {
                 await launchUrl(url);
-                await GAnalyticsService.logCustomEvent(
+                GAnalyticsService.instance.logCustomEvent(
                   'button_click',
                   parameters: {
                     'button_name': 'download_play_store',
                   },
                 );
               } else {
-                throw 'Could not launch $url';
+                debugPrint('Could not launch $url');
               }
             },
           ),
@@ -298,14 +299,14 @@ class CategoriasState extends State<CategoriasPage> {
               Uri url = Uri.parse(AppEnvironment().linkLojaApple);
               if (await canLaunchUrl(url)) {
                 await launchUrl(url);
-                await GAnalyticsService.logCustomEvent(
+                GAnalyticsService.instance.logCustomEvent(
                   'button_click',
                   parameters: {
                     'button_name': 'download_app_store',
                   },
                 );
               } else {
-                throw 'Could not launch $url';
+                debugPrint('Could not launch $url');
               }
             },
           ),

@@ -56,10 +56,10 @@ class NutriAppBar extends StatelessWidget implements PreferredSizeWidget {
       children: itensMenuBottom.map((item) {
         return _buildTextButton(
           context: context,
-          icon: item['icon'],
-          label: item['label'],
+          icon: item['icon'] as IconData,
+          label: item['label'] as String,
           onPressed: () {
-            _navigateToPage(context, item['page']);
+            _navigateToPage(context, item['page'] as String);
           },
         );
       }).toList(),

@@ -90,8 +90,8 @@ class ExercicioAchievementService {
       );
 
       return ExercicioAchievement(
-        title: conquista['title'],
-        description: conquista['description'],
+        title: conquista['title'] as String,
+        description: conquista['description'] as String,
         isUnlocked: isUnlocked,
       );
     }).toList();
@@ -147,7 +147,7 @@ class ExercicioAchievementService {
     final totaisSemana = _statisticsService.calcularTotaisSemana(registros);
 
     final valorAtual = _getValorMetrica(
-      conquista['metric'],
+      conquista['metric'] as String,
       registros,
       estatisticas,
       totaisSemana,
@@ -176,7 +176,7 @@ class ExercicioAchievementService {
     switch (type) {
       case 'count':
         final valorAtual = _getValorMetrica(
-          conquista['metric'],
+          conquista['metric'] as String,
           registros,
           estatisticas,
           totaisSemana,
@@ -225,11 +225,11 @@ class ExercicioAchievementService {
   ) {
     switch (metrica) {
       case 'total_sessoes':
-        return estatisticas['totalSessoes'].toDouble();
+        return (estatisticas['totalSessoes'] as num).toDouble();
       case 'total_minutos':
-        return estatisticas['totalMinutos'].toDouble();
+        return (estatisticas['totalMinutos'] as num).toDouble();
       case 'total_calorias':
-        return estatisticas['totalCalorias'].toDouble();
+        return (estatisticas['totalCalorias'] as num).toDouble();
       case 'minutos_semana':
         return totaisSemana['minutos']!.toDouble();
       case 'calorias_semana':
@@ -246,7 +246,7 @@ class ExercicioAchievementService {
     if (conquista['id'] == 'meta_atingida') {
       return metaMinutosSemanal.toInt();
     }
-    return conquista['target'];
+    return (conquista['target'] as num).toInt();
   }
 
   /// Obtém todas as categorias diferentes dos registros
@@ -259,10 +259,10 @@ class ExercicioAchievementService {
     final estatisticas = _statisticsService.calcularEstatisticasGerais(registros);
     final dicas = <String>[];
 
-    if (estatisticas['totalSessoes'] == 0) {
+    if ((estatisticas['totalSessoes'] as num) == 0) {
       dicas.add('Que tal começar com uma caminhada de 10 minutos?');
       dicas.add('O primeiro passo é sempre o mais importante!');
-    } else if (estatisticas['totalSessoes'] < 5) {
+    } else if ((estatisticas['totalSessoes'] as num) < 5) {
       dicas.add('Você está no caminho certo! Continue assim.');
       dicas.add('Tente estabelecer uma rotina regular de exercícios.');
     } else {

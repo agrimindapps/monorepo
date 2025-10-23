@@ -32,8 +32,10 @@ class MeditacaoController {
   // final RxBool emMeditacao = false.obs;
   // final RxString tipoMeditacaoAtual = MeditacaoConstants.tipoPadrao.obs;
   // final RxString humorSelecionado = ''.obs;
-  // final RxBool notificacoesHabilitadas = false.obs;
-  // final Rx<TimeOfDay> horarioNotificacao = ...obs;
+  // STUB: Substituindo Rx do GetX por variáveis simples (FASE 0.7)
+  // TODO FASE 1: Migrar para Riverpod StateNotifier
+  final _RxValue<bool> notificacoesHabilitadas = _RxValue(false);
+  final _RxValue<TimeOfDay> horarioNotificacao = _RxValue(const TimeOfDay(hour: 9, minute: 0));
 
   // Plug-in de notificações
   FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
@@ -177,4 +179,14 @@ class MeditacaoController {
   //
   // IconData _getIconData(String icone) { ... }
   // Map<DateTime, int> getDadosGrafico() { ... }
+}
+
+// STUB: Helper class para substituir Rx do GetX (FASE 0.7)
+// TODO FASE 1: Remover após migração completa para Riverpod
+class _RxValue<T> {
+  T _value;
+  _RxValue(this._value);
+
+  T get value => _value;
+  set value(T newValue) => _value = newValue;
 }

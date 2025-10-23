@@ -57,7 +57,7 @@ class MeditacaoRepository {
     final sessoesList = prefs.getStringList(_sessoesKey) ?? [];
 
     return sessoesList
-        .map((e) => MeditacaoModel.fromMap(jsonDecode(e)))
+        .map((e) => MeditacaoModel.fromMap(jsonDecode(e) as Map<String, dynamic>))
         .toList();
   }
 
@@ -88,7 +88,7 @@ class MeditacaoRepository {
 
     MeditacaoStatsModel stats;
     if (statsJson != null) {
-      stats = MeditacaoStatsModel.fromMap(jsonDecode(statsJson));
+      stats = MeditacaoStatsModel.fromMap(jsonDecode(statsJson) as Map<String, dynamic>);
     } else {
       stats = MeditacaoStatsModel();
     }
@@ -103,7 +103,7 @@ class MeditacaoRepository {
     final statsJson = prefs.getString(_statsKey);
 
     if (statsJson != null) {
-      return MeditacaoStatsModel.fromMap(jsonDecode(statsJson));
+      return MeditacaoStatsModel.fromMap(jsonDecode(statsJson) as Map<String, dynamic>);
     }
 
     return MeditacaoStatsModel();
@@ -115,8 +115,8 @@ class MeditacaoRepository {
     final achievementsJson = prefs.getString(_achievementsKey);
 
     if (achievementsJson != null) {
-      final List<dynamic> list = jsonDecode(achievementsJson);
-      return list.map((e) => MeditacaoAchievementModel.fromMap(e)).toList();
+      final List<dynamic> list = jsonDecode(achievementsJson) as List<dynamic>;
+      return list.map((e) => MeditacaoAchievementModel.fromMap(e as Map<String, dynamic>)).toList();
     }
 
     // Retorna as conquistas padrão se não houver conquistas salvas

@@ -82,7 +82,7 @@ class NecessidadeHidricaModel {
       (nivel) => nivel['id'] == nivelAtividadeSelecionado,
       orElse: () => niveisAtividade[0],
     );
-    return nivelAtividade['fator'];
+    return (nivelAtividade['fator'] as num).toDouble();
   }
 
   // Método para obter o fator de clima
@@ -91,7 +91,7 @@ class NecessidadeHidricaModel {
       (tipo) => tipo['id'] == climaSelecionado,
       orElse: () => tiposClima[1],
     );
-    return clima['fator'];
+    return (clima['fator'] as num).toDouble();
   }
 
   // Método para limpar os dados

@@ -30,13 +30,13 @@ class MeditacaoAchievementModel {
   // Construir a partir de um Map (do SharedPreferences)
   factory MeditacaoAchievementModel.fromMap(Map<String, dynamic> map) {
     return MeditacaoAchievementModel(
-      id: map['id'],
-      titulo: map['titulo'],
-      descricao: map['descricao'],
-      icone: map['icone'],
-      conquistado: map['conquistado'],
+      id: map['id'] as String,
+      titulo: map['titulo'] as String,
+      descricao: map['descricao'] as String,
+      icone: map['icone'] as String,
+      conquistado: map['conquistado'] as bool,
       dataConquista: map['dataConquista'] != null
-          ? DateTime.parse(map['dataConquista'])
+          ? DateTime.parse(map['dataConquista'] as String)
           : null,
     );
   }

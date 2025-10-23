@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import '../../../core/services/firebase_analytics_service.dart';
+import '../../../core/services/ganalytics_service.dart';
 import '../../const/environment_const.dart';
 
 class HeaderSection extends StatefulWidget {
@@ -243,14 +244,14 @@ class HeaderSectionState extends State<HeaderSection>
           Uri uri = Uri.parse(url);
           if (await canLaunchUrl(uri)) {
             await launchUrl(uri);
-            await GAnalyticsService.logCustomEvent(
+            GAnalyticsService.instance.logCustomEvent(
               'button_click',
               parameters: {
                 'button_name': analyticsName,
               },
             );
           } else {
-            throw 'Could not launch $url';
+            debugPrint('Could not launch $url');
           }
         },
       ),

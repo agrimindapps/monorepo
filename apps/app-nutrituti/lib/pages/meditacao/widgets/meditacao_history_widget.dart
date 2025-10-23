@@ -124,8 +124,8 @@ class _SessionListTile extends StatelessWidget {
       ),
       subtitle: Text('Humor: ${sessao.humor}'),
       trailing: _DateTimeInfo(
-        dateText: _dateFormat.format(sessao.dataRegistro),
-        timeText: _timeFormat.format(sessao.dataRegistro),
+        dateText: _dateFormat.format(sessao.dataRegistro as DateTime),
+        timeText: _timeFormat.format(sessao.dataRegistro as DateTime),
       ),
     );
   }

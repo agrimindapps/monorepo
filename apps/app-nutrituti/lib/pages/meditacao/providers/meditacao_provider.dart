@@ -34,7 +34,7 @@ class MeditacaoState {
   final bool notificacoesHabilitadas;
   final TimeOfDay horarioNotificacao;
 
-  const MeditacaoState({
+  MeditacaoState({
     this.sessoes = const [],
     MeditacaoStatsModel? stats,
     this.conquistas = const [],
@@ -45,11 +45,13 @@ class MeditacaoState {
     this.tipoMeditacaoAtual = MeditacaoConstants.tipoPadrao,
     this.humorSelecionado = '',
     this.notificacoesHabilitadas = false,
-    this.horarioNotificacao = const TimeOfDay(
-      hour: MeditacaoConstants.notificacaoHoraPadrao,
-      minute: MeditacaoConstants.notificacaoMinutoPadrao,
-    ),
-  }) : stats = stats ?? const MeditacaoStatsModel();
+    TimeOfDay? horarioNotificacao,
+  })  : horarioNotificacao = horarioNotificacao ??
+            const TimeOfDay(
+              hour: MeditacaoConstants.notificacaoHoraPadrao,
+              minute: MeditacaoConstants.notificacaoMinutoPadrao,
+            ),
+        stats = stats ?? MeditacaoStatsModel();
 
   MeditacaoState copyWith({
     List<MeditacaoModel>? sessoes,
@@ -107,7 +109,7 @@ class MeditacaoNotifier extends _$MeditacaoNotifier {
     _carregarDados();
 
     // Set initial remaining time
-    final initialState = const MeditacaoState();
+    final initialState = MeditacaoState();
     return initialState.copyWith(
       tempoRestante: MeditacaoConstants.duracaoPadraoMinutos * 60,
     );

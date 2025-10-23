@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Project imports:
 import '../../../../../core/style/shadcn_style.dart';
 import '../../../../../core/themes/manager.dart';
+import '../../../../../core/utils/decimal_input_formatter.dart';
 import '../../../../../core/widgets/textfield_widget.dart';
 import '../controller/cintura_quadril_controller.dart';
 

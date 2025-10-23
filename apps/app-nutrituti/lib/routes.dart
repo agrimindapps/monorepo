@@ -131,7 +131,8 @@ class Routes {
           const DeficitSuperavitCalcPage(),
 
       // Tool Routes
-      AppRoutes.nutritutiApp: (_) => const NutriTutiAppPage(),
+      // TODO FASE 1: Re-enable after fixing NutriTutiAppPage
+      // AppRoutes.nutritutiApp: (_) => const NutriTutiAppPage(),
       AppRoutes.peso: (_) => const PesoPage(),
       AppRoutes.beberAgua: (_) => const BeberAguaPage(),
       AppRoutes.exercicios: (_) => const ExercicioPage(),
@@ -142,7 +143,8 @@ class Routes {
       // Settings Routes
       AppRoutes.configuracoes: (_) => const ConfigPage(),
       AppRoutes.configuracoesAvancadas: (_) => const SettingsPage(),
-      AppRoutes.premium: (_) => const SubscriptionScreen(),
+      // TODO FASE 1: Re-enable after fixing SubscriptionScreen
+      // AppRoutes.premium: (_) => const SubscriptionScreen(),
 
       // About Routes
       // AppRoutes.sobre: (_) => const SobrePage(),

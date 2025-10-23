@@ -11,9 +11,11 @@ import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/development_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
+import 'widgets/sections/legal_section.dart';
 import 'widgets/sections/notifications_section.dart';
 import 'widgets/sections/premium_section.dart';
 import 'widgets/sections/support_section.dart';
+import 'widgets/sections/tts_settings_section.dart';
 
 /// Refactored Settings Page with Clean Architecture
 /// Uses modular components and unified notifier
@@ -109,9 +111,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         SizedBox(height: 8),
         PremiumSection(),
         NotificationsSection(),
+        TtsSettingsSection(),
         FeatureFlagsSection(),
         DevelopmentSection(),
+        LegalSection(),
         SupportSection(),
+        SizedBox(height: 16),
       ],
     );
   }

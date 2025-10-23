@@ -44,11 +44,11 @@ class MeditacaoModel {
   // Construir a partir de um Map (do SharedPreferences)
   factory MeditacaoModel.fromMap(Map<String, dynamic> map) {
     return MeditacaoModel(
-      id: map['id'],
-      dataRegistro: DateTime.parse(map['dataRegistro']),
-      duracao: map['duracao'],
-      tipo: map['tipo'],
-      humor: map['humor'],
+      id: map['id'] as String?,
+      dataRegistro: DateTime.parse(map['dataRegistro'] as String),
+      duracao: (map['duracao'] as num).toInt(),
+      tipo: map['tipo'] as String,
+      humor: map['humor'] as String,
     );
   }
 

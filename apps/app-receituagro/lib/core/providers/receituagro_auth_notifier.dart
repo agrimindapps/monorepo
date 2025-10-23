@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
 import '../di/injection_container.dart' as di;
+import '../di/modules/sync_module.dart';
 import '../services/device_identity_service.dart';
 import '../services/receituagro_data_cleaner.dart';
 
@@ -256,6 +257,23 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
         },
         (user) {
           _analytics.trackAuthFunnelStep('login_success');
+
+          // ✅ FIXED: Executar sync inicial automático após login bem-sucedido
+          if (kDebugMode) {
+            debugPrint('🔄 Login successful - triggering initial sync...');
+          }
+          unawaited(
+            SyncDIModule.performInitialSync(di.sl).then((_) {
+              if (kDebugMode) {
+                debugPrint('✅ Post-login sync completed');
+              }
+            }).catchError((Object e) {
+              if (kDebugMode) {
+                debugPrint('⚠️ Post-login sync failed (non-blocking): $e');
+              }
+            }),
+          );
+
           return AuthResult.success(user);
         },
       );
@@ -297,6 +315,23 @@ class ReceitaAgroAuthNotifier extends _$ReceitaAgroAuthNotifier {
         (user) {
           _analytics.trackAuthFunnelStep('signup_success');
           _analytics.trackSignup('email', success: true);
+
+          // ✅ FIXED: Executar sync inicial automático após signup bem-sucedido
+          if (kDebugMode) {
+            debugPrint('🔄 Signup successful - triggering initial sync...');
+          }
+          unawaited(
+            SyncDIModule.performInitialSync(di.sl).then((_) {
+              if (kDebugMode) {
+                debugPrint('✅ Post-signup sync completed');
+              }
+            }).catchError((Object e) {
+              if (kDebugMode) {
+                debugPrint('⚠️ Post-signup sync failed (non-blocking): $e');
+              }
+            }),
+          );
+
           return AuthResult.success(user);
         },
       );

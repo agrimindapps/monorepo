@@ -127,8 +127,8 @@ class CaloriasDiariasForm extends StatelessWidget {
           value: controller.model.generoSelecionado,
           items: CaloriasDiariasController.generos.map((item) {
             return DropdownMenuItem<int>(
-              value: item['id'],
-              child: Text(item['text']),
+              value: item['id'] as int?,
+              child: Text(item['text'] as String),
             );
           }).toList(),
           onChanged: (value) {
@@ -175,8 +175,8 @@ class CaloriasDiariasForm extends StatelessWidget {
           value: controller.model.atividadeSelecionada,
           items: CaloriasDiariasController.atividades.map((item) {
             return DropdownMenuItem<int>(
-              value: item['id'],
-              child: Text(item['text']),
+              value: item['id'] as int?,
+              child: Text(item['text'] as String),
             );
           }).toList(),
           onChanged: (value) {

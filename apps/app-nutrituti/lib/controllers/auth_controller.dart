@@ -5,5 +5,8 @@ import '../../core/models/auth_models.dart';
 /// Controller padronizado para autenticação do módulo Nutrituti
 class NutrituitAuthController extends BaseAuthController {
   @override
-  ModuleAuthConfig get moduleConfig => ModuleAuthConfig.nutrituti;
+  ModuleAuthConfig get moduleConfig => const ModuleAuthConfig(
+        loginRoute: '/login',
+        homeRoute: '/home',
+      );
 }

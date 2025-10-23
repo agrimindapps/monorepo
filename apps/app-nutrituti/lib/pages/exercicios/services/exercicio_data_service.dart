@@ -165,7 +165,7 @@ class ExercicioDataService {
 
     // Busca exata primeiro
     var exercicio = todosExercicios.firstWhere(
-      (e) => _sanitizarTexto(e['text'] ?? '') == nomeNormalizado,
+      (e) => _sanitizarTexto((e['text'] as String?) ?? '') == nomeNormalizado,
       orElse: () => {},
     );
 
@@ -173,7 +173,7 @@ class ExercicioDataService {
 
     // Busca parcial se não encontrou exata
     exercicio = todosExercicios.firstWhere(
-      (e) => _sanitizarTexto(e['text'] ?? '').contains(nomeNormalizado),
+      (e) => _sanitizarTexto((e['text'] as String?) ?? '').contains(nomeNormalizado),
       orElse: () => {},
     );
 

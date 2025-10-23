@@ -30,7 +30,7 @@ class AlimentosNotifier extends _$AlimentosNotifier {
     state = const AsyncValue.loading();
     final repository = ref.read(alimentosRepositoryProvider);
     state = await AsyncValue.guard(
-      () => repository.loadAlimentos(state.value?.firstOrNull?['categoria'] ?? '0'),
+      () => repository.loadAlimentos((state.value?.firstOrNull?['categoria'] as String?) ?? '0'),
     );
   }
 

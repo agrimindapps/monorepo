@@ -28,8 +28,8 @@ class InputForm extends StatelessWidget {
             value: controller.model.generoSelecionado,
             items: TMBConstants.generos.map((genero) {
               return DropdownMenuItem<int>(
-                value: genero['id'],
-                child: Text(genero['text']),
+                value: genero['id'] as int?,
+                child: Text(genero['text'] as String),
               );
             }).toList(),
             onChanged: (value) => controller.setGenero(value!),
@@ -58,8 +58,8 @@ class InputForm extends StatelessWidget {
             value: controller.model.nivelAtividadeSelecionado,
             items: TMBConstants.niveisAtividade.map((nivel) {
               return DropdownMenuItem<int>(
-                value: nivel['id'],
-                child: Text(nivel['text']),
+                value: nivel['id'] as int?,
+                child: Text(nivel['text'] as String),
               );
             }).toList(),
             onChanged: (value) => controller.setNivelAtividade(value!),

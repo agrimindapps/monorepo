@@ -22,19 +22,6 @@ import 'core/services/revenuecat_service.dart';
 import 'core/di/injection.dart';
 
 void main() async {
-  // RevenueCat setup
-  if (Platform.isIOS || Platform.isMacOS) {
-    RevenuecatService(
-      store: purchases.Store.appStore,
-      apiKey: appleApiKey,
-    );
-  } else if (Platform.isAndroid) {
-    RevenuecatService(
-      store: purchases.Store.playStore,
-      apiKey: googleApiKey,
-    );
-  }
-
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) DartPluginRegistrant.ensureInitialized();
 
@@ -53,6 +40,19 @@ void main() async {
   await configureDependencies();
 
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    // RevenueCat setup
+    if (Platform.isIOS || Platform.isMacOS) {
+      RevenuecatService(
+        store: purchases.Store.appStore,
+        apiKey: appleApiKey,
+      );
+    } else if (Platform.isAndroid) {
+      RevenuecatService(
+        store: purchases.Store.playStore,
+        apiKey: googleApiKey,
+      );
+    }
+
     await InAppPurchaseService().checkSignature();
 
     await AdMobService.initialize();

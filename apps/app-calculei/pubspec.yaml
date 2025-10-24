@@ -66,13 +66,13 @@ dev_dependencies:
 
   # Code Generation
   build_runner: ^2.4.12
-  riverpod_generator: ^2.6.1
+  riverpod_generator: ^2.4.0  # Downgraded for compatibility with hive_generator
   injectable_generator: ^2.6.2
-  hive_generator: ^2.0.1
+  hive_generator: any  # Use version from core package
 
-  # Custom Linting
-  custom_lint: ^0.6.4
-  riverpod_lint: ^2.3.10
+  # Custom Linting (temporarily commented due to dependency conflicts)
+  # custom_lint: ^0.7.0
+  # riverpod_lint: ^2.6.0
 
   # Testing
   mocktail: ^1.0.0

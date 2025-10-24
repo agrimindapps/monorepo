@@ -1,8 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 
+import 'const/atualizacao_const.dart' as atualizacao;
+import 'const/bottom_navigator_const.dart' as menu;
 import 'const/config_const.dart';
+import 'const/database_const.dart' as db;
 import 'const/environment_const.dart';
 import 'const/firebase_consts.dart';
+import 'const/in_app_purshace_const.dart' as iap;
 
 class GlobalEnvironment {
   GlobalEnvironment._();
@@ -28,7 +32,7 @@ class GlobalEnvironment {
   Map<String, dynamic> get prod => _env.prod;
 
   // Database constants
-  List<Map<String, dynamic>> get listaDbJson => listaDbJson;
+  List<Map<String, dynamic>> get listaDbJson => db.listaDbJson();
 
   // RevenueCat constants
   String entitlementID = 'Premium';
@@ -36,11 +40,11 @@ class GlobalEnvironment {
   String googleApiKey = 'goog_JYcfxEUeRnReVEdsLkShLQnzCmf';
 
   // In-app purchase constants
-  List<Map<String, dynamic>> get inappProductIds => inappProductIds;
-  String get regexAssinatura => regexAssinatura;
-  List<Map<String, dynamic>> get inappVantagens => inappVantagens;
-  Map<String, String> get inappTermosUso => inappTermosUso;
-  Map<String, dynamic> get infoAssinatura => infoAssinatura;
+  List<Map<String, dynamic>> get inappProductIds => iap.inappProductIds;
+  String get regexAssinatura => iap.regexAssinatura;
+  List<Map<String, dynamic>> get inappVantagens => iap.inappVantagens;
+  Map<String, String> get inappTermosUso => iap.inappTermosUso;
+  Map<String, dynamic> get infoAssinatura => iap.infoAssinatura;
 
   // Firebase options
   static FirebaseOptions get firebaseOptions =>
@@ -51,7 +55,7 @@ class GlobalEnvironment {
   static FirebaseOptions get firebaseMacOS => DefaultFirebaseOptions.macos;
 
   // Updates history
-  List<Map<String, dynamic>> get atualizacoesText => atualizacoesText;
+  List<Map<String, dynamic>> get atualizacoesText => atualizacao.atualizacoesText;
 
   String get iAppName => appName;
   String get iAppVersion => appVersion;
@@ -62,7 +66,7 @@ class GlobalEnvironment {
   String get iSupabaseAnnoKey => _env.supabaseAnnoKey;
 
   // Menus
-  List<Map<String, dynamic>> get itensMenuBottom => itensMenuBottom;
+  List<Map<String, dynamic>> get itensMenuBottom => menu.itensMenuBottom;
 
   // Method to initialize Environment
   void initialize() => _env.initialize();

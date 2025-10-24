@@ -44,9 +44,13 @@ class Environment {
   String siteApp = 'https://agrimind.com.br';
   final String linkPoliticaPrivacidade =
       'https://agrimindapps.blogspot.com/2022/08/termos-tecnicos-politica-de-privacidade.html';
-  final String linkTermoUso = Platform.isAndroid
+
+  // Use getter to avoid Platform check at initialization on web
+  String get linkTermoUso => kIsWeb
       ? 'https://agrimindapps.blogspot.com/2022/08/termos-tecnicos-termos-e-condicoes.html'
-      : 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+      : Platform.isAndroid
+          ? 'https://agrimindapps.blogspot.com/2022/08/termos-tecnicos-termos-e-condicoes.html'
+          : 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
   void initialize() {
     if (!kIsWeb) {

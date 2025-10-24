@@ -1,5 +1,5 @@
+import 'package:core/core.dart' hide getIt;
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/auth_providers.dart';
 import '../../domain/entities/export_request.dart';
@@ -378,27 +378,27 @@ class DataExportNotifier extends _$DataExportNotifier {
   }
 }
 
-// Dependency providers (to be defined in DI setup)
+// Dependency providers using GetIt
 @riverpod
 CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(
   CheckExportAvailabilityUseCaseRef ref,
 ) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<CheckExportAvailabilityUseCase>();
 }
 
 @riverpod
 RequestExportUseCase requestExportUseCase(RequestExportUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<RequestExportUseCase>();
 }
 
 @riverpod
 GetExportHistoryUseCase getExportHistoryUseCase(
   GetExportHistoryUseCaseRef ref,
 ) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<GetExportHistoryUseCase>();
 }
 
 @riverpod
 DataExportRepository dataExportRepository(DataExportRepositoryRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<DataExportRepository>();
 }

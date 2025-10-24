@@ -517,37 +517,37 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   }
 }
 
-// Dependency providers (to be defined in DI setup)
+// Dependency providers using GetIt
 @riverpod
 GetUserDevicesUseCase getUserDevicesUseCase(GetUserDevicesUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<GetUserDevicesUseCase>();
 }
 
 @riverpod
 ValidateDeviceUseCase validateDeviceUseCase(ValidateDeviceUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<ValidateDeviceUseCase>();
 }
 
 @riverpod
 RevokeDeviceUseCase revokeDeviceUseCase(RevokeDeviceUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<RevokeDeviceUseCase>();
 }
 
 @riverpod
 RevokeAllOtherDevicesUseCase revokeAllOtherDevicesUseCase(
   RevokeAllOtherDevicesUseCaseRef ref,
 ) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<RevokeAllOtherDevicesUseCase>();
 }
 
 @riverpod
 GetDeviceStatisticsUseCase getDeviceStatisticsUseCase(
   GetDeviceStatisticsUseCaseRef ref,
 ) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<GetDeviceStatisticsUseCase>();
 }
 
 @riverpod
 AuthStateNotifier authStateNotifier(AuthStateNotifierRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return AuthStateNotifier.instance;
 }

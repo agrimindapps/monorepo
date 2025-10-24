@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:core/core.dart' hide SyncQueue, SyncQueueItem;
 import 'package:flutter/foundation.dart';
+import '../../features/comentarios/data/comentario_model.dart';
+import '../data/models/diagnostico_hive.dart';
 import '../data/models/sync_queue_item.dart';
+import '../data/repositories/comentarios_hive_repository.dart';
+import '../data/repositories/diagnostico_hive_repository.dart';
 import 'sync_queue.dart';
 
 /// Handles sync operations with queue management
@@ -11,11 +15,34 @@ class SyncOperations {
   final SyncQueue _syncQueue;
   final ConnectivityService _connectivityService;
 
+  // Repositories for data persistence
+  late final ComentariosHiveRepository _comentariosRepo;
+  late final DiagnosticoHiveRepository _diagnosticoRepo;
+
   late StreamSubscription<ConnectivityType> _networkSubscription;
   bool _isProcessingSync = false;
   bool _isInitialized = false;
 
-  SyncOperations(this._syncQueue, this._connectivityService);
+  SyncOperations(this._syncQueue, this._connectivityService) {
+    // Initialize repositories from GetIt
+    try {
+      _comentariosRepo = GetIt.instance<ComentariosHiveRepository>();
+    } catch (e) {
+      _comentariosRepo = ComentariosHiveRepository();
+      if (kDebugMode) {
+        print('⚠️ ComentariosHiveRepository not registered in GetIt, creating new instance');
+      }
+    }
+
+    try {
+      _diagnosticoRepo = GetIt.instance<DiagnosticoHiveRepository>();
+    } catch (e) {
+      _diagnosticoRepo = DiagnosticoHiveRepository();
+      if (kDebugMode) {
+        print('⚠️ DiagnosticoHiveRepository not registered in GetIt, creating new instance');
+      }
+    }
+  }
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -129,37 +156,145 @@ class SyncOperations {
     }
   }
 
-  /// Perform create operation - to be implemented by specific repositories
+  /// Perform create operation - saves new records to local storage
   Future<void> _performCreate(SyncQueueItem item) async {
-    // TODO: Implement specific create logic based on modelType
-    // This will be called by specific repositories
-    switch (item.modelType) {
-      case 'ComentarioHive':
-        // Repository should handle this
-        break;
-      case 'DiagnosticoHive':
-        // Repository should handle this
-        break;
-      default:
-        if (kDebugMode) {
-          print('Unknown model type for create: ${item.modelType}');
-        }
+    try {
+      switch (item.modelType) {
+        case 'ComentarioHive':
+          // Deserialize data to ComentarioModel
+          final comentario = ComentarioModel.fromJson(item.data);
+          await _comentariosRepo.addComentario(comentario);
+
+          if (kDebugMode) {
+            print('✅ Created ComentarioHive: ${comentario.idReg}');
+          }
+          break;
+
+        case 'DiagnosticoHive':
+          // Deserialize data to DiagnosticoHive
+          final diagnostico = DiagnosticoHive.fromJson(item.data);
+          final result = await _diagnosticoRepo.saveWithIdReg(diagnostico);
+
+          result.fold(
+            (failure) => throw Exception('Failed to save DiagnosticoHive: ${failure.message}'),
+            (_) {
+              if (kDebugMode) {
+                print('✅ Created DiagnosticoHive: ${diagnostico.idReg}');
+              }
+            },
+          );
+          break;
+
+        default:
+          if (kDebugMode) {
+            print('⚠️ Unknown model type for create: ${item.modelType}');
+          }
+          throw UnsupportedError('Unsupported model type: ${item.modelType}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error performing create for ${item.modelType}: $e');
+      }
+      rethrow;
     }
   }
 
-  /// Perform update operation - to be implemented by specific repositories
+  /// Perform update operation - updates existing records in local storage
   Future<void> _performUpdate(SyncQueueItem item) async {
-    // TODO: Implement specific update logic based on modelType
-    if (kDebugMode) {
-      print('Update operation for ${item.modelType}');
+    try {
+      switch (item.modelType) {
+        case 'ComentarioHive':
+          // Deserialize data to ComentarioModel
+          final comentario = ComentarioModel.fromJson(item.data);
+          await _comentariosRepo.updateComentario(comentario);
+
+          if (kDebugMode) {
+            print('✅ Updated ComentarioHive: ${comentario.idReg}');
+          }
+          break;
+
+        case 'DiagnosticoHive':
+          // Deserialize data to DiagnosticoHive
+          final diagnostico = DiagnosticoHive.fromJson(item.data);
+          final result = await _diagnosticoRepo.saveWithIdReg(diagnostico);
+
+          result.fold(
+            (failure) => throw Exception('Failed to update DiagnosticoHive: ${failure.message}'),
+            (_) {
+              if (kDebugMode) {
+                print('✅ Updated DiagnosticoHive: ${diagnostico.idReg}');
+              }
+            },
+          );
+          break;
+
+        default:
+          if (kDebugMode) {
+            print('⚠️ Unknown model type for update: ${item.modelType}');
+          }
+          throw UnsupportedError('Unsupported model type: ${item.modelType}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error performing update for ${item.modelType}: $e');
+      }
+      rethrow;
     }
   }
 
-  /// Perform delete operation - to be implemented by specific repositories
+  /// Perform delete operation - soft deletes records in local storage
   Future<void> _performDelete(SyncQueueItem item) async {
-    // TODO: Implement specific delete logic based on modelType
-    if (kDebugMode) {
-      print('Delete operation for ${item.modelType}');
+    try {
+      switch (item.modelType) {
+        case 'ComentarioHive':
+          // Extract ID from data
+          final id = item.data['idReg']?.toString() ?? item.data['id']?.toString();
+          if (id == null || id.isEmpty) {
+            throw ArgumentError('ComentarioHive delete requires idReg or id in data');
+          }
+
+          await _comentariosRepo.deleteComentario(id);
+
+          if (kDebugMode) {
+            print('✅ Deleted ComentarioHive: $id');
+          }
+          break;
+
+        case 'DiagnosticoHive':
+          // Extract ID from data
+          final idReg = item.data['idReg']?.toString();
+          if (idReg == null || idReg.isEmpty) {
+            throw ArgumentError('DiagnosticoHive delete requires idReg in data');
+          }
+
+          // Find the diagnostico by idReg
+          final diagnostico = await _diagnosticoRepo.getByIdOrObjectId(idReg);
+          if (diagnostico == null) {
+            if (kDebugMode) {
+              print('⚠️ DiagnosticoHive not found for delete: $idReg');
+            }
+            return; // Item doesn't exist, consider delete successful
+          }
+
+          // Delete from Hive
+          await diagnostico.delete();
+
+          if (kDebugMode) {
+            print('✅ Deleted DiagnosticoHive: $idReg');
+          }
+          break;
+
+        default:
+          if (kDebugMode) {
+            print('⚠️ Unknown model type for delete: ${item.modelType}');
+          }
+          throw UnsupportedError('Unsupported model type: ${item.modelType}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error performing delete for ${item.modelType}: $e');
+      }
+      rethrow;
     }
   }
 

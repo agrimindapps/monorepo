@@ -3,7 +3,6 @@ import 'package:core/core.dart' show GetIt;
 import 'package:flutter/foundation.dart';
 
 import '../../services/data_cleaner_service.dart';
-import '../../../../../test/mocks/mock_analytics_service.dart';
 import '../di_module.dart';
 
 /// Core module responsible for external services and core infrastructure
@@ -24,10 +23,7 @@ class CoreModule implements DIModule {
       );
 
       getIt.registerLazySingleton<core.IAnalyticsRepository>(
-        () =>
-            kDebugMode
-                ? MockAnalyticsService()
-                : core.FirebaseAnalyticsService(),
+        () => core.FirebaseAnalyticsService(),
       );
 
       getIt.registerLazySingleton<core.ICrashlyticsRepository>(

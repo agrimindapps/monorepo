@@ -40,6 +40,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
   // Protection against multiple AI executions
   bool _isProcessingAIMove = false;
   Timer? _aiTimer;
+  bool _isMounted = true;
 
   @override
   Future<GameState> build() async {
@@ -54,6 +55,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
 
     // Cleanup on dispose
     ref.onDispose(() {
+      _isMounted = false;
       _aiTimer?.cancel();
     });
 
@@ -149,6 +151,7 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
 
   /// Executes AI move with protection against multiple executions
   Future<void> _executeAIMove() async {
+    if (!_isMounted) return;
     if (_isProcessingAIMove) return;
 
     final currentState = state.valueOrNull;
@@ -157,23 +160,31 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
     _isProcessingAIMove = true;
 
     try {
+      if (!_isMounted) return;
       state = const AsyncValue.loading();
 
       final aiMoveResult = await _makeAIMoveUseCase(currentState);
+      if (!_isMounted) return;
 
       await aiMoveResult.fold(
         (failure) async {
+          if (!_isMounted) return;
           state = AsyncValue.data(currentState);
         },
         (newState) async {
+          if (!_isMounted) return;
+
           // Check game result after AI move
           final resultCheck = await _checkGameResultUseCase(newState);
+          if (!_isMounted) return;
 
           await resultCheck.fold(
             (failure) async {
+              if (!_isMounted) return;
               state = AsyncValue.data(newState);
             },
             (finalState) async {
+              if (!_isMounted) return;
               state = AsyncValue.data(finalState);
 
               if (!finalState.isInProgress) {

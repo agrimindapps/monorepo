@@ -41,6 +41,9 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   // High score (cached)
   int _highScore = 0;
 
+  // Mounted flag for race condition protection
+  bool _isMounted = true;
+
   @override
   FutureOr<QuizGameState> build() async {
     // Inject use cases
@@ -53,6 +56,12 @@ class QuizGameNotifier extends _$QuizGameNotifier {
     _restartGameUseCase = getIt<RestartGameUseCase>();
     _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
     _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+
+    // Cleanup on dispose
+    ref.onDispose(() {
+      _isMounted = false;
+      _timer?.cancel();
+    });
 
     // Load high score
     await _loadHighScore();
@@ -91,26 +100,37 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Start a new game
   Future<void> _startNewGame() async {
+    if (!_isMounted) return;
+
     // Cancel any existing timer
     _timer?.cancel();
 
     // Generate questions
     final questionsResult = await _generateGameQuestionsUseCase();
+    if (!_isMounted) return;
 
     await questionsResult.fold(
       (failure) async {
+        if (!_isMounted) return;
         state = AsyncValue.error(failure, StackTrace.current);
       },
       (questions) async {
+        if (!_isMounted) return;
+
         // Start game with questions
         final result = await _startGameUseCase(
           questions: questions,
           difficulty: state.valueOrNull?.difficulty ?? QuizDifficulty.medium,
         );
+        if (!_isMounted) return;
 
         result.fold(
-          (failure) => state = AsyncValue.error(failure, StackTrace.current),
+          (failure) {
+            if (!_isMounted) return;
+            state = AsyncValue.error(failure, StackTrace.current);
+          },
           (newState) {
+            if (!_isMounted) return;
             state = AsyncValue.data(newState);
             _startTimer();
           },
@@ -123,6 +143,8 @@ class QuizGameNotifier extends _$QuizGameNotifier {
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      if (!_isMounted) return;
+
       final currentState = state.valueOrNull;
       if (currentState == null || !currentState.gameStatus.isPlaying) {
         _timer?.cancel();
@@ -131,9 +153,12 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
       // Update timer
       final result = await _updateTimerUseCase(currentState: currentState);
+      if (!_isMounted) return;
+
       result.fold(
         (failure) {}, // Ignore
         (newState) {
+          if (!_isMounted) return;
           state = AsyncValue.data(newState);
 
           // Check timeout
@@ -147,6 +172,8 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Select an answer
   Future<void> selectAnswer(String answer) async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
@@ -158,14 +185,20 @@ class QuizGameNotifier extends _$QuizGameNotifier {
       currentState: currentState,
       selectedAnswer: answer,
     );
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) async {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
 
         // Wait 2 seconds before advancing
         await Future.delayed(const Duration(seconds: 2));
+        if (!_isMounted) return;
 
         // Check if game is over
         if (newState.isOver) {
@@ -179,20 +212,28 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Handle timeout
   Future<void> _handleTimeout() async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
     _timer?.cancel();
 
     final result = await _handleTimeoutUseCase(currentState: currentState);
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) async {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
 
         // Wait 2 seconds
         await Future.delayed(const Duration(seconds: 2));
+        if (!_isMounted) return;
 
         // Check if game is over
         if (newState.isOver) {
@@ -206,14 +247,21 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Advance to next question
   Future<void> _advanceToNextQuestion() async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
     final result = await _nextQuestionUseCase(currentState: currentState);
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
 
         if (!newState.gameStatus.isGameOver) {
@@ -233,15 +281,22 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Restart game
   Future<void> restartGame() async {
+    if (!_isMounted) return;
+
     _timer?.cancel();
 
     final result = await _restartGameUseCase(
       difficulty: state.valueOrNull?.difficulty ?? QuizDifficulty.medium,
     );
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) async {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
         await _startNewGame();
       },
@@ -250,6 +305,8 @@ class QuizGameNotifier extends _$QuizGameNotifier {
 
   /// Change difficulty
   Future<void> changeDifficulty(QuizDifficulty newDifficulty) async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
@@ -257,10 +314,15 @@ class QuizGameNotifier extends _$QuizGameNotifier {
       _timer?.cancel();
 
       final result = await _restartGameUseCase(difficulty: newDifficulty);
+      if (!_isMounted) return;
 
       result.fold(
-        (failure) => state = AsyncValue.error(failure, StackTrace.current),
+        (failure) {
+          if (!_isMounted) return;
+          state = AsyncValue.error(failure, StackTrace.current);
+        },
         (newState) async {
+          if (!_isMounted) return;
           state = AsyncValue.data(newState);
           await _startNewGame();
         },

@@ -19,6 +19,7 @@ part 'sudoku_notifier.g.dart';
 @riverpod
 class SudokuGame extends _$SudokuGame {
   Timer? _gameTimer;
+  bool _isMounted = true;
 
   // Use cases injected via providers (TODO: implement in DI)
   late final GeneratePuzzleUseCase _generatePuzzleUseCase;
@@ -33,6 +34,7 @@ class SudokuGame extends _$SudokuGame {
   GameStateEntity build() {
     // Dispose timer on cleanup
     ref.onDispose(() {
+      _isMounted = false;
       _gameTimer?.cancel();
     });
 
@@ -323,7 +325,10 @@ class SudokuGame extends _$SudokuGame {
   void _startTimer() {
     _gameTimer?.cancel();
     _gameTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!_isMounted) return;
+
       if (state.isPlaying) {
+        if (!_isMounted) return;
         state = state.copyWith(
           elapsedTime: state.elapsedTime + const Duration(seconds: 1),
         );

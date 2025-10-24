@@ -36,6 +36,7 @@ dependencies:
 
   # Utils
   logger: ^2.4.0
+  uuid: ^4.5.1
 
   # Navigation
   go_router: ^16.2.4
@@ -46,6 +47,8 @@ dependencies:
 
   # Dependencies from core (use core's versions)
   firebase_core: any
+  cloud_firestore: any
+  firebase_auth: any
   icons_plus: any
   shared_preferences: any
   provider: any  # Coexist with Riverpod during migration

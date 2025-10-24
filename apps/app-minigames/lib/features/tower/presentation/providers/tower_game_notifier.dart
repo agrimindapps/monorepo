@@ -33,6 +33,9 @@ class TowerGameNotifier extends _$TowerGameNotifier {
   // High score tracking
   int _highScore = 0;
 
+  // Mounted flag for race condition protection
+  bool _isMounted = true;
+
   @override
   Future<GameState> build(double screenWidth) async {
     // Inject use cases from GetIt
@@ -46,6 +49,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
 
     // Cleanup on dispose
     ref.onDispose(() {
+      _isMounted = false;
       _gameTimer?.cancel();
     });
 
@@ -70,6 +74,8 @@ class TowerGameNotifier extends _$TowerGameNotifier {
     _gameTimer?.cancel();
 
     _gameTimer = Timer.periodic(const Duration(milliseconds: 16), (_) {
+      if (!_isMounted) return;
+
       final currentState = state.valueOrNull;
       if (currentState == null || currentState.isPaused || currentState.isGameOver) {
         return;
@@ -83,6 +89,7 @@ class TowerGameNotifier extends _$TowerGameNotifier {
           // Ignore failures in game loop
         },
         (newState) {
+          if (!_isMounted) return;
           state = AsyncValue.data(newState);
         },
       );

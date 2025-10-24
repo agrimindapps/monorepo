@@ -37,6 +37,9 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
   // High score (cached)
   int _highScore = 0;
 
+  // Mounted flag for race condition protection
+  bool _isMounted = true;
+
   @override
   FutureOr<SnakeGameState> build() async {
     // Inject use cases
@@ -47,6 +50,12 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     _changeDifficultyUseCase = getIt<ChangeDifficultyUseCase>();
     _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
     _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+
+    // Cleanup on dispose
+    ref.onDispose(() {
+      _isMounted = false;
+      _gameTimer?.cancel();
+    });
 
     // Load high score
     await _loadHighScore();
@@ -83,13 +92,20 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   /// Start a new game
   Future<void> startGame() async {
+    if (!_isMounted) return;
+
     final currentDifficulty = state.valueOrNull?.difficulty ?? SnakeDifficulty.medium;
 
     final result = await _startNewGameUseCase(difficulty: currentDifficulty);
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
         _startGameLoop();
       },
@@ -106,6 +122,8 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     final gameSpeed = currentState.difficulty.gameSpeed;
 
     _gameTimer = Timer.periodic(gameSpeed, (_) async {
+      if (!_isMounted) return;
+
       final currentState = state.valueOrNull;
       if (currentState == null || !currentState.gameStatus.isRunning) {
         _gameTimer?.cancel();
@@ -114,13 +132,16 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
       // Update snake position
       final result = await _updateSnakePositionUseCase(currentState: currentState);
+      if (!_isMounted) return;
 
       result.fold(
         (failure) {
+          if (!_isMounted) return;
           state = AsyncValue.error(failure, StackTrace.current);
           _gameTimer?.cancel();
         },
         (newState) {
+          if (!_isMounted) return;
           state = AsyncValue.data(newState);
 
           // Check game over
@@ -135,12 +156,16 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   /// Change direction
   Future<void> changeDirection(Direction newDirection) async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
     // Auto-start game if not started
     if (currentState.gameStatus.isNotStarted) {
       await startGame();
+      if (!_isMounted) return;
+
       // Change direction after starting
       final startedState = state.valueOrNull;
       if (startedState != null) {
@@ -148,9 +173,14 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
           currentState: startedState,
           newDirection: newDirection,
         );
+        if (!_isMounted) return;
+
         result.fold(
           (failure) {}, // Ignore opposite direction
-          (newState) => state = AsyncValue.data(newState),
+          (newState) {
+            if (!_isMounted) return;
+            state = AsyncValue.data(newState);
+          },
         );
       }
       return;
@@ -160,23 +190,34 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       currentState: currentState,
       newDirection: newDirection,
     );
+    if (!_isMounted) return;
 
     result.fold(
       (failure) {}, // Ignore opposite direction
-      (newState) => state = AsyncValue.data(newState),
+      (newState) {
+        if (!_isMounted) return;
+        state = AsyncValue.data(newState);
+      },
     );
   }
 
   /// Toggle pause
   Future<void> togglePause() async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
     final result = await _togglePauseUseCase(currentState: currentState);
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
 
         if (newState.gameStatus.isRunning) {
@@ -196,6 +237,8 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
 
   /// Change difficulty
   Future<void> changeDifficulty(SnakeDifficulty newDifficulty) async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
@@ -205,10 +248,15 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       currentState: currentState,
       newDifficulty: newDifficulty,
     );
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) async {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
         await startGame();
       },

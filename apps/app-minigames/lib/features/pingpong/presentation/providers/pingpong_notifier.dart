@@ -17,6 +17,7 @@ part 'pingpong_notifier.g.dart';
 @riverpod
 class PingpongGame extends _$PingpongGame {
   Timer? _gameLoop;
+  bool _isMounted = true;
   late StartGameUseCase _startGameUseCase;
   late UpdateBallUseCase _updateBallUseCase;
   late UpdatePlayerPaddleUseCase _updatePlayerPaddleUseCase;
@@ -29,7 +30,10 @@ class PingpongGame extends _$PingpongGame {
   @override
   GameStateEntity build() {
     _initializeUseCases();
-    ref.onDispose(() => _gameLoop?.cancel());
+    ref.onDispose(() {
+      _isMounted = false;
+      _gameLoop?.cancel();
+    });
     _loadHighScore(GameDifficulty.medium);
     return GameStateEntity.initial();
   }
@@ -82,21 +86,36 @@ class PingpongGame extends _$PingpongGame {
   }
 
   Future<void> _updateGame() async {
+    if (!_isMounted) return;
     if (!state.canPlay) return;
 
     var result = await _updateBallUseCase(state);
-    result.fold((_) {}, (s) => state = s);
+    if (!_isMounted) return;
+    result.fold((_) {}, (s) {
+      if (!_isMounted) return;
+      state = s;
+    });
 
     result = await _checkCollisionUseCase(state);
-    result.fold((_) {}, (s) => state = s);
+    if (!_isMounted) return;
+    result.fold((_) {}, (s) {
+      if (!_isMounted) return;
+      state = s;
+    });
 
     result = await _updateAiPaddleUseCase(state);
-    result.fold((_) {}, (s) => state = s);
+    if (!_isMounted) return;
+    result.fold((_) {}, (s) {
+      if (!_isMounted) return;
+      state = s;
+    });
 
     result = await _checkScoreUseCase(state);
+    if (!_isMounted) return;
     result.fold(
       (_) {},
       (s) {
+        if (!_isMounted) return;
         state = s;
         if (s.isGameOver) {
           _gameLoop?.cancel();

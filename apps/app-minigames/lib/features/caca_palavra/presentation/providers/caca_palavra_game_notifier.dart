@@ -38,6 +38,9 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
   // High score cache
   HighScore _highScore = const HighScore.empty();
 
+  // Mounted flag for race condition protection
+  bool _isMounted = true;
+
   @override
   Future<GameState> build() async {
     // Inject use cases
@@ -51,6 +54,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
     // Cleanup on dispose
     ref.onDispose(() {
+      _isMounted = false;
       _debounceTimer?.cancel();
     });
 
@@ -99,12 +103,15 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
   /// Executes cell tap after debounce
   Future<void> _executeCellTap(int row, int col) async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null || !currentState.isPlaying) return;
 
     // Haptic feedback for selection
     HapticFeedback.selectionClick();
 
+    if (!_isMounted) return;
     state = const AsyncValue.loading();
 
     // Select cell
@@ -116,9 +123,12 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
     await selectResult.fold(
       (failure) async {
+        if (!_isMounted) return;
         state = AsyncValue.data(currentState);
       },
       (newState) async {
+        if (!_isMounted) return;
+
         // Check if selection forms a word (only if 2+ positions)
         if (newState.selectedPositions.length >= 2) {
           final previousFoundCount = newState.foundWordsCount;
@@ -127,9 +137,12 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
           await checkResult.fold(
             (failure) async {
+              if (!_isMounted) return;
               state = AsyncValue.data(newState);
             },
             (finalState) async {
+              if (!_isMounted) return;
+
               // Provide haptic feedback if word was found
               if (finalState.foundWordsCount > previousFoundCount) {
                 HapticFeedback.mediumImpact();
@@ -144,6 +157,7 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
             },
           );
         } else {
+          if (!_isMounted) return;
           state = AsyncValue.data(newState);
         }
       },

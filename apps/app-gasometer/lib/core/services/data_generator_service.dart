@@ -2,6 +2,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 /// Serviço para geração de dados de teste realísticos para o GasOMeter
+///
+/// ⚠️ DEVELOPMENT MODE:
+/// Este serviço atualmente retorna MOCK data apenas para demonstração.
+/// O UnimplementedError é INTENCIONAL e capturado pelo GenerateDataDialog.
+/// Não causa crash - mostra mensagem amigável ao usuário.
 class DataGeneratorService {
   DataGeneratorService._internal();
   static DataGeneratorService? _instance;
@@ -54,6 +59,8 @@ class DataGeneratorService {
       debugPrint('   ${results['maintenanceRecords']} manutenções');
       debugPrint('   Tempo: ${results['duration']}ms');
     }
+    // INTENTIONAL: Exception is caught by GenerateDataDialog (line 105)
+    // Shows user-friendly message instead of crashing
     throw UnimplementedError(
       'DataGeneratorService: Geração de dados reais ainda não implementada. '
       'Este serviço atualmente apenas simula estatísticas. '

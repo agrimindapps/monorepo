@@ -17,7 +17,7 @@ class _PremiumStrings {
   static const choosePlan = 'Escolha seu Plano';
   static const subscribeNow = 'Assinar Agora';
   static const purchaseInProgress =
-      'Funcionalidade de compra em desenvolvimento';
+      'Compras Premium estarão disponíveis em breve!';
   static const mostPopular = 'MAIS POPULAR';
 }
 

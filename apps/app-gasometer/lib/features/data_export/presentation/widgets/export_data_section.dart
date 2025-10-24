@@ -318,7 +318,9 @@ class _ExportDataSectionState extends ConsumerState<ExportDataSection> {
     }
     messenger.showSnackBar(
       SnackBar(
-        content: const Text('Exportação CSV em desenvolvimento'),
+        content: const Text(
+          'Exportação CSV estará disponível em breve! Use PDF por enquanto.',
+        ),
         backgroundColor: theme.colorScheme.secondary,
         behavior: SnackBarBehavior.floating,
       ),

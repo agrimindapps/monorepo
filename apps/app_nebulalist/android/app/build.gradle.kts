@@ -25,7 +25,7 @@ android {
         applicationId = "br.com.agrimind.nebulalist.app_nebulalist"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdkVersion = flutter.minSdkVersion  // Required by cloud_functions plugin
+        minSdk = 23  // Required by cloud_functions plugin
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

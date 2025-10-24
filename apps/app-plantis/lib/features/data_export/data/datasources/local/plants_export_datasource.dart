@@ -14,13 +14,19 @@ abstract class PlantsExportDataSource {
 
 class PlantsExportLocalDataSource implements PlantsExportDataSource {
   final PlantsRepository _plantsRepository;
+  final PlantCommentsRepository _commentsRepository;
+  final TasksRepository _tasksRepository;
+  final SpacesRepository _spacesRepository;
 
   PlantsExportLocalDataSource({
     required PlantsRepository plantsRepository,
     required PlantCommentsRepository commentsRepository,
     required TasksRepository tasksRepository,
     required SpacesRepository spacesRepository,
-  }) : _plantsRepository = plantsRepository;
+  })  : _plantsRepository = plantsRepository,
+        _commentsRepository = commentsRepository,
+        _tasksRepository = tasksRepository,
+        _spacesRepository = spacesRepository;
 
   @override
   Future<List<PlantExportData>> getUserPlantsData(String userId) async {
@@ -77,25 +83,49 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   @override
   Future<List<TaskExportData>> getUserTasksData(String userId) async {
     try {
-      return [
-        TaskExportData(
-          id: '1',
-          title: 'Regar plantas mock',
-          description: 'Tarefa de exemplo para demonstração',
-          plantId: '1',
-          plantName: 'Plantas Mock para Export',
-          type: 'watering',
-          status: 'pending',
-          priority: 'medium',
-          dueDate: DateTime.now().add(const Duration(days: 1)),
-          completedAt: null,
-          completionNotes: null,
-          isRecurring: true,
-          recurringIntervalDays: 7,
-          nextDueDate: DateTime.now().add(const Duration(days: 8)),
-          createdAt: DateTime.now(),
-        ),
-      ];
+      final tasksResult = await _tasksRepository.getTasks();
+      final plantsResult = await _plantsRepository.getPlants();
+
+      return tasksResult.fold(
+        (failure) =>
+            throw Exception('Erro ao buscar tarefas: ${failure.message}'),
+        (tasks) {
+          // Create plant ID to name map for lookup
+          final plantNameMap = <String, String>{};
+          plantsResult.fold(
+            (_) => <String, String>{},
+            (plants) {
+              for (final plant in plants) {
+                plantNameMap[plant.id] = plant.name;
+              }
+            },
+          );
+
+          return tasks
+              .map(
+                (task) => TaskExportData(
+                  id: task.id,
+                  title: task.title,
+                  description: task.description,
+                  plantId: task.plantId,
+                  plantName:
+                      plantNameMap[task.plantId] ??
+                      'Planta ID ${task.plantId}',
+                  type: task.type.name,
+                  status: task.status.name,
+                  priority: task.priority.name,
+                  dueDate: task.dueDate,
+                  completedAt: task.completedAt,
+                  completionNotes: task.completionNotes,
+                  isRecurring: task.isRecurring,
+                  recurringIntervalDays: task.recurringIntervalDays,
+                  nextDueDate: task.nextDueDate,
+                  createdAt: task.createdAt,
+                ),
+              )
+              .toList();
+        },
+      );
     } catch (e) {
       throw Exception('Erro ao buscar dados de tarefas: ${e.toString()}');
     }
@@ -104,15 +134,24 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
   @override
   Future<List<SpaceExportData>> getUserSpacesData(String userId) async {
     try {
-      return [
-        SpaceExportData(
-          id: '1',
-          name: 'Espaço Mock',
-          description: 'Espaço de exemplo para demonstração do export LGPD',
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-      ];
+      final spacesResult = await _spacesRepository.getSpaces();
+
+      return spacesResult.fold(
+        (failure) =>
+            throw Exception('Erro ao buscar espaços: ${failure.message}'),
+        (spaces) =>
+            spaces
+                .map(
+                  (space) => SpaceExportData(
+                    id: space.id,
+                    name: space.name,
+                    description: space.description,
+                    createdAt: space.createdAt,
+                    updatedAt: space.updatedAt,
+                  ),
+                )
+                .toList(),
+      );
     } catch (e) {
       throw Exception('Erro ao buscar dados de espaços: ${e.toString()}');
     }
@@ -123,15 +162,33 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
     String userId,
   ) async {
     try {
-      return [
-        PlantPhotoExportData(
-          plantId: '1',
-          plantName: 'Plantas Mock para Export',
-          photoUrls: const ['mock_photo_url_1.jpg', 'mock_photo_url_2.jpg'],
-          takenAt: DateTime.now(),
-          caption: 'Fotos mock para demonstração',
-        ),
-      ];
+      final plantsResult = await _plantsRepository.getPlants();
+
+      return plantsResult.fold(
+        (failure) =>
+            throw Exception('Erro ao buscar fotos: ${failure.message}'),
+        (plants) {
+          final photoExports = <PlantPhotoExportData>[];
+
+          for (final plant in plants) {
+            if (plant.imageUrls.isNotEmpty) {
+              photoExports.add(
+                PlantPhotoExportData(
+                  plantId: plant.id,
+                  plantName: plant.name,
+                  photoUrls: plant.imageUrls,
+                  takenAt: plant.createdAt,
+                  caption:
+                      plant.notes ??
+                      'Fotos de ${plant.name}',
+                ),
+              );
+            }
+          }
+
+          return photoExports;
+        },
+      );
     } catch (e) {
       throw Exception('Erro ao buscar dados de fotos: ${e.toString()}');
     }
@@ -142,25 +199,50 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
     String userId,
   ) async {
     try {
-      return [
-        PlantCommentExportData(
-          id: '1',
-          plantId: '1',
-          plantName: 'Plantas Mock para Export',
-          content: 'Comentário mock para demonstração do export LGPD',
-          createdAt: DateTime.now().subtract(const Duration(days: 5)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 2)),
-        ),
-        PlantCommentExportData(
-          id: '2',
-          plantId: '1',
-          plantName: 'Plantas Mock para Export',
-          content:
-              'Outro comentário de exemplo para validar estrutura de exportação',
-          createdAt: DateTime.now().subtract(const Duration(days: 1)),
-          updatedAt: DateTime.now(),
-        ),
-      ];
+      final plantsResult = await _plantsRepository.getPlants();
+      final allComments = <PlantCommentExportData>[];
+
+      await plantsResult.fold(
+        (failure) async =>
+            throw Exception('Erro ao buscar plantas: ${failure.message}'),
+        (plants) async {
+          // Create plant ID to name map for lookup
+          final plantNameMap = <String, String>{};
+          for (final plant in plants) {
+            plantNameMap[plant.id] = plant.name;
+          }
+
+          // Fetch comments for each plant
+          for (final plant in plants) {
+            final commentsResult = await _commentsRepository.getCommentsForPlant(
+              plant.id,
+            );
+
+            commentsResult.fold(
+              (failure) {
+                // Log error but continue with other plants
+              },
+              (comments) {
+                for (final comment in comments) {
+                  allComments.add(
+                    PlantCommentExportData(
+                      id: comment.id,
+                      plantId: comment.plantId ?? plant.id,
+                      plantName:
+                          plantNameMap[comment.plantId ?? plant.id] ?? plant.name,
+                      content: comment.conteudo,
+                      createdAt: comment.createdAt ?? comment.dataCriacao,
+                      updatedAt: comment.updatedAt ?? comment.dataAtualizacao,
+                    ),
+                  );
+                }
+              },
+            );
+          }
+        },
+      );
+
+      return allComments;
     } catch (e) {
       throw Exception('Erro ao buscar dados de comentários: ${e.toString()}');
     }

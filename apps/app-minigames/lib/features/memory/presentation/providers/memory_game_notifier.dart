@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:get_it/get_it.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../../core/providers/core_providers.dart';
+import '../../data/datasources/memory_local_datasource.dart';
+import '../../data/repositories/memory_repository_impl.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../../domain/entities/high_score_entity.dart';
+import '../../domain/repositories/memory_repository.dart';
 import '../../domain/usecases/check_match_usecase.dart';
 import '../../domain/usecases/flip_card_usecase.dart';
 import '../../domain/usecases/generate_cards_usecase.dart';
@@ -31,7 +34,6 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
   }
 
   Future<void> startGame(GameDifficulty difficulty) async {
-    final generateCardsUseCase = ref.read(generateCardsUseCaseProvider);
     final restartGameUseCase = ref.read(restartGameUseCaseProvider);
 
     final result = restartGameUseCase(
@@ -185,33 +187,79 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
   }
 }
 
+// ============================================================================
+// Data Layer Providers
+// ============================================================================
+
+/// Memory Local Data Source Provider
+///
+/// Provides local storage for Memory game data using SharedPreferences.
+@Riverpod(keepAlive: true)
+MemoryLocalDataSource memoryLocalDataSource(MemoryLocalDataSourceRef ref) {
+  final sharedPrefs = ref.watch(sharedPreferencesProvider);
+  return MemoryLocalDataSourceImpl(sharedPrefs);
+}
+
+/// Memory Repository Provider
+///
+/// Provides repository implementation for Memory game data operations.
+@Riverpod(keepAlive: true)
+MemoryRepository memoryRepository(MemoryRepositoryRef ref) {
+  final dataSource = ref.watch(memoryLocalDataSourceProvider);
+  return MemoryRepositoryImpl(dataSource);
+}
+
+// ============================================================================
+// Domain Layer Providers - Use Cases
+// ============================================================================
+
+/// Generate Cards Use Case Provider
+///
+/// Creates shuffled card pairs for the memory game.
 @riverpod
 GenerateCardsUseCase generateCardsUseCase(GenerateCardsUseCaseRef ref) {
   return GenerateCardsUseCase();
 }
 
+/// Flip Card Use Case Provider
+///
+/// Handles card flipping logic and validation.
 @riverpod
 FlipCardUseCase flipCardUseCase(FlipCardUseCaseRef ref) {
   return FlipCardUseCase();
 }
 
+/// Check Match Use Case Provider
+///
+/// Validates if two flipped cards match.
 @riverpod
 CheckMatchUseCase checkMatchUseCase(CheckMatchUseCaseRef ref) {
   return CheckMatchUseCase();
 }
 
+/// Restart Game Use Case Provider
+///
+/// Resets game state and generates new cards.
 @riverpod
 RestartGameUseCase restartGameUseCase(RestartGameUseCaseRef ref) {
   final generateCardsUseCase = ref.watch(generateCardsUseCaseProvider);
   return RestartGameUseCase(generateCardsUseCase);
 }
 
+/// Load High Score Use Case Provider
+///
+/// Loads saved high score for a difficulty level from local storage.
 @riverpod
 LoadHighScoreUseCase loadHighScoreUseCase(LoadHighScoreUseCaseRef ref) {
-  return GetIt.instance.get<LoadHighScoreUseCase>();
+  final repository = ref.watch(memoryRepositoryProvider);
+  return LoadHighScoreUseCase(repository);
 }
 
+/// Save High Score Use Case Provider
+///
+/// Saves new high score to local storage with validation.
 @riverpod
 SaveHighScoreUseCase saveHighScoreUseCase(SaveHighScoreUseCaseRef ref) {
-  return GetIt.instance.get<SaveHighScoreUseCase>();
+  final repository = ref.watch(memoryRepositoryProvider);
+  return SaveHighScoreUseCase(repository);
 }

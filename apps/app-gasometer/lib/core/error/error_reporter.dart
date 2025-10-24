@@ -4,8 +4,8 @@ import 'package:core/core.dart' as core;
 import 'package:core/core.dart' show injectable;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import '../di/injection.dart';
 import '../services/gasometer_analytics_service.dart';
-import '../services/mock_analytics_service.dart';
 
 import 'app_error.dart';
 
@@ -358,14 +358,9 @@ extension AppErrorReporting on AppError {
     bool fatal = false,
   }) async {
     try {
-      final reporter = ErrorReporter(
-        GasometerAnalyticsService(
-          core.EnhancedAnalyticsService(
-            analytics: MockAnalyticsService(),
-            crashlytics: core.FirebaseCrashlyticsService(),
-          ),
-        ),
-      );
+      // Use analytics service from DI instead of hardcoded mock
+      final analyticsService = getIt<GasometerAnalyticsService>();
+      final reporter = ErrorReporter(analyticsService);
       await reporter.reportError(
         this,
         stackTrace: stackTrace,
@@ -374,7 +369,9 @@ extension AppErrorReporting on AppError {
         fatal: fatal,
       );
     } catch (e) {
-      print('Failed to report error: $e');
+      if (kDebugMode) {
+        print('Failed to report error: $e');
+      }
     }
   }
 }

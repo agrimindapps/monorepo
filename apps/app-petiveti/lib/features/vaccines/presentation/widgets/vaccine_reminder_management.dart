@@ -566,7 +566,11 @@ class _VaccineReminderManagementState extends ConsumerState<VaccineReminderManag
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Adicionar Lembrete'),
-        content: const Text('Funcionalidade em desenvolvimento...'),
+        content: const Text(
+          'Adição manual de lembretes estará disponível em breve!\n\n'
+          'Por enquanto, lembretes são criados automaticamente ao '
+          'agendar vacinas nas configurações.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

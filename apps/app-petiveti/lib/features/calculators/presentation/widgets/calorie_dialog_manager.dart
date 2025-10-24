@@ -206,7 +206,11 @@ class CalorieDialogManager {
 
   void _showPdfExportNotImplemented() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export PDF em desenvolvimento')),
+      const SnackBar(
+        content: Text(
+          'Exportação PDF estará disponível em breve! Use compartilhar por enquanto.',
+        ),
+      ),
     );
   }
 

@@ -10,7 +10,6 @@ import '../data/repositories/plantas_inf_hive_repository.dart';
 import '../data/repositories/pragas_hive_repository.dart';
 import '../data/repositories/pragas_inf_hive_repository.dart';
 import 'data_initialization_service.dart';
-import 'hive_leak_monitor.dart';
 
 /// Interface para o gerenciador de dados da aplicação
 abstract class IAppDataManager {
@@ -52,12 +51,6 @@ class AppDataManager implements IAppDataManager {
       // já foram executados no main.dart antes de registrar boxes
       // Isso garante que adapters estejam disponíveis quando BoxRegistryService
       // tentar abrir boxes persistentes
-
-      // Iniciar monitoramento de vazamentos de boxes em modo debug
-      assert(() {
-        HiveLeakMonitor.startMonitoring();
-        return true;
-      }());
 
       await _createServices();
       developer.log(

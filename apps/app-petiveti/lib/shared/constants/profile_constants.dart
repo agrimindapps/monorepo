@@ -53,7 +53,7 @@ class ProfileConstants {
   static const String logoutConfirmText = 'Sair';
   static const String cancelButtonText = 'Cancelar';
   static const String okButtonText = 'OK';
-  static const String comingSoonContent = 'Funcionalidade em desenvolvimento';
+  static const String comingSoonContent = 'Esta funcionalidade estará disponível em breve!';
   static const String notificationsSettingsTitle = 'Configurações de Notificação';
   static const String themeSettingsTitle = 'Configurações de Tema';
   static const String languageSettingsTitle = 'Configurações de Idioma';

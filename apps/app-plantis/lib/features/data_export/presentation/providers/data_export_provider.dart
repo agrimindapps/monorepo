@@ -1,6 +1,7 @@
+import 'package:core/core.dart' hide getIt;
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/auth_providers.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
@@ -24,7 +25,7 @@ class DataExportState with _$DataExportState {
   const DataExportState._();
 
   bool get hasError => error != null;
-  bool get canRequestExport => !isLoading;
+  bool get canRequestExport => this.isLoading == false;
 }
 
 /// Provider for managing LGPD data export functionality in Plantis
@@ -51,9 +52,13 @@ class DataExportNotifier extends _$DataExportNotifier {
     return const DataExportState();
   }
 
-  /// Get current user ID (mock for demonstration)
+  /// Get current authenticated user ID from auth provider
   String get _currentUserId {
-    return 'mock_user_123'; // In real implementation, get from auth service
+    final user = ref.watch(currentUserProvider);
+    if (user == null || user.id.isEmpty) {
+      throw Exception('Usuário não autenticado. Faça login para exportar dados.');
+    }
+    return user.id;
   }
 
   /// Initialize provider by loading export history
@@ -373,27 +378,27 @@ class DataExportNotifier extends _$DataExportNotifier {
   }
 }
 
-// Dependency providers (to be defined in DI setup)
+// Dependency providers using GetIt
 @riverpod
 CheckExportAvailabilityUseCase checkExportAvailabilityUseCase(
   CheckExportAvailabilityUseCaseRef ref,
 ) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<CheckExportAvailabilityUseCase>();
 }
 
 @riverpod
 RequestExportUseCase requestExportUseCase(RequestExportUseCaseRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<RequestExportUseCase>();
 }
 
 @riverpod
 GetExportHistoryUseCase getExportHistoryUseCase(
   GetExportHistoryUseCaseRef ref,
 ) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<GetExportHistoryUseCase>();
 }
 
 @riverpod
 DataExportRepository dataExportRepository(DataExportRepositoryRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  return GetIt.instance<DataExportRepository>();
 }

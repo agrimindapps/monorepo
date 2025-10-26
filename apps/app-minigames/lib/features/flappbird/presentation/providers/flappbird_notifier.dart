@@ -37,6 +37,9 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
   // High score (cached)
   int _highScore = 0;
 
+  // Mounted flag for race condition protection
+  bool _isMounted = true;
+
   @override
   FutureOr<FlappyGameState> build() async {
     // Default screen dimensions (will be updated when page layout is known)
@@ -50,6 +53,12 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
     _checkCollisionUseCase = getIt<CheckCollisionUseCase>();
     _loadHighScoreUseCase = getIt<LoadHighScoreUseCase>();
     _saveHighScoreUseCase = getIt<SaveHighScoreUseCase>();
+
+    // Cleanup on dispose
+    ref.onDispose(() {
+      _isMounted = false;
+      _gameTimer?.cancel();
+    });
 
     // Load high score
     await _loadHighScore();
@@ -90,14 +99,21 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
   /// Start game
   Future<void> startGame() async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
     final result = await _startGameUseCase(currentState: currentState);
+    if (!_isMounted) return;
 
     result.fold(
-      (failure) => state = AsyncValue.error(failure, StackTrace.current),
+      (failure) {
+        if (!_isMounted) return;
+        state = AsyncValue.error(failure, StackTrace.current);
+      },
       (newState) {
+        if (!_isMounted) return;
         state = AsyncValue.data(newState);
         _startGameLoop();
       },
@@ -116,6 +132,8 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
   /// Update game (called every frame)
   Future<void> _updateGame() async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null || !currentState.isPlaying) {
       _gameTimer?.cancel();
@@ -124,10 +142,12 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
     // 1. Update physics (gravity, bird position)
     final physicsResult = await _updatePhysicsUseCase(currentState: currentState);
+    if (!_isMounted) return;
 
     var newState = currentState;
     physicsResult.fold(
       (failure) {
+        if (!_isMounted) return;
         state = AsyncValue.error(failure, StackTrace.current);
         _gameTimer?.cancel();
         return;
@@ -137,6 +157,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
     // Check if game over after physics
     if (newState.isGameOver) {
+      if (!_isMounted) return;
       state = AsyncValue.data(newState);
       _gameTimer?.cancel();
       _saveHighScore();
@@ -145,9 +166,11 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
     // 2. Update pipes (movement, scoring, spawning)
     final pipesResult = await _updatePipesUseCase(currentState: newState);
+    if (!_isMounted) return;
 
     pipesResult.fold(
       (failure) {
+        if (!_isMounted) return;
         state = AsyncValue.error(failure, StackTrace.current);
         _gameTimer?.cancel();
         return;
@@ -157,9 +180,11 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
     // 3. Check collision with pipes
     final collisionResult = await _checkCollisionUseCase(currentState: newState);
+    if (!_isMounted) return;
 
     collisionResult.fold(
       (failure) {
+        if (!_isMounted) return;
         state = AsyncValue.error(failure, StackTrace.current);
         _gameTimer?.cancel();
         return;
@@ -175,11 +200,14 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
       },
     );
 
+    if (!_isMounted) return;
     state = AsyncValue.data(newState);
   }
 
   /// Make bird flap (jump)
   Future<void> flap() async {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
@@ -197,10 +225,14 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
     }
 
     final result = await _flapBirdUseCase(currentState: currentState);
+    if (!_isMounted) return;
 
     result.fold(
       (failure) {}, // Ignore flap failures
-      (newState) => state = AsyncValue.data(newState),
+      (newState) {
+        if (!_isMounted) return;
+        state = AsyncValue.data(newState);
+      },
     );
   }
 
@@ -212,6 +244,8 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
 
   /// Change difficulty and restart
   Future<void> changeDifficulty(FlappyDifficulty newDifficulty) async {
+    if (!_isMounted) return;
+
     _gameTimer?.cancel();
 
     final currentState = state.valueOrNull;
@@ -223,11 +257,14 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
       status: FlappyGameStatus.notStarted,
     );
 
+    if (!_isMounted) return;
     state = AsyncValue.data(newState);
   }
 
   /// Update screen dimensions
   void updateScreenDimensions(double width, double height) {
+    if (!_isMounted) return;
+
     final currentState = state.valueOrNull;
     if (currentState == null) return;
 
@@ -242,6 +279,7 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
       ),
     );
 
+    if (!_isMounted) return;
     state = AsyncValue.data(newState);
   }
 }

@@ -1,8 +1,13 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
+
+/// ⚠️ MOCK DATA WARNING:
+/// This service currently returns mock/fake data for development purposes.
+/// In production, this should be replaced with real Firebase Analytics data.
+/// TODO: Integrate with Firebase Analytics API to fetch real metrics
+/// See: https://firebase.google.com/docs/analytics/get-started
 
 /// Conversion funnel steps
 enum ConversionFunnelStep {
@@ -362,34 +367,51 @@ class AnalyticsDashboardService {
     return report;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Analytics data in production
   int _calculateDAU(Map<String, dynamic> data) {
-    return Random().nextInt(1000) + 500;
+    // Mock: 750 daily active users (realistic for growing app)
+    return 750;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Analytics data in production
   int _calculateWAU(Map<String, dynamic> data) {
-    return Random().nextInt(5000) + 2000;
+    // Mock: 3500 weekly active users (~4.7x DAU is typical)
+    return 3500;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Analytics data in production
   int _calculateMAU(Map<String, dynamic> data) {
-    return Random().nextInt(15000) + 8000;
+    // Mock: 12000 monthly active users (~16x DAU is typical)
+    return 12000;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Analytics data in production
   double _calculateAvgSessionDuration(Map<String, dynamic> data) {
-    return Random().nextDouble() * 10 + 5; // 5-15 minutes
+    // Mock: 8.5 minutes average session (realistic for utility app)
+    return 8.5;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Analytics data in production
   int _calculateAvgScreensPerSession(Map<String, dynamic> data) {
-    return Random().nextInt(8) + 3; // 3-10 screens
+    // Mock: 5 screens per session average
+    return 5;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Analytics data in production
   Map<String, int> _calculateFeatureUsage(Map<String, dynamic> data) {
     return {
-      'pragas_search': Random().nextInt(500) + 200,
-      'diagnostics': Random().nextInt(300) + 100,
-      'favorites': Random().nextInt(250) + 50,
-      'export': Random().nextInt(150) + 25,
-      'comments': Random().nextInt(200) + 75,
-      'premium_features': Random().nextInt(100) + 10,
+      'pragas_search': 420, // Most used feature
+      'diagnostics': 280,   // Core feature
+      'favorites': 180,     // Moderate use
+      'export': 95,         // Less frequent
+      'comments': 145,      // Moderate engagement
+      'premium_features': 65, // Premium adoption
     };
   }
 
@@ -455,69 +477,102 @@ class AnalyticsDashboardService {
     return rates;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Performance Monitoring data in production
   double _calculateAvgStartupTime(Map<String, dynamic> data) {
-    return Random().nextDouble() * 2 + 1; // 1-3 seconds
+    // Mock: 1.8 seconds average startup (good for mobile app)
+    return 1.8;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Performance Monitoring data in production
   double _calculateAvgScreenLoadTime(Map<String, dynamic> data) {
-    return Random().nextDouble() * 1 + 0.5; // 0.5-1.5 seconds
+    // Mock: 0.9 seconds average screen load
+    return 0.9;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Performance Monitoring data in production
   Map<String, double> _calculateFeaturePerformance(Map<String, dynamic> data) {
     return {
-      'search': Random().nextDouble() * 0.5 + 0.3,
-      'diagnostics': Random().nextDouble() * 1 + 0.8,
-      'favorites': Random().nextDouble() * 0.3 + 0.2,
-      'export': Random().nextDouble() * 2 + 1,
+      'search': 0.5,        // Fast search: 500ms
+      'diagnostics': 1.2,   // Complex feature: 1.2s
+      'favorites': 0.3,     // Simple operation: 300ms
+      'export': 2.5,        // Heavy operation: 2.5s
     };
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real Firebase Crashlytics data in production
   int _calculateCrashCount(Map<String, dynamic> data) {
-    return Random().nextInt(5); // 0-4 crashes
+    // Mock: 2 crashes (realistic for stable app)
+    return 2;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real error tracking data in production
   int _calculateErrorCount(Map<String, dynamic> data) {
-    return Random().nextInt(20) + 5; // 5-24 errors
+    // Mock: 12 non-fatal errors
+    return 12;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real performance monitoring data in production
   Map<String, int> _calculateSlowOperations(Map<String, dynamic> data) {
     return {
-      'database_query': Random().nextInt(5),
-      'image_loading': Random().nextInt(8),
-      'sync_operation': Random().nextInt(3),
+      'database_query': 3,   // 3 slow queries detected
+      'image_loading': 5,    // 5 slow image loads
+      'sync_operation': 2,   // 2 slow sync operations
     };
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real RevenueCat/subscription data in production
   double _calculateTotalRevenue(List<Map<String, dynamic>> subscriptionData) {
-    return Random().nextDouble() * 5000 + 1000; // $1000-$6000
+    // Mock: $3,450 total monthly revenue
+    return 3450.00;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real RevenueCat/subscription data in production
   double _calculateARPU(List<Map<String, dynamic>> subscriptionData) {
-    return Random().nextDouble() * 20 + 5; // $5-$25
+    // Mock: $12.50 average revenue per user
+    return 12.50;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real RevenueCat/subscription data in production
   int _calculateTotalSubscriptions(
     List<Map<String, dynamic>> subscriptionData,
   ) {
-    return Random().nextInt(500) + 100; // 100-599 subscriptions
+    // Mock: 320 total subscriptions
+    return 320;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real RevenueCat/subscription data in production
   int _calculateActiveSubscriptions(
     List<Map<String, dynamic>> subscriptionData,
   ) {
-    return Random().nextInt(400) + 80; // 80-479 active
+    // Mock: 276 active subscriptions (~86% retention)
+    return 276;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real RevenueCat/subscription data in production
   double _calculateChurnRate(List<Map<String, dynamic>> subscriptionData) {
-    return Random().nextDouble() * 10 + 2; // 2-12% churn
+    // Mock: 5.8% monthly churn rate (good for SaaS)
+    return 5.8;
   }
 
+  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
+  /// TODO: Replace with real RevenueCat/subscription data in production
   Map<String, double> _calculateRevenueByPlan(
     List<Map<String, dynamic>> subscriptionData,
   ) {
     return {
-      'monthly': Random().nextDouble() * 2000 + 500,
-      'yearly': Random().nextDouble() * 3000 + 1500,
+      'monthly': 1250.00,  // Monthly plan revenue
+      'yearly': 2200.00,   // Yearly plan revenue (discounted but more upfront)
     };
   }
 

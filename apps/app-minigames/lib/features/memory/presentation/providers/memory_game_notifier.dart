@@ -18,10 +18,12 @@ part 'memory_game_notifier.g.dart';
 class MemoryGameNotifier extends _$MemoryGameNotifier {
   Timer? _gameTimer;
   HighScoreEntity? _currentHighScore;
+  bool _isMounted = true;
 
   @override
   GameStateEntity build() {
     ref.onDispose(() {
+      _isMounted = false;
       _gameTimer?.cancel();
     });
 
@@ -71,8 +73,11 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
   void _startTimer() {
     _gameTimer?.cancel();
     _gameTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!_isMounted) return;
+
       if (state.status == GameStatus.playing) {
         final elapsed = DateTime.now().difference(state.startTime!);
+        if (!_isMounted) return;
         state = state.copyWith(elapsedTime: elapsed);
       }
     });
@@ -101,6 +106,7 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
 
   Future<void> _checkMatch() async {
     await Future.delayed(Duration(milliseconds: state.difficulty.matchTime));
+    if (!_isMounted) return;
 
     final checkMatchUseCase = ref.read(checkMatchUseCaseProvider);
     final result = checkMatchUseCase(state);
@@ -108,6 +114,7 @@ class MemoryGameNotifier extends _$MemoryGameNotifier {
     result.fold(
       (failure) {},
       (newState) {
+        if (!_isMounted) return;
         state = newState;
 
         if (newState.status == GameStatus.completed) {

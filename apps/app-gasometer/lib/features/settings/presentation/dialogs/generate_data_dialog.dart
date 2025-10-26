@@ -105,7 +105,7 @@ class _GenerateDataDialogState extends State<GenerateDataDialog> {
     } on UnimplementedError {
       if (mounted) {
         _showSnackBar(
-          'Funcionalidade em desenvolvimento.\\n'
+          'Geração automática de dados estará disponível em breve!\\n'
           'O Database Inspector já está funcional para visualizar dados existentes.',
           isError: false
         );

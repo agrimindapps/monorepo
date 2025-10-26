@@ -1,6 +1,6 @@
+import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/plant.dart';
 import '../../domain/entities/plant_task.dart';
@@ -489,7 +489,12 @@ PlantTaskGenerator plantTaskGenerator(PlantTaskGeneratorRef ref) {
 
 @riverpod
 PlantTasksRepository? plantTasksRepository(PlantTasksRepositoryRef ref) {
-  throw UnimplementedError('Define in DI setup');
+  try {
+    return GetIt.instance<PlantTasksRepository>();
+  } catch (e) {
+    // Repository not registered, return null
+    return null;
+  }
 }
 
 /// Type alias for backwards compatibility with existing code

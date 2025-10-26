@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide getIt;
 
+import '../../../../core/providers/auth_providers.dart';
 import '../../domain/entities/export_request.dart';
 import '../../domain/repositories/data_export_repository.dart';
 import '../../domain/usecases/check_export_availability_usecase.dart';
@@ -55,8 +56,14 @@ class DataExportNotifier extends _$DataExportNotifier {
   late final DeleteExportUseCase _deleteUseCase;
   late final DataExportRepository _repository;
 
-  /// Mock user ID - em produção, pegar do auth service
-  String get _currentUserId => 'mock_user_123';
+  /// Get current authenticated user ID from auth provider
+  String get _currentUserId {
+    final user = ref.watch(currentUserProvider);
+    if (user == null || user.id.isEmpty) {
+      throw Exception('Usuário não autenticado. Faça login para exportar dados.');
+    }
+    return user.id;
+  }
 
   @override
   Future<DataExportState> build() async {

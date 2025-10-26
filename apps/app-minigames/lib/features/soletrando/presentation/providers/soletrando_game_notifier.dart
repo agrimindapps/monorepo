@@ -18,10 +18,12 @@ part 'soletrando_game_notifier.g.dart';
 @riverpod
 class SoletrandoGame extends _$SoletrandoGame {
   Timer? _timer;
+  bool _isMounted = true;
 
   @override
   GameStateEntity build() {
     ref.onDispose(() {
+      _isMounted = false;
       _timer?.cancel();
     });
 
@@ -174,10 +176,14 @@ class SoletrandoGame extends _$SoletrandoGame {
   /// Start countdown timer
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!_isMounted) return;
+
       if (state.timeRemaining > 0) {
+        if (!_isMounted) return;
         state = state.copyWith(timeRemaining: state.timeRemaining - 1);
       } else {
         _timer?.cancel();
+        if (!_isMounted) return;
         state = state.copyWith(status: GameStatus.timeUp);
         HapticFeedback.heavyImpact();
       }

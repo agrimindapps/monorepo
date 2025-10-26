@@ -91,11 +91,13 @@ Future<UpdateStatsUseCase> updateStatsUseCase(UpdateStatsUseCaseRef ref) async {
 @riverpod
 class CampoMinadoGameNotifier extends _$CampoMinadoGameNotifier {
   Timer? _gameTimer;
+  bool _isMounted = true;
 
   @override
   GameState build() {
     // Cleanup on dispose
     ref.onDispose(() {
+      _isMounted = false;
       _stopTimer();
     });
 
@@ -233,6 +235,8 @@ class CampoMinadoGameNotifier extends _$CampoMinadoGameNotifier {
     if (state.isGameOver || state.isPaused) return;
 
     _gameTimer = Timer.periodic(const Duration(seconds: 1), (_) async {
+      if (!_isMounted) return;
+
       if (!state.isPlaying || state.isPaused) {
         _stopTimer();
         return;
@@ -241,12 +245,14 @@ class CampoMinadoGameNotifier extends _$CampoMinadoGameNotifier {
       final result = await ref.read(updateTimerUseCaseProvider)(
         currentState: state,
       );
+      if (!_isMounted) return;
 
       result.fold(
         (failure) {
           // Log error
         },
         (newState) {
+          if (!_isMounted) return;
           state = newState;
         },
       );

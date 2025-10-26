@@ -1,3 +1,4 @@
+import 'package:core/core.dart' as core;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../../../core/providers/receituagro_auth_notifier.dart';
 import '../../../core/services/receita_agro_sync_service.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
+import '../../analytics/analytics_service.dart';
 import '../../auth/presentation/pages/login_page.dart';
 import '../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../subscription/presentation/widgets/subscription_progress_widget.dart';
@@ -316,12 +318,190 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final shouldClear = await ClearDataDialog.show(context);
 
     if (shouldClear == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Funcionalidade de limpeza em desenvolvimento'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      final authState = ref.read(receitaAgroAuthNotifierProvider).value;
+      final userId = authState?.currentUser?.id ?? 'unknown';
+
+      try {
+        // Obter o serviço de analytics
+        final analytics = sl<ReceitaAgroAnalyticsService>();
+
+        // Rastrear tentativa de limpeza
+        analytics.trackEvent('clear_data_attempt', parameters: {
+          'user_id': userId,
+          'trigger_source': 'profile_page',
+        });
+
+        // Mostrar loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Text('Limpando dados locais...'),
+              ],
+            ),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 30),
+          ),
+        );
+
+        // Obter o serviço de limpeza
+        final dataCleaner = sl<core.IAppDataCleaner>();
+
+        // Verificar se há dados para limpar
+        final hasData = await dataCleaner.hasDataToClear();
+        if (!hasData) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Row(
+                  children: [
+                    Icon(Icons.info, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text('Não há dados locais para limpar'),
+                  ],
+                ),
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 3),
+              ),
+            );
+          }
+          analytics.trackEvent('clear_data_no_data', parameters: {
+            'user_id': userId,
+          });
+          return;
+        }
+
+        // Obter estatísticas antes da limpeza
+        final stats = await dataCleaner.getDataStatsBeforeCleaning();
+        debugPrint('📊 Dados a serem limpos: $stats');
+
+        // Executar limpeza completa
+        final result = await dataCleaner.clearAllAppData();
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+
+          final success = result['success'] as bool? ?? false;
+          final errors = result['errors'] as List? ?? [];
+          final totalCleared = result['totalRecordsCleared'] as int? ?? 0;
+          final duration = result['duration'] as int? ?? 0;
+
+          if (success && errors.isEmpty) {
+            // Sucesso completo
+            analytics.trackEvent('clear_data_success', parameters: {
+              'user_id': userId,
+              'total_cleared': totalCleared.toString(),
+              'duration_ms': duration.toString(),
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Dados limpos com sucesso! $totalCleared registros removidos',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          } else if (success && errors.isNotEmpty) {
+            // Sucesso parcial com alguns erros
+            analytics.trackEvent('clear_data_partial', parameters: {
+              'user_id': userId,
+              'total_cleared': totalCleared.toString(),
+              'errors_count': errors.length.toString(),
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Dados limpos com ${errors.length} avisos',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.orange,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          } else {
+            // Erro na limpeza
+            final mainError = result['mainError']?.toString() ?? 'Erro desconhecido';
+            analytics.trackEvent('clear_data_failed', parameters: {
+              'user_id': userId,
+              'error': mainError,
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.error, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Erro ao limpar dados: $mainError',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        final analytics = sl<ReceitaAgroAnalyticsService>();
+        analytics.trackError('clear_data_exception', e.toString());
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Erro inesperado ao limpar dados: $e',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
     }
   }
 

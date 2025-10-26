@@ -36,6 +36,9 @@ class QuizImageNotifier extends _$QuizImageNotifier {
   // High score tracking
   int _highScore = 0;
 
+  // Mounted flag for race condition protection
+  bool _isMounted = true;
+
   @override
   Future<QuizGameState> build(GameDifficulty difficulty) async {
     // Inject use cases from GetIt
@@ -51,6 +54,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
 
     // Cleanup on dispose
     ref.onDispose(() {
+      _isMounted = false;
       _timer?.cancel();
     });
 
@@ -95,6 +99,8 @@ class QuizImageNotifier extends _$QuizImageNotifier {
     _timer?.cancel();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!_isMounted) return;
+
       final currentState = state.valueOrNull;
       if (currentState == null || !currentState.isPlaying) {
         return;
@@ -108,6 +114,7 @@ class QuizImageNotifier extends _$QuizImageNotifier {
           // Timer update failed - ignore
         },
         (newState) {
+          if (!_isMounted) return;
           state = AsyncValue.data(newState);
 
           // Check if time has run out

@@ -67,8 +67,8 @@ class RemindersConstants {
   static const String errorPrefix = 'Erro: ';
   static const String successSuffix = ' com sucesso';
   static const String errorActionPrefix = 'Erro ao ';
-  static const String addFeatureDevelopment = 'Funcionalidade de adicionar lembrete em desenvolvimento';
-  static const String editFeatureDevelopment = 'Funcionalidade de editar lembrete em desenvolvimento';
+  static const String addFeatureDevelopment = 'Adição manual de lembretes estará disponível em breve!';
+  static const String editFeatureDevelopment = 'Edição de lembretes estará disponível em breve!';
 }
 
 /// Color constants for different reminder types and states

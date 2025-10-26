@@ -146,7 +146,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Perfil',
           subtitle: 'Gerenciar informações da conta',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Gerenciamento de perfil estará disponível em breve!',
+            );
           },
         ),
         _buildSettingItem(
@@ -224,7 +226,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Idioma',
           subtitle: 'Português (Brasil)',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Seleção de idioma estará disponível em breve!',
+            );
           },
         ),
         _buildSettingItem(
@@ -232,7 +236,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Armazenamento',
           subtitle: 'Gerenciar dados locais',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Gerenciamento de armazenamento estará disponível em breve!',
+            );
           },
         ),
       ],
@@ -249,7 +255,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Central de Ajuda',
           subtitle: 'Perguntas frequentes',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Central de ajuda estará disponível em breve!',
+            );
           },
         ),
         _buildSettingItem(
@@ -257,7 +265,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Contato',
           subtitle: 'Entre em contato conosco',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Contato estará disponível em breve! Por enquanto, use o feedback do app.',
+            );
           },
         ),
         _buildSettingItem(
@@ -288,7 +298,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Termos de Uso',
           subtitle: 'Leia os termos de uso',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Termos de uso estarão disponíveis em breve!',
+            );
           },
         ),
         _buildSettingItem(
@@ -296,7 +308,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Política de Privacidade',
           subtitle: 'Como tratamos seus dados',
           onTap: () {
-            _showSnackBar('Funcionalidade em desenvolvimento');
+            _showSnackBar(
+              'Política de privacidade estará disponível em breve!',
+            );
           },
         ),
       ],

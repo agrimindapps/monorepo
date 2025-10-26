@@ -1,17 +1,24 @@
 import 'package:core/core.dart' hide ConflictResolutionStrategy, Task;
+import 'package:flutter/material.dart';
 
 import '../../features/plants/data/models/plant_model.dart';
+import '../../features/plants/domain/entities/plant.dart';
 import '../../features/tasks/data/models/task_model.dart';
 import '../../features/tasks/domain/entities/task.dart';
+import '../widgets/conflict_resolution_dialog.dart';
 import 'conflict_resolution_strategy.dart';
 
 @injectable
 class ConflictResolver {
   /// Resolve conflito baseado na estratégia definida
-  dynamic resolveConflict(
+  ///
+  /// Para estratégia manual, retorna um Future que será resolvido quando o usuário escolher
+  /// IMPORTANTE: Para estratégia manual, é necessário passar o BuildContext
+  Future<dynamic> resolveConflict(
     ConflictData conflictData, {
     ConflictResolutionStrategy strategy = ConflictResolutionStrategy.newerWins,
-  }) {
+    BuildContext? context,
+  }) async {
     switch (strategy) {
       case ConflictResolutionStrategy.localWins:
         return conflictData.localData;
@@ -22,7 +29,12 @@ class ConflictResolver {
       case ConflictResolutionStrategy.merge:
         return _mergeData(conflictData);
       case ConflictResolutionStrategy.manual:
-        throw UnimplementedError('Resolução manual ainda não implementada');
+        if (context == null) {
+          throw ArgumentError(
+            'BuildContext é obrigatório para resolução manual de conflitos',
+          );
+        }
+        return await _resolveManually(conflictData, context);
     }
   }
 
@@ -111,5 +123,50 @@ class ConflictResolver {
               remoteTask.recurringIntervalDays,
           nextDueDate: localTask.nextDueDate ?? remoteTask.nextDueDate,
         );
+  }
+
+  /// Resolução manual via diálogo interativo
+  /// Mostra diálogo para o usuário escolher qual versão manter
+  Future<dynamic> _resolveManually(
+    ConflictData conflictData,
+    BuildContext context,
+  ) async {
+    // Atualmente, apenas PlantModel tem suporte completo ao diálogo
+    if (conflictData.modelType != 'PlantModel') {
+      // Para outros tipos, usa newerWins como fallback
+      return _resolveNewerWins(conflictData);
+    }
+
+    // PlantModel extends Plant, então podemos fazer cast direto
+    final localPlant = conflictData.localData as Plant;
+    final remotePlant = conflictData.remoteData as Plant;
+
+    // Mostra diálogo e aguarda resolução
+    final result = await showDialog<Plant>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return ConflictResolutionDialog(
+          localVersion: localPlant,
+          remoteVersion: remotePlant,
+          onResolve: (chosenVersion) async {
+            // Retorna a versão escolhida
+            Navigator.of(context).pop(chosenVersion);
+          },
+        );
+      },
+    );
+
+    // Se o usuário fechou o diálogo sem escolher, usa newerWins
+    if (result == null) {
+      return _resolveNewerWins(conflictData);
+    }
+
+    // Determina qual era o modelo original escolhido comparando IDs e timestamps
+    final isLocalChosen = result.id == localPlant.id &&
+        result.name == localPlant.name &&
+        result.updatedAt == localPlant.updatedAt;
+
+    return isLocalChosen ? conflictData.localData : conflictData.remoteData;
   }
 }

@@ -43,7 +43,7 @@ class AppDialogs {
   /// AppDialogs.showComingSoon(
   ///   context, 
   ///   'Configurações de Tema',
-  ///   message: 'Modo escuro em desenvolvimento',
+  ///   message: 'Modo escuro estará disponível em breve!',
   ///   icon: Icons.dark_mode,
   /// );
   /// ```
@@ -75,13 +75,13 @@ class AppDialogs {
           ],
         ),
         content: Semantics(
-          label: 'Mensagem de funcionalidade em desenvolvimento',
+          label: 'Mensagem de funcionalidade em breve',
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                message ?? 'Esta funcionalidade está em desenvolvimento e estará disponível em breve.',
+                message ?? 'Esta funcionalidade estará disponível em breve!',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 16),

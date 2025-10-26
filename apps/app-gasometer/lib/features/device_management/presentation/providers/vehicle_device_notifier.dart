@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
 
 part 'vehicle_device_notifier.g.dart';
@@ -106,13 +107,8 @@ core.DeviceManagementService? deviceManagementService(Ref ref) {
   return null;
 }
 
-/// Provider de dependências: ConnectivityService
-@riverpod
-core.ConnectivityService connectivityService(Ref ref) {
-  throw UnimplementedError('ConnectivityService not configured');
-}
-
 /// Provider de conectividade (stream)
+/// Uses ConnectivityService from dependency_providers.dart (GetIt registered)
 @riverpod
 Stream<bool> connectivityStream(Ref ref) {
   final connectivityService = ref.watch(connectivityServiceProvider);
@@ -120,6 +116,7 @@ Stream<bool> connectivityStream(Ref ref) {
 }
 
 /// Provider de status online
+/// Uses ConnectivityService from dependency_providers.dart (GetIt registered)
 @riverpod
 Future<bool> isOnlineStatus(Ref ref) async {
   final connectivityService = ref.watch(connectivityServiceProvider);

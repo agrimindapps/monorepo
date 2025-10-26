@@ -299,7 +299,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Gráficos em desenvolvimento',
+                      'Gráficos visuais estarão disponíveis em breve!',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],

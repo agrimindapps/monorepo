@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -36,7 +36,28 @@ void main() async {
   // Register custom adapters
   Hive.registerAdapter(ComentariosAdapter());
 
-  // Initialize DI
+  // Initialize Firebase with error handling (BEFORE DI)
+  bool firebaseInitialized = false;
+  FirebaseAnalyticsService? analyticsService;
+  FirebaseCrashlyticsService? crashlyticsService;
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseInitialized = true;
+
+    // Initialize Firebase services from core package
+    analyticsService = FirebaseAnalyticsService();
+    crashlyticsService = FirebaseCrashlyticsService();
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App will continue without Firebase features (local-first mode)');
+    // App continues without Firebase - local storage works independently
+  }
+
+  // Initialize DI (AFTER Firebase)
   await configureDependencies();
 
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
@@ -59,25 +80,17 @@ void main() async {
     // AdMob init() will be called through Riverpod providers when needed
   }
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Initialize Firebase services from core package
-  final analyticsService = FirebaseAnalyticsService();
-  final crashlyticsService = FirebaseCrashlyticsService();
-
   Future.delayed(const Duration(milliseconds: 500), () async {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       await _configureSDK();
     }
   });
 
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+  if (!kIsWeb && firebaseInitialized && (Platform.isAndroid || Platform.isIOS)) {
     runZonedGuarded<Future<void>>(() async {
       runApp(const ProviderScope(child: App()));
     }, (error, stackTrace) {
-      crashlyticsService.recordError(
+      crashlyticsService?.recordError(
         exception: error,
         stackTrace: stackTrace,
         fatal: true,

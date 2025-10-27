@@ -43,25 +43,36 @@ void main() async {
   await CashVsInstallmentLocalDataSourceImplExtension.initialize();
   await UnemploymentInsuranceLocalDataSourceImplExtension.initialize();
 
-  // Initialize DI
-  await configureDependencies();
+  // Initialize Firebase with error handling
+  bool firebaseInitialized = false;
+  FirebaseCrashlyticsService? crashlyticsService;
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseInitialized = true;
 
-  // Initialize Firebase services from core package
-  final crashlyticsService = FirebaseCrashlyticsService();
+    // Initialize Firebase services from core package
+    crashlyticsService = FirebaseCrashlyticsService();
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App will continue without Firebase features (local-first mode)');
+    // App continues without Firebase - local storage works independently
+  }
+
+  // Initialize DI with Firebase status
+  await configureDependencies(firebaseEnabled: firebaseInitialized);
 
   // Run app with error handling for mobile platforms
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+  if (!kIsWeb && firebaseInitialized && (Platform.isAndroid || Platform.isIOS)) {
     runZonedGuarded<Future<void>>(
       () async {
         runApp(const ProviderScope(child: App()));
       },
       (error, stackTrace) {
-        crashlyticsService.recordError(
+        crashlyticsService?.recordError(
           exception: error,
           stackTrace: stackTrace,
           fatal: true,

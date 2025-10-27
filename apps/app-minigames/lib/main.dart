@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:core/core.dart' hide sharedPreferencesProvider;
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -27,18 +27,29 @@ void main() async {
   // Initialize async dependencies for Riverpod providers
   final sharedPrefs = await SharedPreferences.getInstance();
 
-  // Initialize DI (kept for backwards compatibility during migration)
-  await configureDependencies();
+  // Initialize Firebase with error handling
+  bool firebaseInitialized = false;
+  FirebaseCrashlyticsService? crashlyticsService;
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    firebaseInitialized = true;
 
-  // Initialize Firebase services from core package
-  final crashlyticsService = FirebaseCrashlyticsService();
+    // Initialize Firebase services from core package
+    crashlyticsService = FirebaseCrashlyticsService();
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App will continue without Firebase features (local-first mode)');
+    // App continues without Firebase - local storage works independently
+  }
 
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+  // Initialize DI with Firebase status (kept for backwards compatibility during migration)
+  await configureDependencies(firebaseEnabled: firebaseInitialized);
+
+  if (!kIsWeb && firebaseInitialized && (Platform.isAndroid || Platform.isIOS)) {
     runZonedGuarded<Future<void>>(() async {
       runApp(
         ProviderScope(
@@ -50,7 +61,7 @@ void main() async {
         ),
       );
     }, (error, stackTrace) {
-      crashlyticsService.recordError(
+      crashlyticsService?.recordError(
         exception: error,
         stackTrace: stackTrace,
         fatal: true,

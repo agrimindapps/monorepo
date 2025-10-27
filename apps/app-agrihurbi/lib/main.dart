@@ -12,31 +12,47 @@ late ICrashlyticsRepository _crashlyticsRepository;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase with error handling
+  bool firebaseInitialized = false;
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    await di.init();
-    _crashlyticsRepository = di.getIt<ICrashlyticsRepository>();
-    if (!kIsWeb) {
-      FlutterError.onError = (errorDetails) {
-        _crashlyticsRepository.recordError(
-          exception: errorDetails.exception,
-          stackTrace: errorDetails.stack ?? StackTrace.empty,
-          reason: errorDetails.summary.toString(),
-          fatal: true,
-        );
-      };
+    firebaseInitialized = true;
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App will continue without Firebase features (local-first mode)');
+  }
 
-      PlatformDispatcher.instance.onError = (error, stack) {
-        _crashlyticsRepository.recordError(
-          exception: error,
-          stackTrace: stack,
-          fatal: true,
-        );
-        return true;
-      };
+  // Initialize DI with Firebase status (AFTER Firebase)
+  try {
+    await di.init(firebaseEnabled: firebaseInitialized);
+
+    if (firebaseInitialized) {
+      _crashlyticsRepository = di.getIt<ICrashlyticsRepository>();
+      if (!kIsWeb) {
+        FlutterError.onError = (errorDetails) {
+          _crashlyticsRepository.recordError(
+            exception: errorDetails.exception,
+            stackTrace: errorDetails.stack ?? StackTrace.empty,
+            reason: errorDetails.summary.toString(),
+            fatal: true,
+          );
+        };
+
+        PlatformDispatcher.instance.onError = (error, stack) {
+          _crashlyticsRepository.recordError(
+            exception: error,
+            stackTrace: stack,
+            fatal: true,
+          );
+          return true;
+        };
+      }
     }
+
     try {
       print('🔐 MAIN: Initializing account deletion module...');
       AccountDeletionModule.init(di.getIt);
@@ -44,15 +60,20 @@ Future<void> main() async {
     } catch (e) {
       print('❌ MAIN: Account deletion initialization failed: $e');
     }
-    try {
-      print('🔄 MAIN: Forcing AgrihUrbi sync initialization...');
-      AgrihUrbiSyncDIModule.init();
-      await AgrihUrbiSyncDIModule.initializeSyncService();
-      print('✅ MAIN: AgrihUrbi sync initialization completed successfully');
-    } catch (e) {
-      print('❌ MAIN: Sync initialization failed: $e');
+
+    if (firebaseInitialized) {
+      try {
+        print('🔄 MAIN: Forcing AgrihUrbi sync initialization...');
+        AgrihUrbiSyncDIModule.init();
+        await AgrihUrbiSyncDIModule.initializeSyncService();
+        print('✅ MAIN: AgrihUrbi sync initialization completed successfully');
+      } catch (e) {
+        print('❌ MAIN: Sync initialization failed: $e');
+      }
+      await _initializeFirebaseServices();
+    } else {
+      debugPrint('⚠️ Firebase services not initialized - running in local-first mode');
     }
-    await _initializeFirebaseServices();
 
     runApp(const ProviderScope(child: AgriHurbiApp()));
   } catch (error) {

@@ -246,15 +246,15 @@ void configureDependencies() {
 }
 
 /// Legacy initialization function for backward compatibility
-Future<void> init() async {
-  await configureAppDependencies();
+Future<void> init({bool firebaseEnabled = false}) async {
+  await configureAppDependencies(firebaseEnabled: firebaseEnabled);
 }
 
 /// Configure dependencies using @injectable + code generation
 ///
 /// MASSIVE REDUCTION: from 400+ lines to <50 lines!
 /// All @injectable classes are auto-registered by code generation
-Future<void> configureAppDependencies() async {
+Future<void> configureAppDependencies({bool firebaseEnabled = false}) async {
   registerAgrihurbiHiveAdapters();
   getIt.registerSingleton<core_lib.IBoxRegistryService>(
     core_lib.BoxRegistryService(),
@@ -262,21 +262,38 @@ Future<void> configureAppDependencies() async {
   getIt.registerSingleton<core_lib.HiveStorageService>(
     core_lib.HiveStorageService(getIt<core_lib.IBoxRegistryService>()),
   );
-  getIt.registerSingleton<core_lib.FirebaseAuthService>(
-    core_lib.FirebaseAuthService(),
-  );
+
+  // Register Firebase services only if Firebase is initialized
+  if (firebaseEnabled) {
+    try {
+      getIt.registerSingleton<core_lib.FirebaseAuthService>(
+        core_lib.FirebaseAuthService(),
+      );
+      getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(
+        core_lib.FirebaseAnalyticsService(),
+      );
+      debugPrint('Firebase services registered in DI');
+    } catch (e) {
+      debugPrint('Failed to register Firebase services: $e');
+    }
+  } else {
+    debugPrint('Firebase services not registered (running in local-only mode)');
+  }
+
+  // Register RevenueCat service (doesn't require Firebase)
   getIt.registerSingleton<core_lib.RevenueCatService>(
     core_lib.RevenueCatService(),
   );
-  getIt.registerSingleton<core_lib.FirebaseAnalyticsService>(
-    core_lib.FirebaseAnalyticsService(),
-  );
-  getIt.registerSingleton(
-    PremiumService(
-      getIt<core_lib.RevenueCatService>(),
-      getIt<core_lib.FirebaseAnalyticsService>(),
-    ),
-  );
+
+  // Register PremiumService conditionally based on Firebase availability
+  if (firebaseEnabled && getIt.isRegistered<core_lib.FirebaseAnalyticsService>()) {
+    getIt.registerSingleton(
+      PremiumService(
+        getIt<core_lib.RevenueCatService>(),
+        getIt<core_lib.FirebaseAnalyticsService>(),
+      ),
+    );
+  }
   getIt.registerSingleton<Connectivity>(Connectivity());
   getIt.registerSingleton<NetworkInfo>(NetworkInfoImpl(getIt<Connectivity>()));
   getIt.registerSingleton<Dio>(Dio());

@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/data_export/data/datasources/local/export_file_generator.dart';
@@ -59,9 +60,9 @@ import 'modules/tasks_module.dart';
 
 final sl = GetIt.instance;
 
-Future<void> init() async {
+Future<void> init({bool firebaseEnabled = false}) async {
   await _initExternal();
-  _initCoreServices();
+  _initCoreServices(firebaseEnabled: firebaseEnabled);
   await injectable.configureDependencies();
   _initAuth();
   _initAccount();
@@ -83,20 +84,31 @@ Future<void> _initExternal() async {
   sl.registerLazySingleton(() => sharedPreferences);
 }
 
-void _initCoreServices() {
-  sl.registerLazySingleton(() => FirebaseFirestore.instance);
-  sl.registerLazySingleton(() => FirebaseFunctions.instance);
+void _initCoreServices({bool firebaseEnabled = false}) {
+  // Register Firebase services only if Firebase is initialized
+  if (firebaseEnabled) {
+    try {
+      sl.registerLazySingleton(() => FirebaseFirestore.instance);
+      sl.registerLazySingleton(() => FirebaseFunctions.instance);
+      sl.registerLazySingleton<IAuthRepository>(
+        () => PlantisSecurityConfig.createEnhancedAuthService(),
+      );
+      sl.registerLazySingleton<IAnalyticsRepository>(
+        () => FirebaseAnalyticsService(),
+      );
+      sl.registerLazySingleton<ICrashlyticsRepository>(
+        () => FirebaseCrashlyticsService(),
+      );
+      debugPrint('Firebase services registered in DI');
+    } catch (e) {
+      debugPrint('Failed to register Firebase services: $e');
+    }
+  } else {
+    debugPrint('Firebase services not registered (running in local-only mode)');
+  }
+
   sl.registerLazySingleton<NetworkInfo>(
     () => NetworkInfoAdapter(sl<ConnectivityService>()),
-  );
-  sl.registerLazySingleton<IAuthRepository>(
-    () => PlantisSecurityConfig.createEnhancedAuthService(),
-  );
-  sl.registerLazySingleton<IAnalyticsRepository>(
-    () => FirebaseAnalyticsService(),
-  );
-  sl.registerLazySingleton<ICrashlyticsRepository>(
-    () => FirebaseCrashlyticsService(),
   );
   sl.registerLazySingleton<IPerformanceRepository>(
     () => _StubPerformanceRepository(),
@@ -130,7 +142,7 @@ void _initCoreServices() {
       remindLaunches: AppConstants.appRatingRemindLaunches,
     ),
   );
-  sl.registerLazySingleton(() => RateLimiterService());
+  // RateLimiterService is registered via @injectable in injection.config.dart
   sl.registerLazySingleton(() => PlantisNotificationService());
   sl.registerLazySingleton(() => TaskNotificationService());
   sl.registerLazySingleton(() => NotificationManager());

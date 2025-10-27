@@ -17,10 +17,8 @@ class ConnectivityModule implements DIModule {
 
   Future<void> _registerConnectivityServices(GetIt getIt) async {
     try {
-      // Register ConnectivityService from core package (singleton)
-      getIt.registerLazySingleton<ConnectivityService>(
-        () => ConnectivityService.instance,
-      );
+      // Note: ConnectivityService is registered via @injectable in injection.config.dart
+      // Commenting out manual registration to avoid duplicate registration error
 
       // Register ConnectivityStateManager for state persistence
       getIt.registerLazySingleton<ConnectivityStateManager>(

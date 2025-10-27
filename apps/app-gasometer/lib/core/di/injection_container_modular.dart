@@ -20,14 +20,14 @@ class ModularInjectionContainer {
   static GetIt get instance => _getIt;
 
   /// Initialize all dependencies using modular approach
-  static Future<void> init() async {
+  static Future<void> init({bool firebaseEnabled = false}) async {
     try {
       print('🚀 Starting GasOMeter dependency initialization...');
       print('📦 Initializing Hive...');
       await HiveService.instance.init();
       print('✅ Hive initialized');
       print('📦 Registering core modules...');
-      final modules = _createModules();
+      final modules = _createModules(firebaseEnabled: firebaseEnabled);
       for (final module in modules) {
         await module.register(_getIt);
       }
@@ -51,9 +51,9 @@ class ModularInjectionContainer {
   /// Create list of modules in dependency order
   ///
   /// Follows Dependency Inversion Principle - high level depends on abstraction
-  static List<DIModule> _createModules() {
+  static List<DIModule> _createModules({bool firebaseEnabled = false}) {
     return [
-      CoreModule(), // External services and core infrastructure
+      CoreModule(firebaseEnabled: firebaseEnabled), // External services and core infrastructure
       ConnectivityModule(), // Connectivity monitoring services
     ];
   }
@@ -80,6 +80,6 @@ final sl = ModularInjectionContainer.instance;
 /// Legacy initialization function - delegates to modular container
 ///
 /// Maintains backward compatibility during Phase 1
-Future<void> init() async {
-  await ModularInjectionContainer.init();
+Future<void> init({bool firebaseEnabled = false}) async {
+  await ModularInjectionContainer.init(firebaseEnabled: firebaseEnabled);
 }

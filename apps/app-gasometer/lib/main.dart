@@ -18,41 +18,67 @@ late AutoSyncService _autoSyncService;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase with error handling
+  bool firebaseInitialized = false;
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    await initializeDateFormatting('pt_BR', null);
-    await di.init();
-    _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
-    if (!kIsWeb) {
-      FlutterError.onError = (errorDetails) {
-        _crashlyticsRepository.recordError(
-          exception: errorDetails.exception,
-          stackTrace: errorDetails.stack ?? StackTrace.empty,
-          reason: errorDetails.summary.toString(),
-          fatal: true,
-        );
-      };
+    firebaseInitialized = true;
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App will continue without Firebase features (local-first mode)');
+  }
 
-      PlatformDispatcher.instance.onError = (error, stack) {
-        _crashlyticsRepository.recordError(
-          exception: error,
-          stackTrace: stack,
-          fatal: true,
-        );
-        return true;
-      };
+  try {
+    await initializeDateFormatting('pt_BR', null);
+    await di.init(firebaseEnabled: firebaseInitialized);
+
+    if (firebaseInitialized) {
+      _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
+
+      if (!kIsWeb) {
+        FlutterError.onError = (errorDetails) {
+          _crashlyticsRepository.recordError(
+            exception: errorDetails.exception,
+            stackTrace: errorDetails.stack ?? StackTrace.empty,
+            reason: errorDetails.summary.toString(),
+            fatal: true,
+          );
+        };
+
+        PlatformDispatcher.instance.onError = (error, stack) {
+          _crashlyticsRepository.recordError(
+            exception: error,
+            stackTrace: stack,
+            fatal: true,
+          );
+          return true;
+        };
+      }
     }
-    if (kDebugMode) {
-      print('🔄 Initializing GasometerSyncConfig (development mode)...');
-      await GasometerSyncConfig.configureDevelopment();
-      print('✅ GasometerSyncConfig initialized successfully');
+
+    // Sync config only if Firebase is available
+    if (firebaseInitialized) {
+      if (kDebugMode) {
+        print('🔄 Initializing GasometerSyncConfig (development mode)...');
+        await GasometerSyncConfig.configureDevelopment();
+        print('✅ GasometerSyncConfig initialized successfully');
+      } else {
+        await GasometerSyncConfig.configure();
+      }
+      await SyncDIModule.initializeSyncService(di.sl);
     } else {
-      await GasometerSyncConfig.configure();
+      debugPrint('⚠️ Sync services not initialized - running in local-only mode');
     }
-    await SyncDIModule.initializeSyncService(di.sl);
-    await _initializeFirebaseServices();
+
+    if (firebaseInitialized) {
+      await _initializeFirebaseServices();
+    } else {
+      debugPrint('⚠️ Firebase services not initialized - running in local-first mode');
+    }
+
     await _initializeConnectivityMonitoring();
     await _initializeAutoSync();
 
@@ -145,14 +171,17 @@ Future<void> _initializeConnectivityMonitoring() async {
     debugPrint('✅ Connectivity monitoring initialized successfully');
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing connectivity monitoring: $e');
-    try {
-      await _crashlyticsRepository.recordError(
-        exception: e,
-        stackTrace: stackTrace,
-        reason: 'Connectivity monitoring initialization failed',
-      );
-    } catch (_) {
-      // Fail silently - app can still work without connectivity monitoring
+    // Only try to record error if crashlytics is available
+    if (di.sl.isRegistered<ICrashlyticsRepository>()) {
+      try {
+        await _crashlyticsRepository.recordError(
+          exception: e,
+          stackTrace: stackTrace,
+          reason: 'Connectivity monitoring initialization failed',
+        );
+      } catch (_) {
+        // Fail silently - app can still work without connectivity monitoring
+      }
     }
   }
 }
@@ -171,14 +200,17 @@ Future<void> _initializeAutoSync() async {
     debugPrint('✅ Auto-sync service initialized successfully');
   } catch (e, stackTrace) {
     debugPrint('❌ Error initializing auto-sync service: $e');
-    try {
-      await _crashlyticsRepository.recordError(
-        exception: e,
-        stackTrace: stackTrace,
-        reason: 'Auto-sync service initialization failed',
-      );
-    } catch (_) {
-      // Fail silently - app can still work without auto-sync
+    // Only try to record error if crashlytics is available
+    if (di.sl.isRegistered<ICrashlyticsRepository>()) {
+      try {
+        await _crashlyticsRepository.recordError(
+          exception: e,
+          stackTrace: stackTrace,
+          reason: 'Auto-sync service initialization failed',
+        );
+      } catch (_) {
+        // Fail silently - app can still work without auto-sync
+      }
     }
   }
 }

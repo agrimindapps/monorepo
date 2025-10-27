@@ -28,11 +28,26 @@ final plantisSharedPreferencesProvider = Provider<SharedPreferences>((ref) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Skip orientation lock on web
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  // Initialize Firebase with error handling
+  bool firebaseInitialized = false;
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    firebaseInitialized = true;
+    debugPrint('Firebase initialized successfully');
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('App will continue without Firebase features (local-first mode)');
+  }
+
   await Hive.initFlutter();
   Hive.registerAdapter(LicenseModelAdapter()); // TypeId: 10
   Hive.registerAdapter(LicenseTypeAdapter()); // TypeId: 11
@@ -40,7 +55,8 @@ void main() async {
   // Run schema migrations
   await HiveSchemaManager.migrate();
 
-  await di.init();
+  await di.init(firebaseEnabled: firebaseInitialized);
+
   // Initialize SyncQueue before other sync services
   final syncQueue = di.sl<local_sync.SyncQueue>();
   await syncQueue.initialize();
@@ -52,17 +68,31 @@ void main() async {
   );
   await PlantisBoxesSetup.registerPlantisBoxes();
 
-  // Initialize UnifiedSyncManager with Plantis configuration
-  await PlantisSyncConfig.configure();
+  // Initialize UnifiedSyncManager with Plantis configuration (only if Firebase is available)
+  if (firebaseInitialized) {
+    await PlantisSyncConfig.configure();
 
-  final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
-  await simpleSubscriptionSyncService.initialize();
-  final notificationService = PlantisNotificationService();
-  await notificationService.initialize();
+    final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
+    await simpleSubscriptionSyncService.initialize();
+    await SyncDIModule.initializeSyncService(di.sl);
+  } else {
+    debugPrint('⚠️ Sync services not initialized - running in local-only mode');
+  }
+
+  // Notification service can work without Firebase
+  if (!kIsWeb) {
+    final notificationService = PlantisNotificationService();
+    await notificationService.initialize();
+  }
+
   final appRatingService = di.sl<IAppRatingRepository>();
   await appRatingService.incrementUsageCount();
-  await SyncDIModule.initializeSyncService(di.sl);
-  await _initializeFirebaseServices();
+
+  if (firebaseInitialized) {
+    await _initializeFirebaseServices();
+  } else {
+    debugPrint('⚠️ Firebase services not initialized - running in local-first mode');
+  }
   final prefs = await SharedPreferences.getInstance();
   if (EnvironmentConfig.enableAnalytics) {
     runZonedGuarded<Future<void>>(

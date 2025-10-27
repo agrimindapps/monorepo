@@ -10,6 +10,10 @@ import '../di_module.dart';
 /// Follows SRP: Single responsibility of core services registration
 /// Follows OCP: Open for extension via DI module interface
 class CoreModule implements DIModule {
+  final bool firebaseEnabled;
+
+  CoreModule({this.firebaseEnabled = false});
+
   @override
   Future<void> register(GetIt getIt) async {
     await _registerExternalServices(getIt);
@@ -17,51 +21,61 @@ class CoreModule implements DIModule {
   }
 
   Future<void> _registerExternalServices(GetIt getIt) async {
-    try {
-      getIt.registerLazySingleton<core.IAuthRepository>(
-        () => core.FirebaseAuthService(),
-      );
+    // Register Firebase services only if Firebase is initialized
+    if (firebaseEnabled) {
+      try {
+        getIt.registerLazySingleton<core.IAuthRepository>(
+          () => core.FirebaseAuthService(),
+        );
 
-      getIt.registerLazySingleton<core.IAnalyticsRepository>(
-        () => core.FirebaseAnalyticsService(),
-      );
+        getIt.registerLazySingleton<core.IAnalyticsRepository>(
+          () => core.FirebaseAnalyticsService(),
+        );
 
-      getIt.registerLazySingleton<core.ICrashlyticsRepository>(
-        () => core.FirebaseCrashlyticsService(),
-      );
+        getIt.registerLazySingleton<core.ICrashlyticsRepository>(
+          () => core.FirebaseCrashlyticsService(),
+        );
 
-      getIt.registerLazySingleton<core.IPerformanceRepository>(
-        () => core.PerformanceService(),
-      );
-      getIt.registerLazySingleton<core.EnhancedAnalyticsService>(
-        () => core.EnhancedAnalyticsService(
-          analytics: getIt<core.IAnalyticsRepository>(),
-          crashlytics: getIt<core.ICrashlyticsRepository>(),
-          config: core.AnalyticsConfig.forApp(
-            appId: 'gasometer',
-            version: '1.0.0',
+        getIt.registerLazySingleton<core.IPerformanceRepository>(
+          () => core.PerformanceService(),
+        );
+        getIt.registerLazySingleton<core.EnhancedAnalyticsService>(
+          () => core.EnhancedAnalyticsService(
+            analytics: getIt<core.IAnalyticsRepository>(),
+            crashlytics: getIt<core.ICrashlyticsRepository>(),
+            config: core.AnalyticsConfig.forApp(
+              appId: 'gasometer',
+              version: '1.0.0',
+            ),
           ),
-        ),
-      );
+        );
 
-      debugPrint('✅ Core package repositories registered successfully');
-    } catch (e) {
-      debugPrint('⚠️ Warning: Could not register core repositories: $e');
+        debugPrint('✅ Core package repositories registered successfully');
+      } catch (e) {
+        debugPrint('⚠️ Warning: Could not register core repositories: $e');
+      }
+    } else {
+      debugPrint('⚠️ Firebase services not registered (running in local-only mode)');
     }
   }
 
   Future<void> _registerCoreServices(GetIt getIt) async {
     try {
-      getIt.registerLazySingleton<core.FirebaseDeviceService>(
-        () => core.FirebaseDeviceService(),
-      );
-      getIt.registerLazySingleton<core.FirebaseAuthService>(
-        () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
-      );
-      getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
-        () =>
-            getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
-      );
+      // Firebase-dependent services
+      if (firebaseEnabled) {
+        getIt.registerLazySingleton<core.FirebaseDeviceService>(
+          () => core.FirebaseDeviceService(),
+        );
+        getIt.registerLazySingleton<core.FirebaseAuthService>(
+          () => getIt<core.IAuthRepository>() as core.FirebaseAuthService,
+        );
+        getIt.registerLazySingleton<core.FirebaseAnalyticsService>(
+          () =>
+              getIt<core.IAnalyticsRepository>() as core.FirebaseAnalyticsService,
+        );
+      }
+
+      // RevenueCat and local services (don't require Firebase)
       getIt.registerLazySingleton<core.ISubscriptionRepository>(
         () => core.RevenueCatService(),
       );

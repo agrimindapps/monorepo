@@ -45,29 +45,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAelydNE5UxgLC0Vr1moK-FRs5tBcusvhk',
-    appId: '1:552417998440:web:74eb360b86da8a98d36ddd',
-    messagingSenderId: '552417998440',
-    projectId: 'calculei-52e71',
-    authDomain: 'calculei-52e71.firebaseapp.com',
-    storageBucket: 'calculei-52e71.firebasestorage.app',
-    measurementId: 'G-FSBN29NSHC',
+    apiKey: 'AIzaSyBpNH66zlN5aslCFzZI-PVjcC3YK2i6LV0',
+    appId: '1:160272216420:web:b7b7f3e318c94107b20a71',
+    messagingSenderId: '160272216420',
+    projectId: 'compendio-de-racas',
+    authDomain: 'compendio-de-racas.firebaseapp.com',
+    storageBucket: 'compendio-de-racas.firebasestorage.app',
+    measurementId: 'G-5XPCTV6EZX',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB5YiNGjFwu5r71u6a2jXOQTGsw1jsrHYk',
-    appId: '1:552417998440:android:7dec9c69def30940d36ddd',
-    messagingSenderId: '552417998440',
-    projectId: 'calculei-52e71',
-    storageBucket: 'calculei-52e71.firebasestorage.app',
+    apiKey: 'AIzaSyANKIv4gps07OmftEDf-XwMHhvu-xreLNk',
+    appId: '1:160272216420:android:d6eea68c08fccd9eb20a71',
+    messagingSenderId: '160272216420',
+    projectId: 'compendio-de-racas',
+    storageBucket: 'compendio-de-racas.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBQsXkFoLVLisS6Ja_8C5ZukLPRi6sEh-g',
-    appId: '1:552417998440:ios:66c575640f9d394ed36ddd',
-    messagingSenderId: '552417998440',
-    projectId: 'calculei-52e71',
-    storageBucket: 'calculei-52e71.firebasestorage.app',
-    iosBundleId: 'br.com.agrimind.petiveti',
+    apiKey: 'AIzaSyAzQH2cZ8ymfGY0ryfqYo4SPFz--2DSbS8',
+    appId: '1:160272216420:ios:45e169d2d31c1d0eb20a71',
+    messagingSenderId: '160272216420',
+    projectId: 'compendio-de-racas',
+    storageBucket: 'compendio-de-racas.firebasestorage.app',
+    iosBundleId: 'br.com.agrimind.racasdecachorros',
   );
+
 }

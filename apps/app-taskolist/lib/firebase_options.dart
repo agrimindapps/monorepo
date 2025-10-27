@@ -45,29 +45,29 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAelydNE5UxgLC0Vr1moK-FRs5tBcusvhk',
-    appId: '1:552417998440:web:74eb360b86da8a98d36ddd',
-    messagingSenderId: '552417998440',
-    projectId: 'calculei-52e71',
-    authDomain: 'calculei-52e71.firebaseapp.com',
-    storageBucket: 'calculei-52e71.firebasestorage.app',
-    measurementId: 'G-FSBN29NSHC',
+    apiKey: 'AIzaSyDhfNcx1cu8UvSzYtgA5nbeKGu23lFwou8',
+    appId: '1:660468746247:web:522876f2d42ef4904682a2',
+    messagingSenderId: '660468746247',
+    projectId: 'termos-tecnicos',
+    authDomain: 'termos-tecnicos.firebaseapp.com',
+    storageBucket: 'termos-tecnicos.firebasestorage.app',
+    measurementId: 'G-JKT34KP4CE',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB5YiNGjFwu5r71u6a2jXOQTGsw1jsrHYk',
-    appId: '1:552417998440:android:7dec9c69def30940d36ddd',
-    messagingSenderId: '552417998440',
-    projectId: 'calculei-52e71',
-    storageBucket: 'calculei-52e71.firebasestorage.app',
+    apiKey: 'AIzaSyCYXFJ3fBtNBcMy2ij484nB3TteJsYOtCY',
+    appId: '1:660468746247:android:d6ecccbeb0590a494682a2',
+    messagingSenderId: '660468746247',
+    projectId: 'termos-tecnicos',
+    storageBucket: 'termos-tecnicos.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBQsXkFoLVLisS6Ja_8C5ZukLPRi6sEh-g',
-    appId: '1:552417998440:ios:66c575640f9d394ed36ddd',
-    messagingSenderId: '552417998440',
-    projectId: 'calculei-52e71',
-    storageBucket: 'calculei-52e71.firebasestorage.app',
+    apiKey: 'AIzaSyBxvPEvnxes8aXxXajWhEHAbpOC9_Z8pEY',
+    appId: '1:660468746247:ios:ee0b82066d929d0f4682a2',
+    messagingSenderId: '660468746247',
+    projectId: 'termos-tecnicos',
+    storageBucket: 'termos-tecnicos.firebasestorage.app',
     iosBundleId: 'br.com.agrimind.winfinancas',
   );
 

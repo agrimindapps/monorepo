@@ -67,7 +67,7 @@ class ShadcnStyle {
   }
 
   static Color background(BuildContext context) {
-    return Theme.of(context).colorScheme.background;
+    return Theme.of(context).colorScheme.surface;
   }
 
   static Color error(BuildContext context) {
@@ -87,7 +87,7 @@ class ShadcnStyle {
   }
 
   static Color onBackground(BuildContext context) {
-    return Theme.of(context).colorScheme.onBackground;
+    return Theme.of(context).colorScheme.onSurface;
   }
 
   static Color onError(BuildContext context) {

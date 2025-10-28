@@ -116,7 +116,7 @@ class _CategoriaDropdown extends ConsumerWidget {
     final notifier = ref.read(exercicioFormNotifierProvider.notifier);
 
     return DropdownButtonFormField<String>(
-      value: state.selectedCategoria,
+      initialValue: state.selectedCategoria,
       decoration: const InputDecoration(
         labelText: 'Categoria',
         border: OutlineInputBorder(),
@@ -145,7 +145,7 @@ class _ExercicioDropdown extends ConsumerWidget {
     final notifier = ref.read(exercicioFormNotifierProvider.notifier);
 
     return DropdownButtonFormField<Map<String, dynamic>>(
-      value: state.exercicioSelecionado,
+      initialValue: state.exercicioSelecionado,
       decoration: const InputDecoration(
         labelText: 'Tipo de Exercício',
         border: OutlineInputBorder(),

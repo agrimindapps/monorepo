@@ -76,7 +76,7 @@ extension ThemeManagerExtension on BuildContext {
   Color get secondaryColor => Theme.of(this).colorScheme.secondary;
 
   /// Background color
-  Color get backgroundColor => Theme.of(this).colorScheme.background;
+  Color get backgroundColor => Theme.of(this).colorScheme.surface;
 
   /// Surface color
   Color get surfaceColor => Theme.of(this).colorScheme.surface;
@@ -91,7 +91,7 @@ extension ThemeManagerExtension on BuildContext {
   Color get onSecondaryColor => Theme.of(this).colorScheme.onSecondary;
 
   /// On Background color
-  Color get onBackgroundColor => Theme.of(this).colorScheme.onBackground;
+  Color get onBackgroundColor => Theme.of(this).colorScheme.onSurface;
 
   /// On Surface color
   Color get onSurfaceColor => Theme.of(this).colorScheme.onSurface;

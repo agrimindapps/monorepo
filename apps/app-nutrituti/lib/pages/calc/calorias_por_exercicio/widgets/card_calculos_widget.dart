@@ -122,7 +122,7 @@ class CardCalculosWidget extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: controller.atividadeSelecionada.id,
+          initialValue: controller.atividadeSelecionada.id,
           isExpanded: true,
           items: controller.atividades.map((AtividadeFisicaModel item) {
             return DropdownMenuItem<int>(

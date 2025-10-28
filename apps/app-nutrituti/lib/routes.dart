@@ -2,8 +2,6 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import '../core/pages/in_app_purchase_page.dart';
-import 'app-page.dart';
 import 'pages/agua/beber_agua_page.dart';
 import 'pages/alimentos_page.dart';
 import 'pages/calc/alcool_sangue/index.dart';

@@ -130,7 +130,7 @@ class MassaCorporeaForm extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           prefixIcon: Icon(Icons.person_outline),
         ),
-        value: controller.generoSelecionado,
+        initialValue: controller.generoSelecionado,
         items: controller.generos.map((genero) {
           return DropdownMenuItem<int>(
             value: genero['id'] as int,

@@ -130,7 +130,7 @@ class ProteinasDiariasForm extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: model.nivelAtividade,
+          initialValue: model.nivelAtividade,
           items: model.niveisAtividade.map((String nivel) {
             return DropdownMenuItem<String>(
               value: nivel,

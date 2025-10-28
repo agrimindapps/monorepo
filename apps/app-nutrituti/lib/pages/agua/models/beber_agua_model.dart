@@ -8,6 +8,18 @@ part 'beber_agua_model.g.dart';
 
 @HiveType(typeId: 51)
 class BeberAgua extends BaseModel {
+  @HiveField(0)
+  @override
+  final String? id;
+
+  @HiveField(1)
+  @override
+  final DateTime? createdAt;
+
+  @HiveField(2)
+  @override
+  final DateTime? updatedAt;
+
   @HiveField(7)
   int dataRegistro;
 
@@ -15,16 +27,20 @@ class BeberAgua extends BaseModel {
   double quantidade;
 
   @HiveField(9)
-  String fkIdPerfil;
+  final String fkIdPerfil;
 
   BeberAgua({
-    required super.id,
-    required super.createdAt,
-    required super.updatedAt,
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
     required this.dataRegistro,
     required this.quantidade,
     required this.fkIdPerfil,
-  });
+  }) : super(
+          id: id,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        );
 
   @override
   Map<String, dynamic> toMap() {

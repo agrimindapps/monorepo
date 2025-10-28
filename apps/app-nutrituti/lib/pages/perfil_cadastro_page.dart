@@ -180,7 +180,7 @@ class _CadastroPerfilPageState extends State<CadastroPerfilPage> {
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<int>(
-                    value: _localPerfil.genero,
+                    initialValue: _localPerfil.genero,
                     decoration: const InputDecoration(labelText: 'Gênero'),
                     items: const [
                       DropdownMenuItem(value: 0, child: Text('Masculino')),

@@ -147,12 +147,8 @@ ThemeData darkTheme = ThemeData(
     systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: const Color.fromRGBO(
           29, 29, 37, 1), // Barra de status escura consistente
-      statusBarIconBrightness: kIsWeb
-          ? Brightness.light
-          : Brightness.light,
-      statusBarBrightness: kIsWeb
-          ? Brightness.light
-          : Brightness.light,
+      statusBarIconBrightness: kIsWeb ? Brightness.light : Brightness.light,
+      statusBarBrightness: kIsWeb ? Brightness.light : Brightness.light,
       systemNavigationBarColor: const Color.fromRGBO(38, 41, 46, 1),
       systemNavigationBarDividerColor:
           Colors.transparent, // Divisor transparente para consistência

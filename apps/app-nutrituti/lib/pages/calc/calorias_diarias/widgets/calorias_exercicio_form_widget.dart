@@ -169,7 +169,7 @@ class _CaloriasExercicioFormWidgetState
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: widget.controller.atividadeSelecionada,
+          initialValue: widget.controller.atividadeSelecionada,
           isExpanded: true,
           items: widget.controller.atividades.map((item) {
             return DropdownMenuItem<ExercicioModel>(

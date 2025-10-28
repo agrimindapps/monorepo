@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
-import '../../../core/services/firebase_analytics_service.dart';
 import '../../../core/services/ganalytics_service.dart';
 import '../../const/environment_const.dart';
 

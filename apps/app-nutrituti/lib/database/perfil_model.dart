@@ -8,6 +8,18 @@ part 'perfil_model.g.dart';
 
 @HiveType(typeId: 52)
 class PerfilModel extends BaseModel {
+  @HiveField(0)
+  @override
+  final String? id;
+
+  @HiveField(1)
+  @override
+  final DateTime? createdAt;
+
+  @HiveField(2)
+  @override
+  final DateTime? updatedAt;
+
   @HiveField(7)
   final String nome;
 
@@ -27,16 +39,20 @@ class PerfilModel extends BaseModel {
   final String? imagePath;
 
   const PerfilModel({
-    super.id,
-    super.createdAt,
-    super.updatedAt,
+    this.id,
+    this.createdAt,
+    this.updatedAt,
     required this.nome,
     required this.datanascimento,
     required this.altura,
     required this.peso,
     required this.genero,
     this.imagePath,
-  });
+  }) : super(
+          id: id,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        );
 
   @override
   Map<String, dynamic> toMap() {

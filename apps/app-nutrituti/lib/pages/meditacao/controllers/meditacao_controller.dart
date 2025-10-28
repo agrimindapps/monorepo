@@ -2,16 +2,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
 // Project imports:
-import '../constants/meditacao_constants.dart';
-import '../models/meditacao_achievement_model.dart';
-import '../models/meditacao_model.dart';
-import '../models/meditacao_stats_model.dart';
 import '../repository/meditacao_repository.dart';
-import '../services/meditacao_logger_service.dart';
 
 /// DEPRECATED: This GetX controller has been replaced by Riverpod providers
 /// See: lib/pages/meditacao/providers/meditacao_provider.dart

@@ -711,7 +711,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: AppColors.contentColorCyan,
+        activeThumbColor: AppColors.contentColorCyan,
       ),
     );
   }

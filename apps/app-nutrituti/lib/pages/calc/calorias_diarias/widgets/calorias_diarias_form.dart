@@ -124,7 +124,7 @@ class CaloriasDiariasForm extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: controller.model.generoSelecionado,
+          initialValue: controller.model.generoSelecionado,
           items: CaloriasDiariasController.generos.map((item) {
             return DropdownMenuItem<int>(
               value: item['id'] as int?,
@@ -172,7 +172,7 @@ class CaloriasDiariasForm extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: controller.model.atividadeSelecionada,
+          initialValue: controller.model.atividadeSelecionada,
           items: CaloriasDiariasController.atividades.map((item) {
             return DropdownMenuItem<int>(
               value: item['id'] as int?,

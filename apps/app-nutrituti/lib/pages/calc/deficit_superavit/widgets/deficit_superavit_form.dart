@@ -219,7 +219,7 @@ class DeficitSuperavitForm extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: tipoMetaSelecionado,
+          initialValue: tipoMetaSelecionado,
           items: _tiposMeta.map((tipo) {
             return DropdownMenuItem<int>(
               value: tipo['id'] as int,

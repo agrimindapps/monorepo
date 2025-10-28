@@ -171,7 +171,7 @@ class MacronutrientesFormWidget extends StatelessWidget {
         color: isDark ? color.withValues(alpha: 0.8) : color,
       ),
       inputFormatters: [mainController.model.porcentagemmask],
-      onChanged: (_) => null, // Removido o notifyListeners direto
+      onChanged: (_) {}, // Removido o notifyListeners direto
     );
   }
 

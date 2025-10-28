@@ -9,7 +9,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import '../../core/pages/in_app_purchase_page.dart';
-import '../../core/widgets/admob/ads_rewarded_widget.dart';
 import '../../core/widgets/feedback_config_option_widget.dart';
 import '../const/environment_const.dart';
 import '../routes.dart';

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../pages/mobile_page.dart';
-import '../../pages/desktop_page.dart';
 
 // Global navigator key for dialogs, snackbars, etc.
 final rootNavigatorKey = GlobalKey<NavigatorState>();

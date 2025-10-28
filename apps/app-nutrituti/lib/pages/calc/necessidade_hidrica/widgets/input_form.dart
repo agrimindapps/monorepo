@@ -67,7 +67,7 @@ class NecessidadeHidricaInputForm extends StatelessWidget {
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
-        value: model.nivelAtividadeSelecionado,
+        initialValue: model.nivelAtividadeSelecionado,
         items: model.niveisAtividade.map((nivel) {
           return DropdownMenuItem<int>(
             value: nivel['id'] as int,
@@ -90,7 +90,7 @@ class NecessidadeHidricaInputForm extends StatelessWidget {
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
-        value: model.climaSelecionado,
+        initialValue: model.climaSelecionado,
         items: model.tiposClima.map((clima) {
           return DropdownMenuItem<int>(
             value: clima['id'] as int,

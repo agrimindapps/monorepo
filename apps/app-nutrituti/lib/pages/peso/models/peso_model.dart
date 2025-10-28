@@ -8,6 +8,18 @@ part 'peso_model.g.dart';
 
 @HiveType(typeId: 53)
 class PesoModel extends BaseModel {
+  @HiveField(0)
+  @override
+  final String? id;
+
+  @HiveField(1)
+  @override
+  final DateTime? createdAt;
+
+  @HiveField(2)
+  @override
+  final DateTime? updatedAt;
+
   @HiveField(7)
   int dataRegistro;
 
@@ -15,20 +27,24 @@ class PesoModel extends BaseModel {
   double peso;
 
   @HiveField(9)
-  String fkIdPerfil;
+  final String fkIdPerfil;
 
   @HiveField(10)
-  bool isDeleted;
+  final bool isDeleted;
 
   PesoModel({
-    required super.id,
-    required super.createdAt,
-    required super.updatedAt,
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
     required this.dataRegistro,
     required this.peso,
     required this.fkIdPerfil,
     this.isDeleted = false,
-  });
+  }) : super(
+          id: id,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        );
 
   @override
   Map<String, dynamic> toMap() {

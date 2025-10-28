@@ -8,6 +8,18 @@ part 'comentarios_models.g.dart';
 
 @HiveType(typeId: 50)
 class Comentarios extends BaseModel {
+  @HiveField(0)
+  @override
+  final String? id;
+
+  @HiveField(1)
+  @override
+  final DateTime? createdAt;
+
+  @HiveField(2)
+  @override
+  final DateTime? updatedAt;
+
   @HiveField(7)
   final String titulo;
 
@@ -21,14 +33,18 @@ class Comentarios extends BaseModel {
   final String pkIdentificador;
 
   const Comentarios({
-    super.id,
-    super.createdAt,
-    super.updatedAt,
+    this.id,
+    this.createdAt,
+    this.updatedAt,
     required this.titulo,
     required this.conteudo,
     required this.ferramenta,
     required this.pkIdentificador,
-  });
+  }) : super(
+          id: id,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        );
 
   @override
   Map<String, dynamic> toMap() {

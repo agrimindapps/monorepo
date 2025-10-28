@@ -7,7 +7,6 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
-import '../../core/services/firebase_analytics_service.dart';
 import '../../core/services/ganalytics_service.dart';
 import '../const/environment_const.dart';
 import '../repository/alimentos_repository.dart';

@@ -118,7 +118,7 @@ class PesoIdealForm extends StatelessWidget {
                 const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
           ),
           dropdownColor: isDark ? const Color(0xFF303030) : Colors.white,
-          value: controller.model.generoDef['id'] as int,
+          initialValue: controller.model.generoDef['id'] as int,
           items: controller.model.generos.map((item) {
             return DropdownMenuItem<int>(
               value: item['id'] as int,

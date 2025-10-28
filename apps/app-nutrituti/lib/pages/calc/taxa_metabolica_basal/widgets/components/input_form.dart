@@ -25,7 +25,7 @@ class InputForm extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: DropdownButtonFormField<int>(
-            value: controller.model.generoSelecionado,
+            initialValue: controller.model.generoSelecionado,
             items: TMBConstants.generos.map((genero) {
               return DropdownMenuItem<int>(
                 value: genero['id'] as int?,
@@ -55,7 +55,7 @@ class InputForm extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: DropdownButtonFormField<int>(
-            value: controller.model.nivelAtividadeSelecionado,
+            initialValue: controller.model.nivelAtividadeSelecionado,
             items: TMBConstants.niveisAtividade.map((nivel) {
               return DropdownMenuItem<int>(
                 value: nivel['id'] as int?,

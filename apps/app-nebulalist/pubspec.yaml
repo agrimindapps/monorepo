@@ -17,41 +17,9 @@ dependencies:
   core:
     path: ../../packages/core
 
-  # State Management (Riverpod with code generation)
-  flutter_riverpod: any
-  riverpod_annotation: any
-
-  # Dependency Injection
-  get_it: any
-  injectable: any
-
-  # Functional Programming
-  dartz: any
-
-  # Local Storage
-  hive: any
-  hive_flutter: any
-  path_provider: any
-
-  # Firebase
-  cloud_firestore: any
-  firebase_auth: any
-  firebase_storage: any
-  firebase_analytics: any
-  firebase_core: any
-
-  # Navigation
-  go_router: any
-
-  # Utils
+  # Specific dependencies not in core
   uuid: any
-  equatable: any
-  intl: any
-  shared_preferences: any
-  url_launcher: any
-
-  # Freezed (immutable state)
-  freezed_annotation: any
+  hive_flutter: any
 
 dev_dependencies:
   flutter_test:
@@ -59,18 +27,6 @@ dev_dependencies:
 
   # Code Generation
   build_runner: any
-  hive_generator: any
-  riverpod_generator: any
-  injectable_generator: any
-  freezed: any
-  json_serializable: any
-
-  # Testing
-  mocktail: any
-
-  # Linting
-  custom_lint: any
-  riverpod_lint: any
 
 flutter:
   uses-material-design: true

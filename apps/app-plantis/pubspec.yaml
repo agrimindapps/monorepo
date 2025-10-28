@@ -31,7 +31,6 @@ dependencies:
   shared_preferences: any
   riverpod_annotation: any
   flutter_riverpod: any
-  freezed_annotation: ^2.4.1
   cloud_firestore: any
   go_router: any
 dev_dependencies:
@@ -41,7 +40,6 @@ dev_dependencies:
   hive_generator: ^2.0.1
   riverpod_generator: any
   injectable_generator: any
-  freezed: ^2.5.2
   mocktail: ^1.0.0
 
 flutter:

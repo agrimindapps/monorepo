@@ -51,6 +51,9 @@ dependencies:
   flutter_local_notifications: ^19.4.0
   permission_handler: ^12.0.1
   timezone: ^0.10.1
+
+  # Text-to-Speech (Accessibility)
+  flutter_tts: ^4.1.0
   
   # Security Services
   crypto: ^3.0.6
@@ -115,6 +118,9 @@ dependencies:
   # JSON Serialization
   json_annotation: ^4.9.0
 
+  # Code Generation - Immutability
+  freezed_annotation: ^2.4.1
+
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
   flutter_lints: ^5.0.0
   
@@ -127,6 +133,7 @@ dev_dependencies:
   injectable_generator: ^2.6.2
   hive_generator: ^2.0.1
   json_serializable: ^6.8.0
+  freezed: ^2.5.2
   riverpod_generator: 2.4.0
   riverpod_lint: ^2.3.10
   custom_lint: ^0.6.0

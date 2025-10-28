@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
@@ -28,11 +30,13 @@ class LoginUseCase implements UseCase<UserEntity, LoginParams> {
       email: params.email,
       password: params.password,
     );
+
+    // Handle the result and log analytics separately
     return loginResult.fold(
       (failure) => Left(failure),
-      (user) async {
-        await _analyticsRepository.logLogin(method: 'email');
-        
+      (user) {
+        // Fire and forget the analytics logging to avoid blocking the login flow
+        unawaited(_analyticsRepository.logLogin(method: 'email'));
         return Right(user);
       },
     );

@@ -4,6 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:app_calculei/features/home/presentation/pages/home_page.dart';
 import 'package:app_calculei/features/thirteenth_salary_calculator/presentation/pages/thirteenth_salary_calculator_page.dart';
 import 'package:app_calculei/features/vacation_calculator/presentation/pages/vacation_calculator_page.dart';
+import 'package:app_calculei/features/net_salary_calculator/presentation/pages/net_salary_calculator_page.dart';
+import 'package:app_calculei/features/overtime_calculator/presentation/pages/overtime_calculator_page.dart';
+import 'package:app_calculei/features/emergency_reserve_calculator/presentation/pages/emergency_reserve_calculator_page.dart';
+import 'package:app_calculei/features/cash_vs_installment_calculator/presentation/pages/cash_vs_installment_calculator_page.dart';
+import 'package:app_calculei/features/unemployment_insurance_calculator/presentation/pages/unemployment_insurance_calculator_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -28,8 +33,26 @@ final appRouter = GoRouter(
       path: '/calc/vacation',
       builder: (context, state) => const VacationCalculatorPage(),
     ),
-
-    // TODO: Add remaining calculator routes
+    GoRoute(
+      path: '/calc/net-salary',
+      builder: (context, state) => const NetSalaryCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/calc/overtime',
+      builder: (context, state) => const OvertimeCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/calc/emergency-reserve',
+      builder: (context, state) => const EmergencyReserveCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/calc/cash-vs-installment',
+      builder: (context, state) => const CashVsInstallmentCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/calc/unemployment-insurance',
+      builder: (context, state) => const UnemploymentInsuranceCalculatorPage(),
+    ),
   ],
   errorBuilder: (context, state) => Scaffold(
     appBar: AppBar(

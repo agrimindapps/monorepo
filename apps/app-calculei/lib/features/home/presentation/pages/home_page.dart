@@ -47,66 +47,36 @@ class HomePage extends StatelessWidget {
                 onTap: () => context.go('/calc/vacation'),
               ),
 
-              // TODO: Implement these calculators
+              // All calculators now implemented
               _CalculatorCard(
                 title: 'Salário Líquido',
                 icon: Icons.monetization_on,
                 color: Colors.orange,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.go('/calc/net-salary'),
               ),
               _CalculatorCard(
                 title: 'Horas Extras',
                 icon: Icons.access_time,
                 color: Colors.purple,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.go('/calc/overtime'),
               ),
               _CalculatorCard(
                 title: 'Reserva de Emergência',
                 icon: Icons.savings,
                 color: Colors.teal,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.go('/calc/emergency-reserve'),
               ),
               _CalculatorCard(
                 title: 'À vista ou Parcelado',
                 icon: Icons.payment,
                 color: Colors.indigo,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.go('/calc/cash-vs-installment'),
               ),
               _CalculatorCard(
                 title: 'Seguro Desemprego',
                 icon: Icons.work_off,
                 color: Colors.red,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.go('/calc/unemployment-insurance'),
               ),
             ],
           );

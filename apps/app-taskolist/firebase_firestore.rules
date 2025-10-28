@@ -1,0 +1,158 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+
+    /// Check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    /// Get the current authenticated user ID
+    function userId() {
+      return request.auth.uid;
+    }
+
+    /// Check if user is the owner of a task list
+    function isTaskListOwner(taskListId) {
+      return get(/databases/$(database)/documents/task_lists/$(taskListId)).data.ownerId == userId();
+    }
+
+    /// Check if user is a member of a shared task list
+    function isTaskListMember(taskListId) {
+      let taskList = get(/databases/$(database)/documents/task_lists/$(taskListId)).data;
+      return taskList.ownerId == userId() ||
+             userId() in taskList.memberIds;
+    }
+
+    /// Check if user has access to a task list (owner or member)
+    function hasTaskListAccess(taskListId) {
+      return exists(/databases/$(database)/documents/task_lists/$(taskListId)) &&
+             isTaskListMember(taskListId);
+    }
+
+    /// Validate task list data structure
+    function isValidTaskList(data) {
+      return data.size() > 0 &&
+             'title' in data && data.title is string &&
+             'color' in data && data.color is string &&
+             'ownerId' in data && data.ownerId is string &&
+             'createdAt' in data && data.createdAt is timestamp &&
+             'updatedAt' in data && data.updatedAt is timestamp &&
+             'isShared' in data && data.isShared is bool &&
+             'isArchived' in data && data.isArchived is bool &&
+             'memberIds' in data && data.memberIds is list;
+    }
+
+    /// Validate task data structure
+    function isValidTask(data) {
+      return data.size() > 0 &&
+             'title' in data && data.title is string &&
+             'listId' in data && data.listId is string &&
+             'createdById' in data && data.createdById is string &&
+             'createdAt' in data && data.createdAt is timestamp &&
+             'updatedAt' in data && data.updatedAt is timestamp &&
+             'status' in data && data.status is string &&
+             data.status in ['pending', 'inProgress', 'completed', 'cancelled'] &&
+             'priority' in data && data.priority is string &&
+             data.priority in ['low', 'medium', 'high', 'urgent'];
+    }
+
+    // ============================================================
+    // USER PROFILE RULES
+    // ============================================================
+    match /users/{document=**} {
+      allow read: if isAuth() &&
+                     (request.path == /databases/$(database)/documents/users/$(userId()) ||
+                      request.path == /databases/$(database)/documents/users/$(userId())/**);
+      allow write: if isAuth() && request.resource.data.userId == userId();
+      allow create: if isAuth() && request.resource.data.userId == userId();
+    }
+
+    // ============================================================
+    // TASK LISTS RULES
+    // ============================================================
+    match /task_lists/{taskListId} {
+      /// Allow reading task lists where user is owner or member
+      allow read: if isAuth() && isTaskListMember(taskListId);
+
+      /// Allow creating new task lists (auto-set ownerId to current user)
+      allow create: if isAuth() &&
+                       isValidTaskList(request.resource.data) &&
+                       request.resource.data.ownerId == userId();
+
+      /// Allow updating task lists only by owner
+      allow update: if isAuth() &&
+                       isTaskListOwner(taskListId) &&
+                       isValidTaskList(request.resource.data);
+
+      /// Allow deleting task lists only by owner
+      allow delete: if isAuth() && isTaskListOwner(taskListId);
+
+      // ============================================================
+      // TASKS SUBCOLLECTION RULES
+      // ============================================================
+      match /tasks/{taskId} {
+        /// Allow reading tasks if user has access to parent task list
+        allow read: if isAuth() && hasTaskListAccess(taskListId);
+
+        /// Allow creating tasks if user has access to parent task list
+        allow create: if isAuth() &&
+                        hasTaskListAccess(taskListId) &&
+                        isValidTask(request.resource.data) &&
+                        request.resource.data.listId == taskListId &&
+                        request.resource.data.createdById == userId();
+
+        /// Allow updating tasks if user has access to parent task list
+        allow update: if isAuth() &&
+                        hasTaskListAccess(taskListId) &&
+                        isValidTask(request.resource.data) &&
+                        resource.data.createdById == userId();
+
+        /// Allow deleting tasks if user created them or is the list owner
+        allow delete: if isAuth() &&
+                        hasTaskListAccess(taskListId) &&
+                        (resource.data.createdById == userId() ||
+                         isTaskListOwner(taskListId));
+
+        // ============================================================
+        // TASK COMMENTS SUBCOLLECTION (Future expansion)
+        // ============================================================
+        match /comments/{commentId} {
+          allow read: if isAuth() && hasTaskListAccess(taskListId);
+          allow create: if isAuth() &&
+                           hasTaskListAccess(taskListId) &&
+                           'text' in request.resource.data &&
+                           'createdBy' in request.resource.data &&
+                           request.resource.data.createdBy == userId();
+          allow update: if isAuth() &&
+                           hasTaskListAccess(taskListId) &&
+                           resource.data.createdBy == userId();
+          allow delete: if isAuth() &&
+                           hasTaskListAccess(taskListId) &&
+                           resource.data.createdBy == userId();
+        }
+      }
+    }
+
+    // ============================================================
+    // SHARED TASK LISTS (Alternative structure for better query performance)
+    // ============================================================
+    match /shared_task_lists/{userId}/{taskListId} {
+      /// Allow reading shared task lists for the user
+      allow read: if isAuth() && request.auth.uid == userId;
+
+      /// Allow writing only to own shared lists (backend manages this)
+      allow write: if isAuth() && request.auth.uid == userId;
+    }
+
+    // ============================================================
+    // CATCH-ALL DENY RULE (Explicit security)
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

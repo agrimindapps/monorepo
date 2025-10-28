@@ -5,8 +5,8 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.24.0"
 
 dependencies:
   flutter:
@@ -33,6 +33,7 @@ dependencies:
   flutter_riverpod: any
   cloud_firestore: any
   go_router: any
+  freezed_annotation: ^2.4.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,6 +42,8 @@ dev_dependencies:
   riverpod_generator: any
   injectable_generator: any
   mocktail: ^1.0.0
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
 
 flutter:
   uses-material-design: true

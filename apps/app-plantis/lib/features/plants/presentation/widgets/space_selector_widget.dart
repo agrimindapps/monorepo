@@ -79,10 +79,9 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
                 decoration: BoxDecoration(
                   border: Border.all(color: theme.colorScheme.error),
                   borderRadius: BorderRadius.circular(12),
-                  color:
-                      theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(0xFFFFFFFF),
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF),
                 ),
                 child: Center(
                   child: Row(
@@ -106,56 +105,48 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
 
             return _buildSpaceDropdown(context, spacesState, theme);
           },
-          loading:
-              () => Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  color:
-                      theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(0xFFFFFFFF),
-                ),
-                child: const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
+          loading: () => Container(
+            height: 56,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.5),
               ),
-          error:
-              (error, _) => Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  border: Border.all(color: theme.colorScheme.error),
-                  borderRadius: BorderRadius.circular(12),
-                  color:
-                      theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(0xFFFFFFFF),
-                ),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error,
-                        color: theme.colorScheme.error,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Erro ao carregar espaços',
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                    ],
-                  ),
-                ),
+              borderRadius: BorderRadius.circular(12),
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF),
+            ),
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
+            ),
+          ),
+          error: (error, _) => Container(
+            height: 56,
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.colorScheme.error),
+              borderRadius: BorderRadius.circular(12),
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error, color: theme.colorScheme.error, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Erro ao carregar espaços',
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         if (_showCustomSpaceField) ...[
           const SizedBox(height: 12),
@@ -222,7 +213,7 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     ];
 
     return DropdownButtonFormField<String?>(
-      initialValue: _selectedSpaceId,
+      value: _selectedSpaceId,
       onChanged: (value) {
         if (value == 'CREATE_NEW') {
           setState(() {
@@ -261,10 +252,9 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
           borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
         ),
         filled: true,
-        fillColor:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro para modo claro
+        fillColor: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro para modo claro
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
@@ -314,12 +304,9 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
                     ),
                   ),
                   filled: true,
-                  fillColor:
-                      theme.brightness == Brightness.dark
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(
-                            0xFFFFFFFF,
-                          ), // Branco puro para modo claro
+                  fillColor: theme.brightness == Brightness.dark
+                      ? const Color(0xFF2C2C2E)
+                      : const Color(0xFFFFFFFF), // Branco puro para modo claro
                   contentPadding: const EdgeInsets.all(12),
                 ),
                 onChanged: (value) {

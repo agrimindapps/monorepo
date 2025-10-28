@@ -8,7 +8,8 @@ class PlantFormCareConfig extends ConsumerStatefulWidget {
   const PlantFormCareConfig({super.key});
 
   @override
-  ConsumerState<PlantFormCareConfig> createState() => _PlantFormCareConfigState();
+  ConsumerState<PlantFormCareConfig> createState() =>
+      _PlantFormCareConfigState();
 }
 
 class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
@@ -86,8 +87,8 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final formState = ref.watch(plantFormStateNotifierProvider);
         final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
-        final fieldErrors =
-            formState.fieldErrors; // Get validation errors for real-time display
+        final fieldErrors = formState
+            .fieldErrors; // Get validation errors for real-time display
 
         return Column(
           children: [
@@ -96,13 +97,17 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.water_drop,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableWateringCare ?? false,
-              onToggle: (value) => formNotifier.setWateringConfig(enabled: value),
+              onToggle: (value) =>
+                  formNotifier.setWateringConfig(enabled: value),
               interval: _getIntervalText(formState.wateringIntervalDays),
               onIntervalChanged: (interval) {
-                formNotifier.setWateringConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setWateringConfig(
+                  intervalDays: _getIntervalDays(interval),
+                );
               },
               lastDate: formState.lastWateringDate,
-              onDateChanged: (date) => formNotifier.setWateringConfig(lastDate: date),
+              onDateChanged: (date) =>
+                  formNotifier.setWateringConfig(lastDate: date),
               errorText:
                   fieldErrors['wateringInterval'], // Show validation error
             ),
@@ -113,13 +118,17 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.eco,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableFertilizerCare ?? false,
-              onToggle: (value) => formNotifier.setFertilizerConfig(enabled: value),
+              onToggle: (value) =>
+                  formNotifier.setFertilizerConfig(enabled: value),
               interval: _getIntervalText(formState.fertilizingIntervalDays),
               onIntervalChanged: (interval) {
-                formNotifier.setFertilizerConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setFertilizerConfig(
+                  intervalDays: _getIntervalDays(interval),
+                );
               },
               lastDate: formState.lastFertilizerDate,
-              onDateChanged: (date) => formNotifier.setFertilizerConfig(lastDate: date),
+              onDateChanged: (date) =>
+                  formNotifier.setFertilizerConfig(lastDate: date),
               errorText:
                   fieldErrors['fertilizingInterval'], // Show validation error
             ),
@@ -130,13 +139,17 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.wb_sunny,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableSunlightCare ?? false,
-              onToggle: (value) => formNotifier.setSunlightConfig(enabled: value),
+              onToggle: (value) =>
+                  formNotifier.setSunlightConfig(enabled: value),
               interval: _getIntervalText(formState.sunlightIntervalDays),
               onIntervalChanged: (interval) {
-                formNotifier.setSunlightConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setSunlightConfig(
+                  intervalDays: _getIntervalDays(interval),
+                );
               },
               lastDate: formState.lastSunlightDate,
-              onDateChanged: (date) => formNotifier.setSunlightConfig(lastDate: date),
+              onDateChanged: (date) =>
+                  formNotifier.setSunlightConfig(lastDate: date),
             ),
 
             const SizedBox(height: 20),
@@ -145,13 +158,17 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.bug_report,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enablePestInspection ?? false,
-              onToggle: (value) => formNotifier.setPestInspectionConfig(enabled: value),
+              onToggle: (value) =>
+                  formNotifier.setPestInspectionConfig(enabled: value),
               interval: _getIntervalText(formState.pestInspectionIntervalDays),
               onIntervalChanged: (interval) {
-                formNotifier.setPestInspectionConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setPestInspectionConfig(
+                  intervalDays: _getIntervalDays(interval),
+                );
               },
               lastDate: formState.lastPestInspectionDate,
-              onDateChanged: (date) => formNotifier.setPestInspectionConfig(lastDate: date),
+              onDateChanged: (date) =>
+                  formNotifier.setPestInspectionConfig(lastDate: date),
             ),
 
             const SizedBox(height: 20),
@@ -160,13 +177,17 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.content_cut,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enablePruning ?? false,
-              onToggle: (value) => formNotifier.setPruningConfig(enabled: value),
+              onToggle: (value) =>
+                  formNotifier.setPruningConfig(enabled: value),
               interval: _getIntervalText(formState.pruningIntervalDays),
               onIntervalChanged: (interval) {
-                formNotifier.setPruningConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setPruningConfig(
+                  intervalDays: _getIntervalDays(interval),
+                );
               },
               lastDate: formState.lastPruningDate,
-              onDateChanged: (date) => formNotifier.setPruningConfig(lastDate: date),
+              onDateChanged: (date) =>
+                  formNotifier.setPruningConfig(lastDate: date),
               errorText:
                   fieldErrors['pruningInterval'], // Show validation error
             ),
@@ -177,13 +198,17 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
               icon: Icons.grass,
               iconColor: PlantisColors.primary,
               isEnabled: formState.enableReplanting ?? false,
-              onToggle: (value) => formNotifier.setReplantingConfig(enabled: value),
+              onToggle: (value) =>
+                  formNotifier.setReplantingConfig(enabled: value),
               interval: _getIntervalText(formState.replantingIntervalDays),
               onIntervalChanged: (interval) {
-                formNotifier.setReplantingConfig(intervalDays: _getIntervalDays(interval));
+                formNotifier.setReplantingConfig(
+                  intervalDays: _getIntervalDays(interval),
+                );
               },
               lastDate: formState.lastReplantingDate,
-              onDateChanged: (date) => formNotifier.setReplantingConfig(lastDate: date),
+              onDateChanged: (date) =>
+                  formNotifier.setReplantingConfig(lastDate: date),
             ),
           ],
         );
@@ -208,20 +233,18 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2D2D2D)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2D2D2D)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              errorText != null
-                  ? theme
-                      .colorScheme
-                      .error // Show error border
-                  : (isEnabled
-                      ? iconColor.withValues(alpha: 0.3)
-                      : Colors.grey[300]!),
+          color: errorText != null
+              ? theme
+                    .colorScheme
+                    .error // Show error border
+              : (isEnabled
+                    ? iconColor.withValues(alpha: 0.3)
+                    : Colors.grey[300]!),
           width: 1.5,
         ),
         boxShadow: [
@@ -254,12 +277,7 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
                   ),
                 ),
               ),
-              Switch(
-                value: isEnabled,
-                onChanged: onToggle,
-                activeThumbColor: iconColor,
-                activeTrackColor: iconColor.withValues(alpha: 0.3),
-              ),
+              Switch(value: isEnabled, onChanged: onToggle),
             ],
           ),
           if (isEnabled) ...[
@@ -452,41 +470,40 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
   ) {
     showModalBottomSheet<void>(
       context: context,
-      builder:
-          (context) => Container(
-            height: 300,
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Text(
-                  'Selecionar Intervalo',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _intervalOptions.length,
-                    itemBuilder: (context, index) {
-                      final option = _intervalOptions[index];
-                      final isSelected = option == currentValue;
-
-                      return ListTile(
-                        title: Text(option),
-                        trailing: isSelected ? const Icon(Icons.check) : null,
-                        selected: isSelected,
-                        onTap: () {
-                          onChanged(option);
-                          Navigator.of(context).pop();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+      builder: (context) => Container(
+        height: 300,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Text(
+              'Selecionar Intervalo',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-          ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _intervalOptions.length,
+                itemBuilder: (context, index) {
+                  final option = _intervalOptions[index];
+                  final isSelected = option == currentValue;
+
+                  return ListTile(
+                    title: Text(option),
+                    trailing: isSelected ? const Icon(Icons.check) : null,
+                    selected: isSelected,
+                    onTap: () {
+                      onChanged(option);
+                      Navigator.of(context).pop();
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

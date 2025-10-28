@@ -20,6 +20,9 @@ dependencies:
   # Specific dependencies not in core
   uuid: any
   hive_flutter: any
+  freezed_annotation: ^2.4.1
+  riverpod_annotation: any
+  injectable: any
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +30,11 @@ dev_dependencies:
 
   # Code Generation
   build_runner: any
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  riverpod_generator: any
+  injectable_generator: any
+  hive_generator: any
 
 flutter:
   uses-material-design: true

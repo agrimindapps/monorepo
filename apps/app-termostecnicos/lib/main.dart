@@ -25,7 +25,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) DartPluginRegistrant.ensureInitialized();
 
-  usePathUrlStrategy();
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  }
 
   // Initialize production environment using core's PackageInfo
   await GlobalEnvironment.initialize();
@@ -53,7 +55,9 @@ void main() async {
     debugPrint('Firebase initialized successfully');
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
-    debugPrint('App will continue without Firebase features (local-first mode)');
+    debugPrint(
+      'App will continue without Firebase features (local-first mode)',
+    );
     // App continues without Firebase - local storage works independently
   }
 
@@ -63,15 +67,9 @@ void main() async {
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
     // RevenueCat setup
     if (Platform.isIOS || Platform.isMacOS) {
-      RevenuecatService(
-        store: purchases.Store.appStore,
-        apiKey: appleApiKey,
-      );
+      RevenuecatService(store: purchases.Store.appStore, apiKey: appleApiKey);
     } else if (Platform.isAndroid) {
-      RevenuecatService(
-        store: purchases.Store.playStore,
-        apiKey: googleApiKey,
-      );
+      RevenuecatService(store: purchases.Store.playStore, apiKey: googleApiKey);
     }
 
     await InAppPurchaseService().checkSignature();
@@ -86,16 +84,21 @@ void main() async {
     }
   });
 
-  if (!kIsWeb && firebaseInitialized && (Platform.isAndroid || Platform.isIOS)) {
-    runZonedGuarded<Future<void>>(() async {
-      runApp(const ProviderScope(child: App()));
-    }, (error, stackTrace) {
-      crashlyticsService?.recordError(
-        exception: error,
-        stackTrace: stackTrace,
-        fatal: true,
-      );
-    });
+  if (!kIsWeb &&
+      firebaseInitialized &&
+      (Platform.isAndroid || Platform.isIOS)) {
+    runZonedGuarded<Future<void>>(
+      () async {
+        runApp(const ProviderScope(child: App()));
+      },
+      (error, stackTrace) {
+        crashlyticsService?.recordError(
+          exception: error,
+          stackTrace: stackTrace,
+          fatal: true,
+        );
+      },
+    );
   } else {
     runApp(const ProviderScope(child: App()));
   }

@@ -54,9 +54,6 @@ cd plantis_receituagro_monorepo
 # Instalar Melos
 dart pub global activate melos
 
-# Configurar FVM (se necessário)
-fvm use 3.29.2 --force
-
 # Bootstrap do workspace
 melos bootstrap
 ```
@@ -126,10 +123,10 @@ melos run build:receituagro:ios     # App Store
 
 ## 🌟 Features Implementadas
 
-### ✅ **Fase 1: Setup Inicial** 
+### ✅ **Fase 1: Setup Inicial**
 - [x] Estrutura do monorepo criada
 - [x] Melos configurado e funcionando
-- [x] FVM configurado (Flutter 3.29.2)
+- [x] Flutter 3.35.0 configurado
 - [x] Apps base criados
 - [x] Environment config implementado
 
@@ -206,13 +203,6 @@ melos bootstrap --force
 ```
 
 ## 🚨 Troubleshooting
-
-### Problema com FVM
-```bash
-# Reinstalar versão Flutter
-fvm install 3.29.2
-fvm use 3.29.2 --force
-```
 
 ### Problema com Melos
 ```bash

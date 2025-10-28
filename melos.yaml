@@ -40,7 +40,6 @@ scripts:
       echo "🚀 Configurando ambiente de desenvolvimento..."
       flutter doctor -v
       echo "📦 Instalando dependências globais..."
-      flutter pub global activate fvm
       flutter pub global activate flutterfire_cli
       echo "🔄 Executando bootstrap..."
       melos bootstrap

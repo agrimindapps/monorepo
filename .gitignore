@@ -176,12 +176,3 @@ lcov.info
 **/fastlane/Preview.html
 **/fastlane/screenshots
 **/fastlane/test_output
-
-# Flutter Version Manager
-.fvm/
-
-# FVM Config
-.fvmrc
-
-# Asdf-vm
-.tool-versions.fvm/

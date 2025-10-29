@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:app_calculei/core/style/shadcn_style.dart';
@@ -37,7 +38,7 @@ class _CashVsInstallmentCalculatorPageState
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.go('/'),
         ),
         title: const Row(
           children: [
@@ -116,7 +117,9 @@ class _CashVsInstallmentCalculatorPageState
                                       )
                                     : const Icon(Icons.calculate),
                                 label: Text(
-                                  state.isLoading ? 'Calculando...' : 'Calcular',
+                                  state.isLoading
+                                      ? 'Calculando...'
+                                      : 'Calcular',
                                 ),
                                 style: ShadcnStyle.primaryButtonStyle,
                               ),
@@ -172,11 +175,14 @@ class _CashVsInstallmentCalculatorPageState
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
+      // The form's onSaved callbacks will trigger _submitForm()
+      // which calls the onCalculate callback from the form widget
       _formKey.currentState!.save();
     }
   }
 
   void _handleCalculate(CalculateCashVsInstallmentParams params) {
+    // Execute the calculation through the notifier
     ref
         .read(cashVsInstallmentCalculatorNotifierProvider.notifier)
         .calculate(params);

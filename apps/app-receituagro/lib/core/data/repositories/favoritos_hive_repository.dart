@@ -52,9 +52,9 @@ class FavoritosHiveRepository extends BaseHiveRepository<FavoritoItemHive> {
   Future<bool> addFavorito(String tipo, String itemId, Map<String, dynamic> itemData) async {
     try {
       final favorito = FavoritoItemHive(
-        objectId: '${tipo}_$itemId',
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        updatedAt: DateTime.now().millisecondsSinceEpoch,
+        sync_objectId: '${tipo}_$itemId',
+        sync_createdAt: DateTime.now().millisecondsSinceEpoch,
+        sync_updatedAt: DateTime.now().millisecondsSinceEpoch,
         tipo: tipo,
         itemId: itemId,
         itemData: jsonEncode(itemData),

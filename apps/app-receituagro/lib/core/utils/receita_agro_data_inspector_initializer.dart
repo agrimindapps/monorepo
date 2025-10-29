@@ -78,7 +78,7 @@ class ReceitaAgroDataInspectorInitializer {
       ),
 
       const CustomBoxType(
-        key: 'receituagro_user_favorites',
+        key: 'favoritos',  // ✅ FIXED: Deve corresponder a ReceitaAgroBoxes e FavoritosHiveRepository
         displayName: 'Favoritos',
         module: 'Usuário',
         description:

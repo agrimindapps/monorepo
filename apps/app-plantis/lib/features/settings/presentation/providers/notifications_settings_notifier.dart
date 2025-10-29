@@ -1,6 +1,5 @@
+import 'package:core/core.dart' hide getIt;
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/plantis_notification_service.dart';
@@ -62,11 +61,14 @@ class NotificationsSettingsState {
     bool? isLoading,
   }) {
     return NotificationsSettingsState(
-      areNotificationsEnabled: areNotificationsEnabled ?? this.areNotificationsEnabled,
+      areNotificationsEnabled:
+          areNotificationsEnabled ?? this.areNotificationsEnabled,
       taskRemindersEnabled: taskRemindersEnabled ?? this.taskRemindersEnabled,
-      overdueNotificationsEnabled: overdueNotificationsEnabled ?? this.overdueNotificationsEnabled,
+      overdueNotificationsEnabled:
+          overdueNotificationsEnabled ?? this.overdueNotificationsEnabled,
       dailySummaryEnabled: dailySummaryEnabled ?? this.dailySummaryEnabled,
-      reminderMinutesBefore: reminderMinutesBefore ?? this.reminderMinutesBefore,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
       dailySummaryTime: dailySummaryTime ?? this.dailySummaryTime,
       taskTypeSettings: taskTypeSettings ?? this.taskTypeSettings,
       isLoading: isLoading ?? this.isLoading,
@@ -134,7 +136,8 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   static const String _keyDailySummary = 'notifications_daily_summary';
   static const String _keyReminderMinutes = 'notifications_reminder_minutes';
   static const String _keyDailySummaryHour = 'notifications_daily_summary_hour';
-  static const String _keyDailySummaryMinute = 'notifications_daily_summary_minute';
+  static const String _keyDailySummaryMinute =
+      'notifications_daily_summary_minute';
   static const String _keyTaskTypePrefix = 'notifications_task_type_';
 
   @override
@@ -147,9 +150,11 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
   /// Carregar configurações
   Future<NotificationsSettingsState> _loadSettings() async {
     try {
-      final areNotificationsEnabled = await _notificationService.areNotificationsEnabled();
+      final areNotificationsEnabled = await _notificationService
+          .areNotificationsEnabled();
       final taskRemindersEnabled = _prefs.getBool(_keyTaskReminders) ?? true;
-      final overdueNotificationsEnabled = _prefs.getBool(_keyOverdueNotifications) ?? true;
+      final overdueNotificationsEnabled =
+          _prefs.getBool(_keyOverdueNotifications) ?? true;
       final dailySummaryEnabled = _prefs.getBool(_keyDailySummary) ?? true;
       final reminderMinutesBefore = _prefs.getInt(_keyReminderMinutes) ?? 60;
 
@@ -168,7 +173,8 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
       };
 
       for (final key in taskTypeSettings.keys) {
-        taskTypeSettings[key] = _prefs.getBool(_keyTaskTypePrefix + key) ?? true;
+        taskTypeSettings[key] =
+            _prefs.getBool(_keyTaskTypePrefix + key) ?? true;
       }
 
       return NotificationsSettingsState(
@@ -189,55 +195,54 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
 
   /// Alternar lembretes de tarefas
   Future<void> toggleTaskReminders(bool value) async {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
 
-    state = AsyncValue.data(currentState.copyWith(
-      taskRemindersEnabled: value,
-    ));
+    state = AsyncValue.data(currentState.copyWith(taskRemindersEnabled: value));
 
     await _prefs.setBool(_keyTaskReminders, value);
   }
 
   /// Alternar notificações de atraso
   Future<void> toggleOverdueNotifications(bool value) async {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
 
-    state = AsyncValue.data(currentState.copyWith(
-      overdueNotificationsEnabled: value,
-    ));
+    state = AsyncValue.data(
+      currentState.copyWith(overdueNotificationsEnabled: value),
+    );
 
     await _prefs.setBool(_keyOverdueNotifications, value);
   }
 
   /// Alternar resumo diário
   Future<void> toggleDailySummary(bool value) async {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
 
-    state = AsyncValue.data(currentState.copyWith(
-      dailySummaryEnabled: value,
-    ));
+    state = AsyncValue.data(currentState.copyWith(dailySummaryEnabled: value));
 
     await _prefs.setBool(_keyDailySummary, value);
   }
 
   /// Definir minutos de antecedência
   Future<void> setReminderMinutesBefore(int minutes) async {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
 
-    state = AsyncValue.data(currentState.copyWith(
-      reminderMinutesBefore: minutes,
-    ));
+    state = AsyncValue.data(
+      currentState.copyWith(reminderMinutesBefore: minutes),
+    );
 
     await _prefs.setInt(_keyReminderMinutes, minutes);
   }
 
   /// Definir horário do resumo diário
   Future<void> setDailySummaryTime(TimeOfDay time) async {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
 
-    state = AsyncValue.data(currentState.copyWith(
-      dailySummaryTime: time,
-    ));
+    state = AsyncValue.data(currentState.copyWith(dailySummaryTime: time));
 
     await _prefs.setInt(_keyDailySummaryHour, time.hour);
     await _prefs.setInt(_keyDailySummaryMinute, time.minute);
@@ -245,13 +250,16 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
 
   /// Alternar configuração por tipo de tarefa
   Future<void> toggleTaskType(String taskType, bool value) async {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
-    final updatedTaskTypes = Map<String, bool>.from(currentState.taskTypeSettings);
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
+    final updatedTaskTypes = Map<String, bool>.from(
+      currentState.taskTypeSettings,
+    );
     updatedTaskTypes[taskType] = value;
 
-    state = AsyncValue.data(currentState.copyWith(
-      taskTypeSettings: updatedTaskTypes,
-    ));
+    state = AsyncValue.data(
+      currentState.copyWith(taskTypeSettings: updatedTaskTypes),
+    );
 
     await _prefs.setBool(_keyTaskTypePrefix + taskType, value);
   }
@@ -277,13 +285,18 @@ class NotificationsSettingsNotifier extends _$NotificationsSettingsNotifier {
 
   /// Verificar se um tipo de tarefa está habilitado
   bool isTaskTypeEnabled(String taskType) {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
     return currentState.isTaskTypeEnabled(taskType);
   }
 
   /// Verificar se deve mostrar notificação baseado nas configurações
   bool shouldShowNotification(String notificationType, {String? taskType}) {
-    final currentState = state.valueOrNull ?? NotificationsSettingsState.initial();
-    return currentState.shouldShowNotification(notificationType, taskType: taskType);
+    final currentState =
+        state.valueOrNull ?? NotificationsSettingsState.initial();
+    return currentState.shouldShowNotification(
+      notificationType,
+      taskType: taskType,
+    );
   }
 }

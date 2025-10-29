@@ -50,9 +50,9 @@ class SyncQueue {
     _ensureInitialized();
 
     final queueItem = models.SyncQueueItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      sync_id: DateTime.now().millisecondsSinceEpoch.toString(),
       modelType: modelType,
-      operation: operation,
+      sync_operation: operation,
       data: data,
     );
 
@@ -78,9 +78,9 @@ class SyncQueue {
     _ensureInitialized();
 
     return _getAllSyncItems()
-        .where((item) => !item.isSynced && item.shouldRetryNow())
+        .where((item) => !item.sync_isSynced && item.shouldRetryNow())
         .toList()
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+      ..sort((a, b) => a.sync_timestamp.compareTo(b.sync_timestamp));
   }
 
   /// Get all items (including synced)
@@ -92,7 +92,7 @@ class SyncQueue {
   /// Get pending count
   int get pendingCount {
     _ensureInitialized();
-    return _getAllSyncItems().where((item) => !item.isSynced).length;
+    return _getAllSyncItems().where((item) => !item.sync_isSynced).length;
   }
 
   /// Mark item as successfully synced
@@ -100,11 +100,11 @@ class SyncQueue {
     _ensureInitialized();
 
     final item = _getAllSyncItems().firstWhere(
-      (item) => item.id == itemId,
+      (item) => item.sync_id == itemId,
       orElse: () => throw Exception('Item not found: $itemId'),
     );
 
-    item.isSynced = true;
+    item.sync_isSynced = true;
     await item.save();
     _notifyQueueUpdated();
   }
@@ -114,14 +114,14 @@ class SyncQueue {
     _ensureInitialized();
 
     final item = _getAllSyncItems().firstWhere(
-      (item) => item.id == itemId,
+      (item) => item.sync_id == itemId,
       orElse: () => throw Exception('Item not found: $itemId'),
     );
 
-    item.retryCount++;
-    item.lastRetryAt = DateTime.now();
+    item.sync_retryCount++;
+    item.sync_lastRetryAt = DateTime.now();
     if (errorMessage != null) {
-      item.errorMessage = errorMessage;
+      item.sync_errorMessage = errorMessage;
     }
     await item.save();
     _notifyQueueUpdated();
@@ -131,7 +131,7 @@ class SyncQueue {
   Future<void> clearSyncedItems() async {
     _ensureInitialized();
 
-    final syncedItems = _getAllSyncItems().where((item) => item.isSynced).toList();
+    final syncedItems = _getAllSyncItems().where((item) => item.sync_isSynced).toList();
 
     for (var item in syncedItems) {
       await item.delete();
@@ -152,7 +152,7 @@ class SyncQueue {
     _ensureInitialized();
 
     final item = _getAllSyncItems().firstWhere(
-      (item) => item.id == itemId,
+      (item) => item.sync_id == itemId,
       orElse: () => throw Exception('Item not found: $itemId'),
     );
 

@@ -2,6 +2,10 @@ import 'package:core/core.dart';
 
 /// Plantis-specific security configuration
 /// Implements enhanced security policies for the plant care application
+///
+/// Note: This class uses static methods as a factory pattern for configuration.
+/// It's a stateless configuration provider and doesn't require instantiation.
+// ignore: avoid_classes_with_only_static_members
 class PlantisSecurityConfig {
   static const int _maxLoginAttempts = 3;
   static const int _lockoutDurationMinutes = 15;

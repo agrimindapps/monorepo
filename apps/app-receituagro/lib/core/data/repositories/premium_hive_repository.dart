@@ -40,7 +40,7 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
     try {
       final userId = _getCurrentUserId();
       status.userId = userId;
-      status.updatedAt = DateTime.now().millisecondsSinceEpoch;
+      status.sync_updatedAt = DateTime.now().millisecondsSinceEpoch;
 
       final result = await save(status, key: userId);
       if (result.isError) {
@@ -98,9 +98,9 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
       isTestSubscription: true,
       planType: planType,
       expiryDateTimestamp: expiryDate.millisecondsSinceEpoch,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      updatedAt: DateTime.now().millisecondsSinceEpoch,
-      needsOnlineSync: false,
+      sync_createdAt: DateTime.now().millisecondsSinceEpoch,
+      sync_updatedAt: DateTime.now().millisecondsSinceEpoch,
+      sync_needsOnlineSync: false,
     );
 
     await saveCurrentUserPremiumStatus(testStatus);
@@ -143,9 +143,9 @@ class PremiumHiveRepository extends BaseHiveRepository<PremiumStatusHive> {
       userId: userId,
       isActive: false,
       isTestSubscription: false,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      updatedAt: DateTime.now().millisecondsSinceEpoch,
-      needsOnlineSync: true,
+      sync_createdAt: DateTime.now().millisecondsSinceEpoch,
+      sync_updatedAt: DateTime.now().millisecondsSinceEpoch,
+      sync_needsOnlineSync: true,
     );
   }
 

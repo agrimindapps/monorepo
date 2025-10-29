@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
 import '../../domain/entities/space.dart';
@@ -49,16 +50,23 @@ class SpacesRepositoryImpl implements SpacesRepository {
       );
     }
   }
+
   void _syncSpacesInBackground(String userId) {
+    // Background sync - não aguarda resultado
     remoteDatasource
         .getSpaces(userId)
-        .then((remoteSpaces) {
-          for (final space in remoteSpaces) {
-            localDatasource.updateSpace(space);
-          }
-        })
-        .catchError((e) {
-        });
+        .then(
+          (remoteSpaces) {
+            for (final space in remoteSpaces) {
+              localDatasource.updateSpace(space);
+            }
+          },
+          onError: (Object e) {
+            if (kDebugMode) {
+              SecureLogger.debug('Background sync spaces failed', error: e);
+            }
+          },
+        );
   }
 
   @override
@@ -85,14 +93,24 @@ class SpacesRepositoryImpl implements SpacesRepository {
       );
     }
   }
+
   void _syncSingleSpaceInBackground(String spaceId, String userId) {
+    // Background sync - não aguarda resultado
     remoteDatasource
         .getSpaceById(spaceId, userId)
-        .then((remoteSpace) {
-          localDatasource.updateSpace(remoteSpace);
-        })
-        .catchError((e) {
-        });
+        .then(
+          (remoteSpace) {
+            localDatasource.updateSpace(remoteSpace);
+          },
+          onError: (Object e) {
+            if (kDebugMode) {
+              SecureLogger.debug(
+                'Background sync single space failed',
+                error: e,
+              );
+            }
+          },
+        );
   }
 
   @override
@@ -177,8 +195,7 @@ class SpacesRepositoryImpl implements SpacesRepository {
       if (await networkInfo.isConnected) {
         try {
           await remoteDatasource.deleteSpace(id, userId);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
 
       return const Right(null);
@@ -197,13 +214,12 @@ class SpacesRepositoryImpl implements SpacesRepository {
       final allSpaces = await getSpaces();
       return allSpaces.fold((failure) => Left(failure), (spaces) {
         final searchQuery = query.toLowerCase().trim();
-        final filteredSpaces =
-            spaces.where((space) {
-              final name = space.name.toLowerCase();
-              final description = (space.description ?? '').toLowerCase();
-              return name.contains(searchQuery) ||
-                  description.contains(searchQuery);
-            }).toList();
+        final filteredSpaces = spaces.where((space) {
+          final name = space.name.toLowerCase();
+          final description = (space.description ?? '').toLowerCase();
+          return name.contains(searchQuery) ||
+              description.contains(searchQuery);
+        }).toList();
         return Right(filteredSpaces);
       });
     } catch (e) {

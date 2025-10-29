@@ -6,19 +6,19 @@ part 'comentario_hive.g.dart';
 @HiveType(typeId: 108)
 class ComentarioHive extends HiveObject {
   @HiveField(0)
-  String? objectId;
+  String? sync_objectId;
 
   @HiveField(1)
-  int? createdAt;
+  int? sync_createdAt;
 
   @HiveField(2)
-  int? updatedAt;
+  int? sync_updatedAt;
 
   @HiveField(3)
   String idReg;
 
   @HiveField(4)
-  bool status;
+  bool sync_deleted; // true = deleted, false = active (inverted from old 'status')
 
   @HiveField(5)
   String titulo;
@@ -36,11 +36,11 @@ class ComentarioHive extends HiveObject {
   String userId; // ID do usuário que criou o comentário
 
   ComentarioHive({
-    this.objectId,
-    this.createdAt,
-    this.updatedAt,
+    this.sync_objectId,
+    this.sync_createdAt,
+    this.sync_updatedAt,
     required this.idReg,
-    required this.status,
+    required this.sync_deleted,
     required this.titulo,
     required this.conteudo,
     required this.ferramenta,
@@ -50,11 +50,11 @@ class ComentarioHive extends HiveObject {
 
   factory ComentarioHive.fromJson(Map<String, dynamic> json) {
     return ComentarioHive(
-      objectId: json['objectId'] as String?,
-      createdAt: json['createdAt'] != null ? int.tryParse(json['createdAt'].toString()) : null,
-      updatedAt: json['updatedAt'] != null ? int.tryParse(json['updatedAt'].toString()) : null,
+      sync_objectId: json['sync_objectId'] as String?,
+      sync_createdAt: json['sync_createdAt'] != null ? int.tryParse(json['sync_createdAt'].toString()) : null,
+      sync_updatedAt: json['sync_updatedAt'] != null ? int.tryParse(json['sync_updatedAt'].toString()) : null,
       idReg: (json['idReg'] as String?) ?? '',
-      status: json['status'] != null ? json['status'] as bool : true,
+      sync_deleted: json['sync_deleted'] != null ? json['sync_deleted'] as bool : false,
       titulo: (json['titulo'] as String?) ?? '',
       conteudo: (json['conteudo'] as String?) ?? '',
       ferramenta: (json['ferramenta'] as String?) ?? '',
@@ -65,11 +65,11 @@ class ComentarioHive extends HiveObject {
 
   Map<String, dynamic> toJson() {
     return {
-      'objectId': objectId,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'sync_objectId': sync_objectId,
+      'sync_createdAt': sync_createdAt,
+      'sync_updatedAt': sync_updatedAt,
       'idReg': idReg,
-      'status': status,
+      'sync_deleted': sync_deleted,
       'titulo': titulo,
       'conteudo': conteudo,
       'ferramenta': ferramenta,
@@ -87,12 +87,12 @@ class ComentarioHive extends HiveObject {
       conteudo: conteudo,
       ferramenta: ferramenta,
       pkIdentificador: pkIdentificador,
-      status: status,
-      createdAt: createdAt != null 
-          ? DateTime.fromMillisecondsSinceEpoch(createdAt!)
+      status: !sync_deleted, // Invert: sync_deleted=false means active (status=true)
+      createdAt: sync_createdAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(sync_createdAt!)
           : DateTime.now(),
-      updatedAt: updatedAt != null 
-          ? DateTime.fromMillisecondsSinceEpoch(updatedAt!)
+      updatedAt: sync_updatedAt != null
+          ? DateTime.fromMillisecondsSinceEpoch(sync_updatedAt!)
           : DateTime.now(),
     );
   }
@@ -100,16 +100,16 @@ class ComentarioHive extends HiveObject {
   /// Cria um ComentarioHive a partir do ComentarioModel
   static ComentarioHive fromComentarioModel(ComentarioModel model, String userId) {
     return ComentarioHive(
-      objectId: model.id,
+      sync_objectId: model.id,
       idReg: model.idReg,
       titulo: model.titulo,
       conteudo: model.conteudo,
       ferramenta: model.ferramenta,
       pkIdentificador: model.pkIdentificador,
-      status: model.status,
+      sync_deleted: !model.status, // Invert: status=true means sync_deleted=false
       userId: userId,
-      createdAt: model.createdAt.millisecondsSinceEpoch,
-      updatedAt: model.updatedAt.millisecondsSinceEpoch,
+      sync_createdAt: model.createdAt.millisecondsSinceEpoch,
+      sync_updatedAt: model.updatedAt.millisecondsSinceEpoch,
     );
   }
 

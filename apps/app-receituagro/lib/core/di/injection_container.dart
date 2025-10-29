@@ -152,9 +152,9 @@ Future<void> init() async {
   }
   sl.registerLazySingleton<core.IAppRatingRepository>(
     () => core.AppRatingService(
-      appStoreId: '6738924932', // ReceitaAgro App Store ID real
+      appStoreId: '967785485', // ReceitaAgro iOS App Store ID
       googlePlayId:
-          'br.com.agrimind.pragassoja', // Using the correct package ID
+          'br.com.agrimind.pragassoja', // Android Package ID
       minDays: 3,
       minLaunches: 5,
       remindDays: 7,

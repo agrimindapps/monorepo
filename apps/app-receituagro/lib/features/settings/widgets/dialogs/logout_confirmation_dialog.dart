@@ -11,8 +11,11 @@ class LogoutConfirmationDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -134,6 +137,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );

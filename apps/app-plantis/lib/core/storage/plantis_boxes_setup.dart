@@ -11,7 +11,7 @@ class PlantisBoxesSetup {
     final plantisBoxes = [
       BoxConfiguration.basic(name: PlantisBoxes.main, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.reminders, appId: 'plantis'),
-      BoxConfiguration.basic(name: PlantisBoxes.care_logs, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.careLogs, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.backups, appId: 'plantis'),
       BoxConfiguration.basic(name: 'plants', appId: 'plantis'),
       BoxConfiguration.basic(name: 'spaces', appId: 'plantis'),

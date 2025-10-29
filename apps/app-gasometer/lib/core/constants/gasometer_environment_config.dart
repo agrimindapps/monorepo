@@ -5,7 +5,8 @@ import 'package:core/core.dart';
 class GasometerEnvironmentConfig extends AppEnvironmentConfig {
   factory GasometerEnvironmentConfig() => _instance;
   GasometerEnvironmentConfig._internal();
-  static final GasometerEnvironmentConfig _instance = GasometerEnvironmentConfig._internal();
+  static final GasometerEnvironmentConfig _instance =
+      GasometerEnvironmentConfig._internal();
 
   @override
   String get appId => 'gasometer';
@@ -15,31 +16,31 @@ class GasometerEnvironmentConfig extends AppEnvironmentConfig {
 
   @override
   String get apiDomain => 'gasometer.com';
-  String get weatherApiKey => EnvironmentConfig.getApiKey(
-        'WEATHER_API_KEY',
-        fallback: 'weather_dummy_key',
-      );
+  String get weatherApiKey =>
+      EnvironmentConfig.get('WEATHER_API_KEY', fallback: 'weather_dummy_key');
 
-  String get googleMapsApiKey => EnvironmentConfig.getApiKey(
-        'GOOGLE_MAPS_API_KEY',
-        fallback: 'maps_dummy_key',
-      );
-  String get revenueCatApiKey => EnvironmentConfig.getApiKey(
-        'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
-        fallback: 'rcat_dev_dummy_key',
-      );
-  String get monthlyProductId => EnvironmentConfig.getProductId('gasometer_premium_monthly');
-  String get yearlyProductId => EnvironmentConfig.getProductId('gasometer_premium_yearly');
+  String get googleMapsApiKey =>
+      EnvironmentConfig.get('GOOGLE_MAPS_API_KEY', fallback: 'maps_dummy_key');
+  String get revenueCatApiKey => EnvironmentConfig.get(
+    'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
+    fallback: 'rcat_dev_dummy_key',
+  );
+  String get monthlyProductId =>
+      EnvironmentConfig.getProductId('gasometer_premium_monthly');
+  String get yearlyProductId =>
+      EnvironmentConfig.getProductId('gasometer_premium_yearly');
 
   /// Print gasometer-specific configuration for debugging
   void printGasometerConfig() {
-    EnvironmentConfig.printConfig(additionalConfig: {
-      'App ID': appId,
-      'Firebase Project': firebaseProjectId,
-      'API Base URL': apiBaseUrl,
-      'Monthly Product': monthlyProductId,
-      'Yearly Product': yearlyProductId,
-    });
+    EnvironmentConfig.printConfig(
+      additionalConfig: {
+        'App ID': appId,
+        'Firebase Project': firebaseProjectId,
+        'API Base URL': apiBaseUrl,
+        'Monthly Product': monthlyProductId,
+        'Yearly Product': yearlyProductId,
+      },
+    );
   }
 }
 

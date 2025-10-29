@@ -52,11 +52,11 @@ class ComentariosHiveRepository implements IComentariosRepository {
       }
 
       final userComments = hiveitems
-          .where((item) => item.status && item.userId == userId)
+          .where((item) => !item.sync_deleted && item.userId == userId)
           .toList()
         ..sort((a, b) {
-          final aTime = a.createdAt ?? 0;
-          final bTime = b.createdAt ?? 0;
+          final aTime = a.sync_createdAt ?? 0;
+          final bTime = b.sync_createdAt ?? 0;
           return bTime.compareTo(aTime); // Mais recente primeiro
         });
 
@@ -122,7 +122,7 @@ class ComentariosHiveRepository implements IComentariosRepository {
       }
       existing.conteudo = comentario.conteudo;
       existing.titulo = comentario.titulo;
-      existing.updatedAt = DateTime.now().millisecondsSinceEpoch;
+      existing.sync_updatedAt = DateTime.now().millisecondsSinceEpoch;
 
       // 1. Salva localmente
       await existing.save();
@@ -160,8 +160,8 @@ class ComentariosHiveRepository implements IComentariosRepository {
       if (existing.userId != userId) {
         throw Exception('Não autorizado a deletar este comentário');
       }
-      existing.status = false;
-      existing.updatedAt = DateTime.now().millisecondsSinceEpoch;
+      existing.sync_deleted = true;
+      existing.sync_updatedAt = DateTime.now().millisecondsSinceEpoch;
 
       // 1. Marca como deletado localmente (soft delete)
       await existing.save();
@@ -198,7 +198,7 @@ class ComentariosHiveRepository implements IComentariosRepository {
 
       final userId = await _getCurrentUserId();
       if (value.userId != userId) return null;
-      if (!value.status) return null; // Só retorna comentários ativos
+      if (value.sync_deleted) return null; // Só retorna comentários ativos (não deletados)
 
       return value.toComentarioModel();
     } catch (e) {
@@ -221,13 +221,13 @@ class ComentariosHiveRepository implements IComentariosRepository {
 
       final contextComments = hiveitems
           .where((item) =>
-              item.status &&
+              !item.sync_deleted &&
               item.userId == userId &&
               item.pkIdentificador == pkIdentificador)
           .toList()
         ..sort((a, b) {
-          final aTime = a.createdAt ?? 0;
-          final bTime = b.createdAt ?? 0;
+          final aTime = a.sync_createdAt ?? 0;
+          final bTime = b.sync_createdAt ?? 0;
           return bTime.compareTo(aTime);
         });
 
@@ -252,13 +252,13 @@ class ComentariosHiveRepository implements IComentariosRepository {
 
       final toolComments = hiveitems
           .where((item) =>
-              item.status &&
+              !item.sync_deleted &&
               item.userId == userId &&
               item.ferramenta == ferramenta)
           .toList()
         ..sort((a, b) {
-          final aTime = a.createdAt ?? 0;
-          final bTime = b.createdAt ?? 0;
+          final aTime = a.sync_createdAt ?? 0;
+          final bTime = b.sync_createdAt ?? 0;
           return bTime.compareTo(aTime);
         });
 
@@ -285,8 +285,8 @@ class ComentariosHiveRepository implements IComentariosRepository {
 
       final oldInactiveComments = hiveitems
           .where((item) =>
-              !item.status &&
-              (item.updatedAt ?? 0) < cutoffTime)
+              item.sync_deleted &&
+              (item.sync_updatedAt ?? 0) < cutoffTime)
           .toList();
 
       for (final comment in oldInactiveComments) {
@@ -314,10 +314,10 @@ class ComentariosHiveRepository implements IComentariosRepository {
           .where((ComentarioHive item) => item.userId == userId)
           .toList();
 
-      final activeComments = userComments.where((ComentarioHive item) => item.status).length;
-      final deletedComments = userComments.where((ComentarioHive item) => !item.status).length;
+      final activeComments = userComments.where((ComentarioHive item) => !item.sync_deleted).length;
+      final deletedComments = userComments.where((ComentarioHive item) => item.sync_deleted).length;
       final toolCounts = <String, int>{};
-      for (final comment in userComments.where((ComentarioHive item) => item.status)) {
+      for (final comment in userComments.where((ComentarioHive item) => !item.sync_deleted)) {
         toolCounts[comment.ferramenta] = (toolCounts[comment.ferramenta] ?? 0) + 1;
       }
 

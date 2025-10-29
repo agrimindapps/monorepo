@@ -23,7 +23,7 @@ abstract class TaskHistoryLocalDataSource {
 
 class TaskHistoryLocalDataSourceImpl implements TaskHistoryLocalDataSource {
   final ILocalStorageRepository storageService;
-  static const String _boxName = PlantisBoxes.care_logs;
+  static const String _boxName = PlantisBoxes.careLogs;
 
   TaskHistoryLocalDataSourceImpl(this.storageService);
 

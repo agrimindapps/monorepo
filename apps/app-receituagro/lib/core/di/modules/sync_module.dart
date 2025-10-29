@@ -64,7 +64,7 @@ abstract class SyncDIModule {
   }
 
   /// Executa sync inicial após o usuário fazer login
-  /// Usando o UnifiedSyncManager que já está configurado
+  /// Sincroniza dados de diagnósticos + dados do usuário (comentários/favoritos)
   static Future<void> performInitialSync(GetIt sl) async {
     try {
       final syncService = sl<ReceitaAgroSyncService>();
@@ -82,6 +82,7 @@ abstract class SyncDIModule {
         print('ℹ️ Using UnifiedSyncManager with advanced features');
       }
 
+      // Sync geral (diagnósticos, culturas, pragas, fitossanitários)
       final result = await syncService.sync();
 
       result.fold(
@@ -98,9 +99,43 @@ abstract class SyncDIModule {
           }
         },
       );
+
+      // Sync de dados do usuário (comentários e favoritos) - pós-login
+      // Executado após sync geral mas não aguardado (non-blocking)
+      unawaited(
+        _syncUserDataAfterLogin(sl),
+      );
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error during initial sync: $e');
+      }
+    }
+  }
+
+  /// Sincroniza dados do usuário após login (comentários e favoritos)
+  /// Método private chamado de forma non-blocking
+  static Future<void> _syncUserDataAfterLogin(GetIt sl) async {
+    try {
+      final syncService = sl<ReceitaAgroSyncService>();
+      final result = await syncService.syncUserData();
+
+      result.fold(
+        (failure) {
+          if (kDebugMode) {
+            print('⚠️ User data sync failed: ${failure.message}');
+          }
+        },
+        (syncResult) {
+          if (kDebugMode) {
+            print(
+              '✅ User data sync completed: ${syncResult.itemsSynced} items in ${syncResult.duration.inSeconds}s',
+            );
+          }
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error during user data sync: $e');
       }
     }
   }

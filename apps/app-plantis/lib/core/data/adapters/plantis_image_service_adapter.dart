@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/image_preloader_service.dart';
@@ -72,10 +73,9 @@ class PlantisImageServiceAdapter {
       imageFiles,
       folder: folder,
       uploadType: uploadType,
-      onProgress:
-          onProgress != null
-              ? (int index, double progress) => onProgress(progress)
-              : null,
+      onProgress: onProgress != null
+          ? (int index, double progress) => onProgress(progress)
+          : null,
     );
   }
 
@@ -283,11 +283,15 @@ class PlantisImageServiceAdapter {
 
   /// Cleanup resources (optional, for disposal)
   void dispose() {
-    debugPrint('🔌 PlantisImageServiceAdapter disposed');
+    if (kDebugMode) {
+      SecureLogger.debug('PlantisImageServiceAdapter disposed');
+    }
   }
 }
 
 /// Factory class for creating pre-configured adapters
+/// Note: Uses static methods as a factory pattern. No state to maintain.
+// ignore: avoid_classes_with_only_static_members
 class PlantisImageServiceAdapterFactory {
   /// Create adapter with plantis-optimized configuration
   static PlantisImageServiceAdapter createForPlantis() {

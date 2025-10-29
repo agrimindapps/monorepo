@@ -67,7 +67,7 @@ class HiveAdapterRegistry {
     'pragas_inf': 'receituagro_pragas_inf',
     'premium_status': 'receituagro_premium_status',
     'comentarios': 'comentarios',
-    'favoritos': 'receituagro_user_favorites',
+    'favoritos': 'favoritos',  // ✅ FIXED: Deve corresponder a FavoritosHiveRepository e ReceitaAgroBoxes
   };
 
   // ❌ REMOVIDO: openBoxes() - BoxRegistryService gerencia abertura

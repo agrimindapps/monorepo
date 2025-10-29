@@ -96,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: isMobile
-                ? size.width * 0.9
+                ? size.width * 0.95  // ✅ FIXED: Reduzido de 0.9 para 0.95 (mais próximo das bordas)
                 : (isTablet ? 500 : 1000),
             maxHeight: isMobile
                 ? double.infinity
@@ -105,7 +105,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           child: Card(
             elevation: 10,
             shadowColor: Theme.of(context).shadowColor,
-            margin: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),  // ✅ FIXED: Reduzido de 16 em todos os lados para 8 horizontal
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),

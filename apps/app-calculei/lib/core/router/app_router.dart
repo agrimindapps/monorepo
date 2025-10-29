@@ -9,6 +9,12 @@ import 'package:app_calculei/features/overtime_calculator/presentation/pages/ove
 import 'package:app_calculei/features/emergency_reserve_calculator/presentation/pages/emergency_reserve_calculator_page.dart';
 import 'package:app_calculei/features/cash_vs_installment_calculator/presentation/pages/cash_vs_installment_calculator_page.dart';
 import 'package:app_calculei/features/unemployment_insurance_calculator/presentation/pages/unemployment_insurance_calculator_page.dart';
+import 'package:app_calculei/features/construction_calculator/presentation/pages/construction_calculator_selection_page.dart';
+import 'package:app_calculei/features/construction_calculator/presentation/pages/materials_quantity_calculator_page.dart';
+import 'package:app_calculei/features/construction_calculator/presentation/pages/cost_per_sqm_calculator_page.dart';
+import 'package:app_calculei/features/construction_calculator/presentation/pages/paint_consumption_calculator_page.dart';
+import 'package:app_calculei/features/construction_calculator/presentation/pages/flooring_calculator_page.dart';
+import 'package:app_calculei/features/construction_calculator/presentation/pages/concrete_calculator_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -24,34 +30,60 @@ final appRouter = GoRouter(
       builder: (context, state) => const HomePage(),
     ),
 
-    // Implemented calculators
+    // ========== FINANCIAL CALCULATORS GROUP ==========
     GoRoute(
-      path: '/calc/thirteenth-salary',
+      path: '/financial/thirteenth-salary',
       builder: (context, state) => const ThirteenthSalaryCalculatorPage(),
     ),
     GoRoute(
-      path: '/calc/vacation',
+      path: '/financial/vacation',
       builder: (context, state) => const VacationCalculatorPage(),
     ),
     GoRoute(
-      path: '/calc/net-salary',
+      path: '/financial/net-salary',
       builder: (context, state) => const NetSalaryCalculatorPage(),
     ),
     GoRoute(
-      path: '/calc/overtime',
+      path: '/financial/overtime',
       builder: (context, state) => const OvertimeCalculatorPage(),
     ),
     GoRoute(
-      path: '/calc/emergency-reserve',
+      path: '/financial/emergency-reserve',
       builder: (context, state) => const EmergencyReserveCalculatorPage(),
     ),
     GoRoute(
-      path: '/calc/cash-vs-installment',
+      path: '/financial/cash-vs-installment',
       builder: (context, state) => const CashVsInstallmentCalculatorPage(),
     ),
     GoRoute(
-      path: '/calc/unemployment-insurance',
+      path: '/financial/unemployment-insurance',
       builder: (context, state) => const UnemploymentInsuranceCalculatorPage(),
+    ),
+
+    // ========== CONSTRUCTION CALCULATORS GROUP ==========
+    GoRoute(
+      path: '/construction/selection',
+      builder: (context, state) => const ConstructionCalculatorSelectionPage(),
+    ),
+    GoRoute(
+      path: '/construction/materials-quantity',
+      builder: (context, state) => const MaterialsQuantityCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/construction/cost-per-sqm',
+      builder: (context, state) => const CostPerSqmCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/construction/paint-consumption',
+      builder: (context, state) => const PaintConsumptionCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/construction/flooring',
+      builder: (context, state) => const FlooringCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/construction/concrete',
+      builder: (context, state) => const ConcreteCalculatorPage(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

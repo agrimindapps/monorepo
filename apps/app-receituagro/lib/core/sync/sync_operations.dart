@@ -81,12 +81,12 @@ class SyncOperations {
           await _processSyncItem(item);
         } catch (e) {
           if (kDebugMode) {
-            print('Error syncing item ${item.id}: $e');
+            print('Error syncing item ${item.sync_id}: $e');
           }
 
           if (!item.hasExceededMaxRetries) {
             await _syncQueue.incrementRetryCount(
-              item.id,
+              item.sync_id,
               errorMessage: e.toString(),
             );
           }
@@ -125,7 +125,7 @@ class SyncOperations {
       final priorityComparison = getPriority(b).compareTo(getPriority(a));
       return priorityComparison != 0
           ? priorityComparison
-          : a.timestamp.compareTo(b.timestamp); // FIFO within same priority
+          : a.sync_timestamp.compareTo(b.sync_timestamp); // FIFO within same priority
     });
 
     return items;
@@ -134,7 +134,7 @@ class SyncOperations {
   /// Process individual sync item
   Future<void> _processSyncItem(SyncQueueItem item) async {
     if (kDebugMode) {
-      print('Processing sync item: ${item.modelType} - ${item.operation}');
+      print('Processing sync item: ${item.modelType} - ${item.sync_operation}');
     }
 
     switch (item.operationType) {
@@ -149,10 +149,10 @@ class SyncOperations {
         break;
     }
 
-    await _syncQueue.markItemAsSynced(item.id);
+    await _syncQueue.markItemAsSynced(item.sync_id);
 
     if (kDebugMode) {
-      print('Successfully synced item: ${item.id}');
+      print('Successfully synced item: ${item.sync_id}');
     }
   }
 

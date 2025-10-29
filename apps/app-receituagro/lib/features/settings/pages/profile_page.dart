@@ -291,14 +291,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     if (shouldLogout == true && context.mounted) {
       try {
+        // Realizar logout
         await ref.read(receitaAgroAuthNotifierProvider.notifier).signOut();
+
         if (context.mounted) {
+          // Mostrar mensagem de sucesso
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Logout realizado com sucesso!'),
               backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
             ),
           );
+
+          // Aguardar um pouco para o snackbar ser visível
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+
+          // Navegar de volta para Settings
+          if (context.mounted) {
+            Navigator.of(context).popUntil((route) {
+              // Volta até encontrar a SettingsPage (ou sai da pilha)
+              return route.isFirst;
+            });
+          }
         }
       } catch (e) {
         if (context.mounted) {
@@ -306,6 +322,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             SnackBar(
               content: Text('Erro ao sair: $e'),
               backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -326,10 +343,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         final analytics = sl<ReceitaAgroAnalyticsService>();
 
         // Rastrear tentativa de limpeza
-        analytics.trackEvent('clear_data_attempt', parameters: {
-          'user_id': userId,
-          'trigger_source': 'profile_page',
-        });
+        analytics.trackEvent(
+          'clear_data_attempt',
+          parameters: {'user_id': userId, 'trigger_source': 'profile_page'},
+        );
 
         // Mostrar loading
         ScaffoldMessenger.of(context).showSnackBar(
@@ -375,9 +392,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ),
             );
           }
-          analytics.trackEvent('clear_data_no_data', parameters: {
-            'user_id': userId,
-          });
+          analytics.trackEvent(
+            'clear_data_no_data',
+            parameters: {'user_id': userId},
+          );
           return;
         }
 
@@ -398,11 +416,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
           if (success && errors.isEmpty) {
             // Sucesso completo
-            analytics.trackEvent('clear_data_success', parameters: {
-              'user_id': userId,
-              'total_cleared': totalCleared.toString(),
-              'duration_ms': duration.toString(),
-            });
+            analytics.trackEvent(
+              'clear_data_success',
+              parameters: {
+                'user_id': userId,
+                'total_cleared': totalCleared.toString(),
+                'duration_ms': duration.toString(),
+              },
+            );
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -424,11 +445,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             );
           } else if (success && errors.isNotEmpty) {
             // Sucesso parcial com alguns erros
-            analytics.trackEvent('clear_data_partial', parameters: {
-              'user_id': userId,
-              'total_cleared': totalCleared.toString(),
-              'errors_count': errors.length.toString(),
-            });
+            analytics.trackEvent(
+              'clear_data_partial',
+              parameters: {
+                'user_id': userId,
+                'total_cleared': totalCleared.toString(),
+                'errors_count': errors.length.toString(),
+              },
+            );
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -450,11 +474,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             );
           } else {
             // Erro na limpeza
-            final mainError = result['mainError']?.toString() ?? 'Erro desconhecido';
-            analytics.trackEvent('clear_data_failed', parameters: {
-              'user_id': userId,
-              'error': mainError,
-            });
+            final mainError =
+                result['mainError']?.toString() ?? 'Erro desconhecido';
+            analytics.trackEvent(
+              'clear_data_failed',
+              parameters: {'user_id': userId, 'error': mainError},
+            );
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -950,8 +975,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     size: 20,
                   ),
                 ),
-                title: const Text('Limpar Dados Locais'),
-                subtitle: const Text('Remove dados salvos neste dispositivo'),
+                title: const Text('Remover Dados Pessoais'),
+                subtitle: const Text(
+                  'Remove dados e sincroniza com outros dispositivos',
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _handleClearData(context),
               ),
@@ -1029,59 +1056,111 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _showExportDataJson(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(
-                Icons.data_object,
-                color: Colors.green,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text('Exportar como JSON'),
-          ],
-        ),
-        content: const Text(
-          'Esta funcionalidade irá baixar todos os seus dados em formato JSON estruturado. '
-          'Ideal para backup ou migração de dados.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Row(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.construction, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text('Exportação JSON em desenvolvimento'),
+                      Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.data_object,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Exportar como JSON',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Esta funcionalidade irá baixar todos os seus dados em formato JSON estruturado. Ideal para backup ou migração de dados.',
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ],
                   ),
-                  backgroundColor: Colors.green,
                 ),
-              );
-            },
-            child: const Text('Exportar JSON'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey.shade600,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(Icons.construction, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text('Exportação JSON em desenvolvimento'),
+                                  ],
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Exportar JSON',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1090,59 +1169,111 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _showExportDataCsv(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(
-                Icons.table_chart,
-                color: Colors.green,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text('Exportar como CSV'),
-          ],
-        ),
-        content: const Text(
-          'Esta funcionalidade irá baixar todos os seus dados em formato CSV (planilha). '
-          'Ideal para análise em Excel ou Google Sheets.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Row(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.construction, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text('Exportação CSV em desenvolvimento'),
+                      Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.table_chart,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Exportar como CSV',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Esta funcionalidade irá baixar todos os seus dados em formato CSV (planilha). Ideal para análise em Excel ou Google Sheets.',
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ],
                   ),
-                  backgroundColor: Colors.green,
                 ),
-              );
-            },
-            child: const Text('Exportar CSV'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey.shade600,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancelar',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(Icons.construction, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text('Exportação CSV em desenvolvimento'),
+                                  ],
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Exportar CSV',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1243,7 +1374,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                   ],
                 ),
-                backgroundColor: syncResult.success ? Colors.green : Colors.orange,
+                backgroundColor: syncResult.success
+                    ? Colors.green
+                    : Colors.orange,
                 duration: const Duration(seconds: 3),
               ),
             );

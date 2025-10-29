@@ -41,7 +41,7 @@ class PlantisStorageService {
       BoxConfiguration.basic(name: PlantisBoxes.spaces, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.tasks, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.reminders, appId: 'plantis'),
-      BoxConfiguration.basic(name: PlantisBoxes.care_logs, appId: 'plantis'),
+      BoxConfiguration.basic(name: PlantisBoxes.careLogs, appId: 'plantis'),
       BoxConfiguration.basic(name: PlantisBoxes.backups, appId: 'plantis'),
     ];
 
@@ -161,7 +161,7 @@ class PlantisStorageService {
     final result = await _storage.save<T>(
       key: logId,
       data: careLog,
-      box: PlantisBoxes.care_logs,
+      box: PlantisBoxes.careLogs,
     );
     return result.toResult();
   }
@@ -171,7 +171,7 @@ class PlantisStorageService {
     required String plantId,
   }) async {
     await _ensureInitialized();
-    final result = await _storage.getValues<T>(box: PlantisBoxes.care_logs);
+    final result = await _storage.getValues<T>(box: PlantisBoxes.careLogs);
     return result.toResult();
   }
 
@@ -237,7 +237,7 @@ class PlantisStorageService {
       PlantisBoxes.spaces,
       PlantisBoxes.tasks,
       PlantisBoxes.reminders,
-      PlantisBoxes.care_logs,
+      PlantisBoxes.careLogs,
       PlantisBoxes.backups,
     ];
 
@@ -263,7 +263,7 @@ class PlantisStorageService {
       PlantisBoxes.spaces,
       PlantisBoxes.tasks,
       PlantisBoxes.reminders,
-      PlantisBoxes.care_logs,
+      PlantisBoxes.careLogs,
       PlantisBoxes.backups,
     ];
 

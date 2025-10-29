@@ -21,18 +21,18 @@ class AppSettingsModel extends HiveObject {
   
   @HiveField(5)
   final String? userId;
-  
+
   @HiveField(6)
-  final bool synchronized;
-  
+  final bool sync_synchronized;
+
   @HiveField(7)
-  final DateTime? syncedAt;
-  
+  final DateTime? sync_syncedAt;
+
   @HiveField(8)
-  final DateTime createdAt;
-  
+  final DateTime sync_createdAt;
+
   @HiveField(9)
-  final DateTime? updatedAt;
+  final DateTime? sync_updatedAt;
 
   AppSettingsModel({
     this.theme = 'system',
@@ -41,10 +41,10 @@ class AppSettingsModel extends HiveObject {
     this.enableSync = true,
     this.featureFlags = const {},
     this.userId,
-    this.synchronized = false,
-    this.syncedAt,
-    required this.createdAt,
-    this.updatedAt,
+    this.sync_synchronized = false,
+    this.sync_syncedAt,
+    required this.sync_createdAt,
+    this.sync_updatedAt,
   });
 
   factory AppSettingsModel.fromMap(Map<String, dynamic> map) {
@@ -53,17 +53,17 @@ class AppSettingsModel extends HiveObject {
       language: map['language']?.toString() ?? 'pt',
       enableNotifications: map['enableNotifications'] == true,
       enableSync: map['enableSync'] == true,
-      featureFlags: map['featureFlags'] != null 
+      featureFlags: map['featureFlags'] != null
           ? Map<String, bool>.from(map['featureFlags'] as Map)
           : const {},
       userId: map['userId']?.toString(),
-      synchronized: map['synchronized'] == true,
-      syncedAt: map['syncedAt'] != null 
-          ? DateTime.tryParse(map['syncedAt'].toString())
+      sync_synchronized: map['sync_synchronized'] == true,
+      sync_syncedAt: map['sync_syncedAt'] != null
+          ? DateTime.tryParse(map['sync_syncedAt'].toString())
           : null,
-      createdAt: DateTime.tryParse(map['createdAt']?.toString() ?? '') ?? DateTime.now(),
-      updatedAt: map['updatedAt'] != null
-          ? DateTime.tryParse(map['updatedAt'].toString())
+      sync_createdAt: DateTime.tryParse(map['sync_createdAt']?.toString() ?? '') ?? DateTime.now(),
+      sync_updatedAt: map['sync_updatedAt'] != null
+          ? DateTime.tryParse(map['sync_updatedAt'].toString())
           : null,
     );
   }
@@ -76,10 +76,10 @@ class AppSettingsModel extends HiveObject {
       'enableSync': enableSync,
       'featureFlags': featureFlags,
       'userId': userId,
-      'synchronized': synchronized,
-      'syncedAt': syncedAt?.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'sync_synchronized': sync_synchronized,
+      'sync_syncedAt': sync_syncedAt?.toIso8601String(),
+      'sync_createdAt': sync_createdAt.toIso8601String(),
+      'sync_updatedAt': sync_updatedAt?.toIso8601String(),
     };
   }
 
@@ -90,10 +90,10 @@ class AppSettingsModel extends HiveObject {
     bool? enableSync,
     Map<String, bool>? featureFlags,
     String? userId,
-    bool? synchronized,
-    DateTime? syncedAt,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    bool? sync_synchronized,
+    DateTime? sync_syncedAt,
+    DateTime? sync_createdAt,
+    DateTime? sync_updatedAt,
   }) {
     return AppSettingsModel(
       theme: theme ?? this.theme,
@@ -102,24 +102,24 @@ class AppSettingsModel extends HiveObject {
       enableSync: enableSync ?? this.enableSync,
       featureFlags: featureFlags ?? this.featureFlags,
       userId: userId ?? this.userId,
-      synchronized: synchronized ?? this.synchronized,
-      syncedAt: syncedAt ?? this.syncedAt,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      sync_synchronized: sync_synchronized ?? this.sync_synchronized,
+      sync_syncedAt: sync_syncedAt ?? this.sync_syncedAt,
+      sync_createdAt: sync_createdAt ?? this.sync_createdAt,
+      sync_updatedAt: sync_updatedAt ?? this.sync_updatedAt,
     );
   }
 
   AppSettingsModel markAsUnsynchronized() {
     return copyWith(
-      synchronized: false,
-      updatedAt: DateTime.now(),
+      sync_synchronized: false,
+      sync_updatedAt: DateTime.now(),
     );
   }
 
   AppSettingsModel markAsSynchronized() {
     return copyWith(
-      synchronized: true,
-      syncedAt: DateTime.now(),
+      sync_synchronized: true,
+      sync_syncedAt: DateTime.now(),
     );
   }
 
@@ -152,7 +152,7 @@ class AppSettingsModel extends HiveObject {
         'theme: $theme, '
         'language: $language, '
         'sync: $enableSync, '
-        'synchronized: $synchronized'
+        'synchronized: $sync_synchronized'
         ')';
   }
 }

@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
 import '../../constants/settings_design_tokens.dart';
 
-/// Diálogo de confirmação para limpeza de dados
-/// Mostra as consequências de limpar os dados locais
-class ClearDataDialog extends StatelessWidget {
+/// Diálogo de confirmação para remoção de dados pessoais
+/// Mostra as consequências e o impacto em outros dispositivos
+class ClearDataDialog extends StatefulWidget {
   const ClearDataDialog({super.key});
+
+  @override
+  State<ClearDataDialog> createState() => _ClearDataDialogState();
+
+  static Future<bool?> show(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const ClearDataDialog(),
+    );
+  }
+}
+
+class _ClearDataDialogState extends State<ClearDataDialog> {
+  final TextEditingController _confirmationController = TextEditingController();
+  bool _isConfirmationValid = false;
+
+  @override
+  void dispose() {
+    _confirmationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -21,19 +46,19 @@ class ClearDataDialog extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: SettingsDesignTokens.warningColor.withValues(alpha: 0.1),
+                color: Colors.red.shade50,
                 borderRadius: BorderRadius.circular(32),
               ),
               child: const Icon(
                 Icons.delete_sweep,
                 size: 32,
-                color: SettingsDesignTokens.warningColor,
+                color: Colors.red,
               ),
             ),
 
             const SizedBox(height: 20),
             Text(
-              'Limpar Dados Locais',
+              'Remover Dados Pessoais',
               style: SettingsDesignTokens.getSectionTitleStyle(
                 context,
               ).copyWith(fontSize: 20),
@@ -54,7 +79,7 @@ class ClearDataDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ao limpar os dados locais:',
+                    'Ao remover seus dados pessoais:',
                     style: SettingsDesignTokens.getListTitleStyle(context),
                   ),
 
@@ -63,16 +88,16 @@ class ClearDataDialog extends StatelessWidget {
                     context,
                     icon: Icons.storage,
                     text:
-                        'Todas as receitas, diagnósticos e dados salvos localmente serão removidos',
-                    iconColor: SettingsDesignTokens.warningColor,
+                        'Seus favoritos e comentários serão removidos deste dispositivo',
+                    iconColor: Colors.red,
                   ),
 
                   const SizedBox(height: 8),
                   _buildInfoItem(
                     context,
-                    icon: Icons.settings_backup_restore,
-                    text: 'Suas configurações e preferências serão resetadas',
-                    iconColor: SettingsDesignTokens.warningColor,
+                    icon: Icons.sync,
+                    text: 'A remoção será sincronizada com todos seus outros dispositivos',
+                    iconColor: Colors.red,
                   ),
 
                   const SizedBox(height: 8),
@@ -80,22 +105,51 @@ class ClearDataDialog extends StatelessWidget {
                     context,
                     icon: Icons.cloud,
                     text:
-                        'Seus dados na nuvem permanecerão seguros e poderão ser baixados novamente',
-                    iconColor: SettingsDesignTokens.successColor,
-                    textColor: SettingsDesignTokens.successColor,
-                  ),
-
-                  const SizedBox(height: 8),
-                  _buildInfoItem(
-                    context,
-                    icon: Icons.refresh,
-                    text:
-                        'Você pode sincronizar seus dados novamente após a limpeza',
-                    iconColor: SettingsDesignTokens.primaryColor,
-                    textColor: SettingsDesignTokens.primaryColor,
+                        'Esta ação é permanente e não poderá ser desfeita',
+                    iconColor: Colors.red,
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 24),
+            const Text(
+              'Para confirmar, digite CONCORDO abaixo:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _confirmationController,
+              onChanged: (value) {
+                setState(() {
+                  _isConfirmationValid = value.trim().toUpperCase() == 'CONCORDO';
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Digite CONCORDO para confirmar',
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.red.shade400, width: 2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+              textCapitalization: TextCapitalization.characters,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
 
             const SizedBox(height: 24),
@@ -126,9 +180,13 @@ class ClearDataDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: _isConfirmationValid
+                        ? () => Navigator.of(context).pop(true)
+                        : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: SettingsDesignTokens.warningColor,
+                      backgroundColor: _isConfirmationValid
+                          ? Colors.red
+                          : Colors.grey.shade300,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -146,6 +204,7 @@ class ClearDataDialog extends StatelessWidget {
               ],
             ),
           ],
+          ),
         ),
       ),
     );
@@ -176,14 +235,6 @@ class ClearDataDialog extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  static Future<bool?> show(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const ClearDataDialog(),
     );
   }
 }

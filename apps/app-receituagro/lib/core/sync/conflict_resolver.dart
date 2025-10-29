@@ -58,14 +58,14 @@ class ConflictResolver {
   ) {
     // Para comentários, preferimos local se foi editado mais recentemente
     // mas preservamos informações importantes do remote
-    final isLocalNewer = (local.updatedAt ?? 0) >= (remote.updatedAt ?? 0);
+    final isLocalNewer = (local.sync_updatedAt ?? 0) >= (remote.sync_updatedAt ?? 0);
 
     return ComentarioHive(
-      objectId: local.objectId ?? remote.objectId,
-      createdAt: local.createdAt ?? remote.createdAt,
-      updatedAt: isLocalNewer ? local.updatedAt : remote.updatedAt,
+      sync_objectId: local.sync_objectId ?? remote.sync_objectId,
+      sync_createdAt: local.sync_createdAt ?? remote.sync_createdAt,
+      sync_updatedAt: isLocalNewer ? local.sync_updatedAt : remote.sync_updatedAt,
       idReg: local.idReg,
-      status: isLocalNewer ? local.status : remote.status,
+      sync_deleted: isLocalNewer ? local.sync_deleted : remote.sync_deleted,
       titulo: isLocalNewer && local.titulo.isNotEmpty ? local.titulo : remote.titulo,
       conteudo: isLocalNewer && local.conteudo.isNotEmpty ? local.conteudo : remote.conteudo,
       ferramenta: local.ferramenta.isNotEmpty ? local.ferramenta : remote.ferramenta,

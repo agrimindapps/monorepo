@@ -5,13 +5,13 @@ part 'premium_status_hive.g.dart';
 @HiveType(typeId: 111)
 class PremiumStatusHive extends HiveObject {
   @HiveField(0)
-  String? objectId;
+  String? sync_objectId;
 
   @HiveField(1)
-  int? createdAt;
+  int? sync_createdAt;
 
   @HiveField(2)
-  int? updatedAt;
+  int? sync_updatedAt;
 
   @HiveField(3)
   String userId;
@@ -35,15 +35,15 @@ class PremiumStatusHive extends HiveObject {
   String? productId;
 
   @HiveField(10)
-  int? lastSyncTimestamp;
+  int? sync_lastSyncTimestamp;
 
   @HiveField(11)
-  bool needsOnlineSync;
+  bool sync_needsOnlineSync;
 
   PremiumStatusHive({
-    this.objectId,
-    this.createdAt,
-    this.updatedAt,
+    this.sync_objectId,
+    this.sync_createdAt,
+    this.sync_updatedAt,
     required this.userId,
     required this.isActive,
     this.isTestSubscription = false,
@@ -51,8 +51,8 @@ class PremiumStatusHive extends HiveObject {
     this.planType,
     this.subscriptionId,
     this.productId,
-    this.lastSyncTimestamp,
-    this.needsOnlineSync = true,
+    this.sync_lastSyncTimestamp,
+    this.sync_needsOnlineSync = true,
   });
 
   /// Converte timestamp para DateTime
@@ -66,13 +66,13 @@ class PremiumStatusHive extends HiveObject {
   }
 
   /// Data da última sincronização
-  DateTime? get lastSync => lastSyncTimestamp != null
-      ? DateTime.fromMillisecondsSinceEpoch(lastSyncTimestamp!)
+  DateTime? get lastSync => sync_lastSyncTimestamp != null
+      ? DateTime.fromMillisecondsSinceEpoch(sync_lastSyncTimestamp!)
       : null;
 
-  /// Define data da última sincronização  
+  /// Define data da última sincronização
   set lastSync(DateTime? date) {
-    lastSyncTimestamp = date?.millisecondsSinceEpoch;
+    sync_lastSyncTimestamp = date?.millisecondsSinceEpoch;
   }
 
   /// Verifica se o premium está válido (não expirado)
@@ -84,9 +84,9 @@ class PremiumStatusHive extends HiveObject {
 
   /// Verifica se precisa sincronizar (dados antigos > 1 hora)
   bool get shouldSyncOnline {
-    if (needsOnlineSync) return true;
+    if (sync_needsOnlineSync) return true;
     if (lastSync == null) return true;
-    
+
     final hoursSinceSync = DateTime.now().difference(lastSync!).inHours;
     return hoursSinceSync >= 1; // Sincronizar a cada hora
   }
@@ -94,12 +94,12 @@ class PremiumStatusHive extends HiveObject {
   /// Marca como sincronizado
   void markAsSynced() {
     lastSync = DateTime.now();
-    needsOnlineSync = false;
+    sync_needsOnlineSync = false;
   }
 
   /// Marca como necessitando sincronização
   void markNeedsSync() {
-    needsOnlineSync = true;
+    sync_needsOnlineSync = true;
   }
 
   /// Factory para criar a partir de dados do RevenueCat/Core
@@ -114,16 +114,16 @@ class PremiumStatusHive extends HiveObject {
       planType: subscriptionEntity?.planType as String?,
       subscriptionId: subscriptionEntity?.id as String?,
       productId: subscriptionEntity?.productId as String?,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      updatedAt: DateTime.now().millisecondsSinceEpoch,
+      sync_createdAt: DateTime.now().millisecondsSinceEpoch,
+      sync_updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
   }
 
   /// Copia com novos valores
   PremiumStatusHive copyWith({
-    String? objectId,
-    int? createdAt,
-    int? updatedAt,
+    String? sync_objectId,
+    int? sync_createdAt,
+    int? sync_updatedAt,
     String? userId,
     bool? isActive,
     bool? isTestSubscription,
@@ -131,13 +131,13 @@ class PremiumStatusHive extends HiveObject {
     String? planType,
     String? subscriptionId,
     String? productId,
-    int? lastSyncTimestamp,
-    bool? needsOnlineSync,
+    int? sync_lastSyncTimestamp,
+    bool? sync_needsOnlineSync,
   }) {
     return PremiumStatusHive(
-      objectId: objectId ?? this.objectId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      sync_objectId: sync_objectId ?? this.sync_objectId,
+      sync_createdAt: sync_createdAt ?? this.sync_createdAt,
+      sync_updatedAt: sync_updatedAt ?? this.sync_updatedAt,
       userId: userId ?? this.userId,
       isActive: isActive ?? this.isActive,
       isTestSubscription: isTestSubscription ?? this.isTestSubscription,
@@ -145,8 +145,8 @@ class PremiumStatusHive extends HiveObject {
       planType: planType ?? this.planType,
       subscriptionId: subscriptionId ?? this.subscriptionId,
       productId: productId ?? this.productId,
-      lastSyncTimestamp: lastSyncTimestamp ?? this.lastSyncTimestamp,
-      needsOnlineSync: needsOnlineSync ?? this.needsOnlineSync,
+      sync_lastSyncTimestamp: sync_lastSyncTimestamp ?? this.sync_lastSyncTimestamp,
+      sync_needsOnlineSync: sync_needsOnlineSync ?? this.sync_needsOnlineSync,
     );
   }
 

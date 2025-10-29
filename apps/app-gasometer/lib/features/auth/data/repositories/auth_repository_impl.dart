@@ -58,10 +58,19 @@ class AuthRepositoryImpl implements AuthRepository {
           .watchAuthState()
           .map<Either<Failure, UserEntity?>>((userModel) {
             if (userModel == null) {
-              localDataSource.clearCachedUser().catchError((_) {});
+              // Fire-and-forget: Clear cached user on logout
+              localDataSource.clearCachedUser().catchError((Object e) {
+                SecureLogger.warning(
+                  'Failed to clear cached user on logout',
+                  error: e,
+                );
+              });
               return const Right(null);
             }
-            localDataSource.cacheUser(userModel).catchError((_) {});
+            // Fire-and-forget: Cache user on login
+            localDataSource.cacheUser(userModel).catchError((Object e) {
+              SecureLogger.warning('Failed to cache user on login', error: e);
+            });
 
             return Right(userModel);
           })

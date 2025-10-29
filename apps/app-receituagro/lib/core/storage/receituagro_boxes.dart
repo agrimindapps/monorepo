@@ -8,7 +8,7 @@ class ReceitaAgroBoxes {
 
   static const String receituagro = 'receituagro';
   static const String cache = 'receituagro_cache';
-  static const String favoritos = 'receituagro_favoritos';
+  static const String favoritos = 'favoritos';  // ✅ FIXED: Deve corresponder ao nome usado pelo UnifiedSyncManager e FavoritosHiveRepository
   static const String settings = 'receituagro_settings';
   static const String offline = 'receituagro_offline';
 

@@ -16,16 +16,12 @@ class PlantisEnvironmentConfig extends AppEnvironmentConfig {
 
   @override
   String get apiDomain => 'plantisreceituagro.com';
-  String get weatherApiKey => EnvironmentConfig.getApiKey(
-    'WEATHER_API_KEY',
-    fallback: 'weather_dummy_key',
-  );
+  String get weatherApiKey =>
+      EnvironmentConfig.get('WEATHER_API_KEY', fallback: 'weather_dummy_key');
 
-  String get googleMapsApiKey => EnvironmentConfig.getApiKey(
-    'GOOGLE_MAPS_API_KEY',
-    fallback: 'maps_dummy_key',
-  );
-  String get revenueCatApiKey => EnvironmentConfig.getApiKey(
+  String get googleMapsApiKey =>
+      EnvironmentConfig.get('GOOGLE_MAPS_API_KEY', fallback: 'maps_dummy_key');
+  String get revenueCatApiKey => EnvironmentConfig.get(
     'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
     fallback: 'rcat_dev_dummy_key',
   );
@@ -56,7 +52,7 @@ class PlantisBoxes {
   static const String tasks = 'tasks';
   static const String comentarios = 'comentarios';
   static const String reminders = 'plantis_reminders';
-  static const String care_logs = 'plantis_care_logs';
+  static const String careLogs = 'plantis_care_logs';
   static const String backups = 'plantis_backups';
 }
 

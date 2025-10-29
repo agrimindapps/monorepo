@@ -9,7 +9,6 @@ import 'constants/settings_design_tokens.dart';
 import 'presentation/providers/settings_notifier.dart';
 import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/auth_section.dart';
-import 'widgets/sections/development_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
 import 'widgets/sections/legal_section.dart';
 import 'widgets/sections/notifications_section.dart';
@@ -113,7 +112,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         NotificationsSection(),
         TtsSettingsSection(),
         FeatureFlagsSection(),
-        DevelopmentSection(),
         LegalSection(),
         SupportSection(),
         SizedBox(height: 16),

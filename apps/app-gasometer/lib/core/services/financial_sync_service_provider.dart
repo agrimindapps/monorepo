@@ -7,15 +7,19 @@ import 'financial_sync_service.dart';
 import 'financial_validator.dart';
 
 // Provider for FinancialAuditTrailService
-final financialAuditTrailServiceProvider = Provider<FinancialAuditTrailService>((ref) {
-  final service = FinancialAuditTrailService();
-  // Initialize will be called when service is first accessed
-  service.initialize();
-  return service;
-});
+final financialAuditTrailServiceProvider = Provider<FinancialAuditTrailService>(
+  (ref) {
+    final service = FinancialAuditTrailService();
+    // Initialize will be called when service is first accessed
+    service.initialize();
+    return service;
+  },
+);
 
 // Provider for FinancialConflictResolver
-final financialConflictResolverProvider = Provider<FinancialConflictResolver>((ref) {
+final financialConflictResolverProvider = Provider<FinancialConflictResolver>((
+  ref,
+) {
   final auditService = ref.watch(financialAuditTrailServiceProvider);
   return FinancialConflictResolver(auditService);
 });
@@ -35,10 +39,11 @@ final financialSyncServiceProvider = Provider<FinancialSyncService>((ref) {
   );
 
   // Initialize the service
-  service.initialize().catchError((error) {
-    if (kDebugMode) {
-      print('⚠️ Failed to initialize FinancialSyncService: $error');
-    }
+  service.initialize().catchError((Object error) {
+    SecureLogger.warning(
+      'Failed to initialize FinancialSyncService',
+      error: error,
+    );
   });
 
   // Dispose on provider disposal

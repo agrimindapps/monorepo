@@ -97,8 +97,8 @@ class UserDataRepository {
           );
           final updatedSettings = settings.copyWith(
             userId: userId,
-            updatedAt: DateTime.now(),
-            synchronized: false, // Marca como não sincronizado
+            sync_updatedAt: DateTime.now(),
+            sync_synchronized: false, // Marca como não sincronizado
           );
           if (existingKey != null) {
             await box.put(existingKey, updatedSettings);
@@ -127,8 +127,8 @@ class UserDataRepository {
 
       final defaultSettings = AppSettingsModel(
         userId: userId,
-        createdAt: DateTime.now(),
-        synchronized: false,
+        sync_createdAt: DateTime.now(),
+        sync_synchronized: false,
       );
 
       final saveResult = await saveAppSettings(defaultSettings);
@@ -427,7 +427,7 @@ class UserDataRepository {
       final unsynchronizedData = <String, List<dynamic>>{};
       final settingsResult = await getAppSettings();
       settingsResult.fold((error) => null, (settings) {
-        if (settings != null && !settings.synchronized) {
+        if (settings != null && !settings.sync_synchronized) {
           unsynchronizedData['app_settings'] = [settings];
         }
       });

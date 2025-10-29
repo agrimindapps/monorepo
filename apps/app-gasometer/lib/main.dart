@@ -11,6 +11,7 @@ import 'core/services/auto_sync_service.dart';
 import 'core/services/connectivity_state_manager.dart';
 import 'core/services/connectivity_sync_integration.dart';
 import 'firebase_options.dart';
+
 late ICrashlyticsRepository _crashlyticsRepository;
 late ConnectivitySyncIntegration _connectivityIntegration;
 late AutoSyncService _autoSyncService;
@@ -25,10 +26,14 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     firebaseInitialized = true;
-    debugPrint('Firebase initialized successfully');
+    if (kDebugMode) {
+      SecureLogger.info('Firebase initialized successfully');
+    }
   } catch (e) {
-    debugPrint('Firebase initialization failed: $e');
-    debugPrint('App will continue without Firebase features (local-first mode)');
+    SecureLogger.error('Firebase initialization failed', error: e);
+    SecureLogger.warning(
+      'App will continue without Firebase features (local-first mode)',
+    );
   }
 
   try {
@@ -62,21 +67,27 @@ Future<void> main() async {
     // Sync config only if Firebase is available
     if (firebaseInitialized) {
       if (kDebugMode) {
-        print('🔄 Initializing GasometerSyncConfig (development mode)...');
+        SecureLogger.info(
+          'Initializing GasometerSyncConfig (development mode)',
+        );
         await GasometerSyncConfig.configureDevelopment();
-        print('✅ GasometerSyncConfig initialized successfully');
+        SecureLogger.info('GasometerSyncConfig initialized successfully');
       } else {
         await GasometerSyncConfig.configure();
       }
       await SyncDIModule.initializeSyncService(di.sl);
     } else {
-      debugPrint('⚠️ Sync services not initialized - running in local-only mode');
+      SecureLogger.warning(
+        'Sync services not initialized - running in local-only mode',
+      );
     }
 
     if (firebaseInitialized) {
       await _initializeFirebaseServices();
     } else {
-      debugPrint('⚠️ Firebase services not initialized - running in local-first mode');
+      SecureLogger.warning(
+        'Firebase services not initialized - running in local-first mode',
+      );
     }
 
     await _initializeConnectivityMonitoring();
@@ -115,7 +126,9 @@ Future<void> main() async {
 /// Initialize Firebase services (Analytics, Crashlytics, Performance)
 Future<void> _initializeFirebaseServices() async {
   try {
-    debugPrint('🚀 Initializing Firebase services...');
+    if (kDebugMode) {
+      SecureLogger.info('Initializing Firebase services');
+    }
     final analyticsRepository = di.sl<IAnalyticsRepository>();
     final performanceRepository = di.sl<IPerformanceRepository>();
     await _crashlyticsRepository.setCustomKey(
@@ -139,24 +152,27 @@ Future<void> _initializeFirebaseServices() async {
 
     await _crashlyticsRepository.log('GasOMeter app initialized successfully');
 
-    debugPrint('✅ Firebase services initialized successfully');
+    if (kDebugMode) {
+      SecureLogger.info('Firebase services initialized successfully');
+    }
   } catch (e, stackTrace) {
-    debugPrint('❌ Error initializing Firebase services: $e');
+    SecureLogger.error('Error initializing Firebase services', error: e);
     try {
       await _crashlyticsRepository.recordError(
         exception: e,
         stackTrace: stackTrace,
         reason: 'Firebase services initialization failed',
       );
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 }
 
 /// Initialize connectivity monitoring and sync integration
 Future<void> _initializeConnectivityMonitoring() async {
   try {
-    debugPrint('🌐 Initializing connectivity monitoring...');
+    if (kDebugMode) {
+      SecureLogger.info('Initializing connectivity monitoring');
+    }
 
     final connectivityService = di.sl<ConnectivityService>();
     final stateManager = di.sl<ConnectivityStateManager>();
@@ -168,9 +184,11 @@ Future<void> _initializeConnectivityMonitoring() async {
 
     await _connectivityIntegration.initialize();
 
-    debugPrint('✅ Connectivity monitoring initialized successfully');
+    if (kDebugMode) {
+      SecureLogger.info('Connectivity monitoring initialized successfully');
+    }
   } catch (e, stackTrace) {
-    debugPrint('❌ Error initializing connectivity monitoring: $e');
+    SecureLogger.error('Error initializing connectivity monitoring', error: e);
     // Only try to record error if crashlytics is available
     if (di.sl.isRegistered<ICrashlyticsRepository>()) {
       try {
@@ -189,7 +207,9 @@ Future<void> _initializeConnectivityMonitoring() async {
 /// Initialize auto-sync service for periodic background sync
 Future<void> _initializeAutoSync() async {
   try {
-    debugPrint('⏰ Initializing auto-sync service...');
+    if (kDebugMode) {
+      SecureLogger.info('Initializing auto-sync service');
+    }
 
     _autoSyncService = di.sl<AutoSyncService>();
     await _autoSyncService.initialize();
@@ -197,9 +217,11 @@ Future<void> _initializeAutoSync() async {
     // Auto-sync will be started by app lifecycle observer in GasOMeterApp
     // when app becomes active
 
-    debugPrint('✅ Auto-sync service initialized successfully');
+    if (kDebugMode) {
+      SecureLogger.info('Auto-sync service initialized successfully');
+    }
   } catch (e, stackTrace) {
-    debugPrint('❌ Error initializing auto-sync service: $e');
+    SecureLogger.error('Error initializing auto-sync service', error: e);
     // Only try to record error if crashlytics is available
     if (di.sl.isRegistered<ICrashlyticsRepository>()) {
       try {

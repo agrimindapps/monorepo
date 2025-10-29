@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/modern_header_widget.dart';
+import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../constants/settings_design_tokens.dart';
 import '../domain/entities/tts_settings_entity.dart';
 import '../presentation/providers/tts_notifier.dart';
@@ -16,42 +18,50 @@ class TtsSettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ttsSettingsAsync = ref.watch(ttsNotifierProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Leitura de Voz (TTS)'),
-        backgroundColor: theme.colorScheme.surface,
-        foregroundColor: theme.colorScheme.onSurface,
-        elevation: 0,
-      ),
       body: SafeArea(
-        child: ttsSettingsAsync.when(
-          data: (settings) => _buildSettingsContent(context, ref, settings),
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
-          error: (error, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: ResponsiveContentWrapper(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: theme.colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Erro ao carregar configurações de TTS',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                _buildModernHeader(context, isDark),
+                Expanded(
+                  child: ttsSettingsAsync.when(
+                    data: (settings) =>
+                        _buildSettingsContent(context, ref, settings),
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    error: (error, _) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: theme.colorScheme.error,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Erro ao carregar configurações de TTS',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            error.toString(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -61,36 +71,49 @@ class TtsSettingsPage extends ConsumerWidget {
     );
   }
 
+  Widget _buildModernHeader(BuildContext context, bool isDark) {
+    return ModernHeaderWidget(
+      title: 'Leitura de Voz',
+      subtitle: 'Configurar parâmetros de áudio',
+      leftIcon: Icons.volume_up,
+      showBackButton: true,
+      isDark: isDark,
+    );
+  }
+
   Widget _buildSettingsContent(
     BuildContext context,
     WidgetRef ref,
     TTSSettingsEntity settings,
   ) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Enable/Disable Section
-        SettingsCard(
-          child: Column(
-            children: [
-              SettingsListTile(
-                leadingIcon: Icons.volume_up,
-                title: 'Habilitar Leitura de Voz',
-                subtitle: settings.enabled
-                    ? 'Leitura de texto habilitada'
-                    : 'Leitura de texto desabilitada',
-                trailing: Switch.adaptive(
-                  value: settings.enabled,
-                  onChanged: (_) =>
-                      ref.read(ttsNotifierProvider.notifier).toggleEnabled(),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        children: [
+          const SizedBox(height: 8),
+          // Enable/Disable Section
+          SettingsCard(
+            child: Column(
+              children: [
+                SettingsListTile(
+                  leadingIcon: Icons.volume_up,
+                  title: 'Habilitar Leitura de Voz',
+                  subtitle: settings.enabled
+                      ? 'Leitura de texto habilitada'
+                      : 'Leitura de texto desabilitada',
+                  trailing: Switch.adaptive(
+                    value: settings.enabled,
+                    onChanged: (_) =>
+                        ref.read(ttsNotifierProvider.notifier).toggleEnabled(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
 
         if (settings.enabled) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Voice Parameters Section
           SettingsCard(
@@ -98,10 +121,10 @@ class TtsSettingsPage extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                   child: Text(
                     'Parâmetros de Voz',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -179,7 +202,7 @@ class TtsSettingsPage extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Test Voice Section
           SettingsCard(
@@ -191,7 +214,7 @@ class TtsSettingsPage extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Info Card
           Card(
@@ -202,19 +225,20 @@ class TtsSettingsPage extends ConsumerWidget {
                   BorderRadius.circular(SettingsDesignTokens.cardBorderRadius),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
+                    size: 20,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Use os botões de TTS nas páginas de pragas e defensivos para ouvir o conteúdo',
                       style:
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onPrimaryContainer,
@@ -225,8 +249,10 @@ class TtsSettingsPage extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ],
+      ),
     );
   }
 
@@ -242,7 +268,7 @@ class TtsSettingsPage extends ConsumerWidget {
     required ValueChanged<double> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -253,14 +279,14 @@ class TtsSettingsPage extends ConsumerWidget {
                 size: 24,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
                     ),
@@ -278,7 +304,7 @@ class TtsSettingsPage extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Slider.adaptive(
             value: value,
             min: min,

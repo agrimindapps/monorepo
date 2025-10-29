@@ -175,8 +175,8 @@ class _CashVsInstallmentInputFormState
   }
 
   void _submitForm() {
-    if (!widget.formKey.currentState!.validate()) return;
-
+    // Validation has already been done by the parent widget
+    // Just extract and submit the parameters
     final params = CalculateCashVsInstallmentParams(
       cashPrice: _parseNumericValue(_cashPriceController.text),
       installmentPrice: _parseNumericValue(_installmentPriceController.text),

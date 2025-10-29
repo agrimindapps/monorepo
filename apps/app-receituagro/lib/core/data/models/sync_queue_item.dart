@@ -7,47 +7,47 @@ enum SyncOperationType { create, update, delete }
 @HiveType(typeId: 109)
 class SyncQueueItem extends HiveObject {
   @HiveField(0)
-  final String id;
+  final String sync_id;
 
   @HiveField(1)
   final String modelType;
 
   @HiveField(2)
-  final String operation;
+  final String sync_operation;
 
   @HiveField(3)
   final Map<String, dynamic> data;
 
   @HiveField(4)
-  final DateTime timestamp;
+  final DateTime sync_timestamp;
 
   @HiveField(5)
-  int retryCount;
+  int sync_retryCount;
 
   @HiveField(6)
-  bool isSynced;
+  bool sync_isSynced;
 
   @HiveField(7)
-  String? errorMessage;
+  String? sync_errorMessage;
 
   @HiveField(8)
-  DateTime? lastRetryAt;
+  DateTime? sync_lastRetryAt;
 
   SyncQueueItem({
-    required this.id,
+    required this.sync_id,
     required this.modelType,
-    required this.operation,
+    required this.sync_operation,
     required this.data,
-    DateTime? timestamp,
-    this.retryCount = 0,
-    this.isSynced = false,
-    this.errorMessage,
-    this.lastRetryAt,
-  }) : timestamp = timestamp ?? DateTime.now();
+    DateTime? sync_timestamp,
+    this.sync_retryCount = 0,
+    this.sync_isSynced = false,
+    this.sync_errorMessage,
+    this.sync_lastRetryAt,
+  }) : sync_timestamp = sync_timestamp ?? DateTime.now();
 
   /// Get operation type from string
   SyncOperationType get operationType {
-    switch (operation.toLowerCase()) {
+    switch (sync_operation.toLowerCase()) {
       case 'create':
         return SyncOperationType.create;
       case 'update':
@@ -55,58 +55,58 @@ class SyncQueueItem extends HiveObject {
       case 'delete':
         return SyncOperationType.delete;
       default:
-        throw ArgumentError('Invalid operation type: $operation');
+        throw ArgumentError('Invalid operation type: $sync_operation');
     }
   }
 
   /// Check if max retries reached (3 attempts)
-  bool get hasExceededMaxRetries => retryCount >= 3;
+  bool get hasExceededMaxRetries => sync_retryCount >= 3;
 
   /// Check if item needs retry
-  bool get needsRetry => !isSynced && !hasExceededMaxRetries;
+  bool get needsRetry => !sync_isSynced && !hasExceededMaxRetries;
 
   /// Check if should retry based on exponential backoff
   bool shouldRetryNow() {
-    if (isSynced || hasExceededMaxRetries) return false;
-    if (lastRetryAt == null) return true;
+    if (sync_isSynced || hasExceededMaxRetries) return false;
+    if (sync_lastRetryAt == null) return true;
 
     // Exponential backoff: 1min, 5min, 15min
     final backoffMinutes = [1, 5, 15];
-    if (retryCount >= backoffMinutes.length) return false;
+    if (sync_retryCount >= backoffMinutes.length) return false;
 
     final minutesSinceLastRetry = DateTime.now()
-        .difference(lastRetryAt!)
+        .difference(sync_lastRetryAt!)
         .inMinutes;
-    return minutesSinceLastRetry >= backoffMinutes[retryCount];
+    return minutesSinceLastRetry >= backoffMinutes[sync_retryCount];
   }
 
   SyncQueueItem copyWith({
-    String? id,
+    String? sync_id,
     String? modelType,
-    String? operation,
+    String? sync_operation,
     Map<String, dynamic>? data,
-    DateTime? timestamp,
-    int? retryCount,
-    bool? isSynced,
-    String? errorMessage,
-    DateTime? lastRetryAt,
+    DateTime? sync_timestamp,
+    int? sync_retryCount,
+    bool? sync_isSynced,
+    String? sync_errorMessage,
+    DateTime? sync_lastRetryAt,
   }) {
     return SyncQueueItem(
-      id: id ?? this.id,
+      sync_id: sync_id ?? this.sync_id,
       modelType: modelType ?? this.modelType,
-      operation: operation ?? this.operation,
+      sync_operation: sync_operation ?? this.sync_operation,
       data: data ?? this.data,
-      timestamp: timestamp ?? this.timestamp,
-      retryCount: retryCount ?? this.retryCount,
-      isSynced: isSynced ?? this.isSynced,
-      errorMessage: errorMessage ?? this.errorMessage,
-      lastRetryAt: lastRetryAt ?? this.lastRetryAt,
+      sync_timestamp: sync_timestamp ?? this.sync_timestamp,
+      sync_retryCount: sync_retryCount ?? this.sync_retryCount,
+      sync_isSynced: sync_isSynced ?? this.sync_isSynced,
+      sync_errorMessage: sync_errorMessage ?? this.sync_errorMessage,
+      sync_lastRetryAt: sync_lastRetryAt ?? this.sync_lastRetryAt,
     );
   }
 
   @override
   String toString() {
-    return 'SyncQueueItem(id: $id, modelType: $modelType, operation: $operation, '
-        'retryCount: $retryCount, isSynced: $isSynced)';
+    return 'SyncQueueItem(sync_id: $sync_id, modelType: $modelType, sync_operation: $sync_operation, '
+        'sync_retryCount: $sync_retryCount, sync_isSynced: $sync_isSynced)';
   }
 }

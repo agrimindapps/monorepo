@@ -40,12 +40,18 @@ void main() async {
   // Initialize Firebase with error handling
   bool firebaseInitialized = false;
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     firebaseInitialized = true;
-    debugPrint('Firebase initialized successfully');
+    if (kDebugMode) {
+      SecureLogger.info('Firebase initialized successfully');
+    }
   } catch (e) {
-    debugPrint('Firebase initialization failed: $e');
-    debugPrint('App will continue without Firebase features (local-first mode)');
+    SecureLogger.error('Firebase initialization failed', error: e);
+    SecureLogger.warning(
+      'App will continue without Firebase features (local-first mode)',
+    );
   }
 
   await Hive.initFlutter();
@@ -72,11 +78,14 @@ void main() async {
   if (firebaseInitialized) {
     await PlantisSyncConfig.configure();
 
-    final simpleSubscriptionSyncService = di.sl<SimpleSubscriptionSyncService>();
+    final simpleSubscriptionSyncService = di
+        .sl<SimpleSubscriptionSyncService>();
     await simpleSubscriptionSyncService.initialize();
     await SyncDIModule.initializeSyncService(di.sl);
   } else {
-    debugPrint('⚠️ Sync services not initialized - running in local-only mode');
+    SecureLogger.warning(
+      'Sync services not initialized - running in local-only mode',
+    );
   }
 
   // Notification service can work without Firebase
@@ -91,7 +100,9 @@ void main() async {
   if (firebaseInitialized) {
     await _initializeFirebaseServices();
   } else {
-    debugPrint('⚠️ Firebase services not initialized - running in local-first mode');
+    SecureLogger.warning(
+      'Firebase services not initialized - running in local-first mode',
+    );
   }
   final prefs = await SharedPreferences.getInstance();
   if (EnvironmentConfig.enableAnalytics) {
@@ -129,7 +140,9 @@ void main() async {
 /// Initialize Firebase services (Analytics, Crashlytics, Performance)
 Future<void> _initializeFirebaseServices() async {
   try {
-    debugPrint('🚀 Initializing Firebase services...');
+    if (kDebugMode) {
+      SecureLogger.info('Initializing Firebase services...');
+    }
     final analyticsRepository = di.sl<IAnalyticsRepository>();
     _crashlyticsRepository = di.sl<ICrashlyticsRepository>();
     _performanceRepository = di.sl<IPerformanceRepository>();
@@ -182,9 +195,11 @@ Future<void> _initializeFirebaseServices() async {
 
     await _crashlyticsRepository.log('Plantis app initialized successfully');
 
-    debugPrint('✅ Firebase services initialized successfully');
+    if (kDebugMode) {
+      SecureLogger.info('Firebase services initialized successfully');
+    }
   } catch (e, stackTrace) {
-    debugPrint('❌ Error initializing Firebase services: $e');
+    SecureLogger.error('Error initializing Firebase services', error: e);
     try {
       await _crashlyticsRepository.recordError(
         exception: e,

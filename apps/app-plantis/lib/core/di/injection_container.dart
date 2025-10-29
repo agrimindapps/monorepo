@@ -99,12 +99,18 @@ void _initCoreServices({bool firebaseEnabled = false}) {
       sl.registerLazySingleton<ICrashlyticsRepository>(
         () => FirebaseCrashlyticsService(),
       );
-      debugPrint('Firebase services registered in DI');
+      if (kDebugMode) {
+        SecureLogger.info('Firebase services registered in DI');
+      }
     } catch (e) {
-      debugPrint('Failed to register Firebase services: $e');
+      SecureLogger.error('Failed to register Firebase services', error: e);
     }
   } else {
-    debugPrint('Firebase services not registered (running in local-only mode)');
+    if (kDebugMode) {
+      SecureLogger.warning(
+        'Firebase services not registered (running in local-only mode)',
+      );
+    }
   }
 
   sl.registerLazySingleton<NetworkInfo>(

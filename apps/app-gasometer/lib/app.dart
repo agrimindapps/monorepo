@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide AuthProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'core/router/app_router.dart';
@@ -24,7 +25,9 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     try {
       main.autoSyncService.start();
     } catch (e) {
-      debugPrint('⚠️ Failed to start auto-sync service: $e');
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to start auto-sync service', error: e);
+      }
     }
   }
 
@@ -55,7 +58,9 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
           break;
       }
     } catch (e) {
-      debugPrint('⚠️ Error handling lifecycle state change: $e');
+      if (kDebugMode) {
+        SecureLogger.warning('Error handling lifecycle state change', error: e);
+      }
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import '../data/models/comentario_hive.dart';
 import 'hive_adapter_registry.dart';
 
 /// Implementação específica do ReceitaAgro para limpeza de dados
@@ -19,7 +20,8 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
   @override
   Future<Map<String, dynamic>> clearAllAppData() async {
     if (kDebugMode) {
-      debugPrint('🧹 ReceitaAgroDataCleaner: Iniciando limpeza completa de dados...');
+      debugPrint('🧹 ReceitaAgroDataCleaner: Iniciando limpeza de dados do usuário...');
+      debugPrint('   ✅ Preservando dados estáticos: culturas, pragas, defensivos, diagnósticos');
     }
 
     final startTime = DateTime.now();
@@ -31,7 +33,8 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     };
 
     try {
-      final boxResults = await _clearAllHiveBoxes();
+      // Limpar apenas dados do usuário (NOT dados estáticos)
+      final boxResults = await _clearUserDataBoxesOnly();
       results['clearedBoxes'] = boxResults['clearedBoxes'];
       if (boxResults['errors'] != null) {
         results['errors'].addAll(boxResults['errors']);
@@ -51,7 +54,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       results['success'] = false;
       results['mainError'] = e.toString();
       if (kDebugMode) {
-        debugPrint('❌ ReceitaAgroDataCleaner: Erro na limpeza completa - $e');
+        debugPrint('❌ ReceitaAgroDataCleaner: Erro na limpeza - $e');
       }
     }
 
@@ -59,7 +62,7 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     results['duration'] = results['endTime'].difference(startTime).inMilliseconds;
 
     if (kDebugMode) {
-      debugPrint('✅ ReceitaAgroDataCleaner: Limpeza completa finalizada:');
+      debugPrint('✅ ReceitaAgroDataCleaner: Limpeza de dados do usuário finalizada:');
       debugPrint('   Boxes limpos: ${results['totalClearedBoxes'] ?? 0}');
       debugPrint('   Preferências limpas: ${results['totalClearedPreferences'] ?? 0}');
       debugPrint('   Registros totais: ${results['totalRecordsCleared'] ?? 0}');
@@ -164,6 +167,38 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
     };
 
     try {
+      // Tratamento especial para favoritos e comentários: soft delete com sync
+      if (category == 'favoritos') {
+        final softDeleteResult = await _markFavoritosAsDeleted();
+        if (softDeleteResult['success'] == true) {
+          results['clearedBoxes'].add('favoritos');
+          results['totalRecordsCleared'] = softDeleteResult['totalMarkedAsDeleted'] ?? 0;
+          if (kDebugMode) {
+            debugPrint('✅ Favoritos marcados como deletados e sincronização disparada');
+          }
+        } else {
+          results['errors'].add(softDeleteResult['error'] ?? 'Erro ao marcar favoritos como deletados');
+        }
+        results['success'] = results['errors'].isEmpty;
+        return results;
+      }
+
+      if (category == 'comentarios') {
+        final softDeleteResult = await _markComentariosAsDeleted();
+        if (softDeleteResult['success'] == true) {
+          results['clearedBoxes'].add('comentarios');
+          results['totalRecordsCleared'] = softDeleteResult['totalMarkedAsDeleted'] ?? 0;
+          if (kDebugMode) {
+            debugPrint('✅ Comentários marcados como deletados e sincronização disparada');
+          }
+        } else {
+          results['errors'].add(softDeleteResult['error'] ?? 'Erro ao marcar comentários como deletados');
+        }
+        results['success'] = results['errors'].isEmpty;
+        return results;
+      }
+
+      // Para outras categorias, fazer clear normal
       final boxesToClear = _getBoxesForCategory(category);
 
       if (boxesToClear.isEmpty) {
@@ -277,6 +312,83 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
       }
       return false;
     }
+  }
+
+  /// Limpa APENAS boxes com dados do usuário (preserva dados estáticos como culturas, pragas, etc)
+  /// Boxes do usuário: favoritos, comentarios, premium_status
+  /// Boxes estáticas preservadas: culturas, pragas, fitossanitarios, diagnosticos, plantas_inf
+  Future<Map<String, dynamic>> _clearUserDataBoxesOnly() async {
+    final results = <String, dynamic>{
+      'clearedBoxes': <String>[],
+      'errors': <String>[],
+      'totalRecordsCleared': 0,
+    };
+
+    if (kDebugMode) {
+      debugPrint('🧹 ReceitaAgroDataCleaner: Limpando APENAS boxes de dados do usuário...');
+    }
+
+    // APENAS boxes de dados do usuário - NÃO tocar em dados estáticos
+    final userDataBoxKeys = ['favoritos', 'comentarios', 'premium_status'];
+
+    int totalRecords = 0;
+
+    for (final boxKey in userDataBoxKeys) {
+      final boxName = HiveAdapterRegistry.boxNames[boxKey];
+      if (boxName == null) continue;
+
+      try {
+        if (Hive.isBoxOpen(boxName)) {
+          final box = Hive.box<dynamic>(boxName);
+          final recordCount = box.keys.length;
+
+          await box.clear();
+
+          results['clearedBoxes'].add(boxKey);
+          totalRecords += recordCount;
+
+          if (kDebugMode) {
+            debugPrint('   ✅ Box "$boxKey" limpo ($recordCount registros)');
+          }
+        } else {
+          if (kDebugMode) {
+            debugPrint('   ⚠️ Box "$boxKey" não está aberto - pulando');
+          }
+        }
+      } catch (e) {
+        final error = 'Erro ao limpar box "$boxKey": $e';
+        results['errors'].add(error);
+
+        if (kDebugMode) {
+          debugPrint('   ❌ $error');
+        }
+      }
+    }
+
+    // Sempre disparar sincronização para propagar mudanças
+    try {
+      if (kDebugMode) {
+        debugPrint('   🔄 Disparando sincronização com Firestore...');
+      }
+      unawaited(
+        UnifiedSyncManager.instance.forceSyncApp('receituagro').then((_) {
+          if (kDebugMode) {
+            debugPrint('   ✅ Sincronização com Firestore disparada');
+          }
+        }).catchError((Object error) {
+          if (kDebugMode) {
+            debugPrint('   ⚠️ Erro ao sincronizar: $error');
+          }
+        }),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('   ⚠️ Erro ao disparar sincronização: $e');
+      }
+    }
+
+    results['totalRecordsCleared'] = totalRecords;
+    return results;
   }
 
   /// Limpa todas as HiveBoxes do ReceitaAgro
@@ -437,6 +549,168 @@ class ReceitaAgroDataCleaner implements IAppDataCleaner {
         return 'plantas';
       default:
         return 'outros';
+    }
+  }
+
+  /// Limpa favoritos e dispara sincronização com Firestore
+  /// Isso permite que a mudança seja propagada para outros dispositivos
+  Future<Map<String, dynamic>> _markFavoritosAsDeleted() async {
+    final results = <String, dynamic>{
+      'success': false,
+      'totalMarkedAsDeleted': 0,
+      'error': null,
+    };
+
+    try {
+      if (kDebugMode) {
+        debugPrint('🧹 ReceitaAgroDataCleaner: Limpando favoritos e disparando sincronização...');
+      }
+
+      final boxName = HiveAdapterRegistry.boxNames['favoritos'];
+      if (boxName == null) {
+        results['error'] = 'Box de favoritos não encontrada no registry';
+        return results;
+      }
+
+      if (!Hive.isBoxOpen(boxName)) {
+        results['error'] = 'Box de favoritos não está aberta';
+        return results;
+      }
+
+      final box = Hive.box<dynamic>(boxName);
+      final favoriteCount = box.keys.length;
+
+      // Limpar todos os favoritos locais
+      await box.clear();
+
+      if (kDebugMode) {
+        debugPrint('   ✅ $favoriteCount favoritos removidos localmente');
+      }
+
+      // Disparar sincronização com Firestore para propagar mudança
+      try {
+        if (kDebugMode) {
+          debugPrint('   🔄 Disparando sincronização com Firestore...');
+        }
+        unawaited(
+          UnifiedSyncManager.instance.forceSyncApp('receituagro').then((_) {
+            if (kDebugMode) {
+              debugPrint('   ✅ Sincronização com Firestore disparada com sucesso');
+            }
+          }).catchError((Object error) {
+            if (kDebugMode) {
+              debugPrint('   ⚠️ Erro ao sincronizar: $error');
+            }
+          }),
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('   ⚠️ Erro ao disparar sincronização: $e');
+        }
+      }
+
+      results['success'] = true;
+      results['totalMarkedAsDeleted'] = favoriteCount;
+
+      if (kDebugMode) {
+        debugPrint('✅ ReceitaAgroDataCleaner: Limpeza de favoritos concluída');
+      }
+
+      return results;
+    } catch (e) {
+      results['error'] = e.toString();
+      if (kDebugMode) {
+        debugPrint('❌ ReceitaAgroDataCleaner: Erro ao limpar favoritos - $e');
+      }
+      return results;
+    }
+  }
+
+  /// Marca todos os comentários como deletados (soft delete) para sincronização
+  /// Isso permite que a mudança seja propagada para outros dispositivos via Firestore
+  Future<Map<String, dynamic>> _markComentariosAsDeleted() async {
+    final results = <String, dynamic>{
+      'success': false,
+      'totalMarkedAsDeleted': 0,
+      'error': null,
+    };
+
+    try {
+      if (kDebugMode) {
+        debugPrint('🧹 ReceitaAgroDataCleaner: Marcando comentários como deletados (soft delete)...');
+      }
+
+      final boxName = HiveAdapterRegistry.boxNames['comentarios'];
+      if (boxName == null) {
+        results['error'] = 'Box de comentários não encontrada no registry';
+        return results;
+      }
+
+      if (!Hive.isBoxOpen(boxName)) {
+        results['error'] = 'Box de comentários não está aberta';
+        return results;
+      }
+
+      final box = Hive.box<ComentarioHive>(boxName);
+      int markedCount = 0;
+
+      // Iterar sobre todos os comentários e marcar como deletados
+      for (final key in box.keys) {
+        try {
+          final comentario = box.get(key);
+          if (comentario != null) {
+            // Marcar como deletado (sync_deleted = true)
+            comentario.sync_deleted = true;
+            await box.put(key, comentario);
+            markedCount++;
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('   ⚠️ Erro ao marcar comentário $key: $e');
+          }
+        }
+      }
+
+      if (kDebugMode) {
+        debugPrint('   ✅ $markedCount comentários marcados como deletados');
+      }
+
+      // Disparar sincronização com Firestore
+      try {
+        if (kDebugMode) {
+          debugPrint('   🔄 Disparando sincronização com Firestore...');
+        }
+        unawaited(
+          UnifiedSyncManager.instance.forceSyncApp('receituagro').then((_) {
+            if (kDebugMode) {
+              debugPrint('   ✅ Sincronização com Firestore disparada com sucesso');
+            }
+          }).catchError((Object error) {
+            if (kDebugMode) {
+              debugPrint('   ⚠️ Erro ao sincronizar: $error');
+            }
+          }),
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('   ⚠️ Erro ao disparar sincronização: $e');
+        }
+      }
+
+      results['success'] = true;
+      results['totalMarkedAsDeleted'] = markedCount;
+
+      if (kDebugMode) {
+        debugPrint('✅ ReceitaAgroDataCleaner: Soft delete de comentários concluído');
+      }
+
+      return results;
+    } catch (e) {
+      results['error'] = e.toString();
+      if (kDebugMode) {
+        debugPrint('❌ ReceitaAgroDataCleaner: Erro ao marcar comentários como deletados - $e');
+      }
+      return results;
     }
   }
 }

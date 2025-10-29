@@ -1,18 +1,24 @@
 import 'package:core/core.dart';
 import '../entities/busca_entity.dart';
 import '../repositories/i_busca_repository.dart';
+import 'busca_params.dart';
 
 /// Use case para busca com filtros
 @injectable
-class BuscarComFiltrosUseCase implements UseCase<List<BuscaResultEntity>, BuscaFiltersEntity> {
+class BuscarComFiltrosUseCase
+    implements UseCase<List<BuscaResultEntity>, BuscaFiltersEntity> {
   final IBuscaRepository repository;
 
   BuscarComFiltrosUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<BuscaResultEntity>>> call(BuscaFiltersEntity filters) async {
+  Future<Either<Failure, List<BuscaResultEntity>>> call(
+    BuscaFiltersEntity filters,
+  ) async {
     if (!filters.hasActiveFilters) {
-      return const Left(ValidationFailure('Pelo menos um filtro deve ser selecionado'));
+      return const Left(
+        ValidationFailure('Pelo menos um filtro deve ser selecionado'),
+      );
     }
     final result = await repository.buscarComFiltros(filters);
     result.fold(
@@ -26,13 +32,16 @@ class BuscarComFiltrosUseCase implements UseCase<List<BuscaResultEntity>, BuscaF
 
 /// Use case para busca por texto
 @injectable
-class BuscarPorTextoUseCase implements UseCase<List<BuscaResultEntity>, BuscarPorTextoParams> {
+class BuscarPorTextoUseCase
+    implements UseCase<List<BuscaResultEntity>, BuscarPorTextoParams> {
   final IBuscaRepository repository;
 
   BuscarPorTextoUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<BuscaResultEntity>>> call(BuscarPorTextoParams params) async {
+  Future<Either<Failure, List<BuscaResultEntity>>> call(
+    BuscarPorTextoParams params,
+  ) async {
     if (params.query.trim().isEmpty) {
       return const Left(ValidationFailure('Texto de busca não pode ser vazio'));
     }
@@ -73,13 +82,16 @@ class GetSugestoesUseCase implements UseCase<List<BuscaResultEntity>, int?> {
 
 /// Use case para buscar diagnósticos específicos
 @injectable
-class BuscarDiagnosticosUseCase implements UseCase<List<BuscaResultEntity>, BuscarDiagnosticosParams> {
+class BuscarDiagnosticosUseCase
+    implements UseCase<List<BuscaResultEntity>, BuscarDiagnosticosParams> {
   final IBuscaRepository repository;
 
   BuscarDiagnosticosUseCase(this.repository);
 
   @override
-  Future<Either<Failure, List<BuscaResultEntity>>> call(BuscarDiagnosticosParams params) async {
+  Future<Either<Failure, List<BuscaResultEntity>>> call(
+    BuscarDiagnosticosParams params,
+  ) async {
     return await repository.buscarDiagnosticos(
       culturaId: params.culturaId,
       pragaId: params.pragaId,
@@ -90,7 +102,8 @@ class BuscarDiagnosticosUseCase implements UseCase<List<BuscaResultEntity>, Busc
 
 /// Use case para obter histórico
 @injectable
-class GetHistoricoBuscaUseCase implements UseCase<List<BuscaFiltersEntity>, int?> {
+class GetHistoricoBuscaUseCase
+    implements UseCase<List<BuscaFiltersEntity>, int?> {
   final IBuscaRepository repository;
 
   GetHistoricoBuscaUseCase(this.repository);
@@ -113,16 +126,13 @@ class LimparCacheUseCase implements UseCase<void, NoParams> {
     return await repository.limparCache();
   }
 }
+
 class BuscarPorTextoParams {
   final String query;
   final List<String>? tipos;
   final int? limit;
 
-  BuscarPorTextoParams({
-    required this.query,
-    this.tipos,
-    this.limit,
-  });
+  BuscarPorTextoParams({required this.query, this.tipos, this.limit});
 }
 
 class BuscarDiagnosticosParams {
@@ -130,9 +140,5 @@ class BuscarDiagnosticosParams {
   final String? pragaId;
   final String? defensivoId;
 
-  BuscarDiagnosticosParams({
-    this.culturaId,
-    this.pragaId,
-    this.defensivoId,
-  });
+  BuscarDiagnosticosParams({this.culturaId, this.pragaId, this.defensivoId});
 }

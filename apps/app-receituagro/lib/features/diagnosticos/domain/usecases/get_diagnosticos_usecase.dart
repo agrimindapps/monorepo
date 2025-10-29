@@ -2,22 +2,287 @@ import 'package:core/core.dart';
 
 import '../entities/diagnostico_entity.dart';
 import '../repositories/i_diagnosticos_repository.dart';
+import 'get_diagnosticos_params.dart';
 
-/// Use Case para buscar todos os diagnósticos
+/// Use Case consolidado para todas as operações de diagnósticos
 @injectable
 class GetDiagnosticosUseCase {
   final IDiagnosticosRepository _repository;
 
   const GetDiagnosticosUseCase(this._repository);
 
-  Future<Either<Failure, List<DiagnosticoEntity>>> call({
-    int? limit,
-    int? offset,
-  }) async {
+  Future<Either<Failure, dynamic>> call(GetDiagnosticosParams params) async {
     try {
-      return await _repository.getAll(limit: limit, offset: offset);
+      return switch (params) {
+        GetAllDiagnosticosParams p => await _getAll(p),
+        GetDiagnosticoByIdParams p => await _getById(p),
+        GetRecomendacoesParams p => await _getRecomendacoes(p),
+        GetDiagnosticosByDefensivoParams p => await _getByDefensivo(p),
+        GetDiagnosticosByCulturaParams p => await _getByCultura(p),
+        GetDiagnosticosByPragaParams p => await _getByPraga(p),
+        SearchDiagnosticosWithFiltersParams p => await _searchWithFilters(p),
+        GetDiagnosticoStatsParams p => await _getStats(p),
+        ValidateCompatibilidadeParams p => await _validateCompatibilidade(p),
+        SearchDiagnosticosByPatternParams p => await _searchByPattern(p),
+        GetDiagnosticoFiltersDataParams p => await _getFiltersData(p),
+        _ => const Left(CacheFailure('Parâmetros inválidos para diagnósticos')),
+      };
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao processar diagnósticos: ${e.toString()}'),
+      );
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _getAll(
+    GetAllDiagnosticosParams params,
+  ) async {
+    try {
+      return await _repository.getAll(
+        limit: params.limit,
+        offset: params.offset,
+      );
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar diagnósticos: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, DiagnosticoEntity?>> _getById(
+    GetDiagnosticoByIdParams params,
+  ) async {
+    try {
+      if (params.id.trim().isEmpty) {
+        return const Left(
+          ValidationFailure('ID do diagnóstico não pode ser vazio'),
+        );
+      }
+
+      return await _repository.getById(params.id);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar diagnóstico: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _getRecomendacoes(
+    GetRecomendacoesParams params,
+  ) async {
+    try {
+      if (params.idCultura.trim().isEmpty) {
+        return const Left(
+          ValidationFailure('ID da cultura não pode ser vazio'),
+        );
+      }
+      if (params.idPraga.trim().isEmpty) {
+        return const Left(ValidationFailure('ID da praga não pode ser vazio'));
+      }
+
+      return await _repository.getRecomendacoesPara(
+        culturaId: params.idCultura,
+        pragaId: params.idPraga,
+      );
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao buscar recomendações: ${e.toString()}'),
+      );
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _getByDefensivo(
+    GetDiagnosticosByDefensivoParams params,
+  ) async {
+    try {
+      if (params.idDefensivo.trim().isEmpty) {
+        return const Left(
+          ValidationFailure('ID do defensivo não pode ser vazio'),
+        );
+      }
+
+      return await _repository.getByDefensivo(params.idDefensivo);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'),
+      );
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _getByCultura(
+    GetDiagnosticosByCulturaParams params,
+  ) async {
+    try {
+      if (params.idCultura.trim().isEmpty) {
+        return const Left(
+          ValidationFailure('ID da cultura não pode ser vazio'),
+        );
+      }
+
+      return await _repository.getByCultura(params.idCultura);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar por cultura: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _getByPraga(
+    GetDiagnosticosByPragaParams params,
+  ) async {
+    try {
+      if (params.idPraga.trim().isEmpty) {
+        return const Left(ValidationFailure('ID da praga não pode ser vazio'));
+      }
+
+      return await _repository.getByPraga(params.idPraga);
+    } catch (e) {
+      return Left(CacheFailure('Erro ao buscar por praga: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _searchWithFilters(
+    SearchDiagnosticosWithFiltersParams params,
+  ) async {
+    try {
+      return await _repository.searchWithFilters(
+        defensivo: params.filters.idDefensivo,
+        cultura: params.filters.idCultura,
+        praga: params.filters.idPraga,
+        tipoAplicacao: params.filters.tipoAplicacao?.toString(),
+      );
+    } catch (e) {
+      return Left(CacheFailure('Erro na busca com filtros: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, DiagnosticosStats>> _getStats(
+    GetDiagnosticoStatsParams params,
+  ) async {
+    try {
+      final result = await _repository.getStatistics();
+      return result.fold(
+        (failure) => Left(failure),
+        (stats) => Right(
+          DiagnosticosStats(
+            total: stats['total'] as int,
+            completos: 0,
+            parciais: 0,
+            incompletos: 0,
+            porDefensivo: <String, int>{},
+            porCultura: <String, int>{},
+            porPraga: <String, int>{},
+            topDiagnosticos: <DiagnosticoPopular>[],
+          ),
+        ),
+      );
+    } catch (e) {
+      return Left(CacheFailure('Erro ao obter estatísticas: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, bool>> _validateCompatibilidade(
+    ValidateCompatibilidadeParams params,
+  ) async {
+    try {
+      if (params.idDefensivo.trim().isEmpty) {
+        return const Left(
+          ValidationFailure('ID do defensivo não pode ser vazio'),
+        );
+      }
+      if (params.idCultura.trim().isEmpty) {
+        return const Left(
+          ValidationFailure('ID da cultura não pode ser vazio'),
+        );
+      }
+      if (params.idPraga.trim().isEmpty) {
+        return const Left(ValidationFailure('ID da praga não pode ser vazio'));
+      }
+
+      return await _repository.validarCompatibilidade(
+        idDefensivo: params.idDefensivo,
+        idCultura: params.idCultura,
+        idPraga: params.idPraga,
+      );
+    } catch (e) {
+      return Left(ValidationFailure('Erro na validação: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, List<DiagnosticoEntity>>> _searchByPattern(
+    SearchDiagnosticosByPatternParams params,
+  ) async {
+    try {
+      if (params.pattern.trim().isEmpty) {
+        return const Right(<DiagnosticoEntity>[]);
+      }
+
+      if (params.pattern.trim().length < 2) {
+        return const Left(
+          ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'),
+        );
+      }
+
+      return await _repository.searchByPattern(params.pattern.trim());
+    } catch (e) {
+      return Left(CacheFailure('Erro na busca por padrão: ${e.toString()}'));
+    }
+  }
+
+  Future<Either<Failure, DiagnosticoFiltersData>> _getFiltersData(
+    GetDiagnosticoFiltersDataParams params,
+  ) async {
+    try {
+      final futures = await Future.wait([
+        _repository.getAllDefensivos(),
+        _repository.getAllCulturas(),
+        _repository.getAllPragas(),
+        _repository.getUnidadesMedida(),
+      ]);
+
+      final defensivosResult = futures[0];
+      final culturasResult = futures[1];
+      final pragasResult = futures[2];
+      final unidadesResult = futures[3];
+
+      if (defensivosResult.isLeft()) {
+        return const Left(CacheFailure('Erro ao carregar defensivos'));
+      }
+      if (culturasResult.isLeft()) {
+        return const Left(CacheFailure('Erro ao carregar culturas'));
+      }
+      if (pragasResult.isLeft()) {
+        return const Left(CacheFailure('Erro ao carregar pragas'));
+      }
+      if (unidadesResult.isLeft()) {
+        return const Left(CacheFailure('Erro ao carregar unidades'));
+      }
+
+      final filtersData = DiagnosticoFiltersData(
+        defensivos: defensivosResult.fold(
+          (l) => <String>[],
+          (r) => (r as List<Map<String, dynamic>>)
+              .map((m) => m['id'] as String)
+              .toList(),
+        ),
+        culturas: culturasResult.fold(
+          (l) => <String>[],
+          (r) => (r as List<Map<String, dynamic>>)
+              .map((m) => m['id'] as String)
+              .toList(),
+        ),
+        pragas: pragasResult.fold(
+          (l) => <String>[],
+          (r) => (r as List<Map<String, dynamic>>)
+              .map((m) => m['id'] as String)
+              .toList(),
+        ),
+        unidadesMedida: unidadesResult.fold(
+          (l) => <String>[],
+          (r) => r as List<String>,
+        ),
+        tiposAplicacao: TipoAplicacao.values,
+      );
+
+      return Right(filtersData);
+    } catch (e) {
+      return Left(
+        CacheFailure('Erro ao obter dados de filtros: ${e.toString()}'),
+      );
     }
   }
 }
@@ -32,7 +297,9 @@ class GetDiagnosticoByIdUseCase {
   Future<Either<Failure, DiagnosticoEntity?>> call(String id) async {
     try {
       if (id.trim().isEmpty) {
-        return const Left(ValidationFailure('ID do diagnóstico não pode ser vazio'));
+        return const Left(
+          ValidationFailure('ID do diagnóstico não pode ser vazio'),
+        );
       }
 
       return await _repository.getById(id);
@@ -56,7 +323,9 @@ class GetRecomendacoesUseCase {
   }) async {
     try {
       if (idCultura.trim().isEmpty) {
-        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(
+          ValidationFailure('ID da cultura não pode ser vazio'),
+        );
       }
       if (idPraga.trim().isEmpty) {
         return const Left(ValidationFailure('ID da praga não pode ser vazio'));
@@ -67,7 +336,9 @@ class GetRecomendacoesUseCase {
         pragaId: idPraga,
       );
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar recomendações: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao buscar recomendações: ${e.toString()}'),
+      );
     }
   }
 }
@@ -79,15 +350,21 @@ class GetDiagnosticosByDefensivoUseCase {
 
   const GetDiagnosticosByDefensivoUseCase(this._repository);
 
-  Future<Either<Failure, List<DiagnosticoEntity>>> call(String idDefensivo) async {
+  Future<Either<Failure, List<DiagnosticoEntity>>> call(
+    String idDefensivo,
+  ) async {
     try {
       if (idDefensivo.trim().isEmpty) {
-        return const Left(ValidationFailure('ID do defensivo não pode ser vazio'));
+        return const Left(
+          ValidationFailure('ID do defensivo não pode ser vazio'),
+        );
       }
 
       return await _repository.getByDefensivo(idDefensivo);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao buscar por defensivo: ${e.toString()}'),
+      );
     }
   }
 }
@@ -99,10 +376,14 @@ class GetDiagnosticosByCulturaUseCase {
 
   const GetDiagnosticosByCulturaUseCase(this._repository);
 
-  Future<Either<Failure, List<DiagnosticoEntity>>> call(String idCultura) async {
+  Future<Either<Failure, List<DiagnosticoEntity>>> call(
+    String idCultura,
+  ) async {
     try {
       if (idCultura.trim().isEmpty) {
-        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(
+          ValidationFailure('ID da cultura não pode ser vazio'),
+        );
       }
 
       return await _repository.getByCultura(idCultura);
@@ -139,7 +420,9 @@ class SearchDiagnosticosWithFiltersUseCase {
 
   const SearchDiagnosticosWithFiltersUseCase(this._repository);
 
-  Future<Either<Failure, List<DiagnosticoEntity>>> call(DiagnosticoSearchFilters filters) async {
+  Future<Either<Failure, List<DiagnosticoEntity>>> call(
+    DiagnosticoSearchFilters filters,
+  ) async {
     try {
       return await _repository.searchWithFilters(
         defensivo: filters.idDefensivo,
@@ -165,16 +448,18 @@ class GetDiagnosticoStatsUseCase {
       final result = await _repository.getStatistics();
       return result.fold(
         (failure) => Left(failure),
-        (stats) => Right(DiagnosticosStats(
-          total: stats['total'] as int,
-          completos: 0,
-          parciais: 0,
-          incompletos: 0,
-          porDefensivo: {},
-          porCultura: {},
-          porPraga: {},
-          topDiagnosticos: [],
-        )),
+        (stats) => Right(
+          DiagnosticosStats(
+            total: stats['total'] as int,
+            completos: 0,
+            parciais: 0,
+            incompletos: 0,
+            porDefensivo: {},
+            porCultura: {},
+            porPraga: {},
+            topDiagnosticos: [],
+          ),
+        ),
       );
     } catch (e) {
       return Left(CacheFailure('Erro ao obter estatísticas: ${e.toString()}'));
@@ -196,10 +481,14 @@ class ValidateCompatibilidadeUseCase {
   }) async {
     try {
       if (idDefensivo.trim().isEmpty) {
-        return const Left(ValidationFailure('ID do defensivo não pode ser vazio'));
+        return const Left(
+          ValidationFailure('ID do defensivo não pode ser vazio'),
+        );
       }
       if (idCultura.trim().isEmpty) {
-        return const Left(ValidationFailure('ID da cultura não pode ser vazio'));
+        return const Left(
+          ValidationFailure('ID da cultura não pode ser vazio'),
+        );
       }
       if (idPraga.trim().isEmpty) {
         return const Left(ValidationFailure('ID da praga não pode ser vazio'));
@@ -230,7 +519,9 @@ class SearchDiagnosticosByPatternUseCase {
       }
 
       if (pattern.trim().length < 2) {
-        return const Left(ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'));
+        return const Left(
+          ValidationFailure('Padrão de busca deve ter pelo menos 2 caracteres'),
+        );
       }
 
       return await _repository.searchByPattern(pattern.trim());
@@ -275,16 +566,36 @@ class GetDiagnosticoFiltersDataUseCase {
       }
 
       final filtersData = DiagnosticoFiltersData(
-        defensivos: defensivosResult.fold((l) => <String>[], (r) => (r as List<Map<String, dynamic>>).map((m) => m['id'] as String).toList()),
-        culturas: culturasResult.fold((l) => <String>[], (r) => (r as List<Map<String, dynamic>>).map((m) => m['id'] as String).toList()),
-        pragas: pragasResult.fold((l) => <String>[], (r) => (r as List<Map<String, dynamic>>).map((m) => m['id'] as String).toList()),
-        unidadesMedida: unidadesResult.fold((l) => <String>[], (r) => r as List<String>),
+        defensivos: defensivosResult.fold(
+          (l) => <String>[],
+          (r) => (r as List<Map<String, dynamic>>)
+              .map((m) => m['id'] as String)
+              .toList(),
+        ),
+        culturas: culturasResult.fold(
+          (l) => <String>[],
+          (r) => (r as List<Map<String, dynamic>>)
+              .map((m) => m['id'] as String)
+              .toList(),
+        ),
+        pragas: pragasResult.fold(
+          (l) => <String>[],
+          (r) => (r as List<Map<String, dynamic>>)
+              .map((m) => m['id'] as String)
+              .toList(),
+        ),
+        unidadesMedida: unidadesResult.fold(
+          (l) => <String>[],
+          (r) => r as List<String>,
+        ),
         tiposAplicacao: TipoAplicacao.values, // Todos os tipos disponíveis
       );
 
       return Right(filtersData);
     } catch (e) {
-      return Left(CacheFailure('Erro ao obter dados de filtros: ${e.toString()}'));
+      return Left(
+        CacheFailure('Erro ao obter dados de filtros: ${e.toString()}'),
+      );
     }
   }
 }

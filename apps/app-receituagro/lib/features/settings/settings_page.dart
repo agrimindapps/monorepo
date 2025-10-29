@@ -11,8 +11,10 @@ import 'widgets/dialogs/theme_selection_dialog.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
 import 'widgets/sections/legal_section.dart';
-import 'widgets/sections/notifications_section.dart';
-import 'widgets/sections/premium_section.dart';
+import 'widgets/sections/new_device_section.dart';
+import 'widgets/sections/new_notification_section.dart';
+import 'widgets/sections/new_premium_section.dart';
+import 'widgets/sections/new_theme_section.dart';
 import 'widgets/sections/support_section.dart';
 import 'widgets/sections/tts_settings_section.dart';
 
@@ -108,8 +110,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         SizedBox(height: 8),
         AuthSection(),
         SizedBox(height: 8),
-        PremiumSection(),
-        NotificationsSection(),
+        // New refactored sections using new notifiers
+        NewThemeSection(),
+        SizedBox(height: 8),
+        NewNotificationSection(),
+        SizedBox(height: 8),
+        NewDeviceSection(),
+        SizedBox(height: 8),
+        NewPremiumSection(),
+        SizedBox(height: 8),
+        // Legacy sections (to be removed after migration)
+        // PremiumSection(),
+        // NotificationsSection(),
         TtsSettingsSection(),
         FeatureFlagsSection(),
         LegalSection(),

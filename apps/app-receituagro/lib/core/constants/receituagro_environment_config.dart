@@ -3,9 +3,17 @@ import 'package:core/core.dart';
 /// Receituagro-specific environment configuration
 /// Extends the generic AppEnvironmentConfig with receituagro-specific settings
 class ReceituagroEnvironmentConfig extends AppEnvironmentConfig {
-  static final ReceituagroEnvironmentConfig _instance = ReceituagroEnvironmentConfig._internal();
+  static final ReceituagroEnvironmentConfig _instance =
+      ReceituagroEnvironmentConfig._internal();
   factory ReceituagroEnvironmentConfig() => _instance;
   ReceituagroEnvironmentConfig._internal();
+
+  /// Flag para usar mock data em analytics (apenas para desenvolvimento)
+  /// Em produção, SEMPRE deve ser false
+  static const bool DEBUG_ANALYTICS_MOCK_DATA = bool.fromEnvironment(
+    'DEBUG_ANALYTICS_MOCK_DATA',
+    defaultValue: true, // true apenas em debug, false em produção
+  );
 
   @override
   String get appId => 'receituagro';
@@ -16,30 +24,34 @@ class ReceituagroEnvironmentConfig extends AppEnvironmentConfig {
   @override
   String get apiDomain => 'plantisreceituagro.com';
   String get weatherApiKey => EnvironmentConfig.getApiKey(
-        'WEATHER_API_KEY',
-        fallback: 'weather_dummy_key',
-      );
+    'WEATHER_API_KEY',
+    fallback: 'weather_dummy_key',
+  );
 
   String get googleMapsApiKey => EnvironmentConfig.getApiKey(
-        'GOOGLE_MAPS_API_KEY',
-        fallback: 'maps_dummy_key',
-      );
+    'GOOGLE_MAPS_API_KEY',
+    fallback: 'maps_dummy_key',
+  );
   String get revenueCatApiKey => EnvironmentConfig.getApiKey(
-        'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
-        fallback: 'rcat_dev_dummy_key',
-      );
-  String get monthlyProductId => EnvironmentConfig.getProductId('receituagro_pro_monthly');
-  String get yearlyProductId => EnvironmentConfig.getProductId('receituagro_pro_yearly');
+    'REVENUE_CAT_${environment.name.toUpperCase()}_KEY',
+    fallback: 'rcat_dev_dummy_key',
+  );
+  String get monthlyProductId =>
+      EnvironmentConfig.getProductId('receituagro_pro_monthly');
+  String get yearlyProductId =>
+      EnvironmentConfig.getProductId('receituagro_pro_yearly');
 
   /// Print receituagro-specific configuration for debugging
   void printReceituagroConfig() {
-    EnvironmentConfig.printConfig(additionalConfig: {
-      'App ID': appId,
-      'Firebase Project': firebaseProjectId,
-      'API Base URL': apiBaseUrl,
-      'Monthly Product': monthlyProductId,
-      'Yearly Product': yearlyProductId,
-    });
+    EnvironmentConfig.printConfig(
+      additionalConfig: {
+        'App ID': appId,
+        'Firebase Project': firebaseProjectId,
+        'API Base URL': apiBaseUrl,
+        'Monthly Product': monthlyProductId,
+        'Yearly Product': yearlyProductId,
+      },
+    );
   }
 }
 

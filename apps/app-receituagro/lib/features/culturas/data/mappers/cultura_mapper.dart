@@ -8,10 +8,11 @@ class CulturaMapper {
   /// Converte Model para Entity
   static CulturaEntity toEntity(CulturaModel model) {
     return CulturaEntity(
-      id: model.idReg,
-      nome: model.cultura,
+      id: model.id,
+      nome: model.nome,
       grupo: model.grupo,
-      isActive: true, // Assumindo que culturas carregadas estão ativas
+      descricao: model.descricao,
+      isActive: model.isActive,
     );
   }
 
@@ -20,7 +21,8 @@ class CulturaMapper {
     return CulturaEntity(
       id: hive.idReg,
       nome: hive.cultura,
-      grupo: null, // CulturaHive não tem grupo, definir como null
+      grupo: null, // CulturaHive não tem grupo
+      descricao: null, // CulturaHive não tem descricao
       isActive: true, // Assumindo que culturas carregadas estão ativas
     );
   }
@@ -28,9 +30,11 @@ class CulturaMapper {
   /// Converte Entity para Model
   static CulturaModel toModel(CulturaEntity entity) {
     return CulturaModel(
-      idReg: entity.id,
-      cultura: entity.nome,
-      grupo: entity.grupo ?? 'Sem grupo definido',
+      id: entity.id,
+      nome: entity.nome,
+      grupo: entity.grupo,
+      descricao: entity.descricao,
+      isActive: entity.isActive,
     );
   }
 

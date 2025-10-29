@@ -1,59 +1,46 @@
 import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../domain/entities/defensivo_entity.dart';
+import '../../domain/usecases/get_defensivos_params.dart';
 import '../../domain/usecases/get_defensivos_usecase.dart';
 import 'defensivos_state.dart';
 
 part 'defensivos_notifier.g.dart';
 
-
-/// Notifier para gerenciar estado dos defensivos
-/// Segue padrões Clean Architecture + Riverpod
+/// Notifier para gerenciar estado dos defensivos - REFATORADO
+/// Usa novo GetDefensivosUseCase consolidado com typed params
 @riverpod
 class DefensivosNotifier extends _$DefensivosNotifier {
   late final GetDefensivosUseCase _getDefensivosUseCase;
-  late final GetDefensivosByClasseUseCase _getDefensivosByClasseUseCase;
-  late final SearchDefensivosUseCase _searchDefensivosUseCase;
-  late final GetClassesAgronomicasUseCase _getClassesAgronomicasUseCase;
-  late final GetFabricantesUseCase _getFabricantesUseCase;
 
   @override
   Future<DefensivosState> build() async {
     _getDefensivosUseCase = di.sl<GetDefensivosUseCase>();
-    _getDefensivosByClasseUseCase = di.sl<GetDefensivosByClasseUseCase>();
-    _searchDefensivosUseCase = di.sl<SearchDefensivosUseCase>();
-    _getClassesAgronomicasUseCase = di.sl<GetClassesAgronomicasUseCase>();
-    _getFabricantesUseCase = di.sl<GetFabricantesUseCase>();
     return await _loadDefensivos();
   }
 
   /// Carrega todos os defensivos
   Future<DefensivosState> _loadDefensivos() async {
-    final result = await _getDefensivosUseCase.call(const NoParams());
+    final result = await _getDefensivosUseCase.call(
+      const GetAllDefensivosParams(),
+    );
 
     return await result.fold(
-      (failure) async => DefensivosState.initial().copyWith(
+      (Failure failure) async => DefensivosState.initial().copyWith(
         error: _mapFailureToMessage(failure),
       ),
-      (defensivos) async {
-        final classesResult = await _getClassesAgronomicasUseCase.call(const NoParams());
-        final fabricantesResult = await _getFabricantesUseCase.call(const NoParams());
-
-        final classes = classesResult.fold(
-          (failure) {
-            print('Erro ao carregar classes: ${failure.toString()}');
-            return <String>[];
-          },
-          (classes) => classes,
-        );
-
-        final fabricantes = fabricantesResult.fold(
-          (failure) {
-            print('Erro ao carregar fabricantes: ${failure.toString()}');
-            return <String>[];
-          },
-          (fabricantes) => fabricantes,
-        );
+      (dynamic data) async {
+        final defensivosMap = data as Map<String, dynamic>? ?? {};
+        final defensivos = defensivosMap['defensivos'] is List
+            ? (defensivosMap['defensivos'] as List).cast<DefensivoEntity>()
+            : <DefensivoEntity>[];
+        final classes = defensivosMap['classes'] is List
+            ? (defensivosMap['classes'] as List).cast<String>()
+            : <String>[];
+        final fabricantes = defensivosMap['fabricantes'] is List
+            ? (defensivosMap['fabricantes'] as List).cast<String>()
+            : <String>[];
 
         return DefensivosState(
           defensivos: defensivos,
@@ -72,7 +59,9 @@ class DefensivosNotifier extends _$DefensivosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     final newState = await _loadDefensivos();
     state = AsyncValue.data(newState);
@@ -83,12 +72,16 @@ class DefensivosNotifier extends _$DefensivosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(searchQuery: query, isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(searchQuery: query, isLoading: true).clearError(),
+    );
 
-    final result = await _searchDefensivosUseCase.call(query);
+    final result = await _getDefensivosUseCase.call(
+      SearchDefensivosParams(query),
+    );
 
     result.fold(
-      (failure) {
+      (Failure failure) {
         state = AsyncValue.data(
           currentState.copyWith(
             isLoading: false,
@@ -96,12 +89,14 @@ class DefensivosNotifier extends _$DefensivosNotifier {
           ),
         );
       },
-      (defensivos) {
+      (dynamic defensivos) {
+        final defensivosList = defensivos is List
+            ? defensivos.cast<DefensivoEntity>()
+            : <DefensivoEntity>[];
         state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            filteredDefensivos: defensivos,
-          ).clearError(),
+          currentState
+              .copyWith(isLoading: false, filteredDefensivos: defensivosList)
+              .clearError(),
         );
       },
     );
@@ -112,22 +107,30 @@ class DefensivosNotifier extends _$DefensivosNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(selectedClasse: classe, isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState
+          .copyWith(selectedClasse: classe, isLoading: true)
+          .clearError(),
+    );
 
     if (classe.isEmpty) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          filteredDefensivos: currentState.defensivos,
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              filteredDefensivos: currentState.defensivos,
+              isLoading: false,
+            )
+            .clearError(),
       );
       return;
     }
 
-    final result = await _getDefensivosByClasseUseCase.call(classe);
+    final result = await _getDefensivosUseCase.call(
+      GetDefensivosByClasseParams(classe),
+    );
 
     result.fold(
-      (failure) {
+      (Failure failure) {
         state = AsyncValue.data(
           currentState.copyWith(
             isLoading: false,
@@ -135,12 +138,14 @@ class DefensivosNotifier extends _$DefensivosNotifier {
           ),
         );
       },
-      (defensivos) {
+      (dynamic defensivos) {
+        final defensivosList = defensivos is List
+            ? defensivos.cast<DefensivoEntity>()
+            : <DefensivoEntity>[];
         state = AsyncValue.data(
-          currentState.copyWith(
-            isLoading: false,
-            filteredDefensivos: defensivos,
-          ).clearError(),
+          currentState
+              .copyWith(isLoading: false, filteredDefensivos: defensivosList)
+              .clearError(),
         );
       },
     );

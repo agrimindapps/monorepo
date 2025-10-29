@@ -1,27 +1,22 @@
 import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../domain/entities/cultura_entity.dart';
+import '../../domain/usecases/get_culturas_params.dart';
 import '../../domain/usecases/get_culturas_usecase.dart';
 import 'culturas_state.dart';
 
 part 'culturas_notifier.g.dart';
 
-/// Notifier para gerenciar estado das culturas
-/// Segue padrões Clean Architecture + Riverpod
+/// Notifier para gerenciar estado das culturas - REFATORADO
+/// Usa novo GetCulturasUseCase consolidado com typed params
 @riverpod
 class CulturasNotifier extends _$CulturasNotifier {
   late final GetCulturasUseCase _getCulturasUseCase;
-  late final GetCulturasByGrupoUseCase _getCulturasByGrupoUseCase;
-  late final SearchCulturasUseCase _searchCulturasUseCase;
-  late final GetGruposCulturasUseCase _getGruposCulturasUseCase;
 
   @override
   Future<CulturasState> build() async {
     _getCulturasUseCase = di.sl<GetCulturasUseCase>();
-    _getCulturasByGrupoUseCase = di.sl<GetCulturasByGrupoUseCase>();
-    _searchCulturasUseCase = di.sl<SearchCulturasUseCase>();
-    _getGruposCulturasUseCase = di.sl<GetGruposCulturasUseCase>();
-
     return CulturasState.initial();
   }
 
@@ -30,13 +25,17 @@ class CulturasNotifier extends _$CulturasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
-      final result = await _getCulturasUseCase.call(const NoParams());
+      final result = await _getCulturasUseCase.call(
+        const GetAllCulturasParams(),
+      );
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
@@ -44,23 +43,25 @@ class CulturasNotifier extends _$CulturasNotifier {
             ),
           );
         },
-        (culturas) {
+        (dynamic culturas) {
+          final culturasList = culturas is List
+              ? culturas.cast<CulturaEntity>()
+              : <CulturaEntity>[];
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              culturas: culturas,
-              filteredCulturas: culturas,
-            ).clearError(),
+            currentState
+                .copyWith(
+                  isLoading: false,
+                  culturas: culturasList,
+                  filteredCulturas: culturasList,
+                )
+                .clearError(),
           );
           _loadGrupos();
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
@@ -71,14 +72,19 @@ class CulturasNotifier extends _$CulturasNotifier {
     if (currentState == null) return;
 
     try {
-      final result = await _getGruposCulturasUseCase.call(const NoParams());
+      final result = await _getCulturasUseCase.call(
+        const GetGruposCulturasParams(),
+      );
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           print('Erro ao carregar grupos: ${failure.toString()}');
         },
-        (grupos) {
-          state = AsyncValue.data(currentState.copyWith(grupos: grupos));
+        (dynamic grupos) {
+          final gruposList = grupos is List
+              ? grupos.cast<String>()
+              : <String>[];
+          state = AsyncValue.data(currentState.copyWith(grupos: gruposList));
         },
       );
     } catch (e) {
@@ -91,13 +97,17 @@ class CulturasNotifier extends _$CulturasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(searchQuery: query, isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(searchQuery: query, isLoading: true).clearError(),
+    );
 
     try {
-      final result = await _searchCulturasUseCase.call(query);
+      final result = await _getCulturasUseCase.call(
+        SearchCulturasParams(query),
+      );
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
@@ -105,21 +115,20 @@ class CulturasNotifier extends _$CulturasNotifier {
             ),
           );
         },
-        (culturas) {
+        (dynamic culturas) {
+          final culturasList = culturas is List
+              ? culturas.cast<CulturaEntity>()
+              : <CulturaEntity>[];
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              filteredCulturas: culturas,
-            ).clearError(),
+            currentState
+                .copyWith(isLoading: false, filteredCulturas: culturasList)
+                .clearError(),
           );
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }
@@ -129,23 +138,26 @@ class CulturasNotifier extends _$CulturasNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(selectedGrupo: grupo, isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(selectedGrupo: grupo, isLoading: true).clearError(),
+    );
 
     if (grupo.isEmpty) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          filteredCulturas: currentState.culturas,
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(filteredCulturas: currentState.culturas, isLoading: false)
+            .clearError(),
       );
       return;
     }
 
     try {
-      final result = await _getCulturasByGrupoUseCase.call(grupo);
+      final result = await _getCulturasUseCase.call(
+        GetCulturasByGrupoParams(grupo),
+      );
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
@@ -153,21 +165,20 @@ class CulturasNotifier extends _$CulturasNotifier {
             ),
           );
         },
-        (culturas) {
+        (dynamic culturas) {
+          final culturasList = culturas is List
+              ? culturas.cast<CulturaEntity>()
+              : <CulturaEntity>[];
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              filteredCulturas: culturas,
-            ).clearError(),
+            currentState
+                .copyWith(isLoading: false, filteredCulturas: culturasList)
+                .clearError(),
           );
         },
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        ),
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
       );
     }
   }

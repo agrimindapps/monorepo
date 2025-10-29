@@ -7,10 +7,16 @@ abstract class IFavoritosRepository {
   Future<List<FavoritoEntity>> getAll();
   Future<List<FavoritoEntity>> getByTipo(String tipo);
   Future<FavoritosStats> getStats();
-  
+
   /// Verificação de status
   Future<bool> isFavorito(String tipo, String id);
-  
+
+  /// Operações CRUD genéricas (novos métodos para consolidação)
+  /// Substitui os específicos (addDefensivo, addPraga, etc)
+  Future<bool> addFavorito(FavoritoEntity favorito);
+  Future<bool> removeFavorito(String tipo, String id);
+  Future<bool> toggleFavorito(String tipo, String id);
+
   /// Busca
   Future<List<FavoritoEntity>> search(String query);
 }
@@ -59,11 +65,11 @@ abstract class IFavoritosStorage {
   Future<bool> addFavoriteId(String tipo, String id);
   Future<bool> removeFavoriteId(String tipo, String id);
   Future<bool> isFavoriteId(String tipo, String id);
-  
+
   /// Operações de limpeza
   Future<void> clearFavorites(String tipo);
   Future<void> clearAllFavorites();
-  
+
   /// Sincronização
   Future<void> syncFavorites();
 }
@@ -75,11 +81,11 @@ abstract class IFavoritosCache {
   Future<T?> get<T>(String key);
   Future<void> put<T>(String key, T data, {Duration? ttl});
   Future<void> remove(String key);
-  
+
   /// Operações de limpeza
   Future<void> clearByPrefix(String prefix);
   Future<void> clearAll();
-  
+
   /// Estatísticas
   Future<Map<String, dynamic>> getStats();
   Future<List<String>> getKeys();
@@ -90,13 +96,13 @@ abstract class IFavoritosCache {
 abstract class IFavoritosDataResolver {
   /// Resolve dados de defensivo por ID
   Future<Map<String, dynamic>?> resolveDefensivo(String id);
-  
+
   /// Resolve dados de praga por ID
   Future<Map<String, dynamic>?> resolvePraga(String id);
-  
+
   /// Resolve dados de diagnóstico por ID
   Future<Map<String, dynamic>?> resolveDiagnostico(String id);
-  
+
   /// Resolve dados de cultura por ID
   Future<Map<String, dynamic>?> resolveCultura(String id);
 }
@@ -109,25 +115,25 @@ abstract class IFavoritosEntityFactory {
     required String id,
     required Map<String, dynamic> data,
   });
-  
+
   /// Cria entidade de favorito praga
   FavoritoPragaEntity createPraga({
     required String id,
     required Map<String, dynamic> data,
   });
-  
+
   /// Cria entidade de favorito diagnóstico
   FavoritoDiagnosticoEntity createDiagnostico({
     required String id,
     required Map<String, dynamic> data,
   });
-  
+
   /// Cria entidade de favorito cultura
   FavoritoCulturaEntity createCultura({
     required String id,
     required Map<String, dynamic> data,
   });
-  
+
   /// Cria entidade genérica baseada no tipo
   FavoritoEntity create({
     required String tipo,
@@ -141,13 +147,13 @@ abstract class IFavoritosEntityFactory {
 abstract class IFavoritosValidator {
   /// Valida se pode adicionar aos favoritos
   Future<bool> canAddToFavorites(String tipo, String id);
-  
+
   /// Valida se existe no sistema
   Future<bool> exists(String tipo, String id);
-  
+
   /// Valida tipo de favorito
   bool isValidTipo(String tipo);
-  
+
   /// Valida ID
   bool isValidId(String id);
 }
@@ -157,13 +163,9 @@ class FavoritosException implements Exception {
   final String message;
   final String? tipo;
   final String? id;
-  
-  const FavoritosException(
-    this.message, {
-    this.tipo,
-    this.id,
-  });
-  
+
+  const FavoritosException(this.message, {this.tipo, this.id});
+
   @override
   String toString() {
     var msg = 'FavoritosException: $message';

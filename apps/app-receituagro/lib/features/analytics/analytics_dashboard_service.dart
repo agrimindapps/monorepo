@@ -4,12 +4,27 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 /// ⚠️ MOCK DATA WARNING:
-/// This service currently returns mock/fake data for development purposes.
-/// In production, this should be replaced with real Firebase Analytics data.
+/// This service returns mock/fake data for development purposes when
+/// DEBUG_ANALYTICS_MOCK_DATA is true. In production, this should be
+/// replaced with real Firebase Analytics data.
+///
+/// @Deprecated('Use real Firebase Analytics API in production')
 /// TODO: Integrate with Firebase Analytics API to fetch real metrics
 /// See: https://firebase.google.com/docs/analytics/get-started
+///
+/// To disable mock data:
+/// - Set DEBUG_ANALYTICS_MOCK_DATA=false in build/run configuration
+/// - Or ensure ReceituagroEnvironmentConfig.DEBUG_ANALYTICS_MOCK_DATA is false in production
 
-/// Conversion funnel steps
+import '../../core/constants/receituagro_environment_config.dart';
+import 'analytics_service.dart' show ReceitaAgroAnalyticsEvent;
+
+/// 🔄 DEPRECATED: Use ReceitaAgroAnalyticsEvent instead
+/// This enum is kept for backward compatibility only
+@Deprecated(
+  'Use ReceitaAgroAnalyticsEvent from analytics_service.dart instead. '
+  'This will be removed in v2.0.0',
+)
 enum ConversionFunnelStep {
   appOpened('app_opened'),
   signupViewed('signup_viewed'),
@@ -153,6 +168,10 @@ class AnalyticsDashboardService {
   final Map<String, dynamic> _metricsCache = {};
   Timer? _cacheRefreshTimer;
 
+  /// Helper method para verificar se deve usar mock data
+  bool get _useMockData =>
+      ReceituagroEnvironmentConfig.DEBUG_ANALYTICS_MOCK_DATA;
+
   /// Initialize analytics dashboard
   Future<void> initialize({
     required IAnalyticsRepository analytics,
@@ -165,7 +184,8 @@ class AnalyticsDashboardService {
     _startCacheRefresh();
 
     if (kDebugMode) {
-      print('📊 Analytics Dashboard Service initialized');
+      final mockStatus = _useMockData ? '(MOCK DATA)' : '(REAL DATA)';
+      print('📊 Analytics Dashboard Service initialized $mockStatus');
     }
   }
 
@@ -177,11 +197,19 @@ class AnalyticsDashboardService {
   }
 
   /// Get user engagement metrics
+  /// ⚠️ Returns mock data when DEBUG_ANALYTICS_MOCK_DATA is true
   Future<UserEngagementMetrics> getUserEngagementMetrics({
     DateTime? startDate,
     DateTime? endDate,
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
+
+    // Alertar se usando mock data
+    if (_useMockData && kDebugMode) {
+      debugPrint(
+        '⚠️ WARNING: Using MOCK analytics data. Set DEBUG_ANALYTICS_MOCK_DATA=false for production',
+      );
+    }
 
     final cacheKey =
         'user_engagement_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
@@ -192,12 +220,22 @@ class AnalyticsDashboardService {
 
     try {
       final metrics = UserEngagementMetrics(
-        dailyActiveUsers: _calculateDAU({}),
-        weeklyActiveUsers: _calculateWAU({}),
-        monthlyActiveUsers: _calculateMAU({}),
-        avgSessionDuration: _calculateAvgSessionDuration({}),
-        avgScreensPerSession: _calculateAvgScreensPerSession({}),
-        featureUsage: _calculateFeatureUsage({}),
+        dailyActiveUsers: _useMockData
+            ? _calculateDAU({})
+            : 0, // TODO: fetch from Firebase
+        weeklyActiveUsers: _useMockData
+            ? _calculateWAU({})
+            : 0, // TODO: fetch from Firebase
+        monthlyActiveUsers: _useMockData
+            ? _calculateMAU({})
+            : 0, // TODO: fetch from Firebase
+        avgSessionDuration: _useMockData
+            ? _calculateAvgSessionDuration({})
+            : 0.0,
+        avgScreensPerSession: _useMockData
+            ? _calculateAvgScreensPerSession({})
+            : 0,
+        featureUsage: _useMockData ? _calculateFeatureUsage({}) : {},
         timestamp: DateTime.now(),
       );
 
@@ -407,10 +445,10 @@ class AnalyticsDashboardService {
   Map<String, int> _calculateFeatureUsage(Map<String, dynamic> data) {
     return {
       'pragas_search': 420, // Most used feature
-      'diagnostics': 280,   // Core feature
-      'favorites': 180,     // Moderate use
-      'export': 95,         // Less frequent
-      'comments': 145,      // Moderate engagement
+      'diagnostics': 280, // Core feature
+      'favorites': 180, // Moderate use
+      'export': 95, // Less frequent
+      'comments': 145, // Moderate engagement
       'premium_features': 65, // Premium adoption
     };
   }
@@ -447,8 +485,9 @@ class AnalyticsDashboardService {
         rates[step] = 100.0;
       } else {
         final currentCount = funnelData[step] ?? 0;
-        rates[step] =
-            previousCount > 0 ? (currentCount / previousCount * 100) : 0.0;
+        rates[step] = previousCount > 0
+            ? (currentCount / previousCount * 100)
+            : 0.0;
         previousCount = currentCount;
       }
     }
@@ -468,10 +507,9 @@ class AnalyticsDashboardService {
       final currentCount = funnelData[currentStep] ?? 0;
       final nextCount = funnelData[nextStep] ?? 0;
 
-      rates[currentStep] =
-          currentCount > 0
-              ? ((currentCount - nextCount) / currentCount * 100)
-              : 0.0;
+      rates[currentStep] = currentCount > 0
+          ? ((currentCount - nextCount) / currentCount * 100)
+          : 0.0;
     }
 
     return rates;
@@ -495,10 +533,10 @@ class AnalyticsDashboardService {
   /// TODO: Replace with real Firebase Performance Monitoring data in production
   Map<String, double> _calculateFeaturePerformance(Map<String, dynamic> data) {
     return {
-      'search': 0.5,        // Fast search: 500ms
-      'diagnostics': 1.2,   // Complex feature: 1.2s
-      'favorites': 0.3,     // Simple operation: 300ms
-      'export': 2.5,        // Heavy operation: 2.5s
+      'search': 0.5, // Fast search: 500ms
+      'diagnostics': 1.2, // Complex feature: 1.2s
+      'favorites': 0.3, // Simple operation: 300ms
+      'export': 2.5, // Heavy operation: 2.5s
     };
   }
 
@@ -520,9 +558,9 @@ class AnalyticsDashboardService {
   /// TODO: Replace with real performance monitoring data in production
   Map<String, int> _calculateSlowOperations(Map<String, dynamic> data) {
     return {
-      'database_query': 3,   // 3 slow queries detected
-      'image_loading': 5,    // 5 slow image loads
-      'sync_operation': 2,   // 2 slow sync operations
+      'database_query': 3, // 3 slow queries detected
+      'image_loading': 5, // 5 slow image loads
+      'sync_operation': 2, // 2 slow sync operations
     };
   }
 
@@ -571,8 +609,8 @@ class AnalyticsDashboardService {
     List<Map<String, dynamic>> subscriptionData,
   ) {
     return {
-      'monthly': 1250.00,  // Monthly plan revenue
-      'yearly': 2200.00,   // Yearly plan revenue (discounted but more upfront)
+      'monthly': 1250.00, // Monthly plan revenue
+      'yearly': 2200.00, // Yearly plan revenue (discounted but more upfront)
     };
   }
 

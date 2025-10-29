@@ -6,72 +6,106 @@ import '../../favoritos_di.dart';
 part 'favoritos_notifier.g.dart';
 
 /// Estado dos favoritos para Riverpod
+///
+/// **REFACTORED (Task 4):**
+/// - Antes: 5 listas separadas (allFavoritos, defensivos, pragas, diagnosticos, culturas)
+/// - Depois: 1 lista genérica (favoritos) + filtro por tipo
+///
+/// **Benefício:** Eliminação de estado redundante, menor chance de inconsistência
 class FavoritosState {
-  final List<FavoritoEntity> allFavoritos;
-  final List<FavoritoDefensivoEntity> defensivos;
-  final List<FavoritoPragaEntity> pragas;
-  final List<FavoritoDiagnosticoEntity> diagnosticos;
-  final List<FavoritoCulturaEntity> culturas;
+  /// Lista única com todos os favoritos (consolidado)
+  /// Substitui: allFavoritos, defensivos, pragas, diagnosticos, culturas
+  final List<FavoritoEntity> favoritos;
+
   final FavoritosStats? stats;
   final bool isLoading;
   final String? errorMessage;
+
+  /// Tipo de favorito sendo exibido (filtro para UI)
   final String currentFilter;
 
   const FavoritosState({
-    this.allFavoritos = const [],
-    this.defensivos = const [],
-    this.pragas = const [],
-    this.diagnosticos = const [],
-    this.culturas = const [],
+    this.favoritos = const [],
     this.stats,
     this.isLoading = false,
     this.errorMessage,
     this.currentFilter = TipoFavorito.defensivo,
   });
-  bool get hasDefensivos => defensivos.isNotEmpty;
-  bool get hasPragas => pragas.isNotEmpty;
-  bool get hasDiagnosticos => diagnosticos.isNotEmpty;
-  bool get hasCulturas => culturas.isNotEmpty;
-  bool get hasAnyFavoritos => allFavoritos.isNotEmpty;
+
+  // ===== GETTERS PARA COMPATIBILIDADE =====
+
+  /// Retorna favoritos filtrados por tipo
+  /// Mantém compatibilidade com código que acessa .defensivos, .pragas, etc
+  @Deprecated('Use getFavoritosByTipo() em vez disso')
+  List<FavoritoDefensivoEntity> get defensivos =>
+      getFavoritosByTipo<FavoritoDefensivoEntity>(TipoFavorito.defensivo);
+
+  @Deprecated('Use getFavoritosByTipo() em vez disso')
+  List<FavoritoPragaEntity> get pragas =>
+      getFavoritosByTipo<FavoritoPragaEntity>(TipoFavorito.praga);
+
+  @Deprecated('Use getFavoritosByTipo() em vez disso')
+  List<FavoritoDiagnosticoEntity> get diagnosticos =>
+      getFavoritosByTipo<FavoritoDiagnosticoEntity>(TipoFavorito.diagnostico);
+
+  @Deprecated('Use getFavoritosByTipo() em vez disso')
+  List<FavoritoCulturaEntity> get culturas =>
+      getFavoritosByTipo<FavoritoCulturaEntity>(TipoFavorito.cultura);
+
+  @Deprecated('Use getFavoritosByTipo() em vez disso')
+  List<FavoritoEntity> get allFavoritos => favoritos;
+
+  /// Verifica se há favoritos do tipo específico
+  bool hasType(String tipo) => favoritos.any((f) => f.tipo == tipo);
+
+  bool get hasDefensivos => hasType(TipoFavorito.defensivo);
+  bool get hasPragas => hasType(TipoFavorito.praga);
+  bool get hasDiagnosticos => hasType(TipoFavorito.diagnostico);
+  bool get hasCulturas => hasType(TipoFavorito.cultura);
+  bool get hasAnyFavoritos => favoritos.isNotEmpty;
+
+  // ===== MÉTODOS NOVO/CONSOLIDATED =====
+
+  /// Filtra favoritos por tipo com type-safety genérico
+  ///
+  /// **Novo padrão (recomendado):**
+  /// ```dart
+  /// final defensivos = state.getFavoritosByTipo<FavoritoDefensivoEntity>(
+  ///   TipoFavorito.defensivo
+  /// );
+  /// ```
+  List<T> getFavoritosByTipo<T extends FavoritoEntity>(String tipo) {
+    return favoritos.whereType<T>().where((f) => f.tipo == tipo).toList();
+  }
+
+  /// Filtra favoritos do tipo atual (currentFilter)
+  List<FavoritoEntity> getCurrentTypeFavoritos() {
+    return favoritos.where((f) => f.tipo == currentFilter).toList();
+  }
+
+  /// Busca favorito por ID e tipo
+  FavoritoEntity? findFavorito(String tipo, String id) {
+    try {
+      return favoritos.firstWhere((f) => f.tipo == tipo && f.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
 
   FavoritosState copyWith({
-    List<FavoritoEntity>? allFavoritos,
-    List<FavoritoDefensivoEntity>? defensivos,
-    List<FavoritoPragaEntity>? pragas,
-    List<FavoritoDiagnosticoEntity>? diagnosticos,
-    List<FavoritoCulturaEntity>? culturas,
+    List<FavoritoEntity>? favoritos,
     FavoritosStats? stats,
     bool? isLoading,
     String? errorMessage,
     String? currentFilter,
   }) {
     return FavoritosState(
-      allFavoritos: allFavoritos ?? this.allFavoritos,
-      defensivos: defensivos ?? this.defensivos,
-      pragas: pragas ?? this.pragas,
-      diagnosticos: diagnosticos ?? this.diagnosticos,
-      culturas: culturas ?? this.culturas,
+      favoritos: favoritos ?? this.favoritos,
       stats: stats ?? this.stats,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       currentFilter: currentFilter ?? this.currentFilter,
     );
-  }
-
-  /// Obtém favoritos do tipo atual
-  List<FavoritoEntity> getCurrentTypeFavoritos() {
-    switch (currentFilter) {
-      case TipoFavorito.defensivo:
-        return defensivos;
-      case TipoFavorito.praga:
-        return pragas;
-      case TipoFavorito.diagnostico:
-        return diagnosticos;
-      case TipoFavorito.cultura:
-        return culturas;
-      default:
-        return allFavoritos;
-    }
   }
 
   /// Estados específicos para UI
@@ -86,18 +120,8 @@ class FavoritosState {
     if (isLoading) return FavoritosViewState.loading;
     if (errorMessage != null) return FavoritosViewState.error;
 
-    switch (tipo) {
-      case TipoFavorito.defensivo:
-        return hasDefensivos ? FavoritosViewState.loaded : FavoritosViewState.empty;
-      case TipoFavorito.praga:
-        return hasPragas ? FavoritosViewState.loaded : FavoritosViewState.empty;
-      case TipoFavorito.diagnostico:
-        return hasDiagnosticos ? FavoritosViewState.loaded : FavoritosViewState.empty;
-      case TipoFavorito.cultura:
-        return hasCulturas ? FavoritosViewState.loaded : FavoritosViewState.empty;
-      default:
-        return hasAnyFavoritos ? FavoritosViewState.loaded : FavoritosViewState.empty;
-    }
+    final hasType = favoritos.any((f) => f.tipo == tipo);
+    return hasType ? FavoritosViewState.loaded : FavoritosViewState.empty;
   }
 
   String getEmptyMessageForType(String tipo) {
@@ -132,13 +156,7 @@ class FavoritosState {
 }
 
 /// Estados específicos para UI
-enum FavoritosViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-  empty,
-}
+enum FavoritosViewState { initial, loading, loaded, error, empty }
 
 /// Notifier Riverpod para gerenciar estado dos favoritos
 @riverpod
@@ -153,78 +171,50 @@ class FavoritosNotifier extends _$FavoritosNotifier {
 
   /// Inicialização
   Future<void> initialize() async {
-    await Future.wait([
-      loadAllFavoritos(),
-      loadStats(),
-    ]);
+    await Future.wait([loadAllFavoritos(), loadStats()]);
   }
 
   /// Carrega todos os favoritos
+  /// Novo padrão: Carrega uma única lista genérica em vez de 5 separadas
   Future<void> loadAllFavoritos() async {
     await _executeOperation(() async {
       final favoritos = await _repository.getAll();
-      state = state.copyWith(
-        allFavoritos: favoritos,
-      );
-      _separateByType(favoritos);
+      state = state.copyWith(favoritos: favoritos);
     });
   }
 
   /// Carrega favoritos por tipo específico
+  /// Novo padrão: Carrega todos e filtra conforme currentFilter
   Future<void> loadFavoritosByTipo(String tipo) async {
     await _executeOperation(() async {
-      switch (tipo) {
-        case TipoFavorito.defensivo:
-          final defensivos = await _repository.getDefensivos();
-          state = state.copyWith(defensivos: defensivos);
-          break;
-        case TipoFavorito.praga:
-          final pragas = await _repository.getPragas();
-          state = state.copyWith(pragas: pragas);
-          break;
-        case TipoFavorito.diagnostico:
-          final diagnosticos = await _repository.getDiagnosticos();
-          state = state.copyWith(diagnosticos: diagnosticos);
-          break;
-        case TipoFavorito.cultura:
-          final culturas = await _repository.getCulturas();
-          state = state.copyWith(culturas: culturas);
-          break;
-      }
       state = state.copyWith(currentFilter: tipo);
+      // Os favoritos já estão em memory, apenas atualiza o filtro
+      // Se precisar recarregar, chama loadAllFavoritos()
     });
   }
 
   /// Carrega defensivos favoritos
+  /// @Deprecated Use loadAllFavoritos() + state.defensivos getter em vez disso
   Future<void> loadDefensivos() async {
-    await _executeOperation(() async {
-      final defensivos = await _repository.getDefensivos();
-      state = state.copyWith(defensivos: defensivos);
-    });
+    await loadAllFavoritos();
   }
 
   /// Carrega pragas favoritas
+  /// @Deprecated Use loadAllFavoritos() + state.pragas getter em vez disso
   Future<void> loadPragas() async {
-    await _executeOperation(() async {
-      final pragas = await _repository.getPragas();
-      state = state.copyWith(pragas: pragas);
-    });
+    await loadAllFavoritos();
   }
 
   /// Carrega diagnósticos favoritos
+  /// @Deprecated Use loadAllFavoritos() + state.diagnosticos getter em vez disso
   Future<void> loadDiagnosticos() async {
-    await _executeOperation(() async {
-      final diagnosticos = await _repository.getDiagnosticos();
-      state = state.copyWith(diagnosticos: diagnosticos);
-    });
+    await loadAllFavoritos();
   }
 
   /// Carrega culturas favoritas
+  /// @Deprecated Use loadAllFavoritos() + state.culturas getter em vez disso
   Future<void> loadCulturas() async {
-    await _executeOperation(() async {
-      final culturas = await _repository.getCulturas();
-      state = state.copyWith(culturas: culturas);
-    });
+    await loadAllFavoritos();
   }
 
   /// Verifica se um item é favorito
@@ -244,7 +234,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       final result = await _repository.toggleFavorito(tipo, id);
 
       if (result) {
-        await _reloadAfterToggle(tipo);
+        await loadAllFavoritos(); // Recarrega após toggle
       }
 
       return result;
@@ -257,14 +247,32 @@ class FavoritosNotifier extends _$FavoritosNotifier {
   }
 
   /// Adiciona favorito
+  /// @Deprecated Use addFavoritoUseCase(FavoritoEntity) em vez disso
   Future<bool> addFavorito(String tipo, String id) async {
     try {
       _setLoading(true);
 
-      final result = await _repository.addFavorito(tipo, id);
+      // Usa os métodos específicos ainda disponíveis
+      bool result;
+      switch (tipo) {
+        case TipoFavorito.defensivo:
+          result = await _repository.addDefensivo(id);
+          break;
+        case TipoFavorito.praga:
+          result = await _repository.addPraga(id);
+          break;
+        case TipoFavorito.diagnostico:
+          result = await _repository.addDiagnostico(id);
+          break;
+        case TipoFavorito.cultura:
+          result = await _repository.addCultura(id);
+          break;
+        default:
+          result = false;
+      }
 
       if (result) {
-        await _reloadAfterToggle(tipo);
+        await loadAllFavoritos(); // Recarrega após adicionar
       }
 
       return result;
@@ -284,7 +292,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       final result = await _repository.removeFavorito(tipo, id);
 
       if (result) {
-        await _reloadAfterToggle(tipo);
+        await loadAllFavoritos(); // Recarrega após remover
       }
 
       return result;
@@ -303,8 +311,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
         await loadAllFavoritos();
       } else {
         final favoritos = await _repository.search(query);
-        state = state.copyWith(allFavoritos: favoritos);
-        _separateByType(favoritos);
+        state = state.copyWith(favoritos: favoritos);
       }
     });
   }
@@ -372,31 +379,11 @@ class FavoritosNotifier extends _$FavoritosNotifier {
     state = state.copyWith(errorMessage: null);
   }
 
-  void _separateByType(List<FavoritoEntity> favoritos) {
-    state = state.copyWith(
-      defensivos: favoritos.whereType<FavoritoDefensivoEntity>().toList(),
-      pragas: favoritos.whereType<FavoritoPragaEntity>().toList(),
-      diagnosticos: favoritos.whereType<FavoritoDiagnosticoEntity>().toList(),
-      culturas: favoritos.whereType<FavoritoCulturaEntity>().toList(),
-    );
-  }
-
+  /// @Deprecated Método removido - use loadAllFavoritos() em vez disso
+  @Deprecated('Não é mais necessário - todos os favoritos já estão em memória')
   Future<void> _reloadAfterToggle(String tipo) async {
-    switch (tipo) {
-      case TipoFavorito.defensivo:
-        await loadDefensivos();
-        break;
-      case TipoFavorito.praga:
-        await loadPragas();
-        break;
-      case TipoFavorito.diagnostico:
-        await loadDiagnosticos();
-        break;
-      case TipoFavorito.cultura:
-        await loadCulturas();
-        break;
-    }
-    await loadStats();
+    // Apenas recarrega tudo (consolidado)
+    await loadAllFavoritos();
   }
 
   Future<void> _executeOperation(Future<void> Function() operation) async {

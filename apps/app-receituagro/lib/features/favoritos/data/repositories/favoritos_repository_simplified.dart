@@ -10,9 +10,8 @@ import '../services/favoritos_service.dart';
 class FavoritosRepositorySimplified implements IFavoritosRepository {
   final FavoritosService _service;
 
-  const FavoritosRepositorySimplified({
-    required FavoritosService service,
-  }) : _service = service;
+  const FavoritosRepositorySimplified({required FavoritosService service})
+    : _service = service;
 
   @override
   Future<List<FavoritoEntity>> getAll() async {
@@ -29,7 +28,7 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
         allFavoritos.addAll(typeList);
       }
       allFavoritos.sort((a, b) => a.nomeDisplay.compareTo(b.nomeDisplay));
-      
+
       return allFavoritos;
     } catch (e) {
       throw FavoritosException('Erro ao buscar todos os favoritos: $e');
@@ -51,7 +50,10 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
 
       return favoritos;
     } catch (e) {
-      throw FavoritosException('Erro ao buscar favoritos por tipo: $e', tipo: tipo);
+      throw FavoritosException(
+        'Erro ao buscar favoritos por tipo: $e',
+        tipo: tipo,
+      );
     }
   }
 
@@ -69,37 +71,75 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
     try {
       return await _service.isFavoriteId(tipo, id);
     } catch (e) {
-      throw FavoritosException('Erro ao verificar favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao verificar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
-  Future<bool> addFavorito(String tipo, String id) async {
+  /// Implementação genérica: adiciona qualquer tipo de FavoritoEntity
+  /// Novo padrão: substitui addDefensivo, addPraga, addDiagnostico, addCultura
+  @override
+  Future<bool> addFavorito(FavoritoEntity favorito) async {
     try {
-      return await _service.addFavoriteId(tipo, id);
+      return await _service.addFavoriteId(favorito.tipo, favorito.id);
     } catch (e) {
-      throw FavoritosException('Erro ao adicionar favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao adicionar favorito: $e',
+        tipo: favorito.tipo,
+        id: favorito.id,
+      );
     }
   }
 
+  /// Implementação: remove favorito genérico
+  /// Novo padrão: substitui removeDefensivo, removePraga, removeDiagnostico, removeCultura
+  @override
   Future<bool> removeFavorito(String tipo, String id) async {
     try {
       return await _service.removeFavoriteId(tipo, id);
     } catch (e) {
-      throw FavoritosException('Erro ao remover favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao remover favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
+  /// Implementação: alterna favorito genérico
+  @override
   Future<bool> toggleFavorito(String tipo, String id) async {
     try {
       final isFav = await isFavorito(tipo, id);
-      
+
       if (isFav) {
         return await removeFavorito(tipo, id);
       } else {
-        return await addFavorito(tipo, id);
+        // Usa o método antigo por enquanto (compatibilidade)
+        return await _addFavoritoSimples(tipo, id);
       }
     } catch (e) {
-      throw FavoritosException('Erro ao alternar favorito: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao alternar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
+    }
+  }
+
+  /// Helper privado: adiciona favorito (padrão antigo, mantido para compatibilidade)
+  Future<bool> _addFavoritoSimples(String tipo, String id) async {
+    try {
+      return await _service.addFavoriteId(tipo, id);
+    } catch (e) {
+      throw FavoritosException(
+        'Erro ao adicionar favorito: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -108,7 +148,7 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
     try {
       final allFavoritos = await getAll();
       final queryLower = query.toLowerCase();
-      
+
       return allFavoritos.where((favorito) {
         return favorito.nomeDisplay.toLowerCase().contains(queryLower);
       }).toList();
@@ -150,7 +190,11 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
       }
       return null;
     } catch (e) {
-      throw FavoritosException('Erro ao buscar entidade por ID: $e', tipo: tipo, id: id);
+      throw FavoritosException(
+        'Erro ao buscar entidade por ID: $e',
+        tipo: tipo,
+        id: id,
+      );
     }
   }
 
@@ -199,23 +243,27 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
   }
 
   /// Adiciona defensivo aos favoritos
+  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
   Future<bool> addDefensivo(String id) async {
-    return await addFavorito(TipoFavorito.defensivo, id);
+    return await _addFavoritoSimples(TipoFavorito.defensivo, id);
   }
 
   /// Adiciona praga aos favoritos
+  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
   Future<bool> addPraga(String id) async {
-    return await addFavorito(TipoFavorito.praga, id);
+    return await _addFavoritoSimples(TipoFavorito.praga, id);
   }
 
   /// Adiciona diagnóstico aos favoritos
+  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
   Future<bool> addDiagnostico(String id) async {
-    return await addFavorito(TipoFavorito.diagnostico, id);
+    return await _addFavoritoSimples(TipoFavorito.diagnostico, id);
   }
 
   /// Adiciona cultura aos favoritos
+  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
   Future<bool> addCultura(String id) async {
-    return await addFavorito(TipoFavorito.cultura, id);
+    return await _addFavoritoSimples(TipoFavorito.cultura, id);
   }
 
   /// Remove defensivo dos favoritos

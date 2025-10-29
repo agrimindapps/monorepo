@@ -165,22 +165,27 @@ class HiveStorageService implements ILocalStorageRepository {
     try {
       await _ensureInitialized();
       final targetBox = await _ensureBoxOpen(box ?? HiveBoxes.settings);
-      final values =
-          targetBox.values
-              .where((dynamic value) {
-                // Filter out invalid data types
-                if (T == Map<String, dynamic>) {
-                  return value is Map<String, dynamic>;
-                }
-                return true; // For other types, let the cast handle it
-              })
-              .map((dynamic value) {
-                if (value is Map && value is! Map<String, dynamic>) {
-                  return Map<String, dynamic>.from(value) as T;
-                }
-                return value as T;
-              })
-              .toList();
+      final values = <T>[];
+
+      for (final dynamic value in targetBox.values) {
+        try {
+          // Handle Map types - convert any Map to Map<String, dynamic>
+          if (value is Map) {
+            final converted = Map<String, dynamic>.from(value);
+            values.add(converted as T);
+          } else if (value is T) {
+            // For other types, attempt direct cast
+            values.add(value);
+          }
+        } catch (castError) {
+          // Skip items that can't be cast - log in debug mode only
+          if (kDebugMode) {
+            debugPrint(
+              '⚠️ [HiveStorage] Skipping invalid item in box "$box": $castError',
+            );
+          }
+        }
+      }
 
       return Right(values);
     } catch (e) {
@@ -254,8 +259,9 @@ class HiveStorageService implements ILocalStorageRepository {
       final listResult = await getList<T>(key: key, box: box);
 
       return listResult.fold((failure) => Left(failure), (currentList) async {
-        final updatedList =
-            currentList.where((element) => element != item).toList();
+        final updatedList = currentList
+            .where((element) => element != item)
+            .toList();
         return saveList<T>(key: key, data: updatedList, box: box);
       });
     } catch (e) {

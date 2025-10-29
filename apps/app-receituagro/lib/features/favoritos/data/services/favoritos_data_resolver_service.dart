@@ -127,27 +127,16 @@ class FavoritosDataResolverService {
       final diagRepo = GetIt.instance<DiagnosticoHiveRepository>();
       final diagResult = await diagRepo.getAll();
 
-      // Handle Result<T> from dartz - extract data or return fallback
-      late List<dynamic> diagData;
+      // Handle Result<T> - extract data or return fallback
+      final dynamic resultDynamic = diagResult;
+      final bool hasSuccess = resultDynamic.isSuccess == true;
+      final dynamic resultData = resultDynamic.data;
 
-      // Try casting to Result first (dartz Either or Result)
-      final resultDynamic = diagResult as dynamic;
-      if (resultDynamic.isRight != null || resultDynamic.isLeft != null) {
-        // It's a dartz Either/Result - fold it
-        final foldedData =
-            resultDynamic.fold(
-                  (dynamic failure) => <dynamic>[],
-                  (dynamic data) => data as List<dynamic>,
-                )
-                as List<dynamic>;
-        diagData = foldedData;
-        if (diagData.isEmpty) {
-          return _getDiagnosticoFallback(id);
-        }
-      } else {
-        // Direct list response
-        diagData = diagResult as List<dynamic>;
+      if (!hasSuccess || resultData == null || (resultData as List).isEmpty) {
+        return _getDiagnosticoFallback(id);
       }
+
+      final diagData = resultData;
 
       final diagnostico =
           diagData.firstWhere(
@@ -329,26 +318,25 @@ class FavoritosDataResolverService {
       final repository = getRepository();
       final result = await repository.getAll();
 
-      // Handle Result<T> from dartz - extract data or return fallback
-      late List<dynamic> data;
+      // Handle Result<T> - extract data or return fallback
+      // Using dynamic access since Result<T> is deprecated but still in use
+      final dynamic resultDynamic = result;
+      final bool hasSuccess = resultDynamic.isSuccess == true;
+      final dynamic resultData = resultDynamic.data;
+      final bool hasData =
+          resultData != null && (resultData as List).isNotEmpty;
 
-      final resultDynamic = result as dynamic;
-      if (resultDynamic.isRight != null || resultDynamic.isLeft != null) {
-        // It's a dartz Either/Result - fold it
-        final foldedData =
-            resultDynamic.fold(
-                  (dynamic failure) => <dynamic>[],
-                  (dynamic listData) => listData as List<dynamic>,
-                )
-                as List<dynamic>;
-        data = foldedData;
-        if (data.isEmpty) {
-          return fallbackData;
+      if (!hasSuccess || !hasData) {
+        if (kDebugMode) {
+          developer.log(
+            'Falha ao buscar dados: ${resultDynamic.error?.toString() ?? "dados vazios"}',
+            name: 'DataResolver',
+          );
         }
-      } else {
-        // Direct list response
-        data = result as List<dynamic>;
+        return fallbackData;
       }
+
+      final data = resultData;
 
       final item = data.firstWhere(
         matcher,

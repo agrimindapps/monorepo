@@ -14,22 +14,17 @@ class PlantisStorageService {
   bool _isInitialized = false;
 
   /// Initialize the plantis storage system
-  Future<Result<void>> initialize() async {
+  Future<Either<Failure, void>> initialize() async {
     try {
-      if (_isInitialized) return Result.success(null);
+      if (_isInitialized) return const Right(null);
       _boxRegistry = GetIt.I<IBoxRegistryService>();
       _storage = GetIt.I<ILocalStorageRepository>();
       await _registerPlantisBoxes();
 
       _isInitialized = true;
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
-      return Result.error(
-        StorageError(
-          message: 'Failed to initialize plantis storage: $e',
-          code: 'PLANTIS_STORAGE_INIT_ERROR',
-        ),
-      );
+      return Left(CacheFailure('Failed to initialize plantis storage: $e'));
     }
   }
 
@@ -56,7 +51,7 @@ class PlantisStorageService {
   }
 
   /// Save plant data
-  Future<Result<void>> savePlant<T>({
+  Future<Either<Failure, void>> savePlant<T>({
     required String plantId,
     required T plant,
   }) async {
@@ -66,28 +61,28 @@ class PlantisStorageService {
       data: plant,
       box: PlantisBoxes.plants,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get plant data
-  Future<Result<T?>> getPlant<T>({required String plantId}) async {
+  Future<Either<Failure, T?>> getPlant<T>({required String plantId}) async {
     await _ensureInitialized();
     final result = await _storage.get<T>(
       key: plantId,
       box: PlantisBoxes.plants,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get all plants
-  Future<Result<List<T>>> getAllPlants<T>() async {
+  Future<Either<Failure, List<T>>> getAllPlants<T>() async {
     await _ensureInitialized();
     final result = await _storage.getValues<T>(box: PlantisBoxes.plants);
-    return result.toResult();
+    return result;
   }
 
   /// Save space data
-  Future<Result<void>> saveSpace<T>({
+  Future<Either<Failure, void>> saveSpace<T>({
     required String spaceId,
     required T space,
   }) async {
@@ -97,21 +92,21 @@ class PlantisStorageService {
       data: space,
       box: PlantisBoxes.spaces,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get space data
-  Future<Result<T?>> getSpace<T>({required String spaceId}) async {
+  Future<Either<Failure, T?>> getSpace<T>({required String spaceId}) async {
     await _ensureInitialized();
     final result = await _storage.get<T>(
       key: spaceId,
       box: PlantisBoxes.spaces,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Save care task
-  Future<Result<void>> saveTask<T>({
+  Future<Either<Failure, void>> saveTask<T>({
     required String taskId,
     required T task,
   }) async {
@@ -121,18 +116,18 @@ class PlantisStorageService {
       data: task,
       box: PlantisBoxes.tasks,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get all tasks
-  Future<Result<List<T>>> getAllTasks<T>() async {
+  Future<Either<Failure, List<T>>> getAllTasks<T>() async {
     await _ensureInitialized();
     final result = await _storage.getValues<T>(box: PlantisBoxes.tasks);
-    return result.toResult();
+    return result;
   }
 
   /// Save reminder
-  Future<Result<void>> saveReminder<T>({
+  Future<Either<Failure, void>> saveReminder<T>({
     required String reminderId,
     required T reminder,
   }) async {
@@ -142,18 +137,18 @@ class PlantisStorageService {
       data: reminder,
       box: PlantisBoxes.reminders,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get all reminders
-  Future<Result<List<T>>> getAllReminders<T>() async {
+  Future<Either<Failure, List<T>>> getAllReminders<T>() async {
     await _ensureInitialized();
     final result = await _storage.getValues<T>(box: PlantisBoxes.reminders);
-    return result.toResult();
+    return result;
   }
 
   /// Save care log entry
-  Future<Result<void>> saveCareLog<T>({
+  Future<Either<Failure, void>> saveCareLog<T>({
     required String logId,
     required T careLog,
   }) async {
@@ -163,20 +158,20 @@ class PlantisStorageService {
       data: careLog,
       box: PlantisBoxes.careLogs,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get care log entries for a plant
-  Future<Result<List<T>>> getCareLogsForPlant<T>({
+  Future<Either<Failure, List<T>>> getCareLogsForPlant<T>({
     required String plantId,
   }) async {
     await _ensureInitialized();
     final result = await _storage.getValues<T>(box: PlantisBoxes.careLogs);
-    return result.toResult();
+    return result;
   }
 
   /// Save backup data
-  Future<Result<void>> saveBackup<T>({
+  Future<Either<Failure, void>> saveBackup<T>({
     required String backupId,
     required T backupData,
   }) async {
@@ -186,18 +181,18 @@ class PlantisStorageService {
       data: backupData,
       box: PlantisBoxes.backups,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get backup data
-  Future<Result<List<T>>> getAllBackups<T>() async {
+  Future<Either<Failure, List<T>>> getAllBackups<T>() async {
     await _ensureInitialized();
     final result = await _storage.getValues<T>(box: PlantisBoxes.backups);
-    return result.toResult();
+    return result;
   }
 
   /// Save plantis-specific setting
-  Future<Result<void>> setPlantisSetting({
+  Future<Either<Failure, void>> setPlantisSetting({
     required String key,
     required dynamic value,
   }) async {
@@ -207,11 +202,11 @@ class PlantisStorageService {
       data: value,
       box: PlantisBoxes.main,
     );
-    return result.toResult();
+    return result;
   }
 
   /// Get plantis-specific setting
-  Future<Result<T?>> getPlantisSetting<T>({
+  Future<Either<Failure, T?>> getPlantisSetting<T>({
     required String key,
     T? defaultValue,
   }) async {
@@ -222,13 +217,13 @@ class PlantisStorageService {
     );
 
     return result.fold(
-      (failure) => Result.error(AppErrorFactory.fromFailure(failure)),
-      (value) => Result.success(value ?? defaultValue),
+      (failure) => Left(failure),
+      (value) => Right(value ?? defaultValue),
     );
   }
 
   /// Clear all plantis data (for reset/uninstall)
-  Future<Result<void>> clearAllPlantisData() async {
+  Future<Either<Failure, void>> clearAllPlantisData() async {
     await _ensureInitialized();
 
     final boxes = [
@@ -244,11 +239,11 @@ class PlantisStorageService {
     for (final boxName in boxes) {
       final result = await _storage.clear(box: boxName);
       if (result.isLeft()) {
-        return result.toResult();
+        return result;
       }
     }
 
-    return Result.success(null);
+    return const Right(null);
   }
 
   /// Get storage statistics for debugging

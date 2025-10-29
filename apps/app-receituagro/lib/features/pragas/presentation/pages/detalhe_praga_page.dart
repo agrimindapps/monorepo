@@ -8,7 +8,6 @@ import '../../../favoritos/favoritos_page.dart';
 import '../providers/detalhe_praga_notifier.dart';
 import '../providers/diagnosticos_praga_notifier.dart';
 import '../widgets/comentarios_praga_widget.dart';
-import '../widgets/diagnosticos_praga_mockup_widget.dart';
 import '../widgets/praga_info_widget.dart';
 
 /// Página refatorada seguindo Clean Architecture
@@ -109,38 +108,39 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
               child: pragaAsyncState.when(
-                data:
-                    (state) => Column(
-                      children: [
-                        _buildHeader(state),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              StandardTabBarWidget(
-                                tabController: _tabController,
-                                tabs: StandardTabData.pragaDetailsTabs,
-                              ),
-                              Expanded(
-                                child: TabBarView(
-                                  controller: _tabController,
-                                  children: [
-                                    PragaInfoWidget(
-                                      pragaName: widget.pragaName,
-                                      pragaScientificName:
-                                          widget.pragaScientificName,
-                                    ),
-                                    DiagnosticosPragaMockupWidget(
-                                      pragaName: widget.pragaName,
-                                    ),
-                                    const ComentariosPragaWidget(),
-                                  ],
-                                ),
-                              ),
-                            ],
+                data: (state) => Column(
+                  children: [
+                    _buildHeader(state),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          StandardTabBarWidget(
+                            tabController: _tabController,
+                            tabs: StandardTabData.pragaDetailsTabs,
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                PragaInfoWidget(
+                                  pragaName: widget.pragaName,
+                                  pragaScientificName:
+                                      widget.pragaScientificName,
+                                ),
+                                const Center(
+                                  child: Text(
+                                    'Diagnósticos em desenvolvimento',
+                                  ),
+                                ),
+                                const ComentariosPragaWidget(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(child: Text('Erro: $error')),
               ),
@@ -163,8 +163,8 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed:
-          () => GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
+      onBackPressed: () =>
+          GetIt.instance<ReceitaAgroNavigationService>().goBack<void>(),
       onRightIconPressed: () => _toggleFavorito(),
     );
   }

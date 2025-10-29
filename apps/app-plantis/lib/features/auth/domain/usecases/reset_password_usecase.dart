@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+import '../../utils/auth_validators.dart';
+
 /// Use case para solicitar reset de senha via email
 ///
 /// Implementa a lógica de negócio para:
@@ -24,21 +26,9 @@ class ResetPasswordUseCase {
     }
 
     final cleanEmail = email.trim().toLowerCase();
-    if (!_isValidEmailFormat(cleanEmail)) {
+    if (!AuthValidators.isValidEmail(cleanEmail)) {
       return const Left(ValidationFailure('Formato de email inválido'));
     }
     return await _authRepository.sendPasswordResetEmail(email: cleanEmail);
-  }
-
-  /// Validação básica de formato de email
-  /// Usando regex simplificado para o use case
-  bool _isValidEmailFormat(String email) {
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?\.[a-zA-Z]{2,}$',
-    );
-
-    return emailRegex.hasMatch(email) &&
-        email.length <= 320 &&
-        !email.contains('..');
   }
 }

@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../domain/entities/register_data.dart';
+import '../../utils/auth_validators.dart';
 
 part 'register_notifier.g.dart';
 
@@ -134,26 +135,44 @@ class RegisterNotifier extends _$RegisterNotifier {
       case 0: // Initial step
         return true;
       case 1: // Personal info step
-        return state.registerData.isPersonalInfoValid;
+        return _isPersonalInfoValid();
       case 2: // Password step
-        return state.registerData.isPasswordValid;
+        return _isPasswordValid();
       default:
         return false;
     }
   }
 
+  /// Checks if personal info is valid (without setting error)
+  bool _isPersonalInfoValid() {
+    final nameError = AuthValidators.validateName(state.registerData.name);
+    final emailValid = AuthValidators.isValidEmail(state.registerData.email);
+    return nameError == null && emailValid;
+  }
+
+  /// Checks if password is valid (without setting error)
+  bool _isPasswordValid() {
+    final passwordError = AuthValidators.validatePassword(
+      state.registerData.password,
+      isRegistration: true,
+    );
+    final confirmError = AuthValidators.validatePasswordConfirmation(
+      state.registerData.password,
+      state.registerData.confirmPassword,
+    );
+    return passwordError == null && confirmError == null;
+  }
+
   /// Validates personal info step
   bool validatePersonalInfo() {
-    final nameError = state.registerData.validateName();
-    final emailError = state.registerData.validateEmail();
-
+    final nameError = AuthValidators.validateName(state.registerData.name);
     if (nameError != null) {
       _setError(nameError);
       return false;
     }
 
-    if (emailError != null) {
-      _setError(emailError);
+    if (!AuthValidators.isValidEmail(state.registerData.email)) {
+      _setError('Por favor, insira um email válido');
       return false;
     }
 
@@ -163,14 +182,19 @@ class RegisterNotifier extends _$RegisterNotifier {
 
   /// Validates password step
   bool validatePassword() {
-    final passwordError = state.registerData.validatePassword();
-    final confirmPasswordError = state.registerData.validateConfirmPassword();
-
+    final passwordError = AuthValidators.validatePassword(
+      state.registerData.password,
+      isRegistration: true,
+    );
     if (passwordError != null) {
       _setError(passwordError);
       return false;
     }
 
+    final confirmPasswordError = AuthValidators.validatePasswordConfirmation(
+      state.registerData.password,
+      state.registerData.confirmPassword,
+    );
     if (confirmPasswordError != null) {
       _setError(confirmPasswordError);
       return false;

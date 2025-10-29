@@ -13,8 +13,11 @@ class BoxRegistryService implements IBoxRegistryService {
   /// Registry de configurações de boxes
   final Map<String, BoxConfiguration> _boxConfigurations = {};
 
-  /// Registry de boxes abertas
+  /// Registry de boxes abertas (tipadas)
   final Map<String, Box<dynamic>> _openBoxes = {};
+
+  /// Cache de tipos das boxes para validação
+  final Map<String, Type> _boxTypes = {};
 
   /// Flag de inicialização
   bool _isInitialized = false;
@@ -66,7 +69,7 @@ class BoxRegistryService implements IBoxRegistryService {
         );
       }
 
-      // Se persistent, abrir automaticamente
+      // Se persistent, abrir automaticamente como Box<dynamic> por padrão
       if (config.persistent) {
         if (kDebugMode) {
           debugPrint(
@@ -74,7 +77,7 @@ class BoxRegistryService implements IBoxRegistryService {
           );
         }
 
-        final boxResult = await _openBox(config);
+        final boxResult = await _openBox<dynamic>(config);
         if (boxResult.isLeft()) {
           if (kDebugMode) {
             debugPrint(
@@ -128,12 +131,9 @@ class BoxRegistryService implements IBoxRegistryService {
       final config = _boxConfigurations[boxName]!;
 
       if (config.persistent) {
-        // Box persistente, abrir normalmente
-        final boxResult = await _openBox(config);
-        return boxResult.fold(
-          (failure) => Left(failure),
-          (box) => Right(box),
-        );
+        // Box persistente, abrir normalmente como Box<dynamic>
+        final boxResult = await _openBox<dynamic>(config);
+        return boxResult.fold((failure) => Left(failure), (box) => Right(box));
       }
 
       // 5. Box non-persistent e não aberta
@@ -153,6 +153,100 @@ class BoxRegistryService implements IBoxRegistryService {
       );
     } catch (e) {
       return Left(CacheFailure('Erro ao obter box "$boxName": $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Box<T>>> getBoxTyped<T>(String boxName) async {
+    try {
+      await _ensureInitialized();
+
+      // 1. Verificar se box está registrada
+      if (!_boxConfigurations.containsKey(boxName)) {
+        return Left(CacheFailure('Box "$boxName" não está registrada'));
+      }
+
+      // 2. Verificar cache local com tipo correto
+      if (_openBoxes.containsKey(boxName)) {
+        final cachedBox = _openBoxes[boxName]!;
+
+        // Tentar fazer cast para tipo específico
+        if (cachedBox is Box<T>) {
+          if (kDebugMode) {
+            debugPrint(
+              '♻️ [BoxRegistryService.getBoxTyped<$T>] Usando box "$boxName" do cache',
+            );
+          }
+          return Right(cachedBox);
+        }
+
+        // Box cached com tipo diferente
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ [BoxRegistryService.getBoxTyped<$T>] Box "$boxName" cached como '
+            '${cachedBox.runtimeType}, mas solicitada como Box<$T>. '
+            'Removendo do cache e reabrindo...',
+          );
+        }
+        _openBoxes.remove(boxName);
+        _boxTypes.remove(boxName);
+      }
+
+      // 3. ✅ Verificar se box JÁ está aberta com Hive.isBoxOpen
+      if (Hive.isBoxOpen(boxName)) {
+        try {
+          // Tentar obter com tipo específico
+          final box = Hive.box<T>(boxName);
+          _openBoxes[boxName] = box;
+          _boxTypes[boxName] = T;
+
+          if (kDebugMode) {
+            debugPrint(
+              '♻️ [BoxRegistryService.getBoxTyped<$T>] Box "$boxName" já aberta externamente. '
+              'Sincronizando cache (${box.length} items)',
+            );
+          }
+
+          return Right(box);
+        } catch (typeError) {
+          // Erro de tipo - box aberta com tipo incompatível
+          return Left(
+            CacheFailure(
+              'Box "$boxName" já está aberta com tipo incompatível. '
+              'Solicitado: Box<$T>, mas box foi aberta com outro tipo. '
+              'Erro: $typeError',
+            ),
+          );
+        }
+      }
+
+      // 4. Box não está aberta, abrir com tipo específico
+      final config = _boxConfigurations[boxName]!;
+
+      if (config.persistent) {
+        // Box persistente, abrir com tipo específico
+        final boxResult = await _openBox<T>(config);
+        return boxResult.fold((failure) => Left(failure), (box) {
+          _boxTypes[boxName] = T;
+          return Right(box);
+        });
+      }
+
+      // 5. Box non-persistent e não aberta
+      if (kDebugMode) {
+        debugPrint(
+          '⚠️ [BoxRegistryService.getBoxTyped<$T>] Box "$boxName" é non-persistent e não está aberta. '
+          'Box será aberta externamente quando necessário.',
+        );
+      }
+      return Left(
+        CacheFailure(
+          'Box "$boxName" está marcada como non-persistent e não foi aberta. '
+          'Abra a box externamente com o tipo correto antes de usá-la.',
+        ),
+      );
+    } catch (e) {
+      return Left(CacheFailure('Erro ao obter box typed "$boxName": $e'));
     }
   }
 
@@ -255,49 +349,65 @@ class BoxRegistryService implements IBoxRegistryService {
   /// Abre uma box com base na configuração
   /// IMPORTANTE: Verifica se box já está aberta para evitar conflito de tipos
   /// (ex: evita reabrir `Box<ComentarioHive>` como `Box<dynamic>`)
-  Future<Either<Failure, Box<dynamic>>> _openBox(
-    BoxConfiguration config,
-  ) async {
+  ///
+  /// [T] - Tipo dos items na box (padrão: dynamic)
+  Future<Either<Failure, Box<T>>> _openBox<T>(BoxConfiguration config) async {
     try {
-      Box<dynamic> box;
+      Box<T> box;
 
       // 🔍 VERIFICAR SE BOX JÁ ESTÁ ABERTA
       // Se já está aberta (ex: por HiveAdapterRegistry ou HiveManager),
       // usar instância existente ao invés de tentar reabrir
       if (Hive.isBoxOpen(config.name)) {
-        if (kDebugMode) {
-          debugPrint(
-            '♻️ [BoxRegistryService._openBox] Box "${config.name}" já está aberta. '
-            'Usando instância existente para evitar conflito de tipos.',
+        try {
+          box = Hive.box<T>(config.name);
+          _openBoxes[config.name] = box;
+          _boxTypes[config.name] = T;
+
+          if (kDebugMode) {
+            debugPrint(
+              '♻️ [BoxRegistryService._openBox<$T>] Box "${config.name}" já está aberta. '
+              'Usando instância existente (${box.length} items)',
+            );
+          }
+
+          return Right(box);
+        } catch (typeError) {
+          // Erro ao tentar obter com tipo T - box aberta com tipo diferente
+          return Left(
+            CacheFailure(
+              'Box "${config.name}" já está aberta com tipo incompatível. '
+              'Solicitado: Box<$T>. Erro: $typeError',
+            ),
           );
         }
-        box = Hive.box<dynamic>(config.name);
-        _openBoxes[config.name] = box;
-        return Right(box);
       }
 
-      // Box não está aberta, abrir normalmente
+      // Box não está aberta, abrir normalmente com tipo T
       if (kDebugMode) {
         debugPrint(
-          '🔓 [BoxRegistryService._openBox] Abrindo box "${config.name}" (persistent: ${config.persistent})...',
+          '🔓 [BoxRegistryService._openBox<$T>] Abrindo box "${config.name}" '
+          '(persistent: ${config.persistent})...',
         );
       }
 
       if (config.encryption != null) {
-        box = await Hive.openBox(
+        box = await Hive.openBox<T>(
           config.name,
           encryptionCipher: HiveAesCipher(config.encryption!.key),
           path: config.customPath,
         );
       } else {
-        box = await Hive.openBox(config.name, path: config.customPath);
+        box = await Hive.openBox<T>(config.name, path: config.customPath);
       }
 
       _openBoxes[config.name] = box;
+      _boxTypes[config.name] = T;
 
       if (kDebugMode) {
         debugPrint(
-          '✅ [BoxRegistryService._openBox] Box "${config.name}" aberta com sucesso (${box.length} items)',
+          '✅ [BoxRegistryService._openBox<$T>] Box "${config.name}" aberta com sucesso '
+          '(${box.length} items)',
         );
       }
 

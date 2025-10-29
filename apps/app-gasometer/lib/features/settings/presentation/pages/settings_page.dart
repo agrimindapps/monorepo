@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
+import '../dialogs/feedback_dialog.dart';
 import '../providers/settings_notifier.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -180,14 +181,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           subtitle: 'Receber alertas e lembretes',
           trailing: Switch(
             value: notificationsEnabled,
-            onChanged:
-                settingsAsync.isLoading
-                    ? null
-                    : (value) {
-                      ref
-                          .read(settingsNotifierProvider.notifier)
-                          .toggleNotifications(value);
-                    },
+            onChanged: settingsAsync.isLoading
+                ? null
+                : (value) {
+                    ref
+                        .read(settingsNotifierProvider.notifier)
+                        .toggleNotifications(value);
+                  },
           ),
         ),
         _buildSettingItem(
@@ -196,14 +196,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           subtitle: 'Notificações sobre abastecimento',
           trailing: Switch(
             value: fuelAlertsEnabled,
-            onChanged:
-                settingsAsync.isLoading
-                    ? null
-                    : (value) {
-                      ref
-                          .read(settingsNotifierProvider.notifier)
-                          .toggleFuelAlerts(value);
-                    },
+            onChanged: settingsAsync.isLoading
+                ? null
+                : (value) {
+                    ref
+                        .read(settingsNotifierProvider.notifier)
+                        .toggleFuelAlerts(value);
+                  },
           ),
         ),
       ],
@@ -226,9 +225,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Idioma',
           subtitle: 'Português (Brasil)',
           onTap: () {
-            _showSnackBar(
-              'Seleção de idioma estará disponível em breve!',
-            );
+            _showSnackBar('Seleção de idioma estará disponível em breve!');
           },
         ),
         _buildSettingItem(
@@ -255,20 +252,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: 'Central de Ajuda',
           subtitle: 'Perguntas frequentes',
           onTap: () {
-            _showSnackBar(
-              'Central de ajuda estará disponível em breve!',
-            );
+            _showSnackBar('Central de ajuda estará disponível em breve!');
           },
         ),
         _buildSettingItem(
-          icon: Icons.email,
-          title: 'Contato',
-          subtitle: 'Entre em contato conosco',
-          onTap: () {
-            _showSnackBar(
-              'Contato estará disponível em breve! Por enquanto, use o feedback do app.',
-            );
-          },
+          icon: Icons.feedback,
+          title: 'Enviar Feedback',
+          subtitle: 'Ajude-nos a melhorar o app',
+          onTap: () => _showFeedbackDialog(),
         ),
         _buildSettingItem(
           icon: Icons.star_rate,
@@ -297,21 +288,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           icon: Icons.description,
           title: 'Termos de Uso',
           subtitle: 'Leia os termos de uso',
-          onTap: () {
-            _showSnackBar(
-              'Termos de uso estarão disponíveis em breve!',
-            );
-          },
+          onTap: () => context.push('/terms-of-service'),
         ),
         _buildSettingItem(
           icon: Icons.privacy_tip,
           title: 'Política de Privacidade',
           subtitle: 'Como tratamos seus dados',
-          onTap: () {
-            _showSnackBar(
-              'Política de privacidade estará disponível em breve!',
-            );
-          },
+          onTap: () => context.push('/privacy-policy'),
         ),
       ],
     );
@@ -383,45 +366,44 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Escolher Tema'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildThemeOption(
-                  'Automático (Sistema)',
-                  'Segue a configuração do sistema',
-                  Icons.brightness_auto,
-                  ThemeMode.system,
-                  currentThemeMode == ThemeMode.system,
-                  () => _changeTheme(ThemeMode.system),
-                ),
-                _buildThemeOption(
-                  'Claro',
-                  'Tema claro sempre ativo',
-                  Icons.brightness_high,
-                  ThemeMode.light,
-                  currentThemeMode == ThemeMode.light,
-                  () => _changeTheme(ThemeMode.light),
-                ),
-                _buildThemeOption(
-                  'Escuro',
-                  'Tema escuro sempre ativo',
-                  Icons.brightness_2,
-                  ThemeMode.dark,
-                  currentThemeMode == ThemeMode.dark,
-                  () => _changeTheme(ThemeMode.dark),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: const Text('Escolher Tema'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(
+              'Automático (Sistema)',
+              'Segue a configuração do sistema',
+              Icons.brightness_auto,
+              ThemeMode.system,
+              currentThemeMode == ThemeMode.system,
+              () => _changeTheme(ThemeMode.system),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
-            ],
+            _buildThemeOption(
+              'Claro',
+              'Tema claro sempre ativo',
+              Icons.brightness_high,
+              ThemeMode.light,
+              currentThemeMode == ThemeMode.light,
+              () => _changeTheme(ThemeMode.light),
+            ),
+            _buildThemeOption(
+              'Escuro',
+              'Tema escuro sempre ativo',
+              Icons.brightness_2,
+              ThemeMode.dark,
+              currentThemeMode == ThemeMode.dark,
+              () => _changeTheme(ThemeMode.dark),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
           ),
+        ],
+      ),
     );
   }
 
@@ -450,10 +432,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             Icon(
               icon,
-              color:
-                  isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).textTheme.bodyMedium?.color,
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).textTheme.bodyMedium?.color,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -463,12 +444,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      color:
-                          isSelected
-                              ? Theme.of(context).primaryColor
-                              : Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
@@ -486,24 +467,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _showLogoutDialog() {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Sair da conta'),
-            content: const Text('Tem certeza que deseja fazer logout?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _showSnackBar('Logout realizado com sucesso');
-                },
-                child: const Text('Sair'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Sair da conta'),
+        content: const Text('Tem certeza que deseja fazer logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showSnackBar('Logout realizado com sucesso');
+            },
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -520,56 +500,55 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
     await showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Row(
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.star_rate, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Avaliar o App'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Você está gostando do GasOMeter? Sua avaliação é muito importante!',
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.star_rate, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('Avaliar o App'),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
+                Icon(Icons.star, color: Colors.orange, size: 32),
               ],
             ),
-            content: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Você está gostando do GasOMeter? Sua avaliação é muito importante!',
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.star, color: Colors.orange, size: 32),
-                    Icon(Icons.star, color: Colors.orange, size: 32),
-                    Icon(Icons.star, color: Colors.orange, size: 32),
-                    Icon(Icons.star, color: Colors.orange, size: 32),
-                    Icon(Icons.star, color: Colors.orange, size: 32),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Talvez mais tarde'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  final success = await notifier.handleAppRating(context);
-                  if (mounted) {
-                    _showSnackBar(
-                      success
-                          ? 'Obrigado pelo feedback!'
-                          : 'Não foi possível abrir a avaliação',
-                    );
-                  }
-                },
-                icon: const Icon(Icons.star),
-                label: const Text('Avaliar'),
-              ),
-            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Talvez mais tarde'),
           ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              final success = await notifier.handleAppRating(context);
+              if (mounted) {
+                _showSnackBar(
+                  success
+                      ? 'Obrigado pelo feedback!'
+                      : 'Não foi possível abrir a avaliação',
+                );
+              }
+            },
+            icon: const Icon(Icons.star),
+            label: const Text('Avaliar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -579,6 +558,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         content: Text(message),
         backgroundColor: Theme.of(context).primaryColor,
       ),
+    );
+  }
+
+  void _showFeedbackDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => const FeedbackDialog(),
     );
   }
 }

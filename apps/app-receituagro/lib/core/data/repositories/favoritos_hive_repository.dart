@@ -3,27 +3,30 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import '../models/favorito_item_hive.dart';
 
-/// Repositório para gerenciar favoritos usando Hive com dynamic boxes.
-/// ✅ FIXED: Changed from BaseHiveRepository<T> typed to direct dynamic box access.
-/// REASON: Box 'favoritos' is opened as dynamic by BoxRegistryService (persistent:true)
-/// and cannot be reopened with specific types (would cause type mismatch error).
+/// Repositório para gerenciar favoritos usando Hive com type-safe boxes.
+/// ✅ MIGRATED: Using `IBoxRegistryService.getBoxTyped<T>()` for full type safety
+/// BENEFIT: No manual casting, compile-time type checking, better IntelliSense
 class FavoritosHiveRepository {
-  final IHiveManager _hiveManager;
+  final IBoxRegistryService _boxRegistry;
   final String boxName = 'favoritos';
-  Box<dynamic>? _box;
+  Box<FavoritoItemHive>? _box;
 
-  FavoritosHiveRepository() : _hiveManager = GetIt.instance<IHiveManager>();
+  FavoritosHiveRepository()
+    : _boxRegistry = GetIt.instance<IBoxRegistryService>();
 
-  /// Obtém a box como dynamic (já aberta pelo BoxRegistryService)
-  Future<Box<dynamic>> get box async {
+  /// Obtém a box tipada `Box<FavoritoItemHive>`
+  Future<Box<FavoritoItemHive>> get box async {
     if (_box != null && _box!.isOpen) return _box!;
 
-    final result = await _hiveManager.getBox<dynamic>(boxName);
-    if (result.isFailure) {
-      throw Exception('Failed to open Hive box: ${result.error?.message}');
-    }
-    _box = result.data;
-    return _box!;
+    final result = await _boxRegistry.getBoxTyped<FavoritoItemHive>(boxName);
+    return result.fold(
+      (failure) =>
+          throw Exception('Failed to open Hive box: ${failure.message}'),
+      (typedBox) {
+        _box = typedBox;
+        return typedBox;
+      },
+    );
   }
 
   /// Busca favoritos por tipo
@@ -32,11 +35,8 @@ class FavoritosHiveRepository {
       final hiveBox = await box;
       final items = <FavoritoItemHive>[];
 
-      for (final value in hiveBox.values) {
-        if (value is FavoritoItemHive && value.tipo == tipo) {
-          items.add(value);
-        }
-      }
+      // ✅ box.values já é Iterable<FavoritoItemHive> (type-safe)
+      items.addAll(hiveBox.values.where((item) => item.tipo == tipo));
 
       return items;
     } catch (e) {
@@ -53,11 +53,8 @@ class FavoritosHiveRepository {
       final hiveBox = await box;
       final items = <FavoritoItemHive>[];
 
-      for (final value in hiveBox.values) {
-        if (value is FavoritoItemHive) {
-          items.add(value);
-        }
-      }
+      // ✅ box.values já é Iterable<FavoritoItemHive> (type-safe)
+      items.addAll(hiveBox.values);
 
       return items;
     } catch (e) {
@@ -155,7 +152,8 @@ class FavoritosHiveRepository {
       final hiveBox = await box;
       final value = hiveBox.get(key);
 
-      if (value is FavoritoItemHive && value.itemData.isNotEmpty) {
+      // ✅ box.get() já retorna FavoritoItemHive? (type-safe)
+      if (value != null && value.itemData.isNotEmpty) {
         return jsonDecode(value.itemData) as Map<String, dynamic>;
       }
     } catch (e) {

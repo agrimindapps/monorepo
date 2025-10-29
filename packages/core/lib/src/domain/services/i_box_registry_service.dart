@@ -12,10 +12,21 @@ abstract class IBoxRegistryService {
   /// [config] - Configuração da box incluindo nome, app proprietário e adapters
   Future<Either<Failure, void>> registerBox(BoxConfiguration config);
 
-  /// Obtém uma box já registrada
+  /// Obtém uma box já registrada (Box<dynamic>)
   /// [boxName] - Nome da box a ser obtida
   /// Retorna erro se a box não estiver registrada
+  /// @deprecated Use getBoxTyped<T>() para type safety
   Future<Either<Failure, Box<dynamic>>> getBox(String boxName);
+
+  /// Obtém uma box já registrada com tipo específico (Box<T>)
+  /// [boxName] - Nome da box a ser obtida
+  /// Retorna erro se a box não estiver registrada ou tipo incompatível
+  ///
+  /// Exemplo:
+  /// ```dart
+  /// final result = await boxRegistry.getBoxTyped<ComentarioHive>('comentarios');
+  /// ```
+  Future<Either<Failure, Box<T>>> getBoxTyped<T>(String boxName);
 
   /// Verifica se uma box está registrada
   /// [boxName] - Nome da box a verificar

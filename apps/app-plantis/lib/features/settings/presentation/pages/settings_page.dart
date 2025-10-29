@@ -8,6 +8,7 @@ import '../../../../core/providers/settings_providers.dart';
 import '../../../../core/providers/theme_providers.dart' as theme;
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
+import '../dialogs/feedback_dialog.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 
@@ -69,9 +70,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                         _buildPremiumSectionCard(context, appTheme),
                         const SizedBox(height: 8),
                         settingsState.when(
-                          data: (settings) => _buildConfigSection(context, appTheme, settings),
-                          loading: () => const Center(child: CircularProgressIndicator()),
-                          error: (error, _) => Center(child: Text('Erro: $error')),
+                          data: (settings) =>
+                              _buildConfigSection(context, appTheme, settings),
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (error, _) =>
+                              Center(child: Text('Erro: $error')),
                         ),
                         const SizedBox(height: 8),
                         _buildSupportSection(context, appTheme),
@@ -87,10 +91,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error:
-                (error, stack) => Center(
-                  child: Text('Erro ao carregar configurações: $error'),
-                ),
+            error: (error, stack) =>
+                Center(child: Text('Erro ao carregar configurações: $error')),
           ),
         ),
       ),
@@ -121,35 +123,34 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
               CircleAvatar(
                 radius: 30,
                 backgroundColor: PlantisColors.primary,
-                child:
-                    hasPhoto
-                        ? ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: Image.network(
-                            photoUrl,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Text(
-                                initials,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            },
-                          ),
-                        )
-                        : Text(
-                          initials,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                child: hasPhoto
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Image.network(
+                          photoUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text(
+                              initials,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
+                      )
+                    : Text(
+                        initials,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -350,6 +351,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
         _buildSettingsCard(context, [
           _buildSettingsItem(
             context,
+            icon: Icons.feedback,
+            title: 'Enviar Feedback',
+            subtitle: 'Ajude-nos a melhorar o app',
+            onTap: () => _showFeedbackDialog(),
+          ),
+          _buildSettingsItem(
+            context,
             icon: Icons.info,
             title: 'Informações do App',
             subtitle: 'Versão, suporte e feedback',
@@ -510,26 +518,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           ),
           Switch.adaptive(
             value: isWebPlatform ? false : isEnabled,
-            onChanged:
-                isWebPlatform
-                    ? null
-                    : (value) {
-                      ref
-                          .read(settingsNotifierProvider.notifier)
-                          .toggleTaskReminders(value);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            value
-                                ? 'Notificações ativadas'
-                                : 'Notificações desativadas',
-                          ),
-                          backgroundColor: PlantisColors.primary,
-                          behavior: SnackBarBehavior.floating,
-                          duration: const Duration(seconds: 2),
+            onChanged: isWebPlatform
+                ? null
+                : (value) {
+                    ref
+                        .read(settingsNotifierProvider.notifier)
+                        .toggleTaskReminders(value);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          value
+                              ? 'Notificações ativadas'
+                              : 'Notificações desativadas',
                         ),
-                      );
-                    },
+                        backgroundColor: PlantisColors.primary,
+                        behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
             activeColor: PlantisColors.primary,
           ),
         ],
@@ -540,122 +547,114 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   void _showRateAppDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: Row(
-              children: [
-                const Icon(Icons.star_rate, color: PlantisColors.sun, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'Avaliar o App',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: Row(
+          children: [
+            const Icon(Icons.star_rate, color: PlantisColors.sun, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'Avaliar o App',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Está gostando do Plantis?',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Está gostando do Plantis?',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                5,
+                (index) => const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(Icons.star, color: PlantisColors.sun, size: 32),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 16,
-                    height: 1.4,
-                  ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: PlantisColors.primaryLight.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PlantisColors.primary.withValues(alpha: 0.2),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    5,
-                    (index) => const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Icon(
-                        Icons.star,
-                        color: PlantisColors.sun,
-                        size: 32,
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.favorite,
+                    color: PlantisColors.flower,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Obrigado por fazer parte da nossa comunidade!',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: PlantisColors.primaryLight.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: PlantisColors.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.favorite,
-                        color: PlantisColors.flower,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Obrigado por fazer parte da nossa comunidade!',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  'Mais tarde',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Mais tarde',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  await _handleRateApp(context);
-                },
-                icon: const Icon(Icons.star, size: 18),
-                label: const Text('Avaliar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PlantisColors.sun,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await _handleRateApp(context);
+            },
+            icon: const Icon(Icons.star, size: 18),
+            label: const Text('Avaliar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PlantisColors.sun,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -685,85 +684,91 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     }
   }
 
+  void _showFeedbackDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => const FeedbackDialog(),
+    );
+  }
+
   void _showAboutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: PlantisColors.primaryGradient,
-                  ),
-                  child: const Icon(Icons.eco, color: Colors.white, size: 24),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Plantis',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: PlantisColors.primaryGradient,
+              ),
+              child: const Icon(Icons.eco, color: Colors.white, size: 24),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 12),
+            Text(
+              'Plantis',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Seu companheiro para cuidar de plantas',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildInfoRow(context, 'Versão', '1.0.0'),
+            _buildInfoRow(context, 'Build', '1'),
+            _buildInfoRow(context, 'Plataforma', 'Flutter'),
+            const SizedBox(height: 16),
+            Text(
+              'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
               children: [
-                Text(
-                  'Seu companheiro para cuidar de plantas',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                const Icon(
+                  Icons.favorite,
+                  color: PlantisColors.flower,
+                  size: 16,
                 ),
-                const SizedBox(height: 16),
-                _buildInfoRow(context, 'Versão', '1.0.0'),
-                _buildInfoRow(context, 'Build', '1'),
-                _buildInfoRow(context, 'Plataforma', 'Flutter'),
-                const SizedBox(height: 16),
+                const SizedBox(width: 4),
                 Text(
-                  'Sistema inteligente de lembretes e cuidados para suas plantas, com sincronização automática e recursos premium.',
+                  'Feito com carinho para amantes de plantas',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 14,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.favorite,
-                      color: PlantisColors.flower,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Feito com carinho para amantes de plantas',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
-            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
           ),
+        ],
+      ),
     );
   }
 
@@ -807,46 +812,45 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   void _showThemeDialog(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: const Color(0xFFFFFFFF),
-            title: const Text('Escolher Tema'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildThemeOption(
-                  context,
-                  ref,
-                  ThemeMode.system,
-                  'Automático (Sistema)',
-                  'Segue a configuração do sistema',
-                  Icons.brightness_auto,
-                ),
-                _buildThemeOption(
-                  context,
-                  ref,
-                  ThemeMode.light,
-                  'Claro',
-                  'Tema claro sempre ativo',
-                  Icons.brightness_high,
-                ),
-                _buildThemeOption(
-                  context,
-                  ref,
-                  ThemeMode.dark,
-                  'Escuro',
-                  'Tema escuro sempre ativo',
-                  Icons.brightness_2,
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFFFFFFF),
+        title: const Text('Escolher Tema'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(
+              context,
+              ref,
+              ThemeMode.system,
+              'Automático (Sistema)',
+              'Segue a configuração do sistema',
+              Icons.brightness_auto,
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
-            ],
+            _buildThemeOption(
+              context,
+              ref,
+              ThemeMode.light,
+              'Claro',
+              'Tema claro sempre ativo',
+              Icons.brightness_high,
+            ),
+            _buildThemeOption(
+              context,
+              ref,
+              ThemeMode.dark,
+              'Escuro',
+              'Tema escuro sempre ativo',
+              Icons.brightness_2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
           ),
+        ],
+      ),
     );
   }
 
@@ -873,12 +877,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           children: [
             Icon(
               icon,
-              color:
-                  isSelected
-                      ? PlantisColors.primary
-                      : Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: isSelected
+                  ? PlantisColors.primary
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -888,12 +891,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color:
-                          isSelected
-                              ? PlantisColors.primary
-                              : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? PlantisColors.primary
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(

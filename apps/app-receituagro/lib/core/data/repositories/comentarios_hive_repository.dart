@@ -7,32 +7,35 @@ import '../../../features/comentarios/domain/comentarios_service.dart';
 import '../../services/device_identity_service.dart';
 import '../models/comentario_hive.dart';
 
-/// Repository for comentarios using Hive storage with dynamic boxes.
-/// ✅ FIXED: Changed from BaseHiveRepository typed to direct dynamic box access.
-/// REASON: Box 'comentarios' is opened as dynamic by BoxRegistryService (persistent:true)
-/// and cannot be reopened with specific types (would cause type mismatch error).
+/// Repository for comentarios using Hive storage with type-safe boxes.
+/// ✅ MIGRATED: Using `IBoxRegistryService.getBoxTyped<T>()` for full type safety
+/// BENEFIT: No manual casting, compile-time type checking, better IntelliSense
 class ComentariosHiveRepository implements IComentariosRepository {
-  final IHiveManager _hiveManager;
+  final IBoxRegistryService _boxRegistry;
   final String boxName = 'comentarios';
-  Box<dynamic>? _box;
+  Box<ComentarioHive>? _box;
 
   // Sync service para sincronização com Firebase
   late final ComentariosSyncService _syncService;
 
-  ComentariosHiveRepository() : _hiveManager = GetIt.instance<IHiveManager>() {
+  ComentariosHiveRepository()
+    : _boxRegistry = GetIt.instance<IBoxRegistryService>() {
     _syncService = ComentariosSyncService();
   }
 
-  /// Obtém a box como dynamic (já aberta pelo BoxRegistryService)
-  Future<Box<dynamic>> get box async {
+  /// Obtém a box tipada `Box<ComentarioHive>`
+  Future<Box<ComentarioHive>> get box async {
     if (_box != null && _box!.isOpen) return _box!;
 
-    final result = await _hiveManager.getBox<dynamic>(boxName);
-    if (result.isFailure) {
-      throw Exception('Failed to open Hive box: ${result.error?.message}');
-    }
-    _box = result.data;
-    return _box!;
+    final result = await _boxRegistry.getBoxTyped<ComentarioHive>(boxName);
+    return result.fold(
+      (failure) =>
+          throw Exception('Failed to open Hive box: ${failure.message}'),
+      (typedBox) {
+        _box = typedBox;
+        return typedBox;
+      },
+    );
   }
 
   /// Implementação da interface IComentariosRepository
@@ -42,23 +45,16 @@ class ComentariosHiveRepository implements IComentariosRepository {
       final userId = await _getCurrentUserId();
       final hiveBox = await box;
 
-      final hiveitems = <ComentarioHive>[];
-
-      // Itera sobre todos os valores da box e faz cast para ComentarioHive
-      for (final value in hiveBox.values) {
-        if (value is ComentarioHive) {
-          hiveitems.add(value);
-        }
-      }
-
-      final userComments = hiveitems
-          .where((item) => !item.sync_deleted && item.userId == userId)
-          .toList()
-        ..sort((a, b) {
-          final aTime = a.sync_createdAt ?? 0;
-          final bTime = b.sync_createdAt ?? 0;
-          return bTime.compareTo(aTime); // Mais recente primeiro
-        });
+      // ✅ box.values já é Iterable<ComentarioHive> (type-safe)
+      final userComments =
+          hiveBox.values
+              .where((item) => !item.sync_deleted && item.userId == userId)
+              .toList()
+            ..sort((a, b) {
+              final aTime = a.sync_createdAt ?? 0;
+              final bTime = b.sync_createdAt ?? 0;
+              return bTime.compareTo(aTime); // Mais recente primeiro
+            });
 
       return userComments.map((hive) => hive.toComentarioModel()).toList();
     } catch (e) {
@@ -70,7 +66,10 @@ class ComentariosHiveRepository implements IComentariosRepository {
   Future<void> addComentario(ComentarioModel comentario) async {
     try {
       final userId = await _getCurrentUserId();
-      final hiveComentario = ComentarioHive.fromComentarioModel(comentario, userId);
+      final hiveComentario = ComentarioHive.fromComentarioModel(
+        comentario,
+        userId,
+      );
       if (hiveComentario.idReg.isEmpty) {
         hiveComentario.idReg = _generateId();
       }
@@ -80,13 +79,17 @@ class ComentariosHiveRepository implements IComentariosRepository {
       await hiveBox.put(hiveComentario.idReg, hiveComentario);
 
       if (kDebugMode) {
-        debugPrint('✅ [ComentariosRepository] Comentário salvo localmente: ${hiveComentario.idReg}');
+        debugPrint(
+          '✅ [ComentariosRepository] Comentário salvo localmente: ${hiveComentario.idReg}',
+        );
       }
 
       // 2. Sincroniza com Firebase (igual aos favoritos)
       try {
         // Atualiza o modelo com o ID gerado
-        final comentarioComId = comentario.copyWith(idReg: hiveComentario.idReg);
+        final comentarioComId = comentario.copyWith(
+          idReg: hiveComentario.idReg,
+        );
         await _syncService.syncOperation('create', comentarioComId);
 
         if (kDebugMode) {
@@ -113,7 +116,8 @@ class ComentariosHiveRepository implements IComentariosRepository {
       final userId = await _getCurrentUserId();
       final hiveBox = await box;
 
-      final existing = hiveBox.get(comentario.idReg) as ComentarioHive?;
+      // ✅ box.get() já retorna ComentarioHive? (type-safe)
+      final existing = hiveBox.get(comentario.idReg);
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
@@ -153,7 +157,8 @@ class ComentariosHiveRepository implements IComentariosRepository {
       final userId = await _getCurrentUserId();
       final hiveBox = await box;
 
-      final existing = hiveBox.get(id) as ComentarioHive?;
+      // ✅ box.get() já retorna ComentarioHive? (type-safe)
+      final existing = hiveBox.get(id);
       if (existing == null) {
         throw Exception('Comentário não encontrado');
       }
@@ -194,11 +199,11 @@ class ComentariosHiveRepository implements IComentariosRepository {
       final value = hiveBox.get(id);
 
       if (value == null) return null;
-      if (value is! ComentarioHive) return null;
 
       final userId = await _getCurrentUserId();
       if (value.userId != userId) return null;
-      if (value.sync_deleted) return null; // Só retorna comentários ativos (não deletados)
+      if (value.sync_deleted)
+        return null; // Só retorna comentários ativos (não deletados)
 
       return value.toComentarioModel();
     } catch (e) {
@@ -207,29 +212,28 @@ class ComentariosHiveRepository implements IComentariosRepository {
   }
 
   /// Busca comentários por pkIdentificador (contexto específico)
-  Future<List<ComentarioModel>> getComentariosByContext(String pkIdentificador) async {
+  Future<List<ComentarioModel>> getComentariosByContext(
+    String pkIdentificador,
+  ) async {
     try {
       final userId = await _getCurrentUserId();
       final hiveBox = await box;
 
-      final hiveitems = <ComentarioHive>[];
-      for (final value in hiveBox.values) {
-        if (value is ComentarioHive) {
-          hiveitems.add(value);
-        }
-      }
-
-      final contextComments = hiveitems
-          .where((item) =>
-              !item.sync_deleted &&
-              item.userId == userId &&
-              item.pkIdentificador == pkIdentificador)
-          .toList()
-        ..sort((a, b) {
-          final aTime = a.sync_createdAt ?? 0;
-          final bTime = b.sync_createdAt ?? 0;
-          return bTime.compareTo(aTime);
-        });
+      // ✅ box.values já é Iterable<ComentarioHive> (type-safe)
+      final contextComments =
+          hiveBox.values
+              .where(
+                (item) =>
+                    !item.sync_deleted &&
+                    item.userId == userId &&
+                    item.pkIdentificador == pkIdentificador,
+              )
+              .toList()
+            ..sort((a, b) {
+              final aTime = a.sync_createdAt ?? 0;
+              final bTime = b.sync_createdAt ?? 0;
+              return bTime.compareTo(aTime);
+            });
 
       return contextComments.map((hive) => hive.toComentarioModel()).toList();
     } catch (e) {
@@ -243,24 +247,21 @@ class ComentariosHiveRepository implements IComentariosRepository {
       final userId = await _getCurrentUserId();
       final hiveBox = await box;
 
-      final hiveitems = <ComentarioHive>[];
-      for (final value in hiveBox.values) {
-        if (value is ComentarioHive) {
-          hiveitems.add(value);
-        }
-      }
-
-      final toolComments = hiveitems
-          .where((item) =>
-              !item.sync_deleted &&
-              item.userId == userId &&
-              item.ferramenta == ferramenta)
-          .toList()
-        ..sort((a, b) {
-          final aTime = a.sync_createdAt ?? 0;
-          final bTime = b.sync_createdAt ?? 0;
-          return bTime.compareTo(aTime);
-        });
+      // ✅ box.values já é Iterable<ComentarioHive> (type-safe)
+      final toolComments =
+          hiveBox.values
+              .where(
+                (item) =>
+                    !item.sync_deleted &&
+                    item.userId == userId &&
+                    item.ferramenta == ferramenta,
+              )
+              .toList()
+            ..sort((a, b) {
+              final aTime = a.sync_createdAt ?? 0;
+              final bTime = b.sync_createdAt ?? 0;
+              return bTime.compareTo(aTime);
+            });
 
       return toolComments.map((hive) => hive.toComentarioModel()).toList();
     } catch (e) {
@@ -276,17 +277,12 @@ class ComentariosHiveRepository implements IComentariosRepository {
 
       final hiveBox = await box;
 
-      final hiveitems = <ComentarioHive>[];
-      for (final value in hiveBox.values) {
-        if (value is ComentarioHive) {
-          hiveitems.add(value);
-        }
-      }
-
-      final oldInactiveComments = hiveitems
-          .where((item) =>
-              item.sync_deleted &&
-              (item.sync_updatedAt ?? 0) < cutoffTime)
+      // ✅ box.values já é Iterable<ComentarioHive> (type-safe)
+      final oldInactiveComments = hiveBox.values
+          .where(
+            (item) =>
+                item.sync_deleted && (item.sync_updatedAt ?? 0) < cutoffTime,
+          )
           .toList();
 
       for (final comment in oldInactiveComments) {
@@ -303,22 +299,23 @@ class ComentariosHiveRepository implements IComentariosRepository {
       final userId = await _getCurrentUserId();
       final hiveBox = await box;
 
-      final hiveitems = <ComentarioHive>[];
-      for (final value in hiveBox.values) {
-        if (value is ComentarioHive) {
-          hiveitems.add(value);
-        }
-      }
-
-      final userComments = hiveitems
+      // ✅ box.values já é Iterable<ComentarioHive> (type-safe)
+      final userComments = hiveBox.values
           .where((ComentarioHive item) => item.userId == userId)
           .toList();
 
-      final activeComments = userComments.where((ComentarioHive item) => !item.sync_deleted).length;
-      final deletedComments = userComments.where((ComentarioHive item) => item.sync_deleted).length;
+      final activeComments = userComments
+          .where((ComentarioHive item) => !item.sync_deleted)
+          .length;
+      final deletedComments = userComments
+          .where((ComentarioHive item) => item.sync_deleted)
+          .length;
       final toolCounts = <String, int>{};
-      for (final comment in userComments.where((ComentarioHive item) => !item.sync_deleted)) {
-        toolCounts[comment.ferramenta] = (toolCounts[comment.ferramenta] ?? 0) + 1;
+      for (final comment in userComments.where(
+        (ComentarioHive item) => !item.sync_deleted,
+      )) {
+        toolCounts[comment.ferramenta] =
+            (toolCounts[comment.ferramenta] ?? 0) + 1;
       }
 
       return {

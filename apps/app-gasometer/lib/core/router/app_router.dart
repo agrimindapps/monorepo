@@ -7,6 +7,8 @@ import '../../features/expenses/presentation/pages/add_expense_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/fuel/presentation/pages/add_fuel_page.dart';
 import '../../features/fuel/presentation/pages/fuel_page.dart';
+import '../../features/legal/presentation/pages/privacy_policy_page.dart';
+import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/maintenance/presentation/pages/add_maintenance_page.dart';
 import '../../features/maintenance/presentation/pages/maintenance_page.dart';
 import '../../features/odometer/presentation/pages/add_odometer_page.dart';
@@ -32,10 +34,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AdaptiveMainNavigation(child: child);
         },
         routes: [
-          GoRoute(
-            path: '/',
-            redirect: (context, state) => '/vehicles',
-          ),
+          GoRoute(path: '/', redirect: (context, state) => '/vehicles'),
           GoRoute(
             path: '/vehicles',
             name: 'vehicles',
@@ -107,6 +106,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const SettingsPage(),
           ),
           GoRoute(
+            path: '/privacy-policy',
+            name: 'privacy-policy',
+            builder: (context, state) => const PrivacyPolicyPage(),
+          ),
+          GoRoute(
+            path: '/terms-of-service',
+            name: 'terms-of-service',
+            builder: (context, state) => const TermsOfServicePage(),
+          ),
+          GoRoute(
             path: '/profile',
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
@@ -134,11 +143,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Página não encontrada',

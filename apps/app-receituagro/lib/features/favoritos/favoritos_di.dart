@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import 'data/factories/favorito_entity_factory_registry.dart';
 import 'data/repositories/favoritos_repository_simplified.dart';
 import 'data/services/favoritos_service.dart';
 import 'domain/repositories/i_favoritos_repository.dart';
@@ -12,6 +13,11 @@ import 'domain/repositories/i_favoritos_repository.dart';
 /// - Specialized Services: 4 services criados (DataResolver, Validator, Sync, Cache)
 /// - Logs: 157+ logs → ~10 logs essenciais (94% redução)
 /// - Provider: Sendo migrado para Riverpod (FavoritosNotifier)
+///
+/// REFATORAÇÃO FASE 3 (P1):
+/// - Removed switch case factory (OCP violation)
+/// - Added FavoritoEntityFactoryRegistry (Strategy Pattern)
+/// - Extensible: adding new tipos doesn't require code modifications
 ///
 /// ⚠️ IMPORTANTE: Separado em 2 métodos para evitar conflitos com Injectable:
 /// 1. registerServices() - chamado ANTES do Injectable (apenas FavoritosService)
@@ -28,6 +34,13 @@ class FavoritosDI {
   /// ⚠️ FavoritosRepositorySimplified é registrado via @LazySingleton (Injectable)
   static void registerServices() {
     if (_servicesRegistered) return;
+
+    // Register factory registry (Strategy Pattern - no more switch case)
+    if (!_getIt.isRegistered<IFavoritoEntityFactoryRegistry>()) {
+      _getIt.registerSingleton<IFavoritoEntityFactoryRegistry>(
+        FavoritoEntityFactoryRegistry(),
+      );
+    }
 
     // Service com specialized services internos (não tem @injectable)
     _getIt.registerLazySingleton<FavoritosService>(

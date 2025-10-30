@@ -25,6 +25,128 @@ Como designer UX/UI ESPECIALIZADO, você foca em:
 - Gestão de estados visuais (loading, error, empty states)
 - Responsive layouts com MediaQuery e LayoutBuilder
 
+## 🏢 CONTEXTO DO MONOREPO
+
+### **10+ Apps com Diferentes Personalidades UX:**
+
+#### **Agricultura (Design Natural & Funcional):**
+```
+app-plantis (GOLD STANDARD UX):
+├── 🎨 Theme: Verde natural (#4CAF50), earthy tones
+├── 🧭 Navigation: Bottom navigation + FAB
+├── 📱 Screens: Plant cards, watering schedules, care reminders
+├── ✨ Animations: Smooth transitions, water drop effects
+└── ♿ Acessibilidade: High contrast, semantic labels
+
+app-receituagro (Profissional Agrícola):
+├── 🎨 Theme: Verde agrícola, tons corporativos
+├── 🧭 Navigation: Drawer navigation, hierarchical
+├── 📱 Screens: Diagnóstico forms, prescrição lists
+└── 🎯 Focus: Efficiency over beauty
+
+app-agrihurbi (Comercial):
+├── 🎨 Theme: Verde + laranja (comercial)
+├── 🧭 Navigation: Simple navigation
+└── 🎯 Focus: Quick transactions
+```
+
+#### **Produtividade (Clean & Minimal):**
+```
+app_taskolist:
+├── 🎨 Theme: Azul produtividade, whites
+├── 🧭 Navigation: Tab-based organization
+├── 📱 Screens: Task lists, kanban boards, calendars
+└── ✨ Gestures: Swipe to delete, drag-and-drop
+
+app-nebulalist:
+├── 🎨 Theme: Neutral tones
+├── 🧭 Navigation: List-focused
+└── 🎯 Focus: Simplicity, speed
+```
+
+#### **Veículos (Bold & Functional):**
+```
+app-gasometer:
+├── 🎨 Theme: Automotive colors (dark + accent)
+├── 🧭 Navigation: Bottom nav + stats dashboard
+├── 📱 Screens: Vehicle cards, expense trackers, charts
+└── 📊 Data Viz: Charts, graphs, statistics
+```
+
+#### **Saúde & Wellness (Soft & Trustworthy):**
+```
+app-nutrituti:
+├── 🎨 Theme: Health greens, soft blues
+├── 🧭 Navigation: Tab-based nutrition
+├── 📱 Screens: Meal planners, nutrition facts
+└── 🎯 Focus: Readability, trust
+
+app-petiveti:
+├── 🎨 Theme: Pet-friendly pastels
+├── 🧭 Navigation: Pet profiles + tabs
+└── 🎯 Focus: Emotional connection
+```
+
+### **Componentes Compartilhados (Core Package):**
+```dart
+packages/core/lib/widgets/
+├── common_button.dart          # Botão padrão usado em 8 apps
+├── loading_widget.dart         # Loading states consistentes
+├── error_widget.dart           # Error states com retry
+├── empty_state_widget.dart     # Empty states ilustrados
+├── premium_badge.dart          # Badge RevenueCat premium
+└── custom_card.dart            # Card pattern base
+
+OPORTUNIDADE: Reutilizar componentes UX entre apps mantendo personalização
+```
+
+### **Padrões UX Consolidados:**
+```
+✅ PADRÕES ESTABELECIDOS:
+- Bottom navigation para apps multi-seção
+- FAB para ação primária
+- Swipe gestures para ações rápidas
+- Pull-to-refresh em lists
+- Loading/Error/Empty states consistentes
+- Premium paywalls via RevenueCat (modal bottom sheet)
+
+❌ PROBLEMAS COMUNS A EVITAR:
+- Inconsistência de spacing entre apps
+- Navigation patterns diferentes sem justificativa
+- Falta de feedback visual em ações
+- Textos muito pequenos (<14sp)
+- Touch targets <44dp
+- Loading states sem skeleton screens
+```
+
+### **Responsive Design Needs:**
+```
+Target Devices:
+├── 📱 Phone: 360dp - 428dp (maioria dos usuários)
+├── 📱 Tablet: 768dp+ (app-receituagro profissional)
+├── 💻 Web: 1024dp+ (web_agrimindSite, web_receituagro)
+└── ⌚ Adaptive: Landscape support needed
+
+Breakpoints Recomendados:
+- Mobile: < 600dp
+- Tablet: 600dp - 1024dp
+- Desktop: > 1024dp
+```
+
+### **Acessibilidade (CRÍTICO para apps de saúde):**
+```
+WCAG 2.1 AA Compliance:
+✅ app-plantis: Semantic labels, contrast ratios OK
+⚠️ app-nutrituti: CRITICAL - health data needs high accessibility
+⚠️ app-gasometer: Charts need screen reader descriptions
+🔄 Outros apps: Audit needed
+
+Priority:
+1. Health apps (nutrituti, petiveti) - Legal requirement
+2. Productivity apps (taskolist, nebulalist) - User diversity
+3. Specialty apps - Progressive enhancement
+```
+
 ## 📋 Processo de Avaliação UX/UI
 
 ### 1. **Auditoria de Interface (10-15min)**

@@ -34,20 +34,149 @@ Você é um Software Engineer Flutter/Dart sênior especializado em desenvolvime
 
 ## 🏢 CONTEXTO DO MONOREPO
 
-### **Apps Gerenciados:**
-- **app-gasometer**: Controle de veículos (Provider + Hive + Analytics)
-- **app-plantis**: Cuidado de plantas (Provider + Notifications) - **GOLD STANDARD 10/10**
-- **app_task_manager**: Tarefas (Riverpod + Clean Architecture)
-- **app-receituagro**: Diagnóstico agrícola (Provider + Static Data)
+### **Apps Gerenciados (10+ aplicações):**
 
-### **Padrões ESTABELECIDOS (Validados):**
-- **State Management**: Riverpod (code generation) - **PADRÃO ÚNICO**
-- **Architecture**: Clean Architecture + Repository Pattern
-- **Error Handling**: Either<Failure, T> (dartz) - **OBRIGATÓRIO**
-- **Testing**: Mocktail para mocking - **PADRÃO**
-- **DI**: GetIt + Injectable (+ Riverpod providers)
-- **Specialized Services**: SOLID (SRP) pattern - **app-plantis 10/10**
-- **Async Handling**: AsyncValue<T> para loading/error/data states
+#### 🏆 **app-plantis** (GOLD STANDARD 10/10) - SUA REFERÊNCIA PRINCIPAL
+```dart
+// Exemplo real de qualidade do app-plantis:
+
+// 1. Specialized Services (SRP aplicado)
+@riverpod
+PlantCreationService plantCreationService(PlantCreationServiceRef ref) {
+  return PlantCreationService(ref.watch(plantRepositoryProvider));
+}
+
+@riverpod
+WateringScheduleService wateringScheduleService(WateringScheduleServiceRef ref) {
+  return WateringScheduleService(ref.watch(scheduleRepositoryProvider));
+}
+
+// 2. Either<Failure, T> em domain
+abstract class PlantRepository {
+  Future<Either<Failure, List<Plant>>> getPlants();
+  Future<Either<Failure, Plant>> addPlant(Plant plant);
+}
+
+// 3. AsyncValue<T> em providers
+@riverpod
+class PlantNotifier extends _$PlantNotifier {
+  @override
+  FutureOr<List<Plant>> build() async {
+    final result = await ref.read(plantRepositoryProvider).getPlants();
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (plants) => plants,
+    );
+  }
+}
+
+// 4. UI com .when()
+final plantsAsync = ref.watch(plantNotifierProvider);
+plantsAsync.when(
+  data: (plants) => PlantList(plants),
+  loading: () => const CircularProgressIndicator(),
+  error: (error, _) => ErrorWidget(error),
+);
+```
+
+**Métricas:**
+- ✅ 0 analyzer errors
+- ✅ 13 unit tests (100% pass rate)
+- ✅ Clean Architecture rigorosa
+- ✅ SOLID principles aplicados
+- ✅ Either<Failure, T> completo
+
+#### 🚗 **app-gasometer** (Provider → Riverpod migration)
+- Controle de veículos, abastecimentos
+- Hive local + Firebase sync
+- Analytics integration
+
+#### 📋 **app_taskolist** 
+- Riverpod + Clean Architecture
+- Gerenciamento de tarefas
+
+#### 🌾 **app-receituagro** (Provider → Riverpod migration)
+- Diagnóstico agrícola
+- Static data + Hive
+
+### **Padrões OBRIGATÓRIOS (Validados no app-plantis):**
+
+#### **State Management**
+```dart
+// ❌ NUNCA Provider/ChangeNotifier em código novo
+class VehicleProvider extends ChangeNotifier { } 
+
+// ✅ SEMPRE Riverpod com code generation
+@riverpod
+class VehicleNotifier extends _$VehicleNotifier {
+  @override
+  FutureOr<List<Vehicle>> build() async { }
+}
+```
+
+#### **Error Handling**
+```dart
+// ❌ NUNCA throw exceptions em domain
+Future<List<User>> getUsers() {
+  throw Exception('Error'); 
+}
+
+// ✅ SEMPRE Either<Failure, T>
+Future<Either<Failure, List<User>>> getUsers() async {
+  try {
+    return Right(users);
+  } catch (e) {
+    return Left(ServerFailure(e.toString()));
+  }
+}
+```
+
+#### **Async States**
+```dart
+// ❌ NUNCA gerenciar loading/error manualmente
+bool isLoading = false;
+String? error;
+
+// ✅ SEMPRE AsyncValue<T>
+AsyncValue<List<Item>> state = const AsyncValue.loading();
+```
+
+#### **Testing**
+```dart
+// ✅ SEMPRE Mocktail
+class MockRepository extends Mock implements Repository {}
+
+test('should return data when successful', () async {
+  when(() => mockRepo.getData()).thenAnswer((_) async => Right(data));
+  // ...
+});
+```
+
+### **Arquitetura Mandatória:**
+```
+lib/
+├── domain/              # Business logic pura (NUNCA import Flutter)
+│   ├── entities/        # Objetos de negócio (extends Equatable)
+│   ├── repositories/    # Interfaces/contratos (Either<Failure, T>)
+│   ├── usecases/        # Casos de uso (1 responsabilidade)
+│   └── failures/        # Tipos de erro customizados
+├── data/                # Implementações
+│   ├── models/          # DTOs com fromJson/toJson
+│   ├── datasources/     # Local (Hive) + Remote (Firebase)
+│   └── repositories/    # Implementações dos contratos
+├── presentation/        # UI + State (ÚNICO com import Flutter)
+│   ├── providers/       # Riverpod notifiers (@riverpod)
+│   ├── pages/           # Screens
+│   └── widgets/         # Components
+└── core/                # DI, constants, utils
+    └── injection.dart   # GetIt + Injectable setup
+```
+
+### **Quality Standards:**
+- Max **500 linhas** por arquivo
+- Max **50 linhas** por método
+- **0 analyzer errors** em produção
+- **>70% test coverage** em domain/data
 
 ## 🚀 Especialização em Desenvolvimento Completo
 

@@ -4,15 +4,36 @@ import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../domain/entities/praga_entity.dart';
 import '../../domain/repositories/i_pragas_repository.dart';
 import '../mappers/praga_mapper.dart';
+import '../services/pragas_query_service.dart';
+import '../services/pragas_search_service.dart';
+import '../services/pragas_stats_service.dart';
 
 /// Implementação do repositório de pragas usando Hive (Data Layer)
+///
+/// SOLID Refactoring:
+/// - Separated query logic to PragasQueryService (SRP)
+/// - Separated search logic to PragasSearchService (SRP)
+/// - Separated stats logic to PragasStatsService (SRP)
+/// - Repository now focuses only on CRUD operations
+/// - All dependencies injected to improve testability (DIP)
+///
+/// This follows the pattern established in diagnosticos, defensivos, and comentarios features.
+///
 /// Princípios: Single Responsibility + Dependency Inversion
 /// Segue padrão Either for error handling consistente
 @LazySingleton(as: IPragasRepository)
 class PragasRepositoryImpl implements IPragasRepository {
   final PragasHiveRepository _hiveRepository;
+  final IPragasQueryService _queryService;
+  final IPragasSearchService _searchService;
+  final IPragasStatsService _statsService;
 
-  PragasRepositoryImpl(this._hiveRepository);
+  PragasRepositoryImpl(
+    this._hiveRepository,
+    this._queryService,
+    this._searchService,
+    this._statsService,
+  );
 
   @override
   Future<Either<Failure, List<PragaEntity>>> getAll() async {
@@ -23,7 +44,7 @@ class PragasRepositoryImpl implements IPragasRepository {
       }
       final pragasHive = result.data ?? [];
       final pragasEntities = PragaMapper.fromHiveToEntityList(pragasHive);
-      
+
       return Right(pragasEntities);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar pragas: ${e.toString()}'));
@@ -42,11 +63,11 @@ class PragasRepositoryImpl implements IPragasRepository {
         return Left(CacheFailure('Erro ao buscar praga por ID: ${result.error?.message}'));
       }
       final praga = result.data;
-      
+
       if (praga == null) {
         return const Right(null);
       }
-      
+
       final pragaEntity = PragaMapper.fromHiveToEntity(praga);
       return Right(pragaEntity);
     } catch (e) {
@@ -57,9 +78,16 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<Either<Failure, List<PragaEntity>>> getByTipo(String tipo) async {
     try {
-      final result = await _hiveRepository.findByTipo(tipo);
-      final pragasEntities = PragaMapper.fromHiveToEntityList(result);
-      return Right(pragasEntities);
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+
+      final allPragas = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final filteredPragas = _queryService.getByTipo(pragasEntities, tipo);
+
+      return Right(filteredPragas);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar pragas por tipo: ${e.toString()}'));
     }
@@ -68,40 +96,16 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<Either<Failure, List<PragaEntity>>> searchByName(String searchTerm) async {
     try {
-      if (searchTerm.trim().isEmpty) {
-        return const Right([]);
-      }
-
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
         return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
       }
-      
-      final allPragas = result.data ?? [];
-      final term = searchTerm.trim().toLowerCase();
-      final filteredPragas = allPragas.where((praga) {
-        final nomeComumLower = praga.nomeComum.toLowerCase();
-        final nomeCientificoLower = praga.nomeCientifico.toLowerCase();
-        return nomeComumLower.contains(term) || 
-               nomeCientificoLower.contains(term) ||
-               (praga.nomeComum.contains(';') && 
-                praga.nomeComum.toLowerCase().split(';').any((name) => 
-                  name.trim().toLowerCase().contains(term)));
-      }).toList();
-      final entities = PragaMapper.fromHiveToEntityList(filteredPragas);
-      entities.sort((a, b) {
-        final aNameLower = a.nomeComum.toLowerCase();
-        final bNameLower = b.nomeComum.toLowerCase();
-        if (aNameLower == term && bNameLower != term) return -1;
-        if (bNameLower == term && aNameLower != term) return 1;
-        final aStartsWith = aNameLower.startsWith(term);
-        final bStartsWith = bNameLower.startsWith(term);
-        if (aStartsWith && !bStartsWith) return -1;
-        if (bStartsWith && !aStartsWith) return 1;
-        return a.nomeComum.compareTo(b.nomeComum);
-      });
 
-      return Right(entities);
+      final allPragas = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final searchResults = _searchService.searchByName(pragasEntities, searchTerm);
+
+      return Right(searchResults);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar pragas por nome: ${e.toString()}'));
     }
@@ -110,13 +114,16 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<Either<Failure, List<PragaEntity>>> getByFamilia(String familia) async {
     try {
-      if (familia.isEmpty) {
-        return const Right([]);
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
       }
 
-      final result = await _hiveRepository.findByFamilia(familia);
-      final pragasEntities = PragaMapper.fromHiveToEntityList(result);
-      return Right(pragasEntities);
+      final allPragas = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final filteredPragas = _queryService.getByFamilia(pragasEntities, familia);
+
+      return Right(filteredPragas);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar pragas por família: ${e.toString()}'));
     }
@@ -125,15 +132,16 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<Either<Failure, List<PragaEntity>>> getByCultura(String culturaId) async {
     try {
-      if (culturaId.isEmpty) {
-        return const Right([]);
-      }
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
         return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
       }
-      final pragasEntities = PragaMapper.fromHiveToEntityList(result.data ?? []);
-      return Right(pragasEntities);
+
+      final allPragas = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final filteredPragas = _queryService.getByCultura(pragasEntities, culturaId);
+
+      return Right(filteredPragas);
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar pragas por cultura: ${e.toString()}'));
     }
@@ -142,8 +150,16 @@ class PragasRepositoryImpl implements IPragasRepository {
   @override
   Future<Either<Failure, int>> getCountByTipo(String tipo) async {
     try {
-      final result = await _hiveRepository.findByTipo(tipo);
-      return Right(result.length);
+      final result = await _hiveRepository.getAll();
+      if (result.isFailure) {
+        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+      }
+
+      final allPragas = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final count = _statsService.getCountByTipo(pragasEntities, tipo);
+
+      return Right(count);
     } catch (e) {
       return Left(CacheFailure('Erro ao contar pragas por tipo: ${e.toString()}'));
     }
@@ -156,9 +172,14 @@ class PragasRepositoryImpl implements IPragasRepository {
       if (result.isFailure) {
         return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
       }
-      return Right(result.data?.length ?? 0);
+
+      final allPragas = result.data ?? [];
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final count = _statsService.getTotalCount(pragasEntities);
+
+      return Right(count);
     } catch (e) {
-      return Left(CacheFailure('Erro ao contar total de pragas: ${e.toString()}'));
+      return Left(CacheFailure('Erro ao contar total de pragas: {{e.toString()}}'));
     }
   }
 
@@ -167,15 +188,16 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+        return Left(CacheFailure('Erro ao buscar pragas: {{result.error?.message}}'));
       }
+
       final allPragas = result.data ?? [];
-      final pragasRecentes = allPragas.take(limit).toList();
-      final pragasEntities = PragaMapper.fromHiveToEntityList(pragasRecentes);
-      
-      return Right(pragasEntities);
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final recentPragas = _queryService.getRecentes(pragasEntities, limit: limit);
+
+      return Right(recentPragas);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar pragas recentes: ${e.toString()}'));
+      return Left(CacheFailure('Erro ao buscar pragas recentes: {{e.toString()}}'));
     }
   }
 
@@ -184,25 +206,16 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+        return Left(CacheFailure('Erro ao buscar pragas: {{result.error?.message}}'));
       }
+
       final allPragas = result.data ?? [];
-      
-      final stats = <String, int>{
-        'total': allPragas.length,
-        'insetos': allPragas.where((p) => p.tipoPraga == '1').length,
-        'doencas': allPragas.where((p) => p.tipoPraga == '2').length,
-        'plantas': allPragas.where((p) => p.tipoPraga == '3').length,
-        'familias': allPragas
-            .map((p) => p.familia)
-            .where((f) => f != null && f.isNotEmpty)
-            .toSet()
-            .length,
-      };
-      
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final stats = _statsService.calculateStats(pragasEntities);
+
       return Right(stats);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar estatísticas das pragas: ${e.toString()}'));
+      return Left(CacheFailure('Erro ao buscar estatísticas das pragas: {{e.toString()}}'));
     }
   }
 
@@ -211,19 +224,16 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+        return Left(CacheFailure('Erro ao buscar pragas: {{result.error?.message}}'));
       }
+
       final allPragas = result.data ?? [];
-      final tipos = allPragas
-          .map((praga) => praga.tipoPraga)
-          .where((tipo) => tipo.isNotEmpty)
-          .toSet()
-          .toList();
-      
-      tipos.sort();
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final tipos = _queryService.getTiposPragas(pragasEntities);
+
       return Right(tipos);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar tipos de pragas: ${e.toString()}'));
+      return Left(CacheFailure('Erro ao buscar tipos de pragas: {{e.toString()}}'));
     }
   }
 
@@ -232,20 +242,16 @@ class PragasRepositoryImpl implements IPragasRepository {
     try {
       final result = await _hiveRepository.getAll();
       if (result.isFailure) {
-        return Left(CacheFailure('Erro ao buscar pragas: ${result.error?.message}'));
+        return Left(CacheFailure('Erro ao buscar pragas: {{result.error?.message}}'));
       }
+
       final allPragas = result.data ?? [];
-      final familias = allPragas
-          .map((praga) => praga.familia)
-          .where((familia) => familia != null && familia.isNotEmpty)
-          .cast<String>()
-          .toSet()
-          .toList();
-      
-      familias.sort();
+      final pragasEntities = PragaMapper.fromHiveToEntityList(allPragas);
+      final familias = _queryService.getFamiliasPragas(pragasEntities);
+
       return Right(familias);
     } catch (e) {
-      return Left(CacheFailure('Erro ao buscar famílias de pragas: ${e.toString()}'));
+      return Left(CacheFailure('Erro ao buscar famílias de pragas: {{e.toString()}}'));
     }
   }
 }

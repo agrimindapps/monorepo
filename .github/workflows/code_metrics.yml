@@ -1,0 +1,256 @@
+name: Code Metrics & Quality Tracking
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Gerar relatório semanal toda sexta às 18h UTC
+    - cron: '0 18 * * 5'
+
+jobs:
+  code-metrics:
+    name: Generate Code Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better analysis
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        cache: true
+    
+    - name: Install dart_code_metrics
+      run: |
+        flutter pub global activate dart_code_metrics
+    
+    - name: Generate metrics for all apps
+      run: |
+        mkdir -p metrics_output
+        
+        for app in apps/*/; do
+          app_name=$(basename "$app")
+          echo "📊 Analyzing $app_name..."
+          
+          cd "$app"
+          flutter pub get
+          
+          # Gerar métricas
+          metrics analyze lib --reporter=json > ../../metrics_output/${app_name}_metrics.json || true
+          metrics analyze lib --reporter=html > ../../metrics_output/${app_name}_metrics.html || true
+          
+          cd ../..
+        done
+    
+    - name: Calculate overall metrics
+      id: metrics
+      run: |
+        echo "# Code Metrics Report" > metrics_report.md
+        echo "" >> metrics_report.md
+        echo "Generated: $(date)" >> metrics_report.md
+        echo "" >> metrics_report.md
+        
+        total_files=0
+        total_lines=0
+        total_functions=0
+        
+        for app in apps/*/; do
+          app_name=$(basename "$app")
+          echo "## $app_name" >> metrics_report.md
+          echo "" >> metrics_report.md
+          
+          # Contar arquivos Dart
+          dart_files=$(find "$app/lib" -name "*.dart" | wc -l)
+          total_files=$((total_files + dart_files))
+          
+          # Contar linhas de código
+          lines=$(find "$app/lib" -name "*.dart" -exec wc -l {} + | tail -1 | awk '{print $1}')
+          total_lines=$((total_lines + lines))
+          
+          echo "- **Files:** $dart_files" >> metrics_report.md
+          echo "- **Lines of Code:** $lines" >> metrics_report.md
+          echo "" >> metrics_report.md
+        done
+        
+        echo "## Summary" >> metrics_report.md
+        echo "" >> metrics_report.md
+        echo "- **Total Apps:** $(ls -d apps/*/ | wc -l)" >> metrics_report.md
+        echo "- **Total Dart Files:** $total_files" >> metrics_report.md
+        echo "- **Total Lines of Code:** $total_lines" >> metrics_report.md
+        echo "" >> metrics_report.md
+        
+        echo "total_files=$total_files" >> $GITHUB_OUTPUT
+        echo "total_lines=$total_lines" >> $GITHUB_OUTPUT
+    
+    - name: Upload metrics artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-metrics
+        path: metrics_output/
+        retention-days: 90
+    
+    - name: Comment PR with metrics
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('metrics_report.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 📊 Code Metrics\n\n${report}`
+          });
+
+  quality-trends:
+    name: Track Quality Trends
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+    
+    - name: Run quality gates and generate report
+      run: |
+        dart scripts/quality_gates.dart --app=all --check=all --report=json
+    
+    - name: Parse quality report
+      id: quality
+      run: |
+        if [ -f "quality_gates_report.json" ]; then
+          # Extrair métricas principais
+          critical=$(jq '.summary.critical' quality_gates_report.json)
+          warnings=$(jq '.summary.warning' quality_gates_report.json)
+          total=$(jq '.summary.total_issues' quality_gates_report.json)
+          
+          echo "critical=$critical" >> $GITHUB_OUTPUT
+          echo "warnings=$warnings" >> $GITHUB_OUTPUT
+          echo "total=$total" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Store metrics in GitHub
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Criar ou atualizar arquivo de métricas históricas
+          const metrics = {
+            date: new Date().toISOString(),
+            commit: context.sha,
+            critical: ${{ steps.quality.outputs.critical }},
+            warnings: ${{ steps.quality.outputs.warnings }},
+            total: ${{ steps.quality.outputs.total }}
+          };
+          
+          // Salvar em gist ou criar issue com dados
+          // (Implementação depende de onde você quer armazenar)
+
+  complexity-analysis:
+    name: Complexity Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+    
+    - name: Analyze code complexity
+      run: |
+        echo "# Complexity Analysis" > complexity_report.md
+        echo "" >> complexity_report.md
+        
+        for app in apps/*/; do
+          app_name=$(basename "$app")
+          echo "## $app_name" >> complexity_report.md
+          echo "" >> complexity_report.md
+          
+          # Encontrar arquivos grandes (>500 linhas)
+          large_files=$(find "$app/lib" -name "*.dart" -exec wc -l {} + | \
+            awk '$1 > 500 {print "- **" $2 "**: " $1 " lines"}' | \
+            sort -nr)
+          
+          if [ ! -z "$large_files" ]; then
+            echo "### 🔴 Large Files (>500 lines)" >> complexity_report.md
+            echo "" >> complexity_report.md
+            echo "$large_files" >> complexity_report.md
+            echo "" >> complexity_report.md
+          else
+            echo "✅ No files exceed 500 lines" >> complexity_report.md
+            echo "" >> complexity_report.md
+          fi
+          
+          # Encontrar métodos longos (>50 linhas)
+          # (Análise simplificada - pode ser melhorada)
+          long_methods=$(grep -n "}" "$app/lib"/**/*.dart | \
+            awk 'NR%50==0 {print "⚠️  Potential long method at line " $1}' | \
+            head -5)
+          
+          if [ ! -z "$long_methods" ]; then
+            echo "### ⚠️  Potential Long Methods" >> complexity_report.md
+            echo "" >> complexity_report.md
+            echo "$long_methods" >> complexity_report.md
+            echo "" >> complexity_report.md
+          fi
+        done
+    
+    - name: Upload complexity report
+      uses: actions/upload-artifact@v3
+      with:
+        name: complexity-report
+        path: complexity_report.md
+
+  weekly-quality-report:
+    name: Weekly Quality Summary
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    needs: [code-metrics, quality-trends, complexity-analysis]
+    
+    steps:
+    - name: Download all reports
+      uses: actions/download-artifact@v3
+    
+    - name: Combine reports
+      run: |
+        echo "# 📊 Weekly Quality Report" > weekly_report.md
+        echo "" >> weekly_report.md
+        echo "Generated: $(date)" >> weekly_report.md
+        echo "" >> weekly_report.md
+        
+        # Combinar todos os reports
+        cat metrics_report.md >> weekly_report.md || true
+        echo "" >> weekly_report.md
+        cat complexity_report.md >> weekly_report.md || true
+    
+    - name: Create issue with weekly report
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('weekly_report.md', 'utf8');
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `📊 Weekly Quality Report - Week ${new Date().getWeek()}`,
+            body: report,
+            labels: ['quality', 'metrics', 'automated', 'weekly-report']
+          });

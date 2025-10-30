@@ -6,6 +6,7 @@ import '../../../../core/data/repositories/favoritos_hive_repository.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../domain/repositories/i_favoritos_repository.dart';
+import '../factories/favorito_entity_factory_registry.dart';
 import 'favoritos_cache_service_inline.dart';
 import 'favoritos_data_resolver_service.dart';
 import 'favoritos_sync_service.dart';
@@ -13,6 +14,11 @@ import 'favoritos_validator_service.dart';
 
 /// Service consolidado para Favoritos com Specialized Services
 /// Reduzido de 915 linhas para ~250 linhas usando delegation pattern
+///
+/// SOLID Refactoring (P1):
+/// - Removed switch case factory (OCP violation)
+/// - Now uses FavoritoEntityFactoryRegistry (Strategy Pattern)
+/// - Extensible: adding new tipos doesn't require modifying this service
 class FavoritosService {
   // Lazy loading do repository (evita erro de acesso antes do registro no GetIt)
   late final FavoritosHiveRepository _repository;
@@ -23,12 +29,14 @@ class FavoritosService {
   late final FavoritosValidatorService _validator;
   late final FavoritosSyncService _syncService;
   late final FavoritosCacheServiceInline _cache;
+  late final IFavoritoEntityFactoryRegistry _factoryRegistry;
 
   FavoritosService() {
     _dataResolver = FavoritosDataResolverService();
     _validator = FavoritosValidatorService(dataResolver: _dataResolver);
     _syncService = FavoritosSyncService(dataResolver: _dataResolver);
     _cache = FavoritosCacheServiceInline();
+    _factoryRegistry = FavoritoEntityFactoryRegistry();
   }
 
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
@@ -217,47 +225,29 @@ class FavoritosService {
 
   // ========== ENTITY FACTORY ==========
 
+  /// Create FavoritoEntity using the factory registry (Strategy Pattern)
+  /// SOLID Refactoring: Replaced switch case with Strategy Pattern
+  /// Benefit: Adding new tipos doesn't require modifying this method
   FavoritoEntity createEntity({
     required String tipo,
     required String id,
     required Map<String, dynamic> data,
   }) {
-    switch (tipo) {
-      case TipoFavorito.defensivo:
-        return FavoritoDefensivoEntity(
-          id: id,
-          nomeComum: data['nomeComum'] as String? ?? '',
-          ingredienteAtivo: data['ingredienteAtivo'] as String? ?? '',
-          fabricante: data['fabricante'] as String?,
-          adicionadoEm: DateTime.now(),
-        );
-      case TipoFavorito.praga:
-        return FavoritoPragaEntity(
-          id: id,
-          nomeComum: data['nomeComum'] as String? ?? '',
-          nomeCientifico: data['nomeCientifico'] as String? ?? '',
-          tipoPraga: data['tipoPraga'] as String? ?? '1',
-          adicionadoEm: DateTime.now(),
-        );
-      case TipoFavorito.diagnostico:
-        return FavoritoDiagnosticoEntity(
-          id: id,
-          nomePraga: data['nomePraga'] as String? ?? '',
-          nomeDefensivo: data['nomeDefensivo'] as String? ?? '',
-          cultura: data['cultura'] as String? ?? '',
-          dosagem: data['dosagem'] as String? ?? '',
-          adicionadoEm: DateTime.now(),
-        );
-      case TipoFavorito.cultura:
-        return FavoritoCulturaEntity(
-          id: id,
-          nomeCultura: data['nomeCultura'] as String? ?? '',
-          descricao: data['descricao'] as String?,
-          adicionadoEm: DateTime.now(),
-        );
-      default:
-        throw ArgumentError('Tipo de favorito não suportado: $tipo');
-    }
+    return _factoryRegistry.create(
+      tipo: tipo,
+      id: id,
+      data: data,
+    );
+  }
+
+  /// Check if the given tipo is supported
+  bool isTipoSupported(String tipo) {
+    return _factoryRegistry.canHandle(tipo);
+  }
+
+  /// Get list of all supported tipos
+  List<String> getSupportedTipos() {
+    return _factoryRegistry.getRegisteredTipos();
   }
 
   // ========== VALIDATION (DELEGATED) ==========

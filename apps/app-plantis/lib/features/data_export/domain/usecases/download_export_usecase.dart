@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 import '../repositories/data_export_repository.dart';
 
 class DownloadExportUseCase {
@@ -5,7 +7,7 @@ class DownloadExportUseCase {
 
   DownloadExportUseCase(this._repository);
 
-  Future<bool> call(String exportId) async {
+  Future<Either<Failure, bool>> call(String exportId) async {
     return await _repository.downloadExport(exportId);
   }
 }

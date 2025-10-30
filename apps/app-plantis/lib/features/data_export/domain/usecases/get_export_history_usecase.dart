@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 import '../entities/export_request.dart';
 import '../repositories/data_export_repository.dart';
 
@@ -6,7 +8,7 @@ class GetExportHistoryUseCase {
 
   GetExportHistoryUseCase(this._repository);
 
-  Future<List<ExportRequest>> call(String userId) async {
+  Future<Either<Failure, List<ExportRequest>>> call(String userId) async {
     return await _repository.getExportHistory(userId);
   }
 }

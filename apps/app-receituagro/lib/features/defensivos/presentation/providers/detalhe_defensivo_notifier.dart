@@ -260,8 +260,9 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     try {
       await _comentariosService.deleteComentario(commentId);
 
-      final updatedComentarios =
-          currentState.comentarios.where((c) => c.id != commentId).toList();
+      final updatedComentarios = currentState.comentarios
+          .where((c) => c.id != commentId)
+          .toList();
       state = AsyncValue.data(
         currentState.copyWith(comentarios: updatedComentarios),
       );
@@ -303,10 +304,10 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
       return true;
     } catch (e) {
       try {
-        final success =
-            wasAlreadyFavorited
-                ? await _favoritosRepository.removeFavorito('defensivo', itemId)
-                : await _favoritosRepository.addFavorito('defensivo', itemId);
+        final success = await _favoritosRepository.toggleFavorito(
+          'defensivo',
+          itemId,
+        );
 
         if (!success) {
           state = AsyncValue.data(

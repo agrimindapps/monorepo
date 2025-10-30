@@ -464,8 +464,9 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
     try {
       await _comentariosService.deleteComentario(commentId);
 
-      final updatedComentarios =
-          currentState.comentarios.where((c) => c.id != commentId).toList();
+      final updatedComentarios = currentState.comentarios
+          .where((c) => c.id != commentId)
+          .toList();
 
       state = AsyncValue.data(
         currentState.copyWith(comentarios: updatedComentarios).clearError(),
@@ -513,10 +514,10 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       return true;
     } catch (e) {
       try {
-        final success =
-            wasAlreadyFavorited
-                ? await _favoritosRepository.removeFavorito('praga', itemId)
-                : await _favoritosRepository.addFavorito('praga', itemId);
+        final success = await _favoritosRepository.toggleFavorito(
+          'praga',
+          itemId,
+        );
 
         if (!success) {
           state = AsyncValue.data(

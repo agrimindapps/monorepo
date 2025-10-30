@@ -5,11 +5,11 @@ import '../models/pragas_inf_hive.dart';
 /// Repositório para PragasInfHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class PragasInfHiveRepository extends BaseHiveRepository<PragasInfHive> {
-  PragasInfHiveRepository() : super(
-    hiveManager: GetIt.instance<IHiveManager>(),
-    boxName: 'receituagro_pragas_inf',
-  );
-
+  PragasInfHiveRepository()
+    : super(
+        hiveManager: GetIt.instance<IHiveManager>(),
+        boxName: 'receituagro_pragas_inf',
+      );
 
   /// Busca informações complementares de uma praga
   Future<PragasInfHive?> findByIdReg(String idReg) async {
@@ -18,7 +18,10 @@ class PragasInfHiveRepository extends BaseHiveRepository<PragasInfHive> {
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Either<Failure, void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+  Future<Either<Failure, void>> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
     try {
       final Map<dynamic, PragasInfHive> items = {};
 

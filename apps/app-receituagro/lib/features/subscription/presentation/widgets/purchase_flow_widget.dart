@@ -37,7 +37,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late AnimationController _slideController;
-  
+
   int _currentStep = 0;
   bool _isPurchasing = false;
   String? _selectedPlanId;
@@ -74,8 +74,12 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
       data: (subscriptionState) {
         return featureFlagsAsync.when(
           data: (featureFlagsState) {
-            final subscriptionNotifier = ref.read(subscriptionNotifierProvider.notifier);
-            final featureFlagsNotifier = ref.read(featureFlagsNotifierProvider.notifier);
+            final subscriptionNotifier = ref.read(
+              subscriptionNotifierProvider.notifier,
+            );
+            final featureFlagsNotifier = ref.read(
+              featureFlagsNotifierProvider.notifier,
+            );
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,8 +93,17 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      _buildPlanSelectionStep(context, subscriptionNotifier, subscriptionState, featureFlagsNotifier),
-                      _buildConfirmationStep(context, subscriptionNotifier, subscriptionState),
+                      _buildPlanSelectionStep(
+                        context,
+                        subscriptionNotifier,
+                        subscriptionState,
+                        featureFlagsNotifier,
+                      ),
+                      _buildConfirmationStep(
+                        context,
+                        subscriptionNotifier,
+                        subscriptionState,
+                      ),
                       _buildProcessingStep(context),
                     ],
                   ),
@@ -110,7 +123,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   /// Progress Indicator
   Widget _buildProgressIndicator(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -128,7 +141,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
           ),
-          
+
           const SizedBox(height: 8),
           Row(
             children: List.generate(_stepTitles.length, (index) {
@@ -137,7 +150,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   height: 4,
                   decoration: BoxDecoration(
-                    color: index <= _currentStep 
+                    color: index <= _currentStep
                         ? theme.colorScheme.primary
                         : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(2),
@@ -169,15 +182,15 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           const SizedBox(height: 24),
           Text(
             'Planos Disponíveis',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
           ...subscriptionNotifier.availablePlans.map((plan) {
             return _buildPlanCard(context, plan, subscriptionNotifier);
           }),
-          
+
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -203,10 +216,15 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   }
 
   /// Step 2: Purchase Confirmation
-  Widget _buildConfirmationStep(BuildContext context, SubscriptionNotifier subscriptionNotifier, SubscriptionState subscriptionState) {
-    final selectedPlan = subscriptionNotifier.availablePlans
-        .firstWhere((plan) => plan['id'] == _selectedPlanId);
-    
+  Widget _buildConfirmationStep(
+    BuildContext context,
+    SubscriptionNotifier subscriptionNotifier,
+    SubscriptionState subscriptionState,
+  ) {
+    final selectedPlan = subscriptionNotifier.availablePlans.firstWhere(
+      (plan) => plan['id'] == _selectedPlanId,
+    );
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -215,10 +233,14 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -242,10 +264,11 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                   children: [
                     Text(
                       selectedPlan['priceString'] as String,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -259,7 +282,10 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                 if (selectedPlan['hasTrialPeriod'] as bool) ...[
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -276,16 +302,16 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
           Text(
             'O que está incluído:',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
-          
+
           ...(selectedPlan['features'] as List<String>).map((feature) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
@@ -303,7 +329,7 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
               ),
             );
           }),
-          
+
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
@@ -335,11 +361,14 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
                     )
                   : Text(
                       'Confirmar Compra • ${selectedPlan['priceString'] as String}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
             ),
           ),
-          
+
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
@@ -363,9 +392,9 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           const SizedBox(height: 24),
           Text(
             'Processando sua compra...',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
@@ -380,7 +409,10 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   }
 
   /// Trial Offer Card
-  Widget _buildTrialOfferCard(BuildContext context, SubscriptionNotifier subscriptionNotifier) {
+  Widget _buildTrialOfferCard(
+    BuildContext context,
+    SubscriptionNotifier subscriptionNotifier,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -410,9 +442,9 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
           const SizedBox(height: 8),
           Text(
             '7 dias grátis para testar todos os recursos Premium',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -438,22 +470,26 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
   }
 
   /// Individual Plan Card
-  Widget _buildPlanCard(BuildContext context, dynamic plan, SubscriptionNotifier subscriptionNotifier) {
+  Widget _buildPlanCard(
+    BuildContext context,
+    dynamic plan,
+    SubscriptionNotifier subscriptionNotifier,
+  ) {
     final isSelected = _selectedPlanId == plan.id;
     final theme = Theme.of(context);
-    
+
     return GestureDetector(
       onTap: () => _selectPlan(plan['id'] as String),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? theme.colorScheme.primaryContainer.withValues(alpha: 0.2)
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected 
+            color: isSelected
                 ? theme.colorScheme.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
@@ -466,10 +502,13 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
               children: [
                 Radio<String>(
                   value: (plan as Map<String, dynamic>)['id'] as String,
-                  groupValue: _selectedPlanId,
-                  onChanged: _selectPlan,
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      _selectPlan(value);
+                    }
+                  },
                 ),
-                
+
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -602,7 +641,6 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
       if (widget.onPurchaseSuccess != null) {
         widget.onPurchaseSuccess!();
       }
-
     } catch (e) {
       if (widget.onPurchaseError != null) {
         widget.onPurchaseError!();
@@ -633,13 +671,14 @@ class _PurchaseFlowWidgetState extends ConsumerState<PurchaseFlowWidget>
       );
 
       if (!mounted) return;
-      final subscriptionNotifier = ref.read(subscriptionNotifierProvider.notifier);
+      final subscriptionNotifier = ref.read(
+        subscriptionNotifierProvider.notifier,
+      );
       await subscriptionNotifier.purchasePlan(_selectedPlanId!);
 
       if (widget.onPurchaseSuccess != null) {
         widget.onPurchaseSuccess!();
       }
-
     } catch (e) {
       if (widget.onPurchaseError != null) {
         widget.onPurchaseError!();

@@ -11,10 +11,7 @@ import '../../domain/entities/cultura_entity.dart';
 abstract class ICulturasSearchService {
   /// Search culturas by query string
   /// Searches in: nome, cultura, grupo
-  List<CulturaEntity> search(
-    List<CulturaEntity> culturas,
-    String query,
-  );
+  List<CulturaEntity> search(List<CulturaEntity> culturas, String query);
 
   /// Search with custom predicate function
   List<CulturaEntity> searchCustom(
@@ -26,10 +23,7 @@ abstract class ICulturasSearchService {
 /// Default implementation of search service
 class CulturasSearchService implements ICulturasSearchService {
   @override
-  List<CulturaEntity> search(
-    List<CulturaEntity> culturas,
-    String query,
-  ) {
+  List<CulturaEntity> search(List<CulturaEntity> culturas, String query) {
     if (query.trim().isEmpty) {
       return culturas;
     }
@@ -37,11 +31,10 @@ class CulturasSearchService implements ICulturasSearchService {
     final queryLower = query.toLowerCase();
     return culturas.where((cultura) {
       final nomeMatch = cultura.nome.toLowerCase().contains(queryLower);
-      final culturaMatch = cultura.cultura.toLowerCase().contains(queryLower);
       final grupoMatch =
           cultura.grupo?.toLowerCase().contains(queryLower) == true;
 
-      return nomeMatch || culturaMatch || grupoMatch;
+      return nomeMatch || grupoMatch;
     }).toList();
   }
 

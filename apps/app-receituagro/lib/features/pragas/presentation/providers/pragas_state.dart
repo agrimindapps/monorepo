@@ -28,9 +28,6 @@ class PragasState with _$PragasState {
     /// Praga atualmente selecionada
     PragaEntity? selectedPraga,
 
-    /// Estatísticas das pragas
-    PragasStats? stats,
-
     /// Loading state
     @Default(false) bool isLoading,
 

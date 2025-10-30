@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../providers/index.dart';
-import '../shared/settings_card.dart';
-import '../shared/section_header.dart';
+import '../../../widgets/shared/settings_card.dart';
+import '../../../widgets/shared/section_header.dart';
 
 /// Theme Settings Section
 /// Allows users to toggle dark mode and select language preferences
@@ -59,7 +59,7 @@ class NewThemeSection extends ConsumerWidget {
             ],
           ),
           Switch(
-            value: themeState.isDarkTheme,
+            value: themeState.settings.isDarkTheme,
             onChanged: (value) {
               ref.read(themeNotifierProvider.notifier).toggleDarkMode();
             },
@@ -94,7 +94,7 @@ class NewThemeSection extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: DropdownButton<String>(
-              value: themeState.language,
+              value: themeState.settings.language,
               isExpanded: true,
               underline: const SizedBox(),
               items: _buildLanguageItems(),
@@ -109,7 +109,7 @@ class NewThemeSection extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            themeState.isRtl
+            themeState.settings.isRtlLanguage
                 ? 'Layout de direita para esquerda'
                 : 'Layout de esquerda para direita',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(

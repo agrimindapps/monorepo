@@ -7,7 +7,6 @@ import '../../core/theme/design_tokens.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import 'data/praga_view_mode.dart';
 import 'domain/entities/praga_entity.dart';
-import 'domain/usecases/get_pragas_usecase.dart';
 import 'presentation/pages/detalhe_praga_page.dart';
 import 'presentation/providers/pragas_notifier.dart';
 import 'presentation/providers/pragas_state.dart';
@@ -44,8 +43,7 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       try {
         await notifier.loadStats();
         await notifier.loadPragasByTipo(_currentPragaType);
-      } catch (e) {
-      }
+      } catch (e) {}
     });
   }
 
@@ -109,15 +107,13 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
   void _handleItemTap(PragaEntity praga) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder:
-            (context) => DetalhePragaPage(
-              pragaName: praga.nomeComum,
-              pragaId: praga.idReg, // Use ID for better precision
-              pragaScientificName:
-                  praga.nomeCientifico.isNotEmpty
-                      ? praga.nomeCientifico
-                      : 'Nome científico não disponível',
-            ),
+        builder: (context) => DetalhePragaPage(
+          pragaName: praga.nomeComum,
+          pragaId: praga.idReg, // Use ID for better precision
+          pragaScientificName: praga.nomeCientifico.isNotEmpty
+              ? praga.nomeCientifico
+              : 'Nome científico não disponível',
+        ),
       ),
     );
   }
@@ -137,15 +133,14 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1120),
                 child: pragasState.when(
-                  data:
-                      (state) => Column(
-                        children: [
-                          _buildModernHeader(isDark, state),
-                          Expanded(child: _buildBody(isDark, state)),
-                        ],
-                      ),
-                  loading:
-                      () => const Center(child: CircularProgressIndicator()),
+                  data: (state) => Column(
+                    children: [
+                      _buildModernHeader(isDark, state),
+                      Expanded(child: _buildBody(isDark, state)),
+                    ],
+                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, _) => Center(child: Text('Erro: $error')),
                 ),
               ),
@@ -161,10 +156,9 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
       title: _getHeaderTitle(),
       subtitle: _getHeaderSubtitle(state),
       leftIcon: Icons.pest_control_outlined,
-      rightIcon:
-          _isAscending
-              ? Icons.arrow_upward_outlined
-              : Icons.arrow_downward_outlined,
+      rightIcon: _isAscending
+          ? Icons.arrow_upward_outlined
+          : Icons.arrow_downward_outlined,
       isDark: isDark,
       showBackButton: true,
       showActions: true,
@@ -377,8 +371,8 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
                 padding: const EdgeInsets.all(0),
                 sliver: SliverList.separated(
                   itemCount: state.pragas.length,
-                  separatorBuilder:
-                      (context, index) => const SizedBox(height: 4),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     final praga = state.pragas[index];
                     return PragaCardWidget(
@@ -418,26 +412,8 @@ class _ListaPragasPageState extends ConsumerState<ListaPragasPage> {
     if (state.errorMessage != null) {
       return 'Erro no carregamento';
     }
-    final stats = state.stats;
-    if (stats != null) {
-      final totalSessao = _getTotalPorTipo(stats);
-      return '$totalSessao registros na sessão';
-    }
-    return 'Carregando estatísticas...';
-  }
 
-  /// Retorna o total de registros do tipo atual baseado nas estatísticas da sessão
-  int _getTotalPorTipo(PragasStats stats) {
-    switch (_currentPragaType) {
-      case '1': // Insetos
-        return stats.insetos;
-      case '2': // Doenças
-        return stats.doencas;
-      case '3': // Plantas Daninhas
-        return stats.plantas;
-      default:
-        return stats.total; // Total geral
-    }
+    return '${state.pragas.length} registros encontrados';
   }
 
   int _calculateCrossAxisCount(double screenWidth) {

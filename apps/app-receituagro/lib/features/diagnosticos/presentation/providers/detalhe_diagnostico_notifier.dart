@@ -128,16 +128,21 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
             );
 
             // Extensão DiagnosticoHiveExtension já busca dados do defensivo internamente
-            final diagnosticoData =
-                diagnosticoHive != null
-                    ? await diagnosticoHive.toDataMap()
-                    : <String, String>{};
+            final diagnosticoData = diagnosticoHive != null
+                ? await diagnosticoHive.toDataMap()
+                : <String, String>{};
 
             // Debug logs
-            debugPrint('🔍 [DetalheDiagnosticoNotifier] diagnosticoData carregado:');
+            debugPrint(
+              '🔍 [DetalheDiagnosticoNotifier] diagnosticoData carregado:',
+            );
             debugPrint('  - Keys: ${diagnosticoData.keys.toList()}');
-            debugPrint('  - ingredienteAtivo: ${diagnosticoData['ingredienteAtivo']}');
-            debugPrint('  - classificacaoToxicologica: ${diagnosticoData['classificacaoToxicologica']}');
+            debugPrint(
+              '  - ingredienteAtivo: ${diagnosticoData['ingredienteAtivo']}',
+            );
+            debugPrint(
+              '  - classificacaoToxicologica: ${diagnosticoData['classificacaoToxicologica']}',
+            );
             debugPrint('  - formulacao: ${diagnosticoData['formulacao']}');
             debugPrint('  - modoAcao: ${diagnosticoData['modoAcao']}');
 
@@ -156,12 +161,12 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
             await loadPremiumStatus();
           } else {
             final result = await _hiveRepository.getAll();
-            final totalDiagnosticos =
-                result.isSuccess ? result.data!.length : 0;
-            final errorMsg =
-                totalDiagnosticos == 0
-                    ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
-                    : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.';
+            final totalDiagnosticos = result.isSuccess
+                ? result.data!.length
+                : 0;
+            final errorMsg = totalDiagnosticos == 0
+                ? 'Base de dados vazia. Nenhum diagnóstico foi carregado. Verifique se o aplicativo foi inicializado corretamente ou tente resincronizar os dados.'
+                : 'Diagnóstico com ID "$diagnosticoId" não encontrado. Existem $totalDiagnosticos diagnósticos na base de dados local.';
 
             state = AsyncValue.data(
               currentState.copyWith(isLoading: false, errorMessage: errorMsg),
@@ -220,7 +225,9 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
     try {
       final premiumState = ref.read(premiumNotifierProvider).value;
-      state = AsyncValue.data(currentState.copyWith(isPremium: premiumState?.isPremium ?? false));
+      state = AsyncValue.data(
+        currentState.copyWith(isPremium: premiumState?.isPremium ?? false),
+      );
     } catch (e) {
       state = AsyncValue.data(currentState.copyWith(isPremium: false));
     }
@@ -289,16 +296,10 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
       return true;
     } catch (e) {
       try {
-        final success =
-            wasAlreadyFavorited
-                ? await _favoritosRepository.removeFavorito(
-                  'diagnosticos',
-                  diagnosticoId,
-                )
-                : await _favoritosRepository.addFavorito(
-                  'diagnosticos',
-                  diagnosticoId,
-                );
+        final success = await _favoritosRepository.toggleFavorito(
+          'diagnostico',
+          diagnosticoId,
+        );
 
         if (!success) {
           state = AsyncValue.data(

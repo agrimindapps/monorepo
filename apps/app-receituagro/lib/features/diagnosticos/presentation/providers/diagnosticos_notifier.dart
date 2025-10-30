@@ -7,11 +7,11 @@ import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
 import '../../domain/services/search/i_diagnosticos_search_service.dart';
 import '../../domain/services/stats/i_diagnosticos_stats_service.dart';
+import '../../domain/usecases/get_diagnosticos_params.dart';
 import '../../domain/usecases/get_diagnosticos_usecase.dart';
 import 'diagnosticos_state.dart';
 
 part 'diagnosticos_notifier.g.dart';
-
 
 /// Notifier para gerenciar estado dos diagnósticos (Presentation Layer)
 /// Especializado em recomendações defensivo-cultura-praga
@@ -90,10 +90,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     }
 
     try {
-      final result = await _getDiagnosticosUseCase(
-        limit: limit,
-        offset: offset,
-      );
+      final result = await _getDiagnosticosUseCase(GetAllDiagnosticosParams());
       result.fold(
         (failure) {
           state = AsyncValue.data(
@@ -107,9 +104,12 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         (diagnosticos) {
           final List<DiagnosticoEntity> updatedList;
           if (offset == null || offset == 0) {
-            updatedList = diagnosticos;
+            updatedList = diagnosticos as List<DiagnosticoEntity>;
           } else {
-            updatedList = [...currentState.allDiagnosticos, ...diagnosticos];
+            updatedList = [
+              ...currentState.allDiagnosticos,
+              ...?diagnosticos as List<DiagnosticoEntity>?,
+            ];
           }
 
           // CORREÇÃO: loadAllDiagnosticos atualiza tanto allDiagnosticos quanto filteredDiagnosticos
@@ -246,9 +246,11 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           );
         },
       );
-    } catch (e, stack) {
+    } catch (e) {
       if (kDebugMode) {
-        debugPrint('[DiagnosticosNotifier] Error in getDiagnosticosByDefensivo: $e');
+        debugPrint(
+          '[DiagnosticosNotifier] Error in getDiagnosticosByDefensivo: $e',
+        );
       }
       final updatedState = state.requireValue;
       state = AsyncValue.data(
@@ -463,8 +465,10 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
 
       if (diagnosticosParaBusca.isNotEmpty) {
         // REFACTORED: Use client-side search from DiagnosticosSearchService
-        final localResults =
-            _searchService.searchInList(diagnosticosParaBusca, pattern);
+        final localResults = _searchService.searchInList(
+          diagnosticosParaBusca,
+          pattern,
+        );
 
         state = AsyncValue.data(
           currentState

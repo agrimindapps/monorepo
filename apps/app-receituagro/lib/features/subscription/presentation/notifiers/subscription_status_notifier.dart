@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/index.dart';
+import '../services/subscription_error_message_service.dart';
 
 /// Estado da assinatura do usuário com indicadores de progresso
 class SubscriptionStatusState {
@@ -82,7 +83,10 @@ class SubscriptionStatusState {
 /// - Rastrear histórico de mudanças
 class SubscriptionStatusNotifier
     extends StateNotifier<SubscriptionStatusState> {
-  SubscriptionStatusNotifier() : super(SubscriptionStatusState.initial());
+  SubscriptionStatusNotifier(this._errorService)
+    : super(SubscriptionStatusState.initial());
+
+  final SubscriptionErrorMessageService _errorService;
 
   /// Carrega o status da assinatura do usuário
   ///
@@ -123,7 +127,7 @@ class SubscriptionStatusNotifier
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao carregar status: ${error.toString()}',
+        error: _errorService.getLoadStatusError(error.toString()),
       );
     }
   }
@@ -148,7 +152,7 @@ class SubscriptionStatusNotifier
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao atualizar: ${error.toString()}',
+        error: _errorService.getUpdateStatusError(error.toString()),
       );
     }
   }
@@ -249,7 +253,7 @@ class SubscriptionStatusNotifier
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao fazer upgrade: ${error.toString()}',
+        error: _errorService.getUpgradeSubscriptionError(error.toString()),
       );
     }
   }
@@ -307,7 +311,7 @@ class SubscriptionStatusNotifier
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao fazer downgrade: ${error.toString()}',
+        error: _errorService.getDowngradeSubscriptionError(error.toString()),
       );
     }
   }
@@ -360,7 +364,7 @@ class SubscriptionStatusNotifier
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao cancelar assinatura: ${error.toString()}',
+        error: _errorService.getCancelSubscriptionError(error.toString()),
       );
     }
   }
@@ -404,7 +408,7 @@ class SubscriptionStatusNotifier
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao reativar assinatura: ${error.toString()}',
+        error: _errorService.getReactivateSubscriptionError(error.toString()),
       );
     }
   }

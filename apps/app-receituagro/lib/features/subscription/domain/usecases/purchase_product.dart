@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+import '../../presentation/services/subscription_error_message_service.dart';
+
 /// Parâmetros para o use case de compra
 class PurchaseProductUseCaseParams extends Equatable {
   const PurchaseProductUseCaseParams({
@@ -20,18 +22,17 @@ class PurchaseProductUseCaseParams extends Equatable {
 @injectable
 class PurchaseProductUseCase
     implements UseCase<SubscriptionEntity, PurchaseProductUseCaseParams> {
-  PurchaseProductUseCase(this.coreRepository);
+  PurchaseProductUseCase(this.coreRepository, this.errorService);
 
   final ISubscriptionRepository coreRepository;
+  final SubscriptionErrorMessageService errorService;
 
   @override
   Future<Either<Failure, SubscriptionEntity>> call(
     PurchaseProductUseCaseParams params,
   ) async {
     if (params.productId.trim().isEmpty) {
-      return const Left(
-        ValidationFailure('ID do produto não pode ser vazio'),
-      );
+      return Left(ValidationFailure(errorService.getEmptyProductIdError()));
     }
 
     return coreRepository.purchaseProduct(productId: params.productId);

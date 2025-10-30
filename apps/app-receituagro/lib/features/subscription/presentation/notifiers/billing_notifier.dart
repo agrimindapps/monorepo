@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/index.dart';
+import '../services/subscription_error_message_service.dart';
 
 /// Estado dos problemas de cobrança
 class BillingState {
@@ -98,7 +99,9 @@ class BillingState {
 /// - Rastrear métodos de pagamento
 /// - Resolução de problemas
 class BillingNotifier extends StateNotifier<BillingState> {
-  BillingNotifier() : super(BillingState.initial());
+  BillingNotifier(this._errorService) : super(BillingState.initial());
+
+  final SubscriptionErrorMessageService _errorService;
 
   /// Carrega a lista de problemas de cobrança
   ///
@@ -141,7 +144,7 @@ class BillingNotifier extends StateNotifier<BillingState> {
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao carregar problemas de cobrança: ${error.toString()}',
+        error: _errorService.getLoadBillingIssuesError(error.toString()),
       );
     }
   }
@@ -161,7 +164,7 @@ class BillingNotifier extends StateNotifier<BillingState> {
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao atualizar status de cobrança: ${error.toString()}',
+        error: _errorService.getUpdateBillingStatusError(error.toString()),
       );
     }
   }
@@ -217,7 +220,7 @@ class BillingNotifier extends StateNotifier<BillingState> {
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Erro ao fazer retry: ${error.toString()}',
+        error: _errorService.getRetryPaymentError(error.toString()),
       );
     }
   }

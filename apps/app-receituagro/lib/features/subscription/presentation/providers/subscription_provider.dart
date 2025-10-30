@@ -1,7 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 import '../models/user_subscription_model.dart';
 import '../notifiers/index.dart';
+import '../services/subscription_error_message_service.dart';
 import '../../domain/entities/index.dart';
+
+final sl = GetIt.instance;
 
 // ═══════════════════════════════════════════════════════════════
 // INDIVIDUAL NOTIFIER PROVIDERS
@@ -11,7 +15,8 @@ import '../../domain/entities/index.dart';
 /// Gerencia estado de subscription do usuário
 final subscriptionStatusNotifierProvider =
     StateNotifierProvider<SubscriptionStatusNotifier, SubscriptionStatusState>(
-      (ref) => SubscriptionStatusNotifier(),
+      (ref) =>
+          SubscriptionStatusNotifier(sl<SubscriptionErrorMessageService>()),
       name: 'subscriptionStatusNotifier',
     );
 
@@ -26,7 +31,7 @@ final trialNotifierProvider = StateNotifierProvider<TrialNotifier, TrialState>(
 /// Gerencia problemas de cobrança
 final billingNotifierProvider =
     StateNotifierProvider<BillingNotifier, BillingState>(
-      (ref) => BillingNotifier(),
+      (ref) => BillingNotifier(sl<SubscriptionErrorMessageService>()),
       name: 'billingNotifier',
     );
 

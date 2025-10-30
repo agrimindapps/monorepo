@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers/auth_providers.dart' as local;
-import '../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../core/providers/auth_providers.dart' as local;
+import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../utils/widget_utils.dart';
 
 class AccountDetailsSection extends ConsumerWidget {

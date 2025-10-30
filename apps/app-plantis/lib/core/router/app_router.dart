@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../features/account/account_profile_page.dart';
+import '../../features/account/presentation/pages/account_profile_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/data_export/presentation/pages/data_export_page.dart';

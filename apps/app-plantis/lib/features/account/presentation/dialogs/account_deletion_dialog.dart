@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/providers/auth_providers.dart' as local;
+import '../../../../core/providers/auth_providers.dart' as local;
 import '../utils/text_formatters.dart';
 
 /// Dialog stateful para confirmação de exclusão de conta

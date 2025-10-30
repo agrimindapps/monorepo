@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/di/injection_container.dart' as di;
-import '../../../core/providers/auth_providers.dart' as local;
-import '../../../core/services/data_cleaner_service.dart';
-import '../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/providers/auth_providers.dart' as local;
+import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../dialogs/account_deletion_dialog.dart';
 
 class AccountActionsSection extends ConsumerWidget {

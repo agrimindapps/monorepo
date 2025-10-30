@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/services/plants_care_service.dart';
-import '../../domain/services/plants_crud_service.dart';
 import '../../domain/services/plants_filter_service.dart';
 import '../../domain/services/plants_sort_service.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
@@ -25,13 +24,11 @@ part 'plants_notifier.g.dart';
 /// Now follows Single Responsibility Principle using Facade pattern
 ///
 /// Delegates to:
-/// - PlantsCrudService: CRUD operations
 /// - PlantsFilterService: Search & filtering
 /// - PlantsSortService: Sorting & views
 /// - PlantsCareService: Care analytics
 @riverpod
 class PlantsNotifier extends _$PlantsNotifier {
-  late final PlantsCrudService _crudService;
   late final PlantsFilterService _filterService;
   late final PlantsSortService _sortService;
   late final PlantsCareService _careService;
@@ -42,14 +39,6 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   @override
   PlantsState build() {
-    _crudService = PlantsCrudService(
-      getPlantsUseCase: ref.read(getPlantsUseCaseProvider),
-      getPlantByIdUseCase: ref.read(getPlantByIdUseCaseProvider),
-      addPlantUseCase: ref.read(addPlantUseCaseProvider),
-      updatePlantUseCase: ref.read(updatePlantUseCaseProvider),
-      deletePlantUseCase: ref.read(deletePlantUseCaseProvider),
-    );
-
     _filterService = PlantsFilterService();
     _sortService = PlantsSortService();
     _careService = PlantsCareService();
@@ -78,11 +67,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         debugPrint(
           '🔄 PlantsNotifier: No user but auth initialized - clearing plants',
         );
-        state = state.copyWith(
-          plants: [],
-          selectedPlant: null,
-          error: null,
-        );
+        state = state.copyWith(plants: [], selectedPlant: null, error: null);
       }
     });
   }
@@ -96,7 +81,9 @@ class PlantsNotifier extends _$PlantsNotifier {
         );
       }
 
-      final dataStream = UnifiedSyncManager.instance.streamAll<Plant>('plantis');
+      final dataStream = UnifiedSyncManager.instance.streamAll<Plant>(
+        'plantis',
+      );
 
       if (dataStream == null) {
         if (kDebugMode) {
@@ -117,9 +104,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
           if (!_authStateNotifier.isInitialized) {
             if (kDebugMode) {
-              debugPrint(
-                '⏸️ PlantsNotifier: Aguardando inicialização de auth',
-              );
+              debugPrint('⏸️ PlantsNotifier: Aguardando inicialização de auth');
             }
             return;
           }
@@ -162,7 +147,8 @@ class PlantsNotifier extends _$PlantsNotifier {
       if (syncPlant is BaseSyncEntity) {
         try {
           final firebaseMap = syncPlant.toFirebaseMap();
-          if (!firebaseMap.containsKey('id') || !firebaseMap.containsKey('name')) {
+          if (!firebaseMap.containsKey('id') ||
+              !firebaseMap.containsKey('name')) {
             return null;
           }
           return Plant.fromJson(firebaseMap);
@@ -227,6 +213,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       return false;
     }
   }
+
   Future<void> loadPlants() async {
     if (!await _waitForAuthenticationWithTimeout()) {
       state = state.copyWith(error: 'Aguardando autenticação...');
@@ -249,14 +236,10 @@ class PlantsNotifier extends _$PlantsNotifier {
 
       final localResult = await _crudService.getAllPlants();
 
-      localResult.fold(
-        (failure) {
-        },
-        (plants) {
-          _updatePlantsData(plants);
-          state = state.copyWith(isLoading: false);
-        },
-      );
+      localResult.fold((failure) {}, (plants) {
+        _updatePlantsData(plants);
+        state = state.copyWith(isLoading: false);
+      });
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ PlantsNotifier: Erro ao carregar dados locais: $e');
@@ -272,7 +255,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       result.fold(
         (failure) {
           if (state.plants.isEmpty) {
-            state = state.copyWith(error: _crudService.getErrorMessage(failure));
+            state = state.copyWith(error: failure.toString());
           }
         },
         (plants) {
@@ -292,12 +275,13 @@ class PlantsNotifier extends _$PlantsNotifier {
       isLoading: false,
     );
   }
+
   Future<Plant?> getPlantById(String id) async {
     final result = await _crudService.getPlantById(id);
 
     return result.fold(
       (failure) {
-        state = state.copyWith(error: _crudService.getErrorMessage(failure));
+        state = state.copyWith(error: failure.toString());
         return null;
       },
       (plant) {
@@ -306,6 +290,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
     );
   }
+
   Future<void> searchPlants(String query) async {
     if (query.trim().isEmpty) {
       state = state.copyWith(
@@ -316,19 +301,13 @@ class PlantsNotifier extends _$PlantsNotifier {
       return;
     }
 
-    state = state.copyWith(
-      searchQuery: query,
-      isSearching: true,
-    );
+    state = state.copyWith(searchQuery: query, isSearching: true);
 
     final result = await _searchPlantsUseCase.call(SearchPlantsParams(query));
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          error: _crudService.getErrorMessage(failure),
-          isSearching: false,
-        );
+        state = state.copyWith(error: failure.toString(), isSearching: false);
       },
       (results) {
         state = state.copyWith(
@@ -338,6 +317,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
     );
   }
+
   Future<bool> addPlant(AddPlantParams params) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -345,10 +325,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     final success = result.fold(
       (failure) {
-        state = state.copyWith(
-          error: _crudService.getErrorMessage(failure),
-          isLoading: false,
-        );
+        state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
       (plant) {
@@ -363,6 +340,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return success;
   }
+
   Future<bool> updatePlant(UpdatePlantParams params) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -370,10 +348,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     final success = result.fold(
       (failure) {
-        state = state.copyWith(
-          error: _crudService.getErrorMessage(failure),
-          isLoading: false,
-        );
+        state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
       (updatedPlant) {
@@ -385,7 +360,9 @@ class PlantsNotifier extends _$PlantsNotifier {
 
         state = state.copyWith(
           plants: _applyFilters(sorted),
-          selectedPlant: state.selectedPlant?.id == updatedPlant.id ? updatedPlant : state.selectedPlant,
+          selectedPlant: state.selectedPlant?.id == updatedPlant.id
+              ? updatedPlant
+              : state.selectedPlant,
           isLoading: false,
         );
         return true;
@@ -394,6 +371,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return success;
   }
+
   Future<bool> deletePlant(String id) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -401,18 +379,16 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     final success = result.fold(
       (failure) {
-        state = state.copyWith(
-          error: _crudService.getErrorMessage(failure),
-          isLoading: false,
-        );
+        state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
       (_) {
         state = state.copyWith(
           plants: _applyFilters(state.plants.where((p) => p.id != id).toList()),
           searchResults: state.searchResults.where((p) => p.id != id).toList(),
-          selectedPlant:
-              state.selectedPlant?.id == id ? null : state.selectedPlant,
+          selectedPlant: state.selectedPlant?.id == id
+              ? null
+              : state.selectedPlant,
           isLoading: false,
         );
         return true;
@@ -421,11 +397,13 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     return success;
   }
+
   void setViewMode(ViewMode mode) {
     if (state.viewMode != mode) {
       state = state.copyWith(viewMode: mode);
     }
   }
+
   void setSortBy(SortBy sort) {
     if (state.sortBy != sort) {
       final sorted = _sortService.sortPlants(state.plants, sort);
@@ -438,6 +416,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     }
   }
+
   void setSpaceFilter(String? spaceId) {
     if (state.filterBySpace != spaceId) {
       state = state.copyWith(
@@ -446,8 +425,11 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     }
   }
+
   void clearSearch() {
-    if (state.searchQuery.isNotEmpty || state.searchResults.isNotEmpty || state.isSearching) {
+    if (state.searchQuery.isNotEmpty ||
+        state.searchResults.isNotEmpty ||
+        state.isSearching) {
       state = state.copyWith(
         searchQuery: '',
         searchResults: [],
@@ -461,6 +443,7 @@ class PlantsNotifier extends _$PlantsNotifier {
     final newViewMode = _sortService.toggleGroupedView(state.viewMode);
     state = state.copyWith(viewMode: newViewMode);
   }
+
   void clearSelectedPlant() {
     if (state.selectedPlant != null) {
       state = state.copyWith(selectedPlant: null);
@@ -470,6 +453,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
   List<Plant> getPlantsBySpace(String spaceId) {
     return state.plants.where((plant) => plant.spaceId == spaceId).toList();
   }
@@ -484,27 +468,32 @@ class PlantsNotifier extends _$PlantsNotifier {
     clearError();
     await loadInitialData();
   }
+
   List<Plant> getPlantsNeedingWater() {
     return _careService.getPlantsNeedingWater(state.plants);
   }
+
   List<Plant> getPlantsNeedingFertilizer() {
     return _careService.getPlantsNeedingFertilizer(state.plants);
   }
+
   List<Plant> getPlantsByCareStatus(CareStatus status) {
     return _careService.getPlantsByCareStatus(state.plants, status);
   }
 
   /// Groups plants by spaces for grouped view
   Map<String?, List<Plant>> getPlantsGroupedBySpaces() {
-    final plantsToGroup =
-        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
+    final plantsToGroup = state.searchQuery.isNotEmpty
+        ? state.searchResults
+        : state.plants;
     return _filterService.groupPlantsBySpaces(plantsToGroup);
   }
 
   /// Gets the count of plants in each space
   Map<String?, int> getPlantCountsBySpace() {
-    final plantsToGroup =
-        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
+    final plantsToGroup = state.searchQuery.isNotEmpty
+        ? state.searchResults
+        : state.plants;
     return _filterService.getPlantCountsBySpace(plantsToGroup);
   }
 
@@ -521,6 +510,7 @@ class PlantsNotifier extends _$PlantsNotifier {
     return filtered;
   }
 }
+
 @riverpod
 GetPlantsUseCase getPlantsUseCase(Ref ref) {
   return GetIt.instance<GetPlantsUseCase>();

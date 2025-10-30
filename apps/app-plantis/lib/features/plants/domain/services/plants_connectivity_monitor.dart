@@ -9,13 +9,9 @@ import '../../../../core/interfaces/network_info.dart';
 /// Extracted from PlantsRepository to follow Single Responsibility Principle (SRP)
 @injectable
 class PlantsConnectivityMonitor {
-  PlantsConnectivityMonitor({
-    required this.networkInfo,
-    required this.logger,
-  });
+  PlantsConnectivityMonitor({required this.networkInfo});
 
   final NetworkInfo networkInfo;
-  final ILoggingRepository logger;
 
   StreamSubscription<bool>? _connectivitySubscription;
   bool _isMonitoring = false;
@@ -39,20 +35,14 @@ class PlantsConnectivityMonitor {
           onConnectivityChanged(isConnected);
         },
         onError: (Object error) {
-          logger.warning(
-            'Connectivity monitoring error',
-            error: error,
-          );
+          logger.warning('Connectivity monitoring error', error: error);
         },
       );
 
       _isMonitoring = true;
       logger.info('Real-time connectivity monitoring started');
     } catch (e) {
-      logger.error(
-        'Failed to start connectivity monitoring',
-        error: e,
-      );
+      logger.error('Failed to start connectivity monitoring', error: e);
     }
   }
 
@@ -67,10 +57,7 @@ class PlantsConnectivityMonitor {
         logger.info('Connectivity monitoring stopped');
       }
     } catch (e) {
-      logger.error(
-        'Error stopping connectivity monitoring',
-        error: e,
-      );
+      logger.error('Error stopping connectivity monitoring', error: e);
     }
   }
 
@@ -80,10 +67,7 @@ class PlantsConnectivityMonitor {
       final enhanced = networkInfo.asEnhanced;
       if (enhanced != null) {
         final status = await enhanced.detailedStatus;
-        return {
-          ...?status,
-          'monitoring_active': _isMonitoring,
-        };
+        return {...?status, 'monitoring_active': _isMonitoring};
       } else {
         final isConnected = await networkInfo.isConnected;
         return {

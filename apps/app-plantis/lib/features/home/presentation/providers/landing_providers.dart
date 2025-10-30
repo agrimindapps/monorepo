@@ -1,7 +1,6 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/di/injection_container.dart' as di;
 import '../../data/datasources/landing_content_datasource.dart';
 import '../../data/repositories/landing_auth_repository_impl.dart';
 import '../../data/repositories/landing_content_repository_impl.dart';
@@ -33,9 +32,12 @@ LandingContentDataSource landingContentDataSource(
 /// Provider for LandingAuthRepository
 ///
 /// Bridges the core auth system with the landing feature
+/// Note: Uses getIt minimal dependency - this is the bridge point
 @riverpod
 LandingAuthRepository landingAuthRepository(LandingAuthRepositoryRef ref) {
-  final coreAuthRepository = di.sl<IAuthRepository>();
+  // Minimal GetIt usage - only to get core auth repository
+  // Consider moving this to a core provider in the future
+  final coreAuthRepository = getIt<IAuthRepository>();
   return LandingAuthRepositoryImpl(coreAuthRepository: coreAuthRepository);
 }
 

@@ -4,24 +4,24 @@ import 'package:flutter/foundation.dart';
 import '../models/favorito_item_hive.dart';
 
 /// Repositório para gerenciar favoritos usando Hive com type-safe boxes.
-/// ✅ MIGRATED: Using `IBoxRegistryService.getBoxTyped<T>()` for full type safety
-/// BENEFIT: No manual casting, compile-time type checking, better IntelliSense
+/// ✅ MIGRATED: Using `IHiveManager.getBox<T>()` para type safety com cast seguro
+/// BENEFIT: Funciona com `Box<dynamic>` já aberta pelo BoxRegistryService
 class FavoritosHiveRepository {
-  final IBoxRegistryService _boxRegistry;
+  final IHiveManager _hiveManager;
   final String boxName = 'favoritos';
   Box<FavoritoItemHive>? _box;
 
   FavoritosHiveRepository()
-    : _boxRegistry = GetIt.instance<IBoxRegistryService>();
+    : _hiveManager = GetIt.instance<IHiveManager>();
 
-  /// Obtém a box tipada `Box<FavoritoItemHive>`
+  /// Obtém a box tipada `Box<FavoritoItemHive>` com safe cast
+  /// Se a box já está aberta como `Box<dynamic>`, faz cast seguro
   Future<Box<FavoritoItemHive>> get box async {
     if (_box != null && _box!.isOpen) return _box!;
 
-    final result = await _boxRegistry.getBoxTyped<FavoritoItemHive>(boxName);
+    final result = await _hiveManager.getBox<FavoritoItemHive>(boxName);
     return result.fold(
-      (failure) =>
-          throw Exception('Failed to open Hive box: ${failure.message}'),
+      (failure) => throw Exception('Failed to open Hive box: ${failure.message}'),
       (typedBox) {
         _box = typedBox;
         return typedBox;

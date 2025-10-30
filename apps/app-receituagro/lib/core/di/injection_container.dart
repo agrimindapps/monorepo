@@ -58,6 +58,9 @@ Future<void> init() async {
   // ⚠️ IMPORTANTE: Registrar datasources e services SEM @injectable ANTES do Injectable
   // O Injectable precisa deles para criar repositories via @LazySingleton
   await DeviceManagementDI.registerDataSources(sl);
+
+  // ✅ FavoritosDataResolverStrategyRegistry agora usa lazy loading dos repos
+  // Não precisa registrá-los cedo mais
   FavoritosDI.registerServices(); // ⚠️ FavoritosService com lazy loading (não precisa de FavoritosHiveRepository no construtor)
 
   await injectable.configureDependencies();

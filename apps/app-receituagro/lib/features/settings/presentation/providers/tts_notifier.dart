@@ -48,10 +48,15 @@ class TtsNotifier extends _$TtsNotifier {
   }
 
   Future<void> _applySettingsToService(TTSSettingsEntity settings) async {
-    await _service.setLanguage(settings.language);
-    await _service.setRate(settings.rate);
-    await _service.setPitch(settings.pitch);
-    await _service.setVolume(settings.volume);
+    try {
+      await _service.setLanguage(settings.language);
+      await _service.setRate(settings.rate);
+      await _service.setPitch(settings.pitch);
+      await _service.setVolume(settings.volume);
+    } catch (e) {
+      // Log error but don't fail - TTS is non-critical feature
+      print('⚠️ Failed to apply TTS settings: $e');
+    }
   }
 
   /// Speak the given text
@@ -104,14 +109,11 @@ class TtsNotifier extends _$TtsNotifier {
       const userId = 'default';
       final saveResult = await _repository.saveSettings(userId, newSettings);
 
-      return saveResult.fold(
-        (failure) => throw failure,
-        (_) {
-          // Apply new settings to TTS service
-          _applySettingsToService(newSettings);
-          return newSettings;
-        },
-      );
+      return saveResult.fold((failure) => throw failure, (_) {
+        // Apply new settings to TTS service
+        _applySettingsToService(newSettings);
+        return newSettings;
+      });
     });
   }
 

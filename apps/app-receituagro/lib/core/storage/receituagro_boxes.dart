@@ -8,7 +8,6 @@ class ReceitaAgroBoxes {
 
   static const String receituagro = 'receituagro';
   static const String cache = 'receituagro_cache';
-  static const String favoritos = 'favoritos';  // ✅ FIXED: Deve corresponder ao nome usado pelo UnifiedSyncManager e FavoritosHiveRepository
   static const String settings = 'receituagro_settings';
   static const String offline = 'receituagro_offline';
 
@@ -37,16 +36,7 @@ class ReceitaAgroBoxes {
       },
     ),
 
-    BoxConfiguration.basic(
-      name: favoritos,
-      appId: 'receituagro',
-    ).copyWith(
-      version: 1,
-      metadata: {
-        'description': 'Favoritos e bookmarks do usuário',
-        'contains': ['favorite_plantas', 'favorite_receitas'],
-      },
-    ),
+    // ✅ REMOVED: Duplicate 'favoritos' box - real one is defined below in SYNC section
 
     BoxConfiguration.basic(
       name: settings,

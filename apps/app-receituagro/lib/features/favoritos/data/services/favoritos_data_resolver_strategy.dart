@@ -15,7 +15,8 @@ abstract class IFavoritosDataResolverStrategy {
 
 /// Estratégia para resolver dados de defensivos
 class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
-  final FitossanitarioHiveRepository _repository =
+  // ✅ Lazy loading: obtém o repo apenas quando necessário
+  FitossanitarioHiveRepository get _repository =>
       GetIt.instance<FitossanitarioHiveRepository>();
 
   @override
@@ -39,7 +40,8 @@ class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
 
 /// Estratégia para resolver dados de pragas
 class PragaResolverStrategy implements IFavoritosDataResolverStrategy {
-  final PragasHiveRepository _repository =
+  // ✅ Lazy loading: obtém o repo apenas quando necessário
+  PragasHiveRepository get _repository =>
       GetIt.instance<PragasHiveRepository>();
 
   @override
@@ -64,7 +66,8 @@ class PragaResolverStrategy implements IFavoritosDataResolverStrategy {
 
 /// Estratégia para resolver dados de diagnósticos
 class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
-  final DiagnosticoHiveRepository _repository =
+  // ✅ Lazy loading: obtém o repo apenas quando necessário
+  DiagnosticoHiveRepository get _repository =>
       GetIt.instance<DiagnosticoHiveRepository>();
 
   @override
@@ -87,7 +90,8 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
 
 /// Estratégia para resolver dados de culturas
 class CulturaResolverStrategy implements IFavoritosDataResolverStrategy {
-  final CulturaHiveRepository _repository =
+  // ✅ Lazy loading: obtém o repo apenas quando necessário
+  CulturaHiveRepository get _repository =>
       GetIt.instance<CulturaHiveRepository>();
 
   @override

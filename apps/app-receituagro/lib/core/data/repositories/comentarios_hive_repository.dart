@@ -8,10 +8,11 @@ import '../../services/device_identity_service.dart';
 import '../models/comentario_hive.dart';
 
 /// Repository for comentarios using Hive storage with type-safe boxes.
-/// ✅ MIGRATED: Using `IBoxRegistryService.getBoxTyped<T>()` for full type safety
-/// BENEFIT: No manual casting, compile-time type checking, better IntelliSense
+/// ✅ MIGRATED: Using `IHiveManager.getBox<T>()` para type safety com cast seguro
+/// BENEFIT: Funciona com `Box<dynamic>` já aberta pelo BoxRegistryService
+@LazySingleton()
 class ComentariosHiveRepository implements IComentariosRepository {
-  final IBoxRegistryService _boxRegistry;
+  final IHiveManager _hiveManager;
   final String boxName = 'comentarios';
   Box<ComentarioHive>? _box;
 
@@ -19,15 +20,16 @@ class ComentariosHiveRepository implements IComentariosRepository {
   late final ComentariosSyncService _syncService;
 
   ComentariosHiveRepository()
-    : _boxRegistry = GetIt.instance<IBoxRegistryService>() {
+    : _hiveManager = GetIt.instance<IHiveManager>() {
     _syncService = ComentariosSyncService();
   }
 
-  /// Obtém a box tipada `Box<ComentarioHive>`
+  /// Obtém a box tipada `Box<ComentarioHive>` com safe cast
+  /// Se a box já está aberta como `Box<dynamic>`, faz cast seguro
   Future<Box<ComentarioHive>> get box async {
     if (_box != null && _box!.isOpen) return _box!;
 
-    final result = await _boxRegistry.getBoxTyped<ComentarioHive>(boxName);
+    final result = await _hiveManager.getBox<ComentarioHive>(boxName);
     return result.fold(
       (failure) =>
           throw Exception('Failed to open Hive box: ${failure.message}'),

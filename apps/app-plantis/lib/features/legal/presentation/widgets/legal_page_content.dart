@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 import '../../domain/entities/legal_section.dart';
+import '../managers/legal_page_scroll_manager.dart';
 
 /// Stateless widget for displaying legal document content
 /// Compatible with Riverpod and functional programming
+/// SRP: Handles content display only, scroll management delegated to manager
 class BaseLegalPageContent extends StatefulWidget {
   final String title;
   final IconData headerIcon;
@@ -36,37 +38,19 @@ class BaseLegalPageContent extends StatefulWidget {
 }
 
 class _BaseLegalPageContentState extends State<BaseLegalPageContent> {
-  final ScrollController _scrollController = ScrollController();
-  bool _showScrollToTopButton = false;
+  late LegalPageScrollManager _scrollManager;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
-  }
-
-  void _scrollListener() {
-    if (_scrollController.offset >= 400) {
-      if (!_showScrollToTopButton) {
-        setState(() {
-          _showScrollToTopButton = true;
-        });
-      }
-    } else {
-      if (_showScrollToTopButton) {
-        setState(() {
-          _showScrollToTopButton = false;
-        });
-      }
-    }
+    _scrollManager = LegalPageScrollManager();
+    _scrollManager.addScrollListener(() {
+      setState(() {});
+    });
   }
 
   void _scrollToTop() {
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
+    _scrollManager.scrollToTop();
   }
 
   void _shareContent() {
@@ -81,7 +65,7 @@ class _BaseLegalPageContentState extends State<BaseLegalPageContent> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollManager.dispose();
     super.dispose();
   }
 
@@ -114,7 +98,7 @@ class _BaseLegalPageContentState extends State<BaseLegalPageContent> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            controller: _scrollController,
+            controller: _scrollManager.scrollController,
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +121,7 @@ class _BaseLegalPageContentState extends State<BaseLegalPageContent> {
               ],
             ),
           ),
-          if (_showScrollToTopButton)
+          if (_scrollManager.showScrollToTopButton)
             Positioned(
               right: 16,
               bottom: 16,

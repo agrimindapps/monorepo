@@ -268,7 +268,10 @@ class PremiumNotifier extends _$PremiumNotifier {
 
   bool canCreateUnlimitedPlants() {
     return state.maybeWhen(
-      data: (data) => data.premiumFeaturesEnabled.contains('unlimited_plants'),
+      data: (data) {
+        // Delegated to PremiumFeaturesManager for consistency
+        return data.premiumFeaturesEnabled.contains('unlimited_plants');
+      },
       orElse: () => false,
     );
   }

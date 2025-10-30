@@ -4,14 +4,19 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../domain/services/i_tts_service.dart';
 
+/// Adapter para encapsular FlutterTts e fornecer abstração
+/// Implementa Interface Segregation Principle - depende de abstração, não de implementação concreta
 class TTSServiceImpl implements ITTSService {
-  final FlutterTts _flutterTts = FlutterTts();
+  final FlutterTts _flutterTts;
   final StreamController<TTSSpeechState> _stateController =
       StreamController<TTSSpeechState>.broadcast();
 
   TTSSpeechState _currentState = TTSSpeechState.idle;
 
-  TTSServiceImpl() {
+  /// Constructor com injeção de dependência
+  /// Segue Dependency Inversion Principle - aceita abstração, não cria instância direta
+  TTSServiceImpl({FlutterTts? flutterTts})
+    : _flutterTts = flutterTts ?? FlutterTts() {
     _setupCallbacks();
   }
 

@@ -4,7 +4,6 @@ import 'data/factories/favorito_entity_factory_registry.dart';
 import 'data/repositories/favoritos_repository_simplified.dart';
 import 'data/services/favoritos_cache_service_inline.dart';
 import 'data/services/favoritos_data_resolver_service.dart';
-import 'data/services/favoritos_error_message_service.dart';
 import 'data/services/favoritos_service.dart';
 import 'data/services/favoritos_sync_service.dart';
 import 'data/services/favoritos_validator_service.dart';
@@ -80,12 +79,8 @@ class FavoritosDI {
       );
     }
 
-    // Error message service (SOLID - SRP)
-    if (!_getIt.isRegistered<FavoritosErrorMessageService>()) {
-      _getIt.registerLazySingleton<FavoritosErrorMessageService>(
-        () => FavoritosErrorMessageService(),
-      );
-    }
+    // ✅ FavoritosErrorMessageService: Registrado via @lazySingleton (Injectable)
+    // Não registre manualmente aqui para evitar duplicação com Injectable
 
     // Service com specialized services injetadas (DIP)
     _getIt.registerLazySingleton<FavoritosService>(

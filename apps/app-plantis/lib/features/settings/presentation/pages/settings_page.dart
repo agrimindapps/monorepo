@@ -11,6 +11,9 @@ import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
+import '../managers/settings_sections_builder.dart';
+import '../managers/notification_settings_builder.dart';
+import '../managers/settings_dialog_manager.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -51,10 +54,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                             hint:
                                 'Abre diálogo para escolher entre tema claro, escuro ou automático. Atualmente: ${_getThemeDescription(themeMode)}',
                             button: true,
-                            onTap: () => _showThemeDialog(context, ref),
+                            onTap: () {
+                              _showThemeDialog(context, ref);
+                            },
                             child: GestureDetector(
                               onTap: () => _showThemeDialog(context, ref),
-                              child: _buildHeaderIcon(_getThemeIcon(themeMode)),
+                              child: SettingsSectionsBuilder.buildHeaderIcon(
+                                _getThemeIcon(themeMode),
+                              ),
                             ),
                           );
                         },
@@ -105,194 +112,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     dynamic user,
     dynamic authState,
   ) {
-    final hasPhoto = user?.hasProfilePhoto == true;
-    final photoUrl = user?.photoUrl?.toString() ?? '';
-    final initials = (user?.initials as String?) ?? '...';
-    final email = (user?.email as String?) ?? 'Carregando...';
-    const memberSince = 'Membro desde...';
-
-    return PlantisCard(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: () => context.push('/account-profile'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: PlantisColors.primary,
-                child: hasPhoto
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: Image.network(
-                          photoUrl,
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Text(
-                              initials,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : Text(
-                        initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user?.displayName?.toString() ?? 'Usuário',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      memberSince,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: PlantisColors.primary.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.verified,
-                          color: PlantisColors.primary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Verificado',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: PlantisColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.chevron_right,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    return SettingsSectionsBuilder.buildUserSection(
+      context,
+      theme,
+      user,
+      authState,
     );
   }
 
   Widget _buildPremiumSectionCard(BuildContext context, ThemeData theme) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PlantisColors.primary,
-            PlantisColors.primaryDark,
-            PlantisColors.leaf,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: PlantisColors.primary.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: InkWell(
-        onTap: () => context.push('/premium'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.workspace_premium,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '✨ Plantis Premium ✨',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Desbloqueie recursos avançados',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: Colors.white),
-            ],
-          ),
-        ),
-      ),
-    );
+    return SettingsSectionsBuilder.buildPremiumSectionCard(context, theme);
   }
 
   Widget _buildConfigSection(
@@ -537,7 +366,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                       ),
                     );
                   },
-            activeColor: PlantisColors.primary,
+            activeThumbColor: PlantisColors.primary,
           ),
         ],
       ),
@@ -545,117 +374,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   }
 
   void _showRateAppDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: Row(
-          children: [
-            const Icon(Icons.star_rate, color: PlantisColors.sun, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'Avaliar o App',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Está gostando do Plantis?',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 16,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                5,
-                (index) => const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(Icons.star, color: PlantisColors.sun, size: 32),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: PlantisColors.primaryLight.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PlantisColors.primary.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.favorite,
-                    color: PlantisColors.flower,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Obrigado por fazer parte da nossa comunidade!',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Mais tarde',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _handleRateApp(context);
-            },
-            icon: const Icon(Icons.star, size: 18),
-            label: const Text('Avaliar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: PlantisColors.sun,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    final dialogManager = SettingsDialogManager(context: context, ref: null);
+    dialogManager.showRateAppDialog();
+  }
+
+  void _showFeedbackDialog() {
+    final dialogManager = SettingsDialogManager(context: context, ref: null);
+    dialogManager.showFeedbackDialog();
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    final dialogManager = SettingsDialogManager(context: context, ref: null);
+    dialogManager.showAboutDialog();
+  }
+
+  void _showThemeDialog(BuildContext context, WidgetRef ref) {
+    final dialogManager = SettingsDialogManager(context: context, ref: ref);
+    dialogManager.showThemeDialog();
   }
 
   Future<void> _handleRateApp(BuildContext context) async {

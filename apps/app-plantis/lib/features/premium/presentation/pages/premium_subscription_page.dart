@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
+import '../managers/premium_managers_providers.dart';
 import '../providers/premium_notifier.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
@@ -268,14 +269,14 @@ class _PremiumSubscriptionPageState
     );
 
     try {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
-      final success = await notifier.purchaseProduct(_selectedPlanId!);
+      final purchaseManager = ref.read(premiumPurchaseManagerProvider);
+      final success = await purchaseManager.purchaseProduct(_selectedPlanId!);
 
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
 
         if (success) {
-          _showSuccessSnackBar('Bem-vindo ao Premium Plantis! 🌱');
+          _showSuccessSnackBar(purchaseManager.getPurchaseSuccessMessage());
         }
       }
     } catch (e) {
@@ -294,16 +295,16 @@ class _PremiumSubscriptionPageState
     );
 
     try {
-      final notifier = ref.read(premiumNotifierProvider.notifier);
-      final success = await notifier.restorePurchases();
+      final purchaseManager = ref.read(premiumPurchaseManagerProvider);
+      final success = await purchaseManager.restorePurchases();
 
       if (mounted) {
         stopContextualLoading(LoadingContexts.premium);
 
         if (success && premiumState.isPremium) {
-          _showSuccessSnackBar('Compras restauradas com sucesso!');
+          _showSuccessSnackBar(purchaseManager.getRestoreSuccessMessage());
         } else if (success) {
-          _showInfoSnackBar('Nenhuma compra anterior encontrada.');
+          _showInfoSnackBar(purchaseManager.getRestoreNotFoundMessage());
         }
       }
     } catch (e) {

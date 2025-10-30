@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/services/data_sanitization_service.dart';
 import '../../domain/entities/register_data.dart';
 import '../../utils/auth_validators.dart';
 
@@ -30,6 +29,7 @@ class RegisterState {
       isLoading: isLoading ?? this.isLoading,
     );
   }
+
   int get currentStep => registerData.currentStep;
   double get progress {
     switch (registerData.currentStep) {
@@ -204,22 +204,18 @@ class RegisterNotifier extends _$RegisterNotifier {
     return true;
   }
 
-  /// Checks if email already exists (placeholder for real implementation)
+  /// Checks if email already exists (now handled by EmailCheckerManager)
+  /// This method is kept for backwards compatibility but should be replaced
+  /// with EmailCheckerManager.checkExists() in calling code
+  @Deprecated('Use EmailCheckerManager.checkExists() instead')
   Future<bool> checkEmailExists(String email) async {
     try {
-      state = state.copyWith(isLoading: true);
       await Future<void>.delayed(const Duration(milliseconds: 500));
       final exists = email.toLowerCase() == 'test@test.com';
-
-      state = state.copyWith(isLoading: false);
-
       return exists;
     } catch (e) {
-      state = state.copyWith(isLoading: false);
       _setError('Erro ao verificar email. Tente novamente.');
-      print(
-        'Erro verificação email: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
-      );
+      print('Erro verificação email: ${e.toString()}');
       return false;
     }
   }

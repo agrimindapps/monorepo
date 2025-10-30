@@ -5,11 +5,11 @@ import '../models/plantas_inf_hive.dart';
 /// Repositório para PlantasInfHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class PlantasInfHiveRepository extends BaseHiveRepository<PlantasInfHive> {
-  PlantasInfHiveRepository() : super(
-    hiveManager: GetIt.instance<IHiveManager>(),
-    boxName: 'receituagro_plantas_inf',
-  );
-
+  PlantasInfHiveRepository()
+    : super(
+        hiveManager: GetIt.instance<IHiveManager>(),
+        boxName: 'receituagro_plantas_inf',
+      );
 
   /// Busca informações de uma planta
   Future<PlantasInfHive?> findByIdReg(String idReg) async {
@@ -18,7 +18,10 @@ class PlantasInfHiveRepository extends BaseHiveRepository<PlantasInfHive> {
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Either<Failure, void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+  Future<Either<Failure, void>> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
     try {
       final Map<dynamic, PlantasInfHive> items = {};
 

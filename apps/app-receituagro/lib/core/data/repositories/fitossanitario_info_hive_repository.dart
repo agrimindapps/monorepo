@@ -4,12 +4,13 @@ import '../models/fitossanitario_info_hive.dart';
 
 /// Repositório para FitossanitarioInfoHive
 /// Implementa os métodos abstratos do BaseHiveRepository
-class FitossanitarioInfoHiveRepository extends BaseHiveRepository<FitossanitarioInfoHive> {
-  FitossanitarioInfoHiveRepository() : super(
-    hiveManager: GetIt.instance<IHiveManager>(),
-    boxName: 'receituagro_fitossanitarios_info',
-  );
-
+class FitossanitarioInfoHiveRepository
+    extends BaseHiveRepository<FitossanitarioInfoHive> {
+  FitossanitarioInfoHiveRepository()
+    : super(
+        hiveManager: GetIt.instance<IHiveManager>(),
+        boxName: 'receituagro_fitossanitarios_info',
+      );
 
   /// Busca informações complementares de um fitossanitário
   Future<FitossanitarioInfoHive?> findByIdReg(String idReg) async {
@@ -18,7 +19,10 @@ class FitossanitarioInfoHiveRepository extends BaseHiveRepository<Fitossanitario
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Either<Failure, void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+  Future<Either<Failure, void>> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
     try {
       final Map<dynamic, FitossanitarioInfoHive> items = {};
 

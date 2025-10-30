@@ -5,15 +5,17 @@ import '../models/cultura_hive.dart';
 /// Repositório para CulturaHive
 /// Implementa os métodos abstratos do BaseHiveRepository
 class CulturaHiveRepository extends BaseHiveRepository<CulturaHive> {
-  CulturaHiveRepository() : super(
-    hiveManager: GetIt.instance<IHiveManager>(),
-    boxName: 'receituagro_culturas',
-  );
-
+  CulturaHiveRepository()
+    : super(
+        hiveManager: GetIt.instance<IHiveManager>(),
+        boxName: 'receituagro_culturas',
+      );
 
   /// Busca cultura por nome
   Future<CulturaHive?> findByName(String cultura) async {
-    final result = await findBy((item) => item.cultura.toLowerCase() == cultura.toLowerCase());
+    final result = await findBy(
+      (item) => item.cultura.toLowerCase() == cultura.toLowerCase(),
+    );
     if (result.isError) return null;
     return result.data!.isNotEmpty ? result.data!.first : null;
   }
@@ -32,7 +34,10 @@ class CulturaHiveRepository extends BaseHiveRepository<CulturaHive> {
   }
 
   /// Carrega dados do JSON para o repositório
-  Future<Either<Failure, void>> loadFromJson(List<Map<String, dynamic>> jsonData, String version) async {
+  Future<Either<Failure, void>> loadFromJson(
+    List<Map<String, dynamic>> jsonData,
+    String version,
+  ) async {
     try {
       final Map<dynamic, CulturaHive> items = {};
 

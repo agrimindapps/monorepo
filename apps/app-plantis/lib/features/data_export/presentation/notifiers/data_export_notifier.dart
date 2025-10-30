@@ -75,12 +75,14 @@ class DataExportNotifier extends _$DataExportNotifier {
     _downloadUseCase = ref.read(downloadExportUseCaseProvider);
     _deleteUseCase = ref.read(deleteExportUseCaseProvider);
     _repository = ref.read(dataExportRepositoryProvider);
-    try {
-      final history = await _getHistoryUseCase(_currentUserId);
-      return DataExportState(exportHistory: history);
-    } catch (e) {
-      return DataExportState(error: 'Erro ao inicializar: ${e.toString()}');
-    }
+
+    final historyResult = await _getHistoryUseCase(_currentUserId);
+
+    return historyResult.fold(
+      (failure) =>
+          DataExportState(error: 'Erro ao inicializar: ${failure.message}'),
+      (history) => DataExportState(exportHistory: history),
+    );
   }
 
   /// Check availability of data export for the current user
@@ -94,40 +96,42 @@ class DataExportNotifier extends _$DataExportNotifier {
       ),
     );
 
-    try {
-      final dataTypes =
-          requestedDataTypes ??
-          {
-            DataType.plants,
-            DataType.plantTasks,
-            DataType.spaces,
-            DataType.plantPhotos,
-            DataType.plantComments,
-            DataType.settings,
-          };
+    final dataTypes = requestedDataTypes ??
+        {
+          DataType.plants,
+          DataType.plantTasks,
+          DataType.spaces,
+          DataType.plantPhotos,
+          DataType.plantComments,
+          DataType.settings,
+        };
 
-      final result = await _checkAvailabilityUseCase(
-        userId: _currentUserId,
-        requestedDataTypes: dataTypes,
-      );
+    final result = await _checkAvailabilityUseCase(
+      userId: _currentUserId,
+      requestedDataTypes: dataTypes,
+    );
 
-      state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
-          availabilityResult: result,
-          isLoading: false,
-        ),
-      );
-    } catch (e) {
-      state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
-          error: 'Erro ao verificar disponibilidade: ${e.toString()}',
-          availabilityResult: const ExportAvailabilityResult.unavailable(
-            reason: 'Erro interno do sistema',
+    result.fold(
+      (failure) {
+        state = AsyncValue.data(
+          (state.valueOrNull ?? const DataExportState()).copyWith(
+            error: 'Erro ao verificar disponibilidade: ${failure.message}',
+            availabilityResult: const ExportAvailabilityResult.unavailable(
+              reason: 'Erro interno do sistema',
+            ),
+            isLoading: false,
           ),
-          isLoading: false,
-        ),
-      );
-    }
+        );
+      },
+      (availabilityResult) {
+        state = AsyncValue.data(
+          (state.valueOrNull ?? const DataExportState()).copyWith(
+            availabilityResult: availabilityResult,
+            isLoading: false,
+          ),
+        );
+      },
+    );
   }
 
   /// Request data export
@@ -142,106 +146,118 @@ class DataExportNotifier extends _$DataExportNotifier {
       ),
     );
 
-    try {
-      final request = await _requestExportUseCase(
-        userId: _currentUserId,
-        dataTypes: dataTypes,
-        format: format,
-      );
-      final currentState = state.valueOrNull ?? const DataExportState();
-      final updatedHistory = [request, ...currentState.exportHistory];
+    final result = await _requestExportUseCase(
+      userId: _currentUserId,
+      dataTypes: dataTypes,
+      format: format,
+    );
 
-      state = AsyncValue.data(
-        currentState.copyWith(exportHistory: updatedHistory, isLoading: false),
-      );
-      await _monitorExportProgress(request);
+    return result.fold(
+      (failure) {
+        state = AsyncValue.data(
+          (state.valueOrNull ?? const DataExportState()).copyWith(
+            error: 'Erro ao solicitar exportação: ${failure.message}',
+            isLoading: false,
+          ),
+        );
+        return null;
+      },
+      (request) async {
+        final currentState = state.valueOrNull ?? const DataExportState();
+        final updatedHistory = [request, ...currentState.exportHistory];
 
-      return request;
-    } catch (e) {
-      state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
-          error: 'Erro ao solicitar exportação: ${e.toString()}',
-          isLoading: false,
-        ),
-      );
-      return null;
-    }
+        state = AsyncValue.data(
+          currentState.copyWith(
+            exportHistory: updatedHistory,
+            isLoading: false,
+          ),
+        );
+
+        await _monitorExportProgress(request);
+        return request;
+      },
+    );
   }
 
   /// Monitor export progress
   Future<void> _monitorExportProgress(ExportRequest request) async {
-    try {
-      final progressSteps = [
-        (0.1, 'Coletando dados das plantas...'),
-        (0.25, 'Processando tarefas e lembretes...'),
-        (0.4, 'Compilando fotos das plantas...'),
-        (0.55, 'Coletando comentários das plantas...'),
-        (0.7, 'Organizando configurações...'),
-        (0.85, 'Gerando arquivo ${request.format.displayName}...'),
-        (1.0, 'Finalizando exportação...'),
-      ];
+    final progressSteps = [
+      (0.1, 'Coletando dados das plantas...'),
+      (0.25, 'Processando tarefas e lembretes...'),
+      (0.4, 'Compilando fotos das plantas...'),
+      (0.55, 'Coletando comentários das plantas...'),
+      (0.7, 'Organizando configurações...'),
+      (0.85, 'Gerando arquivo ${request.format.displayName}...'),
+      (1.0, 'Finalizando exportação...'),
+    ];
 
-      for (int i = 0; i < progressSteps.length; i++) {
-        final (percentage, task) = progressSteps[i];
-        final currentState = state.valueOrNull ?? const DataExportState();
+    for (int i = 0; i < progressSteps.length; i++) {
+      final (percentage, task) = progressSteps[i];
+      final currentState = state.valueOrNull ?? const DataExportState();
 
-        state = AsyncValue.data(
-          currentState.copyWith(
-            currentProgress: currentState.currentProgress.copyWith(
-              percentage: percentage * 100,
-              currentTask: task,
-              estimatedTimeRemaining:
-                  i < progressSteps.length - 1
-                      ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
-                      : null,
-            ),
+      state = AsyncValue.data(
+        currentState.copyWith(
+          currentProgress: currentState.currentProgress.copyWith(
+            percentage: percentage * 100,
+            currentTask: task,
+            estimatedTimeRemaining: i < progressSteps.length - 1
+                ? '${(progressSteps.length - i - 1) * 3} segundos restantes'
+                : null,
           ),
-        );
-        await Future<void>.delayed(const Duration(seconds: 3));
-        final updatedHistory = await _getHistoryUseCase(_currentUserId);
-        final updatedRequest = updatedHistory.firstWhere(
-          (r) => r.id == request.id,
-          orElse: () => request,
-        );
+        ),
+      );
 
-        if (updatedRequest.status == ExportRequestStatus.failed) {
+      await Future<void>.delayed(const Duration(seconds: 3));
+
+      final historyResult = await _getHistoryUseCase(_currentUserId);
+
+      await historyResult.fold(
+        (failure) async {
           state = AsyncValue.data(
             currentState.copyWith(
               currentProgress: ExportProgress.error(
-                updatedRequest.errorMessage ?? 'Erro desconhecido',
+                'Erro ao monitorar progresso: ${failure.message}',
               ),
             ),
           );
-          _updateRequestInHistory(updatedRequest);
-          return;
-        }
-
-        if (updatedRequest.status == ExportRequestStatus.completed) {
-          state = AsyncValue.data(
-            currentState.copyWith(
-              currentProgress: const ExportProgress.completed(),
-            ),
+        },
+        (updatedHistory) async {
+          final updatedRequest = updatedHistory.firstWhere(
+            (r) => r.id == request.id,
+            orElse: () => request,
           );
-          _updateRequestInHistory(updatedRequest);
-          return;
-        }
-      }
-      final currentState = state.valueOrNull ?? const DataExportState();
-      state = AsyncValue.data(
-        currentState.copyWith(
-          currentProgress: const ExportProgress.completed(),
-        ),
-      );
-    } catch (e) {
-      final currentState = state.valueOrNull ?? const DataExportState();
-      state = AsyncValue.data(
-        currentState.copyWith(
-          currentProgress: ExportProgress.error(
-            'Erro durante monitoramento: ${e.toString()}',
-          ),
-        ),
+
+          if (updatedRequest.status == ExportRequestStatus.failed) {
+            state = AsyncValue.data(
+              currentState.copyWith(
+                currentProgress: ExportProgress.error(
+                  updatedRequest.errorMessage ?? 'Erro desconhecido',
+                ),
+              ),
+            );
+            _updateRequestInHistory(updatedRequest);
+            return;
+          }
+
+          if (updatedRequest.status == ExportRequestStatus.completed) {
+            state = AsyncValue.data(
+              currentState.copyWith(
+                currentProgress: const ExportProgress.completed(),
+              ),
+            );
+            _updateRequestInHistory(updatedRequest);
+            return;
+          }
+        },
       );
     }
+
+    final currentState = state.valueOrNull ?? const DataExportState();
+    state = AsyncValue.data(
+      currentState.copyWith(
+        currentProgress: const ExportProgress.completed(),
+      ),
+    );
   }
 
   /// Update request in history
@@ -270,63 +286,74 @@ class DataExportNotifier extends _$DataExportNotifier {
       ),
     );
 
-    try {
-      final history = await _getHistoryUseCase(_currentUserId);
+    final historyResult = await _getHistoryUseCase(_currentUserId);
 
-      state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
-          exportHistory: history,
-          isLoading: false,
-        ),
-      );
-    } catch (e) {
-      state = AsyncValue.data(
-        (state.valueOrNull ?? const DataExportState()).copyWith(
-          error: 'Erro ao carregar histórico: ${e.toString()}',
-          isLoading: false,
-        ),
-      );
-    }
+    historyResult.fold(
+      (failure) {
+        state = AsyncValue.data(
+          (state.valueOrNull ?? const DataExportState()).copyWith(
+            error: 'Erro ao carregar histórico: ${failure.message}',
+            isLoading: false,
+          ),
+        );
+      },
+      (history) {
+        state = AsyncValue.data(
+          (state.valueOrNull ?? const DataExportState()).copyWith(
+            exportHistory: history,
+            isLoading: false,
+          ),
+        );
+      },
+    );
   }
 
   /// Download export file
   Future<bool> downloadExport(String exportId) async {
-    try {
-      return await _downloadUseCase(exportId);
-    } catch (e) {
-      final currentState = state.valueOrNull ?? const DataExportState();
-      state = AsyncValue.data(
-        currentState.copyWith(error: 'Erro ao baixar arquivo: ${e.toString()}'),
-      );
-      return false;
-    }
+    final result = await _downloadUseCase(exportId);
+
+    return result.fold(
+      (failure) {
+        final currentState = state.valueOrNull ?? const DataExportState();
+        state = AsyncValue.data(
+          currentState.copyWith(
+            error: 'Erro ao baixar arquivo: ${failure.message}',
+          ),
+        );
+        return false;
+      },
+      (success) => success,
+    );
   }
 
   /// Delete export request and associated file
   Future<bool> deleteExport(String exportId) async {
-    try {
-      final success = await _deleteUseCase(exportId);
-      if (success) {
-        final currentState = state.valueOrNull ?? const DataExportState();
-        final updatedHistory =
-            currentState.exportHistory
-                .where((req) => req.id != exportId)
-                .toList();
+    final result = await _deleteUseCase(exportId);
 
+    return result.fold(
+      (failure) {
+        final currentState = state.valueOrNull ?? const DataExportState();
         state = AsyncValue.data(
-          currentState.copyWith(exportHistory: updatedHistory),
+          currentState.copyWith(
+            error: 'Erro ao deletar exportação: ${failure.message}',
+          ),
         );
-      }
-      return success;
-    } catch (e) {
-      final currentState = state.valueOrNull ?? const DataExportState();
-      state = AsyncValue.data(
-        currentState.copyWith(
-          error: 'Erro ao deletar exportação: ${e.toString()}',
-        ),
-      );
-      return false;
-    }
+        return false;
+      },
+      (success) {
+        if (success) {
+          final currentState = state.valueOrNull ?? const DataExportState();
+          final updatedHistory = currentState.exportHistory
+              .where((req) => req.id != exportId)
+              .toList();
+
+          state = AsyncValue.data(
+            currentState.copyWith(exportHistory: updatedHistory),
+          );
+        }
+        return success;
+      },
+    );
   }
 
   /// Get available data types for export
@@ -346,39 +373,55 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Get data type statistics
   Future<Map<DataType, int>> getDataTypeStatistics() async {
-    try {
-      final stats = <DataType, int>{};
+    final stats = <DataType, int>{};
 
-      final plants = await _repository.getUserPlantsData(_currentUserId);
-      stats[DataType.plants] = plants.length;
+    final plantsResult = await _repository.getUserPlantsData(_currentUserId);
+    final plants = plantsResult.fold(
+      (failure) => <PlantExportData>[],
+      (data) => data,
+    );
+    stats[DataType.plants] = plants.length;
 
-      final tasks = await _repository.getUserTasksData(_currentUserId);
-      stats[DataType.plantTasks] = tasks.length;
+    final tasksResult = await _repository.getUserTasksData(_currentUserId);
+    final tasks = tasksResult.fold(
+      (failure) => <TaskExportData>[],
+      (data) => data,
+    );
+    stats[DataType.plantTasks] = tasks.length;
 
-      final spaces = await _repository.getUserSpacesData(_currentUserId);
-      stats[DataType.spaces] = spaces.length;
+    final spacesResult = await _repository.getUserSpacesData(_currentUserId);
+    final spaces = spacesResult.fold(
+      (failure) => <SpaceExportData>[],
+      (data) => data,
+    );
+    stats[DataType.spaces] = spaces.length;
 
-      final photos = await _repository.getUserPlantPhotosData(_currentUserId);
-      stats[DataType.plantPhotos] = photos.length;
+    final photosResult =
+        await _repository.getUserPlantPhotosData(_currentUserId);
+    final photos = photosResult.fold(
+      (failure) => <PlantPhotoExportData>[],
+      (data) => data,
+    );
+    stats[DataType.plantPhotos] = photos.length;
 
-      final comments = await _repository.getUserPlantCommentsData(
-        _currentUserId,
-      );
-      stats[DataType.plantComments] = comments.length;
+    final commentsResult =
+        await _repository.getUserPlantCommentsData(_currentUserId);
+    final comments = commentsResult.fold(
+      (failure) => <PlantCommentExportData>[],
+      (data) => data,
+    );
+    stats[DataType.plantComments] = comments.length;
 
-      final customCareCount = plants.where((p) => p.config != null).length;
-      stats[DataType.customCare] = customCareCount;
+    final customCareCount = plants.where((p) => p.config != null).length;
+    stats[DataType.customCare] = customCareCount;
 
-      final reminderCount = tasks.where((t) => t.status != 'completed').length;
-      stats[DataType.reminders] = reminderCount;
+    final reminderCount = tasks.where((t) => t.status != 'completed').length;
+    stats[DataType.reminders] = reminderCount;
 
-      stats[DataType.settings] = 1;
-      stats[DataType.userProfile] = 1;
+    stats[DataType.settings] = 1;
+    stats[DataType.userProfile] = 1;
 
-      return stats;
-    } catch (e) {
-      throw Exception('Erro ao obter estatísticas: ${e.toString()}');
-    }
+    return stats;
   }
 
   /// Reset current progress

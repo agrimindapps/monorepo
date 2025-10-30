@@ -1,3 +1,5 @@
+import 'package:core/core.dart';
+
 import '../entities/export_request.dart';
 import '../repositories/data_export_repository.dart';
 
@@ -6,7 +8,7 @@ class CheckExportAvailabilityUseCase {
 
   CheckExportAvailabilityUseCase(this._repository);
 
-  Future<ExportAvailabilityResult> call({
+  Future<Either<Failure, ExportAvailabilityResult>> call({
     required String userId,
     required Set<DataType> requestedDataTypes,
   }) async {

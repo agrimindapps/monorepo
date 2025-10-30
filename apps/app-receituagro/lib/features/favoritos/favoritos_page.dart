@@ -122,10 +122,9 @@ class _FavoritosPageState extends ConsumerState<FavoritosPage>
   ) {
     return ModernHeaderWidget(
       title: 'Favoritos',
-      subtitle:
-          state.hasAnyFavoritos
-              ? '${state.allFavoritos.length} itens salvos'
-              : 'Seus itens salvos',
+      subtitle: state.hasAnyFavoritos
+          ? '${state.favoritos.length} itens salvos'
+          : 'Seus itens salvos',
       leftIcon: Icons.favorite,
       showBackButton: false,
       showActions: false,

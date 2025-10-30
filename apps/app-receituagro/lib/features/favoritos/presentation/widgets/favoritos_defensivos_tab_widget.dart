@@ -10,25 +10,27 @@ import '../notifiers/favoritos_notifier.dart';
 class FavoritosDefensivosTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
-  const FavoritosDefensivosTabWidget({
-    super.key,
-    required this.onReload,
-  });
+  const FavoritosDefensivosTabWidget({super.key, required this.onReload});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final favoritosState = ref.watch(favoritosNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Usar novo padrão com getFavoritosByTipo
+    final defensivos = favoritosState
+        .getFavoritosByTipo<FavoritoDefensivoEntity>(TipoFavorito.defensivo);
+
     return _buildTabContent(
       context: context,
       ref: ref,
       favoritosState: favoritosState,
       viewState: favoritosState.getViewStateForType(TipoFavorito.defensivo),
-      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.defensivo),
-      items: favoritosState.defensivos,
-      itemBuilder:
-          (defensivo) => _buildDefensivoItem(context, ref, defensivo),
+      emptyMessage: favoritosState.getEmptyMessageForType(
+        TipoFavorito.defensivo,
+      ),
+      items: defensivos,
+      itemBuilder: (defensivo) => _buildDefensivoItem(context, ref, defensivo),
       isDark: isDark,
     );
   }
@@ -56,7 +58,9 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
-            await ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
+            await ref
+                .read(favoritosNotifierProvider.notifier)
+                .loadAllFavoritos();
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -65,7 +69,9 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.1),
                 ),
               ),
               child: ListView.builder(
@@ -81,7 +87,9 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
                           height: 1,
                           indent: 64,
                           endIndent: 16,
-                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withValues(alpha: 0.2),
                         ),
                     ],
                   );
@@ -130,16 +138,20 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: defensivo.ingredienteAtivo.isNotEmpty || defensivo.fabricante?.isNotEmpty == true
-          ? Text(
-              [
-                if (defensivo.ingredienteAtivo.isNotEmpty) defensivo.ingredienteAtivo,
-                if (defensivo.fabricante?.isNotEmpty == true) defensivo.fabricante!,
-              ].join(' • '),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
+        subtitle:
+            defensivo.ingredienteAtivo.isNotEmpty ||
+                defensivo.fabricante?.isNotEmpty == true
+            ? Text(
+                [
+                  if (defensivo.ingredienteAtivo.isNotEmpty)
+                    defensivo.ingredienteAtivo,
+                  if (defensivo.fabricante?.isNotEmpty == true)
+                    defensivo.fabricante!,
+                ].join(' • '),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              )
+            : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
@@ -236,12 +248,10 @@ class FavoritosDefensivosTabWidget extends ConsumerWidget {
     FavoritoDefensivoEntity defensivo,
   ) async {
     try {
-      await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(
-        TipoFavorito.defensivo,
-        defensivo.id,
-      );
-    } catch (e) {
-    }
+      await ref
+          .read(favoritosNotifierProvider.notifier)
+          .toggleFavorito(TipoFavorito.defensivo, defensivo.id);
+    } catch (e) {}
   }
 
   Widget _buildErrorState(

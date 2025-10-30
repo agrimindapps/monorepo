@@ -11,22 +11,23 @@ import '../notifiers/favoritos_notifier.dart';
 class FavoritosPragasTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
-  const FavoritosPragasTabWidget({
-    super.key,
-    required this.onReload,
-  });
+  const FavoritosPragasTabWidget({super.key, required this.onReload});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final favoritosState = ref.watch(favoritosNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final pragas = favoritosState.getFavoritosByTipo<FavoritoPragaEntity>(
+      TipoFavorito.praga,
+    );
+
     return _buildTabContent(
       context: context,
       ref: ref,
       viewState: favoritosState.getViewStateForType(TipoFavorito.praga),
       emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.praga),
-      items: favoritosState.pragas,
+      items: pragas,
       itemBuilder: (praga) => _buildPragaItem(context, ref, praga),
       isDark: isDark,
       errorMessage: favoritosState.errorMessage,
@@ -56,7 +57,9 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
-            await ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
+            await ref
+                .read(favoritosNotifierProvider.notifier)
+                .loadAllFavoritos();
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -65,7 +68,9 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.1),
                 ),
               ),
               child: ListView.builder(
@@ -81,7 +86,9 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
                           height: 1,
                           indent: 72,
                           endIndent: 16,
-                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withValues(alpha: 0.2),
                         ),
                     ],
                   );
@@ -156,11 +163,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.delete_outline,
-            color: Colors.white,
-            size: 28,
-          ),
+          Icon(Icons.delete_outline, color: Colors.white, size: 28),
           SizedBox(height: 4),
           Text(
             'Excluir',
@@ -187,11 +190,7 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
           ),
           title: const Row(
             children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.orange,
-                size: 24,
-              ),
+              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
               SizedBox(width: 8),
               Text('Confirmar Remoção'),
             ],
@@ -246,12 +245,10 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
     FavoritoPragaEntity praga,
   ) async {
     try {
-      await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(
-        TipoFavorito.praga,
-        praga.id,
-      );
-    } catch (e) {
-    }
+      await ref
+          .read(favoritosNotifierProvider.notifier)
+          .toggleFavorito(TipoFavorito.praga, praga.id);
+    } catch (e) {}
   }
 
   Widget _buildErrorState(
@@ -321,7 +318,10 @@ class FavoritosPragasTabWidget extends ConsumerWidget {
     );
   }
 
-  void _navigateToPragaDetails(BuildContext context, FavoritoPragaEntity praga) {
+  void _navigateToPragaDetails(
+    BuildContext context,
+    FavoritoPragaEntity praga,
+  ) {
     final navigationService = GetIt.instance<ReceitaAgroNavigationService>();
     navigationService.navigateToDetalhePraga(
       pragaName: praga.nomeComum,

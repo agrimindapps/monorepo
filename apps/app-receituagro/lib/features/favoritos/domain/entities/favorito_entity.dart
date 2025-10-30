@@ -37,10 +37,7 @@ class FavoritoDefensivoEntity extends FavoritoEntity {
     required this.ingredienteAtivo,
     this.fabricante,
     super.adicionadoEm,
-  }) : super(
-          tipo: TipoFavorito.defensivo,
-          nomeDisplay: nomeComum,
-        );
+  }) : super(tipo: TipoFavorito.defensivo, nomeDisplay: nomeComum);
 
   /// Propriedades para compatibilidade com navegação existente
   String get displayName => nomeComum;
@@ -65,19 +62,12 @@ class FavoritoPragaEntity extends FavoritoEntity {
     required this.nomeCientifico,
     required this.tipoPraga,
     super.adicionadoEm,
-  }) : super(
-          tipo: TipoFavorito.praga,
-          nomeDisplay: nomeComum,
-        );
+  }) : super(tipo: TipoFavorito.praga, nomeDisplay: nomeComum);
 
   /// Getters de conveniência para navegação
   bool get isInseto => tipoPraga == '1';
   bool get isDoenca => tipoPraga == '2';
   bool get isPlanta => tipoPraga == '3';
-  
-  /// Propriedades para compatibilidade com navegação existente
-  @override
-  String get tipo => tipoPraga;
 
   @override
   String toString() {
@@ -100,9 +90,9 @@ class FavoritoDiagnosticoEntity extends FavoritoEntity {
     required this.dosagem,
     super.adicionadoEm,
   }) : super(
-          tipo: TipoFavorito.diagnostico,
-          nomeDisplay: '$nomePraga - $nomeDefensivo',
-        );
+         tipo: TipoFavorito.diagnostico,
+         nomeDisplay: '$nomePraga - $nomeDefensivo',
+       );
 
   /// Propriedades para compatibilidade com navegação existente
   String get nome => '$nomeDefensivo → $nomePraga';
@@ -125,10 +115,7 @@ class FavoritoCulturaEntity extends FavoritoEntity {
     required this.nomeCultura,
     this.descricao,
     super.adicionadoEm,
-  }) : super(
-          tipo: TipoFavorito.cultura,
-          nomeDisplay: nomeCultura,
-        );
+  }) : super(tipo: TipoFavorito.cultura, nomeDisplay: nomeCultura);
 
   @override
   String toString() {
@@ -143,12 +130,7 @@ class TipoFavorito {
   static const String diagnostico = 'diagnostico';
   static const String cultura = 'cultura';
 
-  static const List<String> todos = [
-    defensivo,
-    praga,
-    diagnostico,
-    cultura,
-  ];
+  static const List<String> todos = [defensivo, praga, diagnostico, cultura];
 
   static bool isValid(String tipo) => todos.contains(tipo);
 }
@@ -166,7 +148,8 @@ class FavoritosStats {
     required this.totalPragas,
     required this.totalDiagnosticos,
     required this.totalCulturas,
-  }) : total = totalDefensivos + totalPragas + totalDiagnosticos + totalCulturas;
+  }) : total =
+           totalDefensivos + totalPragas + totalDiagnosticos + totalCulturas;
 
   factory FavoritosStats.empty() {
     return const FavoritosStats(

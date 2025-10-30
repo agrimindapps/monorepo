@@ -11,10 +11,7 @@ import '../notifiers/favoritos_notifier.dart';
 class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   final VoidCallback onReload;
 
-  const FavoritosDiagnosticosTabWidget({
-    super.key,
-    required this.onReload,
-  });
+  const FavoritosDiagnosticosTabWidget({super.key, required this.onReload});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,16 +22,24 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
     if (!isPremium) {
       return _buildPremiumRequiredCard(context);
     }
-    
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
+    final diagnosticos = favoritosState
+        .getFavoritosByTipo<FavoritoDiagnosticoEntity>(
+          TipoFavorito.diagnostico,
+        );
+
     return _buildTabContent(
       context: context,
       ref: ref,
       viewState: favoritosState.getViewStateForType(TipoFavorito.diagnostico),
-      emptyMessage: favoritosState.getEmptyMessageForType(TipoFavorito.diagnostico),
-      items: favoritosState.diagnosticos,
-      itemBuilder: (diagnostico) => _buildDiagnosticoItem(context, diagnostico, ref),
+      emptyMessage: favoritosState.getEmptyMessageForType(
+        TipoFavorito.diagnostico,
+      ),
+      items: diagnosticos,
+      itemBuilder: (diagnostico) =>
+          _buildDiagnosticoItem(context, diagnostico, ref),
       isDark: isDark,
     );
   }
@@ -51,17 +56,19 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
     switch (viewState) {
       case FavoritosViewState.loading:
         return const Center(child: CircularProgressIndicator());
-      
+
       case FavoritosViewState.error:
         return _buildErrorState(context, ref, isDark);
-      
+
       case FavoritosViewState.empty:
         return _buildEmptyState(context, emptyMessage, isDark);
-      
+
       case FavoritosViewState.loaded:
         return RefreshIndicator(
           onRefresh: () async {
-            await ref.read(favoritosNotifierProvider.notifier).loadAllFavoritos();
+            await ref
+                .read(favoritosNotifierProvider.notifier)
+                .loadAllFavoritos();
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -70,7 +77,9 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.1),
                 ),
               ),
               child: ListView.builder(
@@ -86,7 +95,9 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
                           height: 1,
                           indent: 64,
                           endIndent: 16,
-                          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withValues(alpha: 0.2),
                         ),
                     ],
                   );
@@ -95,7 +106,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
             ),
           ),
         );
-      
+
       default:
         return const SizedBox.shrink();
     }
@@ -104,14 +115,17 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
   Widget _buildDiagnosticoItem(
     BuildContext context,
     FavoritoDiagnosticoEntity diagnostico,
-    WidgetRef ref
+    WidgetRef ref,
   ) {
     return Dismissible(
       key: Key('favorito_diagnostico_${diagnostico.id}'),
       direction: DismissDirection.endToStart,
       background: _buildSwipeBackground(),
       confirmDismiss: (direction) async {
-        return await _showRemoveDialog(context, '${diagnostico.nomeDefensivo} → ${diagnostico.nomePraga}');
+        return await _showRemoveDialog(
+          context,
+          '${diagnostico.nomeDefensivo} → ${diagnostico.nomePraga}',
+        );
       },
       onDismissed: (direction) async {
         await _removeFavorito(context, ref, diagnostico);
@@ -135,16 +149,19 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: diagnostico.cultura.isNotEmpty || diagnostico.dosagem.isNotEmpty
-          ? Text(
-              [
-                if (diagnostico.cultura.isNotEmpty) 'Cultura: ${diagnostico.cultura}',
-                if (diagnostico.dosagem.isNotEmpty) 'Dosagem: ${diagnostico.dosagem}',
-              ].join(' • '),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
+        subtitle:
+            diagnostico.cultura.isNotEmpty || diagnostico.dosagem.isNotEmpty
+            ? Text(
+                [
+                  if (diagnostico.cultura.isNotEmpty)
+                    'Cultura: ${diagnostico.cultura}',
+                  if (diagnostico.dosagem.isNotEmpty)
+                    'Dosagem: ${diagnostico.dosagem}',
+                ].join(' • '),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              )
+            : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
     );
@@ -159,11 +176,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.delete_outline,
-            color: Colors.white,
-            size: 28,
-          ),
+          Icon(Icons.delete_outline, color: Colors.white, size: 28),
           SizedBox(height: 4),
           Text(
             'Excluir',
@@ -190,11 +203,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
           ),
           title: const Row(
             children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.orange,
-                size: 24,
-              ),
+              Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
               SizedBox(width: 8),
               Text('Confirmar Remoção'),
             ],
@@ -249,15 +258,17 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
     FavoritoDiagnosticoEntity diagnostico,
   ) async {
     try {
-      await ref.read(favoritosNotifierProvider.notifier).toggleFavorito(TipoFavorito.diagnostico, diagnostico.id);
-    } catch (e) {
-    }
+      await ref
+          .read(favoritosNotifierProvider.notifier)
+          .toggleFavorito(TipoFavorito.diagnostico, diagnostico.id);
+    } catch (e) {}
   }
 
   Widget _buildPremiumRequiredCard(BuildContext context) {
     return PremiumFeatureCard(
       title: 'Diagnósticos Favoritos',
-      description: 'Salve seus diagnósticos favoritos para acesso rápido. Recurso exclusivo para assinantes.',
+      description:
+          'Salve seus diagnósticos favoritos para acesso rápido. Recurso exclusivo para assinantes.',
       buttonText: 'Desbloquear Agora',
       useRocketIcon: true,
       onUpgradePressed: () {
@@ -266,11 +277,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(
-    BuildContext context,
-    WidgetRef ref,
-    bool isDark,
-  ) {
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, bool isDark) {
     final favoritosState = ref.watch(favoritosNotifierProvider);
     return Center(
       child: Column(
@@ -334,7 +341,10 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
     );
   }
 
-  void _navigateToDiagnosticoDetails(BuildContext context, FavoritoDiagnosticoEntity diagnostico) {
+  void _navigateToDiagnosticoDetails(
+    BuildContext context,
+    FavoritoDiagnosticoEntity diagnostico,
+  ) {
     Navigator.pushNamed(
       context,
       '/detalhe-diagnostico',

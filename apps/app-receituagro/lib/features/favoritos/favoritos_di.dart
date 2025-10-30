@@ -2,7 +2,11 @@ import 'package:core/core.dart';
 
 import 'data/factories/favorito_entity_factory_registry.dart';
 import 'data/repositories/favoritos_repository_simplified.dart';
+import 'data/services/favoritos_cache_service_inline.dart';
+import 'data/services/favoritos_data_resolver_service.dart';
 import 'data/services/favoritos_service.dart';
+import 'data/services/favoritos_sync_service.dart';
+import 'data/services/favoritos_validator_service.dart';
 import 'domain/repositories/i_favoritos_repository.dart';
 // import 'presentation/providers/favoritos_provider_simplified.dart'; // DEPRECATED: Migrando para Riverpod
 
@@ -20,17 +24,17 @@ import 'domain/repositories/i_favoritos_repository.dart';
 /// - Extensible: adding new tipos doesn't require code modifications
 ///
 /// ⚠️ IMPORTANTE: Separado em 2 métodos para evitar conflitos com Injectable:
-/// 1. registerServices() - chamado ANTES do Injectable (apenas FavoritosService)
+/// 1. registerServices() - chamado ANTES do Injectable (todas as specialized services)
 /// 2. IFavoritosRepository - gerenciado via @LazySingleton (Injectable)
 ///
-/// Princípio: Simplicidade + Delegation Pattern
+/// Princípio: Simplicidade + Dependency Inversion Principle
 class FavoritosDI {
   FavoritosDI._(); // Private constructor prevents instantiation
 
   static final GetIt _getIt = GetIt.instance;
   static bool _servicesRegistered = false;
 
-  /// Registra APENAS FavoritosService (chamado ANTES do Injectable)
+  /// Registra TODAS as specialized services (chamado ANTES do Injectable)
   /// ⚠️ FavoritosRepositorySimplified é registrado via @LazySingleton (Injectable)
   static void registerServices() {
     if (_servicesRegistered) return;
@@ -42,9 +46,44 @@ class FavoritosDI {
       );
     }
 
-    // Service com specialized services internos (não tem @injectable)
+    // Register specialized services (injetar tudo, não instantiar internamente)
+    if (!_getIt.isRegistered<FavoritosDataResolverService>()) {
+      _getIt.registerLazySingleton<FavoritosDataResolverService>(
+        () => FavoritosDataResolverService(),
+      );
+    }
+
+    if (!_getIt.isRegistered<FavoritosValidatorService>()) {
+      _getIt.registerLazySingleton<FavoritosValidatorService>(
+        () => FavoritosValidatorService(
+          dataResolver: _getIt<FavoritosDataResolverService>(),
+        ),
+      );
+    }
+
+    if (!_getIt.isRegistered<FavoritosSyncService>()) {
+      _getIt.registerLazySingleton<FavoritosSyncService>(
+        () => FavoritosSyncService(
+          dataResolver: _getIt<FavoritosDataResolverService>(),
+        ),
+      );
+    }
+
+    if (!_getIt.isRegistered<FavoritosCacheServiceInline>()) {
+      _getIt.registerLazySingleton<FavoritosCacheServiceInline>(
+        () => FavoritosCacheServiceInline(),
+      );
+    }
+
+    // Service com specialized services injetadas (DIP)
     _getIt.registerLazySingleton<FavoritosService>(
-      () => FavoritosService(),
+      () => FavoritosService(
+        dataResolver: _getIt<FavoritosDataResolverService>(),
+        validator: _getIt<FavoritosValidatorService>(),
+        syncService: _getIt<FavoritosSyncService>(),
+        cache: _getIt<FavoritosCacheServiceInline>(),
+        factoryRegistry: _getIt<IFavoritoEntityFactoryRegistry>(),
+      ),
     );
 
     _servicesRegistered = true;
@@ -55,8 +94,11 @@ class FavoritosDI {
   static void registerRepository() {
     if (!_getIt.isRegistered<FavoritosRepositorySimplified>()) {
       // Registra a classe concreta usando a mesma instância registrada como interface
-      final repository = _getIt<IFavoritosRepository>() as FavoritosRepositorySimplified;
-      _getIt.registerLazySingleton<FavoritosRepositorySimplified>(() => repository);
+      final repository =
+          _getIt<IFavoritosRepository>() as FavoritosRepositorySimplified;
+      _getIt.registerLazySingleton<FavoritosRepositorySimplified>(
+        () => repository,
+      );
     }
   }
 

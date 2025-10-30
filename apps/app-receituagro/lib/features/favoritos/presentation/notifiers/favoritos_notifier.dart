@@ -34,27 +34,6 @@ class FavoritosState {
 
   // ===== GETTERS PARA COMPATIBILIDADE =====
 
-  /// Retorna favoritos filtrados por tipo
-  /// Mantém compatibilidade com código que acessa .defensivos, .pragas, etc
-  @Deprecated('Use getFavoritosByTipo() em vez disso')
-  List<FavoritoDefensivoEntity> get defensivos =>
-      getFavoritosByTipo<FavoritoDefensivoEntity>(TipoFavorito.defensivo);
-
-  @Deprecated('Use getFavoritosByTipo() em vez disso')
-  List<FavoritoPragaEntity> get pragas =>
-      getFavoritosByTipo<FavoritoPragaEntity>(TipoFavorito.praga);
-
-  @Deprecated('Use getFavoritosByTipo() em vez disso')
-  List<FavoritoDiagnosticoEntity> get diagnosticos =>
-      getFavoritosByTipo<FavoritoDiagnosticoEntity>(TipoFavorito.diagnostico);
-
-  @Deprecated('Use getFavoritosByTipo() em vez disso')
-  List<FavoritoCulturaEntity> get culturas =>
-      getFavoritosByTipo<FavoritoCulturaEntity>(TipoFavorito.cultura);
-
-  @Deprecated('Use getFavoritosByTipo() em vez disso')
-  List<FavoritoEntity> get allFavoritos => favoritos;
-
   /// Verifica se há favoritos do tipo específico
   bool hasType(String tipo) => favoritos.any((f) => f.tipo == tipo);
 
@@ -140,18 +119,7 @@ class FavoritosState {
   }
 
   int getCountForType(String tipo) {
-    switch (tipo) {
-      case TipoFavorito.defensivo:
-        return defensivos.length;
-      case TipoFavorito.praga:
-        return pragas.length;
-      case TipoFavorito.diagnostico:
-        return diagnosticos.length;
-      case TipoFavorito.cultura:
-        return culturas.length;
-      default:
-        return allFavoritos.length;
-    }
+    return favoritos.where((f) => f.tipo == tipo).length;
   }
 }
 

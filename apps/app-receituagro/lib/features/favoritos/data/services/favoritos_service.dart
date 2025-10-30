@@ -24,20 +24,24 @@ class FavoritosService {
   late final FavoritosHiveRepository _repository;
   bool _repositoryInitialized = false;
 
-  // Specialized Services
-  late final FavoritosDataResolverService _dataResolver;
-  late final FavoritosValidatorService _validator;
-  late final FavoritosSyncService _syncService;
-  late final FavoritosCacheServiceInline _cache;
-  late final IFavoritoEntityFactoryRegistry _factoryRegistry;
+  // Specialized Services (injetadas via construtor - DIP)
+  final FavoritosDataResolverService _dataResolver;
+  final FavoritosValidatorService _validator;
+  final FavoritosSyncService _syncService;
+  final FavoritosCacheServiceInline _cache;
+  final IFavoritoEntityFactoryRegistry _factoryRegistry;
 
-  FavoritosService() {
-    _dataResolver = FavoritosDataResolverService();
-    _validator = FavoritosValidatorService(dataResolver: _dataResolver);
-    _syncService = FavoritosSyncService(dataResolver: _dataResolver);
-    _cache = FavoritosCacheServiceInline();
-    _factoryRegistry = FavoritoEntityFactoryRegistry();
-  }
+  FavoritosService({
+    required FavoritosDataResolverService dataResolver,
+    required FavoritosValidatorService validator,
+    required FavoritosSyncService syncService,
+    required FavoritosCacheServiceInline cache,
+    required IFavoritoEntityFactoryRegistry factoryRegistry,
+  }) : _dataResolver = dataResolver,
+       _validator = validator,
+       _syncService = syncService,
+       _cache = cache,
+       _factoryRegistry = factoryRegistry;
 
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
   FavoritosHiveRepository get repo {
@@ -233,11 +237,7 @@ class FavoritosService {
     required String id,
     required Map<String, dynamic> data,
   }) {
-    return _factoryRegistry.create(
-      tipo: tipo,
-      id: id,
-      data: data,
-    );
+    return _factoryRegistry.create(tipo: tipo, id: id, data: data);
   }
 
   /// Check if the given tipo is supported

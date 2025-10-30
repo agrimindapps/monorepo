@@ -3,14 +3,83 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/favorito_entity.dart';
 import 'favoritos_data_resolver_service.dart';
 
+/// Strategy para validar dados fallback de diferentes tipos
+/// Princípio: Strategy Pattern - Eliminando switch case
+abstract class IFavoritoFallbackValidator {
+  /// Verifica se os dados são fallback (item não existe)
+  bool isFallback(Map<String, dynamic> data, String id);
+}
+
+/// Validador de fallback para defensivo
+class DefensivoFallbackValidator implements IFavoritoFallbackValidator {
+  @override
+  bool isFallback(Map<String, dynamic> data, String id) {
+    return data['nomeComum'] == 'Defensivo $id' ||
+        data['ingredienteAtivo'] == 'Não disponível';
+  }
+}
+
+/// Validador de fallback para praga
+class PragaFallbackValidator implements IFavoritoFallbackValidator {
+  @override
+  bool isFallback(Map<String, dynamic> data, String id) {
+    return data['nomeComum'] == 'Praga $id' ||
+        data['nomeCientifico'] == 'Não disponível';
+  }
+}
+
+/// Validador de fallback para diagnóstico
+class DiagnosticoFallbackValidator implements IFavoritoFallbackValidator {
+  @override
+  bool isFallback(Map<String, dynamic> data, String id) {
+    return data['nomePraga'] == 'Diagnóstico $id' ||
+        data['nomeDefensivo'] == 'Não disponível';
+  }
+}
+
+/// Validador de fallback para cultura
+class CulturaFallbackValidator implements IFavoritoFallbackValidator {
+  @override
+  bool isFallback(Map<String, dynamic> data, String id) {
+    return data['nomeCultura'] == 'Cultura $id' ||
+        data['descricao'] == 'Não disponível';
+  }
+}
+
+/// Registry de validadores fallback
+class FavoritoFallbackValidatorRegistry {
+  final Map<String, IFavoritoFallbackValidator> _validators = {};
+
+  FavoritoFallbackValidatorRegistry() {
+    _validators[TipoFavorito.defensivo] = DefensivoFallbackValidator();
+    _validators[TipoFavorito.praga] = PragaFallbackValidator();
+    _validators[TipoFavorito.diagnostico] = DiagnosticoFallbackValidator();
+    _validators[TipoFavorito.cultura] = CulturaFallbackValidator();
+  }
+
+  /// Verifica se dados são fallback
+  bool isFallback(String tipo, Map<String, dynamic> data, String id) {
+    final validator = _validators[tipo];
+    if (validator == null) return true; // Assume fallback se tipo desconhecido
+    return validator.isFallback(data, id);
+  }
+}
+
 /// Service especializado para validações de favoritos
 /// Responsabilidade: Validar tipo, ID e existência de itens antes de favoritá-los
+///
+/// Refatoração: Usa Strategy Pattern via FavoritoFallbackValidatorRegistry
+/// - Eliminado switch case (OCP violation)
+/// - Agora extensível sem modificar este serviço
 class FavoritosValidatorService {
   final FavoritosDataResolverService _dataResolver;
+  late final FavoritoFallbackValidatorRegistry _fallbackValidators;
 
   FavoritosValidatorService({
     required FavoritosDataResolverService dataResolver,
-  }) : _dataResolver = dataResolver;
+  }) : _dataResolver = dataResolver {
+    _fallbackValidators = FavoritoFallbackValidatorRegistry();
+  }
 
   /// Valida se um item pode ser adicionado aos favoritos
   ///
@@ -52,8 +121,8 @@ class FavoritosValidatorService {
         return false;
       }
 
-      // Verifica se não é fallback data comparando valores conhecidos
-      final isFallback = _isFallbackData(tipo, data, id);
+      // Verifica se não é fallback data usando a estratégia apropriada
+      final isFallback = _fallbackValidators.isFallback(tipo, data, id);
 
       if (kDebugMode && !isFallback) {
         print('Item existe: tipo=$tipo, id=$id');
@@ -65,30 +134,6 @@ class FavoritosValidatorService {
         print('Erro ao verificar existência: $e');
       }
       return false;
-    }
-  }
-
-  /// Verifica se os dados são fallback (item não existe)
-  bool _isFallbackData(String tipo, Map<String, dynamic> data, String id) {
-    switch (tipo) {
-      case TipoFavorito.defensivo:
-        return data['nomeComum'] == 'Defensivo $id' ||
-            data['ingredienteAtivo'] == 'Não disponível';
-
-      case TipoFavorito.praga:
-        return data['nomeComum'] == 'Praga $id' ||
-            data['nomeCientifico'] == 'Não disponível';
-
-      case TipoFavorito.diagnostico:
-        return data['nomePraga'] == 'Diagnóstico $id' ||
-            data['nomeDefensivo'] == 'Não disponível';
-
-      case TipoFavorito.cultura:
-        return data['nomeCultura'] == 'Cultura $id' ||
-            data['descricao'] == 'Não disponível';
-
-      default:
-        return true;
     }
   }
 }

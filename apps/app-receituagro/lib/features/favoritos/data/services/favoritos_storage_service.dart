@@ -11,14 +11,15 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 
 /// Implementação do storage local para favoritos usando Hive (Data Layer)
 /// Princípio: Single Responsibility - Apenas storage
+///
+/// ⚠️ NOTA: Esta classe é mantida por compatibilidade com IFavoritosStorage
+/// mas a implementação atual usa FavoritosService consolidado
 class FavoritosStorageService implements IFavoritosStorage {
-  final FavoritosHiveRepository _repository = sl<FavoritosHiveRepository>();
-  final FitossanitarioHiveRepository _fitossanitarioRepository =
-      sl<FitossanitarioHiveRepository>();
-  final PragasHiveRepository _pragasRepository = sl<PragasHiveRepository>();
-  final DiagnosticoHiveRepository _diagnosticoRepository =
-      sl<DiagnosticoHiveRepository>();
-  final CulturaHiveRepository _culturaRepository = sl<CulturaHiveRepository>();
+  // Lazy loading para evitar circular dependencies (DIP)
+  late final FavoritosHiveRepository _repository;
+
+  bool _repositoryInitialized = false;
+
   static const Map<String, String> _storageKeys = {
     'defensivo': 'defensivos',
     'praga': 'pragas',
@@ -26,9 +27,17 @@ class FavoritosStorageService implements IFavoritosStorage {
     'cultura': 'culturas',
   };
 
+  /// Inicializa as dependências lazy (chamado na primeira vez que são acessadas)
+  void _initializeRepository() {
+    if (_repositoryInitialized) return;
+    _repository = sl<FavoritosHiveRepository>();
+    _repositoryInitialized = true;
+  }
+
   @override
   Future<List<String>> getFavoriteIds(String tipo) async {
     try {
+      _initializeRepository();
       final boxName = _getBoxName(tipo);
       if (boxName == null) return [];
 
@@ -181,8 +190,9 @@ class FavoritosCacheService implements IFavoritosCache {
   @override
   Future<void> clearByPrefix(String prefix) async {
     try {
-      final keysToRemove =
-          _memoryCache.keys.where((key) => key.startsWith(prefix)).toList();
+      final keysToRemove = _memoryCache.keys
+          .where((key) => key.startsWith(prefix))
+          .toList();
 
       for (final key in keysToRemove) {
         await remove(key);

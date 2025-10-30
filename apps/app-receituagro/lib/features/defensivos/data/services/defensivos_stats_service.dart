@@ -1,6 +1,7 @@
 import '../../domain/entities/defensivo_entity.dart';
 
-/// Service responsible for calculating statistics from defensivos.
+/// Service responsible for generating statistics about defensivos.
+/// Implements factory pattern for creating strategy implementations.
 ///
 /// This service encapsulates statistics calculation logic, separating it from
 /// the repository to improve Single Responsibility Principle (SRP) compliance.

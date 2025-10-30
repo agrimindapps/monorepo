@@ -1,9 +1,9 @@
 import 'package:core/core.dart' hide DeviceManagementState;
 import 'package:flutter/material.dart';
 
-import '../../../core/providers/device_management_providers.dart';
-import '../../../core/router/app_router.dart';
-import '../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../core/providers/device_management_providers.dart';
+import '../../../../core/router/app_router.dart';
+import '../../../../shared/widgets/base_page_scaffold.dart';
 
 /// Seção de gerenciamento de dispositivos na página de perfil
 /// Mostra resumo e permite navegação para página completa

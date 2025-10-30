@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/providers/sync_providers.dart';
-import '../../../core/router/app_router.dart';
-import '../../../core/theme/plantis_colors.dart';
-import '../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../core/providers/sync_providers.dart';
+import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/plantis_colors.dart';
+import '../../../../shared/widgets/base_page_scaffold.dart';
 
 class DataSyncSection extends ConsumerWidget {
   const DataSyncSection({super.key});

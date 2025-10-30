@@ -1,15 +1,15 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/providers/auth_providers.dart' as local;
-import '../../shared/widgets/base_page_scaffold.dart';
-import '../../shared/widgets/loading/loading_components.dart';
-import '../../shared/widgets/responsive_layout.dart';
-import 'widgets/account_actions_section.dart';
-import 'widgets/account_details_section.dart';
-import 'widgets/account_info_section.dart';
-import 'widgets/data_sync_section.dart';
-import 'widgets/device_management_section.dart';
+import '../../../../core/providers/auth_providers.dart' as local;
+import '../../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../shared/widgets/loading/loading_components.dart';
+import '../../../../shared/widgets/responsive_layout.dart';
+import '../widgets/account_actions_section.dart';
+import '../widgets/account_details_section.dart';
+import '../widgets/account_info_section.dart';
+import '../widgets/data_sync_section.dart';
+import '../widgets/device_management_section.dart';
 
 class AccountProfilePage extends ConsumerStatefulWidget {
   const AccountProfilePage({super.key});

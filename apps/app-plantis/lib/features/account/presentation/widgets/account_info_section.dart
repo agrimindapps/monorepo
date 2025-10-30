@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/providers/auth_providers.dart' as local;
-import '../../../core/services/data_sanitization_service.dart';
-import '../../../core/theme/plantis_colors.dart';
-import '../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../core/providers/auth_providers.dart' as local;
+import '../../../../core/services/data_sanitization_service.dart';
+import '../../../../core/theme/plantis_colors.dart';
+import '../../../../shared/widgets/base_page_scaffold.dart';
 
 class AccountInfoSection extends ConsumerWidget {
   const AccountInfoSection({super.key});

@@ -1,10 +1,14 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/subscription_plan.dart';
 import '../entities/user_subscription.dart';
 import '../repositories/subscription_repository.dart';
+import '../services/subscription_validation_service.dart';
 
+@lazySingleton
 class GetAvailablePlans implements UseCase<List<SubscriptionPlan>, NoParams> {
   final SubscriptionRepository repository;
 
@@ -16,16 +20,20 @@ class GetAvailablePlans implements UseCase<List<SubscriptionPlan>, NoParams> {
   }
 }
 
+@lazySingleton
 class GetCurrentSubscription implements UseCase<UserSubscription?, String> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  GetCurrentSubscription(this.repository);
+  GetCurrentSubscription(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, UserSubscription?>> call(String userId) async {
-    if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+    final validation = validationService.validateUserId(userId);
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
+
     return await repository.getCurrentSubscription(userId);
   }
 }
@@ -40,63 +48,79 @@ class SubscribeToPlanParams {
   });
 }
 
-class SubscribeToPlan implements UseCase<UserSubscription, SubscribeToPlanParams> {
+@lazySingleton
+class SubscribeToPlan
+    implements UseCase<UserSubscription, SubscribeToPlanParams> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  SubscribeToPlan(this.repository);
+  SubscribeToPlan(this.repository, this.validationService);
 
   @override
-  Future<Either<Failure, UserSubscription>> call(SubscribeToPlanParams params) async {
-    if (params.userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
-    }
-
-    if (params.planId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do plano é obrigatório'));
+  Future<Either<Failure, UserSubscription>> call(
+      SubscribeToPlanParams params) async {
+    final validation = validationService.validateSubscribeToPlanParams(
+      userId: params.userId,
+      planId: params.planId,
+    );
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
 
     return await repository.subscribeToPlan(params.userId, params.planId);
   }
 }
 
+@lazySingleton
 class CancelSubscription implements UseCase<void, String> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  CancelSubscription(this.repository);
+  CancelSubscription(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(String userId) async {
-    if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+    final validation = validationService.validateUserId(userId);
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
+
     return await repository.cancelSubscription(userId);
   }
 }
 
+@lazySingleton
 class PauseSubscription implements UseCase<void, String> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  PauseSubscription(this.repository);
+  PauseSubscription(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(String userId) async {
-    if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+    final validation = validationService.validateUserId(userId);
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
+
     return await repository.pauseSubscription(userId);
   }
 }
 
+@lazySingleton
 class ResumeSubscription implements UseCase<void, String> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  ResumeSubscription(this.repository);
+  ResumeSubscription(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(String userId) async {
-    if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+    final validation = validationService.validateUserId(userId);
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
+
     return await repository.resumeSubscription(userId);
   }
 }
@@ -111,49 +135,60 @@ class UpgradePlanParams {
   });
 }
 
+@lazySingleton
 class UpgradePlan implements UseCase<UserSubscription, UpgradePlanParams> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  UpgradePlan(this.repository);
+  UpgradePlan(this.repository, this.validationService);
 
   @override
-  Future<Either<Failure, UserSubscription>> call(UpgradePlanParams params) async {
-    if (params.userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
-    }
-
-    if (params.newPlanId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do novo plano é obrigatório'));
+  Future<Either<Failure, UserSubscription>> call(
+      UpgradePlanParams params) async {
+    final validation = validationService.validateUpgradePlanParams(
+      userId: params.userId,
+      newPlanId: params.newPlanId,
+    );
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
 
     return await repository.upgradePlan(params.userId, params.newPlanId);
   }
 }
 
+@lazySingleton
 class RestorePurchases implements UseCase<void, String> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  RestorePurchases(this.repository);
+  RestorePurchases(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(String userId) async {
-    if (userId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do usuário é obrigatório'));
+    final validation = validationService.validateUserId(userId);
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
+
     return await repository.restorePurchases(userId);
   }
 }
 
+@lazySingleton
 class ValidateReceipt implements UseCase<bool, String> {
   final SubscriptionRepository repository;
+  final SubscriptionValidationService validationService;
 
-  ValidateReceipt(this.repository);
+  ValidateReceipt(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, bool>> call(String receiptData) async {
-    if (receiptData.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Dados do recibo são obrigatórios'));
+    final validation = validationService.validateReceiptData(receiptData);
+    if (validation.isLeft()) {
+      return Left(validation.fold((l) => l, (r) => throw Exception()));
     }
+
     return await repository.validateReceipt(receiptData);
   }
 }

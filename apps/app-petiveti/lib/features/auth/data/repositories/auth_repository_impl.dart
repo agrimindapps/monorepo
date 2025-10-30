@@ -12,20 +12,26 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_local_datasource.dart';
 import '../datasources/auth_remote_datasource.dart';
 import '../models/user_model.dart';
+import '../services/auth_error_handling_service.dart';
 
 @LazySingleton(as: AuthRepository)
-class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository {
+class AuthRepositoryImpl
+    with LoggableRepositoryMixin
+    implements AuthRepository {
   final AuthLocalDataSource localDataSource;
   final AuthRemoteDataSource remoteDataSource;
+  final AuthErrorHandlingService errorHandlingService;
   StreamSubscription<UserModel?>? _authStateSubscription;
 
   AuthRepositoryImpl({
     required this.localDataSource,
     required this.remoteDataSource,
+    required this.errorHandlingService,
   });
 
   @override
-  Future<Either<Failure, User>> signInWithEmail(String email, String password) async {
+  Future<Either<Failure, User>> signInWithEmail(
+      String email, String password) async {
     return await logTimedOperation<Either<Failure, User>>(
       category: LogCategory.auth,
       operation: LogOperation.login,
@@ -41,23 +47,23 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
           );
 
           final user = await remoteDataSource.signInWithEmail(email, password);
-          
+
           await logLocalStorageOperation(
             category: LogCategory.auth,
             operation: LogOperation.create,
             message: 'caching user session',
             metadata: {'user_id': user.id, 'email': user.email},
           );
-          
+
           await localDataSource.cacheUser(user);
-          
+
           await logOperationSuccess(
             category: LogCategory.auth,
             operation: LogOperation.login,
             message: 'sign in with email',
             metadata: {'user_id': user.id, 'email': user.email},
           );
-          
+
           return Right(user);
         } on ServerException catch (e, stackTrace) {
           await logOperationError(
@@ -110,83 +116,36 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
   }
 
   @override
-  Future<Either<Failure, User>> signUpWithEmail(String email, String password, String? name) async {
-    try {
-      final user = await remoteDataSource.signUpWithEmail(email, password, name);
-      await localDataSource.cacheUser(user);
-      return Right(user);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      try {
-        final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha na criação da conta'));
-      } catch (_) {
-        return Left(CacheFailure(message: e.message));
-      }
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+  Future<Either<Failure, User>> signUpWithEmail(
+      String email, String password, String? name) async {
+    return errorHandlingService.executeAuthOperation(
+      operation: () => remoteDataSource.signUpWithEmail(email, password, name),
+      operationName: 'criação da conta',
+    );
   }
 
   @override
   Future<Either<Failure, User>> signInWithGoogle() async {
-    try {
-      final user = await remoteDataSource.signInWithGoogle();
-      await localDataSource.cacheUser(user);
-      return Right(user);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      try {
-        final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Google'));
-      } catch (_) {
-        return Left(CacheFailure(message: e.message));
-      }
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeAuthOperation(
+      operation: () => remoteDataSource.signInWithGoogle(),
+      operationName: 'login com Google',
+    );
   }
 
   @override
   Future<Either<Failure, User>> signInWithApple() async {
-    try {
-      final user = await remoteDataSource.signInWithApple();
-      await localDataSource.cacheUser(user);
-      return Right(user);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      try {
-        final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Apple'));
-      } catch (_) {
-        return Left(CacheFailure(message: e.message));
-      }
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeAuthOperation(
+      operation: () => remoteDataSource.signInWithApple(),
+      operationName: 'login com Apple',
+    );
   }
 
   @override
   Future<Either<Failure, User>> signInWithFacebook() async {
-    try {
-      final user = await remoteDataSource.signInWithFacebook();
-      await localDataSource.cacheUser(user);
-      return Right(user);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      try {
-        final user = await remoteDataSource.getCurrentUser();
-        return user != null ? Right(user) : const Left(AuthFailure(message: 'Falha no login com Facebook'));
-      } catch (_) {
-        return Left(CacheFailure(message: e.message));
-      }
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeAuthOperation(
+      operation: () => remoteDataSource.signInWithFacebook(),
+      operationName: 'login com Facebook',
+    );
   }
 
   @override
@@ -205,23 +164,23 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
           );
 
           final user = await remoteDataSource.signInAnonymously();
-          
+
           await logLocalStorageOperation(
             category: LogCategory.auth,
             operation: LogOperation.create,
             message: 'caching anonymous user session',
             metadata: {'user_id': user.id, 'is_anonymous': true},
           );
-          
+
           await localDataSource.cacheUser(user);
-          
+
           await logOperationSuccess(
             category: LogCategory.auth,
             operation: LogOperation.login,
             message: 'sign in anonymously',
             metadata: {'user_id': user.id},
           );
-          
+
           return Right(user);
         } on ServerException catch (e, stackTrace) {
           await logOperationError(
@@ -246,7 +205,8 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
               await logOperationSuccess(
                 category: LogCategory.auth,
                 operation: LogOperation.login,
-                message: 'sign in anonymously (cache failed but auth succeeded)',
+                message:
+                    'sign in anonymously (cache failed but auth succeeded)',
                 metadata: {'user_id': user.id, 'cache_failed': true},
               );
               return Right(user);
@@ -272,20 +232,13 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
 
   @override
   Future<Either<Failure, void>> signOut() async {
-    try {
-      await remoteDataSource.signOut();
-      await localDataSource.clearCache();
-      await localDataSource.clearToken();
-      return const Right(null);
-    } on ServerException catch (e) {
-      await localDataSource.clearCache();
-      await localDataSource.clearToken();
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(message: e.message));
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeVoidAuthOperation(
+      operation: () async {
+        await remoteDataSource.signOut();
+        await localDataSource.clearCache();
+        await localDataSource.clearToken();
+      },
+    );
   }
 
   @override
@@ -314,77 +267,54 @@ class AuthRepositoryImpl with LoggableRepositoryMixin implements AuthRepository 
 
   @override
   Future<Either<Failure, void>> sendEmailVerification() async {
-    try {
-      await remoteDataSource.sendEmailVerification();
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeVoidAuthOperation(
+      operation: () => remoteDataSource.sendEmailVerification(),
+    );
   }
 
   @override
   Future<Either<Failure, void>> sendPasswordResetEmail(String email) async {
-    try {
-      await remoteDataSource.sendPasswordResetEmail(email);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeVoidAuthOperation(
+      operation: () => remoteDataSource.sendPasswordResetEmail(email),
+    );
   }
 
   @override
-  Future<Either<Failure, User>> updateProfile(String? name, String? photoUrl) async {
-    try {
-      final updatedUser = await remoteDataSource.updateProfile(name, photoUrl);
-      await localDataSource.cacheUser(updatedUser);
-      return Right(updatedUser);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(message: e.message));
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+  Future<Either<Failure, User>> updateProfile(
+      String? name, String? photoUrl) async {
+    return errorHandlingService.executeAuthOperation(
+      operation: () => remoteDataSource.updateProfile(name, photoUrl),
+      operationName: 'atualização de perfil',
+    );
   }
 
   @override
   Future<Either<Failure, void>> deleteAccount() async {
-    try {
-      await remoteDataSource.deleteAccount();
-      await localDataSource.clearCache();
-      await localDataSource.clearToken();
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(message: e.message));
-    } on CacheException catch (e) {
-      return Left(CacheFailure(message: e.message));
-    } catch (e) {
-      return Left(AuthFailure(message: 'Erro inesperado: $e'));
-    }
+    return errorHandlingService.executeVoidAuthOperation(
+      operation: () async {
+        await remoteDataSource.deleteAccount();
+        await localDataSource.clearCache();
+        await localDataSource.clearToken();
+      },
+    );
   }
 
   @override
   Stream<Either<Failure, User?>> watchAuthState() {
     return remoteDataSource.watchAuthState().map((user) {
       if (user != null) {
-        localDataSource.cacheUser(user).catchError((_) {
-        });
+        localDataSource.cacheUser(user).catchError((_) {});
       } else {
-        localDataSource.clearCache().catchError((_) {
-        });
-        localDataSource.clearToken().catchError((_) {
-        });
+        localDataSource.clearCache().catchError((_) {});
+        localDataSource.clearToken().catchError((_) {});
       }
       return Right<Failure, User?>(user);
     }).handleError((Object error) {
       if (error is ServerException) {
         return Left<Failure, User?>(AuthFailure(message: error.message));
       }
-      return Left<Failure, User?>(AuthFailure(message: 'Erro inesperado: $error'));
+      return Left<Failure, User?>(
+          AuthFailure(message: 'Erro inesperado: $error'));
     });
   }
 

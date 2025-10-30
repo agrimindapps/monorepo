@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -15,13 +16,16 @@ class GetExpensesByCategoryParams {
   });
 }
 
-class GetExpensesByCategory implements UseCase<List<Expense>, GetExpensesByCategoryParams> {
+@lazySingleton
+class GetExpensesByCategory
+    implements UseCase<List<Expense>, GetExpensesByCategoryParams> {
   final ExpenseRepository repository;
 
   GetExpensesByCategory(this.repository);
 
   @override
-  Future<Either<Failure, List<Expense>>> call(GetExpensesByCategoryParams params) async {
-    return await repository.getExpensesByCategory(params.userId, params.category);
+  Future<Either<Failure, List<Expense>>> call(
+      GetExpensesByCategoryParams params) async {
+    return repository.getExpensesByCategory(params.userId, params.category);
   }
 }

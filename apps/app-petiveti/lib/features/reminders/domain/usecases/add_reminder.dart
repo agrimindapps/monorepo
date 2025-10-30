@@ -1,28 +1,41 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/reminder.dart';
 import '../repositories/reminder_repository.dart';
+import '../services/reminder_validation_service.dart';
 
+/// Use case for adding a new reminder
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles reminder addition flow
+/// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
+///
+/// **Dependencies:**
+/// - ReminderRepository: For data persistence
+/// - ReminderValidationService: For business rule validation
+@lazySingleton
 class AddReminder implements UseCase<void, Reminder> {
-  final ReminderRepository repository;
+  final ReminderRepository _repository;
+  final ReminderValidationService _validationService;
 
-  AddReminder(this.repository);
+  AddReminder(this._repository, this._validationService);
 
   @override
   Future<Either<Failure, void>> call(Reminder reminder) async {
-    if (reminder.title.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Título do lembrete é obrigatório'));
+    // Validate reminder data
+    final validationResult = _validationService.validateForAdd(reminder);
+
+    if (validationResult.isLeft()) {
+      return validationResult.fold(
+        (failure) => Left(failure),
+        (_) => throw StateError('Validation should not return Right'),
+      );
     }
 
-    if (reminder.scheduledDate.isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
-      return const Left(ValidationFailure(message: 'Data do lembrete não pode ser no passado'));
-    }
-
-    if (reminder.isRecurring && (reminder.recurringDays == null || reminder.recurringDays! <= 0)) {
-      return const Left(ValidationFailure(message: 'Intervalo de recorrência deve ser maior que zero'));
-    }
-
-    return await repository.addReminder(reminder);
+    // Add reminder
+    return await _repository.addReminder(reminder);
   }
 }

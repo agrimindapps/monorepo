@@ -1,25 +1,40 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../repositories/promo_repository.dart';
+import '../services/promo_validation_service.dart';
 
+/// Use case for submitting pre-registration email
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles pre-registration submission flow
+/// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
+///
+/// **Dependencies:**
+/// - PromoRepository: For data submission
+/// - PromoValidationService: For email validation
+@lazySingleton
 class SubmitPreRegistration implements UseCase<void, String> {
-  final PromoRepository repository;
+  final PromoRepository _repository;
+  final PromoValidationService _validationService;
 
-  SubmitPreRegistration(this.repository);
+  SubmitPreRegistration(this._repository, this._validationService);
 
   @override
   Future<Either<Failure, void>> call(String email) async {
-    if (email.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Email é obrigatório'));
+    // Validate email
+    final validationResult = _validationService.validateEmail(email);
+
+    if (validationResult.isLeft()) {
+      return validationResult.fold(
+        (failure) => Left(failure),
+        (_) => throw StateError('Validation should not return Right'),
+      );
     }
 
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-    if (!emailRegex.hasMatch(email)) {
-      return const Left(ValidationFailure(message: 'Email inválido'));
-    }
-
-    return await repository.submitPreRegistration(email);
+    // Submit pre-registration
+    return await _repository.submitPreRegistration(email);
   }
 }

@@ -5,7 +5,6 @@ export 'data/comentario_model.dart';
 export 'data/comentarios_state.dart';
 export 'di/comentarios_bindings.dart';
 export 'domain/comentarios_service.dart';
-export 'presentation/comentarios_controller.dart';
 export 'views/widgets/add_comentario_dialog.dart';
 export 'views/widgets/comentario_card.dart';
 export 'views/widgets/comments_list_widget.dart';

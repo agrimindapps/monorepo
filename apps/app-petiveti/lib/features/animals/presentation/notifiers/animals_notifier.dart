@@ -6,7 +6,6 @@ import '../../../../core/interfaces/usecase.dart' as local;
 import '../../../../core/logging/entities/log_entry.dart';
 import '../../../../core/logging/services/logging_service.dart';
 import '../../domain/entities/animal.dart';
-import '../../domain/entities/animal_enums.dart';
 import '../../domain/repositories/animal_repository.dart';
 import '../../domain/usecases/add_animal.dart';
 import '../../domain/usecases/delete_animal.dart';
@@ -16,78 +15,41 @@ import '../../domain/usecases/update_animal.dart';
 
 part 'animals_notifier.g.dart';
 
-class AnimalsFilter {
-  final String searchQuery;
-  final AnimalSpecies? speciesFilter;
-  final AnimalGender? genderFilter;
-  final AnimalSize? sizeFilter;
-  final bool onlyActive;
-
-  const AnimalsFilter({
-    this.searchQuery = '',
-    this.speciesFilter,
-    this.genderFilter,
-    this.sizeFilter,
-    this.onlyActive = true,
-  });
-
-  AnimalsFilter copyWith({
-    String? searchQuery,
-    AnimalSpecies? speciesFilter,
-    AnimalGender? genderFilter,
-    AnimalSize? sizeFilter,
-    bool? onlyActive,
-  }) {
-    return AnimalsFilter(
-      searchQuery: searchQuery ?? this.searchQuery,
-      speciesFilter: speciesFilter,
-      genderFilter: genderFilter,
-      sizeFilter: sizeFilter,
-      onlyActive: onlyActive ?? this.onlyActive,
-    );
-  }
-
-  bool get hasActiveFilters =>
-      searchQuery.isNotEmpty ||
-      speciesFilter != null ||
-      genderFilter != null ||
-      sizeFilter != null;
-}
-
+/// State para gerenciar dados de animais - responsabilidade ÚNICA em dados
+/// Filtragem separada em AnimalsFilterNotifier (SRP)
 class AnimalsState {
   final List<Animal> animals;
-  final List<Animal> filteredAnimals;
-  final AnimalsFilter filter;
   final bool isLoading;
   final String? error;
 
   const AnimalsState({
     this.animals = const [],
-    this.filteredAnimals = const [],
-    this.filter = const AnimalsFilter(),
     this.isLoading = false,
     this.error,
   });
 
   AnimalsState copyWith({
     List<Animal>? animals,
-    List<Animal>? filteredAnimals,
-    AnimalsFilter? filter,
     bool? isLoading,
     String? error,
   }) {
     return AnimalsState(
       animals: animals ?? this.animals,
-      filteredAnimals: filteredAnimals ?? this.filteredAnimals,
-      filter: filter ?? this.filter,
       isLoading: isLoading ?? this.isLoading,
       error: error,
     );
   }
-
-  List<Animal> get displayedAnimals => filter.hasActiveFilters ? filteredAnimals : animals;
 }
 
+/// Notifier responsável APENAS por gerenciar dados de animais (CRUD + logging)
+/// Filtragem é responsabilidade de AnimalsFilterNotifier (SRP)
+/// UI state é responsabilidade de AnimalsUIStateNotifier (SRP)
+///
+/// Benefícios dessa separação:
+/// - Cada notifier tem responsabilidade única
+/// - Fácil testar cada componente isoladamente
+/// - Fácil adicionar novos filtros sem modificar este notifier
+/// - Padrão consistente com Clean Architecture
 @riverpod
 class AnimalsNotifier extends _$AnimalsNotifier {
   late final GetAnimals _getAnimals;
@@ -107,6 +69,7 @@ class AnimalsNotifier extends _$AnimalsNotifier {
     return const AnimalsState();
   }
 
+  /// Carregar todos os animais
   Future<void> loadAnimals() async {
     await LoggingService.instance.trackUserAction(
       category: LogCategory.animals,
@@ -149,83 +112,11 @@ class AnimalsNotifier extends _$AnimalsNotifier {
           isLoading: false,
           error: null,
         );
-        _applyFilter();
       },
     );
   }
 
-  void updateSearchQuery(String query) {
-    final newFilter = state.filter.copyWith(searchQuery: query);
-    state = state.copyWith(filter: newFilter);
-    _applyFilter();
-  }
-
-  void updateSpeciesFilter(AnimalSpecies? species) {
-    final newFilter = state.filter.copyWith(speciesFilter: species);
-    state = state.copyWith(filter: newFilter);
-    _applyFilter();
-  }
-
-  void updateGenderFilter(AnimalGender? gender) {
-    final newFilter = state.filter.copyWith(genderFilter: gender);
-    state = state.copyWith(filter: newFilter);
-    _applyFilter();
-  }
-
-  void updateSizeFilter(AnimalSize? size) {
-    final newFilter = state.filter.copyWith(sizeFilter: size);
-    state = state.copyWith(filter: newFilter);
-    _applyFilter();
-  }
-
-  void clearFilters() {
-    state = state.copyWith(
-      filter: const AnimalsFilter(),
-      filteredAnimals: [],
-    );
-  }
-
-  void _applyFilter() {
-    final filter = state.filter;
-
-    if (!filter.hasActiveFilters) {
-      state = state.copyWith(filteredAnimals: []);
-      return;
-    }
-
-    List<Animal> filtered = state.animals;
-    if (filter.onlyActive) {
-      filtered = filtered.where((animal) => animal.isActive).toList();
-    }
-    if (filter.searchQuery.isNotEmpty) {
-      final query = filter.searchQuery.toLowerCase();
-      filtered = filtered.where((animal) {
-        return animal.name.toLowerCase().contains(query) ||
-            animal.breed?.toLowerCase().contains(query) == true ||
-            animal.color?.toLowerCase().contains(query) == true ||
-            animal.species.displayName.toLowerCase().contains(query) ||
-            animal.microchipNumber?.toLowerCase().contains(query) == true;
-      }).toList();
-    }
-    if (filter.speciesFilter != null) {
-      filtered = filtered
-          .where((animal) => animal.species == filter.speciesFilter)
-          .toList();
-    }
-    if (filter.genderFilter != null) {
-      filtered = filtered
-          .where((animal) => animal.gender == filter.genderFilter)
-          .toList();
-    }
-    if (filter.sizeFilter != null) {
-      filtered = filtered
-          .where((animal) => animal.size == filter.sizeFilter)
-          .toList();
-    }
-
-    state = state.copyWith(filteredAnimals: filtered);
-  }
-
+  /// Adicionar novo animal
   Future<void> addAnimal(Animal animal) async {
     final result = await _addAnimal(animal);
 
@@ -237,11 +128,11 @@ class AnimalsNotifier extends _$AnimalsNotifier {
           animals: updatedAnimals,
           error: null,
         );
-        _applyFilter();
       },
     );
   }
 
+  /// Atualizar animal existente
   Future<void> updateAnimal(Animal animal) async {
     final result = await _updateAnimal(animal);
 
@@ -256,11 +147,11 @@ class AnimalsNotifier extends _$AnimalsNotifier {
           animals: updatedAnimals,
           error: null,
         );
-        _applyFilter();
       },
     );
   }
 
+  /// Deletar animal
   Future<void> deleteAnimal(String id) async {
     final result = await _deleteAnimal(id);
 
@@ -272,11 +163,11 @@ class AnimalsNotifier extends _$AnimalsNotifier {
           animals: updatedAnimals,
           error: null,
         );
-        _applyFilter();
       },
     );
   }
 
+  /// Buscar animal por ID
   Future<Animal?> getAnimalById(String id) async {
     final result = await _getAnimalById(id);
 
@@ -289,6 +180,7 @@ class AnimalsNotifier extends _$AnimalsNotifier {
     );
   }
 
+  /// Limpar error
   void clearError() {
     state = state.copyWith(error: null);
   }

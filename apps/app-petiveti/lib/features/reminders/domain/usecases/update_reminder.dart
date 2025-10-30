@@ -1,36 +1,55 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/reminder.dart';
 import '../repositories/reminder_repository.dart';
+import '../services/reminder_validation_service.dart';
 
+/// Use case for updating an existing reminder
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles reminder update flow
+/// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
+@lazySingleton
 class UpdateReminder implements UseCase<void, Reminder> {
-  final ReminderRepository repository;
+  final ReminderRepository _repository;
+  final ReminderValidationService _validationService;
 
-  UpdateReminder(this.repository);
+  UpdateReminder(this._repository, this._validationService);
 
   @override
   Future<Either<Failure, void>> call(Reminder reminder) async {
-    if (reminder.title.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Título do lembrete é obrigatório'));
+    // Validate reminder data
+    final validationResult = _validationService.validateForUpdate(reminder);
+
+    if (validationResult.isLeft()) {
+      return validationResult.fold(
+        (failure) => Left(failure),
+        (_) => throw StateError('Validation should not return Right'),
+      );
     }
 
-    if (reminder.isRecurring && (reminder.recurringDays == null || reminder.recurringDays! <= 0)) {
-      return const Left(ValidationFailure(message: 'Intervalo de recorrência deve ser maior que zero'));
-    }
-
-    return await repository.updateReminder(reminder);
+    // Update reminder
+    return await _repository.updateReminder(reminder);
   }
 }
 
+/// Use case for marking a reminder as completed
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles reminder completion flow
+/// - **Dependency Inversion**: Depends on repository abstraction
+@lazySingleton
 class CompleteReminder implements UseCase<void, String> {
-  final ReminderRepository repository;
+  final ReminderRepository _repository;
 
-  CompleteReminder(this.repository);
+  CompleteReminder(this._repository);
 
   @override
   Future<Either<Failure, void>> call(String reminderId) async {
-    return await repository.completeReminder(reminderId);
+    return await _repository.completeReminder(reminderId);
   }
 }
 
@@ -44,17 +63,33 @@ class SnoozeReminderParams {
   });
 }
 
+/// Use case for snoozing a reminder to a later date
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles reminder snooze flow
+/// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
+@lazySingleton
 class SnoozeReminder implements UseCase<void, SnoozeReminderParams> {
-  final ReminderRepository repository;
+  final ReminderRepository _repository;
+  final ReminderValidationService _validationService;
 
-  SnoozeReminder(this.repository);
+  SnoozeReminder(this._repository, this._validationService);
 
   @override
   Future<Either<Failure, void>> call(SnoozeReminderParams params) async {
-    if (params.snoozeUntil.isBefore(DateTime.now())) {
-      return const Left(ValidationFailure(message: 'Data de adiamento deve ser futura'));
+    // Validate snooze date
+    final validationResult =
+        _validationService.validateSnoozeDate(params.snoozeUntil);
+
+    if (validationResult.isLeft()) {
+      return validationResult.fold(
+        (failure) => Left(failure),
+        (_) => throw StateError('Validation should not return Right'),
+      );
     }
 
-    return await repository.snoozeReminder(params.reminderId, params.snoozeUntil);
+    // Snooze reminder
+    return await _repository.snoozeReminder(
+        params.reminderId, params.snoozeUntil);
   }
 }

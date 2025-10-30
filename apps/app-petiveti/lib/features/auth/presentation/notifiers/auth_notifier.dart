@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/interfaces/usecase.dart' as local;
 import '../../domain/entities/user.dart';
+import '../../domain/services/pet_data_sync_service.dart';
+import '../../domain/services/rate_limit_service.dart';
 import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
 
 part 'auth_notifier.g.dart';
@@ -43,7 +45,8 @@ class AuthState {
     );
   }
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && user != null;
   bool get isLoading => status == AuthStatus.loading;
   bool get hasError => status == AuthStatus.error && error != null;
 }
@@ -62,13 +65,8 @@ class AuthNotifier extends _$AuthNotifier {
   late final auth_usecases.SendPasswordResetEmail _sendPasswordResetEmail;
   late final auth_usecases.UpdateProfile _updateProfile;
   late final EnhancedAccountDeletionService _enhancedDeletionService;
-
-  DateTime? _lastLoginAttempt;
-  DateTime? _lastRegisterAttempt;
-  int _loginAttempts = 0;
-  int _registerAttempts = 0;
-  static const int _maxAttempts = 5;
-  static const Duration _cooldownPeriod = Duration(minutes: 2);
+  late final RateLimitService _rateLimitService;
+  late final PetDataSyncService _petDataSyncService;
 
   @override
   AuthState build() {
@@ -84,6 +82,8 @@ class AuthNotifier extends _$AuthNotifier {
     _sendPasswordResetEmail = di.getIt<auth_usecases.SendPasswordResetEmail>();
     _updateProfile = di.getIt<auth_usecases.UpdateProfile>();
     _enhancedDeletionService = di.getIt<EnhancedAccountDeletionService>();
+    _rateLimitService = di.getIt<RateLimitService>();
+    _petDataSyncService = di.getIt<PetDataSyncService>();
 
     _checkAuthState();
 
@@ -105,7 +105,9 @@ class AuthNotifier extends _$AuthNotifier {
         }
 
         state = state.copyWith(
-          status: user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated,
+          status: user != null
+              ? AuthStatus.authenticated
+              : AuthStatus.unauthenticated,
           user: user,
           isAnonymous: isAnonymous,
         );
@@ -113,51 +115,20 @@ class AuthNotifier extends _$AuthNotifier {
     );
   }
 
-  bool _canAttemptLogin() {
-    if (_lastLoginAttempt == null) return true;
-
-    final timeSinceLastAttempt = DateTime.now().difference(_lastLoginAttempt!);
-    if (timeSinceLastAttempt > _cooldownPeriod) {
-      _loginAttempts = 0;
-      return true;
-    }
-
-    return _loginAttempts < _maxAttempts;
-  }
-
-  bool _canAttemptRegister() {
-    if (_lastRegisterAttempt == null) return true;
-
-    final timeSinceLastAttempt = DateTime.now().difference(_lastRegisterAttempt!);
-    if (timeSinceLastAttempt > _cooldownPeriod) {
-      _registerAttempts = 0;
-      return true;
-    }
-
-    return _registerAttempts < _maxAttempts;
-  }
-
-  String _getRateLimitMessage(int attempts) {
-    final remainingTime = _cooldownPeriod.inMinutes -
-      DateTime.now().difference(_lastLoginAttempt ?? _lastRegisterAttempt!).inMinutes;
-
-    return 'Muitas tentativas. Aguarde ${remainingTime > 0 ? remainingTime : 1} minuto(s) antes de tentar novamente.';
-  }
-
   Future<bool> signInWithEmail(String email, String password) async {
-    if (!_canAttemptLogin()) {
+    if (!_rateLimitService.canAttemptLogin()) {
       state = state.copyWith(
         status: AuthStatus.error,
-        error: _getRateLimitMessage(_loginAttempts),
+        error: _rateLimitService.getRateLimitMessageForLogin(),
       );
       return false;
     }
-    _lastLoginAttempt = DateTime.now();
-    _loginAttempts++;
+    _rateLimitService.recordLoginAttempt();
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final params = auth_usecases.SignInWithEmailParams(email: email, password: password);
+    final params =
+        auth_usecases.SignInWithEmailParams(email: email, password: password);
     final result = await _signInWithEmail(params);
 
     return result.fold(
@@ -169,8 +140,7 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (user) {
-        _loginAttempts = 0;
-        _lastLoginAttempt = null;
+        _rateLimitService.resetLoginAttempts();
 
         state = state.copyWith(
           status: AuthStatus.authenticated,
@@ -183,21 +153,22 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Login com sincronização automática de dados dos pets
   /// Adaptado do padrão usado no gasometer e plantis para o contexto do PetiVeti
-  Future<bool> loginAndSync(String email, String password, {bool showSyncOverlay = true}) async {
-    if (!_canAttemptLogin()) {
+  Future<bool> loginAndSync(String email, String password,
+      {bool showSyncOverlay = true}) async {
+    if (!_rateLimitService.canAttemptLogin()) {
       state = state.copyWith(
         status: AuthStatus.error,
-        error: _getRateLimitMessage(_loginAttempts),
+        error: _rateLimitService.getRateLimitMessageForLogin(),
       );
       return false;
     }
-    _lastLoginAttempt = DateTime.now();
-    _loginAttempts++;
+    _rateLimitService.recordLoginAttempt();
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
     try {
-      final params = auth_usecases.SignInWithEmailParams(email: email, password: password);
+      final params =
+          auth_usecases.SignInWithEmailParams(email: email, password: password);
       final loginResult = await _signInWithEmail(params);
 
       bool loginSuccess = false;
@@ -209,8 +180,7 @@ class AuthNotifier extends _$AuthNotifier {
           );
         },
         (user) async {
-          _loginAttempts = 0;
-          _lastLoginAttempt = null;
+          _rateLimitService.resetLoginAttempts();
 
           state = state.copyWith(
             status: AuthStatus.authenticated,
@@ -223,10 +193,9 @@ class AuthNotifier extends _$AuthNotifier {
       if (!loginSuccess) {
         return false;
       }
-      await _performPetDataSync();
+      await _petDataSyncService.syncPetData();
 
       return true;
-
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -236,26 +205,21 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  /// Simula sincronização de dados dos pets
-  /// No futuro, aqui seria onde carregaríamos dados do Firebase, cache local, etc.
-  Future<void> _performPetDataSync() async {
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-  }
-
-  Future<bool> signUpWithEmail(String email, String password, String? name) async {
-    if (!_canAttemptRegister()) {
+  Future<bool> signUpWithEmail(
+      String email, String password, String? name) async {
+    if (!_rateLimitService.canAttemptRegister()) {
       state = state.copyWith(
         status: AuthStatus.error,
-        error: _getRateLimitMessage(_registerAttempts),
+        error: _rateLimitService.getRateLimitMessageForRegister(),
       );
       return false;
     }
-    _lastRegisterAttempt = DateTime.now();
-    _registerAttempts++;
+    _rateLimitService.recordRegisterAttempt();
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final params = auth_usecases.SignUpWithEmailParams(email: email, password: password, name: name);
+    final params = auth_usecases.SignUpWithEmailParams(
+        email: email, password: password, name: name);
     final result = await _signUpWithEmail(params);
 
     return result.fold(
@@ -267,8 +231,7 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (user) {
-        _registerAttempts = 0;
-        _lastRegisterAttempt = null;
+        _rateLimitService.resetRegisterAttempts();
 
         state = state.copyWith(
           status: AuthStatus.authenticated,
@@ -408,7 +371,8 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<bool> updateProfile(String? name, String? photoUrl) async {
-    final params = auth_usecases.UpdateProfileParams(name: name, photoUrl: photoUrl);
+    final params =
+        auth_usecases.UpdateProfileParams(name: name, photoUrl: photoUrl);
     final result = await _updateProfile(params);
 
     return result.fold(

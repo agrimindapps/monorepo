@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -17,14 +18,17 @@ class GetExpensesByDateRangeParams {
   });
 }
 
-class GetExpensesByDateRange implements UseCase<List<Expense>, GetExpensesByDateRangeParams> {
+@lazySingleton
+class GetExpensesByDateRange
+    implements UseCase<List<Expense>, GetExpensesByDateRangeParams> {
   final ExpenseRepository repository;
 
   GetExpensesByDateRange(this.repository);
 
   @override
-  Future<Either<Failure, List<Expense>>> call(GetExpensesByDateRangeParams params) async {
-    return await repository.getExpensesByDateRange(
+  Future<Either<Failure, List<Expense>>> call(
+      GetExpensesByDateRangeParams params) async {
+    return repository.getExpensesByDateRange(
       params.userId,
       params.startDate,
       params.endDate,

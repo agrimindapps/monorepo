@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
+import 'services/analytics_cache_service.dart';
+import 'services/analytics_metrics_calculation_service.dart';
+
 /// ⚠️ MOCK DATA WARNING:
 /// This service returns mock/fake data for development purposes when
 /// DEBUG_ANALYTICS_MOCK_DATA is true. In production, this should be
@@ -164,8 +167,9 @@ class AnalyticsDashboardService {
   AnalyticsDashboardService._();
 
   late IAnalyticsRepository _analytics;
+  late AnalyticsMetricsCalculationService _calculationService;
+  late AnalyticsCacheService _cacheService;
   bool _isInitialized = false;
-  final Map<String, dynamic> _metricsCache = {};
   Timer? _cacheRefreshTimer;
 
   /// Helper method para verificar se deve usar mock data
@@ -176,10 +180,15 @@ class AnalyticsDashboardService {
   Future<void> initialize({
     required IAnalyticsRepository analytics,
     required IStorageRepository storage,
+    AnalyticsMetricsCalculationService? calculationService,
+    AnalyticsCacheService? cacheService,
   }) async {
     if (_isInitialized) return;
 
     _analytics = analytics;
+    _calculationService =
+        calculationService ?? AnalyticsMetricsCalculationService();
+    _cacheService = cacheService ?? AnalyticsCacheService();
     _isInitialized = true;
     _startCacheRefresh();
 
@@ -211,35 +220,41 @@ class AnalyticsDashboardService {
       );
     }
 
-    final cacheKey =
-        'user_engagement_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+    final cacheKey = _cacheService.generateCacheKey(
+      'user_engagement',
+      startDate,
+      endDate,
+    );
 
-    if (_metricsCache.containsKey(cacheKey)) {
-      return _metricsCache[cacheKey] as UserEngagementMetrics;
+    final cachedMetrics = _cacheService.get<UserEngagementMetrics>(cacheKey);
+    if (cachedMetrics != null) {
+      return cachedMetrics;
     }
 
     try {
       final metrics = UserEngagementMetrics(
         dailyActiveUsers: _useMockData
-            ? _calculateDAU({})
+            ? _calculationService.calculateDAU({})
             : 0, // TODO: fetch from Firebase
         weeklyActiveUsers: _useMockData
-            ? _calculateWAU({})
+            ? _calculationService.calculateWAU({})
             : 0, // TODO: fetch from Firebase
         monthlyActiveUsers: _useMockData
-            ? _calculateMAU({})
+            ? _calculationService.calculateMAU({})
             : 0, // TODO: fetch from Firebase
         avgSessionDuration: _useMockData
-            ? _calculateAvgSessionDuration({})
+            ? _calculationService.calculateAvgSessionDuration({})
             : 0.0,
         avgScreensPerSession: _useMockData
-            ? _calculateAvgScreensPerSession({})
+            ? _calculationService.calculateAvgScreensPerSession({})
             : 0,
-        featureUsage: _useMockData ? _calculateFeatureUsage({}) : {},
+        featureUsage: _useMockData
+            ? _calculationService.calculateFeatureUsage({})
+            : {},
         timestamp: DateTime.now(),
       );
 
-      _metricsCache[cacheKey] = metrics;
+      _cacheService.set(cacheKey, metrics);
       return metrics;
     } catch (e) {
       if (kDebugMode) print('❌ Error getting engagement metrics: $e');
@@ -254,21 +269,29 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey =
-        'conversion_funnel_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+    final cacheKey = _cacheService.generateCacheKey(
+      'conversion_funnel',
+      startDate,
+      endDate,
+    );
 
-    if (_metricsCache.containsKey(cacheKey)) {
-      return _metricsCache[cacheKey] as ConversionFunnelMetrics;
+    final cachedMetrics = _cacheService.get<ConversionFunnelMetrics>(cacheKey);
+    if (cachedMetrics != null) {
+      return cachedMetrics;
     }
 
     try {
       final funnelData = <ConversionFunnelStep, int>{};
 
       for (final step in ConversionFunnelStep.values) {
-        funnelData[step] = _getMockFunnelData(step);
+        funnelData[step] = _calculationService.getMockFunnelData(step);
       }
-      final conversionRates = _calculateConversionRates(funnelData);
-      final dropOffRates = _calculateDropOffRates(funnelData);
+      final conversionRates = _calculationService.calculateConversionRates(
+        funnelData,
+      );
+      final dropOffRates = _calculationService.calculateDropOffRates(
+        funnelData,
+      );
 
       final metrics = ConversionFunnelMetrics(
         stepCounts: funnelData,
@@ -277,7 +300,7 @@ class AnalyticsDashboardService {
         timestamp: DateTime.now(),
       );
 
-      _metricsCache[cacheKey] = metrics;
+      _cacheService.set(cacheKey, metrics);
       return metrics;
     } catch (e) {
       if (kDebugMode) print('❌ Error getting funnel metrics: $e');
@@ -292,25 +315,29 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey =
-        'performance_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+    final cacheKey = _cacheService.generateCacheKey(
+      'performance',
+      startDate,
+      endDate,
+    );
 
-    if (_metricsCache.containsKey(cacheKey)) {
-      return _metricsCache[cacheKey] as PerformanceMetrics;
+    final cachedMetrics = _cacheService.get<PerformanceMetrics>(cacheKey);
+    if (cachedMetrics != null) {
+      return cachedMetrics;
     }
 
     try {
       final metrics = PerformanceMetrics(
-        avgAppStartupTime: _calculateAvgStartupTime({}),
-        avgScreenLoadTime: _calculateAvgScreenLoadTime({}),
-        featurePerformance: _calculateFeaturePerformance({}),
-        crashCount: _calculateCrashCount({}),
-        errorCount: _calculateErrorCount({}),
-        slowOperations: _calculateSlowOperations({}),
+        avgAppStartupTime: _calculationService.calculateAvgStartupTime({}),
+        avgScreenLoadTime: _calculationService.calculateAvgScreenLoadTime({}),
+        featurePerformance: _calculationService.calculateFeaturePerformance({}),
+        crashCount: _calculationService.calculateCrashCount({}),
+        errorCount: _calculationService.calculateErrorCount({}),
+        slowOperations: _calculationService.calculateSlowOperations({}),
         timestamp: DateTime.now(),
       );
 
-      _metricsCache[cacheKey] = metrics;
+      _cacheService.set(cacheKey, metrics);
       return metrics;
     } catch (e) {
       if (kDebugMode) print('❌ Error getting performance metrics: $e');
@@ -325,29 +352,41 @@ class AnalyticsDashboardService {
   }) async {
     if (!_isInitialized) throw Exception('Analytics Dashboard not initialized');
 
-    final cacheKey =
-        'revenue_${startDate?.toIso8601String()}_${endDate?.toIso8601String()}';
+    final cacheKey = _cacheService.generateCacheKey(
+      'revenue',
+      startDate,
+      endDate,
+    );
 
-    if (_metricsCache.containsKey(cacheKey)) {
-      return _metricsCache[cacheKey] as RevenueMetrics;
+    final cachedMetrics = _cacheService.get<RevenueMetrics>(cacheKey);
+    if (cachedMetrics != null) {
+      return cachedMetrics;
     }
 
     try {
       final mockSubscriptionData = <Map<String, dynamic>>[];
 
       final metrics = RevenueMetrics(
-        totalRevenue: _calculateTotalRevenue(mockSubscriptionData),
-        averageRevenuePerUser: _calculateARPU(mockSubscriptionData),
-        totalSubscriptions: _calculateTotalSubscriptions(mockSubscriptionData),
-        activeSubscriptions: _calculateActiveSubscriptions(
+        totalRevenue: _calculationService.calculateTotalRevenue(
           mockSubscriptionData,
         ),
-        churnRate: _calculateChurnRate(mockSubscriptionData),
-        revenueByPlan: _calculateRevenueByPlan(mockSubscriptionData),
+        averageRevenuePerUser: _calculationService.calculateARPU(
+          mockSubscriptionData,
+        ),
+        totalSubscriptions: _calculationService.calculateTotalSubscriptions(
+          mockSubscriptionData,
+        ),
+        activeSubscriptions: _calculationService.calculateActiveSubscriptions(
+          mockSubscriptionData,
+        ),
+        churnRate: _calculationService.calculateChurnRate(mockSubscriptionData),
+        revenueByPlan: _calculationService.calculateRevenueByPlan(
+          mockSubscriptionData,
+        ),
         timestamp: DateTime.now(),
       );
 
-      _metricsCache[cacheKey] = metrics;
+      _cacheService.set(cacheKey, metrics);
       return metrics;
     } catch (e) {
       if (kDebugMode) print('❌ Error getting revenue metrics: $e');
@@ -405,221 +444,12 @@ class AnalyticsDashboardService {
     return report;
   }
 
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Analytics data in production
-  int _calculateDAU(Map<String, dynamic> data) {
-    // Mock: 750 daily active users (realistic for growing app)
-    return 750;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Analytics data in production
-  int _calculateWAU(Map<String, dynamic> data) {
-    // Mock: 3500 weekly active users (~4.7x DAU is typical)
-    return 3500;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Analytics data in production
-  int _calculateMAU(Map<String, dynamic> data) {
-    // Mock: 12000 monthly active users (~16x DAU is typical)
-    return 12000;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Analytics data in production
-  double _calculateAvgSessionDuration(Map<String, dynamic> data) {
-    // Mock: 8.5 minutes average session (realistic for utility app)
-    return 8.5;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Analytics data in production
-  int _calculateAvgScreensPerSession(Map<String, dynamic> data) {
-    // Mock: 5 screens per session average
-    return 5;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Analytics data in production
-  Map<String, int> _calculateFeatureUsage(Map<String, dynamic> data) {
-    return {
-      'pragas_search': 420, // Most used feature
-      'diagnostics': 280, // Core feature
-      'favorites': 180, // Moderate use
-      'export': 95, // Less frequent
-      'comments': 145, // Moderate engagement
-      'premium_features': 65, // Premium adoption
-    };
-  }
-
-  int _getMockFunnelData(ConversionFunnelStep step) {
-    switch (step) {
-      case ConversionFunnelStep.appOpened:
-        return 10000;
-      case ConversionFunnelStep.signupViewed:
-        return 3000;
-      case ConversionFunnelStep.signupCompleted:
-        return 1500;
-      case ConversionFunnelStep.premiumViewed:
-        return 500;
-      case ConversionFunnelStep.premiumPurchased:
-        return 150;
-      case ConversionFunnelStep.featureUsed:
-        return 1200;
-      case ConversionFunnelStep.retentionDay7:
-        return 800;
-      case ConversionFunnelStep.retentionDay30:
-        return 400;
-    }
-  }
-
-  Map<ConversionFunnelStep, double> _calculateConversionRates(
-    Map<ConversionFunnelStep, int> funnelData,
-  ) {
-    final rates = <ConversionFunnelStep, double>{};
-    int previousCount = funnelData[ConversionFunnelStep.appOpened] ?? 1;
-
-    for (final step in ConversionFunnelStep.values) {
-      if (step == ConversionFunnelStep.appOpened) {
-        rates[step] = 100.0;
-      } else {
-        final currentCount = funnelData[step] ?? 0;
-        rates[step] = previousCount > 0
-            ? (currentCount / previousCount * 100)
-            : 0.0;
-        previousCount = currentCount;
-      }
-    }
-
-    return rates;
-  }
-
-  Map<ConversionFunnelStep, double> _calculateDropOffRates(
-    Map<ConversionFunnelStep, int> funnelData,
-  ) {
-    final rates = <ConversionFunnelStep, double>{};
-
-    for (int i = 0; i < ConversionFunnelStep.values.length - 1; i++) {
-      final currentStep = ConversionFunnelStep.values[i];
-      final nextStep = ConversionFunnelStep.values[i + 1];
-
-      final currentCount = funnelData[currentStep] ?? 0;
-      final nextCount = funnelData[nextStep] ?? 0;
-
-      rates[currentStep] = currentCount > 0
-          ? ((currentCount - nextCount) / currentCount * 100)
-          : 0.0;
-    }
-
-    return rates;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Performance Monitoring data in production
-  double _calculateAvgStartupTime(Map<String, dynamic> data) {
-    // Mock: 1.8 seconds average startup (good for mobile app)
-    return 1.8;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Performance Monitoring data in production
-  double _calculateAvgScreenLoadTime(Map<String, dynamic> data) {
-    // Mock: 0.9 seconds average screen load
-    return 0.9;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Performance Monitoring data in production
-  Map<String, double> _calculateFeaturePerformance(Map<String, dynamic> data) {
-    return {
-      'search': 0.5, // Fast search: 500ms
-      'diagnostics': 1.2, // Complex feature: 1.2s
-      'favorites': 0.3, // Simple operation: 300ms
-      'export': 2.5, // Heavy operation: 2.5s
-    };
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real Firebase Crashlytics data in production
-  int _calculateCrashCount(Map<String, dynamic> data) {
-    // Mock: 2 crashes (realistic for stable app)
-    return 2;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real error tracking data in production
-  int _calculateErrorCount(Map<String, dynamic> data) {
-    // Mock: 12 non-fatal errors
-    return 12;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real performance monitoring data in production
-  Map<String, int> _calculateSlowOperations(Map<String, dynamic> data) {
-    return {
-      'database_query': 3, // 3 slow queries detected
-      'image_loading': 5, // 5 slow image loads
-      'sync_operation': 2, // 2 slow sync operations
-    };
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real RevenueCat/subscription data in production
-  double _calculateTotalRevenue(List<Map<String, dynamic>> subscriptionData) {
-    // Mock: $3,450 total monthly revenue
-    return 3450.00;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real RevenueCat/subscription data in production
-  double _calculateARPU(List<Map<String, dynamic>> subscriptionData) {
-    // Mock: $12.50 average revenue per user
-    return 12.50;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real RevenueCat/subscription data in production
-  int _calculateTotalSubscriptions(
-    List<Map<String, dynamic>> subscriptionData,
-  ) {
-    // Mock: 320 total subscriptions
-    return 320;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real RevenueCat/subscription data in production
-  int _calculateActiveSubscriptions(
-    List<Map<String, dynamic>> subscriptionData,
-  ) {
-    // Mock: 276 active subscriptions (~86% retention)
-    return 276;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real RevenueCat/subscription data in production
-  double _calculateChurnRate(List<Map<String, dynamic>> subscriptionData) {
-    // Mock: 5.8% monthly churn rate (good for SaaS)
-    return 5.8;
-  }
-
-  /// ⚠️ MOCK DATA: Returns fixed realistic values for development
-  /// TODO: Replace with real RevenueCat/subscription data in production
-  Map<String, double> _calculateRevenueByPlan(
-    List<Map<String, dynamic>> subscriptionData,
-  ) {
-    return {
-      'monthly': 1250.00, // Monthly plan revenue
-      'yearly': 2200.00, // Yearly plan revenue (discounted but more upfront)
-    };
-  }
-
   /// Refresh all cached metrics
   Future<void> _refreshAllMetrics() async {
     if (!_isInitialized) return;
 
     try {
-      _metricsCache.clear();
+      _cacheService.clearAll();
       await getUserEngagementMetrics();
       await getConversionFunnelMetrics();
       await getPerformanceMetrics();
@@ -636,7 +466,7 @@ class AnalyticsDashboardService {
   /// Dispose resources
   void dispose() {
     _cacheRefreshTimer?.cancel();
-    _metricsCache.clear();
+    _cacheService.clearAll();
     _isInitialized = false;
   }
 }

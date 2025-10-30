@@ -1,36 +1,33 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/medication.dart';
 import '../repositories/medication_repository.dart';
+import '../services/medication_validation_service.dart';
 
+/// Use case for updating an existing medication
+///
+/// **SOLID Principles:**
+/// - **Single Responsibility**: Only handles updating medications
+/// - **Dependency Inversion**: Depends on abstractions (repository, services)
+/// - **Open/Closed**: Validation logic extracted to service
+@lazySingleton
 class UpdateMedication implements UseCase<void, Medication> {
   final MedicationRepository repository;
+  final MedicationValidationService validationService;
 
-  UpdateMedication(this.repository);
+  UpdateMedication(
+    this.repository,
+    this.validationService,
+  );
 
   @override
   Future<Either<Failure, void>> call(Medication medication) async {
-    if (medication.name.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Nome do medicamento é obrigatório'));
-    }
-    
-    if (medication.dosage.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Dosagem é obrigatória'));
-    }
-    
-    if (medication.frequency.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Frequência é obrigatória'));
-    }
-    
-    if (medication.animalId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID do animal é obrigatório'));
-    }
-    
-    if (medication.startDate.isAfter(medication.endDate)) {
-      return const Left(ValidationFailure(message: 'Data de início deve ser anterior à data de fim'));
-    }
+    // Validate using centralized service
+    final validationResult = validationService.validateForUpdate(medication);
+    if (validationResult.isLeft()) return validationResult;
 
     return await repository.updateMedication(medication);
   }

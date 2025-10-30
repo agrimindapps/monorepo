@@ -1,33 +1,51 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/appointment.dart';
 import '../repositories/appointment_repository.dart';
+import '../services/appointment_validation_service.dart';
 
-class UpdateAppointment implements UseCase<Appointment, UpdateAppointmentParams> {
-  final AppointmentRepository repository;
+/// Use case for updating an existing appointment
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles appointment update flow
+/// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
+///
+/// **Dependencies:**
+/// - AppointmentRepository: For data persistence
+/// - AppointmentValidationService: For business rule validation
+@lazySingleton
+class UpdateAppointment
+    implements UseCase<Appointment, UpdateAppointmentParams> {
+  final AppointmentRepository _repository;
+  final AppointmentValidationService _validationService;
 
-  UpdateAppointment(this.repository);
+  UpdateAppointment(this._repository, this._validationService);
 
   @override
-  Future<Either<Failure, Appointment>> call(UpdateAppointmentParams params) async {
-    if (params.appointment.veterinarianName.isEmpty) {
-      return const Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
+  Future<Either<Failure, Appointment>> call(
+      UpdateAppointmentParams params) async {
+    // Validate appointment data
+    final validationResult = _validationService.validateForUpdate(
+      params.appointment,
+    );
+
+    if (validationResult.isLeft()) {
+      return validationResult.fold(
+        (failure) => Left(failure),
+        (_) => throw StateError('Validation should not return Right'),
+      );
     }
-    
-    if (params.appointment.reason.isEmpty) {
-      return const Left(ValidationFailure(message: 'Motivo da consulta é obrigatório'));
-    }
-    
-    if (params.appointment.id.isEmpty) {
-      return const Left(ValidationFailure(message: 'ID da consulta é obrigatório'));
-    }
+
+    // Update timestamp
     final updatedAppointment = params.appointment.copyWith(
       updatedAt: DateTime.now(),
     );
 
-    return await repository.updateAppointment(updatedAppointment);
+    // Update appointment
+    return await _repository.updateAppointment(updatedAppointment);
   }
 }
 

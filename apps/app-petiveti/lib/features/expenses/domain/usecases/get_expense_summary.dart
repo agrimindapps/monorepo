@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/expense_summary.dart';
 import '../repositories/expense_repository.dart';
 
+@lazySingleton
 class GetExpenseSummary implements UseCase<ExpenseSummary, String> {
   final ExpenseRepository repository;
 
@@ -12,6 +14,6 @@ class GetExpenseSummary implements UseCase<ExpenseSummary, String> {
 
   @override
   Future<Either<Failure, ExpenseSummary>> call(String userId) async {
-    return await repository.getExpenseSummary(userId);
+    return repository.getExpenseSummary(userId);
   }
 }

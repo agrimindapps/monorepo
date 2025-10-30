@@ -1,13 +1,24 @@
 import 'package:core/core.dart' hide User, AuthState, AuthStatus;
 import 'package:flutter/material.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../../../shared/constants/profile_constants.dart';
-import '../../../../shared/widgets/dialogs/app_dialogs.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../services/profile_actions_service.dart';
 import '../widgets/profile_state_handlers.dart';
 
+/// Profile page widget for displaying user information and settings
+///
+/// **SOLID Principles:**
+/// - **Single Responsibility**: Only handles UI rendering
+/// - **Dependency Inversion**: Depends on ProfileActionsService abstraction
+/// - **Open/Closed**: Business logic extracted to service
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
+
+  // Lazy initialization of service
+  ProfileActionsService get _actionsService =>
+      di.getIt<ProfileActionsService>();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,59 +71,54 @@ class ProfilePage extends ConsumerWidget {
                 () => context.push(ProfileConstants.subscriptionRoute),
               ),
             ]),
-
             const SizedBox(height: 24),
-
             _buildMenuSection(context, ProfileConstants.settingsSectionTitle, [
               _buildMenuItem(
                 context,
                 'Notificações',
                 Icons.notifications,
-                () => _showNotificationsSettings(context),
+                () => _actionsService.showNotificationsSettings(context),
               ),
               _buildMenuItem(
                 context,
                 'Tema',
                 Icons.palette,
-                () => _showThemeSettings(context),
+                () => _actionsService.showThemeSettings(context),
               ),
               _buildMenuItem(
                 context,
                 'Idioma',
                 Icons.language,
-                () => _showLanguageSettings(context),
+                () => _actionsService.showLanguageSettings(context),
               ),
               _buildMenuItem(
                 context,
                 'Backup e Sincronização',
                 Icons.cloud_sync,
-                () => _showBackupSettings(context),
+                () => _actionsService.showBackupSettings(context),
               ),
             ]),
-
             const SizedBox(height: 24),
-
             _buildMenuSection(context, ProfileConstants.supportSectionTitle, [
               _buildMenuItem(
                 context,
                 'Central de Ajuda',
                 Icons.help,
-                () => _showHelp(context),
+                () => _actionsService.showHelp(context),
               ),
               _buildMenuItem(
                 context,
                 'Contatar Suporte',
                 Icons.support_agent,
-                () => _contactSupport(context),
+                () => _actionsService.contactSupport(context),
               ),
               _buildMenuItem(
                 context,
                 'Sobre o App',
                 Icons.info,
-                () => _showAbout(context),
+                () => _actionsService.showAbout(context),
               ),
             ]),
-
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -140,22 +146,20 @@ class ProfilePage extends ConsumerWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
             Semantics(
               label: 'Informações da versão do aplicativo',
               child: FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (context, snapshot) {
-                  final version =
-                      snapshot.hasData
-                          ? 'Versão ${snapshot.data!.version}'
-                          : 'Versão 1.0.0';
+                  final version = snapshot.hasData
+                      ? 'Versão ${snapshot.data!.version}'
+                      : 'Versão 1.0.0';
                   return Text(
                     version,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   );
                 },
               ),
@@ -224,57 +228,9 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  void _showComingSoonDialog(BuildContext context, String title) {
-    AppDialogs.showComingSoon(context, title);
-  }
-
-  void _showNotificationsSettings(BuildContext context) {
-    _showComingSoonDialog(context, 'Configurações de Notificação');
-  }
-
-  void _showThemeSettings(BuildContext context) {
-    _showComingSoonDialog(context, 'Configurações de Tema');
-  }
-
-  void _showLanguageSettings(BuildContext context) {
-    _showComingSoonDialog(context, 'Configurações de Idioma');
-  }
-
-  void _showBackupSettings(BuildContext context) {
-    _showComingSoonDialog(context, 'Backup e Sincronização');
-  }
-
-  void _showHelp(BuildContext context) {
-    _showComingSoonDialog(context, 'Central de Ajuda');
-  }
-
-  void _contactSupport(BuildContext context) {
-    AppDialogs.showContactSupport(
-      context,
-      supportEmail: 'suporte@petiveti.com',
-      supportPhone: '(11) 99999-9999',
-      showSocialMedia: true,
-    );
-  }
-
-  void _showAbout(BuildContext context) {
-    AppDialogs.showAboutApp(
-      context,
-      appName: 'PetiVeti',
-      appIcon: Icon(
-        Icons.pets,
-        size: 32,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-      customDescription:
-          'App completo para cuidados veterinários com calculadoras especializadas, controle de medicamentos, agendamento de consultas e muito mais.',
-      showTechnicalInfo: true,
-    );
-  }
-
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    AppDialogs.showLogoutConfirmation(
-      context,
+    _actionsService.showLogoutDialog(
+      context: context,
       onConfirm: () {
         ref.read(authProvider.notifier).signOut();
         context.go('/login');

@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
+import '../services/auth_validation_service.dart';
 
 class SignInWithEmailParams {
   final String email;
@@ -18,32 +19,24 @@ class SignInWithEmailParams {
 @lazySingleton
 class SignInWithEmail implements UseCase<User, SignInWithEmailParams> {
   final AuthRepository repository;
+  final AuthValidationService validationService;
 
-  SignInWithEmail(this.repository);
+  SignInWithEmail(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, User>> call(SignInWithEmailParams params) async {
-    if (params.email.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Email é obrigatório'));
-    }
+    final validation = validationService.validateSignInCredentials(
+      params.email,
+      params.password,
+    );
 
-    if (!_isValidEmail(params.email)) {
-      return const Left(ValidationFailure(message: 'Email inválido'));
-    }
-
-    if (params.password.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Senha é obrigatória'));
-    }
-
-    if (params.password.length < 6) {
-      return const Left(ValidationFailure(message: 'Senha deve ter pelo menos 6 caracteres'));
-    }
-
-    return await repository.signInWithEmail(params.email, params.password);
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+    return validation.fold(
+      (failure) => Left(failure),
+      (credentials) => repository.signInWithEmail(
+        credentials.email,
+        credentials.password,
+      ),
+    );
   }
 }
 
@@ -59,41 +52,33 @@ class SignUpWithEmailParams {
   });
 }
 
+@lazySingleton
 class SignUpWithEmail implements UseCase<User, SignUpWithEmailParams> {
   final AuthRepository repository;
+  final AuthValidationService validationService;
 
-  SignUpWithEmail(this.repository);
+  SignUpWithEmail(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, User>> call(SignUpWithEmailParams params) async {
-    if (params.email.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Email é obrigatório'));
-    }
+    final validation = validationService.validateSignUpCredentials(
+      params.email,
+      params.password,
+      params.name,
+    );
 
-    if (!_isValidEmail(params.email)) {
-      return const Left(ValidationFailure(message: 'Email inválido'));
-    }
-
-    if (params.password.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Senha é obrigatória'));
-    }
-
-    if (params.password.length < 6) {
-      return const Left(ValidationFailure(message: 'Senha deve ter pelo menos 6 caracteres'));
-    }
-
-    if (params.name != null && params.name!.trim().length < 2) {
-      return const Left(ValidationFailure(message: 'Nome deve ter pelo menos 2 caracteres'));
-    }
-
-    return await repository.signUpWithEmail(params.email, params.password, params.name);
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+    return validation.fold(
+      (failure) => Left(failure),
+      (credentials) => repository.signUpWithEmail(
+        credentials.email,
+        credentials.password,
+        credentials.name,
+      ),
+    );
   }
 }
 
+@lazySingleton
 class SignInWithGoogle implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -101,10 +86,11 @@ class SignInWithGoogle implements UseCase<User, NoParams> {
 
   @override
   Future<Either<Failure, User>> call(NoParams params) async {
-    return await repository.signInWithGoogle();
+    return repository.signInWithGoogle();
   }
 }
 
+@lazySingleton
 class SignInWithApple implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -112,10 +98,11 @@ class SignInWithApple implements UseCase<User, NoParams> {
 
   @override
   Future<Either<Failure, User>> call(NoParams params) async {
-    return await repository.signInWithApple();
+    return repository.signInWithApple();
   }
 }
 
+@lazySingleton
 class SignInWithFacebook implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -123,10 +110,11 @@ class SignInWithFacebook implements UseCase<User, NoParams> {
 
   @override
   Future<Either<Failure, User>> call(NoParams params) async {
-    return await repository.signInWithFacebook();
+    return repository.signInWithFacebook();
   }
 }
 
+@lazySingleton
 class SignInAnonymously implements UseCase<User, NoParams> {
   final AuthRepository repository;
 
@@ -134,10 +122,11 @@ class SignInAnonymously implements UseCase<User, NoParams> {
 
   @override
   Future<Either<Failure, User>> call(NoParams params) async {
-    return await repository.signInAnonymously();
+    return repository.signInAnonymously();
   }
 }
 
+@lazySingleton
 class SignOut implements UseCase<void, NoParams> {
   final AuthRepository repository;
 
@@ -145,10 +134,11 @@ class SignOut implements UseCase<void, NoParams> {
 
   @override
   Future<Either<Failure, void>> call(NoParams params) async {
-    return await repository.signOut();
+    return repository.signOut();
   }
 }
 
+@lazySingleton
 class GetCurrentUser implements UseCase<User?, NoParams> {
   final AuthRepository repository;
 
@@ -156,10 +146,11 @@ class GetCurrentUser implements UseCase<User?, NoParams> {
 
   @override
   Future<Either<Failure, User?>> call(NoParams params) async {
-    return await repository.getCurrentUser();
+    return repository.getCurrentUser();
   }
 }
 
+@lazySingleton
 class SendEmailVerification implements UseCase<void, NoParams> {
   final AuthRepository repository;
 
@@ -167,30 +158,25 @@ class SendEmailVerification implements UseCase<void, NoParams> {
 
   @override
   Future<Either<Failure, void>> call(NoParams params) async {
-    return await repository.sendEmailVerification();
+    return repository.sendEmailVerification();
   }
 }
 
+@lazySingleton
 class SendPasswordResetEmail implements UseCase<void, String> {
   final AuthRepository repository;
+  final AuthValidationService validationService;
 
-  SendPasswordResetEmail(this.repository);
+  SendPasswordResetEmail(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(String email) async {
-    if (email.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Email é obrigatório'));
-    }
+    final validation = validationService.validateEmail(email);
 
-    if (!_isValidEmail(email)) {
-      return const Left(ValidationFailure(message: 'Email inválido'));
-    }
-
-    return await repository.sendPasswordResetEmail(email);
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+    return validation.fold(
+      (failure) => Left(failure),
+      (validEmail) => repository.sendPasswordResetEmail(validEmail),
+    );
   }
 }
 
@@ -204,21 +190,30 @@ class UpdateProfileParams {
   });
 }
 
+@lazySingleton
 class UpdateProfile implements UseCase<User, UpdateProfileParams> {
   final AuthRepository repository;
+  final AuthValidationService validationService;
 
-  UpdateProfile(this.repository);
+  UpdateProfile(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, User>> call(UpdateProfileParams params) async {
-    if (params.name != null && params.name!.trim().length < 2) {
-      return const Left(ValidationFailure(message: 'Nome deve ter pelo menos 2 caracteres'));
+    if (params.name != null && params.name!.isNotEmpty) {
+      final nameValidation = validationService.validateName(params.name!);
+      if (nameValidation.isLeft()) {
+        return nameValidation.fold(
+          (failure) => Left(failure),
+          (_) => throw UnimplementedError(),
+        );
+      }
     }
 
-    return await repository.updateProfile(params.name, params.photoUrl);
+    return repository.updateProfile(params.name, params.photoUrl);
   }
 }
 
+@lazySingleton
 class DeleteAccount implements UseCase<void, NoParams> {
   final AuthRepository repository;
 
@@ -226,6 +221,6 @@ class DeleteAccount implements UseCase<void, NoParams> {
 
   @override
   Future<Either<Failure, void>> call(NoParams params) async {
-    return await repository.deleteAccount();
+    return repository.deleteAccount();
   }
 }

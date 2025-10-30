@@ -5,6 +5,7 @@ import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
+import '../../domain/services/expense_processing_service.dart';
 import '../../domain/usecases/add_expense.dart';
 import '../../domain/usecases/delete_expense.dart';
 import '../../domain/usecases/get_expense_summary.dart';
@@ -69,6 +70,7 @@ class ExpensesNotifier extends _$ExpensesNotifier {
   late final AddExpense _addExpense;
   late final UpdateExpense _updateExpense;
   late final DeleteExpense _deleteExpense;
+  late final ExpenseProcessingService _processingService;
 
   @override
   ExpensesState build() {
@@ -79,6 +81,7 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     _addExpense = di.getIt<AddExpense>();
     _updateExpense = di.getIt<UpdateExpense>();
     _deleteExpense = di.getIt<DeleteExpense>();
+    _processingService = di.getIt<ExpenseProcessingService>();
 
     return const ExpensesState();
   }
@@ -111,15 +114,9 @@ class ExpensesNotifier extends _$ExpensesNotifier {
   }
 
   void _processExpensesData(List<Expense> expenses) {
-    final now = DateTime.now();
-    final monthlyExpenses = expenses.where((expense) =>
-        expense.expenseDate.year == now.year &&
-        expense.expenseDate.month == now.month).toList();
-    final expensesByCategory = <ExpenseCategory, List<Expense>>{};
-    for (final category in ExpenseCategory.values) {
-      expensesByCategory[category] = expenses.where((e) => e.category == category).toList();
-    }
-    final summary = ExpenseSummary.fromExpenses(expenses);
+    final monthlyExpenses = _processingService.getMonthlyExpenses(expenses);
+    final expensesByCategory = _processingService.groupByCategory(expenses);
+    final summary = _processingService.calculateSummary(expenses);
 
     state = state.copyWith(
       expenses: expenses,
@@ -131,14 +128,17 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     );
   }
 
-  Future<void> loadExpensesByCategory(String userId, ExpenseCategory category) async {
-    final params = GetExpensesByCategoryParams(userId: userId, category: category);
+  Future<void> loadExpensesByCategory(
+      String userId, ExpenseCategory category) async {
+    final params =
+        GetExpensesByCategoryParams(userId: userId, category: category);
     final result = await _getExpensesByCategory(params);
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (expenses) {
-        final updatedCategoryMap = Map<ExpenseCategory, List<Expense>>.from(state.expensesByCategory);
+        final updatedCategoryMap =
+            Map<ExpenseCategory, List<Expense>>.from(state.expensesByCategory);
         updatedCategoryMap[category] = expenses;
         state = state.copyWith(
           expensesByCategory: updatedCategoryMap,
@@ -203,7 +203,8 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        final updatedExpenses = state.expenses.where((e) => e.id != expenseId).toList();
+        final updatedExpenses =
+            state.expenses.where((e) => e.id != expenseId).toList();
         _processExpensesData(updatedExpenses);
       },
     );
@@ -255,20 +256,22 @@ Future<List<Expense>> categoryExpenses(
 Stream<List<Expense>> expensesStream(ExpensesStreamRef ref, String userId) {
   final repository = di.getIt.get<ExpenseRepository>();
   return repository.watchExpenses(userId).map((either) => either.fold(
-    (failure) => <Expense>[],
-    (expenses) => expenses,
-  ));
+        (failure) => <Expense>[],
+        (expenses) => expenses,
+      ));
 }
 
 @riverpod
-Future<List<Expense>> monthlyExpenses(MonthlyExpensesRef ref, String userId) async {
+Future<List<Expense>> monthlyExpenses(
+    MonthlyExpensesRef ref, String userId) async {
   final notifier = ref.read(expensesNotifierProvider.notifier);
   await notifier.loadMonthlyExpenses(userId);
   return ref.read(expensesNotifierProvider).monthlyExpenses;
 }
 
 @riverpod
-Future<ExpenseSummary?> expenseSummary(ExpenseSummaryRef ref, String userId) async {
+Future<ExpenseSummary?> expenseSummary(
+    ExpenseSummaryRef ref, String userId) async {
   final notifier = ref.read(expensesNotifierProvider.notifier);
   await notifier.loadExpenseSummary(userId);
   return ref.read(expensesNotifierProvider).summary;

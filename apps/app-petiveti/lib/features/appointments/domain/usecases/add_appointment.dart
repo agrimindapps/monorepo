@@ -1,30 +1,44 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/appointment.dart';
 import '../repositories/appointment_repository.dart';
+import '../services/appointment_validation_service.dart';
 
+/// Use case for adding a new appointment
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles appointment addition flow
+/// - **Dependency Inversion**: Depends on abstractions (repository, validation service)
+///
+/// **Dependencies:**
+/// - AppointmentRepository: For data persistence
+/// - AppointmentValidationService: For business rule validation
+@lazySingleton
 class AddAppointment implements UseCase<Appointment, AddAppointmentParams> {
-  final AppointmentRepository repository;
+  final AppointmentRepository _repository;
+  final AppointmentValidationService _validationService;
 
-  AddAppointment(this.repository);
+  AddAppointment(this._repository, this._validationService);
 
   @override
   Future<Either<Failure, Appointment>> call(AddAppointmentParams params) async {
-    if (params.appointment.veterinarianName.isEmpty) {
-      return const Left(ValidationFailure(message: 'Nome do veterinário é obrigatório'));
-    }
-    
-    if (params.appointment.reason.isEmpty) {
-      return const Left(ValidationFailure(message: 'Motivo da consulta é obrigatório'));
-    }
-    
-    if (params.appointment.animalId.isEmpty) {
-      return const Left(ValidationFailure(message: 'Animal deve ser selecionado'));
+    // Validate appointment data
+    final validationResult = _validationService.validateForAdd(
+      params.appointment,
+    );
+
+    if (validationResult.isLeft()) {
+      return validationResult.fold(
+        (failure) => Left(failure),
+        (_) => throw StateError('Validation should not return Right'),
+      );
     }
 
-    return await repository.addAppointment(params.appointment);
+    // Add appointment
+    return await _repository.addAppointment(params.appointment);
   }
 }
 

@@ -8,6 +8,7 @@ import '../../domain/entities/sync/medication_sync_entity.dart';
 import '../../domain/repositories/medication_repository.dart';
 import '../datasources/medication_local_datasource.dart';
 import '../models/medication_model.dart';
+import '../services/medication_error_handling_service.dart';
 
 /// MedicationRepository implementation using UnifiedSyncManager for offline-first sync
 ///
@@ -28,10 +29,19 @@ import '../models/medication_model.dart';
 /// 2. UPDATE: Atualiza local → Marca dirty + incrementVersion → Sync em background
 /// 3. DELETE: Marca como deleted (soft delete) → Sync em background
 /// 4. READ: Sempre lê do cache local (extremamente rápido)
+///
+/// **SOLID Principles:**
+/// - **Single Responsibility**: Only handles data access
+/// - **Dependency Inversion**: Depends on abstractions (datasource, services)
+/// - **Open/Closed**: Error handling extracted to service
 class MedicationRepositoryImpl implements MedicationRepository {
-  const MedicationRepositoryImpl(this._localDataSource);
+  const MedicationRepositoryImpl(
+    this._localDataSource,
+    this._errorHandlingService,
+  );
 
   final MedicationLocalDataSource _localDataSource;
+  final MedicationErrorHandlingService _errorHandlingService;
 
   /// UnifiedSyncManager singleton instance (for future use)
   // ignore: unused_element
@@ -45,42 +55,36 @@ class MedicationRepositoryImpl implements MedicationRepository {
   Future<Either<local_failures.Failure, void>> addMedication(
     Medication medication,
   ) async {
-    try {
-      // 1. Converter para MedicationSyncEntity e marcar como dirty para sync posterior
-      final syncEntity = MedicationSyncEntity.fromLegacyMedication(
-        medication,
-        moduleName: 'petiveti',
-      ).markAsDirty();
+    return _errorHandlingService.executeVoidOperation(
+      operation: () async {
+        // 1. Converter para MedicationSyncEntity e marcar como dirty para sync posterior
+        final syncEntity = MedicationSyncEntity.fromLegacyMedication(
+          medication,
+          moduleName: 'petiveti',
+        ).markAsDirty();
 
-      // 2. Salvar localmente (usando MedicationModel para compatibilidade com Hive)
-      final medicationModel =
-          MedicationModel.fromEntity(syncEntity.toLegacyMedication());
-      await _localDataSource.cacheMedication(medicationModel);
+        // 2. Salvar localmente (usando MedicationModel para compatibilidade com Hive)
+        final medicationModel =
+            MedicationModel.fromEntity(syncEntity.toLegacyMedication());
+        await _localDataSource.cacheMedication(medicationModel);
 
-      if (kDebugMode) {
-        debugPrint(
-          '[MedicationRepository] Medication created locally: ${medication.id}',
-        );
-        if (syncEntity.isCritical) {
+        if (kDebugMode) {
           debugPrint(
-            '[MedicationRepository] ⚠️ Critical medication - priority sync',
+            '[MedicationRepository] Medication created locally: ${medication.id}',
           );
+          if (syncEntity.isCritical) {
+            debugPrint(
+              '[MedicationRepository] ⚠️ Critical medication - priority sync',
+            );
+          }
         }
-      }
 
-      // 3. Trigger sync em background (não-bloqueante)
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        debugPrint('[MedicationRepository] Error creating medication: $e');
-        debugPrint('Stack trace: $stackTrace');
-      }
-      return Left(
-        local_failures.ServerFailure(message: 'Failed to create medication: $e'),
-      );
-    }
+        // 3. Trigger sync em background (não-bloqueante)
+        _triggerBackgroundSync();
+      },
+      errorMessage: 'Failed to create medication',
+      isCache: false,
+    );
   }
 
   // ========================================================================
@@ -88,145 +92,124 @@ class MedicationRepositoryImpl implements MedicationRepository {
   // ========================================================================
 
   @override
-  Future<Either<local_failures.Failure, List<Medication>>> getMedications() async {
-    try {
-      final localMedications = await _localDataSource.getMedications();
-      final activeMedications = localMedications
-          .where((model) => !model.isDeleted)
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(activeMedications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(message: 'Failed to get medications: $e'),
-      );
-    }
+  Future<Either<local_failures.Failure, List<Medication>>>
+      getMedications() async {
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications = await _localDataSource.getMedications();
+        final activeMedications = localMedications
+            .where((model) => !model.isDeleted)
+            .map((model) => model.toEntity())
+            .toList();
+        return activeMedications;
+      },
+      errorMessage: 'Failed to get medications',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, List<Medication>>>
       getMedicationsByAnimalId(String animalId) async {
-    try {
-      final localMedications =
-          await _localDataSource.getMedicationsByAnimalId(animalId);
-      final activeMedications = localMedications
-          .where((model) => !model.isDeleted)
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(activeMedications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get medications by animal: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications =
+            await _localDataSource.getMedicationsByAnimalId(animalId);
+        final activeMedications = localMedications
+            .where((model) => !model.isDeleted)
+            .map((model) => model.toEntity())
+            .toList();
+        return activeMedications;
+      },
+      errorMessage: 'Failed to get medications by animal',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, List<Medication>>>
       getActiveMedications() async {
-    try {
-      final localMedications = await _localDataSource.getActiveMedications();
-      final medications = localMedications
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(medications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get active medications: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications = await _localDataSource.getActiveMedications();
+        final medications =
+            localMedications.map((model) => model.toEntity()).toList();
+        return medications;
+      },
+      errorMessage: 'Failed to get active medications',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, List<Medication>>>
       getActiveMedicationsByAnimalId(String animalId) async {
-    try {
-      final localMedications =
-          await _localDataSource.getActiveMedicationsByAnimalId(animalId);
-      final medications = localMedications
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(medications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get active medications by animal: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications =
+            await _localDataSource.getActiveMedicationsByAnimalId(animalId);
+        final medications =
+            localMedications.map((model) => model.toEntity()).toList();
+        return medications;
+      },
+      errorMessage: 'Failed to get active medications by animal',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, List<Medication>>>
       getExpiringSoonMedications() async {
-    try {
-      final localMedications =
-          await _localDataSource.getExpiringSoonMedications();
-      final medications = localMedications
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(medications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get expiring medications: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications =
+            await _localDataSource.getExpiringSoonMedications();
+        final medications =
+            localMedications.map((model) => model.toEntity()).toList();
+        return medications;
+      },
+      errorMessage: 'Failed to get expiring medications',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, Medication>> getMedicationById(
     String id,
   ) async {
-    try {
-      final localMedication = await _localDataSource.getMedicationById(id);
+    return _errorHandlingService.executeNullableOperation(
+      operation: () async {
+        final localMedication = await _localDataSource.getMedicationById(id);
 
-      if (localMedication != null) {
-        if (localMedication.isDeleted) {
-          return Left(
-            local_failures.CacheFailure(message: 'Medication was deleted'),
-          );
+        if (localMedication != null && localMedication.isDeleted) {
+          throw Exception('Medication was deleted');
         }
-        return Right(localMedication.toEntity());
-      }
 
-      return Left(
-        local_failures.CacheFailure(message: 'Medication not found'),
-      );
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(message: 'Failed to get medication: $e'),
-      );
-    }
+        return localMedication?.toEntity();
+      },
+      errorMessage: 'Failed to get medication',
+      notFoundMessage: 'Medication not found',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, List<Medication>>> searchMedications(
     String query,
   ) async {
-    try {
-      final localMedications = await _localDataSource.searchMedications(query);
-      final medications = localMedications
-          .where((model) => !model.isDeleted)
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(medications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(message: 'Failed to search medications: $e'),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications =
+            await _localDataSource.searchMedications(query);
+        final medications = localMedications
+            .where((model) => !model.isDeleted)
+            .map((model) => model.toEntity())
+            .toList();
+        return medications;
+      },
+      errorMessage: 'Failed to search medications',
+      isCache: true,
+    );
   }
 
   @override
@@ -235,24 +218,20 @@ class MedicationRepositoryImpl implements MedicationRepository {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    try {
-      final localMedications = await _localDataSource.getMedicationHistory(
-        animalId,
-        startDate,
-        endDate,
-      );
-      final medications = localMedications
-          .map((model) => model.toEntity())
-          .toList();
-
-      return Right(medications);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get medication history: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localMedications = await _localDataSource.getMedicationHistory(
+          animalId,
+          startDate,
+          endDate,
+        );
+        final medications =
+            localMedications.map((model) => model.toEntity()).toList();
+        return medications;
+      },
+      errorMessage: 'Failed to get medication history',
+      isCache: true,
+    );
   }
 
   // ========================================================================
@@ -263,42 +242,39 @@ class MedicationRepositoryImpl implements MedicationRepository {
   Future<Either<local_failures.Failure, void>> updateMedication(
     Medication medication,
   ) async {
-    try {
-      // 1. Buscar medication atual para preservar sync fields
-      final currentMedication =
-          await _localDataSource.getMedicationById(medication.id);
-      if (currentMedication == null) {
-        return Left(
-          local_failures.CacheFailure(message: 'Medication not found'),
-        );
-      }
+    return _errorHandlingService.executeWithValidation(
+      operation: () async {
+        // 1. Buscar medication atual para preservar sync fields
+        final currentMedication =
+            await _localDataSource.getMedicationById(medication.id);
+        if (currentMedication == null) {
+          throw Exception('Medication not found');
+        }
 
-      // 2. Converter para SyncEntity, marcar como dirty e incrementar versão
-      final syncEntity = MedicationSyncEntity.fromLegacyMedication(
-        medication,
-        moduleName: 'petiveti',
-      ).markAsDirty().incrementVersion();
+        // 2. Converter para SyncEntity, marcar como dirty e incrementar versão
+        final syncEntity = MedicationSyncEntity.fromLegacyMedication(
+          medication,
+          moduleName: 'petiveti',
+        ).markAsDirty().incrementVersion();
 
-      // 3. Atualizar localmente
-      final medicationModel =
-          MedicationModel.fromEntity(syncEntity.toLegacyMedication());
-      await _localDataSource.updateMedication(medicationModel);
+        // 3. Atualizar localmente
+        final medicationModel =
+            MedicationModel.fromEntity(syncEntity.toLegacyMedication());
+        await _localDataSource.updateMedication(medicationModel);
 
-      if (kDebugMode) {
-        debugPrint(
-          '[MedicationRepository] Medication updated locally: ${medication.id} (version: ${syncEntity.version})',
-        );
-      }
+        if (kDebugMode) {
+          debugPrint(
+            '[MedicationRepository] Medication updated locally: ${medication.id} (version: ${syncEntity.version})',
+          );
+        }
 
-      // 4. Trigger sync em background
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.ServerFailure(message: 'Failed to update medication: $e'),
-      );
-    }
+        // 4. Trigger sync em background
+        _triggerBackgroundSync();
+      },
+      validator: (_) => const Right(null),
+      errorMessage: 'Failed to update medication',
+      isCache: false,
+    );
   }
 
   // ========================================================================
@@ -306,49 +282,44 @@ class MedicationRepositoryImpl implements MedicationRepository {
   // ========================================================================
 
   @override
-  Future<Either<local_failures.Failure, void>> deleteMedication(String id) async {
-    try {
-      // Soft delete (datasource já implementa)
-      await _localDataSource.deleteMedication(id);
+  Future<Either<local_failures.Failure, void>> deleteMedication(
+      String id) async {
+    return _errorHandlingService.executeVoidOperation(
+      operation: () async {
+        // Soft delete (datasource já implementa)
+        await _localDataSource.deleteMedication(id);
 
-      if (kDebugMode) {
-        debugPrint('[MedicationRepository] Medication soft-deleted: $id');
-      }
+        if (kDebugMode) {
+          debugPrint('[MedicationRepository] Medication soft-deleted: $id');
+        }
 
-      // Trigger sync para propagar delete
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.ServerFailure(message: 'Failed to delete medication: $e'),
-      );
-    }
+        // Trigger sync para propagar delete
+        _triggerBackgroundSync();
+      },
+      errorMessage: 'Failed to delete medication',
+      isCache: false,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, void>> hardDeleteMedication(
     String id,
   ) async {
-    try {
-      // Hard delete (remover permanentemente)
-      await _localDataSource.hardDeleteMedication(id);
+    return _errorHandlingService.executeVoidOperation(
+      operation: () async {
+        // Hard delete (remover permanentemente)
+        await _localDataSource.hardDeleteMedication(id);
 
-      if (kDebugMode) {
-        debugPrint('[MedicationRepository] Medication hard-deleted: $id');
-      }
+        if (kDebugMode) {
+          debugPrint('[MedicationRepository] Medication hard-deleted: $id');
+        }
 
-      // Trigger sync para propagar delete
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.ServerFailure(
-          message: 'Failed to hard delete medication: $e',
-        ),
-      );
-    }
+        // Trigger sync para propagar delete
+        _triggerBackgroundSync();
+      },
+      errorMessage: 'Failed to hard delete medication',
+      isCache: false,
+    );
   }
 
   @override
@@ -356,27 +327,23 @@ class MedicationRepositoryImpl implements MedicationRepository {
     String id,
     String reason,
   ) async {
-    try {
-      // Descontinuar medication (marca como discontinued)
-      await _localDataSource.discontinueMedication(id, reason);
+    return _errorHandlingService.executeVoidOperation(
+      operation: () async {
+        // Descontinuar medication (marca como discontinued)
+        await _localDataSource.discontinueMedication(id, reason);
 
-      if (kDebugMode) {
-        debugPrint(
-          '[MedicationRepository] Medication discontinued: $id (reason: $reason)',
-        );
-      }
+        if (kDebugMode) {
+          debugPrint(
+            '[MedicationRepository] Medication discontinued: $id (reason: $reason)',
+          );
+        }
 
-      // Trigger sync para propagar mudança
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.ServerFailure(
-          message: 'Failed to discontinue medication: $e',
-        ),
-      );
-    }
+        // Trigger sync para propagar mudança
+        _triggerBackgroundSync();
+      },
+      errorMessage: 'Failed to discontinue medication',
+      isCache: false,
+    );
   }
 
   // ========================================================================
@@ -385,19 +352,16 @@ class MedicationRepositoryImpl implements MedicationRepository {
 
   @override
   Stream<List<Medication>> watchMedications() {
-    return _localDataSource
-        .watchMedications()
-        .map((models) => models
-            .where((model) => !model.isDeleted)
-            .map((model) => model.toEntity())
-            .toList());
+    return _localDataSource.watchMedications().map((models) => models
+        .where((model) => !model.isDeleted)
+        .map((model) => model.toEntity())
+        .toList());
   }
 
   @override
   Stream<List<Medication>> watchMedicationsByAnimalId(String animalId) {
-    return _localDataSource
-        .watchMedicationsByAnimalId(animalId)
-        .map((models) => models
+    return _localDataSource.watchMedicationsByAnimalId(animalId).map((models) =>
+        models
             .where((model) => !model.isDeleted)
             .map((model) => model.toEntity())
             .toList());
@@ -417,20 +381,18 @@ class MedicationRepositoryImpl implements MedicationRepository {
   @override
   Future<Either<local_failures.Failure, List<Medication>>>
       checkMedicationConflicts(Medication medication) async {
-    try {
-      final medicationModel = MedicationModel.fromEntity(medication);
-      final conflictModels =
-          await _localDataSource.checkMedicationConflicts(medicationModel);
-      final conflicts = conflictModels.map((model) => model.toEntity()).toList();
-
-      return Right(conflicts);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to check medication conflicts: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final medicationModel = MedicationModel.fromEntity(medication);
+        final conflictModels =
+            await _localDataSource.checkMedicationConflicts(medicationModel);
+        final conflicts =
+            conflictModels.map((model) => model.toEntity()).toList();
+        return conflicts;
+      },
+      errorMessage: 'Failed to check medication conflicts',
+      isCache: true,
+    );
   }
 
   // ========================================================================
@@ -441,17 +403,15 @@ class MedicationRepositoryImpl implements MedicationRepository {
   Future<Either<local_failures.Failure, int>> getActiveMedicationsCount(
     String animalId,
   ) async {
-    try {
-      final count =
-          await _localDataSource.getActiveMedicationsCount(animalId);
-      return Right(count);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to count active medications: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final count =
+            await _localDataSource.getActiveMedicationsCount(animalId);
+        return count;
+      },
+      errorMessage: 'Failed to count active medications',
+      isCache: true,
+    );
   }
 
   // ========================================================================
@@ -461,54 +421,48 @@ class MedicationRepositoryImpl implements MedicationRepository {
   @override
   Future<Either<local_failures.Failure, List<Map<String, dynamic>>>>
       exportMedicationsData() async {
-    try {
-      final medicationModels = await _localDataSource.getMedications();
-      final data = medicationModels.map((model) => model.toJson()).toList();
-      return Right(data);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to export medications data: $e',
-        ),
-      );
-    }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final medicationModels = await _localDataSource.getMedications();
+        final data = medicationModels.map((model) => model.toJson()).toList();
+        return data;
+      },
+      errorMessage: 'Failed to export medications data',
+      isCache: true,
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, void>> importMedicationsData(
     List<Map<String, dynamic>> data,
   ) async {
-    try {
-      final medicationModels =
-          data.map((json) => MedicationModel.fromJson(json)).toList();
+    return _errorHandlingService.executeVoidOperation(
+      operation: () async {
+        final medicationModels =
+            data.map((json) => MedicationModel.fromJson(json)).toList();
 
-      // Marcar todos como dirty para sync
-      final dirtyModels = medicationModels.map((model) {
-        final syncEntity = MedicationSyncEntity.fromLegacyMedication(
-          model.toEntity(),
-          moduleName: 'petiveti',
-        ).markAsDirty();
-        return MedicationModel.fromEntity(syncEntity.toLegacyMedication());
-      }).toList();
+        // Marcar todos como dirty para sync
+        final dirtyModels = medicationModels.map((model) {
+          final syncEntity = MedicationSyncEntity.fromLegacyMedication(
+            model.toEntity(),
+            moduleName: 'petiveti',
+          ).markAsDirty();
+          return MedicationModel.fromEntity(syncEntity.toLegacyMedication());
+        }).toList();
 
-      await _localDataSource.cacheMedications(dirtyModels);
+        await _localDataSource.cacheMedications(dirtyModels);
 
-      if (kDebugMode) {
-        debugPrint(
-          '[MedicationRepository] Imported ${dirtyModels.length} medications',
-        );
-      }
+        if (kDebugMode) {
+          debugPrint(
+            '[MedicationRepository] Imported ${dirtyModels.length} medications',
+          );
+        }
 
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to import medications data: $e',
-        ),
-      );
-    }
+        _triggerBackgroundSync();
+      },
+      errorMessage: 'Failed to import medications data',
+      isCache: true,
+    );
   }
 
   // ========================================================================

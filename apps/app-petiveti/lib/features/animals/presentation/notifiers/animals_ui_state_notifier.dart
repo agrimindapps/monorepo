@@ -111,9 +111,8 @@ class AnimalsUIStateNotifier extends _$AnimalsUIStateNotifier {
 List<Animal> filteredAnimals(FilteredAnimalsRef ref) {
   final animalsState = ref.watch(animalsNotifierProvider);
   final uiState = ref.watch(animalsUIStateNotifierProvider);
-  List<Animal> filteredAnimals = animalsState.displayedAnimals;
+  final animals = animalsState.animals;
   final maxItems = uiState.displayItemCount;
-  final paginatedAnimals = filteredAnimals.take(maxItems).toList();
 
-  return paginatedAnimals;
+  return animals.take(maxItems).toList();
 }

@@ -1,10 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/data/repositories/cultura_hive_repository.dart';
-import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
-import '../../../../core/data/repositories/pragas_hive_repository.dart';
 import '../../../../core/di/injection_container.dart' as di;
 import '../../../../core/services/diagnostico_integration_service.dart';
+import '../../services/busca_data_loading_service.dart';
+import '../../services/busca_validation_service.dart';
 
 part 'busca_avancada_notifier.g.dart';
 
@@ -76,7 +75,8 @@ class BuscaAvancadaState {
       errorMessage: errorMessage ?? this.errorMessage,
       culturaIdSelecionada: culturaIdSelecionada ?? this.culturaIdSelecionada,
       pragaIdSelecionada: pragaIdSelecionada ?? this.pragaIdSelecionada,
-      defensivoIdSelecionado: defensivoIdSelecionado ?? this.defensivoIdSelecionado,
+      defensivoIdSelecionado:
+          defensivoIdSelecionado ?? this.defensivoIdSelecionado,
       resultados: resultados ?? this.resultados,
       culturas: culturas ?? this.culturas,
       pragas: pragas ?? this.pragas,
@@ -88,48 +88,8 @@ class BuscaAvancadaState {
   BuscaAvancadaState clearError() {
     return copyWith(hasError: false, errorMessage: null);
   }
-  bool get temFiltrosAtivos =>
-      culturaIdSelecionada != null || pragaIdSelecionada != null || defensivoIdSelecionado != null;
 
   bool get temResultados => resultados.isNotEmpty;
-
-  String get filtrosAtivosTexto {
-    final filtros = <String>[];
-    if (culturaIdSelecionada != null) filtros.add('Cultura');
-    if (pragaIdSelecionada != null) filtros.add('Praga');
-    if (defensivoIdSelecionado != null) filtros.add('Defensivo');
-    return filtros.join(', ');
-  }
-
-  Map<String, String> get filtrosDetalhados {
-    final filtros = <String, String>{};
-
-    if (culturaIdSelecionada != null) {
-      final cultura = culturas.firstWhere(
-        (c) => c['id'] == culturaIdSelecionada,
-        orElse: () => {'nome': 'Desconhecida'},
-      );
-      filtros['Cultura'] = cultura['nome']!;
-    }
-
-    if (pragaIdSelecionada != null) {
-      final praga = pragas.firstWhere(
-        (p) => p['id'] == pragaIdSelecionada,
-        orElse: () => {'nome': 'Desconhecida'},
-      );
-      filtros['Praga'] = praga['nome']!;
-    }
-
-    if (defensivoIdSelecionado != null) {
-      final defensivo = defensivos.firstWhere(
-        (d) => d['id'] == defensivoIdSelecionado,
-        orElse: () => {'nome': 'Desconhecido'},
-      );
-      filtros['Defensivo'] = defensivo['nome']!;
-    }
-
-    return filtros;
-  }
 }
 
 /// Provider especializado para gerenciar estado complexo da busca avançada (Presentation Layer)
@@ -137,16 +97,14 @@ class BuscaAvancadaState {
 @riverpod
 class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
   late final DiagnosticoIntegrationService _integrationService;
-  late final CulturaHiveRepository _culturaRepo;
-  late final PragasHiveRepository _pragasRepo;
-  late final FitossanitarioHiveRepository _fitossanitarioRepo;
+  late final BuscaDataLoadingService _dataLoadingService;
+  late final BuscaValidationService _validationService;
 
   @override
   Future<BuscaAvancadaState> build() async {
     _integrationService = di.sl<DiagnosticoIntegrationService>();
-    _culturaRepo = di.sl<CulturaHiveRepository>();
-    _pragasRepo = di.sl<PragasHiveRepository>();
-    _fitossanitarioRepo = di.sl<FitossanitarioHiveRepository>();
+    _dataLoadingService = di.sl<BuscaDataLoadingService>();
+    _validationService = di.sl<BuscaValidationService>();
 
     return BuscaAvancadaState.initial();
   }
@@ -159,61 +117,18 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     if (currentState.dadosCarregados) return;
 
     try {
-      List<Map<String, String>> culturas = [];
-      List<Map<String, String>> pragas = [];
-      List<Map<String, String>> defensivos = [];
-      final culturasResult = await _culturaRepo.getAll();
-      culturasResult.fold(
-        (error) {
-        },
-        (culturasData) {
-          culturas = culturasData
-              .map((c) => {
-                    'id': c.idReg,
-                    'nome': c.cultura,
-                  })
-              .toList()
-            ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-        },
-      );
-      final pragasResult = await _pragasRepo.getAll();
-      pragasResult.fold(
-        (error) {
-        },
-        (pragasData) {
-          pragas = pragasData
-              .map((p) => {
-                    'id': p.idReg,
-                    'nome': p.nomeComum.isNotEmpty ? p.nomeComum : p.nomeCientifico,
-                  })
-              .toList()
-            ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-        },
-      );
-      final defensivosResult = await _fitossanitarioRepo.getAll();
-      defensivosResult.fold(
-        (error) {
-        },
-        (defensivosData) {
-          defensivos = defensivosData
-              .map((d) => {
-                    'id': d.idReg,
-                    'nome': d.nomeComum.isNotEmpty ? d.nomeComum : d.nomeTecnico,
-                  })
-              .toList()
-            ..sort((a, b) => a['nome']!.compareTo(b['nome']!));
-        },
-      );
+      final dropdownData = await _dataLoadingService.loadAllDropdownData();
 
       state = AsyncValue.data(
         currentState.copyWith(
-          culturas: culturas,
-          pragas: pragas,
-          defensivos: defensivos,
+          culturas: dropdownData['culturas']!,
+          pragas: dropdownData['pragas']!,
+          defensivos: dropdownData['defensivos']!,
           dadosCarregados: true,
         ),
       );
     } catch (e) {
+      // Silently fail - dropdowns will be empty
     }
   }
 
@@ -243,7 +158,9 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     if (currentState == null) return;
 
     if (currentState.defensivoIdSelecionado != id) {
-      state = AsyncValue.data(currentState.copyWith(defensivoIdSelecionado: id));
+      state = AsyncValue.data(
+        currentState.copyWith(defensivoIdSelecionado: id),
+      );
     }
   }
 
@@ -252,8 +169,15 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     final currentState = state.value;
     if (currentState == null) return 'Estado não inicializado';
 
-    if (!currentState.temFiltrosAtivos) {
-      return 'Selecione pelo menos um filtro para realizar a busca';
+    // Validate search parameters
+    final validationError = _validationService.validateSearchParams(
+      culturaId: currentState.culturaIdSelecionada,
+      pragaId: currentState.pragaIdSelecionada,
+      defensivoId: currentState.defensivoIdSelecionado,
+    );
+
+    if (validationError != null) {
+      return validationError;
     }
 
     state = AsyncValue.data(
@@ -321,5 +245,46 @@ class BuscaAvancadaNotifier extends _$BuscaAvancadaNotifier {
     if (currentState.hasError) {
       state = AsyncValue.data(currentState.clearError());
     }
+  }
+
+  /// Helper methods that delegate to services
+
+  /// Checks if at least one filter is active
+  bool temFiltrosAtivos() {
+    final currentState = state.value;
+    if (currentState == null) return false;
+
+    return _validationService.hasActiveFilters(
+      culturaId: currentState.culturaIdSelecionada,
+      pragaId: currentState.pragaIdSelecionada,
+      defensivoId: currentState.defensivoIdSelecionado,
+    );
+  }
+
+  /// Builds a text description of active filters
+  String filtrosAtivosTexto() {
+    final currentState = state.value;
+    if (currentState == null) return '';
+
+    return _validationService.buildFiltrosAtivosTexto(
+      culturaId: currentState.culturaIdSelecionada,
+      pragaId: currentState.pragaIdSelecionada,
+      defensivoId: currentState.defensivoIdSelecionado,
+    );
+  }
+
+  /// Builds a map of active filters with their display names
+  Map<String, String> filtrosDetalhados() {
+    final currentState = state.value;
+    if (currentState == null) return {};
+
+    return _dataLoadingService.buildFiltrosDetalhados(
+      culturaId: currentState.culturaIdSelecionada,
+      pragaId: currentState.pragaIdSelecionada,
+      defensivoId: currentState.defensivoIdSelecionado,
+      culturas: currentState.culturas,
+      pragas: currentState.pragas,
+      defensivos: currentState.defensivos,
+    );
   }
 }

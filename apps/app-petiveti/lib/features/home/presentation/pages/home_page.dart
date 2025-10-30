@@ -2,11 +2,23 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../providers/home_provider.dart';
+import '../services/home_actions_service.dart';
 import '../widgets/home_app_bar.dart';
 import '../widgets/home_feature_grid.dart';
 import '../widgets/home_quick_info.dart';
 import '../widgets/home_stats_section.dart';
 
+/// Home Page - Main dashboard for PetiVeti app
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles UI layout and navigation
+/// - **Dependency Inversion**: Depends on HomeActionsService abstraction
+///
+/// Displays:
+/// - Quick stats and health status
+/// - Notifications and system status
+/// - Feature grid for navigation
+/// - Quick info cards for upcoming activities
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -15,12 +27,15 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  // Service instance (injectable via constructor in real app)
+  final HomeActionsService _actionsService = HomeActionsService();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       _loadHomeData();
     });
   }
@@ -39,99 +54,50 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       appBar: HomeAppBar(
         onNotificationTap: _showNotifications,
-        onStatusTap: () => _showStatusInfo(context, statusState),
+        onStatusTap: () => _actionsService.showStatusInfo(context, statusState),
       ),
       body: statusState.isLoading
-        ? Semantics(
-            label: 'Carregando dados da tela inicial',
-            child: const Center(child: CircularProgressIndicator()),
-          )
-        : Semantics(
-            label: 'Página inicial do PetiVeti',
-            hint: 'Arraste para baixo para atualizar os dados',
-            child: RefreshIndicator(
-              onRefresh: () async => _loadHomeData(),
-              child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!statusState.isLoading) HomeStatsSection(stats: statsState),
-                  const SizedBox(height: 16),
-                  if (!statusState.isLoading && statsState.totalAnimals > 0) ...[
-                    HomeQuickInfo(stats: statsState),
-                    const SizedBox(height: 24),
-                  ],
-                  HomeFeatureGrid(stats: statsState),
-                ],
+          ? Semantics(
+              label: 'Carregando dados da tela inicial',
+              child: const Center(child: CircularProgressIndicator()),
+            )
+          : Semantics(
+              label: 'Página inicial do PetiVeti',
+              hint: 'Arraste para baixo para atualizar os dados',
+              child: RefreshIndicator(
+                onRefresh: () async => _loadHomeData(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!statusState.isLoading)
+                        HomeStatsSection(stats: statsState),
+                      const SizedBox(height: 16),
+                      if (!statusState.isLoading &&
+                          statsState.totalAnimals > 0) ...[
+                        HomeQuickInfo(stats: statsState),
+                        const SizedBox(height: 24),
+                      ],
+                      HomeFeatureGrid(stats: statsState),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-      ),
-    );
-  }
-
-  void _showStatusInfo(BuildContext context, HomeStatusState statusState) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          statusState.isOnline 
-            ? 'Online - Última atualização: ${_formatTime(statusState.lastUpdated)}'
-            : 'Offline - Dados locais',
-        ),
-      ),
     );
   }
 
   void _showNotifications() {
     final notifications = ref.read(homeNotificationsProvider);
-    
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Notificações'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: notifications.recentNotifications.isEmpty
-            ? [const Text('Nenhuma notificação')]
-            : notifications.recentNotifications
-                .map((notification) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text('• $notification'),
-                    ))
-                .toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              ref.read(homeNotificationsProvider.notifier).markAllAsRead();
-              Navigator.pop(context);
-            },
-            child: const Text('Marcar como lidas'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-    
-    if (difference.inMinutes < 1) {
-      return 'agora mesmo';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}min atrás';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h atrás';
-    } else {
-      return '${difference.inDays}d atrás';
-    }
+    _actionsService.showNotifications(
+      context,
+      notifications,
+      onMarkAllAsRead: () {
+        ref.read(homeNotificationsProvider.notifier).markAllAsRead();
+      },
+    );
   }
 }

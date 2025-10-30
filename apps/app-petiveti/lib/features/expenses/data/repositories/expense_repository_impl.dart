@@ -1,106 +1,100 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_summary.dart';
 import '../../domain/repositories/expense_repository.dart';
 import '../datasources/expense_local_datasource.dart';
 import '../models/expense_model.dart';
+import '../services/expense_error_handling_service.dart';
 
+@LazySingleton(as: ExpenseRepository)
 class ExpenseRepositoryImpl implements ExpenseRepository {
   final ExpenseLocalDataSource localDataSource;
+  final ExpenseErrorHandlingService errorHandlingService;
 
   ExpenseRepositoryImpl({
     required this.localDataSource,
+    required this.errorHandlingService,
   });
 
   @override
   Future<Either<Failure, List<Expense>>> getExpenses(String userId) async {
-    try {
-      final expenses = await localDataSource.getExpenses(userId);
-      return Right(expenses);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao buscar despesas: ${e.toString()}'));
-    }
+    return errorHandlingService.executeListOperation(
+      operation: () => localDataSource.getExpenses(userId),
+      operationName: 'buscar despesas',
+    );
   }
 
   @override
-  Future<Either<Failure, List<Expense>>> getExpensesByAnimal(String animalId) async {
-    try {
-      final expenses = await localDataSource.getExpensesByAnimal(animalId);
-      return Right(expenses);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao buscar despesas do animal: ${e.toString()}'));
-    }
+  Future<Either<Failure, List<Expense>>> getExpensesByAnimal(
+      String animalId) async {
+    return errorHandlingService.executeListOperation(
+      operation: () => localDataSource.getExpensesByAnimal(animalId),
+      operationName: 'buscar despesas do animal',
+    );
   }
 
   @override
   Future<Either<Failure, List<Expense>>> getExpensesByDateRange(
-    String userId, 
-    DateTime startDate, 
-    DateTime endDate
-  ) async {
-    try {
-      final expenses = await localDataSource.getExpensesByDateRange(userId, startDate, endDate);
-      return Right(expenses);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao buscar despesas por período: ${e.toString()}'));
-    }
+      String userId, DateTime startDate, DateTime endDate) async {
+    return errorHandlingService.executeListOperation(
+      operation: () =>
+          localDataSource.getExpensesByDateRange(userId, startDate, endDate),
+      operationName: 'buscar despesas por período',
+    );
   }
 
   @override
   Future<Either<Failure, List<Expense>>> getExpensesByCategory(
-    String userId, 
-    ExpenseCategory category
-  ) async {
-    try {
-      final expenses = await localDataSource.getExpensesByCategory(userId, category);
-      return Right(expenses);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao buscar despesas por categoria: ${e.toString()}'));
-    }
+      String userId, ExpenseCategory category) async {
+    return errorHandlingService.executeListOperation(
+      operation: () => localDataSource.getExpensesByCategory(userId, category),
+      operationName: 'buscar despesas por categoria',
+    );
   }
 
   @override
-  Future<Either<Failure, ExpenseSummary>> getExpenseSummary(String userId) async {
-    try {
-      final expenses = await localDataSource.getExpenses(userId);
-      final summary = ExpenseSummary.fromExpenses(expenses);
-      return Right(summary);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao gerar resumo de despesas: ${e.toString()}'));
-    }
+  Future<Either<Failure, ExpenseSummary>> getExpenseSummary(
+      String userId) async {
+    return errorHandlingService.executeSummaryOperation(
+      operation: () async {
+        final expenses = await localDataSource.getExpenses(userId);
+        return ExpenseSummary.fromExpenses(expenses);
+      },
+      operationName: 'gerar resumo de despesas',
+    );
   }
 
   @override
   Future<Either<Failure, void>> addExpense(Expense expense) async {
-    try {
-      final expenseModel = ExpenseModel.fromEntity(expense);
-      await localDataSource.addExpense(expenseModel);
-      return const Right(null);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao adicionar despesa: ${e.toString()}'));
-    }
+    return errorHandlingService.executeVoidOperation(
+      operation: () async {
+        final expenseModel = ExpenseModel.fromEntity(expense);
+        await localDataSource.addExpense(expenseModel);
+      },
+      operationName: 'adicionar despesa',
+    );
   }
 
   @override
   Future<Either<Failure, void>> updateExpense(Expense expense) async {
-    try {
-      final expenseModel = ExpenseModel.fromEntity(expense);
-      await localDataSource.updateExpense(expenseModel);
-      return const Right(null);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao atualizar despesa: ${e.toString()}'));
-    }
+    return errorHandlingService.executeVoidOperation(
+      operation: () async {
+        final expenseModel = ExpenseModel.fromEntity(expense);
+        await localDataSource.updateExpense(expenseModel);
+      },
+      operationName: 'atualizar despesa',
+    );
   }
 
   @override
   Future<Either<Failure, void>> deleteExpense(String expenseId) async {
-    try {
-      await localDataSource.deleteExpense(expenseId);
-      return const Right(null);
-    } catch (e) {
-      return Left(CacheFailure(message: 'Erro ao deletar despesa: ${e.toString()}'));
-    }
+    return errorHandlingService.executeVoidOperation(
+      operation: () => localDataSource.deleteExpense(expenseId),
+      operationName: 'deletar despesa',
+    );
   }
 
   @override

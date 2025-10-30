@@ -8,6 +8,8 @@ import '../../domain/entities/comentario_entity.dart';
 import '../../domain/usecases/add_comentario_usecase.dart';
 import '../../domain/usecases/delete_comentario_usecase.dart';
 import '../../domain/usecases/get_comentarios_usecase.dart';
+import '../../services/comentarios_filter_service.dart';
+import '../../services/comentarios_validation_service.dart';
 import 'comentarios_state.dart';
 
 part 'comentarios_notifier.g.dart';
@@ -20,6 +22,8 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   late final AddComentarioUseCase _addComentarioUseCase;
   late final DeleteComentarioUseCase _deleteComentarioUseCase;
   late final ErrorHandlerService _errorHandler;
+  late final ComentariosFilterService _filterService;
+  late final ComentariosValidationService _validationService;
 
   Timer? _filterDebounceTimer;
   List<ComentarioEntity>? _cachedFilteredResults;
@@ -31,6 +35,8 @@ class ComentariosNotifier extends _$ComentariosNotifier {
     _addComentarioUseCase = di.sl<AddComentarioUseCase>();
     _deleteComentarioUseCase = di.sl<DeleteComentarioUseCase>();
     _errorHandler = ErrorHandlerService();
+    _filterService = di.sl<ComentariosFilterService>();
+    _validationService = di.sl<ComentariosValidationService>();
 
     // ✅ CORREÇÃO: Carregar comentários automaticamente no build
     // Isso garante que a página sempre tenha dados na inicialização
@@ -488,7 +494,17 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   void _performFiltering() {
     final currentState = state.value;
     if (currentState == null) return;
-    final currentFilterHash = _generateFilterHash(currentState);
+
+    // Generate filter hash for caching
+    final currentFilterHash = _filterService.generateFilterHash(
+      comentariosCount: currentState.comentarios.length,
+      category: currentState.selectedFilter,
+      tool: currentState.selectedTool,
+      context: currentState.selectedContext,
+      searchQuery: currentState.searchQuery,
+    );
+
+    // Return cached results if filter state hasn't changed
     if (_lastFilterHash == currentFilterHash &&
         _cachedFilteredResults != null) {
       state = AsyncValue.data(
@@ -496,52 +512,23 @@ class ComentariosNotifier extends _$ComentariosNotifier {
       );
       return;
     }
-    List<ComentarioEntity> filtered = currentState.comentarios;
-    if (currentState.selectedFilter != 'all') {
-      filtered = filtered
-          .where((c) => c.ageCategory == currentState.selectedFilter)
-          .toList();
-    }
-    if (currentState.selectedTool != null) {
-      filtered = filtered
-          .where((c) => c.ferramenta == currentState.selectedTool)
-          .toList();
-    }
-    if (currentState.searchQuery.isNotEmpty) {
-      final query = currentState.searchQuery.toLowerCase();
-      filtered = _performOptimizedSearch(filtered, query);
-    }
+
+    // Apply all filters using the service
+    final filtered = _filterService.applyAllFilters(
+      comentarios: currentState.comentarios,
+      category: currentState.selectedFilter,
+      tool: currentState.selectedTool,
+      context: currentState.selectedContext,
+      searchQuery: currentState.searchQuery,
+    );
+
+    // Cache results
     _cachedFilteredResults = filtered;
     _lastFilterHash = currentFilterHash;
 
     state = AsyncValue.data(
       currentState.copyWith(filteredComentarios: filtered),
     );
-  }
-
-  /// Generate a hash for current filter state to enable caching
-  String _generateFilterHash(ComentariosState currentState) {
-    return '${currentState.selectedFilter}_${currentState.selectedTool ?? 'null'}_${currentState.searchQuery}_${currentState.comentarios.length}';
-  }
-
-  /// Perform optimized search with early termination and better string matching
-  List<ComentarioEntity> _performOptimizedSearch(
-    List<ComentarioEntity> items,
-    String query,
-  ) {
-    if (query.isEmpty) return items;
-    final searchTerms = query
-        .split(' ')
-        .where((term) => term.isNotEmpty)
-        .map((term) => term.toLowerCase())
-        .toList();
-
-    return items.where((comentario) {
-      final searchableText =
-          '${comentario.titulo} ${comentario.conteudo} ${comentario.ferramenta}'
-              .toLowerCase();
-      return searchTerms.every((term) => searchableText.contains(term));
-    }).toList();
   }
 
   /// Clear filter cache when data changes
@@ -605,5 +592,33 @@ class ComentariosNotifier extends _$ComentariosNotifier {
   bool canEditComentario(String id) {
     final comentario = getComentarioById(id);
     return comentario?.canBeEdited ?? false;
+  }
+
+  /// Validation helper methods that delegate to service
+
+  /// Validates if content is valid
+  bool isValidContent(String content) {
+    return _validationService.isValidContent(content);
+  }
+
+  /// Gets validation error message for content
+  String getContentValidationError(String content) {
+    return _validationService.getContentValidationError(content);
+  }
+
+  /// Checks if user can add more comentarios
+  bool canAddComentario(int maxAllowed) {
+    final currentState = state.value;
+    if (currentState == null) return false;
+
+    return _validationService.canAddComentario(
+      currentState.comentarios.length,
+      maxAllowed,
+    );
+  }
+
+  /// Gets error message when limit is reached
+  String getLimitReachedMessage(int maxAllowed) {
+    return _validationService.getLimitReachedMessage(maxAllowed);
   }
 }

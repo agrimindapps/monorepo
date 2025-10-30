@@ -1,29 +1,26 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../entities/expense.dart';
 import '../repositories/expense_repository.dart';
+import '../services/expense_validation_service.dart';
 
+@lazySingleton
 class AddExpense implements UseCase<void, Expense> {
   final ExpenseRepository repository;
+  final ExpenseValidationService validationService;
 
-  AddExpense(this.repository);
+  AddExpense(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(Expense expense) async {
-    if (expense.title.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'Título da despesa é obrigatório'));
-    }
+    final validation = validationService.validateForAdd(expense);
 
-    if (expense.amount <= 0) {
-      return const Left(ValidationFailure(message: 'Valor da despesa deve ser maior que zero'));
-    }
-
-    if (expense.expenseDate.isAfter(DateTime.now().add(const Duration(days: 1)))) {
-      return const Left(ValidationFailure(message: 'Data da despesa não pode ser futura'));
-    }
-
-    return await repository.addExpense(expense);
+    return validation.fold(
+      (failure) => Left(failure),
+      (validExpense) => repository.addExpense(validExpense),
+    );
   }
 }

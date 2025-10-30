@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/receituagro_auth_notifier.dart';
+import '../../services/auth_validation_service.dart';
 import '../state/login_state.dart';
 
 part 'login_notifier.g.dart';
@@ -15,6 +16,7 @@ class LoginNotifier extends _$LoginNotifier {
   late final TextEditingController _passwordController;
   late final TextEditingController _nameController;
   late final TextEditingController _confirmPasswordController;
+  late final AuthValidationService _validationService;
 
   @override
   LoginState build() {
@@ -22,6 +24,7 @@ class LoginNotifier extends _$LoginNotifier {
     _passwordController = TextEditingController();
     _nameController = TextEditingController();
     _confirmPasswordController = TextEditingController();
+    _validationService = AuthValidationService();
     ref.onDispose(() {
       _emailController.dispose();
       _passwordController.dispose();
@@ -43,20 +46,16 @@ class LoginNotifier extends _$LoginNotifier {
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
   TextEditingController get nameController => _nameController;
-  TextEditingController get confirmPasswordController => _confirmPasswordController;
+  TextEditingController get confirmPasswordController =>
+      _confirmPasswordController;
 
   void toggleAuthMode() {
-    state = state.copyWith(
-      isSignUpMode: !state.isSignUpMode,
-      clearError: true,
-    );
+    state = state.copyWith(isSignUpMode: !state.isSignUpMode, clearError: true);
     _clearForms();
   }
 
   void togglePasswordVisibility() {
-    state = state.copyWith(
-      obscurePassword: !state.obscurePassword,
-    );
+    state = state.copyWith(obscurePassword: !state.obscurePassword);
   }
 
   void toggleConfirmPasswordVisibility() {
@@ -66,61 +65,39 @@ class LoginNotifier extends _$LoginNotifier {
   }
 
   void toggleRememberMe() {
-    state = state.copyWith(
-      rememberMe: !state.rememberMe,
-    );
+    state = state.copyWith(rememberMe: !state.rememberMe);
   }
 
   void showRecoveryForm() {
-    state = state.copyWith(
-      isShowingRecoveryForm: true,
-    );
+    state = state.copyWith(isShowingRecoveryForm: true);
   }
 
   void hideRecoveryForm() {
-    state = state.copyWith(
-      isShowingRecoveryForm: false,
-    );
+    state = state.copyWith(isShowingRecoveryForm: false);
   }
 
   String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email é obrigatório';
-    }
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      return 'Email inválido';
-    }
-    return null;
+    return _validationService
+        .validateEmail(value)
+        .fold((error) => error, (_) => null);
   }
 
   String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Senha é obrigatória';
-    }
-    if (value.length < 6) {
-      return 'Senha deve ter pelo menos 6 caracteres';
-    }
-    return null;
+    return _validationService
+        .validatePassword(value)
+        .fold((error) => error, (_) => null);
   }
 
   String? validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Nome é obrigatório';
-    }
-    if (value.length < 2) {
-      return 'Nome deve ter pelo menos 2 caracteres';
-    }
-    return null;
+    return _validationService
+        .validateName(value)
+        .fold((error) => error, (_) => null);
   }
 
   String? validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Confirmação de senha é obrigatória';
-    }
-    if (value != _passwordController.text) {
-      return 'Senhas não coincidem';
-    }
-    return null;
+    return _validationService
+        .validateConfirmPassword(value, _passwordController.text)
+        .fold((error) => error, (_) => null);
   }
 
   /// Login with email and password
@@ -131,24 +108,23 @@ class LoginNotifier extends _$LoginNotifier {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final emailError = validateEmail(email);
-    final passwordError = validatePassword(password);
 
-    if (emailError != null || passwordError != null) {
+    final validation = _validationService.validateLoginForm(
+      email: email,
+      password: password,
+    );
+
+    if (validation.isLeft()) {
+      final errorMessage = validation.fold((error) => error, (_) => '');
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro de validação - $emailError, $passwordError');
+        print('❌ LoginNotifier: Erro de validação - $errorMessage');
       }
-      state = state.copyWith(
-        errorMessage: emailError ?? passwordError,
-      );
+      state = state.copyWith(errorMessage: errorMessage);
       return;
     }
 
     // Atualiza state para loading
-    state = state.copyWith(
-      isLoading: true,
-      clearError: true,
-    );
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final result = await _authNotifier.signInWithEmailAndPassword(
@@ -196,26 +172,25 @@ class LoginNotifier extends _$LoginNotifier {
     final password = _passwordController.text;
     final name = _nameController.text.trim();
     final confirmPassword = _confirmPasswordController.text;
-    final emailError = validateEmail(email);
-    final passwordError = validatePassword(password);
-    final nameError = validateName(name);
-    final confirmPasswordError = validateConfirmPassword(confirmPassword);
 
-    if (emailError != null || passwordError != null || nameError != null || confirmPasswordError != null) {
+    final validation = _validationService.validateSignupForm(
+      email: email,
+      password: password,
+      name: name,
+      confirmPassword: confirmPassword,
+    );
+
+    if (validation.isLeft()) {
+      final errorMessage = validation.fold((error) => error, (_) => '');
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro de validação no cadastro');
+        print('❌ LoginNotifier: Erro de validação no cadastro - $errorMessage');
       }
-      state = state.copyWith(
-        errorMessage: emailError ?? passwordError ?? nameError ?? confirmPasswordError,
-      );
+      state = state.copyWith(errorMessage: errorMessage);
       return;
     }
 
     // Atualiza state para loading
-    state = state.copyWith(
-      isLoading: true,
-      clearError: true,
-    );
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final result = await _authNotifier.signUpWithEmailAndPassword(
@@ -262,32 +237,27 @@ class LoginNotifier extends _$LoginNotifier {
 
     final email = _emailController.text.trim();
 
-    final emailError = validateEmail(email);
-    if (emailError != null) {
+    final validation = _validationService.validateEmail(email);
+    if (validation.isLeft()) {
+      final errorMessage = validation.fold((error) => error, (_) => '');
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro de validação no email de recuperação');
+        print(
+          '❌ LoginNotifier: Erro de validação no email de recuperação - $errorMessage',
+        );
       }
-      state = state.copyWith(
-        errorMessage: emailError,
-      );
+      state = state.copyWith(errorMessage: errorMessage);
       return;
     }
 
     // Atualiza state para loading
-    state = state.copyWith(
-      isLoading: true,
-      clearError: true,
-    );
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       await _authNotifier.sendPasswordResetEmail(email: email);
       if (kDebugMode) {
         print('✅ LoginNotifier: Email de recuperação enviado');
       }
-      state = state.copyWith(
-        isLoading: false,
-        clearError: true,
-      );
+      state = state.copyWith(isLoading: false, clearError: true);
     } catch (e) {
       if (kDebugMode) {
         print('❌ LoginNotifier: Erro ao enviar email de recuperação - $e');

@@ -2,6 +2,7 @@ import 'package:core/core.dart' show Box;
 
 import '../../../../core/storage/hive_service.dart';
 import '../models/animal_model.dart';
+import 'delete_strategy.dart';
 
 abstract class AnimalLocalDataSource {
   Future<List<AnimalModel>> getAnimals();
@@ -12,10 +13,23 @@ abstract class AnimalLocalDataSource {
   Stream<List<AnimalModel>> watchAnimals();
 }
 
+/// Responsabilidades ÚNICAS (SRP):
+/// 1. Comunicação com Hive (storage)
+/// 2. Operações CRUD básicas
+/// 3. Ordenação e filtragem básica de resultados
+///
+/// Não é responsável por:
+/// - Lógica de delete (delegada para DeleteStrategy)
+/// - Transformações complexas (responsabilidade da Repository)
+/// - Sincronização (responsabilidade do Sync Manager)
 class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   final HiveService _hiveService;
+  final DeleteStrategy _deleteStrategy;
 
-  AnimalLocalDataSourceImpl(this._hiveService);
+  AnimalLocalDataSourceImpl(
+    this._hiveService, {
+    DeleteStrategy? deleteStrategy,
+  }) : _deleteStrategy = deleteStrategy ?? SoftDeleteStrategy();
 
   Future<Box<AnimalModel>> get _box async {
     return await _hiveService.getBox<AnimalModel>(HiveBoxNames.animals);
@@ -24,16 +38,14 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
   @override
   Future<List<AnimalModel>> getAnimals() async {
     final animalsBox = await _box;
-    return animalsBox.values.where((animal) => !animal.isDeleted).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return _filterAndSort(animalsBox.values.toList());
   }
 
   @override
   Future<AnimalModel?> getAnimalById(String id) async {
     final animalsBox = await _box;
-    return animalsBox.values
-        .where((animal) => animal.id == id && !animal.isDeleted)
-        .firstOrNull;
+    final animal = animalsBox.get(id);
+    return animal != null && !animal.isDeleted ? animal : null;
   }
 
   @override
@@ -53,10 +65,8 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     final animalsBox = await _box;
     final animal = animalsBox.get(id);
     if (animal != null) {
-      final deletedAnimal = animal.copyWith(
-        isActive: false,
-        updatedAt: DateTime.now(),
-      );
+      // Delegar lógica de delete para a estratégia
+      final deletedAnimal = await _deleteStrategy.execute(animal);
       await animalsBox.put(id, deletedAnimal);
     }
   }
@@ -66,8 +76,13 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     final animalsBox = await _box;
 
     yield* Stream.periodic(const Duration(milliseconds: 500), (_) {
-      return animalsBox.values.where((animal) => !animal.isDeleted).toList()
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return _filterAndSort(animalsBox.values.toList());
     });
+  }
+
+  /// Filtrar ativos e ordenar por data de criação (responsabilidade comum)
+  List<AnimalModel> _filterAndSort(List<AnimalModel> animals) {
+    return animals.where((animal) => !animal.isDeleted).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 }

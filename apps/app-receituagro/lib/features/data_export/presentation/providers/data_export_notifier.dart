@@ -1,6 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/di/injection_container.dart' as di;
 import '../../domain/entities/export_request.dart';
+import '../../services/export_progress_service.dart';
+import '../../services/export_validation_service.dart';
 
 part 'data_export_notifier.g.dart';
 
@@ -59,8 +62,13 @@ class DataExportState {
 /// Princípios: Single Responsibility + Dependency Inversion
 @riverpod
 class DataExportNotifier extends _$DataExportNotifier {
+  late final ExportProgressService _progressService;
+  late final ExportValidationService _validationService;
+
   @override
   Future<DataExportState> build() async {
+    _progressService = di.sl<ExportProgressService>();
+    _validationService = di.sl<ExportValidationService>();
     return DataExportState.initial();
   }
 
@@ -72,13 +80,34 @@ class DataExportNotifier extends _$DataExportNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
+      // Simulate API call
       await Future<void>.delayed(const Duration(seconds: 2));
+
+      // Use validation service to check availability
+      final isAvailable = _validationService.areDataTypesAvailable(
+        requestedDataTypes,
+      );
+
+      if (!isAvailable) {
+        state = AsyncValue.data(
+          currentState.copyWith(
+            isLoading: false,
+            availabilityResult: const ExportAvailabilityResult.unavailable(
+              reason: 'Diagnósticos não estão disponíveis para exportação',
+            ),
+          ),
+        );
+        return;
+      }
+
       final availableTypes = <DataType, bool>{};
       for (final dataType in requestedDataTypes) {
-        availableTypes[dataType] = dataType != DataType.diagnostics; // Example: diagnostics not available
+        availableTypes[dataType] = dataType != DataType.diagnostics;
       }
 
       state = AsyncValue.data(
@@ -112,7 +141,34 @@ class DataExportNotifier extends _$DataExportNotifier {
     final currentState = state.value;
     if (currentState == null) return null;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    // Validate export request
+    final validationError = _validationService.validateExportRequest(
+      userId: userId,
+      dataTypes: dataTypes,
+      format: format,
+    );
+
+    if (validationError != null) {
+      state = AsyncValue.data(currentState.copyWith(error: validationError));
+      return null;
+    }
+
+    // Check if user can request more exports
+    if (!_validationService.canRequestExport(
+      history: currentState.exportHistory,
+    )) {
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error:
+              'Você atingiu o limite de exportações pendentes. Aguarde a conclusão das exportações em andamento.',
+        ),
+      );
+      return null;
+    }
+
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final request = ExportRequest(
@@ -124,7 +180,9 @@ class DataExportNotifier extends _$DataExportNotifier {
         status: ExportRequestStatus.pending,
       );
       final updatedHistory = [...currentState.exportHistory, request];
-      state = AsyncValue.data(currentState.copyWith(exportHistory: updatedHistory));
+      state = AsyncValue.data(
+        currentState.copyWith(exportHistory: updatedHistory),
+      );
       await _processExportRequest(request);
 
       return request;
@@ -145,28 +203,35 @@ class DataExportNotifier extends _$DataExportNotifier {
     if (currentState == null) return;
 
     try {
-      _updateExportRequest(request.copyWith(status: ExportRequestStatus.processing));
+      _updateExportRequest(
+        request.copyWith(status: ExportRequestStatus.processing),
+      );
+
       const totalSteps = 5;
-      final steps = [
-        'Coletando dados do perfil...',
-        'Processando favoritos...',
-        'Compilando comentários...',
-        'Gerando arquivo ${request.format.displayName}...',
-        'Finalizando exportação...',
-      ];
+      const averageStepDuration = 3; // seconds
 
       for (int i = 0; i < totalSteps; i++) {
-        final updatedProgress = currentState.currentProgress.copyWith(
-          percentage: ((i + 1) / totalSteps) * 100,
-          currentTask: steps[i],
-          estimatedTimeRemaining: i < totalSteps - 1 ? '${(totalSteps - i - 1) * 3} segundos restantes' : null,
+        // Use progress service to calculate and update progress
+        final updatedProgress = _progressService.updateProgress(
+          currentStep: i,
+          totalSteps: totalSteps,
+          format: request.format,
+          averageStepDurationSeconds: averageStepDuration,
         );
 
-        state = AsyncValue.data(currentState.copyWith(currentProgress: updatedProgress));
-        await Future<void>.delayed(const Duration(seconds: 3));
+        state = AsyncValue.data(
+          currentState.copyWith(currentProgress: updatedProgress),
+        );
+        await Future<void>.delayed(
+          const Duration(seconds: averageStepDuration),
+        );
       }
-      const completedProgress = ExportProgress.completed();
-      state = AsyncValue.data(currentState.copyWith(currentProgress: completedProgress));
+
+      // Use progress service for completion
+      final completedProgress = _progressService.createCompletedProgress();
+      state = AsyncValue.data(
+        currentState.copyWith(currentProgress: completedProgress),
+      );
 
       _updateExportRequest(
         request.copyWith(
@@ -176,8 +241,13 @@ class DataExportNotifier extends _$DataExportNotifier {
         ),
       );
     } catch (e) {
-      final errorProgress = ExportProgress.error('Erro durante processamento: ${e.toString()}');
-      state = AsyncValue.data(currentState.copyWith(currentProgress: errorProgress));
+      // Use progress service for error
+      final errorProgress = _progressService.createErrorProgress(
+        'Erro durante processamento: ${e.toString()}',
+      );
+      state = AsyncValue.data(
+        currentState.copyWith(currentProgress: errorProgress),
+      );
 
       _updateExportRequest(
         request.copyWith(
@@ -195,11 +265,17 @@ class DataExportNotifier extends _$DataExportNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    final index = currentState.exportHistory.indexWhere((req) => req.id == updatedRequest.id);
+    final index = currentState.exportHistory.indexWhere(
+      (req) => req.id == updatedRequest.id,
+    );
     if (index != -1) {
-      final updatedHistory = List<ExportRequest>.from(currentState.exportHistory);
+      final updatedHistory = List<ExportRequest>.from(
+        currentState.exportHistory,
+      );
       updatedHistory[index] = updatedRequest;
-      state = AsyncValue.data(currentState.copyWith(exportHistory: updatedHistory));
+      state = AsyncValue.data(
+        currentState.copyWith(exportHistory: updatedHistory),
+      );
     }
   }
 
@@ -208,7 +284,9 @@ class DataExportNotifier extends _$DataExportNotifier {
     final currentState = state.value;
     if (currentState == null) return;
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       await Future<void>.delayed(const Duration(seconds: 1));
@@ -219,17 +297,16 @@ class DataExportNotifier extends _$DataExportNotifier {
           dataTypes: const {DataType.userProfile, DataType.favorites},
           format: ExportFormat.json,
           requestDate: DateTime.now().subtract(const Duration(days: 2)),
-          completionDate: DateTime.now().subtract(const Duration(days: 2, hours: 1)),
+          completionDate: DateTime.now().subtract(
+            const Duration(days: 2, hours: 1),
+          ),
           status: ExportRequestStatus.completed,
           downloadUrl: 'https://example.com/download/1',
         ),
       ];
 
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          exportHistory: history,
-        ),
+        currentState.copyWith(isLoading: false, exportHistory: history),
       );
     } catch (e) {
       state = AsyncValue.data(
@@ -247,10 +324,29 @@ class DataExportNotifier extends _$DataExportNotifier {
     if (currentState == null) return false;
 
     try {
-      final request = currentState.exportHistory.firstWhere((req) => req.id == exportId);
-      if (request.downloadUrl == null) {
-        throw Exception('URL de download não disponível');
+      final request = currentState.exportHistory.firstWhere(
+        (req) => req.id == exportId,
+        orElse: () => throw Exception('Exportação não encontrada'),
+      );
+
+      // Validate if export is downloadable
+      if (!_validationService.isDownloadable(request)) {
+        String errorMessage;
+        if (request.status != ExportRequestStatus.completed) {
+          errorMessage = 'Exportação ainda não foi concluída';
+        } else if (request.downloadUrl == null) {
+          errorMessage = 'URL de download não disponível';
+        } else if (_validationService.isExportExpired(request)) {
+          errorMessage = 'Exportação expirada. Solicite uma nova exportação.';
+        } else {
+          errorMessage = 'Exportação não está disponível para download';
+        }
+
+        state = AsyncValue.data(currentState.copyWith(error: errorMessage));
+        return false;
       }
+
+      // Simulate download
       await Future<void>.delayed(const Duration(seconds: 2));
 
       return true;
@@ -268,14 +364,20 @@ class DataExportNotifier extends _$DataExportNotifier {
     if (currentState == null) return false;
 
     try {
-      final updatedHistory = currentState.exportHistory.where((req) => req.id != exportId).toList();
-      state = AsyncValue.data(currentState.copyWith(exportHistory: updatedHistory));
+      final updatedHistory = currentState.exportHistory
+          .where((req) => req.id != exportId)
+          .toList();
+      state = AsyncValue.data(
+        currentState.copyWith(exportHistory: updatedHistory),
+      );
       await Future<void>.delayed(const Duration(milliseconds: 500));
 
       return true;
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(error: 'Erro ao deletar exportação: ${e.toString()}'),
+        currentState.copyWith(
+          error: 'Erro ao deletar exportação: ${e.toString()}',
+        ),
       );
       return false;
     }

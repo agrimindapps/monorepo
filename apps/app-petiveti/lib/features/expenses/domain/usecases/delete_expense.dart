@@ -1,20 +1,25 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
 import '../repositories/expense_repository.dart';
+import '../services/expense_validation_service.dart';
 
+@lazySingleton
 class DeleteExpense implements UseCase<void, String> {
   final ExpenseRepository repository;
+  final ExpenseValidationService validationService;
 
-  DeleteExpense(this.repository);
+  DeleteExpense(this.repository, this.validationService);
 
   @override
   Future<Either<Failure, void>> call(String expenseId) async {
-    if (expenseId.trim().isEmpty) {
-      return const Left(ValidationFailure(message: 'ID da despesa é obrigatório'));
-    }
+    final validation = validationService.validateId(expenseId);
 
-    return await repository.deleteExpense(expenseId);
+    return validation.fold(
+      (failure) => Left(failure),
+      (validId) => repository.deleteExpense(validId),
+    );
   }
 }

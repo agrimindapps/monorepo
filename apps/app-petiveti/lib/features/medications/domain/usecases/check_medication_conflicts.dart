@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/interfaces/usecase.dart';
@@ -9,7 +10,13 @@ import '../repositories/medication_repository.dart';
 ///
 /// This use case verifies if a medication conflicts with existing medications
 /// based on timing and potential drug interactions.
-class CheckMedicationConflicts implements UseCase<List<Medication>, Medication> {
+///
+/// **SOLID Principles:**
+/// - **Single Responsibility**: Only checks for conflicts
+/// - **Dependency Inversion**: Depends on repository abstraction
+@lazySingleton
+class CheckMedicationConflicts
+    implements UseCase<List<Medication>, Medication> {
   final MedicationRepository repository;
 
   CheckMedicationConflicts(this.repository);

@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/cultura_entity.dart';
 import '../../domain/usecases/get_culturas_params.dart';
 import '../../domain/usecases/get_culturas_usecase.dart';
@@ -13,10 +14,12 @@ part 'culturas_notifier.g.dart';
 @riverpod
 class CulturasNotifier extends _$CulturasNotifier {
   late final GetCulturasUseCase _getCulturasUseCase;
+  late final FailureMessageService _failureMessageService;
 
   @override
   Future<CulturasState> build() async {
     _getCulturasUseCase = di.sl<GetCulturasUseCase>();
+    _failureMessageService = di.sl<FailureMessageService>();
     return CulturasState.initial();
   }
 
@@ -39,7 +42,7 @@ class CulturasNotifier extends _$CulturasNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: _mapFailureToMessage(failure),
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -111,7 +114,7 @@ class CulturasNotifier extends _$CulturasNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: _mapFailureToMessage(failure),
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -161,7 +164,7 @@ class CulturasNotifier extends _$CulturasNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: _mapFailureToMessage(failure),
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -203,18 +206,5 @@ class CulturasNotifier extends _$CulturasNotifier {
     if (currentState == null) return;
 
     state = AsyncValue.data(currentState.clearError());
-  }
-
-  String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure:
-        return 'Erro do servidor. Tente novamente.';
-      case CacheFailure:
-        return 'Erro ao acessar dados locais.';
-      case NetworkFailure:
-        return 'Erro de conexão. Verifique sua internet.';
-      default:
-        return 'Erro inesperado. Tente novamente.';
-    }
   }
 }

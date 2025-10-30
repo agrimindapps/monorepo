@@ -7,8 +7,13 @@ import '../../domain/entities/sync/appointment_sync_entity.dart';
 import '../../domain/repositories/appointment_repository.dart';
 import '../datasources/appointment_local_datasource.dart';
 import '../models/appointment_model.dart';
+import '../services/appointment_error_handling_service.dart';
 
 /// AppointmentRepository implementation using UnifiedSyncManager for offline-first sync
+///
+/// **SOLID Principles Applied:**
+/// - **Single Responsibility**: Only handles data persistence and sync coordination
+/// - **Dependency Inversion**: Depends on abstractions (datasource, error handling service)
 ///
 /// **Características especiais para Appointments:**
 /// - **Emergency Priority**: Appointments de emergência têm prioridade alta
@@ -22,6 +27,7 @@ import '../models/appointment_model.dart';
 /// - Marca entidades como dirty após operações CRUD
 /// - Auto-sync triggers após operações de escrita
 /// - Removido BaseRepository e Connectivity dependency
+/// - Usa AppointmentErrorHandlingService para error handling centralizado
 ///
 /// **Fluxo de operações:**
 /// 1. CREATE: Salva local → Marca dirty → UnifiedSyncManager sincroniza em background
@@ -29,9 +35,13 @@ import '../models/appointment_model.dart';
 /// 3. DELETE: Marca como deleted (soft delete) → Sync em background
 /// 4. READ: Sempre lê do cache local (extremamente rápido)
 class AppointmentRepositoryImpl implements AppointmentRepository {
-  const AppointmentRepositoryImpl(this._localDataSource);
+  const AppointmentRepositoryImpl(
+    this._localDataSource,
+    this._errorHandlingService,
+  );
 
   final AppointmentLocalDataSource _localDataSource;
+  final AppointmentErrorHandlingService _errorHandlingService;
 
   /// UnifiedSyncManager singleton instance (for future use)
   // ignore: unused_element
@@ -45,44 +55,37 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   Future<Either<local_failures.Failure, Appointment>> addAppointment(
     Appointment appointment,
   ) async {
-    try {
-      // 1. Converter para AppointmentSyncEntity e marcar como dirty para sync posterior
-      final syncEntity = AppointmentSyncEntity.fromLegacyAppointment(
-        appointment,
-        moduleName: 'petiveti',
-      ).markAsDirty();
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        // 1. Converter para AppointmentSyncEntity e marcar como dirty para sync posterior
+        final syncEntity = AppointmentSyncEntity.fromLegacyAppointment(
+          appointment,
+          moduleName: 'petiveti',
+        ).markAsDirty();
 
-      // 2. Salvar localmente (usando AppointmentModel para compatibilidade com Hive)
-      final appointmentModel =
-          AppointmentModel.fromEntity(syncEntity.toLegacyAppointment());
-      await _localDataSource.cacheAppointment(appointmentModel);
+        // 2. Salvar localmente (usando AppointmentModel para compatibilidade com Hive)
+        final appointmentModel =
+            AppointmentModel.fromEntity(syncEntity.toLegacyAppointment());
+        await _localDataSource.cacheAppointment(appointmentModel);
 
-      if (kDebugMode) {
-        debugPrint(
-          '[AppointmentRepository] Appointment created locally: ${appointment.id}',
-        );
-        if (syncEntity.isEmergency) {
+        if (kDebugMode) {
           debugPrint(
-            '[AppointmentRepository] ⚠️ Emergency appointment - priority sync',
+            '[AppointmentRepository] Appointment created locally: ${appointment.id}',
           );
+          if (syncEntity.isEmergency) {
+            debugPrint(
+              '[AppointmentRepository] ⚠️ Emergency appointment - priority sync',
+            );
+          }
         }
-      }
 
-      // 3. Trigger sync em background (não-bloqueante)
-      _triggerBackgroundSync();
+        // 3. Trigger sync em background (não-bloqueante)
+        _triggerBackgroundSync();
 
-      return Right(syncEntity.toLegacyAppointment());
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        debugPrint('[AppointmentRepository] Error creating appointment: $e');
-        debugPrint('Stack trace: $stackTrace');
-      }
-      return Left(
-        local_failures.ServerFailure(
-          message: 'Failed to create appointment: $e',
-        ),
-      );
-    }
+        return syncEntity.toLegacyAppointment();
+      },
+      operationName: 'addAppointment',
+    );
   }
 
   // ========================================================================
@@ -93,67 +96,58 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   Future<Either<local_failures.Failure, List<Appointment>>> getAppointments(
     String animalId,
   ) async {
-    try {
-      final localAppointments =
-          await _localDataSource.getAppointments(animalId);
-      final activeAppointments = localAppointments
-          .where((model) => !model.isDeleted)
-          .map((model) => model.toEntity())
-          .toList();
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localAppointments =
+            await _localDataSource.getAppointments(animalId);
+        final activeAppointments = localAppointments
+            .where((model) => !model.isDeleted)
+            .map((model) => model.toEntity())
+            .toList();
 
-      return Right(activeAppointments);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get appointments: $e',
-        ),
-      );
-    }
+        return activeAppointments;
+      },
+      operationName: 'getAppointments',
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, List<Appointment>>>
       getUpcomingAppointments(String animalId) async {
-    try {
-      final localAppointments =
-          await _localDataSource.getAppointments(animalId);
-      final upcomingAppointments = localAppointments
-          .where((model) => !model.isDeleted && model.toEntity().isUpcoming)
-          .map((model) => model.toEntity())
-          .toList();
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localAppointments =
+            await _localDataSource.getAppointments(animalId);
+        final upcomingAppointments = localAppointments
+            .where((model) => !model.isDeleted && model.toEntity().isUpcoming)
+            .map((model) => model.toEntity())
+            .toList();
 
-      return Right(upcomingAppointments);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get upcoming appointments: $e',
-        ),
-      );
-    }
+        return upcomingAppointments;
+      },
+      operationName: 'getUpcomingAppointments',
+    );
   }
 
   @override
   Future<Either<local_failures.Failure, Appointment?>> getAppointmentById(
     String id,
   ) async {
-    try {
-      final localAppointment = await _localDataSource.getAppointmentById(id);
+    return _errorHandlingService.executeNullableOperation(
+      operation: () async {
+        final localAppointment = await _localDataSource.getAppointmentById(id);
 
-      if (localAppointment != null) {
-        if (localAppointment.isDeleted) {
-          return Left(
-            local_failures.CacheFailure(message: 'Appointment was deleted'),
-          );
+        if (localAppointment != null) {
+          if (localAppointment.isDeleted) {
+            throw Exception('Appointment was deleted');
+          }
+          return localAppointment.toEntity();
         }
-        return Right(localAppointment.toEntity());
-      }
 
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(message: 'Failed to get appointment: $e'),
-      );
-    }
+        return null;
+      },
+      operationName: 'getAppointmentById',
+    );
   }
 
   @override
@@ -163,28 +157,29 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    try {
-      final localAppointments =
-          await _localDataSource.getAppointments(animalId);
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        final localAppointments =
+            await _localDataSource.getAppointments(animalId);
 
-      final filteredAppointments = localAppointments.where((model) {
-        if (model.isDeleted) return false;
+        final filteredAppointments = localAppointments
+            .where((model) {
+              if (model.isDeleted) return false;
 
-        final appointmentDate =
-            DateTime.fromMillisecondsSinceEpoch(model.dateTimestamp);
-        return appointmentDate
-                .isAfter(startDate.subtract(const Duration(days: 1))) &&
-            appointmentDate.isBefore(endDate.add(const Duration(days: 1)));
-      }).map((model) => model.toEntity()).toList();
+              final appointmentDate =
+                  DateTime.fromMillisecondsSinceEpoch(model.dateTimestamp);
+              return appointmentDate
+                      .isAfter(startDate.subtract(const Duration(days: 1))) &&
+                  appointmentDate
+                      .isBefore(endDate.add(const Duration(days: 1)));
+            })
+            .map((model) => model.toEntity())
+            .toList();
 
-      return Right(filteredAppointments);
-    } catch (e) {
-      return Left(
-        local_failures.CacheFailure(
-          message: 'Failed to get appointments by date range: $e',
-        ),
-      );
-    }
+        return filteredAppointments;
+      },
+      operationName: 'getAppointmentsByDateRange',
+    );
   }
 
   // ========================================================================
@@ -195,44 +190,39 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   Future<Either<local_failures.Failure, Appointment>> updateAppointment(
     Appointment appointment,
   ) async {
-    try {
-      // 1. Buscar appointment atual para preservar sync fields
-      final currentAppointment =
-          await _localDataSource.getAppointmentById(appointment.id);
-      if (currentAppointment == null) {
-        return Left(
-          local_failures.CacheFailure(message: 'Appointment not found'),
-        );
-      }
+    return _errorHandlingService.executeOperation(
+      operation: () async {
+        // 1. Buscar appointment atual para preservar sync fields
+        final currentAppointment =
+            await _localDataSource.getAppointmentById(appointment.id);
+        if (currentAppointment == null) {
+          throw Exception('Appointment not found');
+        }
 
-      // 2. Converter para SyncEntity, marcar como dirty e incrementar versão
-      final syncEntity = AppointmentSyncEntity.fromLegacyAppointment(
-        appointment,
-        moduleName: 'petiveti',
-      ).markAsDirty().incrementVersion();
+        // 2. Converter para SyncEntity, marcar como dirty e incrementar versão
+        final syncEntity = AppointmentSyncEntity.fromLegacyAppointment(
+          appointment,
+          moduleName: 'petiveti',
+        ).markAsDirty().incrementVersion();
 
-      // 3. Atualizar localmente
-      final appointmentModel =
-          AppointmentModel.fromEntity(syncEntity.toLegacyAppointment());
-      await _localDataSource.updateAppointment(appointmentModel);
+        // 3. Atualizar localmente
+        final appointmentModel =
+            AppointmentModel.fromEntity(syncEntity.toLegacyAppointment());
+        await _localDataSource.updateAppointment(appointmentModel);
 
-      if (kDebugMode) {
-        debugPrint(
-          '[AppointmentRepository] Appointment updated locally: ${appointment.id} (version: ${syncEntity.version})',
-        );
-      }
+        if (kDebugMode) {
+          debugPrint(
+            '[AppointmentRepository] Appointment updated locally: ${appointment.id} (version: ${syncEntity.version})',
+          );
+        }
 
-      // 4. Trigger sync em background
-      _triggerBackgroundSync();
+        // 4. Trigger sync em background
+        _triggerBackgroundSync();
 
-      return Right(syncEntity.toLegacyAppointment());
-    } catch (e) {
-      return Left(
-        local_failures.ServerFailure(
-          message: 'Failed to update appointment: $e',
-        ),
-      );
-    }
+        return syncEntity.toLegacyAppointment();
+      },
+      operationName: 'updateAppointment',
+    );
   }
 
   // ========================================================================
@@ -243,25 +233,20 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   Future<Either<local_failures.Failure, void>> deleteAppointment(
     String id,
   ) async {
-    try {
-      // Soft delete (datasource implementa)
-      await _localDataSource.deleteAppointment(id);
+    return _errorHandlingService.executeVoidOperation(
+      operation: () async {
+        // Soft delete (datasource implementa)
+        await _localDataSource.deleteAppointment(id);
 
-      if (kDebugMode) {
-        debugPrint('[AppointmentRepository] Appointment soft-deleted: $id');
-      }
+        if (kDebugMode) {
+          debugPrint('[AppointmentRepository] Appointment soft-deleted: $id');
+        }
 
-      // Trigger sync para propagar delete
-      _triggerBackgroundSync();
-
-      return const Right(null);
-    } catch (e) {
-      return Left(
-        local_failures.ServerFailure(
-          message: 'Failed to delete appointment: $e',
-        ),
-      );
-    }
+        // Trigger sync para propagar delete
+        _triggerBackgroundSync();
+      },
+      operationName: 'deleteAppointment',
+    );
   }
 
   // ========================================================================

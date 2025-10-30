@@ -1,3 +1,7 @@
+/// Pure entity representing registration data
+///
+/// This entity only holds data without business logic.
+/// Validation is handled by AuthValidators utility class.
 class RegisterData {
   final String name;
   final String email;
@@ -27,62 +31,6 @@ class RegisterData {
       confirmPassword: confirmPassword ?? this.confirmPassword,
       currentStep: currentStep ?? this.currentStep,
     );
-  }
-
-  String? validateName() {
-    final trimmedName = name.trim();
-    if (trimmedName.isEmpty) {
-      return 'Por favor, insira seu nome completo';
-    }
-    if (trimmedName.length < 2) {
-      return 'Nome deve ter pelo menos 2 caracteres';
-    }
-    return null;
-  }
-
-  String? validateEmail() {
-    final trimmedEmail = email.trim().toLowerCase();
-    if (trimmedEmail.isEmpty) {
-      return 'Por favor, insira seu email';
-    }
-    if (!RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    ).hasMatch(trimmedEmail)) {
-      return 'Por favor, insira um email válido';
-    }
-    return null;
-  }
-
-  String? validatePassword() {
-    if (password.isEmpty) {
-      return 'Por favor, insira uma senha';
-    }
-    if (password.length < 8) {
-      return 'A senha deve ter pelo menos 8 caracteres';
-    }
-    return null;
-  }
-
-  String? validateConfirmPassword() {
-    if (confirmPassword.isEmpty) {
-      return 'Por favor, confirme sua senha';
-    }
-    if (confirmPassword != password) {
-      return 'As senhas não coincidem';
-    }
-    return null;
-  }
-
-  bool get isPersonalInfoValid {
-    return validateName() == null && validateEmail() == null;
-  }
-
-  bool get isPasswordValid {
-    return validatePassword() == null && validateConfirmPassword() == null;
-  }
-
-  bool get isValid {
-    return isPersonalInfoValid && isPasswordValid;
   }
 
   RegisterData clear() {

@@ -6,6 +6,7 @@ import '../../data/services/pragas_cultura_data_service.dart';
 import '../../data/services/pragas_cultura_query_service.dart';
 import '../../data/services/pragas_cultura_sort_service.dart';
 import '../../data/services/pragas_cultura_statistics_service.dart';
+import '../services/pragas_cultura_error_message_service.dart';
 
 /// State class para o ViewModel
 class PragasCulturaPageState {
@@ -55,12 +56,14 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
   final IPragasCulturaQueryService queryService;
   final IPragasCulturaSortService sortService;
   final IPragasCulturaStatisticsService statisticsService;
+  final PragasCulturaErrorMessageService errorService;
 
   PragasCulturaPageViewModel({
     required this.dataService,
     required this.queryService,
     required this.sortService,
     required this.statisticsService,
+    required this.errorService,
   }) : super(const PragasCulturaPageState());
 
   /// Carrega pragas para uma cultura
@@ -73,7 +76,7 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        erro: 'Erro ao carregar pragas: $e',
+        erro: errorService.getLoadPragasError(e.toString()),
       );
     }
   }
@@ -84,7 +87,9 @@ class PragasCulturaPageViewModel extends StateNotifier<PragasCulturaPageState> {
       final culturas = await dataService.getAllCulturas();
       state = state.copyWith(culturas: culturas);
     } catch (e) {
-      state = state.copyWith(erro: 'Erro ao carregar culturas: $e');
+      state = state.copyWith(
+        erro: errorService.getLoadCulturasError(e.toString()),
+      );
     }
   }
 

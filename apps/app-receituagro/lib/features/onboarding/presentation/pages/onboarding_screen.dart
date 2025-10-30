@@ -1,8 +1,11 @@
+import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/entities.dart';
 import '../providers/providers.dart';
+import '../services/onboarding_error_message_service.dart';
+import '../services/onboarding_ui_service.dart';
 
 /// Onboarding screen for ReceitauAgro
 /// Uses Riverpod state management with ConsumerStatefulWidget
@@ -18,11 +21,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late AnimationController _animationController;
+  late OnboardingUIService _uiService;
+  late OnboardingErrorMessageService _errorService;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _uiService = di.getIt<OnboardingUIService>();
+    _errorService = di.getIt<OnboardingErrorMessageService>();
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
@@ -50,25 +57,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     final currentIndex = ref.watch(currentStepIndexProvider);
 
     return progressAsync.when(
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stack) => Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
               const SizedBox(height: 16),
-              Text('Erro ao carregar onboarding: $error'),
-              const SizedBox(height: 24),
+              Text(_errorService.getLoadError(error.toString())),
+              const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  ref.read(onboardingNotifierProvider.notifier).start();
-                },
-                child: const Text('Tentar Novamente'),
+                onPressed: () =>
+                    ref.read(onboardingNotifierProvider.notifier).start(),
+                child: const Text('Tentar novamente'),
               ),
             ],
           ),
@@ -91,10 +98,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Theme.of(context).primaryColor
-                      .withAlpha((255 * 0.8).round()),
-                  Theme.of(context).primaryColor
-                      .withAlpha((255 * 0.3).round()),
+                  Theme.of(context).primaryColor.withAlpha((255 * 0.8).round()),
+                  Theme.of(context).primaryColor.withAlpha((255 * 0.3).round()),
                 ],
               ),
             ),
@@ -112,10 +117,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                           setState(() {});
                         },
                         itemBuilder: (context, index) {
-                          return _buildOnboardingPage(
-                            context,
-                            steps[index],
-                          );
+                          return _buildOnboardingPage(context, steps[index]);
                         },
                       ),
                     ),
@@ -144,59 +146,44 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
           Text(
             'ReceitauAgro',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Text(
             '${currentIndex + 1} de $totalSteps',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white70,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOnboardingPage(
-    BuildContext context,
-    OnboardingStep step,
-  ) {
+  Widget _buildOnboardingPage(BuildContext context, OnboardingStep step) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha((255 * 0.1).round()),
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: Icon(
-              _getStepIcon(step.id),
-              size: 100,
-              color: Colors.white,
-            ),
-          ),
+          _uiService.buildStepIconContainer(step.id),
           const SizedBox(height: 40),
           Text(
             step.title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             step.description,
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white70,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: Colors.white70),
           ),
         ],
       ),
@@ -258,14 +245,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                 onPressed: () => isLastStep
                     ? _finishOnboarding()
                     : _completeStep(currentStep.id),
-                icon: Icon(
-                  isLastStep ? Icons.check : Icons.arrow_forward,
-                ),
+                icon: Icon(isLastStep ? Icons.check : Icons.arrow_forward),
                 label: Text(isLastStep ? 'Finalizar' : 'Próximo'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor:
-                      Theme.of(context).primaryColor,
+                  foregroundColor: Theme.of(context).primaryColor,
                 ),
               ),
             ],
@@ -288,8 +272,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
     try {
       await ref.read(onboardingNotifierProvider.notifier).completeStep(stepId);
       final steps = ref.read(onboardingStepsProvider);
-      final currentIndex =
-          steps.indexWhere((s) => s.id == stepId);
+      final currentIndex = steps.indexWhere((s) => s.id == stepId);
       if (currentIndex < steps.length - 1) {
         await _pageController.nextPage(
           duration: const Duration(milliseconds: 300),
@@ -300,7 +283,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao completar etapa: $e'),
+            content: Text(_errorService.getCompleteStepError(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -319,7 +302,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao pular etapa: $e'),
+            content: Text(_errorService.getSkipStepError(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -329,18 +312,5 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
 
   void _finishOnboarding() {
     Navigator.of(context).pushReplacementNamed('/home');
-  }
-
-  IconData _getStepIcon(String stepId) {
-    return switch (stepId) {
-      'welcome' => Icons.waving_hand_outlined,
-      'explore_database' => Icons.search_outlined,
-      'diagnostic_tool' => Icons.analytics_outlined,
-      'favorites' => Icons.favorite_outline,
-      'premium_features' => Icons.star_outline,
-      'notifications' => Icons.notifications_outlined,
-      'profile_setup' => Icons.person_outline,
-      _ => Icons.info_outline,
-    };
   }
 }

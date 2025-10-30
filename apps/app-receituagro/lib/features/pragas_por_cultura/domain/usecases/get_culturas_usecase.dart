@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../repositories/i_pragas_cultura_repository.dart';
 
 /// Use Case para carregar todas as culturas disponíveis.
@@ -11,8 +12,9 @@ import '../repositories/i_pragas_cultura_repository.dart';
 @injectable
 class GetCulturasUseCase {
   final IPragasCulturaRepository _repository;
+  final PragasCulturaErrorMessageService errorService;
 
-  const GetCulturasUseCase(this._repository);
+  const GetCulturasUseCase(this._repository, this.errorService);
 
   /// Executa a busca de todas as culturas.
   ///
@@ -26,7 +28,7 @@ class GetCulturasUseCase {
       return result;
     } catch (e) {
       return Left(
-        UnexpectedFailure('Erro ao carregar culturas: ${e.toString()}'),
+        UnexpectedFailure(errorService.getLoadCulturasError(e.toString())),
       );
     }
   }

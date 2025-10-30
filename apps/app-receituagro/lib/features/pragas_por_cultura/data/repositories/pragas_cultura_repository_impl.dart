@@ -3,6 +3,7 @@ import 'package:core/core.dart';
 import '../../../../core/data/repositories/cultura_hive_repository.dart';
 import '../../../../core/data/repositories/fitossanitario_hive_repository.dart';
 import '../../domain/repositories/i_pragas_cultura_repository.dart';
+import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../datasources/pragas_cultura_integration_datasource.dart';
 import '../datasources/pragas_cultura_local_datasource.dart';
 
@@ -21,12 +22,14 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   final PragasCulturaLocalDataSource localDataSource;
   final CulturaHiveRepository culturaRepository;
   final FitossanitarioHiveRepository fitossanitarioRepository;
+  final PragasCulturaErrorMessageService errorService;
 
   const PragasCulturaRepositoryImpl({
     required this.integrationDataSource,
     required this.localDataSource,
     required this.culturaRepository,
     required this.fitossanitarioRepository,
+    required this.errorService,
   });
 
   @override
@@ -37,25 +40,29 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
 
       if (result.isFailure) {
         return Left(
-          CacheFailure('Erro ao carregar culturas: ${result.error?.message}'),
+          CacheFailure(
+            errorService.getLoadCulturasError(result.error?.message),
+          ),
         );
       }
 
       final culturas = result.data ?? [];
       return Right(culturas as List<dynamic>);
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar culturas: $e'));
+      return Left(
+        CacheFailure(errorService.getLoadCulturasError(e.toString())),
+      );
     }
   }
 
   @override
-  Future<Either<Failure, List<dynamic>>> getPragasPorCultura(String culturaId) async {
+  Future<Either<Failure, List<dynamic>>> getPragasPorCultura(
+    String culturaId,
+  ) async {
     try {
       // Validar ID
       if (culturaId.isEmpty) {
-        return const Left(
-          ValidationFailure('ID da cultura não pode ser vazio'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyCulturaIdError()));
       }
 
       // ESTRATÉGIA: Cache-First
@@ -75,7 +82,7 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
     } on ValidationFailure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(ServerFailure('Erro ao carregar pragas: $e'));
+      return Left(ServerFailure(errorService.getLoadPragasError(e.toString())));
     }
   }
 
@@ -84,9 +91,7 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
     try {
       // Validar ID
       if (pragaId.isEmpty) {
-        return const Left(
-          ValidationFailure('ID da praga não pode ser vazio'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyPragaIdError()));
       }
 
       // Obter defensivos do repositório Hive
@@ -94,7 +99,9 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
 
       if (result.isFailure) {
         return Left(
-          CacheFailure('Erro ao carregar defensivos: ${result.error?.message}'),
+          CacheFailure(
+            errorService.getLoadDefensivosError(result.error?.message),
+          ),
         );
       }
 
@@ -107,7 +114,9 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
 
       return Right(defensivosElegibles);
     } catch (e) {
-      return Left(CacheFailure('Erro ao carregar defensivos: $e'));
+      return Left(
+        CacheFailure(errorService.getLoadDefensivosError(e.toString())),
+      );
     }
   }
 
@@ -119,22 +128,18 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
     try {
       // Validar parâmetros
       if (culturaId.isEmpty) {
-        return const Left(
-          ValidationFailure('ID da cultura não pode ser vazio'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyCulturaIdError()));
       }
 
       if (pragas.isEmpty) {
-        return const Left(
-          ValidationFailure('Lista de pragas não pode estar vazia'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyPragasListError()));
       }
 
       // Armazenar em cache
       await localDataSource.cachePragas(culturaId, pragas);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao cachear pragas: $e'));
+      return Left(CacheFailure(errorService.getCachePragasError(e.toString())));
     }
   }
 
@@ -143,16 +148,14 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
     try {
       // Validar ID
       if (culturaId.isEmpty) {
-        return const Left(
-          ValidationFailure('ID da cultura não pode ser vazio'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyCulturaIdError()));
       }
 
       // Limpar cache
       await localDataSource.clearCache(culturaId);
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao limpar cache: $e'));
+      return Left(CacheFailure(errorService.getClearCacheError(e.toString())));
     }
   }
 
@@ -163,7 +166,9 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
       await localDataSource.clearAllCache();
       return const Right<Failure, void>(null);
     } catch (e) {
-      return Left(CacheFailure('Erro ao limpar cache completo: $e'));
+      return Left(
+        CacheFailure(errorService.getClearAllCacheError(e.toString())),
+      );
     }
   }
 
@@ -179,18 +184,20 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
     try {
       // Validar IDs
       if (pragaId.isEmpty || culturaId.isEmpty) {
-        return const Left(
-          ValidationFailure('pragaId e culturaId são obrigatórios'),
-        );
+        return Left(ValidationFailure(errorService.getRequiredIdsError()));
       }
 
       // Buscar praga completa com integração
-      final pragaCompleta =
-          await integrationDataSource.getPragaCompleta(pragaId, culturaId);
+      final pragaCompleta = await integrationDataSource.getPragaCompleta(
+        pragaId,
+        culturaId,
+      );
 
       return Right(pragaCompleta);
     } catch (e) {
-      return Left(ServerFailure('Erro ao buscar praga completa: $e'));
+      return Left(
+        ServerFailure(errorService.getFetchFullPragaError(e.toString())),
+      );
     }
   }
 
@@ -200,7 +207,9 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
       final stats = await localDataSource.getCacheStats();
       return Right(stats);
     } catch (e) {
-      return Left(CacheFailure('Erro ao obter estatísticas de cache: $e'));
+      return Left(
+        CacheFailure(errorService.getGetCacheStatsError(e.toString())),
+      );
     }
   }
 
@@ -208,15 +217,13 @@ class PragasCulturaRepositoryImpl implements IPragasCulturaRepository {
   Future<Either<Failure, bool>> hasCachedPragas(String culturaId) async {
     try {
       if (culturaId.isEmpty) {
-        return const Left(
-          ValidationFailure('ID da cultura não pode ser vazio'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyCulturaIdError()));
       }
 
       final hasCached = await localDataSource.hasCachedPragas(culturaId);
       return Right(hasCached);
     } catch (e) {
-      return Left(CacheFailure('Erro ao verificar cache: $e'));
+      return Left(CacheFailure(errorService.getVerifyCacheError(e.toString())));
     }
   }
 }

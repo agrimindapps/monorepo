@@ -1,4 +1,5 @@
 import 'package:app_receituagro/core/di/injection.dart' as di;
+import 'package:app_receituagro/core/services/failure_message_service.dart';
 import 'package:core/core.dart';
 
 import '../../domain/domain.dart';
@@ -9,17 +10,13 @@ part 'onboarding_provider.g.dart';
 
 /// Provides [StartOnboardingUseCase] instance
 @riverpod
-StartOnboardingUseCase startOnboardingUseCase(
-  StartOnboardingUseCaseRef ref,
-) {
+StartOnboardingUseCase startOnboardingUseCase(StartOnboardingUseCaseRef ref) {
   return di.getIt<StartOnboardingUseCase>();
 }
 
 /// Provides [CompleteStepUseCase] instance
 @riverpod
-CompleteStepUseCase completeStepUseCase(
-  CompleteStepUseCaseRef ref,
-) {
+CompleteStepUseCase completeStepUseCase(CompleteStepUseCaseRef ref) {
   return di.getIt<CompleteStepUseCase>();
 }
 
@@ -47,9 +44,7 @@ ShowFeatureTooltipUseCase showFeatureTooltipUseCase(
 
 /// Provides [ResetOnboardingUseCase] instance
 @riverpod
-ResetOnboardingUseCase resetOnboardingUseCase(
-  ResetOnboardingUseCaseRef ref,
-) {
+ResetOnboardingUseCase resetOnboardingUseCase(ResetOnboardingUseCaseRef ref) {
   return di.getIt<ResetOnboardingUseCase>();
 }
 
@@ -61,10 +56,7 @@ List<OnboardingStep> onboardingSteps(OnboardingStepsRef ref) {
   final repository = di.getIt<IOnboardingRepository>();
   final result = repository.getOnboardingSteps();
 
-  return result.fold(
-    (failure) => [],
-    (steps) => steps,
-  );
+  return result.fold((failure) => [], (steps) => steps);
 }
 
 /// Provides list of all feature discovery tooltips
@@ -73,10 +65,7 @@ List<FeatureTooltip> featureTooltips(FeatureTooltipsRef ref) {
   final repository = di.getIt<IOnboardingRepository>();
   final result = repository.getFeatureTooltips();
 
-  return result.fold(
-    (failure) => [],
-    (tooltips) => tooltips,
-  );
+  return result.fold((failure) => [], (tooltips) => tooltips);
 }
 
 // ==================== Main State Notifier ====================
@@ -97,10 +86,7 @@ class OnboardingNotifier extends _$OnboardingNotifier {
     final useCase = ref.read(getOnboardingProgressUseCaseProvider);
     final result = await useCase.call(const NoParams());
 
-    return result.fold(
-      (failure) => null,
-      (progress) => progress,
-    );
+    return result.fold((failure) => null, (progress) => progress);
   }
 
   /// Start onboarding flow
@@ -112,10 +98,10 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       final useCase = ref.read(startOnboardingUseCaseProvider);
       final result = await useCase.call(const NoParams());
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (progress) => progress,
-      );
+      return result.fold((failure) {
+        final messageService = di.getIt<FailureMessageService>();
+        throw Exception(messageService.mapFailureToMessage(failure));
+      }, (progress) => progress);
     });
   }
 
@@ -134,16 +120,13 @@ class OnboardingNotifier extends _$OnboardingNotifier {
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(completeStepUseCaseProvider);
       final result = await useCase.call(
-        CompleteStepParams(
-          stepId: stepId,
-          currentProgress: currentProgress,
-        ),
+        CompleteStepParams(stepId: stepId, currentProgress: currentProgress),
       );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (updatedProgress) => updatedProgress,
-      );
+      return result.fold((failure) {
+        final messageService = di.getIt<FailureMessageService>();
+        throw Exception(messageService.mapFailureToMessage(failure));
+      }, (updatedProgress) => updatedProgress);
     });
   }
 
@@ -160,16 +143,13 @@ class OnboardingNotifier extends _$OnboardingNotifier {
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(skipStepUseCaseProvider);
       final result = await useCase.call(
-        SkipStepParams(
-          stepId: stepId,
-          currentProgress: currentProgress,
-        ),
+        SkipStepParams(stepId: stepId, currentProgress: currentProgress),
       );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (updatedProgress) => updatedProgress,
-      );
+      return result.fold((failure) {
+        final messageService = di.getIt<FailureMessageService>();
+        throw Exception(messageService.mapFailureToMessage(failure));
+      }, (updatedProgress) => updatedProgress);
     });
   }
 
@@ -181,10 +161,10 @@ class OnboardingNotifier extends _$OnboardingNotifier {
       final useCase = ref.read(resetOnboardingUseCaseProvider);
       final result = await useCase.call(const NoParams());
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (_) => null,
-      );
+      return result.fold((failure) {
+        final messageService = di.getIt<FailureMessageService>();
+        throw Exception(messageService.mapFailureToMessage(failure));
+      }, (_) => null);
     });
   }
 }

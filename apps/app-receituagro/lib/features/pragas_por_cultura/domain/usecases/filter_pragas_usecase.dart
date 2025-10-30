@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import 'pragas_cultura_params.dart';
 
 /// Use Case para filtrar pragas (lógica pura - sem I/O).
@@ -11,7 +12,9 @@ import 'pragas_cultura_params.dart';
 /// Nota: Use case de lógica pura - sem chamadas de repositório
 @injectable
 class FilterPragasUseCase {
-  const FilterPragasUseCase();
+  final PragasCulturaErrorMessageService errorService;
+
+  const FilterPragasUseCase(this.errorService);
 
   /// Executa a filtragem de pragas.
   ///
@@ -26,9 +29,7 @@ class FilterPragasUseCase {
   /// - Se [onlyCriticas]: filtra apenas pragas críticas
   /// - Se [onlyNormais]: filtra apenas pragas normais
   /// - Se [tipoPraga]: filtra por tipo específico (Insetos, Doenças, Daninhas)
-  Future<Either<Failure, List<dynamic>>> call(
-    FilterPragasParams params,
-  ) async {
+  Future<Either<Failure, List<dynamic>>> call(FilterPragasParams params) async {
     try {
       final pragas = params.pragas;
       final filter = params.filter;
@@ -56,19 +57,21 @@ class FilterPragasUseCase {
       // Filtro por tipo de praga
       if (filter.tipoPraga != null && filter.tipoPraga!.isNotEmpty) {
         filtradas = filtradas
-            .where((p) =>
-                p is Map &&
-                (p['praga'] is Map
-                    ? (p['praga']['tipoPraga'] as String? ?? '') ==
-                        filter.tipoPraga
-                    : false))
+            .where(
+              (p) =>
+                  p is Map &&
+                  (p['praga'] is Map
+                      ? (p['praga']['tipoPraga'] as String? ?? '') ==
+                            filter.tipoPraga
+                      : false),
+            )
             .toList();
       }
 
       return Right(filtradas);
     } catch (e) {
       return Left(
-        UnexpectedFailure('Erro ao filtrar pragas: ${e.toString()}'),
+        UnexpectedFailure(errorService.getFilterPragasError(e.toString())),
       );
     }
   }

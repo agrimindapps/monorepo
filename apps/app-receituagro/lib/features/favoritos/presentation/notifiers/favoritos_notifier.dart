@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/repositories/favoritos_repository_simplified.dart';
+import '../../data/services/favoritos_error_message_service.dart';
 import '../../domain/entities/favorito_entity.dart';
 import '../../favoritos_di.dart';
 
@@ -127,13 +128,18 @@ class FavoritosState {
 enum FavoritosViewState { initial, loading, loaded, error, empty }
 
 /// Notifier Riverpod para gerenciar estado dos favoritos
+///
+/// **REFACTORED (SOLID):**
+/// - Usa FavoritosErrorMessageService para mensagens de erro centralizadas
 @riverpod
 class FavoritosNotifier extends _$FavoritosNotifier {
   late final FavoritosRepositorySimplified _repository;
+  late final FavoritosErrorMessageService _errorMessageService;
 
   @override
   FavoritosState build() {
     _repository = FavoritosDI.get<FavoritosRepositorySimplified>();
+    _errorMessageService = FavoritosDI.get<FavoritosErrorMessageService>();
     return const FavoritosState();
   }
 
@@ -207,7 +213,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
 
       return result;
     } catch (e) {
-      _setError('Erro ao alterar favorito: $e');
+      _setError(_errorMessageService.getToggleErrorMessage(tipo));
       return false;
     } finally {
       _setLoading(false);
@@ -245,7 +251,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
 
       return result;
     } catch (e) {
-      _setError('Erro ao adicionar favorito: $e');
+      _setError(_errorMessageService.getAddErrorMessage(tipo));
       return false;
     } finally {
       _setLoading(false);
@@ -265,7 +271,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
 
       return result;
     } catch (e) {
-      _setError('Erro ao remover favorito: $e');
+      _setError(_errorMessageService.getRemoveErrorMessage(tipo));
       return false;
     } finally {
       _setLoading(false);
@@ -300,7 +306,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       await _repository.clearFavorites(tipo);
       await _reloadAfterToggle(tipo);
     } catch (e) {
-      _setError('Erro ao limpar favoritos: $e');
+      _setError(_errorMessageService.getClearErrorMessage(tipo));
     } finally {
       _setLoading(false);
     }
@@ -315,7 +321,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       await loadAllFavoritos();
       await loadStats();
     } catch (e) {
-      _setError('Erro ao limpar todos os favoritos: $e');
+      _setError(_errorMessageService.getClearAllErrorMessage());
     } finally {
       _setLoading(false);
     }

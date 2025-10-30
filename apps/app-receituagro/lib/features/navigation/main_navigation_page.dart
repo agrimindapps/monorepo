@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_icons.dart';
-import '../comentarios/comentarios_page.dart';
-import '../defensivos/home_defensivos_page.dart';
-import '../favoritos/favoritos_page.dart';
-import '../pragas/presentation/pages/home_pragas_page.dart';
-import '../settings/settings_page.dart';
+import '../../core/di/injection_container.dart' as di;
+import 'domain/navigation_constants.dart';
+import 'domain/navigation_item_builder.dart';
+import 'domain/navigation_page_service.dart';
 
+/// Main navigation page com BottomNavigationBar
+///
+/// **REFACTORED (SOLID):**
+/// - Usa NavigationPageService para gerenciar páginas (elimina switch case)
+/// - Usa NavigationItemBuilder para criar items (elimina duplicação)
+/// - Usa NavigationConstants para índices (elimina magic numbers)
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
 
   const MainNavigationPage({
     super.key,
-    this.initialIndex = 0,
+    this.initialIndex = NavigationConstants.indexDefensivos,
   });
 
   @override
@@ -20,11 +24,13 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
-  int _currentBottomNavIndex = 0;
+  late final NavigationPageService _pageService;
+  int _currentBottomNavIndex = NavigationConstants.indexDefensivos;
 
   @override
   void initState() {
     super.initState();
+    _pageService = di.sl<NavigationPageService>();
     _currentBottomNavIndex = widget.initialIndex;
   }
 
@@ -49,77 +55,25 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       unselectedFontSize: 0, // 0 para ocultar completamente
       iconSize: 24,
       selectedIconTheme: const IconThemeData(size: 26),
-      items: const [
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(AppIcons.defensivos),
-          ),
-          activeIcon: Icon(AppIcons.defensivos),
-          label: 'Defensivos',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(AppIcons.pragas),
-          ),
-          activeIcon: Icon(AppIcons.pragas),
-          label: 'Pragas',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(AppIcons.favoritos),
-          ),
-          activeIcon: Icon(AppIcons.favoritosFill),
-          label: 'Favoritos',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(AppIcons.comentarios),
-          ),
-          activeIcon: Icon(AppIcons.comentariosFill),
-          label: 'Comentários',
-        ),
-        BottomNavigationBarItem(
-          icon: Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Icon(AppIcons.configuracoes),
-          ),
-          activeIcon: Icon(AppIcons.configuracoesFill),
-          label: 'Config',
-        ),
-      ],
+      // REFACTORED: Usa NavigationItemBuilder (elimina 50+ linhas de código)
+      items: NavigationItemBuilder.buildItems(),
     );
   }
 
   void _onBottomNavTap(int index) {
-    if (_currentBottomNavIndex == index) return; // Evita rebuilds desnecessários
-    
+    if (_currentBottomNavIndex == index)
+      return; // Evita rebuilds desnecessários
+
     setState(() {
       _currentBottomNavIndex = index;
     });
-    if (index == 2) { // Index 2 é a página de favoritos
-      FavoritosPage.reloadIfActive();
-    }
+
+    // REFACTORED: Usa NavigationPageService (elimina magic number)
+    _pageService.onNavigateToIndex(index);
   }
 
   Widget _buildCurrentPage() {
-    switch (_currentBottomNavIndex) {
-      case 0:
-        return const HomeDefensivosPage();
-      case 1:
-        return const HomePragasPage();
-      case 2:
-        return const FavoritosPage();
-      case 3:
-        return const ComentariosPage();
-      case 4:
-        return const SettingsPage();
-      default:
-        return const HomeDefensivosPage();
-    }
+    // REFACTORED: Usa NavigationPageService (elimina switch case - OCP violation)
+    return _pageService.getPageByIndex(_currentBottomNavIndex);
   }
-
 }

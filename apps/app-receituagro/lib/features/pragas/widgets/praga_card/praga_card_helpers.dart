@@ -1,59 +1,45 @@
-import 'package:core/core.dart';
+import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
 
+import '../../presentation/services/pragas_type_service.dart';
+
 /// Classe utilitária com helpers para PragaCard
-/// 
+///
+/// Refactored to use PragasTypeService for type-related logic (SOLID compliance)
+///
 /// Responsabilidades:
-/// - Cálculos de cores baseadas no tipo de praga
-/// - Mapeamento de ícones
-/// - Textos de tipos
-/// - Cores de card e temas
+/// - Cores de card e temas (UI theming)
+/// - Delegação para PragasTypeService para lógica de tipos
 class PragaCardHelpers {
+  // Lazy-initialized service instance
+  static PragasTypeService? _typeService;
+
+  static PragasTypeService get _service {
+    _typeService ??= di.getIt<PragasTypeService>();
+    return _typeService!;
+  }
+
   /// Retorna a cor do card baseada no tema
   static Color getCardColor(bool isDarkMode) {
     return isDarkMode ? const Color(0xFF222228) : Colors.white;
   }
 
   /// Retorna a cor baseada no tipo de praga
+  /// Delegates to PragasTypeService
   static Color getTypeColor(String tipoPraga) {
-    switch (tipoPraga) {
-      case '1': // Insetos
-        return const Color(0xFFE53935);
-      case '2': // Doenças
-        return const Color(0xFFFF9800);
-      case '3': // Plantas Daninhas
-        return const Color(0xFF4CAF50);
-      default:
-        return const Color(0xFF757575);
-    }
+    return _service.getTypeColor(tipoPraga);
   }
 
   /// Retorna o ícone baseado no tipo de praga
+  /// Delegates to PragasTypeService
   static IconData getTypeIcon(String tipoPraga) {
-    switch (tipoPraga) {
-      case '1': // Insetos
-        return FontAwesomeIcons.bug;
-      case '2': // Doenças
-        return FontAwesomeIcons.virus;
-      case '3': // Plantas Daninhas
-        return FontAwesomeIcons.seedling;
-      default:
-        return FontAwesomeIcons.triangleExclamation;
-    }
+    return _service.getTypeIcon(tipoPraga);
   }
 
   /// Retorna o texto do tipo de praga
+  /// Delegates to PragasTypeService
   static String getTypeText(String tipoPraga) {
-    switch (tipoPraga) {
-      case '1':
-        return 'Inseto';
-      case '2':
-        return 'Doença';
-      case '3':
-        return 'Planta Daninha';
-      default:
-        return 'Praga';
-    }
+    return _service.getTypeLabel(tipoPraga);
   }
 
   /// Retorna cor de texto baseada no tema

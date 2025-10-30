@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/defensivo_entity.dart';
 import '../../domain/usecases/get_defensivos_params.dart';
 import '../../domain/usecases/get_defensivos_usecase.dart';
@@ -13,10 +14,12 @@ part 'defensivos_notifier.g.dart';
 @riverpod
 class DefensivosNotifier extends _$DefensivosNotifier {
   late final GetDefensivosUseCase _getDefensivosUseCase;
+  late final FailureMessageService _failureMessageService;
 
   @override
   Future<DefensivosState> build() async {
     _getDefensivosUseCase = di.sl<GetDefensivosUseCase>();
+    _failureMessageService = di.sl<FailureMessageService>();
     return await _loadDefensivos();
   }
 
@@ -28,7 +31,7 @@ class DefensivosNotifier extends _$DefensivosNotifier {
 
     return await result.fold(
       (Failure failure) async => DefensivosState.initial().copyWith(
-        error: _mapFailureToMessage(failure),
+        error: _failureMessageService.mapFailureToMessage(failure),
       ),
       (dynamic data) async {
         final defensivosMap = data as Map<String, dynamic>? ?? {};
@@ -85,7 +88,7 @@ class DefensivosNotifier extends _$DefensivosNotifier {
         state = AsyncValue.data(
           currentState.copyWith(
             isLoading: false,
-            error: _mapFailureToMessage(failure),
+            error: _failureMessageService.mapFailureToMessage(failure),
           ),
         );
       },
@@ -134,7 +137,7 @@ class DefensivosNotifier extends _$DefensivosNotifier {
         state = AsyncValue.data(
           currentState.copyWith(
             isLoading: false,
-            error: _mapFailureToMessage(failure),
+            error: _failureMessageService.mapFailureToMessage(failure),
           ),
         );
       },
@@ -164,18 +167,5 @@ class DefensivosNotifier extends _$DefensivosNotifier {
         filteredDefensivos: currentState.defensivos,
       ),
     );
-  }
-
-  String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure:
-        return 'Erro do servidor. Tente novamente.';
-      case CacheFailure:
-        return 'Erro ao acessar dados locais.';
-      case NetworkFailure:
-        return 'Erro de conexão. Verifique sua internet.';
-      default:
-        return 'Erro inesperado. Tente novamente.';
-    }
   }
 }

@@ -6,6 +6,8 @@ import '../data/services/pragas_query_service.dart';
 import '../data/services/pragas_search_service.dart';
 import '../data/services/pragas_stats_service.dart';
 import '../domain/repositories/i_pragas_repository.dart';
+import '../presentation/services/pragas_error_message_service.dart';
+import '../presentation/services/pragas_type_service.dart';
 
 /// Configuração de Dependency Injection para o módulo de Pragas
 ///
@@ -19,7 +21,7 @@ class PragasDI {
   static void configure() {
     final sl = GetIt.instance;
 
-    // Register specialized services
+    // Register specialized services (Data Layer)
     if (!sl.isRegistered<IPragasQueryService>()) {
       sl.registerSingleton<IPragasQueryService>(PragasQueryService());
     }
@@ -32,6 +34,17 @@ class PragasDI {
       sl.registerSingleton<IPragasStatsService>(PragasStatsService());
     }
 
+    // Register presentation services
+    if (!sl.isRegistered<PragasErrorMessageService>()) {
+      sl.registerSingleton<PragasErrorMessageService>(
+        PragasErrorMessageService(),
+      );
+    }
+
+    if (!sl.isRegistered<PragasTypeService>()) {
+      sl.registerSingleton<PragasTypeService>(PragasTypeService());
+    }
+
     // Register repository with service dependencies
     sl.registerLazySingleton<IPragasRepository>(
       () => PragasRepositoryImpl(
@@ -39,11 +52,15 @@ class PragasDI {
         sl<IPragasQueryService>(),
         sl<IPragasSearchService>(),
         sl<IPragasStatsService>(),
+        sl<PragasErrorMessageService>(),
       ),
     );
 
     sl.registerLazySingleton<IPragasHistoryRepository>(
-      () => PragasHistoryRepositoryImpl(sl<PragasHiveRepository>()),
+      () => PragasHistoryRepositoryImpl(
+        sl<PragasHiveRepository>(),
+        sl<PragasErrorMessageService>(),
+      ),
     );
 
     sl.registerLazySingleton<IPragasFormatter>(() => PragasFormatterImpl());

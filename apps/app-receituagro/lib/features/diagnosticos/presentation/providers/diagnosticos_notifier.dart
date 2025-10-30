@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/di/injection_container.dart' as di;
+import '../../../../core/services/failure_message_service.dart';
 import '../../domain/entities/diagnostico_entity.dart';
 import '../../domain/services/filtering/i_diagnosticos_filter_service.dart';
 import '../../domain/services/metadata/i_diagnosticos_metadata_service.dart';
@@ -24,6 +25,7 @@ part 'diagnosticos_notifier.g.dart';
 /// - DiagnosticosSearchService: search operations
 /// - DiagnosticosMetadataService: metadata extraction
 /// - DiagnosticosStatsService: analytics and statistics
+/// - FailureMessageService: error message handling
 @Riverpod(keepAlive: true)
 class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   // ========== Specialized Services (New Architecture) ==========
@@ -31,6 +33,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
   late final IDiagnosticosSearchService _searchService;
   late final IDiagnosticosMetadataService _metadataService;
   late final IDiagnosticosStatsService _statsService;
+  late final FailureMessageService _failureMessageService;
 
   // ========== Use Cases (Kept for backward compatibility) ==========
   late final GetDiagnosticosUseCase _getDiagnosticosUseCase;
@@ -45,6 +48,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
     _searchService = di.sl<IDiagnosticosSearchService>();
     _metadataService = di.sl<IDiagnosticosMetadataService>();
     _statsService = di.sl<IDiagnosticosStatsService>();
+    _failureMessageService = di.sl<FailureMessageService>();
 
     // ========== Inject Use Cases (Kept for backward compatibility) ==========
     _getDiagnosticosUseCase = di.sl<GetDiagnosticosUseCase>();
@@ -97,7 +101,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             currentState.copyWith(
               isLoading: false,
               isLoadingMore: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -168,7 +172,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -222,7 +226,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           state = AsyncValue.data(
             updatedState.copyWith(
               isLoading: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -284,7 +288,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -333,7 +337,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -378,7 +382,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
           state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -491,7 +495,7 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
             currentState.copyWith(
               searchQuery: pattern,
               isLoading: false,
-              errorMessage: failure.message,
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
             ),
           );
         },
@@ -526,7 +530,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         final currentState = state.value;
         if (currentState != null) {
           state = AsyncValue.data(
-            currentState.copyWith(errorMessage: failure.message),
+            currentState.copyWith(
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+            ),
           );
         }
         return null;
@@ -558,7 +564,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
         final currentState = state.value;
         if (currentState != null) {
           state = AsyncValue.data(
-            currentState.copyWith(errorMessage: failure.message),
+            currentState.copyWith(
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+            ),
           );
         }
         return false;
@@ -665,7 +673,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
       result.fold(
         (failure) {
           state = AsyncValue.data(
-            currentState.copyWith(errorMessage: failure.message),
+            currentState.copyWith(
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+            ),
           );
         },
         (stats) {
@@ -691,7 +701,9 @@ class DiagnosticosNotifier extends _$DiagnosticosNotifier {
       result.fold(
         (failure) {
           state = AsyncValue.data(
-            currentState.copyWith(errorMessage: failure.message),
+            currentState.copyWith(
+              errorMessage: _failureMessageService.mapFailureToMessage(failure),
+            ),
           );
         },
         (filtersData) {

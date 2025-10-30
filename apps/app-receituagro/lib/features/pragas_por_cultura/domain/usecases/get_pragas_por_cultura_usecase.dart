@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../repositories/i_pragas_cultura_repository.dart';
 import 'pragas_cultura_params.dart';
 
@@ -12,8 +13,9 @@ import 'pragas_cultura_params.dart';
 @injectable
 class GetPragasPorCulturaUseCase {
   final IPragasCulturaRepository _repository;
+  final PragasCulturaErrorMessageService errorService;
 
-  const GetPragasPorCulturaUseCase(this._repository);
+  const GetPragasPorCulturaUseCase(this._repository, this.errorService);
 
   /// Executa a busca de pragas para uma cultura.
   ///
@@ -32,9 +34,7 @@ class GetPragasPorCulturaUseCase {
     try {
       // Valida se o culturaId não está vazio
       if (params.culturaId.trim().isEmpty) {
-        return const Left(
-          ValidationFailure('ID da cultura não pode ser vazio'),
-        );
+        return Left(ValidationFailure(errorService.getEmptyCulturaIdError()));
       }
 
       // Busca as pragas da cultura no repositório
@@ -42,9 +42,7 @@ class GetPragasPorCulturaUseCase {
       return result;
     } catch (e) {
       return Left(
-        UnexpectedFailure(
-          'Erro ao carregar pragas da cultura: ${e.toString()}',
-        ),
+        UnexpectedFailure(errorService.getLoadPragasError(e.toString())),
       );
     }
   }

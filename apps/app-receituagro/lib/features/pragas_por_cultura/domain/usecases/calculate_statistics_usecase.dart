@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../../presentation/services/pragas_cultura_error_message_service.dart';
 import '../entities/pragas_cultura_statistics.dart';
 import 'pragas_cultura_params.dart';
 
@@ -12,7 +13,9 @@ import 'pragas_cultura_params.dart';
 /// Nota: Use case de lógica pura - sem chamadas de repositório
 @injectable
 class CalculateStatisticsUseCase {
-  const CalculateStatisticsUseCase();
+  final PragasCulturaErrorMessageService errorService;
+
+  const CalculateStatisticsUseCase(this.errorService);
 
   /// Executa o cálculo de estatísticas.
   ///
@@ -73,8 +76,7 @@ class CalculateStatisticsUseCase {
       final totalDiagnosticos = pragas.fold<int>(
         0,
         (total, p) =>
-            total +
-            (p is Map ? (p['quantidadeDiagnosticos'] as int?) ?? 0 : 0),
+            total + (p is Map ? (p['quantidadeDiagnosticos'] as int?) ?? 0 : 0),
       );
 
       // Calcula defensivos únicos (conta defensivos relacionados únicos)
@@ -92,7 +94,7 @@ class CalculateStatisticsUseCase {
       return Right(statistics);
     } catch (e) {
       return Left(
-        UnexpectedFailure('Erro ao calcular estatísticas: ${e.toString()}'),
+        UnexpectedFailure(errorService.getCalculateStatsError(e.toString())),
       );
     }
   }

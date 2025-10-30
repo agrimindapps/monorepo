@@ -1,5 +1,7 @@
+import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:flutter/material.dart';
 import '../data/praga_view_mode.dart';
+import '../presentation/services/pragas_type_service.dart';
 
 class PragaSearchFieldWidget extends StatefulWidget {
   final TextEditingController controller;
@@ -34,14 +36,17 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
   final FocusNode _focusNode = FocusNode();
+  late PragasTypeService _typeService;
   bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
 
+    _typeService = di.getIt<PragasTypeService>();
+
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -50,24 +55,19 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+    _scaleAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.elasticOut,
-    ));
-
-    _elevationAnimation = Tween<double>(
-      begin: 5.0,
-      end: 15.0,
-    ).animate(CurvedAnimation(
-      parent: _focusController,
-      curve: Curves.easeInOut,
-    ));
+      curve: Curves.easeOutBack,
+    );
 
     _focusNode.addListener(_onFocusChange);
-    _animationController.forward();
+
+    // Start entry animation
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
   }
 
   void _onFocusChange() {
@@ -89,17 +89,10 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
     super.dispose();
   }
 
+  /// Refactored to use PragasTypeService (SOLID compliance)
   String get _hintText {
-    switch (widget.pragaType) {
-      case '1':
-        return 'Localizar insetos...';
-      case '2':
-        return 'Localizar doenças...';
-      case '3':
-        return 'Localizar plantas daninhas...';
-      default:
-        return 'Localizar pragas...';
-    }
+    final typeName = _typeService.getTypeLabel(widget.pragaType);
+    return 'Localizar ${typeName.toLowerCase()}...';
   }
 
   @override
@@ -118,7 +111,9 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
-                    color: widget.isDark ? const Color(0xFF1E1E22) : Colors.white,
+                    color: widget.isDark
+                        ? const Color(0xFF1E1E22)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -136,15 +131,16 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                       children: [
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (Widget child, Animation<double> animation) {
-                            return RotationTransition(
-                              turns: animation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              ),
-                            );
-                          },
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                                return RotationTransition(
+                                  turns: animation,
+                                  child: FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  ),
+                                );
+                              },
                           child: widget.isSearching
                               ? SizedBox(
                                   key: const ValueKey('loading'),
@@ -166,11 +162,11 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                                     Icons.search,
                                     color: _isFocused
                                         ? (widget.isDark
-                                            ? Colors.green.shade300
-                                            : Colors.green.shade700)
+                                              ? Colors.green.shade300
+                                              : Colors.green.shade700)
                                         : (widget.isDark
-                                            ? Colors.grey.shade500
-                                            : Colors.grey.shade400),
+                                              ? Colors.grey.shade500
+                                              : Colors.grey.shade400),
                                     size: 20,
                                   ),
                                 ),
@@ -206,8 +202,9 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
                               errorBorder: InputBorder.none,
                               focusedErrorBorder: InputBorder.none,
                               disabledBorder: InputBorder.none,
-                              contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
                             ),
                             style: TextStyle(
                               color: widget.isDark
@@ -265,8 +262,8 @@ class _PragaSearchFieldWidgetState extends State<PragaSearchFieldWidget>
         decoration: BoxDecoration(
           color: isSelected
               ? (widget.isDark
-                  ? Colors.green.withValues(alpha: 0.15)
-                  : Colors.green.shade50)
+                    ? Colors.green.withValues(alpha: 0.15)
+                    : Colors.green.shade50)
               : Colors.transparent,
           borderRadius: BorderRadius.horizontal(
             left: Radius.circular(isFirstButton ? 20 : 0),

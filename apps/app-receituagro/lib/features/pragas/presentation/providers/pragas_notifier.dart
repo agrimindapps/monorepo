@@ -1,8 +1,10 @@
+import 'package:app_receituagro/core/di/injection.dart' as di;
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/access_history_service.dart';
 import '../../domain/entities/praga_entity.dart';
+import '../services/pragas_error_message_service.dart';
 import 'pragas_state.dart';
 
 part 'pragas_notifier.g.dart';
@@ -12,10 +14,12 @@ part 'pragas_notifier.g.dart';
 @Riverpod(keepAlive: true)
 class PragasNotifier extends _$PragasNotifier {
   late final AccessHistoryService _historyService;
+  late final PragasErrorMessageService _errorService;
 
   @override
   Future<PragasState> build() async {
     _historyService = AccessHistoryService();
+    _errorService = di.getIt<PragasErrorMessageService>();
     return await _loadInitialData();
   }
 
@@ -34,7 +38,7 @@ class PragasNotifier extends _$PragasNotifier {
         recentPragas: const [],
         suggestedPragas: const [],
         isLoading: false,
-        errorMessage: 'Erro ao carregar dados das pragas: $e',
+        errorMessage: _errorService.getLoadInitialError(e.toString()),
       );
     }
   }
@@ -58,7 +62,7 @@ class PragasNotifier extends _$PragasNotifier {
       state = AsyncValue.data(
         currentState.copyWith(
           isLoading: false,
-          errorMessage: 'Erro ao inicializar dados das pragas: $e',
+          errorMessage: _errorService.getInitializeError(e.toString()),
         ),
       );
     }

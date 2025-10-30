@@ -3,8 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/analytics/advanced_health_monitoring_service.dart';
+import '../../core/di/injection_container.dart' as di;
+import 'domain/services/monitoring_alert_service.dart';
+import 'domain/services/monitoring_formatter_service.dart';
+import 'domain/services/monitoring_ui_mapper_service.dart';
 
 /// Error tracking dashboard for monitoring system health and issues
+///
+/// **REFACTORED (SOLID):**
+/// - Usa serviços especializados para formatação, mapeamento UI e alertas
+/// - Lógica de negócio extraída para serviços reutilizáveis
+/// - Dependency Injection: serviços injetados via DI
 class ErrorTrackingDashboard extends StatefulWidget {
   const ErrorTrackingDashboard({super.key});
 
@@ -16,9 +25,13 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     with TickerProviderStateMixin {
   late TabController _tabController;
   late AdvancedHealthMonitoringService _healthService;
+  late MonitoringFormatterService _formatterService;
+  late MonitoringUIMapperService _uiMapperService;
+  late MonitoringAlertService _alertService;
 
   SystemHealthReport? _currentReport;
   List<SystemHealthReport> _healthHistory = [];
+  List<MonitoringAlert> _alerts = [];
   bool _isLoading = true;
   Timer? _refreshTimer;
 
@@ -27,6 +40,12 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _healthService = AdvancedHealthMonitoringService.instance;
+
+    // Injeção de serviços via DI (SOLID - Dependency Inversion Principle)
+    _formatterService = di.sl<MonitoringFormatterService>();
+    _uiMapperService = di.sl<MonitoringUIMapperService>();
+    _alertService = di.sl<MonitoringAlertService>();
+
     _loadHealthData();
     _startAutoRefresh();
   }
@@ -46,10 +65,12 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     try {
       final report = await _healthService.performHealthCheck();
       final history = _healthService.getHealthHistory(limit: 20);
+      final alerts = _alertService.getRecentAlerts(limit: 10);
 
       setState(() {
         _currentReport = report;
         _healthHistory = history;
+        _alerts = alerts;
         _isLoading = false;
       });
     } catch (e) {
@@ -97,9 +118,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
         ],
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : TabBarView(
               controller: _tabController,
               children: [
@@ -113,9 +132,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
 
   Widget _buildCurrentStatusTab() {
     if (_currentReport == null) {
-      return const Center(
-        child: Text('Nenhum dado disponível'),
-      );
+      return const Center(child: Text('Nenhum dado disponível'));
     }
 
     return SingleChildScrollView(
@@ -130,8 +147,9 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 12),
-          ..._currentReport!.componentResults
-              .map((result) => _buildComponentCard(result)),
+          ..._currentReport!.componentResults.map(
+            (result) => _buildComponentCard(result),
+          ),
           const SizedBox(height: 16),
           Text(
             'Métricas do Sistema',
@@ -146,9 +164,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
 
   Widget _buildHistoryTab() {
     if (_healthHistory.isEmpty) {
-      return const Center(
-        child: Text('Nenhum histórico disponível'),
-      );
+      return const Center(child: Text('Nenhum histórico disponível'));
     }
 
     return ListView.builder(
@@ -162,64 +178,26 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
   }
 
   Widget _buildAlertsTab() {
-    final alerts = [
-      {
-        'name': 'Alto uso de memória',
-        'level': 'warning',
-        'time': '2 min atrás',
-        'message': 'Uso de memória em 85%',
-      },
-      {
-        'name': 'Resposta lenta da API',
-        'level': 'critical',
-        'time': '5 min atrás',
-        'message': 'Tempo de resposta médio > 3s',
-      },
-      {
-        'name': 'Falha de sincronização',
-        'level': 'warning',
-        'time': '10 min atrás',
-        'message': '3 sincronizações falharam',
-      },
-    ];
+    // REFACTORED: Usa MonitoringAlertService para obter alertas reais
+    if (_alerts.isEmpty) {
+      return const Center(child: Text('Nenhum alerta no momento'));
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: alerts.length,
+      itemCount: _alerts.length,
       itemBuilder: (context, index) {
-        final alert = alerts[index] as Map<String, dynamic>;
+        final alert = _alerts[index];
         return _buildAlertCard(alert);
       },
     );
   }
 
   Widget _buildOverallStatusCard(SystemHealthReport report) {
-    Color statusColor;
-    IconData statusIcon;
-    String statusText;
-
-    switch (report.overallStatus) {
-      case HealthStatus.healthy:
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
-        statusText = 'Sistema Saudável';
-        break;
-      case HealthStatus.warning:
-        statusColor = Colors.orange;
-        statusIcon = Icons.warning;
-        statusText = 'Sistema com Avisos';
-        break;
-      case HealthStatus.critical:
-        statusColor = Colors.red;
-        statusIcon = Icons.error;
-        statusText = 'Sistema Crítico';
-        break;
-      case HealthStatus.failed:
-        statusColor = Colors.red[900]!;
-        statusIcon = Icons.cancel;
-        statusText = 'Sistema com Falhas';
-        break;
-    }
+    // REFACTORED: Usa MonitoringUIMapperService para mapear status -> UI
+    final statusColor = _uiMapperService.getStatusColor(report.overallStatus);
+    final statusIcon = _uiMapperService.getStatusIcon(report.overallStatus);
+    final statusText = _uiMapperService.getStatusText(report.overallStatus);
 
     return Card(
       child: Padding(
@@ -238,12 +216,12 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
                       Text(
                         statusText,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
-                        'Última verificação: ${_formatTime(report.timestamp)}',
+                        'Última verificação: ${_formatterService.formatRelativeTime(report.timestamp)}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -263,27 +241,12 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
   }
 
   Widget _buildComponentCard(ComponentHealthResult result) {
-    Color statusColor;
-    IconData statusIcon;
-
-    switch (result.status) {
-      case HealthStatus.healthy:
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle_outline;
-        break;
-      case HealthStatus.warning:
-        statusColor = Colors.orange;
-        statusIcon = Icons.warning_outlined;
-        break;
-      case HealthStatus.critical:
-        statusColor = Colors.red;
-        statusIcon = Icons.error_outline;
-        break;
-      case HealthStatus.failed:
-        statusColor = Colors.red[900]!;
-        statusIcon = Icons.cancel_outlined;
-        break;
-    }
+    // REFACTORED: Usa MonitoringUIMapperService para mapear status -> UI
+    final statusColor = _uiMapperService.getStatusColor(result.status);
+    final statusIcon = _uiMapperService.getStatusIcon(
+      result.status,
+      outlined: true,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -307,7 +270,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
               ),
             ),
             Text(
-              _formatTime(result.timestamp),
+              _formatterService.formatRelativeTime(result.timestamp),
               style: const TextStyle(fontSize: 10),
             ),
           ],
@@ -329,19 +292,21 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            ...metrics.entries.map((entry) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _formatMetricKey(entry.key),
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      Text(entry.value.toString()),
-                    ],
-                  ),
-                )),
+            ...metrics.entries.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _formatterService.formatMetricKey(entry.key),
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    Text(entry.value.toString()),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -349,21 +314,8 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
   }
 
   Widget _buildHistoryCard(SystemHealthReport report) {
-    Color statusColor;
-    switch (report.overallStatus) {
-      case HealthStatus.healthy:
-        statusColor = Colors.green;
-        break;
-      case HealthStatus.warning:
-        statusColor = Colors.orange;
-        break;
-      case HealthStatus.critical:
-        statusColor = Colors.red;
-        break;
-      case HealthStatus.failed:
-        statusColor = Colors.red[900]!;
-        break;
-    }
+    // REFACTORED: Usa MonitoringUIMapperService para mapear status -> UI
+    final statusColor = _uiMapperService.getStatusColor(report.overallStatus);
 
     final criticalCount = report.componentResults
         .where((r) => r.status == HealthStatus.critical)
@@ -378,10 +330,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
         leading: Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: statusColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
         ),
         title: Text(report.overallStatus.value.toUpperCase()),
         subtitle: Text(
@@ -390,7 +339,7 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
           '${warningCount > 0 ? '$warningCount avisos' : ''}',
         ),
         trailing: Text(
-          _formatTime(report.timestamp),
+          _formatterService.formatRelativeTime(report.timestamp),
           style: const TextStyle(fontSize: 12),
         ),
         onTap: () => _showReportDetails(report),
@@ -398,43 +347,30 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     );
   }
 
-  Widget _buildAlertCard(Map<String, dynamic> alert) {
-    Color alertColor;
-    IconData alertIcon;
-
-    switch (alert['level'] as String) {
-      case 'warning':
-        alertColor = Colors.orange;
-        alertIcon = Icons.warning;
-        break;
-      case 'critical':
-        alertColor = Colors.red;
-        alertIcon = Icons.error;
-        break;
-      default:
-        alertColor = Colors.blue;
-        alertIcon = Icons.info;
-    }
+  Widget _buildAlertCard(MonitoringAlert alert) {
+    // REFACTORED: Usa MonitoringUIMapperService para mapear nível -> UI
+    final alertColor = _uiMapperService.getAlertLevelColor(alert.level);
+    final alertIcon = _uiMapperService.getAlertLevelIcon(alert.level);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(alertIcon, color: alertColor),
-        title: Text(alert['name'] as String),
+        title: Text(alert.name),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(alert['message'] as String),
+            Text(alert.message),
             const SizedBox(height: 4),
             Text(
-              alert['time'] as String,
+              _formatterService.formatRelativeTime(alert.timestamp),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
         trailing: Chip(
           label: Text(
-            (alert['level'] as String).toUpperCase(),
+            alert.level.toUpperCase(),
             style: const TextStyle(fontSize: 10, color: Colors.white),
           ),
           backgroundColor: alertColor,
@@ -459,12 +395,17 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
               const SizedBox(height: 8),
               Text('Timestamp: ${result.timestamp}'),
               const SizedBox(height: 16),
-              const Text('Métricas:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Métricas:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              ...result.metrics.entries.map((entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Text('${entry.key}: ${entry.value}'),
-                  )),
+              ...result.metrics.entries.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('${entry.key}: ${entry.value}'),
+                ),
+              ),
             ],
           ),
         ),
@@ -486,27 +427,8 @@ class _ErrorTrackingDashboardState extends State<ErrorTrackingDashboard>
     );
   }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d atrás';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h atrás';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}min atrás';
-    } else {
-      return 'agora';
-    }
-  }
-
-  String _formatMetricKey(String key) {
-    return key
-        .split('_')
-        .map((word) => word[0].toUpperCase() + word.substring(1))
-        .join(' ');
-  }
+  // REMOVED: _formatTime() e _formatMetricKey()
+  // Agora usa MonitoringFormatterService para formatação (SOLID - SRP)
 }
 
 class _ReportDetailsScreen extends StatelessWidget {
@@ -517,9 +439,7 @@ class _ReportDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detalhes do Relatório'),
-      ),
+      appBar: AppBar(title: const Text('Detalhes do Relatório')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -547,27 +467,34 @@ class _ReportDetailsScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            ...report.componentResults.map((result) => Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          result.component.toUpperCase(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text('Status: ${result.status.value}'),
-                        Text('Mensagem: ${result.message}'),
-                        const SizedBox(height: 8),
-                        const Text('Métricas:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ...result.metrics.entries.map((entry) => Text('${entry.key}: ${entry.value}')),
-                      ],
-                    ),
+            ...report.componentResults.map(
+              (result) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        result.component.toUpperCase(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('Status: ${result.status.value}'),
+                      Text('Mensagem: ${result.message}'),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Métricas:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      ...result.metrics.entries.map(
+                        (entry) => Text('${entry.key}: ${entry.value}'),
+                      ),
+                    ],
                   ),
-                )),
+                ),
+              ),
+            ),
           ],
         ),
       ),

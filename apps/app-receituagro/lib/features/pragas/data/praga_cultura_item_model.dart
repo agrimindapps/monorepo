@@ -1,3 +1,6 @@
+import 'package:app_receituagro/core/di/injection.dart' as di;
+import '../presentation/services/pragas_type_service.dart';
+
 class PragaCulturaItemModel {
   final String idReg;
   final String nomeComum;
@@ -25,21 +28,15 @@ class PragaCulturaItemModel {
 
   String get displayName => nomeComum;
   String get displaySecondaryName => nomeSecundario ?? nomeCientifico ?? '';
-  
+
+  /// Refactored to use PragasTypeService (SOLID compliance)
   String get displayType {
-    switch (tipoPraga) {
-      case '1':
-        return 'Inseto';
-      case '2':
-        return 'Doença';
-      case '3':
-        return 'Planta Daninha';
-      default:
-        return 'Praga';
-    }
+    final typeService = di.getIt<PragasTypeService>();
+    return typeService.getTypeLabel(tipoPraga ?? '');
   }
 
-  String get imagePath => 'assets/imagens/bigsize/${nomeCientifico ?? nomeImagem}.jpg';
+  String get imagePath =>
+      'assets/imagens/bigsize/${nomeCientifico ?? nomeImagem}.jpg';
 
   factory PragaCulturaItemModel.fromMap(Map<String, dynamic> map) {
     return PragaCulturaItemModel(
@@ -77,7 +74,7 @@ class PragaCulturaItemModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is PragaCulturaItemModel && 
+    return other is PragaCulturaItemModel &&
         other.idReg == idReg &&
         other.tipoPraga == tipoPraga;
   }

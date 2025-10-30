@@ -4,6 +4,7 @@ import 'data/factories/favorito_entity_factory_registry.dart';
 import 'data/repositories/favoritos_repository_simplified.dart';
 import 'data/services/favoritos_cache_service_inline.dart';
 import 'data/services/favoritos_data_resolver_service.dart';
+import 'data/services/favoritos_error_message_service.dart';
 import 'data/services/favoritos_service.dart';
 import 'data/services/favoritos_sync_service.dart';
 import 'data/services/favoritos_validator_service.dart';
@@ -22,6 +23,10 @@ import 'domain/repositories/i_favoritos_repository.dart';
 /// - Removed switch case factory (OCP violation)
 /// - Added FavoritoEntityFactoryRegistry (Strategy Pattern)
 /// - Extensible: adding new tipos doesn't require code modifications
+///
+/// REFATORAÇÃO FASE 4 (SOLID):
+/// - Added FavoritosErrorMessageService (SRP - Single Responsibility)
+/// - Centralized error messages for consistency and i18n readiness
 ///
 /// ⚠️ IMPORTANTE: Separado em 2 métodos para evitar conflitos com Injectable:
 /// 1. registerServices() - chamado ANTES do Injectable (todas as specialized services)
@@ -72,6 +77,13 @@ class FavoritosDI {
     if (!_getIt.isRegistered<FavoritosCacheServiceInline>()) {
       _getIt.registerLazySingleton<FavoritosCacheServiceInline>(
         () => FavoritosCacheServiceInline(),
+      );
+    }
+
+    // Error message service (SOLID - SRP)
+    if (!_getIt.isRegistered<FavoritosErrorMessageService>()) {
+      _getIt.registerLazySingleton<FavoritosErrorMessageService>(
+        () => FavoritosErrorMessageService(),
       );
     }
 

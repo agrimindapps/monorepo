@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+
+import 'domain/navigation_constants.dart';
+import 'domain/navigation_item_builder.dart';
 import 'main_navigation_page.dart';
 
 /// Widget wrapper que adiciona BottomNavigationBar a páginas secundárias
-
+///
+/// **REFACTORED (SOLID):**
+/// - Usa NavigationItemBuilder para criar items (elimina duplicação)
+/// - Usa NavigationConstants para índice padrão (elimina magic numbers)
 class BottomNavWrapper extends StatelessWidget {
   final Widget child;
   final int? selectedIndex;
@@ -15,38 +21,13 @@ class BottomNavWrapper extends StatelessWidget {
       body: child,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: selectedIndex ?? 0,
+        currentIndex: selectedIndex ?? NavigationConstants.indexDefensivos,
         onTap: (index) {
           _navigateToMainPage(context, index);
         },
         elevation: 8,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shield),
-            activeIcon: Icon(Icons.shield, size: 28),
-            label: 'Defensivos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bug_report),
-            activeIcon: Icon(Icons.bug_report, size: 28),
-            label: 'Pragas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite, size: 28),
-            label: 'Favoritos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.comment_outlined),
-            activeIcon: Icon(Icons.comment, size: 28),
-            label: 'Comentários',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings, size: 28),
-            label: 'Config',
-          ),
-        ],
+        // REFACTORED: Usa NavigationItemBuilder (elimina duplicação)
+        items: NavigationItemBuilder.buildSimpleItems(),
       ),
     );
   }

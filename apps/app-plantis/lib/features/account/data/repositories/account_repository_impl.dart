@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:core/core.dart';
 
 import '../../domain/entities/account_info.dart';
@@ -12,19 +13,19 @@ import '../datasources/account_remote_datasource.dart';
 class AccountRepositoryImpl implements AccountRepository {
   final AccountRemoteDataSource remoteDataSource;
   final AccountLocalDataSource localDataSource;
-  final FirebaseService firebaseService;
+  final fb.FirebaseAuth firebaseAuth;
 
   const AccountRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
-    required this.firebaseService,
+    required this.firebaseAuth,
   });
 
   @override
   Future<Either<Failure, AccountInfo>> getAccountInfo() async {
     try {
       final userEntity = await remoteDataSource.getRemoteAccountInfo();
-      
+
       if (userEntity == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
@@ -34,13 +35,13 @@ class AccountRepositoryImpl implements AccountRepository {
 
       final accountInfo = AccountInfo(
         userId: userEntity.id,
-        displayName: userEntity.displayName ?? 'Usuário',
-        email: userEntity.email ?? '',
-        isAnonymous: userEntity.isAnonymous,
+        displayName: userEntity.displayName,
+        email: userEntity.email,
+        isAnonymous: userEntity.provider == AuthProvider.anonymous,
         isPremium: isPremium,
         createdAt: userEntity.createdAt,
         lastLoginAt: userEntity.lastLoginAt,
-        avatarUrl: userEntity.photoURL,
+        avatarUrl: userEntity.photoUrl,
       );
 
       return Right(accountInfo);
@@ -56,10 +57,10 @@ class AccountRepositoryImpl implements AccountRepository {
     try {
       // Realiza logout remoto
       await remoteDataSource.logout();
-      
+
       // Limpa dados locais da sessão
       await localDataSource.clearAccountData();
-      
+
       return const Right(null);
     } on Failure catch (failure) {
       return Left(failure);
@@ -72,28 +73,26 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<Either<Failure, int>> clearUserData() async {
     try {
       final userEntity = await remoteDataSource.getRemoteAccountInfo();
-      
+
       if (userEntity == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       // Limpa dados locais
       final localCleared = await localDataSource.clearLocalUserData();
-      
+
       // Limpa dados remotos
       final remoteCleared = await remoteDataSource.clearRemoteUserData(
         userEntity.id,
       );
-      
+
       final totalCleared = localCleared + remoteCleared;
-      
+
       return Right(totalCleared);
     } on Failure catch (failure) {
       return Left(failure);
     } catch (e) {
-      return Left(
-        UnknownFailure('Erro ao limpar dados do usuário: $e'),
-      );
+      return Left(UnknownFailure('Erro ao limpar dados do usuário: $e'));
     }
   }
 
@@ -101,17 +100,17 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<Either<Failure, void>> deleteAccount() async {
     try {
       final userEntity = await remoteDataSource.getRemoteAccountInfo();
-      
+
       if (userEntity == null) {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
       // Deleta conta remota (isso já limpa os dados)
       await remoteDataSource.deleteAccount(userEntity.id);
-      
+
       // Limpa dados locais
       await localDataSource.clearAccountData();
-      
+
       return const Right(null);
     } on Failure catch (failure) {
       return Left(failure);
@@ -123,7 +122,7 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Either<Failure, bool>> isAuthenticated() async {
     try {
-      final currentUser = firebaseService.currentUser;
+      final currentUser = firebaseAuth.currentUser;
       return Right(currentUser != null);
     } catch (e) {
       return Left(UnknownFailure('Erro ao verificar autenticação: $e'));
@@ -132,7 +131,7 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Stream<AccountInfo?> watchAccountInfo() {
-    return firebaseService.authStateChanges.asyncMap((user) async {
+    return firebaseAuth.authStateChanges().asyncMap((fb.User? user) async {
       if (user == null) {
         return null;
       }

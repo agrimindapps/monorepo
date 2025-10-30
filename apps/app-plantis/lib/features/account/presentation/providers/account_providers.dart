@@ -1,4 +1,6 @@
-import 'package:core/core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:core/core.dart' hide DeleteAccountUseCase;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/datasources/account_local_datasource.dart';
@@ -9,7 +11,7 @@ import '../../domain/repositories/account_repository.dart';
 import '../../domain/usecases/clear_data_usecase.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 import '../../domain/usecases/get_account_info_usecase.dart';
-import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/logout_usecase.dart' as account_logout;
 
 part 'account_providers.g.dart';
 
@@ -21,16 +23,18 @@ part 'account_providers.g.dart';
 AccountRemoteDataSource accountRemoteDataSource(
   AccountRemoteDataSourceRef ref,
 ) {
-  final firebaseService = ref.watch(firebaseServiceProvider);
-  return AccountRemoteDataSourceImpl(firebaseService);
+  final firebaseAuth = fb.FirebaseAuth.instance;
+  final firebaseFirestore = FirebaseFirestore.instance;
+  return AccountRemoteDataSourceImpl(
+    firebaseAuth: firebaseAuth,
+    firebaseFirestore: firebaseFirestore,
+  );
 }
 
 @riverpod
-AccountLocalDataSource accountLocalDataSource(
-  AccountLocalDataSourceRef ref,
-) {
-  final hiveService = ref.watch(hiveServiceProvider);
-  return AccountLocalDataSourceImpl(hiveService);
+AccountLocalDataSource accountLocalDataSource(AccountLocalDataSourceRef ref) {
+  final hiveManager = HiveManager.instance;
+  return AccountLocalDataSourceImpl(hiveManager);
 }
 
 // ============================================================================
@@ -41,12 +45,12 @@ AccountLocalDataSource accountLocalDataSource(
 AccountRepository accountRepository(AccountRepositoryRef ref) {
   final remoteDataSource = ref.watch(accountRemoteDataSourceProvider);
   final localDataSource = ref.watch(accountLocalDataSourceProvider);
-  final firebaseService = ref.watch(firebaseServiceProvider);
+  final firebaseAuth = fb.FirebaseAuth.instance;
 
   return AccountRepositoryImpl(
     remoteDataSource: remoteDataSource,
     localDataSource: localDataSource,
-    firebaseService: firebaseService,
+    firebaseAuth: firebaseAuth,
   );
 }
 
@@ -61,9 +65,9 @@ GetAccountInfoUseCase getAccountInfoUseCase(GetAccountInfoUseCaseRef ref) {
 }
 
 @riverpod
-LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
+account_logout.LogoutUseCase logoutUseCase(LogoutUseCaseRef ref) {
   final repository = ref.watch(accountRepositoryProvider);
-  return LogoutUseCase(repository);
+  return account_logout.LogoutUseCase(repository);
 }
 
 @riverpod
@@ -115,15 +119,17 @@ class LogoutNotifier extends _$LogoutNotifier {
 
   Future<Either<Failure, void>> logout() async {
     state = const AsyncLoading();
-    
+
     final useCase = ref.read(logoutUseCaseProvider);
     final result = await useCase(const NoParams());
-    
-    state = result.fold(
-      (failure) => AsyncError(failure, StackTrace.current),
-      (_) => const AsyncData(null),
-    );
-    
+
+    if (result.isRight()) {
+      state = const AsyncData<void>(null);
+    } else {
+      final failure = result.fold((f) => f, (r) => null);
+      state = AsyncError<void>(failure ?? Exception(), StackTrace.current);
+    }
+
     return result;
   }
 }
@@ -138,15 +144,18 @@ class ClearDataNotifier extends _$ClearDataNotifier {
 
   Future<Either<Failure, int>> clearData() async {
     state = const AsyncLoading();
-    
+
     final useCase = ref.read(clearDataUseCaseProvider);
     final result = await useCase(const NoParams());
-    
-    state = result.fold(
-      (failure) => AsyncError(failure, StackTrace.current),
-      (count) => AsyncData(count),
-    );
-    
+
+    if (result.isRight()) {
+      final count = result.fold((f) => 0, (c) => c);
+      state = AsyncData<int?>(count);
+    } else {
+      final failure = result.fold((f) => f, (r) => null);
+      state = AsyncError<int?>(failure ?? Exception(), StackTrace.current);
+    }
+
     return result;
   }
 }
@@ -161,15 +170,17 @@ class DeleteAccountNotifier extends _$DeleteAccountNotifier {
 
   Future<Either<Failure, void>> deleteAccount() async {
     state = const AsyncLoading();
-    
+
     final useCase = ref.read(deleteAccountUseCaseProvider);
     final result = await useCase(const NoParams());
-    
-    state = result.fold(
-      (failure) => AsyncError(failure, StackTrace.current),
-      (_) => const AsyncData(null),
-    );
-    
+
+    if (result.isRight()) {
+      state = const AsyncData<void>(null);
+    } else {
+      final failure = result.fold((f) => f, (r) => null);
+      state = AsyncError<void>(failure ?? Exception(), StackTrace.current);
+    }
+
     return result;
   }
 }

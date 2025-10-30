@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' show injectable;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/interfaces/network_info.dart';
@@ -13,70 +13,61 @@ class PlantsConnectivityMonitor {
 
   final NetworkInfo networkInfo;
 
-  StreamSubscription<bool>? _connectivitySubscription;
+  Timer? _pollTimer;
   bool _isMonitoring = false;
 
   bool get isMonitoring => _isMonitoring;
 
   /// Initialize real-time connectivity monitoring
-  void startMonitoring(Function(bool) onConnectivityChanged) {
+  void startMonitoring(void Function(bool) onConnectivityChanged) {
     try {
-      final enhanced = networkInfo.asEnhanced;
-      if (enhanced == null) {
-        logger.debug('Basic NetworkInfo - real-time monitoring unavailable');
-        return;
-      }
-
-      _connectivitySubscription = enhanced.connectivityStream.listen(
-        (isConnected) {
-          logger.debug(
-            'Connectivity changed - ${isConnected ? 'Online' : 'Offline'}',
-          );
-          onConnectivityChanged(isConnected);
-        },
-        onError: (Object error) {
-          logger.warning('Connectivity monitoring error', error: error);
-        },
-      );
+      // Start polling connectivity status since NetworkInfo only provides isConnected Future
+      _startPolling(onConnectivityChanged);
 
       _isMonitoring = true;
-      logger.info('Real-time connectivity monitoring started');
+      debugPrint('✅ Connectivity monitoring started');
     } catch (e) {
-      logger.error('Failed to start connectivity monitoring', error: e);
+      debugPrint('❌ Failed to start connectivity monitoring: $e');
     }
+  }
+
+  /// Start polling connectivity status periodically
+  void _startPolling(void Function(bool) onConnectivityChanged) {
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      try {
+        final isConnected = await networkInfo.isConnected;
+        onConnectivityChanged(isConnected);
+      } catch (e) {
+        debugPrint('⚠️ Error checking connectivity: $e');
+      }
+    });
   }
 
   /// Stop connectivity monitoring and cleanup resources
   Future<void> stopMonitoring() async {
     try {
-      if (_connectivitySubscription != null) {
-        await _connectivitySubscription!.cancel();
-        _connectivitySubscription = null;
+      if (_pollTimer != null) {
+        _pollTimer!.cancel();
+        _pollTimer = null;
         _isMonitoring = false;
 
-        logger.info('Connectivity monitoring stopped');
+        debugPrint('✅ Connectivity monitoring stopped');
       }
     } catch (e) {
-      logger.error('Error stopping connectivity monitoring', error: e);
+      debugPrint('❌ Error stopping connectivity monitoring: $e');
     }
   }
 
   /// Get current connectivity status
   Future<Map<String, dynamic>> getConnectivityStatus() async {
     try {
-      final enhanced = networkInfo.asEnhanced;
-      if (enhanced != null) {
-        final status = await enhanced.detailedStatus;
-        return {...?status, 'monitoring_active': _isMonitoring};
-      } else {
-        final isConnected = await networkInfo.isConnected;
-        return {
-          'is_online': isConnected,
-          'monitoring_active': false,
-          'adapter_type': 'basic',
-          'timestamp': DateTime.now().toIso8601String(),
-        };
-      }
+      final isConnected = await networkInfo.isConnected;
+      return {
+        'is_online': isConnected,
+        'monitoring_active': _isMonitoring,
+        'adapter_type': 'basic',
+        'timestamp': DateTime.now().toIso8601String(),
+      };
     } catch (e) {
       return {
         'error': e.toString(),

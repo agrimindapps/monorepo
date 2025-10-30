@@ -1,3 +1,5 @@
+import 'dart:convert' as convert;
+
 import 'package:core/core.dart';
 
 import '../../domain/entities/export_request.dart';
@@ -10,23 +12,31 @@ class DataExportRepositoryImpl implements DataExportRepository {
   final PlantsExportDataSource _plantsDataSource;
   final SettingsExportDataSource _settingsDataSource;
   final ExportFileGenerator _fileGenerator;
-  final IHiveRepository _hiveRepository;
+  final IHiveManager _hiveManager;
   static const Duration _exportCooldown = Duration(hours: 1);
+  static const String _boxName = 'data_export';
 
   DataExportRepositoryImpl({
     required PlantsExportDataSource plantsDataSource,
     required SettingsExportDataSource settingsDataSource,
     required ExportFileGenerator fileGenerator,
-    required IHiveRepository hiveRepository,
-  })  : _plantsDataSource = plantsDataSource,
-        _settingsDataSource = settingsDataSource,
-        _fileGenerator = fileGenerator,
-        _hiveRepository = hiveRepository;
+    required IHiveManager hiveManager,
+  }) : _plantsDataSource = plantsDataSource,
+       _settingsDataSource = settingsDataSource,
+       _fileGenerator = fileGenerator,
+       _hiveManager = hiveManager;
 
   // Helper methods for Hive persistence
   Future<DateTime?> _getLastExportTime() async {
     try {
-      return await _hiveRepository.get<DateTime?>('last_export_time');
+      final boxResult = await _hiveManager.getBox<String>(_boxName);
+      return boxResult.fold((failure) => null, (box) {
+        final value = box.get('last_export_time');
+        if (value is String) {
+          return DateTime.tryParse(value);
+        }
+        return null;
+      });
     } catch (e) {
       return null;
     }
@@ -34,7 +44,11 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
   Future<void> _setLastExportTime(DateTime time) async {
     try {
-      await _hiveRepository.put('last_export_time', time);
+      final boxResult = await _hiveManager.getBox<String>(_boxName);
+      boxResult.fold(
+        (failure) => null,
+        (box) => box.put('last_export_time', time.toIso8601String()),
+      );
     } catch (e) {
       // Log error but don't fail the operation
     }
@@ -42,21 +56,33 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
   Future<Map<String, ExportRequest>> _getExportRequests() async {
     try {
-      final stored = await _hiveRepository.get<List<dynamic>>(
-        'export_requests',
-      );
-      if (stored == null) return {};
+      final boxResult = await _hiveManager.getBox<String>(_boxName);
+      return boxResult.fold((failure) => {}, (box) {
+        final stored = box.get('export_requests');
+        if (stored == null || stored.isEmpty) return {};
 
-      final Map<String, ExportRequest> requests = {};
-      for (final item in stored) {
-        if (item is Map<String, dynamic>) {
-          final request = _exportRequestFromJson(item);
-          if (request != null) {
-            requests[request.id] = request;
+        final Map<String, ExportRequest> requests = {};
+        try {
+          // Parse from the stored string representation
+          if (stored.startsWith('[')) {
+            // It's a JSON array
+            final parsed = convert.jsonDecode(stored);
+            if (parsed is List) {
+              for (final item in parsed) {
+                if (item is Map<String, dynamic>) {
+                  final request = _exportRequestFromJson(item);
+                  if (request != null) {
+                    requests[request.id] = request;
+                  }
+                }
+              }
+            }
           }
+        } catch (e) {
+          // Silently fail to parse
         }
-      }
-      return requests;
+        return requests;
+      });
     } catch (e) {
       return {};
     }
@@ -70,14 +96,16 @@ class DataExportRepositoryImpl implements DataExportRepository {
         dataTypes: (json['dataTypes'] as List<dynamic>)
             .map((e) => DataType.values.firstWhere((dt) => dt.name == e))
             .toSet(),
-        format: ExportFormat.values
-            .firstWhere((f) => f.name == json['format'] as String),
+        format: ExportFormat.values.firstWhere(
+          (f) => f.name == json['format'] as String,
+        ),
         requestDate: DateTime.parse(json['requestDate'] as String),
         completionDate: json['completionDate'] != null
             ? DateTime.parse(json['completionDate'] as String)
             : null,
-        status: ExportRequestStatus.values
-            .firstWhere((s) => s.name == json['status'] as String),
+        status: ExportRequestStatus.values.firstWhere(
+          (s) => s.name == json['status'] as String,
+        ),
         downloadUrl: json['downloadUrl'] as String?,
         errorMessage: json['errorMessage'] as String?,
         metadata: json['metadata'] as Map<String, dynamic>?,
@@ -198,7 +226,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
           estimatedSizeInBytes: totalSize,
         ),
       );
-    } on CacheException catch (e) {
+    } on StorageException catch (e) {
       return Left(
         CacheFailure(
           'Erro ao acessar dados locais',
@@ -243,7 +271,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       _processExportRequest(request);
 
       return Right(request);
-    } on CacheException catch (e) {
+    } on StorageException catch (e) {
       return Left(
         CacheFailure(
           'Erro ao salvar solicitação de exportação',
@@ -252,12 +280,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
         ),
       );
     } catch (e) {
-      return Left(
-        UnknownFailure(
-          'Erro ao solicitar exportação',
-          details: e,
-        ),
-      );
+      return Left(UnknownFailure('Erro ao solicitar exportação', details: e));
     }
   }
 
@@ -272,7 +295,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
           .toList();
       userRequests.sort((a, b) => b.requestDate.compareTo(a.requestDate));
       return Right(userRequests);
-    } on CacheException catch (e) {
+    } on StorageException catch (e) {
       return Left(
         CacheFailure(
           'Erro ao acessar histórico de exportações',
@@ -281,12 +304,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
         ),
       );
     } catch (e) {
-      return Left(
-        UnknownFailure(
-          'Erro ao carregar histórico',
-          details: e,
-        ),
-      );
+      return Left(UnknownFailure('Erro ao carregar histórico', details: e));
     }
   }
 
@@ -327,7 +345,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       await Future<void>.delayed(const Duration(seconds: 2));
 
       return const Right(true);
-    } on CacheException catch (e) {
+    } on StorageException catch (e) {
       return Left(
         CacheFailure(
           'Erro ao acessar dados de exportação',
@@ -336,12 +354,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
         ),
       );
     } catch (e) {
-      return Left(
-        UnknownFailure(
-          'Erro ao baixar arquivo',
-          details: e,
-        ),
-      );
+      return Left(UnknownFailure('Erro ao baixar arquivo', details: e));
     }
   }
 
@@ -362,7 +375,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       await _saveAllExportRequests(requests);
 
       return const Right(true);
-    } on CacheException catch (e) {
+    } on StorageException catch (e) {
       return Left(
         CacheFailure(
           'Erro ao deletar exportação',
@@ -371,12 +384,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
         ),
       );
     } catch (e) {
-      return Left(
-        UnknownFailure(
-          'Erro ao deletar exportação',
-          details: e,
-        ),
-      );
+      return Left(UnknownFailure('Erro ao deletar exportação', details: e));
     }
   }
 
@@ -389,10 +397,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       return Right(plants);
     } catch (e) {
       return Left(
-        UnknownFailure(
-          'Erro ao buscar dados de plantas',
-          details: e,
-        ),
+        UnknownFailure('Erro ao buscar dados de plantas', details: e),
       );
     }
   }
@@ -406,10 +411,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       return Right(tasks);
     } catch (e) {
       return Left(
-        UnknownFailure(
-          'Erro ao buscar dados de tarefas',
-          details: e,
-        ),
+        UnknownFailure('Erro ao buscar dados de tarefas', details: e),
       );
     }
   }
@@ -423,10 +425,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       return Right(spaces);
     } catch (e) {
       return Left(
-        UnknownFailure(
-          'Erro ao buscar dados de espaços',
-          details: e,
-        ),
+        UnknownFailure('Erro ao buscar dados de espaços', details: e),
       );
     }
   }
@@ -439,12 +438,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       final settings = await _settingsDataSource.getUserSettingsData(userId);
       return Right(settings);
     } catch (e) {
-      return Left(
-        UnknownFailure(
-          'Erro ao buscar configurações',
-          details: e,
-        ),
-      );
+      return Left(UnknownFailure('Erro ao buscar configurações', details: e));
     }
   }
 
@@ -457,28 +451,19 @@ class DataExportRepositoryImpl implements DataExportRepository {
       return Right(photos);
     } catch (e) {
       return Left(
-        UnknownFailure(
-          'Erro ao buscar fotos das plantas',
-          details: e,
-        ),
+        UnknownFailure('Erro ao buscar fotos das plantas', details: e),
       );
     }
   }
 
   @override
   Future<Either<Failure, List<PlantCommentExportData>>>
-      getUserPlantCommentsData(String userId) async {
+  getUserPlantCommentsData(String userId) async {
     try {
-      final comments =
-          await _plantsDataSource.getUserPlantCommentsData(userId);
+      final comments = await _plantsDataSource.getUserPlantCommentsData(userId);
       return Right(comments);
     } catch (e) {
-      return Left(
-        UnknownFailure(
-          'Erro ao buscar comentários',
-          details: e,
-        ),
-      );
+      return Left(UnknownFailure('Erro ao buscar comentários', details: e));
     }
   }
 
@@ -495,10 +480,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       return Right(filePath);
     } catch (e) {
       return Left(
-        UnknownFailure(
-          'Erro ao gerar arquivo de exportação',
-          details: e,
-        ),
+        UnknownFailure('Erro ao gerar arquivo de exportação', details: e),
       );
     }
   }
@@ -511,48 +493,52 @@ class DataExportRepositoryImpl implements DataExportRepository {
       );
       final exportData = <DataType, dynamic>{};
 
+      // Helper to handle data fetch results
+      Future<bool> _fetchData(
+        Future<Either<Failure, dynamic>> Function() fetcher,
+        DataType dataType,
+      ) async {
+        final result = await fetcher();
+        return result.fold(
+          (failure) {
+            // Log failure but continue processing other data types
+            exportData[dataType] = {'error': failure.message};
+            return false;
+          },
+          (data) {
+            exportData[dataType] = data;
+            return true;
+          },
+        );
+      }
+
       for (final dataType in request.dataTypes) {
         switch (dataType) {
           case DataType.plants:
-            final result = await getUserPlantsData(request.userId);
-            result.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[dataType] = data,
-            );
+            await _fetchData(() => getUserPlantsData(request.userId), dataType);
             break;
           case DataType.plantTasks:
-            final result = await getUserTasksData(request.userId);
-            result.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[dataType] = data,
-            );
+            await _fetchData(() => getUserTasksData(request.userId), dataType);
             break;
           case DataType.spaces:
-            final result = await getUserSpacesData(request.userId);
-            result.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[dataType] = data,
-            );
+            await _fetchData(() => getUserSpacesData(request.userId), dataType);
             break;
           case DataType.plantPhotos:
-            final result = await getUserPlantPhotosData(request.userId);
-            result.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[dataType] = data,
+            await _fetchData(
+              () => getUserPlantPhotosData(request.userId),
+              dataType,
             );
             break;
           case DataType.plantComments:
-            final result = await getUserPlantCommentsData(request.userId);
-            result.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[dataType] = data,
+            await _fetchData(
+              () => getUserPlantCommentsData(request.userId),
+              dataType,
             );
             break;
           case DataType.settings:
-            final result = await getUserSettingsData(request.userId);
-            result.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[dataType] = data,
+            await _fetchData(
+              () => getUserSettingsData(request.userId),
+              dataType,
             );
             break;
           case DataType.userProfile:
@@ -562,41 +548,30 @@ class DataExportRepositoryImpl implements DataExportRepository {
             };
             break;
           case DataType.all:
-            final plantsResult = await getUserPlantsData(request.userId);
-            plantsResult.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[DataType.plants] = data,
+            // Fetch all data types
+            await _fetchData(
+              () => getUserPlantsData(request.userId),
+              DataType.plants,
             );
-
-            final tasksResult = await getUserTasksData(request.userId);
-            tasksResult.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[DataType.plantTasks] = data,
+            await _fetchData(
+              () => getUserTasksData(request.userId),
+              DataType.plantTasks,
             );
-
-            final spacesResult = await getUserSpacesData(request.userId);
-            spacesResult.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[DataType.spaces] = data,
+            await _fetchData(
+              () => getUserSpacesData(request.userId),
+              DataType.spaces,
             );
-
-            final photosResult = await getUserPlantPhotosData(request.userId);
-            photosResult.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[DataType.plantPhotos] = data,
+            await _fetchData(
+              () => getUserPlantPhotosData(request.userId),
+              DataType.plantPhotos,
             );
-
-            final commentsResult =
-                await getUserPlantCommentsData(request.userId);
-            commentsResult.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[DataType.plantComments] = data,
+            await _fetchData(
+              () => getUserPlantCommentsData(request.userId),
+              DataType.plantComments,
             );
-
-            final settingsResult = await getUserSettingsData(request.userId);
-            settingsResult.fold(
-              (failure) => throw Exception(failure.message),
-              (data) => exportData[DataType.settings] = data,
+            await _fetchData(
+              () => getUserSettingsData(request.userId),
+              DataType.settings,
             );
             break;
           default:
@@ -652,9 +627,14 @@ class DataExportRepositoryImpl implements DataExportRepository {
     Map<String, ExportRequest> requests,
   ) async {
     try {
-      final requestsList =
-          requests.values.map(_exportRequestToJson).toList();
-      await _hiveRepository.put('export_requests', requestsList);
+      final requestsList = requests.values.map(_exportRequestToJson).toList();
+      // Serialize to JSON string for storage
+      final jsonString = requestsList.toString();
+      final boxResult = await _hiveManager.getBox<String>(_boxName);
+      boxResult.fold(
+        (failure) => null,
+        (box) => box.put('export_requests', jsonString),
+      );
     } catch (e) {
       // Log error
     }

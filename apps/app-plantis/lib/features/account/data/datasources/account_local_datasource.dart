@@ -15,9 +15,9 @@ abstract class AccountLocalDataSource {
 
 /// Implementação do data source local usando Hive
 class AccountLocalDataSourceImpl implements AccountLocalDataSource {
-  final HiveService hiveService;
+  final IHiveManager hiveManager;
 
-  const AccountLocalDataSourceImpl(this.hiveService);
+  const AccountLocalDataSourceImpl(this.hiveManager);
 
   @override
   Future<UserEntity?> getLocalAccountInfo() async {
@@ -34,19 +34,25 @@ class AccountLocalDataSourceImpl implements AccountLocalDataSource {
   Future<int> clearLocalUserData() async {
     try {
       int totalCleared = 0;
-      
+
       // Limpa boxes de plantas
-      final plantsBox = await hiveService.openBox('plantas');
-      totalCleared += plantsBox.length;
-      await plantsBox.clear();
+      final plantsBoxResult = await hiveManager.getBox<dynamic>('plantas');
+      if (plantsBoxResult.isSuccess) {
+        final plantsBox = plantsBoxResult.data as Box<dynamic>;
+        totalCleared += plantsBox.length;
+        await plantsBox.clear();
+      }
 
       // Limpa boxes de tarefas
-      final tasksBox = await hiveService.openBox('tarefas');
-      totalCleared += tasksBox.length;
-      await tasksBox.clear();
+      final tasksBoxResult = await hiveManager.getBox<dynamic>('tarefas');
+      if (tasksBoxResult.isSuccess) {
+        final tasksBox = tasksBoxResult.data as Box<dynamic>;
+        totalCleared += tasksBox.length;
+        await tasksBox.clear();
+      }
 
       // Limpa outros boxes de conteúdo conforme necessário
-      
+
       return totalCleared;
     } catch (e) {
       throw CacheFailure('Erro ao limpar dados locais: $e');

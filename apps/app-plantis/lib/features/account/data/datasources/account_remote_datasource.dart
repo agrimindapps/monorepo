@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:core/core.dart';
 
 /// Interface para data source remoto de conta
@@ -18,27 +20,34 @@ abstract class AccountRemoteDataSource {
 
 /// Implementação do data source remoto usando Firebase
 class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
-  final FirebaseService firebaseService;
+  final fb.FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firebaseFirestore;
 
-  const AccountRemoteDataSourceImpl(this.firebaseService);
+  const AccountRemoteDataSourceImpl({
+    required this.firebaseAuth,
+    required this.firebaseFirestore,
+  });
 
   @override
   Future<UserEntity?> getRemoteAccountInfo() async {
     try {
-      final firebaseUser = firebaseService.currentUser;
+      final firebaseUser = firebaseAuth.currentUser;
       if (firebaseUser == null) {
         return null;
       }
 
+      // Determina o provider de autenticação
+      final providerId =
+          firebaseUser.providerData.firstOrNull?.providerId ?? 'password';
+      final provider = _mapFirebaseProviderToAuthProvider(providerId);
+
       return UserEntity(
         id: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        isAnonymous: firebaseUser.isAnonymous,
-        provider: AuthProvider.fromFirebase(
-          firebaseUser.providerData.firstOrNull?.providerId ?? 'anonymous',
-        ),
+        email: firebaseUser.email ?? '',
+        displayName: firebaseUser.displayName ?? 'Usuário',
+        photoUrl: firebaseUser.photoURL,
+        isEmailVerified: firebaseUser.emailVerified,
+        provider: provider,
         createdAt: firebaseUser.metadata.creationTime,
         lastLoginAt: firebaseUser.metadata.lastSignInTime,
       );
@@ -47,10 +56,26 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     }
   }
 
+  /// Mapeia provider ID do Firebase para AuthProvider do core
+  AuthProvider _mapFirebaseProviderToAuthProvider(String providerId) {
+    switch (providerId) {
+      case 'google.com':
+        return AuthProvider.google;
+      case 'apple.com':
+        return AuthProvider.apple;
+      case 'facebook.com':
+        return AuthProvider.facebook;
+      case 'anonymous':
+        return AuthProvider.anonymous;
+      default:
+        return AuthProvider.email;
+    }
+  }
+
   @override
   Future<void> logout() async {
     try {
-      await firebaseService.signOut();
+      await firebaseAuth.signOut();
     } catch (e) {
       throw AuthFailure('Erro ao fazer logout: $e');
     }
@@ -62,22 +87,22 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       int totalCleared = 0;
 
       // Limpa coleção de plantas
-      final plantsSnapshot = await firebaseService.firestore
+      final plantsSnapshot = await firebaseFirestore
           .collection('plantas')
           .where('userId', isEqualTo: userId)
           .get();
-      
+
       for (final doc in plantsSnapshot.docs) {
         await doc.reference.delete();
         totalCleared++;
       }
 
       // Limpa coleção de tarefas
-      final tasksSnapshot = await firebaseService.firestore
+      final tasksSnapshot = await firebaseFirestore
           .collection('tarefas')
           .where('userId', isEqualTo: userId)
           .get();
-      
+
       for (final doc in tasksSnapshot.docs) {
         await doc.reference.delete();
         totalCleared++;
@@ -96,10 +121,10 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       await clearRemoteUserData(userId);
 
       // Remove documento do usuário
-      await firebaseService.firestore.collection('users').doc(userId).delete();
+      await firebaseFirestore.collection('users').doc(userId).delete();
 
       // Deleta a conta de autenticação
-      final currentUser = firebaseService.currentUser;
+      final currentUser = firebaseAuth.currentUser;
       if (currentUser != null) {
         await currentUser.delete();
       }

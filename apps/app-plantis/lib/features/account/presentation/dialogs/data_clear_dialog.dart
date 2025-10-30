@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../core/providers/auth_providers.dart' as local;
-import '../../../core/services/data_cleaner_service.dart';
-import '../../../core/services/data_sanitization_service.dart';
+import '../../../../core/services/data_cleaner_service.dart';
+import '../../../../core/services/data_sanitization_service.dart';
 import '../utils/text_formatters.dart';
 
 /// Dialog stateful para confirmação de limpeza de dados
 class DataClearDialog extends StatefulWidget {
-  final local.AuthState authState;
-
-  const DataClearDialog({super.key, required this.authState});
+  const DataClearDialog({super.key});
 
   @override
   State<DataClearDialog> createState() => _DataClearDialogState();
@@ -166,58 +163,43 @@ class _DataClearDialogState extends State<DataClearDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed:
-              _isConfirmationValid && !_isLoading
-                  ? () async {
-                    setState(() {
-                      _isLoading = true;
-                    });
+          onPressed: _isConfirmationValid && !_isLoading
+              ? () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
 
-                    try {
-                      final dataCleanerService =
-                          GetIt.instance<DataCleanerService>();
-                      final result =
-                          await dataCleanerService.clearUserContentOnly();
+                  try {
+                    final dataCleanerService =
+                        GetIt.instance<DataCleanerService>();
+                    final result = await dataCleanerService
+                        .clearUserContentOnly();
 
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
 
-                        if (result['success'] as bool) {
-                          final plantsCleaned = result['plantsCleaned'] as int;
-                          final tasksCleaned = result['tasksCleaned'] as int;
-                          final spacesCleaned = result['spacesCleaned'] as int;
+                      if (result['success'] as bool) {
+                        final plantsCleaned = result['plantsCleaned'] as int;
+                        final tasksCleaned = result['tasksCleaned'] as int;
+                        final spacesCleaned = result['spacesCleaned'] as int;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Dados limpos com sucesso!\n'
-                                'Plantas: $plantsCleaned | Tarefas: $tasksCleaned | Espaços: $spacesCleaned',
-                              ),
-                              backgroundColor: Colors.green,
-                              behavior: SnackBarBehavior.floating,
-                              duration: const Duration(seconds: 4),
-                            ),
-                          );
-                        } else {
-                          final errors = result['errors'] as List<String>;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Erro ao limpar dados: ${errors.join(', ')}',
-                              ),
-                              backgroundColor: theme.colorScheme.error,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Erro ao limpar dados: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+                              'Dados limpos com sucesso!\n'
+                              'Plantas: $plantsCleaned | Tarefas: $tasksCleaned | Espaços: $spacesCleaned',
+                            ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 4),
+                          ),
+                        );
+                      } else {
+                        final errors = result['errors'] as List<String>;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Erro ao limpar dados: ${errors.join(', ')}',
                             ),
                             backgroundColor: theme.colorScheme.error,
                             behavior: SnackBarBehavior.floating,
@@ -225,36 +207,47 @@ class _DataClearDialogState extends State<DataClearDialog> {
                         );
                       }
                     }
-
-                    setState(() {
-                      _isLoading = false;
-                    });
+                  } catch (e) {
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Erro ao limpar dados: ${DataSanitizationService.sanitizeForLogging(e.toString())}',
+                          ),
+                          backgroundColor: theme.colorScheme.error,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   }
-                  : null,
+
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                _isConfirmationValid && !_isLoading
-                    ? Colors.orange
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-            foregroundColor:
-                _isConfirmationValid && !_isLoading
-                    ? Colors.white
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            backgroundColor: _isConfirmationValid && !_isLoading
+                ? Colors.orange
+                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor: _isConfirmationValid && !_isLoading
+                ? Colors.white
+                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child:
-              _isLoading
-                  ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                  : const Text('Limpar Dados'),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text('Limpar Dados'),
         ),
       ],
     );

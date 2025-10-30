@@ -33,6 +33,11 @@ class PlantsNotifier extends _$PlantsNotifier {
   late final PlantsSortService _sortService;
   late final PlantsCareService _careService;
   late final SearchPlantsUseCase _searchPlantsUseCase;
+  late final GetPlantsUseCase _getPlantsUseCase;
+  late final GetPlantByIdUseCase _getPlantByIdUseCase;
+  late final AddPlantUseCase _addPlantUseCase;
+  late final UpdatePlantUseCase _updatePlantUseCase;
+  late final DeletePlantUseCase _deletePlantUseCase;
   late final AuthStateNotifier _authStateNotifier;
   StreamSubscription<UserEntity?>? _authSubscription;
   StreamSubscription<List<dynamic>>? _realtimeDataSubscription;
@@ -43,6 +48,11 @@ class PlantsNotifier extends _$PlantsNotifier {
     _sortService = PlantsSortService();
     _careService = PlantsCareService();
     _searchPlantsUseCase = ref.read(searchPlantsUseCaseProvider);
+    _getPlantsUseCase = ref.read(getPlantsUseCaseProvider);
+    _getPlantByIdUseCase = ref.read(getPlantByIdUseCaseProvider);
+    _addPlantUseCase = ref.read(addPlantUseCaseProvider);
+    _updatePlantUseCase = ref.read(updatePlantUseCaseProvider);
+    _deletePlantUseCase = ref.read(deletePlantUseCaseProvider);
     _authStateNotifier = AuthStateNotifier.instance;
     ref.onDispose(() {
       _authSubscription?.cancel();
@@ -234,12 +244,17 @@ class PlantsNotifier extends _$PlantsNotifier {
 
       state = state.copyWith(error: null);
 
-      final localResult = await _crudService.getAllPlants();
+      final localResult = await _getPlantsUseCase.call(const NoParams());
 
-      localResult.fold((failure) {}, (plants) {
-        _updatePlantsData(plants);
-        state = state.copyWith(isLoading: false);
-      });
+      localResult.fold(
+        (Failure failure) {
+          // Silent fail for local data
+        },
+        (List<Plant> plants) {
+          _updatePlantsData(plants);
+          state = state.copyWith(isLoading: false);
+        },
+      );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ PlantsNotifier: Erro ao carregar dados locais: $e');
@@ -250,15 +265,15 @@ class PlantsNotifier extends _$PlantsNotifier {
   /// Syncs with remote data in background
   void _syncInBackground() {
     Future.delayed(const Duration(milliseconds: 100), () async {
-      final result = await _crudService.getAllPlants();
+      final result = await _getPlantsUseCase.call(const NoParams());
 
       result.fold(
-        (failure) {
+        (Failure failure) {
           if (state.plants.isEmpty) {
             state = state.copyWith(error: failure.toString());
           }
         },
-        (plants) {
+        (List<Plant> plants) {
           _updatePlantsData(plants);
         },
       );
@@ -277,14 +292,14 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<Plant?> getPlantById(String id) async {
-    final result = await _crudService.getPlantById(id);
+    final result = await _getPlantByIdUseCase.call(id);
 
     return result.fold(
-      (failure) {
+      (Failure failure) {
         state = state.copyWith(error: failure.toString());
         return null;
       },
-      (plant) {
+      (Plant plant) {
         state = state.copyWith(selectedPlant: plant);
         return plant;
       },
@@ -321,14 +336,14 @@ class PlantsNotifier extends _$PlantsNotifier {
   Future<bool> addPlant(AddPlantParams params) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _crudService.addPlant(params);
+    final result = await _addPlantUseCase.call(params);
 
     final success = result.fold(
-      (failure) {
+      (Failure failure) {
         state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
-      (plant) {
+      (Plant plant) {
         final newPlants = [plant, ...state.plants];
         state = state.copyWith(
           plants: _applyFilters(newPlants),
@@ -344,14 +359,14 @@ class PlantsNotifier extends _$PlantsNotifier {
   Future<bool> updatePlant(UpdatePlantParams params) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _crudService.updatePlant(params);
+    final result = await _updatePlantUseCase.call(params);
 
     final success = result.fold(
-      (failure) {
+      (Failure failure) {
         state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
-      (updatedPlant) {
+      (Plant updatedPlant) {
         final updatedPlants = state.plants.map((p) {
           return p.id == updatedPlant.id ? updatedPlant : p;
         }).toList();
@@ -375,10 +390,10 @@ class PlantsNotifier extends _$PlantsNotifier {
   Future<bool> deletePlant(String id) async {
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _crudService.deletePlant(id);
+    final result = await _deletePlantUseCase.call(id);
 
     final success = result.fold(
-      (failure) {
+      (Failure failure) {
         state = state.copyWith(error: failure.toString(), isLoading: false);
         return false;
       },
@@ -498,7 +513,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   /// Get total plants count
-  int get plantsCount => _crudService.getPlantCount(state.plants);
+  int get plantsCount => state.plants.length;
 
   List<Plant> _applyFilters(List<Plant> plants) {
     List<Plant> filtered = List.from(plants);

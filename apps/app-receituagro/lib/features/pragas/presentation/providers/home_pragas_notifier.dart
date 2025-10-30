@@ -154,7 +154,6 @@ class HomePragasNotifier extends _$HomePragasNotifier {
         currentCarouselIndex: 0,
         isLoading: false,
         errorMessage: pragasState.errorMessage,
-        stats: pragasState.stats,
         suggestedPragas: pragasState.suggestedPragas,
         recentPragas: pragasState.recentPragas,
         onRecordPragaAccess: (praga) => recordPragaAccess(praga),
@@ -207,7 +206,6 @@ class HomePragasNotifier extends _$HomePragasNotifier {
       currentState.copyWith(
         isLoading: pragasState?.isLoading ?? false,
         errorMessage: pragasState?.errorMessage,
-        stats: pragasState?.stats,
         suggestedPragas: pragasState?.suggestedPragas ?? [],
         recentPragas: pragasState?.recentPragas ?? [],
         onRecordPragaAccess: (praga) => recordPragaAccess(praga),

@@ -57,10 +57,11 @@ class DataExportNotifier extends _$DataExportNotifier {
   late final DataExportRepository _repository;
 
   /// Get current authenticated user ID from auth provider
-  String get _currentUserId {
+  /// Returns null if user is not authenticated
+  String? get _currentUserId {
     final user = ref.watch(currentUserProvider);
     if (user == null || user.id.isEmpty) {
-      throw Exception('Usuário não autenticado. Faça login para exportar dados.');
+      return null;
     }
     return user.id;
   }
@@ -76,7 +77,14 @@ class DataExportNotifier extends _$DataExportNotifier {
     _deleteUseCase = ref.read(deleteExportUseCaseProvider);
     _repository = ref.read(dataExportRepositoryProvider);
 
-    final historyResult = await _getHistoryUseCase(_currentUserId);
+    final userId = _currentUserId;
+    if (userId == null) {
+      return const DataExportState(
+        error: 'Usuário não autenticado. Faça login para exportar dados.',
+      );
+    }
+
+    final historyResult = await _getHistoryUseCase(userId);
 
     return historyResult.fold(
       (failure) =>
@@ -89,6 +97,17 @@ class DataExportNotifier extends _$DataExportNotifier {
   Future<void> checkExportAvailability({
     Set<DataType>? requestedDataTypes,
   }) async {
+    final userId = _currentUserId;
+    if (userId == null) {
+      state = AsyncValue.data(
+        (state.valueOrNull ?? const DataExportState()).copyWith(
+          error: 'Usuário não autenticado',
+          isLoading: false,
+        ),
+      );
+      return;
+    }
+
     state = AsyncValue.data(
       (state.valueOrNull ?? const DataExportState()).copyWith(
         isLoading: true,
@@ -96,7 +115,8 @@ class DataExportNotifier extends _$DataExportNotifier {
       ),
     );
 
-    final dataTypes = requestedDataTypes ??
+    final dataTypes =
+        requestedDataTypes ??
         {
           DataType.plants,
           DataType.plantTasks,
@@ -107,7 +127,7 @@ class DataExportNotifier extends _$DataExportNotifier {
         };
 
     final result = await _checkAvailabilityUseCase(
-      userId: _currentUserId,
+      userId: userId,
       requestedDataTypes: dataTypes,
     );
 
@@ -139,6 +159,17 @@ class DataExportNotifier extends _$DataExportNotifier {
     required Set<DataType> dataTypes,
     required ExportFormat format,
   }) async {
+    final userId = _currentUserId;
+    if (userId == null) {
+      state = AsyncValue.data(
+        (state.valueOrNull ?? const DataExportState()).copyWith(
+          error: 'Usuário não autenticado',
+          isLoading: false,
+        ),
+      );
+      return null;
+    }
+
     state = AsyncValue.data(
       (state.valueOrNull ?? const DataExportState()).copyWith(
         isLoading: true,
@@ -147,7 +178,7 @@ class DataExportNotifier extends _$DataExportNotifier {
     );
 
     final result = await _requestExportUseCase(
-      userId: _currentUserId,
+      userId: userId,
       dataTypes: dataTypes,
       format: format,
     );
@@ -209,7 +240,17 @@ class DataExportNotifier extends _$DataExportNotifier {
 
       await Future<void>.delayed(const Duration(seconds: 3));
 
-      final historyResult = await _getHistoryUseCase(_currentUserId);
+      final userId = _currentUserId;
+      if (userId == null) {
+        state = AsyncValue.data(
+          currentState.copyWith(
+            currentProgress: ExportProgress.error('Usuário não autenticado'),
+          ),
+        );
+        return;
+      }
+
+      final historyResult = await _getHistoryUseCase(userId);
 
       await historyResult.fold(
         (failure) async {
@@ -254,9 +295,7 @@ class DataExportNotifier extends _$DataExportNotifier {
 
     final currentState = state.valueOrNull ?? const DataExportState();
     state = AsyncValue.data(
-      currentState.copyWith(
-        currentProgress: const ExportProgress.completed(),
-      ),
+      currentState.copyWith(currentProgress: const ExportProgress.completed()),
     );
   }
 
@@ -279,6 +318,17 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Load export history for user
   Future<void> loadExportHistory() async {
+    final userId = _currentUserId;
+    if (userId == null) {
+      state = AsyncValue.data(
+        (state.valueOrNull ?? const DataExportState()).copyWith(
+          error: 'Usuário não autenticado',
+          isLoading: false,
+        ),
+      );
+      return;
+    }
+
     state = AsyncValue.data(
       (state.valueOrNull ?? const DataExportState()).copyWith(
         isLoading: true,
@@ -286,7 +336,7 @@ class DataExportNotifier extends _$DataExportNotifier {
       ),
     );
 
-    final historyResult = await _getHistoryUseCase(_currentUserId);
+    final historyResult = await _getHistoryUseCase(userId);
 
     historyResult.fold(
       (failure) {
@@ -312,18 +362,15 @@ class DataExportNotifier extends _$DataExportNotifier {
   Future<bool> downloadExport(String exportId) async {
     final result = await _downloadUseCase(exportId);
 
-    return result.fold(
-      (failure) {
-        final currentState = state.valueOrNull ?? const DataExportState();
-        state = AsyncValue.data(
-          currentState.copyWith(
-            error: 'Erro ao baixar arquivo: ${failure.message}',
-          ),
-        );
-        return false;
-      },
-      (success) => success,
-    );
+    return result.fold((failure) {
+      final currentState = state.valueOrNull ?? const DataExportState();
+      state = AsyncValue.data(
+        currentState.copyWith(
+          error: 'Erro ao baixar arquivo: ${failure.message}',
+        ),
+      );
+      return false;
+    }, (success) => success);
   }
 
   /// Delete export request and associated file
@@ -373,39 +420,43 @@ class DataExportNotifier extends _$DataExportNotifier {
 
   /// Get data type statistics
   Future<Map<DataType, int>> getDataTypeStatistics() async {
+    final userId = _currentUserId;
     final stats = <DataType, int>{};
 
-    final plantsResult = await _repository.getUserPlantsData(_currentUserId);
+    if (userId == null) {
+      // Return empty statistics if not authenticated
+      return stats;
+    }
+
+    final plantsResult = await _repository.getUserPlantsData(userId);
     final plants = plantsResult.fold(
       (failure) => <PlantExportData>[],
       (data) => data,
     );
     stats[DataType.plants] = plants.length;
 
-    final tasksResult = await _repository.getUserTasksData(_currentUserId);
+    final tasksResult = await _repository.getUserTasksData(userId);
     final tasks = tasksResult.fold(
       (failure) => <TaskExportData>[],
       (data) => data,
     );
     stats[DataType.plantTasks] = tasks.length;
 
-    final spacesResult = await _repository.getUserSpacesData(_currentUserId);
+    final spacesResult = await _repository.getUserSpacesData(userId);
     final spaces = spacesResult.fold(
       (failure) => <SpaceExportData>[],
       (data) => data,
     );
     stats[DataType.spaces] = spaces.length;
 
-    final photosResult =
-        await _repository.getUserPlantPhotosData(_currentUserId);
+    final photosResult = await _repository.getUserPlantPhotosData(userId);
     final photos = photosResult.fold(
       (failure) => <PlantPhotoExportData>[],
       (data) => data,
     );
     stats[DataType.plantPhotos] = photos.length;
 
-    final commentsResult =
-        await _repository.getUserPlantCommentsData(_currentUserId);
+    final commentsResult = await _repository.getUserPlantCommentsData(userId);
     final comments = commentsResult.fold(
       (failure) => <PlantCommentExportData>[],
       (data) => data,
@@ -470,8 +521,8 @@ class DataExportNotifier extends _$DataExportNotifier {
           null,
           (most, current) =>
               most == null || current.requestDate.isAfter(most.requestDate)
-                  ? current
-                  : most,
+              ? current
+              : most,
         );
 
     if (mostRecentRequest == null) return null;

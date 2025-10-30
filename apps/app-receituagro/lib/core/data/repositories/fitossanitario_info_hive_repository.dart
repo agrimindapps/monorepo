@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+
 import '../models/fitossanitario_info_hive.dart';
 
 /// Repositório para FitossanitarioInfoHive

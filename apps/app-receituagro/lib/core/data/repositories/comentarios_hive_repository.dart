@@ -197,13 +197,17 @@ class ComentariosHiveRepository implements IComentariosRepository {
     try {
       final hiveBox = await box;
       final value = hiveBox.get(id);
-
-      if (value == null) return null;
+      if (value == null) {
+        return null;
+      }
 
       final userId = await _getCurrentUserId();
-      if (value.userId != userId) return null;
-      if (value.sync_deleted)
+      if (value.userId != userId) {
+        return null;
+      }
+      if (value.sync_deleted) {
         return null; // Só retorna comentários ativos (não deletados)
+      }
 
       return value.toComentarioModel();
     } catch (e) {

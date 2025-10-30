@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
-import 'package:dartz/dartz.dart';
+
 import 'package:core/core.dart';
+
 import '../models/diagnostico_hive.dart';
 
 /// Repositório para DiagnosticoHive
@@ -17,17 +18,21 @@ class DiagnosticoHiveRepository extends BaseHiveRepository<DiagnosticoHive> {
     try {
       // Try idReg first (stored as the key during import)
       final byIdReg = await getByKey(id);
-      if (byIdReg.isSuccess && byIdReg.data != null) return byIdReg.data;
+      if (byIdReg.isSuccess && byIdReg.data != null) {
+        return byIdReg.data;
+      }
 
       // Fallback: search by objectId field
       final matches = await findBy((item) => item.objectId == id);
-      if (matches.isSuccess && matches.data!.isNotEmpty)
+      if (matches.isSuccess && matches.data!.isNotEmpty) {
         return matches.data!.first;
+      }
 
       // Final fallback: try searching by idReg equality (in case key types differ)
       final matches2 = await findBy((item) => item.idReg == id);
-      if (matches2.isSuccess && matches2.data!.isNotEmpty)
+      if (matches2.isSuccess && matches2.data!.isNotEmpty) {
         return matches2.data!.first;
+      }
 
       return null;
     } catch (e) {

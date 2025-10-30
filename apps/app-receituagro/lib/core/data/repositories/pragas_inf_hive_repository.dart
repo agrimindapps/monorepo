@@ -1,5 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
+
 import '../models/pragas_inf_hive.dart';
 
 /// Repositório para PragasInfHive

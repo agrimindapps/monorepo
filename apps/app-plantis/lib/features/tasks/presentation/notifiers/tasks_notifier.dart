@@ -4,15 +4,14 @@ import 'package:core/core.dart' hide getIt;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../../../core/di/injection.dart';
 import '../../../../core/localization/app_strings.dart';
 import '../../../../core/services/task_notification_service.dart';
 import '../../core/constants/tasks_constants.dart';
 import '../../domain/entities/task.dart' as task_entity;
-import '../../domain/repositories/tasks_repository.dart';
 import '../../domain/usecases/add_task_usecase.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
 import '../../domain/usecases/get_tasks_usecase.dart';
+import '../providers/tasks_providers.dart';
 import '../providers/tasks_state.dart';
 
 part 'tasks_notifier.g.dart';
@@ -896,33 +895,6 @@ class UnauthorizedAccessException implements Exception {
 
   @override
   String toString() => 'UnauthorizedAccessException: $message';
-}
-
-/// Provider for GetTasksUseCase
-@riverpod
-GetTasksUseCase getTasksUseCase(Ref ref) {
-  final repository = ref.watch(tasksRepositoryProvider);
-  return GetTasksUseCase(repository);
-}
-
-/// Provider for AddTaskUseCase
-@riverpod
-AddTaskUseCase addTaskUseCase(Ref ref) {
-  final repository = ref.watch(tasksRepositoryProvider);
-  return AddTaskUseCase(repository);
-}
-
-/// Provider for CompleteTaskUseCase
-@riverpod
-CompleteTaskUseCase completeTaskUseCase(Ref ref) {
-  final repository = ref.watch(tasksRepositoryProvider);
-  return CompleteTaskUseCase(repository);
-}
-
-/// Provider for TasksRepository
-@riverpod
-TasksRepository tasksRepository(Ref ref) {
-  return getIt<TasksRepository>();
 }
 
 /// Extension on TasksNotifier for backwards compatibility

@@ -50,7 +50,9 @@ class TasksRepositoryImpl implements TasksRepository {
 
         return null;
       } catch (e) {
-        print('Auth attempt $attempt/$maxRetries failed: $e');
+        if (kDebugMode) {
+          print('Auth attempt $attempt/$maxRetries failed: $e');
+        }
         if (attempt >= maxRetries) {
           return null;
         }
